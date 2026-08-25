@@ -77,18 +77,30 @@ def _configure_tools_mode(
     root_conftest = _load_root_conftest()
     local_path = _local_tools_path()
     vendored_path = _vendored_tools_path()
+    vendored_root = _repo_root() / "vendor/ud-tools"
+    vendored_parent_paths = {
+        str((vendored_root / "src").resolve()),
+        str((vendored_root / "src/python/src").resolve()),
+    }
     real_exists = root_conftest.os.path.exists
 
     def _fake_exists(path: object) -> bool:
-        return str(path) in {local_path, vendored_path} or real_exists(path)
+        controlled_paths = {local_path, vendored_path, *vendored_parent_paths}
+        return str(path) in controlled_paths or real_exists(path)
 
+    monkeypatch.delenv("TOOLS_REPO_PATH", raising=False)
     monkeypatch.setattr(root_conftest.os.path, "exists", _fake_exists)
     if alias_contracts:
-        canonical_module = ModuleType("src.shared.python.contracts")
+        canonical_name = (
+            "shared.python.contracts"
+            if mode == "vendored"
+            else "src.shared.python.contracts"
+        )
+        canonical_module = ModuleType(canonical_name)
         real_import_module = importlib.import_module
 
         def _fake_import_module(name: str, package: str | None = None) -> ModuleType:
-            if name == "src.shared.python.contracts":
+            if name == canonical_name:
                 sys.modules[name] = canonical_module
                 return canonical_module
             return real_import_module(name, package)

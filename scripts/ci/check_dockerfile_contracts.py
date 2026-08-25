@@ -56,7 +56,6 @@ def docker_contract_failures(root: Path = Path(".")) -> list[str]:
     feature_registry_copy = modular.find("COPY src/shared/python/feature_registry/")
     engine_core_copy = modular.find("COPY src/shared/python/engine_core/")
     feature_install = modular.rfind('install_features.py --profile "$PROFILE"')
-    launcher_copy = modular.find("COPY launch_golf_suite.py ./")
     if feature_registry_copy == -1 or (
         first_dry_run != -1 and feature_registry_copy > first_dry_run
     ):
@@ -69,12 +68,14 @@ def docker_contract_failures(root: Path = Path(".")) -> list[str]:
         failures.append(
             "Dockerfile.modular must copy engine_core before profile dry-run"
         )
-    if launcher_copy == -1 or (
-        feature_install != -1 and launcher_copy > feature_install
-    ):
-        failures.append(
-            "Dockerfile.modular must copy launch_golf_suite.py before feature install"
-        )
+    for launcher in ("launch_golf_suite.py", "launch_upstream_drift.py"):
+        launcher_copy = modular.find(f"COPY {launcher} ./")
+        if launcher_copy == -1 or (
+            feature_install != -1 and launcher_copy > feature_install
+        ):
+            failures.append(
+                f"Dockerfile.modular must copy {launcher} before feature install"
+            )
 
     heavy = _read(root / "Dockerfile.heavy_test")
     for package in ("PyQt6", "drake", "opensim", "myosuite"):

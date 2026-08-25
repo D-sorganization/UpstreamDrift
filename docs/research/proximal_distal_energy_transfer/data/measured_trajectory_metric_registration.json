@@ -1,0 +1,366 @@
+{
+  "schema_version": "measured-trajectory-metric-registration/v1",
+  "registration_id": "articulated-golf-likeness-v1",
+  "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9004",
+  "registered_at_utc": "2026-08-23T16:50:00Z",
+  "registered_before_outcomes": true,
+  "source_registry_path": "measured_trajectory_source_registry.json",
+  "authority_status": "blocked_no_qualified_measured_trajectory_authority",
+  "estimand": "Participant-held-out distributional discrepancy and coverage of declared club, body, hand, geometry, closure, tracking, and residual-effort observables after frozen frame, event, processing, normalization, and uncertainty rules; this is not a binary visual golf-likeness judgment.",
+  "participant_split": {
+    "unit": "participant",
+    "assignment": "deterministic_digest",
+    "grouping_key": "participant_id",
+    "minimum_training_participants": 2,
+    "minimum_held_out_participants": 1,
+    "adverse_cohort_required": true,
+    "framewise_random_split_prohibited": true,
+    "freeze_before_outcomes": true
+  },
+  "frames": [
+    {
+      "frame_id": "lab",
+      "definition": "Right-handed laboratory frame declared by the acquisition authority with gravity and floor-plane directions retained.",
+      "transform_authority": "dataset calibration and laboratory documentation",
+      "uncertainty_required": true
+    },
+    {
+      "frame_id": "anatomical",
+      "definition": "Participant-specific anatomical segment frames derived from declared landmarks and functional or static calibration.",
+      "transform_authority": "governed landmark and calibration record",
+      "uncertainty_required": true
+    },
+    {
+      "frame_id": "model",
+      "definition": "Articulated model generalized-coordinate and body frames with an explicit laboratory-to-model transform.",
+      "transform_authority": "versioned mapping and inverse-kinematics contract",
+      "uncertainty_required": true
+    },
+    {
+      "frame_id": "club",
+      "definition": "Clubhead and shaft frame with declared origin, face, shaft, and swing-normal axes.",
+      "transform_authority": "club calibration and rigid-body marker or sensor definition",
+      "uncertainty_required": true
+    }
+  ],
+  "events": [
+    {
+      "event_id": "downswing_start",
+      "definition": "Frozen dataset-specific transition into the downswing, reported with its detector and temporal uncertainty.",
+      "uncertainty_required": true,
+      "missing_policy": "unavailable_not_zero"
+    },
+    {
+      "event_id": "impact",
+      "definition": "Frozen club-ball contact event from synchronized measurement or an explicitly bounded kinematic proxy.",
+      "uncertainty_required": true,
+      "missing_policy": "unavailable_not_zero"
+    }
+  ],
+  "metrics": [
+    {
+      "metric_id": "club_pose",
+      "family": "club_kinematics",
+      "unit": "m and rad",
+      "definition": "Position and orientation discrepancy of the declared club frame over normalized downswing phase.",
+      "required_channels": ["club_position_lab_m", "club_orientation_lab_wxyz"],
+      "comparison": "distributional_coverage",
+      "normalization": "club_length",
+      "uncertainty_sources": ["coordinate_mapping", "marker_reconstruction"],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Held-out club poses fall outside the frozen training support after registered transform sensitivities."
+    },
+    {
+      "metric_id": "club_speed",
+      "family": "club_kinematics",
+      "unit": "m/s and rad/s",
+      "definition": "Linear and angular club-speed discrepancy, peak timing, and coverage over normalized downswing phase.",
+      "required_channels": [
+        "club_linear_velocity_lab_m_s",
+        "club_angular_velocity_lab_rad_s"
+      ],
+      "comparison": "distributional_coverage",
+      "normalization": "club_length",
+      "uncertainty_sources": ["time_alignment", "filtering", "event_detection"],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Held-out speed magnitudes or peak timing reject the frozen training distribution under registered processing sensitivities."
+    },
+    {
+      "metric_id": "pelvis_pose_rate",
+      "family": "body_kinematics",
+      "unit": "rad and rad/s",
+      "definition": "Pelvis orientation and angular-rate discrepancy in the declared anatomical and laboratory frames.",
+      "required_channels": [
+        "pelvis_orientation_lab_wxyz",
+        "pelvis_angular_velocity_lab_rad_s"
+      ],
+      "comparison": "distributional_coverage",
+      "normalization": "body_height",
+      "uncertainty_sources": [
+        "coordinate_mapping",
+        "marker_reconstruction",
+        "filtering"
+      ],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Held-out pelvis orientation or rate lies outside frozen support after coordinate and filtering sensitivities."
+    },
+    {
+      "metric_id": "thorax_pose_rate",
+      "family": "body_kinematics",
+      "unit": "rad and rad/s",
+      "definition": "Thorax orientation and angular-rate discrepancy in the declared anatomical and laboratory frames.",
+      "required_channels": [
+        "thorax_orientation_lab_wxyz",
+        "thorax_angular_velocity_lab_rad_s"
+      ],
+      "comparison": "distributional_coverage",
+      "normalization": "body_height",
+      "uncertainty_sources": [
+        "coordinate_mapping",
+        "marker_reconstruction",
+        "filtering"
+      ],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Held-out thorax orientation or rate lies outside frozen support after coordinate and filtering sensitivities."
+    },
+    {
+      "metric_id": "segment_phase_ordering",
+      "family": "timing",
+      "unit": "normalized phase",
+      "definition": "Ordering and separation of pelvis, thorax, arm, and club angular-speed peaks without equating their order to energy flow.",
+      "required_channels": [
+        "pelvis_angular_speed_rad_s",
+        "thorax_angular_speed_rad_s",
+        "arm_angular_speed_rad_s",
+        "club_angular_speed_rad_s"
+      ],
+      "comparison": "phase_order_confusion",
+      "normalization": "declared_units",
+      "uncertainty_sources": ["time_alignment", "filtering", "event_detection"],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "The analytic authority's ordering or peak separations are uncommon or reversed in participant-held-out trials."
+    },
+    {
+      "metric_id": "wrist_hand_path",
+      "family": "distal_kinematics",
+      "unit": "m and rad",
+      "definition": "Bilateral hand paths and measured wrist coordinates over normalized downswing phase.",
+      "required_channels": [
+        "left_hand_position_lab_m",
+        "right_hand_position_lab_m",
+        "wrist_joint_angles_rad"
+      ],
+      "comparison": "distributional_coverage",
+      "normalization": "body_height",
+      "uncertainty_sources": ["coordinate_mapping", "marker_reconstruction"],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Held-out bilateral hand paths or wrist coordinates reject the frozen measured support."
+    },
+    {
+      "metric_id": "intersegment_geometry",
+      "family": "geometry",
+      "unit": "rad and dimensionless",
+      "definition": "Relative pelvis, thorax, arm, forearm, hand, and club orientations and declared length ratios.",
+      "required_channels": [
+        "segment_orientation_lab_wxyz",
+        "segment_length_m",
+        "club_orientation_lab_wxyz"
+      ],
+      "comparison": "distributional_coverage",
+      "normalization": "measured_range",
+      "uncertainty_sources": [
+        "coordinate_mapping",
+        "marker_reconstruction",
+        "anthropometric_scaling"
+      ],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Relative orientations or scaled lengths place analytic states outside participant-held-out geometric support."
+    },
+    {
+      "metric_id": "joint_range_margin",
+      "family": "model_feasibility",
+      "unit": "rad",
+      "definition": "Minimum distance between mapped generalized coordinates and declared participant or model joint limits.",
+      "required_channels": [
+        "model_joint_angles_rad",
+        "joint_limit_lower_rad",
+        "joint_limit_upper_rad"
+      ],
+      "comparison": "threshold_exceedance",
+      "normalization": "measured_range",
+      "uncertainty_sources": ["coordinate_mapping", "anthropometric_scaling"],
+      "threshold_policy": "registered_engineering_tolerance_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Mapped held-out states cross declared limits or lose the preregistered positive margin under sensitivity."
+    },
+    {
+      "metric_id": "closure_residual",
+      "family": "model_feasibility",
+      "unit": "m",
+      "definition": "Bilateral distance between mapped anatomical hand contact points and declared club grip points.",
+      "required_channels": [
+        "model_hand_contact_position_m",
+        "club_grip_position_m"
+      ],
+      "comparison": "threshold_exceedance",
+      "normalization": "club_length",
+      "uncertainty_sources": ["coordinate_mapping", "marker_reconstruction"],
+      "threshold_policy": "registered_engineering_tolerance_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Closure residual exceeds its frozen tolerance or becomes sensitive to plausible frame and marker perturbations."
+    },
+    {
+      "metric_id": "tracking_error",
+      "family": "model_discrepancy",
+      "unit": "m and rad",
+      "definition": "Difference between held-out measured coordinates and mapped replay or constrained-tracking coordinates under frozen weights.",
+      "required_channels": [
+        "measured_generalized_coordinates",
+        "tracked_generalized_coordinates"
+      ],
+      "comparison": "residual_distribution",
+      "normalization": "body_height",
+      "uncertainty_sources": [
+        "time_alignment",
+        "filtering",
+        "coordinate_mapping"
+      ],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Participant-held-out tracking residuals exceed frozen support or change conclusion under registered processing choices."
+    },
+    {
+      "metric_id": "residual_generalized_effort",
+      "family": "dynamic_consistency",
+      "unit": "N and N m",
+      "definition": "Residual generalized force required to reproduce mapped measured acceleration after declared inertial, gravity, contact, and external-load terms.",
+      "required_channels": [
+        "measured_generalized_coordinates",
+        "measured_generalized_velocity",
+        "measured_generalized_acceleration",
+        "model_dynamic_terms"
+      ],
+      "comparison": "residual_distribution",
+      "normalization": "declared_units",
+      "uncertainty_sources": [
+        "filtering",
+        "coordinate_mapping",
+        "anthropometric_scaling"
+      ],
+      "threshold_policy": "training_distribution_then_frozen",
+      "missing_data_policy": "unavailable_not_zero",
+      "falsifier": "Held-out residual effort is implausibly large, structurally biased, or unstable under registered differentiation and scaling sensitivities."
+    }
+  ],
+  "negative_controls": [
+    {
+      "control_id": "phase_scrambled",
+      "transformation": "Permute within-trial phase blocks while preserving marginal channel values and participant identity.",
+      "must_reject_metrics": [
+        "club_pose",
+        "club_speed",
+        "pelvis_pose_rate",
+        "thorax_pose_rate",
+        "segment_phase_ordering",
+        "wrist_hand_path"
+      ],
+      "pass_condition": "Frozen multichannel timing and path metrics classify every manufactured phase-scrambled trial outside qualified support.",
+      "evidence_class": "software_discrimination_only"
+    },
+    {
+      "control_id": "velocity_reversed",
+      "transformation": "Reverse declared velocity channels while retaining the same sampled configurations and event window.",
+      "must_reject_metrics": [
+        "club_speed",
+        "pelvis_pose_rate",
+        "thorax_pose_rate",
+        "segment_phase_ordering",
+        "residual_generalized_effort"
+      ],
+      "pass_condition": "Frozen direction, timing, and dynamic-consistency metrics reject every reversed-velocity trial.",
+      "evidence_class": "software_discrimination_only"
+    },
+    {
+      "control_id": "scale_mismatched",
+      "transformation": "Apply an out-of-domain body-to-club and segment-length scale while preserving normalized phase.",
+      "must_reject_metrics": [
+        "club_pose",
+        "wrist_hand_path",
+        "intersegment_geometry",
+        "joint_range_margin",
+        "closure_residual",
+        "tracking_error"
+      ],
+      "pass_condition": "Frozen geometry, feasibility, closure, and tracking metrics reject every registered scale mismatch.",
+      "evidence_class": "software_discrimination_only"
+    },
+    {
+      "control_id": "non_golf_synthetic",
+      "transformation": "Use a deterministic non-golf multisegment trajectory with valid shapes, units, and finite values.",
+      "must_reject_metrics": [
+        "club_pose",
+        "club_speed",
+        "pelvis_pose_rate",
+        "thorax_pose_rate",
+        "segment_phase_ordering",
+        "wrist_hand_path",
+        "intersegment_geometry"
+      ],
+      "pass_condition": "The frozen primary kinematic metric set rejects the manufactured non-golf trajectory despite schema validity.",
+      "evidence_class": "software_discrimination_only"
+    }
+  ],
+  "uncertainty_analyses": [
+    {
+      "analysis_id": "time_alignment",
+      "perturbation": "Shift synchronized channels and event anchors over the governed timing-uncertainty interval.",
+      "decision_rule": "Retain the full classification range; any support reversal makes the affected conclusion inconclusive."
+    },
+    {
+      "analysis_id": "filtering",
+      "perturbation": "Repeat registered differentiation and smoothing alternatives without selecting them from held-out results.",
+      "decision_rule": "Retain all alternatives and fail promotion when sign, support, or failure class is processing-dependent."
+    },
+    {
+      "analysis_id": "coordinate_mapping",
+      "perturbation": "Perturb laboratory, anatomical, model, and club transforms within calibrated uncertainty.",
+      "decision_rule": "Require classification stability or report the affected metric as transform-unidentified."
+    },
+    {
+      "analysis_id": "marker_reconstruction",
+      "perturbation": "Propagate declared marker, keypoint, occlusion, and rigid-body reconstruction uncertainty.",
+      "decision_rule": "Require coverage conclusions to survive the complete retained reconstruction ensemble."
+    },
+    {
+      "analysis_id": "event_detection",
+      "perturbation": "Vary downswing-start and impact anchors over their governed detector uncertainty.",
+      "decision_rule": "Require timing and peak-order conclusions to survive every registered event realization."
+    },
+    {
+      "analysis_id": "anthropometric_scaling",
+      "perturbation": "Propagate measured and estimator uncertainty in segment lengths, mass properties, joint centers, and club dimensions.",
+      "decision_rule": "Require geometry, range, tracking, and effort classifications to remain stable or report them as scaling-dependent."
+    }
+  ],
+  "results_status": "not_run_no_authority",
+  "readiness": {
+    "status": "blocked_no_qualified_measured_trajectory_authority",
+    "metric_count": 11,
+    "negative_control_count": 4,
+    "frame_count": 4,
+    "event_count": 2,
+    "participant_held_out_required": true,
+    "thresholds_frozen_before_held_out": true,
+    "execution_ready": false,
+    "human_inference_ready": false,
+    "bilateral_wrench_gate_satisfied": false
+  },
+  "inference_boundary": "This motion-only preregistration cannot establish bilateral wrench allocation, interaction-force causality, muscle or scapular intent, passive human negative torque, performance optimality, injury risk, or coaching guidance; synthetic controls qualify only software discrimination."
+}

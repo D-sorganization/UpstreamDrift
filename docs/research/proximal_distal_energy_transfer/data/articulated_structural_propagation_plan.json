@@ -2,8 +2,8 @@
   "schema_version": "articulated-structural-propagation-plan/v1",
   "status": "ready",
   "authority_campaign_sha256": "d8115073dc1b506f145196b08c96d7cb3cf00e8cf29099970e2f7b0fbe6d63f3",
-  "design_sha256": "192c4ba00a6550c1c7d0776c2e065871edc6b538b5a7d4058ab5cc0455e9d7e0",
-  "contract_sha256": "301320971702916faf94bc36b5fd959da05df64bd173863b55ba386384026391",
+  "design_sha256": "63561056b88e11858663f6d5f235021f16a4864ddc5076dae7dd889befef5a08",
+  "contract_sha256": "c3a31faa62ada6bbdf9ae4efb4237bc5f1071179f8310f7e35f844a9dacf0fd8",
   "design": {
     "case_indices": [
       0,
@@ -137,7 +137,7 @@
           "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
           "scripts/research/proximal_distal_energy/articulated_structural_branch_contract.py"
         ],
-        "atlas_source_sha256": "c9a3ffdf729495974d2181a7c88f4537f5339220c6714b453e9a2702022f0763",
+        "atlas_source_sha256": "4764699b3e8d450b5f205703f67df174d93a7ffe864fd26efd0caba362c8f0e3",
         "scientific_configuration_sha256": "4b3a56fada938d5e508a1311567342887e1355b71d2d5676f37ae5545ceb41b4"
       },
       "ground": {
@@ -160,7 +160,7 @@
           "scripts/research/proximal_distal_energy/articulated_structural_checkpoint.py",
           "scripts/research/proximal_distal_energy/articulated_structural_branch_contract.py"
         ],
-        "atlas_source_sha256": "dc29787512fc22e499f4112dda41dd1ec42985e43d8df237aa8ec95b9885c965",
+        "atlas_source_sha256": "2740ae9102ec26a4167bced56f800ded1fea827e5bf7a562baaeec65465ccaba",
         "scientific_configuration_sha256": "e8e04493e1681dfcc0438df8316e1ae84ebca1c0d48a1012d57174939d6c07dc"
       }
     },
@@ -1039,7 +1039,7 @@
     "tests/research/test_articulated_structural_publication.py": "0ceedaaa0a263ef17e49875f196b4bcd440bd1aaec1fd43a032e6d31a8ce9bb5",
     "tests/research/test_articulated_structural_result.py": "a95c8d4ce5f3c88088b87e62af68a912001eeadf8ed6724d4d3a1ee773d7b900",
     "tests/research/test_articulated_structural_propagation_plan.py": "12a79802cae571e9e93180a350cce0718ae7d42363c5ed751d927635c7df3c6c",
-    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "7e9c2b520a8423df1499e7040c988ba9ef7fc7ab4bc1f0b37d015c3c1b6fdba4",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "1d25ac5dbbb27d2bf67240c3cab18aa7c0a988f68cbb24fcf305bb5b2b37cca2",
@@ -1058,7 +1058,7 @@
     "tests/research/test_articulated_ground.py": "a703f845e7b3f85e88e6c69ac8369897799fc77530c4a46a8244909e01d28fac",
     "tests/research/test_articulated_ground_forward.py": "9274478a3f6d4e7e03939e7c63b220e556176e1272752b0376a9697c423b4089",
     "tests/research/test_articulated_ground_atlas.py": "3b8298a0dd73f87131b4221165255517c2b51210a56d9d92043361b46735d03f",
-    "tests/research/test_articulated_ground_checkpoint.py": "8764c3c2fd15eb7e8e3bb4eab7c35dfe0817c0274dfdce5457db8d64def960ab"
+    "tests/research/test_articulated_ground_checkpoint.py": "1b335a1be7ad2bb025eaef502964a9dab072df5d7a4b6b47163d22021466efec"
   },
   "limitations": {
     "scope": "engineering OAT corners, not a participant distribution",

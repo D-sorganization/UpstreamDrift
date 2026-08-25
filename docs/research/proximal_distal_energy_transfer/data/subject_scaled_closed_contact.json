@@ -11,7 +11,11 @@
     "case_count": 18,
     "club_coordinates": "held_at_each_prescribed_reference_state",
     "grip_span_count": 3,
-    "grip_spans_m": [0.12, 0.18, 0.24],
+    "grip_spans_m": [
+      0.12,
+      0.18,
+      0.24
+    ],
     "profile_count": 6,
     "profiles": [
       {
@@ -182,7 +186,19 @@
       "trail_wrist"
     ],
     "time_s": [
-      0.0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22, 0.24
+      0.0,
+      0.02,
+      0.04,
+      0.06,
+      0.08,
+      0.1,
+      0.12,
+      0.14,
+      0.16,
+      0.18,
+      0.2,
+      0.22,
+      0.24
     ],
     "time_sample_count": 13
   },
@@ -199,6 +215,7 @@
     "configuration": {
       "closure_residual_scale_m": 0.001,
       "closure_tolerance_m": 0.0005,
+      "joint_limit_scale": 1.0,
       "maximum_function_evaluations": 1000,
       "regularization_weight": 0.01,
       "solver_tolerance": 1e-11
@@ -208,7 +225,9 @@
     "solver": "bounded_trust_region_reflective_least_squares"
   },
   "results": {
-    "constraint_jacobian_rank_values": [6],
+    "constraint_jacobian_rank_values": [
+      6
+    ],
     "feasible_fraction": 1.0,
     "feasible_sample_count": 234,
     "maximum_adjacent_configuration_change_rad": 0.02557365571376033,
@@ -223,8 +242,8 @@
   "source_sha256": {
     "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py": "511ceb7b9e70b8c8e81d26fa32ec58d76d791cfb69f8f1c4c46c39e0c7e3be83",
     "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py": "5a56b538f8a9ccbc53cd3b23e70e873d48faf2c6d3eb6926f77c7f5d78b32a1a",
-    "scripts/research/proximal_distal_energy/spatial_full_body.py": "8e0c3efb06747742cca30f6bc1b9e18a28779a1c187e4b98ba6cde5293d96cfc",
-    "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py": "b62fd2d7b90bb0593d660c362ebfc266cb905f0d808593b2c978a515275a3d0a",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a",
+    "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py": "c48f22da72d0b09856e3d0879dab2f48b2ce4bf57d99c2234d21b6d431386674",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8"
   },
   "study_id": "subject-scaled-bilateral-closed-contact-feasibility"

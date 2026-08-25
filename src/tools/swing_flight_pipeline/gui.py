@@ -15,6 +15,7 @@ from typing import Any
 
 import numpy as np
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -31,9 +32,41 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.physics.swing_state_providers import (
+    SwingStateConfig,
+    SwingStateProvider,
+    available_swing_state_providers,
+)
 from src.shared.python.ui import HoverCopyTextBrowser
+from src.shared.python.ui.pane_layout import install_two_pane_splitter
 
 logger = logging.getLogger(__name__)
+
+
+def _populate_engine_combo(
+    combo: QComboBox, providers: list[SwingStateProvider]
+) -> None:
+    """Fill ``combo`` with providers, disabling the unavailable ones.
+
+    Unavailable entries stay visible (so users see the roadmap) but cannot
+    be selected, and carry a tooltip explaining why (issue #8819 — the old
+    combo silently stamped manual numbers with engine names).
+    """
+    combo.clear()
+    model = combo.model()
+    for index, provider in enumerate(providers):
+        combo.addItem(provider.provider_id)
+        if not provider.is_available():
+            # QComboBox uses a QStandardItemModel by default; guard anyway so
+            # a custom model degrades to tooltip-only rather than crashing.
+            item = model.item(index) if isinstance(model, QStandardItemModel) else None
+            if item is not None:
+                item.setEnabled(False)
+            combo.setItemData(
+                index,
+                provider.availability_reason(),
+                Qt.ItemDataRole.ToolTipRole,
+            )
 
 
 class SwingFlightWidget(QWidget):
@@ -45,10 +78,12 @@ class SwingFlightWidget(QWidget):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        layout = QHBoxLayout(self)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
+        install_two_pane_splitter(
+            self, self._build_controls_panel(), self._build_results_panel()
+        )
 
-        # Left: controls
+    def _build_controls_panel(self) -> QWidget:
+        """Left pane: title, swing parameters, engine source, presets, run."""
         left = QWidget()
         left_layout = QVBoxLayout(left)
 
@@ -59,7 +94,23 @@ class SwingFlightWidget(QWidget):
         title.setFont(title_font)
         left_layout.addWidget(title)
 
-        # Swing parameters
+        left_layout.addWidget(self._build_swing_group())
+        left_layout.addWidget(self._build_engine_group())
+        left_layout.addWidget(self._build_preset_group())
+
+        # Run button
+        self._run_btn = QPushButton("Run Full Pipeline")
+        self._run_btn.setStyleSheet(
+            "background-color: #4CAF50; color: white; font-weight: bold; padding: 12px;"
+        )
+        self._run_btn.clicked.connect(self._run_pipeline)
+        left_layout.addWidget(self._run_btn)
+
+        left_layout.addStretch()
+        return left
+
+    def _build_swing_group(self) -> QGroupBox:
+        """Swing-parameter spin boxes (speed, loft, clubhead mass)."""
         swing_group = QGroupBox("Swing Parameters")
         swing_form = QFormLayout(swing_group)
 
@@ -82,18 +133,22 @@ class SwingFlightWidget(QWidget):
         self._mass_spin.setSuffix(" kg")
         swing_form.addRow("Clubhead Mass:", self._mass_spin)
 
-        left_layout.addWidget(swing_group)
+        return swing_group
 
-        # Engine selector
+    def _build_engine_group(self) -> QGroupBox:
+        """Engine selector — entries are real SwingStateProviders; the ones
+        without an implemented sourcing path are disabled (issue #8819)."""
         engine_group = QGroupBox("Physics Engine Source")
         engine_layout = QVBoxLayout(engine_group)
         self._engine_combo = QComboBox()
-        self._engine_combo.addItems(["mujoco", "drake", "pinocchio", "manual"])
+        self._providers = {p.provider_id: p for p in available_swing_state_providers()}
+        _populate_engine_combo(self._engine_combo, list(self._providers.values()))
         self._engine_combo.setCurrentText("manual")
         engine_layout.addWidget(self._engine_combo)
-        left_layout.addWidget(engine_group)
+        return engine_group
 
-        # Presets
+    def _build_preset_group(self) -> QGroupBox:
+        """Club preset buttons that stamp speed/loft pairs."""
         preset_group = QGroupBox("Club Presets")
         preset_layout = QHBoxLayout(preset_group)
         for name, speed, loft in [
@@ -106,20 +161,10 @@ class SwingFlightWidget(QWidget):
                 lambda checked, s=speed, loft_val=loft: self._apply_preset(s, loft_val)
             )
             preset_layout.addWidget(btn)
-        left_layout.addWidget(preset_group)
+        return preset_group
 
-        # Run button
-        self._run_btn = QPushButton("Run Full Pipeline")
-        self._run_btn.setStyleSheet(
-            "background-color: #4CAF50; color: white; font-weight: bold; padding: 12px;"
-        )
-        self._run_btn.clicked.connect(self._run_pipeline)
-        left_layout.addWidget(self._run_btn)
-
-        left_layout.addStretch()
-        splitter.addWidget(left)
-
-        # Right: results
+    def _build_results_panel(self) -> QWidget:
+        """Right pane: 3D trajectory view (when available) and results text."""
         right = QWidget()
         right_layout = QVBoxLayout(right)
 
@@ -163,10 +208,7 @@ class SwingFlightWidget(QWidget):
         )
         results_layout.addWidget(self._results_text)
         right_layout.addWidget(results_group)
-        splitter.addWidget(right)
-
-        splitter.setSizes([350, 650])
-        layout.addWidget(splitter)
+        return right
 
     def _apply_preset(self, speed: float, loft: float) -> None:
         self._speed_spin.setValue(speed)
@@ -177,23 +219,17 @@ class SwingFlightWidget(QWidget):
         try:
             from src.shared.python.physics.swing_ball_flight_pipeline import (
                 SwingBallFlightPipeline,
-                SwingState,
             )
 
-            speed = self._speed_spin.value()
-            loft = self._loft_spin.value()
-            mass = self._mass_spin.value()
-            engine = self._engine_combo.currentText()
-
-            # Build swing state from UI parameters
-            velocity = np.array([speed, 0.0, 0.0])
-            swing = SwingState(
-                clubhead_velocity=velocity,
-                clubhead_angular_velocity=np.zeros(3),
-                clubhead_orientation=np.array([0.0, 0.0, 1.0]),
-                clubhead_mass=mass,
-                clubhead_loft_deg=loft,
-                engine_name=engine,
+            # Route through the selected provider so the stamped engine_name
+            # reflects the actual source of the swing state (issue #8819).
+            provider = self._providers[self._engine_combo.currentText()]
+            swing = provider.get_swing_state(
+                SwingStateConfig(
+                    clubhead_speed_ms=self._speed_spin.value(),
+                    loft_deg=self._loft_spin.value(),
+                    clubhead_mass_kg=self._mass_spin.value(),
+                )
             )
 
             pipeline = SwingBallFlightPipeline()

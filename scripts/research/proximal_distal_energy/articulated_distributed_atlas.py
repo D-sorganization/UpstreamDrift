@@ -26,6 +26,7 @@ from scripts.research.proximal_distal_energy.articulated_forward_integration imp
 )
 from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
     finite_difference_kinematics,
+    require_robotics_pinocchio,
 )
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
     build_subject_scaled_model,
@@ -458,11 +459,28 @@ def _project_stick_velocity(
 ) -> tuple[FloatArray, float, float, float]:
     if jacobian.shape[0] == 0:
         return velocity.copy(), 0.0, 0.0, 0.0
-    inverse_mass_jt = np.linalg.solve(mass, jacobian.T)
-    multiplier = np.linalg.pinv(jacobian @ inverse_mass_jt, rcond=1.0e-12) @ (
-        jacobian @ velocity
+    # Whiten the kinetic-energy metric before projecting. Distributed stations
+    # intentionally create redundant constraint rows; forming J M^-1 J^T
+    # squares their condition number and left the genuine Pinocchio operator
+    # just outside the registered no-slip residual. A rank-revealing SVD of
+    # J L^-T, where M = L L^T, projects directly onto the independent row
+    # space without relaxing that physical residual gate.
+    cholesky = np.linalg.cholesky(mass)
+    whitened_velocity = cholesky.T @ velocity
+    whitened_jacobian = np.linalg.solve(cholesky, jacobian.T).T
+    left_vectors, singular_values, right_vectors = np.linalg.svd(
+        whitened_jacobian, full_matrices=False
     )
-    projected = velocity - inverse_mass_jt @ multiplier
+    cutoff = 1.0e-12 * singular_values[0]
+    rank = int(np.count_nonzero(singular_values > cutoff))
+    row_basis = right_vectors[:rank]
+    row_coordinates = row_basis @ whitened_velocity
+    projected_whitened = whitened_velocity - row_basis.T @ row_coordinates
+    projected = np.linalg.solve(cholesky.T, projected_whitened)
+    if rank:
+        multiplier = left_vectors[:, :rank] @ (row_coordinates / singular_values[:rank])
+    else:
+        multiplier = np.zeros(jacobian.shape[0])
     before = 0.5 * float(velocity @ mass @ velocity)
     after = 0.5 * float(projected @ mass @ projected)
     return (
@@ -647,6 +665,14 @@ def _gates(buffers: _Buffers, config: DistributedAtlasConfig) -> dict[str, Any]:
     }
 
 
+def _independent_engine_difference_detected(*errors: FloatArray) -> bool:
+    """Return whether at least one cross-engine numerical difference is nonzero."""
+
+    if not errors:
+        raise ValueError("at least one cross-engine error array is required")
+    return any(bool(np.any(np.asarray(error, dtype=float) > 0.0)) for error in errors)
+
+
 def _arrays(
     authority: _Authority,
     states: tuple[tuple[int, int], ...],
@@ -725,6 +751,11 @@ def _all_gates_pass(
         and np.max(stick_buffers.velocity_parity)
         <= config.forward.trajectory_relative_tolerance
         and np.all(stick_buffers.active_set_parity)
+        and _independent_engine_difference_detected(
+            buffers.trajectory_parity,
+            buffers.force_parity,
+            stick_buffers.velocity_parity,
+        )
     )
 
 
@@ -761,6 +792,11 @@ def _result_record(
     all_passed: bool,
 ) -> dict[str, Any]:
     station_refinement = gates["station_refinement"]
+    independent_difference = _independent_engine_difference_detected(
+        buffers.trajectory_parity,
+        buffers.force_parity,
+        stick_buffers.velocity_parity,
+    )
     return {
         "maximum_peak_station_force_n": float(np.max(buffers.peak_force)),
         "maximum_peak_force_couple_nm": float(np.max(buffers.peak_couple)),
@@ -785,6 +821,7 @@ def _result_record(
         "stick_active_set_parity_failures": int(
             np.count_nonzero(~stick_buffers.active_set_parity)
         ),
+        "independent_engine_difference_detected": independent_difference,
         "stick_capture_energy_range_j": [
             float(np.min(stick_buffers.capture_energy_j)),
             float(np.max(stick_buffers.capture_energy_j)),
@@ -869,10 +906,11 @@ def run_distributed_grip_atlas(
         raise RuntimeError("MuJoCo is required") from error
     try:
         import pinocchio as pin
-
-        pin_ver = str(pin.__version__)
-    except (ImportError, AttributeError):
-        pin_ver = "3.8.0"
+    except ImportError as error:  # pragma: no cover - native runtime gate
+        raise RuntimeError(
+            "robotics Pinocchio >= 2.6 is required; install the 'pin' package"
+        ) from error
+    pin_ver = require_robotics_pinocchio(pin)
     authority = _load_authority()
     states = tuple(
         (case, sample)

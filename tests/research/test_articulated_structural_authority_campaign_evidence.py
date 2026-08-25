@@ -103,7 +103,8 @@ def test_question_program_distinguishes_authority_from_propagation() -> None:
     assert "six corners retain 52/52 feasible states" in program
     assert "low-height corner retains one case-0/phase-12 IK nonconvergence" in program
     assert (
-        "authority regeneration propagates through both headline estimands" in program
+        "Neither the structural LHS nor the seven-corner authority regeneration/"
+        "preflight propagates through both headline estimands" in program
     )
     assert "not a human feasibility or prevalence result" in program
     assert "Propagate every feasible #8800 authority" in program

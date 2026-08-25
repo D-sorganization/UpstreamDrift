@@ -3,8 +3,8 @@
   "study_id": "distributed-grip-friction-contact-atlas",
   "design": {
     "engine_versions": {
-      "mujoco": "3.3.4",
-      "pinocchio": "0.1"
+      "mujoco": "3.8.0",
+      "pinocchio": "3.8.0"
     },
     "state_count": 12,
     "station_counts_per_hand": [
@@ -77,38 +77,39 @@
     "event_probe_velocity_m_s": -0.8
   },
   "results": {
-    "maximum_peak_station_force_n": 4.021274058414114,
-    "maximum_peak_force_couple_nm": 0.4344427542728466,
+    "maximum_peak_station_force_n": 4.021274058413951,
+    "maximum_peak_force_couple_nm": 0.4344427542728409,
     "maximum_open_fraction": 1.0,
     "maximum_transition_count": 0,
     "maximum_registered_event_transition_count": 21,
     "registered_event_opening_count": 80,
     "registered_event_reattachment_count": 186,
     "event_active_set_parity_failures": 0,
-    "maximum_stick_projection_residual_m_s": 9.644937626340777e-11,
-    "maximum_stick_velocity_relative_error": 0.0,
+    "maximum_stick_projection_residual_m_s": 4.6074255521944e-15,
+    "maximum_stick_velocity_relative_error": 3.986702410832903e-12,
     "stick_active_set_parity_failures": 0,
+    "independent_engine_difference_detected": true,
     "stick_capture_energy_range_j": [
-      9.839105530318193e-09,
-      0.37664840792427867
+      9.83910541929589e-09,
+      0.37664840792455956
     ],
-    "maximum_station_load_concentration": 0.820363593977165,
+    "maximum_station_load_concentration": 0.8203635939772279,
     "maximum_coincident_couple_residual_nm": 0.0,
     "maximum_reversed_couple_sign_residual_nm": 0.0,
-    "maximum_virtual_power_residual_w": 1.2212453270876722e-15,
+    "maximum_virtual_power_residual_w": 1.4432899320127035e-15,
     "maximum_positive_dissipation_power_w": 0.0,
-    "maximum_normalized_work_energy_residual": 0.03346282496030918,
-    "maximum_trajectory_relative_error": 0.0,
-    "maximum_force_relative_error": 0.0,
+    "maximum_normalized_work_energy_residual": 0.03346282496053799,
+    "maximum_trajectory_relative_error": 3.8398810850459676e-13,
+    "maximum_force_relative_error": 1.4426264707959885e-10,
     "active_set_parity_failures": 0,
     "failed_numerical_cell_count": 0,
     "failed_parity_cell_count": 0,
     "time_refinement_worst_normalized_residual": [
-      0.03346282496030918,
-      0.016734236783381585
+      0.03346282496053799,
+      0.01673423678360995
     ],
     "time_refinement_passed": true,
-    "maximum_fine_step_three_to_five_station_error": 0.0030030637957723866,
+    "maximum_fine_step_three_to_five_station_error": 0.0030030637957757776,
     "station_refinement_passed": true,
     "all_registered_gates_passed": true
   },
@@ -131,14 +132,14 @@
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "1d25ac5dbbb27d2bf67240c3cab18aa7c0a988f68cbb24fcf305bb5b2b37cca2",
     "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "3422db8884ecdba7938f7100253b0d261c4cd51a5d1c052ac65ae57586d16d63",
-    "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py": "cb8882b32a532bed1ed4fc8c927a2020f89f38990ed583c52dd7b1d7c52c0359",
+    "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py": "8c52c72b7cb0a68d2971f60319784205edaba9fdfc3bda82a75f8f7cab0dae7e",
     "scripts/research/proximal_distal_energy/articulated_slack_contact.py": "79ad8644029ff8d447eae2e697a5ed7deceb173c000e5ef2b4f53be6c791ad69",
-    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "3942fe624a4ed4642a61e68f2fd5029eb92df9dc0fff08617a2f62883e443b9a",
+    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "9b2f3e6a86122bcc41f22ae593ee40e7c89b47856109525548cf48bc1d99916e",
     "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
     "tests/research/test_articulated_distributed_grip.py": "f79a5a74e399352581f1e6f81a4642cd09aaed8ed21e02635ef87c7a12b18d69",
     "tests/research/test_articulated_distributed_forward.py": "2e0c6e9749afd61ae88a297d94f5e101152ecba268ea8ce42051ee2cfcb4c008",
     "tests/research/test_articulated_distributed_friction.py": "7b91050578a415483e2380210f80fd2559b399664b1e282d8531a088d501f4d7",
-    "tests/research/test_articulated_distributed_atlas.py": "7ab56bf424e72912b536a170c3680f7bb48ea28e9716bb58bd59356588de50c0"
+    "tests/research/test_articulated_distributed_atlas.py": "92d1827e00fb7a9718d30df900046d17b26212d97b56d4fd1c2fa4baa33e492f"
   }
 }

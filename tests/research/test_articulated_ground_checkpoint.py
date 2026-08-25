@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from importlib.machinery import PathFinder
 
 import numpy as np
 import pytest
@@ -72,6 +73,8 @@ def test_branch_checkpoint_round_trip_and_design_drift_rejection(tmp_path) -> No
 
 
 def test_short_real_atlas_restarts_from_identical_branch_checkpoints(tmp_path) -> None:
+    if PathFinder.find_spec("pinocchio") is None:
+        pytest.skip("robotics Pinocchio is required for the native restart test")
     config = atlas.ArticulatedGroundAtlasConfig(
         forward=atlas.GroundForwardConfig(
             duration_s=0.001,

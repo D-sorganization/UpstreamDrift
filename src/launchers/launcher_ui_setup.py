@@ -54,6 +54,7 @@ from src.launchers._launcher_top_bar_ui import (
 )
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.layout_metrics import LayoutMetrics
 from src.shared.python.theme.style_constants import Styles
 
 if TYPE_CHECKING:
@@ -290,17 +291,9 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
         main_layout.setHandleWidth(4)
         main_layout.setChildrenCollapsible(False)
 
-        try:
-            from src.shared.python.theme import get_current_colors
+        from src.shared.python.theme.palette import get_current_colors
 
-            _colors = get_current_colors()
-        except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as _dt
-
-            _colors = {
-                "border": getattr(_dt, "border_default", "#555555"),
-                "accent": getattr(_dt, "accent", "#0A84FF"),
-            }
+        _colors = get_current_colors()
         _splitter_bg = _colors.get("border", "#555555")
         _splitter_hover = _colors.get("accent", "#0A84FF")
         main_layout.setStyleSheet(f"""
@@ -329,12 +322,12 @@ class UISetupManager(LauncherNavigationUIMixin, LauncherTopBarUIMixin):
         content_container = QWidget()
         content_container.setMinimumWidth(300)
         content_layout = QVBoxLayout(content_container)
-        content_layout.setSpacing(Styles.SPACING_LG)
+        content_layout.setSpacing(LayoutMetrics.SPACING_LG)
         content_layout.setContentsMargins(
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
-            Styles.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
+            LayoutMetrics.MARGIN_PAGE,
         )
 
         # --- Top Bar ---

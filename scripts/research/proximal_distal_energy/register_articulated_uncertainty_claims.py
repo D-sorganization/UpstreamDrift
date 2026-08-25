@@ -11,7 +11,22 @@ ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
 DATE = "2026-08-23"
-CLAIM_IDS = {f"PD-CLAIM-{value}" for value in range(297, 307)}
+CLAIM_IDS = {f"PD-CLAIM-{value}" for value in range(305, 315)}
+ADJUDICATION_OUTCOMES = dict.fromkeys(
+    (
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307",
+        "PD-CLAIM-308",
+        "PD-CLAIM-309",
+        "PD-CLAIM-310",
+        "PD-CLAIM-311",
+        "PD-CLAIM-312",
+        "PD-CLAIM-313",
+        "PD-CLAIM-314",
+    ),
+    "supported",
+)
 REGISTRATION_ARTIFACT = (
     "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py"
 )
@@ -83,6 +98,12 @@ def _claim(
     falsifier: str,
     adjudication: str,
 ) -> dict[str, Any]:
+    try:
+        adjudication_outcome = ADJUDICATION_OUTCOMES[claim_id]
+    except KeyError as exc:
+        raise ValueError(
+            f"missing explicit adjudication outcome for {claim_id}"
+        ) from exc
     return {
         "claim_id": claim_id,
         "candidate_ids": [candidate["candidate_id"] for candidate in candidates],
@@ -90,6 +111,7 @@ def _claim(
         "classification": classification,
         "published_status": status,
         "audit_status": audit_status,
+        "adjudication_outcome": adjudication_outcome,
         "source_locations": [
             f"{candidate['source_path']}:{candidate['line_start']}"
             for candidate in candidates
@@ -247,7 +269,7 @@ def main() -> None:
     ]
     new_claims = [
         _claim(
-            "PD-CLAIM-297",
+            "PD-CLAIM-305",
             [screen["bounds"], screen["method"]],
             statement=(
                 "A deterministic 40-row articulated screen perturbs nine declared "
@@ -279,7 +301,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-298",
+            "PD-CLAIM-306",
             [screen["result"]],
             statement=(
                 "All 40 registered rows have finite response vectors and remain "
@@ -307,7 +329,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-299",
+            "PD-CLAIM-307",
             [screen["prcc"], screen["interpretation"]],
             statement=(
                 "The largest absolute conditional PRCCs are +0.936 for initial "
@@ -333,7 +355,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-300",
+            "PD-CLAIM-308",
             [screen["boundary"]],
             statement=(
                 "The local articulated screen does not propagate structural variation "
@@ -355,7 +377,7 @@ def main() -> None:
             adjudication="The missing propagation is recorded as an acceptance boundary.",
         ),
         _claim(
-            "PD-CLAIM-301",
+            "PD-CLAIM-309",
             [authority["method"]],
             statement=(
                 "A seven-corner structural campaign regenerates all 13 phase states for "
@@ -383,7 +405,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-302",
+            "PD-CLAIM-310",
             [authority["table"], authority["caption"], authority["result"]],
             statement=(
                 "Six structural corners retain 52/52 feasible selected states; the "
@@ -411,7 +433,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-303",
+            "PD-CLAIM-311",
             [authority["boundary"]],
             statement=(
                 "Structural authority regeneration does not establish sensitivity of "
@@ -433,7 +455,7 @@ def main() -> None:
             adjudication="The unexecuted dynamic propagation remains an explicit gate.",
         ),
         _claim(
-            "PD-CLAIM-304",
+            "PD-CLAIM-312",
             [headline["method"], headline["bounds"], headline["provenance"]],
             statement=(
                 "A registered 19-corner one-at-a-time campaign repeats affected full "
@@ -465,7 +487,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-305",
+            "PD-CLAIM-313",
             [headline["estimand"], headline["boundary"]],
             statement=(
                 "Headline matched-count movement diagnoses sensitivity of the "
@@ -493,7 +515,7 @@ def main() -> None:
             ),
         ),
         _claim(
-            "PD-CLAIM-306",
+            "PD-CLAIM-314",
             [headline["result"], headline["provenance"]],
             statement=(
                 "Across nine completed nonnominal shaft corners, the matched set spans "
@@ -531,12 +553,12 @@ def main() -> None:
     claims = {claim["claim_id"]: claim for claim in registry["claims"]}
 
     mapping = {
-        "bounds": ("PD-CLAIM-297",),
-        "method": ("PD-CLAIM-297",),
-        "result": ("PD-CLAIM-298",),
-        "prcc": ("PD-CLAIM-299",),
-        "interpretation": ("PD-CLAIM-299",),
-        "boundary": ("PD-CLAIM-300",),
+        "bounds": ("PD-CLAIM-305",),
+        "method": ("PD-CLAIM-305",),
+        "result": ("PD-CLAIM-306",),
+        "prcc": ("PD-CLAIM-307",),
+        "interpretation": ("PD-CLAIM-307",),
+        "boundary": ("PD-CLAIM-308",),
     }
     for name, claim_ids in mapping.items():
         _review(
@@ -546,13 +568,13 @@ def main() -> None:
         _review(reviews, screen[name], (), "Figure or governed-artifact pointer.")
 
     mapping = {
-        "method": ("PD-CLAIM-301",),
+        "method": ("PD-CLAIM-309",),
         "header": (),
-        "table": ("PD-CLAIM-302",),
+        "table": ("PD-CLAIM-310",),
         "figure": (),
-        "caption": ("PD-CLAIM-302",),
-        "result": ("PD-CLAIM-302",),
-        "boundary": ("PD-CLAIM-303",),
+        "caption": ("PD-CLAIM-310",),
+        "result": ("PD-CLAIM-310",),
+        "boundary": ("PD-CLAIM-311",),
         "availability": (),
     }
     for name, claim_ids in mapping.items():
@@ -564,13 +586,13 @@ def main() -> None:
         )
 
     mapping = {
-        "method": ("PD-CLAIM-304",),
-        "bounds": ("PD-CLAIM-304",),
-        "estimand": ("PD-CLAIM-305",),
-        "result": ("PD-CLAIM-306",),
+        "method": ("PD-CLAIM-312",),
+        "bounds": ("PD-CLAIM-312",),
+        "estimand": ("PD-CLAIM-313",),
+        "result": ("PD-CLAIM-314",),
         "figure": (),
-        "provenance": ("PD-CLAIM-304", "PD-CLAIM-306"),
-        "boundary": ("PD-CLAIM-305",),
+        "provenance": ("PD-CLAIM-312", "PD-CLAIM-314"),
+        "boundary": ("PD-CLAIM-313",),
     }
     for name, claim_ids in mapping.items():
         _review(
@@ -593,12 +615,12 @@ def main() -> None:
                 "PD-CLAIM-253",
                 "PD-CLAIM-273",
                 "PD-CLAIM-296",
-                "PD-CLAIM-297",
-                "PD-CLAIM-298",
-                "PD-CLAIM-300",
-                "PD-CLAIM-301",
-                "PD-CLAIM-302",
-                "PD-CLAIM-303",
+                "PD-CLAIM-305",
+                "PD-CLAIM-306",
+                "PD-CLAIM-308",
+                "PD-CLAIM-309",
+                "PD-CLAIM-310",
+                "PD-CLAIM-311",
             ),
         ),
         (
@@ -613,15 +635,15 @@ def main() -> None:
         ),
         (
             _find(candidates, "_ch09_conclusions.qmd", "A seven-corner structural"),
-            ("PD-CLAIM-301", "PD-CLAIM-302", "PD-CLAIM-303"),
+            ("PD-CLAIM-309", "PD-CLAIM-310", "PD-CLAIM-311"),
         ),
         (
             _find(candidates, "_ch09_conclusions.qmd", "The completed 19-corner"),
-            ("PD-CLAIM-304", "PD-CLAIM-305", "PD-CLAIM-306"),
+            ("PD-CLAIM-312", "PD-CLAIM-313", "PD-CLAIM-314"),
         ),
         (
             _find(candidates, "_ch09_conclusions.qmd", "The open-resource layer"),
-            ("PD-CLAIM-223", "PD-CLAIM-241", "PD-CLAIM-303"),
+            ("PD-CLAIM-223", "PD-CLAIM-241", "PD-CLAIM-311"),
         ),
         (
             _find(
@@ -629,7 +651,7 @@ def main() -> None:
                 "_ch09_conclusions.qmd",
                 "1. **Complete Structural-Corner",
             ),
-            ("PD-CLAIM-128", "PD-CLAIM-206", "PD-CLAIM-234", "PD-CLAIM-303"),
+            ("PD-CLAIM-128", "PD-CLAIM-206", "PD-CLAIM-234", "PD-CLAIM-311"),
         ),
     ]
     for candidate, claim_ids in repeated:

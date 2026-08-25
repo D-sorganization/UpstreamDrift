@@ -40,14 +40,19 @@ equipment calibration and external archive/PID deposition.
 
 ## Current Candidate Result
 
-The 231-page candidate renders successfully on all 231 pages, exposes
-extractable text on all 231 pages, contains 246 outline entries and 192 valid
-external links, and is now linearized for fast web access. Its candidate PDF
-SHA-256 is
-`a46ec01e6085eda7a80533ab59137b116b6bd3d0f548def792cabf3212137482`.
+The 239-page candidate renders successfully on all 239 pages, exposes
+extractable text on all 239 pages, contains 247 outline entries and 194 valid
+external links, and is linearized for fast web access. Its candidate PDF has
+1,870,344 bytes and SHA-256
+`be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
+The complete ordered 239-page render set is inspected in contact-sheet form,
+with full-resolution inspection of the newly added claim-adjudication reviewer
+section and its surrounding pages. No blank, clipped, missing, or grossly
+unreadable page may be accepted. This visual record qualifies the current
+candidate only; any regenerated PDF requires a new complete inspection.
 
 The computational profile passes. The archival profile remains deliberately
-blocked because the PDF has no structure tag tree, contains 110 Type 3 font
+blocked because the PDF has no structure tag tree, contains 112 Type 3 font
 resources from embedded figures, and uses two unembedded base-font resources.
 Those facts are release findings, not waived successes. An archival release or
 accessibility claim must wait for a regenerated, tagged document with accessible
@@ -89,6 +94,44 @@ Use `--profile archival` only when preparing a professional archival
 publication; it currently fails closed on the disclosed accessibility gaps.
 The generated JSON report is runtime evidence and is not committed into the
 self-hashed release bundle.
+
+## Numeric Claim Verification Boundary
+
+The protected computational profile runs a second, executable numeric layer in
+addition to claim-schema and artifact-integrity checks. Every numeral in every
+material claim statement is bound to a reviewed JSON Pointer, unit transform,
+and tolerance in `data/claim_numeric_contracts.json`. Exact statement digests
+and literal inventories fail closed when prose changes, and the registered
+claim records store the resulting `numeric_evidence` pointer maps. The release
+gate is:
+
+```bash
+python3 -m scripts.research.proximal_distal_energy.build_claim_numeric_comparison_evidence check
+python3 -m scripts.research.proximal_distal_energy.register_numeric_claim_evidence check
+python3 -m scripts.research.proximal_distal_energy.claim_audit numeric
+```
+
+The pointer gate verifies that claim text agrees with the declared registered
+value. It does **not** establish that a cited paper is correct, that a model is
+physically adequate, or that a JSON result independently reproduces the
+underlying mechanics. Its evidence scopes preserve that distinction:
+
+- `local_json_value` addresses a semantically matched value in a declared
+  project JSON artifact;
+- `reported_external_value` is an explicitly non-independent transcription
+  from a linked source;
+- `registered_protocol_or_notation` covers notation or a declared protocol
+  constant rather than an empirical result; and
+- `registered_claim_value_not_independently_recomputed` makes a reviewed value
+  addressable when no unambiguous semantic JSON path exists, while explicitly
+  withholding independent recomputation.
+
+Representative planar, spatial, articulated-shaft, and finite-ground headline
+scalars are separately recomputed from committed CSV/NPZ arrays in
+`tests/research/test_claim_headline_recomputation.py`. Cross-engine array
+comparison evidence must be close but nonidentical; exact-zero parity is
+rejected as degenerate. These tests reduce the former register/self-report
+loop, but they remain model-conditional and are not human validation.
 
 ## Protected Publication Contract
 

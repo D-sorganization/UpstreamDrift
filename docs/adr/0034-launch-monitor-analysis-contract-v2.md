@@ -46,6 +46,11 @@ filename, and file layout are never identity evidence. Insufficient complete
 rows and rank-deficient OLS designs are explicit unavailable results. Invalid
 requests and unsafe aggregation remain errors.
 
+ADR 0036 strengthens this boundary: `PlayerIdentityV2` rejects forbidden
+pseudo-identifiers during model validation even when a user attests them.
+Session boundaries and observation order use separate evidence contracts and
+cannot upgrade a field into player identity.
+
 Commit identifiers are full 40-character lowercase hexadecimal SHAs. The safe
 explicit identity level is `explicit_user_attested`; a session label is not an
 identity level. All canonical metrics and retained numeric source fields remain

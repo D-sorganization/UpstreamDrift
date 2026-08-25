@@ -8,6 +8,9 @@ import sys
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication
+import pytest
+
+pytestmark = [pytest.mark.unit, pytest.mark.ui]
 
 from src.shared.python.physics.terrain_presets import (
     ENVIRONMENT_PRESETS,
@@ -59,3 +62,36 @@ def test_get_dockable_ui_returns_launcher_hosted_widget() -> None:
 
     assert isinstance(widget, TerrainExplorerWidget)
     assert widget.objectName() == "TerrainExplorerWidget"
+
+
+def test_terrain_engine_widget_builder_failure_shows_error_without_abort(
+    monkeypatch,
+) -> None:
+    """Issue #8890: exceptions raised during preset building must be caught and show dialog."""
+    _ensure_qapp()
+
+    def failing_builder(*args, **kwargs):
+        raise ValueError("Invalid slope/direction combination for preset")
+
+    import src.shared.python.physics.terrain_presets as presets_mod
+
+    monkeypatch.setattr(presets_mod, "build_environment_preset", failing_builder)
+    for _mod in list(sys.modules.values()):
+        if hasattr(_mod, "build_environment_preset"):
+            monkeypatch.setattr(_mod, "build_environment_preset", failing_builder)
+
+    widget = TerrainExplorerWidget()
+    assert "Failed to Load Terrain" in widget.query_result.text()
+    assert widget.query_btn.isEnabled() is False
+
+
+def test_terrain_engine_widget_query_without_terrain_shows_error_without_abort(
+    monkeypatch,
+) -> None:
+    """Issue #8890: query without loaded terrain must be caught and show error dialog."""
+    _ensure_qapp()
+    widget = TerrainExplorerWidget()
+    widget._terrain = None
+    widget._query_surface()
+
+    assert "Terrain Query Error" in widget.query_result.text()

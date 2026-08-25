@@ -17,6 +17,7 @@ from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.physics.flight_models import (
     FlightModelRegistry,
     FlightModelType,
+    TrajectoryPoint,
     UnifiedLaunchConditions,
 )
 
@@ -130,6 +131,9 @@ class BallFlightModelResult(BaseModel):
 
     model_name: str
     model_key: FlightModelType
+    #: Named coefficient values the model integrated with, so every returned
+    #: trajectory is attributable to its coefficient set (issue #8978).
+    coefficients: dict[str, float]
     trajectory: list[BallFlightTrajectorySample]
     summary: BallFlightSummary
 
@@ -146,7 +150,9 @@ class BallFlightSimulationResponse(BallFlightModelResult):
     results: list[BallFlightModelResult]
 
 
-def _trajectory_samples(result_trajectory: list) -> list[BallFlightTrajectorySample]:
+def _trajectory_samples(
+    result_trajectory: list[TrajectoryPoint],
+) -> list[BallFlightTrajectorySample]:
     """Serialize existing trajectory points without changing physics behavior."""
     return [
         BallFlightTrajectorySample(
@@ -171,6 +177,7 @@ def _simulate_one(
     return BallFlightModelResult(
         model_name=result.model_name,
         model_key=model_type,
+        coefficients={k: float(v) for k, v in result.coefficients.items()},
         trajectory=_trajectory_samples(result.trajectory),
         summary=BallFlightSummary(
             carry_m=float(result.carry_distance),
@@ -219,6 +226,7 @@ async def simulate_ball_flight(
     return BallFlightSimulationResponse(
         model_name=first.model_name,
         model_key=first.model_key,
+        coefficients=first.coefficients,
         trajectory=first.trajectory,
         summary=first.summary,
         results=results,

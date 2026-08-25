@@ -2,17 +2,25 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
+from types import SimpleNamespace
+from typing import Any, cast
 
 import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_distributed_atlas import (
     DistributedAtlasConfig,
+    _independent_engine_difference_detected,
     _project_stick_velocity,
 )
 from scripts.research.proximal_distal_energy.articulated_distributed_forward import (
     DistributedForwardConfig,
 )
+from scripts.research.proximal_distal_energy.articulated_forward_integration import (
+    native_dynamics_operator,
+)
+from scripts.research.proximal_distal_energy.spatial_full_body import SpatialModel
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
@@ -66,6 +74,47 @@ def test_mass_metric_stick_projection_has_an_analytic_solution() -> None:
     )
 
 
+def test_mass_metric_stick_projection_is_stable_for_redundant_constraints() -> None:
+    """Rank-deficient station rows must not defeat the no-slip residual gate."""
+    rng = np.random.default_rng(333)
+    basis, _ = np.linalg.qr(rng.normal(size=(20, 20)))
+    mass = basis @ np.diag(np.geomspace(10**-3.5, 10**3.5, 20)) @ basis.T
+    independent_rows = rng.normal(size=(10, 20))
+    jacobian = np.vstack(
+        (
+            independent_rows,
+            independent_rows[2],
+            independent_rows[7],
+        )
+    )
+    velocity = rng.normal(size=20)
+
+    projected, residual, capture_energy, _ = _project_stick_velocity(
+        mass, velocity, jacobian
+    )
+
+    assert np.linalg.matrix_rank(jacobian) == 10
+    assert residual < 1e-11
+    assert np.linalg.norm(jacobian @ projected, ord=np.inf) == pytest.approx(residual)
+    assert capture_energy >= 0.0
+
+
+def test_cross_engine_gate_rejects_an_identically_zero_comparison() -> None:
+    zeros = np.zeros((2, 3))
+
+    assert not _independent_engine_difference_detected(zeros, zeros, zeros)
+    assert _independent_engine_difference_detected(zeros, zeros, np.array([0.0, 1e-15]))
+
+
+def test_pinocchio_operator_rejects_an_impostor_without_mujoco_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setitem(sys.modules, "pinocchio", SimpleNamespace(__version__="0.1"))
+
+    with pytest.raises(RuntimeError, match="unrelated PyPI 'pinocchio'"):
+        native_dynamics_operator("pinocchio", cast(SpatialModel, cast(Any, object())))
+
+
 def test_committed_distributed_atlas_is_complete_finite_and_qualified() -> None:
     summary = json.loads(
         (DATA / "articulated_distributed_grip_atlas.json").read_text(encoding="utf-8")
@@ -74,6 +123,7 @@ def test_committed_distributed_atlas_is_complete_finite_and_qualified() -> None:
     assert summary["design"]["trajectory_count"] == 576
     assert summary["design"]["station_counts_per_hand"] == [1, 3, 5]
     assert summary["design"]["friction_coefficients"] == [0.0, 0.35]
+    assert summary["design"]["engine_versions"]["pinocchio"] != "0.1"
     assert summary["design"]["horizons_s"] == [0.004, 0.01, 0.025, 0.05]
     assert summary["results"]["maximum_registered_event_transition_count"] > 0
     assert summary["results"]["registered_event_opening_count"] > 0
@@ -87,6 +137,7 @@ def test_committed_distributed_atlas_is_complete_finite_and_qualified() -> None:
     assert summary["results"]["active_set_parity_failures"] == 0
     assert summary["results"]["time_refinement_passed"]
     assert summary["results"]["station_refinement_passed"]
+    assert summary["results"]["independent_engine_difference_detected"]
     assert summary["results"]["all_registered_gates_passed"]
 
     with np.load(DATA / "articulated_distributed_grip_atlas.npz") as arrays:

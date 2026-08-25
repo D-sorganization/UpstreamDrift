@@ -714,6 +714,20 @@ def mujoco_inverse_dynamics(
     return result
 
 
+def _populate_mujoco_full_mass_matrix(
+    mujoco_module: Any,
+    mj_model: Any,
+    data: Any,
+    matrix: Array,
+) -> None:
+    """Populate a dense inertia matrix across MuJoCo's qM-to-CSR API change."""
+
+    if hasattr(data, "qM"):
+        mujoco_module.mj_fullM(mj_model, matrix, data.qM)
+    else:
+        mujoco_module.mj_fullM(mj_model, data, matrix)
+
+
 def mujoco_mass_matrix_and_bias(
     model: SpatialModel, q: Array, qd: Array
 ) -> tuple[Array, Array]:
@@ -727,7 +741,7 @@ def mujoco_mass_matrix_and_bias(
     data.qvel[:] = qd
     mujoco.mj_forward(mj_model, data)
     matrix = np.empty((model.nq, model.nq), dtype=np.float64)
-    mujoco.mj_fullM(mj_model, matrix, data.qM)
+    _populate_mujoco_full_mass_matrix(mujoco, mj_model, data, matrix)
     bias = np.asarray(data.qfrc_bias, dtype=np.float64).copy()
     if not np.all(np.isfinite(matrix)) or not np.all(np.isfinite(bias)):
         raise RuntimeError("MuJoCo mass/bias audit returned invalid output")

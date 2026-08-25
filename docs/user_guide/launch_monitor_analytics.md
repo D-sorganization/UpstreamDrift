@@ -54,6 +54,43 @@ infer monitor identity from headers, filename, or directory layout. Missing
 access or a missing pinned file fails closed; there is no public download
 fallback.
 
+### Full-Corpus Dataset Jobs
+
+Authorized web clients can analyze a corpus larger than the 20,000-record
+inline limit without transferring its rows. A server administrator configures
+opaque aliases with `UPSTREAMDRIFT_LAUNCH_MONITOR_DATASET_ROOTS`, a JSON object
+whose values are absolute authorized checkout roots. The existing
+`LAUNCH_MONITOR_DATA_ROOT` is also available as alias `default`. These are
+server settings; clients cannot submit a filesystem path.
+
+Each request supplies the alias and exact repository, 40-character commit,
+corpus-manifest SHA-256, deterministic Parquet-content SHA-256, and expected row
+count. Generate the content digest with
+`dataset_content_sha256(corpus_dataset_path(authority_root))`. A job fails
+closed if any identity differs, if a symlink enters the fixed authority layout,
+or if committed qualification metadata does not bind the backing manifests.
+
+The API surface is:
+
+- `GET /tools/launch-monitor-analytics/contracts/dataset-jobs/v1`;
+- `POST /tools/launch-monitor-analytics/v2/dataset-jobs`;
+- `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}`; and
+- `GET /tools/launch-monitor-analytics/v2/dataset-jobs/{job_id}/results`.
+
+Operations are restricted to source summaries, metric summaries, and
+correlations. Pages contain at most 200 aggregate or source-backing records.
+They never contain shot rows, server paths, arbitrary SQL results, or inline
+input records. Numeric groups below ten complete observations are suppressed.
+Source summaries join observed counts to the authority's hash-verified source
+repository, source commit, file path, and file SHA-256 metadata.
+
+Jobs are process-local and bounded. A server restart clears their status and
+results; resubmit the same immutable reference. A structured `unavailable`
+state distinguishes missing authorization or data, repository/commit/hash/row
+count mismatches, and unavailable dependencies without leaking a private path.
+See [ADR 0036](../adr/0036-immutable-launch-monitor-dataset-jobs.md) for the
+security and retention rationale.
+
 ## Workflow
 
 ### 1. Import and Review
@@ -156,10 +193,13 @@ an exported result independently auditable without copying restricted source
 values into the result.
 
 Player grouping in v2 requires an explicitly supplied trusted identifier and
-evidence. The application never infers identity from session, club, filename,
-directory structure, or row order. Vendor names remain vendor-comparable
-labels; no result claims firmware reproduction, device emulation, or device
-certification.
+evidence. The application rejects session, club, source, filename, and row
+fields as player identifiers even if they are user-attested. Session boundaries
+and chronological/ordinal order are declared independently with their own
+identifier or order column, trust level, unit where applicable, and evidence.
+Declaring either one never establishes player identity. Vendor names remain
+vendor-comparable labels; no result claims firmware reproduction, device
+emulation, or device certification.
 
 All canonical metrics and retained numeric source fields remain available for
 selection. Canonical fields use the metric registry's units. A retained source
@@ -167,6 +207,60 @@ field is labeled `source_declared` only when its unit is explicitly supplied in
 the v2 context; otherwise the unit and authority are `unknown`. An unknown unit
 is never silently treated as canonical. Backing rows similarly name their
 declared content-addressed source or state why no source link is available.
+
+### Analyze Within-Player and Population Covariation
+
+Use the player-covariation operation only when the dataset contains a stable,
+explicitly attested or externally verified player identifier. Select any two
+numeric canonical or retained source variables. Retained fields remain
+selectable, but an undeclared source unit is shown as `unknown`, not promoted to
+a canonical unit.
+
+Read the outputs as separate descriptive views:
+
+- **Pooled** describes all usable rows and can be dominated by player mix.
+- **Within player** removes each player's mean before calculating association.
+- **Between player** describes the association among player means.
+- **Per player** reports each eligible player's estimate and population weight.
+- **Population meta-analysis** reports fixed/random Fisher-z summaries and Q,
+  tau-squared, and I-squared heterogeneity.
+
+If pooled and within-player directions differ, the result warns about an
+aggregation reversal. Do not interpret the pooled result as the player's swing
+pattern. A large random-effects correlation with high heterogeneity likewise
+does not mean every player follows that pattern.
+
+The all-pairs scan is for hypothesis generation. It ranks a bounded set of
+numeric pairs deterministically, retains structured unavailable pairs, and
+warns about multiple comparisons. Validate any selected relationship on new or
+held-out sessions before using it for coaching. Correlation alone does not show
+causality, improvement, or device-model equivalence.
+
+Exports retain source references and source-joinable backing hashes rather
+than copying restricted row values. Selected-pair results contain player labels;
+store and share them according to the source dataset's privacy and usage terms.
+
+### Source-Backed Strokes Gained
+
+True strokes gained requires more than carry and lateral dispersion. Each row
+must identify the start and finish lie, context, target or hole, and distance.
+The expected-strokes benchmark must be versioned, cited by HTTP(S) source URL,
+license-declared, and protected by the canonical table SHA-256. The application
+fails closed when a row is outside benchmark support or lacks a required state.
+
+The governed result reports:
+
+- `SG = E(start state) - 1 - E(finish state)` in strokes;
+- the exact benchmark version, source, license, and hash;
+- row-level interpolation inputs, input hashes, and exclusions;
+- sampling confidence intervals and benchmark uncertainty when supplied;
+- explicit units and non-causal limitations; and
+- player/session/club and longitudinal summaries only for user-attested or
+  externally verified identifiers and order fields.
+
+Target-relative radial error remains available as a dispersion proxy in yards.
+It is explicitly labeled **not strokes gained** because it has no versioned
+expected-strokes baseline or complete course state.
 
 ### Public Reference Data
 

@@ -17,7 +17,9 @@ from src.shared.python.launch_monitor import (
     DatasetAuthorityV2,
     FlexibleAnalysisRequest,
     ModelProvenanceV2,
+    OrderEvidenceV2,
     PlayerIdentityV2,
+    SessionIdentityV2,
     SourceFileReferenceV2,
     TransformRecordV2,
     adapt_v2_to_v1,
@@ -200,6 +202,74 @@ def test_v2_player_grouping_requires_explicit_trusted_identity() -> None:
         )
 
 
+@pytest.mark.parametrize(
+    "identifier_column",
+    [
+        "session",
+        "session_id",
+        "Session ID",
+        "club",
+        "club_id",
+        "source",
+        "source_id",
+        "file",
+        "filename",
+        "file_name",
+        "row_order",
+        "source_row",
+        "source-row",
+    ],
+)
+def test_v2_rejects_forbidden_player_pseudo_identity_even_when_attested(
+    identifier_column: str,
+) -> None:
+    with pytest.raises(ValidationError, match="cannot be used as player identity"):
+        PlayerIdentityV2(
+            trust_level="explicit_user_attested",
+            identifier_column=identifier_column,
+            evidence="The user attested this source field.",
+        )
+
+
+def test_v2_separates_session_identity_and_order_evidence() -> None:
+    context = AnalysisContextV2(
+        session_identity=SessionIdentityV2(
+            trust_level="explicit_user_attested",
+            identifier_column="session_id",
+            evidence="The data owner attested the session boundaries.",
+        ),
+        order_evidence=OrderEvidenceV2(
+            trust_level="source_reported",
+            order_column="captured_at",
+            order_kind="timestamp",
+            unit="iso8601-utc",
+            evidence="Exported capture timestamp from the source device.",
+        ),
+    )
+
+    assert context.session_identity.identifier_column == "session_id"
+    assert context.order_evidence.order_kind == "timestamp"
+    assert context.player_identity.trust_level == "not_provided"
+
+
+def test_v2_session_identity_requires_complete_evidence() -> None:
+    with pytest.raises(ValidationError, match="evidence"):
+        SessionIdentityV2(
+            trust_level="explicit_user_attested",
+            identifier_column="session_id",
+        )
+
+
+def test_v2_order_contract_requires_complete_evidence() -> None:
+    with pytest.raises(ValidationError, match="unit"):
+        OrderEvidenceV2(
+            trust_level="source_reported",
+            order_column="captured_at",
+            order_kind="timestamp",
+            evidence="Device timestamp.",
+        )
+
+
 def test_v2_accepts_only_full_commit_shas() -> None:
     with pytest.raises(ValidationError, match="commit"):
         DatasetAuthorityV2(dataset_id="corpus", commit="97f3ecf")
@@ -313,3 +383,11 @@ def test_published_schema_matches_the_python_authority() -> None:
     published = json.loads(schema_path.read_text(encoding="utf-8"))
     assert CONTRACT_VERSION_V2 == "2.0.0"
     assert published == contract_v2_json_schema()
+    result_properties = published["properties"]
+    assert result_properties["session_identity"]["$ref"].endswith("/SessionIdentityV2")
+    assert result_properties["order_evidence"]["$ref"].endswith("/OrderEvidenceV2")
+    player_identifier = published["$defs"]["PlayerIdentityV2"]["properties"][
+        "identifier_column"
+    ]
+    assert "session_id" in player_identifier["not"]["enum"]
+    assert "source_row" in player_identifier["not"]["enum"]

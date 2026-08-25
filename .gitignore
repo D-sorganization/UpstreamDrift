@@ -80,6 +80,7 @@ ProfilePhoto.jpg
 .ruff_cache/
 .mypy_cache/
 .pytest_cache/
+/.pytest_tmp_*/
 .cache/
 
 # MuJoCo runtime log (created by mj_saveModel/from_binary_path on warning)

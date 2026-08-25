@@ -46,6 +46,10 @@ from src.launchers.launcher_layout_manager import (
     LayoutManager,
     compute_centered_geometry,
 )
+from src.launchers.launcher_layout_persistence import (
+    load_layout_state,
+    save_layout_state,
+)
 from src.launchers.launcher_model_handlers import ModelHandlerRegistry
 from src.launchers.launcher_orchestrator import LauncherOrchestrator
 from src.launchers.launcher_process_cleanup_worker import ProcessCleanupWorker
@@ -471,7 +475,9 @@ class UpstreamDriftLauncher(QMainWindow):
 
             c = _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment,no-redef]
+            from src.shared.python.theme.palette import (  # type: ignore[assignment,no-redef]
+                DARK_THEME as c,
+            )
 
         lbl = QLabel(title)
         lbl.setFont(get_display_font(size=14, weight=Weights.BOLD))
@@ -509,22 +515,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
-        window_state = {
-            "selected_model": self.selected_model,
-            "geometry": {
-                "x": self.x(),
-                "y": self.y(),
-                "width": self.width(),
-                "height": self.height(),
-            },
-            "options": {
-                "live_visualization": (self.chk_live.isChecked() if True else True),
-                "gpu_acceleration": (self.chk_gpu.isChecked() if True else False),
-                "docker_mode": (self.chk_docker.isChecked() if True else False),
-                "wsl_mode": (self.chk_wsl.isChecked() if True else False),
-            },
-        }
-        self.layout_manager.save_layout(window_state)
+        save_layout_state(self)
 
     def _sync_model_cards(self) -> None:
         """Ensure widgets match the current model order."""
@@ -624,9 +615,34 @@ class UpstreamDriftLauncher(QMainWindow):
         self._monitor_sidekick_api_readiness()
 
     def _monitor_sidekick_api_readiness(self) -> None:
-        """Delegate API readiness monitoring to the Sidekick owner."""
+        """Probe API readiness off the GUI thread, then advance the monitor.
+
+        The blocking HTTP probe runs on a ``SidekickReadinessProbeThread``
+        (issue #8939); its result is marshalled back to the GUI thread via a
+        signal and fed to the sidebar manager's readiness state machine.
+        """
+        if not getattr(self, "_sidekick_api_monitoring", True):
+            return
+        from src.launchers.sidekick_readiness_worker import (
+            SidekickReadinessProbeThread,
+        )
+
+        runtime = self._sidekick_runtime_config
+        expected_instance_id = runtime.instance_id if runtime is not None else None
+        worker = SidekickReadinessProbeThread(
+            probe=check_sidekick_api_readiness,
+            expected_instance_id=expected_instance_id,
+        )
+        worker.readiness_ready.connect(self._on_sidekick_readiness_result)
+        worker.finished.connect(worker.deleteLater)
+        # Keep a reference so the thread is not garbage-collected mid-probe.
+        self._sidekick_readiness_worker = worker
+        worker.start()
+
+    def _on_sidekick_readiness_result(self, readiness: Any) -> None:
+        """Advance the readiness state machine with an already-probed result."""
         self.sidekick_sidebar_manager._monitor_sidekick_api_readiness(
-            readiness_check=check_sidekick_api_readiness,
+            readiness_check=lambda *, expected_instance_id=None: readiness,
             schedule_once=QTimer.singleShot,
             monotonic=time.monotonic,
         )
@@ -720,70 +736,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _load_layout(self) -> None:
         """Load the saved model layout from configuration file."""
-        layout_data = self.layout_manager.load_layout()
-
-        if layout_data is None:
-            self._rebuild_grid()
-            return
-
-        # Restore view mode checkmark
-        if True:
-            act = self._viewmode_actions.get(self.layout_manager.current_view_mode)
-            if act:
-                act.setChecked(True)
-
-        self.model_order = self.layout_manager.model_order
-        self._sync_model_cards()
-
-        # Restore window geometry, clamped to screen bounds
-        geo = layout_data.get("window_geometry", {})
-        if geo:
-            x = geo.get("x", 100)
-            y = geo.get("y", 100)
-            w = geo.get("width", 1280)
-            h = geo.get("height", 800)
-            # Clamp to screen size
-            screen = QApplication.primaryScreen()
-            if screen:
-                avail = screen.availableGeometry()
-                w = min(w, avail.width() - 40)
-                h = min(h, avail.height() - 40)
-                x = max(avail.x(), min(x, avail.x() + avail.width() - w))
-                y = max(avail.y() + 30, min(y, avail.y() + avail.height() - h))
-            elif y < 30:
-                y = 50
-            self.setGeometry(x, y, w, h)
-        else:
-            self._center_window()
-
-        # Restore options
-        options = layout_data.get("options", {})
-        if True:
-            self.chk_live.setChecked(options.get("live_visualization", True))
-        if True:
-            self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
-        if True:
-            saved_docker = options.get("docker_mode", None)
-            if saved_docker is None:
-                saved_docker = self.orchestrator.docker_available
-            if saved_docker:
-                self.chk_docker.setChecked(True)
-            else:
-                self.chk_docker.setChecked(False)
-        if True:
-            saved_wsl = options.get("wsl_mode", False)
-            if saved_wsl:
-                self.chk_wsl.setChecked(True)
-            else:
-                self.chk_wsl.setChecked(False)
-
-        # Restore selected model
-        saved_selection = layout_data.get("selected_model")
-        if saved_selection and saved_selection in self.model_cards:
-            self.select_model(saved_selection)
-
-        self._rebuild_grid()
-        logger.info("Layout loaded successfully")
+        load_layout_state(self)
 
     def _safe_int(self, value: Any, default: int) -> int:
         """Safely convert a value to int, handling Mock objects from tests."""
@@ -818,7 +771,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
             return _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME
+            from src.shared.python.theme.palette import DARK_THEME
 
             return DARK_THEME
 
@@ -923,7 +876,9 @@ class UpstreamDriftLauncher(QMainWindow):
 
             c = _theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as c  # type: ignore[assignment,no-redef]
+            from src.shared.python.theme.palette import (  # type: ignore[assignment,no-redef]
+                DARK_THEME as c,
+            )
 
         if not self.selected_model:
             self.btn_launch.setText("Select a Model")

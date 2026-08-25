@@ -31,6 +31,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "closed_state_forward_bridge",
         "forward_contact_validity_horizon",
         "articulated_inertia_cross_engine",
+        "articulated_native_constraint_discrepancy",
         "articulated_contact_projection",
         "articulated_forward_contact",
         "articulated_slack_atlas",

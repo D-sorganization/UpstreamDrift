@@ -309,6 +309,16 @@ jobs:
           cache-dependency-path: |
             pyproject.toml
             requirements*.lock
+      - name: Validate Unit-Gate Quarantine Contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            python scripts/ci/check_unit_gate_quarantine.py \
+              --baseline-ref "origin/${{ github.base_ref }}"
+          else
+            python scripts/ci/check_unit_gate_quarantine.py
+          fi
       - name: Purge pip cache
         run: python -m pip cache purge || true
       - name: Create Quality Virtual Environment
@@ -1108,11 +1118,18 @@ jobs:
           cache: "pip"
           cache-dependency-path: pyproject.toml
       - name: Install publication inspection dependencies
-        run: python -m pip install --no-cache-dir "pymupdf>=1.26.0" "pikepdf>=10.0.0"
+        run: >-
+          python -m pip install --no-cache-dir
+          "numpy>=1.26.0"
+          "pymupdf>=1.26.0"
+          "pikepdf>=10.0.0"
       - name: Validate release authority and every PDF page
         shell: bash
         run: |
           set -euo pipefail
+          python -m scripts.research.proximal_distal_energy.build_claim_numeric_comparison_evidence check
+          python -m scripts.research.proximal_distal_energy.register_numeric_claim_evidence check
+          python -m scripts.research.proximal_distal_energy.claim_audit numeric
           python -m scripts.research.proximal_distal_energy.qualify_open_release validate \
             --source-revision "$(git rev-parse HEAD)" \
             --publication-profile computational

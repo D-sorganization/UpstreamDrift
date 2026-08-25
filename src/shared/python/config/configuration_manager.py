@@ -38,6 +38,11 @@ class SimulationConfig:
     save_state_path: str = ""
     load_state_path: str = ""
 
+    # Asset roots (Issue #7941 / #8967). Empty string means "not yet
+    # resolved"; launchers populate these with absolute paths on startup.
+    engine_root: str = ""
+    model_root: str = ""
+
     # Polynomial Control
     polynomial_coefficients: dict[str, list[float]] = field(default_factory=dict)
 

@@ -1,0 +1,1071 @@
+{
+  "$defs": {
+    "AnalysisContextV2": {
+      "additionalProperties": false,
+      "description": "Caller-supplied lineage and identity assertions.",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatasetAuthorityV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "order_evidence": {
+          "$ref": "#/$defs/OrderEvidenceV2"
+        },
+        "player_identity": {
+          "$ref": "#/$defs/PlayerIdentityV2"
+        },
+        "session_identity": {
+          "$ref": "#/$defs/SessionIdentityV2"
+        },
+        "source_units": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Source Units",
+          "type": "object"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SourceFileReferenceV2"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "transformations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TransformRecordV2"
+          },
+          "title": "Transformations",
+          "type": "array"
+        }
+      },
+      "title": "AnalysisContextV2",
+      "type": "object"
+    },
+    "AvailabilityV1": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "observed_count": {
+          "minimum": 0,
+          "title": "Observed Count",
+          "type": "integer"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason Code"
+        },
+        "required_count": {
+          "minimum": 0,
+          "title": "Required Count",
+          "type": "integer"
+        },
+        "state": {
+          "enum": ["available", "unavailable"],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": ["state", "observed_count", "required_count"],
+      "title": "AvailabilityV1",
+      "type": "object"
+    },
+    "BaselineProvenanceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_id": {
+          "title": "Baseline Id",
+          "type": "string"
+        },
+        "contract_version": {
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "license": {
+          "title": "License",
+          "type": "string"
+        },
+        "source_url": {
+          "title": "Source Url",
+          "type": "string"
+        },
+        "table_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Table Sha256",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "baseline_id",
+        "version",
+        "source_url",
+        "license",
+        "table_sha256",
+        "contract_version"
+      ],
+      "title": "BaselineProvenanceV1",
+      "type": "object"
+    },
+    "ConfidenceIntervalV1": {
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "title": "Level",
+          "type": "number"
+        },
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": ["lower", "upper", "level", "method"],
+      "title": "ConfidenceIntervalV1",
+      "type": "object"
+    },
+    "CourseStateValueV1": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "title": "Context",
+          "type": "string"
+        },
+        "distance_yards": {
+          "minimum": 0.0,
+          "title": "Distance Yards",
+          "type": "number"
+        },
+        "lie": {
+          "title": "Lie",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": ["lie", "context", "target", "distance_yards"],
+      "title": "CourseStateValueV1",
+      "type": "object"
+    },
+    "DatasetAuthorityV2": {
+      "additionalProperties": false,
+      "description": "Commit-addressable authority for the analyzed dataset.",
+      "properties": {
+        "commit": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "dataset_id": {
+          "minLength": 1,
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "dataset_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Path"
+        },
+        "manifest_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manifest Sha256"
+        },
+        "repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repository"
+        }
+      },
+      "required": ["dataset_id"],
+      "title": "DatasetAuthorityV2",
+      "type": "object"
+    },
+    "EstimateSummaryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence_interval": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConfidenceIntervalV1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "count": {
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "mean": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean"
+        },
+        "standard_deviation": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standard Deviation"
+        },
+        "standard_error": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standard Error"
+        }
+      },
+      "required": ["count"],
+      "title": "EstimateSummaryV1",
+      "type": "object"
+    },
+    "ExcludedRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "reason_code": {
+          "enum": [
+            "missing_course_state",
+            "invalid_distance",
+            "outside_baseline"
+          ],
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "source_index": {
+          "minimum": 0,
+          "title": "Source Index",
+          "type": "integer"
+        }
+      },
+      "required": ["source_index", "reason_code", "message"],
+      "title": "ExcludedRowV1",
+      "type": "object"
+    },
+    "ExclusionSummaryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "by_reason": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "By Reason",
+          "type": "object"
+        },
+        "included_row_count": {
+          "minimum": 0,
+          "title": "Included Row Count",
+          "type": "integer"
+        },
+        "input_row_count": {
+          "minimum": 0,
+          "title": "Input Row Count",
+          "type": "integer"
+        },
+        "total_excluded": {
+          "minimum": 0,
+          "title": "Total Excluded",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_row_count",
+        "included_row_count",
+        "total_excluded",
+        "by_reason"
+      ],
+      "title": "ExclusionSummaryV1",
+      "type": "object"
+    },
+    "GroupSummaryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "enum": ["player", "session", "club"],
+          "title": "Dimension",
+          "type": "string"
+        },
+        "estimate": {
+          "$ref": "#/$defs/EstimateSummaryV1"
+        },
+        "evidence": {
+          "title": "Evidence",
+          "type": "string"
+        },
+        "group_value": {
+          "title": "Group Value",
+          "type": "string"
+        },
+        "trust_level": {
+          "enum": [
+            "explicit_user_attested",
+            "pseudonymous_stable",
+            "verified_external"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dimension",
+        "group_value",
+        "estimate",
+        "trust_level",
+        "evidence"
+      ],
+      "title": "GroupSummaryV1",
+      "type": "object"
+    },
+    "InterpolationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "fraction": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Fraction",
+          "type": "number"
+        },
+        "lower_distance_yards": {
+          "title": "Lower Distance Yards",
+          "type": "number"
+        },
+        "upper_distance_yards": {
+          "title": "Upper Distance Yards",
+          "type": "number"
+        }
+      },
+      "required": ["lower_distance_yards", "upper_distance_yards", "fraction"],
+      "title": "InterpolationV1",
+      "type": "object"
+    },
+    "LongitudinalSummaryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "title": "Evidence",
+          "type": "string"
+        },
+        "group_dimension": {
+          "enum": ["player", "session", "club", "all"],
+          "title": "Group Dimension",
+          "type": "string"
+        },
+        "group_value": {
+          "title": "Group Value",
+          "type": "string"
+        },
+        "intercept": {
+          "title": "Intercept",
+          "type": "number"
+        },
+        "p_value": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "P Value",
+          "type": "number"
+        },
+        "r_squared": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "R Squared",
+          "type": "number"
+        },
+        "sample_count": {
+          "minimum": 3,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "slope": {
+          "title": "Slope",
+          "type": "number"
+        },
+        "slope_unit": {
+          "title": "Slope Unit",
+          "type": "string"
+        },
+        "trust_level": {
+          "enum": [
+            "explicit_user_attested",
+            "pseudonymous_stable",
+            "verified_external"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_dimension",
+        "group_value",
+        "sample_count",
+        "slope",
+        "intercept",
+        "r_squared",
+        "p_value",
+        "slope_unit",
+        "trust_level",
+        "evidence"
+      ],
+      "title": "LongitudinalSummaryV1",
+      "type": "object"
+    },
+    "OrderEvidenceV2": {
+      "additionalProperties": false,
+      "description": "Evidence defining chronological or ordinal order for longitudinal work.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "order_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Order Column"
+        },
+        "order_kind": {
+          "anyOf": [
+            {
+              "enum": ["timestamp", "ordinal", "source_sequence"],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Order Kind"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "source_reported",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "title": "OrderEvidenceV2",
+      "type": "object"
+    },
+    "PlayerIdentityV2": {
+      "additionalProperties": false,
+      "description": "Declared identity evidence; identity is never inferred from layout.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "identifier_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit player identifier column; session, club, source, file, and row-position fields are forbidden.",
+          "not": {
+            "enum": [
+              "club",
+              "club_id",
+              "file",
+              "file_name",
+              "filename",
+              "row_order",
+              "session",
+              "session_id",
+              "source",
+              "source_id",
+              "source_row"
+            ]
+          },
+          "title": "Identifier Column"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "pseudonymous_stable",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "title": "PlayerIdentityV2",
+      "type": "object"
+    },
+    "SessionIdentityV2": {
+      "additionalProperties": false,
+      "description": "Evidence for repeated-observation session boundaries, never a player ID.",
+      "properties": {
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "identifier_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identifier Column"
+        },
+        "trust_level": {
+          "default": "not_provided",
+          "enum": [
+            "not_provided",
+            "explicit_user_attested",
+            "source_reported",
+            "verified_external",
+            "untrusted_inferred"
+          ],
+          "title": "Trust Level",
+          "type": "string"
+        }
+      },
+      "title": "SessionIdentityV2",
+      "type": "object"
+    },
+    "SourceFileReferenceV2": {
+      "additionalProperties": false,
+      "description": "Content-addressed source and the sessions it backs.",
+      "properties": {
+        "file_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "File Sha256",
+          "type": "string"
+        },
+        "rights_status": {
+          "default": "unknown",
+          "enum": [
+            "public_redistributable",
+            "restricted_internal",
+            "permission_required",
+            "unknown"
+          ],
+          "title": "Rights Status",
+          "type": "string"
+        },
+        "session_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Session Ids",
+          "type": "array"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Uri"
+        }
+      },
+      "required": ["source_id", "file_sha256"],
+      "title": "SourceFileReferenceV2",
+      "type": "object"
+    },
+    "StrokesGainedClaimsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "causal_inference": {
+          "const": false,
+          "default": false,
+          "title": "Causal Inference",
+          "type": "boolean"
+        },
+        "device_certification": {
+          "const": false,
+          "default": false,
+          "title": "Device Certification",
+          "type": "boolean"
+        },
+        "device_emulation": {
+          "const": false,
+          "default": false,
+          "title": "Device Emulation",
+          "type": "boolean"
+        },
+        "is_strokes_gained": {
+          "const": true,
+          "default": true,
+          "title": "Is Strokes Gained",
+          "type": "boolean"
+        },
+        "source_backed": {
+          "const": true,
+          "default": true,
+          "title": "Source Backed",
+          "type": "boolean"
+        }
+      },
+      "title": "StrokesGainedClaimsV1",
+      "type": "object"
+    },
+    "StrokesGainedRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_standard_error": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Standard Error"
+        },
+        "expected_finish": {
+          "title": "Expected Finish",
+          "type": "number"
+        },
+        "expected_start": {
+          "title": "Expected Start",
+          "type": "number"
+        },
+        "finish": {
+          "$ref": "#/$defs/CourseStateValueV1"
+        },
+        "finish_interpolation": {
+          "$ref": "#/$defs/InterpolationV1"
+        },
+        "groups": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Groups",
+          "type": "object"
+        },
+        "input_record_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Input Record Sha256",
+          "type": "string"
+        },
+        "longitudinal_order": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Longitudinal Order"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "source_index": {
+          "minimum": 0,
+          "title": "Source Index",
+          "type": "integer"
+        },
+        "start": {
+          "$ref": "#/$defs/CourseStateValueV1"
+        },
+        "start_interpolation": {
+          "$ref": "#/$defs/InterpolationV1"
+        },
+        "strokes_gained": {
+          "title": "Strokes Gained",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source_index",
+        "input_record_sha256",
+        "start",
+        "finish",
+        "expected_start",
+        "expected_finish",
+        "strokes_gained",
+        "start_interpolation",
+        "finish_interpolation"
+      ],
+      "title": "StrokesGainedRowV1",
+      "type": "object"
+    },
+    "StrokesGainedUncertaintyV1": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "benchmark_method": {
+          "title": "Benchmark Method",
+          "type": "string"
+        },
+        "benchmark_standard_error_mean": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Standard Error Mean"
+        },
+        "confidence_level": {
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "sampling_method": {
+          "title": "Sampling Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sampling_method",
+        "confidence_level",
+        "benchmark_method",
+        "assumptions"
+      ],
+      "title": "StrokesGainedUncertaintyV1",
+      "type": "object"
+    },
+    "TransformRecordV2": {
+      "additionalProperties": false,
+      "description": "Versioned transformation applied before analysis.",
+      "properties": {
+        "parameters_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Parameters Sha256",
+          "type": "string"
+        },
+        "transform_id": {
+          "minLength": 1,
+          "title": "Transform Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": ["transform_id", "version", "parameters_sha256"],
+      "title": "TransformRecordV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analysis_context": {
+      "$ref": "#/$defs/AnalysisContextV2"
+    },
+    "availability": {
+      "$ref": "#/$defs/AvailabilityV1"
+    },
+    "baseline": {
+      "$ref": "#/$defs/BaselineProvenanceV1"
+    },
+    "claims": {
+      "$ref": "#/$defs/StrokesGainedClaimsV1"
+    },
+    "contract_version": {
+      "const": "launch-monitor-strokes-gained-analysis/1.0.0",
+      "default": "launch-monitor-strokes-gained-analysis/1.0.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "dataset_fingerprint_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Dataset Fingerprint Sha256",
+      "type": "string"
+    },
+    "excluded_rows": {
+      "items": {
+        "$ref": "#/$defs/ExcludedRowV1"
+      },
+      "title": "Excluded Rows",
+      "type": "array"
+    },
+    "exclusions": {
+      "$ref": "#/$defs/ExclusionSummaryV1"
+    },
+    "formula": {
+      "title": "Formula",
+      "type": "string"
+    },
+    "group_summaries": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GroupSummaryV1"
+      },
+      "title": "Group Summaries",
+      "type": "array"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "longitudinal_summaries": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/LongitudinalSummaryV1"
+      },
+      "title": "Longitudinal Summaries",
+      "type": "array"
+    },
+    "metric_name": {
+      "const": "source_backed_strokes_gained",
+      "default": "source_backed_strokes_gained",
+      "title": "Metric Name",
+      "type": "string"
+    },
+    "row_results": {
+      "items": {
+        "$ref": "#/$defs/StrokesGainedRowV1"
+      },
+      "title": "Row Results",
+      "type": "array"
+    },
+    "status": {
+      "enum": ["available", "partial", "unavailable"],
+      "title": "Status",
+      "type": "string"
+    },
+    "uncertainty": {
+      "$ref": "#/$defs/StrokesGainedUncertaintyV1"
+    },
+    "unit": {
+      "const": "strokes",
+      "default": "strokes",
+      "title": "Unit",
+      "type": "string"
+    },
+    "units": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Units",
+      "type": "object"
+    },
+    "value_summary": {
+      "$ref": "#/$defs/EstimateSummaryV1"
+    },
+    "warnings": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "status",
+    "value_summary",
+    "baseline",
+    "formula",
+    "units",
+    "availability",
+    "uncertainty",
+    "row_results",
+    "excluded_rows",
+    "exclusions",
+    "analysis_context",
+    "dataset_fingerprint_sha256",
+    "limitations"
+  ],
+  "title": "StrokesGainedAnalysisResultV1",
+  "type": "object"
+}

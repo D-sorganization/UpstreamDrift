@@ -1,148 +1,16 @@
-"""Tests for model_registry."""
+"""Tombstone: the module this file tested was removed.
 
-from pathlib import Path  # noqa: E402
-from unittest.mock import mock_open, patch  # noqa: E402
+The dead launcher shells (``src/launchers/unified_launcher.py``,
+``src/launchers/golf_suite_launcher.py``, ``src/launchers/model_registry.py``)
+were quarantined and deleted in #8831/#8859 (landed via PR #8976) because they
+shadowed the canonical launcher/registry. This tombstone preserves the test
+path so the deleted-test gate stays honest; it is slated for post-merge
+cleanup.
+"""
 
-import pytest  # noqa: E402
-import yaml  # noqa: E402
-from src.launchers.model_registry import (  # noqa: E402
-    ModelRegistry,
-    ModelSpec,
-    _registry,
-    get_model_registry,
+import pytest
+
+pytest.skip(
+    "target module removed in #8831 — tombstone pending post-merge cleanup",
+    allow_module_level=True,
 )
-
-
-@pytest.fixture
-def mock_yaml_data() -> dict:
-    return {
-        "models": [
-            {
-                "id": "model_1",
-                "name": "First Model",
-                "description": "Test description 1",
-                "type": "engine_managed",
-                "path": "path/to/model_1.urdf",
-                "engine_type": "mujoco",
-            },
-            {
-                "id": "model_2",
-                "name": "Second Model",
-                "description": "Test description 2",
-                "type": "special_app",
-                "path": "path/to/script.py",
-            },
-        ]
-    }
-
-
-def test_model_spec() -> None:
-    """Test ModelSpec dataclass."""
-    spec = ModelSpec(
-        id="test",
-        name="Test",
-        description="A test spec.",
-        type="engine_managed",
-        path="foo/bar.urdf",
-    )
-    assert spec.id == "test"
-    assert spec.engine_type is None
-
-
-def test_model_registry_init() -> None:
-    """Test initializing registry."""
-    registry = ModelRegistry("custom/path.yaml")
-    assert registry.config_path == Path("custom/path.yaml")
-    assert not registry._loaded
-
-
-def test_model_registry_load_success(mock_yaml_data) -> None:
-    """Test parsing yaml config correctly."""
-    registry = ModelRegistry()
-    mock_file = mock_open(read_data=yaml.dump(mock_yaml_data))
-
-    with (
-        patch("builtins.open", mock_file),
-        patch.object(Path, "exists", return_value=True),
-    ):
-        registry.load(Path("/fake/root"))
-
-    assert registry._loaded
-    assert len(registry.models) == 2
-
-    model = registry.get_model_by_id("model_1")
-    assert model is not None
-    assert model.name == "First Model"
-    assert model.engine_type == "mujoco"
-
-    models = registry.get_all_models()
-    assert len(models) == 2
-
-
-def test_model_registry_load_missing_file() -> None:
-    """Test behaviour when config file is missing."""
-    registry = ModelRegistry()
-
-    with patch.object(Path, "exists", return_value=False):
-        registry.load(Path("/fake/root"))
-
-    assert not registry._loaded
-    assert len(registry.models) == 0
-
-
-def test_model_registry_yaml_error() -> None:
-    """Test yaml parsing error handling."""
-    registry = ModelRegistry()
-    mock_file = mock_open(read_data="invalid: yaml: content\n - - -")
-
-    with (
-        patch("builtins.open", mock_file),
-        patch.object(Path, "exists", return_value=True),
-        pytest.raises(yaml.YAMLError),
-    ):
-        registry.load(Path("/fake/root"))
-
-
-def test_model_registry_type_error(mock_yaml_data) -> None:
-    """Test type error when loading."""
-    # Introduce bad data to cause TypeError in ModelSpec initialization
-    bad_data = {"models": [{"id": "bad", "unknown_arg": "value"}]}
-    registry = ModelRegistry()
-    mock_file = mock_open(read_data=yaml.dump(bad_data))
-
-    with (
-        patch("builtins.open", mock_file),
-        patch.object(Path, "exists", return_value=True),
-        pytest.raises(TypeError),
-    ):
-        registry.load(Path("/fake/root"))
-
-
-def test_model_registry_os_error() -> None:
-    """Test OS error when loading file."""
-    registry = ModelRegistry()
-
-    with (
-        patch("builtins.open", side_effect=OSError("Read failed")),
-        patch.object(Path, "exists", return_value=True),
-        pytest.raises(OSError),
-    ):
-        registry.load(Path("/fake/root"))
-
-
-def test_get_model_by_id_not_found(mock_yaml_data) -> None:
-    """Test getting an unknown model."""
-    registry = ModelRegistry()
-    mock_file = mock_open(read_data=yaml.dump(mock_yaml_data))
-    with (
-        patch("builtins.open", mock_file),
-        patch.object(Path, "exists", return_value=True),
-    ):
-        registry.load(Path("/fake/root"))
-
-    assert registry.get_model_by_id("nonexistent") is None
-
-
-def test_get_global_registry() -> None:
-    """Test the global singleton accessor."""
-    assert get_model_registry() is _registry

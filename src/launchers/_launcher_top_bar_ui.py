@@ -184,7 +184,7 @@ class LauncherTopBarUIMixin:
 
             colors = theme.get_current_colors()  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
-            from src.shared.python.theme import DARK_THEME as colors
+            from src.shared.python.theme.palette import DARK_THEME as colors
 
         background = _resolve_theme_color(
             colors, "surface_hover", "group_bg", "#2d2d2d"

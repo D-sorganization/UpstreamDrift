@@ -120,7 +120,7 @@ class TestParity:
         "pinocchio_golf",
         "opensim_golf",
         "myosim_suite",
-        "matlab_unified",
+        "matlab_suite",
         "motion_capture",
         "model_explorer",
         "putting_green",

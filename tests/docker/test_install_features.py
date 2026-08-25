@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import shutil
 import subprocess
 import sys
@@ -42,6 +43,27 @@ def test_slim_profile_matches_core_runtime_contract() -> None:
     features = install_features._resolve_profile_features(profiles["profiles"], "slim")
 
     assert features == ["api", "pendulum", "mujoco"]
+
+
+def test_profile_size_workflow_uses_canonical_catalog_budgets() -> None:
+    install_features = _load_install_features_module()
+    profiles = install_features._load_profiles(REPO_ROOT / "docker" / "profiles.yaml")[
+        "profiles"
+    ]
+    workflow = (
+        REPO_ROOT / ".github" / "workflows" / "docker-size-gates.yml"
+    ).read_text(encoding="utf-8")
+    workflow_budgets = {
+        profile: int(budget)
+        for profile, budget in re.findall(
+            r"- profile: ([a-z0-9-]+)\s+max_size_mb: (\d+)", workflow
+        )
+    }
+
+    assert workflow_budgets
+    assert workflow_budgets == {
+        profile: int(profiles[profile]["max_size_mb"]) for profile in workflow_budgets
+    }
 
 
 def test_profile_dry_run_works_with_modular_dockerfile_early_copy_set(

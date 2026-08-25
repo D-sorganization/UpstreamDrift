@@ -5,6 +5,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from src.shared.python.engine_core import engine_manager as engine_manager_module
+from src.shared.python.engine_core.engine_availability import (
+    EngineStatus as RuntimeAvailabilityStatus,
+)
 from src.shared.python.engine_core.engine_manager import (
     EngineManager,
     EngineStatus,
@@ -161,6 +165,13 @@ class TestEngineManager(unittest.TestCase):
             ),
             patch("pathlib.Path.exists", return_value=True),
             patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
+            # The launch path deep-probes the runtime for real (#8934); the
+            # mocked mujoco module would be flagged, so stub the deep probe.
+            patch.object(
+                engine_manager_module,
+                "get_runtime_engine_status",
+                lambda name: RuntimeAvailabilityStatus.AVAILABLE,
+            ),
         ):
             # Use the actual method that exists in EngineManager
             manager._load_engine(EngineType.MUJOCO)

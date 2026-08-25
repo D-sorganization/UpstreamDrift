@@ -13,9 +13,12 @@ from src.shared.python.config.model_registry import ModelRegistry
 from src.shared.python.config.model_source_providers import resolve_model_source
 from src.shared.python.config.tools_vendor_authority import (
     ProviderUnavailableError,
-    TOOLS_GITLINK_SHA,
     ToolsVendorAuthority,
 )
+
+# The fixture pin is arbitrary: the authority derives the expected SHA from
+# the tracked gitlink at runtime (issue #8852), so tests supply their own.
+FAKE_TOOLS_PIN = "aa" * 20
 
 pytestmark = pytest.mark.unit
 
@@ -25,6 +28,7 @@ TOOLS_MODEL_IDS = (
     "video_processor",
     "data_explorer",
     "data_processor",
+    "pendulum_simulator",
     "rate_of_closure",
 )
 
@@ -42,7 +46,7 @@ def _authorize_tools_vendor(monkeypatch: pytest.MonkeyPatch, repo_root: Path) ->
         "src.shared.python.config.model_source_providers.inspect_tools_vendor_authority",
         lambda _repo_root: ToolsVendorAuthority(
             root=vendor_root,
-            expected_sha=TOOLS_GITLINK_SHA,
+            expected_sha=FAKE_TOOLS_PIN,
             available=True,
         ),
     )

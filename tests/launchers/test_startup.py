@@ -50,7 +50,9 @@ def mock_theme_unavailable() -> Generator[None, None, None]:
 
 
 def test_get_theme_colors_available(mock_theme_available) -> None:
-    with patch("src.shared.python.theme.get_current_colors", create=True) as mock_get:
+    with patch(
+        "src.shared.python.theme.palette.get_current_colors", create=True
+    ) as mock_get:
         mock_get.return_value = "mock_theme"
         assert _get_theme_colors() == "mock_theme"
         mock_get.assert_called_once()
@@ -66,7 +68,10 @@ def test_get_theme_colors_not_available() -> None:
         def mock_import(
             name, globals=None, locals=None, fromlist=(), level=0
         ) -> object:
-            if name == "src.shared.python.theme" and "get_current_colors" in fromlist:
+            if (
+                name == "src.shared.python.theme.palette"
+                and "get_current_colors" in fromlist
+            ):
                 raise ImportError("Mocked error")
             return real_import(name, globals, locals, fromlist, level)
 

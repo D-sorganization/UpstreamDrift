@@ -228,11 +228,13 @@ class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow
         self.config_manager = ConfigurationManager(self.config_path)
         self.config = self.config_manager.load()
 
-        # Ensure default engine/model roots (Issue #7941)
-        if "engine_root" not in self.config:
-            self.config["engine_root"] = str(self.repo_path)
-        if "model_root" not in self.config:
-            self.config["model_root"] = str(PROJECT_ROOT / "src" / "shared" / "urdf")
+        # Ensure default engine/model roots (Issue #7941 / #8967).
+        # ``self.config`` is a ``SimulationConfig`` dataclass, not a dict:
+        # membership tests are invalid; probe the declared fields instead.
+        if not self.config.engine_root:
+            self.config.engine_root = str(self.repo_path)
+        if not self.config.model_root:
+            self.config.model_root = str(PROJECT_ROOT / "src" / "shared" / "urdf")
         self.config_manager.save(self.config)
 
         # Ensure standard humanoid is downloaded
@@ -270,7 +272,14 @@ def get_dockable_ui() -> Any:
     return container
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Launch the MuJoCo humanoid golf GUI.
+
+    Module-level entry point required by
+    ``src.shared.python.launcher_factory.launch_engine_directly`` for
+    ``--engine mujoco`` (issue #8967). Blocks in the Qt event loop and
+    exits the process with Qt's return code.
+    """
     app = QApplication(sys.argv)
 
     # Global Stylesheet for Rounded Buttons and Modern Look
@@ -325,3 +334,7 @@ if __name__ == "__main__":
     window = HumanoidLauncher()
     window.show()
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

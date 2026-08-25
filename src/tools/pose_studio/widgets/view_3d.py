@@ -155,8 +155,7 @@ class View3D(QtWidgets.QWidget):
             try:
                 self._service.set_pose(pose) if pose else None
                 transforms = self._service.get_link_transforms()
-                self._render_from_transforms(transforms)
-                self._canvas.draw_idle()
+                self.update_from_service_transforms(transforms)
                 return
             except (NotImplementedError, RuntimeError, ValueError) as exc:
                 # Fall back to canonical forward kinematics if service fails.

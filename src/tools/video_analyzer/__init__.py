@@ -14,17 +14,19 @@ Public API:
 from src.tools.video_analyzer.analyzer import SwingAnalyzer
 from src.tools.video_analyzer.types import Landmark, PoseFrame, PostureMetrics
 
-__all__ = [
-    "Landmark",
-    "PoseFrame",
-    "PostureMetrics",
-    "SwingAnalyzer",
-]
-
 from src.shared.python.launcher_embed import register_embeddable_tool
+
 from ._embed_adapter import VideoAnalyzerAdapter
 
 # Register immediately when the package is imported
 register_embeddable_tool(VideoAnalyzerAdapter())
 
-__all__ = ["VideoAnalyzerAdapter"]
+# Single __all__: the documented analysis API plus the embed adapter.
+# A second assignment used to silently drop the analysis names (issue #8863).
+__all__ = [
+    "Landmark",
+    "PoseFrame",
+    "PostureMetrics",
+    "SwingAnalyzer",
+    "VideoAnalyzerAdapter",
+]

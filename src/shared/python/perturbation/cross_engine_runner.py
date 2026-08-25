@@ -25,13 +25,33 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from typing import Any
+
+import numpy as np
 
 from src.shared.python.perturbation.config import (
     PerturbationConfig,
     PerturbationSummary,
 )
+from src.shared.python.perturbation.canonical_trial_executor import (
+    TrialEvidenceCollector,
+    VariationSampler,
+)
+from src.shared.python.perturbation.cross_engine_trial_parity import (
+    CrossEngineCompatibilityError,
+    CrossEngineParityMetrics,
+    CrossEngineTolerances,
+    compare_cross_engine_trials,
+)
+from src.shared.python.perturbation.perturbation_base import (
+    CanonicalPerturbationBatch,
+)
+from src.shared.python.perturbation.trial_adapter_contracts import (
+    require_plan_execution_identity,
+)
+from src.shared.python.perturbation.trial_evidence import CanonicalTrialEvidence
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +169,53 @@ class CrossEngineReport:
             "failed_engines": self.failed_engines,
             "total_time_sec": self.total_time_sec,
         }
+
+
+@dataclass(frozen=True)
+class CanonicalCrossEngineReport:
+    """Retained canonical batches and fail-closed cross-engine qualification.
+
+    Rankings in ``legacy_report`` are populated only when every configured
+    engine completed and every complete trial was semantically compatible,
+    outcome-matched, and equivalent within the declared tolerances. Expected
+    numerical/partial rows remain in ``batches`` and are explicitly listed as
+    non-comparable rather than being assigned artificial numeric traces.
+    """
+
+    reference_engine: str
+    batches: dict[str, CanonicalPerturbationBatch]
+    parity_metrics: dict[str, tuple[CrossEngineParityMetrics, ...]]
+    non_comparable_trials: dict[str, tuple[int, ...]]
+    comparison_qualified: bool
+    legacy_report: CrossEngineReport
+
+    def __post_init__(self) -> None:
+        if not self.reference_engine:
+            raise ValueError("reference_engine must be non-empty")
+        if set(self.parity_metrics) != set(self.non_comparable_trials):
+            raise ValueError("parity and non-comparable engine sets must match")
+        if self.comparison_qualified:
+            if self.reference_engine not in self.batches or len(self.batches) < 2:
+                raise ValueError(
+                    "qualified comparison requires reference and candidate"
+                )
+            if self.legacy_report.failed_engines:
+                raise ValueError("qualified comparison cannot contain failed engines")
+            if not self.legacy_report.ranking:
+                raise ValueError("qualified comparison requires a legacy ranking")
+            expected_candidates = set(self.batches).difference({self.reference_engine})
+            if set(self.parity_metrics) != expected_candidates:
+                raise ValueError("qualified comparison requires every candidate")
+            if any(self.non_comparable_trials.values()):
+                raise ValueError("qualified comparison cannot skip trials")
+            if any(
+                not metric.tolerance_equivalent
+                for metrics in self.parity_metrics.values()
+                for metric in metrics
+            ):
+                raise ValueError("qualified comparison requires equivalent trials")
+        elif self.legacy_report.ranking or self.legacy_report.consistency:
+            raise ValueError("unqualified comparison must suppress legacy comparisons")
 
 
 # ---------------------------------------------------------------------------
@@ -378,6 +445,167 @@ class CrossEnginePerturbationRunner:
             total_time_sec=total_time,
         )
 
+    def _run_canonical_batches(
+        self,
+        *,
+        plan: object,
+        gateway: VariationSampler,
+        collectors: Mapping[str, TrialEvidenceCollector],
+        row_to_coeffs: Mapping[str, Callable[[np.ndarray], list[list[float]]]],
+        compatibility_config: PerturbationConfig,
+    ) -> tuple[dict[str, CanonicalPerturbationBatch], list[str]]:
+        batches: dict[str, CanonicalPerturbationBatch] = {}
+        failed_engines: list[str] = []
+        for engine_name in self._engines:
+            try:
+                analyzer = self._get_or_load_analyzer(engine_name)
+                batch = analyzer.run_canonical_batch(
+                    plan=plan,
+                    gateway=gateway,
+                    collector=collectors[engine_name],
+                    row_to_coeffs=row_to_coeffs[engine_name],
+                    compatibility_config=compatibility_config,
+                )
+                _validate_canonical_batch_engine(engine_name, batch)
+                batches[engine_name] = batch
+            except CrossEngineCompatibilityError:
+                raise
+            except (ValueError, RuntimeError, FloatingPointError, ImportError):
+                logger.warning(
+                    "Canonical engine '%s' failed",
+                    engine_name,
+                    exc_info=True,
+                )
+                failed_engines.append(engine_name)
+        return batches, failed_engines
+
+    def _compare_canonical_batches(
+        self,
+        *,
+        reference_engine: str,
+        batches: Mapping[str, CanonicalPerturbationBatch],
+        tolerances: CrossEngineTolerances,
+        initially_qualified: bool,
+    ) -> tuple[
+        dict[str, tuple[CrossEngineParityMetrics, ...]],
+        dict[str, tuple[int, ...]],
+        bool,
+    ]:
+        parity_metrics: dict[str, tuple[CrossEngineParityMetrics, ...]] = {}
+        non_comparable: dict[str, tuple[int, ...]] = {}
+        qualified = initially_qualified
+        reference_batch = batches.get(reference_engine)
+        if reference_batch is None:
+            return parity_metrics, non_comparable, False
+        for engine_name in self._engines:
+            if engine_name == reference_engine or engine_name not in batches:
+                continue
+            metrics: list[CrossEngineParityMetrics] = []
+            skipped: list[int] = []
+            for reference, candidate in zip(
+                reference_batch.records,
+                batches[engine_name].records,
+                strict=True,
+            ):
+                if not _has_complete_trace(reference) or not _has_complete_trace(
+                    candidate
+                ):
+                    skipped.append(reference.trial_index)
+                    qualified = False
+                    continue
+                comparison = compare_cross_engine_trials(
+                    reference,
+                    candidate,
+                    tolerances,
+                )
+                metrics.append(comparison)
+                qualified = qualified and comparison.tolerance_equivalent
+            parity_metrics[engine_name] = tuple(metrics)
+            non_comparable[engine_name] = tuple(skipped)
+        return parity_metrics, non_comparable, qualified
+
+    def run_canonical_all(
+        self,
+        *,
+        plan: object,
+        gateway: VariationSampler,
+        collectors: Mapping[str, TrialEvidenceCollector],
+        row_to_coeffs: Mapping[
+            str,
+            Callable[[np.ndarray], list[list[float]]],
+        ],
+        compatibility_config: PerturbationConfig,
+        tolerances: CrossEngineTolerances,
+        reference_engine: str | None = None,
+    ) -> CanonicalCrossEngineReport:
+        """Run one canonical plan across engines and retain typed artifacts.
+
+        Missing per-engine dependencies fail before any execution. Engine-level
+        numerical/runtime failures are retained as failed engines. Semantic
+        identity, topology, frame, unit, and sampled-input mismatches raise
+        ``CrossEngineCompatibilityError`` before any ranking is produced.
+        """
+        if reference_engine is None:
+            reference_engine = self._engines[0]
+        if reference_engine not in self._engines:
+            raise ValueError("reference_engine must be one configured engine")
+        _validate_canonical_dependencies(
+            self._engines,
+            gateway=gateway,
+            collectors=collectors,
+            row_to_coeffs=row_to_coeffs,
+        )
+        _validate_plan_projection(plan, compatibility_config)
+        if not isinstance(tolerances, CrossEngineTolerances):
+            raise TypeError("tolerances must be CrossEngineTolerances")
+
+        t_wall_start = time.monotonic()
+        batches, failed_engines = self._run_canonical_batches(
+            plan=plan,
+            gateway=gateway,
+            collectors=collectors,
+            row_to_coeffs=row_to_coeffs,
+            compatibility_config=compatibility_config,
+        )
+        initially_qualified = (
+            not failed_engines
+            and reference_engine in batches
+            and len(batches) == len(self._engines)
+            and len(batches) >= 2
+        )
+        parity_metrics, non_comparable, qualified = self._compare_canonical_batches(
+            reference_engine=reference_engine,
+            batches=batches,
+            tolerances=tolerances,
+            initially_qualified=initially_qualified,
+        )
+
+        summaries = {
+            engine_name: batch.legacy_summary for engine_name, batch in batches.items()
+        }
+        ranking = rank_engines(summaries) if qualified else []
+        consistency = (
+            compute_consistency(summaries, self._consistency_threshold)
+            if qualified
+            else {}
+        )
+        legacy_report = CrossEngineReport(
+            config=compatibility_config,
+            summaries=summaries,
+            ranking=ranking,
+            consistency=consistency,
+            failed_engines=failed_engines,
+            total_time_sec=time.monotonic() - t_wall_start,
+        )
+        return CanonicalCrossEngineReport(
+            reference_engine=reference_engine,
+            batches=batches,
+            parity_metrics=parity_metrics,
+            non_comparable_trials=non_comparable,
+            comparison_qualified=qualified,
+            legacy_report=legacy_report,
+        )
+
     def run_single(
         self, engine_name: str, config: PerturbationConfig
     ) -> PerturbationSummary:
@@ -400,6 +628,68 @@ class CrossEnginePerturbationRunner:
 # ---------------------------------------------------------------------------
 # Standalone utility functions
 # ---------------------------------------------------------------------------
+
+
+def _validate_canonical_dependencies(
+    engines: list[str],
+    *,
+    gateway: VariationSampler,
+    collectors: Mapping[str, TrialEvidenceCollector],
+    row_to_coeffs: Mapping[str, Callable[[np.ndarray], list[list[float]]]],
+) -> None:
+    if not callable(getattr(gateway, "sample_inputs", None)):
+        raise TypeError("gateway must expose callable sample_inputs")
+    if not isinstance(collectors, Mapping):
+        raise TypeError("collectors must be a mapping")
+    if not isinstance(row_to_coeffs, Mapping):
+        raise TypeError("row_to_coeffs must be a mapping")
+    for name, values in (
+        ("collectors", collectors),
+        ("row_to_coeffs", row_to_coeffs),
+    ):
+        missing = sorted(set(engines).difference(values))
+        if missing:
+            raise ValueError(f"{name} missing configured engines: {missing}")
+    for engine_name in engines:
+        collector = collectors[engine_name]
+        for operation in ("collect_success", "collect_failure"):
+            if not callable(getattr(collector, operation, None)):
+                raise TypeError(
+                    f"collector for {engine_name} must expose callable {operation}"
+                )
+        if not callable(row_to_coeffs[engine_name]):
+            raise TypeError(f"row_to_coeffs for {engine_name} must be callable")
+
+
+def _validate_plan_projection(
+    plan: object,
+    compatibility_config: PerturbationConfig,
+) -> None:
+    n_runs, seed = require_plan_execution_identity(plan)
+    if compatibility_config.n_trials != n_runs:
+        raise ValueError("compatibility_config n_trials must match plan n_runs")
+    if compatibility_config.seed != seed:
+        raise ValueError("compatibility_config seed must match plan seed")
+
+
+def _validate_canonical_batch_engine(
+    engine_name: str,
+    batch: object,
+) -> None:
+    if not isinstance(batch, CanonicalPerturbationBatch):
+        raise TypeError("run_canonical_batch must return CanonicalPerturbationBatch")
+    if batch.legacy_summary.engine_name != engine_name:
+        raise CrossEngineCompatibilityError(
+            f"cross-engine legacy summary identity mismatch for {engine_name}"
+        )
+    if any(record.engine_id != engine_name for record in batch.records):
+        raise CrossEngineCompatibilityError(
+            f"cross-engine trial engine identity mismatch for {engine_name}"
+        )
+
+
+def _has_complete_trace(record: CanonicalTrialEvidence) -> bool:
+    return record.trace is not None and record.trace.complete
 
 
 def rank_engines(

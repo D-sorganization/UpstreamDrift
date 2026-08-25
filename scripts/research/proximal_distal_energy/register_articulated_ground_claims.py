@@ -88,7 +88,7 @@ def _claim(
             "translation-only and intrinsic-free-moment-only pathways",
             "rigid-shaft and horizontal-restraint-removed controls",
             "center-of-pressure reference reversal",
-            "three-level diagnostic refinement and two-engine parity",
+            "three-level diagnostic refinement and two-operator inertia-and-bias transport parity",
             "primary-match failure retained without tolerance widening",
         ],
         "falsifier": falsifier,
@@ -188,7 +188,7 @@ def main() -> None:
         _claim(
             "PD-CLAIM-294",
             [selected["initialization"], selected["diagnostic"]],
-            "All 42 diagnostic traces refine monotonically and agree across native engines, while natural-zero, gravity-only, and conditional-base initializations produce materially different short-transient loads and speeds.",
+            "All 42 diagnostic traces refine monotonically and remain within the paired inertia-and-bias transport bounds under shared contact and integration, while natural-zero, gravity-only, and conditional-base initializations produce materially different short-transient loads and speeds.",
             "articulated_ground_initialization_sensitivity",
             "qualified_as_synthetic_initialization_diagnostic",
             "Conditional equilibrium balances base coordinates only and none of the initializations estimates a human preload state.",
@@ -201,7 +201,7 @@ def main() -> None:
             "articulated_ground_numerical_result",
             "qualified_through_declared_fifty_millisecond_synthetic_horizon",
             "Loads and material values are uncalibrated, the horizon excludes impact, and numerical qualification is not efficacy evidence.",
-            "A committed trajectory violates a registered domain, refinement, energy, or native-engine gate.",
+            "A committed trajectory violates a registered domain, refinement, energy, or inertia-and-bias transport gate.",
         ),
         _claim(
             "PD-CLAIM-296",

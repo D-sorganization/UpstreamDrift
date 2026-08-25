@@ -95,7 +95,10 @@ def _build_claims(
         "design": _find(candidates, "The reduced forward-contact result cannot"),
         "methods": _find(candidates, "MuJoCo independently evaluates"),
         "figure": _find(candidates, "![Native Articulated Dynamics"),
-        "result": _find(candidates, "All 234 states pass"),
+        "result": _find(
+            candidates,
+            "All 234 states pass the preregistered mass-matrix",
+        ),
         "boundary": _find(candidates, "This closes an engine-transport question"),
     }
     claims = [

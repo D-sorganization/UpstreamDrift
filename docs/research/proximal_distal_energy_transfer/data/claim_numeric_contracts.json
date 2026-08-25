@@ -1,0 +1,4910 @@
+{
+  "schema_version": "claim-numeric-contract-v1",
+  "review_process": "protected_pull_request",
+  "generation_boundary": "Scaffolded candidates are not release authority until reviewed and registered through the protected pull request.",
+  "claims": [
+    {
+      "claim_id": "PD-CLAIM-002",
+      "statement_sha256": "8b4eafca28ddcc9690d6892cddfba856d09fdf97dc1454f4c4068fa26c44c0b1",
+      "numeric_evidence": [
+        {
+          "literal_id": "-19.63#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/minimum_equivalent_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-003",
+      "statement_sha256": "6fef243018b47ac9b695aae275405b099539404f25e5a27bae9e2f4a0f501c9c",
+      "numeric_evidence": [
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-003/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-7.43#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+          "json_pointer": "/representative_killswitch/minimum_force_generated_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-004",
+      "statement_sha256": "b3eaf0cbf34f8caea18c1446e17f6eb4789288f4f204b92a3ebaa88a69faab5a",
+      "numeric_evidence": [
+        {
+          "literal_id": "2.14e-11#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+          "json_pointer": "/cross_formulation/maximum_relative_inverse_dynamics_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999993e-14,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-005",
+      "statement_sha256": "de6771ce0473826cc57c6bc562b315f7b82474c22a3633e42fe09cf0d5e9b5b6",
+      "numeric_evidence": [
+        {
+          "literal_id": "37.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+          "json_pointer": "/mechanism_tests/baseline_and_killswitch_trace_summaries/mujoco_killswitch/post_killswitch_negative_duration_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-006",
+      "statement_sha256": "272fd5260952f205842a49685f2b97465c87716ec724f855a106f795cff757d2",
+      "numeric_evidence": [
+        {
+          "literal_id": "45#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-006/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "18#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-006/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "80#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-006/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-006/3/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "27#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-006/4/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.950#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-006/5/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-009",
+      "statement_sha256": "8fd646cea45bf8f42f269ac053dbf66cf995387619548f2b40472c487811ffd5",
+      "numeric_evidence": [
+        {
+          "literal_id": "68.7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-009/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "72.2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-009/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "24.3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-009/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "28#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-009/3/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3.3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-009/4/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3.8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-009/5/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-010",
+      "statement_sha256": "7e0fa07b4558d5c8d47694801f5711f1a79084eca4c1887386e254a8aa4bf3f1",
+      "numeric_evidence": [
+        {
+          "literal_id": "30#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-010/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-010/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "35.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-010/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "75.4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-010/3/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-011",
+      "statement_sha256": "0c62e0202614ec6b80b2c02bedd36bdc151c02b44fa543bea094ce884e0ef332",
+      "numeric_evidence": [
+        {
+          "literal_id": "63#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-011/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-011/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-013",
+      "statement_sha256": "6a54dd88a09ac3ff43681c0b6254b329247329c21a3a8008253419bf9f6bb014",
+      "numeric_evidence": [
+        {
+          "literal_id": "45#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-013/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-014",
+      "statement_sha256": "d70ac2af761768b0260cdc17f06b435d68907633d257eb6f575d6333f707e707",
+      "numeric_evidence": [
+        {
+          "literal_id": "7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-014/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-015",
+      "statement_sha256": "fc2a7fe6bde78f4daee42c2ab386c837784bb17952820370fa8b7461f3563eb3",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-015/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "100#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-015/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-016",
+      "statement_sha256": "4f0c311c31b5be69e12f8ac0b06ad5ae418678b7ca31bb46b63dd5bff376dd75",
+      "numeric_evidence": [
+        {
+          "literal_id": "308#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-016/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "43.7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-016/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "73.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-016/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-017",
+      "statement_sha256": "1813aa57eca1fafccd41c0f9478d5f6c9596c358a29bb7a927046849f02faca3",
+      "numeric_evidence": [
+        {
+          "literal_id": "15#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-017/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "33.7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-017/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "66.7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-017/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-018",
+      "statement_sha256": "edb073213d56e0f2e31cb48d56dd92155390746a00697ada369cbbe3084b6c04",
+      "numeric_evidence": [
+        {
+          "literal_id": "18#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-018/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-019",
+      "statement_sha256": "cbab069d04f3fd3fbd5ebe943756ddfa3026abb6ecf2c7554b55d418e57ba1c6",
+      "numeric_evidence": [
+        {
+          "literal_id": "25#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-019/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-020",
+      "statement_sha256": "17273d25d7840376ee255e550a6839f4a19c70746b2664ff4c986e71551e359b",
+      "numeric_evidence": [
+        {
+          "literal_id": "13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-020/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-023",
+      "statement_sha256": "f80bcd666df75145489121b778895ef2691a9e6757920c9740c693b54a58392f",
+      "numeric_evidence": [
+        {
+          "literal_id": "9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-023/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "30#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-023/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-024",
+      "statement_sha256": "9f8eb5d2d81a9a137d552fd8a63a5f28ea950a24dd5025ebbd25617a9b5c43c9",
+      "numeric_evidence": [
+        {
+          "literal_id": "44.7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-024/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-024/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "44.0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-024/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "38.9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-024/3/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-031",
+      "statement_sha256": "e4ed21de7d182cbd59c712f6b6d614417cb1f9f12b4a86271f56510d84035eb7",
+      "numeric_evidence": [
+        {
+          "literal_id": "41.9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-031/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-031/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.07#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-031/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-031/3/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.17#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-031/4/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-032",
+      "statement_sha256": "a9b760d58bf3cd308f4fbf979f0e33a81c17e11875fcd193759b5085aa790984",
+      "numeric_evidence": [
+        {
+          "literal_id": "41.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-032/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "196#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-032/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.11#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-032/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-032/3/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.14#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-032/4/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.17#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-032/5/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-033",
+      "statement_sha256": "a55af70bb50b57655a90da94fbec5b186d603e1a2a36ccfc5c165f83e5b143c9",
+      "numeric_evidence": [
+        {
+          "literal_id": "164#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-033/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "257#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-033/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-040",
+      "statement_sha256": "7947ead0f24bca9f19fdb70e4366da3e2de6826d48a19b90c454c349313850d9",
+      "numeric_evidence": [
+        {
+          "literal_id": "1986#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-040/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1989#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-040/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-048",
+      "statement_sha256": "fe9cfe6508516e6b4fba83d00cbd931f17d308104f7cd8de1495aacd4c596b96",
+      "numeric_evidence": [
+        {
+          "literal_id": "13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-048/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-056",
+      "statement_sha256": "3225917179794396316b560008ab46ec799a4131f5a18852c2eb334bd03224d1",
+      "numeric_evidence": [
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-056/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-056/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "+15#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-056/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.3493#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/impact/time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "38.85#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-056/3/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "315.4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/force/peak_total_n_to_impact",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "310.6#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/force/peak_drift_n_to_impact",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "16.3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/force/rms_control_fraction_to_impact",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-057",
+      "statement_sha256": "2a0dc6a32acd1bae1e315e30b3e8fca64933c0d5d8c36ba8d9fc71a495d4bbc7",
+      "numeric_evidence": [
+        {
+          "literal_id": "130.7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/transfer/net_work_to_impact_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "131.7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/transfer/net_work_late_half_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "136.8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/transfer/positive_work_to_impact_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-6.1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/transfer/negative_work_to_impact_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "132.2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/transfer/drift_work_to_impact_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-058",
+      "statement_sha256": "90890b1868ebd1d0557416cc82558aa3a1c94e27ef89fc1506e63b2aaed9127a",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.251#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/killswitch/cut_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.120#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/killswitch/horizon_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.540#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/killswitch/terminal_q_separation_rad",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "8.49#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/interaction_force_summary.json",
+          "json_pointer": "/killswitch/terminal_v_separation_rad_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-062",
+      "statement_sha256": "bf9576fe8992bb1a501598971eea1299407788dc5474cda68237e6a6b58afae3",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.96#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-062/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.92#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-062/1/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "76#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-062/2/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-066",
+      "statement_sha256": "57871294f8f61dd14b44bb0a48b29d4193f2d0ef12e088d82218294522ac9915",
+      "numeric_evidence": [
+        {
+          "literal_id": "101.2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-066/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "103.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-066/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-071",
+      "statement_sha256": "42e1716d3724e50eceae77c12072d7666644e31c71541733f55a40ae728db51e",
+      "numeric_evidence": [
+        {
+          "literal_id": "-19.63#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_preactivation_hypothesis.json",
+          "json_pointer": "/source_reversal/pointwise_ztcf_minimum_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-077",
+      "statement_sha256": "ae69dbcb19b3f31cbfae52282dc8290041cbb9784e56b8eb0b156e935201fa0d",
+      "numeric_evidence": [
+        {
+          "literal_id": "161#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-077/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2e-13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
+          "json_pointer": "/closure/max_abs_zero_velocity_control_preserved_N",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999993e-14,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.871#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
+          "json_pointer": "/drift_only_prediction/r_squared/0",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.814#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
+          "json_pointer": "/drift_only_prediction/r_squared/1",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.02#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
+          "json_pointer": "/drift_only_prediction/nrmse_planar_weight/0",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.42#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/grf_drift/grf_drift_study.json",
+          "json_pointer": "/drift_only_prediction/nrmse_planar_weight/1",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "71.1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-077/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-093",
+      "statement_sha256": "f6d3cd69dd380f12c2ac837ce1f57abf4fa66a5f0659cccbab4cc692531632f3",
+      "numeric_evidence": [
+        {
+          "literal_id": "25#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-093/0/value",
+          "evidence_scope": "reported_external_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-095",
+      "statement_sha256": "1e7ad8f08782175a57703d13141a09e771c60231bd18330612b12963f711760e",
+      "numeric_evidence": [
+        {
+          "literal_id": "-1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-095/0/value",
+          "evidence_scope": "registered_protocol_or_notation",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-1#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-095/1/value",
+          "evidence_scope": "registered_protocol_or_notation",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-099",
+      "statement_sha256": "7e0bd72fd82e61a83aa05076ec40f6515e73244b131bfe49b0d5e62c29f20eed",
+      "numeric_evidence": [
+        {
+          "literal_id": "96#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-099/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-30.876#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json",
+          "json_pointer": "/rows/94/force_work_difference_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "+66.169#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-099/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-099/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "78#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-099/3/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.30#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-099/4/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "80#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json",
+          "json_pointer": "/rows/66/horizon_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.22#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json",
+          "json_pointer": "/rows/60/cut_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-100",
+      "statement_sha256": "d0a95feec393c90a6a585bf0d80ef95dc8c91a8e792bd708c66389bf6ef6c949",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.099#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-100/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.100#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-100/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.101#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-100/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-100/3/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-100/4/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0174#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json",
+          "json_pointer": "/timestep_sensitivity/1_ms_versus_0_5_ms/max_abs_force_work_difference_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-100/5/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.5#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-100/6/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-101",
+      "statement_sha256": "6b727aa1a37da1ce771dcaeeef66a1628c159faedd34cfdf0c8cdff38985df32",
+      "numeric_evidence": [
+        {
+          "literal_id": "12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-101/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-103",
+      "statement_sha256": "34aa516ce6cffca3d661cab13fea53aeeb61162c4fe59651a6df0be801da0adf",
+      "numeric_evidence": [
+        {
+          "literal_id": "96#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-103/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-103/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-103/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-105",
+      "statement_sha256": "cb81782487558caef4823c8d7bc0e3e14e30bbe3de84947019e56f1ab4a1cf4c",
+      "numeric_evidence": [
+        {
+          "literal_id": "2,801#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/base/sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "256#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-105/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-106",
+      "statement_sha256": "56e9ae1cb771051d3b83eaf8715c58f2b0cc0868893bf28cfd617c59ad2ca23c",
+      "numeric_evidence": [
+        {
+          "literal_id": "1.05#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/delta/maximum_local_force_projection_residual_n",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.215#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-106/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-109",
+      "statement_sha256": "9caa9c2dc0c5bc24a0d3c277ed33bb707b77e2b15d9ca08cafcd43484b9711b1",
+      "numeric_evidence": [
+        {
+          "literal_id": "1.1e-12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/base/maximum_resultant_reconstruction_residual_n",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999993e-14,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.057#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/delta/maximum_couple_reconstruction_residual_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.2e-13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/decomposition/maximum_abs_base_minus_ztcf_minus_delta_couple_residual_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-15,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-109/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-110",
+      "statement_sha256": "28661c2e5591e70b08717e73632f92b2f7672b1c66675d828f42d5d60d4a2fb5",
+      "numeric_evidence": [
+        {
+          "literal_id": "-22.79#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/base/minimum_equivalent_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.2151#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/base/minimum_couple_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-18.60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/base/force_moment_at_minimum_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-4.22#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/base/free_torque_at_minimum_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-19.63#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/minimum_equivalent_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.2148#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/minimum_couple_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3.1e-13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/maximum_free_torque_command_residual_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-15,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "86.1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-110/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-111",
+      "statement_sha256": "a4516f4d399a37e8dfc7d62f93c3386528e28382883526ea474ad54537b57a94",
+      "numeric_evidence": [
+        {
+          "literal_id": "90.652#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/base/negative_interval_duration_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "88.122#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/negative_interval_duration_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.808#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-111/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-111/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "7.95#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-111/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-112",
+      "statement_sha256": "c00a72154d9ddda9c1e017c3cb2bf24f2bf34a5f02cd1e90105b1aa96d0c6935",
+      "numeric_evidence": [
+        {
+          "literal_id": "+249.8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-112/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-266.2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-112/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-497.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-112/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "+30.4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-112/3/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-113",
+      "statement_sha256": "45af51f852fe7c0c5af3df854959f2e18a0630e05b9e5af47a1db31e11c6b304",
+      "numeric_evidence": [
+        {
+          "literal_id": "1.5e-14#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-113/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-114",
+      "statement_sha256": "7aa17d8872399d994342b32b51389032f7b2eef962a5a7310281d77903ba9a82",
+      "numeric_evidence": [
+        {
+          "literal_id": "2.0e-11#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/base/maximum_internal_force_power_identity_residual_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000000999999999e-13,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "72.8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/maximum_archived_linear_power_discrepancy_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.188#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-114/0/value",
+          "evidence_scope": "registered_protocol_or_notation",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-115",
+      "statement_sha256": "8bcb831a85d2bdf4713d10167ba2304c0b416eed5dd11e5e41d1e0eac8ba2cb3",
+      "numeric_evidence": [
+        {
+          "literal_id": "-2.08#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/reconstructed_force_power_at_minimum_w",
+          "evidence_scope": "local_json_value",
+          "scale": 0.001,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "88.122#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/negative_interval_duration_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "84.95#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/negative_interval_reconstructed_force_power_negative_fraction",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-149.42#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/negative_interval_reconstructed_force_work_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-149.45#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/negative_interval_archived_linear_work_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-116",
+      "statement_sha256": "4a1d4eb6bd85a3d302606023727ea33ee78b44aff557fc37bc9b5b39d0435a82",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.180#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-116/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.215#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-116/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.270#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/crossings/late/left_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-118",
+      "statement_sha256": "ba05f6b3962fd6c2319ff8508c895f095e66f3fec290e32829a84730b477ddd5",
+      "numeric_evidence": [
+        {
+          "literal_id": "72.8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json",
+          "json_pointer": "/cases/ztcf/maximum_archived_linear_power_discrepancy_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-120",
+      "statement_sha256": "c8fffeb96c7f52b13a6c3365b2a74bbda12b69c2dc612376ec798db1080d50a9",
+      "numeric_evidence": [
+        {
+          "literal_id": "51#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/frame_and_transport_audits/rotation_sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/frame_and_transport_audits/reference_translation_m/0",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/frame_and_transport_audits/reference_translation_m/1",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.05#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/frame_and_transport_audits/reference_translation_m/2",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "7.1e-15#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/frame_and_transport_audits/maximum_rotation_force_norm_residual_n",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000000999999999e-17,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "8.9e-16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/frame_and_transport_audits/maximum_rotation_couple_norm_residual_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-18,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.4e-13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-120/0/value",
+          "evidence_scope": "registered_protocol_or_notation",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5.7e-14#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-120/1/value",
+          "evidence_scope": "registered_protocol_or_notation",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-121",
+      "statement_sha256": "5a6ce27fa4a97c22d1bfd2194a15372edf7bfd1f30f183737b89b7b485c4b2bd",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.427252#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/three_link_reference/delivery_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000000999999999e-7,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-121/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "56.37#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/three_link_reference/interface_force_at_delivery_n",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4.91#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/three_link_reference/interface_couple_at_delivery_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "32.09#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/three_link_reference/interface_force_power_at_delivery_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "74.60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/three_link_reference/interface_couple_power_at_delivery_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "106.69#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/three_link_reference/interface_total_power_at_delivery_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-122",
+      "statement_sha256": "8fe0d434ff2d32bc122cf3502de54292eb468f328ca01acaca9b064873e7a423",
+      "numeric_evidence": [
+        {
+          "literal_id": "1.25#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/mobile_hub_contract/fundamental_frequency_hz",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/mobile_hub_contract/second_harmonic_frequency_hz",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "100#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-122/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.67#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/mobile_hub_cases/3/maximum_force_shift_n",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "38.09#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/mobile_hub_cases/3/maximum_power_difference_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.174#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/mobile_hub_cases/3/signed_power_difference_integral_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-123",
+      "statement_sha256": "015bae2ca2747e8f5bf9a05bd201cd75844603b3501c48b26832d944e0f231ec",
+      "numeric_evidence": [
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-123/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-124",
+      "statement_sha256": "2645391d9883568140d5941468cec866da2e0df86a5d5e51b56dcc819850d850",
+      "numeric_evidence": [
+        {
+          "literal_id": "201#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-124/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "9.05#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/closed_loop_diagnostics/minimum_condition_number",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "9.46#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/closed_loop_diagnostics/maximum_condition_number",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "6.8e-16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
+          "json_pointer": "/closed_loop_diagnostics/maximum_constraint_velocity_residual",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-18,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-126",
+      "statement_sha256": "435b7cd4e16704a67a9e0ec9d7adc9aacdbe8d5e6ffb76a7edd529c079262d16",
+      "numeric_evidence": [
+        {
+          "literal_id": "20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-126/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "61#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-126/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.14e-11#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+          "json_pointer": "/cross_formulation/maximum_relative_inverse_dynamics_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999993e-14,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-4.32#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+          "json_pointer": "/intervention/force_generated_couple_minimum_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-127",
+      "statement_sha256": "3f2b68f4525e47d18c2af8b8479f4a2f4d6b2a7496d060dabe23c9f80719b18e",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.180#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-127/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "37.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+          "json_pointer": "/mechanism_tests/baseline_and_killswitch_trace_summaries/mujoco_killswitch/post_killswitch_negative_duration_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.409#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+          "json_pointer": "/mechanism_tests/baseline_and_killswitch_trace_summaries/pinocchio_killswitch/minimum_swing_normal_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "9.2e-16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+          "json_pointer": "/mechanism_tests/baseline_and_killswitch_trace_summaries/mujoco_killswitch/reversed_geometry_sign_residual_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-18,
+          "rtol": 0.0
+        }
+      ],
+      "numeric_comparisons": [
+        {
+          "comparison_id": "spatial-forward-contact-cross-engine-couple",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_comparison_evidence.json",
+          "reference_pointer": "/spatial_forward_contact/reference",
+          "candidate_pointer": "/spatial_forward_contact/candidate",
+          "require_nondegenerate": true,
+          "atol": 0.004,
+          "rtol": 0.002
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-134",
+      "statement_sha256": "9d8b105b4aac5c43c6a6603025d5c91313c26f59215005e3aa634a66403a54f4",
+      "numeric_evidence": [
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-134/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-136",
+      "statement_sha256": "edef382c2e0d5e09a47fa22b61c7fe12def5f57263d71d70b7cd593ef09ec1ba",
+      "numeric_evidence": [
+        {
+          "literal_id": "8.52#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/timestep_rows/1/terms/momentum/signed_power_integral_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-136/0/value",
+          "evidence_scope": "registered_protocol_or_notation",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3.6e-7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-136/1/value",
+          "evidence_scope": "registered_protocol_or_notation",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-137",
+      "statement_sha256": "64b14495c99f8aedb480f06ed03633af7da82e38735468e1d1967cbf590bbf84",
+      "numeric_evidence": [
+        {
+          "literal_id": "56.34#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/65/shaft_interface_force_at_impact_n",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-3.58#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/timestep_rows/0/impact/shaft_flex_at_impact_deg",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "+5.00#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/70/shaft_elastic_moment_at_impact_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.083#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/76/shaft_damping_moment_at_impact_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "32.09#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-137/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "74.60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-137/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.682#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-137/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-138",
+      "statement_sha256": "6e01be61bc346dfd8becea65845ca3f65922018d223d572a3322540327e972c0",
+      "numeric_evidence": [
+        {
+          "literal_id": "164.38#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/timestep_rows/1/energy/control_work_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "9.21#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-138/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.97#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-138/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.720#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/timestep_rows/0/energy/peak_shaft_strain_energy_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "227.88#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/timestep_rows/2/energy/peak_kinetic_energy_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0322#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/timestep_rows/1/energy/maximum_abs_energy_closure_error_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0092#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/variant_summaries/2/energy/rms_rate_residual_away_from_switch_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-139",
+      "statement_sha256": "69ce6fc0054d5f4ee908cb78e6a1c773842ee4a372889c042c313021232af8a8",
+      "numeric_evidence": [
+        {
+          "literal_id": "20.799#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-139/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "20.691#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-139/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.42725#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-139/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.42452#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-139/3/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "+0.108#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-139/4/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.00134#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/variant_summaries/2/impact/maximum_tip_position_gradient_discrepancy_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-6,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.00915#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/variant_summaries/1/impact/maximum_tip_position_gradient_discrepancy_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-6,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-140",
+      "statement_sha256": "1141d13fb3dfeed2de3adb7f52b529f811339b42799e214027fbecb2f0e337fb",
+      "numeric_evidence": [
+        {
+          "literal_id": "16.035#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-140/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "22.969#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-140/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "20.508#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-140/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-5.66#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/60/shaft_flex_at_impact_deg",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.805#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/60/peak_shaft_strain_energy_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-141",
+      "statement_sha256": "138347b9969f4793ddc80da5d1c79e1830df05aa708e7e1f9cab0716c9a46ebf",
+      "numeric_evidence": [
+        {
+          "literal_id": "120#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-141/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "12.99#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-141/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "22.65#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-141/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.425#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/105/impact_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.719#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/1/impact_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.161#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-141/3/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "18.05#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-141/4/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-42.9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-141/5/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "+11.1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/24/shaft_flex_at_impact_deg",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "99.14#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/balanced_main_effect_fraction_of_total_ss/impact_speed_m_s/torque_cut_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "23.78#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/balanced_main_effect_fraction_of_total_ss/peak_shaft_strain_energy_j/shaft_stiffness_nm_rad",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "27.06#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/balanced_main_effect_fraction_of_total_ss/peak_shaft_strain_energy_j/shaft_damping_nms_rad",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "46.54#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/balanced_main_effect_fraction_of_total_ss/peak_shaft_strain_energy_j/unattributed_to_main_effects",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-142",
+      "statement_sha256": "326146bd922aaba17033ebce189fbc77fbc61920ef38f68593322ee07b9ea27c",
+      "numeric_evidence": [
+        {
+          "literal_id": "-5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "20.799#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/70/peak_speed_within_0_ms_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "20.915#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/70/peak_speed_within_5_ms_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "21.016#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/70/peak_speed_within_10_ms_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "21.156#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/robustness_grid/rows/70/peak_speed_within_20_ms_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.25#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/3/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/4/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/5/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5.6#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/6/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "11.3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/7/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "41#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/8/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "82#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-142/9/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0161#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/timestep_rows/0/energy/maximum_abs_energy_closure_error_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0647#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json",
+          "json_pointer": "/timestep_rows/2/energy/maximum_abs_energy_closure_error_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-153",
+      "statement_sha256": "06cb5d1c960f7ea00ca6d2671a6cd53d2a2be9bdcb4c0b1fe57b86c1c62aaea4",
+      "numeric_evidence": [
+        {
+          "literal_id": "1.28e-13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json",
+          "json_pointer": "/baseline/closure/contact_power_identity_max_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-16,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-154",
+      "statement_sha256": "446a5b9cfba0d9b308f97e1c42cb33e570c753bcad19f8e37223e813e455a7d7",
+      "numeric_evidence": [
+        {
+          "literal_id": "2.65e-13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json",
+          "json_pointer": "/baseline/closure/constraint_two_sided_power_residual_max_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-16,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-154/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "91.521#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-154/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "111.133#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json",
+          "json_pointer": "/baseline/closure/applied_control_work_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-19.624#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json",
+          "json_pointer": "/baseline/closure/dissipated_work_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0130#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json",
+          "json_pointer": "/baseline/closure/work_energy_residual_abs_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0758#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json",
+          "json_pointer": "/baseline/closure/projection_energy_change_absolute_sum_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-156",
+      "statement_sha256": "65d477e484b7d1af3877f75872c0891d9bc402e27019ca1d04a11353364e3617",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.200#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json",
+          "json_pointer": "/zero_command_branch/cut_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-158",
+      "statement_sha256": "dd2302fc73a6d8627262cbed963756c6d4f811d08c2b2802980c614ab3cea4b9",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-158/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-160",
+      "statement_sha256": "c935c4fb32e73f242531a94c7a1a6ff8b6bcc9011452fa0568bfad79ffe1c8ce",
+      "numeric_evidence": [
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-160/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-163",
+      "statement_sha256": "9c589dd29c40e521401454fe0ad6f001e378dc150836e69fa659ef2802f9e4b6",
+      "numeric_evidence": [
+        {
+          "literal_id": "1.04e-9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-163/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-165",
+      "statement_sha256": "2484889ffc1fab73364c18d2eab8bac209ac9b13111365dbc19df89166771336",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.400#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-165/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.25#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-165/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-167",
+      "statement_sha256": "5fe99285f6c5babe15e452398c388ad22586e5c941c1ec36fc3b4a3d5df2f49f",
+      "numeric_evidence": [
+        {
+          "literal_id": "6.68e-13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+          "json_pointer": "/baseline/closure/contact_wrench_power_equivalence_max_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-16,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-169",
+      "statement_sha256": "e04e709e694a8b865721c14ecee1b7e049afab0e1801e0f3f1a99e76f25c32eb",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.19825#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+          "json_pointer": "/baseline/force_generated_couple/first_negative_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-6,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-32.85#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+          "json_pointer": "/baseline/force_generated_couple/minimum_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.200#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+          "json_pointer": "/killswitch_ensemble/2/first_negative_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-169/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-171",
+      "statement_sha256": "9143e47241862555675124fdccb12a27d3c584ca137b3a688c3301d1febee19c",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.778#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+          "json_pointer": "/baseline/closure/projection_energy_change_absolute_sum_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.096#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_two_arm_study.json",
+          "json_pointer": "/baseline/closure/work_energy_residual_abs_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-175",
+      "statement_sha256": "836ef0c0cf36645af1c178cd4acf2503c972bb9c038c5a3ea447b109974ea5b5",
+      "numeric_evidence": [
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+          "json_pointer": "/spatial_checks/proper_axes_rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-176",
+      "statement_sha256": "8c55a414e6943df9b1b0cae38174563d06ec136ac3461918224125539235f31e",
+      "numeric_evidence": [
+        {
+          "literal_id": "20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-176/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-177",
+      "statement_sha256": "0bdc50889d52f010d0cc7b5fc59718c2149756c873996d25afd3df33250c9838",
+      "numeric_evidence": [
+        {
+          "literal_id": "2.49e-14#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+          "json_pointer": "/cross_formulation/maximum_absolute_mass_matrix_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000000999999999e-17,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.25e-9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+          "json_pointer": "/cross_formulation/maximum_absolute_generalized_force_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999995e-12,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "26.3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-177/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-180",
+      "statement_sha256": "c303d0c305697486bd17e4b787f3f5ed3461bb9abf2e522134148ddccce74a03",
+      "numeric_evidence": [
+        {
+          "literal_id": "61#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-180/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.25e-9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+          "json_pointer": "/cross_formulation/maximum_absolute_generalized_force_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999995e-12,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.14e-11#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json",
+          "json_pointer": "/cross_formulation/maximum_relative_inverse_dynamics_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999993e-14,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-185",
+      "statement_sha256": "6abb886f69f2e787ff5db6c638381390321810e96f13adc6264b7aaf89a1c140",
+      "numeric_evidence": [
+        {
+          "literal_id": "13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+          "json_pointer": "/engine_identities/mujoco/coordinate_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-189",
+      "statement_sha256": "985f97fe822ea3670cf98ae0b4a85180fa5edc515312ffc0d04ea450d73ee813",
+      "numeric_evidence": [
+        {
+          "literal_id": "37.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json",
+          "json_pointer": "/mechanism_tests/baseline_and_killswitch_trace_summaries/mujoco_killswitch/post_killswitch_negative_duration_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-195",
+      "statement_sha256": "d70dbc64a5c5725f7b0110904ba795fc6c9cc2bb2a3e593e9a2971e29a6ca21e",
+      "numeric_evidence": [
+        {
+          "literal_id": "10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-195/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-201",
+      "statement_sha256": "ec3f3e24be40b6d022f754e6d6ce577d7b7c024be76598c03279fc7521b01438",
+      "numeric_evidence": [
+        {
+          "literal_id": "8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/torque_allocation_preload_study.json",
+          "json_pointer": "/matched_task/target_net_control_moment_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-207",
+      "statement_sha256": "6741d97bca39d444f2e541f862aed9d375e52733f42e0d46144f7b90b6c3d9a1",
+      "numeric_evidence": [
+        {
+          "literal_id": "92#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-207/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "63#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+          "json_pointer": "/impact_status_counts/accepted_registered_delivery_zone",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "29#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-207/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/results_summary.json",
+          "json_pointer": "/representatives/best_drive/program/shoulder_torque_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-208",
+      "statement_sha256": "813e2a4189735e6cc936b794a0fabd30a39738b3fcb5789939a268f52d23aed6",
+      "numeric_evidence": [
+        {
+          "literal_id": "12.4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+          "json_pointer": "/selected_programs/60/drive_vs_passive_percent",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "7.8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-208/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-208/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-208/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-211",
+      "statement_sha256": "29c25c9b185e2aec12908cae031804af84db83fb14927cc7b8c887e285381515",
+      "numeric_evidence": [
+        {
+          "literal_id": "5e-12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+          "json_pointer": "/energy_balance_residual_max_w",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000000999999999e-13,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-213",
+      "statement_sha256": "7bfccafb70f4bc00707c3716deb79f51a0ee1614f148aad457f0835ad0844b97",
+      "numeric_evidence": [
+        {
+          "literal_id": "13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/results_chapter_audit.json",
+          "json_pointer": "/parameter_case_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+          "json_pointer": "/summaries/0_ms/shoulder_100/grid_selected_drive/command_time_constant_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/e1e_smooth_command_sensitivity.json",
+          "json_pointer": "/summaries/50_ms/shoulder_100/grid_selected_drive/command_time_constant_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-216",
+      "statement_sha256": "76de253ed7314808f4c97c520b8d9706a183f47453eb2351607a562febe651ab",
+      "numeric_evidence": [
+        {
+          "literal_id": "24#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-216/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-216/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-219",
+      "statement_sha256": "86185219b0453ea6a197d1f5b44f4c66b375f077888eb3ea22f2f0b70726cfb1",
+      "numeric_evidence": [
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
+          "json_pointer": "/identifiability/individual_hand_force_from_net_planar_wrench/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-219/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-219/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-226",
+      "statement_sha256": "06339e038b38ed6a04540b2c138e454ab2a4f7965addd40835f65592e6e19b82",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.13476#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+          "json_pointer": "/baseline/maximum_abs_modal_tip_deflection_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-6,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.05#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json",
+          "json_pointer": "/model_use_screen/threshold",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-228",
+      "statement_sha256": "92b5d45c97699bbc619155a45239ac2a8e34f215e1cdc3f5018414c3c9072099",
+      "numeric_evidence": [
+        {
+          "literal_id": "25#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-228/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-246",
+      "statement_sha256": "16ba6af232810c9d7295a06586754dd2b68a911fe70e05c508e601b165e699d8",
+      "numeric_evidence": [
+        {
+          "literal_id": "15#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-246/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-246/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/timing_viability_study.json",
+          "json_pointer": "/viability_sensitivity/primary/policies/state_triggered/per_load/combined_adverse/viable_fraction",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-252",
+      "statement_sha256": "9f8d59132dcdb752ade7e931be05114378a7c45663122df23c1a49d926d2cb17",
+      "numeric_evidence": [
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-252/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-253",
+      "statement_sha256": "10f4f1c8901cae32b10cb43c5592bc520048ec1d1fb5a14d47be01eddf59c3bd",
+      "numeric_evidence": [
+        {
+          "literal_id": "576#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-253/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-257",
+      "statement_sha256": "2d8db3d100527c6d29133c35c3afac0d9f295f361ba80d017cb01642cdc4211c",
+      "numeric_evidence": [
+        {
+          "literal_id": "11.86#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_sensor_qualification.json",
+          "json_pointer": "/cases/net_wrench_only/allocation_rmse_n",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "29.05#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/bilateral_wrench_sensor_qualification.json",
+          "json_pointer": "/cases/net_wrench_only/axial_mode_rmse_n",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-084",
+      "statement_sha256": "ef0f56f2d8c00884af2c1d226da84271dfa70d66895bb900ab32d0e83fcfa828",
+      "numeric_evidence": [
+        {
+          "literal_id": "126#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-084/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-249",
+      "statement_sha256": "2b0adbe423236026f4484dab1103545bf936cfa14f2c41e487c8f9a7edd21c31",
+      "numeric_evidence": [
+        {
+          "literal_id": "45#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-249/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-085",
+      "statement_sha256": "d277965a05ecf0206f27b5691831b5d5cb8270eb36ff610103d2ee47d15660ed",
+      "numeric_evidence": [
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-085/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "34#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-085/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-086",
+      "statement_sha256": "a970332432a731efb8d067b05bb6cef9a2d622a5a6f5cc208bf02f6e986cf113",
+      "numeric_evidence": [
+        {
+          "literal_id": "26#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-086/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-250",
+      "statement_sha256": "aaf35d9d63a3efbe288ebbd44c90b6d5c391c73c5933a803cf7d922bad813e04",
+      "numeric_evidence": [
+        {
+          "literal_id": "216#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-250/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "46#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-250/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-092",
+      "statement_sha256": "8e28b880bbe1bec994dbea1e1a7600730a424659d4006da8b3469ee0b3319e52",
+      "numeric_evidence": [
+        {
+          "literal_id": "126#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-092/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "45#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-092/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-092/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "216#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/joint_matched_proximal_rate_study.json",
+          "json_pointer": "/attempted_program_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-274",
+      "statement_sha256": "4d46e912a85b607f4c0c2b40af2f4e178cc4a7f15a7f7030f3794b9c329ad6fc",
+      "numeric_evidence": [
+        {
+          "literal_id": "20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
+          "json_pointer": "/design/coordinate_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "234#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-274/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-275",
+      "statement_sha256": "0cfd7ab20ca45e92188bac3ddf08b45eb76b0ca7fe7144eccfa6ce9e3b3a22c9",
+      "numeric_evidence": [
+        {
+          "literal_id": "234#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-275/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-299",
+      "statement_sha256": "cc7608e40d0518d88292b628e04b8cca9c4a5fbe2a01cb4da56f83aa5d2bd66d",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.02#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+          "json_pointer": "/design/conservation_relative_tolerance",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-277",
+      "statement_sha256": "b9107b7758cce5696f461d086e8b492ab0fdaa60ce1f1b443bb8c0d509a165b6",
+      "numeric_evidence": [
+        {
+          "literal_id": "234#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-277/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-278",
+      "statement_sha256": "df53d9044fc876a1cec34e728254d009ac4d26e87d21576e2154c132b0d4c98e",
+      "numeric_evidence": [
+        {
+          "literal_id": "234#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-278/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-284",
+      "statement_sha256": "fc88086abb51e97eefbdd78b776756518e3887189d4f2c5fb9c3c698b79c3a07",
+      "numeric_evidence": [
+        {
+          "literal_id": "1,944#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.json",
+          "json_pointer": "/design/trajectory_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-286",
+      "statement_sha256": "e73124c6cbe8a8fe715a12e3fc4dc7db32744d5377ca4c3de69e7b9c7e5c118a",
+      "numeric_evidence": [
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-286/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-286/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-287",
+      "statement_sha256": "11580b7ddc163efac57d960e034781ec634e2ca7af8aec9777a91f2348032f79",
+      "numeric_evidence": [
+        {
+          "literal_id": "576#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json",
+          "json_pointer": "/design/trajectory_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-287/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "24#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-287/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "144#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-287/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-290",
+      "statement_sha256": "b8f66d975c9f20bf6e1ecb0692f121261a030edecf7109166a4c7633fb4a862e",
+      "numeric_evidence": [
+        {
+          "literal_id": "5.2399#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
+          "json_pointer": "/first_bending_frequency_hz",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "70.1260#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_atlas.json",
+          "json_pointer": "/structural_authority/torsion_frequency_hz",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-291",
+      "statement_sha256": "802b66bf053891a6a0cbe61ac87ef72f2b91589a5643659198a8aad664e58bf5",
+      "numeric_evidence": [
+        {
+          "literal_id": "384#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_atlas.json",
+          "json_pointer": "/results/matched_load_work_total_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-291/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-292",
+      "statement_sha256": "f516f364906374c0c7d99dec8effe31db40eeb927acfa8857d69381f7bd7789d",
+      "numeric_evidence": [
+        {
+          "literal_id": "126#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_atlas.json",
+          "json_pointer": "/results/matched_load_work_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-292/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "82#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-292/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "44#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-292/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-294",
+      "statement_sha256": "271e9debb4a01a8c9cc8b84f5b49f38d7e94af613b971b559631167b582866df",
+      "numeric_evidence": [
+        {
+          "literal_id": "42#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-294/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-295",
+      "statement_sha256": "3a1f9a4d4cc1f38171f3468243966fd36288f9e1b3ae0cf6eb8a9fb4e6a69c8e",
+      "numeric_evidence": [
+        {
+          "literal_id": "576#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-295/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-295/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-296",
+      "statement_sha256": "4c3bc8c5a12e63d0a6a3182eaeef42bdb0bca9da394c69b927cb8c33805ea6d7",
+      "numeric_evidence": [
+        {
+          "literal_id": "384#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json",
+          "json_pointer": "/results/matched_load_work_total_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-296/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json",
+          "json_pointer": "/nonground_dissipation_sensitivity/tolerance_sensitivity/0/speed_difference_m_s/count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-272",
+      "statement_sha256": "5602846959c7a4c969d84ba9b808c933654a27b5922118c0522c058b14dc8fba",
+      "numeric_evidence": [
+        {
+          "literal_id": "2,160#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
+          "json_pointer": "/design/evaluated_horizon_case_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-272/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-273",
+      "statement_sha256": "d756804e7e9adc1414183a605419d197f37d5d8137fe9614dba8c32016b8df4c",
+      "numeric_evidence": [
+        {
+          "literal_id": "50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
+          "json_pointer": "/cases/1003/horizon_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-273/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "50#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-273/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-260",
+      "statement_sha256": "8035387c924fb3bedbe205b7afd9637ceb3b0a5b811d774c80557a124ce8d691",
+      "numeric_evidence": [
+        {
+          "literal_id": "61#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-260/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.171#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+          "json_pointer": "/closure_tests/minimum_hand_to_grip_distance_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.616#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+          "json_pointer": "/closure_tests/maximum_hand_to_grip_distance_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5.35#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+          "json_pointer": "/geometry_tests/constraint_condition_number_minimum",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "6.40#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
+          "json_pointer": "/geometry_tests/constraint_condition_number_maximum",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-262",
+      "statement_sha256": "d046f67c18fe34fb594d1dd8f66134f610967008d5147aff6b54932c1c44bb1c",
+      "numeric_evidence": [
+        {
+          "literal_id": "5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-262/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-263",
+      "statement_sha256": "ec4d96aeabd1b86c7116d3076017aff93dfaa5a25205dbff61958643cbbfde01",
+      "numeric_evidence": [
+        {
+          "literal_id": "234#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-263/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.16e-10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+          "json_pointer": "/results/maximum_contact_error_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000000999999999e-13,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.103#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+          "json_pointer": "/results/minimum_joint_limit_margin_rad",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "30.9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+          "json_pointer": "/results/minimum_collision_clearance_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-265",
+      "statement_sha256": "7eaaa8e10194eca67b091e5942855e4fbc43e211f3a2aeecf3db620dd0dcf8eb",
+      "numeric_evidence": [
+        {
+          "literal_id": "54#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+          "json_pointer": "/results/fixed_solver_termination_success_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+          "json_pointer": "/results/fixed_contact_closed_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-265/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "31#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-265/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-265/2/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "28#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+          "json_pointer": "/results/scapular_bound_active_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.101#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+          "json_pointer": "/results/maximum_scapular_shoulder_excursion_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+          "json_pointer": "/adverse_control/grip_span_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.05000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.480#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+          "json_pointer": "/adverse_control/scapular_max_contact_error_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-268",
+      "statement_sha256": "9ab5aadd32472a9bf3498c5111539ea25f3b14339b6fd3e34e4823c0c7aa5e0e",
+      "numeric_evidence": [
+        {
+          "literal_id": "234#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-268/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.16e-10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+          "json_pointer": "/results/maximum_contact_error_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000000999999999e-13,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.29#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-268/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-269",
+      "statement_sha256": "51a663aad388194c3b25fc7da0dc7afed7fc6f01cb58e5bc65594f85880d8ff9",
+      "numeric_evidence": [
+        {
+          "literal_id": "54#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/scapulothoracic_contact_screen.json",
+          "json_pointer": "/design/paired_state_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-269/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-236",
+      "statement_sha256": "30d4c6826f572db4d8f85ae506c7c55a93e11ae0b25756137a067e33111c726c",
+      "numeric_evidence": [
+        {
+          "literal_id": "18#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/attempted_case_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.604#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-236/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.273#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-236/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-237",
+      "statement_sha256": "12d02f4b0110fc8ebe19d59b71007c6598766f7b22e13152f160c2b77ae41a08",
+      "numeric_evidence": [
+        {
+          "literal_id": "30#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/same_state_killswitch/branch_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.223#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/same_state_killswitch/channels/torso/delivery_speed_difference_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.818#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/same_state_killswitch/channels/bilateral_wrist/delivery_speed_difference_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.364#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-237/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-238",
+      "statement_sha256": "f524019a26c2df147e79c804accdff4d25264384f0e24bbffd0488886bf903e1",
+      "numeric_evidence": [
+        {
+          "literal_id": "+1.351#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/negative_controls/baseline_separated_grip_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-1.351#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/negative_controls/reversed_grip_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-240",
+      "statement_sha256": "6f8429628ff29b7ca1d33079eb1f5bb5397343f58d8f9ccae4c364d7e0dd3023",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.0413#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
+          "json_pointer": "/comparison/high_frequency_tip_rms_discrepancy_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-5,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-240/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.9e-7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
+          "json_pointer": "/closure/maximum_reference_work_energy_residual_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-9,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-305",
+      "statement_sha256": "a942a62ed0de73eb019a2b41efeba0bfabed5ff874d58782089f3d7bda652e96",
+      "numeric_evidence": [
+        {
+          "literal_id": "40#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+          "json_pointer": "/results/sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-306",
+      "statement_sha256": "40e8e09c5b7b672b308eae65155ff5e4927b7580eb2c9e3b6e5a06bfb674b9ed",
+      "numeric_evidence": [
+        {
+          "literal_id": "40#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+          "json_pointer": "/results/analysis_included_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-306/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-307",
+      "statement_sha256": "43b991ffcbde4e9de5e3c1ea7a131c9e2699e4704da5dfb7499d48aa0c108209",
+      "numeric_evidence": [
+        {
+          "literal_id": "+0.936#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+          "json_pointer": "/results/top_sensitivities/peak_station_force_n/initial_velocity_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.500#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+          "json_pointer": "/results/top_sensitivities/peak_force_couple_nm/height_scale",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.940#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+          "json_pointer": "/results/top_sensitivities/max_sliding_speed_m_s/friction_coefficient",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.760#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+          "json_pointer": "/results/top_sensitivities/total_transition_count/height_scale",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "+0.931#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json",
+          "json_pointer": "/results/top_sensitivities/normalized_work_energy_residual/body_mass_scale",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-308",
+      "statement_sha256": "2c1ca091cedf7d23808ef9c5f9f0004179373f4167e67169e9bdd8f605bc847a",
+      "numeric_evidence": [
+        {
+          "literal_id": "126#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+          "json_pointer": "/acceptance/nominal_reproduction/shaft_matched_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "384#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+          "json_pointer": "/acceptance/nominal_reproduction/shaft_total_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+          "json_pointer": "/acceptance/nominal_reproduction/ground_matched_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "384#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+          "json_pointer": "/acceptance/nominal_reproduction/ground_total_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-309",
+      "statement_sha256": "38c09a99eb44de57732906c4e25b0d2e394639af8454bcfa205801aa3ef859c6",
+      "numeric_evidence": [
+        {
+          "literal_id": "13#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.json",
+          "json_pointer": "/results/phase_sample_count_per_case",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-310",
+      "statement_sha256": "ffb007b65a509df4800163b2b518d8e17c253d19e24b8729e49513a55fd369e1",
+      "numeric_evidence": [
+        {
+          "literal_id": "52#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.json",
+          "json_pointer": "/results/selected_feasible_sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "52#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_nominal.json",
+          "json_pointer": "/results/selected_total_sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "51#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_height_scale_low.json",
+          "json_pointer": "/results/selected_feasible_sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "52#3",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_authority_height_scale_low.json",
+          "json_pointer": "/results/selected_total_sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+          "json_pointer": "/corners/1/retained_failures/0/case_index",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json",
+          "json_pointer": "/corners/1/retained_failures/0/phase_index",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-312",
+      "statement_sha256": "ce58c6af777f7620d7f7b10a9edfcaf6cfac144fb9a5bac5f53057552b880072",
+      "numeric_evidence": [
+        {
+          "literal_id": "19#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/design/corner_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-314",
+      "statement_sha256": "0741dadfb74e832b2586faf3bc82bcd502cac2dcfa2200bf6822ada1593c39c1",
+      "numeric_evidence": [
+        {
+          "literal_id": "80#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/results/shaft/matched_cell_count_range/0",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "182#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/results/shaft/matched_cell_count_range/1",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-46#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/results/shaft/matched_cell_count_change_range/0",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "+56#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/results/shaft/matched_cell_count_change_range/1",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "126#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/results/shaft/nominal_matched_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "384#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/corners/0/shaft/total_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "18#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/results/ground/completed_corner_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/results/ground/nominal_matched_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "384#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_headline_uncertainty.json",
+          "json_pointer": "/corners/0/ground/total_cell_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    }
+  ]
+}

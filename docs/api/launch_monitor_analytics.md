@@ -142,6 +142,66 @@ The HTTP surfaces are:
 - `POST /tools/launch-monitor-analytics/v2/analyze` for v2 results;
 - `POST /tools/launch-monitor-analytics/analyze` for compatible v1 clients.
 
+## Player Covariation and Population Synthesis
+
+Contract `launch-monitor-player-covariation/1.0.0` separates four questions
+that a pooled correlation cannot answer by itself:
+
+- the association across all pairwise-complete rows;
+- the association after centering each variable within player;
+- the association between player means; and
+- per-player estimates combined with fixed- and random-effects Fisher-z
+  population summaries.
+
+The population result reports Q, tau-squared, and I-squared heterogeneity,
+contributor counts, explicit confidence methods, and assumptions. Small or
+constant player groups and insufficient population evidence are typed
+`unavailable`; missing, non-numeric, non-finite, and blank-player rows remain
+counted rather than silently disappearing. Aggregation reversals are warned.
+
+Every request requires an explicitly attested or externally verified player
+identifier that exactly matches the grouping column. Session, club, source,
+filename, and row fields remain forbidden pseudo-identities. The response also
+retains selected-variable units, vendor/model provenance, dataset authority,
+source references, and source-joinable backing-record hashes. Unknown source
+fields may be selected, but an undeclared unit stays `unknown`.
+
+The bounded pair scan is exploratory and deterministic. It exposes unavailable
+pairs and multiplicity warnings; rankings do not establish causality or a
+universal player relationship. Its HTTP surfaces are:
+
+- `GET /tools/launch-monitor-analytics/contracts/player-covariation/v1`;
+- `POST /tools/launch-monitor-analytics/v2/player-covariation`; and
+- `POST /tools/launch-monitor-analytics/v2/player-covariation/scan`.
+
+## Source-Backed Strokes Gained
+
+Contract `launch-monitor-strokes-gained-analysis/1.0.0` is the canonical
+scoring boundary. A valid request supplies every shot's start and finish lie,
+context, target/hole, and distance plus an expected-strokes table conforming to
+`launch-monitor-strokes-gained-baseline/2.0.0`. The table carries a source URL,
+license declaration, version, and canonical SHA-256. Equivalent numeric values
+and row orders produce the same hash; tampering and duplicate course states are
+rejected.
+
+The analysis interpolates only within an exact lie/context/target stratum and
+never extrapolates outside table support. Its result includes the formula,
+units, row and dataset hashes, interpolated benchmark points, exclusions,
+sampling and optional benchmark uncertainty, and conservative claim flags.
+Player, session, and club summaries require an explicit trusted identifier and
+evidence. Longitudinal slopes additionally require an explicit numeric order
+field and are descriptive, not causal.
+
+The scoring HTTP surfaces are:
+
+- `GET /tools/launch-monitor-analytics/contracts/strokes-gained/v1`;
+- `POST /tools/launch-monitor-analytics/v2/strokes-gained`; and
+- `POST /tools/launch-monitor-analytics/v2/outcome-proxy`.
+
+The outcome-proxy endpoint reports target-relative radial error in yards. Its
+typed claims explicitly state that it is not strokes gained and is not
+source-backed. Carry/lateral dispersion must never be relabeled as SG.
+
 The v2 response model is registered with FastAPI, so it is also present in the
 application OpenAPI document. The checked-in schema is generated from the same
 Pydantic authority and guarded against drift:
@@ -151,11 +211,48 @@ python -m scripts.generate_launch_monitor_contract
 ```
 
 Grouping by a player field fails closed unless `player_identity` declares a
-trusted identifier column and evidence. Session, club, source filename, file
-layout, and row order are never accepted as player identity. Insufficient or
-rank-deficient regression is returned as an explicit unavailable result rather
-than an apparently successful null result. Invalid columns, unsafe pooling, and
-other request-contract violations still fail with a descriptive error.
+trusted identifier column and evidence. `PlayerIdentityV2` rejects `session`,
+`session_id`, club, source, file/filename, row-order, and source-row fields even
+when the caller attests them. This is a request-contract error (`422` at the
+HTTP boundary), not an unavailable statistical result.
+
+`session_identity` separately declares a session identifier, trust level, and
+evidence. `order_evidence` declares an order column, whether it is a timestamp,
+ordinal, or source sequence, its unit, trust level, and evidence. Missing or
+untrusted session/order evidence does not block analyses that do not use it.
+
+## Attested Longitudinal Sessions
+
+Contract `launch-monitor-longitudinal-session/1.0.0` performs longitudinal
+analysis only when player identity, session identity, and ordering have trusted
+evidence. It never infers those fields from club, source layout, filename, row
+position, or shot ID. Every included shot is first collapsed into an
+equal-weight player/session/stratum cell. Per-player direction is then computed
+from one equal-weight value per ordered session, so repeating shots cannot
+reweight a player's trend.
+
+The pooled estimate is a descriptive player-fixed-effects OLS association with
+a finite-cluster-corrected sandwich covariance clustered by player. Declared
+strata enter as categorical design terms and declared confounders enter as
+numeric design terms. Confounder adjustment is not causal control. Fewer than
+four player clusters, too few ordered sessions, rank deficiency, degenerate
+clustered variance, nonconstant within-session order, missing fields, and a
+corpus with no complete finite shots produce typed unavailable states. The
+result always retains authority, source, transformation, and row-level backing
+hashes, including when the statistical result is unavailable.
+
+The `direction` request field records how a consumer interprets the metric; it
+does not transform the reported raw-metric slope into an improvement claim.
+Result claims explicitly set shot-level inference and causal improvement to
+false. The HTTP surfaces are:
+
+- `GET /tools/launch-monitor-analytics/contracts/longitudinal-sessions/v1`;
+- `POST /tools/launch-monitor-analytics/v2/longitudinal-sessions`.
+
+Insufficient or rank-deficient regression is returned as an explicit
+unavailable result rather than an apparently successful null result. Invalid
+columns, unsafe pooling, and other request-contract violations fail with a
+descriptive error.
 
 Every canonical metric and retained numeric `source::<header>` field remains
 selectable. Registry metrics carry registry-authoritative canonical/display
@@ -168,3 +265,28 @@ Dataset and analytical-model commits, when present, are full 40-character
 lowercase hexadecimal SHAs. Each backing record either joins to a declared
 content-addressed source by `source_id` or carries an explicit unlinked reason.
 An undeclared `source_id` is a contract error.
+
+## Data-Free Consumer Conformance Bundle
+
+Contract `launch-monitor-analytics-conformance/1.0.0` publishes one available
+and one structured-unavailable synthetic case for analysis v2, player
+covariation, attested longitudinal sessions, source-backed strokes gained, and
+the distance/target proxy. The fixture contains no input `records` array and no
+private or observed player rows. Derived synthetic row outputs and opaque
+backing hashes remain only where an underlying result contract requires them.
+
+Every scenario includes units and their authority, conservative claim flags,
+separate player/session/order evidence, source references, source-joinable
+backing hashes, exclusions, its result contract version, and a canonical
+scenario SHA-256. The bundle SHA-256 covers every field except the hash itself;
+validation fails after any content mutation.
+
+Consumers should validate both generated artifacts:
+
+- `docs/api/contracts/launch-monitor-conformance-bundle-v1.schema.json`;
+- `docs/api/contracts/fixtures/launch-monitor-conformance-bundle-v1.golden.json`.
+
+Regenerate them with `python -m scripts.generate_launch_monitor_contract`.
+Unknown fields remain selectable, but their units are `unknown` unless the
+synthetic source explicitly declares them. Source-declared units are not
+canonical authority. See [ADR 0040](../adr/0040-data-free-launch-monitor-conformance-bundle.md).
