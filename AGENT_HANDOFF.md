@@ -12,7 +12,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `501ac302d112cb3447b3a23a92706648bacb3888`. The normalized-claim authority
+  `4f84a8a2dbdafac01a634ceb41b1e415ea7ec5bb`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 245 pages with SHA-256
   `16e5e16b1c5d539135e48c8211ad7080491f2721b59559319729690fc4ffe4ac`,
@@ -96,16 +96,17 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - #8358 PR #9039 is merged at `eb7076466`; its immutable Tools gateway and
   typed variation evidence are on `main`. Keep #8358 open because its broader
   UI, localized-perturbation, and presentation criteria remain unaudited.
-- PR #9032 is reconciled with `501ac302d` at `d254d2a3d`; it carries the
-  16-source biomechanics bridge and headless GRF correction. A follow-up fixes
-  the Linux/Windows claim-registry digest boundary and explicit unit marking;
-  protected CI must rerun and requested human review remains absent.
+- PR #9032 is reconciled with `4f84a8a2d` at local merge head `a3da2b166`;
+  it carries the 16-source biomechanics bridge, headless GRF correction, and
+  the follow-up Linux/Windows claim-registry digest and unit-marker fixes.
+  Push the reconciled head normally, then allow protected CI to rerun once;
+  requested human review remains absent.
 - PR #9049 is mergeable with required `quality-gate` green and awaits the same
   requested human review. Its dependent 1 ms controller transport stays local.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and
   requirement-level R10–R15 qualification are complete.
-- AffineDrift #3942 remains downstream of the qualified UpstreamDrift release;
-  do not project a moving or partial campaign.
+- AffineDrift PR #3942 is merged. Do not project a moving or partial campaign;
+  the next public projection must pin a qualified UpstreamDrift merge commit.
 - #8963 architecture debt remains separate from the frozen campaign source.
   Do not merge or regenerate source-bound spatial evidence until campaign
   integration removes the source-lock conflict.
