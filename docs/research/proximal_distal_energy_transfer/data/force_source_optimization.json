@@ -2,7 +2,7 @@
   "schema_version": "force-source-optimization/v1",
   "force_attribution_schema": "force-attribution/v1",
   "provenance": {
-    "git_sha": "0dd7d5bee195f3c3f0b35182db1eeac99308a55a",
+    "git_sha": "942c4e328b339f67317a0de8809cb22a83b53009",
     "model": "GolfModelParams.default()",
     "backend": "ode",
     "coordinates": ["shoulder_absolute", "wrist_relative"],

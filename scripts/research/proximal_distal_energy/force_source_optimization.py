@@ -175,6 +175,7 @@ def _qualified(
         for outcome in outcomes
         if outcome.status == "qualified_impact"
         and outcome.coriolis_tangent_impulse_n_s is not None
+        and outcome.coriolis_absolute_tangent_impulse_n_s is not None
         and outcome.clubhead_speed_m_s is not None
     )
 
