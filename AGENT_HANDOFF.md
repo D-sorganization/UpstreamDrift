@@ -12,7 +12,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `3a5b9d630b38b6e017a3568dc638b22f9839b3c0`. The normalized-claim authority
+  `c6fc49a7c63549fa6b60afb43594d3c76a226d50`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 239 pages with SHA-256
   `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
@@ -93,17 +93,16 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   is merged at immutable commit
   `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
   canonical JSON/CSV/HDF5 analysis authority.
-- Active #8358 PR #9039 uses `UpstreamDrift-worktrees/8358-tools-variation-adapter`
-  on branch `feat/8358-tools-variation-adapter`. Fifteen coherent commits
-  were transplanted onto current remote `main`. The Tools gateway, typed trial
-  evidence, serial/batched execution, analytical and articulated MuJoCo
-  adapters, fail-closed cross-engine comparison, lossless bundles, and
-  canonical scalar, rank/OAT, dispersion, and quiet-zone analysis are present.
-  The 222-test serial suite, pinned mypy, Ruff, Bandit, architecture, file-size,
-  title-case, claim-integrity, and 592-artifact release gates pass. Complete
-  outcome, trace, marker, frame/unit, provenance, and bilateral-allocation
-  evidence remains explicit. Use a worktree-local pytest `--basetemp`; the
-  ambient Windows `pytest-current` link is denied.
+- Active #8358 PR #9039 is on `feat/8358-tools-variation-adapter`, updated to
+  current `main`. Its Tools gateway, typed trial evidence, serial/batched
+  execution, analytical and articulated MuJoCo adapters, fail-closed
+  cross-engine comparison, lossless bundles, and canonical scalar, rank/OAT,
+  dispersion, and quiet-zone analysis are present. Protected head `1bdc73c60`
+  exposed a headless `--version` GUI-import failure after 11,922 other tests
+  passed; the current candidate defers GUI/diagnostics imports until launch and
+  adds a forced-import-block regression. All five launcher tests pass on Python
+  3.11 and 3.13; a new protected run is pending. Keep #8358 open because its
+  broader UI, localized-perturbation, and presentation criteria remain unaudited.
 - PR #9032 is open at `5edacb13c`; Standard CI passes, but optional-stack has
   a headless `DISPLAY` failure and human review remains absent.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and
