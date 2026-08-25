@@ -135,23 +135,9 @@ def _attach(
     _review(reviews, candidate, claim_ids, "Repeated summary inherits claim bounds.")
 
 
-def main() -> None:
-    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    candidates = inventory["candidates"]
-    valid_ids = {candidate["candidate_id"] for candidate in candidates}
-    registry["claims"] = [
-        claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
-    ]
-    for claim in registry["claims"]:
-        claim["candidate_ids"] = [
-            candidate_id
-            for candidate_id in claim.get("candidate_ids", [])
-            if candidate_id in valid_ids
-        ]
-
+def _select_ground_candidates(candidates: list[dict[str, Any]]) -> dict[str, Any]:
     chapter = "_ch06ca_articulated_ground.qmd"
-    selected = {
+    return {
         "intro": _find(candidates, chapter, "The finite-base extension supplies"),
         "mass": _find(candidates, chapter, "Only the non-club body tree"),
         "law": _find(candidates, chapter, "The synthetic passive support law"),
@@ -175,7 +161,10 @@ def main() -> None:
         ),
         "boundary": _find(candidates, chapter, "The support is linear and bilateral"),
     }
-    new_claims = [
+
+
+def _build_ground_claims(selected: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
         _claim(
             "PD-CLAIM-293",
             [selected[key] for key in ("intro", "mass", "law", "moment", "pathways")],
@@ -213,13 +202,12 @@ def main() -> None:
             "A primary match exists under the registered rule, the post-hoc counts fail to reproduce, or unmatched differences are presented as identified effects.",
         ),
     ]
-    registry["claims"].extend(new_claims)
-    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
-    reviews = {
-        review["candidate_id"]: review
-        for review in registry["candidate_reviews"]
-        if review["candidate_id"] in valid_ids
-    }
+
+
+def _apply_primary_ground_reviews(
+    reviews: dict[str, dict[str, Any]],
+    selected: dict[str, Any],
+) -> None:
     mapping = {
         "intro": ("PD-CLAIM-293",),
         "mass": ("PD-CLAIM-293",),
@@ -246,262 +234,206 @@ def main() -> None:
         "last_verified_on": DATE,
     }
 
-    repeated = [
+
+REPEATED_GROUND_SPECS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    (
+        "proximal_distal_energy_transfer.qmd",
+        "Proximal-to-distal (P→D) sequencing",
         (
-            _find(
-                candidates,
-                "proximal_distal_energy_transfer.qmd",
-                "Proximal-to-distal (P→D) sequencing",
-            ),
-            (
-                "PD-CLAIM-007",
-                "PD-CLAIM-008",
-                "PD-CLAIM-214",
-                "PD-CLAIM-260",
-                "PD-CLAIM-263",
-                "PD-CLAIM-272",
-                "PD-CLAIM-291",
-                "PD-CLAIM-292",
-                "PD-CLAIM-293",
-                "PD-CLAIM-294",
-                "PD-CLAIM-295",
-                "PD-CLAIM-296",
-            ),
+            "PD-CLAIM-007",
+            "PD-CLAIM-008",
+            "PD-CLAIM-214",
+            "PD-CLAIM-260",
+            "PD-CLAIM-263",
+            "PD-CLAIM-272",
+            "PD-CLAIM-291",
+            "PD-CLAIM-292",
+            "PD-CLAIM-293",
+            "PD-CLAIM-294",
+            "PD-CLAIM-295",
+            "PD-CLAIM-296",
         ),
+    ),
+    (
+        "_ch06c_spatial_cross_formulation.qmd",
+        "At this shaft-only tier",
+        ("PD-CLAIM-292", "PD-CLAIM-293"),
+    ),
+    (
+        "_ch07_model_ladder.qmd",
+        "The discrepancy matrix",
+        ("PD-CLAIM-128", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch07_model_ladder.qmd",
+        "1. interaction force may remain",
+        ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch07_model_ladder.qmd",
+        "Other claims do not yet survive",
+        ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch07_model_ladder.qmd",
+        "**Articulated Finite Ground",
+        ("PD-CLAIM-293", "PD-CLAIM-295", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch07_model_ladder.qmd",
+        "The ladder remains deliberately incomplete",
+        ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch07_model_ladder.qmd",
+        "- the three-link trace remains",
+        ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch07_model_ladder.qmd",
+        "The next decisive model test replaces",
+        ("PD-CLAIM-128", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch08b_momentum_transfer_questions.qmd",
+        "| How much transfer is drift-mediated?",
         (
-            _find(
-                candidates,
-                "_ch06c_spatial_cross_formulation.qmd",
-                "At this shaft-only tier",
-            ),
-            ("PD-CLAIM-292", "PD-CLAIM-293"),
+            "PD-CLAIM-243",
+            "PD-CLAIM-247",
+            "PD-CLAIM-253",
+            "PD-CLAIM-273",
+            "PD-CLAIM-296",
         ),
+    ),
+    (
+        "_ch09_conclusions.qmd",
+        "The articulated finite-base extension",
+        ("PD-CLAIM-293", "PD-CLAIM-294", "PD-CLAIM-295", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch09_conclusions.qmd",
+        "1. **Articulated Spatial Forward-Contact",
+        ("PD-CLAIM-128", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch06f_open_release.qmd",
+        "The scientific product is distributed",
+        ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-295", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch06f_open_release.qmd",
+        "The release records planar interaction",
         (
-            _find(candidates, "_ch07_model_ladder.qmd", "The discrepancy matrix"),
-            ("PD-CLAIM-128", "PD-CLAIM-296"),
+            "PD-CLAIM-128",
+            "PD-CLAIM-214",
+            "PD-CLAIM-260",
+            "PD-CLAIM-263",
+            "PD-CLAIM-272",
+            "PD-CLAIM-291",
+            "PD-CLAIM-292",
+            "PD-CLAIM-293",
+            "PD-CLAIM-295",
+            "PD-CLAIM-296",
         ),
+    ),
+    (
+        "_ch06f_open_release.qmd",
+        "Five release-level completion gates",
+        ("PD-CLAIM-128", "PD-CLAIM-296"),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "The fixed shoulder centers",
+        ("PD-CLAIM-262", "PD-CLAIM-265"),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "The screen uses the same six",
+        ("PD-CLAIM-262", "PD-CLAIM-265"),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "No fixed-shoulder arm-only state",
+        ("PD-CLAIM-265", "PD-CLAIM-266"),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "Both paired contact Jacobians",
+        ("PD-CLAIM-267",),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "This result advances the model ladder",
+        ("PD-CLAIM-262", "PD-CLAIM-267"),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "The bounded articulated experiments",
         (
-            _find(
-                candidates, "_ch07_model_ladder.qmd", "1. interaction force may remain"
-            ),
-            ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
+            "PD-CLAIM-128",
+            "PD-CLAIM-288",
+            "PD-CLAIM-292",
+            "PD-CLAIM-293",
+            "PD-CLAIM-295",
+            "PD-CLAIM-296",
         ),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "The executed experiment advances",
+        ("PD-CLAIM-182",),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "First, the common spatial wrench",
+        ("PD-CLAIM-182",),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "Second, the same model",
+        ("PD-CLAIM-182",),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "Third, the geometry intervention",
+        ("PD-CLAIM-182",),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "Four stronger statements remain open",
+        ("PD-CLAIM-183",),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "- **Passive Contact Origin Is Inconclusive",
+        ("PD-CLAIM-183",),
+    ),
+    (
+        "_ch06cb_spatial_cross_tail.qmd",
+        "The next chapter tests",
+        ("PD-CLAIM-183",),
+    ),
+    (
+        "_appendices.qmd",
+        "- A multi-phase matched-state",
         (
-            _find(
-                candidates, "_ch07_model_ladder.qmd", "Other claims do not yet survive"
-            ),
-            ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
+            "PD-CLAIM-128",
+            "PD-CLAIM-183",
+            "PD-CLAIM-293",
+            "PD-CLAIM-295",
+            "PD-CLAIM-296",
         ),
-        (
-            _find(candidates, "_ch07_model_ladder.qmd", "**Articulated Finite Ground"),
-            ("PD-CLAIM-293", "PD-CLAIM-295", "PD-CLAIM-296"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch07_model_ladder.qmd",
-                "The ladder remains deliberately incomplete",
-            ),
-            ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
-        ),
-        (
-            _find(
-                candidates, "_ch07_model_ladder.qmd", "- the three-link trace remains"
-            ),
-            ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-296"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch07_model_ladder.qmd",
-                "The next decisive model test replaces",
-            ),
-            ("PD-CLAIM-128", "PD-CLAIM-296"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch08b_momentum_transfer_questions.qmd",
-                "| How much transfer is drift-mediated?",
-            ),
-            (
-                "PD-CLAIM-243",
-                "PD-CLAIM-247",
-                "PD-CLAIM-253",
-                "PD-CLAIM-273",
-                "PD-CLAIM-296",
-            ),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch09_conclusions.qmd",
-                "The articulated finite-base extension",
-            ),
-            ("PD-CLAIM-293", "PD-CLAIM-294", "PD-CLAIM-295", "PD-CLAIM-296"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch09_conclusions.qmd",
-                "1. **Articulated Spatial Forward-Contact",
-            ),
-            ("PD-CLAIM-128", "PD-CLAIM-296"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06f_open_release.qmd",
-                "The scientific product is distributed",
-            ),
-            ("PD-CLAIM-128", "PD-CLAIM-293", "PD-CLAIM-295", "PD-CLAIM-296"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06f_open_release.qmd",
-                "The release records planar interaction",
-            ),
-            (
-                "PD-CLAIM-128",
-                "PD-CLAIM-214",
-                "PD-CLAIM-260",
-                "PD-CLAIM-263",
-                "PD-CLAIM-272",
-                "PD-CLAIM-291",
-                "PD-CLAIM-292",
-                "PD-CLAIM-293",
-                "PD-CLAIM-295",
-                "PD-CLAIM-296",
-            ),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06f_open_release.qmd",
-                "Five release-level completion gates",
-            ),
-            ("PD-CLAIM-128", "PD-CLAIM-296"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "The fixed shoulder centers",
-            ),
-            ("PD-CLAIM-262", "PD-CLAIM-265"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "The screen uses the same six",
-            ),
-            ("PD-CLAIM-262", "PD-CLAIM-265"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "No fixed-shoulder arm-only state",
-            ),
-            ("PD-CLAIM-265", "PD-CLAIM-266"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "Both paired contact Jacobians",
-            ),
-            ("PD-CLAIM-267",),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "This result advances the model ladder",
-            ),
-            ("PD-CLAIM-262", "PD-CLAIM-267"),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "The bounded articulated experiments",
-            ),
-            (
-                "PD-CLAIM-128",
-                "PD-CLAIM-288",
-                "PD-CLAIM-292",
-                "PD-CLAIM-293",
-                "PD-CLAIM-295",
-                "PD-CLAIM-296",
-            ),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "The executed experiment advances",
-            ),
-            ("PD-CLAIM-182",),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "First, the common spatial wrench",
-            ),
-            ("PD-CLAIM-182",),
-        ),
-        (
-            _find(
-                candidates, "_ch06cb_spatial_cross_tail.qmd", "Second, the same model"
-            ),
-            ("PD-CLAIM-182",),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "Third, the geometry intervention",
-            ),
-            ("PD-CLAIM-182",),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "Four stronger statements remain open",
-            ),
-            ("PD-CLAIM-183",),
-        ),
-        (
-            _find(
-                candidates,
-                "_ch06cb_spatial_cross_tail.qmd",
-                "- **Passive Contact Origin Is Inconclusive",
-            ),
-            ("PD-CLAIM-183",),
-        ),
-        (
-            _find(
-                candidates, "_ch06cb_spatial_cross_tail.qmd", "The next chapter tests"
-            ),
-            ("PD-CLAIM-183",),
-        ),
-        (
-            _find(candidates, "_appendices.qmd", "- A multi-phase matched-state"),
-            (
-                "PD-CLAIM-128",
-                "PD-CLAIM-183",
-                "PD-CLAIM-293",
-                "PD-CLAIM-295",
-                "PD-CLAIM-296",
-            ),
-        ),
-    ]
-    for candidate, claim_ids in repeated:
+    ),
+)
+
+
+def _attach_repeated_ground_candidates(
+    candidates: list[dict[str, Any]],
+    claims: dict[str, dict[str, Any]],
+    reviews: dict[str, dict[str, Any]],
+) -> None:
+    for suffix, prefix, claim_ids in REPEATED_GROUND_SPECS:
+        candidate = _find(candidates, suffix, prefix)
         _attach(claims, reviews, candidate, claim_ids)
 
     availability = _find(
@@ -529,6 +461,12 @@ def main() -> None:
         "last_verified_on": DATE,
     }
 
+
+def _reconcile_ground_reciprocal_and_locations(
+    candidates: list[dict[str, Any]],
+    claims: dict[str, dict[str, Any]],
+    reviews: dict[str, dict[str, Any]],
+) -> None:
     reciprocal: dict[str, list[str]] = {}
     for claim in claims.values():
         for candidate_id in claim.get("candidate_ids", []):
@@ -547,7 +485,10 @@ def main() -> None:
                 for candidate_id in claim["candidate_ids"]
             ]
 
-    registry["candidate_reviews"] = list(reviews.values())
+
+def _update_ground_release_inventory_and_scope(
+    registry: dict[str, Any], source_digest: str
+) -> None:
     release = {
         item["release_claim_key"]: item for item in registry["release_claim_inventory"]
     }
@@ -562,7 +503,37 @@ def main() -> None:
         "intrinsic-free-moment tier passes registered numerical gates, while its "
         "primary coupled--fixed matching set is empty and no effect is identified."
     )
-    registry["paper"]["source_digest"] = inventory["source_digest"]
+    registry["paper"]["source_digest"] = source_digest
+
+
+def main() -> None:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
+    candidates = inventory["candidates"]
+    valid_ids = {candidate["candidate_id"] for candidate in candidates}
+    registry["claims"] = [
+        claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
+    ]
+    for claim in registry["claims"]:
+        claim["candidate_ids"] = [
+            candidate_id
+            for candidate_id in claim.get("candidate_ids", [])
+            if candidate_id in valid_ids
+        ]
+
+    selected = _select_ground_candidates(candidates)
+    registry["claims"].extend(_build_ground_claims(selected))
+    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
+    reviews = {
+        review["candidate_id"]: review
+        for review in registry["candidate_reviews"]
+        if review["candidate_id"] in valid_ids
+    }
+    _apply_primary_ground_reviews(reviews, selected)
+    _attach_repeated_ground_candidates(candidates, claims, reviews)
+    _reconcile_ground_reciprocal_and_locations(candidates, claims, reviews)
+    registry["candidate_reviews"] = list(reviews.values())
+    _update_ground_release_inventory_and_scope(registry, inventory["source_digest"])
     registry["claims"] = list(claims.values())
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 
