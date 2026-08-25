@@ -10,7 +10,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - Tools PR #4699 is the reusable source authority for
   `force-attribution/v1`; UpstreamDrift consumes it only through
   `vendor/ud-tools` and the thin biomechanics gateway. The vendor pin is the
-  protected Tools squash `3a1c34b4aab2472599dbacfd4c1654772cbf1cc5`.
+  protected Tools follow-up squash
+  `fb88f6ac62c1a2cd5e772aa4d2c9052e885e9524`, which includes the source
+  feature from PR #4699 and its read-only provider-Protocol correction from
+  PR #4700.
 - The registered planar study evaluates 135 programs and retains 91 qualified
   impacts. It publishes separate absolute Coriolis-impulse, signed-impulse,
   and clubhead-speed optima plus component power/work and mapping residuals.
