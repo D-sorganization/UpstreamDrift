@@ -13,9 +13,10 @@ qualified-impact clubhead speed as distinct estimands. This is synthetic
 planar model evidence, not a measured grip wrench, muscle attribution,
 continuous optimal-control solution, human strategy, or coaching authority.
 The source authority is protected Tools squash
-`fb88f6ac62c1a2cd5e772aa4d2c9052e885e9524`, incorporating PR #4699 and the
-read-only provider-Protocol correction from PR #4700; feature-branch commits
-are not publication authority.
+`8dc4512184d8c29e10770ad81e4ce947f849b355`, incorporating PR #4699, the
+read-only provider-Protocol correction from PR #4700, and the restored
+downstream dataset façade from PR #4701; feature-branch commits are not
+publication authority.
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
 1,100 reviewed candidates and 303 atomic claims. Issue #8724 adds an exhaustive,
