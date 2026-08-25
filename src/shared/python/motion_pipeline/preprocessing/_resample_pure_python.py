@@ -16,6 +16,7 @@ from ._frame_arrays import (
     estimate_fps as _estimate_fps,
     keypoints_to_array as _keypoints_to_array,
     markers_to_array as _markers_to_array,
+    vectorized_interp_axes as _vectorized_interp_axes,
 )
 
 
@@ -70,12 +71,7 @@ def _resample_keypoints(
     timestamps = np.array([f.timestamp for f in seq.frames])
 
     # Resample each keypoint dimension
-    resampled_data = np.zeros((num_new_frames, data.shape[1], 3))
-    for i in range(data.shape[1]):
-        for j in range(data.shape[2]):
-            resampled_data[:, i, j] = np.interp(
-                new_timestamps, timestamps, data[:, i, j]
-            )
+    resampled_data = _vectorized_interp_axes(new_timestamps, timestamps, data)
 
     # Reconstruct frames
     new_frames = _array_to_keypoint_frames_at_timestamps(
@@ -120,12 +116,7 @@ def _resample_markers(
     timestamps = np.array([f.timestamp for f in traj.frames])
 
     # Resample each marker dimension
-    resampled_data = np.zeros((num_new_frames, data.shape[1], 3))
-    for i in range(data.shape[1]):
-        for j in range(data.shape[2]):
-            resampled_data[:, i, j] = np.interp(
-                new_timestamps, timestamps, data[:, i, j]
-            )
+    resampled_data = _vectorized_interp_axes(new_timestamps, timestamps, data)
 
     # Reconstruct frames
     new_frames = _array_to_marker_frames_at_timestamps(
