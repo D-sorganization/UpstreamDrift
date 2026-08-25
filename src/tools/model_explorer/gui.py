@@ -332,9 +332,15 @@ class MainWidget(QWidget):
             self.current_file_path = file_path
             self._update_window_title()
             logger.info(f"URDF loaded: {file_path}")
-        except (RuntimeError, TypeError, ValueError) as e:
-            logger.error(f"Error loading URDF file: {e}")
-            raise
+        except (RuntimeError, TypeError, ValueError, OSError) as e:
+            logger.exception("Error loading URDF file: %s", e)
+            from PyQt6.QtWidgets import QMessageBox
+
+            QMessageBox.warning(
+                self,
+                "Model Load Error",
+                f"Failed to load model file '{file_path.name}':\n\n{e}",
+            )
 
     def save_urdf(self) -> None:
         if self.current_file_path:

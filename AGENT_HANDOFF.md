@@ -11,7 +11,7 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
   release bundle. AffineDrift is an immutable revision-pinned public
   projection. Tools owns reusable analysis authorities; do not copy its
   algorithms into this repository or edit `vendor/ud-tools` by hand.
-- Remote `main` is `a5714721a2d94b07ef75fc18c0a092ce141fa1f8`.
+- Remote `main` is `06d0b92039c0f0427358feb9c3bee5a6143ae4a6`.
 - The computational paper is 239 pages with SHA-256
   `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
   Archival qualification remains false because the PDF is untagged and retains
