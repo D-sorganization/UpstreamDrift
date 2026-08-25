@@ -96,9 +96,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - #8358 PR #9039 is merged at `eb7076466`; its immutable Tools gateway and
   typed variation evidence are on `main`. Keep #8358 open because its broader
   UI, localized-perturbation, and presentation criteria remain unaudited.
-- PR #9032 carries the 16-source biomechanics bridge and the headless GRF
-  correction `413dc21c7`. Its branch is being reconciled with `501ac302d` by
-  replaying the 1,137-candidate/304-claim generators; human review remains absent.
+- PR #9032 is reconciled with `501ac302d` at `d254d2a3d`; it carries the
+  16-source biomechanics bridge and headless GRF correction. A follow-up fixes
+  the Linux/Windows claim-registry digest boundary and explicit unit marking;
+  protected CI must rerun and requested human review remains absent.
 - PR #9049 is mergeable with required `quality-gate` green and awaits the same
   requested human review. Its dependent 1 ms controller transport stays local.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and

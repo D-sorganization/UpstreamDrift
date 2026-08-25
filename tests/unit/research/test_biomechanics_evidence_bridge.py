@@ -11,6 +11,7 @@ import pytest
 from scripts.research.proximal_distal_energy.biomechanics_evidence_bridge import (
     BRIDGE_REL,
     EXTERNAL_REVIEW_REL,
+    _sha256,
     validate_biomechanics_evidence_bridge,
 )
 
@@ -28,6 +29,16 @@ def _bridge() -> dict:
 
 def _external_review() -> dict:
     return _load(EXTERNAL_REVIEW_REL)
+
+
+def test_bridge_digests_are_stable_across_text_line_endings(tmp_path: Path) -> None:
+    """Text provenance must identify repository content, not checkout style."""
+    lf_path = tmp_path / "lf.json"
+    crlf_path = tmp_path / "crlf.json"
+    lf_path.write_bytes(b'{\n  "claim": "bounded"\n}\n')
+    crlf_path.write_bytes(b'{\r\n  "claim": "bounded"\r\n}\r\n')
+
+    assert _sha256(lf_path) == _sha256(crlf_path)
 
 
 def test_bridge_covers_required_modalities_and_retains_open_gates() -> None:

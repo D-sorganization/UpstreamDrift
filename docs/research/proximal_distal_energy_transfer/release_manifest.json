@@ -560,7 +560,7 @@
       "bytes": 3647
     },
     "docs/research/proximal_distal_energy_transfer/data/biomechanics_evidence_bridge.json": {
-      "sha256": "848bd1f855561ee31dce7c3a9cd2a1bacdd8cca93c57509ec5fc382c171066ba",
+      "sha256": "8e93e6fad5a84c8b3e7e0746f0496a61454fb64ba1bc9a013ee76a3b5d65d946",
       "bytes": 40110
     },
     "docs/research/proximal_distal_energy_transfer/data/biomechanics_source_register.json": {
@@ -1952,8 +1952,8 @@
       "bytes": 8858
     },
     "scripts/research/proximal_distal_energy/biomechanics_evidence_bridge.py": {
-      "sha256": "56323f14a5f8b569fda7c5c84056ce96deaf2eec0df1988fe8ec9afc6675c893",
-      "bytes": 15532
+      "sha256": "0c602e1ecfb5c70056eb5a513fe09adac925e99f2f4806b5281f4f91f1f0ab37",
+      "bytes": 15655
     },
     "scripts/research/proximal_distal_energy/biomechanics_evidence_surfaces.py": {
       "sha256": "5282b94f6aee24b93f1d5e564972cd51de288b1f106f9be69febf5ac3a59fd21",

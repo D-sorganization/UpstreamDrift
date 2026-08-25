@@ -8,6 +8,8 @@ import pytest
 
 from src.shared.python.biomechanics import grf_visualization
 
+pytestmark = pytest.mark.unit
+
 plot_grf_and_com_3d = grf_visualization.plot_grf_and_com_3d
 
 
