@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.engine_core.interfaces import PhysicsEngine
@@ -150,3 +151,50 @@ def test_recorder_analysis() -> None:
     times, ztcf = recorder.get_counterfactual_series("ztcf_accel")
     assert len(times) == 1
     assert ztcf.shape == (1, 2)
+
+
+@pytest.mark.unit
+def test_ensure_capacity_boundary_below_max_samples_growth() -> None:
+    """Regression test for #8933 item 4.
+
+    ``_ensure_capacity`` must only grow buffers whose current shape is
+    smaller than ``new_capacity``. Several buffers (e.g. ``com_position``,
+    ``ground_forces``, ``ground_moments``) are allocated directly at
+    ``max_samples`` rather than the growable ``current_capacity``. When a
+    growth step lands strictly between ``current_capacity`` and
+    ``max_samples`` (i.e. ``current_capacity < new_capacity < max_samples``),
+    those already-max-sized buffers must be left untouched. The old
+    implementation instead resized every ndarray in ``self.data`` down to
+    ``new_capacity`` and then tried to copy the (larger) old array into a
+    (smaller) destination slice, raising a ``ValueError`` on shape mismatch.
+    """
+    engine = MockPhysicsEngine()
+    # growth sequence with growth_factor=1.5 (default): 2 -> 3 -> 4 -> 5.
+    # max_samples=5 means new_capacity=3 and new_capacity=4 both land
+    # strictly below max_samples, exercising the boundary bug.
+    recorder = GenericPhysicsRecorder(engine, max_samples=5, initial_capacity=2)
+
+    recorder.start()
+    for _ in range(4):
+        engine.step()
+        recorder.record_step()
+
+    assert recorder.is_recording is True
+    assert recorder.current_idx == 4
+    assert recorder.current_capacity >= 4
+
+    # Buffers allocated directly at max_samples must retain that full
+    # allocation regardless of how current_capacity has grown.
+    assert recorder.data["com_position"].shape[0] == recorder.max_samples
+    assert recorder.data["ground_forces"].shape[0] == recorder.max_samples
+    assert recorder.data["ground_moments"].shape[0] == recorder.max_samples
+
+    # Growable buffers must have grown to at least current_capacity, and
+    # recorded data must be preserved through the resize(s).
+    assert recorder.data["joint_positions"].shape[0] == recorder.current_capacity
+    assert recorder.data["times"].shape[0] == recorder.current_capacity
+
+    recorder.stop()
+    times, positions = recorder.get_time_series("joint_positions")
+    assert len(times) == 4
+    assert len(positions) == 4

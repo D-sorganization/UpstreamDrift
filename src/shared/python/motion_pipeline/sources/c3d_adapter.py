@@ -319,18 +319,32 @@ class C3DAdapter(MocapSourceAdapter):
             path=p,
         ).scale_to_meters
         n_frames = int(points.shape[2])
+        n_labelled_markers = min(len(labels), points.shape[1])
+        labels = labels[:n_labelled_markers]
+        # Bypass pydantic validation on the inner Marker objects via
+        # model_construct: coordinates are already known-finite (checked
+        # per-frame below via has_nan_coordinate) and residual/occluded use
+        # their model defaults, so validation would be redundant. Slicing a
+        # whole frame at once (instead of scalar-indexing the strided
+        # (4, M, N) array per marker) avoids ~3x redundant strided reads per
+        # marker. This mirrors the ≥10x-faster pattern documented on the
+        # Rust ingestion path (`_load_via_rust` above).
+        marker_ctor = Marker.model_construct
         frames: list[MarkerFrame] = []
         for fi in range(n_frames):
+            xs = points[0, :n_labelled_markers, fi] * scale
+            ys = points[1, :n_labelled_markers, fi] * scale
+            zs = points[2, :n_labelled_markers, fi] * scale
             markers: dict[str, Marker] = {}
             for mi, name in enumerate(labels):
-                if mi >= points.shape[1]:
-                    break
-                x = float(points[0, mi, fi]) * scale
-                y = float(points[1, mi, fi]) * scale
-                z = float(points[2, mi, fi]) * scale
+                x = float(xs[mi])
+                y = float(ys[mi])
+                z = float(zs[mi])
                 if has_nan_coordinate(x, y, z):
                     continue
-                markers[name] = Marker(name=name, x=x, y=y, z=z)
+                markers[name] = marker_ctor(
+                    name=name, x=x, y=y, z=z, residual=None, occluded=False
+                )
             frames.append(
                 MarkerFrame(timestamp=fi / fps, markers=markers, frame_index=fi)
             )
