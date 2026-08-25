@@ -196,45 +196,41 @@ class _AnalysisMixin:
         if forces is None:
             raise ValueError("forces must be provided")
         from src.shared.python.spatial_algebra.reference_frames import (
-            ReferenceFrame,
-            ReferenceFrameTransformer,
-            WrenchInFrame,
+            WRENCH_DECOMPOSITION_KEYS,
+            build_wrench_decomposition,
         )
 
-        transformer = ReferenceFrameTransformer()
-        if fsp is not None:
-            transformer.set_swing_plane(fsp)
+        if fsp is None:
+            return {k: np.zeros(n) for k in WRENCH_DECOMPOSITION_KEYS}
 
-        wrench_decompositions: list[dict[str, float]] = []
-        for i in range(n):
-            wrench = WrenchInFrame(
-                force=forces[i],
-                torque=moments[i],
-                frame=ReferenceFrame.GLOBAL,
-                body_name="ground",
-            )
-            if fsp is not None:
-                decomp = transformer.get_swing_plane_decomposition(wrench)
-            else:
-                decomp = {
-                    "force_in_plane": 0.0,
-                    "force_out_of_plane": 0.0,
-                    "force_along_grip": 0.0,
-                    "torque_in_plane": 0.0,
-                    "torque_out_of_plane": 0.0,
-                    "torque_about_grip": 0.0,
-                }
-            wrench_decompositions.append(decomp)
+        # Vectorized swing-plane decomposition: replaces a per-frame
+        # WrenchInFrame + get_swing_plane_decomposition() loop with whole-array
+        # dot products against the (fixed, per-call) plane axes. Numerically
+        # identical to the per-frame formulation since both reduce to the same
+        # BLAS dot products, just batched (issue #8931).
+        f = forces[:n]
+        tau = moments[:n]
 
-        decomp_keys = [
-            "force_in_plane",
-            "force_out_of_plane",
-            "force_along_grip",
-            "torque_in_plane",
-            "torque_out_of_plane",
-            "torque_about_grip",
-        ]
-        return {k: np.array([d[k] for d in wrench_decompositions]) for k in decomp_keys}
+        force_out_of_plane = f @ fsp.normal
+        force_x = f @ fsp.in_plane_x
+        force_y = f @ fsp.in_plane_y
+        force_in_plane = np.sqrt(force_x**2 + force_y**2)
+        force_along_grip = f @ fsp.grip_axis
+
+        torque_out_of_plane = tau @ fsp.normal
+        torque_x = tau @ fsp.in_plane_x
+        torque_y = tau @ fsp.in_plane_y
+        torque_in_plane = np.sqrt(torque_x**2 + torque_y**2)
+        torque_about_grip = tau @ fsp.grip_axis
+
+        return build_wrench_decomposition(
+            force_in_plane,
+            force_out_of_plane,
+            force_along_grip,
+            torque_in_plane,
+            torque_out_of_plane,
+            torque_about_grip,
+        )
 
     @staticmethod
     def _build_grf_wrench_result(
