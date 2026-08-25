@@ -5647,8 +5647,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "12cbafd25fedaa77722f7aae636d3bae12b0130e941a7081d203612142a67c1c",
-      "bytes": 138102,
+      "sha256": "eb13b1cdf5447084cfbe50132f14599621a8eb51bfad267918a547d246ae801c",
+      "bytes": 139093,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
