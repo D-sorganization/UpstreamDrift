@@ -19,7 +19,7 @@ try:
     from PyQt6.QtWidgets import QApplication, QMessageBox
 
     _HAVE_QT = True
-except Exception:
+except Exception:  # noqa: BLE001
     _HAVE_QT = False
 
 if not _HAVE_QT:
