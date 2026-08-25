@@ -51,8 +51,10 @@ history. Epic #8557 is the canonical proximal-to-distal completion authority.
 - The current-main merge is resolved locally. Shared adapter contracts remove
   the reported LoD and DRY growth; 56 focused adapter/executor tests, Ruff,
   LoD, DRY, architecture, and file-size gates pass. The earlier pendulum
-  entry-point failure is fixed by current `main`. Push only after focused MyPy
-  and the pre-push hooks pass; then inspect the exact protected CI state once.
+  entry-point failure is fixed by current `main`. A typed `TrialObservation`
+  keeps the shared evidence collector within the eight-parameter architecture
+  budget. Push only after focused MyPy and the pre-push hooks pass; then inspect
+  the exact protected CI state once.
 - This integration is synthetic, model-conditional infrastructure. It does not
   establish participant mechanics, anatomy, physiology, equipment calibration,
   injury risk, coaching strategy, or a universal speed benefit.

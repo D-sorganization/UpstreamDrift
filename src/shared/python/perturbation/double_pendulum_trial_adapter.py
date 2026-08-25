@@ -34,6 +34,7 @@ from .trial_evidence import (
     TrialTrace,
 )
 from .trial_adapter_contracts import (
+    TrialObservation,
     collect_trial_evidence,
     collect_trial_failure,
     make_trial_evidence_identity,
@@ -400,10 +401,7 @@ class DoublePendulumTrialAdapter:
             plan_seed,
             sampled_row,
             self._columns,
-            outcome,
-            trial_trace,
-            impact=impact,
-            closest_approach=closest,
+            TrialObservation(outcome, trial_trace, impact, closest),
         )
 
     def collect_failure(

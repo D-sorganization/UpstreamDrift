@@ -202,6 +202,16 @@ class TrialEvidenceIdentity:
         )
 
 
+@dataclass(frozen=True)
+class TrialObservation:
+    """Outcome-specific trace and event evidence retained by an adapter."""
+
+    outcome: TrialOutcome
+    trace: TrialTrace | None
+    impact: ImpactObservation | None = None
+    closest_approach: ClosestApproach | None = None
+
+
 def make_trial_evidence_identity(
     plan_sha256: str,
     scenario_sha256: str,
@@ -229,21 +239,17 @@ def collect_trial_evidence(
     seed: int,
     sampled_row: np.ndarray,
     columns: Sequence[SampledColumn],
-    outcome: TrialOutcome,
-    trace: TrialTrace | None,
-    *,
-    impact: ImpactObservation | None = None,
-    closest_approach: ClosestApproach | None = None,
+    observation: TrialObservation,
 ) -> CanonicalTrialEvidence:
     """Build canonical evidence directly from one ordered sampled row."""
     return identity.build(
         trial_index=trial_index,
         seed=seed,
         sampled_inputs=sampled_inputs_from_row(sampled_row, columns),
-        outcome=outcome,
-        trace=trace,
-        impact=impact,
-        closest_approach=closest_approach,
+        outcome=observation.outcome,
+        trace=observation.trace,
+        impact=observation.impact,
+        closest_approach=observation.closest_approach,
     )
 
 
@@ -266,6 +272,7 @@ def collect_trial_failure(
 
 __all__ = [
     "TrialEvidenceIdentity",
+    "TrialObservation",
     "collect_trial_evidence",
     "collect_trial_failure",
     "make_trial_evidence_identity",
