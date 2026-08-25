@@ -5,12 +5,15 @@ from __future__ import annotations
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass, fields
 import hashlib
+import logging
 import multiprocessing
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+
+logger = logging.getLogger(__name__)
 
 from scripts.research.proximal_distal_energy.articulated_distributed_grip import (
     DistributedGripConfig,
@@ -582,6 +585,100 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _record_design(
+    states: tuple[tuple[int, int], ...],
+    config: ArticulatedGroundAtlasConfig,
+    versions: dict[str, str],
+) -> dict[str, Any]:
+    return {
+        "engine_versions": versions,
+        "state_count": len(states),
+        "ground_activations": list(config.ground_activations),
+        "controls": list(config.control_names),
+        "velocity_factors": list(VELOCITY_FACTORS),
+        "horizons_s": list(config.horizons_s),
+        "primary_trajectory_count": len(states)
+        * len(config.ground_activations)
+        * 2
+        * len(config.forward.time_steps_s)
+        * 2,
+        "control_trajectory_count": len(states)
+        * len(config.control_names)
+        * 2
+        * len(config.forward.time_steps_s)
+        * 2,
+        "initialization": "identical natural-zero base and shaft coordinates; rigid state and signed club perturbation shared within cell",
+        "active_driver_or_joint_torque": "none; motion is an initial condition",
+        "center_of_pressure_reversal": "reference-transport invariance is contract-tested because center of pressure does not enter generalized force",
+    }
+
+
+def _record_results(
+    primary: _Buffers,
+    controls: _Buffers,
+    gates: dict[str, Any],
+    all_passed: bool,
+) -> dict[str, Any]:
+    matched = gates["matched"]
+    matched_delta = gates["matched_speed_difference"][matched]
+    return {
+        "all_registered_gates_passed": all_passed,
+        "maximum_normalized_work_energy_residual": float(
+            max(
+                np.max(primary.normalized_energy_residual),
+                np.max(controls.normalized_energy_residual),
+            )
+        ),
+        "maximum_trajectory_relative_error": float(
+            max(
+                np.max(primary.trajectory_parity),
+                np.max(controls.trajectory_parity),
+            )
+        ),
+        "maximum_ground_force_n": float(np.max(primary.peak_ground_force)),
+        "maximum_intrinsic_free_moment_nm": float(
+            np.max(primary.peak_intrinsic_moment)
+        ),
+        "time_refinement_worst_normalized_residual": gates["time_refinement"].tolist(),
+        "time_refinement_passed": gates["time_refinement_passed"],
+        "maximum_initial_energy_relative_range": float(
+            np.max(gates["initial_energy_relative_range"])
+        ),
+        "initial_energy_match_passed": gates["initial_energy_match_passed"],
+        "matched_load_work_cell_count": int(np.count_nonzero(matched)),
+        "matched_load_work_total_cell_count": int(matched.size),
+        "matched_final_speed_difference_range_m_s": (
+            [float(np.min(matched_delta)), float(np.max(matched_delta))]
+            if matched_delta.size
+            else None
+        ),
+        "failed_primary_numerical_cell_count": int(
+            np.count_nonzero(~gates["primary_numerical"])
+        ),
+        "failed_control_numerical_cell_count": int(
+            np.count_nonzero(~gates["control_numerical"])
+        ),
+        "failed_primary_parity_cell_count": int(
+            np.count_nonzero(~gates["primary_parity"])
+        ),
+        "failed_control_parity_cell_count": int(
+            np.count_nonzero(~gates["control_parity"])
+        ),
+    }
+
+
+def _record_limitations() -> dict[str, str]:
+    return {
+        "calibration_status": "synthetic_reference_not_human_or_force_plate_calibrated",
+        "ground_law": "linear planar x-z translation and free pitch moment; not unilateral normal contact, Coulomb friction, foot segmentation, or measured pressure",
+        "horizontal_control": "zero horizontal stiffness and damping removes modeled horizontal restraint; it is not a complete friction-contact model",
+        "initialization_boundary": "natural-zero provides exact pathway matching but is not static whole-mechanism equilibrium",
+        "matching_boundary": "post-registered load/work matching is descriptive, not randomized causal identification",
+        "time_boundary": "the atlas ends at 50 ms and cannot establish whole-downswing or impact behavior",
+        "human_boundary": "no participant, intent, timing-economy, injury, or coaching inference",
+    }
+
+
 def _record(
     states: tuple[tuple[int, int], ...],
     primary: _Buffers,
@@ -590,8 +687,6 @@ def _record(
     gates: dict[str, Any],
     versions: dict[str, str],
 ) -> dict[str, Any]:
-    matched = gates["matched"]
-    matched_delta = gates["matched_speed_difference"][matched]
     all_passed = bool(
         np.all(gates["primary_numerical"])
         and np.all(gates["control_numerical"])
@@ -603,83 +698,10 @@ def _record(
     return {
         "schema_version": "articulated-ground-atlas/v1",
         "study_id": "finite-ground-free-moment-falsification-atlas",
-        "design": {
-            "engine_versions": versions,
-            "state_count": len(states),
-            "ground_activations": list(config.ground_activations),
-            "controls": list(config.control_names),
-            "velocity_factors": list(VELOCITY_FACTORS),
-            "horizons_s": list(config.horizons_s),
-            "primary_trajectory_count": len(states)
-            * len(config.ground_activations)
-            * 2
-            * len(config.forward.time_steps_s)
-            * 2,
-            "control_trajectory_count": len(states)
-            * len(config.control_names)
-            * 2
-            * len(config.forward.time_steps_s)
-            * 2,
-            "initialization": "identical natural-zero base and shaft coordinates; rigid state and signed club perturbation shared within cell",
-            "active_driver_or_joint_torque": "none; motion is an initial condition",
-            "center_of_pressure_reversal": "reference-transport invariance is contract-tested because center of pressure does not enter generalized force",
-        },
+        "design": _record_design(states, config, versions),
         "configuration": asdict(config),
-        "results": {
-            "all_registered_gates_passed": all_passed,
-            "maximum_normalized_work_energy_residual": float(
-                max(
-                    np.max(primary.normalized_energy_residual),
-                    np.max(controls.normalized_energy_residual),
-                )
-            ),
-            "maximum_trajectory_relative_error": float(
-                max(
-                    np.max(primary.trajectory_parity),
-                    np.max(controls.trajectory_parity),
-                )
-            ),
-            "maximum_ground_force_n": float(np.max(primary.peak_ground_force)),
-            "maximum_intrinsic_free_moment_nm": float(
-                np.max(primary.peak_intrinsic_moment)
-            ),
-            "time_refinement_worst_normalized_residual": gates[
-                "time_refinement"
-            ].tolist(),
-            "time_refinement_passed": gates["time_refinement_passed"],
-            "maximum_initial_energy_relative_range": float(
-                np.max(gates["initial_energy_relative_range"])
-            ),
-            "initial_energy_match_passed": gates["initial_energy_match_passed"],
-            "matched_load_work_cell_count": int(np.count_nonzero(matched)),
-            "matched_load_work_total_cell_count": int(matched.size),
-            "matched_final_speed_difference_range_m_s": (
-                [float(np.min(matched_delta)), float(np.max(matched_delta))]
-                if matched_delta.size
-                else None
-            ),
-            "failed_primary_numerical_cell_count": int(
-                np.count_nonzero(~gates["primary_numerical"])
-            ),
-            "failed_control_numerical_cell_count": int(
-                np.count_nonzero(~gates["control_numerical"])
-            ),
-            "failed_primary_parity_cell_count": int(
-                np.count_nonzero(~gates["primary_parity"])
-            ),
-            "failed_control_parity_cell_count": int(
-                np.count_nonzero(~gates["control_parity"])
-            ),
-        },
-        "limitations": {
-            "calibration_status": "synthetic_reference_not_human_or_force_plate_calibrated",
-            "ground_law": "linear planar x-z translation and free pitch moment; not unilateral normal contact, Coulomb friction, foot segmentation, or measured pressure",
-            "horizontal_control": "zero horizontal stiffness and damping removes modeled horizontal restraint; it is not a complete friction-contact model",
-            "initialization_boundary": "natural-zero provides exact pathway matching but is not static whole-mechanism equilibrium",
-            "matching_boundary": "post-registered load/work matching is descriptive, not randomized causal identification",
-            "time_boundary": "the atlas ends at 50 ms and cannot establish whole-downswing or impact behavior",
-            "human_boundary": "no participant, intent, timing-economy, injury, or coaching inference",
-        },
+        "results": _record_results(primary, controls, gates, all_passed),
+        "limitations": _record_limitations(),
         "next_gate": "add uncertainty and governed force-plate or bilateral-wrench validation before human inference",
         "source_sha256": {path: _sha256(ROOT / path) for path in SOURCE_PATHS},
     }
@@ -723,10 +745,11 @@ def run_articulated_ground_atlas(
         ):
             _merge_state(primary, state_slot, local_primary)
             _merge_state(controls, state_slot, local_controls)
-            print(
-                f"ground atlas state {completed}/{len(states)} complete: "
-                f"{states[state_slot]}",
-                flush=True,
+            logger.info(
+                "ground atlas state %d/%d complete: %s",
+                completed,
+                len(states),
+                states[state_slot],
             )
     finally:
         if executor is not None:
