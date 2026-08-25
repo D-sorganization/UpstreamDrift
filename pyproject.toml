@@ -422,7 +422,7 @@ ignore = [
 #   new violations must use src/shared/python/core/process_safety.narrow_catch
 #   or supply a justified `# noqa: BLE001 - <reason>` comment. Enforced via
 #   scripts/ci/check_error_handling_ratchet.py (issue #5911 / epic #5907).
-extend-ignore = ["E501", "C901", "E402", "I001", "SIM118", "SIM105", "SIM117", "PLE0604", "SIM102", "BLE001", "SIM113", "PERF403", "F841", "F401"]
+extend-ignore = ["E501", "C901", "E402", "I001", "SIM118", "SIM105", "SIM117", "PLE0604", "SIM102", "SIM113", "PERF403", "F841", "F401"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
@@ -441,6 +441,27 @@ max-complexity = 10
 # programmatic_pid CLI: generate-pid command intentionally writes to stdout as a command-line tool.
 "src/shared/python/programmatic_pid/cli.py" = ["T201"]
 "src/shared/python/humanoid_character_builder/__main__.py" = ["T201"]
+# Deferred: mypy follows this file's huge mujoco GUI transitive import
+# tree (209 pre-existing errors across 20 unrelated dependency files --
+# issue #8813) whenever it is included in a changed-file mypy diff. The
+# BLE001 grandfathering here is file-scoped (not annotated inline) so this
+# file never enters that diff. Follow-up: clean the dependency-graph mypy
+# debt, then replace this with an inline `# noqa: BLE001` like its peers.
+# Deferred: these two files pull huge unrelated transitive mypy debt
+# (209 and 92 pre-existing errors respectively, across files they don't
+# even import by name) into any changed-file mypy diff that includes
+# them -- the strict src/api mypy check works around this class of gap
+# with --follow-imports=silent; the general baseline check does not.
+# Issue #8813.
+"src/engines/physics_engines/mujoco/python/humanoid_launcher.py" = ["BLE001"]
+"src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/core/main_window.py" = ["BLE001"]
+# Deferred: all of src/shared/python/ is a Tools-owned child copy tree
+# (mirrored 1:1 from D-sorganization/Tools; see
+# tests/unit/repo_hygiene/test_tools_child_copy_contract.py) -- this repo
+# must not edit it directly. BLE001 grandfathering for its bare
+# except-Exception sites has to land in Tools first, then flow here via
+# a vendor/ud-tools pin bump. Issue #8813.
+"src/shared/python/**" = ["BLE001"]
 
 
 [tool.mypy]
