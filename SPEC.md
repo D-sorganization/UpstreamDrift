@@ -554,7 +554,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.587                                            |
+| **Spec Version**        | 1.0.588                                            |
 | **Last Spec Update**    | 2026-08-25                                         |
 
 ## 2. Purpose & Mission
@@ -585,6 +585,12 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-25** - Re-executed the registered native equality-constraint versus
+  projected compliant-contact comparison after its governed source set changed.
+  Scientific record fields and numeric arrays reproduce exactly; only current
+  source identities and their downstream evidence/release digests changed. The
+  Python 3.11 and 3.12 matrix test now validates the regenerated authority.
 
 - **2026-08-25** - Repaired claim-registry candidate/location reconciliation.
   Candidate identity now projects current source locations, duplicate location-
@@ -3272,6 +3278,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-25 | 1.0.588 | Re-executed the registered native equality-constraint versus projected compliant-contact comparison after its governed source set changed. Scientific record fields and numeric arrays reproduce exactly; only current source identities and their downstream evidence/release digests changed. The Python 3.11 and 3.12 matrix test now validates the regenerated authority. |
 | 2026-08-25 | 1.0.587 | Repaired claim-registry candidate/location reconciliation. Candidate identity now projects current source locations, duplicate location-only entries collapse, genuine location-only evidence is paired with its candidate and review, and repeated registration remains canonical without erasing normalized adjudication fields. |
 | 2026-08-25 | 1.0.586 | Made #8800 structural-plan hashing portable by canonicalizing declared text sources to LF while retaining binary bytes exactly, with CRLF/LF regression coverage. The native restart test now requires a qualified robotics Pinocchio module instead of treating the unrelated PyPI name collision as engine availability. Regenerated plan identities remain execution contracts only; they do not promote the 93/830 obsolete checkpoints or imply completed structural propagation. |
 | 2026-08-25 | 1.0.585 | Reconciled #8752's terminal articulated uncertainty evidence with the 313-claim paper. The 19-corner campaign and retained failures remain source-revision bound; matched-set movement is explicitly non-promotional. Claim migration now recognizes the exact 1,126-candidate, 313-claim reviewed snapshot and all ten supported terminal claims. Numeric scaffolding preserves protected-review local pointers and custom reported-value boundaries only for unchanged statement digests. Shallow CI checkouts fetch the registered campaign revision before scientific tests, the structural-result tamper test performs a non-no-op mutation, and locked club coordinates allow only eight binary64 epsilons of platform roundoff. The spatial claim-locator chapter retains an owned size exception through 2026-09-30 pending post-#8752 locator migration. #8800 remains open because obsolete 93/830 checkpoints do not satisfy the current source and plan. |

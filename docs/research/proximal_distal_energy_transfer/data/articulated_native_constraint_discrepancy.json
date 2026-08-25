@@ -68,16 +68,16 @@
   },
   "classification": "synthetic_formulation_discrepancy_not_human_or_engine_equivalence_evidence",
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "7e9c2b520a8423df1499e7040c988ba9ef7fc7ab4bc1f0b37d015c3c1b6fdba4",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "a5914695739fd3f2137c3be0905f707b8de11f4dea3edc1d0c04897853149fd3",
     "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
-    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "c21da21dc11b56abd4199e10bed5d96cf2320c00492399ababe78c89d8aeb9cf",
+    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "d8580a62612082cff6c42fbadd107d59d899c1cf01cc02ee64b764323573bbd7",
     "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py": "e1c6f0f066e4ad3f157557d003e4e12ae83842cc275ccc0965f263e1fc21220a",
     "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py": "612603f379e28a0491a3fda92937cce041e0057570dc99a5cff3afd92f90d2dd",
     "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py": "6a3d450ac009efd777b0051ab988171952b975ed7c6e61628f2d009bccd04f49",
     "scripts/research/proximal_distal_energy/spatial_full_body.py": "862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
-    "tests/research/test_articulated_native_constraint_discrepancy.py": "876594e8643179cfd6df01e34cb006ebdfd96f9d6b5eae9302cfd435fbe9419c"
+    "tests/research/test_articulated_native_constraint_discrepancy.py": "0c41a6634a79e6ccc8704850219bef0d0fadb5b59d053d28e9969fce303e35e7"
   }
 }

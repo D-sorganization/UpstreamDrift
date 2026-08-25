@@ -4228,7 +4228,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json": {
-      "sha256": "d1e01f1e1c35a14e8a9b2250b7698aa2d3725218b2f30beb61cfcbb77d6f69cb",
+      "sha256": "ac842a65f28d9fabd40a76bed3411aa0eecfb4187dbabaa3a2aa9d76b2657466",
       "bytes": 4524,
       "referenced_by": [
         "PD-CLAIM-302",
@@ -5843,7 +5843,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "70795b68061ef4c2350d8eb044cf79993b4b44ceeb13c62b942cead9c5d91e64",
+      "sha256": "bb273e41319d2f4dd8e9e9b68fad1e73a00c3436e63884b68c16c43af9279b56",
       "bytes": 146400,
       "referenced_by": [
         "PD-CLAIM-241"

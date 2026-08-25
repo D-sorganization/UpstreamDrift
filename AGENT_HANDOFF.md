@@ -122,10 +122,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   host's unqualified Pinocchio. Forty-two claim/native tests, both 56-test
   release suites, and 38 governance tests pass. Regenerated qualification covers
   653 artifacts, 410 literals, 2,333 references, 78 URLs, and 239 PDF pages.
-- Candidate/location reconciliation now restores canonical parallel arrays and
-  repeated registration is idempotent. Ruff, title case, tracked-file budget,
-  SPEC, workflow, document catalog, and document-size gates pass. The spatial
-  locator keeps its owned size exception through 2026-09-30.
+- Candidate/location reconciliation is idempotent. The registered native-contact
+  comparison was re-executed after governed sources changed; scientific fields
+  and arrays reproduce exactly, while current provenance and release digests now
+  validate. The spatial locator exception expires 2026-09-30.
 - Computational qualification remains true and archival qualification false.
   Seven #8752 orchestration/API exceptions expire under #8963 on 2026-09-30.
 
