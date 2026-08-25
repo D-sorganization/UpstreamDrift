@@ -13,11 +13,12 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   edit `vendor/ud-tools` directly.
 - The #8752 terminal reconciliation worktree is
   `C:\Users\diete\Repositories\UpstreamDrift-worktrees\8752-terminal-reconciliation`
-  on `research/8752-terminal-reconciliation`. It merges terminal source commit
+  on `research/8752-terminal-reconciliation`. Reconciliation merge
+  `c3471998d00a719a1b94607ce7e9902e267cc69a` merges terminal source commit
   `2fa6cf8861eeaf7ae111dd8dd18c4053a9f82e65` with remote-main snapshot
-  `eb7076466152cbacd40a7f4d3fb9d92255d4ae43`. Finish the merge commit, push,
-  and open a full protected PR; UpstreamDrift requires human review and forbids
-  auto-merge.
+  `eb7076466152cbacd40a7f4d3fb9d92255d4ae43`. The current handoff and
+  architecture-governance commit is `SELF`. Push and open a full protected PR;
+  UpstreamDrift requires human review and forbids auto-merge.
 - The current computational paper is 239 pages, 1,870,344 bytes, and has
   SHA-256 `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
   All pages render; 194 URI links and 247 outline entries validate. The PDF is
@@ -74,9 +75,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   `release_evidence=false`; no campaign process is running.
 - Reconciliation regenerated the governed seven-corner plan against current
   source. New design SHA-256 is
-  `ad5fcc3373944890d4bef0af220530b5b19a11cfa8d2765f14bd473c2bbd376e` and
+  `63561056b88e11858663f6d5f235021f16a4864ddc5076dae7dd889befef5a08` and
   contract SHA-256 is
-  `dfb74825019774975895dc1627497a4bd040720b16595b56f77aff86378b52c9`.
+  `c3a31faa62ada6bbdf9ae4efb4237bc5f1071179f8310f7e35f844a9dacf0fd8`.
+  The deterministic plan-file SHA-256 is
+  `4ea2fa71631fc17b0dee3b5d50470f305d253c18487ec0907259fd6d617b6124`.
   The prior partial checkpoints were created under different plan/source
   identities and must not be reused as release evidence or resumed without an
   explicit recovery/restart decision and exact checkpoint revalidation.
@@ -101,28 +104,28 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Current Validation
 
-- The complete changed scientific surface (39 files) passes serially; one native
+- The complete changed scientific surface (38 files) passes serially; one native
   restart test skips locally because robotics Pinocchio is not installed.
 - A separate 76-test propagation-plan/checkpoint subset passes. The focused
   #8752, claim-summary, and numeric-registration set passes 45 tests.
-- Ruff check and format pass for all 69 Python files in the PR diff.
+- Ruff check and format pass for all 70 Python files in the PR diff. Title-case,
+  changed-file whitespace, and tracked-file size-budget checks pass.
 - Claim audit, numeric audit, release review, evidence integrity, external-source
   review, momentum readiness, and computational open-release qualification pass.
 - Computational qualification rendered all 239 PDF pages. Archival qualification
   intentionally remains false.
+- The architecture gate exposed seven pre-existing #8752 orchestration/API
+  violations. They are registered as narrow exceptions expiring 2026-09-30
+  under open decomposition issue #8963; acceptance requires byte-equivalent
+  evidence, registry, and plan hashes before removing them.
 
 ## Immediate Next Actions
 
-1. Regenerate claim/release manifests once more after any source edit.
-2. Run Ruff, title-case, file-size, architecture, `git diff --check`, and the
-   focused scientific suites serially. DeskComputer is drained from runner duty;
-   do not re-enable its runners for this work.
-3. Confirm the PR diff is limited to #8752/structural-authority integration,
-   finish the merge commit, fetch current remote `main`, and reconcile once if it
-   moved.
-4. Push the branch, open a full PR closing #8752, preserve human review, and
+1. Validate the architecture budget and commit the expiring #8963 exception
+   registry plus this handoff update.
+2. Push the branch, open a full PR closing #8752, preserve human review, and
    shepherd protected CI without bypasses or redundant reruns.
-5. After merge, verify the merge commit is on remote `main`, update this handoff,
+3. After merge, verify the merge commit is on remote `main`, update this handoff,
    then make an explicit #8800 recovery-versus-fresh-execution decision.
 
 ## Repository Rules

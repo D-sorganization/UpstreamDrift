@@ -75,6 +75,69 @@
       "expires_on": "2026-09-30"
     },
     {
+      "path": "scripts/research/proximal_distal_energy/articulated_ground_atlas.py",
+      "symbol": "run_articulated_ground_atlas",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: terminal #8752 reconciliation changes the governed ground-atlas source identity; decomposition must preserve the checkpoint contract and byte-equivalent authority outputs.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+      "symbol": "_digest_payload",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: the scaled-authority digest boundary exposes nine independently hashed identity fields; replace it with a typed identity record while preserving the committed digest.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_scaled_authority.py",
+      "symbol": "build_scaled_authority",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: terminal #8752 reconciliation updates the scaled authority consumed by structural planning; decompose build and digest assembly with byte-equivalent evidence regeneration.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_structural_corner_evidence.py",
+      "symbol": "assemble_structural_corner_pathway_evidence",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: the structural-corner assembler currently receives twelve registered evidence components; introduce a typed corner-evidence context without changing evidence hashes.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py",
+      "symbol": "build_structural_propagation_plan",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: #8752 registers the current 830-checkpoint fail-closed plan; split design, pathway, cell, and contract assembly only with fixed-point plan-hash tests.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+      "symbol": "_claim",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: terminal #8752 claim registration requires a typed claim input while preserving all claim IDs, reciprocal evidence mappings, and canonical registry bytes.",
+      "expires_on": "2026-09-30"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/register_articulated_uncertainty_claims.py",
+      "symbol": "main",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8963,
+      "reason": "Issue #8963: terminal #8752 adds the complete uncertainty adjudication block; convert it to data-driven claim records under byte-equivalent registry and release-manifest tests.",
+      "expires_on": "2026-09-30"
+    },
+    {
       "path": "src/launchers/upstream_drift_launcher.py",
       "symbol": "UpstreamDriftLauncher.select_model",
       "rule": "function-lines",
