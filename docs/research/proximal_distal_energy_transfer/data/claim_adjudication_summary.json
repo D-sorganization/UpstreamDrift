@@ -5064,7 +5064,6 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:479",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:333",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:460",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:155",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64",
@@ -5162,7 +5161,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:415",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:420",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:429",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:152"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:179"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -7477,7 +7476,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:309",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:387",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:98",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:9",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:14",
@@ -8455,8 +8454,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:204",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:207",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:220",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:135",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:152",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:162",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:179",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:182"
       ],
       "evidence_artifacts": [
@@ -9123,7 +9122,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:112",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:120",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:131",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:126"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:153"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
@@ -9173,7 +9172,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:150",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:157",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:159",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:126"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:153"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
@@ -9219,7 +9218,7 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:163",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:171",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:126"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:153"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/uncertainty_control_study.json",
@@ -9328,7 +9327,6 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:13",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch05_platform.qmd:26",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:142",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:93",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:104",
@@ -9829,7 +9827,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:167",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:170",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07c_transmission_robustness.qmd:187",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:152",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:179",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:182"
       ],
@@ -10234,8 +10232,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:159",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:167",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:178",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -12379,10 +12377,10 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:460",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:479",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:124"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:124",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -12617,7 +12615,7 @@
       "falsifier": "A committed trajectory violates a registered domain, refinement, energy, or inertia-and-bias transport gate.",
       "adjudication": "The finite-base mechanism is reported with an empty primary matched set; unmatched speed differences are not interpreted as an effect.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
+      "last_verified_on": "2026-08-21"
     },
     {
       "claim_id": "PD-CLAIM-296",
@@ -12656,14 +12654,13 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:458",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:460",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:479",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:155",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:124"
       ],
       "evidence_artifacts": [
@@ -12696,7 +12693,7 @@
       "falsifier": "A primary match exists under the registered rule, the post-hoc counts fail to reproduce, or unmatched differences are presented as identified effects.",
       "adjudication": "The finite-base mechanism is reported with an empty primary matched set; unmatched speed differences are not interpreted as an effect.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
+      "last_verified_on": "2026-08-21"
     },
     {
       "claim_id": "PD-CLAIM-271",
@@ -12765,7 +12762,7 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:384",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:115"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
@@ -12810,8 +12807,8 @@
       "claim_family": "ch06c_spatial_cross_formulation",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:396",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:115",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
@@ -13004,7 +13001,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:291",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:387",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:98",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620"
       ],
       "evidence_artifacts": [
@@ -13139,8 +13136,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:318",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:76",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:76"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -13204,7 +13201,7 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:23",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:91"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:89"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -13269,7 +13266,7 @@
       "claim_family": "ch06cb_spatial_cross_tail",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:32",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:91"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:89"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -13333,7 +13330,7 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:40",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:91"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:89"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json",
@@ -13561,150 +13558,6 @@
       "adjudication": "The executable atlas was regenerated from canonical anthropometrics and the shared spatial model; favorable rank and couple-scaling controls are retained alongside the adverse contact-closure result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
-    },
-    {
-      "claim_id": "PD-CLAIM-302",
-      "adjudication_outcome": "supported",
-      "statement": "A MuJoCo-native branch uses two connect equalities, mj_step, and qfrc_constraint from the same initial state as a projected bilateral compliant-contact branch.",
-      "classification": "native_constraint_formulation_discrepancy_design",
-      "published_status": "complete_for_declared_single_state_control",
-      "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
-      "evidence_qualifications": [
-        "project_executable_or_data"
-      ],
-      "evidence_tiers": [
-        "project_derivation_or_document",
-        "project_executable_or_generated"
-      ],
-      "source_independence": "project_only",
-      "model_tiers": [
-        "spatial_reduced",
-        "two_hand_or_bilateral"
-      ],
-      "unresolved_replication_classes": [
-        "none_declared"
-      ],
-      "claim_family": "ch06c_spatial_cross_formulation",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:494"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
-        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
-        "scripts/research/proximal_distal_energy/spatial_full_body.py",
-        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
-        "tests/research/test_articulated_native_constraint_discrepancy.py",
-        "tests/research/test_spatial_full_body_cross_formulation.py"
-      ],
-      "model_domain": "One synthetic subject-scaled closed state, two bilateral three-row MuJoCo connect equalities, one projected bilateral Kelvin-Voigt formulation, a four-millisecond horizon, and two time steps.",
-      "uncertainty_boundary": "The branches do not encode equivalent constitutive laws and the contact parameters are uncalibrated engineering values.",
-      "falsifier": "The native path does not call mj_step, fewer than six native constraint rows are active, or the initial states differ.",
-      "adjudication": "The native MuJoCo constraint-and-integrator branch executes and differs from the projected formulation; no equivalence or human claim is inferred.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-21"
-    },
-    {
-      "claim_id": "PD-CLAIM-303",
-      "adjudication_outcome": "supported",
-      "statement": "The native equality and projected compliant-contact branches produce a nonzero trajectory discrepancy while the disabled-equality killswitch produces zero native constraint force.",
-      "classification": "native_constraint_formulation_discrepancy_result",
-      "published_status": "supported_at_declared_state_horizon_and_steps",
-      "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
-      "evidence_qualifications": [
-        "project_executable_or_data"
-      ],
-      "evidence_tiers": [
-        "project_derivation_or_document",
-        "project_executable_or_generated"
-      ],
-      "source_independence": "project_only",
-      "model_tiers": [
-        "spatial_reduced",
-        "two_hand_or_bilateral"
-      ],
-      "unresolved_replication_classes": [
-        "none_declared"
-      ],
-      "claim_family": "ch06c_spatial_cross_formulation",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:509"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
-        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
-        "scripts/research/proximal_distal_energy/spatial_full_body.py",
-        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
-        "tests/research/test_articulated_native_constraint_discrepancy.py",
-        "tests/research/test_spatial_full_body_cross_formulation.py"
-      ],
-      "model_domain": "One synthetic subject-scaled closed state, two bilateral three-row MuJoCo connect equalities, one projected bilateral Kelvin-Voigt formulation, a four-millisecond horizon, and two time steps.",
-      "uncertainty_boundary": "The discrepancy measures two declared formulations at one state; it is not a statistical uncertainty bound or engine-equivalence result.",
-      "falsifier": "The active native force is zero, the killswitch force is nonzero, the formulations are numerically identical, or a registered finite-value gate fails.",
-      "adjudication": "The native MuJoCo constraint-and-integrator branch executes and differs from the projected formulation; no equivalence or human claim is inferred.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-21"
-    },
-    {
-      "claim_id": "PD-CLAIM-304",
-      "adjudication_outcome": "supported",
-      "statement": "Native constraint-and-integrator execution does not validate either contact law, anatomical grip mechanics, engine equivalence, human transfer, or coaching strategy.",
-      "classification": "native_constraint_formulation_inference_boundary",
-      "published_status": "explicitly_bounded",
-      "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
-      "evidence_qualifications": [
-        "project_executable_or_data"
-      ],
-      "evidence_tiers": [
-        "project_derivation_or_document",
-        "project_executable_or_generated"
-      ],
-      "source_independence": "project_only",
-      "model_tiers": [
-        "cross_tier_synthesis",
-        "spatial_reduced",
-        "two_hand_or_bilateral"
-      ],
-      "unresolved_replication_classes": [
-        "none_declared"
-      ],
-      "claim_family": "ch06c_spatial_cross_formulation",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:519",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:272",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:387",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
-        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
-        "scripts/research/proximal_distal_energy/spatial_full_body.py",
-        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
-        "tests/research/test_articulated_native_constraint_discrepancy.py",
-        "tests/research/test_spatial_full_body_cross_formulation.py"
-      ],
-      "model_domain": "One synthetic subject-scaled closed state, two bilateral three-row MuJoCo connect equalities, one projected bilateral Kelvin-Voigt formulation, a four-millisecond horizon, and two time steps.",
-      "uncertainty_boundary": "Calibrated distributed grip, articulated bilateral native contact, population uncertainty, and governed human data remain open.",
-      "falsifier": "A physical-equivalence, anatomical, human-transfer, or coaching claim is attributed to this synthetic discrepancy control alone.",
-      "adjudication": "The native MuJoCo constraint-and-integrator branch executes and differs from the projected formulation; no equivalence or human claim is inferred.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-21"
     },
     {
       "claim_id": "PD-CLAIM-235",
@@ -14463,6 +14316,150 @@
       "adjudication": "The shaft matching set is constitutively sensitive and the ground matching set remains empty on completed corners; neither result is promoted to a pathway benefit.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-23"
+    },
+    {
+      "claim_id": "PD-CLAIM-302",
+      "adjudication_outcome": "supported",
+      "statement": "A MuJoCo-native branch uses two connect equalities, mj_step, and qfrc_constraint from the same initial state as a projected bilateral compliant-contact branch.",
+      "classification": "native_constraint_formulation_discrepancy_design",
+      "published_status": "complete_for_declared_single_state_control",
+      "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "spatial_reduced",
+        "two_hand_or_bilateral"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch06c_spatial_cross_formulation",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:494"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
+        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
+        "tests/research/test_articulated_native_constraint_discrepancy.py",
+        "tests/research/test_spatial_full_body_cross_formulation.py"
+      ],
+      "model_domain": "One synthetic subject-scaled closed state, two bilateral three-row MuJoCo connect equalities, one projected bilateral Kelvin-Voigt formulation, a four-millisecond horizon, and two time steps.",
+      "uncertainty_boundary": "The branches do not encode equivalent constitutive laws and the contact parameters are uncalibrated engineering values.",
+      "falsifier": "The native path does not call mj_step, fewer than six native constraint rows are active, or the initial states differ.",
+      "adjudication": "The native MuJoCo constraint-and-integrator branch executes and differs from the projected formulation; no equivalence or human claim is inferred.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "claim_id": "PD-CLAIM-303",
+      "adjudication_outcome": "supported",
+      "statement": "The native equality and projected compliant-contact branches produce a nonzero trajectory discrepancy while the disabled-equality killswitch produces zero native constraint force.",
+      "classification": "native_constraint_formulation_discrepancy_result",
+      "published_status": "supported_at_declared_state_horizon_and_steps",
+      "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "spatial_reduced",
+        "two_hand_or_bilateral"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch06c_spatial_cross_formulation",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:509"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
+        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
+        "tests/research/test_articulated_native_constraint_discrepancy.py",
+        "tests/research/test_spatial_full_body_cross_formulation.py"
+      ],
+      "model_domain": "One synthetic subject-scaled closed state, two bilateral three-row MuJoCo connect equalities, one projected bilateral Kelvin-Voigt formulation, a four-millisecond horizon, and two time steps.",
+      "uncertainty_boundary": "The discrepancy measures two declared formulations at one state; it is not a statistical uncertainty bound or engine-equivalence result.",
+      "falsifier": "The active native force is zero, the killswitch force is nonzero, the formulations are numerically identical, or a registered finite-value gate fails.",
+      "adjudication": "The native MuJoCo constraint-and-integrator branch executes and differs from the projected formulation; no equivalence or human claim is inferred.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
+    },
+    {
+      "claim_id": "PD-CLAIM-304",
+      "adjudication_outcome": "supported",
+      "statement": "Native constraint-and-integrator execution does not validate either contact law, anatomical grip mechanics, engine equivalence, human transfer, or coaching strategy.",
+      "classification": "native_constraint_formulation_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "native_constraint_integrator_and_formulation_discrepancy_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "cross_tier_synthesis",
+        "spatial_reduced",
+        "two_hand_or_bilateral"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch06c_spatial_cross_formulation",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:519",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:272",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:286",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:387",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:98"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
+        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
+        "tests/research/test_articulated_native_constraint_discrepancy.py",
+        "tests/research/test_spatial_full_body_cross_formulation.py"
+      ],
+      "model_domain": "One synthetic subject-scaled closed state, two bilateral three-row MuJoCo connect equalities, one projected bilateral Kelvin-Voigt formulation, a four-millisecond horizon, and two time steps.",
+      "uncertainty_boundary": "Calibrated distributed grip, articulated bilateral native contact, population uncertainty, and governed human data remain open.",
+      "falsifier": "A physical-equivalence, anatomical, human-transfer, or coaching claim is attributed to this synthetic discrepancy control alone.",
+      "adjudication": "The native MuJoCo constraint-and-integrator branch executes and differs from the projected formulation; no equivalence or human claim is inferred.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-21"
     }
   ]
 }

@@ -498,9 +498,13 @@ def _reconcile(
     selected: dict[str, dict[str, Any]],
 ) -> None:
     _canonicalize_candidate_location_pairs(registry, inventory["candidates"])
+    existing_claims = {claim["claim_id"]: claim for claim in registry["claims"]}
+    reconciled_claims = [
+        {**existing_claims.get(claim["claim_id"], {}), **claim} for claim in claims
+    ]
     registry["claims"] = [
         claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
-    ] + claims
+    ] + reconciled_claims
     _reconcile_forward_transport_claims(registry, inventory["candidates"])
     _reconcile_synthesis_candidates(registry, inventory["candidates"])
     valid_ids = {candidate["candidate_id"] for candidate in inventory["candidates"]}
@@ -529,7 +533,7 @@ def _reconcile(
             "reviewer": "Codex technical audit",
             "last_verified_on": DATE,
         }
-    for claim in claims:
+    for claim in reconciled_claims:
         for candidate_id in claim["candidate_ids"]:
             claim_ids = reviews[candidate_id]["claim_ids"]
             if claim["claim_id"] not in claim_ids:

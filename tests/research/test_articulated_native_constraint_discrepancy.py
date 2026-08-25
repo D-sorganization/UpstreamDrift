@@ -14,6 +14,7 @@ from scripts.research.proximal_distal_energy.articulated_native_constraint_discr
 from scripts.research.proximal_distal_energy import (
     register_articulated_native_constraint_discrepancy_claims as claim_registration,
 )
+from scripts.research.proximal_distal_energy.claim_audit import validate_registry
 
 pytestmark = pytest.mark.scientific
 
@@ -21,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
-def test_native_claim_registration_is_idempotent() -> None:
+def test_native_claim_registration_is_idempotent(tmp_path: Path) -> None:
     registry = json.loads((DATA / "claim_audit_registry.json").read_text("utf-8"))
     inventory = json.loads((DATA / "claim_candidate_inventory.json").read_text("utf-8"))
 
@@ -52,6 +53,14 @@ def test_native_claim_registration_is_idempotent() -> None:
             assert source_location == (
                 f"{candidate['source_path']}:{candidate['line_start']}"
             )
+    registry_path = tmp_path / "claim_audit_registry.json"
+    registry_path.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
+    result = validate_registry(
+        registry_path,
+        repository_root=ROOT,
+        check_release_manifest=False,
+    )
+    assert result["completion_status"] == "complete"
 
 
 def test_native_constraint_configuration_fails_closed() -> None:

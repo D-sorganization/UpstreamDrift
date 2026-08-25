@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "50609d85ce275ae7eb363dd5a123f11ec46960408fca6209d59e3801f2d5c577"
+    "sha256": "c49d9897bc56279d2605e8d317c92f115954ca811dadb4012d45ed679d1dd21a"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -3700,54 +3700,6 @@
       ],
       "external_references": []
     },
-    "PD-CLAIM-302": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
-        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
-        "scripts/research/proximal_distal_energy/spatial_full_body.py",
-        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
-        "tests/research/test_articulated_native_constraint_discrepancy.py",
-        "tests/research/test_spatial_full_body_cross_formulation.py"
-      ],
-      "external_references": []
-    },
-    "PD-CLAIM-303": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
-        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
-        "scripts/research/proximal_distal_energy/spatial_full_body.py",
-        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
-        "tests/research/test_articulated_native_constraint_discrepancy.py",
-        "tests/research/test_spatial_full_body_cross_formulation.py"
-      ],
-      "external_references": []
-    },
-    "PD-CLAIM-304": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
-        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
-        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
-        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
-        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
-        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
-        "scripts/research/proximal_distal_energy/spatial_full_body.py",
-        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
-        "tests/research/test_articulated_native_constraint_discrepancy.py",
-        "tests/research/test_spatial_full_body_cross_formulation.py"
-      ],
-      "external_references": []
-    },
     "PD-CLAIM-235": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
@@ -3943,6 +3895,54 @@
         "tests/research/test_articulated_headline_record_audit.py",
         "tests/research/test_articulated_headline_uncertainty_evidence.py",
         "tests/research/test_articulated_headline_uncertainty_figure.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-302": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
+        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
+        "tests/research/test_articulated_native_constraint_discrepancy.py",
+        "tests/research/test_spatial_full_body_cross_formulation.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-303": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
+        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
+        "tests/research/test_articulated_native_constraint_discrepancy.py",
+        "tests/research/test_spatial_full_body_cross_formulation.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-304": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_native_constraint_discrepancy.pdf",
+        "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py",
+        "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py",
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
+        "tests/research/test_articulated_native_constraint_discrepancy.py",
+        "tests/research/test_spatial_full_body_cross_formulation.py"
       ],
       "external_references": []
     }
@@ -5843,7 +5843,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "feb1b5fea2a0f5b3ff866c7edad84cd639065b4f3aa9d60fdab5d16e2bdb5879",
+      "sha256": "70795b68061ef4c2350d8eb044cf79993b4b44ceeb13c62b942cead9c5d91e64",
       "bytes": 146400,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -6557,8 +6557,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py": {
-      "sha256": "005e49130c338c86556b59ef0b694df829a6f4852fbb3ab81dbe0d53be4bcc2e",
-      "bytes": 20751,
+      "sha256": "9b600a75df204a8632fd7c71379ea689589fba466cd699616bec11d99907dbf5",
+      "bytes": 24169,
       "referenced_by": [
         "PD-CLAIM-302",
         "PD-CLAIM-303",
@@ -7577,8 +7577,8 @@
       ]
     },
     "tests/research/test_articulated_native_constraint_discrepancy.py": {
-      "sha256": "876594e8643179cfd6df01e34cb006ebdfd96f9d6b5eae9302cfd435fbe9419c",
-      "bytes": 5641,
+      "sha256": "0c41a6634a79e6ccc8704850219bef0d0fadb5b59d053d28e9969fce303e35e7",
+      "bytes": 6511,
       "referenced_by": [
         "PD-CLAIM-302",
         "PD-CLAIM-303",

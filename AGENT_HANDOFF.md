@@ -118,10 +118,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   boundaries only when claim ID, literal ID, and statement digest match;
   statement drift forces fresh scaffolding. Registered numeric documents remain
   byte-authoritative instead of being rerouted to semantically weaker values.
-- The plan-bound structural suite passes, with native restart skipped on this
-  host's unqualified Pinocchio module. The two 56-test affected/release suites
-  and 38 governance tests pass. Qualification covers 653 artifacts, 410
-  literals, 2,333 references, 78 URLs, and 239 PDF pages.
+- The plan-bound structural suite passes with native restart skipped on this
+  host's unqualified Pinocchio. Forty-two claim/native tests, both 56-test
+  release suites, and 38 governance tests pass. Regenerated qualification covers
+  653 artifacts, 410 literals, 2,333 references, 78 URLs, and 239 PDF pages.
 - Candidate/location reconciliation now restores canonical parallel arrays and
   repeated registration is idempotent. Ruff, title case, tracked-file budget,
   SPEC, workflow, document catalog, and document-size gates pass. The spatial
@@ -131,7 +131,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Immediate Next Actions
 
-1. Commit and push the candidate/location correction once, then shepherd PR
+1. Commit and push the regenerated release authorities once, then shepherd PR
    #9046 through protected CI and human review without bypasses or redundant
    reruns.
 2. After merge, verify the merge commit is on remote `main`, update this handoff,
