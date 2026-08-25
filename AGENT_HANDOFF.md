@@ -16,9 +16,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   on `research/8752-terminal-reconciliation`. Reconciliation merge
   `c3471998d00a719a1b94607ce7e9902e267cc69a` merges terminal source commit
   `2fa6cf8861eeaf7ae111dd8dd18c4053a9f82e65` with remote-main snapshot
-  `eb7076466152cbacd40a7f4d3fb9d92255d4ae43`. The current handoff and
-  architecture-governance commit is `SELF`. Push and open a full protected PR;
-  UpstreamDrift requires human review and forbids auto-merge.
+  `eb7076466152cbacd40a7f4d3fb9d92255d4ae43`. The current handoff commit is
+  `SELF`. Full protected PR
+  [#9046](https://github.com/D-sorganization/UpstreamDrift/pull/9046) is open,
+  closes #8752, requires human review, and must not use auto-merge.
 - The current computational paper is 239 pages, 1,870,344 bytes, and has
   SHA-256 `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
   All pages render; 194 URI links and 247 outline entries validate. The PDF is
@@ -125,11 +126,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Immediate Next Actions
 
-1. Validate the architecture budget and commit the expiring #8963 exception
-   registry plus this handoff update.
-2. Push the branch, open a full PR closing #8752, preserve human review, and
-   shepherd protected CI without bypasses or redundant reruns.
-3. After merge, verify the merge commit is on remote `main`, update this handoff,
+1. Shepherd PR #9046 through protected CI and human review without bypasses or
+   redundant reruns. The first check wave started on `f4eccd3a`; this handoff
+   update intentionally supersedes it once.
+2. After merge, verify the merge commit is on remote `main`, update this handoff,
    then make an explicit #8800 recovery-versus-fresh-execution decision.
 
 ## Repository Rules
