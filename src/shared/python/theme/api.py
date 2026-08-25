@@ -90,11 +90,6 @@ class ThemeOperationResponse(BaseModel):
     message: str
     theme_name: str | None = None
 
-    @property
-    def solver_status(self) -> str:
-        """Return operation status string."""
-        return "success" if self.success else "error"
-
 
 # ---------------------------------------------------------------------------
 # Router factory
@@ -250,7 +245,7 @@ def _register_active_and_list_endpoints(router: APIRouter, theme_manager: Any) -
         return ThemeListResponse(themes=themes)
 
 
-def create_theme_router(theme_manager: Any, prefix: str = "") -> APIRouter:
+def create_theme_router(theme_manager: Any) -> APIRouter:
     """Create a FastAPI router for theme CRUD operations.
 
     The router exposes endpoints for listing, creating, updating, and
@@ -258,12 +253,11 @@ def create_theme_router(theme_manager: Any, prefix: str = "") -> APIRouter:
 
     Args:
         theme_manager: A ThemeManager instance (from shared.python.theme)
-        prefix: Optional URL prefix for all router routes.
 
     Returns:
         FastAPI APIRouter ready to be mounted
     """
-    router = APIRouter(prefix=prefix)
+    router = APIRouter()
     _register_builtin_endpoints(router, theme_manager)
     _register_custom_endpoints(router, theme_manager)
     _register_active_and_list_endpoints(router, theme_manager)

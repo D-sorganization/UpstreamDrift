@@ -143,16 +143,22 @@ def get_current_colors() -> ThemePalette:
 
 def _resolve_color_token(target: Any, name: str) -> Any:
     """Helper resolving color token attributes on metaclass or instance."""
-    getter = (
-        type.__getattribute__ if isinstance(target, type) else object.__getattribute__
-    )
+    is_cls = type(target) is type or issubclass(type(target), type)
     if (name.startswith("__") and name.endswith("__")) or name == "get_current_colors":
-        return getter(target, name)
+        return (
+            type.__getattribute__(target, name)
+            if is_cls
+            else object.__getattribute__(target, name)
+        )
     try:
         return getattr(get_current_colors(), name)
     except AttributeError:
         pass
-    return getter(target, name)
+    return (
+        type.__getattribute__(target, name)
+        if is_cls
+        else object.__getattribute__(target, name)
+    )
 
 
 class _ColorsMeta(type):
