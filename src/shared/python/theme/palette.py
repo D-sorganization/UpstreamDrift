@@ -141,20 +141,22 @@ def get_current_colors() -> ThemePalette:
     return colors
 
 
+def _resolve_color_token(target: Any, name: str) -> Any:
+    """Helper resolving color token attributes on metaclass or instance."""
+    if (name.startswith("__") and name.endswith("__")) or name == "get_current_colors":
+        return object.__getattribute__(target, name)
+    try:
+        return getattr(get_current_colors(), name)
+    except AttributeError:
+        pass
+    return object.__getattribute__(target, name)
+
+
 class _ColorsMeta(type):
     """Metaclass intercepting attribute access to dynamically resolve theme tokens."""
 
     def __getattribute__(cls, name: str) -> Any:
-        if name.startswith("__") and name.endswith("__"):
-            return super().__getattribute__(name)
-        if name == "get_current_colors":
-            return super().__getattribute__(name)
-        try:
-            palette = get_current_colors()
-            return getattr(palette, name)
-        except AttributeError:
-            pass
-        return super().__getattribute__(name)
+        return _resolve_color_token(cls, name)
 
 
 class Colors(metaclass=_ColorsMeta):
@@ -238,16 +240,7 @@ class Colors(metaclass=_ColorsMeta):
     """Info status color."""
 
     def __getattribute__(self, name: str) -> Any:
-        if name.startswith("__") and name.endswith("__"):
-            return super().__getattribute__(name)
-        if name == "get_current_colors":
-            return super().__getattribute__(name)
-        try:
-            palette = get_current_colors()
-            return getattr(palette, name)
-        except AttributeError:
-            pass
-        return super().__getattribute__(name)
+        return _resolve_color_token(self, name)
 
     @classmethod
     def get_current_colors(cls) -> ThemePalette:
