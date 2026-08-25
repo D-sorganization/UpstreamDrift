@@ -24,6 +24,9 @@ model tier, but it must not silently acquire an anatomical or causal meaning.
 | Role reversal               | One or more declared modeled channels change sign                                                                                                                   | Proof of a particular arm, wrist, or scapular strategy                              |
 | Passive after killswitch    | The branch receives no further value from the removed modeled input after the intervention                                                                          | No stored energy, no prior actuation, no gravity, no damping, or no muscle activity |
 | Model support               | A preregistered prediction passes at its declared model tier                                                                                                        | Human validation or a coaching recommendation                                       |
+| Coriolis term               | A cross-speed monomial in the declared coordinate-specific Christoffel split                                                                                        | A new external force, muscle force, or coordinate-invariant physical source         |
+| Squared-speed term          | A squared generalized-speed monomial in the declared coordinate-specific Christoffel split; describe centripetal/centrifugal frame meaning explicitly               | A second force to add to both centripetal and centrifugal descriptions              |
+| Force-only endpoint map     | A virtual-work equivalent force with rank and generalized residual reported                                                                                         | A complete measured grip wrench when the task Jacobian is deficient                 |
 
 ## Frames, Wrenches, and Power
 

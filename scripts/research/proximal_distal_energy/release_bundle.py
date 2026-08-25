@@ -92,6 +92,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_experiments",
             "tier": "planar_open_chain",
         },
+        "pendulum_force_source_optimization": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_force_source_optimization",
+            "tier": "planar_open_chain_coordinate_explicit_force_attribution",
+        },
         "forward_two_hand": {
             "command": "python -m scripts.research.proximal_distal_energy.run_forward_two_arm_study",
             "tier": "planar_constrained_forward",
@@ -239,6 +243,9 @@ _RELEASE_METADATA: dict[str, Any] = {
     },
     "claims": {
         "interaction_dynamics_planar": "supported_at_declared_model_tier",
+        "coordinate_force_source_attribution": (
+            "supported_at_declared_planar_model_and_coordinate_tier"
+        ),
         "geometry_transfer_spatial_common_state": "supported_at_declared_model_tier",
         "distributed_shaft_modal_reduction": "supported_on_synthetic_structural_case",
         "distributed_modal_shaft_coupled_forward": (

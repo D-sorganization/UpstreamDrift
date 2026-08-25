@@ -2,6 +2,17 @@
 
 ## Current Scientific Audit State (2026-08-24)
 
+Issue #9059 adds a coordinate-explicit planar pendulum attribution contract on
+top of the pinned Tools source authority. It separates cross-speed Coriolis,
+squared-speed centripetal/centrifugal, gravity, damping, applied-drive, and
+independent velocity-residual terms under shoulder-absolute/wrist-relative
+coordinates. The force-only wrist endpoint map reports Jacobian rank and the
+unreconstructed generalized couple. A complete 135-program grid keeps
+absolute Coriolis tangent impulse, signed impulse, generalized work, and
+qualified-impact clubhead speed as distinct estimands. This is synthetic
+planar model evidence, not a measured grip wrench, muscle attribution,
+continuous optimal-control solution, human strategy, or coaching authority.
+
 Epic #8557 has completed the current narrative-candidate adjudication contract:
 1,100 reviewed candidates and 303 atomic claims. Issue #8724 adds an exhaustive,
 snapshot-locked four-way outcome authority: 283 supported at their declared

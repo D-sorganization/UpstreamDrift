@@ -1,9 +1,24 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the single proximal-to-distal completion authority.
+
+## Coordinate Force-Source Attribution (#9059)
+
+- Tools PR #4699 is the reusable source authority for
+  `force-attribution/v1`; UpstreamDrift consumes it only through
+  `vendor/ud-tools` and the thin biomechanics gateway.
+- The registered planar study evaluates 135 programs and retains 91 qualified
+  impacts. It publishes separate absolute Coriolis-impulse, signed-impulse,
+  and clubhead-speed optima plus component power/work and mapping residuals.
+- The Christoffel cross-versus-squared split is explicitly tied to
+  shoulder-absolute/wrist-relative coordinates. The wrist force-only virtual-
+  work map is rank deficient, so its generalized residual remains evidence.
+- Do not repin this branch to a Tools feature head for release. Pin only the
+  protected Tools merge commit, then run the focused scientific, release,
+  render, and publication-quality gates before opening the protected PR.
 
 ## Repository Authority
 
