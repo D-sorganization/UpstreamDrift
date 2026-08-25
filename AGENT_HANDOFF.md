@@ -12,7 +12,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `0dd7d5bee21d4e1485d1085436328186aedf4c6f`. The normalized-claim authority
+  `4f84a8a2dbdafac01a634ceb41b1e415ea7ec5bb`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 239 pages with SHA-256
   `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
@@ -96,19 +96,20 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   analytical and articulated adapters, lossless bundles, scalar/rank/OAT,
   dispersion, and quiet-zone analysis are merged. Keep #8358 open because its
   broader UI, localized-perturbation, and presentation criteria remain unaudited.
-- #9027 PR #9049 is reconciled through current `main` `501ac302d`; hybrid and
-  Kalman gates pass. Its non-required optional lane exposes a pre-existing #9055
-  source-digest drift in two signed release records. Do not rewrite the PDF or
-  release marker here; track the governed regeneration separately. No campaign ran.
-- PR #9032 is open at remote head `fc4832035`; its reported checks are green and
-  human review remains absent. Preserve local headless-rendering fix `413dc21c7`
-  for replay after the protected parent merges.
+- #9027 PR #9049 is reconciled through current `main` `4f84a8a2d` at local
+  merge head `af134b8b3`; hybrid and Kalman gates pass. Its non-required
+  optional lane exposes the pre-existing #8963 source lock: committed
+  manufactured-solution evidence no longer matches `spatial_full_body.py`.
+  Do not update the digest alone, rewrite the PDF or release marker, or run a
+  campaign here; regenerate only after governed campaign integration resolves
+  the source-lock boundary.
+- PR #9032 is pushed at remote head `d341a0c92` on current `main`; protected CI
+  is rerunning once and requested human review remains absent.
 - Tools #4142 remains open. PR #4685 is recovered on current Tools `main` at
   `6bcd19d59`, retains the 21-verified/10-partial R10--R15 ledger and existing
   auto-merge request, and is waiting on protected checks and human review.
-- AffineDrift PR #3942 is fully green at `093a6e907`, awaits human review, and
-  remains downstream of the qualified UpstreamDrift release; do not project a
-  moving or partial campaign.
+- AffineDrift PR #3942 is merged. Do not project a moving or partial campaign;
+  the next public projection must pin a qualified UpstreamDrift merge commit.
 - #8963 architecture debt remains separate from the frozen campaign source.
   Do not merge or regenerate source-bound spatial evidence until campaign
   integration removes the source-lock conflict.
