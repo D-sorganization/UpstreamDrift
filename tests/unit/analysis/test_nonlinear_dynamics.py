@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from src.shared.python.analysis.nonlinear_dynamics import NonlinearDynamicsMixin
 
 
@@ -99,3 +100,57 @@ class TestLocalDivergenceRate:
     def test_rates_are_finite(self) -> None:
         _, rates = self.obj.compute_local_divergence_rate(joint_idx=0)
         assert np.all(np.isfinite(rates))
+
+
+class TestRecurrenceMatrixSparseParity:
+    """Parity test for #8933 item 2 (query_pairs vectorization)."""
+
+    @pytest.mark.unit
+    def test_sparse_query_pairs_matches_scalar_loop_reference(self) -> None:
+        from scipy.spatial import cKDTree
+
+        n = 150  # > 100 so compute_recurrence_matrix takes the sparse path
+        obj = _Concrete(n=n, n_joints=4)
+        threshold_ratio = 0.1
+
+        actual = obj.compute_recurrence_matrix(
+            threshold_ratio=threshold_ratio, use_sparse=True
+        )
+        assert actual.shape == (n, n)
+
+        # Independently replicate the pre-#8933 scalar-loop algorithm
+        # (tree.query_ball_point per point + nested Python loop) using the
+        # exact same preprocessing (normalization, seeded threshold
+        # estimation) the production method performs, to verify the
+        # vectorized query_pairs implementation produces an identical
+        # recurrence matrix.
+        state_vec = np.hstack((obj.joint_positions, obj.joint_velocities))
+        mean = np.mean(state_vec, axis=0)
+        std = np.std(state_vec, axis=0)
+        std[std < 1e-6] = 1.0
+        normalized_state = (state_vec - mean) / std
+        N = len(normalized_state)
+
+        tree = cKDTree(normalized_state)
+        sample_size = min(100, N)
+        rng = np.random.default_rng(0)
+        sample_indices = rng.choice(N, sample_size, replace=False)
+        sample_dists: list[float] = []
+        for i in sample_indices:
+            dists_i, _ = tree.query(normalized_state[i], k=min(10, N))
+            sample_dists.extend(dists_i[1:])
+        estimated_max = np.max(sample_dists) * 2
+        threshold = threshold_ratio * estimated_max
+
+        reference = np.zeros((N, N), dtype=np.int_)
+        for i in range(N):
+            neighbors = tree.query_ball_point(normalized_state[i], threshold)
+            for j in neighbors:
+                if j >= i:
+                    reference[i, j] = 1
+                    reference[j, i] = 1
+
+        np.testing.assert_array_equal(actual, reference)
+        # Sanity: the reference (and therefore actual) has off-diagonal
+        # recurrences for this data, so the test isn't vacuously trivial.
+        assert reference.sum() > n
