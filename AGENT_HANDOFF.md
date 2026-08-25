@@ -96,10 +96,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   analytical and articulated adapters, lossless bundles, scalar/rank/OAT,
   dispersion, and quiet-zone analysis are merged. Keep #8358 open because its
   broader UI, localized-perturbation, and presentation criteria remain unaudited.
-- #9027's first bounded slice is in PR #9049, reconciled through remote `main`
-  `0dd7d5bee`. Its executable eight-tier hybrid topology authority passes the
-  focused hybrid and inherited Kalman parity suites serially. No campaign or
-  human analysis was run; controller comparisons remain future protected work.
+- #9027 PR #9049 is reconciled through current `main` `501ac302d`; hybrid and
+  Kalman gates pass. Its non-required optional lane exposes a pre-existing #9055
+  source-digest drift in two signed release records. Do not rewrite the PDF or
+  release marker here; track the governed regeneration separately. No campaign ran.
 - PR #9032 is open at remote head `fc4832035`; its reported checks are green and
   human review remains absent. Preserve local headless-rendering fix `413dc21c7`
   for replay after the protected parent merges.
