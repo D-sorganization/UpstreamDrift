@@ -12,8 +12,8 @@ from PyQt6.QtCore import QEvent, QObject, Qt
 from PyQt6.QtGui import QIcon, QKeySequence, QShortcut, QWheelEvent
 from PyQt6.QtWidgets import QApplication, QComboBox, QDoubleSpinBox, QSpinBox
 
-from .gui import MainWindow
 from .gui.diagnostics import get_tracker
+from .gui.main_window import MainWindow
 
 logger = logging.getLogger(__name__)
 
