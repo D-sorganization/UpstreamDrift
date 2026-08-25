@@ -8,12 +8,16 @@ import logging
 import sys
 from pathlib import Path
 
+from typing import TYPE_CHECKING
+
 from PyQt6.QtCore import QEvent, QObject, Qt
 from PyQt6.QtGui import QIcon, QKeySequence, QShortcut, QWheelEvent
 from PyQt6.QtWidgets import QApplication, QComboBox, QDoubleSpinBox, QSpinBox
 
 from .gui.diagnostics import get_tracker
-from .gui.main_window import MainWindow
+
+if TYPE_CHECKING:
+    from .gui.main_window import MainWindow
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +100,8 @@ __version__ = "0.1.0"
 
 def get_dockable_ui() -> MainWindow:
     """Return the main window instance for docking in the unified launcher."""
+    from .gui.main_window import MainWindow
+
     return MainWindow()
 
 
@@ -104,6 +110,8 @@ def main() -> None:
     if "--version" in sys.argv:
         sys.stdout.write(f"pendulum-simulator {__version__}\n")
         sys.exit(0)
+
+    from .gui.main_window import MainWindow
 
     _configure_logging()
 
