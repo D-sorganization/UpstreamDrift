@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "ea406841c4a500dcab41d3b4ed1d7763ee0a2f9cf559d15041faa4036b31dfe7",
-  "source_count": 36,
-  "candidate_count": 1100,
+  "source_digest": "f6a793330c5b8b941ce1b489decf10406426e628175ddf66e6cdd47418ea8dd1",
+  "source_count": 37,
+  "candidate_count": 1130,
   "candidates": [
     {
       "candidate_id": "PD-CAND-f9b891e62e1d24de",
@@ -3049,6 +3049,460 @@
       "priority_score": 3,
       "triage_flags": [
         "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-112606d15ea2d816",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 5,
+      "line_end": 11,
+      "text": "The words *Coriolis*, *centripetal*, and *centrifugal* can make a multibody equation sound as though three additional physical agents have appeared. They have not. The physical system still contains applied torques, gravity, damping, constraints, and body-to-body reactions. Coriolis and squared-speed terms are velocity-dependent parts of the same equations after a coordinate system has been chosen. They explain how an achieved configuration and motion redirect the effects of earlier and current loading.",
+      "text_sha256": "9bdad9fc390ba407217494a1a5df61f04ba4eee6fddc51a039d294ef65b1eb60",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-ca674f26bab18be9",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 13,
+      "line_end": 13,
+      "text": "This chapter uses the fixed convention",
+      "text_sha256": "9e81f40bac511107992e757700f033982415e0f621e6e5be67cc9e54a4b4ca1d",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-59199be33daae8dc",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 19,
+      "line_end": 23,
+      "text": "where $h$ is the complete velocity bias. An equation term $r_k$ is reported with its equal-and-opposite generalized **drive** $Q_k=-r_k$. Thus a positive drive accelerates the declared positive coordinate, whereas a positive left-hand-side term resists it. Every figure and data field follows this sign rule.",
+      "text_sha256": "d5014e34abc87f8b654675cb3cb54af2052014fff73c8b1a1ed8779ad34e8786",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-7518c8804197a62a",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 25,
+      "line_end": 25,
+      "text": "The first-kind Christoffel symbols are",
+      "text_sha256": "877fc53bf6433c6d7973925122bcc994642e378fc9550342afe9a1e3bdd4712b",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-6aeb1db692e3d706",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 38,
+      "line_end": 38,
+      "text": "The registered monomial convention assigns",
+      "text_sha256": "ac127f66a1e4139e9f03d93ae79518266ae5e32353c4624f1e4e206220a087f2",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-4b6ed06bf2bff222",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 46,
+      "line_end": 52,
+      "text": "The cross-speed terms are called **Coriolis terms** and the squared-speed terms are called **centripetal/centrifugal terms**. Their sum is checked against the provider's independently evaluated $h$. Any discrepancy is retained as `velocity_residual`; it is never hidden in one of the named sources. The total $h$ is mechanically meaningful within the model, but the cross-versus-squared partition changes under a change of generalized coordinates. A coordinate label is therefore part of every reported result.",
+      "text_sha256": "35268ed0771a167547a883801e3a32da99e0836f00cc716c9ba12829ae8d7cb8",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-07cfea156d04e8e8",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 56,
+      "line_end": 59,
+      "text": "The double-pendulum study declares $q_1$ as the absolute arm angle and $q_2$ as the club angle relative to the arm, so the club's absolute angle is $q_1+q_2$. Let $K=m_2 l_1 l_{c2}$ be the inertial coupling coefficient. For this coordinate choice, the velocity terms reduce to",
+      "text_sha256": "789e23817bdf31120879ade1d911b83a4278da340355373bdf406e197a15fadb",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-f4708e9826b5364f",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 77,
+      "line_end": 77,
+      "text": "This form gives the names operational meaning:",
+      "text_sha256": "30503f985803c19e444df214f743ff58d1503c8eb8f737c50fc64d19b227ad2f",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-5c9ff146c28adfaf",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 79,
+      "line_end": 93,
+      "text": "1. The Coriolis cross term exists only while both the arm and the relative wrist angle are moving. If either rate is zero, it vanishes. Its sign also changes with link geometry through $\\sin(q_2)$ and with either rate. 2. The squared-speed terms remain when only one rate is nonzero. The $\\dot q_1^2$ term is the generalized wrist-coordinate consequence of carrying the distal mass around the proximal pivot; the $\\dot q_2^2$ term is its reciprocal contribution to the proximal equation. 3. In an inertial free-body diagram, **centripetal** denotes the inward force required to bend a mass trajectory. **Centrifugal** is the outward inertial interpretation used in a rotating frame or generalized-coordinate balance. These are two descriptions of one interaction, not forces to add together. 4. Gravity is configuration dependent rather than speed dependent. Its drive is $-g(q)$ under Equation @eq-source-equation, and its power can be positive or negative depending on the direction of motion.",
+      "text_sha256": "bf7ef3f84ced6573fede94412b9417e239b7e1ab7a7bfa1225f4a2bcc4410cfe",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-12c53d8b9892e7f1",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 95,
+      "line_end": 99,
+      "text": "The equations do not say that a golfer consciously creates a Coriolis force. Applied moments and external forces create and reshape the state; the linked system's geometry and velocity then determine the velocity-bias terms. In that limited, useful sense, earlier proximal work can be expressed later as a motion-dependent distal drive. The flow is state mediated, not force free.",
+      "text_sha256": "db6f5fabb465b083f283c098c29cbbe8078cbc613d3ffe9ebd586476a8b98aba",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-0a78a1c7cd966a72",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 102,
+      "line_end": 108,
+      "text": "Imagine swinging a partly folded two-section ruler. Pulling and turning it builds motion. As the hinge opens, the same moving mass must be redirected, so the ruler pushes back through the hinge. The cross-speed part appears only when the whole ruler is turning *and* the hinge is opening. The squared-speed part is the inward-turning demand associated with either rotation by itself. Gravity tilts the balance throughout. These labels help audit the motion; they do not identify which muscle supplied the original energy.",
+      "text_sha256": "61fa8035a64688de4f79a2a89d903c62e331f655cde7298e9adb8ebd0bf7c652",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-1b6f227f8be25b88",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 113,
+      "line_end": 117,
+      "text": "MacKenzie, McCourt, and Champoux found that signed linear work per metre of hand travel was strongly associated with clubhead speed in their sample [@mackenzie2020energy]. That observable motivates a hand-path projection, but it does not authorize relabeling every generalized term as a measured hand force.",
+      "text_sha256": "658b91dc288ce3392d764124ff9efd77ba36dd729711105207184112ecdb2519",
+      "citation_keys": [
+        "mackenzie2020energy"
+      ],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 3,
+      "triage_flags": [
+        "numeric",
+        "external_citation"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-81fb4d30a25156a9",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 119,
+      "line_end": 120,
+      "text": "For endpoint position $x_H(q)$ and Jacobian $J_H=\\partial x_H/\\partial q$, virtual work requires",
+      "text_sha256": "e2165c83ac1eee5e31a9dcbe0492337cdcaac6eb8d70b07ebc51a55957d9001a",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-cc7054b8e5e6715a",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 126,
+      "line_end": 128,
+      "text": "where $F_{H,k}$ is the minimum-norm force-only equivalent and $r_k$ is the unreconstructed generalized residual. Both are reported. The wrist point in this fixed-hub model depends only on $q_1$:",
+      "text_sha256": "ac29c96609c81fbf3d59822441e3ea7cd2e01ce58fbc060179aa3f4b54decc8d",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-e367492f3fe95028",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 138,
+      "line_end": 143,
+      "text": "Its rank is one. A two-coordinate generalized drive containing a wrist couple therefore cannot be represented exactly by a single planar force at that point. The contract reports `rank_deficient_force_only` and the residual in N m. The mapped force is useful for a declared along-path comparison, while the residual prevents that comparison from masquerading as a complete grip wrench.",
+      "text_sha256": "71ec0356782668c99d6c20a43611cbbf65ed7032ec8eaad02b0b302d3c082433",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-a8b3b8f66eb946bd",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 145,
+      "line_end": 145,
+      "text": "When hand speed exceeds the numerical threshold, the achieved path tangent is",
+      "text_sha256": "79243055e201845fd950bffcb3fc77abf536fa8d9738036a895a569854031221",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-9217d54d29fb8a8e",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 152,
+      "line_end": 154,
+      "text": "Zero-speed samples have no tangent and remain undefined. Trajectory integration uses only intervals whose two endpoints have a defined tangent, and publishes valid duration divided by total duration.",
+      "text_sha256": "757170f034f688b6fd61ecd0f7f6e155391568d59a6e4f140573d829d4ede3f0",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-70a00f4eb1097706",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 158,
+      "line_end": 158,
+      "text": "For each source $k$, the implementation reports",
+      "text_sha256": "bf69ec487b7f62320db3ef4c76b08bb211f940b6c4b9ccbfdd4310de2c454561",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-ba5e3a60a66a5396",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 172,
+      "line_end": 177,
+      "text": "Signed impulse measures directional accumulation; absolute impulse measures how much action occurred before cancellation. Power measures instantaneous energy rate. Work measures its time integral. A large impulse can do little work if it is nearly normal to velocity, and a shorter high-power interval can do substantial work. These quantities must not be substituted for one another.",
+      "text_sha256": "3c031f6634aa1be12ddcae9e66409c884dddc9a974dd7e1d328c97401b863feb",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-9a0e030ae677737a",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 179,
+      "line_end": 185,
+      "text": "The generalized work of a Coriolis or squared-speed equation term is a coordinate-explicit kinetic-energy attribution. It is not automatically the energy transferred from arm to club as physical subsystems. That latter claim requires the club free-body balance and wrist reaction-force power developed in @sec-interaction-forces. The two views are complementary: one audits the joint-coordinate equation; the other audits energy crossing a named physical interface.",
+      "text_sha256": "a313032784416f93ed2741c9e07d5c28246e0caf74561ae3f9b1b1ac7e8cfd6e",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-b46f52b674b41ef2",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 189,
+      "line_end": 196,
+      "text": "The executable study evaluates a complete, frozen 135-program grid: three shoulder torques (60, 80, and 100 N m), three early wrist-restraining magnitudes (0, 5, and 10 N m), and fifteen drive-onset times from 0.000 to 0.350 s, all followed by a 15 N m wrist drive. Each trajectory is integrated with the ODE reference backend and truncated at the first club-vertical crossing inside the registered delivery zone. Forty-four programs fail that impact gate and are excluded rather than rewarded for additional rotations; 91 qualify.",
+      "text_sha256": "efac0f40368deb1411010377e938aa09b7b987470fc7ea162c89363403e5632c",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-876aa20e067d9e6f",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 198,
+      "line_end": 202,
+      "text": "The primary example maximizes **absolute** Coriolis tangent impulse because the signed values reverse within a swing. A signed companion objective is published so direction and cancellation remain visible. The grid maximum is not a continuous optimal-control solution and not a human technique recommendation.",
+      "text_sha256": "f09c9df2ce5daca538c130c90f3e67231ea3da19df2c363cd2d6e156ebd26994",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 5,
+      "triage_flags": [
+        "assertive_language",
+        "causal_or_generalizing_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-e38603b02ff2b864",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 204,
+      "line_end": 204,
+      "text": "The two grid-selected programs are:",
+      "text_sha256": "96acafca72304b40a3e8000b74905cbfd5e6a5f20cf9973d72d76dae4bc4be10",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-fa87fd7ca6238f07",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 206,
+      "line_end": 211,
+      "text": "- **Maximum absolute Coriolis impulse:** shoulder torque 100 N m, early wrist restraint 10 N m, drive onset 0.100 s, absolute/signed Coriolis tangent impulse 13.817/-6.825 N s, and impact speed 46.780 m/s. - **Maximum clubhead speed:** shoulder torque 100 N m, early wrist restraint 5 N m, drive onset 0.125 s, absolute/signed Coriolis tangent impulse 13.701/-7.033 N s, and impact speed 46.913 m/s.",
+      "text_sha256": "f0bc30dd4ec28955b03c2f5b393ef7f57aefa9343f73585e24071d673cebeeaa",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-ea008e813328dfcd",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 213,
+      "line_end": 213,
+      "text": "![The registered search compares absolute Coriolis tangent impulse with impact clubhead speed and signed component work. The two highlighted optima are close but not identical.](figures/fig_force_source_optimization.pdf){#fig-source-optimization width=100% fig-alt=\"Scatterplot of 91 qualified pendulum programs comparing absolute Coriolis hand-path impulse with clubhead speed, colored by wrist-drive onset. A star marks maximum impulse and a diamond marks maximum speed. A bar chart compares signed Coriolis, squared-speed, gravity, and applied generalized work for the two programs.\"}",
+      "text_sha256": "215cb0e9d9fa95b5936f5110ed9a727a5b3f3c7277e19a5756b2207203fc791f",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-43a0a7c746f716b6",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 215,
+      "line_end": 221,
+      "text": "For the maximum-impulse program, Coriolis generalized work is -100.69 J, squared-speed work is -33.73 J, gravity work is +25.56 J, and applied-drive work is +358.20 J through impact. The negative Coriolis work does not mean the term was absent: its absolute tangent impulse is the largest in the grid, but its generalized drive opposes the instantaneous generalized velocity on net. That contrast is precisely why impulse and energy-transfer claims are reported separately.",
+      "text_sha256": "dbcf4d020bd4120367d35fe61822458958315f3d3cd94d27ff79bb53a07b13a4",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-a81cfd24d9c12dab",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 223,
+      "line_end": 227,
+      "text": "The force-only wrist mapping is rank deficient for every sample. In the two highlighted programs, the maximum retained generalized residual is 54.44 and 52.81 N m, respectively; the hand-path tangent is defined for more than 99.6% of the impact-truncated duration. These diagnostics are part of the result, not footnotes to discard.",
+      "text_sha256": "bc8af7c90dca63e92554a431c18b0eee90d39cc502659d0b8cf777e870fb9114",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-9a466b64aebab7a7",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 231,
+      "line_end": 235,
+      "text": "The reusable objective returns the negative signed or absolute component impulse for minimizer-compatible software. A defensible next study can vary a smooth torque history, segment parameters, or event-triggered timing while constraining impact validity, torque, torque rate, joint range, work, peak force, and mapping residual. It should report at least a Pareto surface over",
+      "text_sha256": "37be4ae512afd3594282c9e25f8585886e83629178fc8299c058a4a5f5af4a28",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-18debd8032e9c7de",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 237,
+      "line_end": 242,
+      "text": "1. clubhead speed or task outcome; 2. signed and absolute Coriolis hand-path impulse; 3. net force-work-per-path-length using the MacKenzie-compatible definition; 4. actuator work and peak applied moment; 5. physical wrist-interface work from the subsystem balance; and 6. robustness on held-out parameter and initial-state distributions.",
+      "text_sha256": "69225e1506429a1224b491792958bc9eeea631ec6416156f7cd676e500e02e65",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-eeaa2c572205d5a6",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd",
+      "line_start": 244,
+      "line_end": 247,
+      "text": "Optimizing only one named equation term can produce a mechanically extreme trajectory, exploit cancellation, or move work into the actuators. The term is most informative as an explanatory coordinate within a constrained, multi-objective experiment—not as an isolated coaching target.",
+      "text_sha256": "2baf057bffd68dacc2466eb37494f7f9c30f2e14121442192663ac51096692ab",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
       ],
       "review_state": "unadjudicated"
     },

@@ -23,6 +23,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - Do not repin this branch to a Tools feature head for release. Pin only the
   protected Tools merge commit, then run the focused scientific, release,
   render, and publication-quality gates before opening the protected PR.
+- The complete chapter audit now contains 1,130 reviewed candidates, 306
+  atomic claims, 125 numeric contracts, and 382/382 verified literals. The
+  608-artifact computational bundle validates with no open release claims;
+  this supersedes the earlier 303-claim candidate on PR #9062.
 
 ## Repository Authority
 
@@ -31,7 +35,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `c6fc49a7c63549fa6b60afb43594d3c76a226d50`. The normalized-claim authority
+  `4f84a8a2dbdafac01a634ceb41b1e415ea7ec5bb`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 244 pages with SHA-256
   `59faa25bce589777560d66bd9d5712b37fe0099979c91318c5875460ec6447b6`,
