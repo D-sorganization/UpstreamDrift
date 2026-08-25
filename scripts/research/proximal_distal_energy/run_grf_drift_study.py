@@ -20,13 +20,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-from upstream_drift.research.interaction_force_mechanisms import (
-    PlanarInertials,
+from scripts.research.proximal_distal_energy.double_pendulum_attribution import (
     double_pendulum_support_reaction_decomposition,
-    evaluate_reaction_prediction,
 )
+from scripts.research.proximal_distal_energy.swing_model import PlanarInertials
+from src.shared.python.physics import evaluate_reaction_prediction
+from src.shared.python.simulation_backends import GolfModelParams
 
-SCHEMA_VERSION = "falsification_study/1.0.0"
+matplotlib.rcParams["svg.hashsalt"] = "upstreamdrift-grf-drift-study-v1"
+
+SCHEMA_VERSION = "grf-drift-attribution-v1"
+
 FIGURE_STEMS = (
     "fig_reaction_attribution_trace",
     "fig_reaction_vector_field",
@@ -57,19 +61,10 @@ def _manifest() -> dict[str, Any]:
 
 
 def _reference_trace() -> tuple[
-    dict[str, float], np.ndarray, np.ndarray, np.ndarray, np.ndarray
+    GolfModelParams, np.ndarray, np.ndarray, np.ndarray, np.ndarray
 ]:
-    params = {
-        "m1": 2.2,
-        "m2": 0.45,
-        "l1": 0.65,
-        "l2": 0.85,
-        "lc1": 0.30,
-        "lc2": 0.55,
-        "i1": 0.08,
-        "i2": 0.025,
-        "g_proj": 9.81,
-    }
+    params = GolfModelParams.default()
+
     nodes_time = np.array([0.0, 0.12, 0.22, 0.30])
     nodes_q = np.array(
         [
