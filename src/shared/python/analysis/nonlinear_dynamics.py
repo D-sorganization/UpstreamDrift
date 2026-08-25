@@ -170,12 +170,18 @@ class NonlinearDynamicsMixin:
             threshold = threshold_ratio * estimated_max
 
             recurrence_matrix = np.zeros((N, N), dtype=np.int_)
-            for i in range(N):
-                neighbors = tree.query_ball_point(normalized_state[i], threshold)
-                for j in neighbors:
-                    if j >= i:
-                        recurrence_matrix[i, j] = 1
-                        recurrence_matrix[j, i] = 1
+            # query_pairs finds every unordered pair (i, j), i < j, whose
+            # distance is within threshold in one vectorized pass, replacing
+            # the O(N) Python loop over query_ball_point + inner Python loop.
+            pairs = tree.query_pairs(threshold, output_type="ndarray")
+            if pairs.size > 0:
+                recurrence_matrix[pairs[:, 0], pairs[:, 1]] = 1
+                recurrence_matrix[pairs[:, 1], pairs[:, 0]] = 1
+            # query_ball_point(state[i], threshold) always includes point i
+            # itself (distance 0), so the original loop always set the
+            # diagonal; query_pairs excludes self-pairs by construction, so
+            # it must be set explicitly here to preserve identical output.
+            np.fill_diagonal(recurrence_matrix, 1)
 
             return cast(
                 np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix
