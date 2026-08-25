@@ -183,13 +183,9 @@ def _butterworth_filter(
 
         b, a = butter(order, normalized_cutoff, btype="low")
 
-        # Apply filter to each dimension
-        filtered = np.zeros_like(data)
-        for i in range(data.shape[1]):
-            for j in range(data.shape[2]):
-                filtered[:, i, j] = filtfilt(b, a, data[:, i, j])
-
-        return filtered
+        # Apply filter to every (marker/keypoint, xyz) slice at once
+        # instead of one scipy call per slice (issue #8924).
+        return filtfilt(b, a, data, axis=0)
     except ImportError:
         # Fallback to simple moving average if scipy not available
         return _moving_average(data, window=5)
@@ -212,14 +208,9 @@ def _savgol_filter(
         if window_length <= polyorder:
             window_length = polyorder + 2
 
-        filtered = np.zeros_like(data)
-        for i in range(data.shape[1]):
-            for j in range(data.shape[2]):
-                filtered[:, i, j] = savgol_filter(
-                    data[:, i, j], window_length, polyorder
-                )
-
-        return filtered
+        # Apply filter to every (marker/keypoint, xyz) slice at once
+        # instead of one scipy call per slice (issue #8924).
+        return savgol_filter(data, window_length, polyorder, axis=0)
     except ImportError:
         # Fallback to moving average
         return _moving_average(data, window=window_length)
@@ -233,12 +224,14 @@ def _median_filter(
     try:
         from scipy.signal import medfilt
 
-        filtered = np.zeros_like(data)
-        for i in range(data.shape[1]):
-            for j in range(data.shape[2]):
-                filtered[:, i, j] = medfilt(data[:, i, j], kernel_size=kernel_size)
-
-        return filtered
+        # medfilt accepts a per-axis kernel_size and applies to the whole
+        # nd array in one call — literally the same function as the old
+        # per-slice loop, just invoked once instead of once per
+        # (marker/keypoint, xyz) slice (issue #8924). scipy.ndimage's
+        # median_filter was considered but its default boundary mode
+        # ('reflect') doesn't match medfilt's zero-padding, so it was
+        # rejected in favor of this bit-identical multi-axis call.
+        return medfilt(data, kernel_size=(kernel_size, 1, 1))
     except ImportError:
         return _moving_average(data, window=kernel_size)
 
@@ -264,14 +257,29 @@ def _moving_average(
     if window < 2:
         return data
 
-    filtered = np.zeros_like(data)
-    for i in range(data.shape[1]):
-        for j in range(data.shape[2]):
-            filtered[:, i, j] = np.convolve(
-                data[:, i, j], np.ones(window) / window, mode="same"
-            )
+    try:
+        # scipy.ndimage.uniform_filter1d(..., mode="constant") reproduces
+        # np.convolve(..., mode="same")'s zero-padded edge behavior exactly
+        # (verified for both odd and even windows) while applying to the
+        # whole nd array in one call instead of once per (marker/keypoint,
+        # xyz) slice (issue #8924). The default uniform_filter1d boundary
+        # mode ('reflect') does NOT match and was rejected.
+        from scipy.ndimage import uniform_filter1d
 
-    return filtered
+        return uniform_filter1d(data, window, axis=0, mode="constant")
+    except ImportError:
+        # _moving_average is itself the no-SciPy fallback for the other
+        # filters, so it must stay usable without SciPy. This reproduces
+        # np.convolve(..., mode="same") via a zero-padded cumulative sum
+        # (a vectorized sliding-window average), still without the
+        # per-(marker/keypoint, xyz)-slice Python loop.
+        n = data.shape[0]
+        padded = np.pad(data, ((window - 1, window - 1), (0, 0), (0, 0)))
+        csum = np.cumsum(padded, axis=0)
+        csum = np.concatenate([np.zeros((1, *data.shape[1:])), csum], axis=0)
+        full = (csum[window:] - csum[:-window]) / window
+        start = (window - 1) // 2
+        return full[start : start + n]
 
 
 def _kalman_filter(

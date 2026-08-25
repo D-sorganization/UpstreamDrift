@@ -118,7 +118,7 @@ class MainWidget(QtWidgets.QWidget):
             mgr = get_theme_manager()
             if mgr and hasattr(mgr, "themeChanged"):
                 mgr.themeChanged.connect(self._apply_theme_colors)
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
         self._apply_theme_colors()
 
@@ -223,7 +223,7 @@ class MainWidget(QtWidgets.QWidget):
             text_sec = colors.get("text_secondary", "#cccccc")
             border_color = colors.get("border_default", colors.get("border", "#3a3a3a"))
             hover_bg = colors.get("bg_highlight", colors.get("button_hover", "#2a2a2a"))
-        except Exception:
+        except Exception:  # noqa: BLE001
             bg_color = "#1e1e1e"
             text_color = "#ffffff"
             text_sec = "#cccccc"

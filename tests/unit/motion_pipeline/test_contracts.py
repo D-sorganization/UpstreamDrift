@@ -861,6 +861,59 @@ class TestMarkerTrajectory:
         assert traj.num_frames == 2
         assert traj.duration > 0
 
+    @pytest.mark.unit
+    def test_non_monotonic_timestamps_raise(self):
+        """Non-monotonic timestamps must still raise after the single-pass
+        rewrite of check_monotonic_timestamps (issue #8926)."""
+        frames = [
+            MarkerFrame(
+                timestamp=0.1,
+                markers={"LASI": Marker(name="LASI", x=0.1, y=0.2, z=0.3)},
+            ),
+            MarkerFrame(
+                timestamp=0.05,  # earlier than the previous frame
+                markers={"LASI": Marker(name="LASI", x=0.11, y=0.21, z=0.31)},
+            ),
+        ]
+        with pytest.raises(ValueError, match="monotonically increasing"):
+            MarkerTrajectory(id="traj_bad", frames=frames)
+
+    @pytest.mark.unit
+    def test_monotonic_timestamps_with_ties_allowed(self):
+        """Equal consecutive timestamps are allowed (a <= b, not a < b)."""
+        frames = [
+            MarkerFrame(
+                timestamp=0.0,
+                markers={"LASI": Marker(name="LASI", x=0.1, y=0.2, z=0.3)},
+            ),
+            MarkerFrame(
+                timestamp=0.0,
+                markers={"LASI": Marker(name="LASI", x=0.11, y=0.21, z=0.31)},
+            ),
+        ]
+        traj = MarkerTrajectory(id="traj_ties", frames=frames)
+        assert traj.num_frames == 2
+
+    @pytest.mark.unit
+    def test_inconsistent_marker_sets_no_longer_enforced(self):
+        """check_consistent_markers was a dead no-op (its result was always
+        discarded via `pass`) and has been deleted per issue #8926 rather
+        than gated behind a debug flag, since nothing depended on it
+        enforcing anything. Frames with differing marker sets must still
+        construct successfully."""
+        frames = [
+            MarkerFrame(
+                timestamp=0.0,
+                markers={"LASI": Marker(name="LASI", x=0.1, y=0.2, z=0.3)},
+            ),
+            MarkerFrame(
+                timestamp=0.033,
+                markers={"RASI": Marker(name="RASI", x=0.2, y=0.2, z=0.3)},
+            ),
+        ]
+        traj = MarkerTrajectory(id="traj_mixed", frames=frames)
+        assert traj.num_frames == 2
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

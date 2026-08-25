@@ -193,10 +193,8 @@ def _vec(x: float, y: float, z: float) -> Array:
     return np.array([x, y, z], dtype=np.float64)
 
 
-def build_spatial_model() -> SpatialModel:
-    """Return the deterministic 20-DOF reduced full-body + club tree."""
-
-    joints = (
+def _default_spatial_joints() -> tuple[JointSpec, ...]:
+    return (
         JointSpec(
             "pelvis_yaw", -1, "revolute", _vec(0, 0, 1), _vec(0, 0, 0.95), "pelvis"
         ),
@@ -262,7 +260,10 @@ def build_spatial_model() -> SpatialModel:
         JointSpec("club_pitch", 17, "revolute", _vec(0, 1, 0), _vec(0, 0, 0), "club"),
         JointSpec("club_yaw", 18, "revolute", _vec(0, 0, 1), _vec(0, 0, 0), "club"),
     )
-    physical_bodies = (
+
+
+def _default_physical_bodies() -> tuple[BodySpec, ...]:
+    return (
         BodySpec("lower_body", 1, 27.0, 0.19, _vec(0, 0, -0.43), "lower_body"),
         BodySpec("pelvis_mass", 1, 11.0, 0.14, _vec(0, 0, 0.02), "pelvis"),
         BodySpec("torso_mass", 3, 26.0, 0.17, _vec(0, 0, 0.16), "torso"),
@@ -276,6 +277,13 @@ def build_spatial_model() -> SpatialModel:
         BodySpec("club_shaft_mass", 19, 0.16, 0.018, _vec(0, 0, -0.55), "club"),
         BodySpec("clubhead_mass", 19, 0.20, 0.045, _vec(0, 0, -1.08), "club"),
     )
+
+
+def build_spatial_model() -> SpatialModel:
+    """Return the deterministic 20-DOF reduced full-body + club tree."""
+
+    joints = _default_spatial_joints()
+    physical_bodies = _default_physical_bodies()
     # MuJoCo requires every moving body, including zero-length gimbal carriers,
     # to own a positive inertia.  The same traceable carrier masses are included
     # in the Lagrange model so this numerical regularization is not engine-only.

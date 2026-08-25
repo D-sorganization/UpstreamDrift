@@ -293,7 +293,13 @@ def _kalman_filter_python(
 
     The steady-state P initialization avoids the long high-gain transient that
     would otherwise reduce smoothing quality for the first 20–30 frames when
-    starting with P=1.0.
+    starting with P=1.0. Critically, initializing at the fixed point also
+    means P (and therefore the Kalman gain) is the *same constant* at every
+    timestep and for every series (issue #8923) — the whole two-pass
+    computation collapses to a pair of fixed-coefficient first-order IIR
+    filters, applied to the entire ``(n_frames, n_points, n_dims)`` array in
+    two ``scipy.signal.lfilter`` calls instead of a 750k-iteration
+    pure-Python double loop with a scalar update per timestep.
 
     Args:
         data: Array of shape (n_frames, n_points, n_dims).
@@ -314,46 +320,37 @@ def _kalman_filter_python(
     # Positive root: P_ss = 0.5 * (-q + np.sqrt(q**2 + 4.0 * q * r))
     p_steady = 0.5 * (-q + np.sqrt(q**2 + 4.0 * q * r))
 
-    filtered = np.zeros_like(data)
+    from scipy.signal import lfilter
+
     n_frames = data.shape[0]
+    if n_frames == 1:
+        return data.copy()
 
-    for i in range(data.shape[1]):
-        for j in range(data.shape[2]):
-            series = data[:, i, j]
+    # --- Forward pass ---
+    # Kalman gain is constant: k = P_pred / (P_pred + r), P_pred = p_steady + q.
+    # Recursion: x[t] = (1-k) * x[t-1] + k * data[t], x[0] = data[0].
+    # This is lfilter([k], [1, -(1-k)], data, axis=0) with the initial filter
+    # state chosen so the first output sample equals data[0] exactly (matching
+    # the loop, where x is seeded with the raw first sample before the first
+    # update is even applied).
+    p_pred = p_steady + q
+    k = p_pred / (p_pred + r)
+    zi_fwd = ((1.0 - k) * data[0])[np.newaxis, ...]
+    x_fwd, _ = lfilter([k], [1.0, -(1.0 - k)], data, axis=0, zi=zi_fwd)
 
-            # --- Forward pass ---
-            x_fwd = np.empty(n_frames)
-            p_fwd = np.empty(n_frames)
+    # --- Backward RTS smoother pass ---
+    # RTS gain is also constant: g = p_fwd / (p_fwd + q) = p_steady / (p_steady + q)
+    # (since p_fwd[t] == p_steady for every t once initialized at the fixed
+    # point). Recursion running backward in time:
+    #   smoothed[t] = (1-g) * x_fwd[t] + g * smoothed[t+1], smoothed[-1] = x_fwd[-1]
+    # Reversing time turns this into the same causal IIR form as the forward
+    # pass, applied to x_fwd[::-1].
+    g = p_steady / (p_steady + q)
+    x_fwd_rev = x_fwd[::-1]
+    zi_bwd = (g * x_fwd_rev[0])[np.newaxis, ...]
+    smoothed_rev, _ = lfilter([1.0 - g], [1.0, -g], x_fwd_rev, axis=0, zi=zi_bwd)
 
-            p = p_steady
-            x = float(series[0])
-
-            for t in range(n_frames):
-                # Predict (random-walk: x_k = x_{k-1}, P_k = P_{k-1} + Q)
-                p_pred = p + q
-                # Update (Kalman gain and correction)
-                k_gain = p_pred / (p_pred + r)
-                x = x + k_gain * (series[t] - x)
-                p = (1.0 - k_gain) * p_pred
-                x_fwd[t] = x
-                p_fwd[t] = p
-
-            # --- Backward RTS smoother pass ---
-            smoothed = np.empty(n_frames)
-            smoothed[-1] = x_fwd[-1]
-            p_s = p_fwd[-1]
-
-            for t in range(n_frames - 2, -1, -1):
-                # Predicted covariance at t+1 (using forward filter's P at t)
-                p_pred = p_fwd[t] + q
-                # RTS smoother gain
-                g_s = p_fwd[t] / p_pred
-                smoothed[t] = x_fwd[t] + g_s * (smoothed[t + 1] - x_fwd[t])
-                p_s = p_fwd[t] + g_s**2 * (p_s - p_pred)
-
-            filtered[:, i, j] = smoothed
-
-    return filtered
+    return np.asarray(smoothed_rev[::-1])
 
 
 def _ewma(data: np.ndarray, alpha: float = 0.5) -> np.ndarray:

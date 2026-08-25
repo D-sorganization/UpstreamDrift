@@ -20,6 +20,7 @@ from ._frame_arrays import (
     estimate_fps as _estimate_fps,
     keypoints_to_array as _keypoints_to_array,
     markers_to_array as _markers_to_array,
+    vectorized_interp_axes as _vectorized_interp_axes,
 )
 
 try:  # pragma: no cover - import guard
@@ -45,12 +46,8 @@ def _rust_interp_axes(
                 np.ascontiguousarray(target_ts, dtype=np.float64),
             )
         )
-    # Pure-Python: per-axis np.interp.
-    out = np.zeros((target_ts.shape[0], data.shape[1], data.shape[2]))
-    for i in range(data.shape[1]):
-        for j in range(data.shape[2]):
-            out[:, i, j] = np.interp(target_ts, source_ts, data[:, i, j])
-    return out
+    # Pure-Python fallback: vectorized per-axis linear interpolation.
+    return _vectorized_interp_axes(target_ts, source_ts, data)
 
 
 def resample(

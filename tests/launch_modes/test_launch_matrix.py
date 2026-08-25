@@ -77,7 +77,9 @@ def _declared_engine_ids() -> list[str]:
         ids.update(
             t.engine_type for t in LauncherManifest.load().tiles if t.engine_type
         )
-    except Exception:  # pragma: no cover - manifest failures surface elsewhere
+    except (
+        Exception  # noqa: BLE001
+    ):  # pragma: no cover - manifest failures surface elsewhere
         pass
     return sorted(ids)
 

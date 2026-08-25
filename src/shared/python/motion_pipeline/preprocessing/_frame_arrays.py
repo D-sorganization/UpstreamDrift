@@ -47,6 +47,43 @@ def markers_to_array(frames: list[MarkerFrame]) -> np.ndarray:
     return data
 
 
+def vectorized_interp_axes(
+    target_ts: np.ndarray,
+    source_ts: np.ndarray,
+    data: np.ndarray,
+) -> np.ndarray:
+    """Vectorized per-axis linear interpolation, equivalent to running
+    ``np.interp(target_ts, source_ts, data[:, i, j])`` for every
+    ``(marker/keypoint, xyz)`` slice but without the Python loop (issue
+    #8924). One ``np.searchsorted`` + gather/lerp handles the full
+    ``(frames, points, 3)`` array at once.
+
+    Matches ``np.interp`` semantics exactly: values outside
+    ``[source_ts[0], source_ts[-1]]`` clamp to the nearest edge value,
+    exact timestamp matches return that sample, and duplicate
+    ``source_ts`` entries are handled the same way ``np.interp`` handles
+    them (division-by-zero in the local slope is short-circuited to 0).
+
+    Args:
+        target_ts: ``(T,)`` timestamps to sample at.
+        source_ts: ``(N,)`` strictly non-decreasing source timestamps.
+        data: ``(N, M, 3)`` source array.
+
+    Returns:
+        ``(T, M, 3)`` interpolated array.
+    """
+    idx = np.searchsorted(source_ts, target_ts, side="right")
+    idx = np.clip(idx, 1, len(source_ts) - 1)
+    lo, hi = idx - 1, idx
+
+    denom = source_ts[hi] - source_ts[lo]
+    with np.errstate(invalid="ignore", divide="ignore"):
+        t = np.where(denom != 0, (target_ts - source_ts[lo]) / denom, 0.0)
+    t = np.clip(t, 0.0, 1.0)[:, None, None]
+
+    return data[lo] + t * (data[hi] - data[lo])
+
+
 def estimate_fps(frames: list) -> float:
     """Estimate FPS from frame timestamps."""
     if len(frames) < 2:
@@ -66,9 +103,12 @@ def _keypoint_from_array(
     frame_index: int,
     keypoint_index: int,
     template: Keypoint,
+    *,
+    use_model_construct: bool = False,
 ) -> Keypoint:
     """Rebuild one keypoint from array coordinates and a metadata template."""
-    return Keypoint(
+    ctor = Keypoint.model_construct if use_model_construct else Keypoint
+    return ctor(
         x=float(data[frame_index, keypoint_index, 0]),
         y=float(data[frame_index, keypoint_index, 1]),
         z=(
@@ -87,9 +127,12 @@ def _marker_from_array(
     marker_index: int,
     name: str,
     template: Marker,
+    *,
+    use_model_construct: bool = False,
 ) -> Marker:
     """Rebuild one marker from array coordinates and a metadata template."""
-    return Marker(
+    ctor = Marker.model_construct if use_model_construct else Marker
+    return ctor(
         name=name,
         x=float(data[frame_index, marker_index, 0]),
         y=float(data[frame_index, marker_index, 1]),
@@ -102,17 +145,33 @@ def _marker_from_array(
 def array_to_keypoint_frames(
     frames: list[KeypointFrame],
     data: np.ndarray,
+    *,
+    use_model_construct: bool = False,
 ) -> list[KeypointFrame]:
-    """Convert array data back to keypoint frames."""
+    """Convert array data back to keypoint frames.
+
+    ``use_model_construct`` skips Pydantic validation on the rebuilt
+    ``Keypoint``/``KeypointFrame`` objects (see ``sources/c3d_adapter.py``
+    for the precedent). Only pass ``True`` when the caller has already
+    guaranteed the input frames were validated and every array op applied
+    to ``data`` is finite-preserving (e.g. a fixed rotation/permutation
+    matmul, a finite scalar scale, or a finite centroid subtraction) —
+    the default keeps the original validated-construction behavior.
+    """
     new_frames: list[KeypointFrame] = []
+    frame_ctor = KeypointFrame.model_construct if use_model_construct else KeypointFrame
 
     for i, frame in enumerate(frames):
         new_keypoints = []
         for j, kp in enumerate(frame.keypoints):
-            new_keypoints.append(_keypoint_from_array(data, i, j, kp))
+            new_keypoints.append(
+                _keypoint_from_array(
+                    data, i, j, kp, use_model_construct=use_model_construct
+                )
+            )
 
         new_frames.append(
-            KeypointFrame(
+            frame_ctor(
                 timestamp=frame.timestamp,
                 keypoints=new_keypoints,
                 schema_name=frame.schema_name,
@@ -126,20 +185,28 @@ def array_to_keypoint_frames(
 def array_to_marker_frames(
     frames: list[MarkerFrame],
     data: np.ndarray,
+    *,
+    use_model_construct: bool = False,
 ) -> list[MarkerFrame]:
-    """Convert array data back to marker frames."""
+    """Convert array data back to marker frames.
+
+    See ``array_to_keypoint_frames`` for the ``use_model_construct`` contract.
+    """
     new_frames: list[MarkerFrame] = []
     marker_names = list(frames[0].markers.keys())
+    frame_ctor = MarkerFrame.model_construct if use_model_construct else MarkerFrame
 
     for i, frame in enumerate(frames):
         new_markers = {}
         for j, name in enumerate(marker_names):
             if name in frame.markers:
                 marker = frame.markers[name]
-                new_markers[name] = _marker_from_array(data, i, j, name, marker)
+                new_markers[name] = _marker_from_array(
+                    data, i, j, name, marker, use_model_construct=use_model_construct
+                )
 
         new_frames.append(
-            MarkerFrame(
+            frame_ctor(
                 timestamp=frame.timestamp,
                 markers=new_markers,
                 frame_index=frame.frame_index,
