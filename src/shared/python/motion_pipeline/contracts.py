@@ -18,6 +18,7 @@ Models:
 
 from __future__ import annotations
 
+import itertools
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -320,22 +321,11 @@ class MarkerTrajectory(BaseModel):
 
     @model_validator(mode="after")
     def check_monotonic_timestamps(self) -> MarkerTrajectory:
-        timestamps = [f.timestamp for f in self.frames]
-        if timestamps != sorted(timestamps):
+        # Single pass, no sort + no full-list copy (issue #8926): a
+        # trajectory is monotonic iff every consecutive pair is ordered.
+        timestamps = (f.timestamp for f in self.frames)
+        if not all(a <= b for a, b in itertools.pairwise(timestamps)):
             raise ValueError("Timestamps must be monotonically increasing")
-        return self
-
-    @model_validator(mode="after")
-    def check_consistent_markers(self) -> MarkerTrajectory:
-        """All frames should have the same marker set."""
-        if len(self.frames) < 2:
-            return self
-        reference_markers = set(self.frames[0].marker_names)
-        for _i, frame in enumerate(self.frames[1:], 1):
-            frame_markers = set(frame.marker_names)
-            if frame_markers != reference_markers:
-                # Allow for occlusions, but names should be consistent
-                pass  # Relaxing this constraint for practical use
         return self
 
     @property

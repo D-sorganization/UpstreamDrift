@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, cast
 
 import numpy as np
+from scipy.linalg import cho_factor, cho_solve
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -108,11 +109,26 @@ class _RecordingMixin:
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
         if sources and M is not None and M.size > 0:
             try:
-                M_inv = np.linalg.inv(M)
-                for src_idx in sources:
-                    if src_idx in self.data["induced_accelerations"]:
+                # M is SPD (see DynamicsInterface.compute_mass_matrix
+                # postconditions), so a single Cholesky factorization
+                # replaces the O(nv^3) full inverse, and cho_solve against a
+                # selection matrix yields every requested column of M^-1 in
+                # one factorized solve instead of re-deriving it per source
+                # (issue #8931).
+                valid_sources = [
+                    src_idx
+                    for src_idx in sources
+                    if src_idx in self.data["induced_accelerations"]
+                ]
+                if valid_sources:
+                    cho = cho_factor(M)
+                    selection = np.zeros((M.shape[0], len(valid_sources)))
+                    for col, src_idx in enumerate(valid_sources):
+                        selection[src_idx, col] = 1.0
+                    m_inv_cols = cho_solve(cho, selection)
+                    for col, src_idx in enumerate(valid_sources):
                         self.data["induced_accelerations"][src_idx][idx] = (
-                            M_inv[:, src_idx] * tau[src_idx]
+                            m_inv_cols[:, col] * tau[src_idx]
                         )
             except (ValueError, TypeError, RuntimeError) as e:
                 logger.warning(
