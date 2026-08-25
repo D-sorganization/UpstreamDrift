@@ -17,11 +17,34 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.mark.unit
-def test_pendulum_simulator_module_entrypoint_reports_its_version() -> None:
+def test_pendulum_simulator_module_entrypoint_reports_its_version(
+    tmp_path: Path,
+) -> None:
     """The launcher-safe module command must start without GUI initialization errors."""
+    (tmp_path / "sitecustomize.py").write_text(
+        """import importlib.abc
+import sys
+
+
+class _BlockedGuiFinder(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.endswith(".gui.main_window"):
+            raise ImportError("version probe imported the GUI")
+        return None
+
+
+sys.meta_path.insert(0, _BlockedGuiFinder())
+""",
+        encoding="utf-8",
+    )
     environment = os.environ.copy()
     environment["PYTHONPATH"] = os.pathsep.join(
-        (str(REPO_ROOT), str(REPO_ROOT / "src"), environment.get("PYTHONPATH", ""))
+        (
+            str(tmp_path),
+            str(REPO_ROOT),
+            str(REPO_ROOT / "src"),
+            environment.get("PYTHONPATH", ""),
+        )
     )
     result = subprocess.run(
         [

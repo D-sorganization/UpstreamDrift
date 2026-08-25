@@ -52,7 +52,7 @@ def generate_noise(  # noqa: C901
     elif noise_type == "pink":
         # Pink noise (1/f): filter white noise via cumulative sum + differentiation
         # We use Voss-McCartney approximation: sum of octave bands
-        pink = np.zeros(n_samples)
+        pink: np.ndarray = np.zeros(n_samples)
         n_octaves = max(1, int(np.log2(n_samples)))
         for k in range(n_octaves):
             step = 2**k
@@ -61,8 +61,8 @@ def generate_noise(  # noqa: C901
 
         # Normalize to variance=1, then scale
         if np.std(pink) > 0:
-            pink = (pink / np.std(pink)) * amplitude  # type: ignore[operator]
-        noise = pink  # type: ignore[assignment]
+            pink = (pink / np.std(pink)) * amplitude
+        noise = pink
 
     elif noise_type == "brown":
         # Brown (Brownian) noise: cumulative sum of white noise
