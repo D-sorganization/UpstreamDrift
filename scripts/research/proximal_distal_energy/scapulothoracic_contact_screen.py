@@ -469,9 +469,9 @@ def _run_registered_cases(
                     scap_reference,
                     config,
                     include_scapula=True,
-                    seed=scapular_previous
-                    if scapular_previous is not None
-                    else embedded,
+                    seed=(
+                        scapular_previous if scapular_previous is not None else embedded
+                    ),
                     fallback=embedded,
                 )
                 scapular_previous = scapular.coordinates

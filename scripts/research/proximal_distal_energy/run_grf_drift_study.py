@@ -268,9 +268,11 @@ def _make_figures(
             label = (
                 name.upper()
                 if name in {"ztcf", "zvcf"}
-                else "Zero-Velocity Control-Preserved"
-                if name == "zero_velocity_control_preserved"
-                else name.title()
+                else (
+                    "Zero-Velocity Control-Preserved"
+                    if name == "zero_velocity_control_preserved"
+                    else name.title()
+                )
             )
             axis.plot(
                 phase,

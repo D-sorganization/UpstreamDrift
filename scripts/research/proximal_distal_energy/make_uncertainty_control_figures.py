@@ -277,9 +277,11 @@ def make_strategy_figure(record: dict) -> tuple[Path, Path]:
     for axis, (key, title, higher_is_better) in zip(axes.flat, panels, strict=True):
         values = np.asarray([row[key] for row in held])
         colors = [
-            COLORS["green"]
-            if value == (np.max(values) if higher_is_better else np.min(values))
-            else COLORS["blue"]
+            (
+                COLORS["green"]
+                if value == (np.max(values) if higher_is_better else np.min(values))
+                else COLORS["blue"]
+            )
             for value in values
         ]
         axis.bar(np.arange(len(names)), values, color=colors)
