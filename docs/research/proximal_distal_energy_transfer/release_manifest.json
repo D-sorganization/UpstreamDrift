@@ -2410,8 +2410,8 @@
       "bytes": 18711
     },
     "scripts/research/proximal_distal_energy/run_grf_drift_study.py": {
-      "sha256": "57fa96bf6658bb057908829c8ca0837f8a203ac325b1dbfb361864254e7923f7",
-      "bytes": 15135
+      "sha256": "a26a439e749d12b5be7ef5789db33e685783a5689993648caf9a33002b4288a8",
+      "bytes": 15214
     },
     "scripts/research/proximal_distal_energy/run_hand_path_attribution_study.py": {
       "sha256": "b22b42bd6d515b2e866c1391acbd9967b93be633332cb42b637e0fb4b240208c",
