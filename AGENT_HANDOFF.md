@@ -9,7 +9,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 - Tools PR #4699 is the reusable source authority for
   `force-attribution/v1`; UpstreamDrift consumes it only through
-  `vendor/ud-tools` and the thin biomechanics gateway.
+  `vendor/ud-tools` and the thin biomechanics gateway. The vendor pin is the
+  protected Tools squash `3a1c34b4aab2472599dbacfd4c1654772cbf1cc5`.
 - The registered planar study evaluates 135 programs and retains 91 qualified
   impacts. It publishes separate absolute Coriolis-impulse, signed-impulse,
   and clubhead-speed optima plus component power/work and mapping residuals.
@@ -29,9 +30,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - UpstreamDrift remote `main` is
   `c6fc49a7c63549fa6b60afb43594d3c76a226d50`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
-- The current computational publication is 239 pages with SHA-256
-  `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
-  194 URI links, and 247 outline entries. All pages render and were inspected.
+- The current computational publication is 244 pages with SHA-256
+  `59faa25bce589777560d66bd9d5712b37fe0099979c91318c5875460ec6447b6`,
+  194 URI links, and 254 outline entries. Its new coordinate-source chapter
+  and registered-search figure were rendered and inspected at full-page scale.
   Archival qualification remains false because the PDF is untagged and retains
   Type 3 and unembedded font resources.
 

@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-24)
+## Current Scientific Audit State (2026-08-25)
 
 Issue #9059 adds a coordinate-explicit planar pendulum attribution contract on
 top of the pinned Tools source authority. It separates cross-speed Coriolis,
@@ -12,6 +12,9 @@ absolute Coriolis tangent impulse, signed impulse, generalized work, and
 qualified-impact clubhead speed as distinct estimands. This is synthetic
 planar model evidence, not a measured grip wrench, muscle attribution,
 continuous optimal-control solution, human strategy, or coaching authority.
+The source authority is the protected Tools squash
+`3a1c34b4aab2472599dbacfd4c1654772cbf1cc5` from PR #4699; feature-branch
+commits are not publication authority.
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
 1,100 reviewed candidates and 303 atomic claims. Issue #8724 adds an exhaustive,
