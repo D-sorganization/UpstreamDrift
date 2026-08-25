@@ -472,17 +472,19 @@ def get_rgba(hex_color: str, alpha: float = 1.0) -> tuple[float, float, float, f
     """
     if hex_color is None:
         raise ValueError("hex_color must be provided")
-    hex_color = hex_color.lstrip("#")
+    cleaned = hex_color.lstrip("#")
+    if len(cleaned) not in (6, 8):
+        raise ValueError(f"hex_color must contain 6 or 8 hex digits; got {hex_color!r}")
 
-    if len(hex_color) == 8:  # Has alpha component
-        r = int(hex_color[0:2], 16) / 255
-        g = int(hex_color[2:4], 16) / 255
-        b = int(hex_color[4:6], 16) / 255
-        a = int(hex_color[6:8], 16) / 255
+    if len(cleaned) == 8:  # Has alpha component
+        r = int(cleaned[0:2], 16) / 255
+        g = int(cleaned[2:4], 16) / 255
+        b = int(cleaned[4:6], 16) / 255
+        a = int(cleaned[6:8], 16) / 255
         return (r, g, b, a * alpha)
-    r = int(hex_color[0:2], 16) / 255
-    g = int(hex_color[2:4], 16) / 255
-    b = int(hex_color[4:6], 16) / 255
+    r = int(cleaned[0:2], 16) / 255
+    g = int(cleaned[2:4], 16) / 255
+    b = int(cleaned[4:6], 16) / 255
     return (r, g, b, alpha)
 
 

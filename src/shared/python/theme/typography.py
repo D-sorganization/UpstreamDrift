@@ -141,8 +141,8 @@ def get_qfont(
     """
     if size is None:
         raise ValueError("size must be provided")
-    if size is None:
-        raise ValueError("size must be provided")
+    if not isinstance(size, int) or size <= 0:
+        raise ValueError(f"size must be a positive int; got {size!r}")
     from PyQt6.QtGui import QFont
 
     font = QFont()
@@ -174,8 +174,8 @@ def get_display_font(size: int = Sizes.XL, weight: int = Weights.BOLD) -> "QFont
     """
     if size is None:
         raise ValueError("size must be provided")
-    if size is None:
-        raise ValueError("size must be provided")
+    if not isinstance(size, int) or size <= 0:
+        raise ValueError(f"size must be a positive int; got {size!r}")
     from PyQt6.QtGui import QFont
 
     font = QFont()
@@ -199,8 +199,8 @@ def get_mono_font(size: int = Sizes.BASE, weight: int = Weights.NORMAL) -> "QFon
     """
     if size is None:
         raise ValueError("size must be provided")
-    if size is None:
-        raise ValueError("size must be provided")
+    if not isinstance(size, int) or size <= 0:
+        raise ValueError(f"size must be a positive int; got {size!r}")
     from PyQt6.QtGui import QFont
 
     font = QFont()

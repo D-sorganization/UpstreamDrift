@@ -4404,3 +4404,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Pose studio actions: initialize undo/redo QActions on MainWidget and guard action refresh against uninitialized state (#8879).
 - GUI exception handling: catch and log unexpected slot exceptions in terrain engine and model explorer GUI tools (#8890).
 - Model Explorer: propagate load_model boolean success status to caller slots and guard status bar updates against failed loads (#9041).
+- Theme Colors dynamic token resolution: ensure declared class attributes on Colors (e.g. PRIMARY, BG_BASE, TEXT_PRIMARY, ACCENT) dynamically delegate to active theme palette via \_ColorsMeta.**getattribute** interception without shadowing theme updates (#9037).

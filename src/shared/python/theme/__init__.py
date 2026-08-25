@@ -45,8 +45,30 @@ from .colors import (
     is_valid_hex_color,
     normalise_hex_color,
 )
+from .palette import (
+    DARK_THEME,
+    SEMANTIC_ALIASES,
+    Colors,
+    ThemePalette,
+    get_current_colors,
+)
 from .protocols import StylesheetGenerator, ThemeProvider, ThemeSwitcher
 from .stylesheets import generate_minimal_stylesheet, generate_stylesheet
+from .typography import (
+    CSS_FONT_DISPLAY,
+    CSS_FONT_MONO,
+    CSS_FONT_UI,
+    FONT_STACK_DISPLAY,
+    FONT_STACK_MONO,
+    FONT_STACK_UI,
+    FontSizes,
+    FontWeights,
+    Sizes,
+    Weights,
+    get_display_font,
+    get_mono_font,
+    get_qfont,
+)
 
 # PyQt6-dependent imports - only available when PyQt6 is installed
 try:
@@ -162,6 +184,26 @@ __all__ = [
     "is_dark_theme",
     "is_valid_hex_color",
     "normalise_hex_color",
+    # Palette & Dynamic Colors
+    "DARK_THEME",
+    "SEMANTIC_ALIASES",
+    "Colors",
+    "ThemePalette",
+    "get_current_colors",
+    # Typography & Fonts
+    "CSS_FONT_DISPLAY",
+    "CSS_FONT_MONO",
+    "CSS_FONT_UI",
+    "FONT_STACK_DISPLAY",
+    "FONT_STACK_MONO",
+    "FONT_STACK_UI",
+    "FontSizes",
+    "FontWeights",
+    "Sizes",
+    "Weights",
+    "get_display_font",
+    "get_mono_font",
+    "get_qfont",
     # Stylesheet generation
     "generate_minimal_stylesheet",
     "generate_stylesheet",
