@@ -19,7 +19,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   `eb7076466152cbacd40a7f4d3fb9d92255d4ae43`. The current handoff commit is
   `SELF`. Full protected PR
   [#9046](https://github.com/D-sorganization/UpstreamDrift/pull/9046) is open,
-  closes #8752, requires human review, and must not use auto-merge.
+  advances but intentionally does not close #8752, requires human review, and
+  must not use auto-merge. #8800 remains an explicit #8752 completion blocker.
 - The current computational paper is 239 pages, 1,870,344 bytes, and has
   SHA-256 `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
   All pages render; 194 URI links and 247 outline entries validate. The PDF is
@@ -130,7 +131,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
    redundant reruns. The first check wave started on `f4eccd3a`; this handoff
    update intentionally supersedes it once.
 2. After merge, verify the merge commit is on remote `main`, update this handoff,
-   then make an explicit #8800 recovery-versus-fresh-execution decision.
+   then make an explicit #8800 recovery-versus-fresh-execution decision. Keep
+   #8752 open until #8800 produces the registered evidence or is explicitly
+   adjudicated under its own acceptance contract.
 
 ## Repository Rules
 
