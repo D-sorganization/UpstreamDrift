@@ -4376,3 +4376,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 - Starting pose matcher: `on_clear_overrides_clicked` prompts for confirmation and unconditionally restores original mocap events state on confirm (#8889).
 - Pose studio actions: initialize undo/redo QActions on MainWidget and guard action refresh against uninitialized state (#8879).
+- GUI exception handling: catch and log unexpected slot exceptions in terrain engine and model explorer GUI tools (#8890).
