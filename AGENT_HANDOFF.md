@@ -97,10 +97,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   analytical and articulated adapters, lossless bundles, scalar/rank/OAT,
   dispersion, and quiet-zone analysis are merged. Keep #8358 open because its
   broader UI, localized-perturbation, and presentation criteria remain unaudited.
-- #9027 is leased to Codex for its first bounded slice. The local
-  `research/9027-hybrid-system-contract` branch adds an executable eight-tier
-  hybrid topology authority; controller comparisons and diagnostic reports
-  remain future protected slices and no campaign or human analysis was run.
+- #9027's first bounded slice is in PR #9049 at `83aa75b84`. It adds an
+  executable eight-tier hybrid topology authority; controller comparisons and
+  diagnostic reports remain future protected slices and no campaign or human
+  analysis was run.
 - PR #9032 is open at `5edacb13c`; Standard CI passes, but optional-stack has
   a headless `DISPLAY` failure and human review remains absent.
 - Tools #4142 remains open. PR #4685 is recovered on current Tools `main` at
