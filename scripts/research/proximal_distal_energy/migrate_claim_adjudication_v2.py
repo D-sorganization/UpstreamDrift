@@ -19,10 +19,10 @@ PRE_ADJUDICATION_SOURCE_DIGEST = (
     "ad5a9e7338f9f8ef9517464f8c8cf9f70a2dc033de50312de760417438a1d6d5"
 )
 PRIOR_REVIEWED_SOURCE_DIGEST = (
-    "034692d69e1447ea0552c2d5a8f36c05299294c1f23635cd74e6690ad304815b"
+    "7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a"
 )
 REVIEWED_SOURCE_DIGEST = (
-    "7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a"
+    "ea406841c4a500dcab41d3b4ed1d7763ee0a2f9cf559d15041faa4036b31dfe7"
 )
 REVIEWED_CLAIM_COUNT = 303
 REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
@@ -34,7 +34,7 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
         "PD-CAND-87d26eacc282b21c",
         "PD-CAND-d2f2b5b07b466265",
         "PD-CAND-bcfcc2b3a9631de1",
-        "PD-CAND-bb48a75174a745ce",
+        "PD-CAND-b2e277593764ee20",
         "PD-CAND-fdcf5c685afbb41a",
         "PD-CAND-feff7c3d6f4ddc55",
         "PD-CAND-9519d7e6dfb308ef",
@@ -51,15 +51,9 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
         "PD-CAND-b5b2526e23b77d70",
     }
 )
-PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = REVIEWER_PROJECTION_CANDIDATE_IDS - {
-    "PD-CAND-b06a3cbe5b2d0e01",
-    "PD-CAND-f5697c26aed70275",
-    "PD-CAND-c6f7607002d58a93",
-} | {
-    "PD-CAND-1e8415652d3743aa",
-    "PD-CAND-585da748b9832879",
-    "PD-CAND-f0b8fbb7ca966f01",
-}
+PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = (
+    REVIEWER_PROJECTION_CANDIDATE_IDS - {"PD-CAND-b2e277593764ee20"}
+) | {"PD-CAND-bb48a75174a745ce"}
 
 # These sets are the exhaustive finding-level review authority for the locked
 # 303-claim snapshot. They are intentionally explicit: no claim can inherit an

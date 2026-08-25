@@ -3,126 +3,107 @@
 Last updated: 2026-08-24
 
 This file records current operational state, not history. Git and GitHub retain
-history. Epic #8557 is the single proximal-to-distal completion authority.
+history. Epic #8557 is the canonical proximal-to-distal completion authority.
 
 ## Repository Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
-  release bundle. AffineDrift is a generated, immutable, revision-pinned public
-  projection. Tools owns reusable consumers; do not copy its solver or UI
-  implementations into this repository or `vendor/ud-tools`.
-- UpstreamDrift remote `main` is
-  `228b9a5df130ac46954dd2c9431d795525003c58`. The normalized-claim authority
-  from PR #9018 remains an ancestor; issue #8724 is closed.
-- The current computational publication is 239 pages with SHA-256
-  `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
-  194 URI links, and 247 outline entries. All pages render and were inspected.
+  release bundle. AffineDrift is an immutable revision-pinned public
+  projection. Tools owns reusable consumers; do not copy implementations into
+  this repository or edit `vendor/ud-tools`.
+- Remote `main` is `3a5b9d630b38b6e017a3568dc638b22f9839b3c0`.
+- The computational paper is 239 pages with SHA-256
+  `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`.
   Archival qualification remains false because the PDF is untagged and retains
   Type 3 and unembedded font resources.
 
-## Active Structural Campaign and Recovery Boundary (#8800)
+## Numeric Claim Audit (#8918)
 
-- ControlTower prepared clean source commit
-  `1bd4d57da7bd257b76b42b3cc19524b283b5f748`, image
-  `sha256:b40d91fe2326c5fae288e4a853377fb164aa0a6ba1de62cb28aba15d65500a1e`,
-  plan file SHA-256
-  `2bddb125492e907acc827e1dbf4cb43b9724e73087679cbf4113bcf96824b120`,
-  and plan-contract SHA-256
-  `c5cfba35ecafa96054ef8cc872f2e91a9f7855db0b93cfa491f9b18ee3db80f4`.
-- The campaign used two workers and two CPUs. Shaft is complete at 48/48
-  atomic checkpoints; ground has 45/48. The 93 checkpoint files and completed
-  shaft artifacts remain on the ControlTower C: drive under
-  `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
-- Status remains `running`, has no retained execution failures, and explicitly
-  reports `release_evidence=false`. Partial checkpoints are resume evidence,
-  not scientific release evidence.
-- WSL cannot currently mount
-  `F:\WSL\ControlTower-SSD\ext4.vhdx`; Windows reported the file corrupted and
-  unreadable (`0x80070570`). Both WSL distributions are stopped. Tailscale SSH
-  to ControlTower remains available.
-- Do not retry WSL, run CHKDSK, repair or mount the VHDX, restart Windows
-  services, create a replacement campaign, or alter frozen source or plans
-  without an explicit recovery and recoverability decision. Preserve the VHDX
-  and C: checkpoints. After recovery, verify identities and resume only the
-  three missing ground branches before complete-set and digest qualification.
+- Worktree: `UpstreamDrift-worktrees/8918-numeric-claim-audit`; branch:
+  `fix/8918-numeric-claim-audit`; base: exact remote `main` above.
+- Status: protected PR #9042 is open for required human review. Its first full
+  protected run passed 11,816 tests except the deterministic adjudication
+  freshness gate. The canonical summary, 1,100-candidate inventory, reviewed
+  migration lock, integrity records, and release hashes are now refreshed;
+  73 focused tests pass serially.
+- All 303 material claims are covered. The 124 numeric claims contain 380
+  numeric literals, each bound to a reviewed JSON Pointer, transform, scope,
+  and tolerance. Exact statement digests and literal inventories fail closed.
+- Evidence scopes deliberately distinguish 172 semantically matched local JSON
+  values, 144 registered claim values not independently recomputed, 57
+  reported external values, and seven protocol or notation values.
+- Pointer agreement is not physical validation. Four representative headline
+  tests independently recompute planar, spatial, articulated-shaft, and
+  finite-ground quantities from committed CSV/NPZ arrays.
+- Cross-engine spatial comparison uses independently stored arrays and must be
+  close but nonidentical. Exact-zero parity is rejected as degenerate.
+- Release validation covers 2,232 evidence references, 321 local artifacts, 78
+  external URLs, and a 600-artifact computational bundle.
+- The maintainer scaffold is not a release generator. It proposes conservative
+  semantic matches for protected review and falls back to explicitly weaker
+  ledgers rather than inventing source authority.
 
-## Normalized Claim Adjudication (#8724)
+## Completed and Incomplete Campaigns
 
-- Protected PR #9018 is merged on remote `main` as
-  `9e220712025564caf0ac5201a0ddcf69dd98299e`; #8724 is closed.
-- The authority contains 1,100 reviewed narrative candidates and 303 material
-  claims: 283 supported only within declared estimands and boundaries, five
-  inconclusive, 15 untested, and zero contradicted. Supported claims may report
-  null, mixed, or adverse findings; the count does not imply theory survival.
-- The schema and snapshot-locked migration require explicit normalized
-  outcomes, typed locators, reciprocal mappings, falsifiers, source digests,
-  reasons, reviewer identity, dates, and supported-scope contradiction checks.
-  Unfamiliar claims fail closed.
-- Reviewer JSON, CSV, and paper tables separately report normalized outcome,
-  evidence tier, source independence, model tier, unresolved replication, and
-  claim-family source concentration. Model evidence is never promoted to human
-  validation.
-- Deterministic release evidence covers 2,130 evidence references, 319 local
-  artifacts, 78 external URLs, and a 592-artifact release bundle. The merged
-  head passed 63 focused tests plus standard, optional-stack, publication,
-  security, title-case, file-size, architecture, Ruff, MyPy, and Bandit gates.
+- #8752 completed on ControlTower at source commit
+  `13146cdcece879e7156e06e2dca6626c1a54e045`; terminal evidence is committed on
+  `origin/research/8752-articulated-uncertainty` at
+  `2fa6cf8861eeaf7ae111dd8dd18c4053a9f82e65`. The computation completed, but
+  terminal publication integration is not yet an ancestor of remote `main`.
+- #8800 did not complete. The registered campaign requires 830 atomic
+  checkpoints across 83 feasible states: 332 shaft and 498 ground. Current
+  evidence is 93/830: nominal shaft 48/48 and nominal ground 45/72. No campaign
+  Python process is running; persisted `state=running` is stale and
+  `release_evidence=false`.
+- Preserve #8800 source, plan identities, 93 checkpoints, and the corrupted
+  ControlTower WSL VHDX. Do not claim three missing branches or a 45/48 ground
+  denominator; 737 registered checkpoints remain absent.
 
-## Measured-Trajectory and Human-Evidence Boundaries
+## Human-Evidence Boundaries
 
-- PR #9017 is merged at
-  `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`. It provides fail-closed
-  participant split, processing, frame-transform, and event-detector
-  authorities for #9004.
-- #9004 remains open because no qualifying governed participant trajectory
-  dataset or held-out human outcome is registered. Simscape exports, fixtures,
-  tutorials, GolfDB labels, and launch-monitor records are not substitutes.
+- #9004 remains open because no governed participant trajectory dataset or
+  held-out human outcome is registered. Simscape exports, fixtures, tutorials,
+  GolfDB labels, and launch-monitor records are not substitutes.
 - #8556 remains externally blocked by the absence of governed synchronized
-  bilateral six-axis grip-wrench participant data. Synthetic traces and
-  paper-level curves must never substitute for human validation.
-
-## Other Active Dependencies
-
-- #8800 propagates height, body-mass, and joint-limit bounds through both
-  headline atlases and blocks the final #8752/#8668 audit.
-- #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
-  Verify each issue's exact acceptance evidence before changing state.
-- Tools PR #4669 is open at exact head
-  `36f4b1add2bc72cea87bd9f87d36b232db76d50b` with squash auto-merge requested;
-  do not pin it before protected merge. Its final suite exposed an
-  UpstreamDrift provider-mode test isolation defect, corrected in protected
-  PR #9022. Tools #4142 remains open until immutable UpstreamDrift consumption
-  and R10–R15 qualification are complete.
-- AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;
-  do not project a moving or partial campaign.
-- #8963 architecture debt remains separate from the frozen campaign source.
-  Do not merge or regenerate source-bound spatial evidence until campaign
-  integration removes the source-lock conflict.
+  bilateral six-axis grip-wrench participant data.
+- Synthetic evidence never substitutes for unavailable human validation.
+  Model results do not establish anatomy, physiology, equipment calibration,
+  injury, coaching strategy, or a universal speed benefit.
 
 ## Scientific Boundaries
 
-- The model ladder is synthetic and model-conditional. It does not establish
-  participant mechanics, anatomy, physiology, equipment calibration, injury,
-  coaching strategy, or a universal speed benefit.
 - Distinguish energy transfer, momentum redistribution, joint work, constraint
   forces, and clubhead speed. Preserve falsifiers, adverse cases,
   identifiability limits, uncertainty, countermodels, and unavailable states.
+- A supported registry outcome means only that the declared estimand survives
+  its registered evidence and boundary. It may still describe null, mixed, or
+  adverse findings and does not imply theory confirmation.
 
 ## Repository and Review Rules
 
 - PRs target `main`; use full PRs, never drafts. Human review is required.
 - Never force-push, admin-merge, bypass hooks/checks, add quarantine debt, or
-  edit `vendor/ud-tools`.
-- Use TDD, DbC, DRY, and LoD. Edit canonical sources and regenerate governed
-  artifacts. Use title case for document headings and captions.
+  edit generated/vendor authority by hand.
+- Use TDD, DbC, DRY, and LoD. Edit canonical sources, regenerate governed
+  artifacts, and use Title Case for document headings and captions.
+- Run resource-intensive tests serially on DeskComputer. Dispatch checkpointed
+  campaigns to ControlTower only through reviewed, recoverable plans.
 - Verify exact PR head, reviews, checks, merge SHA, remote-main ancestry, and a
   clean worktree before reporting completion.
 
 ## Focused Validation
 
 ```powershell
+python -m scripts.research.proximal_distal_energy.build_claim_numeric_comparison_evidence check
+python -m scripts.research.proximal_distal_energy.register_numeric_claim_evidence check
+python -m scripts.research.proximal_distal_energy.claim_audit numeric
 python -m scripts.research.proximal_distal_energy.claim_audit validate
+python -m scripts.research.proximal_distal_energy.claim_adjudication_summary validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
-python -m scripts.research.proximal_distal_energy.qualify_open_release validate
+python -m scripts.research.proximal_distal_energy.release_claim_review validate
+python -m scripts.research.proximal_distal_energy.external_source_review validate
+python -m scripts.research.proximal_distal_energy.qualify_open_release validate --source-revision (git rev-parse HEAD) --publication-profile computational
+python -m pytest tests/unit/research/test_proximal_distal_claim_audit.py tests/unit/research/test_claim_adjudication_summary.py tests/unit/research/test_claim_numeric_audit.py tests/unit/research/test_register_numeric_claim_evidence.py tests/unit/research/test_scaffold_numeric_claim_contracts.py tests/research/test_claim_numeric_registry.py tests/research/test_claim_headline_recomputation.py -q -n 0 --timeout=120
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
 ```

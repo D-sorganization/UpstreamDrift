@@ -20,6 +20,10 @@ import subprocess
 from typing import Any
 from urllib.parse import urlparse
 
+from scripts.research.proximal_distal_energy.claim_numeric_audit import (
+    audit_registry_numeric_evidence,
+)
+
 SCHEMA_VERSION = "proximal-distal-claim-audit-v2"
 ADJUDICATION_OUTCOMES = frozenset(
     {"supported", "contradicted", "inconclusive", "untested"}
@@ -277,6 +281,14 @@ def build_candidate_inventory(
         "candidate_count": len(candidates),
         "candidates": candidates,
     }
+
+
+def write_candidate_inventory(output: Path, inventory: dict[str, Any]) -> None:
+    """Write the canonical inventory without escaping scientific Unicode."""
+    output.write_text(
+        json.dumps(inventory, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _require_list(record: dict[str, Any], field: str, claim_id: str) -> None:
@@ -747,6 +759,9 @@ def main() -> None:
     inventory_parser = subparsers.add_parser("inventory", help="Write claim candidates")
     inventory_parser.add_argument("--output", type=Path)
     subparsers.add_parser("validate", help="Validate the claim registry")
+    subparsers.add_parser(
+        "numeric", help="Validate numeric literals against declared JSON pointers"
+    )
     args = parser.parse_args()
 
     root = _repository_root()
@@ -754,14 +769,21 @@ def main() -> None:
     if args.command == "inventory":
         output = args.output or default_output
         result = build_candidate_inventory(master, repository_root=root)
-        output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        write_candidate_inventory(output, result)
         print(
             json.dumps(
                 {"output": output.as_posix(), "candidates": result["candidate_count"]}
             )
         )
-    else:
+    elif args.command == "validate":
         print(json.dumps(validate_registry(registry, repository_root=root), indent=2))
+    else:
+        print(
+            json.dumps(
+                audit_registry_numeric_evidence(registry, repository_root=root),
+                indent=2,
+            )
+        )
 
 
 if __name__ == "__main__":

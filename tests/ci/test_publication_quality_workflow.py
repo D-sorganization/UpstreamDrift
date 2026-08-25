@@ -38,6 +38,7 @@ def test_publication_paths_drive_a_dedicated_protected_job() -> None:
     assert 'echo "publication=true" >> "$GITHUB_OUTPUT"' in detect
     assert publication["needs"] == ["pick-runner", "changed-paths"]
     assert publication["if"] == "needs.changed-paths.outputs.publication == 'true'"
+    assert "numpy>=1.26.0" in text
     assert "pymupdf>=1.26.0" in text
     assert "pikepdf>=10.0.0" in text
 
