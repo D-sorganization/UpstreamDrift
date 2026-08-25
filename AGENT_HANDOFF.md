@@ -77,11 +77,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   `release_evidence=false`; no campaign process is running.
 - Reconciliation regenerated the governed seven-corner plan against current
   source. New design SHA-256 is
-  `d50568a8df8fecee2da4285458bc5373d41389924ba9730713224658f72c7d5a` and
+  `c3d47a118aa043e72734255ef4127a57c21234823adda83f6b755cafaba2b11c` and
   contract SHA-256 is
-  `438bc0078358597d64893f71a73e64da29a9398cd23fea9e7e3b07522615c52e`.
+  `99f663c0e664b19e9215b9f3bf6635fd6dc02fc22bff9148321d4a14d88eb944`.
   The deterministic plan-file SHA-256 is
-  `59a6a0cbacffbf55ab1a4c3d6fa68bded66f4960a69402718db72c632743bbf7`.
+  `d0fb9af7f6a9778394feb62ea93c1a4ba26d8284c1aed388487d559934e7b715`.
   The prior partial checkpoints were created under different plan/source
   identities and must not be reused as release evidence or resumed without an
   explicit recovery/restart decision and exact checkpoint revalidation.
@@ -106,8 +106,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Current Validation
 
-- PR #9046 head `2b7a70135469f720a5005da766e4d6fee544936f` remains open,
-  mergeable, human-review gated, and without auto-merge. Its first protected
+- PR #9046 remains open, mergeable, human-review gated, and without auto-merge.
+  Its first protected
   wave passed publication, architecture, size, DRY, security, dependency, Rust,
   and document gates; the correction addresses every remaining CI failure.
 - The local correction fetches the registered campaign source commit explicitly
@@ -118,16 +118,16 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   boundaries only when claim ID, literal ID, and statement digest match;
   statement drift forces fresh scaffolding. Registered numeric documents remain
   byte-authoritative instead of being rerouted to semantically weaker values.
-- The 56-test affected-model/claim suite, separate 56-test release/evidence/PDF
-  suite, and 38 governance tests pass serially. Qualification validates 653
-  artifacts, 410 literals, 2,333 references, 78 URLs, and 239 PDF pages.
+- The plan-bound structural suite passes, with native restart skipped on this
+  host's unqualified Pinocchio module. The two 56-test affected/release suites
+  and 38 governance tests pass. Qualification covers 653 artifacts, 410
+  literals, 2,333 references, 78 URLs, and 239 PDF pages.
 - Ruff check/format, PR-delta title case, tracked-file budget, SPEC paths,
   workflow governance, document catalog, and document-size gates pass. One
   owned exception through 2026-09-30 retains the 51,523-byte spatial locator
   chapter until post-#8752 migration; the 51,200-byte default remains.
-- Computational qualification remains 239 rendered pages and archival
-  qualification remains intentionally false. The seven pre-existing #8752
-  orchestration/API exceptions still expire 2026-09-30 under issue #8963.
+- Computational qualification remains true and archival qualification false.
+  Seven #8752 orchestration/API exceptions expire under #8963 on 2026-09-30.
 
 ## Immediate Next Actions
 

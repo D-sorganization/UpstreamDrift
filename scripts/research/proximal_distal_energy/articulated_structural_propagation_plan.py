@@ -23,6 +23,9 @@ from scripts.research.proximal_distal_energy.articulated_shaft_atlas import (
     ArticulatedShaftAtlasConfig,
     SOURCE_PATHS as SHAFT_SOURCE_PATHS,
 )
+from scripts.research.proximal_distal_energy.release_bundle import (
+    canonical_artifact_bytes,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
@@ -78,7 +81,9 @@ SOURCE_PATHS = tuple(
 
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """Hash text portably and retain byte-exact binary authority."""
+
+    return hashlib.sha256(canonical_artifact_bytes(path)).hexdigest()
 
 
 def _serialized(record: dict[str, Any]) -> bytes:

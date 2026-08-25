@@ -622,7 +622,7 @@
       "bytes": 27139
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_propagation_plan.json": {
-      "sha256": "59a6a0cbacffbf55ab1a4c3d6fa68bded66f4960a69402718db72c632743bbf7",
+      "sha256": "d0fb9af7f6a9778394feb62ea93c1a4ba26d8284c1aed388487d559934e7b715",
       "bytes": 40698
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json": {
@@ -2094,8 +2094,8 @@
       "bytes": 6305
     },
     "scripts/research/proximal_distal_energy/articulated_structural_propagation_plan.py": {
-      "sha256": "d2bbb92f9483cf34b7303af73de0c6e4cddce76432ec89ff9b40f53ab19e73e7",
-      "bytes": 26994
+      "sha256": "331be3dd451ac1edb3d0b07331434d5f1dc773d958c598e8f24c8e28eb461f4d",
+      "bytes": 27178
     },
     "scripts/research/proximal_distal_energy/articulated_structural_publication.py": {
       "sha256": "97eefd74745b22dd0321d39004086ec63926467fc777e649f4aaedb5bf7e5229",

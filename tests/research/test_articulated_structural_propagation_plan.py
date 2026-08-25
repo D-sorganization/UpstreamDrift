@@ -10,6 +10,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_propagation_plan import (
     CAMPAIGN,
+    _sha256,
     build_structural_propagation_plan,
     validate_structural_propagation_plan,
     write_structural_propagation_plan,
@@ -22,6 +23,15 @@ COMMITTED = (
     / "docs/research/proximal_distal_energy_transfer/data"
     / "articulated_structural_propagation_plan.json"
 )
+
+
+def test_source_hash_is_portable_across_text_newlines(tmp_path: Path) -> None:
+    crlf = tmp_path / "crlf.py"
+    lf = tmp_path / "lf.py"
+    crlf.write_bytes(b"value = 1\r\nprint(value)\r\n")
+    lf.write_bytes(b"value = 1\nprint(value)\n")
+
+    assert _sha256(crlf) == _sha256(lf)
 
 
 def _first_difference(left, right, path: str = "$") -> str | None:

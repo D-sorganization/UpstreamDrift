@@ -554,7 +554,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.585                                            |
+| **Spec Version**        | 1.0.586                                            |
 | **Last Spec Update**    | 2026-08-25                                         |
 
 ## 2. Purpose & Mission
@@ -585,6 +585,15 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ## 4. Architecture Overview
 
 ### Recent Spec Updates
+
+- **2026-08-25** - Made #8800 structural-plan source identity portable across
+  Windows and Linux by applying the release authority's LF canonicalization to
+  declared text sources while retaining byte-exact binary hashes. A regression
+  proves CRLF/LF equivalence. The native restart test now qualifies robotics
+  Pinocchio rather than accepting an unrelated same-name package. The governed
+  plan was regenerated; its scientific design and contract identities changed
+  because those source hashes are deliberately part of execution identity, but
+  the registered seven-corner scope and unexecuted evidence boundary did not.
 
 - **2026-08-25** - Reconciled #8752's terminal articulated uncertainty
   campaign with the 313-claim publication authority. The protected record now
@@ -3257,6 +3266,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-25 | 1.0.586 | Made #8800 structural-plan hashing portable by canonicalizing declared text sources to LF while retaining binary bytes exactly, with CRLF/LF regression coverage. The native restart test now requires a qualified robotics Pinocchio module instead of treating the unrelated PyPI name collision as engine availability. Regenerated plan identities remain execution contracts only; they do not promote the 93/830 obsolete checkpoints or imply completed structural propagation. |
 | 2026-08-25 | 1.0.585 | Reconciled #8752's terminal articulated uncertainty evidence with the 313-claim paper. The 19-corner campaign and retained failures remain source-revision bound; matched-set movement is explicitly non-promotional. Claim migration now recognizes the exact 1,126-candidate, 313-claim reviewed snapshot and all ten supported terminal claims. Numeric scaffolding preserves protected-review local pointers and custom reported-value boundaries only for unchanged statement digests. Shallow CI checkouts fetch the registered campaign revision before scientific tests, the structural-result tamper test performs a non-no-op mutation, and locked club coordinates allow only eight binary64 epsilons of platform roundoff. The spatial claim-locator chapter retains an owned size exception through 2026-09-30 pending post-#8752 locator migration. #8800 remains open because obsolete 93/830 checkpoints do not satisfy the current source and plan. |
 | 2026-08-24 | 1.0.584 | Kept the Pendulum Simulator module version probe independent of GUI initialization. Runtime imports of diagnostics and `MainWindow` now occur only on docked or standalone GUI launch, so `python -m shared.python.pendulum_simulator --version` does not transitively load MuJoCo/OpenGL on headless systems. A subprocess regression deliberately blocks `gui.main_window` and requires the version command to succeed; normal launcher behavior remains covered on Python 3.11 and 3.13. |
 | 2026-08-24 | 1.0.583 | Added the #8358 immutable Tools variation-consumer boundary. UpstreamDrift now delegates deterministic sampling, canonical JSON/CSV/HDF5 persistence, scalar and noncausal rank/OAT summaries, common-grid dispersion, and quiet-zone mathematics to protected Tools commit `17474249b9267d0e73a779c1d72f231e7b8de39c`. Host-owned adapters retain complete typed hit, no-impact, numerical-failure, and partial-trace rows across serial and batched execution; analytical double-pendulum and articulated MuJoCo mappings preserve stable marker, frame, unit, plan, seed, model, source, and bilateral shoulder/wrist allocation evidence. Cross-engine ranking fails closed on semantic or tolerance mismatch, and current architecture budgets pass without exceptions. This is reusable model evidence, not participant or coaching validation. |
