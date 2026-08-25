@@ -24,6 +24,10 @@ from .claim_evidence_integrity import (
     build_claim_evidence_manifest,
     validate_claim_evidence_manifest,
 )
+from .build_claim_numeric_comparison_evidence import (
+    validate_record as validate_numeric_comparison,
+)
+from .claim_numeric_audit import audit_registry_numeric_evidence
 from .external_source_review import (
     REVIEW_REL as EXTERNAL_SOURCE_REVIEW_REL,
     validate_external_source_review,
@@ -35,6 +39,8 @@ from .release_bundle import (
     validate_release_manifest,
 )
 from .release_claim_review import validate_review
+from .register_numeric_claim_evidence import REGISTRY as CLAIM_REGISTRY
+from .register_numeric_claim_evidence import register as register_numeric_claim_evidence
 from .publication_quality import (
     EXPECTED_AUTHOR,
     EXPECTED_TITLE,
@@ -103,6 +109,17 @@ def _write_publication_report(path: Path | None, report: dict[str, object]) -> N
     path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
 
+def _validate_numeric_claims() -> dict[str, object]:
+    registration = register_numeric_claim_evidence(check=True)
+    comparison = validate_numeric_comparison()
+    audit = audit_registry_numeric_evidence(CLAIM_REGISTRY, repository_root=ROOT)
+    return {
+        "registration": registration,
+        "comparison": comparison,
+        "audit": audit,
+    }
+
+
 def main() -> None:
     """Execute the release qualification action."""
     args = _parser().parse_args()
@@ -110,6 +127,7 @@ def main() -> None:
     manifest_path = ROOT / ARTICLE_REL / "release_manifest.json"
     if action == "write":
         validate_review()
+        _validate_numeric_claims()
         claim_manifest_path = ROOT / CLAIM_EVIDENCE_MANIFEST_REL
         claim_manifest = build_claim_evidence_manifest(ROOT)
         external_review = json.loads(
@@ -154,6 +172,7 @@ def main() -> None:
     if action == "validate":
         validate_review()
         result = validate_release_manifest(ROOT, manifest)
+        result["numeric_claims"] = _validate_numeric_claims()
         claim_manifest_path = ROOT / CLAIM_EVIDENCE_MANIFEST_REL
         claim_manifest = json.loads(claim_manifest_path.read_text(encoding="utf-8"))
         result["claim_evidence"] = validate_claim_evidence_manifest(

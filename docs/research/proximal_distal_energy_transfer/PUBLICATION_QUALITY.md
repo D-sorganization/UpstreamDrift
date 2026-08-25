@@ -95,6 +95,44 @@ publication; it currently fails closed on the disclosed accessibility gaps.
 The generated JSON report is runtime evidence and is not committed into the
 self-hashed release bundle.
 
+## Numeric Claim Verification Boundary
+
+The protected computational profile runs a second, executable numeric layer in
+addition to claim-schema and artifact-integrity checks. Every numeral in every
+material claim statement is bound to a reviewed JSON Pointer, unit transform,
+and tolerance in `data/claim_numeric_contracts.json`. Exact statement digests
+and literal inventories fail closed when prose changes, and the registered
+claim records store the resulting `numeric_evidence` pointer maps. The release
+gate is:
+
+```bash
+python3 -m scripts.research.proximal_distal_energy.build_claim_numeric_comparison_evidence check
+python3 -m scripts.research.proximal_distal_energy.register_numeric_claim_evidence check
+python3 -m scripts.research.proximal_distal_energy.claim_audit numeric
+```
+
+The pointer gate verifies that claim text agrees with the declared registered
+value. It does **not** establish that a cited paper is correct, that a model is
+physically adequate, or that a JSON result independently reproduces the
+underlying mechanics. Its evidence scopes preserve that distinction:
+
+- `local_json_value` addresses a semantically matched value in a declared
+  project JSON artifact;
+- `reported_external_value` is an explicitly non-independent transcription
+  from a linked source;
+- `registered_protocol_or_notation` covers notation or a declared protocol
+  constant rather than an empirical result; and
+- `registered_claim_value_not_independently_recomputed` makes a reviewed value
+  addressable when no unambiguous semantic JSON path exists, while explicitly
+  withholding independent recomputation.
+
+Representative planar, spatial, articulated-shaft, and finite-ground headline
+scalars are separately recomputed from committed CSV/NPZ arrays in
+`tests/research/test_claim_headline_recomputation.py`. Cross-engine array
+comparison evidence must be close but nonidentical; exact-zero parity is
+rejected as degenerate. These tests reduce the former register/self-report
+loop, but they remain model-conditional and are not human validation.
+
 ## Protected Publication Contract
 
 CI Standard's dedicated `publication-quality` job installs the release-only PDF

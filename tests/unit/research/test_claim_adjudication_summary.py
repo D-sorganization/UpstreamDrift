@@ -94,3 +94,11 @@ def test_reviewer_chapter_has_pdf_breaks_and_wrappable_family_rows() -> None:
         "tuple is project only / one independent work / two or more independent works"
         in chapter
     )
+
+
+@pytest.mark.unit
+def test_byte_governed_summary_is_excluded_from_prettier() -> None:
+    root = Path(__file__).resolve().parents[3]
+    precommit = (root / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+
+    assert "|claim_adjudication_summary|claim_audit_registry|" in precommit

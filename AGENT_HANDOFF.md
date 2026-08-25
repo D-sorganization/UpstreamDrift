@@ -1,131 +1,144 @@
-# Agent Handoff — Proximal-Distal Program
+# Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
-## Canonical Authority
+This file records current operational state, not history. Git and GitHub retain
+history. Epic #8557 is the single proximal-to-distal completion authority.
 
-- Epic #8557 is the single completion authority. UpstreamDrift owns scientific
-  sources, models, evidence registers, claims, and release artifacts.
-  AffineDrift publishes an immutable revision-pinned projection. Tools owns
-  reusable consumers; do not copy its implementations into UpstreamDrift or
-  edit `vendor/ud-tools`.
-- Preserve the distinction between mechanics, model-conditional results,
-  empirical context, provisional interpretation, and unavailable human data.
-  Synthetic traces never substitute for participant validation.
-- UpstreamDrift requires human review. Never force-push, admin-merge, bypass
-  checks, add quarantine debt, or change shared runners to force progress.
+## Repository Authority
 
-## Active #9026 Evidence Bridge
-
-- Worktree:
-  `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9026-biomechanics-evidence-bridge`.
-  Branch: `research/9026-biomechanics-evidence-bridge`.
-- Machine authorities are
-  `data/biomechanics_source_register.json` and
-  `data/biomechanics_evidence_bridge.json`. The source register covers 16
-  independently authored works and 16 anatomical, apparatus, population,
-  equipment, and task domains. The bridge covers seven modalities, nine
-  mechanisms, 41 linked claims, and nine transport dimensions.
-- Bilateral allocation remains structurally unidentified without independent
-  bilateral six-axis measurements. Human validation remains externally
-  blocked. Five of seven modalities retain explicit source/data gaps.
-- The paper and reviewer projections are generated and freshness checked.
-  Dense paper tables were replaced with wrapped records; reviewer Markdown
-  retains the full tables. PDF pages 166--187 were rasterized and visually
-  inspected with no overlap or clipping.
-- Claim inventory reviews 1,137/1,137 candidates through 304 claims: 284
-  supported, 5 inconclusive, and 15 untested. `PD-CLAIM-305` binds the bridge
-  chapter to local digest authorities. It deliberately does not treat all 16
-  papers as direct support for the umbrella bridge claim.
-- The evidence manifest validates 2,139 references, 328 local artifacts, and
-  78 externally adjudicated URLs. The release validates 600 artifacts.
-- The optimized paper is 245 pages, 1,897,607 bytes, SHA-256
+- UpstreamDrift owns scientific sources, models, evidence registers, and the
+  release bundle. AffineDrift is a generated, immutable, revision-pinned public
+  projection. Tools owns reusable consumers; do not copy its solver or UI
+  implementations into this repository or `vendor/ud-tools`.
+- UpstreamDrift remote `main` is
+  `501ac302d112cb3447b3a23a92706648bacb3888`. The normalized-claim authority
+  from PR #9018 remains an ancestor; issue #8724 is closed.
+- The current computational publication is 245 pages with SHA-256
   `16e5e16b1c5d539135e48c8211ad7080491f2721b59559319729690fc4ffe4ac`,
-  with 197 URI links, 248 outline entries, fast-web access, and extractable
-  text on every page. Computational qualification passes. Archival
-  qualification remains false because the PDF is untagged and retains Type 3
-  and two unembedded font resources.
-- A bibliography defect was corrected: `deRugy2018` now identifies Borzelli et
-  al., DOI `10.1371/journal.pone.0205911`, rather than unrelated DOI
-  `10.1371/journal.pone.0205538`. Higdon et al. fatigue metadata was added.
-- Local focused gates pass: 21 bridge tests, 55 final claim/release/PDF tests,
-  Ruff, title capitalization, file-size budget, all-page rendering, and exact
-  release qualification. Source-register digests reuse canonical release bytes,
-  with a line-ending regression test preventing Windows/Linux drift. The branch
-  is rebased onto remote main
-  `76bf6ab1d`; PR #9032 is open. Shepherd its exact head through protected CI
-  and human review, then verify its merge commit on remote main.
+  197 URI links and 248 outline entries. All pages render and were inspected.
+  Archival qualification remains false because the PDF is untagged and retains
+  Type 3 and unembedded font resources.
 
-## ControlTower #8800 Recovery Boundary
+## Active Structural Campaign and Recovery Boundary (#8800)
 
-- Tailscale and noninteractive SSH from Deskcomputer are verified. A separate
-  Codex session on ControlTower is unnecessary.
-- Campaign `UpstreamDrift-8800-1bd4d57da` is stopped. No campaign Python
-  process is running. The status file saying `running` is stale.
-- Windows checkpoints are preserved: shaft 48/48 and ground 45/48. The frozen
-  launch authority binds source
+- Separate #8752 constitutive uncertainty completed on ControlTower and was
+  transferred at branch commit `2fa6cf886`; it is not yet on remote `main`.
+- #8800 uses clean source commit
   `1bd4d57da7bd257b76b42b3cc19524b283b5f748`, image
   `sha256:b40d91fe2326c5fae288e4a853377fb164aa0a6ba1de62cb28aba15d65500a1e`,
-  two workers, two CPUs, 56 GB RAM, and atomic pathway checkpoints.
-- `ControlTower-SSD` is stopped. Windows previously reported its approximately
-  342 GiB `F:\WSL\ControlTower-SSD\ext4.vhdx` as corrupted and unreadable
-  (`0x80070570`). Preserve the VHDX and C: checkpoints.
-- Do not retry WSL, run CHKDSK, repair/mount the VHDX, restart services, or
-  resume the campaign without explicit approval of the VHDX safety copy,
-  recovery, and one-worker resume. After recovery, verify all 93 checkpoints
-  and run only the three missing ground evaluations.
+  plan file SHA-256
+  `2bddb125492e907acc827e1dbf4cb43b9724e73087679cbf4113bcf96824b120`,
+  and plan-contract SHA-256
+  `c5cfba35ecafa96054ef8cc872f2e91a9f7855db0b93cfa491f9b18ee3db80f4`.
+- #8800 used two workers/two CPUs. Nominal shaft is 48/48 and nominal ground
+  45/72; the full seven-corner plan is only 93/830, with 737 checkpoints absent.
+  The checkpoints and nominal shaft artifact remain under
+  `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
+- The persisted status saying `running` is stale; no campaign process is
+  running and `release_evidence=false`. Partial checkpoints are resume
+  evidence, not scientific release evidence.
+- WSL cannot currently mount
+  `F:\WSL\ControlTower-SSD\ext4.vhdx`; Windows reported the file corrupted and
+  unreadable (`0x80070570`). Both WSL distributions are stopped. Tailscale SSH
+  to ControlTower remains available.
+- Do not retry WSL, run CHKDSK, repair or mount the VHDX, restart Windows
+  services, create a replacement campaign, or alter frozen source or plans
+  without an explicit recovery and recoverability decision. Preserve the VHDX
+  and C: checkpoints. After recovery, verify identities, finish 27 nominal
+  ground branches, then qualify the remaining registered structural corners.
 
-## Headless Visualization Correction
+## Normalized Claim Adjudication (#8724)
 
-- The optional-stack run on PR #9032 exposed a deterministic Linux failure in
-  `test_plot_grf_and_com_3d`: importing `matplotlib.pyplot` selected an
-  interactive backend and raised `RuntimeError: Invalid DISPLAY variable`.
-- The visualization now constructs `matplotlib.figure.Figure` directly. A
-  regression test rejects any future `pyplot` dependency in this module.
-- Focused verification on 2026-08-24: 3 tests passed with `-n 0`; Ruff check
-  and format checks passed. This correction is local until the runner drain is
-  complete; push it once without creating a redundant rerun beforehand.
+- Protected PR #9018 is merged on remote `main` as
+  `9e220712025564caf0ac5201a0ddcf69dd98299e`; #8724 is closed.
+- The reconciled #9026 authority contains 1,137 reviewed narrative candidates
+  and 304 material claims: 284 supported only within declared boundaries, five
+  inconclusive, 15 untested, and zero contradicted. Supported claims may report
+  null, mixed, or adverse findings; the count does not imply theory survival.
+- The schema and snapshot-locked migration require explicit normalized
+  outcomes, typed locators, reciprocal mappings, falsifiers, source digests,
+  reasons, reviewer identity, dates, and supported-scope contradiction checks.
+  Unfamiliar claims fail closed.
+- Reviewer JSON, CSV, and paper tables separately report normalized outcome,
+  evidence tier, source independence, model tier, unresolved replication, and
+  claim-family source concentration. Model evidence is never promoted to human
+  validation.
+- Deterministic release evidence covers 2,241 evidence references, 330 local
+  artifacts, 78 external URLs, and a 608-artifact release bundle. The current
+  candidate passed 66 focused tests plus the full pre-push gate; protected CI
+  must rerun on the reconciled head.
 
-## Dependencies and Open Scientific Gates
+## Measured-Trajectory and Human-Evidence Boundaries
 
-- Upstream PR #9022 merged as remote-main commit `76bf6ab1d`; its provider-mode
-  isolation and recovery record must remain.
-- PR #9017 merged at `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`
-  and supplies fail-closed participant split, processing, frame-transform, and
-  event authorities for #9004.
-- #9004 remains open without a qualifying governed participant trajectory.
-  #8556 remains open without synchronized participant-level bilateral six-axis
-  grip wrenches. Simscape exports, fixtures, tutorials, and paper curves are
-  not substitutes.
-- #8800 blocks the final #8752/#8668 audit until its complete checkpoint set is
-  recovered and qualified. Preserve adverse/null results.
-- Tools protected work remains dependency ordered. Do not create redundant
-  reruns for unchanged capacity-bound work, and do not pin a Tools revision
-  until its protected merge is verified. Staged consumer worktree
-  `8358-tools-variation-adapter-prep` remains unpublishable until dependencies
-  merge. AffineDrift #3930 remains downstream of a qualified UpstreamDrift
-  release; never project a moving or partial campaign.
-- The model ladder is synthetic and conditional. It does not establish human
-  mechanics, anatomy, physiology, injury, equipment calibration, coaching
-  strategy, or a universal speed benefit. Keep energy transfer, momentum
-  redistribution, joint work, constraint forces, and clubhead speed distinct.
+- PR #9017 is merged at
+  `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`. It provides fail-closed
+  participant split, processing, frame-transform, and event-detector
+  authorities for #9004.
+- #9004 remains open because no qualifying governed participant trajectory
+  dataset or held-out human outcome is registered. Simscape exports, fixtures,
+  tutorials, GolfDB labels, and launch-monitor records are not substitutes.
+- #8556 remains externally blocked by the absence of governed synchronized
+  bilateral six-axis grip-wrench participant data. Synthetic traces and
+  paper-level curves must never substitute for human validation.
 
-## Validation
+## Other Active Dependencies
+
+- #8800 propagates height, body-mass, and joint-limit bounds through both
+  headline atlases and blocks the final #8752/#8668 audit. It was reopened on
+  2026-08-24 after a manual closure lacked a complete campaign, protected PR,
+  or remote-main merge.
+- #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
+- PR #9022 is merged as current remote-main commit `76bf6ab1d`. Tools PR #4674
+  is merged at immutable commit
+  `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
+  canonical JSON/CSV/HDF5 analysis authority.
+- #8358 PR #9039 is merged at `eb7076466`; its immutable Tools gateway and
+  typed variation evidence are on `main`. Keep #8358 open because its broader
+  UI, localized-perturbation, and presentation criteria remain unaudited.
+- PR #9032 carries the 16-source biomechanics bridge and the headless GRF
+  correction `413dc21c7`. Its branch is being reconciled with `501ac302d` by
+  replaying the 1,137-candidate/304-claim generators; human review remains absent.
+- PR #9049 is mergeable with required `quality-gate` green and awaits the same
+  requested human review. Its dependent 1 ms controller transport stays local.
+- Tools #4142 remains open until immutable UpstreamDrift consumption and
+  requirement-level R10–R15 qualification are complete.
+- AffineDrift #3942 remains downstream of the qualified UpstreamDrift release;
+  do not project a moving or partial campaign.
+- #8963 architecture debt remains separate from the frozen campaign source.
+  Do not merge or regenerate source-bound spatial evidence until campaign
+  integration removes the source-lock conflict.
+
+## Scientific Boundaries
+
+- The model ladder is synthetic and model-conditional. It does not establish
+  participant mechanics, anatomy, physiology, equipment calibration, injury,
+  coaching strategy, or a universal speed benefit.
+- Distinguish energy transfer, momentum redistribution, joint work, constraint
+  forces, and clubhead speed. Preserve falsifiers, adverse cases,
+  identifiability limits, uncertainty, countermodels, and unavailable states.
+
+## Repository and Review Rules
+
+- PRs target `main`; use full PRs, never drafts. Human review is required.
+- Never force-push, admin-merge, bypass hooks/checks, add quarantine debt, or
+  edit `vendor/ud-tools`.
+- Use TDD, DbC, DRY, and LoD. Edit canonical sources and regenerate governed
+  artifacts. Use title case for document headings and captions.
+- Verify exact PR head, reviews, checks, merge SHA, remote-main ancestry, and a
+  clean worktree before reporting completion.
+
+## Focused Validation
 
 ```powershell
-python3 -m pytest -n 0 -q tests/unit/research/test_biomechanics_source_register.py tests/unit/research/test_biomechanics_evidence_bridge.py tests/unit/research/test_biomechanics_evidence_surfaces.py tests/unit/research/test_biomechanics_claim_registration.py
-python3 -m scripts.research.proximal_distal_energy.biomechanics_source_register validate
-python3 -m scripts.research.proximal_distal_energy.biomechanics_evidence_bridge validate
-python3 -m scripts.research.proximal_distal_energy.biomechanics_evidence_surfaces validate
-python3 -m scripts.research.proximal_distal_energy.claim_adjudication_summary validate
-python3 -m scripts.research.proximal_distal_energy.claim_audit validate
-python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
-python3 -m scripts.research.proximal_distal_energy.external_source_review validate
-python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python3 scripts/check_document_title_case.py --changed-from origin/main
-python3 scripts/ci/check_file_size_budget.py
+python -m scripts.research.proximal_distal_energy.claim_audit validate
+python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
+python -m scripts.research.proximal_distal_energy.qualify_open_release validate
+python -m pytest -n 0 -q tests/unit/perturbation tests/shared_contracts/test_tools_vendoring.py tests/launchers/test_tools_vendor_authority.py
+python scripts/ci/check_architecture_budget.py
+python scripts/check_document_title_case.py --changed-from origin/main
+python scripts/ci/check_file_size_budget.py
 ```
 
-Use TDD, DbC, DRY, and LoD. Edit canonical sources, regenerate governed
-outputs, and verify exact PR head, reviews, checks, merge SHA, remote-main
-ancestry, and a clean checkout before reporting completion.
+Passing shared gates does not close a scientific child whose narrower evidence
+or governed external-data requirement remains incomplete.

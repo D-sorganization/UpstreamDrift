@@ -4,8 +4,8 @@
   "measurement_boundary": "Direct observation is reserved for a calibrated sensor observable in its declared frame and units. Derived quantities retain their inverse-problem, filtering, model, synchronization, and allocation dependencies. Missing governed participant data remain unavailable.",
   "owner": "UpstreamDrift proximal-distal research program",
   "external_source_review_sha256": "77a0088908653948bc9bacf65f9f4942205d9ff3067d6126c38a61889bb9e76d",
-  "claim_registry_sha256": "c6a43ccd289acdfe3677105a06d2414add918244cf8153aa39ae8f136990d54f",
-  "source_register_sha256": "d61e503f3b7a7435ece1f320b8ffadfdf2fa8973c2432f33cad2c63090812736",
+  "claim_registry_sha256": "fce0bfd7ea61492a36d46bb10ef442f1dda6ffa4a89ce737e8f6990676e8accd",
+  "source_register_sha256": "c2ba6ca3931ab242d4281fe44ccc7a4d4d8657cfd854a31cfb934e6fd89bdb5b",
   "human_validation_status": "externally_blocked",
   "modalities": [
     {

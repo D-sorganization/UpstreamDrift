@@ -99,6 +99,7 @@ class PerturbationSummary:
             },
             "success_rate": self.success_rate,
             "execution_time_sec": self.execution_time_sec,
+            "failures": [failure.to_dict() for failure in self.failures],
         }
 
 

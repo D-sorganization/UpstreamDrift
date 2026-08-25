@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-24)
+## Current Scientific Audit State (2026-08-25)
 
 Epic #8557 has completed the current narrative-candidate adjudication contract:
 1,137 reviewed candidates and 304 atomic claims. Issue #8724 adds an exhaustive,
@@ -11,16 +11,26 @@ the paper reports accurately. This status is not scientific closure: all 42
 public release claims have a traceable review disposition, and
 each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
-Issue #9026 evidence bridge registers 16 independently authored works across 16
-domains, seven measurement modalities, nine candidate mechanisms, and nine
-transport dimensions. It maps model outputs to directly observed and derived
-quantities, retains processing and uncertainty authorities, and supplies
-countermodels, adverse cases, falsifiers, identifiability limits, and governed
-data gates. Five modalities remain source/data gaps, bilateral allocation is
-structurally unidentified without independent bilateral six-axis measurements,
-and human validation remains externally blocked; synthetic evidence cannot
-satisfy those gates. The trajectory-level bilateral point-force sensor
-qualification and subject-scaled
+issue #8918 numeric authority binds all 380 numeric literals across 124 of the
+304 claims to reviewed statement digests, JSON Pointers, transforms, evidence
+scopes, and tolerances. It distinguishes 172 semantically matched local JSON
+values, 144 registered claim values that have not been independently
+recomputed, 57 externally reported values, and seven protocol or notation
+values. Representative planar, spatial, articulated-shaft, and finite-ground
+headlines are independently recomputed from committed raw arrays, while the
+spatial cross-engine control must remain close but nonidentical. Pointer
+agreement and release traceability do not establish physical validity, human
+validation, anatomy, physiology, equipment calibration, injury, coaching
+efficacy, or a universal clubhead-speed benefit. Issue #9026 adds a
+source-qualified biological bridge with 16 independently authored works across
+16 domains, seven measurement modalities, nine candidate mechanisms, and nine
+transport dimensions. It binds direct versus derived observables, processing
+and uncertainty authorities, countermodels, adverse cases, falsifiers,
+identifiability limits, and governed data gates. Five modalities remain source
+or data gaps, bilateral allocation remains structurally unidentified without
+independent bilateral six-axis measurement, and human validation remains
+externally blocked. The
+trajectory-level bilateral point-force sensor qualification and subject-scaled
 spatial contact-closure audit retain their synthetic and prescribed-state
 scopes. The closed-state forward bridge maps all 234 solved states and advances
 54 profile--span--phase cases for 4 ms in native MuJoCo and Pinocchio. This is
@@ -545,8 +555,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.582                                            |
-| **Last Spec Update**    | 2026-08-22                                         |
+| **Spec Version**        | 1.0.588                                            |
+| **Last Spec Update**    | 2026-08-25                                         |
 
 ## 2. Purpose & Mission
 
@@ -3233,7 +3243,13 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-24 | 1.0.582 | Added issue #9026's source-qualified biomechanics evidence and model-to-measurement bridge. Sixteen independently authored works are grouped by underlying source and bounded across 16 anatomical, apparatus, population, equipment, and task domains. Seven measurement modalities distinguish direct observables from derived quantities, non-identifiable quantities, processing authorities, uncertainty sensitivities, and governed data gates. Nine candidate mechanisms retain competing explanations, observable discriminators, adverse cases, falsifiers, and structural or practical identifiability states; nine transport dimensions expose current coverage and acquisition requirements. The generated paper and reviewer surfaces derive from the machine registers, claim and release authorities are digest-bound, and qualification fails closed on stale source, bridge, claim, evidence, or publication bytes. Five modalities remain gaps, bilateral allocation remains structurally unidentified, and governed human validation remains externally blocked. |
+| 2026-08-25 | 1.0.588 | Reconciled issue #9026's source-qualified biomechanics evidence bridge with current `main`. The exact reviewed authority now covers 1,137 narrative candidates and 304 claims, including one bounded audit/protocol claim for 16 independent works, 16 biological and transport domains, seven measurement modalities, nine candidate mechanisms, and nine transport dimensions. Direct, derived, structurally unidentified, practically unqualified, and unavailable quantities remain distinct; five modalities retain open source or governed-data gates and human validation remains externally blocked. The migration freezes the exact old and new reviewer-projection candidate sets and source digests. The GRF visualization uses Matplotlib's object-oriented `Figure` API so headless Linux validation does not select an interactive backend. No participant, anatomy, safety, or coaching conclusion follows. |
+| 2026-08-25 | 1.0.587 | Fixed issue #8921: the geometric IK backend's `forward_kinematics` no longer recomputes rig topology (`_dof_layout`/`_topological_order`, a full recursive tree walk) on every call; it is built once per rig and cached by rig identity via `_get_rig_topology`. The Levenberg-Marquardt Jacobian is now the analytic revolute-joint form (`axis_world x (p_i - p_pivot)`, correctly composed for multi-axis joints) built from one already-computed forward-kinematics pass per iteration instead of `2 * n_dof` central-difference forward-kinematics calls; the hot-path FK also returns arrays plus a name-to-row map instead of a dict of Python float tuples, avoiding a numpy<->dict round trip. `solve_frame` now accepts and honors a per-call `IKConfig`, fixing a latent bug where `solve()`'s resolved config was silently ignored (the iteration loop always read `self.config`). Numerical parity with the removed finite-difference Jacobian is covered by `tests/unit/motion_pipeline/ik/test_geometric_backend_perf.py`, which reimplements the pre-fix algorithm independently for comparison and asserts call-count reduction (2 forward-kinematics passes per iteration, not `2 * n_dof + 2`). |
+| 2026-08-25 | 1.0.586 | Vectorized the motion_pipeline preprocessing Kalman smoother for issue #8923: `_kalman_filter_python` in `filter.py` initialized its covariance at the DARE steady-state fixed point, which makes the forward Kalman gain and backward RTS gain constant across every timestep and series — collapsing the 750k-iteration `for marker: for axis: for frame:` scalar-update double loop into two `scipy.signal.lfilter` calls (forward IIR, then the same IIR run on the reversed array for the RTS pass) applied to the whole `(n_frames, n_points, n_dims)` array at once. Numerically identical to the prior loop implementation (parity tests at rtol=atol=1e-10 on realistic 1250x50x3 data plus short-sequence and varied-noise-parameter cases), zero behavior change; the old loop reimplementation is preserved as a private reference in the parity test file rather than in production code. |
+| 2026-08-25 | 1.0.585 | Vectorized motion_pipeline preprocessing for issues #8925 and #8924: normalize.py's per-frame transform/center/units/up-axis-detection passes now run as a single fused array expression via markers_to_array/keypoints_to_array, reconstructing frames once with model_construct; filtfilt/savgol_filter/median_filter/moving-average and the resample np.interp loops in _filter_pure_python.py and _resample_pure_python.py/resample.py now operate on whole (N, M, 3) arrays instead of per-marker/per-axis Python loops, deduplicated into a shared vectorized_interp_axes helper. Numerically identical to the prior implementations (parity tests at rtol=atol=1e-12), zero behavior change. |
+| 2026-08-24 | 1.0.584 | Kept the Pendulum Simulator module version probe independent of GUI initialization. Runtime imports of diagnostics and `MainWindow` now occur only on docked or standalone GUI launch, so `python -m shared.python.pendulum_simulator --version` does not transitively load MuJoCo/OpenGL on headless systems. A subprocess regression deliberately blocks `gui.main_window` and requires the version command to succeed; normal launcher behavior remains covered on Python 3.11 and 3.13. |
+| 2026-08-24 | 1.0.583 | Added the #8358 immutable Tools variation-consumer boundary. UpstreamDrift now delegates deterministic sampling, canonical JSON/CSV/HDF5 persistence, scalar and noncausal rank/OAT summaries, common-grid dispersion, and quiet-zone mathematics to protected Tools commit `17474249b9267d0e73a779c1d72f231e7b8de39c`. Host-owned adapters retain complete typed hit, no-impact, numerical-failure, and partial-trace rows across serial and batched execution; analytical double-pendulum and articulated MuJoCo mappings preserve stable marker, frame, unit, plan, seed, model, source, and bilateral shoulder/wrist allocation evidence. Cross-engine ranking fails closed on semantic or tolerance mismatch, and current architecture budgets pass without exceptions. This is reusable model evidence, not participant or coaching validation. |
+| 2026-08-24 | 1.0.582 | Added issue #8918's executable numeric-claim authority. All 380 numeric literals across 124 of the 303 material claims are bound to exact statement digests, JSON Pointers, transforms, scopes, and tolerances. The audit distinguishes 172 local JSON values, 144 registered values not independently recomputed, 57 externally reported values, and seven protocol or notation values. Representative planar, spatial, articulated-shaft, and finite-ground headlines are recomputed from committed raw arrays; a cross-engine control must remain close but nonidentical. Claim integrity and the 600-artifact computational release fail closed on numeric drift without promoting pointer agreement to physical or human validation. |
 | 2026-08-23 | 1.0.581 | Reconciled issue #8724's normalized adjudication checkpoint with the current 303-claim paper. The migration is locked to the exact paper digest and contains an exhaustive explicit claim-ID authority, so an unfamiliar claim cannot inherit `supported`. The reviewer JSON/CSV and generated paper tables now separate outcome, evidence tier, source independence, model tier, unresolved replication, and claim-family concentration. Typed evidence locators, local anchors, bibliography keys, deterministic source digest, exact candidate reciprocity, falsifiers, adjudication reasons, and human-data boundaries remain fail-closed. Source and evidence-file caches remove repeated validation I/O without weakening resolution. |
 | 2026-08-23 | 1.0.580 | Closed participant-holdout and executable-mapping authority gaps in #9004's governed ingestion boundary. Each trial now binds an immutable `measured-trajectory-participant-split/v1` manifest that freezes sorted, disjoint training, held-out, and adverse cohorts before outcomes. The loader verifies the split digest, source, registered deterministic assignment method, UTC freeze-before-artifact ordering, minimum cohort counts, adverse cohort, unique participant membership, cohort label, and intended-use eligibility before invoking a parser. It also contains and verifies the exact acquisition-processing authority, four frame-transform records, and two event-detector configurations by relative path and SHA-256 before payload parsing. Returned artifacts expose the split, cohort, processing, transform, and detector provenance while retaining false human-inference and bilateral-wrench gates. UTC timestamps, format hints, and channel identifiers are also validated structurally. |
 | 2026-08-23 | 1.0.579 | Added the fail-closed #9004 measured-trajectory acquisition and ingestion boundary. A per-trial typed manifest now binds an authorized source package and decoded trajectory to immutable digests, participant grouping, canonical units, acquisition processing, four frame authorities, two event records, declared channels, six uncertainty analyses, and intended use. The gateway recomputes source and preregistration readiness, rejects duplicate keys, path traversal and pickle formats before parsing, verifies both digest layers, delegates only to the canonical motion-pipeline adapter, and reports missing channels as unavailable rather than zero. It always denies human-inference and bilateral-wrench authority; no current dataset is admitted. |
@@ -4345,39 +4361,61 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   numerical-formulation evidence. It shall not establish anatomy, tissue
   mechanics, equipment calibration, human transfer, or coaching strategy.
 
-### F-8557.29: Biomechanics Evidence and Model-to-Measurement Bridge
+### F-8557.29: Canonical Ensemble Variation Consumer Boundary
 
-- Every external biomechanics work used by the program shall be assigned to
-  one canonical underlying source and declare authorship independence, source
-  type, population, task, apparatus, measurements, estimands, uncertainty,
-  applicability, limitations, and the atomic claims it can support. Mirrors
-  and metadata pages shall not be counted as independent replication.
-- Every measurement modality shall distinguish calibrated direct observables
-  from processed or model-derived quantities and from quantities that remain
-  structurally unidentified, practically unqualified, or unavailable. Raw-data
-  retention, calibration, frame, filtering, synchronization, differentiation,
-  event, uncertainty, and participant-held-out authorities shall fail closed.
-- Every candidate mechanism shall map to required measurements, competing
+- UpstreamDrift shall consume plan sampling, execution-document metadata,
+  producer provenance, persisted-plan and dataset bindings, scalar summaries,
+  noncausal rank attribution, one-at-a-time sensitivity normalization, common-
+  grid geometry dispersion, and quiet-zone detection only through the public
+  Tools variation modules pinned to an immutable protected `main` commit.
+- Capability discovery shall validate the exact supported plan, execution-
+  document, provenance, and plan-binding schema versions. Missing Tools shall
+  remain an actionable optional capability; available but incompatible schemas
+  shall fail closed and shall not silently fall back to local algorithms.
+- The consumer shall return canonical Tools plans, samples, datasets, metadata,
+  persisted-plan resolutions, and analysis records without wrapping,
+  relabeling, copying numerical algorithms, or inventing provenance.
+  UpstreamDrift remains responsible only for engine-specific
+  parameter mapping, execution, stable-marker traces, typed trial outcomes,
+  and cross-engine orchestration.
+- Subsequent trial evidence shall retain hit, no-impact, numerical-failure,
+  and partial-valid-trace outcomes, with explicit engine, model, frame, units,
+  stable marker IDs, seed, plan, and source-revision identity. Misses shall
+  never receive fabricated impact or shot coordinates.
+- Serial and batched execution, editable and vendored Tools providers,
+  pendulum and non-pendulum adapters, and cross-engine topology/frame/unit
+  rejection shall pass deterministic parity tests before R15 is promoted.
+
+### F-8557.30: Biomechanics Evidence and Model-to-Measurement Bridge
+
+- Each external biomechanics work shall declare its canonical source,
+  authorship independence, population, task, apparatus, measurements,
+  estimands, uncertainty, applicability, limitations, and supported claims.
+  Mirrors and metadata pages shall not count as independent replication.
+- Each modality shall distinguish calibrated direct observables from processed
+  or model-derived quantities and from quantities that are structurally
+  unidentified, practically unqualified, or unavailable. Calibration, frames,
+  filtering, synchronization, event, uncertainty, and participant-holdout
+  authorities shall fail closed.
+- Each candidate mechanism shall map to required measurements, competing
   explanations, an observable discriminator, an adverse case, and a decisive
-  falsifier. Segment sequencing, ground reaction, bilateral hand allocation,
-  muscle activation, muscle--tendon mechanics, shaft storage and recoil,
-  launch outcome, passive late negative torque, and slack or preload shall not
-  inherit validation from one another.
+  falsifier. Segment sequence, ground reaction, bilateral hand allocation,
+  muscle activation, muscle--tendon mechanics, shaft recoil, launch outcome,
+  passive late negative torque, and slack or preload shall not inherit
+  validation from one another.
 - Population, anatomy, injury, handedness, impairment, equipment, and task
-  transport shall be registered separately. Engineering design profiles and
-  mixed literature samples shall not be represented as participant samples or
-  evidence of subgroup, safety, equipment, or coaching effects.
+  transport shall be registered separately. Engineering profiles and mixed
+  literature samples shall not be represented as participant evidence.
 - Generated reviewer and paper surfaces shall derive from the exact source and
   bridge registers. Claim, evidence, bibliography, external-source, release,
-  and PDF authorities shall bind their content digests and fail qualification
-  when any reciprocal mapping or generated byte projection is stale.
-- Source coverage establishes traceability and bounded contextual support, not
-  human mechanism validation. Synthetic traces, inverse solutions, publication
+  and PDF authorities shall fail when a reciprocal mapping or byte projection
+  is stale.
+- Source coverage establishes traceability and bounded context, not human
+  mechanism validation. Synthetic traces, inverse solutions, publication
   aggregates, and digitized figures shall not substitute for governed raw
   participant data. Bilateral allocation and passive late negative-torque
-  origin shall remain structurally unidentified until independently calibrated
-  bilateral six-axis hand measurements and the registered synchronized
-  companion signals satisfy the participant-held-out data gates.
+  origin remain unidentified until the registered synchronized measurements
+  and participant-held-out gates pass.
 
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
@@ -4405,6 +4443,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Vectorized batch swing optimizer effort sum-of-squares computation across environments via `np.einsum("nij,nij->n", controls, controls)` in `src/shared/python/optimization/batch_swing_optimizer.py` (#8958). (spec-exempt: micro-optimization)
 
 - (spec-exempt: micro-optimization) Replaced `np.sum(condition)` and `np.sum(np.isnan(arr))` with `np.count_nonzero` in python analytics and motion matching codebase for faster array evaluation.
-
 - Starting pose matcher: `on_clear_overrides_clicked` prompts for confirmation and unconditionally restores original mocap events state on confirm (#8889).
 - Pose studio actions: initialize undo/redo QActions on MainWidget and guard action refresh against uninitialized state (#8879).
+- GUI exception handling: catch and log unexpected slot exceptions in terrain engine and model explorer GUI tools (#8890).
+- Model Explorer: propagate load_model boolean success status to caller slots and guard status bar updates against failed loads (#9041).
+- Decomposed 13 oversized proximal-distal research registration, authority, and study orchestrator functions below 100 lines and <= 8 parameters without altering numerical outputs or claim evidence (#8963).

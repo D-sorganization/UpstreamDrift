@@ -324,7 +324,10 @@ python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridg
 python3 -m scripts.research.proximal_distal_energy.claim_audit inventory
 python3 -m scripts.research.proximal_distal_energy.register_closed_state_forward_bridge_claims
 python3 -m scripts.research.proximal_distal_energy.register_forward_contact_validity_horizon_claims
+python3 -m scripts.research.proximal_distal_energy.build_claim_numeric_comparison_evidence check
+python3 -m scripts.research.proximal_distal_energy.register_numeric_claim_evidence check
 python3 -m scripts.research.proximal_distal_energy.claim_audit validate
+python3 -m scripts.research.proximal_distal_energy.claim_audit numeric
 python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python3 -m scripts.research.proximal_distal_energy.external_source_review validate
 python3 -m scripts.research.proximal_distal_energy.biomechanics_source_register validate

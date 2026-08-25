@@ -126,6 +126,12 @@ class URDFGeneratorWindow(QMainWindow):
     def load_from_library(self) -> None:
         self._main_widget.load_from_library()
 
+    def load_model(self, file_path: str | Path) -> bool:
+        return self._main_widget.load_model(file_path)
+
+    def _load_urdf_file(self, file_path: str | Path) -> bool:
+        return self._main_widget.load_model(file_path)
+
     def save_urdf(self) -> None:
         self._main_widget.save_urdf()
 

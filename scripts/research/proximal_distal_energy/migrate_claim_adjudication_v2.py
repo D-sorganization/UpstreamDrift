@@ -19,10 +19,10 @@ PRE_ADJUDICATION_SOURCE_DIGEST = (
     "ad5a9e7338f9f8ef9517464f8c8cf9f70a2dc033de50312de760417438a1d6d5"
 )
 PRIOR_REVIEWED_SOURCE_DIGEST = (
-    "034692d69e1447ea0552c2d5a8f36c05299294c1f23635cd74e6690ad304815b"
+    "9baa8c4e7e70f0da2db7f93040e9d36475d9aa11e52dc7c60fd35f9085ca26c9"
 )
 REVIEWED_SOURCE_DIGEST = (
-    "1847a46b26000da3d02ecce6c5f09d24b4ac3ea76a8d1aa8aae171b7e7217904"
+    "fa2c9971201dc312d48ff4774d15e1b9b9749962ab882224ccb8a5409eef1f67"
 )
 REVIEWED_CLAIM_COUNT = 304
 REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
@@ -34,10 +34,11 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
         "PD-CAND-76fd7cb2bfe59cbb",
         "PD-CAND-8bcb732b1326ec45",
         "PD-CAND-9345c1e6be2ef186",
+        "PD-CAND-98cad550879bf9d5",
         "PD-CAND-9906005bff75ba72",
         "PD-CAND-a3ffec776426fce8",
-        "PD-CAND-ab4689630944a0fe",
         "PD-CAND-aa6efbe9274b5d53",
+        "PD-CAND-ab4689630944a0fe",
         "PD-CAND-b06a3cbe5b2d0e01",
         "PD-CAND-b5b2526e23b77d70",
         "PD-CAND-bcfcc2b3a9631de1",
@@ -45,21 +46,37 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
         "PD-CAND-c6f7607002d58a93",
         "PD-CAND-cd8822807d808531",
         "PD-CAND-d2f2b5b07b466265",
-        "PD-CAND-f385c12c357c840a",
         "PD-CAND-f6ba096416890d02",
         "PD-CAND-fdcf5c685afbb41a",
         "PD-CAND-feff7c3d6f4ddc55",
     }
 )
-PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = REVIEWER_PROJECTION_CANDIDATE_IDS - {
-    "PD-CAND-b06a3cbe5b2d0e01",
-    "PD-CAND-f5697c26aed70275",
-    "PD-CAND-c6f7607002d58a93",
-} | {
-    "PD-CAND-1e8415652d3743aa",
-    "PD-CAND-585da748b9832879",
-    "PD-CAND-f0b8fbb7ca966f01",
-}
+PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
+    {
+        "PD-CAND-0acfb3375ef769f8",
+        "PD-CAND-165a6caf21ef85e2",
+        "PD-CAND-39f42d06f3e621a5",
+        "PD-CAND-87d26eacc282b21c",
+        "PD-CAND-9345c1e6be2ef186",
+        "PD-CAND-9519d7e6dfb308ef",
+        "PD-CAND-9906005bff75ba72",
+        "PD-CAND-aa6efbe9274b5d53",
+        "PD-CAND-ab4689630944a0fe",
+        "PD-CAND-aeecc7c4cec6b96f",
+        "PD-CAND-b06a3cbe5b2d0e01",
+        "PD-CAND-b2e277593764ee20",
+        "PD-CAND-b5b2526e23b77d70",
+        "PD-CAND-bcfcc2b3a9631de1",
+        "PD-CAND-be8a26a0593eab4f",
+        "PD-CAND-c6f7607002d58a93",
+        "PD-CAND-cd8822807d808531",
+        "PD-CAND-d2f2b5b07b466265",
+        "PD-CAND-f1e25f4b524e7a06",
+        "PD-CAND-f5697c26aed70275",
+        "PD-CAND-fdcf5c685afbb41a",
+        "PD-CAND-feff7c3d6f4ddc55",
+    }
+)
 
 # These sets are the exhaustive finding-level review authority for the locked
 # 304-claim snapshot. They are intentionally explicit: no claim can inherit an
@@ -421,7 +438,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1100-candidate paper inventory is adjudicated. Repeated "
+        "The complete 1137-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."

@@ -1,6 +1,7 @@
 {
   "_comment": "Baseline counts for error-handling anti-patterns. Captured 2026-05-21 as part of issue #5911. The ratchet check in scripts/ci/check_error_handling_ratchet.py fails if any of these counts grow.",
   "_policy": "Counts may DECREASE freely. Counts may NOT increase. New PRs that legitimately need to add to any count must (a) lower another count by an equal or greater amount in the same PR, or (b) edit this file with a justification and the approver's GH handle in the same PR.",
+  "_baseline_correction_2026-08-25": "Issue #8813: `BLE001` had been silently added to pyproject.toml's global ruff extend-ignore, so `ruff check` never actually flagged blind `except Exception:` blocks and this baseline never saw the true count. Removing BLE001 from extend-ignore (restoring per-file grandfathering as documented in CLAUDE.md) surfaced 4 previously-invisible pre-existing violations in UD-owned files (c3d_viewer.py x2, test_launch_matrix.py, test_clear_overrides_state.py), each now individually annotated with `# noqa: BLE001`. noqa_BLE001 raised 369 -> 342 -- net DECREASE, because restoring global enforcement also required grandfathering the entire src/shared/python/ tree (a Tools-owned child copy this repo must not edit directly -- see tests/unit/repo_hygiene/test_tools_child_copy_contract.py) plus two mujoco-engine files with huge unrelated transitive mypy import debt, via file-scoped pyproject.toml per-file-ignores instead of inline noqa annotations; those sites no longer match the noqa_BLE001 regex count at all. Real BLE001 grandfathering for src/shared/python/ must land in D-sorganization/Tools first, then flow here via a vendor/ud-tools pin bump. Approved by dieterolson via PR review.",
   "_pattern_meanings": {
     "noqa_BLE001": "# noqa: BLE001 — blind except Exception grandfathered. New code must use src/shared/python/core/process_safety.narrow_catch or list specific exception types.",
     "noqa_F841": "# noqa: F841 — unused local variable grandfathered. New code: drop the binding or prefix with _.",
@@ -9,7 +10,7 @@
     "gather_no_return_exceptions": "asyncio.gather(...) without return_exceptions=True. New code must use src/shared/python/core/process_safety.safe_gather."
   },
   "counts": {
-    "noqa_BLE001": 369,
+    "noqa_BLE001": 342,
     "noqa_F841": 22,
     "noqa_F401": 711,
     "raw_popen": 42,
