@@ -32,6 +32,8 @@ from scripts.research.proximal_distal_energy.articulated_structural_execution_id
     resolve_structural_execution_identity,
 )
 
+pytestmark = pytest.mark.scientific
+
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 

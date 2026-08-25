@@ -77,11 +77,11 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   `release_evidence=false`; no campaign process is running.
 - Reconciliation regenerated the governed seven-corner plan against current
   source. New design SHA-256 is
-  `63561056b88e11858663f6d5f235021f16a4864ddc5076dae7dd889befef5a08` and
+  `d50568a8df8fecee2da4285458bc5373d41389924ba9730713224658f72c7d5a` and
   contract SHA-256 is
-  `c3a31faa62ada6bbdf9ae4efb4237bc5f1071179f8310f7e35f844a9dacf0fd8`.
+  `438bc0078358597d64893f71a73e64da29a9398cd23fea9e7e3b07522615c52e`.
   The deterministic plan-file SHA-256 is
-  `4ea2fa71631fc17b0dee3b5d50470f305d253c18487ec0907259fd6d617b6124`.
+  `59a6a0cbacffbf55ab1a4c3d6fa68bded66f4960a69402718db72c632743bbf7`.
   The prior partial checkpoints were created under different plan/source
   identities and must not be reused as release evidence or resumed without an
   explicit recovery/restart decision and exact checkpoint revalidation.
@@ -124,12 +124,17 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   and unit tests, then correctly stopped because Prettier rewrote the generated
   Simscape `.leaderboard_meta.json`. Its committed bytes are retained and the
   exact generated path is now excluded from formatter mutation.
+- CI Standard on PR #9046 passed architecture, size, SPEC, DRY, error-handling,
+  and suppression gates, then exposed 18 net-new unmarked scientific tests in
+  three #8752 modules. Those modules now declare `pytest.mark.scientific`; the
+  resulting source-identity change was propagated through the deterministic
+  structural plan and release manifests. All 37 focused tests pass; the marker
+  baseline shrank by 38 entries to 19,769 and the ratchet reports no drift.
 
 ## Immediate Next Actions
 
-1. Shepherd PR #9046 through protected CI and human review without bypasses or
-   redundant reruns. The first check wave started on `f4eccd3a`; this handoff
-   update intentionally supersedes it once.
+1. Push the suite-marker correction, then shepherd PR #9046 through protected
+   CI and human review without bypasses or redundant reruns.
 2. After merge, verify the merge commit is on remote `main`, update this handoff,
    then make an explicit #8800 recovery-versus-fresh-execution decision. Keep
    #8752 open until #8800 produces the registered evidence or is explicitly
