@@ -12,7 +12,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `eb7076466152cbacd40a7f4d3fb9d92255d4ae43`. The normalized-claim authority
+  `0dd7d5bee21d4e1485d1085436328186aedf4c6f`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 239 pages with SHA-256
   `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
@@ -89,20 +89,20 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   2026-08-24 after a manual closure lacked a complete campaign, protected PR,
   or remote-main merge.
 - #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
-- PR #9039 is merged as current remote-main commit `eb7076466`. Tools PR #4674
-  is merged at immutable commit
-  `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
-  canonical JSON/CSV/HDF5 analysis authority.
+- PR #9039 remains an ancestor of current remote `main`. Tools PR #4674 is merged at immutable commit
+  `17474249b9267d0e73a779c1d72f231e7b8de39c`; this remains the immutable #8358
+  analysis authority. Current `main` carries Tools gitlink `16adbb2503`.
 - #8358's immutable Tools gateway, typed outcomes, serial/batched execution,
   analytical and articulated adapters, lossless bundles, scalar/rank/OAT,
   dispersion, and quiet-zone analysis are merged. Keep #8358 open because its
   broader UI, localized-perturbation, and presentation criteria remain unaudited.
-- #9027's first bounded slice is in PR #9049 at `83aa75b84`. It adds an
-  executable eight-tier hybrid topology authority; controller comparisons and
-  diagnostic reports remain future protected slices and no campaign or human
-  analysis was run.
-- PR #9032 is open at `5edacb13c`; Standard CI passes, but optional-stack has
-  a headless `DISPLAY` failure and human review remains absent.
+- #9027's first bounded slice is in PR #9049, reconciled through remote `main`
+  `0dd7d5bee`. Its executable eight-tier hybrid topology authority passes the
+  focused hybrid and inherited Kalman parity suites serially. No campaign or
+  human analysis was run; controller comparisons remain future protected work.
+- PR #9032 is open at remote head `fc4832035`; its reported checks are green and
+  human review remains absent. Preserve local headless-rendering fix `413dc21c7`
+  for replay after the protected parent merges.
 - Tools #4142 remains open. PR #4685 is recovered on current Tools `main` at
   `6bcd19d59`, retains the 21-verified/10-partial R10--R15 ledger and existing
   auto-merge request, and is waiting on protected checks and human review.
