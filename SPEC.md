@@ -547,8 +547,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.583                                            |
-| **Last Spec Update**    | 2026-08-22                                         |
+| **Spec Version**        | 1.0.584                                            |
+| **Last Spec Update**    | 2026-08-25                                         |
 
 ## 2. Purpose & Mission
 
@@ -4405,3 +4405,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Pose studio actions: initialize undo/redo QActions on MainWidget and guard action refresh against uninitialized state (#8879).
 - GUI exception handling: catch and log unexpected slot exceptions in terrain engine and model explorer GUI tools (#8890).
 - Model Explorer: propagate load_model boolean success status to caller slots and guard status bar updates against failed loads (#9041).
+- Decomposed 13 oversized proximal-distal research registration, authority, and study orchestrator functions below 100 lines and <= 8 parameters without altering numerical outputs or claim evidence (#8963).

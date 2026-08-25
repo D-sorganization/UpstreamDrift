@@ -376,9 +376,11 @@ def _modal_response(
     )
     moment = np.array(
         [
-            _half_sine_force(float(value), pulse_s, config.peak_tip_moment_nm)
-            if include_tip_moment
-            else 0.0
+            (
+                _half_sine_force(float(value), pulse_s, config.peak_tip_moment_nm)
+                if include_tip_moment
+                else 0.0
+            )
             for value in time
         ]
     )

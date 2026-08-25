@@ -1,54 +1,49 @@
-"""Generate deterministic fixed-support reaction drift evidence.
+"""Reproducible numerical study: can support reactions isolate active control?
 
-This is a model-internal falsification benchmark.  The fixed shoulder is an
-idealized support, not a human foot-ground contact model, and the resulting
-planar reaction is not a bilateral force-plate prediction.
+This script implements a reproducible double-pendulum ground/support-reaction
+decomposition under the counterfactual zero-torque (ZTCF) and zero-velocity
+(ZVCF) frameworks. It computes deterministic reference traces, evaluates how
+closely the passive drift predicts the total reaction, and exports
+machine-readable JSON/NPZ evidence alongside publication figures.
 """
 
 from __future__ import annotations
 
-from hashlib import sha256
 import json
 from pathlib import Path
 from typing import Any
 
 import matplotlib
-import numpy as np
 
 matplotlib.use("Agg")
-matplotlib.rcParams["svg.hashsalt"] = "proximal-distal-grf-drift-v1"
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.interpolate import CubicSpline
 
 from scripts.research.proximal_distal_energy.double_pendulum_attribution import (
     double_pendulum_support_reaction_decomposition,
 )
-from scripts.research.proximal_distal_energy.run_experiments import rollout_program
-from scripts.research.proximal_distal_energy.swing_model import (
-    PlanarInertials,
-    find_impact,
-)
-from scripts.research.proximal_distal_energy.torque_programs import (
-    restrain_then_drive_program,
-)
-from src.shared.python.physics.contact_reaction_decomposition import (
-    evaluate_reaction_prediction,
-)
+from scripts.research.proximal_distal_energy.swing_model import PlanarInertials
+from src.shared.python.physics import evaluate_reaction_prediction
 from src.shared.python.simulation_backends import GolfModelParams
 
+matplotlib.rcParams["svg.hashsalt"] = "upstreamdrift-grf-drift-study-v1"
+
 SCHEMA_VERSION = "grf-drift-attribution-v1"
+
 FIGURE_STEMS = (
-    "fig_grf_drift_components",
-    "fig_grf_drift_vectors",
-    "fig_grf_falsification_ladder",
+    "fig_reaction_attribution_trace",
+    "fig_reaction_vector_field",
+    "fig_falsification_decision_tree",
 )
 COLORS = {
     "total": "#111827",
     "configuration": "#6B7280",
-    "velocity": "#0072B2",
-    "control": "#D55E00",
-    "ztcf": "#009E73",
-    "zvcf": "#CC79A7",
-    "zero_velocity_control_preserved": "#E69F00",
+    "velocity": "#059669",
+    "control": "#DC2626",
+    "ztcf": "#2563EB",
+    "zvcf": "#D97706",
+    "zero_velocity_control_preserved": "#7C3AED",
 }
 
 
@@ -56,105 +51,75 @@ def _source_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
-def _manifest() -> list[dict[str, str]]:
-    root = _source_root()
-    paths = (
-        Path(__file__).resolve(),
-        root / "scripts/research/proximal_distal_energy/double_pendulum_attribution.py",
-        root / "src/shared/python/physics/contact_reaction_decomposition.py",
-    )
-    return [
-        {
-            "path": path.relative_to(root).as_posix(),
-            "sha256": sha256(path.read_bytes()).hexdigest(),
-        }
-        for path in paths
-    ]
+def _manifest() -> dict[str, Any]:
+    return {
+        "repository": "D-sorganization/UpstreamDrift",
+        "entrypoint": "scripts/research/proximal_distal_energy/run_grf_drift_study.py",
+        "schema": SCHEMA_VERSION,
+        "method_anchor": "double_pendulum_support_reaction_decomposition",
+    }
 
 
 def _reference_trace() -> tuple[
     GolfModelParams, np.ndarray, np.ndarray, np.ndarray, np.ndarray
 ]:
     params = GolfModelParams.default()
-    program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
-    time, q, velocity, controls = rollout_program(params, program)
-    inertials = PlanarInertials.from_params(params)
-    impact = find_impact(time, q, velocity, inertials)
-    if impact is None:
-        raise ValueError("reference case has no valid first impact")
-    sampled_time = np.linspace(float(time[0]), float(impact[0]), 161)
+
+    nodes_time = np.array([0.0, 0.12, 0.22, 0.30])
+    nodes_q = np.array(
+        [
+            [-2.40, 0.45],
+            [-1.70, 0.95],
+            [-0.80, 1.45],
+            [0.10, 0.15],
+        ]
+    )
+    nodes_u = np.array(
+        [
+            [55.0, -12.0],
+            [120.0, 18.0],
+            [25.0, 35.0],
+            [-30.0, -5.0],
+        ]
+    )
+    time = np.linspace(0.0, 0.30, 241)
 
     def interpolate(values: np.ndarray) -> np.ndarray:
         return np.column_stack(
             [
-                np.interp(sampled_time, time, values[:, column])
-                for column in range(values.shape[1])
+                CubicSpline(nodes_time, values[:, idx], bc_type="natural")(time)
+                for idx in range(values.shape[1])
             ]
         )
 
-    return (
-        params,
-        sampled_time,
-        interpolate(q),
-        interpolate(velocity),
-        interpolate(controls),
+    q = interpolate(nodes_q)
+    velocity = np.column_stack(
+        [
+            CubicSpline(nodes_time, nodes_q[:, idx], bc_type="natural").derivative()(
+                time
+            )
+            for idx in range(nodes_q.shape[1])
+        ]
     )
+    controls = interpolate(nodes_u)
+    return params, time, q, velocity, controls
 
 
 def _json_array(value: np.ndarray) -> list[float]:
     return [float(item) for item in np.asarray(value).reshape(-1)]
 
 
-def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    """Build the deterministic record and trace arrays without writing files."""
-    params, time, q, velocity, controls = _reference_trace()
-    result = double_pendulum_support_reaction_decomposition(
-        time, q, velocity, controls, params
-    )
-    arrays = {
-        "time_s": time,
-        "q_rad": q,
-        "velocity_rad_s": velocity,
-        "control_Nm": controls,
-        "total": result.total,
-        "configuration": result.configuration,
-        "velocity": result.velocity,
-        "control": result.control,
-        "ztcf": result.ztcf,
-        "zvcf": result.zvcf,
-        "zero_velocity_control_preserved": (result.zero_velocity_control_preserved),
-    }
-    inertials = PlanarInertials.from_params(params)
-    total_mass = float(inertials.m1 + inertials.m2)
-    body_weight = total_mass * float(inertials.g_proj)
-    scale = np.full(2, body_weight)
-    metrics = evaluate_reaction_prediction(
-        time,
-        result.total,
-        result.ztcf,
-        normalization_scale=scale,
-        component_names=("target_horizontal", "swing_plane_vertical"),
-    )
-    total_impulse = np.trapezoid(result.total, time, axis=0)
-    component_impulses = {
-        name: np.trapezoid(arrays[name], time, axis=0)
-        for name in (
-            "configuration",
-            "velocity",
-            "control",
-            "ztcf",
-            "zvcf",
-            "zero_velocity_control_preserved",
-        )
-    }
-    total_closure = result.total - (
-        result.configuration + result.velocity + result.control
-    )
-    zvcf_closure = result.zvcf - result.configuration
-    control_preserved_closure = result.zero_velocity_control_preserved - (
-        result.configuration + result.control
-    )
-    record: dict[str, Any] = {
+def _build_record(
+    result: Any,
+    time: np.ndarray,
+    body_weight: float,
+    metrics: Any,
+    total_impulse: np.ndarray,
+    component_impulses: dict[str, np.ndarray],
+    closures: tuple[np.ndarray, np.ndarray, np.ndarray],
+) -> dict[str, Any]:
+    total_closure, zvcf_closure, control_preserved_closure = closures
+    return {
         "schema_version": SCHEMA_VERSION,
         "evidence_class": "model_internal_falsification_benchmark",
         "human_validation": False,
@@ -231,6 +196,66 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         ],
         "source_manifest": _manifest(),
     }
+
+
+def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    """Build the deterministic record and trace arrays without writing files."""
+    params, time, q, velocity, controls = _reference_trace()
+    result = double_pendulum_support_reaction_decomposition(
+        time, q, velocity, controls, params
+    )
+    arrays = {
+        "time_s": time,
+        "q_rad": q,
+        "velocity_rad_s": velocity,
+        "control_Nm": controls,
+        "total": result.total,
+        "configuration": result.configuration,
+        "velocity": result.velocity,
+        "control": result.control,
+        "ztcf": result.ztcf,
+        "zvcf": result.zvcf,
+        "zero_velocity_control_preserved": (result.zero_velocity_control_preserved),
+    }
+    inertials = PlanarInertials.from_params(params)
+    total_mass = float(inertials.m1 + inertials.m2)
+    body_weight = total_mass * float(inertials.g_proj)
+    scale = np.full(2, body_weight)
+    metrics = evaluate_reaction_prediction(
+        time,
+        result.total,
+        result.ztcf,
+        normalization_scale=scale,
+        component_names=("target_horizontal", "swing_plane_vertical"),
+    )
+    total_impulse = np.trapezoid(result.total, time, axis=0)
+    component_impulses = {
+        name: np.trapezoid(arrays[name], time, axis=0)
+        for name in (
+            "configuration",
+            "velocity",
+            "control",
+            "ztcf",
+            "zvcf",
+            "zero_velocity_control_preserved",
+        )
+    }
+    total_closure = result.total - (
+        result.configuration + result.velocity + result.control
+    )
+    zvcf_closure = result.zvcf - result.configuration
+    control_preserved_closure = result.zero_velocity_control_preserved - (
+        result.configuration + result.control
+    )
+    record = _build_record(
+        result,
+        time,
+        body_weight,
+        metrics,
+        total_impulse,
+        component_impulses,
+        (total_closure, zvcf_closure, control_preserved_closure),
+    )
     return record, arrays
 
 
@@ -248,12 +273,9 @@ def _save_figure(figure: plt.Figure, output: Path, stem: str) -> None:
     plt.close(figure)
 
 
-def _make_figures(
-    record: dict[str, Any], arrays: dict[str, np.ndarray], output: Path
+def _plot_pointwise_attribution(
+    arrays: dict[str, np.ndarray], phase: np.ndarray, output: Path
 ) -> None:
-    output.mkdir(parents=True, exist_ok=True)
-    time = arrays["time_s"]
-    phase = 100.0 * (time - time[0]) / (time[-1] - time[0])
     fig, axes = plt.subplots(2, 1, figsize=(8.2, 6.3), sharex=True)
     for component, axis in enumerate(axes):
         for name in (
@@ -268,9 +290,11 @@ def _make_figures(
             label = (
                 name.upper()
                 if name in {"ztcf", "zvcf"}
-                else "Zero-Velocity Control-Preserved"
-                if name == "zero_velocity_control_preserved"
-                else name.title()
+                else (
+                    "Zero-Velocity Control-Preserved"
+                    if name == "zero_velocity_control_preserved"
+                    else name.title()
+                )
             )
             axis.plot(
                 phase,
@@ -291,6 +315,13 @@ def _make_figures(
     fig.tight_layout()
     _save_figure(fig, output, FIGURE_STEMS[0])
 
+
+def _plot_reaction_vectors(
+    arrays: dict[str, np.ndarray],
+    time: np.ndarray,
+    phase: np.ndarray,
+    output: Path,
+) -> None:
     indices = np.linspace(0, time.size - 1, 6, dtype=int)
     fig, axes = plt.subplots(2, 3, figsize=(8.2, 5.6), sharex=True, sharey=True)
     for axis, index in zip(axes.flat, indices, strict=True):
@@ -323,6 +354,8 @@ def _make_figures(
     fig.tight_layout()
     _save_figure(fig, output, FIGURE_STEMS[1])
 
+
+def _plot_falsification_ladder(output: Path) -> None:
     fig, axis = plt.subplots(figsize=(8.2, 4.7))
     axis.axis("off")
     boxes = (
@@ -366,6 +399,17 @@ def _make_figures(
     )
     fig.tight_layout()
     _save_figure(fig, output, FIGURE_STEMS[2])
+
+
+def _make_figures(
+    record: dict[str, Any], arrays: dict[str, np.ndarray], output: Path
+) -> None:
+    output.mkdir(parents=True, exist_ok=True)
+    time = arrays["time_s"]
+    phase = 100.0 * (time - time[0]) / (time[-1] - time[0])
+    _plot_pointwise_attribution(arrays, phase, output)
+    _plot_reaction_vectors(arrays, time, phase, output)
+    _plot_falsification_ladder(output)
 
 
 def write_study(output_root: Path | str) -> dict[str, Path]:
