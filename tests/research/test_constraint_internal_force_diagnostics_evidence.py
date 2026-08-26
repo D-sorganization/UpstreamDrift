@@ -20,6 +20,10 @@ REPORT = (
     ROOT / "docs/research/proximal_distal_energy_transfer/data/"
     "constraint_internal_force_diagnostics.json"
 )
+REGISTRY = (
+    ROOT
+    / "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json"
+)
 
 
 def test_registered_report_is_deterministic_and_source_bound() -> None:
@@ -78,3 +82,18 @@ def test_validation_rejects_conflation_scale_drift_and_human_promotion() -> None
     lost["bilateral_point_force"]["coincident_contact_case"]["rank"] = 5
     with pytest.raises(ValueError, match="coincident-contact"):
         validate_report(lost)
+
+
+def test_atomic_claims_retain_scales_adverse_cases_and_human_boundary() -> None:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
+
+    assert {"PD-CLAIM-311", "PD-CLAIM-312"} <= set(claims)
+    planar = claims["PD-CLAIM-311"]
+    contact = claims["PD-CLAIM-312"]
+    assert planar["adjudication_outcome"] == "supported"
+    assert contact["adjudication_outcome"] == "supported"
+    assert "human" in planar["uncertainty_boundary"].lower()
+    assert "human" in contact["uncertainty_boundary"].lower()
+    assert planar["numeric_evidence"]
+    assert contact["numeric_evidence"]

@@ -163,6 +163,10 @@ Recorded outputs:
 - `data/bilateral_wrench_identifiability_study.json` — three-dimensional
   point-force and full bilateral-wrench ranks, null spaces, grip-span sweep,
   proper-rotation audit, sensing boundary, and explicit nonhuman claims.
+- `data/constraint_internal_force_diagnostics.json` — source-hash-bound planar
+  closure and bilateral wrench-map ranks, explicit coordinate/wrench scales,
+  singular and coincident-contact controls, tolerance sensitivity, and
+  nonhuman inference boundaries.
 - `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse-
   dynamics factorization, analytic physical-map rank witness, three exact
   nonunique parameter families, dimensionless finite-record rank, unit and

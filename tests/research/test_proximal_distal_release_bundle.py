@@ -22,6 +22,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "double_pendulum",
         "pendulum_force_source_optimization",
         "local_linear_diagnostics",
+        "constraint_internal_force_diagnostics",
         "double_pendulum_identifiability",
         "forward_two_hand",
         "moving_base_flexible_club",
