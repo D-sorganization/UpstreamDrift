@@ -112,7 +112,8 @@ def _finite_time_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "On the registered analytical downswing refined to 0.125 ms, state-step "
         "multipliers 0.1 through 10 change the event transition by at most "
         "6.9e-6, and three complete perturbation rollouts agree with the "
-        "propagated fixed-horizon map within 3.45969e-7; at the 0.349256 s "
+        "propagated fixed-horizon map within a conservative 4e-7 bound; at the "
+        "0.349256 s "
         "geometric event, the observed scaled gains span 0.093456 to 8.33244."
     )
     return _claim(
@@ -144,7 +145,7 @@ def _finite_time_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
                 "/step_refinement/0/event_transition_max_abs_residual_from_nominal",
             ),
             _numeric_entry(
-                "3.45969e-7#1", "/direct_transition_controls/0/maximum_abs_residual"
+                "4e-7#1", "/direct_transition_controls/0/maximum_abs_residual"
             ),
             _numeric_entry("0.349256#1", "/reference_event/time_s"),
             _numeric_entry(

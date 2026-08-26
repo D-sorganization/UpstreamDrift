@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from argparse import ArgumentParser
 from dataclasses import asdict, dataclass
+from decimal import Decimal, ROUND_CEILING
 import json
 from pathlib import Path
 import sys
@@ -56,6 +57,8 @@ SCHEMA_VERSION = "proximal-distal-phase-event-stability/v1"
 ANALYSIS_DT_S = DT / 8.0
 REFINEMENT_RESIDUAL_GATE = 1e-5
 REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS = 2
+DIRECT_TRANSITION_RESIDUAL_GATE = 1e-4
+DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS = 1
 ANALYSIS_HORIZON = HORIZON * 8
 STATE_STEPS = np.array([1e-6, 1e-6, 1e-5, 1e-5], dtype=float)
 STEP_MULTIPLIERS = (0.1, 1.0, 10.0)
@@ -198,6 +201,31 @@ def canonicalize_refinement_residual(value: float) -> float:
             context="phase/event step-refinement residual",
         )
     )
+
+
+def canonicalize_direct_transition_residual(value: float) -> float:
+    """Return a portable upper bound after enforcing the raw residual gate.
+
+    Complete direct-transition matrices remain in the NPZ evidence. The JSON
+    scalar is deliberately rounded upward so its stated ``within`` bound stays
+    true across qualified runtimes instead of publishing machine-level digits.
+    """
+
+    if not np.isfinite(value) or value < 0.0:
+        raise ValueError(
+            "raw direct-transition residual must be finite and nonnegative"
+        )
+    if value >= DIRECT_TRANSITION_RESIDUAL_GATE:
+        raise ValueError(
+            "raw direct-transition residual must remain below the registered gate"
+        )
+    if value == 0.0:
+        return 0.0
+    decimal_value = Decimal(str(value))
+    quantum = Decimal(1).scaleb(
+        decimal_value.adjusted() - DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS + 1
+    )
+    return float(decimal_value.quantize(quantum, rounding=ROUND_CEILING))
 
 
 def _transition_refinement(
@@ -347,9 +375,12 @@ def _direct_transition_controls(
             perturbation_scale=perturbation_scale,
         )
         matrices.append(direct)
+        raw_residual = float(np.max(np.abs(direct - predicted)))
         trials.append(
             {
-                "maximum_abs_residual": float(np.max(np.abs(direct - predicted))),
+                "maximum_abs_residual": canonicalize_direct_transition_residual(
+                    raw_residual
+                ),
                 "perturbation_scale": perturbation_scale,
             }
         )
@@ -445,6 +476,10 @@ def _registration_payload(state: _AnalysisState) -> dict[str, Any]:
         "refinement_residual_gate": REFINEMENT_RESIDUAL_GATE,
         "refinement_residual_reporting_significant_digits": (
             REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS
+        ),
+        "direct_transition_residual_gate": DIRECT_TRANSITION_RESIDUAL_GATE,
+        "direct_transition_residual_reporting_significant_digits": (
+            DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS
         ),
         "direct_perturbation_scales": list(PERTURBATION_SCALES),
         "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
@@ -615,6 +650,18 @@ def validate_report(report: dict[str, Any]) -> dict[str, int]:
         != REFINEMENT_RESIDUAL_GATE
     ):
         raise ValueError("step-refinement residual gate is not registered")
+    if (
+        report["registration"].get(
+            "direct_transition_residual_reporting_significant_digits"
+        )
+        != DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS
+    ):
+        raise ValueError("direct-transition reporting precision is not registered")
+    if (
+        report["registration"].get("direct_transition_residual_gate")
+        != DIRECT_TRANSITION_RESIDUAL_GATE
+    ):
+        raise ValueError("direct-transition residual gate is not registered")
     event = report["event_time_sensitivity"]
     if event["implicit"]["status"] != "transverse":
         raise ValueError("registered event must remain transverse")

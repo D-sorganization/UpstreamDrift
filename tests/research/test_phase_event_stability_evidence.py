@@ -15,10 +15,13 @@ import pytest
 
 from scripts.research.proximal_distal_energy.run_phase_event_stability import (
     ARRAY_PATH,
+    DIRECT_TRANSITION_RESIDUAL_GATE,
+    DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS,
     REFINEMENT_RESIDUAL_GATE,
     REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS,
     REPORT_PATH,
     build_report,
+    canonicalize_direct_transition_residual,
     canonicalize_refinement_residual,
     validate_report,
 )
@@ -40,6 +43,16 @@ def test_refinement_residual_projection_is_portable_across_registered_runtimes()
     assert canonicalize_refinement_residual(8.79523e-7) == 8.8e-7
     with pytest.raises(ValueError, match="raw step-refinement residual"):
         canonicalize_refinement_residual(REFINEMENT_RESIDUAL_GATE)
+
+
+def test_direct_transition_residual_is_a_portable_conservative_upper_bound() -> None:
+    """Direct-rollout diagnostics must remain true on every qualified runtime."""
+
+    assert DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS == 1
+    assert canonicalize_direct_transition_residual(3.43946e-7) == 4e-7
+    assert canonicalize_direct_transition_residual(3.46646e-7) == 4e-7
+    with pytest.raises(ValueError, match="raw direct-transition residual"):
+        canonicalize_direct_transition_residual(DIRECT_TRANSITION_RESIDUAL_GATE)
 
 
 @pytest.fixture(scope="module")
@@ -136,6 +149,15 @@ def test_variational_predictions_converge_and_match_direct_rollouts(
     )
     assert (
         report["registration"]["refinement_residual_gate"] == REFINEMENT_RESIDUAL_GATE
+    )
+    assert report["registration"]["direct_transition_residual_gate"] == (
+        DIRECT_TRANSITION_RESIDUAL_GATE
+    )
+    assert (
+        report["registration"][
+            "direct_transition_residual_reporting_significant_digits"
+        ]
+        == DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS
     )
 
     assert (

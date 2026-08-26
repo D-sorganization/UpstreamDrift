@@ -5078,7 +5078,7 @@
     },
     {
       "claim_id": "PD-CLAIM-315",
-      "statement_sha256": "4bd43261164b7e7720499289d0225487ef94f40bbb55bc6929ccadef8582a0e5",
+      "statement_sha256": "65a5cc39c7fde09ec29d297211729b72afca00e2e7231628d1163f047c6a3950",
       "numeric_evidence": [
         {
           "literal_id": "0.125#1",
@@ -5121,7 +5121,7 @@
           "rtol": 0.0
         },
         {
-          "literal_id": "3.45969e-7#1",
+          "literal_id": "4e-7#1",
           "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
           "json_pointer": "/direct_transition_controls/0/maximum_abs_residual",
           "evidence_scope": "local_json_value",

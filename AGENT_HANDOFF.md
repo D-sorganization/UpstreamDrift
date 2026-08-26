@@ -13,7 +13,7 @@ is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence, and release; AffineDrift
   is the immutable public projection and Tools owns consumers.
 - Remote `main` is `99acc997a97b3d97cb4ddd857b79bedd4a66f290` (PR #9109); active branch: `research/9116-phase-event-stability`.
-- The 246-page publication is SHA-256 `f7c2f3f7f2040a9fa97a8810940521b6545d9af64f3d2114df004aaf0efabb4`,
+- The 246-page publication is SHA-256 `64f552741217fc627af0cdbbe4066fd430a7ed8a5d2ca05ad9f109cce794c52b`,
   with 194 URI links and 255 outline entries; archival qualification is false.
 - The complete audit contains 1,148 reviewed candidates, 315 atomic claims,
   134 numeric contracts, and 445/445 verified literals. Outcomes are 295
@@ -72,14 +72,14 @@ is the single proximal-to-distal completion authority.
   phases each close below `1.67e-16` m with rank/nullity 4/1; exact 0.03 m and
   1.53 m degeneracies are 3/2. Controls retain numerical rank/tolerance
   dependence without labeling it a physical or anatomical threshold.
-- #9116 is published in PR #9117; its branch also reconciles the current lock-header and architecture-budget gates.
+- #9116 is published in PR #9117 with the Python 3.11/3.12 portability fix; it also reconciles the lock-header and architecture-budget gates.
   It propagates the exact discrete RK4 variational map at 0.125 ms and separates
   finite-window gains from transverse event-time derivatives, rejects grazing
   guards, tests saltation controls, and suppresses Floquet output because the
   scaled periodicity residual is 1.48546 versus a `1e-6` tolerance.
-- Python 3.11/3.12 reproduce the report exactly. Its step-refinement scalar is
-  published at two significant digits (`6.9e-6`); full-precision arrays and the
-  `1e-5` gate remain unchanged. Gains span 0.093456--8.33244; the event
+- Python 3.11/3.12 reproduce the report exactly. Step refinement is reported at
+  two significant digits (`6.9e-6`), and direct-rollout agreement is an upward-
+  rounded `4e-7`; raw `1e-5`/`1e-4` gates and full NPZ arrays remain. Gains span 0.093456--8.33244; the event
   denominator is 35.0258 s^-1 and direct/implicit agreement is `5.98e-5` s.
   These are local synthetic diagnostics, not asymptotic stability, neural
   timing demand, participant robustness, passive torque, or coaching evidence.

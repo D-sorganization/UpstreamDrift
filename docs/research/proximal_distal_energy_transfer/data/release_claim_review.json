@@ -2745,9 +2745,9 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:273",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:285",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:298",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:307",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:315"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:299",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:308",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:316"
       ],
       "negative_controls": [
         "three central-difference step multipliers",

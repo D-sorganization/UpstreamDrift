@@ -27,6 +27,12 @@ and the full-precision transition arrays remain available in the NPZ evidence;
 the reporting projection therefore limits claimed numerical precision without
 relaxing the registered $10^{-5}$ convergence gate.
 
+The direct-rollout comparison likewise evaluates its unrounded residual against
+a fail-closed $10^{-4}$ gate. Its JSON diagnostic is rounded upward to one
+significant digit, so the published $4\times10^{-7}$ value is a conservative
+cross-runtime upper bound; the complete direct-transition matrices remain in
+the NPZ evidence.
+
 The first positive crossing of
 $h(\mathbf x)=\theta_s+\theta_w=0$ is interpolated on the common grid. Its
 implicit event-time derivative is accepted only when

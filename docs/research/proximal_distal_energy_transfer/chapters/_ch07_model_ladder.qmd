@@ -288,7 +288,8 @@ exponents. The computation refines the paper's 1 ms reference integration to
 0.125 ms for this derivative audit. Central-difference step multipliers from
 0.1 to 10 change the event transition by at most $6.9\times10^{-6}$, while
 three complete symmetric perturbation rollouts agree with the propagated map
-within $3.46\times10^{-7}$. At the 0.349256 s geometric delivery event, the
+within a registered conservative upper bound of $4\times10^{-7}$. At the
+0.349256 s geometric delivery event, the
 largest observed scaled gain is 8.33244 and the smallest is 0.093456. Thus the
 local map amplifies some perturbation directions while contracting others; a
 single label such as “stable swing” would discard that anisotropy.

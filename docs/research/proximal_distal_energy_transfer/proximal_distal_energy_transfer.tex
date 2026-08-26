@@ -505,7 +505,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, breakable, opacityback=0, left=2mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, colback=white, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, left=2mm, titlerule=0mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, colback=white, bottomtitle=1mm, arc=.35mm, colframe=quarto-callout-note-color-frame, opacityback=0, toprule=.15mm, leftrule=.75mm, rightrule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2812,7 +2812,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, breakable, opacityback=0, left=2mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, colback=white, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, left=2mm, titlerule=0mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, colback=white, bottomtitle=1mm, arc=.35mm, colframe=quarto-callout-note-color-frame, opacityback=0, toprule=.15mm, leftrule=.75mm, rightrule=.15mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -10159,11 +10159,12 @@ Lyapunov exponents. The computation refines the paper's 1 ms reference
 integration to 0.125 ms for this derivative audit. Central-difference
 step multipliers from 0.1 to 10 change the event transition by at most
 \(6.9\times10^{-6}\), while three complete symmetric perturbation
-rollouts agree with the propagated map within \(3.46\times10^{-7}\). At
-the 0.349256 s geometric delivery event, the largest observed scaled
-gain is 8.33244 and the smallest is 0.093456. Thus the local map
-amplifies some perturbation directions while contracting others; a
-single label such as ``stable swing'' would discard that anisotropy.
+rollouts agree with the propagated map within a registered conservative
+upper bound of \(4\times10^{-7}\). At the 0.349256 s geometric delivery
+event, the largest observed scaled gain is 8.33244 and the smallest is
+0.093456. Thus the local map amplifies some perturbation directions
+while contracting others; a single label such as ``stable swing'' would
+discard that anisotropy.
 
 \begin{figure}
 

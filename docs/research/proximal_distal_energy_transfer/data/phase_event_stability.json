@@ -43,6 +43,8 @@
     ],
     "refinement_residual_gate": 1e-05,
     "refinement_residual_reporting_significant_digits": 2,
+    "direct_transition_residual_gate": 0.0001,
+    "direct_transition_residual_reporting_significant_digits": 1,
     "direct_perturbation_scales": [
       5e-07,
       1e-06,
@@ -209,15 +211,15 @@
   ],
   "direct_transition_controls": [
     {
-      "maximum_abs_residual": 3.45969e-07,
+      "maximum_abs_residual": 4e-07,
       "perturbation_scale": 5e-07
     },
     {
-      "maximum_abs_residual": 3.44485e-07,
+      "maximum_abs_residual": 4e-07,
       "perturbation_scale": 1e-06
     },
     {
-      "maximum_abs_residual": 3.43946e-07,
+      "maximum_abs_residual": 4e-07,
       "perturbation_scale": 2e-06
     }
   ],
