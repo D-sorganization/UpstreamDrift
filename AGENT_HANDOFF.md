@@ -64,7 +64,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - Four synthetic operating points, three finite-difference multipliers, three
   scale scenarios, and 16 countermodels in each class are registered. The
   zero-input and zero-output killswitches return rank zero.
-- Published floats use eight significant digits for cross-platform identity;
+- Published floats use six significant digits for cross-platform identity;
   rank decisions are computed at full precision before serialization. These
   local results do not establish structural/global rank or human strategy.
 
