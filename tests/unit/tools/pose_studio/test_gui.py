@@ -15,6 +15,7 @@ from src.shared.python.pose_interchange.canonical import (
 from src.shared.python.motion_matching.diagnostics.reference_pose import (
     REFERENCE_GOLFER_FIELDS,
 )
+from src.shared.python.pose_interchange.services import MockKinematicsService
 
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
@@ -160,6 +161,49 @@ def test_gui_apply_pose_with_service_transforms(mock_qapp) -> None:
     with patch.object(win.view_3d, "update_pose") as mock_update_pose:
         win._apply_pose(pose, record_history=False)
         mock_update_pose.assert_called_with(pose)
+
+
+@patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
+def test_gui_apply_pose_refreshes_stale_status_pill_on_mock_downgrade(
+    mock_qapp,
+) -> None:
+    """Issue #8827: a mid-session silent mock-downgrade must not leave a
+    stale 'live' status pill.
+
+    ``EngineController.set_pose`` transparently swaps in
+    ``MockKinematicsService`` (and sets ``EngineStatus.MOCK``) when the
+    live engine bridge raises ``NotImplementedError``. Before this fix,
+    ``MainWidget._apply_pose`` never re-read ``EngineController.status``
+    after calling ``set_pose``, so the pill only updated at initial
+    engine selection (``_on_engine_selected``) and stayed stuck on
+    whatever it showed then -- e.g. a green "live" pill -- even though
+    the 3D view was now being driven by the mock service.
+    """
+    win = PoseStudioWindow()
+
+    # Force the controller into a "live" state with a service whose
+    # set_pose() raises NotImplementedError, simulating a partial engine
+    # bridge (EPIC #4895) that only fails once the user actually edits a
+    # joint (not at initial activation).
+    live_service = MagicMock()
+    live_service.set_pose.side_effect = NotImplementedError("partial bridge")
+    win._engine_controller._service = live_service
+    win._engine_controller._status = EngineStatus.LIVE
+
+    # Simulate the pill showing "live" from the earlier, healthy
+    # engine-selection event.
+    win.engine_picker.set_status(EngineStatus.LIVE)
+    assert win.engine_picker.status_pill.text() == EngineStatus.LIVE.value
+
+    # A pose edit (e.g. a joint drag) now triggers the silent downgrade.
+    win._apply_pose(canonical_zero_pose(), record_history=False)
+
+    # The controller itself downgraded correctly...
+    assert win._engine_controller.status == EngineStatus.MOCK
+    assert isinstance(win._engine_controller.service, MockKinematicsService)
+    # ...and the pill must reflect that in real time, not just at the
+    # next engine-selection event.
+    assert win.engine_picker.status_pill.text() == EngineStatus.MOCK.value
 
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
