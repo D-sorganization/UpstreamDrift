@@ -10,7 +10,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `a4b7d3f9b19864103d842c4a3e5c708c4ce1cba5`.
+- Remote `main` is `2091667158907427c1b59276041fcdbc4b92964c`.
   PR #9018 and its normalized-claim authority remain ancestors of `main`.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
