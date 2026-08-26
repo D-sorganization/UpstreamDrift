@@ -40,6 +40,24 @@ def _spec(
 
 
 REVIEW_SPECS: dict[str, dict[str, Any]] = {
+    "double_pendulum_base_coefficient_excitation": _spec(
+        "reviewed_as_dimensionless_finite_record_excitation",
+        "full_rank_for_registered_synthetic_record",
+        ("PD-CLAIM-309",),
+        "Independent trajectories, derivative pipelines, noise models, and held-out prediction under the same declared scale contract.",
+    ),
+    "double_pendulum_physical_parameter_identifiability": _spec(
+        "reviewed_as_exact_structural_nonidentifiability",
+        "structurally_non_identifiable_under_declared_model",
+        ("PD-CLAIM-308",),
+        "A richer independently justified model or measurement set that breaks the registered exact invariance families.",
+    ),
+    "double_pendulum_practical_identifiability": _spec(
+        "reviewed_as_oracle_lower_bound_only",
+        "not_established_oracle_kinematics_lower_bound_only",
+        ("PD-CLAIM-310",),
+        "Governed repeated-participant data with synchronized loads and kinematics, calibrated error models, and participant-held-out prediction.",
+    ),
     "coordinate_force_source_attribution": _spec(
         "reviewed_as_bounded_coordinate_explicit_model_result",
         "supported_at_declared_planar_model_and_coordinate_tier",

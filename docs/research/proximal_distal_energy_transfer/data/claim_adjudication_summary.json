@@ -1,11 +1,11 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "d6902ef0535d09743a28a538b5a0c267bf215c6fd508c258afdc873cac261e8d",
-  "claim_count": 306,
+  "paper_source_digest": "53d11ff4dd10954807b69bbed0f6442b5efd93cf02ea6ed1c9c9da10b3d4ad1d",
+  "claim_count": 309,
   "outcome_counts": {
     "inconclusive": 5,
-    "supported": 286,
+    "supported": 289,
     "untested": 15
   },
   "evidence_qualification_counts": {
@@ -16,7 +16,7 @@
     "hypothesis_or_prospective_protocol": 12,
     "independent_followup_open": 24,
     "original_full_text_checked": 18,
-    "project_executable_or_data": 277
+    "project_executable_or_data": 280
   },
   "evidence_tier_counts": {
     "bibliographic_record": 3,
@@ -24,13 +24,13 @@
     "external_methods_or_measurement": 10,
     "external_modeling_or_simulation": 15,
     "external_review_or_synthesis": 10,
-    "project_derivation_or_document": 91,
-    "project_executable_or_generated": 277,
+    "project_derivation_or_document": 94,
+    "project_executable_or_generated": 280,
     "prospective_or_unexecuted": 15
   },
   "source_independence_counts": {
     "multiple_independent_external_support": 20,
-    "project_only": 252,
+    "project_only": 255,
     "single_independent_external_support": 34
   },
   "model_tier_counts": {
@@ -40,7 +40,7 @@
     "declared_model_tier_unclassified": 12,
     "finite_ground_or_base": 16,
     "human_or_external_evidence": 46,
-    "planar_reduced": 131,
+    "planar_reduced": 134,
     "spatial_reduced": 76,
     "two_hand_or_bilateral": 92,
     "uncertainty_or_control": 8
@@ -51,7 +51,7 @@
     "governed_human_data_unavailable": 11,
     "independent_reimplementation_open": 12,
     "mixed_or_insufficient_evidence": 5,
-    "none_declared": 262,
+    "none_declared": 265,
     "prospective_experiment_open": 15,
     "statistical_reanalysis_or_replication_open": 9,
     "systematic_review_open": 2
@@ -67,8 +67,8 @@
     },
     {
       "claim_family": "ch02_mechanics",
-      "claim_count": 30,
-      "project_only_count": 2,
+      "claim_count": 33,
+      "project_only_count": 5,
       "single_independent_external_support_count": 17,
       "multiple_independent_external_support_count": 11,
       "concentration_flag": "mixed_independence"
@@ -14077,6 +14077,140 @@
       "uncertainty_boundary": "This is a finite model-scenario grid, not continuous optimal control, a causal human estimate, or a technique recommendation.",
       "falsifier": "A clean replay changes grid membership or either selected optimum, fails impact qualification, or violates the published mapping and ledger diagnostics.",
       "adjudication": "The chapter is retained as coordinate-explicit model evidence and does not identify biological force, coaching technique, or a human optimum.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "claim_id": "PD-CLAIM-308",
+      "adjudication_outcome": "supported",
+      "statement": "The declared physical-parameter map has analytic rank 7 and nullity 4, with three exact nonunique parameter families that preserve every base coefficient.",
+      "classification": "double_pendulum_exact_physical_map_nonuniqueness",
+      "published_status": "structurally_non_identifiable_under_declared_model",
+      "audit_status": "exact_map_dimensionless_evidence_and_inference_boundary_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch02_mechanics",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:217"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+        "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+        "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability_evidence.py"
+      ],
+      "model_domain": "Planar fixed-hub analytical double pendulum in declared absolute-arm/relative-club coordinates with oracle inverse-dynamics kinematics.",
+      "uncertainty_boundary": "The exact result applies only to the declared eleven-entry reduced physical map; it does not test model adequacy or a richer sensor model.",
+      "falsifier": "The analytic rank witness vanishes inside the declared parameter domain or any registered alternative changes a base coefficient.",
+      "adjudication": "The result is retained as exact or registered synthetic model evidence; it does not identify participant anatomy, human strategy, or coaching advice.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "claim_id": "PD-CLAIM-309",
+      "adjudication_outcome": "supported",
+      "statement": "Under declared coefficient and 60 N m torque scales, the registered synthetic record yields dimensionless regressor rank 7 and condition 180.853; equivalent coefficient units change the matrix by at most 4.44089e-16, while zero motion returns rank 0.",
+      "classification": "double_pendulum_dimensionless_finite_record_excitation",
+      "published_status": "full_rank_for_registered_synthetic_record",
+      "audit_status": "exact_map_dimensionless_evidence_and_inference_boundary_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch02_mechanics",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:237"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+        "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+        "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "model_domain": "Planar fixed-hub analytical double pendulum in declared absolute-arm/relative-club coordinates with oracle inverse-dynamics kinematics.",
+      "uncertainty_boundary": "Rank and condition are finite-record, tolerance-, coordinate-, and scale-contract results; raw dimensional conditioning is not interpreted.",
+      "falsifier": "A clean replay changes the registered rank, equivalent units change a dimensionless rank decision, or the zero-motion killswitch has nonzero rank.",
+      "adjudication": "The result is retained as exact or registered synthetic model evidence; it does not identify participant anatomy, human strategy, or coaching advice.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "claim_id": "PD-CLAIM-310",
+      "adjudication_outcome": "supported",
+      "statement": "With exact kinematics and iid Gaussian torque noise of 1 N m, the oracle lower-bound screen gives worst relative 95% half-width 0.123266 over the full record and 498.504 over its first 10%; this is not practical or participant identifiability.",
+      "classification": "double_pendulum_identifiability_inference_boundary",
+      "published_status": "explicitly_bounded_oracle_lower_bound_only",
+      "audit_status": "exact_map_dimensionless_evidence_and_inference_boundary_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch02_mechanics",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:248"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+        "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+        "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "model_domain": "Planar fixed-hub analytical double pendulum in declared absolute-arm/relative-club coordinates with oracle inverse-dynamics kinematics.",
+      "uncertainty_boundary": "The screen omits kinematic differentiation noise, correlated errors, model discrepancy, event uncertainty, unknown noise scale, priors, repeated participants, and held-out prediction.",
+      "falsifier": "The uncertainty calculation reports pseudo-precision for a deficient record or the paper promotes the oracle bound to practical inference.",
+      "adjudication": "The result is retained as exact or registered synthetic model evidence; it does not identify participant anatomy, human strategy, or coaching advice.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-25"
     }
