@@ -4,13 +4,18 @@ Last updated: 2026-08-26
 This is current operational state; Git/GitHub retain history, and epic #8557
 is the single proximal-to-distal completion authority.
 
+## Markerless Mocap Program (#9063)
+
+- ADR-0041 assigns camera, observation, calibration, timing, session, reconstruction, and C3D contracts to Tools #4706; UpstreamDrift owns orchestration, UX, persistence, and biomechanics adapters; AffineDrift owns sanitized publication. Tools PR #4734 remains a protected candidate; do not repin `vendor/ud-tools` to a feature head, and let UpstreamDrift #9069 follow its immutable merge. Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation: there is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
+
 ## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`;
-  this branch merges that authority after protected PR #9114's squash.
+- Remote `main` is `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c`; this
+  branch normally integrates its protected #9114 and markerless-authority #9088
+  history before requalifying #9107's packaging transport boundary.
 - The current branch publication is 245 pages, SHA-256
   `48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa`,
   with 194 URI links and 255 outline entries. Archival qualification remains
