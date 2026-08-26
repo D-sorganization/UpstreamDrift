@@ -124,6 +124,26 @@ def _registered_packages(hook) -> dict[str, str]:
     return build_data["force_include"]
 
 
+def test_canonical_bunkershot_package_is_registered_at_top_level(tmp_path) -> None:
+    """External installs must expose the repository's one canonical import root."""
+    package_root = tmp_path / "src" / "bunkershot3d"
+    _write_package_file(package_root, "__init__.py")
+    _write_package_file(package_root, "postproc/__init__.py")
+    _write_package_file(package_root, "postproc/wrench_trace.py")
+    _write_package_file(package_root, "tests/test_forbidden.py")
+
+    build_data: dict = {}
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+    hook._register_upstream_packages("editable", build_data)
+
+    registered = build_data["force_include"]
+    assert registered[str(package_root / "__init__.py")] == ("bunkershot3d/__init__.py")
+    assert registered[str(package_root / "postproc" / "wrench_trace.py")] == (
+        "bunkershot3d/postproc/wrench_trace.py"
+    )
+    assert str(package_root / "tests" / "test_forbidden.py") not in registered
+
+
 def _initialize_with_pinned_tools(hook, version: str, build_data: dict) -> None:
     with patch.object(
         build_hooks.UIBuildHook,
