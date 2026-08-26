@@ -2581,7 +2581,8 @@
         "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
         "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
         "tests/research/test_double_pendulum_identifiability.py",
-        "tests/research/test_double_pendulum_identifiability_evidence.py"
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:237"
@@ -2654,7 +2655,8 @@
         "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
         "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
         "tests/research/test_double_pendulum_identifiability.py",
-        "tests/research/test_double_pendulum_identifiability_evidence.py"
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:248"

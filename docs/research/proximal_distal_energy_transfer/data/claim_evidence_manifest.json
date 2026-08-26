@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "25fc64c8d7c128a383f1e06d69bba87a70f06f98aa79a1af247bb806167bad3d"
+    "sha256": "dcd44491a94e74044abda4e853ef73d9447c0a912b8d1e75a6066540199dd66f"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -12,7 +12,7 @@
   },
   "summary": {
     "claim_count": 309,
-    "evidence_reference_count": 2284,
+    "evidence_reference_count": 2286,
     "local_artifact_count": 338,
     "external_url_count": 78
   },
@@ -3858,7 +3858,8 @@
         "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
         "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
         "tests/research/test_double_pendulum_identifiability.py",
-        "tests/research/test_double_pendulum_identifiability_evidence.py"
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "external_references": []
     },
@@ -3873,7 +3874,8 @@
         "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
         "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
         "tests/research/test_double_pendulum_identifiability.py",
-        "tests/research/test_double_pendulum_identifiability_evidence.py"
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "external_references": []
     }
@@ -4261,8 +4263,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json": {
-      "sha256": "9dca8d5c31554b2818ddb3c4ba303a7fa8eb60d3f3db96e7af57bbcd4cd848e4",
-      "bytes": 299456,
+      "sha256": "92d01ae80c77c24e6466f54117cdfcc0b55056f2ae5351353b55c4abef2b4c3d",
+      "bytes": 305329,
       "referenced_by": [
         "PD-CLAIM-003",
         "PD-CLAIM-006",
@@ -4365,7 +4367,9 @@
         "PD-CLAIM-294",
         "PD-CLAIM-295",
         "PD-CLAIM-296",
-        "PD-CLAIM-307"
+        "PD-CLAIM-307",
+        "PD-CLAIM-309",
+        "PD-CLAIM-310"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json": {
@@ -5710,7 +5714,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "58439a5f3adcb9c31134bbbedee5cad27312795c7c8722564103e352f5746187",
+      "sha256": "54112db36d4ae7076236ccca6ac9dee0a46b66dd663b6eb1b4ec96ddff95189b",
       "bytes": 141661,
       "referenced_by": [
         "PD-CLAIM-241"

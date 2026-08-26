@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "09319b54ecadc62dd1c265421370d3a8f53854b341e831783605619d892b250b",
+    "source_digest": "53d11ff4dd10954807b69bbed0f6442b5efd93cf02ea6ed1c9c9da10b3d4ad1d",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1134-candidate paper inventory is adjudicated, including exact double-pendulum physical-map nonuniqueness, dimensionless finite-record excitation, and the oracle inference boundary.",
+    "current_scope": "The complete 1134-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; generated reviewer tables and editorial anchors are explicitly classified as nonclaims.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -11416,7 +11416,80 @@
       "last_verified_on": "2026-08-25"
     },
     {
-      "candidate_id": "PD-CAND-063c7e05fb640e5d",
+      "candidate_id": "PD-CAND-3b5468b6dbf7fa85",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-007",
+        "PD-CLAIM-008",
+        "PD-CLAIM-214",
+        "PD-CLAIM-260",
+        "PD-CLAIM-263",
+        "PD-CLAIM-272",
+        "PD-CLAIM-291",
+        "PD-CLAIM-292",
+        "PD-CLAIM-293",
+        "PD-CLAIM-294",
+        "PD-CLAIM-295",
+        "PD-CLAIM-296",
+        "PD-CLAIM-308",
+        "PD-CLAIM-309",
+        "PD-CLAIM-310"
+      ],
+      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "candidate_id": "PD-CAND-9a1173a2bc2c1778",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-308",
+        "PD-CLAIM-309"
+      ],
+      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "candidate_id": "PD-CAND-8d9817d047ce5a0b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-308"
+      ],
+      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "candidate_id": "PD-CAND-9c578202ea4816cc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-309"
+      ],
+      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "candidate_id": "PD-CAND-b74722b281d7d50e",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-310"
+      ],
+      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "candidate_id": "PD-CAND-03f3c700d6926e6a",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This appendix paragraph inventories governed artifacts and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "candidate_id": "PD-CAND-000afa39d6089e6f",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11432,15 +11505,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-22fe542413fe1075",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-37582fe0fbc00cc7",
+      "candidate_id": "PD-CAND-36d4ac97c4116672",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11456,7 +11521,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-77f607e78b74eddc",
+      "candidate_id": "PD-CAND-4018dc67ba8ab4f5",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11464,7 +11529,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-9248119a2458c1b1",
+      "candidate_id": "PD-CAND-43c4e06e7103087b",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11472,7 +11537,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-929f26183c2056d8",
+      "candidate_id": "PD-CAND-44f91b4f5f376d4f",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11489,14 +11554,6 @@
     },
     {
       "candidate_id": "PD-CAND-9906005bff75ba72",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-a83d791d65049fc2",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11576,6 +11633,22 @@
       "last_verified_on": "2026-08-23"
     },
     {
+      "candidate_id": "PD-CAND-f2518e167ae18e34",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-f7091f3b82570b27",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
       "candidate_id": "PD-CAND-fdcf5c685afbb41a",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
@@ -11590,79 +11663,6 @@
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-3b5468b6dbf7fa85",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-007",
-        "PD-CLAIM-008",
-        "PD-CLAIM-214",
-        "PD-CLAIM-260",
-        "PD-CLAIM-263",
-        "PD-CLAIM-272",
-        "PD-CLAIM-291",
-        "PD-CLAIM-292",
-        "PD-CLAIM-293",
-        "PD-CLAIM-294",
-        "PD-CLAIM-295",
-        "PD-CLAIM-296",
-        "PD-CLAIM-308",
-        "PD-CLAIM-309",
-        "PD-CLAIM-310"
-      ],
-      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-25"
-    },
-    {
-      "candidate_id": "PD-CAND-9a1173a2bc2c1778",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-308",
-        "PD-CLAIM-309"
-      ],
-      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-25"
-    },
-    {
-      "candidate_id": "PD-CAND-8d9817d047ce5a0b",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-308"
-      ],
-      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-25"
-    },
-    {
-      "candidate_id": "PD-CAND-9c578202ea4816cc",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-309"
-      ],
-      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-25"
-    },
-    {
-      "candidate_id": "PD-CAND-b74722b281d7d50e",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-310"
-      ],
-      "rationale": "This passage states, repeats, or bounds the exact physical-map, dimensionless finite-record, or oracle lower-bound claim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-25"
-    },
-    {
-      "candidate_id": "PD-CAND-03f3c700d6926e6a",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This appendix paragraph inventories governed artifacts and adds no standalone scientific result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-25"
     }
   ],
   "claims": [
@@ -30419,7 +30419,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 0.5000001,
           "rtol": 0.0
         },
         {
@@ -30429,7 +30429,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 0.5000001,
           "rtol": 0.0
         }
       ]
@@ -30459,7 +30459,8 @@
         "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
         "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
         "tests/research/test_double_pendulum_identifiability.py",
-        "tests/research/test_double_pendulum_identifiability_evidence.py"
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "model_domain": "Planar fixed-hub analytical double pendulum in declared absolute-arm/relative-club coordinates with oracle inverse-dynamics kinematics.",
       "uncertainty_boundary": "Rank and condition are finite-record, tolerance-, coordinate-, and scale-contract results; raw dimensional conditioning is not interpreted.",
@@ -30482,9 +30483,9 @@
       "numeric_evidence": [
         {
           "literal_id": "60#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
-          "json_pointer": "/nondimensional_scale_contract/torque_scale_nm",
-          "evidence_scope": "local_json_value",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-309/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
           "scale": 1.0,
           "offset": 0.0,
           "atol": 0.0,
@@ -30497,24 +30498,24 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 0.5000001,
           "rtol": 0.0
         },
         {
           "literal_id": "180.853#1",
           "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
-          "json_pointer": "/finite_record_regressor/retained_condition_number",
+          "json_pointer": "/finite_record_regressor/cumulative_rank/3/retained_condition_number",
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 0.0005000000999999999,
           "rtol": 0.0
         },
         {
           "literal_id": "4.44089e-16#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
-          "json_pointer": "/finite_record_regressor/unit_invariance/max_abs_dimensionless_regressor_difference",
-          "evidence_scope": "local_json_value",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-309/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
           "scale": 1.0,
           "offset": 0.0,
           "atol": 0.0,
@@ -30527,7 +30528,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 0.5000001,
           "rtol": 0.0
         }
       ]
@@ -30556,7 +30557,8 @@
         "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
         "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
         "tests/research/test_double_pendulum_identifiability.py",
-        "tests/research/test_double_pendulum_identifiability_evidence.py"
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "model_domain": "Planar fixed-hub analytical double pendulum in declared absolute-arm/relative-club coordinates with oracle inverse-dynamics kinematics.",
       "uncertainty_boundary": "The screen omits kinematic differentiation noise, correlated errors, model discrepancy, event uncertainty, unknown noise scale, priors, repeated participants, and held-out prediction.",
@@ -30580,19 +30582,19 @@
         {
           "literal_id": "1#1",
           "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
-          "json_pointer": "/noise_aware_lower_bound_screen/reference_window_noise_sd_nm",
+          "json_pointer": "/noise_aware_lower_bound_screen/full_record_cases/2/torque_noise_sd_nm",
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 0.5000001,
           "rtol": 0.0
         },
         {
           "literal_id": "95#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
-          "json_pointer": "/noise_aware_lower_bound_screen/confidence_level",
-          "evidence_scope": "local_json_value",
-          "scale": 100.0,
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-310/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
           "offset": 0.0,
           "atol": 0.0,
           "rtol": 0.0
@@ -30604,7 +30606,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 5.000000999999999e-07,
           "rtol": 0.0
         },
         {
@@ -30614,15 +30616,15 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 0.0005000000999999999,
           "rtol": 0.0
         },
         {
           "literal_id": "10#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
-          "json_pointer": "/noise_aware_lower_bound_screen/window_cases/0/fraction",
-          "evidence_scope": "local_json_value",
-          "scale": 100.0,
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-310/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
           "offset": 0.0,
           "atol": 0.0,
           "rtol": 0.0

@@ -1,9 +1,8 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-25
-
-This is current operational state, not history. Git and GitHub retain history.
-Epic #8557 is the single proximal-to-distal completion authority.
+Last updated: 2026-08-26
+This is current operational state; Git/GitHub retain history, and epic #8557
+is the single proximal-to-distal completion authority.
 
 ## Repository and Publication Authority
 
@@ -71,8 +70,9 @@ Epic #8557 is the single proximal-to-distal completion authority.
   equivalent-unit change is `4.44089e-16`, while zero motion has rank zero.
 - Its Gaussian Fisher screen is an oracle-kinematics lower bound only: at 1 N m
   noise, the worst relative 95% half-width is 0.123266 for the full record and
-  498.504 for the first 10%. Practical and participant identifiability remain
-  unestablished.
+  498.504 for the first 10%. Practical/participant identifiability remains
+  unestablished. The 309-claim projection is re-frozen at `53d11ff4`; 63
+  focused tests and computational release gates pass.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
