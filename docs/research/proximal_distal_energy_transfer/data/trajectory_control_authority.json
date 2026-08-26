@@ -1,0 +1,435 @@
+{
+  "schema_version": "proximal-distal-trajectory-control-authority/v1",
+  "model_tier": "analytical_double_pendulum",
+  "source_identity": {
+    "phase_event_array_sha256": "3ec34ca51823849371b8045e668ce5357ef3f9c4be4309e4478e035921dc012e",
+    "phase_event_report_schema": "proximal-distal-phase-event-stability/v1",
+    "phase_event_report_sha256": "ee594a499c4f0d9c11e50f6cc3161b7b47c641712f782e99a16b1270f7028fc0",
+    "required_parent_pr": 9117,
+    "required_parent_issue": 9116
+  },
+  "registration": {
+    "state_coordinates": [
+      "shoulder_angle_rad",
+      "wrist_relative_angle_rad",
+      "shoulder_rate_rad_s",
+      "wrist_relative_rate_rad_s"
+    ],
+    "control_coordinates": [
+      "shoulder_torque_nm",
+      "wrist_torque_nm"
+    ],
+    "state_scales": [
+      3.14159,
+      3.14159,
+      13.5215,
+      28.2684
+    ],
+    "control_scales_nm": [
+      100.0,
+      100.0
+    ],
+    "state_steps": [
+      1e-06,
+      1e-06,
+      1e-05,
+      1e-05
+    ],
+    "control_steps_nm": [
+      0.0001,
+      0.0001
+    ],
+    "base_dt_s": 0.000125,
+    "input_normalization": "continuous_energy_equivalent_Bd_divided_by_sqrt_dt",
+    "rank_absolute_tolerance": 1e-12,
+    "rank_relative_tolerance": 1e-09,
+    "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
+    "guard_residual_gate": 1e-10,
+    "transversality_threshold_per_s": 1e-06
+  },
+  "event_conditioned_authority": {
+    "status": "transverse",
+    "unique_crossing": true,
+    "full_state_dimension": 4,
+    "tangent_dimension": 3,
+    "guard_normal_null_direction_is_actuator_loss": false,
+    "event_time_s": 0.349256,
+    "source_interpolated_event_time_s": 0.349256,
+    "exact_step_minus_source_event_time_s": 1.60458e-07,
+    "guard_residual": 1.30562e-13,
+    "transversality_per_s": 35.0258,
+    "full_state": {
+      "dimension": 4,
+      "eigenvalues": [
+        898.933,
+        33.8748,
+        3.90796,
+        1.14141
+      ],
+      "rank": 4,
+      "rank_threshold": 8.98933e-07,
+      "retained_condition_number": 787.565,
+      "trace": 937.857
+    },
+    "event_tangent": {
+      "dimension": 3,
+      "eigenvalues": [
+        350.613,
+        27.1567,
+        1.59005
+      ],
+      "rank": 3,
+      "rank_threshold": 3.50613e-07,
+      "retained_condition_number": 220.504,
+      "trace": 379.359
+    }
+  },
+  "channel_cases": {
+    "full": {
+      "full_state": {
+        "dimension": 4,
+        "eigenvalues": [
+          898.933,
+          33.8748,
+          3.90796,
+          1.14141
+        ],
+        "rank": 4,
+        "rank_threshold": 8.98933e-07,
+        "retained_condition_number": 787.565,
+        "trace": 937.857
+      },
+      "event_tangent": {
+        "dimension": 3,
+        "eigenvalues": [
+          350.613,
+          27.1567,
+          1.59005
+        ],
+        "rank": 3,
+        "rank_threshold": 3.50613e-07,
+        "retained_condition_number": 220.504,
+        "trace": 379.359
+      }
+    },
+    "shoulder_only": {
+      "full_state": {
+        "dimension": 4,
+        "eigenvalues": [
+          22.9469,
+          1.52594,
+          0.277116,
+          0.0947735
+        ],
+        "rank": 4,
+        "rank_threshold": 2.29469e-08,
+        "retained_condition_number": 242.123,
+        "trace": 24.8447
+      },
+      "event_tangent": {
+        "dimension": 3,
+        "eigenvalues": [
+          4.2958,
+          0.947431,
+          0.440331
+        ],
+        "rank": 3,
+        "rank_threshold": 4.2958e-09,
+        "retained_condition_number": 9.75583,
+        "trace": 5.68356
+      }
+    },
+    "wrist_only": {
+      "full_state": {
+        "dimension": 4,
+        "eigenvalues": [
+          888.099,
+          24.6019,
+          0.311247,
+          0.000354049
+        ],
+        "rank": 4,
+        "rank_threshold": 8.88099e-07,
+        "retained_condition_number": 2508400.0,
+        "trace": 913.012
+      },
+      "event_tangent": {
+        "dimension": 3,
+        "eigenvalues": [
+          347.37,
+          26.2183,
+          0.0878132
+        ],
+        "rank": 3,
+        "rank_threshold": 3.4737e-07,
+        "retained_condition_number": 3955.78,
+        "trace": 373.676
+      }
+    },
+    "zero_input": {
+      "full_state": {
+        "dimension": 4,
+        "eigenvalues": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rank": 0,
+        "rank_threshold": 1e-12,
+        "retained_condition_number": null,
+        "trace": 0.0
+      },
+      "event_tangent": {
+        "dimension": 3,
+        "eigenvalues": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rank": 0,
+        "rank_threshold": 1e-12,
+        "retained_condition_number": null,
+        "trace": 0.0
+      }
+    }
+  },
+  "frozen_local_countermodel": [
+    {
+      "window_index": 0,
+      "start_phase_fraction": 0.0,
+      "end_phase_fraction": 0.25,
+      "elapsed_time_s": 0.087375,
+      "same_phase_and_horizon": true,
+      "trajectory_varying": {
+        "dimension": 4,
+        "eigenvalues": [
+          23.4723,
+          1.99908,
+          1.18729,
+          0.0203792
+        ],
+        "rank": 4,
+        "rank_threshold": 2.34723e-08,
+        "retained_condition_number": 1151.78,
+        "trace": 26.6791
+      },
+      "frozen_local": {
+        "dimension": 4,
+        "eigenvalues": [
+          27.2952,
+          1.6391,
+          1.27955,
+          0.0188844
+        ],
+        "rank": 4,
+        "rank_threshold": 2.72952e-08,
+        "retained_condition_number": 1445.38,
+        "trace": 30.2327
+      },
+      "relative_gramian_difference": 0.173175,
+      "interpretation": "matched-window structural countermodel only"
+    },
+    {
+      "window_index": 1,
+      "start_phase_fraction": 0.25,
+      "end_phase_fraction": 0.5,
+      "elapsed_time_s": 0.087375,
+      "same_phase_and_horizon": true,
+      "trajectory_varying": {
+        "dimension": 4,
+        "eigenvalues": [
+          23.7073,
+          2.71544,
+          0.822522,
+          0.0283632
+        ],
+        "rank": 4,
+        "rank_threshold": 2.37073e-08,
+        "retained_condition_number": 835.848,
+        "trace": 27.2737
+      },
+      "frozen_local": {
+        "dimension": 4,
+        "eigenvalues": [
+          20.8511,
+          2.4661,
+          1.05427,
+          0.0232154
+        ],
+        "rank": 4,
+        "rank_threshold": 2.08511e-08,
+        "retained_condition_number": 898.158,
+        "trace": 24.3947
+      },
+      "relative_gramian_difference": 0.136042,
+      "interpretation": "matched-window structural countermodel only"
+    },
+    {
+      "window_index": 2,
+      "start_phase_fraction": 0.5,
+      "end_phase_fraction": 0.75,
+      "elapsed_time_s": 0.08725,
+      "same_phase_and_horizon": true,
+      "trajectory_varying": {
+        "dimension": 4,
+        "eigenvalues": [
+          31.7344,
+          2.67293,
+          0.591996,
+          0.0317374
+        ],
+        "rank": 4,
+        "rank_threshold": 3.17344e-08,
+        "retained_condition_number": 999.906,
+        "trace": 35.031
+      },
+      "frozen_local": {
+        "dimension": 4,
+        "eigenvalues": [
+          24.4839,
+          2.84927,
+          0.768521,
+          0.0308526
+        ],
+        "rank": 4,
+        "rank_threshold": 2.44839e-08,
+        "retained_condition_number": 793.579,
+        "trace": 28.1326
+      },
+      "relative_gramian_difference": 0.297782,
+      "interpretation": "matched-window structural countermodel only"
+    },
+    {
+      "window_index": 3,
+      "start_phase_fraction": 0.75,
+      "end_phase_fraction": 1.0,
+      "elapsed_time_s": 0.0872562,
+      "same_phase_and_horizon": true,
+      "trajectory_varying": {
+        "dimension": 4,
+        "eigenvalues": [
+          47.2775,
+          2.03806,
+          0.657975,
+          0.0223441
+        ],
+        "rank": 4,
+        "rank_threshold": 4.72775e-08,
+        "retained_condition_number": 2115.88,
+        "trace": 49.9959
+      },
+      "frozen_local": {
+        "dimension": 4,
+        "eigenvalues": [
+          36.142,
+          3.04507,
+          0.425629,
+          0.0316514
+        ],
+        "rank": 4,
+        "rank_threshold": 3.6142e-08,
+        "retained_condition_number": 1141.88,
+        "trace": 39.6443
+      },
+      "relative_gramian_difference": 0.247684,
+      "interpretation": "matched-window structural countermodel only"
+    }
+  ],
+  "falsification_controls": {
+    "zero_input": {
+      "maximum_abs_gramian_entry": 0.0
+    },
+    "channel_additivity": {
+      "maximum_abs_residual": 5.17275e-12
+    },
+    "direct_pulses": [
+      {
+        "phase_fraction": 0.2,
+        "pulse_step": 559,
+        "channel": "shoulder",
+        "maximum_abs_residual": 1.04178e-08
+      },
+      {
+        "phase_fraction": 0.2,
+        "pulse_step": 559,
+        "channel": "wrist",
+        "maximum_abs_residual": 4.11321e-08
+      },
+      {
+        "phase_fraction": 0.5,
+        "pulse_step": 1398,
+        "channel": "shoulder",
+        "maximum_abs_residual": 2.42519e-09
+      },
+      {
+        "phase_fraction": 0.5,
+        "pulse_step": 1398,
+        "channel": "wrist",
+        "maximum_abs_residual": 3.58805e-09
+      },
+      {
+        "phase_fraction": 0.8,
+        "pulse_step": 2236,
+        "channel": "shoulder",
+        "maximum_abs_residual": 1.59162e-09
+      },
+      {
+        "phase_fraction": 0.8,
+        "pulse_step": 2236,
+        "channel": "wrist",
+        "maximum_abs_residual": 3.39897e-09
+      }
+    ],
+    "input_step_refinement": [
+      {
+        "control_step_multiplier": 0.5,
+        "relative_event_gramian_residual": 2.71501e-10
+      },
+      {
+        "control_step_multiplier": 1.0,
+        "relative_event_gramian_residual": 0.0
+      },
+      {
+        "control_step_multiplier": 2.0,
+        "relative_event_gramian_residual": 4.11814e-10
+      }
+    ],
+    "integration_step_refinement": [
+      {
+        "integration_step_multiplier": 0.5,
+        "dt_s": 6.25e-05,
+        "event_time_s": 0.349256,
+        "relative_event_gramian_residual": 1.26519e-07
+      },
+      {
+        "integration_step_multiplier": 1.0,
+        "dt_s": 0.000125,
+        "event_time_s": 0.349256,
+        "relative_event_gramian_residual": 0.0
+      },
+      {
+        "integration_step_multiplier": 2.0,
+        "dt_s": 0.00025,
+        "event_time_s": 0.349256,
+        "relative_event_gramian_residual": 1.20158e-07
+      }
+    ],
+    "equivalent_units": {
+      "maximum_abs_residual": 3.33067e-16
+    }
+  },
+  "availability": {
+    "bounded_control_feasibility": "unavailable",
+    "controller_ranking": "unavailable",
+    "human_actuator_interpretation": "unavailable",
+    "coaching_recommendation": "unavailable"
+  },
+  "inference_boundary": "This is local first-order finite-window authority on one synthetic analytical-double-pendulum trajectory. The frozen-local result is a countermodel, not a global nonlinear reachability result. A Gramian does not establish bounded-control feasibility, controller superiority, human strength or neural strategy, passive torque, robustness, or coaching benefit.",
+  "limitations": [
+    "The Jacobians differentiate the same analytical RK4 operator as the parent phase/event study; this is not independent model validation.",
+    "The trajectory is synthetic and open loop, with no participant, muscle, fatigue, delay, noise, or bilateral-wrench observations.",
+    "Gramian eigenvalues depend on the declared state, torque, energy, and rank scales; raw dimensional rankings are not reported.",
+    "The event is a geometric club-vertical guard, not measured club-ball impact."
+  ]
+}
