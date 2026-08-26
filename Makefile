@@ -10,6 +10,11 @@
 
 .PHONY: help lint format test test-unit test-int test-in-tree smoke clean install check all docs sync-deps sbom codemap codemap-watch codemap-mcp
 
+# pip-tools embeds this repository-owned command in every generated lockfile.
+# Keep resolution flags (including inherited offline/no-index policy) out of the
+# provenance header so equivalent environments generate byte-identical headers.
+LOCK_COMPILE_COMMAND := make sync-deps
+
 # Default target
 help:
 	@echo "Golf Modeling Suite - Available targets:"
@@ -60,8 +65,8 @@ format:
 # Regenerate dependency artifacts from pyproject.toml, the canonical Python source.
 sync-deps:
 	python3 -m pip install "pip-tools>=7.4" "tomli>=2.0.0; python_version<'3.11'"
-	python3 -m piptools compile -o requirements.lock pyproject.toml
-	python3 -m piptools compile --extra dev --extra gui-test -o requirements-dev.lock pyproject.toml
+	CUSTOM_COMPILE_COMMAND="$(LOCK_COMPILE_COMMAND)" python3 -m piptools compile -o requirements.lock pyproject.toml
+	CUSTOM_COMPILE_COMMAND="$(LOCK_COMPILE_COMMAND)" python3 -m piptools compile --extra dev --extra gui-test -o requirements-dev.lock pyproject.toml
 	python3 scripts/sync_environment_yml.py
 
 # Run all tests
