@@ -77,6 +77,7 @@ class DummyConfig:
 @pytest.fixture(autouse=True)
 def _canonical_tools_package_roots(tmp_path) -> None:
     """Model the pinned Tools submodule present in a normal checkout."""
+    _write_package_file(tmp_path / "src" / "bunkershot3d", "__init__.py")
     tools_src = tmp_path / "vendor" / "ud-tools" / "src"
     canonical_python = tools_src / "shared" / "python"
     for package_name in ("sidekick", "chat", "chat_contracts"):

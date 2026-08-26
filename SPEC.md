@@ -12,6 +12,15 @@ tiers remain explicitly unavailable. This is a topology and evidence-boundary
 gate; observability, controllability, stability, controller ranking, participant
 validity, and coaching interpretation remain unqualified.
 
+Issue #9107 closes an external-install packaging gap exposed by the protected
+Tools downstream-consumer gate. The canonical BunkerShot3D public identity is
+`bunkershot3d`; the Hatch build hook now maps the Upstream-owned source package
+to that top-level destination for editable and wheel installs, while the wheel
+selection excludes `src.bunkershot3d`. This preserves exception and class
+identity without library-time `sys.path` mutation. Isolated editable and wheel
+probes must import `bunkershot3d.postproc.WrenchTrace` outside the checkout, and
+the built wheel must contain no second `src/bunkershot3d` payload.
+
 Issue #9059 adds a coordinate-explicit planar pendulum attribution contract on
 top of the pinned Tools source authority. It separates cross-speed Coriolis,
 squared-speed centripetal/centrifugal, gravity, damping, applied-drive, and
@@ -582,7 +591,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.596                                            |
+| **Spec Version**        | 1.0.597                                            |
 | **Last Spec Update**    | 2026-08-25                                         |
 
 ## 2. Purpose & Mission
@@ -3270,6 +3279,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-25 | 1.0.597 | Fixed #9107's external-install packaging boundary. Hatch now force-includes the Upstream-owned `src/bunkershot3d` source under the one canonical top-level `bunkershot3d` destination for editable and wheel builds, while normal wheel selection excludes `src/bunkershot3d` so distinct class and exception identities cannot ship. The build hook filters test artifacts and fails closed if the canonical source root is absent. A RED unit contract, wheel smoke contract, isolated editable install, and isolated 383.7 MB wheel install prove `bunkershot3d.postproc.WrenchTrace` resolves outside the checkout with stable identity and no duplicate wheel payload. No library mutates `sys.path`; no Tools vendor pin, scientific claim, public schema, workflow, runner, or UI behavior changes. |
 | 2026-08-25 | 1.0.596 | Reconciled the #8358 Tools provider-contract regression with protected nondimensional-local-rank main. Refreshing one selected provider no longer evicts the downstream-owned `src.shared` namespace, and a regression preserves an already-imported UpstreamDrift perturbation gateway when Tools is first on `PYTHONPATH`. Existing contracts still require each selected provider to resolve from Tools. This changes no production import, public API, provider schema, vendor pin, workflow, or runner; it restores deterministic downstream compatibility verification for Tools PR #4734. |
 | 2026-08-25 | 1.0.595 | Registered #9092 as the nondimensional local-rank qualification slice downstream of #9027. Raw analytical linearizations remain trace evidence, while local rank and condition interpretation now require declared state/control/output/time scales, unit-invariance and scale-sensitivity gates, output/actuator countermodels, manufactured fixtures, and killswitches. Structural/practical identifiability, global nonlinear control, human validity, and coaching conclusions remain unavailable. |
 | 2026-08-25 | 1.0.594 | Reconciled #9027's first nonlinear-systems qualification slice with the coordinate-explicit #9059 authority and current main. The typed eight-tier hybrid-system topology and referential tamper gates remain intact alongside the 135-program force-attribution grid and unrelated gap-fill acceleration; neither topology registration nor planar attribution is promoted to controller, participant, or coaching evidence. |

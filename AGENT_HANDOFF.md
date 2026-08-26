@@ -106,10 +106,10 @@ Epic #8557 is the single proximal-to-distal completion authority.
   verification. Its optional source-lock failure is deliberate.
 - #8358's immutable Tools gateway and analysis methods are merged, but its UI,
   localized-perturbation, and presentation criteria remain unaudited.
-- The focused `fix/8358-perturbation-package-import` follow-up preserves
-  UpstreamDrift-owned `src.shared` modules while refreshing one Tools provider.
-  It is a test-harness compatibility repair for Tools PR #4734 and changes no
-  production API, provider schema, or vendor pin.
+- #9096 merged the `src.shared` preservation repair for Tools PR #4734. #9107
+  now exposes Upstream-owned `bunkershot3d` at its canonical top-level import
+  in editable and wheel installs; it excludes the duplicate
+  `src.bunkershot3d` wheel identity and changes no runtime path or vendor pin.
 - Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
   moving or partial campaign; the next public projection must pin a qualified
   UpstreamDrift merge commit.
