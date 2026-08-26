@@ -10,16 +10,9 @@ is the single proximal-to-distal completion authority.
 
 ## Repository and Publication Authority
 
-- UpstreamDrift owns scientific sources, models, evidence registers, and the
-  release bundle. AffineDrift is an immutable, revision-pinned public
-  projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c`; this
-  branch normally integrates its protected #9114 and markerless-authority #9088
-  history before requalifying #9107's packaging transport boundary.
-- The current branch publication is 245 pages, SHA-256
-  `48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa`,
-  with 194 URI links and 255 outline entries. Archival qualification remains
-  false because the PDF is untagged and retains Type 3 and unembedded fonts.
+- UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.
+- Remote `main` is `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c`; this branch integrates protected #9114 and markerless-authority #9088 before requalifying #9107's packaging boundary.
+- The current branch publication is 245 pages, SHA-256 `48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa`, with 194 URI links and 255 outline entries. Archival qualification remains false because the PDF is untagged and retains Type 3 and unembedded fonts.
 - The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
   132 numeric contracts, and 427/427 verified literals. Outcomes are 293
   supported only within declared estimands and boundaries, five inconclusive,
@@ -120,38 +113,11 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9049, #9100, #9108, #9110, and #9114 are merged; #9114 completed issue
-  #9113's protected singular-margin slice.
-- #8358's Tools gateway and analyses are merged; UI, localized-perturbation,
-  and presentation criteria remain unaudited. Merged #9096 preserves
-  `src.shared` modules while refreshing one Tools provider and changes no
-  production API, schema, or vendor pin. #9107 exposes Upstream-owned
-  `bunkershot3d` at its canonical top-level import in editable and wheel
-  installs, excludes the duplicate `src.bunkershot3d` wheel identity, and
-  changes no runtime path or vendor pin.
-- #9107 was reconciled normally with current `main` at merge commit `d0cc289d0`.
-  Thirty-six build-hook/unit contracts pass. A Python 3.11 isolated install of
-  the exact 384,333,159-byte wheel
-  (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`)
-  proves canonical `bunkershot3d.postproc.WrenchTrace` identity, absence of
-  `src.bunkershot3d`, the UI bundle, and test-payload exclusion. The broader
-  pre-existing wheel smoke still exposes two out-of-scope runtime debts: the
-  installed `src.api` path resolves a Tools-owned `shared.python.config` copy
-  without Upstream's `get_database_pool_pre_ping`, and `sidekick --help` fails.
-  Neither payload is changed by #9107; do not claim the full wheel runtime is
-  qualified or hide those failures. The prior protected cross-engine failure
-  was a corrupted shared Python tool-cache license file; runner configuration
-  remains untouched and fresh protected evidence is required.
-- #9107's first protected wheel-smoke matrix never reached installation: each
-  job exhausted its budget while downloading a combined 771,541,995-byte wheel
-  plus source artifact after a recursive checkout. The repaired workflow keeps
-  separate immutable wheel/source artifacts; smoke jobs use a fixture-only
-  sparse checkout, transfer only the selected wheel, and retain both unchanged
-  runtime assertions within a measured 20-minute bound. No runner changes or
-  smoke-test exemptions are authorized.
-- Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
-  moving or partial campaign; the next public projection must pin a qualified
-  UpstreamDrift merge commit.
+- #9049, #9100, #9108, #9110, and #9114 are merged; #9114 completed #9113's singular-margin slice.
+- #8358's Tools gateway and analyses are merged; UI, localized-perturbation, and presentation criteria remain unaudited. Merged #9096 changes no production API, schema, or vendor pin.
+- #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
+- #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound; fresh protected evidence is required, and no runner change or smoke exemption is authorized.
+- Tools #4142 remains open. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge commit.
 
 ## Scientific and Review Invariants
 
