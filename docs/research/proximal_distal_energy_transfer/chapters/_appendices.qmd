@@ -163,6 +163,10 @@ Recorded outputs:
 - `data/bilateral_wrench_identifiability_study.json` — three-dimensional
   point-force and full bilateral-wrench ranks, null spaces, grip-span sweep,
   proper-rotation audit, sensing boundary, and explicit nonhuman claims.
+- `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse-
+  dynamics factorization, analytic physical-map rank witness, three exact
+  nonunique parameter families, dimensionless finite-record rank, unit and
+  scale audits, conditional noise bounds, and a zero-motion killswitch.
 - `data/shaft_contribution_study.json` — matched rigid/flexible results,
   termwise acceleration and power summaries, ablations, 120 robustness cases,
   endpoint windows, timestep convergence, and interpretation boundaries.
