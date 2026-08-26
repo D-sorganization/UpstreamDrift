@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
+from dataclasses import dataclass
 import json
 from pathlib import Path
 import sys
@@ -18,6 +19,7 @@ if str(SOURCE_ROOT) not in sys.path:
 from scripts.research.proximal_distal_energy.double_pendulum_identifiability import (
     BASE_COEFFICIENT_NAMES,
     PHYSICAL_PARAMETER_NAMES,
+    CoefficientScaleContract,
     DoublePendulumPhysicalParameters,
     nondimensional_regressor,
     parameter_map_jacobian,
@@ -44,6 +46,7 @@ from scripts.research.proximal_distal_energy.double_pendulum_identifiability_val
     validate_report_contract,
 )
 from scripts.research.proximal_distal_energy.local_linear_diagnostics import (
+    RankDiagnostic,
     rank_diagnostic,
 )
 from scripts.research.proximal_distal_energy.numeric_evidence import (
@@ -79,8 +82,22 @@ PROGRAM = {
 }
 
 
-def build_report() -> dict[str, object]:
-    """Build deterministic exact-map and finite-record rank evidence."""
+@dataclass(frozen=True)
+class _ReferenceEvidence:
+    physical: DoublePendulumPhysicalParameters
+    time: np.ndarray
+    delivery_index: int
+    impact_time_s: float
+    impact_speed_m_s: float
+    impact_arm_angle_rad: float
+    regressor: np.ndarray
+    base_coefficients: np.ndarray
+    scales: CoefficientScaleContract
+    record_rank: RankDiagnostic
+    zero_rank: RankDiagnostic
+
+
+def _build_reference_evidence() -> _ReferenceEvidence:
     model = GolfModelParams.default()
     physical = DoublePendulumPhysicalParameters.from_model(model)
     program = restrain_then_drive_program(
@@ -112,19 +129,71 @@ def build_report() -> dict[str, object]:
     zero_rank = rank_diagnostic(
         nondimensional_regressor(zero_regressor, scales), RANK_TOLERANCE
     )
-    physical_jacobian = parameter_map_jacobian(physical)
-    structural_witness = physical_parameter_rank_witness(physical)
+    return _ReferenceEvidence(
+        physical=physical,
+        time=time,
+        delivery_index=delivery_index,
+        impact_time_s=impact_time_s,
+        impact_speed_m_s=impact_speed_m_s,
+        impact_arm_angle_rad=impact_arm_angle_rad,
+        regressor=regressor,
+        base_coefficients=base_coefficients,
+        scales=scales,
+        record_rank=record_rank,
+        zero_rank=zero_rank,
+    )
+
+
+def _physical_parameter_map(evidence: _ReferenceEvidence) -> dict[str, object]:
+    structural_witness = physical_parameter_rank_witness(evidence.physical)
+    return {
+        "jacobian": parameter_map_jacobian(evidence.physical).tolist(),
+        "jacobian_conditioning_status": "not_interpreted_dimensioned_columns",
+        "nullity": len(PHYSICAL_PARAMETER_NAMES) - len(BASE_COEFFICIENT_NAMES),
+        "rank": len(BASE_COEFFICIENT_NAMES),
+        "rank_basis": "analytic_nonzero_minor",
+        "structural_rank_witness": {
+            "closed_form": structural_witness.closed_form,
+            "determinant": structural_witness.determinant,
+            "parameter_columns": list(structural_witness.parameter_columns),
+        },
+    }
+
+
+def _reference_rollout(evidence: _ReferenceEvidence) -> dict[str, object]:
+    index = evidence.delivery_index
+    return {
+        "delivery_event": {
+            "arm_angle_rad": evidence.impact_arm_angle_rad,
+            "clubhead_speed_m_s": evidence.impact_speed_m_s,
+            "nearest_sample_index": index,
+            "nearest_sample_time_s": float(evidence.time[index]),
+            "time_s": evidence.impact_time_s,
+        },
+        "dt_s": DT,
+        "horizon_steps": HORIZON,
+        "initial_q_rad": list(INITIAL_Q),
+        "model_parameters": "GolfModelParams.default()",
+        "program": PROGRAM,
+        "scope": "synthetic reference trajectory; not participant evidence",
+    }
+
+
+def build_report() -> dict[str, object]:
+    """Build deterministic exact-map and finite-record rank evidence."""
+    evidence = _build_reference_evidence()
+    index = evidence.delivery_index
     report = {
         "base_coefficient_finite_record_status": (
             "full_rank_for_registered_synthetic_record"
         ),
         "base_coefficients": dict(
-            zip(BASE_COEFFICIENT_NAMES, base_coefficients, strict=True)
+            zip(BASE_COEFFICIENT_NAMES, evidence.base_coefficients, strict=True)
         ),
         "classification": (
             "exact_reduced_physical_map_with_finite_record_regressor_rank"
         ),
-        "exact_counterexamples": counterexample_payload(physical),
+        "exact_counterexamples": counterexample_payload(evidence.physical),
         "falsifiers": [
             "The analytical regressor fails to reconstruct canonical ODE inverse dynamics.",
             "Any registered distinct physical counterexample changes a base coefficient.",
@@ -134,24 +203,30 @@ def build_report() -> dict[str, object]:
             "Equivalent coefficient units change the dimensionless rank decision.",
         ],
         "finite_record_regressor": {
-            **rank_payload(record_rank),
-            "cumulative_rank": cumulative_rank_payload(dimensionless),
-            "full_base_coefficient_rank": record_rank.rank
+            **rank_payload(evidence.record_rank),
+            "cumulative_rank": cumulative_rank_payload(
+                nondimensional_regressor(evidence.regressor, evidence.scales)
+            ),
+            "full_base_coefficient_rank": evidence.record_rank.rank
             == len(BASE_COEFFICIENT_NAMES),
             "raw_dimensional_conditioning_status": "not_interpreted",
             "rank_basis": "nondimensional_base_coefficient_regressor",
-            "sample_count": delivery_index + 1,
-            "scale_sensitivity": scale_sensitivity_payload(regressor, scales),
-            "time_span_s": [float(time[0]), float(time[delivery_index])],
-            "unit_invariance": unit_invariance_payload(regressor, scales),
+            "sample_count": index + 1,
+            "scale_sensitivity": scale_sensitivity_payload(
+                evidence.regressor, evidence.scales
+            ),
+            "time_span_s": [float(evidence.time[0]), float(evidence.time[index])],
+            "unit_invariance": unit_invariance_payload(
+                evidence.regressor, evidence.scales
+            ),
         },
         "inference_boundary": INFERENCE_BOUNDARY,
         "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9104",
         "model_tier": "analytical_double_pendulum",
         "noise_aware_lower_bound_screen": noise_aware_lower_bound_payload(
-            regressor, base_coefficients, scales
+            evidence.regressor, evidence.base_coefficients, evidence.scales
         ),
-        "nondimensional_scale_contract": scale_contract_payload(scales),
+        "nondimensional_scale_contract": scale_contract_payload(evidence.scales),
         "numeric_representation_contract": {
             "canonical_significant_digits": CANONICAL_SIGNIFICANT_DIGITS,
             "decision_precision": "full_precision_before_publication_rounding",
@@ -159,45 +234,20 @@ def build_report() -> dict[str, object]:
         },
         "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
         "participant_status": "not_evaluated",
-        "physical_parameter_map": {
-            "jacobian": physical_jacobian.tolist(),
-            "jacobian_conditioning_status": "not_interpreted_dimensioned_columns",
-            "nullity": len(PHYSICAL_PARAMETER_NAMES) - len(BASE_COEFFICIENT_NAMES),
-            "rank": len(BASE_COEFFICIENT_NAMES),
-            "rank_basis": "analytic_nonzero_minor",
-            "structural_rank_witness": {
-                "closed_form": structural_witness.closed_form,
-                "determinant": structural_witness.determinant,
-                "parameter_columns": list(structural_witness.parameter_columns),
-            },
-        },
+        "physical_parameter_map": _physical_parameter_map(evidence),
         "physical_parameter_nonuniqueness_status": (
             "established_by_exact_invariance_families"
         ),
         "physical_parameter_status": (
             "structurally_non_identifiable_under_declared_model"
         ),
-        "physical_parameters": parameter_record(physical),
+        "physical_parameters": parameter_record(evidence.physical),
         "practical_identifiability_status": (
             "not_established_oracle_kinematics_lower_bound_only"
         ),
-        "reference_rollout": {
-            "delivery_event": {
-                "arm_angle_rad": impact_arm_angle_rad,
-                "clubhead_speed_m_s": impact_speed_m_s,
-                "nearest_sample_index": delivery_index,
-                "nearest_sample_time_s": float(time[delivery_index]),
-                "time_s": impact_time_s,
-            },
-            "dt_s": DT,
-            "horizon_steps": HORIZON,
-            "initial_q_rad": list(INITIAL_Q),
-            "model_parameters": "GolfModelParams.default()",
-            "program": PROGRAM,
-            "scope": "synthetic reference trajectory; not participant evidence",
-        },
+        "reference_rollout": _reference_rollout(evidence),
         "schema_version": SCHEMA_VERSION,
-        "zero_motion_killswitch": rank_payload(zero_rank),
+        "zero_motion_killswitch": rank_payload(evidence.zero_rank),
     }
     return cast(
         dict[str, object],

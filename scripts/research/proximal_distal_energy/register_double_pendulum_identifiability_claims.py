@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import Any
@@ -37,6 +38,19 @@ ARTIFACTS = [
     "tests/research/test_double_pendulum_identifiability.py",
     "tests/research/test_double_pendulum_identifiability_evidence.py",
 ]
+
+
+@dataclass(frozen=True)
+class _ClaimSpec:
+    claim_id: str
+    source_line: int
+    statement: str
+    classification: str
+    published_status: str
+    boundary: str
+    falsifier: str
+    negative_controls: list[str]
+    numeric_evidence: list[dict[str, Any]]
 
 
 def _numeric_entry(
@@ -82,51 +96,173 @@ def _selected_candidates(
 
 
 def _claim(
-    claim_id: str,
+    spec: _ClaimSpec,
     members: list[str],
-    *,
-    source_line: int,
-    statement: str,
-    classification: str,
-    published_status: str,
-    boundary: str,
-    falsifier: str,
-    negative_controls: list[str],
-    numeric_evidence: list[dict[str, Any]],
 ) -> dict[str, Any]:
     return {
-        "claim_id": claim_id,
+        "claim_id": spec.claim_id,
         "candidate_ids": members,
-        "statement": statement,
-        "classification": classification,
-        "published_status": published_status,
+        "statement": spec.statement,
+        "classification": spec.classification,
+        "published_status": spec.published_status,
         "audit_status": (
             "exact_map_dimensionless_evidence_and_inference_boundary_checked"
         ),
         "adjudication_outcome": "supported",
-        "source_locations": [f"{CHAPTER}:{source_line}"],
+        "source_locations": [f"{CHAPTER}:{spec.source_line}"],
         "evidence_artifacts": ARTIFACTS,
         "model_domain": (
             "Planar fixed-hub analytical double pendulum in declared absolute-arm/"
             "relative-club coordinates with oracle inverse-dynamics kinematics."
         ),
-        "uncertainty_boundary": boundary,
+        "uncertainty_boundary": spec.boundary,
         "competing_explanations": [
             "insufficient trajectory excitation",
             "parameter grouping in the equation of motion",
             "scale choice",
             "unmodeled dynamics and measurement error",
         ],
-        "negative_controls": negative_controls,
-        "falsifier": falsifier,
+        "negative_controls": spec.negative_controls,
+        "falsifier": spec.falsifier,
         "adjudication": (
             "The result is retained as exact or registered synthetic model evidence; "
             "it does not identify participant anatomy, human strategy, or coaching advice."
         ),
         "reviewer": "Codex technical audit",
         "last_verified_on": DATE,
-        "numeric_evidence": numeric_evidence,
+        "numeric_evidence": spec.numeric_evidence,
     }
+
+
+def _structural_claim(members: list[str]) -> dict[str, Any]:
+    spec = _ClaimSpec(
+        claim_id="PD-CLAIM-308",
+        source_line=217,
+        statement=(
+            "The declared physical-parameter map has analytic rank 7 and nullity 4, "
+            "with three exact nonunique parameter families that preserve every base "
+            "coefficient."
+        ),
+        classification="double_pendulum_exact_physical_map_nonuniqueness",
+        published_status="structurally_non_identifiable_under_declared_model",
+        boundary=(
+            "The exact result applies only to the declared eleven-entry reduced "
+            "physical map; it does not test model adequacy or a richer sensor model."
+        ),
+        falsifier=(
+            "The analytic rank witness vanishes inside the declared parameter domain "
+            "or any registered alternative changes a base coefficient."
+        ),
+        negative_controls=[
+            "analytic nonzero-minor witness",
+            "three exact coefficient-preserving alternatives",
+            "independent finite-difference Jacobian comparison",
+        ],
+        numeric_evidence=[
+            _numeric_entry("7#1", "/physical_parameter_map/rank"),
+            _numeric_entry("4#1", "/physical_parameter_map/nullity"),
+        ],
+    )
+    return _claim(spec, members)
+
+
+def _finite_record_claim(members: list[str]) -> dict[str, Any]:
+    spec = _ClaimSpec(
+        claim_id="PD-CLAIM-309",
+        source_line=237,
+        statement=(
+            "Under declared coefficient and 60 N m torque scales, the registered "
+            "synthetic record yields dimensionless regressor rank 7 and condition "
+            "180.853; equivalent coefficient units change the matrix by at most "
+            "4.44089e-16, while zero motion returns rank 0."
+        ),
+        classification="double_pendulum_dimensionless_finite_record_excitation",
+        published_status="full_rank_for_registered_synthetic_record",
+        boundary=(
+            "Rank and condition are finite-record, tolerance-, coordinate-, and "
+            "scale-contract results; raw dimensional conditioning is not interpreted."
+        ),
+        falsifier=(
+            "A clean replay changes the registered rank, equivalent units change a "
+            "dimensionless rank decision, or the zero-motion killswitch has nonzero rank."
+        ),
+        negative_controls=[
+            "equivalent coefficient-unit conversion",
+            "two positive scale alternatives",
+            "zero-motion rank killswitch",
+            "manufactured inverse-dynamics reconstruction",
+        ],
+        numeric_evidence=[
+            _numeric_entry("60#1", "/nondimensional_scale_contract/torque_scale_nm"),
+            _numeric_entry("7#1", "/finite_record_regressor/rank"),
+            _numeric_entry(
+                "180.853#1", "/finite_record_regressor/retained_condition_number"
+            ),
+            _numeric_entry(
+                "4.44089e-16#1",
+                "/finite_record_regressor/unit_invariance/"
+                "max_abs_dimensionless_regressor_difference",
+            ),
+            _numeric_entry("0#1", "/zero_motion_killswitch/rank"),
+        ],
+    )
+    return _claim(spec, members)
+
+
+def _oracle_claim(members: list[str]) -> dict[str, Any]:
+    spec = _ClaimSpec(
+        claim_id="PD-CLAIM-310",
+        source_line=248,
+        statement=(
+            "With exact kinematics and iid Gaussian torque noise of 1 N m, the oracle "
+            "lower-bound screen gives worst relative 95% half-width 0.123266 over the "
+            "full record and 498.504 over its first 10%; this is not practical or "
+            "participant identifiability."
+        ),
+        classification="double_pendulum_identifiability_inference_boundary",
+        published_status="explicitly_bounded_oracle_lower_bound_only",
+        boundary=(
+            "The screen omits kinematic differentiation noise, correlated errors, "
+            "model discrepancy, event uncertainty, unknown noise scale, priors, "
+            "repeated participants, and held-out prediction."
+        ),
+        falsifier=(
+            "The uncertainty calculation reports pseudo-precision for a deficient "
+            "record or the paper promotes the oracle bound to practical inference."
+        ),
+        negative_controls=[
+            "four torque-noise levels",
+            "four cumulative record windows",
+            "rank-deficient Fisher fail-closed case",
+            "explicit practical-identifiability non-promotion",
+        ],
+        numeric_evidence=[
+            _numeric_entry(
+                "1#1", "/noise_aware_lower_bound_screen/reference_window_noise_sd_nm"
+            ),
+            _numeric_entry(
+                "95#1",
+                "/noise_aware_lower_bound_screen/confidence_level",
+                scale=100.0,
+            ),
+            _numeric_entry(
+                "0.123266#1",
+                "/noise_aware_lower_bound_screen/full_record_cases/2/"
+                "worst_ci95_relative_half_width",
+            ),
+            _numeric_entry(
+                "498.504#1",
+                "/noise_aware_lower_bound_screen/window_cases/0/"
+                "worst_ci95_relative_half_width",
+            ),
+            _numeric_entry(
+                "10#1",
+                "/noise_aware_lower_bound_screen/window_cases/0/fraction",
+                scale=100.0,
+            ),
+        ],
+    )
+    return _claim(spec, members)
 
 
 def _build_claims(
@@ -146,132 +282,9 @@ def _build_claims(
         boundary_id: ("PD-CLAIM-310",),
     }
     claims = [
-        _claim(
-            "PD-CLAIM-308",
-            [abstract_id, setup_id, structural_id],
-            source_line=217,
-            statement=(
-                "The declared physical-parameter map has analytic rank 7 and "
-                "nullity 4, with three exact nonunique parameter families that "
-                "preserve every base coefficient."
-            ),
-            classification="double_pendulum_exact_physical_map_nonuniqueness",
-            published_status="structurally_non_identifiable_under_declared_model",
-            boundary=(
-                "The exact result applies only to the declared eleven-entry reduced "
-                "physical map; it does not test model adequacy or a richer sensor model."
-            ),
-            falsifier=(
-                "The analytic rank witness vanishes inside the declared parameter "
-                "domain or any registered alternative changes a base coefficient."
-            ),
-            negative_controls=[
-                "analytic nonzero-minor witness",
-                "three exact coefficient-preserving alternatives",
-                "independent finite-difference Jacobian comparison",
-            ],
-            numeric_evidence=[
-                _numeric_entry("7#1", "/physical_parameter_map/rank"),
-                _numeric_entry("4#1", "/physical_parameter_map/nullity"),
-            ],
-        ),
-        _claim(
-            "PD-CLAIM-309",
-            [abstract_id, setup_id, finite_id],
-            source_line=237,
-            statement=(
-                "Under declared coefficient and 60 N m torque scales, the registered "
-                "synthetic record yields dimensionless regressor rank 7 and condition "
-                "180.853; equivalent coefficient units change the matrix by at most "
-                "4.44089e-16, while zero motion returns rank 0."
-            ),
-            classification="double_pendulum_dimensionless_finite_record_excitation",
-            published_status="full_rank_for_registered_synthetic_record",
-            boundary=(
-                "Rank and condition are finite-record, tolerance-, coordinate-, and "
-                "scale-contract results; raw dimensional conditioning is not interpreted."
-            ),
-            falsifier=(
-                "A clean replay changes the registered rank, equivalent units change a "
-                "dimensionless rank decision, or the zero-motion killswitch has nonzero rank."
-            ),
-            negative_controls=[
-                "equivalent coefficient-unit conversion",
-                "two positive scale alternatives",
-                "zero-motion rank killswitch",
-                "manufactured inverse-dynamics reconstruction",
-            ],
-            numeric_evidence=[
-                _numeric_entry(
-                    "60#1", "/nondimensional_scale_contract/torque_scale_nm"
-                ),
-                _numeric_entry("7#1", "/finite_record_regressor/rank"),
-                _numeric_entry(
-                    "180.853#1",
-                    "/finite_record_regressor/retained_condition_number",
-                ),
-                _numeric_entry(
-                    "4.44089e-16#1",
-                    "/finite_record_regressor/unit_invariance/"
-                    "max_abs_dimensionless_regressor_difference",
-                ),
-                _numeric_entry("0#1", "/zero_motion_killswitch/rank"),
-            ],
-        ),
-        _claim(
-            "PD-CLAIM-310",
-            [abstract_id, boundary_id],
-            source_line=248,
-            statement=(
-                "With exact kinematics and iid Gaussian torque noise of 1 N m, the "
-                "oracle lower-bound screen gives worst relative 95% half-width 0.123266 "
-                "over the full record and 498.504 over its first 10%; this is not "
-                "practical or participant identifiability."
-            ),
-            classification="double_pendulum_identifiability_inference_boundary",
-            published_status="explicitly_bounded_oracle_lower_bound_only",
-            boundary=(
-                "The screen omits kinematic differentiation noise, correlated errors, "
-                "model discrepancy, event uncertainty, unknown noise scale, priors, "
-                "repeated participants, and held-out prediction."
-            ),
-            falsifier=(
-                "The uncertainty calculation reports pseudo-precision for a deficient "
-                "record or the paper promotes the oracle bound to practical inference."
-            ),
-            negative_controls=[
-                "four torque-noise levels",
-                "four cumulative record windows",
-                "rank-deficient Fisher fail-closed case",
-                "explicit practical-identifiability non-promotion",
-            ],
-            numeric_evidence=[
-                _numeric_entry(
-                    "1#1",
-                    "/noise_aware_lower_bound_screen/reference_window_noise_sd_nm",
-                ),
-                _numeric_entry(
-                    "95#1",
-                    "/noise_aware_lower_bound_screen/confidence_level",
-                    scale=100.0,
-                ),
-                _numeric_entry(
-                    "0.123266#1",
-                    "/noise_aware_lower_bound_screen/full_record_cases/2/"
-                    "worst_ci95_relative_half_width",
-                ),
-                _numeric_entry(
-                    "498.504#1",
-                    "/noise_aware_lower_bound_screen/window_cases/0/"
-                    "worst_ci95_relative_half_width",
-                ),
-                _numeric_entry(
-                    "10#1",
-                    "/noise_aware_lower_bound_screen/window_cases/0/fraction",
-                    scale=100.0,
-                ),
-            ],
-        ),
+        _structural_claim([abstract_id, setup_id, structural_id]),
+        _finite_record_claim([abstract_id, setup_id, finite_id]),
+        _oracle_claim([abstract_id, boundary_id]),
     ]
     return claims, assignments, abstract_id
 
@@ -301,6 +314,36 @@ def _migrate_abstract(
                 }
             )
     return prior_claim_ids
+
+
+def _reconcile_release_inventory(registry: dict[str, Any]) -> None:
+    release_items = {
+        "double_pendulum_base_coefficient_excitation": (
+            "full_rank_for_registered_synthetic_record",
+            "reviewed_as_dimensionless_finite_record_excitation",
+        ),
+        "double_pendulum_physical_parameter_identifiability": (
+            "structurally_non_identifiable_under_declared_model",
+            "reviewed_as_exact_structural_nonidentifiability",
+        ),
+        "double_pendulum_practical_identifiability": (
+            "not_established_oracle_kinematics_lower_bound_only",
+            "reviewed_as_oracle_lower_bound_only",
+        ),
+    }
+    registry["release_claim_inventory"] = [
+        item
+        for item in registry["release_claim_inventory"]
+        if item["release_claim_key"] not in release_items
+    ]
+    registry["release_claim_inventory"].extend(
+        {
+            "release_claim_key": key,
+            "published_status": values[0],
+            "audit_state": values[1],
+        }
+        for key, values in release_items.items()
+    )
 
 
 def _reconcile(
@@ -373,33 +416,7 @@ def _reconcile(
         }
     )
     registry["claims"].extend(claims)
-    release_items = {
-        "double_pendulum_base_coefficient_excitation": (
-            "full_rank_for_registered_synthetic_record",
-            "reviewed_as_dimensionless_finite_record_excitation",
-        ),
-        "double_pendulum_physical_parameter_identifiability": (
-            "structurally_non_identifiable_under_declared_model",
-            "reviewed_as_exact_structural_nonidentifiability",
-        ),
-        "double_pendulum_practical_identifiability": (
-            "not_established_oracle_kinematics_lower_bound_only",
-            "reviewed_as_oracle_lower_bound_only",
-        ),
-    }
-    registry["release_claim_inventory"] = [
-        item
-        for item in registry["release_claim_inventory"]
-        if item["release_claim_key"] not in release_items
-    ]
-    registry["release_claim_inventory"].extend(
-        {
-            "release_claim_key": key,
-            "published_status": values[0],
-            "audit_state": values[1],
-        }
-        for key, values in release_items.items()
-    )
+    _reconcile_release_inventory(registry)
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
