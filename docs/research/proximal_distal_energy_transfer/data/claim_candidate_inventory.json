@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "f6a793330c5b8b941ce1b489decf10406426e628175ddf66e6cdd47418ea8dd1",
+  "source_digest": "d6902ef0535d09743a28a538b5a0c267bf215c6fd508c258afdc873cac261e8d",
   "source_count": 37,
   "candidate_count": 1130,
   "candidates": [
@@ -17948,12 +17948,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-aeecc7c4cec6b96f",
+      "candidate_id": "PD-CAND-77f607e78b74eddc",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 4,
       "line_end": 4,
-      "text": "The current census contains 303 material claims. The normalized outcome applies only to each claim's declared estimand, model domain, and uncertainty boundary. A `supported` model-conditional claim is not thereby independently replicated, empirically validated, or converted into a human strategy recommendation.",
-      "text_sha256": "02b877c75e90341fd8c619f737b307adbe55d852bd8700f8d78da1960207bbb7",
+      "text": "The current census contains 306 material claims. The normalized outcome applies only to each claim's declared estimand, model domain, and uncertainty boundary. A `supported` model-conditional claim is not thereby independently replicated, empirically validated, or converted into a human strategy recommendation.",
+      "text_sha256": "fd6b0f4af860ee0d6f0630f975cb36be837860093c29693b8a22bb7e90bb2414",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -17996,12 +17996,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-87d26eacc282b21c",
+      "candidate_id": "PD-CAND-929f26183c2056d8",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 12,
       "line_end": 14,
-      "text": "| `inconclusive` | 5 | | `supported` | 283 | | `untested` | 15 |",
-      "text_sha256": "f0b23829c387fce68115a6a6f754801f12f8a277b92b951df311d8b0e3c87965",
+      "text": "| `inconclusive` | 5 | | `supported` | 286 | | `untested` | 15 |",
+      "text_sha256": "9d04bd0dbd6132f54bb9421bbafbc934f4518779a23124d4b1b9bb1af160d1da",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18042,12 +18042,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-b2e277593764ee20",
+      "candidate_id": "PD-CAND-37582fe0fbc00cc7",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 26,
       "line_end": 33,
-      "text": "| `bibliographic_record` | 3 | | `external_empirical_human` | 34 | | `external_methods_or_measurement` | 10 | | `external_modeling_or_simulation` | 15 | | `external_review_or_synthesis` | 10 | | `project_derivation_or_document` | 88 | | `project_executable_or_generated` | 274 | | `prospective_or_unexecuted` | 15 |",
-      "text_sha256": "37aa15cafc7cb1b8a7249f463c1c82a97683dde1f57dacdf82a04f4bd3656d90",
+      "text": "| `bibliographic_record` | 3 | | `external_empirical_human` | 34 | | `external_methods_or_measurement` | 10 | | `external_modeling_or_simulation` | 15 | | `external_review_or_synthesis` | 10 | | `project_derivation_or_document` | 91 | | `project_executable_or_generated` | 277 | | `prospective_or_unexecuted` | 15 |",
+      "text_sha256": "9768da9e95e937a5ec9f7bd767ee74dd58ad5e7b49e88bd6013842f6103f077c",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18088,12 +18088,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-9519d7e6dfb308ef",
+      "candidate_id": "PD-CAND-063c7e05fb640e5d",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 41,
       "line_end": 43,
-      "text": "| `multiple_independent_external_support` | 20 | | `project_only` | 249 | | `single_independent_external_support` | 34 |",
-      "text_sha256": "1b41d7eb9f68ed66618d85ff38f9bdf57ee45fecb1377ff5738800457b065cf0",
+      "text": "| `multiple_independent_external_support` | 20 | | `project_only` | 252 | | `single_independent_external_support` | 34 |",
+      "text_sha256": "6567db35a4cd11a8b5a248126fb6e4f4369f7a9681ff3c261e4955bb297f809b",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18132,12 +18132,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-f1e25f4b524e7a06",
+      "candidate_id": "PD-CAND-22fe542413fe1075",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 51,
       "line_end": 60,
-      "text": "| `articulated_spatial` | 32 | | `compliant_shaft` | 66 | | `cross_tier_synthesis` | 63 | | `declared_model_tier_unclassified` | 12 | | `finite_ground_or_base` | 16 | | `human_or_external_evidence` | 46 | | `planar_reduced` | 128 | | `spatial_reduced` | 76 | | `two_hand_or_bilateral` | 92 | | `uncertainty_or_control` | 8 |",
-      "text_sha256": "27a319b855f4aaac21c4081207c96ce2a795f73d0595ebfdd7175735f558de66",
+      "text": "| `articulated_spatial` | 32 | | `compliant_shaft` | 66 | | `cross_tier_synthesis` | 63 | | `declared_model_tier_unclassified` | 12 | | `finite_ground_or_base` | 16 | | `human_or_external_evidence` | 46 | | `planar_reduced` | 131 | | `spatial_reduced` | 76 | | `two_hand_or_bilateral` | 92 | | `uncertainty_or_control` | 8 |",
+      "text_sha256": "7632397dbdcbb5da83284a8bb0c4c1e15bd4c20a9caa77abd258fedcabd58651",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18176,12 +18176,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-0acfb3375ef769f8",
+      "candidate_id": "PD-CAND-9248119a2458c1b1",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 68,
       "line_end": 76,
-      "text": "| `external_validation_open` | 1 | | `full_text_or_original_source_open` | 5 | | `governed_human_data_unavailable` | 11 | | `independent_reimplementation_open` | 12 | | `mixed_or_insufficient_evidence` | 5 | | `none_declared` | 259 | | `prospective_experiment_open` | 15 | | `statistical_reanalysis_or_replication_open` | 9 | | `systematic_review_open` | 2 |",
-      "text_sha256": "b862fb770383e089e8707ff16ea091eb90a536989f186936bc4f8112a6435347",
+      "text": "| `external_validation_open` | 1 | | `full_text_or_original_source_open` | 5 | | `governed_human_data_unavailable` | 11 | | `independent_reimplementation_open` | 12 | | `mixed_or_insufficient_evidence` | 5 | | `none_declared` | 262 | | `prospective_experiment_open` | 15 | | `statistical_reanalysis_or_replication_open` | 9 | | `systematic_review_open` | 2 |",
+      "text_sha256": "ac7dce3e7a818fb647267112a1fbf8dd9cd1b73416064bbdf49521056c276a6e",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18220,12 +18220,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-f5697c26aed70275",
+      "candidate_id": "PD-CAND-a83d791d65049fc2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 88,
-      "line_end": 116,
-      "text": "| ch01 introduction | 3 | 0 / 2 / 1 | mixed independence | | ch02 mechanics | 30 | 2 / 17 / 11 | mixed independence | | ch03 evidence | 13 | 1 / 10 / 2 | mixed independence | | ch03 interaction forces | 10 | 8 / 1 / 1 | mixed independence | | ch03b hand path attribution | 11 | 7 / 2 / 2 | mixed independence | | ch03c ground reaction drift | 8 | 4 / 2 / 2 | mixed independence | | ch03d shoulder velocity transfer | 18 | 18 / 0 / 0 | project authored only | | ch04 counterfactual ensemble | 6 | 6 / 0 / 0 | project authored only | | ch04 counterfactuals | 5 | 4 / 0 / 1 | mixed independence | | ch05 two hand wrench | 21 | 21 / 0 / 0 | project authored only | | ch05a interactive workbench | 1 | 1 / 0 / 0 | project authored only | | ch05b forward two hand | 15 | 15 / 0 / 0 | project authored only | | ch06 shaft contributions | 15 | 15 / 0 / 0 | project authored only | | ch06b coupled base flex | 14 | 14 / 0 / 0 | project authored only | | ch06bb shaft beam reference | 2 | 2 / 0 / 0 | project authored only | | ch06bbb forward modal shaft | 7 | 7 / 0 / 0 | project authored only | | ch06bc torque allocation preload | 7 | 7 / 0 / 0 | project authored only | | ch06c spatial cross formulation | 43 | 43 / 0 / 0 | project authored only | | ch06ca articulated ground | 4 | 4 / 0 / 0 | project authored only | | ch06cb spatial cross tail | 5 | 5 / 0 / 0 | project authored only | | ch06cc spatial forward contact | 8 | 8 / 0 / 0 | project authored only | | ch06d uncertainty control | 8 | 8 / 0 / 0 | project authored only | | ch06e experimental protocol | 1 | 1 / 0 / 0 | project authored only | | ch07 model ladder | 17 | 17 / 0 / 0 | project authored only | | ch07 results | 8 | 8 / 0 / 0 | project authored only | | ch07b frames biology engines | 5 | 5 / 0 / 0 | project authored only | | ch07c transmission robustness | 5 | 5 / 0 / 0 | project authored only | | ch08b momentum transfer questions | 10 | 10 / 0 / 0 | project authored only | | proximal distal energy transfer | 3 | 3 / 0 / 0 | project authored only |",
-      "text_sha256": "fbc4d5e0b00a17b540bc5e5cc3a673c62edc6f0605c722d1f4fcf872d33f9758",
+      "line_end": 117,
+      "text": "| ch01 introduction | 3 | 0 / 2 / 1 | mixed independence | | ch02 mechanics | 30 | 2 / 17 / 11 | mixed independence | | ch03 evidence | 13 | 1 / 10 / 2 | mixed independence | | ch03 interaction forces | 10 | 8 / 1 / 1 | mixed independence | | ch03b hand path attribution | 11 | 7 / 2 / 2 | mixed independence | | ch03ba coordinate force sources | 3 | 3 / 0 / 0 | project authored only | | ch03c ground reaction drift | 8 | 4 / 2 / 2 | mixed independence | | ch03d shoulder velocity transfer | 18 | 18 / 0 / 0 | project authored only | | ch04 counterfactual ensemble | 6 | 6 / 0 / 0 | project authored only | | ch04 counterfactuals | 5 | 4 / 0 / 1 | mixed independence | | ch05 two hand wrench | 21 | 21 / 0 / 0 | project authored only | | ch05a interactive workbench | 1 | 1 / 0 / 0 | project authored only | | ch05b forward two hand | 15 | 15 / 0 / 0 | project authored only | | ch06 shaft contributions | 15 | 15 / 0 / 0 | project authored only | | ch06b coupled base flex | 14 | 14 / 0 / 0 | project authored only | | ch06bb shaft beam reference | 2 | 2 / 0 / 0 | project authored only | | ch06bbb forward modal shaft | 7 | 7 / 0 / 0 | project authored only | | ch06bc torque allocation preload | 7 | 7 / 0 / 0 | project authored only | | ch06c spatial cross formulation | 43 | 43 / 0 / 0 | project authored only | | ch06ca articulated ground | 4 | 4 / 0 / 0 | project authored only | | ch06cb spatial cross tail | 5 | 5 / 0 / 0 | project authored only | | ch06cc spatial forward contact | 8 | 8 / 0 / 0 | project authored only | | ch06d uncertainty control | 8 | 8 / 0 / 0 | project authored only | | ch06e experimental protocol | 1 | 1 / 0 / 0 | project authored only | | ch07 model ladder | 17 | 17 / 0 / 0 | project authored only | | ch07 results | 8 | 8 / 0 / 0 | project authored only | | ch07b frames biology engines | 5 | 5 / 0 / 0 | project authored only | | ch07c transmission robustness | 5 | 5 / 0 / 0 | project authored only | | ch08b momentum transfer questions | 10 | 10 / 0 / 0 | project authored only | | proximal distal energy transfer | 3 | 3 / 0 / 0 | project authored only |",
+      "text_sha256": "614eee0d1dd74eae33867549eb45b1ed46c888e91223c1d170b823c49eff55f2",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -18239,8 +18239,8 @@
     {
       "candidate_id": "PD-CAND-c6f7607002d58a93",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
-      "line_start": 118,
-      "line_end": 118,
+      "line_start": 119,
+      "line_end": 119,
       "text": ": Claim-Family Source Concentration Flags; the tuple is project only / one independent work / two or more independent works. {#tbl-claim-family-concentration}",
       "text_sha256": "cd0206b08c119de6a5195ac9ac4d9c32cc68e2f253f46b284aa0d315cf745fab",
       "citation_keys": [],
@@ -18253,8 +18253,8 @@
     {
       "candidate_id": "PD-CAND-b5b2526e23b77d70",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
-      "line_start": 120,
-      "line_end": 120,
+      "line_start": 121,
+      "line_end": 121,
       "text": "Evidence-tier, model-tier, and unresolved-replication labels are nonexclusive, so those totals can exceed the claim count. Source independence is an exact one-category partition derived from the canonical-work review. No governed participant outcome is present; human validation remains an external-data boundary.",
       "text_sha256": "92b61700f14f7aa8d05766fa7d78ab3abdbe855ea4a1e3451874bda83a4f1b8f",
       "citation_keys": [],

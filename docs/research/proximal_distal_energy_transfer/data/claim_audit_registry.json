@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "f6a793330c5b8b941ce1b489decf10406426e628175ddf66e6cdd47418ea8dd1",
+    "source_digest": "d6902ef0535d09743a28a538b5a0c267bf215c6fd508c258afdc873cac261e8d",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1130-candidate paper inventory is adjudicated, including the coordinate-force decomposition and bounded Coriolis-impulse optimization chapter.",
+    "current_scope": "The complete 1100-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; generated reviewer tables and editorial anchors are explicitly classified as nonclaims.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -11130,182 +11130,6 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-0acfb3375ef769f8",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-165a6caf21ef85e2",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-39f42d06f3e621a5",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-87d26eacc282b21c",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-9345c1e6be2ef186",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-9519d7e6dfb308ef",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-9906005bff75ba72",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-aa6efbe9274b5d53",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-ab4689630944a0fe",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-aeecc7c4cec6b96f",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-b06a3cbe5b2d0e01",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-b5b2526e23b77d70",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-b2e277593764ee20",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-bcfcc2b3a9631de1",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-be8a26a0593eab4f",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-c6f7607002d58a93",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-cd8822807d808531",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-d2f2b5b07b466265",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-f1e25f4b524e7a06",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-f5697c26aed70275",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-fdcf5c685afbb41a",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-feff7c3d6f4ddc55",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
       "candidate_id": "PD-CAND-07cfea156d04e8e8",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -11604,6 +11428,182 @@
       "rationale": "This coordinate-force passage states or bounds an explicitly registered mechanics, mapping, literature, or model-grid claim.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-25"
+    },
+    {
+      "candidate_id": "PD-CAND-063c7e05fb640e5d",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-165a6caf21ef85e2",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-22fe542413fe1075",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-37582fe0fbc00cc7",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-39f42d06f3e621a5",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-77f607e78b74eddc",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-9248119a2458c1b1",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-929f26183c2056d8",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-9345c1e6be2ef186",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-9906005bff75ba72",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-a83d791d65049fc2",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-aa6efbe9274b5d53",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-ab4689630944a0fe",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-b06a3cbe5b2d0e01",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-b5b2526e23b77d70",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-bcfcc2b3a9631de1",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-be8a26a0593eab4f",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-c6f7607002d58a93",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-cd8822807d808531",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-d2f2b5b07b466265",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-fdcf5c685afbb41a",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-feff7c3d6f4ddc55",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
     }
   ],
   "claims": [
