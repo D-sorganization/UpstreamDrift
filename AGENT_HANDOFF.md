@@ -69,16 +69,19 @@ is the single proximal-to-distal completion authority.
 - Regular planar rank/nullity is 4/1; the constructed adverse alignment is
   3/2 but is not a qualified anatomical pose. Separated/coincident point-force
   maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
-- #9113 is implemented on `research/9113-closed-loop-margins`. Exact triangle
+- #9113 is implemented in open PR #9114 on
+  `research/9113-closed-loop-margins`. Exact triangle
   closure covers both branches and 181 phases each; all 362 nominal samples
   close below `1.67e-16` m with rank/nullity 4/1. Exact 0.03 m and 1.53 m
   degeneracies are 3/2. A five-offset by five-tolerance matrix retains the
   observed numerical rank boundary without calling it physical.
 - Phase, scale, feasible/impossible geometry, equivalent-unit, and manufactured
-  rank controls pass. Expected-zero SVD diagnostics use conservative
-  power-of-ten upper bounds (`1e-14` m for cross-phase spread), while decisions
-  retain full precision. This is planar kinematics only: no force, anatomy, passive
-  torque, human occurrence, strategy, or coaching inference is authorized.
+  rank controls pass. Python 3.12 CI exposed platform SVD roundoff; the corrected
+  publication bounds all expected-zero SVD diagnostics by conservative powers
+  of ten, including exact null singular values, while rank decisions retain raw
+  precision. The 58-test focused gate and 636-artifact release validation pass.
+  This is planar kinematics only: no force, anatomy, passive torque, human
+  occurrence, strategy, or coaching inference is authorized.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -111,10 +114,7 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9049, #9100, #9108, and #9110 are merged. #9113 is the active protected
-  slice; requalify stale controls selectively rather than merging wholesale.
-- PR #9032 is at remote head `d341a0c92`; required CI passed at last
-  verification. Its optional source-lock failure is deliberate.
+- #9049, #9100, #9108, and #9110 are merged; #9113 is the active protected slice.
 - #8358's Tools gateway and analyses are merged; UI and presentation criteria
   remain unaudited. Merged #9096 preserves `src.shared` modules while refreshing
   one Tools provider and changes no production API, schema, or vendor pin.

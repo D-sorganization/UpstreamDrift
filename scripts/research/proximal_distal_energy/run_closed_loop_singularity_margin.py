@@ -70,7 +70,16 @@ def _orbit_payload(audit: ClosedLoopOrbitAudit) -> dict[str, object]:
     return payload
 
 
-def _audit_payload(audit: PlanarClosedLoopAudit) -> dict[str, object]:
+def _audit_payload(
+    audit: PlanarClosedLoopAudit,
+    *,
+    bound_exact_null_singular_value: bool = False,
+) -> dict[str, object]:
+    singular_values = list(audit.scaled_singular_values_m)
+    smallest_singular_value = audit.smallest_scaled_singular_value_m
+    if bound_exact_null_singular_value:
+        smallest_singular_value = _roundoff_upper_bound(smallest_singular_value)
+        singular_values[-1] = smallest_singular_value
     return {
         "angular_coordinate_scale_rad": audit.angular_coordinate_scale_rad,
         "maximum_scaled_nullspace_residual_m": _roundoff_upper_bound(
@@ -83,8 +92,8 @@ def _audit_payload(audit: PlanarClosedLoopAudit) -> dict[str, object]:
             if math.isfinite(audit.scaled_condition_number)
             else None
         ),
-        "scaled_singular_values_m": list(audit.scaled_singular_values_m),
-        "smallest_scaled_singular_value_m": audit.smallest_scaled_singular_value_m,
+        "scaled_singular_values_m": singular_values,
+        "smallest_scaled_singular_value_m": smallest_singular_value,
         "translation_coordinate_scale_m": audit.translation_coordinate_scale_m,
     }
 
@@ -288,12 +297,18 @@ def build_report() -> dict[str, object]:
             "lower_position_closure_residual_m": (
                 degeneracies.lower_position_closure_residual_m
             ),
-            "lower_rank_audit": _audit_payload(degeneracies.lower),
+            "lower_rank_audit": _audit_payload(
+                degeneracies.lower,
+                bound_exact_null_singular_value=True,
+            ),
             "upper_geometry_m": asdict(degeneracies.upper_geometry),
             "upper_position_closure_residual_m": (
                 degeneracies.upper_position_closure_residual_m
             ),
-            "upper_rank_audit": _audit_payload(degeneracies.upper),
+            "upper_rank_audit": _audit_payload(
+                degeneracies.upper,
+                bound_exact_null_singular_value=True,
+            ),
         },
         "falsifiers": [
             "Any registered orbit sample violates the closure tolerance.",

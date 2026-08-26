@@ -623,8 +623,8 @@
       "bytes": 305329
     },
     "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json": {
-      "sha256": "1228f5cd5738b9c6495bff642995e788598a56f86eb886cc71c75d1d76be6fe4",
-      "bytes": 25714
+      "sha256": "73f5e9ed04c99210c6f1dc6b3ea684e31b03f1620c31f965dd94cb2ed2839959",
+      "bytes": 25690
     },
     "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json": {
       "sha256": "5cc95b0fbc4069a39fd0c48002aa0e9a6df5d178ac95bd1efe7820ce90e5f267",
@@ -2531,8 +2531,8 @@
       "bytes": 6726
     },
     "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py": {
-      "sha256": "b03529989d1eefae4f2b23f12f0f1a827f2e2b62814bf6c7093d6a2c8b36b700",
-      "bytes": 15984
+      "sha256": "773ef45933bfa318eacf8cfa9ae468c97f15741d1287c65d8324ee17b7dee8b9",
+      "bytes": 16486
     },
     "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py": {
       "sha256": "2036e603bdacfeb14ce7c105d2a9a86ac89bde40161e1a049bf3ceba99af0ef3",

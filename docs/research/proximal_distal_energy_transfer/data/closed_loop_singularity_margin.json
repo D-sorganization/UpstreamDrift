@@ -17,8 +17,8 @@
       "nullity": 2,
       "rank": 3,
       "scaled_condition_number": null,
-      "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 6.49217e-19],
-      "smallest_scaled_singular_value_m": 6.49217e-19,
+      "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1e-18],
+      "smallest_scaled_singular_value_m": 1e-18,
       "translation_coordinate_scale_m": 0.75
     },
     "upper_geometry_m": {
@@ -33,8 +33,8 @@
       "nullity": 2,
       "rank": 3,
       "scaled_condition_number": null,
-      "scaled_singular_values_m": [1.32871, 1.30418, 1.06066, 5.99501e-17],
-      "smallest_scaled_singular_value_m": 5.99501e-17,
+      "scaled_singular_values_m": [1.32871, 1.30418, 1.06066, 1e-16],
+      "smallest_scaled_singular_value_m": 1e-16,
       "translation_coordinate_scale_m": 0.75
     }
   },
