@@ -63,13 +63,20 @@ The command reports the tier count and authority-status census. Tests also
 apply semantic tampering to references, identifiers, reasons, and source paths
 and require fail-closed rejection.
 
+The analytical tier now has a separately bounded
+[local linear diagnostic](LOCAL_LINEAR_DIAGNOSTICS.md). It establishes only
+first-order numerical observability and controllability rank for declared
+synthetic states, outputs, controls, steps, and tolerances. It leaves every
+structural, practical, global nonlinear, and human inference unavailable.
+
 ## Remaining Nonlinear-Control Work
 
 This contract is the dependency for, not the result of, the remaining #9027
 analyses. Subsequent protected slices must add:
 
-1. model-tier-specific observability, controllability, constraint-rank,
-   structural-identifiability, and practical-identifiability reports;
+1. extend the analytical local-rank audit across eligible tiers and add
+   constraint-rank, structural-identifiability, and practical-identifiability
+   reports;
 2. event-time sensitivity and finite-time stability methods only where their
    assumptions are satisfied;
 3. matched open-loop, state-triggered, impedance, robust-control, stochastic,
