@@ -25,6 +25,8 @@ from scripts.research.proximal_distal_energy.run_trajectory_control_authority im
 )
 
 pytestmark = pytest.mark.scientific
+ROOT = REPORT_PATH.parents[4]
+ARTICLE = REPORT_PATH.parent.parent
 
 
 def _sha256(path: Path) -> str:
@@ -150,3 +152,32 @@ def test_validation_rejects_lost_controls_and_inference_promotion(
     promoted["inference_boundary"] = "This proves a universal coaching strategy."
     with pytest.raises(ValueError, match="inference boundary"):
         validate_report(promoted)
+
+
+def test_release_claims_preserve_local_authority_boundary() -> None:
+    registry = json.loads(
+        (ARTICLE / "data/claim_audit_registry.json").read_text(encoding="utf-8")
+    )
+    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
+
+    assert {"PD-CLAIM-317", "PD-CLAIM-318"} <= set(claims)
+    for claim_id in ("PD-CLAIM-317", "PD-CLAIM-318"):
+        claim = claims[claim_id]
+        assert claim["published_status"] == (
+            "supported_for_declared_local_first_order_analytical_trajectory"
+        )
+        adjudication = claim["adjudication"].lower()
+        assert "bounded nonlinear reachability" in adjudication
+        assert "human" in adjudication
+        assert "coaching" in adjudication
+
+    review = json.loads(
+        (ARTICLE / "data/release_claim_review.json").read_text(encoding="utf-8")
+    )
+    release = next(
+        item
+        for item in review["release_claim_reviews"]
+        if item["release_claim_key"] == "trajectory_varying_event_control_authority"
+    )
+    assert release["supporting_claim_ids"] == ["PD-CLAIM-317", "PD-CLAIM-318"]
+    assert "participant-held-out" in release["remaining_scientific_gate"]

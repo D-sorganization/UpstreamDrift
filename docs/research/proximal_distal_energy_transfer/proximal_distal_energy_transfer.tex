@@ -505,7 +505,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, left=2mm, titlerule=0mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, colback=white, bottomtitle=1mm, arc=.35mm, colframe=quarto-callout-note-color-frame, opacityback=0, toprule=.15mm, leftrule=.75mm, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, opacityback=0, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, coltitle=black, breakable, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, colframe=quarto-callout-note-color-frame, arc=.35mm, colback=white, rightrule=.15mm, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, toptitle=1mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2812,7 +2812,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, left=2mm, titlerule=0mm, coltitle=black, opacitybacktitle=0.6, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, colback=white, bottomtitle=1mm, arc=.35mm, colframe=quarto-callout-note-color-frame, opacityback=0, toprule=.15mm, leftrule=.75mm, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, opacityback=0, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, coltitle=black, breakable, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, colframe=quarto-callout-note-color-frame, arc=.35mm, colback=white, rightrule=.15mm, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, toptitle=1mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -10208,6 +10208,82 @@ These diagnostics use one synthetic open-loop model. They do not measure
 neural timing demand, fatigue tolerance, participant robustness, passive
 negative torque, technique, or coaching efficacy.
 
+\subsection{Trajectory-Varying Event-Conditioned Control
+Authority}\label{sec-ladder-trajectory-control-authority}
+
+The finite-time transition map describes sensitivity to an initial-state
+perturbation. It does not answer the different question of which local
+state directions can be produced by a torque perturbation distributed
+along the trajectory. The registered input audit differentiates the same
+exact RK4 step operator with respect to state and input, giving
+
+\begin{equation}\phantomsection\label{eq-ladder-trajectory-gramian}{
+\mathbf z_{k+1}=\mathbf A_k\mathbf z_k+\mathbf B_k\mathbf v_k,
+\qquad
+\mathbf W_{k+1}=\mathbf A_k\mathbf W_k\mathbf A_k^\mathsf T
++\mathbf B_k\mathbf B_k^\mathsf T.
+}\end{equation}
+
+State and torque coordinates are explicitly scaled. The input matrix is
+divided by \(\sqrt{\Delta t}\) so the discrete sum represents a
+continuous-energy-equivalent torque perturbation rather than changing
+merely because the integration grid changes. At the transverse delivery
+guard, the fixed-time perturbation is projected to the event surface
+with
+
+\begin{equation}\phantomsection\label{eq-ladder-event-tangent-gramian}{
+\mathbf P=\mathbf I-
+\frac{\mathbf f_e\mathbf n^\mathsf T}{\mathbf n^\mathsf T\mathbf f_e},
+\qquad
+\mathbf W_{e,T}=\mathbf Q^\mathsf T\mathbf P\mathbf W_e
+\mathbf P^\mathsf T\mathbf Q,
+}\end{equation}
+
+where \(\mathbf n=\nabla h\), \(\mathbf f_e\) is the event velocity, and
+the columns of \(\mathbf Q\) form an explicit orthonormal basis for the
+guard tangent space. The exact crossing has guard residual
+\(1.31\times10^{-13}\) and transversality 35.0258 s\(^{-1}\). Under the
+declared scales and rank tolerance, the two-channel Gramian has rank
+four in the four-state fixed-time space and rank three in the
+three-dimensional event tangent space. Shoulder-only and wrist-only
+input maps also have full retained rank under this local numerical
+contract, but their eigenvalue spectra and conditioning differ strongly.
+Rank therefore establishes neither equal effort nor interchangeable
+human strategies.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_trajectory_control_authority.pdf}
+
+}
+
+\caption{\label{fig-trajectory-control-authority}Trajectory Variation
+and Event Geometry Condition Local Control Authority}
+
+\end{figure}%
+
+The result passes four registered falsification controls. Zero input
+produces an exactly zero Gramian; shoulder and wrist contributions add
+with maximum residual \(5.18\times10^{-12}\); six direct nonlinear
+torque-pulse comparisons agree with their linearized step responses
+within \(4.12\times10^{-8}\) scaled state units; and input-step,
+integration-step, and equivalent-unit residuals remain below
+\(4.12\times10^{-10}\), \(1.27\times10^{-7}\), and
+\(3.34\times10^{-16}\), respectively. A frozen-local countermodel
+evaluated on the same four phase windows differs from the
+trajectory-varying Gramian by 0.136--0.298 in relative norm. Thus a
+single operating-point approximation does not reproduce the registered
+finite-window authority even when phase and horizon are matched.
+
+These are local, scale-dependent first-order diagnostics on one
+synthetic open-loop trajectory. They do not prove nonlinear or
+bounded-control reachability, controller superiority, human strength or
+neural allocation, passive negative torque, robustness to delay, fatigue
+or noise, or a coaching benefit. Those remain separate falsification
+gates.
+
 \section{Three-Dimensional Frame
 Audit}\label{sec-ladder-three-dimensional}
 
@@ -13257,7 +13333,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 315 material claims. The normalized outcome
+The current census contains 317 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -13286,7 +13362,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 295 \\
+\texttt{supported} & 297 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -13312,8 +13388,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 100 \\
-\texttt{project\_executable\_or\_generated} & 286 \\
+\texttt{project\_derivation\_or\_document} & 102 \\
+\texttt{project\_executable\_or\_generated} & 288 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -13334,7 +13410,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 261 \\
+\texttt{project\_only} & 263 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -13355,11 +13431,11 @@ Model Tier & Claim Count \\
 \endlastfoot
 \texttt{articulated\_spatial} & 32 \\
 \texttt{compliant\_shaft} & 66 \\
-\texttt{cross\_tier\_synthesis} & 67 \\
+\texttt{cross\_tier\_synthesis} & 69 \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
-\texttt{planar\_reduced} & 140 \\
+\texttt{planar\_reduced} & 142 \\
 \texttt{spatial\_reduced} & 76 \\
 \texttt{two\_hand\_or\_bilateral} & 94 \\
 \texttt{uncertainty\_or\_control} & 10 \\
@@ -13386,7 +13462,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 271 \\
+\texttt{none\_declared} & 273 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -13460,7 +13536,7 @@ ch06cc spatial forward contact & 8 & 8 / 0 / 0 & project authored
 only \\
 ch06d uncertainty control & 10 & 10 / 0 / 0 & project authored only \\
 ch06e experimental protocol & 1 & 1 / 0 / 0 & project authored only \\
-ch07 model ladder & 21 & 21 / 0 / 0 & project authored only \\
+ch07 model ladder & 23 & 23 / 0 / 0 & project authored only \\
 ch07 results & 8 & 8 / 0 / 0 & project authored only \\
 ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
 ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\
@@ -13737,6 +13813,12 @@ Recorded outputs:
   transverse-event derivatives, direct perturbation controls,
   near-grazing rejection, saltation controls, equivalent-unit checks,
   and the fail-closed periodicity/Floquet gate.
+\item
+  \texttt{data/trajectory\_control\_authority.\{json,npz\}} ---
+  exact-step trajectory-varying input maps, continuous-energy-equivalent
+  Gramians, event-tangent projection, channel masks, direct nonlinear
+  pulse controls, frozen-local countermodels, refinement, additivity,
+  zero-input, and equivalent-unit gates.
 \item
   \texttt{data/double\_pendulum\_identifiability.json} --- exact
   seven-coefficient inverse- dynamics factorization, analytic
