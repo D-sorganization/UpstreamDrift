@@ -2531,8 +2531,8 @@
       "bytes": 6726
     },
     "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py": {
-      "sha256": "773ef45933bfa318eacf8cfa9ae468c97f15741d1287c65d8324ee17b7dee8b9",
-      "bytes": 16486
+      "sha256": "378784b97e54c638f4379d2c1516fb81888cf90858a37c0988ef57f80bb0d310",
+      "bytes": 16595
     },
     "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py": {
       "sha256": "2036e603bdacfeb14ce7c105d2a9a86ac89bde40161e1a049bf3ceba99af0ef3",

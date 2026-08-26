@@ -72,6 +72,7 @@ def test_report_retains_all_declared_sensitivity_and_adverse_controls() -> None:
     assert exact["upper_rank_audit"]["smallest_scaled_singular_value_m"] == 1e-16
     for audit_name in ("lower_rank_audit", "upper_rank_audit"):
         audit = exact[audit_name]
+        assert audit["maximum_scaled_nullspace_residual_m"] == 1e-15
         assert (
             audit["scaled_singular_values_m"][-1]
             == audit["smallest_scaled_singular_value_m"]

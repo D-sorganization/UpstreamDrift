@@ -48,14 +48,14 @@ RELATIVE_TOLERANCES = (1e-12, 1e-10, 1e-8, 1e-6, 1e-4)
 ROUND_OFF_DIAGNOSTIC_REPORTING = "conservative_power_of_ten_upper_bound"
 
 
-def _roundoff_upper_bound(value: float) -> float:
+def _roundoff_upper_bound(value: float, *, minimum: float = 0.0) -> float:
     """Bound an expected-zero floating diagnostic without platform false precision."""
 
-    if value < 0.0 or not math.isfinite(value):
+    if value < 0.0 or minimum < 0.0 or not all(map(math.isfinite, (value, minimum))):
         raise ValueError("roundoff diagnostic must be finite and nonnegative")
     if value == 0.0:
-        return 0.0
-    return 10.0 ** math.ceil(math.log10(value))
+        return minimum
+    return max(minimum, 10.0 ** math.ceil(math.log10(value)))
 
 
 def _orbit_payload(audit: ClosedLoopOrbitAudit) -> dict[str, object]:
@@ -83,7 +83,8 @@ def _audit_payload(
     return {
         "angular_coordinate_scale_rad": audit.angular_coordinate_scale_rad,
         "maximum_scaled_nullspace_residual_m": _roundoff_upper_bound(
-            audit.maximum_scaled_nullspace_residual_m
+            audit.maximum_scaled_nullspace_residual_m,
+            minimum=1e-15,
         ),
         "nullity": audit.nullity,
         "rank": audit.rank,
