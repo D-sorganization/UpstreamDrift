@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "871b8d1e422ac37f8247c9e570845e55cc8ea78cb167887cd0715415a4925357"
+    "sha256": "ec4e219fec599383780e1afc5d1592fa1437a83a0e5f5bafbb212b9ce829d3cb"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -11,9 +11,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 303,
-    "evidence_reference_count": 2232,
-    "local_artifact_count": 321,
+    "claim_count": 306,
+    "evidence_reference_count": 2254,
+    "local_artifact_count": 328,
     "external_url_count": 78
   },
   "claims": {
@@ -3794,6 +3794,43 @@
         "docs/research/proximal_distal_energy_transfer/release_manifest.json"
       ],
       "external_references": []
+    },
+    "PD-CLAIM-305": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf",
+        "scripts/research/proximal_distal_energy/force_source_optimization.py",
+        "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
+        "src/shared/python/biomechanics/force_source_attribution.py",
+        "tests/research/test_force_source_optimization.py",
+        "tests/unit/biomechanics/test_force_source_attribution.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-306": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf",
+        "scripts/research/proximal_distal_energy/force_source_optimization.py",
+        "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
+        "src/shared/python/biomechanics/force_source_attribution.py",
+        "tests/research/test_force_source_optimization.py",
+        "tests/unit/biomechanics/test_force_source_attribution.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-307": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf",
+        "scripts/research/proximal_distal_energy/force_source_optimization.py",
+        "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
+        "src/shared/python/biomechanics/force_source_attribution.py",
+        "tests/research/test_force_source_optimization.py",
+        "tests/unit/biomechanics/test_force_source_attribution.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "external_references": []
     }
   },
   "local_artifacts": {
@@ -4170,8 +4207,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json": {
-      "sha256": "b8be28cdf9c806107d7e6ca0134d2900981892ce91fb1065eafe217c04cab295",
-      "bytes": 298298,
+      "sha256": "9dca8d5c31554b2818ddb3c4ba303a7fa8eb60d3f3db96e7af57bbcd4cd848e4",
+      "bytes": 299456,
       "referenced_by": [
         "PD-CLAIM-003",
         "PD-CLAIM-006",
@@ -4273,7 +4310,8 @@
         "PD-CLAIM-292",
         "PD-CLAIM-294",
         "PD-CLAIM-295",
-        "PD-CLAIM-296"
+        "PD-CLAIM-296",
+        "PD-CLAIM-307"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json": {
@@ -4415,6 +4453,15 @@
       "bytes": 6164,
       "referenced_by": [
         "PD-CLAIM-199"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json": {
+      "sha256": "671a1fe6fe7de08fe2a044d354b5292e3e17c66d0a5da19fd121f17395aeebfe",
+      "bytes": 127204,
+      "referenced_by": [
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json": {
@@ -5489,6 +5536,15 @@
         "PD-CLAIM-100"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf": {
+      "sha256": "f378c755208c26d044e8f776e6477cd7a1fcecfb752300925f747f5ca26b0a80",
+      "bytes": 33776,
+      "referenced_by": [
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_forward_contact_validity_horizon.pdf": {
       "sha256": "9f1ecb737e9ae5f7bd53c579cd4627a6748486feb6ce8d7b4e79e69317d54ecb",
       "bytes": 38704,
@@ -5591,8 +5647,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "4c090151a5d507ab41e336598367461023f1581503e95f0e8945f507350fa07b",
-      "bytes": 135191,
+      "sha256": "e90a7a48d6f29afd8beda4569f54b2f877962d05dd77314d06a0e2ee77b8a524",
+      "bytes": 137127,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -5929,6 +5985,15 @@
         "PD-CLAIM-144",
         "PD-CLAIM-145",
         "PD-CLAIM-146"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/force_source_optimization.py": {
+      "sha256": "290dd514d886e6f732000d0616af8010bf0ab3cb9e2b0d6aa8a98c0faac4973e",
+      "bytes": 8439,
+      "referenced_by": [
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307"
       ]
     },
     "scripts/research/proximal_distal_energy/forward_contact_validity_horizon.py": {
@@ -6439,6 +6504,15 @@
         "PD-CLAIM-286",
         "PD-CLAIM-287",
         "PD-CLAIM-288"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/run_force_source_optimization.py": {
+      "sha256": "450164c277ae396bb6b709f04a5769bc853e21fb156f6b556f46600f106e7d7d",
+      "bytes": 4023,
+      "referenced_by": [
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307"
       ]
     },
     "scripts/research/proximal_distal_energy/run_forward_contact_validity_horizon.py": {
@@ -7008,6 +7082,15 @@
         "PD-CLAIM-096"
       ]
     },
+    "src/shared/python/biomechanics/force_source_attribution.py": {
+      "sha256": "0cbf1122cc1749b863950120074740dce6c8393f1af5971ae5d0a86b9632a86d",
+      "bytes": 2314,
+      "referenced_by": [
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307"
+      ]
+    },
     "src/shared/python/physics/contact_reaction_decomposition.py": {
       "sha256": "9f2abd71d3619edf1f693aee8f47417964066b6a77e8c57a15708a5f25574309",
       "bytes": 10667,
@@ -7323,6 +7406,15 @@
         "PD-CLAIM-144",
         "PD-CLAIM-145",
         "PD-CLAIM-146"
+      ]
+    },
+    "tests/research/test_force_source_optimization.py": {
+      "sha256": "1edf63d25516882e9412d907d38c56ec46ebfd2e31dfac21a257baf0cf068ea8",
+      "bytes": 2444,
+      "referenced_by": [
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307"
       ]
     },
     "tests/research/test_forward_contact_validity_horizon.py": {
@@ -7799,6 +7891,15 @@
         "PD-CLAIM-220",
         "PD-CLAIM-221",
         "PD-CLAIM-222"
+      ]
+    },
+    "tests/unit/biomechanics/test_force_source_attribution.py": {
+      "sha256": "bfb06b8bbaff80a444b644716477efc6172c0d89b9f48cb1b9ace3b4999d44be",
+      "bytes": 1850,
+      "referenced_by": [
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307"
       ]
     },
     "tests/unit/biomechanics/test_interaction_evidence.py": {

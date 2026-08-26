@@ -1,9 +1,32 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the single proximal-to-distal completion authority.
+
+## Coordinate Force-Source Attribution (#9059)
+
+- Tools PR #4699 is the reusable source authority for
+  `force-attribution/v1`; UpstreamDrift consumes it only through
+  `vendor/ud-tools` and the thin biomechanics gateway. The vendor pin is the
+  protected Tools follow-up squash
+  `8dc4512184d8c29e10770ad81e4ce947f849b355`, which includes the source
+  feature from PR #4699, its read-only provider-Protocol correction from
+  PR #4700, and the restored downstream dataset façade from PR #4701.
+- The registered planar study evaluates 135 programs and retains 91 qualified
+  impacts. It publishes separate absolute Coriolis-impulse, signed-impulse,
+  and clubhead-speed optima plus component power/work and mapping residuals.
+- The Christoffel cross-versus-squared split is explicitly tied to
+  shoulder-absolute/wrist-relative coordinates. The wrist force-only virtual-
+  work map is rank deficient, so its generalized residual remains evidence.
+- Do not repin this branch to a Tools feature head for release. Pin only the
+  protected Tools merge commit, then run the focused scientific, release,
+  render, and publication-quality gates before opening the protected PR.
+- The complete chapter audit now contains 1,130 reviewed candidates, 306
+  atomic claims, 125 numeric contracts, and 382/382 verified literals. The
+  608-artifact computational bundle validates with no open release claims;
+  this supersedes the earlier 303-claim candidate on PR #9062.
 
 ## Repository Authority
 
@@ -12,11 +35,12 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `c6fc49a7c63549fa6b60afb43594d3c76a226d50`. The normalized-claim authority
+  `4f84a8a2dbdafac01a634ceb41b1e415ea7ec5bb`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
-- The current computational publication is 239 pages with SHA-256
-  `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
-  194 URI links, and 247 outline entries. All pages render and were inspected.
+- The current computational publication is 244 pages with SHA-256
+  `59faa25bce589777560d66bd9d5712b37fe0099979c91318c5875460ec6447b6`,
+  194 URI links, and 254 outline entries. Its new coordinate-source chapter
+  and registered-search figure were rendered and inspected at full-page scale.
   Archival qualification remains false because the PDF is untagged and retains
   Type 3 and unembedded font resources.
 

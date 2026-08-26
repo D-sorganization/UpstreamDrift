@@ -40,6 +40,12 @@ def _spec(
 
 
 REVIEW_SPECS: dict[str, dict[str, Any]] = {
+    "coordinate_force_source_attribution": _spec(
+        "reviewed_as_bounded_coordinate_explicit_model_result",
+        "supported_at_declared_planar_model_and_coordinate_tier",
+        ("PD-CLAIM-305", "PD-CLAIM-306", "PD-CLAIM-307"),
+        "Independent coordinate implementation, measured bilateral grip wrenches, and participant-held-out validation.",
+    ),
     "interaction_dynamics_planar": _spec(
         "reviewed_at_declared_model_tier",
         "mechanism_supported_at_declared_model_tier",

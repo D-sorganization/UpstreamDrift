@@ -20,6 +20,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     manifest = build_release_manifest(ROOT)
     assert list(manifest["presets"]) == [
         "double_pendulum",
+        "pendulum_force_source_optimization",
         "forward_two_hand",
         "moving_base_flexible_club",
         "forward_modal_shaft",
@@ -58,6 +59,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "bilateral_wrench_sensor_qualification",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
+    assert manifest["claims"]["coordinate_force_source_attribution"] == (
+        "supported_at_declared_planar_model_and_coordinate_tier"
+    )
     assert manifest["claims"]["high_proximal_velocity_universally_beneficial"] == (
         "falsified_at_declared_planar_tiers"
     )

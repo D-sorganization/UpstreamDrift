@@ -19,6 +19,16 @@ results do not establish human self-stabilization or a universal strategy.
 
 Open research materials for a study of proximal-to-distal (P→D) energy
 transfer in the golf swing. The study combines a literature synthesis
+with a coordinate-explicit Christoffel decomposition that separates
+cross-speed Coriolis terms, squared-speed centripetal/centrifugal terms,
+gravity, damping, and applied drive without treating those coordinate terms
+as new external or biological forces. A registered 135-program pendulum grid
+compares maximum absolute Coriolis hand-path impulse with maximum clubhead
+speed, retaining signed work, undefined zero-speed tangent intervals, task
+Jacobian rank, and force-only mapping residuals. See
+[`data/force_source_optimization.json`](data/force_source_optimization.json)
+and the chapter “Coordinate-Explicit Coriolis, Centripetal, and Gravity
+Attribution.” The study continues
 with reproducible two-link simulations, counterfactual acceleration
 decomposition, exact interaction-force and force-power accounting, a
 matched-state torque-killswitch, actuator-bound checks, impact-definition
