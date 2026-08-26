@@ -8,6 +8,27 @@ is the single proximal-to-distal completion authority.
 
 - ADR-0041 assigns camera, observation, calibration, timing, session, reconstruction, and C3D contracts to Tools #4706; UpstreamDrift owns orchestration, UX, persistence, and biomechanics adapters; AffineDrift owns sanitized publication. Tools PR #4734 remains a protected candidate; do not repin `vendor/ud-tools` to a feature head, and let UpstreamDrift #9069 follow its immutable merge. Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation: there is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
 
+## Dependency Lock Provenance (#9120)
+
+- Branch `fix/9120-lock-provenance` is based on exact protected `main`
+  `99acc997a97b3d97cb4ddd857b79bedd4a66f290`. It makes `make sync-deps` the
+  literal provenance command for both pip-tools outputs and adds a focused
+  normal/offline recipe and committed-header contract.
+- RED run `33012056244`, job `98320580185`, on OGLaptop-3 failed exactly two
+  tests for the missing custom command and legacy headers. Generation run
+  `33012500516`, job `98322140416`, generated both headers on OGLaptop and
+  passed the focused serial `python -m pytest -q -n 0` contract.
+- Runtime pin digest stayed
+  `2d63cae544355c89da703c3d3703dae28ae246596abcd6e58ccdcde262835f20`;
+  development pin digest stayed
+  `14b89a51e085a5912e9526b7f16e0dfe06f9dd43a34db730d1608a39580416bf`.
+  Only the two generated provenance lines changed.
+- Full `PIP_NO_INDEX=1` resolution failed closed because the bounded validator
+  did not contain the complete distribution cache (first missing candidate:
+  `numpy>=2.0.0`). That separate cache/bootstrap gap is #9122. Do not weaken
+  offline policy, prewarm the fleet implicitly, or relax the protected
+  dependency-consistency clean-diff gate to close #9120.
+
 ## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.
