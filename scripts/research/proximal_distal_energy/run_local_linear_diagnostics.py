@@ -60,7 +60,7 @@ STEP_MULTIPLIERS = (0.1, 1.0, 10.0)
 BASE_STATE_STEPS = np.array([1e-6, 1e-6, 1e-5, 1e-5])
 BASE_CONTROL_STEPS = np.array([1e-4, 1e-4])
 RANK_TOLERANCE = RankTolerance(absolute=1e-8, relative=1e-7)
-CANONICAL_SIGNIFICANT_DIGITS = 9
+CANONICAL_SIGNIFICANT_DIGITS = 8
 
 
 @dataclass(frozen=True, slots=True)

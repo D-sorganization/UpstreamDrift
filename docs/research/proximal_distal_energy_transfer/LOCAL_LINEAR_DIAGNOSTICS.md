@@ -46,7 +46,7 @@ dimensional $A$, $B$, and $C$ remain in the report for traceability. Raw
 continuous-time observability and controllability condition numbers are not
 interpreted because their columns mix powers with different physical units.
 
-Published JSON floats are canonicalized to nine significant digits so the
+Published JSON floats are canonicalized to eight significant digits so the
 registered artifact is reproducible across supported operating systems and
 Python versions. Rank and conditioning decisions are made at full numerical
 precision before this publication-only normalization.
