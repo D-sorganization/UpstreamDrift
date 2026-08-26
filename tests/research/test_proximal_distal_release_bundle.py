@@ -22,6 +22,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "double_pendulum",
         "pendulum_force_source_optimization",
         "local_linear_diagnostics",
+        "constraint_internal_force_diagnostics",
+        "closed_loop_singularity_margin",
+        "double_pendulum_identifiability",
         "forward_two_hand",
         "moving_base_flexible_club",
         "forward_modal_shaft",
@@ -60,6 +63,18 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "bilateral_wrench_sensor_qualification",
     ]
     assert manifest["claims"]["human_experimental"] == "untested"
+    assert manifest["claims"]["feasible_closed_loop_singularity_margin"] == (
+        "supported_for_declared_exact_planar_kinematic_triangle"
+    )
+    assert manifest["claims"]["double_pendulum_base_coefficient_excitation"] == (
+        "full_rank_for_registered_synthetic_record"
+    )
+    assert manifest["claims"]["double_pendulum_physical_parameter_identifiability"] == (
+        "structurally_non_identifiable_under_declared_model"
+    )
+    assert manifest["claims"]["double_pendulum_practical_identifiability"] == (
+        "not_established_oracle_kinematics_lower_bound_only"
+    )
     assert manifest["claims"]["coordinate_force_source_attribution"] == (
         "supported_at_declared_planar_model_and_coordinate_tier"
     )

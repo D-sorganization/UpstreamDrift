@@ -282,7 +282,9 @@ def _greedy_spread_selection(candidates: np.ndarray, keep: int) -> list[int]:
     """
     flat = candidates.reshape(candidates.shape[0], -1)
     centroid = flat.mean(axis=0)
-    chosen = [int(np.argmax(np.linalg.norm(flat - centroid, axis=1)))]
+    diff = flat - centroid
+    # ⚡ Bolt: np.einsum is used to calculate squared magnitude for argmax, avoiding square root and intermediate allocations.
+    chosen = [int(np.argmax(np.einsum("ij,ij->i", diff, diff)))]
     distance = np.linalg.norm(flat - flat[chosen[0]], axis=1)
     while len(chosen) < keep:
         nxt = int(np.argmax(distance))

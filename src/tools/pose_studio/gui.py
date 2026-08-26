@@ -212,6 +212,11 @@ class MainWidget(QtWidgets.QWidget):
     def _apply_pose(self, pose: CanonicalPose, *, record_history: bool) -> None:
         """Apply *pose* to controller, view, and joint panel."""
         self._engine_controller.set_pose(pose)
+        # set_pose() can silently downgrade the controller to the mock
+        # kinematics service (or flip it into ERROR) if the live engine
+        # bridge raises; re-read the status here so the pill never goes
+        # stale between engine-selection events (issue #8827).
+        self.engine_picker.set_status(self._engine_controller.status)
         # Pass the service to the view so it can render engine-specific kinematics
         self.view_3d.set_service(self._engine_controller.service)
         self.view_3d.update_pose(pose)

@@ -73,6 +73,12 @@ The executable
 [`hybrid-system contract`](HYBRID_SYSTEM_CONTRACT.md) registers these components
 and explicit unavailable states across all eight tiers. Registration is a
 topology gate, not evidence that the remaining diagnostics or comparisons pass.
+The bounded
+[`constraint and internal-force diagnostic`](CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md)
+separates kinematic, point-force, and full hand-wrench nullspaces under explicit
+coordinate, wrench, and rank-tolerance scales. Its adverse cases qualify local
+linear maps only; feasible-trajectory force recovery and human evidence remain
+open.
 
 Open-loop timing, state-triggered policies, impedance control, robust model
 predictive control, stochastic or optimal feedback control, differential

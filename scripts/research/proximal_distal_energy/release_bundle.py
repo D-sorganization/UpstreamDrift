@@ -100,6 +100,18 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_local_linear_diagnostics write",
             "tier": "analytical_double_pendulum_local_first_order_rank",
         },
+        "constraint_internal_force_diagnostics": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics write",
+            "tier": "scaled_cross_tier_constraint_and_wrench_map_rank",
+        },
+        "closed_loop_singularity_margin": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin write",
+            "tier": "analytical_planar_exact_position_closure",
+        },
+        "double_pendulum_identifiability": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability write",
+            "tier": "analytical_double_pendulum_exact_map_and_dimensionless_finite_record",
+        },
         "forward_two_hand": {
             "command": "python -m scripts.research.proximal_distal_energy.run_forward_two_arm_study",
             "tier": "planar_constrained_forward",
@@ -247,6 +259,18 @@ _RELEASE_METADATA: dict[str, Any] = {
     },
     "claims": {
         "interaction_dynamics_planar": "supported_at_declared_model_tier",
+        "feasible_closed_loop_singularity_margin": (
+            "supported_for_declared_exact_planar_kinematic_triangle"
+        ),
+        "double_pendulum_base_coefficient_excitation": (
+            "full_rank_for_registered_synthetic_record"
+        ),
+        "double_pendulum_physical_parameter_identifiability": (
+            "structurally_non_identifiable_under_declared_model"
+        ),
+        "double_pendulum_practical_identifiability": (
+            "not_established_oracle_kinematics_lower_bound_only"
+        ),
         "coordinate_force_source_attribution": (
             "supported_at_declared_planar_model_and_coordinate_tier"
         ),

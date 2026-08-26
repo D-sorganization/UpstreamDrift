@@ -37,19 +37,40 @@ actuator countermodels, manufactured fixtures, and killswitches are required.
 Structural or practical identifiability, global nonlinear properties, human
 validity, and coaching interpretation remain unavailable.
 
+Issue #9104 qualifies the exact and finite-record identifiability boundary for
+the declared analytical double pendulum. Its inverse-dynamics regressor has
+seven named base coefficients, while an analytic nonzero-minor witness proves
+that the eleven-entry reduced physical map has rank seven and nullity four.
+Three exact physical-parameter alternatives preserve every base coefficient.
+Finite-record rank and conditioning use positive coefficient and torque scales,
+equivalent-unit and scale audits, shortened-window adverse cases, and a
+zero-motion rank-zero killswitch. Gaussian Fisher intervals are oracle-
+kinematics lower bounds only and shall not be promoted to practical,
+participant, biological, or coaching identifiability.
+
+Issue #9027 also qualifies a dimensionally explicit constraint-rank boundary.
+Planar closure Jacobians require declared generalized-coordinate scales before
+their singular values or condition numbers are interpreted, and bilateral
+hand-wrench maps require a declared moment reference length. The governed
+diagnostic keeps kinematic closure, point-force allocation, and full wrench
+measurement nullspaces separate; positive rescaling preserves exact rank and
+nullity but not numerical conditioning. Its adverse alignments are constructed
+mathematical controls, not qualified anatomical poses, and the result does not
+identify constraint force, muscle action, human strategy, or coaching intent.
+
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,130 reviewed candidates and 306 atomic claims. Issue #8724 adds an exhaustive,
-snapshot-locked four-way outcome authority: 286 supported at their declared
+1,134 reviewed candidates and 309 atomic claims. Issue #8724 adds an exhaustive,
+snapshot-locked four-way outcome authority: 289 supported at their declared
 estimands and boundaries, five inconclusive, 15 untested, and none contradicted.
 The absence of a contradicted row does not erase adverse or null results that
-the paper reports accurately. This status is not scientific closure: all 43
+the paper reports accurately. This status is not scientific closure: all 46
 public release claims have a traceable review disposition, and
 each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
-issue #8918 numeric authority binds all 382 numeric literals across 125 of the
-306 claims to reviewed statement digests, JSON Pointers, transforms, evidence
-scopes, and tolerances. It distinguishes 174 semantically matched local JSON
-values, 144 registered claim values that have not been independently
+issue #8918 numeric authority binds all 394 numeric literals across 128 of the
+309 claims to reviewed statement digests, JSON Pointers, transforms, evidence
+scopes, and tolerances. It distinguishes 181 semantically matched local JSON
+values, 149 registered claim values that have not been independently
 recomputed, 57 externally reported values, and seven protocol or notation
 values. Representative planar, spatial, articulated-shaft, and finite-ground
 headlines are independently recomputed from committed raw arrays, while the
@@ -582,8 +603,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.596                                            |
-| **Last Spec Update**    | 2026-08-25                                         |
+| **Spec Version**        | 1.0.604                                            |
+| **Last Spec Update**    | 2026-08-26                                         |
 
 ## 2. Purpose & Mission
 
@@ -3270,7 +3291,15 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-25 | 1.0.596 | Reconciled UP-D0 (#9066) with protected nondimensional-local-rank main. `manuals/upstreamdrift` QMD remains the sole editable engineering design-manual authority; existing user, ADR, and research products remain separate; generated HTML, LaTeX, PDF, and DOCX remain non-editable and unapproved. The versioned policy, fail-closed empty registry, ADR-0041, agent guidance, contract tests, and offline CI/pre-commit verifier enforce program-contract ownership, safe paths, Ruff formatting, TDD/DbC/DRY/LoD, impacted-path/freshness rules, immutable release evidence, visual and semantic review, and human approval. UP-D1 through UP-D8 remain explicit blockers; this governance scaffold makes no calculation-coverage or publication claim. |
+| 2026-08-26 | 1.0.604 | Reconciled UP-D0 (#9066) with protected current main `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`. `manuals/upstreamdrift` QMD remains the sole editable engineering design-manual authority; existing user, ADR, and research products remain separate; generated HTML, LaTeX, PDF, and DOCX remain non-editable and unapproved. The versioned policy, fail-closed empty registry, ADR-0041, agent guidance, contract tests, and offline CI/pre-commit verifier enforce program-contract ownership, safe paths, Ruff formatting, TDD/DbC/DRY/LoD, impacted-path/freshness rules, immutable release evidence, visual and semantic review, and human approval. UP-D1 through UP-D8 remain explicit blockers; this governance scaffold makes no calculation-coverage or publication claim. |
+| 2026-08-26 | 1.0.603 | Qualified #9113's feasible closed-loop singular-margin boundary. An exact same-origin planar triangle constructor now covers both assembly branches and a full global-phase orbit before interpreting the scaled closure Jacobian. The governed evidence retains exact lower/upper triangle degeneracies, a five-by-five distance/tolerance matrix, phase-resolution, positive-scale, feasible-geometry, equivalent-unit, impossible-geometry, and manufactured-rank controls. The result establishes only local planar kinematic closure and scale-qualified rank/nullity; it does not establish anatomy, dynamics, contact force, passive torque, human occurrence, or coaching guidance. |
+| 2026-08-26 | 1.0.600 | Qualified #9027's dimensionally explicit constraint-rank boundary. Planar closure diagnostics now declare generalized-coordinate scales, bilateral wrench diagnostics declare an input/output moment reference length, and positive rescaling is tested to preserve exact rank and nullity while numerical conditioning remains scale-dependent. Kinematic closure, point-force allocation, and full wrench measurement nullspaces remain separate governed estimands; reviewed numeric-pointer overrides make the scaffold reproduce all new contracts exactly. Constructed adverse alignments are mathematical controls rather than anatomical poses, and no constraint-force, muscle-action, human-strategy, or coaching inference is authorized. |
+| 2026-08-26 | 1.0.601 | Fixed issue #8823: the `ProvenanceRecord`/`ProvenanceValue` infrastructure in `src/shared/python/ux/provenance.py` and its `ProvenanceValueLabel` Qt wrapper in `src/shared/python/ui/provenance_value.py` had no real callers outside their own unit test — dead, tested, unwired infrastructure. `src/tools/swing_flight_pipeline/gui.py`'s `SwingFlightWidget` now renders its two headline computed values (Carry Distance, Launch Speed) as `ProvenanceValueLabel`s, rebuilt fresh on each `_run_pipeline()` call with a `ProvenanceRecord` naming the producing `engine_name`, a per-run `source` id, the deriving formula, and the consumed swing-state input ids — hovering or right-clicking either value now answers "why does this say 220.4 m?" without leaving the screen. A new `_update_provenance_labels` helper enforces, via an explicit `require()` precondition (not a silent default), that no headline value is ever rendered against an empty `engine_name`, echoing the honest-attribution guarantee issue #8819 already established for the engine combo. New unit tests assert the rendered `ProvenanceRecord` carries the correct engine/source/formula, that the run id increments across runs, that the tooltip/whatsThis describe the value, and that the precondition raises `PreconditionError` on an empty engine name. |
+| 2026-08-26 | 1.0.602 | Fixed issue #8825: Launch Monitor Analytics's five matplotlib analysis canvases (`relationship_plot`, `model_plot`, `comparison_plot`, `dispersion_plot`, `trend_plot`) were never cleared when the underlying data changed, so `clear_project`, `import_file`, `load_project`, `_remove_selected_sessions`, and `_run_treatment_ui` all left stale charts (including leftover colorbar axes) from a previous project/session visibly on screen. `_refresh_all` — the single choke point already reached by all five call sites — now calls a new `_reset_analysis_canvases()` that resets every canvas to a placeholder state naming the current project. `PlotCanvas.empty()` was changed to fully reset the figure via `reset_axes()` instead of clearing the current axes in place, so a colorbar's own axes can no longer survive a reset. Analysis plot titles across relationship, PCA/VIF, model, monitor-comparison, dispersion, and trend charts now include the project name via a new `_title_with_project()` helper, so a viewer can tell which project's data a rendered chart reflects. New regression test asserts a populated relationship canvas (with its colorbar axes and image artist) is fully cleared and shows a project-named placeholder after `clear_project()`. `gui.py` was also split (`PlotCanvas` extracted to a new `plot_canvas.py`, `_selected_text`/`_populate_combo` moved to `widgets.py`) to stay under the 1200-line file-size budget after this fix. |
+| 2026-08-26 | 1.0.599 | Fixed issue #8826: Launch Monitor Analytics `_on_export_data` wrote a bare CSV/Parquet and `_on_export_manifest` wrote a wholly separate reproducibility-manifest JSON, with no shared identifier linking the pair once separated on disk. `export_data` (new public method backing `_on_export_data`) now stamps a fresh UUID export ID and export timestamp directly into the artifact — a leading `# export_id=... exported_at=...` comment row for CSV, Parquet schema metadata for Parquet — mirroring the existing `ImportManifest` provenance pattern, and records the exported file's own SHA-256 on `self._last_data_export`. `export_manifest` (new public method backing `_on_export_manifest`) embeds that export's ID, filename, and SHA-256 under a `data_export` field, or `None` when no data export ran yet. New tests assert the CSV comment and Parquet schema metadata carry the same export ID recorded in the manifest, and that the manifest's recorded SHA-256 matches the exported file's actual on-disk content. |
+| 2026-08-26 | 1.0.598 | Qualified #9104's double-pendulum identifiability boundary. The exact seven-coefficient inverse-dynamics factorization and analytic physical-map witness establish rank seven and nullity four for the declared eleven-entry reduced map, with three coefficient-preserving physical alternatives. Dimensionless finite-record evidence retains equivalent-unit and scale audits, shortened-window adverse cases, four torque-noise levels, and a zero-motion rank-zero killswitch. Oracle Gaussian Fisher intervals remain lower bounds under exact kinematics and do not establish practical, participant, biological, or coaching identifiability. Claim registration and report construction satisfy the current function-size and parameter architecture budgets without changing the governed scientific JSON. |
+| 2026-08-25 | 1.0.597 | Fixed issue #8827: Pose Studio's engine-status pill went stale after a silent mid-session downgrade to the mock kinematics service. `EngineController.set_pose` already tracked this correctly (catching `NotImplementedError` from a partial engine bridge, swapping in `MockKinematicsService`, and setting `EngineStatus.MOCK`), but `MainWidget._apply_pose` never re-read `EngineController.status` afterward — the pill only updated in `_on_engine_selected`, at initial engine selection. A user whose engine reported "live" at activation and then edited a joint mid-session (undo/redo, angle edit, or pose-library load all route through `_apply_pose`) would see a stale green "live" pill while the 3D view was actually being driven by the mock. `_apply_pose` now calls `self.engine_picker.set_status(self._engine_controller.status)` immediately after `set_pose`, so the pill reflects any downgrade in real time. New offscreen Qt test forces a live-engine service whose `set_pose` raises `NotImplementedError`, calls `_apply_pose`, and asserts the status pill reads `mock` (not the stale prior `live`) afterward. |
+| 2026-08-25 | 1.0.596 | Reconciled the #8358 Tools provider-contract regression with protected nondimensional-local-rank main. Refreshing one selected provider no longer evicts the downstream-owned `src.shared` namespace, and a regression preserves an already-imported UpstreamDrift perturbation gateway when Tools is first on `PYTHONPATH`. Existing contracts still require each selected provider to resolve from Tools. This changes no production import, public API, provider schema, vendor pin, workflow, or runner; it restores deterministic downstream compatibility verification for Tools PR #4734. |
 | 2026-08-25 | 1.0.595 | Registered #9092 as the nondimensional local-rank qualification slice downstream of #9027. Raw analytical linearizations remain trace evidence, while local rank and condition interpretation now require declared state/control/output/time scales, unit-invariance and scale-sensitivity gates, output/actuator countermodels, manufactured fixtures, and killswitches. Structural/practical identifiability, global nonlinear control, human validity, and coaching conclusions remain unavailable. |
 | 2026-08-25 | 1.0.594 | Reconciled #9027's first nonlinear-systems qualification slice with the coordinate-explicit #9059 authority and current main. The typed eight-tier hybrid-system topology and referential tamper gates remain intact alongside the 135-program force-attribution grid and unrelated gap-fill acceleration; neither topology registration nor planar attribution is promoted to controller, participant, or coaching evidence. |
 | 2026-08-25 | 1.0.593 | Wired issue #8871's `export_paths` gap: `SimulationService._run_simulation_sync` previously returned `SimulationResponse(..., export_paths=[])` on both success and failure, and `OutputManager` (`save_simulation_results`/`get_simulation_list`/`export_analysis_report`) had exactly one caller (`video_pose_pipeline.py`), never the API simulation service. `SimulationService` now takes an injectable `OutputManager` (defaulting to a project-root-relative instance; tests inject one rooted at `tmp_path`) and, on a successful run, persists simulation data plus any analysis results as JSON via the new `_persist_simulation_results`, threading through only genuinely-known provenance (engine type, model path, duration, timestep) — nothing fabricated. The saved file's path populates `export_paths`; a failed run persists nothing, so `export_paths` stays empty. `OutputManager`'s docstring and `output/README.md` document the resulting `simulations/<engine>/` schema. New tests assert `export_paths` is non-empty and every listed path exists on disk after a successful run, and stays empty after a failed one, with no other test writing into the real `output/` tree (an autouse fixture roots the default `OutputManager` at `tmp_path`). |
@@ -4421,6 +4450,23 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   pendulum and non-pendulum adapters, and cross-engine topology/frame/unit
   rejection shall pass deterministic parity tests before R15 is promoted.
 
+### F-8557.30: Double-Pendulum Parameter Identifiability Boundary
+
+- The analytical inverse-dynamics authority shall name its base coefficients,
+  coordinates, units, signs, and physical domain and reconstruct the canonical
+  dynamics over independent manufactured states.
+- Physical-parameter rank and nullity shall be established by exact algebra or
+  a nondimensional independently checked equivalent, not solely by a floating-
+  point SVD of a dimensioned Jacobian. At least three nontrivial physical-
+  parameter alternatives shall preserve every base coefficient.
+- Finite-record rank, conditioning, and Fisher-information conclusions shall
+  use declared positive column and output scales and retain equivalent-unit,
+  scale, shortened-window, noise, rank-deficient, and zero-motion controls.
+- Full base-coefficient rank for a synthetic oracle record shall be labeled an
+  excitation result only. Oracle-kinematics uncertainty shall fail closed when
+  rank deficient and shall exclude practical, participant, biological, and
+  coaching inference.
+
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
@@ -4452,3 +4498,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - GUI exception handling: catch and log unexpected slot exceptions in terrain engine and model explorer GUI tools (#8890).
 - Model Explorer: propagate load_model boolean success status to caller slots and guard status bar updates against failed loads (#9041).
 - Decomposed 13 oversized proximal-distal research registration, authority, and study orchestrator functions below 100 lines and <= 8 parameters without altering numerical outputs or claim evidence (#8963).
+- Split `src/tools/launch_monitor_analytics/gui.py` back under the 1200-line file-size budget after the #8825 stale-canvas fix: extracted `PlotCanvas` to a new `plot_canvas.py` module and the module-level `_selected_text`/`_populate_combo` helpers into `widgets.py` (`PlotCanvas` re-exported from `gui.py` for compatibility, no behavior change).
