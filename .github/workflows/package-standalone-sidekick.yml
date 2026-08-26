@@ -1,7 +1,7 @@
 name: Package Standalone Sidekick
 
-# Builds an sdist + wheel from the exact pinned Tools source, uploads both
-# artifacts, and smoke-tests the one wheel selected by the build job.
+# Builds an sdist + wheel from the exact pinned Tools source, retains them as
+# separate artifacts, and smoke-tests only the wheel selected by the build job.
 
 on:
   pull_request:
@@ -127,17 +127,31 @@ jobs:
           fi
           echo "Wheel contents look clean."
 
-      - name: Upload artifacts
+      # Keep the source archive available for inspection without forcing every
+      # matrix smoke job to transfer it. The wheel is already hundreds of MB;
+      # combining both distributions exhausted the smoke-job transfer budget.
+      - name: Upload wheel artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: sidekick-dist
-          path: dist/
+          name: sidekick-wheel
+          path: dist/${{ steps.build-dist.outputs.wheel_filename }}
+          if-no-files-found: error
+
+      - name: Upload source artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: sidekick-sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
 
   smoke-test-wheel:
     name: Smoke-test wheel (Python ${{ matrix.python }})
     needs: build-wheel
     runs-on: d-sorg-fleet-docker
-    timeout-minutes: 10
+    # Cold fleet transfer measurements put the verified wheel alone near five
+    # minutes. Retain a bounded budget for download, clean install, and both
+    # smoke assertions without weakening any assertion or changing runners.
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -146,8 +160,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          submodules: recursive
+          submodules: false
           persist-credentials: false
+          sparse-checkout: tests/fixtures/wgs.json
+          sparse-checkout-cone-mode: false
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
@@ -167,7 +183,7 @@ jobs:
         run: python3 -m pip cache purge
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          name: sidekick-dist
+          name: sidekick-wheel
           path: dist/
 
       - name: Install wheel in clean venv

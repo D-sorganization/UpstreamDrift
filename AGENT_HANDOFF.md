@@ -117,7 +117,7 @@ is the single proximal-to-distal completion authority.
   Upstream-owned `bunkershot3d` at its canonical top-level import in editable
   and wheel installs, excludes the duplicate `src.bunkershot3d` wheel identity,
   and changes no runtime path or vendor pin.
-- #9107 is reconciled normally with current `main` at merge commit `56fc0dcde`.
+- #9107 was reconciled normally with current `main` at merge commit `d0cc289d0`.
   Thirty-six build-hook/unit contracts pass. A Python 3.11 isolated install of
   the exact 384,333,159-byte wheel
   (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`)
@@ -130,6 +130,13 @@ is the single proximal-to-distal completion authority.
   qualified or hide those failures. The prior protected cross-engine failure
   was a corrupted shared Python tool-cache license file; runner configuration
   remains untouched and fresh protected evidence is required.
+- #9107's first protected wheel-smoke matrix never reached installation: each
+  job exhausted its budget while downloading a combined 771,541,995-byte wheel
+  plus source artifact after a recursive checkout. The repaired workflow keeps
+  separate immutable wheel/source artifacts; smoke jobs use a fixture-only
+  sparse checkout, transfer only the selected wheel, and retain both unchanged
+  runtime assertions within a measured 20-minute bound. No runner changes or
+  smoke-test exemptions are authorized.
 - Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
   moving or partial campaign; the next public projection must pin a qualified
   UpstreamDrift merge commit.
