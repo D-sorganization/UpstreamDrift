@@ -2464,8 +2464,8 @@
       "bytes": 6684
     },
     "scripts/research/proximal_distal_energy/register_phase_event_stability_claims.py": {
-      "sha256": "a3c4b5fa0a498fea76acd6f5037ca554bb28836ec3d6d4a201f3c56042967030",
-      "bytes": 15159
+      "sha256": "1c96ff18912d0da5a65434ddc4258be8431b8892006f173e1bb5003ebc826229",
+      "bytes": 15355
     },
     "scripts/research/proximal_distal_energy/register_proximal_dose_claims.py": {
       "sha256": "85f3df5b6d0754dcc50810ae225f04d5844591216d569434ecacc51600e07c88",
@@ -2648,8 +2648,8 @@
       "bytes": 13272
     },
     "scripts/research/proximal_distal_energy/run_phase_event_stability.py": {
-      "sha256": "44a87b0050247688d7df8ab73be967b65262b00b1464a7f9a990970b1b36e626",
-      "bytes": 19434
+      "sha256": "ea101db14e5cd64aa3eb7573616611566780233b660cd8c76d23a8a507ca104c",
+      "bytes": 24192
     },
     "scripts/research/proximal_distal_energy/run_proximal_acceleration_transfer_study.py": {
       "sha256": "6bf6cfb89ed81ace35c034e4a2bc580f396b32a646ef8af102e1707e14842ac1",

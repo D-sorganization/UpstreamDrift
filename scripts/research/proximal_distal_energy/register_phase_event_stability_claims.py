@@ -107,26 +107,18 @@ def _claim(
     }
 
 
-def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]:
-    finite_time_statement = (
+def _finite_time_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    statement = (
         "On the registered analytical downswing refined to 0.125 ms, state-step "
         "multipliers 0.1 through 10 change the event transition by at most "
         "6.87737e-6, and three complete perturbation rollouts agree with the "
         "propagated fixed-horizon map within 3.45969e-7; at the 0.349256 s "
         "geometric event, the observed scaled gains span 0.093456 to 8.33244."
     )
-    event_statement = (
-        "The registered club-vertical guard is transverse at 35.0258 per second, "
-        "with scaled-state event-time derivatives (-0.137655, -0.0240043, "
-        "-0.299636, -0.243972) s and direct-rollout discrepancy no greater than "
-        "5.98012e-5 s; a 0.95 reset corruption produces 0.05 saltation deviation, "
-        "while the 1.48546 scaled periodicity residual exceeds 1e-6 and suppresses "
-        "Floquet output."
-    )
-    finite_time = _claim(
+    return _claim(
         claim_id="PD-CLAIM-315",
         candidates=[candidates["transition"], candidates["finite_time"]],
-        statement=finite_time_statement,
+        statement=statement,
         classification="local_finite_time_state_transition_amplification",
         boundary=(
             "The gain spectrum is local to one scaled finite trajectory and is "
@@ -163,14 +155,25 @@ def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]
             ),
         ],
     )
-    event = _claim(
+
+
+def _event_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    statement = (
+        "The registered club-vertical guard is transverse at 35.0258 per second, "
+        "with scaled-state event-time derivatives (-0.137655, -0.0240043, "
+        "-0.299636, -0.243972) s and direct-rollout discrepancy no greater than "
+        "5.98012e-5 s; a 0.95 reset corruption produces 0.05 saltation deviation, "
+        "while the 1.48546 scaled periodicity residual exceeds 1e-6 and suppresses "
+        "Floquet output."
+    )
+    return _claim(
         claim_id="PD-CLAIM-316",
         candidates=[
             candidates["implicit"],
             candidates["event"],
             candidates["periodicity"],
         ],
-        statement=event_statement,
+        statement=statement,
         classification="transverse_event_sensitivity_and_floquet_suppression",
         boundary=(
             "The derivative applies only to the declared transverse geometric "
@@ -222,7 +225,10 @@ def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]
             _numeric_entry("1e-6#1", "/periodicity_gate/tolerance"),
         ],
     )
-    return finite_time, event
+
+
+def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]:
+    return _finite_time_claim(candidates), _event_claim(candidates)
 
 
 def _find_candidates(inventory: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -272,7 +278,7 @@ def _update_numeric_contracts(claims: tuple[dict[str, Any], ...]) -> None:
         for claim in claims
     )
     NUMERIC_CONTRACTS.write_text(
-        json.dumps(contracts, indent=2) + "\n", encoding="utf-8"
+        json.dumps(contracts, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
 
 
@@ -368,7 +374,9 @@ def main() -> None:
         f"The complete {inventory['candidate_count']}-candidate paper inventory is "
         "adjudicated, including local finite-time and event-sensitivity evidence."
     )
-    REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
+    REGISTRY.write_text(
+        json.dumps(registry, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     _update_numeric_contracts(claims)
 
 

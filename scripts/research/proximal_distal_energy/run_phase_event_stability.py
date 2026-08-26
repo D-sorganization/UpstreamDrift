@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
 import sys
@@ -20,8 +20,13 @@ from scripts.research.proximal_distal_energy.numeric_evidence import (
     canonicalize_published_numbers,
 )
 from scripts.research.proximal_distal_energy.phase_event_stability import (
+    Crossing,
     DirectEventSensitivity,
+    EventSensitivity,
+    FiniteTimeSpectra,
+    PeriodicityGate,
     StateScales,
+    TransitionRollout,
     direct_event_time_control,
     direct_transition_control,
     event_time_sensitivity,
@@ -63,6 +68,46 @@ INFERENCE_BOUNDARY = (
     "demand; and neither result establishes anatomy, passive negative torque, "
     "participant robustness, human strategy, or coaching guidance."
 )
+
+
+@dataclass(frozen=True, slots=True)
+class _AnalysisState:
+    params: GolfModelParams
+    initial: np.ndarray
+    controls: np.ndarray
+    event_controls: np.ndarray
+    crossing: Crossing
+    event_time_s: float
+    scales: StateScales
+    nominal: TransitionRollout
+    nominal_event_transition: np.ndarray
+    nominal_event_state: np.ndarray
+    normalized_maps: np.ndarray
+    spectra: FiniteTimeSpectra
+    event_flow: np.ndarray
+    step_trials: list[dict[str, Any]]
+
+
+@dataclass(frozen=True, slots=True)
+class _AdverseControls:
+    grazing: EventSensitivity
+    identity: np.ndarray
+    time_guard_saltation: np.ndarray
+    corrupted_saltation: np.ndarray
+    periodicity: PeriodicityGate
+    unit_residual: float
+    time_unit_residual: float
+
+
+@dataclass(frozen=True, slots=True)
+class _EvidenceParts:
+    state: _AnalysisState
+    implicit: EventSensitivity
+    direct_event_trials: list[dict[str, Any]]
+    direct_event_derivatives: list[np.ndarray]
+    direct_transition_trials: list[dict[str, Any]]
+    direct_transition_matrices: list[np.ndarray]
+    adverse: _AdverseControls
 
 
 def _interpolate(time_s: np.ndarray, values: np.ndarray, target_s: float) -> np.ndarray:
@@ -132,9 +177,47 @@ def _checkpoint_payload(
     return records
 
 
-def build_evidence() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    """Build deterministic evidence and full-precision reviewer arrays."""
+def _transition_refinement(
+    params: GolfModelParams,
+    initial: np.ndarray,
+    event_controls: np.ndarray,
+    event_time_s: float,
+) -> tuple[TransitionRollout, np.ndarray, np.ndarray, list[dict[str, Any]]]:
+    rollouts = {
+        multiplier: propagate_state_transition(
+            params,
+            initial_state=initial,
+            controls=event_controls,
+            dt_s=ANALYSIS_DT_S,
+            state_steps=STATE_STEPS * multiplier,
+        )
+        for multiplier in STEP_MULTIPLIERS
+    }
+    nominal = rollouts[1.0]
+    event_transition = _interpolate(nominal.time_s, nominal.transition, event_time_s)
+    event_state = _interpolate(nominal.time_s, nominal.state, event_time_s)
+    trials = [
+        {
+            "event_transition_max_abs_residual_from_nominal": float(
+                np.max(
+                    np.abs(
+                        _interpolate(
+                            rollouts[multiplier].time_s,
+                            rollouts[multiplier].transition,
+                            event_time_s,
+                        )
+                        - event_transition
+                    )
+                )
+            ),
+            "state_step_multiplier": multiplier,
+        }
+        for multiplier in STEP_MULTIPLIERS
+    ]
+    return nominal, event_transition, event_state, trials
 
+
+def _build_analysis_state() -> _AnalysisState:
     params = GolfModelParams.default()
     initial = np.array([*INITIAL_Q, 0.0, 0.0], dtype=float)
     program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
@@ -147,72 +230,70 @@ def build_evidence() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         raise RuntimeError("registered club-vertical guard must cross exactly once")
     if crossing.sample_index is None or crossing.fraction is None:
         raise RuntimeError("registered crossing must include interpolation metadata")
-    event_time_s = crossing.time_s
-    event_step_count = crossing.sample_index + 1
-    event_controls = controls[:event_step_count]
-    scales = _state_scales(full_state[: event_step_count + 1])
-
-    step_trials = []
-    trial_rollouts = {}
-    for multiplier in STEP_MULTIPLIERS:
-        rollout = propagate_state_transition(
-            params,
-            initial_state=initial,
-            controls=event_controls,
-            dt_s=ANALYSIS_DT_S,
-            state_steps=STATE_STEPS * multiplier,
-        )
-        trial_rollouts[multiplier] = rollout
-    nominal = trial_rollouts[1.0]
-    nominal_event_transition = _interpolate(
-        nominal.time_s, nominal.transition, event_time_s
+    event_controls = controls[: crossing.sample_index + 1]
+    scales = _state_scales(full_state[: crossing.sample_index + 2])
+    nominal, event_transition, event_state, step_trials = _transition_refinement(
+        params, initial, event_controls, crossing.time_s
     )
-    nominal_event_state = _interpolate(nominal.time_s, nominal.state, event_time_s)
-    for multiplier in STEP_MULTIPLIERS:
-        trial = trial_rollouts[multiplier]
-        transition = _interpolate(trial.time_s, trial.transition, event_time_s)
-        step_trials.append(
-            {
-                "event_transition_max_abs_residual_from_nominal": float(
-                    np.max(np.abs(transition - nominal_event_transition))
-                ),
-                "state_step_multiplier": multiplier,
-            }
-        )
-
     normalized_maps = np.asarray(
         [normalized_transition(matrix, scales) for matrix in nominal.transition]
     )
     spectra = finite_time_spectra(normalized_maps, nominal.time_s)
     event_flow = state_derivative(
-        params, nominal_event_state, event_controls[crossing.sample_index]
+        params, event_state, event_controls[crossing.sample_index]
     )
-    implicit = event_time_sensitivity(
-        nominal_event_transition,
+    return _AnalysisState(
+        params=params,
+        initial=initial,
+        controls=controls,
+        event_controls=event_controls,
+        crossing=crossing,
+        event_time_s=crossing.time_s,
+        scales=scales,
+        nominal=nominal,
+        nominal_event_transition=event_transition,
+        nominal_event_state=event_state,
+        normalized_maps=normalized_maps,
+        spectra=spectra,
         event_flow=event_flow,
+        step_trials=step_trials,
+    )
+
+
+def _implicit_sensitivity(state: _AnalysisState) -> EventSensitivity:
+    implicit = event_time_sensitivity(
+        state.nominal_event_transition,
+        event_flow=state.event_flow,
         guard_gradient=GUARD_GRADIENT,
-        state_scales=scales,
+        state_scales=state.scales,
         transversality_threshold=TRANSVERSALITY_THRESHOLD_PER_S,
     )
     if implicit.derivative_s_per_scaled_state is None:
         raise RuntimeError("registered club-vertical guard must be transverse")
+    return implicit
 
-    direct_event_trials = []
-    direct_event_derivatives = []
+
+def _direct_event_controls(
+    state: _AnalysisState, implicit: EventSensitivity
+) -> tuple[list[dict[str, Any]], list[np.ndarray]]:
+    trials: list[dict[str, Any]] = []
+    derivatives: list[np.ndarray] = []
+    if implicit.derivative_s_per_scaled_state is None:
+        raise RuntimeError("implicit event derivative must be available")
     for perturbation_scale in PERTURBATION_SCALES:
         result = direct_event_time_control(
-            params,
-            initial_state=initial,
-            controls=controls,
+            state.params,
+            initial_state=state.initial,
+            controls=state.controls,
             dt_s=ANALYSIS_DT_S,
-            state_scales=scales,
+            state_scales=state.scales,
             perturbation_scale=perturbation_scale,
             guard_gradient=GUARD_GRADIENT,
         )
         payload = _direct_event_payload(result)
         payload["perturbation_scale"] = perturbation_scale
         if result.derivative_s_per_scaled_state is not None:
-            direct_event_derivatives.append(result.derivative_s_per_scaled_state)
+            derivatives.append(result.derivative_s_per_scaled_state)
             payload["maximum_abs_residual_from_implicit_s"] = float(
                 np.max(
                     np.abs(
@@ -221,173 +302,220 @@ def build_evidence() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
                     )
                 )
             )
-        direct_event_trials.append(payload)
+        trials.append(payload)
+    return trials, derivatives
 
-    direct_transition_trials = []
-    predicted_fixed = normalized_transition(nominal.transition[-1], scales)
-    direct_transition_matrices = []
+
+def _direct_transition_controls(
+    state: _AnalysisState,
+) -> tuple[list[dict[str, Any]], list[np.ndarray]]:
+    trials: list[dict[str, Any]] = []
+    matrices: list[np.ndarray] = []
+    predicted = normalized_transition(state.nominal.transition[-1], state.scales)
     for perturbation_scale in PERTURBATION_SCALES:
         direct = direct_transition_control(
-            params,
-            initial_state=initial,
-            controls=event_controls,
+            state.params,
+            initial_state=state.initial,
+            controls=state.event_controls,
             dt_s=ANALYSIS_DT_S,
-            state_scales=scales,
+            state_scales=state.scales,
             perturbation_scale=perturbation_scale,
         )
-        direct_transition_matrices.append(direct)
-        direct_transition_trials.append(
+        matrices.append(direct)
+        trials.append(
             {
-                "maximum_abs_residual": float(np.max(np.abs(direct - predicted_fixed))),
+                "maximum_abs_residual": float(np.max(np.abs(direct - predicted))),
                 "perturbation_scale": perturbation_scale,
             }
         )
+    return trials, matrices
 
-    grazing_gradient = np.array([event_flow[1], -event_flow[0], 0.0, 0.0], dtype=float)
+
+def _adverse_controls(state: _AnalysisState) -> _AdverseControls:
+    grazing_gradient = np.array(
+        [state.event_flow[1], -state.event_flow[0], 0.0, 0.0], dtype=float
+    )
     grazing = event_time_sensitivity(
-        nominal_event_transition,
-        event_flow=event_flow,
+        state.nominal_event_transition,
+        event_flow=state.event_flow,
         guard_gradient=grazing_gradient,
-        state_scales=scales,
+        state_scales=state.scales,
         transversality_threshold=TRANSVERSALITY_THRESHOLD_PER_S,
     )
-
     identity = np.eye(4)
-    time_guard_saltation = saltation_matrix(
+    time_guard = saltation_matrix(
         reset_jacobian=identity,
-        flow_before=event_flow,
-        flow_after=event_flow,
+        flow_before=state.event_flow,
+        flow_after=state.event_flow,
         guard_gradient=np.zeros(4),
         guard_time_derivative=1.0,
         reset_time_derivative=np.zeros(4),
     )
     corrupted_reset = identity.copy()
     corrupted_reset[0, 0] = 0.95
-    corrupted_saltation = saltation_matrix(
+    corrupted = saltation_matrix(
         reset_jacobian=corrupted_reset,
-        flow_before=event_flow,
-        flow_after=event_flow,
+        flow_before=state.event_flow,
+        flow_after=state.event_flow,
         guard_gradient=np.zeros(4),
         guard_time_derivative=1.0,
         reset_time_derivative=np.zeros(4),
     )
-
     periodicity = periodicity_gate(
-        initial_state=initial,
-        final_state=nominal_event_state,
-        state_scales=scales,
+        initial_state=state.initial,
+        final_state=state.nominal_event_state,
+        state_scales=state.scales,
         tolerance=PERIODICITY_TOLERANCE,
     )
     degree_change = np.diag(np.full(4, 180.0 / np.pi))
-    converted_transition = (
-        degree_change @ nominal_event_transition @ np.linalg.inv(degree_change)
+    converted = (
+        degree_change @ state.nominal_event_transition @ np.linalg.inv(degree_change)
     )
-    converted_scales = StateScales(tuple(degree_change.diagonal() * scales.array))
+    converted_scales = StateScales(tuple(degree_change.diagonal() * state.scales.array))
     unit_residual = float(
         np.max(
             np.abs(
-                normalized_transition(converted_transition, converted_scales)
-                - normalized_transition(nominal_event_transition, scales)
+                normalized_transition(converted, converted_scales)
+                - normalized_transition(state.nominal_event_transition, state.scales)
             )
         )
     )
+    exponents = state.spectra.exponents_per_s[1:]
     time_unit_residual = float(
-        np.nanmax(
-            np.abs(
-                spectra.exponents_per_s[1:]
-                - (spectra.exponents_per_s[1:] / 1000.0) * 1000.0
-            )
-        )
+        np.nanmax(np.abs(exponents - (exponents / 1000.0) * 1000.0))
+    )
+    return _AdverseControls(
+        grazing=grazing,
+        identity=identity,
+        time_guard_saltation=time_guard,
+        corrupted_saltation=corrupted,
+        periodicity=periodicity,
+        unit_residual=unit_residual,
+        time_unit_residual=time_unit_residual,
     )
 
-    report = {
+
+def _registration_payload(state: _AnalysisState) -> dict[str, Any]:
+    return {
+        "control_program": {
+            "onset_s": 0.10,
+            "shoulder_torque_nm": 60.0,
+            "wrist_drive_nm": 15.0,
+            "wrist_restrain_nm": 10.0,
+        },
+        "analysis_dt_s": ANALYSIS_DT_S,
+        "analysis_horizon_steps": ANALYSIS_HORIZON,
+        "source_reference_dt_s": DT,
+        "source_reference_horizon_steps": HORIZON,
+        "initial_state": state.initial.tolist(),
+        "state_coordinates": [
+            "shoulder_angle_rad",
+            "wrist_relative_angle_rad",
+            "shoulder_rate_rad_s",
+            "wrist_relative_rate_rad_s",
+        ],
+        "state_scales": state.scales.values,
+        "state_steps": STATE_STEPS.tolist(),
+        "state_step_multipliers": list(STEP_MULTIPLIERS),
+        "direct_perturbation_scales": list(PERTURBATION_SCALES),
+        "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
+        "transversality_threshold_per_s": TRANSVERSALITY_THRESHOLD_PER_S,
+        "periodicity_tolerance": PERIODICITY_TOLERANCE,
+    }
+
+
+def _finite_time_payload(state: _AnalysisState) -> dict[str, Any]:
+    return {
+        "interpretation": "local finite-window amplification on a nonperiodic trajectory",
+        "event_transition_matrix_scaled": normalized_transition(
+            state.nominal_event_transition, state.scales
+        ).tolist(),
+        "phase_checkpoints": _checkpoint_payload(
+            time_s=state.nominal.time_s,
+            transitions=state.normalized_maps,
+            event_time_s=state.event_time_s,
+        ),
+        "maximum_observed_amplification": float(
+            np.max(state.spectra.singular_values[:, 0])
+        ),
+        "minimum_observed_amplification": float(
+            np.min(state.spectra.singular_values[:, -1])
+        ),
+    }
+
+
+def _event_sensitivity_payload(parts: _EvidenceParts) -> dict[str, Any]:
+    derivative = parts.implicit.derivative_s_per_scaled_state
+    if derivative is None:
+        raise RuntimeError("implicit event derivative must be available")
+    grazing = parts.adverse.grazing
+    return {
+        "implicit": {
+            "status": parts.implicit.status,
+            "transversality_per_s": parts.implicit.transversality_per_s,
+            "derivative_s_per_scaled_state": derivative.tolist(),
+        },
+        "direct_trials": parts.direct_event_trials,
+        "constructed_near_grazing_control": {
+            "status": grazing.status,
+            "transversality_per_s": grazing.transversality_per_s,
+            "derivative_s_per_scaled_state": None,
+            "construction": "configuration guard normal orthogonal to event configuration velocity",
+        },
+    }
+
+
+def _control_payloads(parts: _EvidenceParts) -> dict[str, dict[str, Any]]:
+    adverse = parts.adverse
+    saltation = {
+        "time_guard_identity_reset_max_abs_residual": float(
+            np.max(np.abs(adverse.time_guard_saltation - adverse.identity))
+        ),
+        "corrupted_reset_diagonal": 0.95,
+        "corrupted_reset_max_abs_deviation_from_identity": float(
+            np.max(np.abs(adverse.corrupted_saltation - adverse.identity))
+        ),
+    }
+    equivalent_units = {
+        "radian_to_degree_scaled_transition_max_abs_residual": adverse.unit_residual,
+        "second_to_millisecond_exponent_roundtrip_max_abs_residual_per_s": (
+            adverse.time_unit_residual
+        ),
+    }
+    periodicity = {
+        **asdict(adverse.periodicity),
+        "floquet_multipliers": None,
+        "reason": "suppressed because the registered trajectory does not close in scaled state",
+    }
+    return {
+        "saltation_controls": saltation,
+        "equivalent_unit_controls": equivalent_units,
+        "periodicity_gate": periodicity,
+    }
+
+
+def _report_payload(parts: _EvidenceParts) -> dict[str, Any]:
+    state = parts.state
+    controls = _control_payloads(parts)
+    return {
         "schema_version": SCHEMA_VERSION,
         "model_tier": "analytical_double_pendulum",
-        "registration": {
-            "control_program": {
-                "onset_s": 0.10,
-                "shoulder_torque_nm": 60.0,
-                "wrist_drive_nm": 15.0,
-                "wrist_restrain_nm": 10.0,
-            },
-            "analysis_dt_s": ANALYSIS_DT_S,
-            "analysis_horizon_steps": ANALYSIS_HORIZON,
-            "source_reference_dt_s": DT,
-            "source_reference_horizon_steps": HORIZON,
-            "initial_state": initial.tolist(),
-            "state_coordinates": [
-                "shoulder_angle_rad",
-                "wrist_relative_angle_rad",
-                "shoulder_rate_rad_s",
-                "wrist_relative_rate_rad_s",
-            ],
-            "state_scales": scales.values,
-            "state_steps": STATE_STEPS.tolist(),
-            "state_step_multipliers": list(STEP_MULTIPLIERS),
-            "direct_perturbation_scales": list(PERTURBATION_SCALES),
-            "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
-            "transversality_threshold_per_s": TRANSVERSALITY_THRESHOLD_PER_S,
-            "periodicity_tolerance": PERIODICITY_TOLERANCE,
-        },
+        "registration": _registration_payload(state),
         "reference_event": {
-            "crossing_count": crossing.crossing_count,
-            "sample_index_before_crossing": crossing.sample_index,
-            "interpolation_fraction": crossing.fraction,
-            "time_s": event_time_s,
-            "state": nominal_event_state.tolist(),
-            "flow": event_flow.tolist(),
+            "crossing_count": state.crossing.crossing_count,
+            "sample_index_before_crossing": state.crossing.sample_index,
+            "interpolation_fraction": state.crossing.fraction,
+            "time_s": state.event_time_s,
+            "state": state.nominal_event_state.tolist(),
+            "flow": state.event_flow.tolist(),
         },
-        "finite_time_analysis": {
-            "interpretation": "local finite-window amplification on a nonperiodic trajectory",
-            "event_transition_matrix_scaled": normalized_transition(
-                nominal_event_transition, scales
-            ).tolist(),
-            "phase_checkpoints": _checkpoint_payload(
-                time_s=nominal.time_s,
-                transitions=normalized_maps,
-                event_time_s=event_time_s,
-            ),
-            "maximum_observed_amplification": float(
-                np.max(spectra.singular_values[:, 0])
-            ),
-            "minimum_observed_amplification": float(
-                np.min(spectra.singular_values[:, -1])
-            ),
-        },
-        "step_refinement": step_trials,
-        "direct_transition_controls": direct_transition_trials,
-        "event_time_sensitivity": {
-            "implicit": {
-                "status": implicit.status,
-                "transversality_per_s": implicit.transversality_per_s,
-                "derivative_s_per_scaled_state": implicit.derivative_s_per_scaled_state.tolist(),
-            },
-            "direct_trials": direct_event_trials,
-            "constructed_near_grazing_control": {
-                "status": grazing.status,
-                "transversality_per_s": grazing.transversality_per_s,
-                "derivative_s_per_scaled_state": None,
-                "construction": "configuration guard normal orthogonal to event configuration velocity",
-            },
-        },
-        "saltation_controls": {
-            "time_guard_identity_reset_max_abs_residual": float(
-                np.max(np.abs(time_guard_saltation - identity))
-            ),
-            "corrupted_reset_diagonal": 0.95,
-            "corrupted_reset_max_abs_deviation_from_identity": float(
-                np.max(np.abs(corrupted_saltation - identity))
-            ),
-        },
-        "equivalent_unit_controls": {
-            "radian_to_degree_scaled_transition_max_abs_residual": unit_residual,
-            "second_to_millisecond_exponent_roundtrip_max_abs_residual_per_s": time_unit_residual,
-        },
-        "periodicity_gate": {
-            **asdict(periodicity),
-            "floquet_multipliers": None,
-            "reason": "suppressed because the registered trajectory does not close in scaled state",
-        },
+        "finite_time_analysis": _finite_time_payload(state),
+        "step_refinement": state.step_trials,
+        "direct_transition_controls": parts.direct_transition_trials,
+        "event_time_sensitivity": _event_sensitivity_payload(parts),
+        "saltation_controls": controls["saltation_controls"],
+        "equivalent_unit_controls": controls["equivalent_unit_controls"],
+        "periodicity_gate": controls["periodicity_gate"],
         "inference_boundary": INFERENCE_BOUNDARY,
         "limitations": [
             "The state-transition map is a local derivative of the registered RK4 trajectory, not an independent physics engine.",
@@ -397,19 +525,41 @@ def build_evidence() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "No participant data, actuator delay, state-estimation error, fatigue, muscle dynamics, or bilateral wrench data enter this slice.",
         ],
     }
-    arrays = {
-        "time_s": nominal.time_s,
-        "state": nominal.state,
-        "physical_transition": nominal.transition,
-        "scaled_transition": normalized_maps,
-        "singular_values": spectra.singular_values,
-        "finite_time_exponents_per_s": spectra.exponents_per_s,
-        "direct_transition_matrices": np.asarray(direct_transition_matrices),
+
+
+def _array_payload(parts: _EvidenceParts) -> dict[str, np.ndarray]:
+    state = parts.state
+    return {
+        "time_s": state.nominal.time_s,
+        "state": state.nominal.state,
+        "physical_transition": state.nominal.transition,
+        "scaled_transition": state.normalized_maps,
+        "singular_values": state.spectra.singular_values,
+        "finite_time_exponents_per_s": state.spectra.exponents_per_s,
+        "direct_transition_matrices": np.asarray(parts.direct_transition_matrices),
         "direct_event_derivatives_s_per_scaled_state": np.asarray(
-            direct_event_derivatives
+            parts.direct_event_derivatives
         ),
     }
-    return canonicalize_published_numbers(report), arrays
+
+
+def build_evidence() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    """Build deterministic evidence and full-precision reviewer arrays."""
+
+    state = _build_analysis_state()
+    implicit = _implicit_sensitivity(state)
+    event_trials, event_derivatives = _direct_event_controls(state, implicit)
+    transition_trials, transition_matrices = _direct_transition_controls(state)
+    parts = _EvidenceParts(
+        state=state,
+        implicit=implicit,
+        direct_event_trials=event_trials,
+        direct_event_derivatives=event_derivatives,
+        direct_transition_trials=transition_trials,
+        direct_transition_matrices=transition_matrices,
+        adverse=_adverse_controls(state),
+    )
+    return canonicalize_published_numbers(_report_payload(parts)), _array_payload(parts)
 
 
 def build_report() -> dict[str, Any]:
@@ -475,7 +625,9 @@ def write_evidence() -> None:
 
     report, arrays = build_evidence()
     validate_report(report)
-    REPORT_PATH.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    REPORT_PATH.write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     np.savez_compressed(ARRAY_PATH, **arrays)
 
 

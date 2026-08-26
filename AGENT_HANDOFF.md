@@ -74,8 +74,8 @@ is the single proximal-to-distal completion authority.
   phases each close below `1.67e-16` m with rank/nullity 4/1; exact 0.03 m and
   1.53 m degeneracies are 3/2. Controls retain numerical rank/tolerance
   dependence without labeling it a physical or anatomical threshold.
-- #9116 is published in PR #9117 at head `c92f4f321`; protected checks are
-  running. It propagates the exact discrete RK4 variational map at 0.125 ms, separates
+- #9116 is published in PR #9117; protected checks rerun on each branch head.
+  It propagates the exact discrete RK4 variational map at 0.125 ms and separates
   finite-window gains from transverse event-time derivatives, rejects grazing
   guards, tests saltation controls, and suppresses Floquet output because the
   scaled periodicity residual is 1.48546 versus a `1e-6` tolerance.
