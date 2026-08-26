@@ -11,6 +11,7 @@ in ``models.yaml`` under the ``simulation`` category.
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
 import numpy as np
@@ -32,6 +33,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.contracts import require
 from src.shared.python.physics.swing_state_providers import (
     SwingStateConfig,
     SwingStateProvider,
@@ -39,6 +41,8 @@ from src.shared.python.physics.swing_state_providers import (
 )
 from src.shared.python.ui import HoverCopyTextBrowser
 from src.shared.python.ui.pane_layout import install_two_pane_splitter
+from src.shared.python.ui.provenance_value import ProvenanceValueLabel
+from src.shared.python.ux.provenance import ProvenanceRecord, ProvenanceValue
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +79,9 @@ class SwingFlightWidget(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._result: Any = None
+        self._run_counter: int = 0
+        self._carry_label: ProvenanceValueLabel | None = None
+        self._launch_speed_label: ProvenanceValueLabel | None = None
         self._build_ui()
 
     def _build_ui(self) -> None:
@@ -195,6 +202,20 @@ class SwingFlightWidget(QWidget):
             self._gl_view = None
             self._plot_item = None
 
+        # Headline provenance-carrying values (issue #8823): swapped for a
+        # freshly-built ProvenanceValueLabel each run so the tooltip/whatsThis
+        # always names the engine + run that produced the number currently
+        # shown, answering "why does this say 220.4 m?" on hover.
+        self._carry_row = QHBoxLayout()
+        self._carry_row.addWidget(QLabel("Carry Distance: (run pipeline to compute)"))
+        results_layout.addLayout(self._carry_row)
+
+        self._launch_speed_row = QHBoxLayout()
+        self._launch_speed_row.addWidget(
+            QLabel("Launch Speed: (run pipeline to compute)")
+        )
+        results_layout.addLayout(self._launch_speed_row)
+
         self._results_text = HoverCopyTextBrowser()
         self._results_text.setReadOnly(True)
         self._results_text.setPlainText(
@@ -235,6 +256,7 @@ class SwingFlightWidget(QWidget):
             pipeline = SwingBallFlightPipeline()
             result = pipeline.run(swing)
             self._result = result
+            self._update_provenance_labels(result)
 
             self._results_text.setPlainText(
                 f"Pipeline Complete\n"
@@ -291,6 +313,95 @@ class SwingFlightWidget(QWidget):
         except Exception as e:
             logger.exception("Pipeline execution failed")
             self._results_text.setPlainText(f"Pipeline error: {e}")
+
+    def _update_provenance_labels(self, result: Any) -> None:
+        """Rebuild the headline ProvenanceValueLabels for the latest run.
+
+        Precondition (DbC): every rendered headline value must carry a
+        non-empty, honest ``engine`` attribution before it is shown — a
+        silent "unknown" default would recreate the exact bug issue #8819
+        fixed for the engine combo. Enforced with an explicit ``require``
+        rather than defaulting the field.
+        """
+        engine_name = result.swing_state.engine_name
+        require(
+            bool(engine_name),
+            "cannot render a headline value without a non-empty engine "
+            "attribution (ProvenanceRecord.engine)",
+            engine_name,
+        )
+        self._run_counter += 1
+        run_id = str(self._run_counter)
+        computed_at = datetime.now(timezone.utc)
+        source = f"{engine_name}:run-{run_id}"
+
+        carry_record = ProvenanceRecord(
+            formula="carry_m = ballistic flight range to landing "
+            "(SwingBallFlightPipeline.run -> PipelineMetrics.carry_m)",
+            inputs=(
+                "swing.clubhead_velocity",
+                "swing.clubhead_angular_velocity",
+                "swing.loft_deg",
+            ),
+            source=source,
+            computed_at=computed_at,
+            engine=engine_name,
+            run_id=run_id,
+        )
+        carry_value = ProvenanceValue(
+            value=round(float(result.carry_m), 1),
+            record=carry_record,
+            display_units="m",
+            label="Carry Distance",
+        )
+        self._carry_label = self._replace_row_widget(
+            self._carry_row,
+            ProvenanceValueLabel(carry_value),
+            prefix="Carry Distance: ",
+        )
+
+        speed_record = ProvenanceRecord(
+            formula="launch speed = |post-impact ball velocity| "
+            "(SwingBallFlightPipeline.run -> LaunchConditions.velocity)",
+            inputs=(
+                "swing.clubhead_velocity",
+                "swing.clubhead_mass_kg",
+            ),
+            source=source,
+            computed_at=computed_at,
+            engine=engine_name,
+            run_id=run_id,
+        )
+        speed_value = ProvenanceValue(
+            value=round(float(result.launch_conditions.velocity), 1),
+            record=speed_record,
+            display_units="m/s",
+            label="Launch Speed",
+        )
+        self._launch_speed_label = self._replace_row_widget(
+            self._launch_speed_row,
+            ProvenanceValueLabel(speed_value),
+            prefix="Launch Speed: ",
+        )
+
+    @staticmethod
+    def _replace_row_widget(
+        row: QHBoxLayout, new_label: ProvenanceValueLabel, *, prefix: str
+    ) -> ProvenanceValueLabel:
+        """Swap the single widget in ``row`` for ``new_label``.
+
+        ``ProvenanceValueLabel`` has no in-place update method (by design —
+        it binds one immutable ``ProvenanceValue``), so each pipeline run
+        rebuilds the label rather than mutating text on a stale one.
+        """
+        old_item = row.takeAt(0)
+        if old_item is not None:
+            old_widget = old_item.widget()
+            if old_widget is not None:
+                old_widget.deleteLater()
+        new_label.setText(f"{prefix}{new_label.text()}")
+        row.addWidget(new_label)
+        return new_label
 
     def cleanup(self) -> None:
         """Release resources."""
