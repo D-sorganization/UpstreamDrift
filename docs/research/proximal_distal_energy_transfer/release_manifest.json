@@ -243,16 +243,16 @@
       "bytes": 7786
     },
     "docs/research/proximal_distal_energy_transfer/COMPREHENSIVE_RESEARCH_PROGRAM.md": {
-      "sha256": "1a37dcd16ff0d8f6d1e22d0b7f4420a38ea0095770d6e7834747c65c7b4e38ba",
-      "bytes": 27529
+      "sha256": "b58ec7bd0de2f557d37adcab1d2dd42c489196faff69951a2c8bffec0cb6200e",
+      "bytes": 27780
     },
     "docs/research/proximal_distal_energy_transfer/CONTROL_AFFINE_TERMINOLOGY_CONTRACT.md": {
       "sha256": "82e81398a1b54f5063a6bb8b7ffccaac22c798cfd1af2538b4f94b83fa6b7a0d",
       "bytes": 2789
     },
     "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
-      "sha256": "01046f803e511c637b0092d7a163c06e1d9de279850ab783c2917db5349034b7",
-      "bytes": 38071
+      "sha256": "2d4613554b0248746d7f03b414fde372aba0d642a2d9b29b1d884ed1d1a57fa5",
+      "bytes": 38775
     },
     "docs/research/proximal_distal_energy_transfer/EVIDENCE_SCHEMA_V2.md": {
       "sha256": "43e5e9728e63f6c22bed3874c5149976df7b50ffbf20d1e28104033b8a3adc7e",
@@ -265,6 +265,10 @@
     "docs/research/proximal_distal_energy_transfer/HAND_PATH_ATTRIBUTION_CONTRACT.md": {
       "sha256": "92763404502cdee772028920aa18e6fa7175041405794a596377611a03ff816b",
       "bytes": 10805
+    },
+    "docs/research/proximal_distal_energy_transfer/HYBRID_SYSTEM_CONTRACT.md": {
+      "sha256": "ae98c1f9c10f79b4f7e78ee9745ec79d09af009db629ede0ec4b9cf44458fe70",
+      "bytes": 4751
     },
     "docs/research/proximal_distal_energy_transfer/MEASURED_TRAJECTORY_ACQUISITION.md": {
       "sha256": "ec4376d09b3e0bff2f4d8c765d5c1b965dd2ea1cbf0f05a016059495ddf00377",
@@ -287,8 +291,8 @@
       "bytes": 9004
     },
     "docs/research/proximal_distal_energy_transfer/README.md": {
-      "sha256": "1bf533c718974232408be3a1bebd7921c1eaa62e1bc879723b1672f4fd42259d",
-      "bytes": 37067
+      "sha256": "f331eeed43546cfc9f84466553824e870a305d8e19a7a32bc63a64153249c82a",
+      "bytes": 37471
     },
     "docs/research/proximal_distal_energy_transfer/REVIEWER_WORKBENCH.md": {
       "sha256": "c0ec13a6072b09edb6147a9a7a636c56ebb62650d4a0946525a32f07ee5751da",
@@ -503,7 +507,7 @@
       "bytes": 11261
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "2b892eb8dc216cabf07d842001688bf4b25f70a0529147ac418ff5f61df6aacf",
+      "sha256": "0a0eca93c1a586de47e24fde79f36a084cf30a81e29437d66653c9869d93b3a0",
       "bytes": 3478
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json": {
@@ -713,6 +717,10 @@
     "docs/research/proximal_distal_energy_transfer/data/hand_path_attribution/hand_path_attribution_traces.npz": {
       "sha256": "8ea2d6e1db806878ce69404757157d7f58211445d6fe394b0c94e80a5bd351b6",
       "bytes": 453773
+    },
+    "docs/research/proximal_distal_energy_transfer/data/hybrid_system_contract_v1.json": {
+      "sha256": "e483741b8067289dccf01460b4fd1b503f0857c6b7327dd6103e5ea7999ed011",
+      "bytes": 46348
     },
     "docs/research/proximal_distal_energy_transfer/data/interaction_force_mechanisms.npz": {
       "sha256": "69f641abdb55f6388a5a92e818aa1b415e9c4fdb35d065f39e3382ebd381b20a",
@@ -1834,6 +1842,14 @@
       "sha256": "6284875dd432761d214dbcad5031e14cc4203018bc19b59005712521acb1bea1",
       "bytes": 261
     },
+    "scripts/research/proximal_distal_energy/_hybrid_system_contract_records.py": {
+      "sha256": "dd2e4d88b4c259f35faca97682d3f29c36156ed2f8eaf47a22d281b72a598a9b",
+      "bytes": 5275
+    },
+    "scripts/research/proximal_distal_energy/_hybrid_system_contract_validation.py": {
+      "sha256": "8dae98848e1d0b2a3514832bb238d948ec4300f85d13f23c3cf260a0b6c242db",
+      "bytes": 2670
+    },
     "scripts/research/proximal_distal_energy/advanced_biological_bridge.py": {
       "sha256": "eea8eb4f7b5bcf3af9dfd55fe3b34cc407e40511ca02710269d1feeaa666a736",
       "bytes": 16553
@@ -2033,6 +2049,10 @@
     "scripts/research/proximal_distal_energy/generate_articulated_shaft_structural_basis.py": {
       "sha256": "0ccf6f8f02fde877a9a4330cdd034afc1518c39f9c5d55a2b70fccd9c7858d2e",
       "bytes": 2635
+    },
+    "scripts/research/proximal_distal_energy/hybrid_system_contract.py": {
+      "sha256": "d05dd2db201320f59f1227177d7c73946504e57aa71f2c9508cab15de9ce633d",
+      "bytes": 13725
     },
     "scripts/research/proximal_distal_energy/interaction_forces.py": {
       "sha256": "813088e7d6cb1c205d514fc5c4f63465567ded5c6616a7a343847660f9d7bb77",
