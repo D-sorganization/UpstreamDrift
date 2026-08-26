@@ -105,7 +105,7 @@ class ForceVisualizer:
             except (RuntimeError, ValueError, OSError):
                 body2_name = f"body_{body2_id}"
 
-                # ⚡ Bolt: math.hypot avoids temporary allocations and is ~7x faster than np.linalg.norm for small 1D arrays
+            # ⚡ Bolt: math.hypot avoids temporary allocations and is ~7x faster than np.linalg.norm for small 1D arrays
             contacts.append(
                 {
                     "position": contact.pos.copy(),

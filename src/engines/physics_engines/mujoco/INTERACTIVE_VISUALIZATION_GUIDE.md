@@ -331,7 +331,6 @@ def analyze_contacts(model, data):
         contact = data.contact[i]
 
         # Get contact force
-        import math
         force = np.zeros(6)
         mujoco.mj_contactForce(model, data, i, force)
 
@@ -388,7 +387,6 @@ def compute_stability_metrics(model, data):
     total_moment = np.zeros(3)
 
     for i in range(data.ncon):
-        import math
         force = np.zeros(6)
         mujoco.mj_contactForce(model, data, i, force)
         contact_pos = data.contact[i].pos
