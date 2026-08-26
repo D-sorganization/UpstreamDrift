@@ -46,6 +46,11 @@ dimensional $A$, $B$, and $C$ remain in the report for traceability. Raw
 continuous-time observability and controllability condition numbers are not
 interpreted because their columns mix powers with different physical units.
 
+Published JSON floats are canonicalized to nine significant digits so the
+registered artifact is reproducible across supported operating systems and
+Python versions. Rank and conditioning decisions are made at full numerical
+precision before this publication-only normalization.
+
 The numerical rank threshold is
 $\max(\epsilon_{\mathrm{abs}},\epsilon_{\mathrm{rel}}\sigma_1)$, with
 $\epsilon_{\mathrm{abs}}=10^{-8}$ and $\epsilon_{\mathrm{rel}}=10^{-7}$.

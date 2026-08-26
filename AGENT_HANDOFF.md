@@ -56,6 +56,18 @@ Epic #8557 is the single proximal-to-distal completion authority.
   release marker, or run a replacement campaign. Regenerate only after
   governed campaign integration resolves the source-lock boundary.
 
+## Nondimensional Local Rank (#9092)
+
+- PR #9100 is the current protected delivery. It retains raw dimensional
+  matrices for traceability but interprets rank and condition only after
+  declared state, control, output, and time scaling.
+- Four synthetic operating points, three finite-difference multipliers, three
+  scale scenarios, and 16 countermodels in each class are registered. The
+  zero-input and zero-output killswitches return rank zero.
+- Published floats use nine significant digits for cross-platform identity;
+  rank decisions are computed at full precision before serialization. These
+  local results do not establish structural/global rank or human strategy.
+
 ## Structural Campaign and Recovery Boundary (#8800)
 
 - The separate #8752 constitutive campaign completed on ControlTower and was

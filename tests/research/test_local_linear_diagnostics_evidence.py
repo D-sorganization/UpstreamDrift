@@ -12,6 +12,7 @@ import sys
 import pytest
 
 from scripts.research.proximal_distal_energy.run_local_linear_diagnostics import (
+    CANONICAL_SIGNIFICANT_DIGITS,
     build_report,
     validate_report,
 )
@@ -41,6 +42,26 @@ def test_registered_report_is_reproducible_and_canonical() -> None:
         "scale_sensitivity_count": 12,
         "step_multiplier_count": 3,
     }
+
+
+def test_published_floats_use_registered_cross_platform_precision() -> None:
+    def visit(value: object) -> None:
+        if isinstance(value, float):
+            assert value == float(f"{value:.{CANONICAL_SIGNIFICANT_DIGITS}g}")
+        elif isinstance(value, dict):
+            for item in value.values():
+                visit(item)
+        elif isinstance(value, list):
+            for item in value:
+                visit(item)
+
+    report = build_report()
+    assert report["numeric_representation_contract"] == {
+        "canonical_significant_digits": CANONICAL_SIGNIFICANT_DIGITS,
+        "rank_decision_precision": "full_precision_before_publication_rounding",
+        "scope": "published_json_floats_only",
+    }
+    visit(report)
 
 
 def test_documented_cli_validates_without_inherited_pythonpath() -> None:

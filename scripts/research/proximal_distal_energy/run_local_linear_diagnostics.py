@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -60,6 +60,7 @@ STEP_MULTIPLIERS = (0.1, 1.0, 10.0)
 BASE_STATE_STEPS = np.array([1e-6, 1e-6, 1e-5, 1e-5])
 BASE_CONTROL_STEPS = np.array([1e-4, 1e-4])
 RANK_TOLERANCE = RankTolerance(absolute=1e-8, relative=1e-7)
+CANONICAL_SIGNIFICANT_DIGITS = 9
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +97,24 @@ def _linearization_point(
         ),
         control_steps=tuple(float(value) for value in selected_control_steps),
     )
+
+
+def _canonicalize_numeric(value: Any) -> Any:
+    """Normalize published floats while retaining full-precision rank decisions."""
+    if isinstance(value, (float, np.floating)):
+        numeric = float(value)
+        if not np.isfinite(numeric):
+            raise ValueError("published local-rank evidence must be finite")
+        if numeric == 0.0:
+            return 0.0
+        return float(f"{numeric:.{CANONICAL_SIGNIFICANT_DIGITS}g}")
+    if isinstance(value, dict):
+        return {key: _canonicalize_numeric(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_canonicalize_numeric(item) for item in value]
+    if isinstance(value, tuple):
+        return [_canonicalize_numeric(item) for item in value]
+    return value
 
 
 def _scale_payload(scales: NondimensionalScales) -> dict[str, Any]:
@@ -467,7 +486,7 @@ def build_report() -> dict[str, object]:
         _operating_point(name=name, phase_fraction=fraction, trajectory=trajectory)
         for name, fraction in PHASES
     ]
-    return {
+    report = {
         "classification": "local_first_order_numerical_rank",
         "conditioning_contract": {
             "interpreted_basis": "nondimensional_matrices",
@@ -488,6 +507,11 @@ def build_report() -> dict[str, object]:
         },
         "model_tier": "analytical_double_pendulum",
         "nondimensional_scale_contract": _scale_contract(scale_scenarios),
+        "numeric_representation_contract": {
+            "canonical_significant_digits": CANONICAL_SIGNIFICANT_DIGITS,
+            "rank_decision_precision": "full_precision_before_publication_rounding",
+            "scope": "published_json_floats_only",
+        },
         "operating_points": points,
         "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
         "practical_identifiability_status": "not_evaluated",
@@ -500,6 +524,7 @@ def build_report() -> dict[str, object]:
         "structural_identifiability_status": "not_evaluated",
         "summary": _summary_payload(points, scale_scenarios),
     }
+    return cast(dict[str, object], _canonicalize_numeric(report))
 
 
 def validate_report(report: dict[str, Any]) -> dict[str, int]:
@@ -508,6 +533,12 @@ def validate_report(report: dict[str, Any]) -> dict[str, int]:
         raise ValueError(f"schema_version must be {SCHEMA_VERSION}")
     if report.get("structural_identifiability_status") != "not_evaluated":
         raise ValueError("structural identifiability is not established by local rank")
+    if report.get("numeric_representation_contract") != {
+        "canonical_significant_digits": CANONICAL_SIGNIFICANT_DIGITS,
+        "rank_decision_precision": "full_precision_before_publication_rounding",
+        "scope": "published_json_floats_only",
+    }:
+        raise ValueError("numeric representation contract is missing or stale")
     for field in ("practical_identifiability_status", "global_nonlinear_status"):
         if report.get(field) != "not_evaluated":
             raise ValueError(f"{field} must remain not_evaluated")
