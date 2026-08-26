@@ -2,6 +2,20 @@
 
 ## Current Scientific Audit State (2026-08-25)
 
+## Markerless Mocap Program (#9063)
+
+Issue #9065 establishes ADR-0041 and an executable acceptance program before
+live markerless capture begins. Canonical camera, capture, time, calibration,
+observation, reconstruction, session, and C3D exchange contracts belong to
+Tools #4706. UpstreamDrift owns application orchestration, persistence,
+biomechanics integration, and matching PyQt6/React/API workflows. AffineDrift
+owns sanitized evidence publication. Tools_Private is not a dependency of the
+open runtime. The first consumer under #9069 must pin a protected Tools merge,
+reject missing or incompatible schema authority, and adapt existing C3D and
+motion-pipeline paths instead of copying shared code. This M0 slice makes no
+camera, inference, C3D round-trip, commercial, or physical-lab qualification
+claim.
+
 Issue #9027 now has a versioned, executable hybrid-system topology contract for
 all eight model tiers. It binds implemented and partial tiers to existing source
 authorities and requires continuous states, controls, algebraic constraints,
@@ -603,7 +617,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.603                                            |
+| **Spec Version**        | 1.0.604                                            |
 | **Last Spec Update**    | 2026-08-26                                         |
 
 ## 2. Purpose & Mission
@@ -3291,6 +3305,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-26 | 1.0.604 | Reconciled markerless-mocap authority issue #9065 with protected compatibility main `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`. ADR-0041 and its executable acceptance program retain Tools as canonical camera/observation/calibration/timing/session/reconstruction/C3D contract owner, UpstreamDrift as orchestration/UX/persistence/biomechanics owner, and AffineDrift as sanitized evidence-publication owner. No feature-head vendor pin, live-lab implementation, physical qualification, C3D round-trip, or human-performance claim is introduced. |
 | 2026-08-26 | 1.0.603 | Qualified #9113's feasible closed-loop singular-margin boundary. An exact same-origin planar triangle constructor now covers both assembly branches and a full global-phase orbit before interpreting the scaled closure Jacobian. The governed evidence retains exact lower/upper triangle degeneracies, a five-by-five distance/tolerance matrix, phase-resolution, positive-scale, feasible-geometry, equivalent-unit, impossible-geometry, and manufactured-rank controls. The result establishes only local planar kinematic closure and scale-qualified rank/nullity; it does not establish anatomy, dynamics, contact force, passive torque, human occurrence, or coaching guidance. |
 | 2026-08-26 | 1.0.600 | Qualified #9027's dimensionally explicit constraint-rank boundary. Planar closure diagnostics now declare generalized-coordinate scales, bilateral wrench diagnostics declare an input/output moment reference length, and positive rescaling is tested to preserve exact rank and nullity while numerical conditioning remains scale-dependent. Kinematic closure, point-force allocation, and full wrench measurement nullspaces remain separate governed estimands; reviewed numeric-pointer overrides make the scaffold reproduce all new contracts exactly. Constructed adverse alignments are mathematical controls rather than anatomical poses, and no constraint-force, muscle-action, human-strategy, or coaching inference is authorized. |
 | 2026-08-26 | 1.0.601 | Fixed issue #8823: the `ProvenanceRecord`/`ProvenanceValue` infrastructure in `src/shared/python/ux/provenance.py` and its `ProvenanceValueLabel` Qt wrapper in `src/shared/python/ui/provenance_value.py` had no real callers outside their own unit test — dead, tested, unwired infrastructure. `src/tools/swing_flight_pipeline/gui.py`'s `SwingFlightWidget` now renders its two headline computed values (Carry Distance, Launch Speed) as `ProvenanceValueLabel`s, rebuilt fresh on each `_run_pipeline()` call with a `ProvenanceRecord` naming the producing `engine_name`, a per-run `source` id, the deriving formula, and the consumed swing-state input ids — hovering or right-clicking either value now answers "why does this say 220.4 m?" without leaving the screen. A new `_update_provenance_labels` helper enforces, via an explicit `require()` precondition (not a silent default), that no headline value is ever rendered against an empty `engine_name`, echoing the honest-attribution guarantee issue #8819 already established for the engine combo. New unit tests assert the rendered `ProvenanceRecord` carries the correct engine/source/formula, that the run id increments across runs, that the tooltip/whatsThis describe the value, and that the precondition raises `PreconditionError` on an empty engine name. |
