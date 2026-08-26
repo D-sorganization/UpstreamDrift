@@ -58,9 +58,7 @@ def test_rehydrates_missing_and_modified_tracked_inputs(tmp_path: Path) -> None:
 
     assert restored == ("Dockerfile", ".dockerignore", "src")
     assert (repo / "Dockerfile").read_text(encoding="utf-8") == "FROM scratch\n"
-    assert (repo / "src" / "package.py").read_text(encoding="utf-8") == (
-        "VALUE = 1\n"
-    )
+    assert (repo / "src" / "package.py").read_text(encoding="utf-8") == ("VALUE = 1\n")
     assert _git(repo, "diff", "--name-only", "HEAD", "--", *restored) == ""
 
 
@@ -144,7 +142,7 @@ def test_workflow_rehydrates_immediately_before_runtime_build() -> None:
     assert "git rev-parse HEAD" in bounded
     assert "git cat-file -e HEAD:scripts/ci/rehydrate_tracked_paths.py" in bounded
     assert "git --literal-pathspecs checkout --force HEAD --" in bounded
-    assert "--expected-head \"${{ github.sha }}\"" in bounded
+    assert '--expected-head "${{ github.sha }}"' in bounded
     assert "--profile runtime" in bounded
     assert "target: runtime" in workflow[build:]
     assert "tags: upstream-drift:runtime" in workflow[build:]
