@@ -72,6 +72,22 @@ jobs:
           rm -rf "${CACHE_BASE}-next"
           mkdir -p "${CACHE_BASE}"
 
+      - name: Rehydrate and verify runtime build context
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_head="$(git rev-parse HEAD)"
+          if [ "$actual_head" != "${{ github.sha }}" ]; then
+            echo "::error::Checked-out HEAD $actual_head does not match workflow SHA ${{ github.sha }}"
+            exit 1
+          fi
+          git cat-file -e HEAD:scripts/ci/rehydrate_tracked_paths.py
+          git --literal-pathspecs checkout --force HEAD -- \
+            scripts/ci/rehydrate_tracked_paths.py
+          python3 scripts/ci/rehydrate_tracked_paths.py \
+            --expected-head "${{ github.sha }}" \
+            --profile runtime
+
       - name: Build Docker Image (runtime)
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:

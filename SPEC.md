@@ -2,6 +2,22 @@
 
 ## Current Scientific Audit State (2026-08-25)
 
+## Docker Workspace Rehydration (#9121)
+
+The production `docker-smoke-and-size` job treats the checked-out Git commit as
+the only authority for its Dockerfile and build context. Immediately before
+Buildx, the workflow verifies that the checkout still equals `github.sha`,
+restores the repository-owned rehydration helper from `HEAD`, and asks that
+helper to restore only the paths explicitly consumed by the production
+Dockerfile. The helper preflights the complete bounded path set before its first
+mutation, rejects absolute, parent-traversing, backslash, duplicate, and Git
+pathspec-magic inputs, and fails if any requested object is not tracked at
+`HEAD`. It then verifies the restored superproject content against the same
+commit without treating stale submodule worktree state as replacement source.
+It never synthesizes a Dockerfile or placeholder context. Image target, tag,
+BuildKit cache, size budget, health checks, and runner selection remain
+unchanged.
+
 ## Markerless Mocap Program (#9063)
 
 Issue #9065 establishes ADR-0041 and an executable acceptance program before
@@ -630,7 +646,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.607                                            |
+| **Spec Version**        | 1.0.608                                            |
 | **Last Spec Update**    | 2026-08-26                                         |
 
 ## 2. Purpose & Mission
@@ -3318,6 +3334,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-26 | 1.0.608 | Repaired issue #9121's production Docker workspace-loss boundary. The monolithic runtime job now rehydrates and verifies only `Dockerfile`, `.dockerignore`, and the exact tracked roots consumed by Dockerfile `COPY` instructions immediately before Buildx. Complete preflight, exact `github.sha` identity, literal pathspecs, post-restore Git comparison, and adverse missing-object, head-mismatch, modified-file, and unsafe-path tests fail closed without placeholder creation. The runtime target/tag, BuildKit cache, 4,000 MB size budget, health checks, and runner selection are unchanged. |
 | 2026-08-26 | 1.0.607 | Normally reconciled #9107 with protected markerless-authority main `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c` after #9088 merged. The packaging-only wheel/source split, fixture-only smoke checkout, canonical BunkerShot3D identity, and bounded transfer/install assertions remain unchanged; the integrated ADR-0041 authority boundary introduces no camera, inference, C3D round-trip, physical-lab, or human-performance qualification. |
 | 2026-08-26 | 1.0.606 | Repaired #9107's wheel-smoke transport boundary after both matrix jobs exhausted their time while downloading the combined 771,541,995-byte wheel-plus-sdist artifact and never reached installation. The build now retains separate wheel and source artifacts; smoke jobs use a fixture-only sparse checkout, download only the selected wheel, and have a measured bounded 20-minute transfer/install/assertion budget. Runner selection, the built distributions, and both smoke assertions are unchanged. |
 | 2026-08-26 | 1.0.605 | Reconciled #9107 with current `main` and qualified the exact 384,333,159-byte wheel (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`) under Python 3.11. The branch-owned canonical BunkerShot3D import, one-object identity, duplicate exclusion, UI presence, and test-payload exclusion pass. Two broader inherited wheel-runtime failures remain explicit and unqualified: `src.api` collides with the co-installed Tools config alias and `sidekick --help` fails. No runner, workflow, vendor pin, runtime API, or scientific authority is changed to mask them. |
