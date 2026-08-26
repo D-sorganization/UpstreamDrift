@@ -63,15 +63,15 @@ is the single proximal-to-distal completion authority.
 
 ## Scaled Constraint and Internal-Force Diagnostics (#9027)
 
-- Branch `research/9027-control-qualification` adds source-bound planar
+- PR #9110 on `research/9027-control-qualification` adds source-bound planar
   closure and bilateral wrench-map audits. It requires explicit 1 rad/0.75 m
   generalized-coordinate scales, a 0.10 m wrench scale, and `1e-12` rank tolerance.
 - Regular planar rank/nullity is 4/1; the constructed adverse alignment is
   3/2 but is not a qualified anatomical pose. Separated/coincident point-force
   maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
-- The 1,138-candidate, 311-claim projection is frozen at `9bd5ca45`; condition
-  values never identify forces, feasible contact, human strategy, or coaching.
-  Keep exact closed-loop singular margins as the next separate dependent slice.
+- The 1,138-candidate, 311-claim projection is frozen at `9bd5ca45`; it never
+  identifies force, contact, strategy, or coaching. Numeric scaffolding is
+  reproducible; keep closed-loop singular margins as the next separate slice.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
