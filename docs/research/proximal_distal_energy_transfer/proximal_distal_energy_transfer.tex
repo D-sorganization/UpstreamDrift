@@ -446,7 +446,14 @@ proxy relative to clock timing but raises peak hand force; higher
 impedance changes the tradeoff, and all four registered programs remain
 Pareto-nondominated. A local task-Jacobian partition exposes five
 task-null input directions, but this is a model property rather than
-evidence of a neural synergy or human self-stabilization. A
+evidence of a neural synergy or human self-stabilization. An exact
+double-pendulum identifiability audit separates coefficient excitation
+from physical-parameter recovery. The registered synthetic trajectory
+excites all seven dimensionless base-coefficient directions, while the
+eleven-entry physical map has analytic rank seven, nullity four, and
+three exact nonunique parameter families. The associated Fisher screen
+is an oracle-kinematics lower bound only; it does not identify
+participant anatomy, equipment, or practical measurement performance. A
 phase-resolved proximal-motion study evaluates 126 rate cases under
 relative-rate, absolute-rate, and exact total-kinetic-energy matching,
 plus 45 identical-state acceleration interventions. The large pre-impact
@@ -498,7 +505,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, leftrule=.75mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, left=2mm, toprule=.15mm, opacityback=0, titlerule=0mm, breakable, toptitle=1mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, coltitle=black, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, breakable, left=2mm, colback=white, toptitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -948,6 +955,59 @@ and torque program are defined (\citeproc{ref-white2006}{White 2006}).
 The numerical study in Section~\ref{sec-results} therefore tests one
 specified intervention family rather than treating the literature as a
 prior proof of its ordering.
+
+\subsection{Which Double-Pendulum Parameters Are
+Identifiable?}\label{sec-double-pendulum-identifiability}
+
+The analytical model also permits an exact distinction between
+coefficient excitation and physical-parameter recovery. Its inverse
+dynamics factor as
+
+\[
+\tau=Y(q,\dot q,\ddot q)\,
+[\alpha,\beta,\delta,\gamma_1,\gamma_2,d_1,d_2]^\mathsf{T},
+\]
+
+where the seven base coefficients combine eleven reduced physical
+entries: two masses, two centers of mass, two proximal inertias,
+upper-link length, gravity, plane inclination, and two damping
+coefficients. The exact physical-to-base Jacobian has analytic row rank
+seven because one declared \(7\times7\) minor has magnitude
+\(m_2^2r_1r_2[g\cos(\phi)]^2>0\). Its nullity is therefore four. Three
+finite counterexample families independently preserve every base
+coefficient while changing mass--center-of-mass, lower-link coupling, or
+gravity--plane parameters. Consequently, even an arbitrarily long
+noiseless record governed by this model cannot uniquely recover the
+declared eleven-entry physical vector.
+
+The registered \texttt{restrain\_then\_drive@0.100s} synthetic record
+answers the separate excitation question. After scaling each coefficient
+by its registered base value and generalized torque by the registered 60
+N m maximum, its \(700\times7\) dimensionless regressor has rank seven
+with retained condition number 180.853 under the threshold
+\(\max(10^{-8},10^{-7}\bar\sigma_1)\). Equivalent coefficient units
+change the dimensionless matrix by at most \(4.45\times10^{-16}\) and
+preserve the rank. Two additional positive scale choices also preserve
+rank while changing the condition number, so every reported condition
+number remains inseparable from its declared scale contract.
+
+Full rank does not imply useful finite-noise recovery. Under
+deliberately favorable assumptions of exact kinematics, exact model form
+and event timing, and independent known Gaussian torque noise, a 1 N m
+noise standard deviation produces a worst relative 95\% half-width of
+0.123 for the full record but 499 for its first 10\%. These are
+Cramér--Rao-style oracle lower bounds. Kinematic differentiation noise,
+correlated sensor errors, model discrepancy, unknown noise scale,
+repeated participants, and held-out prediction can only weaken the
+practical inference. The result therefore establishes structural
+non-uniqueness of the declared physical map and finite-record excitation
+of seven base coefficients; it does not establish participant
+parameters, model adequacy, human mechanism, or coaching guidance. The
+derivation, unit and scale audits, adverse windows, exact
+counterexamples, and reproduction command are provided in
+\href{../DOUBLE_PENDULUM_IDENTIFIABILITY.md}{\texttt{DOUBLE\_PENDULUM\_IDENTIFIABILITY.md}}
+and the registered
+\href{../data/double_pendulum_identifiability.json}{\texttt{double\_pendulum\_identifiability.json}}.
 
 \subsection{Source-Level Contrast
 Matrix}\label{sec-release-contrast-matrix}
@@ -2752,7 +2812,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, leftrule=.75mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, left=2mm, toprule=.15mm, opacityback=0, titlerule=0mm, breakable, toptitle=1mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, coltitle=black, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, breakable, left=2mm, colback=white, toptitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, rightrule=.15mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -9316,6 +9376,43 @@ observables cannot identify the full 12-parameter vector.}
 
 \end{figure}%
 
+\section{Constraint Rank Is Not Force
+Identification}\label{constraint-rank-is-not-force-identification}
+
+The cross-tier constraint audit keeps three right nullspaces separate.
+The planar closure nullspace contains locally feasible generalized
+velocities; the two-point-force nullspace contains bilateral force
+allocations invisible to a net club wrench; and the full two-hand-wrench
+nullspace contains allocations among twelve inputs that one
+six-component resultant cannot distinguish. Neither kinematic freedom
+nor a sensing ambiguity identifies a produced hand force.
+
+At the declared regular planar geometry, the \(4\times5\) closure
+Jacobian has rank 4 and nullity 1. The constructed alignment with both
+arm angles zero and grip angle \(\pi/2\) has rank 3 and nullity 2. This
+is an analytical adverse geometry, not a closed anatomical pose. Near
+the alignment, rank remains 4 while conditioning degrades. Because
+angular and translational columns have different units, the reported
+singular values use explicit 1 rad angular and 0.75 m translational
+coordinate scales; alternative translation scales change the condition
+number without changing exact rank.
+
+The three-dimensional point-force map has rank 5/nullity 1 for separated
+contacts and rank 3/nullity 3 for coincident contacts. Its force and
+moment rows are normalized with a declared 0.10 m length. A 1 micrometre
+separation remains rank 5 at relative SVD tolerances \(10^{-12}\) and
+\(10^{-8}\) but is classified rank 3 at \(10^{-6}\). Thus geometry,
+units, scaling, and tolerance are part of the result rather than
+incidental solver settings.
+
+The complete contract, source digests, scale alternatives, adverse
+cases, and reproduction commands are recorded in
+\href{../CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md}{\texttt{CONSTRAINT\_INTERNAL\_FORCE\_DIAGNOSTICS.md}}
+and \texttt{data/constraint\_internal\_force\_diagnostics.json}. These
+diagnostics do not recover constraint multipliers, establish feasible
+spatial contact, observe a human internal-force strategy, or support
+coaching guidance.
+
 \section{Preselected Programs and Held-Out
 Evaluation}\label{preselected-programs-and-held-out-evaluation}
 
@@ -9991,6 +10088,52 @@ constrained and coupled-base models in
 Section~\ref{sec-forward-two-hand} and
 Section~\ref{sec-coupled-base-flex} solve contact reactions dynamically;
 their evidence is not supplied by this rank audit.
+
+\subsection{Feasible Closed-Loop Orbits and Singular
+Margins}\label{sec-ladder-feasible-closure}
+
+The preceding sweep samples Jacobians without first proving that every
+pose belongs to an exactly closed two-contact configuration. A separate
+analytical control now constructs the same-origin triangle directly. For
+arm lengths \(L_L=0.75\) m and \(L_T=0.78\) m and grip separation
+\(d=0.25\) m, the relative arm angle satisfies
+
+\begin{equation}\phantomsection\label{eq-ladder-exact-triangle}{
+\cos(\theta_T-\theta_L)=
+\frac{L_L^2+L_T^2-d^2}{2L_LL_T}.
+}\end{equation}
+
+Both signs of the inverse cosine define the two assembly branches, while
+a global phase rotates the entire triangle without changing its internal
+geometry. All 362 registered samples---181 phases on each branch---close
+both contacts to at most \(1.66533\times10^{-16}\) m. Under the
+separately declared 1 rad angular and 0.75 m translation coordinate
+scales, every sample has rank four and nullity one. The minimum scaled
+singular value is 0.202095 m, the scaled condition number is 6.45326,
+and the maximum singular-spectrum change under global phase rotation is
+\(2.22045\times10^{-15}\) m.
+
+The triangle inequality supplies two exact geometric countermodels. At
+\(d=|L_L-L_T|=0.03\) m and \(d=L_L+L_T=1.53\) m, the triangle becomes
+collinear; both exact boundaries have rank three and nullity two. A
+near-boundary sweep keeps position closure exact while varying the
+distance to the lower boundary from \(10^{-4}\) to \(10^{-12}\) m and
+the relative SVD tolerance from \(10^{-12}\) to \(10^{-4}\). For
+example, the \(10^{-8}\) m offset remains rank four through a
+\(10^{-6}\) tolerance but is classified rank three at \(10^{-4}\). This
+is a numerical classification dependence, not a physical failure
+threshold.
+
+An equivalent centimetre representation preserves rank, nullity, and
+condition number while multiplying the scaled singular values by 100, as
+required by the unit change. Three positive translation scales, three
+feasible geometries, three phase-grid resolutions, impossible-triangle
+rejections, and a manufactured row-dependency killswitch are retained in
+\texttt{data/closed\_loop\_singularity\_margin.json}. These controls
+establish only an exact planar kinematic result. They do not establish
+anatomical shoulder closure, contact-force magnitude, constraint
+multipliers, muscle action, passive negative torque, human occurrence,
+or coaching guidance.
 
 \section{Three-Dimensional Frame
 Audit}\label{sec-ladder-three-dimensional}
@@ -13041,7 +13184,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 306 material claims. The normalized outcome
+The current census contains 311 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -13070,7 +13213,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 286 \\
+\texttt{supported} & 291 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -13096,8 +13239,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 91 \\
-\texttt{project\_executable\_or\_generated} & 277 \\
+\texttt{project\_derivation\_or\_document} & 96 \\
+\texttt{project\_executable\_or\_generated} & 282 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -13118,7 +13261,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 252 \\
+\texttt{project\_only} & 257 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -13143,10 +13286,10 @@ Model Tier & Claim Count \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
-\texttt{planar\_reduced} & 131 \\
+\texttt{planar\_reduced} & 136 \\
 \texttt{spatial\_reduced} & 76 \\
-\texttt{two\_hand\_or\_bilateral} & 92 \\
-\texttt{uncertainty\_or\_control} & 8 \\
+\texttt{two\_hand\_or\_bilateral} & 94 \\
+\texttt{uncertainty\_or\_control} & 10 \\
 \end{longtable}
 
 \subsection{Unresolved Replication
@@ -13170,7 +13313,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 262 \\
+\texttt{none\_declared} & 267 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -13216,7 +13359,7 @@ Flag
 \bottomrule\noalign{}
 \endlastfoot
 ch01 introduction & 3 & 0 / 2 / 1 & mixed independence \\
-ch02 mechanics & 30 & 2 / 17 / 11 & mixed independence \\
+ch02 mechanics & 33 & 5 / 17 / 11 & mixed independence \\
 ch03 evidence & 13 & 1 / 10 / 2 & mixed independence \\
 ch03 interaction forces & 10 & 8 / 1 / 1 & mixed independence \\
 ch03b hand path attribution & 11 & 7 / 2 / 2 & mixed independence \\
@@ -13242,7 +13385,7 @@ ch06ca articulated ground & 4 & 4 / 0 / 0 & project authored only \\
 ch06cb spatial cross tail & 5 & 5 / 0 / 0 & project authored only \\
 ch06cc spatial forward contact & 8 & 8 / 0 / 0 & project authored
 only \\
-ch06d uncertainty control & 8 & 8 / 0 / 0 & project authored only \\
+ch06d uncertainty control & 10 & 10 / 0 / 0 & project authored only \\
 ch06e experimental protocol & 1 & 1 / 0 / 0 & project authored only \\
 ch07 model ladder & 17 & 17 / 0 / 0 & project authored only \\
 ch07 results & 8 & 8 / 0 / 0 & project authored only \\
@@ -13504,6 +13647,23 @@ Recorded outputs:
   three-dimensional point-force and full bilateral-wrench ranks, null
   spaces, grip-span sweep, proper-rotation audit, sensing boundary, and
   explicit nonhuman claims.
+\item
+  \texttt{data/constraint\_internal\_force\_diagnostics.json} ---
+  source-hash-bound planar closure and bilateral wrench-map ranks,
+  explicit coordinate/wrench scales, singular and coincident-contact
+  controls, tolerance sensitivity, and nonhuman inference boundaries.
+\item
+  \texttt{data/closed\_loop\_singularity\_margin.json} --- exact
+  same-origin closure on both assembly branches, full-phase scaled
+  singular margins, exact triangle degeneracies, and phase, geometry,
+  scale, unit, tolerance, impossible- geometry, and manufactured-rank
+  controls.
+\item
+  \texttt{data/double\_pendulum\_identifiability.json} --- exact
+  seven-coefficient inverse- dynamics factorization, analytic
+  physical-map rank witness, three exact nonunique parameter families,
+  dimensionless finite-record rank, unit and scale audits, conditional
+  noise bounds, and a zero-motion killswitch.
 \item
   \texttt{data/shaft\_contribution\_study.json} --- matched
   rigid/flexible results, termwise acceleration and power summaries,

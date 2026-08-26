@@ -40,6 +40,15 @@ def _spec(
 
 
 REVIEW_SPECS: dict[str, dict[str, Any]] = {
+    "feasible_closed_loop_singularity_margin": _spec(
+        "reviewed_as_exact_planar_kinematic_qualification",
+        "supported_for_declared_exact_planar_kinematic_triangle",
+        ("PD-CLAIM-313", "PD-CLAIM-314"),
+        (
+            "Calibrated spatial anatomical closure and compliant forward contact, "
+            "followed by comparison with governed participant trajectories."
+        ),
+    ),
     "double_pendulum_base_coefficient_excitation": _spec(
         "reviewed_as_dimensionless_finite_record_excitation",
         "full_rank_for_registered_synthetic_record",

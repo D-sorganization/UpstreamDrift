@@ -38,6 +38,31 @@ complete six-axis wrenches, twelve inputs map to six net-wrench outputs; six
 allocation directions remain unobservable without bilateral sensing or an
 independently justified constitutive model.
 
+## Exact Feasible-Orbit Qualification
+
+The companion `data/closed_loop_singularity_margin.json` replaces an
+unqualified adverse Jacobian alignment with exact same-origin triangle
+closures. It constructs both assembly branches, rotates them through a full
+phase orbit, and requires position closure before interpreting rank or
+conditioning. The nominal 0.75 m/0.78 m/0.25 m geometry retains rank four and
+nullity one at all 362 registered samples. The exact 0.03 m and 1.53 m
+collinear boundaries retain rank three and nullity two.
+
+The report preserves rather than hides numerical dependence. Its five
+distance-to-degeneracy offsets are crossed with five relative SVD tolerances;
+three phase resolutions, three positive translation scales, three feasible
+geometries, an equivalent-centimetre representation, impossible geometries,
+and a manufactured row-dependency killswitch are also machine readable. No
+rank threshold is interpreted as a physical or anatomical failure boundary.
+
+Reproduce the qualification with:
+
+```powershell
+python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin write
+python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin validate
+python -m pytest -n 0 -q tests/research/test_closed_loop_singularity_margin.py tests/research/test_closed_loop_singularity_margin_evidence.py
+```
+
 ## Dimensionally Declared Conditioning
 
 Raw closure Jacobians mix angular and translational generalized coordinates.

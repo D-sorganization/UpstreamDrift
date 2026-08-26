@@ -9,16 +9,16 @@ is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `6f9b068a54d841c56e4efbd34855705eaad5d473`, protected PR #9108's squash.
-- The current publication is 244 pages, SHA-256
-  `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
-  with 194 URI links and 254 outline entries. Archival qualification remains
+- Remote `main` is `d16212ac7bf67ab486c447647db379d38a2540b0`, protected PR #9110's squash.
+- The current branch publication is 245 pages, SHA-256
+  `2c78d3e1017f929f0a29f00c153f076211717433686c0a646f568483904e82f7`,
+  with 194 URI links and 255 outline entries. Archival qualification remains
   false because the PDF is untagged and retains Type 3 and unembedded fonts.
-- The complete audit contains 1,138 reviewed candidates, 311 atomic claims,
-  130 numeric contracts, and 406/406 verified literals. Outcomes are 291
+- The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
+  132 numeric contracts, and 427/427 verified literals. Outcomes are 293
   supported only within declared estimands and boundaries, five inconclusive,
-  15 untested, and zero contradicted. All 46 public release claims have review
-  dispositions and scientifically open gates. The bundle has 632 artifacts.
+  15 untested, and zero contradicted. All 47 public release claims have review
+  dispositions and scientifically open gates. The bundle has 636 artifacts.
 
 ## Coordinate Force-Source Attribution (#9059)
 
@@ -61,17 +61,22 @@ is the single proximal-to-distal completion authority.
   unestablished. Its protected 309-claim snapshot is preserved in migration
   history and has been superseded by the current #9027 projection.
 
-## Scaled Constraint and Internal-Force Diagnostics (#9027)
+## Scaled Constraints and Feasible Closed-Loop Margins (#9027, #9113)
 
-- PR #9110 on `research/9027-control-qualification` adds source-bound planar
+- PR #9110 is merged as `d16212ac7`. It adds source-bound planar
   closure and bilateral wrench-map audits. It requires explicit 1 rad/0.75 m
   generalized-coordinate scales, a 0.10 m wrench scale, and `1e-12` rank tolerance.
 - Regular planar rank/nullity is 4/1; the constructed adverse alignment is
   3/2 but is not a qualified anatomical pose. Separated/coincident point-force
   maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
-- The 1,138-candidate, 311-claim projection is frozen at `9bd5ca45`; it never
-  identifies force, contact, strategy, or coaching. Numeric scaffolding is
-  reproducible; keep closed-loop singular margins as the next separate slice.
+- #9113 is implemented on `research/9113-closed-loop-margins`. Exact triangle
+  closure covers both branches and 181 phases each; all 362 nominal samples
+  close below `1.67e-16` m with rank/nullity 4/1. Exact 0.03 m and 1.53 m
+  degeneracies are 3/2. A five-offset by five-tolerance matrix retains the
+  observed numerical rank boundary without calling it physical.
+- Phase, scale, feasible/impossible geometry, equivalent-unit, and manufactured
+  rank controls pass. The paper treatment is visually clean on printed page 175. This is planar kinematics only: no force, anatomy, passive torque,
+  human occurrence, strategy, or coaching inference is authorized.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -105,8 +110,8 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9027 contract PR #9049, local-rank PR #9100, and exact-map PR #9108 are
-  merged. The scaled constraint/internal-force slice is active here; selectively
+- #9027 contract PR #9049, local-rank PR #9100, exact-map PR #9108, and scaled
+  constraint PR #9110 are merged. #9113 is the active protected slice; selectively
   requalify later stale control commits rather than merging them wholesale.
 - PR #9032 is at remote head `d341a0c92`; required CI passed at last
   verification. Its optional source-lock failure is deliberate.
@@ -139,8 +144,9 @@ python -m scripts.research.proximal_distal_energy.claim_evidence_integrity valid
 python -m scripts.research.proximal_distal_energy.hybrid_system_contract validate
 python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability validate
 python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics validate
+python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python -m pytest -n 0 -q tests/research/test_constraint_internal_force_diagnostics.py tests/research/test_constraint_internal_force_diagnostics_evidence.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
+python -m pytest -n 0 -q tests/research/test_closed_loop_singularity_margin.py tests/research/test_closed_loop_singularity_margin_evidence.py tests/research/test_constraint_internal_force_diagnostics.py tests/research/test_constraint_internal_force_diagnostics_evidence.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
 python scripts/ci/check_architecture_budget.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py

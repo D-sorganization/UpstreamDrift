@@ -1,11 +1,11 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a",
-  "claim_count": 311,
+  "paper_source_digest": "a78581ce799257c1f907562b46eda711f91d7c11780ea7175248053603f4a44e",
+  "claim_count": 313,
   "outcome_counts": {
     "inconclusive": 5,
-    "supported": 291,
+    "supported": 293,
     "untested": 15
   },
   "evidence_qualification_counts": {
@@ -16,7 +16,7 @@
     "hypothesis_or_prospective_protocol": 12,
     "independent_followup_open": 24,
     "original_full_text_checked": 18,
-    "project_executable_or_data": 282
+    "project_executable_or_data": 284
   },
   "evidence_tier_counts": {
     "bibliographic_record": 3,
@@ -24,23 +24,23 @@
     "external_methods_or_measurement": 10,
     "external_modeling_or_simulation": 15,
     "external_review_or_synthesis": 10,
-    "project_derivation_or_document": 96,
-    "project_executable_or_generated": 282,
+    "project_derivation_or_document": 98,
+    "project_executable_or_generated": 284,
     "prospective_or_unexecuted": 15
   },
   "source_independence_counts": {
     "multiple_independent_external_support": 20,
-    "project_only": 257,
+    "project_only": 259,
     "single_independent_external_support": 34
   },
   "model_tier_counts": {
     "articulated_spatial": 32,
     "compliant_shaft": 66,
-    "cross_tier_synthesis": 63,
+    "cross_tier_synthesis": 65,
     "declared_model_tier_unclassified": 12,
     "finite_ground_or_base": 16,
     "human_or_external_evidence": 46,
-    "planar_reduced": 136,
+    "planar_reduced": 138,
     "spatial_reduced": 76,
     "two_hand_or_bilateral": 94,
     "uncertainty_or_control": 10
@@ -51,7 +51,7 @@
     "governed_human_data_unavailable": 11,
     "independent_reimplementation_open": 12,
     "mixed_or_insufficient_evidence": 5,
-    "none_declared": 267,
+    "none_declared": 269,
     "prospective_experiment_open": 15,
     "statistical_reanalysis_or_replication_open": 9,
     "systematic_review_open": 2
@@ -251,8 +251,8 @@
     },
     {
       "claim_family": "ch07_model_ladder",
-      "claim_count": 17,
-      "project_only_count": 17,
+      "claim_count": 19,
+      "project_only_count": 19,
       "single_independent_external_support_count": 0,
       "multiple_independent_external_support_count": 0,
       "concentration_flag": "project_authored_only"
@@ -14298,6 +14298,92 @@
       "uncertainty_boundary": "The map establishes sensing/allocation ambiguity only; it does not show that a human produces the null-mode force, identify complete hand wrenches, or qualify compliant or distributed contact.",
       "falsifier": "Coincident contacts retain moment observability above rank three, the separated map loses its axial null mode, or rank is reported without the geometry, normalization, and tolerance contract.",
       "adjudication": "The result is retained as scale-qualified analytical and registered synthetic evidence; it does not identify participant force, biological allocation, human strategy, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "claim_id": "PD-CLAIM-313",
+      "adjudication_outcome": "supported",
+      "statement": "For the exact 0.75 m/0.78 m/0.25 m planar triangle, all 362 registered branch-phase samples close within 1.66533e-16 m and retain rank 4/nullity 1 under 1 rad and 0.75 m coordinate scales; the minimum scaled singular value is 0.202095 m, condition number is 6.45326, and phase-spectrum spread is 2.22045e-15 m.",
+      "classification": "exact_feasible_closed_loop_regular_orbit",
+      "published_status": "supported_for_declared_exact_planar_kinematic_map",
+      "audit_status": "exact_closure_branch_phase_geometry_scale_unit_tolerance_and_manufactured_adverse_controls_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "cross_tier_synthesis",
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch07_model_ladder",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:229",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:240"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py",
+        "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin_evidence.py"
+      ],
+      "model_domain": "Same-origin, fixed-length planar two-arm/grip triangle with exact position closure and a scaled local velocity-constraint Jacobian.",
+      "uncertainty_boundary": "The result is local planar kinematics under declared coordinate scales; it neither qualifies anatomy nor identifies reactions.",
+      "falsifier": "Any registered sample violates closure, changes rank/nullity across global phase or assembly branch, or loses spectrum invariance.",
+      "adjudication": "The result is retained as exact analytical planar kinematic evidence. It does not establish anatomy, dynamics, contact force, muscle action, passive torque, human occurrence, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "claim_id": "PD-CLAIM-314",
+      "adjudication_outcome": "supported",
+      "statement": "The exact 0.03 m and 1.53 m triangle boundaries have rank 3/nullity 2; at a 1e-8 m lower-bound offset, numerical rank remains 4 through relative tolerance 1e-6 and becomes 3 at 1e-4, while equivalent centimetre units preserve rank and condition number.",
+      "classification": "exact_triangle_degeneracy_and_numerical_margin_boundary",
+      "published_status": "supported_for_declared_exact_planar_kinematic_map",
+      "audit_status": "exact_closure_branch_phase_geometry_scale_unit_tolerance_and_manufactured_adverse_controls_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "cross_tier_synthesis",
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch07_model_ladder",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:249",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:258"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py",
+        "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin_evidence.py"
+      ],
+      "model_domain": "Same-origin, fixed-length planar two-arm/grip triangle with exact position closure and a scaled local velocity-constraint Jacobian.",
+      "uncertainty_boundary": "The tolerance-dependent rank transition is numerical and is not a physical singularity threshold, anatomical limit, or human strategy.",
+      "falsifier": "Either exact boundary fails to add one velocity null mode, equivalent units change rank/condition, or the offset/tolerance matrix does not reproduce.",
+      "adjudication": "The result is retained as exact analytical planar kinematic evidence. It does not establish anatomy, dynamics, contact force, muscle action, passive torque, human occurrence, or coaching guidance.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-26"
     }

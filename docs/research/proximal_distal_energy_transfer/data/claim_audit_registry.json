@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a",
+    "source_digest": "a78581ce799257c1f907562b46eda711f91d7c11780ea7175248053603f4a44e",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1138-candidate paper inventory is adjudicated, including scale-qualified constraint singularity and contact-geometry/tolerance boundaries.",
+    "current_scope": "The complete 1142-candidate paper inventory is adjudicated, including exact feasible closed-loop singular margins.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -271,6 +271,11 @@
       "release_claim_key": "double_pendulum_practical_identifiability",
       "published_status": "not_established_oracle_kinematics_lower_bound_only",
       "audit_state": "reviewed_as_oracle_lower_bound_only"
+    },
+    {
+      "release_claim_key": "feasible_closed_loop_singularity_margin",
+      "published_status": "supported_for_declared_exact_planar_kinematic_triangle",
+      "audit_state": "reviewed_as_exact_planar_kinematic_qualification"
     }
   ],
   "candidate_reviews": [
@@ -11481,22 +11486,6 @@
       "last_verified_on": "2026-08-25"
     },
     {
-      "candidate_id": "PD-CAND-077e007135da1237",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-11518bcf919bffed",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
       "candidate_id": "PD-CAND-165a6caf21ef85e2",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
@@ -11505,31 +11494,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-36e3133e0ac5fa09",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
       "candidate_id": "PD-CAND-39f42d06f3e621a5",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-43048ff0f70552c3",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-736a228f903fce32",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11569,14 +11534,6 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-afc739da59a79cdf",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
       "candidate_id": "PD-CAND-b06a3cbe5b2d0e01",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
@@ -11586,14 +11543,6 @@
     },
     {
       "candidate_id": "PD-CAND-b5b2526e23b77d70",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-b7ebf4884a957a0a",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11698,10 +11647,106 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-7cc776acea2219eb",
+      "candidate_id": "PD-CAND-524f491e0cbc1f44",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
-      "rationale": "This appendix paragraph inventories governed artifacts and adds no standalone scientific result.",
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-cd24933165397298",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-d85c724d3f72cbe2",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-bc46713685de7818",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-f042fdcb64fee75c",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-9d0e8390817e048e",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-a9e1fc92ffa02774",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-0144e381229b0963",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-313"
+      ],
+      "rationale": "This passage states or bounds the exact feasible closed-loop singular-margin qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-497772c0894b7803",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-313"
+      ],
+      "rationale": "This passage states or bounds the exact feasible closed-loop singular-margin qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-13137e42805e3165",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-314"
+      ],
+      "rationale": "This passage states or bounds the exact feasible closed-loop singular-margin qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-64d13d42a613065c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-314"
+      ],
+      "rationale": "This passage states or bounds the exact feasible closed-loop singular-margin qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-e951127cf88b543b",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This appendix paragraph inventories governed artifacts.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-26"
     }
@@ -30878,6 +30923,310 @@
           "literal_id": "3#2",
           "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
           "json_pointer": "/bilateral_point_force/coincident_contact_case/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-313",
+      "candidate_ids": [
+        "PD-CAND-0144e381229b0963",
+        "PD-CAND-497772c0894b7803"
+      ],
+      "statement": "For the exact 0.75 m/0.78 m/0.25 m planar triangle, all 362 registered branch-phase samples close within 1.66533e-16 m and retain rank 4/nullity 1 under 1 rad and 0.75 m coordinate scales; the minimum scaled singular value is 0.202095 m, condition number is 6.45326, and phase-spectrum spread is 2.22045e-15 m.",
+      "classification": "exact_feasible_closed_loop_regular_orbit",
+      "published_status": "supported_for_declared_exact_planar_kinematic_map",
+      "audit_status": "exact_closure_branch_phase_geometry_scale_unit_tolerance_and_manufactured_adverse_controls_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:229",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:240"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py",
+        "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin_evidence.py"
+      ],
+      "model_domain": "Same-origin, fixed-length planar two-arm/grip triangle with exact position closure and a scaled local velocity-constraint Jacobian.",
+      "uncertainty_boundary": "The result is local planar kinematics under declared coordinate scales; it neither qualifies anatomy nor identifies reactions.",
+      "competing_explanations": [
+        "distance to a triangle-degeneracy boundary",
+        "relative SVD tolerance",
+        "generalized-coordinate scale",
+        "equivalent length-unit representation",
+        "phase-grid resolution"
+      ],
+      "negative_controls": [
+        "both exact assembly branches",
+        "181 phases per branch",
+        "three phase resolutions",
+        "three feasible geometries",
+        "three positive translation-coordinate scales"
+      ],
+      "falsifier": "Any registered sample violates closure, changes rank/nullity across global phase or assembly branch, or loses spectrum invariance.",
+      "adjudication": "The result is retained as exact analytical planar kinematic evidence. It does not establish anatomy, dynamics, contact force, muscle action, passive torque, human occurrence, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.75#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_geometry_m/lead_arm_length_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.78#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_geometry_m/trail_arm_length_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.25#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_geometry_m/grip_separation_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "362#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.66533e-16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/maximum_closure_residual_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/minimum_rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/minimum_nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/coordinate_scale_contract/angular_coordinate_scale_rad",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.75#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/coordinate_scale_contract/translation_coordinate_scale_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.202095#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/minimum_smallest_scaled_singular_value_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "6.45326#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/maximum_scaled_condition_number",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.22045e-15#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/maximum_scaled_singular_value_spread_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-314",
+      "candidate_ids": [
+        "PD-CAND-13137e42805e3165",
+        "PD-CAND-64d13d42a613065c"
+      ],
+      "statement": "The exact 0.03 m and 1.53 m triangle boundaries have rank 3/nullity 2; at a 1e-8 m lower-bound offset, numerical rank remains 4 through relative tolerance 1e-6 and becomes 3 at 1e-4, while equivalent centimetre units preserve rank and condition number.",
+      "classification": "exact_triangle_degeneracy_and_numerical_margin_boundary",
+      "published_status": "supported_for_declared_exact_planar_kinematic_map",
+      "audit_status": "exact_closure_branch_phase_geometry_scale_unit_tolerance_and_manufactured_adverse_controls_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:249",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:258"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py",
+        "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin_evidence.py"
+      ],
+      "model_domain": "Same-origin, fixed-length planar two-arm/grip triangle with exact position closure and a scaled local velocity-constraint Jacobian.",
+      "uncertainty_boundary": "The tolerance-dependent rank transition is numerical and is not a physical singularity threshold, anatomical limit, or human strategy.",
+      "competing_explanations": [
+        "distance to a triangle-degeneracy boundary",
+        "relative SVD tolerance",
+        "generalized-coordinate scale",
+        "equivalent length-unit representation",
+        "phase-grid resolution"
+      ],
+      "negative_controls": [
+        "both exact triangle boundaries",
+        "five distance offsets crossed with five SVD tolerances",
+        "equivalent-centimetre transformation",
+        "two impossible geometries",
+        "manufactured row-dependency killswitch"
+      ],
+      "falsifier": "Either exact boundary fails to add one velocity null mode, equivalent units change rank/condition, or the offset/tolerance matrix does not reproduce.",
+      "adjudication": "The result is retained as exact analytical planar kinematic evidence. It does not establish anatomy, dynamics, contact force, muscle action, passive torque, human occurrence, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.03#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/exact_triangle_degeneracies/lower_geometry_m/grip_separation_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.53#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/exact_triangle_degeneracies/upper_geometry_m/grip_separation_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/exact_triangle_degeneracies/lower_rank_audit/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/exact_triangle_degeneracies/lower_rank_audit/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1e-8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/distance_to_lower_degeneracy_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/3/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1e-6#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/3/relative_tolerance",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/4/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1e-4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/4/relative_tolerance",
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,

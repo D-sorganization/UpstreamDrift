@@ -224,6 +224,47 @@ kinematic geometry contract. Separate forward constrained and coupled-base
 models in @sec-forward-two-hand and @sec-coupled-base-flex solve contact
 reactions dynamically; their evidence is not supplied by this rank audit.
 
+### Feasible Closed-Loop Orbits and Singular Margins {#sec-ladder-feasible-closure}
+
+The preceding sweep samples Jacobians without first proving that every pose
+belongs to an exactly closed two-contact configuration. A separate analytical
+control now constructs the same-origin triangle directly. For arm lengths
+$L_L=0.75$ m and $L_T=0.78$ m and grip separation $d=0.25$ m, the relative arm
+angle satisfies
+
+$$
+\cos(\theta_T-\theta_L)=
+\frac{L_L^2+L_T^2-d^2}{2L_LL_T}.
+$$ {#eq-ladder-exact-triangle}
+
+Both signs of the inverse cosine define the two assembly branches, while a
+global phase rotates the entire triangle without changing its internal
+geometry. All 362 registered samples---181 phases on each branch---close both
+contacts to at most $1.66533\times10^{-16}$ m. Under the separately declared
+1 rad angular and 0.75 m translation coordinate scales, every sample has rank
+four and nullity one. The minimum scaled singular value is 0.202095 m, the
+scaled condition number is 6.45326, and the maximum singular-spectrum change
+under global phase rotation is $2.22045\times10^{-15}$ m.
+
+The triangle inequality supplies two exact geometric countermodels. At
+$d=|L_L-L_T|=0.03$ m and $d=L_L+L_T=1.53$ m, the triangle becomes collinear;
+both exact boundaries have rank three and nullity two. A near-boundary sweep
+keeps position closure exact while varying the distance to the lower boundary
+from $10^{-4}$ to $10^{-12}$ m and the relative SVD tolerance from $10^{-12}$
+to $10^{-4}$. For example, the $10^{-8}$ m offset remains rank four through a
+$10^{-6}$ tolerance but is classified rank three at $10^{-4}$. This is a
+numerical classification dependence, not a physical failure threshold.
+
+An equivalent centimetre representation preserves rank, nullity, and condition
+number while multiplying the scaled singular values by 100, as required by the
+unit change. Three positive translation scales, three feasible geometries,
+three phase-grid resolutions, impossible-triangle rejections, and a
+manufactured row-dependency killswitch are retained in
+`data/closed_loop_singularity_margin.json`. These controls establish only an
+exact planar kinematic result. They do not establish anatomical shoulder
+closure, contact-force magnitude, constraint multipliers, muscle action,
+passive negative torque, human occurrence, or coaching guidance.
+
 ## Three-Dimensional Frame Audit {#sec-ladder-three-dimensional}
 
 Planar vectors can be embedded in three dimensions and expressed in arbitrary

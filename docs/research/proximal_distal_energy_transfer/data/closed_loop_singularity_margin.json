@@ -1,0 +1,698 @@
+{
+  "classification": "analytical_planar_exact_position_closure",
+  "coordinate_scale_contract": {
+    "angular_coordinate_scale_rad": 1.0,
+    "translation_coordinate_scale_m": 0.75
+  },
+  "exact_triangle_degeneracies": {
+    "lower_geometry_m": {
+      "grip_separation_m": 0.03,
+      "lead_arm_length_m": 0.75,
+      "trail_arm_length_m": 0.78
+    },
+    "lower_position_closure_residual_m": 9.18485e-19,
+    "lower_rank_audit": {
+      "angular_coordinate_scale_rad": 1.0,
+      "maximum_scaled_nullspace_residual_m": 1.82131e-16,
+      "nullity": 2,
+      "rank": 3,
+      "scaled_condition_number": null,
+      "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 6.49217e-19],
+      "smallest_scaled_singular_value_m": 6.49217e-19,
+      "translation_coordinate_scale_m": 0.75
+    },
+    "upper_geometry_m": {
+      "grip_separation_m": 1.53,
+      "lead_arm_length_m": 0.75,
+      "trail_arm_length_m": 0.78
+    },
+    "upper_position_closure_residual_m": 9.18485e-19,
+    "upper_rank_audit": {
+      "angular_coordinate_scale_rad": 1.0,
+      "maximum_scaled_nullspace_residual_m": 1.6047e-16,
+      "nullity": 2,
+      "rank": 3,
+      "scaled_condition_number": null,
+      "scaled_singular_values_m": [1.32871, 1.30418, 1.06066, 5.99501e-17],
+      "smallest_scaled_singular_value_m": 5.99501e-17,
+      "translation_coordinate_scale_m": 0.75
+    }
+  },
+  "falsifiers": [
+    "Any registered orbit sample violates the closure tolerance.",
+    "A global phase rotation changes the singular spectrum beyond tolerance.",
+    "Equivalent length units change rank, nullity, or condition number.",
+    "Either exact triangle degeneracy fails to add one velocity null mode.",
+    "An impossible triangle geometry passes the constructor.",
+    "A manufactured row dependency fails to reduce rank."
+  ],
+  "geometry_controls": [
+    {
+      "geometry_m": {
+        "grip_separation_m": 0.2,
+        "lead_arm_length_m": 0.65,
+        "trail_arm_length_m": 0.7
+      },
+      "orbit": {
+        "lower_degeneracy_distance_m": 0.15,
+        "maximum_closure_residual_m": 1.11022e-16,
+        "maximum_nullity": 1,
+        "maximum_rank": 4,
+        "maximum_scaled_condition_number": 7.89166,
+        "maximum_scaled_nullspace_residual_m": 3.16775e-16,
+        "maximum_scaled_singular_value_spread_m": 2.22045e-15,
+        "maximum_smallest_scaled_singular_value_m": 0.159061,
+        "minimum_nullity": 1,
+        "minimum_rank": 4,
+        "minimum_scaled_condition_number": 7.89166,
+        "minimum_smallest_scaled_singular_value_m": 0.159061,
+        "reference_scaled_singular_values_m": [
+          1.25525, 1.06786, 0.664239, 0.159061
+        ],
+        "relative_tolerance": 1e-12,
+        "sample_count": 82,
+        "scale": {
+          "angular_coordinate_scale_rad": 1.0,
+          "translation_coordinate_scale_m": 0.75
+        },
+        "triangle_sine_margin": 0.284112,
+        "upper_degeneracy_distance_m": 1.15
+      }
+    },
+    {
+      "geometry_m": {
+        "grip_separation_m": 0.25,
+        "lead_arm_length_m": 0.75,
+        "trail_arm_length_m": 0.78
+      },
+      "orbit": {
+        "lower_degeneracy_distance_m": 0.22,
+        "maximum_closure_residual_m": 1.11022e-16,
+        "maximum_nullity": 1,
+        "maximum_rank": 4,
+        "maximum_scaled_condition_number": 6.45326,
+        "maximum_scaled_nullspace_residual_m": 3.91398e-16,
+        "maximum_scaled_singular_value_spread_m": 1.9984e-15,
+        "maximum_smallest_scaled_singular_value_m": 0.202095,
+        "minimum_nullity": 1,
+        "minimum_rank": 4,
+        "minimum_scaled_condition_number": 6.45326,
+        "minimum_smallest_scaled_singular_value_m": 0.202095,
+        "reference_scaled_singular_values_m": [
+          1.30417, 1.07487, 0.745056, 0.202095
+        ],
+        "relative_tolerance": 1e-12,
+        "sample_count": 82,
+        "scale": {
+          "angular_coordinate_scale_rad": 1.0,
+          "translation_coordinate_scale_m": 0.75
+        },
+        "triangle_sine_margin": 0.320199,
+        "upper_degeneracy_distance_m": 1.28
+      }
+    },
+    {
+      "geometry_m": {
+        "grip_separation_m": 0.4,
+        "lead_arm_length_m": 0.9,
+        "trail_arm_length_m": 0.72
+      },
+      "orbit": {
+        "lower_degeneracy_distance_m": 0.22,
+        "maximum_closure_residual_m": 2.22045e-16,
+        "maximum_nullity": 1,
+        "maximum_rank": 4,
+        "maximum_scaled_condition_number": 4.72602,
+        "maximum_scaled_nullspace_residual_m": 3.87143e-16,
+        "maximum_scaled_singular_value_spread_m": 1.55431e-15,
+        "maximum_smallest_scaled_singular_value_m": 0.28317,
+        "minimum_nullity": 1,
+        "minimum_rank": 4,
+        "minimum_scaled_condition_number": 4.72602,
+        "minimum_smallest_scaled_singular_value_m": 0.28317,
+        "reference_scaled_singular_values_m": [
+          1.33827, 1.09002, 0.77402, 0.28317
+        ],
+        "relative_tolerance": 1e-12,
+        "sample_count": 82,
+        "scale": {
+          "angular_coordinate_scale_rad": 1.0,
+          "translation_coordinate_scale_m": 0.75
+        },
+        "triangle_sine_margin": 0.432689,
+        "upper_degeneracy_distance_m": 1.22
+      }
+    }
+  ],
+  "impossible_geometry_controls": [
+    {
+      "geometry_m": {
+        "grip_separation_m": 2.0,
+        "lead_arm_length_m": 0.75,
+        "trail_arm_length_m": 0.78
+      },
+      "reason": "grip separation violates the triangle inequality",
+      "rejected": true
+    },
+    {
+      "geometry_m": {
+        "grip_separation_m": 0.25,
+        "lead_arm_length_m": 0.0,
+        "trail_arm_length_m": 0.78
+      },
+      "reason": "lead_arm_length_m must be positive and finite",
+      "rejected": true
+    }
+  ],
+  "inference_boundary": "This exact same-origin planar kinematic triangle does not establish anatomical shoulder closure, dynamics, constraint forces or multipliers, muscle action, passive torque, human occurrence, or coaching guidance.",
+  "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9113",
+  "manufactured_matrix_killswitch": {
+    "adverse_fixture": "fourth row replaced by third row",
+    "adverse_nullity": 2,
+    "adverse_rank": 3,
+    "regular_nullity": 1,
+    "regular_rank": 4
+  },
+  "near_lower_boundary_sweep": [
+    {
+      "closure_residual_m": 1.11022e-15,
+      "distance_to_lower_degeneracy_m": 0.0001,
+      "tolerance_cases": [
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-12,
+          "scaled_condition_number": 654.928,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765133, 0.0019972],
+          "smallest_scaled_singular_value_m": 0.0019972,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-10,
+          "scaled_condition_number": 654.928,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765133, 0.0019972],
+          "smallest_scaled_singular_value_m": 0.0019972,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-8,
+          "scaled_condition_number": 654.928,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765133, 0.0019972],
+          "smallest_scaled_singular_value_m": 0.0019972,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-6,
+          "scaled_condition_number": 654.928,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765133, 0.0019972],
+          "smallest_scaled_singular_value_m": 0.0019972,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 0.0001,
+          "scaled_condition_number": 654.928,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765133, 0.0019972],
+          "smallest_scaled_singular_value_m": 0.0019972,
+          "translation_coordinate_scale_m": 0.75
+        }
+      ],
+      "triangle_sine_margin": 0.00320523
+    },
+    {
+      "closure_residual_m": 6.66134e-16,
+      "distance_to_lower_degeneracy_m": 1e-6,
+      "tolerance_cases": [
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.29296e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-12,
+          "scaled_condition_number": 6554.68,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 0.000199555],
+          "smallest_scaled_singular_value_m": 0.000199555,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.29296e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-10,
+          "scaled_condition_number": 6554.68,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 0.000199555],
+          "smallest_scaled_singular_value_m": 0.000199555,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.29296e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-8,
+          "scaled_condition_number": 6554.68,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 0.000199555],
+          "smallest_scaled_singular_value_m": 0.000199555,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.29296e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-6,
+          "scaled_condition_number": 6554.68,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 0.000199555],
+          "smallest_scaled_singular_value_m": 0.000199555,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 0.000141107,
+          "nullity": 2,
+          "rank": 3,
+          "relative_tolerance": 0.0001,
+          "scaled_condition_number": null,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 0.000199555],
+          "smallest_scaled_singular_value_m": 0.000199555,
+          "translation_coordinate_scale_m": 0.75
+        }
+      ],
+      "triangle_sine_margin": 0.000320259
+    },
+    {
+      "closure_residual_m": 3.33067e-16,
+      "distance_to_lower_degeneracy_m": 1e-8,
+      "tolerance_cases": [
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 2.25698e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-12,
+          "scaled_condition_number": 65547.4,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99553e-5],
+          "smallest_scaled_singular_value_m": 1.99553e-5,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 2.25698e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-10,
+          "scaled_condition_number": 65547.4,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99553e-5],
+          "smallest_scaled_singular_value_m": 1.99553e-5,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 2.25698e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-8,
+          "scaled_condition_number": 65547.4,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99553e-5],
+          "smallest_scaled_singular_value_m": 1.99553e-5,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 2.25698e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-6,
+          "scaled_condition_number": 65547.4,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99553e-5],
+          "smallest_scaled_singular_value_m": 1.99553e-5,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.41106e-5,
+          "nullity": 2,
+          "rank": 3,
+          "relative_tolerance": 0.0001,
+          "scaled_condition_number": null,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99553e-5],
+          "smallest_scaled_singular_value_m": 1.99553e-5,
+          "translation_coordinate_scale_m": 0.75
+        }
+      ],
+      "triangle_sine_margin": 3.20256e-5
+    },
+    {
+      "closure_residual_m": 7.77156e-16,
+      "distance_to_lower_degeneracy_m": 1e-10,
+      "tolerance_cases": [
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.31109e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-12,
+          "scaled_condition_number": 655479.0,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99552e-6],
+          "smallest_scaled_singular_value_m": 1.99552e-6,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.31109e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-10,
+          "scaled_condition_number": 655479.0,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99552e-6],
+          "smallest_scaled_singular_value_m": 1.99552e-6,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.31109e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-8,
+          "scaled_condition_number": 655479.0,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99552e-6],
+          "smallest_scaled_singular_value_m": 1.99552e-6,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.41104e-6,
+          "nullity": 2,
+          "rank": 3,
+          "relative_tolerance": 1e-6,
+          "scaled_condition_number": null,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99552e-6],
+          "smallest_scaled_singular_value_m": 1.99552e-6,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.41104e-6,
+          "nullity": 2,
+          "rank": 3,
+          "relative_tolerance": 0.0001,
+          "scaled_condition_number": null,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99552e-6],
+          "smallest_scaled_singular_value_m": 1.99552e-6,
+          "translation_coordinate_scale_m": 0.75
+        }
+      ],
+      "triangle_sine_margin": 3.20254e-6
+    },
+    {
+      "closure_residual_m": 1.11022e-16,
+      "distance_to_lower_degeneracy_m": 1e-12,
+      "tolerance_cases": [
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.31589e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-12,
+          "scaled_condition_number": 6554080.0,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99573e-7],
+          "smallest_scaled_singular_value_m": 1.99573e-7,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.31589e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-10,
+          "scaled_condition_number": 6554080.0,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99573e-7],
+          "smallest_scaled_singular_value_m": 1.99573e-7,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.31589e-16,
+          "nullity": 1,
+          "rank": 4,
+          "relative_tolerance": 1e-8,
+          "scaled_condition_number": 6554080.0,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99573e-7],
+          "smallest_scaled_singular_value_m": 1.99573e-7,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.4112e-7,
+          "nullity": 2,
+          "rank": 3,
+          "relative_tolerance": 1e-6,
+          "scaled_condition_number": null,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99573e-7],
+          "smallest_scaled_singular_value_m": 1.99573e-7,
+          "translation_coordinate_scale_m": 0.75
+        },
+        {
+          "angular_coordinate_scale_rad": 1.0,
+          "maximum_scaled_nullspace_residual_m": 1.4112e-7,
+          "nullity": 2,
+          "rank": 3,
+          "relative_tolerance": 0.0001,
+          "scaled_condition_number": null,
+          "scaled_singular_values_m": [1.30802, 1.06066, 0.765135, 1.99573e-7],
+          "smallest_scaled_singular_value_m": 1.99573e-7,
+          "translation_coordinate_scale_m": 0.75
+        }
+      ],
+      "triangle_sine_margin": 3.20288e-7
+    }
+  ],
+  "nominal_geometry_m": {
+    "grip_separation_m": 0.25,
+    "lead_arm_length_m": 0.75,
+    "trail_arm_length_m": 0.78
+  },
+  "nominal_orbit": {
+    "lower_degeneracy_distance_m": 0.22,
+    "maximum_closure_residual_m": 1.66533e-16,
+    "maximum_nullity": 1,
+    "maximum_rank": 4,
+    "maximum_scaled_condition_number": 6.45326,
+    "maximum_scaled_nullspace_residual_m": 5.57125e-16,
+    "maximum_scaled_singular_value_spread_m": 2.22045e-15,
+    "maximum_smallest_scaled_singular_value_m": 0.202095,
+    "minimum_nullity": 1,
+    "minimum_rank": 4,
+    "minimum_scaled_condition_number": 6.45326,
+    "minimum_smallest_scaled_singular_value_m": 0.202095,
+    "reference_scaled_singular_values_m": [
+      1.30417, 1.07487, 0.745056, 0.202095
+    ],
+    "relative_tolerance": 1e-12,
+    "sample_count": 362,
+    "scale": {
+      "angular_coordinate_scale_rad": 1.0,
+      "translation_coordinate_scale_m": 0.75
+    },
+    "triangle_sine_margin": 0.320199,
+    "upper_degeneracy_distance_m": 1.28
+  },
+  "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
+  "phase_resolution_controls": [
+    {
+      "orbit": {
+        "lower_degeneracy_distance_m": 0.22,
+        "maximum_closure_residual_m": 1.11022e-16,
+        "maximum_nullity": 1,
+        "maximum_rank": 4,
+        "maximum_scaled_condition_number": 6.45326,
+        "maximum_scaled_nullspace_residual_m": 3.31422e-16,
+        "maximum_scaled_singular_value_spread_m": 1.33227e-15,
+        "maximum_smallest_scaled_singular_value_m": 0.202095,
+        "minimum_nullity": 1,
+        "minimum_rank": 4,
+        "minimum_scaled_condition_number": 6.45326,
+        "minimum_smallest_scaled_singular_value_m": 0.202095,
+        "reference_scaled_singular_values_m": [
+          1.30417, 1.07487, 0.745056, 0.202095
+        ],
+        "relative_tolerance": 1e-12,
+        "sample_count": 34,
+        "scale": {
+          "angular_coordinate_scale_rad": 1.0,
+          "translation_coordinate_scale_m": 0.75
+        },
+        "triangle_sine_margin": 0.320199,
+        "upper_degeneracy_distance_m": 1.28
+      },
+      "phase_sample_count_per_branch": 17
+    },
+    {
+      "orbit": {
+        "lower_degeneracy_distance_m": 0.22,
+        "maximum_closure_residual_m": 1.11022e-16,
+        "maximum_nullity": 1,
+        "maximum_rank": 4,
+        "maximum_scaled_condition_number": 6.45326,
+        "maximum_scaled_nullspace_residual_m": 4.24404e-16,
+        "maximum_scaled_singular_value_spread_m": 2.22045e-15,
+        "maximum_smallest_scaled_singular_value_m": 0.202095,
+        "minimum_nullity": 1,
+        "minimum_rank": 4,
+        "minimum_scaled_condition_number": 6.45326,
+        "minimum_smallest_scaled_singular_value_m": 0.202095,
+        "reference_scaled_singular_values_m": [
+          1.30417, 1.07487, 0.745056, 0.202095
+        ],
+        "relative_tolerance": 1e-12,
+        "sample_count": 122,
+        "scale": {
+          "angular_coordinate_scale_rad": 1.0,
+          "translation_coordinate_scale_m": 0.75
+        },
+        "triangle_sine_margin": 0.320199,
+        "upper_degeneracy_distance_m": 1.28
+      },
+      "phase_sample_count_per_branch": 61
+    },
+    {
+      "orbit": {
+        "lower_degeneracy_distance_m": 0.22,
+        "maximum_closure_residual_m": 1.66533e-16,
+        "maximum_nullity": 1,
+        "maximum_rank": 4,
+        "maximum_scaled_condition_number": 6.45326,
+        "maximum_scaled_nullspace_residual_m": 5.57125e-16,
+        "maximum_scaled_singular_value_spread_m": 2.22045e-15,
+        "maximum_smallest_scaled_singular_value_m": 0.202095,
+        "minimum_nullity": 1,
+        "minimum_rank": 4,
+        "minimum_scaled_condition_number": 6.45326,
+        "minimum_smallest_scaled_singular_value_m": 0.202095,
+        "reference_scaled_singular_values_m": [
+          1.30417, 1.07487, 0.745056, 0.202095
+        ],
+        "relative_tolerance": 1e-12,
+        "sample_count": 362,
+        "scale": {
+          "angular_coordinate_scale_rad": 1.0,
+          "translation_coordinate_scale_m": 0.75
+        },
+        "triangle_sine_margin": 0.320199,
+        "upper_degeneracy_distance_m": 1.28
+      },
+      "phase_sample_count_per_branch": 181
+    }
+  ],
+  "position_closure_tolerance_m": 1e-12,
+  "relative_rank_tolerance": 1e-12,
+  "scale_controls": [
+    {
+      "lower_degeneracy_distance_m": 0.22,
+      "maximum_closure_residual_m": 1.11022e-16,
+      "maximum_nullity": 1,
+      "maximum_rank": 4,
+      "maximum_scaled_condition_number": 5.35441,
+      "maximum_scaled_nullspace_residual_m": 3.83022e-16,
+      "maximum_scaled_singular_value_spread_m": 1.9984e-15,
+      "maximum_smallest_scaled_singular_value_m": 0.194061,
+      "minimum_nullity": 1,
+      "minimum_rank": 4,
+      "minimum_scaled_condition_number": 5.35441,
+      "minimum_smallest_scaled_singular_value_m": 0.194061,
+      "reference_scaled_singular_values_m": [
+        1.03908, 0.799814, 0.667152, 0.194061
+      ],
+      "relative_tolerance": 1e-12,
+      "sample_count": 82,
+      "scale": {
+        "angular_coordinate_scale_rad": 1.0,
+        "translation_coordinate_scale_m": 0.5
+      },
+      "translation_coordinate_scale_m": 0.5,
+      "triangle_sine_margin": 0.320199,
+      "upper_degeneracy_distance_m": 1.28
+    },
+    {
+      "lower_degeneracy_distance_m": 0.22,
+      "maximum_closure_residual_m": 1.11022e-16,
+      "maximum_nullity": 1,
+      "maximum_rank": 4,
+      "maximum_scaled_condition_number": 6.45326,
+      "maximum_scaled_nullspace_residual_m": 3.91398e-16,
+      "maximum_scaled_singular_value_spread_m": 1.9984e-15,
+      "maximum_smallest_scaled_singular_value_m": 0.202095,
+      "minimum_nullity": 1,
+      "minimum_rank": 4,
+      "minimum_scaled_condition_number": 6.45326,
+      "minimum_smallest_scaled_singular_value_m": 0.202095,
+      "reference_scaled_singular_values_m": [
+        1.30417, 1.07487, 0.745056, 0.202095
+      ],
+      "relative_tolerance": 1e-12,
+      "sample_count": 82,
+      "scale": {
+        "angular_coordinate_scale_rad": 1.0,
+        "translation_coordinate_scale_m": 0.75
+      },
+      "translation_coordinate_scale_m": 0.75,
+      "triangle_sine_margin": 0.320199,
+      "upper_degeneracy_distance_m": 1.28
+    },
+    {
+      "lower_degeneracy_distance_m": 0.22,
+      "maximum_closure_residual_m": 1.11022e-16,
+      "maximum_nullity": 1,
+      "maximum_rank": 4,
+      "maximum_scaled_condition_number": 7.76682,
+      "maximum_scaled_nullspace_residual_m": 5.98322e-16,
+      "maximum_scaled_singular_value_spread_m": 2.88658e-15,
+      "maximum_smallest_scaled_singular_value_m": 0.206559,
+      "minimum_nullity": 1,
+      "minimum_rank": 4,
+      "minimum_scaled_condition_number": 7.76682,
+      "minimum_smallest_scaled_singular_value_m": 0.206559,
+      "reference_scaled_singular_values_m": [
+        1.60431, 1.42177, 0.751168, 0.206559
+      ],
+      "relative_tolerance": 1e-12,
+      "sample_count": 82,
+      "scale": {
+        "angular_coordinate_scale_rad": 1.0,
+        "translation_coordinate_scale_m": 1.0
+      },
+      "translation_coordinate_scale_m": 1.0,
+      "triangle_sine_margin": 0.320199,
+      "upper_degeneracy_distance_m": 1.28
+    }
+  ],
+  "schema_version": "proximal-distal-closed-loop-singularity-margin/v1",
+  "unit_equivalence_control": {
+    "closure_residual_m": 5.55112e-17,
+    "condition_number_after": 6.45326,
+    "condition_number_before": 6.45326,
+    "conversion": "metre residual/translation coordinates to centimetres",
+    "maximum_abs_scaled_spectrum_conversion_residual_cm": 2.84217e-14,
+    "rank_after": 4,
+    "rank_before": 4,
+    "singular_value_scale_factor": 100.0
+  }
+}
