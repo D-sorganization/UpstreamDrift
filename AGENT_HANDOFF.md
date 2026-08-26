@@ -10,7 +10,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `9c44fc068ec44788a1b957bbbfee109f59b02dbf`.
+- Remote `main` is `5fa4a6dd13ed12aee8b857d7fdf3022d1a6bf632`.
   PR #9018 and its normalized-claim authority remain ancestors of `main`.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
@@ -42,7 +42,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 ## Hybrid-System Topology Contract (#9027)
 
 - PR #9049 branch `research/9027-hybrid-system-contract` is reconciled with
-  `main` `9c44fc068` in merge commit `SELF`. It defines typed topology for all
+  `main` `5fa4a6dd1` in merge commit `SELF`. It defines typed topology for all
   eight model tiers: continuous state, controls, algebraic constraints, modes,
   guards, resets, impacts, actuator dynamics, uncertain event surfaces,
   observables, limitations, falsifiers, and comparison blockers.
@@ -88,8 +88,8 @@ Epic #8557 is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- PR #9032 is at remote head `d341a0c92`; required CI is green and requested
-  human review is absent. Its optional source-lock failure is deliberate.
+- PR #9032 is at remote head `d341a0c92`; required CI passed at last
+  verification. Its optional source-lock failure is deliberate.
 - #8358's immutable Tools gateway and analysis methods are merged, but its UI,
   localized-perturbation, and presentation criteria remain unaudited.
 - Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
@@ -104,9 +104,11 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - Model evidence is never promoted to human validation. No current result
   establishes anatomy, physiology, equipment calibration, injury, coaching
   efficacy, or a universal speed benefit.
-- PRs target `main`; use full PRs and require human review. Never force-push,
-  admin-merge, bypass checks, add quarantine debt, or edit the vendor pin
-  independently of a protected Tools authority.
+- PRs target `main`; use full PRs and let required protected checks govern
+  readiness. The live ruleset requires zero approvals, so do not request a
+  named maintainer as a standing gate. Never force-push, admin-merge, bypass
+  checks, add quarantine debt, or edit the vendor pin independently of a
+  protected Tools authority.
 
 ## Focused Validation
 

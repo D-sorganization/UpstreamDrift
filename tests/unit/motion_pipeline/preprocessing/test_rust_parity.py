@@ -155,3 +155,117 @@ def test_linear_gap_fill_reproduces_python_logic() -> None:
         t = k / (8 - 5 + 1)
         expected = v_before + t * (v_after - v_before)
         np.testing.assert_allclose(out[frame_idx, 1], expected, atol=1e-12)
+
+
+# ── Gap fill: LINEAR marker dispatch, Rust vs Python (issue #8927) ──────────
+#
+# The default GapFillStep.strategy is LINEAR (pipeline.py:95); prior to
+# #8927, gap_fill.py never called the Rust linear_gap_fill/cubic_gap_fill
+# kernels even though they were exported. This compares the two code paths
+# through the public gap_fill() -> _gap_fill_markers() dispatch (not the raw
+# binding), using the same rtol/atol precedent as the other vectorize/Rust
+# parity suites in this directory (test_filter_resample_vectorize_parity.py,
+# test_kalman_vectorize_parity.py): rtol=1e-10, atol=1e-10.
+
+
+def _make_gappy_marker_trajectory(
+    seed: int, num_frames: int = 90, num_markers: int = 6
+):
+    """Build a MarkerTrajectory with well-separated per-marker occlusion windows.
+
+    Each marker's occluded run is isolated in its own time slot (12 frames
+    apart) rather than staggered/overlapping with other markers'. This keeps
+    every gap's "combined window" (what ``_find_gaps_markers`` sees, unioned
+    across all markers) identical to that single marker's own occluded run.
+
+    That distinction matters for parity: the pre-Rust Python path
+    (``_linear_interp_markers``) anchors its interpolation ``t`` fraction to
+    the *combined* window's start/end, while the Rust kernel fills each
+    marker column using its *own* contiguous run. When gaps from different
+    markers overlap/touch, those two boundaries diverge and the two paths
+    would legitimately compute different (both "correct", but non-identical)
+    interpolated values for a pre-existing reason unrelated to #8927 dispatch
+    wiring. Isolating each marker's gap sidesteps that so this test verifies
+    the actual regression surface: that the Rust dispatch reproduces the
+    Python fallback's values and its skip-when-oversized behavior.
+    """
+    from src.shared.python.motion_pipeline.contracts import (
+        Marker,
+        MarkerFrame,
+        MarkerTrajectory,
+    )
+
+    rng = np.random.default_rng(seed)
+    marker_names = [f"M{j}" for j in range(num_markers)]
+    coords = rng.standard_normal((num_frames, num_markers, 3))
+
+    # Carve one short (fillable) gap per marker, well separated so the
+    # windows never merge, plus one long (unfillable) gap on marker 0 in its
+    # own isolated slot too.
+    occluded = np.zeros((num_frames, num_markers), dtype=bool)
+    for j in range(num_markers):
+        start = 5 + j * 12
+        occluded[start : start + 3, j] = True  # short gap, within max_gap=10
+    occluded[70:85, 0] = True  # long gap on marker 0, exceeds max_gap=10
+
+    frames = []
+    for i in range(num_frames):
+        markers = {
+            marker_names[j]: Marker(
+                name=marker_names[j],
+                x=float(coords[i, j, 0]),
+                y=float(coords[i, j, 1]),
+                z=float(coords[i, j, 2]),
+                occluded=bool(occluded[i, j]),
+            )
+            for j in range(num_markers)
+        }
+        frames.append(MarkerFrame(timestamp=i / 30.0, markers=markers, frame_index=i))
+    return MarkerTrajectory(id="gappy", frames=frames), marker_names
+
+
+def test_gap_fill_markers_linear_rust_matches_python_fallback(monkeypatch) -> None:
+    """Rust-dispatched LINEAR marker fill matches the pure-Python fallback."""
+    from importlib import import_module
+
+    from src.shared.python.motion_pipeline.preprocessing.gap_fill import (
+        GapFillStrategy,
+        gap_fill as gap_fill_fn,
+    )
+
+    # NOTE: `preprocessing/__init__.py` re-exports the `gap_fill` *function*
+    # into the package namespace, shadowing the `gap_fill` *submodule*
+    # attribute — `from ...preprocessing import gap_fill` would therefore
+    # bind the function, not the module. Use import_module for the real
+    # module object (same pattern as test_gap_fill.py).
+    gap_fill_module = import_module(
+        "src.shared.python.motion_pipeline.preprocessing.gap_fill"
+    )
+
+    traj, marker_names = _make_gappy_marker_trajectory(seed=11)
+
+    # Rust path: the module already has _RUST_AVAILABLE=True since `ump`
+    # imported successfully above (module-level import happens at gap_fill.py
+    # import time, before this test runs).
+    assert gap_fill_module._RUST_AVAILABLE is True
+    rust_out = gap_fill_fn(traj, strategy=GapFillStrategy.LINEAR, max_gap=10)
+
+    # Python fallback path, forced via monkeypatch.
+    monkeypatch.setattr(gap_fill_module, "_RUST_AVAILABLE", False)
+    python_out = gap_fill_fn(traj, strategy=GapFillStrategy.LINEAR, max_gap=10)
+
+    for i in range(traj.num_frames):
+        for name in marker_names:
+            r = rust_out.frames[i].markers[name]
+            p = python_out.frames[i].markers[name]
+            assert r.occluded == p.occluded
+            np.testing.assert_allclose(r.x, p.x, rtol=1e-10, atol=1e-10)
+            np.testing.assert_allclose(r.y, p.y, rtol=1e-10, atol=1e-10)
+            np.testing.assert_allclose(r.z, p.z, rtol=1e-10, atol=1e-10)
+
+    # Sanity: the long gap on marker 0 stayed occluded on both paths.
+    assert rust_out.frames[75].markers["M0"].occluded is True
+    assert python_out.frames[75].markers["M0"].occluded is True
+    # And a short, fillable gap actually got filled on both paths.
+    assert rust_out.frames[6].markers["M0"].occluded is False
+    assert python_out.frames[6].markers["M0"].occluded is False
