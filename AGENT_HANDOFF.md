@@ -4,29 +4,29 @@ Last updated: 2026-08-26
 This is current operational state; Git/GitHub retain history, and epic #8557
 is the single proximal-to-distal completion authority.
 
+## Markerless Mocap Program (#9063)
+
+- ADR-0041 assigns camera, observation, calibration, timing, session, reconstruction, and C3D contracts to Tools #4706; UpstreamDrift owns orchestration, UX, persistence, and biomechanics adapters; AffineDrift owns sanitized publication. Tools PR #4734 remains a protected candidate; do not repin `vendor/ud-tools` to a feature head, and let UpstreamDrift #9069 follow its immutable merge. Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation: there is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
+
 ## Repository and Publication Authority
 
-- UpstreamDrift owns scientific sources, models, evidence registers, and the
-  release bundle. AffineDrift is an immutable, revision-pinned public
-  projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`, protected
-  PR #9114's squash. Active branch: `research/9116-phase-event-stability`.
+- UpstreamDrift owns scientific sources, models, evidence registers, and the release
+  bundle; AffineDrift is an immutable public projection; Tools owns consumers.
+- Remote `main` is `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c`, including
+  PR #9088 after #9114. Active branch: `research/9116-phase-event-stability`.
 - The current branch publication is 246 pages, SHA-256
   `3997e95ef44731e4a33f655a634719cbfd18c4bcab0054e5d82d2821b700eb36`,
-  with 194 URI links and 255 outline entries. Archival qualification remains
-  false because the PDF is untagged and retains Type 3 and unembedded fonts.
+  with 194 URI links and 255 outline entries; archival qualification is false.
 - The complete audit contains 1,148 reviewed candidates, 315 atomic claims,
   134 numeric contracts, and 445/445 verified literals. Outcomes are 295
   supported only within declared estimands and boundaries, five inconclusive,
-  15 untested, and zero contradicted. All 48 release claims have reviewed
-  boundaries and open gates. The bundle has 644 artifacts.
+  15 untested, and zero contradicted; 48 release claims are reviewed and open.
 
 ## Coordinate Force-Source Attribution (#9059)
 
 - Tools squash `8dc4512184` is the `force-attribution/v1` authority, consumed
-  through the vendor pin and thin biomechanics gateway. The 135-program grid
-  retains 91 qualified impacts and separates impulse, work, power, mapping
-  residuals, and speed optima in declared coordinates.
+  through the vendor pin and thin biomechanics gateway. Its 135-program grid
+  retains 91 impacts and separates impulse, work, power, residuals, and optima.
 - The force-only endpoint map is rank deficient; its residual couple remains
   explicit. This is synthetic planar evidence, not a measured grip wrench,
   muscle attribution, human strategy, or coaching authority.
