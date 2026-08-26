@@ -118,6 +118,19 @@ is the single proximal-to-distal completion authority.
   Upstream-owned `bunkershot3d` at its canonical top-level import in editable
   and wheel installs, excludes the duplicate `src.bunkershot3d` wheel identity,
   and changes no runtime path or vendor pin.
+- #9107 is reconciled normally with current `main` at merge commit `56fc0dcde`.
+  Thirty-six build-hook/unit contracts pass. A Python 3.11 isolated install of
+  the exact 384,333,159-byte wheel
+  (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`)
+  proves canonical `bunkershot3d.postproc.WrenchTrace` identity, absence of
+  `src.bunkershot3d`, the UI bundle, and test-payload exclusion. The broader
+  pre-existing wheel smoke still exposes two out-of-scope runtime debts: the
+  installed `src.api` path resolves a Tools-owned `shared.python.config` copy
+  without Upstream's `get_database_pool_pre_ping`, and `sidekick --help` fails.
+  Neither payload is changed by #9107; do not claim the full wheel runtime is
+  qualified or hide those failures. The prior protected cross-engine failure
+  was a corrupted shared Python tool-cache license file; runner configuration
+  remains untouched and fresh protected evidence is required.
 - Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
   moving or partial campaign; the next public projection must pin a qualified
   UpstreamDrift merge commit.
