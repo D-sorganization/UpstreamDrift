@@ -12,13 +12,14 @@ is the single proximal-to-distal completion authority.
 
 - UpstreamDrift owns scientific sources, models, evidence, and release; AffineDrift
   is the immutable public projection and Tools owns consumers.
-- Remote `main` is `99acc997a97b3d97cb4ddd857b79bedd4a66f290` (PR #9109); active branch: `research/9116-phase-event-stability`.
-- The 246-page publication is SHA-256 `64f552741217fc627af0cdbbe4066fd430a7ed8a5d2ca05ad9f109cce794c52b`,
+- Remote `main` is `99acc997a97b3d97cb4ddd857b79bedd4a66f290` (PR #9109); active branch: `research/9123-trajectory-control-authority`.
+- The 247-page publication is SHA-256 `8356e14e33fda24c1cbd79ad48485a76dfe6240c34fb9ed5d505ef95d7251907`,
   with 194 URI links and 255 outline entries; archival qualification is false.
-- The complete audit contains 1,148 reviewed candidates, 315 atomic claims,
-  134 numeric contracts, and 445/445 verified literals. Outcomes are 295
+- The complete audit contains 1,154 reviewed candidates, 317 atomic claims,
+  136 numeric contracts, and 455/455 verified literals. Outcomes are 297
   supported only within declared estimands and boundaries, five inconclusive,
-  15 untested, and zero contradicted; 48 release claims are reviewed and open.
+  15 untested, and zero contradicted; all 49 release claims are reviewed with
+  zero open release reviews.
 
 ## Coordinate Force-Source Attribution (#9059)
 
@@ -85,6 +86,31 @@ is the single proximal-to-distal completion authority.
   These are local synthetic diagnostics, not asymptotic stability, neural
   timing demand, participant robustness, passive torque, or coaching evidence.
 
+## Trajectory-Varying Control Authority (#9123)
+
+- Local branch commits `5d82cd890` through `3c9358636` implement and publish
+  the exact-discrete trajectory-varying authority milestone on the immutable
+  #9116 source identity. Do not push or open its PR until dependency PR #9117
+  is protected-merged and the branch is reconciled with the resulting main.
+- The registered event is at 0.349256 s with guard residual `1.30562e-13` and
+  transversality 35.0258 s^-1. Full-state rank is four and the explicit
+  orthonormal event-tangent rank is three; the guard-normal null direction is
+  not classified as actuator loss.
+- Four channel cases, six direct nonlinear pulse checks, four matched frozen-
+  local countermodels, three input-step refinements, three integration-step
+  refinements, additivity, zero-input, and equivalent-unit controls pass. The
+  maximum direct-pulse residual is `4.11321e-08`; the maximum integration-step
+  residual is `1.26519e-07`.
+- The architecture refactor introduces owned numerical, pulse, and guard
+  contracts and bounded figure/report helpers. It is evidence-inert: JSON,
+  NPZ, and PDF hashes are unchanged, and the regenerated figure is pixel-
+  identical. The architecture, claim, release, title-case, and file-size gates
+  pass with 652 release artifacts and no mismatches.
+- These results remain local first-order diagnostics on one synthetic open-loop
+  analytical trajectory. Bounded nonlinear feasibility, controller ranking,
+  human capacity, passive torque, robustness, and coaching inference are
+  explicitly unavailable.
+
 ## Structural Campaign and Recovery Boundary (#8800)
 
 - The separate #8752 constitutive campaign completed on ControlTower and was
@@ -116,7 +142,9 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9049, #9100, #9108, #9110, and #9114 are merged; #9116 is active.
+- #9049, #9100, #9108, #9110, and #9114 are merged; #9116/PR #9117 is
+  protected and capacity-bound. #9123 is complete locally but cannot enter its
+  protected publication workflow until #9117 merges.
 - #8358's Tools gateway and analyses are merged; UI and presentation criteria
   remain unaudited. Merged #9096 changes no production API, schema, or vendor pin.
 - #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
