@@ -196,3 +196,18 @@ class ImportMappingDialog(QtWidgets.QDialog):
             monitor_model=self.model_edit.text().strip() or None,
             software_version=self.version_edit.text().strip() or None,
         )
+
+
+def selected_text(list_widget: QtWidgets.QListWidget) -> tuple[str, ...]:
+    return tuple(item.text() for item in list_widget.selectedItems())
+
+
+def populate_combo(combo: QtWidgets.QComboBox, values: list[str]) -> None:
+    previous = combo.currentText()
+    combo.blockSignals(True)
+    combo.clear()
+    combo.addItems(values)
+    previous_index = combo.findText(previous)
+    if previous_index >= 0:
+        combo.setCurrentIndex(previous_index)
+    combo.blockSignals(False)

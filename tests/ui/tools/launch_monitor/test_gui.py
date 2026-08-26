@@ -133,6 +133,61 @@ def test_relationship_analysis_populates_matrix_and_scientific_warning(widget) -
     assert "caus" in widget.scientific_boundary.text().lower()
 
 
+def test_relationship_analysis_title_identifies_the_project(widget) -> None:  # noqa: ANN001
+    widget.import_file(FIXTURES / "trackman.csv")
+    widget.import_file(FIXTURES / "garmin.csv")
+    for index in range(widget.relationship_metrics.count()):
+        item = widget.relationship_metrics.item(index)
+        if item.text() in {"club_speed", "ball_speed", "carry_distance"}:
+            item.setSelected(True)
+    widget.run_relationship_analysis()
+
+    assert widget.project.name in widget.relationship_plot.axes.get_title()
+
+
+def test_data_change_clears_every_stale_analysis_canvas(widget) -> None:  # noqa: ANN001
+    """Regression test for #8825.
+
+    ``_refresh_all`` used to rebuild trees/tables/combos but never touch
+    the five matplotlib analysis canvases, so a chart built against a
+    previous project/session set (including extra colorbar axes and
+    plotted artists) stayed visible after ``clear_project``,
+    ``import_file``, ``load_project``, ``_remove_selected_sessions``, or
+    ``_run_treatment_ui`` changed the underlying data.
+    """
+    widget.import_file(FIXTURES / "trackman.csv")
+    widget.import_file(FIXTURES / "garmin.csv")
+    for index in range(widget.relationship_metrics.count()):
+        item = widget.relationship_metrics.item(index)
+        if item.text() in {"club_speed", "ball_speed", "carry_distance"}:
+            item.setSelected(True)
+    widget.run_relationship_analysis()
+
+    canvases = (
+        widget.relationship_plot,
+        widget.model_plot,
+        widget.comparison_plot,
+        widget.dispersion_plot,
+        widget.trend_plot,
+    )
+    # Sanity check the fixture actually populated the canvas: a colorbar
+    # adds a second axes to the figure, and the heatmap is an image.
+    assert len(widget.relationship_plot.figure.axes) > 1
+    assert widget.relationship_plot.axes.images
+
+    widget.clear_project()
+
+    for canvas in canvases:
+        assert len(canvas.figure.axes) == 1, (
+            "stale colorbar axes survived a project switch"
+        )
+        assert not canvas.axes.images
+        assert not canvas.axes.collections
+        assert not canvas.axes.lines
+        assert canvas.axes.texts, "canvas should show a placeholder after data changes"
+        assert widget.project.name in canvas.axes.texts[0].get_text()
+
+
 def test_project_save_and_load_round_trip(widget, tmp_path) -> None:  # noqa: ANN001
     widget.import_file(FIXTURES / "uneekor.csv")
     destination = tmp_path / "player.lmproject"
