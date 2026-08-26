@@ -167,6 +167,10 @@ Recorded outputs:
   closure and bilateral wrench-map ranks, explicit coordinate/wrench scales,
   singular and coincident-contact controls, tolerance sensitivity, and
   nonhuman inference boundaries.
+- `data/closed_loop_singularity_margin.json` — exact same-origin closure on
+  both assembly branches, full-phase scaled singular margins, exact triangle
+  degeneracies, and phase, geometry, scale, unit, tolerance, impossible-
+  geometry, and manufactured-rank controls.
 - `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse-
   dynamics factorization, analytic physical-map rank witness, three exact
   nonunique parameter families, dimensionless finite-record rank, unit and

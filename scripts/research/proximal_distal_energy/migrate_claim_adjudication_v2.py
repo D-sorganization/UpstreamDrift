@@ -33,10 +33,13 @@ PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST = (
 PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST = (
     "e1a06c08ffe31fe6ec872b8de222179239c87f1e1f7eab3d48cf20f88c673d49"
 )
-REVIEWED_SOURCE_DIGEST = (
+PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST = (
     "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a"
 )
-REVIEWED_CLAIM_COUNT = 311
+REVIEWED_SOURCE_DIGEST = (
+    "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe"
+)
+REVIEWED_CLAIM_COUNT = 313
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -111,21 +114,14 @@ PRE_CONSTRAINT_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
 )
 REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
-        "PD-CAND-077e007135da1237",
-        "PD-CAND-11518bcf919bffed",
         "PD-CAND-165a6caf21ef85e2",
-        "PD-CAND-36e3133e0ac5fa09",
         "PD-CAND-39f42d06f3e621a5",
-        "PD-CAND-43048ff0f70552c3",
-        "PD-CAND-736a228f903fce32",
         "PD-CAND-9345c1e6be2ef186",
         "PD-CAND-9906005bff75ba72",
         "PD-CAND-aa6efbe9274b5d53",
         "PD-CAND-ab4689630944a0fe",
-        "PD-CAND-afc739da59a79cdf",
         "PD-CAND-b06a3cbe5b2d0e01",
         "PD-CAND-b5b2526e23b77d70",
-        "PD-CAND-b7ebf4884a957a0a",
         "PD-CAND-bcfcc2b3a9631de1",
         "PD-CAND-be8a26a0593eab4f",
         "PD-CAND-c6f7607002d58a93",
@@ -432,6 +428,8 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-310",
         "PD-CLAIM-311",
         "PD-CLAIM-312",
+        "PD-CLAIM-313",
+        "PD-CLAIM-314",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -541,6 +539,7 @@ def migrate(root: Path) -> dict[str, int]:
         PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
         PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
         PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }:
         raise ValueError(
@@ -560,6 +559,7 @@ def migrate(root: Path) -> dict[str, int]:
         PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
         PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
         PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
     }:
         _reconcile_reviewer_projection(registry, inventory)
     else:

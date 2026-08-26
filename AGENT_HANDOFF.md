@@ -9,16 +9,17 @@ is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `6f9b068a54d841c56e4efbd34855705eaad5d473`, protected PR #9108's squash.
-- The current publication is 244 pages, SHA-256
-  `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
-  with 194 URI links and 254 outline entries. Archival qualification remains
+- Remote `main` is `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`;
+  this branch merges that authority after protected PR #9114's squash.
+- The current branch publication is 245 pages, SHA-256
+  `48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa`,
+  with 194 URI links and 255 outline entries. Archival qualification remains
   false because the PDF is untagged and retains Type 3 and unembedded fonts.
-- The complete audit contains 1,138 reviewed candidates, 311 atomic claims,
-  130 numeric contracts, and 406/406 verified literals. Outcomes are 291
+- The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
+  132 numeric contracts, and 427/427 verified literals. Outcomes are 293
   supported only within declared estimands and boundaries, five inconclusive,
-  15 untested, and zero contradicted. All 46 public release claims have review
-  dispositions and scientifically open gates. The bundle has 632 artifacts.
+  15 untested, and zero contradicted. All 47 public release claims have review
+  dispositions and scientifically open gates. The bundle has 636 artifacts.
 
 ## Coordinate Force-Source Attribution (#9059)
 
@@ -61,17 +62,27 @@ is the single proximal-to-distal completion authority.
   unestablished. Its protected 309-claim snapshot is preserved in migration
   history and has been superseded by the current #9027 projection.
 
-## Scaled Constraint and Internal-Force Diagnostics (#9027)
+## Scaled Constraints and Feasible Closed-Loop Margins (#9027, #9113)
 
-- PR #9110 on `research/9027-control-qualification` adds source-bound planar
+- PR #9110 is merged as `d16212ac7`. It adds source-bound planar
   closure and bilateral wrench-map audits. It requires explicit 1 rad/0.75 m
   generalized-coordinate scales, a 0.10 m wrench scale, and `1e-12` rank tolerance.
 - Regular planar rank/nullity is 4/1; the constructed adverse alignment is
   3/2 but is not a qualified anatomical pose. Separated/coincident point-force
   maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
-- The 1,138-candidate, 311-claim projection is frozen at `9bd5ca45`; it never
-  identifies force, contact, strategy, or coaching. Numeric scaffolding is
-  reproducible; keep closed-loop singular margins as the next separate slice.
+- #9113 is implemented in open PR #9114 on
+  `research/9113-closed-loop-margins`. Exact triangle
+  closure covers both branches and 181 phases each; all 362 nominal samples
+  close below `1.67e-16` m with rank/nullity 4/1. Exact 0.03 m and 1.53 m
+  degeneracies are 3/2. A five-offset by five-tolerance matrix retains the
+  observed numerical rank boundary without calling it physical.
+- Phase, scale, feasible/impossible geometry, equivalent-unit, and manufactured
+  rank controls pass. Python 3.12 CI exposed platform SVD roundoff; the corrected
+  publication bounds all expected-zero SVD diagnostics by conservative powers
+  of ten, including exact null singular values, while rank decisions retain raw
+  precision. The 58-test focused gate and 636-artifact release validation pass.
+  This is planar kinematics only: no force, anatomy, passive torque, human
+  occurrence, strategy, or coaching inference is authorized.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -81,11 +92,10 @@ is the single proximal-to-distal completion authority.
   The seven-corner plan is 93/830; 737 checkpoints and 27 nominal ground
   branches are absent. `release_evidence=false`; a persisted `running` state
   is stale and no campaign process is active.
-- Checkpoints remain under
-  `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`. ControlTower's
-  WSL VHDX is unreadable (`0x80070570`). Preserve it and the C: checkpoints.
-  Do not retry mounts, run CHKDSK, mutate frozen plans, or start a replacement
-  campaign without an explicit recoverability decision.
+- Checkpoints remain under `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
+  ControlTower's WSL VHDX is unreadable (`0x80070570`); preserve it and the C:
+  checkpoints. Do not retry mounts, run CHKDSK, mutate frozen plans, or start
+  a replacement campaign without an explicit recoverability decision.
 - DeskComputer is fully runner-drained and must not run uncertainty campaigns
   or large parallel tests. Use serial bounded tests with `-n 0` only.
 
@@ -105,18 +115,15 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9027 contract PR #9049, local-rank PR #9100, and exact-map PR #9108 are
-  merged. The scaled constraint/internal-force slice is active here; selectively
-  requalify later stale control commits rather than merging them wholesale.
-- PR #9032 is at remote head `d341a0c92`; required CI passed at last
-  verification. Its optional source-lock failure is deliberate.
+- #9049, #9100, #9108, #9110, and #9114 are merged; #9114 completed issue
+  #9113's protected singular-margin slice.
 - #8358's Tools gateway and analyses are merged; UI, localized-perturbation,
-  and presentation criteria remain unaudited.
-- Merged #9096 preserves `src.shared` modules while refreshing one Tools
-  provider and changes no production API, schema, or vendor pin. #9107 exposes
-  Upstream-owned `bunkershot3d` at its canonical top-level import in editable
-  and wheel installs, excludes the duplicate `src.bunkershot3d` wheel identity,
-  and changes no runtime path or vendor pin.
+  and presentation criteria remain unaudited. Merged #9096 preserves
+  `src.shared` modules while refreshing one Tools provider and changes no
+  production API, schema, or vendor pin. #9107 exposes Upstream-owned
+  `bunkershot3d` at its canonical top-level import in editable and wheel
+  installs, excludes the duplicate `src.bunkershot3d` wheel identity, and
+  changes no runtime path or vendor pin.
 - #9107 was reconciled normally with current `main` at merge commit `d0cc289d0`.
   Thirty-six build-hook/unit contracts pass. A Python 3.11 isolated install of
   the exact 384,333,159-byte wheel
@@ -159,16 +166,11 @@ is the single proximal-to-distal completion authority.
 
 ```powershell
 python -m scripts.research.proximal_distal_energy.claim_audit validate
-python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
-python -m scripts.research.proximal_distal_energy.hybrid_system_contract validate
-python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability validate
 python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics validate
+python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python -m pytest -n 0 -q tests/research/test_constraint_internal_force_diagnostics.py tests/research/test_constraint_internal_force_diagnostics_evidence.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
-python scripts/ci/check_architecture_budget.py
-python scripts/check_document_title_case.py --changed-from origin/main
+python -m pytest -n 0 -q tests/research/test_closed_loop_singularity_margin.py tests/research/test_closed_loop_singularity_margin_evidence.py tests/research/test_constraint_internal_force_diagnostics.py tests/research/test_constraint_internal_force_diagnostics_evidence.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
 python scripts/ci/check_file_size_budget.py
 ```
 
-Passing shared gates does not close a scientific child whose narrower evidence
-or governed external-data requirement remains incomplete.
+Passing shared gates does not close narrower scientific or external-data gates.
