@@ -5,6 +5,18 @@ Last updated: 2026-08-25
 This file records current operational state, not history. Git and GitHub retain
 history. Epic #8557 is the single proximal-to-distal completion authority.
 
+## Engineering Design Manual Authority (#9064)
+
+- UP-D0 (#9066) establishes `manuals/upstreamdrift` QMD as the sole editable
+  engineering design-manual authority. Generated LaTeX, PDF, DOCX, and HTML are
+  non-editable and remain unapproved.
+- `python3 -m scripts.check_design_manual_governance` enforces the versioned
+  policy, empty fail-closed calculation registry, program-contract ownership,
+  agent context, and absent publication projection.
+- UP-D1 (#9067) must inventory and classify the repository before any coverage
+  claim. UP-D2 through UP-D8 retain traceability, rendering, freshness, visual,
+  accessibility, digest, and human-approval release blockers.
+
 ## Coordinate Force-Source Attribution (#9059)
 
 - Tools PR #4699 is the reusable source authority for
@@ -35,7 +47,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `4f84a8a2dbdafac01a634ceb41b1e415ea7ec5bb`. The normalized-claim authority
+  `e4d6a7c513cae351df47ec1af9d88b66fea74656`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 244 pages with SHA-256
   `59faa25bce589777560d66bd9d5712b37fe0099979c91318c5875460ec6447b6`,
@@ -46,17 +58,9 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Active Structural Campaign and Recovery Boundary (#8800)
 
-- Separate #8752 constitutive uncertainty completed on ControlTower and was
-  transferred at branch commit `2fa6cf886`; it is not yet on remote `main`.
-- #8800 uses clean source commit
-  `1bd4d57da7bd257b76b42b3cc19524b283b5f748`, image
-  `sha256:b40d91fe2326c5fae288e4a853377fb164aa0a6ba1de62cb28aba15d65500a1e`,
-  plan file SHA-256
-  `2bddb125492e907acc827e1dbf4cb43b9724e73087679cbf4113bcf96824b120`,
-  and plan-contract SHA-256
-  `c5cfba35ecafa96054ef8cc872f2e91a9f7855db0b93cfa491f9b18ee3db80f4`.
-- #8800 used two workers/two CPUs. Nominal shaft is 48/48 and nominal ground
-  45/72; the full seven-corner plan is only 93/830, with 737 checkpoints absent.
+- #8800 uses frozen source `1bd4d57da7bd257b76b42b3cc19524b283b5f748`
+  and a hash-locked plan/image contract. Nominal shaft is 48/48, nominal ground
+  45/72, and the full plan is only 93/830; 737 checkpoints remain absent.
   The checkpoints and nominal shaft artifact remain under
   `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
 - The persisted status saying `running` is stale; no campaign process is
@@ -69,29 +73,8 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - Do not retry WSL, run CHKDSK, repair or mount the VHDX, restart Windows
   services, create a replacement campaign, or alter frozen source or plans
   without an explicit recovery and recoverability decision. Preserve the VHDX
-  and C: checkpoints. After recovery, verify identities, finish 27 nominal
-  ground branches, then qualify the remaining registered structural corners.
-
-## Normalized Claim Adjudication (#8724)
-
-- Protected PR #9018 is merged on remote `main` as
-  `9e220712025564caf0ac5201a0ddcf69dd98299e`; #8724 is closed.
-- The authority contains 1,100 reviewed narrative candidates and 303 material
-  claims: 283 supported only within declared estimands and boundaries, five
-  inconclusive, 15 untested, and zero contradicted. Supported claims may report
-  null, mixed, or adverse findings; the count does not imply theory survival.
-- The schema and snapshot-locked migration require explicit normalized
-  outcomes, typed locators, reciprocal mappings, falsifiers, source digests,
-  reasons, reviewer identity, dates, and supported-scope contradiction checks.
-  Unfamiliar claims fail closed.
-- Reviewer JSON, CSV, and paper tables separately report normalized outcome,
-  evidence tier, source independence, model tier, unresolved replication, and
-  claim-family source concentration. Model evidence is never promoted to human
-  validation.
-- Deterministic release evidence covers 2,130 evidence references, 319 local
-  artifacts, 78 external URLs, and a 592-artifact release bundle. The merged
-  head passed 63 focused tests plus standard, optional-stack, publication,
-  security, title-case, file-size, architecture, Ruff, MyPy, and Bandit gates.
+  and C: checkpoints. After recovery, verify identities and complete the
+  registered campaign before any release claim.
 
 ## Measured-Trajectory and Human-Evidence Boundaries
 
@@ -113,10 +96,6 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   2026-08-24 after a manual closure lacked a complete campaign, protected PR,
   or remote-main merge.
 - #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
-- PR #9022 is merged as current remote-main commit `76bf6ab1d`. Tools PR #4674
-  is merged at immutable commit
-  `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
-  canonical JSON/CSV/HDF5 analysis authority.
 - Active #8358 PR #9039 is on `feat/8358-tools-variation-adapter`, updated to
   current `main`. Its Tools gateway, typed trial evidence, serial/batched
   execution, analytical and articulated MuJoCo adapters, fail-closed
@@ -127,8 +106,6 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   adds a forced-import-block regression. All five launcher tests pass on Python
   3.11 and 3.13; a new protected run is pending. Keep #8358 open because its
   broader UI, localized-perturbation, and presentation criteria remain unaudited.
-- PR #9032 is open at `5edacb13c`; Standard CI passes, but optional-stack has
-  a headless `DISPLAY` failure and human review remains absent.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and
   requirement-level R10–R15 qualification are complete.
 - AffineDrift #3930 remains downstream of the qualified UpstreamDrift release;

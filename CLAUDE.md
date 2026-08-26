@@ -5,7 +5,16 @@
 > **GAAI Fleet Member.** GAAI framework installed in `.gaai/`. Read `.gaai/core/GAAI.md` for full governance spec.
 > Rules: `@.gaai/core/contexts/rules/base.rules.md` and `@.gaai/project/contexts/rules/project.rules.md`
 > PRs target `main`. Use focused topic branches such as `fix/...`, `feat/...`, `chore/...`, or `claude/...`.
->
+
+## Engineering Design Manual Authority
+
+`manuals/upstreamdrift` QMD is the only editable engineering design-manual
+source. Generated LaTeX, PDF, DOCX, and HTML are non-editable artifacts. Read
+`config/design_manual_governance.json`, update the calculation registry/SPEC/
+handoff when their governed pathways change, and run
+`python3 -m scripts.check_design_manual_governance`. A successful render is not
+scientific, semantic, visual, accessibility, or publication approval.
+
 > **Before writing new code, read [`AGENTS.md`](AGENTS.md)** — it lists the
 > shared infrastructure (FK, reference poses, mocap loaders, theme,
 > rendering helpers) you should reuse instead of reinventing.

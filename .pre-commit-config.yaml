@@ -83,6 +83,13 @@ repos:
         additional_dependencies: [pypdf>=5.0]
         files: '\.(md|qmd|tex|docx|pdf)$'
 
+      - id: design-manual-governance
+        name: "engineering design-manual governance"
+        entry: python -m scripts.check_design_manual_governance
+        language: system
+        pass_filenames: false
+        files: ^(manuals/upstreamdrift/|config/design_manual_governance\.json$|scripts/(check_design_manual_governance|design_manual_contract)\.py$|AGENTS\.md$|CLAUDE\.md$|SPEC\.md$|AGENT_HANDOFF\.md$)
+
   # -------------------------------------------------------------------------
   # Stage 3: Config File Formatting - ALWAYS RUNS
   # -------------------------------------------------------------------------

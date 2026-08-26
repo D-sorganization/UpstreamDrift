@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - "docs/**"
+      - "manuals/upstreamdrift/**"
+      - "config/design_manual_governance.json"
+      - "scripts/check_design_manual_governance.py"
+      - "scripts/design_manual_contract.py"
       - "scripts/check_docs_governance.py"
       - "scripts/check_doc_catalog.py"
       - "scripts/check_doc_size_budget.py"
@@ -11,11 +15,16 @@ on:
       - "scripts/config/doc_size_budget.json"
       - "tests/scripts/test_doc_governance_checks.py"
       - "tests/scripts/test_document_title_case.py"
+      - "tests/scripts/test_design_manual_governance_contract.py"
       - ".github/workflows/docs-governance.yml"
   push:
     branches: [main]
     paths:
       - "docs/**"
+      - "manuals/upstreamdrift/**"
+      - "config/design_manual_governance.json"
+      - "scripts/check_design_manual_governance.py"
+      - "scripts/design_manual_contract.py"
       - "scripts/check_docs_governance.py"
       - "scripts/check_doc_catalog.py"
       - "scripts/check_doc_size_budget.py"
@@ -23,6 +32,7 @@ on:
       - "scripts/config/doc_size_budget.json"
       - "tests/scripts/test_doc_governance_checks.py"
       - "tests/scripts/test_document_title_case.py"
+      - "tests/scripts/test_design_manual_governance_contract.py"
       - ".github/workflows/docs-governance.yml"
 
 concurrency:
@@ -57,6 +67,9 @@ jobs:
       - name: Validate documentation governance files
         run: python3 scripts/check_docs_governance.py
 
+      - name: Validate engineering design-manual governance
+        run: python3 -m scripts.check_design_manual_governance
+
       - name: Install test dependencies
         run: |
           python3 -m venv "$RUNNER_TEMP/docs-governance-venv"
@@ -65,7 +78,7 @@ jobs:
           "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest pytest-asyncio pytest-timeout pypdf
 
       - name: Test documentation governance files
-        run: python -m pytest tests/scripts/test_doc_governance_checks.py -q
+        run: python -m pytest tests/scripts/test_doc_governance_checks.py tests/scripts/test_design_manual_governance_contract.py -q
 
       - name: Validate documentation catalog
         run: python3 scripts/check_doc_catalog.py
