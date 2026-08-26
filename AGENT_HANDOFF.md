@@ -65,9 +65,9 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - Published floats use six significant digits for cross-platform identity;
   rank decisions are computed at full precision before serialization. These
   local results do not establish structural/global rank or human strategy.
-- The active #9104 branch proves analytic physical-map rank seven/nullity four,
-  retains three exact nonunique families, and gives registered finite-record
-  rank seven with condition 180.853;
+- PR #9108 is the active protected delivery for #9104. It proves analytic
+  physical-map rank seven/nullity four, retains three exact nonunique families,
+  and gives registered finite-record rank seven with condition 180.853;
   equivalent-unit change is `4.44089e-16`, while zero motion has rank zero.
 - Its Gaussian Fisher screen is an oracle-kinematics lower bound only: at 1 N m
   noise, the worst relative 95% half-width is 0.123266 for the full record and
@@ -107,8 +107,8 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
 - #9027 contract PR #9049 and dependent local-rank PR #9100 are merged. #9104
-  is the active exact-map and finite-record child; raw dimensional conditioning
-  alone is not evidence.
+  and PR #9108 are the active exact-map and finite-record delivery; raw
+  dimensional conditioning alone is not evidence.
 - PR #9032 is at remote head `d341a0c92`; required CI passed at last
   verification. Its optional source-lock failure is deliberate.
 - #8358's Tools gateway and analyses are merged; UI and presentation criteria
