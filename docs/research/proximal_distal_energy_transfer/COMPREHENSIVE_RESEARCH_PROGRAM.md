@@ -69,6 +69,11 @@ identifiability, constraint singularities, internal-force null spaces,
 finite-time stability, phase sensitivity, basins, and bifurcations where the
 mathematics is applicable.
 
+The executable
+[`hybrid-system contract`](HYBRID_SYSTEM_CONTRACT.md) registers these components
+and explicit unavailable states across all eight tiers. Registration is a
+topology gate, not evidence that the remaining diagnostics or comparisons pass.
+
 Open-loop timing, state-triggered policies, impedance control, robust model
 predictive control, stochastic or optimal feedback control, differential
 dynamic programming, and risk-sensitive formulations are compared under the
