@@ -145,6 +145,10 @@ is the single proximal-to-distal completion authority.
 - #9049, #9100, #9108, #9110, and #9114 are merged; #9116/PR #9117 is
   protected and capacity-bound. #9123 is complete locally but cannot enter its
   protected publication workflow until #9117 merges.
+- #9124 is the registered next control milestone: bounded nonlinear event-
+  reaching feasibility under explicit model-scenario torque and torque-rate
+  bounds. It is a child of #8557/#9027/#8449 and depends on protected #9123;
+  do not infer physiological bounds, controller ranking, or coaching guidance.
 - #8358's Tools gateway and analyses are merged; UI and presentation criteria
   remain unaudited. Merged #9096 changes no production API, schema, or vendor pin.
 - #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
