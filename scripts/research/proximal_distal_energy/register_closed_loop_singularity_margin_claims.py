@@ -108,7 +108,8 @@ def _nominal_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "branch-phase samples close within 1.66533e-16 m and retain rank 4/nullity "
         "1 under 1 rad and 0.75 m coordinate scales; the minimum scaled singular "
         "value is 0.202095 m, condition number is 6.45326, and phase-spectrum "
-        "spread is 2.22045e-15 m."
+        "spread is approximately 2e-15 m at the declared one-significant-digit "
+        "roundoff reporting precision."
     )
     return _claim(
         claim_id="PD-CLAIM-313",
@@ -155,7 +156,7 @@ def _nominal_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
                 "6.45326#1", "/nominal_orbit/maximum_scaled_condition_number"
             ),
             _numeric_entry(
-                "2.22045e-15#1",
+                "2e-15#1",
                 "/nominal_orbit/maximum_scaled_singular_value_spread_m",
             ),
         ],

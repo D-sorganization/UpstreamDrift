@@ -4856,7 +4856,7 @@
     },
     {
       "claim_id": "PD-CLAIM-313",
-      "statement_sha256": "dc75c8d3673aea8d21109f836504a9f8e867832590885ac8a9d3bd8bfa277342",
+      "statement_sha256": "27e84a32a75817c3d65c634bcd960371162cfdf52279ea3d6cc5d13b38f44d2e",
       "numeric_evidence": [
         {
           "literal_id": "0.75#1",
@@ -4969,7 +4969,7 @@
           "rtol": 0.0
         },
         {
-          "literal_id": "2.22045e-15#1",
+          "literal_id": "2e-15#1",
           "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
           "json_pointer": "/nominal_orbit/maximum_scaled_singular_value_spread_m",
           "evidence_scope": "local_json_value",

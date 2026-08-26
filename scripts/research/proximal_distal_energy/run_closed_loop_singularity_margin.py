@@ -14,6 +14,7 @@ import numpy as np
 from scripts.research.proximal_distal_energy.closed_loop_singularity_margin import (
     PlanarClosedGeometry,
     PlanarCoordinateScale,
+    ROUND_OFF_DIAGNOSTIC_SIGNIFICANT_DIGITS,
     audit_closed_loop_orbit,
     audit_feasible_configuration,
     audit_triangle_degeneracies,
@@ -308,6 +309,9 @@ def build_report() -> dict[str, object]:
         ],
         "position_closure_tolerance_m": POSITION_CLOSURE_TOLERANCE_M,
         "relative_rank_tolerance": NOMINAL_RELATIVE_TOLERANCE,
+        "roundoff_diagnostic_significant_digits": (
+            ROUND_OFF_DIAGNOSTIC_SIGNIFICANT_DIGITS
+        ),
         "scale_controls": _scale_control(),
         "schema_version": SCHEMA_VERSION,
         "unit_equivalence_control": _equivalent_unit_control(),

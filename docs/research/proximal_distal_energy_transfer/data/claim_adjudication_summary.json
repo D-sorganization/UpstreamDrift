@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "a78581ce799257c1f907562b46eda711f91d7c11780ea7175248053603f4a44e",
+  "paper_source_digest": "0b03e99f13b5b8728980125250710f46a1638ba392f535f32191d3773cd28333",
   "claim_count": 313,
   "outcome_counts": {
     "inconclusive": 5,
@@ -14304,7 +14304,7 @@
     {
       "claim_id": "PD-CLAIM-313",
       "adjudication_outcome": "supported",
-      "statement": "For the exact 0.75 m/0.78 m/0.25 m planar triangle, all 362 registered branch-phase samples close within 1.66533e-16 m and retain rank 4/nullity 1 under 1 rad and 0.75 m coordinate scales; the minimum scaled singular value is 0.202095 m, condition number is 6.45326, and phase-spectrum spread is 2.22045e-15 m.",
+      "statement": "For the exact 0.75 m/0.78 m/0.25 m planar triangle, all 362 registered branch-phase samples close within 1.66533e-16 m and retain rank 4/nullity 1 under 1 rad and 0.75 m coordinate scales; the minimum scaled singular value is 0.202095 m, condition number is 6.45326, and phase-spectrum spread is approximately 2e-15 m at the declared one-significant-digit roundoff reporting precision.",
       "classification": "exact_feasible_closed_loop_regular_orbit",
       "published_status": "supported_for_declared_exact_planar_kinematic_map",
       "audit_status": "exact_closure_branch_phase_geometry_scale_unit_tolerance_and_manufactured_adverse_controls_checked",
@@ -14368,8 +14368,8 @@
       ],
       "claim_family": "ch07_model_ladder",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:249",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:258"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:251",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:260"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",

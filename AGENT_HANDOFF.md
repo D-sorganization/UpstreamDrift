@@ -9,9 +9,9 @@ is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `41101daf7bde97e6005a5a25b7c36bc329820a6c`; this branch merges that authority after protected PR #9110's `d16212ac7` squash.
+- Remote `main` is `41101daf751b38da99c88ce5f576dd77902937eb`; this branch merges that authority after protected PR #9110's `d16212ac7` squash.
 - The current branch publication is 245 pages, SHA-256
-  `2c78d3e1017f929f0a29f00c153f076211717433686c0a646f568483904e82f7`,
+  `987b65f48733bbd213d24d56767504a1da412f3d255ecb5d389f6c0369e3cb4b`,
   with 194 URI links and 255 outline entries. Archival qualification remains
   false because the PDF is untagged and retains Type 3 and unembedded fonts.
 - The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
@@ -75,8 +75,10 @@ is the single proximal-to-distal completion authority.
   degeneracies are 3/2. A five-offset by five-tolerance matrix retains the
   observed numerical rank boundary without calling it physical.
 - Phase, scale, feasible/impossible geometry, equivalent-unit, and manufactured
-  rank controls pass. The paper treatment is visually clean on printed page 175. This is planar kinematics only: no force, anatomy, passive torque,
-  human occurrence, strategy, or coaching inference is authorized.
+  rank controls pass. The cross-phase roundoff diagnostic is explicitly
+  one-significant-digit and approximately `2e-15` m, while decisions retain
+  full precision. This is planar kinematics only: no force, anatomy, passive
+  torque, human occurrence, strategy, or coaching inference is authorized.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -86,11 +88,10 @@ is the single proximal-to-distal completion authority.
   The seven-corner plan is 93/830; 737 checkpoints and 27 nominal ground
   branches are absent. `release_evidence=false`; a persisted `running` state
   is stale and no campaign process is active.
-- Checkpoints remain under
-  `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`. ControlTower's
-  WSL VHDX is unreadable (`0x80070570`). Preserve it and the C: checkpoints.
-  Do not retry mounts, run CHKDSK, mutate frozen plans, or start a replacement
-  campaign without an explicit recoverability decision.
+- Checkpoints remain under `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
+  ControlTower's WSL VHDX is unreadable (`0x80070570`); preserve it and the C:
+  checkpoints. Do not retry mounts, run CHKDSK, mutate frozen plans, or start
+  a replacement campaign without an explicit recoverability decision.
 - DeskComputer is fully runner-drained and must not run uncertainty campaigns
   or large parallel tests. Use serial bounded tests with `-n 0` only.
 
@@ -110,9 +111,8 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9027 contract PR #9049, local-rank PR #9100, exact-map PR #9108, and scaled
-  constraint PR #9110 are merged. #9113 is the active protected slice; selectively
-  requalify later stale control commits rather than merging them wholesale.
+- #9049, #9100, #9108, and #9110 are merged. #9113 is the active protected
+  slice; requalify stale controls selectively rather than merging wholesale.
 - PR #9032 is at remote head `d341a0c92`; required CI passed at last
   verification. Its optional source-lock failure is deliberate.
 - #8358's Tools gateway and analyses are merged; UI and presentation criteria
@@ -140,17 +140,11 @@ is the single proximal-to-distal completion authority.
 
 ```powershell
 python -m scripts.research.proximal_distal_energy.claim_audit validate
-python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
-python -m scripts.research.proximal_distal_energy.hybrid_system_contract validate
-python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability validate
 python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics validate
 python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
 python -m pytest -n 0 -q tests/research/test_closed_loop_singularity_margin.py tests/research/test_closed_loop_singularity_margin_evidence.py tests/research/test_constraint_internal_force_diagnostics.py tests/research/test_constraint_internal_force_diagnostics_evidence.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
-python scripts/ci/check_architecture_budget.py
-python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
 ```
 
-Passing shared gates does not close a scientific child whose narrower evidence
-or governed external-data requirement remains incomplete.
+Passing shared gates does not close narrower scientific or external-data gates.

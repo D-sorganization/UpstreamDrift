@@ -505,7 +505,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, coltitle=black, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, breakable, left=2mm, colback=white, toptitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, breakable, titlerule=0mm, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, arc=.35mm, left=2mm, colback=white, leftrule=.75mm, coltitle=black, bottomrule=.15mm, opacityback=0, toprule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2812,7 +2812,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, coltitle=black, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, breakable, left=2mm, colback=white, toptitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, breakable, titlerule=0mm, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, arc=.35mm, left=2mm, colback=white, leftrule=.75mm, coltitle=black, bottomrule=.15mm, opacityback=0, toprule=.15mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -10111,7 +10111,9 @@ separately declared 1 rad angular and 0.75 m translation coordinate
 scales, every sample has rank four and nullity one. The minimum scaled
 singular value is 0.202095 m, the scaled condition number is 6.45326,
 and the maximum singular-spectrum change under global phase rotation is
-\(2.22045\times10^{-15}\) m.
+approximately \(2\times10^{-15}\) m when this roundoff-only diagnostic
+is reported to one significant digit. Rank decisions and singular values
+are still evaluated before publication rounding.
 
 The triangle inequality supplies two exact geometric countermodels. At
 \(d=|L_L-L_T|=0.03\) m and \(d=L_L+L_T=1.53\) m, the triangle becomes
@@ -13184,7 +13186,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 311 material claims. The normalized outcome
+The current census contains 313 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -13213,7 +13215,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 291 \\
+\texttt{supported} & 293 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -13239,8 +13241,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 96 \\
-\texttt{project\_executable\_or\_generated} & 282 \\
+\texttt{project\_derivation\_or\_document} & 98 \\
+\texttt{project\_executable\_or\_generated} & 284 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -13261,7 +13263,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 257 \\
+\texttt{project\_only} & 259 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -13282,11 +13284,11 @@ Model Tier & Claim Count \\
 \endlastfoot
 \texttt{articulated\_spatial} & 32 \\
 \texttt{compliant\_shaft} & 66 \\
-\texttt{cross\_tier\_synthesis} & 63 \\
+\texttt{cross\_tier\_synthesis} & 65 \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
-\texttt{planar\_reduced} & 136 \\
+\texttt{planar\_reduced} & 138 \\
 \texttt{spatial\_reduced} & 76 \\
 \texttt{two\_hand\_or\_bilateral} & 94 \\
 \texttt{uncertainty\_or\_control} & 10 \\
@@ -13313,7 +13315,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 267 \\
+\texttt{none\_declared} & 269 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -13387,7 +13389,7 @@ ch06cc spatial forward contact & 8 & 8 / 0 / 0 & project authored
 only \\
 ch06d uncertainty control & 10 & 10 / 0 / 0 & project authored only \\
 ch06e experimental protocol & 1 & 1 / 0 / 0 & project authored only \\
-ch07 model ladder & 17 & 17 / 0 / 0 & project authored only \\
+ch07 model ladder & 19 & 19 / 0 / 0 & project authored only \\
 ch07 results & 8 & 8 / 0 / 0 & project authored only \\
 ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
 ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\

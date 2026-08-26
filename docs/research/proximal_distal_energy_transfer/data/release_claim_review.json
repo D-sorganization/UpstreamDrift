@@ -2696,8 +2696,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:229",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:240",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:249",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:258"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:251",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:260"
       ],
       "negative_controls": [
         "both exact assembly branches",

@@ -17,6 +17,21 @@ from scripts.research.proximal_distal_energy.mechanism_ladder import (
 )
 
 FloatArray = npt.NDArray[np.float64]
+ROUND_OFF_DIAGNOSTIC_SIGNIFICANT_DIGITS = 1
+
+
+def _canonical_roundoff_diagnostic(value: float) -> float:
+    """Return a platform-stable scalar for a numerical roundoff diagnostic.
+
+    Rank, condition, and singular-value decisions use the unrounded arrays.
+    Only the reported cross-phase spread is quantized because its expected
+    value is analytically zero and its observed magnitude is set by LAPACK/BLAS
+    rounding order rather than by the closed-loop geometry.
+    """
+
+    if value == 0.0:
+        return 0.0
+    return float(f"{value:.{ROUND_OFF_DIAGNOSTIC_SIGNIFICANT_DIGITS - 1}e}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -254,7 +269,9 @@ def audit_closed_loop_orbit(
         minimum_scaled_condition_number=min(conditions),
         maximum_scaled_condition_number=max(conditions),
         reference_scaled_singular_values_m=tuple(float(value) for value in spectra[0]),
-        maximum_scaled_singular_value_spread_m=float(np.max(np.ptp(spectra, axis=0))),
+        maximum_scaled_singular_value_spread_m=_canonical_roundoff_diagnostic(
+            float(np.max(np.ptp(spectra, axis=0)))
+        ),
         maximum_scaled_nullspace_residual_m=max(
             audit.maximum_scaled_nullspace_residual_m for audit in audits
         ),

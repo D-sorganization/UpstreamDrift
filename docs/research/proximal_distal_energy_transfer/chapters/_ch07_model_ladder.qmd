@@ -244,7 +244,9 @@ contacts to at most $1.66533\times10^{-16}$ m. Under the separately declared
 1 rad angular and 0.75 m translation coordinate scales, every sample has rank
 four and nullity one. The minimum scaled singular value is 0.202095 m, the
 scaled condition number is 6.45326, and the maximum singular-spectrum change
-under global phase rotation is $2.22045\times10^{-15}$ m.
+under global phase rotation is approximately $2\times10^{-15}$ m when this
+roundoff-only diagnostic is reported to one significant digit. Rank decisions
+and singular values are still evaluated before publication rounding.
 
 The triangle inequality supplies two exact geometric countermodels. At
 $d=|L_L-L_T|=0.03$ m and $d=L_L+L_T=1.53$ m, the triangle becomes collinear;
