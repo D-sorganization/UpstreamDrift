@@ -188,10 +188,10 @@ def test_canonical_pdf_byte_identity_is_dependency_free() -> None:
     ]
 
     assert digest == (
-        "be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b"
+        "8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30"
     )
-    assert PDF.stat().st_size == 1_870_344
-    assert artifact == {"sha256": digest, "bytes": 1_870_344}
+    assert PDF.stat().st_size == 1_899_798
+    assert artifact == {"sha256": digest, "bytes": 1_899_798}
 
 
 @requires_fitz
@@ -207,27 +207,27 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
     )
 
     assert report["publication"]["sha256"] == (
-        "be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b"
+        "8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30"
     )
-    assert report["publication"]["bytes"] == 1_870_344
-    assert report["publication"]["pages"] == 239
+    assert report["publication"]["bytes"] == 1_899_798
+    assert report["publication"]["pages"] == 244
     assert report["publication"]["fast_web_access"] is True
     assert report["navigation"] == {
-        "outline_entries": 247,
+        "outline_entries": 254,
         "uri_links": 194,
         "internal_links": 0,
         "invalid_uri_links": [],
         "invalid_internal_links": [],
     }
-    assert report["rendering"]["pages_rendered"] == 239
+    assert report["rendering"]["pages_rendered"] == 244
     assert report["rendering"]["errors"] == []
     assert report["accessibility"] == {
         "tagged": False,
-        "pages_with_extractable_text": 239,
+        "pages_with_extractable_text": 244,
         "font_inventory": {
-            "resources": 131,
-            "types": {"Type0": 17, "Type1": 2, "Type3": 112},
-            "type3_resources": 112,
+            "resources": 133,
+            "types": {"Type0": 17, "Type1": 2, "Type3": 114},
+            "type3_resources": 114,
             "unembedded_resources": 2,
         },
     }

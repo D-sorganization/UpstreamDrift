@@ -2,79 +2,81 @@
 
 Last updated: 2026-08-25
 
-This file records current operational state, not history. Git and GitHub retain
-history. Epic #8557 is the single proximal-to-distal completion authority.
+This is current operational state, not history. Git and GitHub retain history.
+Epic #8557 is the single proximal-to-distal completion authority.
 
-## Repository Authority
+## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
-  release bundle. AffineDrift is a generated, immutable, revision-pinned public
-  projection. Tools owns reusable consumers; do not copy its solver or UI
-  implementations into this repository or `vendor/ud-tools`.
-- UpstreamDrift remote `main` is
-  `4f84a8a2dbdafac01a634ceb41b1e415ea7ec5bb`. The normalized-claim authority
-  from PR #9018 remains an ancestor; issue #8724 is closed.
-- The current computational publication is 239 pages with SHA-256
-  `be85b7b62bba060a26ce3fea8355aa8b01dcf8c1b1ccf09304450898a4e5e78b`,
-  194 URI links, and 247 outline entries. All pages render and were inspected.
-  Archival qualification remains false because the PDF is untagged and retains
-  Type 3 and unembedded font resources.
+  release bundle. AffineDrift is an immutable, revision-pinned public
+  projection. Tools owns reusable consumers and source contracts.
+- Remote `main` is `9c44fc068ec44788a1b957bbbfee109f59b02dbf`.
+  PR #9018 and its normalized-claim authority remain ancestors of `main`.
+- The current publication is 244 pages, SHA-256
+  `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
+  with 194 URI links and 254 outline entries. Archival qualification remains
+  false because the PDF is untagged and retains Type 3 and unembedded fonts.
+- The complete audit contains 1,130 reviewed candidates, 306 atomic claims,
+  125 numeric contracts, and 382/382 verified literals. Outcomes are 286
+  supported only within declared estimands and boundaries, five inconclusive,
+  15 untested, and zero contradicted. All 43 public release claims have review
+  dispositions and scientifically open gates. The bundle has 613 artifacts.
 
-## Active Structural Campaign and Recovery Boundary (#8800)
+## Coordinate Force-Source Attribution (#9059)
 
-- Separate #8752 constitutive uncertainty completed on ControlTower and was
-  transferred at branch commit `2fa6cf886`; it is not yet on remote `main`.
-- #8800 uses clean source commit
-  `1bd4d57da7bd257b76b42b3cc19524b283b5f748`, image
-  `sha256:b40d91fe2326c5fae288e4a853377fb164aa0a6ba1de62cb28aba15d65500a1e`,
-  plan file SHA-256
-  `2bddb125492e907acc827e1dbf4cb43b9724e73087679cbf4113bcf96824b120`,
-  and plan-contract SHA-256
-  `c5cfba35ecafa96054ef8cc872f2e91a9f7855db0b93cfa491f9b18ee3db80f4`.
-- #8800 used two workers/two CPUs. Nominal shaft is 48/48 and nominal ground
-  45/72; the full seven-corner plan is only 93/830, with 737 checkpoints absent.
-  The checkpoints and nominal shaft artifact remain under
-  `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
-- The persisted status saying `running` is stale; no campaign process is
-  running and `release_evidence=false`. Partial checkpoints are resume
-  evidence, not scientific release evidence.
-- WSL cannot currently mount
-  `F:\WSL\ControlTower-SSD\ext4.vhdx`; Windows reported the file corrupted and
-  unreadable (`0x80070570`). Both WSL distributions are stopped. Tailscale SSH
-  to ControlTower remains available.
-- Do not retry WSL, run CHKDSK, repair or mount the VHDX, restart Windows
-  services, create a replacement campaign, or alter frozen source or plans
-  without an explicit recovery and recoverability decision. Preserve the VHDX
-  and C: checkpoints. After recovery, verify identities, finish 27 nominal
-  ground branches, then qualify the remaining registered structural corners.
+- Tools protected squash `8dc4512184d8c29e10770ad81e4ce947f849b355`
+  is the reusable `force-attribution/v1` authority. UpstreamDrift consumes it
+  only through `vendor/ud-tools` and the thin biomechanics gateway.
+- The planar study evaluates 135 programs and retains 91 qualified impacts.
+  It separates absolute Coriolis impulse, signed impulse, generalized work,
+  component power/work, mapping residuals, and clubhead-speed optima.
+- The Christoffel cross-versus-squared split is explicitly tied to
+  shoulder-absolute/wrist-relative coordinates. The wrist force-only
+  virtual-work map is rank deficient, so its unreconstructed couple remains
+  evidence rather than being silently assigned to either hand.
+- The chapter, registered search, figure, claim records, release manifests,
+  and focused tests are now on `main`. This is synthetic planar evidence, not
+  a measured grip wrench, muscle attribution, human strategy, or coaching
+  authority.
 
-## Normalized Claim Adjudication (#8724)
+## Hybrid-System Topology Contract (#9027)
 
-- Protected PR #9018 is merged on remote `main` as
-  `9e220712025564caf0ac5201a0ddcf69dd98299e`; #8724 is closed.
-- The authority contains 1,100 reviewed narrative candidates and 303 material
-  claims: 283 supported only within declared estimands and boundaries, five
-  inconclusive, 15 untested, and zero contradicted. Supported claims may report
-  null, mixed, or adverse findings; the count does not imply theory survival.
-- The schema and snapshot-locked migration require explicit normalized
-  outcomes, typed locators, reciprocal mappings, falsifiers, source digests,
-  reasons, reviewer identity, dates, and supported-scope contradiction checks.
-  Unfamiliar claims fail closed.
-- Reviewer JSON, CSV, and paper tables separately report normalized outcome,
-  evidence tier, source independence, model tier, unresolved replication, and
-  claim-family source concentration. Model evidence is never promoted to human
-  validation.
-- Deterministic release evidence covers 2,232 evidence references, 321 local
-  artifacts, 78 external URLs, and a 605-artifact release bundle. The merged
-  head passed 63 focused tests plus standard, optional-stack, publication,
-  security, title-case, file-size, architecture, Ruff, MyPy, and Bandit gates.
+- PR #9049 branch `research/9027-hybrid-system-contract` is reconciled with
+  `main` `9c44fc068` in merge commit `SELF`. It defines typed topology for all
+  eight model tiers: continuous state, controls, algebraic constraints, modes,
+  guards, resets, impacts, actuator dynamics, uncertain event surfaces,
+  observables, limitations, falsifiers, and comparison blockers.
+- Three tiers are implemented, three are partial, and the participant-
+  calibrated and governed-human tiers are explicitly unavailable. This does
+  not establish observability, controllability, stability, controller ranking,
+  participant validity, or coaching interpretation.
+- The non-required optional lane exposes the pre-existing #8963 source lock:
+  committed manufactured-solution evidence does not match
+  `spatial_full_body.py`. Do not update the digest alone, rewrite the PDF or
+  release marker, or run a replacement campaign. Regenerate only after
+  governed campaign integration resolves the source-lock boundary.
 
-## Measured-Trajectory and Human-Evidence Boundaries
+## Structural Campaign and Recovery Boundary (#8800)
 
-- PR #9017 is merged at
-  `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`. It provides fail-closed
-  participant split, processing, frame-transform, and event-detector
-  authorities for #9004.
+- The separate #8752 constitutive campaign completed on ControlTower and was
+  transferred at branch commit `2fa6cf886`; it is not on remote `main`.
+- #8800 is frozen at source `1bd4d57da7bd257b76b42b3cc19524b283b5f748`.
+  The seven-corner plan is 93/830; 737 checkpoints and 27 nominal ground
+  branches are absent. `release_evidence=false`; a persisted `running` state
+  is stale and no campaign process is active.
+- Checkpoints remain under
+  `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`. ControlTower's
+  WSL VHDX is unreadable (`0x80070570`). Preserve it and the C: checkpoints.
+  Do not retry mounts, run CHKDSK, mutate frozen plans, or start a replacement
+  campaign without an explicit recoverability decision.
+- DeskComputer is fully runner-drained and must not run uncertainty campaigns
+  or large parallel tests. Use serial bounded tests with `-n 0` only.
+
+## Human-Evidence Boundaries
+
+- PR #9017 is merged at `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`
+  and provides fail-closed participant split, processing, frame-transform, and
+  event-detector authorities for #9004.
 - #9004 remains open because no qualifying governed participant trajectory
   dataset or held-out human outcome is registered. Simscape exports, fixtures,
   tutorials, GolfDB labels, and launch-monitor records are not substitutes.
@@ -82,56 +84,29 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   bilateral six-axis grip-wrench participant data. Synthetic traces and
   paper-level curves must never substitute for human validation.
 
-## Other Active Dependencies
+## Active Dependencies
 
-- #8800 propagates height, body-mass, and joint-limit bounds through both
-  headline atlases and blocks the final #8752/#8668 audit. It was reopened on
-  2026-08-24 after a manual closure lacked a complete campaign, protected PR,
-  or remote-main merge.
-- #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
-- PR #9039 remains an ancestor of current remote `main`. Tools PR #4674 is merged at immutable commit
-  `17474249b9267d0e73a779c1d72f231e7b8de39c`; this remains the immutable #8358
-  analysis authority. Current `main` carries Tools gitlink `16adbb2503`.
-- #8358's immutable Tools gateway, typed outcomes, serial/batched execution,
-  analytical and articulated adapters, lossless bundles, scalar/rank/OAT,
-  dispersion, and quiet-zone analysis are merged. Keep #8358 open because its
-  broader UI, localized-perturbation, and presentation criteria remain unaudited.
-- #9027 PR #9049 is reconciled through current `main` `4f84a8a2d` at local
-  merge head `af134b8b3`; hybrid and Kalman gates pass. Its non-required
-  optional lane exposes the pre-existing #8963 source lock: committed
-  manufactured-solution evidence no longer matches `spatial_full_body.py`.
-  Do not update the digest alone, rewrite the PDF or release marker, or run a
-  campaign here; regenerate only after governed campaign integration resolves
-  the source-lock boundary.
-- PR #9032 is pushed at remote head `d341a0c92` on current `main`; protected CI
-  is rerunning once and requested human review remains absent.
-- Tools #4142 remains open. PR #4685 is recovered on current Tools `main` at
-  `6bcd19d59`, retains the 21-verified/10-partial R10--R15 ledger and existing
-  auto-merge request, and is waiting on protected checks and human review.
-- AffineDrift PR #3942 is merged. Do not project a moving or partial campaign;
-  the next public projection must pin a qualified UpstreamDrift merge commit.
-- #8963 architecture debt remains separate from the frozen campaign source.
-  Do not merge or regenerate source-bound spatial evidence until campaign
-  integration removes the source-lock conflict.
+- #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
+  #8595, #8668, #8684, and #8796 remain open.
+- PR #9032 is at remote head `d341a0c92`; required CI is green and requested
+  human review is absent. Its optional source-lock failure is deliberate.
+- #8358's immutable Tools gateway and analysis methods are merged, but its UI,
+  localized-perturbation, and presentation criteria remain unaudited.
+- Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
+  moving or partial campaign; the next public projection must pin a qualified
+  UpstreamDrift merge commit.
 
-## Scientific Boundaries
+## Scientific and Review Invariants
 
-- The model ladder is synthetic and model-conditional. It does not establish
-  participant mechanics, anatomy, physiology, equipment calibration, injury,
-  coaching strategy, or a universal speed benefit.
-- Distinguish energy transfer, momentum redistribution, joint work, constraint
-  forces, and clubhead speed. Preserve falsifiers, adverse cases,
+- Distinguish energy transfer, momentum redistribution, joint work,
+  constraint forces, and clubhead speed. Preserve falsifiers, adverse cases,
   identifiability limits, uncertainty, countermodels, and unavailable states.
-
-## Repository and Review Rules
-
-- PRs target `main`; use full PRs, never drafts. Human review is required.
-- Never force-push, admin-merge, bypass hooks/checks, add quarantine debt, or
-  edit `vendor/ud-tools`.
-- Use TDD, DbC, DRY, and LoD. Edit canonical sources and regenerate governed
-  artifacts. Use title case for document headings and captions.
-- Verify exact PR head, reviews, checks, merge SHA, remote-main ancestry, and a
-  clean worktree before reporting completion.
+- Model evidence is never promoted to human validation. No current result
+  establishes anatomy, physiology, equipment calibration, injury, coaching
+  efficacy, or a universal speed benefit.
+- PRs target `main`; use full PRs and require human review. Never force-push,
+  admin-merge, bypass checks, add quarantine debt, or edit the vendor pin
+  independently of a protected Tools authority.
 
 ## Focused Validation
 
@@ -140,8 +115,7 @@ python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.hybrid_system_contract validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python -m pytest -q tests/research/test_hybrid_system_contract.py
-python -m pytest -n 0 -q tests/unit/perturbation tests/shared_contracts/test_tools_vendoring.py tests/launchers/test_tools_vendor_authority.py
+python -m pytest -n 0 -q tests/research/test_hybrid_system_contract.py tests/research/test_proximal_distal_release_bundle.py tests/unit/research/test_proximal_distal_claim_evidence_integrity.py tests/research/test_force_source_claim_registration.py tests/research/test_force_source_optimization.py tests/unit/biomechanics/test_force_source_attribution.py
 python scripts/ci/check_architecture_budget.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py

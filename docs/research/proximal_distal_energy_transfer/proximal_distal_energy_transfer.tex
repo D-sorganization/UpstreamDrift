@@ -498,7 +498,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable, rightrule=.15mm, bottomrule=.15mm, colback=white, leftrule=.75mm, opacityback=0, arc=.35mm, opacitybacktitle=0.6, coltitle=black, toptitle=1mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, toprule=.15mm, bottomtitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, leftrule=.75mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, left=2mm, toprule=.15mm, opacityback=0, titlerule=0mm, breakable, toptitle=1mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2636,6 +2636,309 @@ implication is therefore diagnostic rather than prescriptive: evaluate
 how the complete force vector, couple, and interface velocity evolve
 together, and distinguish the state-dependent reaction from the current
 command before interpreting a large hand-path force as greater effort.
+
+\chapter{Coordinate-Explicit Coriolis, Centripetal, and Gravity
+Attribution}\label{sec-coordinate-force-sources}
+
+\section{Why the Names Need a Contract}\label{sec-force-source-contract}
+
+The words \emph{Coriolis}, \emph{centripetal}, and \emph{centrifugal}
+can make a multibody equation sound as though three additional physical
+agents have appeared. They have not. The physical system still contains
+applied torques, gravity, damping, constraints, and body-to-body
+reactions. Coriolis and squared-speed terms are velocity-dependent parts
+of the same equations after a coordinate system has been chosen. They
+explain how an achieved configuration and motion redirect the effects of
+earlier and current loading.
+
+This chapter uses the fixed convention
+
+\begin{equation}\phantomsection\label{eq-source-equation}{
+M(q)\ddot q+h(q,\dot q)+g(q)+d(\dot q)=\tau,
+}\end{equation}
+
+where \(h\) is the complete velocity bias. An equation term \(r_k\) is
+reported with its equal-and-opposite generalized \textbf{drive}
+\(Q_k=-r_k\). Thus a positive drive accelerates the declared positive
+coordinate, whereas a positive left-hand-side term resists it. Every
+figure and data field follows this sign rule.
+
+The first-kind Christoffel symbols are
+
+\begin{equation}\phantomsection\label{eq-source-christoffel}{
+\Gamma_{ijk}
+=\frac{1}{2}\left(
+\frac{\partial M_{ij}}{\partial q_k}
++\frac{\partial M_{ik}}{\partial q_j}
+-\frac{\partial M_{jk}}{\partial q_i}
+\right),
+\qquad
+h_i=\sum_{j,k}\Gamma_{ijk}\dot q_j\dot q_k.
+}\end{equation}
+
+The registered monomial convention assigns
+
+\begin{equation}\phantomsection\label{eq-source-monomial-split}{
+h_i^{\mathrm{sq}}=\sum_j\Gamma_{ijj}\dot q_j^2,
+\qquad
+h_i^{\mathrm{cor}}=2\sum_{j<k}\Gamma_{ijk}\dot q_j\dot q_k.
+}\end{equation}
+
+The cross-speed terms are called \textbf{Coriolis terms} and the
+squared-speed terms are called \textbf{centripetal/centrifugal terms}.
+Their sum is checked against the provider's independently evaluated
+\(h\). Any discrepancy is retained as \texttt{velocity\_residual}; it is
+never hidden in one of the named sources. The total \(h\) is
+mechanically meaningful within the model, but the cross-versus-squared
+partition changes under a change of generalized coordinates. A
+coordinate label is therefore part of every reported result.
+
+\section{What the Terms Mean in This
+Pendulum}\label{sec-two-link-source-meaning}
+
+The double-pendulum study declares \(q_1\) as the absolute arm angle and
+\(q_2\) as the club angle relative to the arm, so the club's absolute
+angle is \(q_1+q_2\). Let \(K=m_2 l_1 l_{c2}\) be the inertial coupling
+coefficient. For this coordinate choice, the velocity terms reduce to
+
+\begin{equation}\phantomsection\label{eq-two-link-source-terms}{
+h^{\mathrm{cor}}
+=
+\begin{bmatrix}
+-2K\sin(q_2)\dot q_1\dot q_2\\
+0
+\end{bmatrix},
+\qquad
+h^{\mathrm{sq}}
+=
+\begin{bmatrix}
+-K\sin(q_2)\dot q_2^2\\
+ K\sin(q_2)\dot q_1^2
+\end{bmatrix}.
+}\end{equation}
+
+This form gives the names operational meaning:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The Coriolis cross term exists only while both the arm and the
+  relative wrist angle are moving. If either rate is zero, it vanishes.
+  Its sign also changes with link geometry through \(\sin(q_2)\) and
+  with either rate.
+\item
+  The squared-speed terms remain when only one rate is nonzero. The
+  \(\dot q_1^2\) term is the generalized wrist-coordinate consequence of
+  carrying the distal mass around the proximal pivot; the \(\dot q_2^2\)
+  term is its reciprocal contribution to the proximal equation.
+\item
+  In an inertial free-body diagram, \textbf{centripetal} denotes the
+  inward force required to bend a mass trajectory. \textbf{Centrifugal}
+  is the outward inertial interpretation used in a rotating frame or
+  generalized-coordinate balance. These are two descriptions of one
+  interaction, not forces to add together.
+\item
+  Gravity is configuration dependent rather than speed dependent. Its
+  drive is \(-g(q)\) under Equation Equation~\ref{eq-source-equation},
+  and its power can be positive or negative depending on the direction
+  of motion.
+\end{enumerate}
+
+The equations do not say that a golfer consciously creates a Coriolis
+force. Applied moments and external forces create and reshape the state;
+the linked system's geometry and velocity then determine the
+velocity-bias terms. In that limited, useful sense, earlier proximal
+work can be expressed later as a motion-dependent distal drive. The flow
+is state mediated, not force free.
+
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, leftrule=.75mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, left=2mm, toprule=.15mm, opacityback=0, titlerule=0mm, breakable, toptitle=1mm, bottomtitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm]
+
+Imagine swinging a partly folded two-section ruler. Pulling and turning
+it builds motion. As the hinge opens, the same moving mass must be
+redirected, so the ruler pushes back through the hinge. The cross-speed
+part appears only when the whole ruler is turning \emph{and} the hinge
+is opening. The squared-speed part is the inward-turning demand
+associated with either rotation by itself. Gravity tilts the balance
+throughout. These labels help audit the motion; they do not identify
+which muscle supplied the original energy.
+
+\end{tcolorbox}
+
+\section{From a Generalized Drive to Force Along the Hand
+Path}\label{sec-source-hand-path-map}
+
+MacKenzie, McCourt, and Champoux found that signed linear work per metre
+of hand travel was strongly associated with clubhead speed in their
+sample (\citeproc{ref-mackenzie2020energy}{MacKenzie, McCourt, and
+Champoux 2020}). That observable motivates a hand-path projection, but
+it does not authorize relabeling every generalized term as a measured
+hand force.
+
+For endpoint position \(x_H(q)\) and Jacobian
+\(J_H=\partial x_H/\partial q\), virtual work requires
+
+\begin{equation}\phantomsection\label{eq-source-virtual-work}{
+Q_k=J_H^T F_{H,k}+r_k,
+}\end{equation}
+
+where \(F_{H,k}\) is the minimum-norm force-only equivalent and \(r_k\)
+is the unreconstructed generalized residual. Both are reported. The
+wrist point in this fixed-hub model depends only on \(q_1\):
+
+\begin{equation}\phantomsection\label{eq-source-wrist-jacobian}{
+J_H=
+\begin{bmatrix}
+l_1\cos q_1&0\\
+l_1\sin q_1&0
+\end{bmatrix}.
+}\end{equation}
+
+Its rank is one. A two-coordinate generalized drive containing a wrist
+couple therefore cannot be represented exactly by a single planar force
+at that point. The contract reports
+\texttt{rank\_deficient\_force\_only} and the residual in N m. The
+mapped force is useful for a declared along-path comparison, while the
+residual prevents that comparison from masquerading as a complete grip
+wrench.
+
+When hand speed exceeds the numerical threshold, the achieved path
+tangent is
+
+\begin{equation}\phantomsection\label{eq-source-tangent}{
+e_t=\frac{\dot x_H}{\lVert\dot x_H\rVert},
+\qquad F_{\parallel,k}=F_{H,k}\cdot e_t.
+}\end{equation}
+
+Zero-speed samples have no tangent and remain undefined. Trajectory
+integration uses only intervals whose two endpoints have a defined
+tangent, and publishes valid duration divided by total duration.
+
+\section{Impulse, Power, and Energy Answer Different
+Questions}\label{sec-source-metrics}
+
+For each source \(k\), the implementation reports
+
+\[
+I_{\parallel,k}=\int F_{\parallel,k}\,dt,
+\qquad
+I_{|\parallel|,k}=\int |F_{\parallel,k}|\,dt,
+\]
+
+\begin{equation}\phantomsection\label{eq-source-integrals}{
+P_{q,k}=Q_k^T\dot q,
+\qquad
+W_{q,k}=\int P_{q,k}\,dt.
+}\end{equation}
+
+Signed impulse measures directional accumulation; absolute impulse
+measures how much action occurred before cancellation. Power measures
+instantaneous energy rate. Work measures its time integral. A large
+impulse can do little work if it is nearly normal to velocity, and a
+shorter high-power interval can do substantial work. These quantities
+must not be substituted for one another.
+
+The generalized work of a Coriolis or squared-speed equation term is a
+coordinate-explicit kinetic-energy attribution. It is not automatically
+the energy transferred from arm to club as physical subsystems. That
+latter claim requires the club free-body balance and wrist
+reaction-force power developed in Section~\ref{sec-interaction-forces}.
+The two views are complementary: one audits the joint-coordinate
+equation; the other audits energy crossing a named physical interface.
+
+\section{Registered Optimization Example}\label{sec-source-optimization}
+
+The executable study evaluates a complete, frozen 135-program grid:
+three shoulder torques (60, 80, and 100 N m), three early
+wrist-restraining magnitudes (0, 5, and 10 N m), and fifteen drive-onset
+times from 0.000 to 0.350 s, all followed by a 15 N m wrist drive. Each
+trajectory is integrated with the ODE reference backend and truncated at
+the first club-vertical crossing inside the registered delivery zone.
+Forty-four programs fail that impact gate and are excluded rather than
+rewarded for additional rotations; 91 qualify.
+
+The primary example maximizes \textbf{absolute} Coriolis tangent impulse
+because the signed values reverse within a swing. A signed companion
+objective is published so direction and cancellation remain visible. The
+grid maximum is not a continuous optimal-control solution and not a
+human technique recommendation.
+
+The two grid-selected programs are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Maximum absolute Coriolis impulse:} shoulder torque 100 N m,
+  early wrist restraint 10 N m, drive onset 0.100 s, absolute/signed
+  Coriolis tangent impulse 13.817/-6.825 N s, and impact speed 46.780
+  m/s.
+\item
+  \textbf{Maximum clubhead speed:} shoulder torque 100 N m, early wrist
+  restraint 5 N m, drive onset 0.125 s, absolute/signed Coriolis tangent
+  impulse 13.701/-7.033 N s, and impact speed 46.913 m/s.
+\end{itemize}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_force_source_optimization.pdf}
+
+}
+
+\caption{\label{fig-source-optimization}The registered search compares
+absolute Coriolis tangent impulse with impact clubhead speed and signed
+component work. The two highlighted optima are close but not identical.}
+
+\end{figure}%
+
+For the maximum-impulse program, Coriolis generalized work is -100.69 J,
+squared-speed work is -33.73 J, gravity work is +25.56 J, and
+applied-drive work is +358.20 J through impact. The negative Coriolis
+work does not mean the term was absent: its absolute tangent impulse is
+the largest in the grid, but its generalized drive opposes the
+instantaneous generalized velocity on net. That contrast is precisely
+why impulse and energy-transfer claims are reported separately.
+
+The force-only wrist mapping is rank deficient for every sample. In the
+two highlighted programs, the maximum retained generalized residual is
+54.44 and 52.81 N m, respectively; the hand-path tangent is defined for
+more than 99.6\% of the impact-truncated duration. These diagnostics are
+part of the result, not footnotes to discard.
+
+\section{What a Researcher Can Optimize
+Next}\label{sec-source-next-optimization}
+
+The reusable objective returns the negative signed or absolute component
+impulse for minimizer-compatible software. A defensible next study can
+vary a smooth torque history, segment parameters, or event-triggered
+timing while constraining impact validity, torque, torque rate, joint
+range, work, peak force, and mapping residual. It should report at least
+a Pareto surface over
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  clubhead speed or task outcome;
+\item
+  signed and absolute Coriolis hand-path impulse;
+\item
+  net force-work-per-path-length using the MacKenzie-compatible
+  definition;
+\item
+  actuator work and peak applied moment;
+\item
+  physical wrist-interface work from the subsystem balance; and
+\item
+  robustness on held-out parameter and initial-state distributions.
+\end{enumerate}
+
+Optimizing only one named equation term can produce a mechanically
+extreme trajectory, exploit cancellation, or move work into the
+actuators. The term is most informative as an explanatory coordinate
+within a constrained, multi-objective experiment---not as an isolated
+coaching target.
 
 \chapter{Ground-Reaction Drift
 Attribution}\label{ground-reaction-drift-attribution}
@@ -12738,7 +13041,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 303 material claims. The normalized outcome
+The current census contains 306 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -12767,7 +13070,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 283 \\
+\texttt{supported} & 286 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -12793,8 +13096,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 88 \\
-\texttt{project\_executable\_or\_generated} & 253 \\
+\texttt{project\_derivation\_or\_document} & 91 \\
+\texttt{project\_executable\_or\_generated} & 277 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -12815,7 +13118,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 249 \\
+\texttt{project\_only} & 252 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -12840,7 +13143,7 @@ Model Tier & Claim Count \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
-\texttt{planar\_reduced} & 128 \\
+\texttt{planar\_reduced} & 131 \\
 \texttt{spatial\_reduced} & 76 \\
 \texttt{two\_hand\_or\_bilateral} & 92 \\
 \texttt{uncertainty\_or\_control} & 8 \\
@@ -12867,7 +13170,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 259 \\
+\texttt{none\_declared} & 262 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -12917,6 +13220,8 @@ ch02 mechanics & 30 & 2 / 17 / 11 & mixed independence \\
 ch03 evidence & 13 & 1 / 10 / 2 & mixed independence \\
 ch03 interaction forces & 10 & 8 / 1 / 1 & mixed independence \\
 ch03b hand path attribution & 11 & 7 / 2 / 2 & mixed independence \\
+ch03ba coordinate force sources & 3 & 3 / 0 / 0 & project authored
+only \\
 ch03c ground reaction drift & 8 & 4 / 2 / 2 & mixed independence \\
 ch03d shoulder velocity transfer & 18 & 18 / 0 / 0 & project authored
 only \\

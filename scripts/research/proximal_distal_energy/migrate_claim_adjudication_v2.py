@@ -19,13 +19,13 @@ PRE_ADJUDICATION_SOURCE_DIGEST = (
     "ad5a9e7338f9f8ef9517464f8c8cf9f70a2dc033de50312de760417438a1d6d5"
 )
 PRIOR_REVIEWED_SOURCE_DIGEST = (
-    "7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a"
+    "f6a793330c5b8b941ce1b489decf10406426e628175ddf66e6cdd47418ea8dd1"
 )
 REVIEWED_SOURCE_DIGEST = (
-    "ea406841c4a500dcab41d3b4ed1d7763ee0a2f9cf559d15041faa4036b31dfe7"
+    "d6902ef0535d09743a28a538b5a0c267bf215c6fd508c258afdc873cac261e8d"
 )
-REVIEWED_CLAIM_COUNT = 303
-REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
+REVIEWED_CLAIM_COUNT = 306
+PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
         "PD-CAND-aeecc7c4cec6b96f",
@@ -51,12 +51,29 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
         "PD-CAND-b5b2526e23b77d70",
     }
 )
-PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = (
-    REVIEWER_PROJECTION_CANDIDATE_IDS - {"PD-CAND-b2e277593764ee20"}
-) | {"PD-CAND-bb48a75174a745ce"}
+REVIEWER_PROJECTION_CANDIDATE_IDS = (
+    PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS
+    - {
+        "PD-CAND-aeecc7c4cec6b96f",
+        "PD-CAND-87d26eacc282b21c",
+        "PD-CAND-b2e277593764ee20",
+        "PD-CAND-9519d7e6dfb308ef",
+        "PD-CAND-f1e25f4b524e7a06",
+        "PD-CAND-0acfb3375ef769f8",
+        "PD-CAND-f5697c26aed70275",
+    }
+) | {
+    "PD-CAND-77f607e78b74eddc",
+    "PD-CAND-929f26183c2056d8",
+    "PD-CAND-37582fe0fbc00cc7",
+    "PD-CAND-063c7e05fb640e5d",
+    "PD-CAND-22fe542413fe1075",
+    "PD-CAND-9248119a2458c1b1",
+    "PD-CAND-a83d791d65049fc2",
+}
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 303-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 306-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -343,6 +360,9 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(

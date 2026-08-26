@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 42,
-    "reviewed_release_claim_count": 42,
+    "release_claim_count": 43,
+    "reviewed_release_claim_count": 43,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 42,
-    "atomic_claim_count": 303
+    "scientifically_open_gate_count": 43,
+    "atomic_claim_count": 306
   },
   "release_claim_reviews": [
     {
@@ -2519,6 +2519,49 @@
         "Calibrated distributed grip, articulated bilateral native contact, population uncertainty, and governed human data remain open."
       ],
       "remaining_scientific_gate": "Repeat with calibrated distributed grip contact, additional states, independent native formulations, and governed human data before physical or biomechanical inference."
+    },
+    {
+      "release_claim_key": "coordinate_force_source_attribution",
+      "published_status": "supported_at_declared_planar_model_and_coordinate_tier",
+      "audit_state": "reviewed_as_bounded_coordinate_explicit_model_result",
+      "scientific_disposition": "supported_at_declared_planar_model_and_coordinate_tier",
+      "supporting_claim_ids": [
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf",
+        "scripts/research/proximal_distal_energy/force_source_optimization.py",
+        "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
+        "src/shared/python/biomechanics/force_source_attribution.py",
+        "tests/research/test_force_source_optimization.py",
+        "tests/unit/biomechanics/test_force_source_attribution.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd:119",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd:189"
+      ],
+      "negative_controls": [
+        "single-rate Coriolis zero",
+        "velocity-bias reconstruction residual",
+        "rank-deficient endpoint mapping residual",
+        "signed-versus-absolute impulse comparison"
+      ],
+      "falsifiers": [
+        "The monomial sum fails to reconstruct the provider velocity bias, or a cross-speed term remains when either participating rate is zero.",
+        "The mapped force and retained residual do not reconstruct the generalized drive, or undefined zero-speed tangent intervals contribute to integration.",
+        "A clean replay changes grid membership or either selected optimum, fails impact qualification, or violates the published mapping and ledger diagnostics."
+      ],
+      "uncertainty_boundaries": [
+        "The partition changes under coordinate transformation and does not introduce additional physical agents or identify muscle action.",
+        "A rank-deficient force-only equivalent is not a complete grip wrench, and generalized component work is not automatically subsystem transfer.",
+        "This is a finite model-scenario grid, not continuous optimal control, a causal human estimate, or a technique recommendation."
+      ],
+      "remaining_scientific_gate": "Independent coordinate implementation, measured bilateral grip wrenches, and participant-held-out validation."
     }
   ]
 }
