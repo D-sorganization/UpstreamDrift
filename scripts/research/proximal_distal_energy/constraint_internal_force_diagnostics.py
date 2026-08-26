@@ -109,41 +109,26 @@ def normalized_full_hand_wrench_map(
     return output_scale @ matrix @ input_scale
 
 
-def planar_closed_loop_audit(
+def audit_scaled_planar_closure_jacobian(
+    jacobian: npt.ArrayLike,
+    scales: tuple[float, float],
     *,
-    lead_angle_rad: float,
-    trail_angle_rad: float,
-    grip_angle_rad: float,
-    angular_coordinate_scale_rad: float,
-    translation_coordinate_scale_m: float,
-    lead_arm_length_m: float = 0.75,
-    trail_arm_length_m: float = 0.78,
-    grip_separation_m: float = 0.25,
+    relative_tolerance: float,
 ) -> PlanarClosedLoopAudit:
-    """Audit one planar closure map under declared coordinate scales.
+    """Audit a 4-by-5 planar closure Jacobian under declared scales."""
 
-    Postconditions: rank and nullity describe the raw and positively scaled
-    Jacobians identically. Reported singular values, residual, and condition
-    number describe only the scaled map and therefore carry an explicit scale
-    contract.
-    """
-
+    matrix = np.asarray(jacobian, dtype=float)
+    if matrix.shape != (4, 5) or not np.all(np.isfinite(matrix)):
+        raise ValueError("jacobian must be a finite 4-by-5 matrix")
     angular_scale = _positive_finite(
-        angular_coordinate_scale_rad,
+        scales[0],
         name="angular_coordinate_scale_rad coordinate_scale",
     )
     translation_scale = _positive_finite(
-        translation_coordinate_scale_m,
+        scales[1],
         name="translation_coordinate_scale_m coordinate_scale",
     )
-    jacobian = closed_loop_grip_jacobian(
-        lead_angle_rad=lead_angle_rad,
-        trail_angle_rad=trail_angle_rad,
-        grip_angle_rad=grip_angle_rad,
-        lead_arm_length_m=lead_arm_length_m,
-        trail_arm_length_m=trail_arm_length_m,
-        grip_separation_m=grip_separation_m,
-    )
+    tolerance = _positive_finite(relative_tolerance, name="relative_tolerance")
     coordinate_scales = np.array(
         (
             angular_scale,
@@ -153,15 +138,9 @@ def planar_closed_loop_audit(
             angular_scale,
         )
     )
-    scaled_jacobian = jacobian @ np.diag(coordinate_scales)
-    audit = audit_linear_map(
-        scaled_jacobian,
-        relative_tolerance=1e-12,
-    )
-    raw_rank = audit_linear_map(
-        jacobian,
-        relative_tolerance=1e-12,
-    ).rank
+    scaled_jacobian = matrix @ np.diag(coordinate_scales)
+    audit = audit_linear_map(scaled_jacobian, relative_tolerance=tolerance)
+    raw_rank = audit_linear_map(matrix, relative_tolerance=tolerance).rank
     if raw_rank != audit.rank:
         raise ValueError(
             "positive coordinate scaling changed the numerical rank decision; "
@@ -184,4 +163,38 @@ def planar_closed_loop_audit(
         maximum_scaled_nullspace_residual_m=residual,
         angular_coordinate_scale_rad=angular_scale,
         translation_coordinate_scale_m=translation_scale,
+    )
+
+
+def planar_closed_loop_audit(
+    *,
+    lead_angle_rad: float,
+    trail_angle_rad: float,
+    grip_angle_rad: float,
+    angular_coordinate_scale_rad: float,
+    translation_coordinate_scale_m: float,
+    lead_arm_length_m: float = 0.75,
+    trail_arm_length_m: float = 0.78,
+    grip_separation_m: float = 0.25,
+) -> PlanarClosedLoopAudit:
+    """Audit one planar closure map under declared coordinate scales.
+
+    Postconditions: rank and nullity describe the raw and positively scaled
+    Jacobians identically. Reported singular values, residual, and condition
+    number describe only the scaled map and therefore carry an explicit scale
+    contract.
+    """
+
+    jacobian = closed_loop_grip_jacobian(
+        lead_angle_rad=lead_angle_rad,
+        trail_angle_rad=trail_angle_rad,
+        grip_angle_rad=grip_angle_rad,
+        lead_arm_length_m=lead_arm_length_m,
+        trail_arm_length_m=trail_arm_length_m,
+        grip_separation_m=grip_separation_m,
+    )
+    return audit_scaled_planar_closure_jacobian(
+        jacobian,
+        (angular_coordinate_scale_rad, translation_coordinate_scale_m),
+        relative_tolerance=1e-12,
     )

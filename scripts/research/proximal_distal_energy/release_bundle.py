@@ -104,6 +104,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics write",
             "tier": "scaled_cross_tier_constraint_and_wrench_map_rank",
         },
+        "closed_loop_singularity_margin": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin write",
+            "tier": "analytical_planar_exact_position_closure",
+        },
         "double_pendulum_identifiability": {
             "command": "python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability write",
             "tier": "analytical_double_pendulum_exact_map_and_dimensionless_finite_record",
@@ -255,6 +259,9 @@ _RELEASE_METADATA: dict[str, Any] = {
     },
     "claims": {
         "interaction_dynamics_planar": "supported_at_declared_model_tier",
+        "feasible_closed_loop_singularity_margin": (
+            "supported_for_declared_exact_planar_kinematic_triangle"
+        ),
         "double_pendulum_base_coefficient_excitation": (
             "full_rank_for_registered_synthetic_record"
         ),

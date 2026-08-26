@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 46,
-    "reviewed_release_claim_count": 46,
+    "release_claim_count": 47,
+    "reviewed_release_claim_count": 47,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 46,
-    "atomic_claim_count": 311
+    "scientifically_open_gate_count": 47,
+    "atomic_claim_count": 313
   },
   "release_claim_reviews": [
     {
@@ -2674,6 +2674,52 @@
         "The screen omits kinematic differentiation noise, correlated errors, model discrepancy, event uncertainty, unknown noise scale, priors, repeated participants, and held-out prediction."
       ],
       "remaining_scientific_gate": "Governed repeated-participant data with synchronized loads and kinematics, calibrated error models, and participant-held-out prediction."
+    },
+    {
+      "release_claim_key": "feasible_closed_loop_singularity_margin",
+      "published_status": "supported_for_declared_exact_planar_kinematic_triangle",
+      "audit_state": "reviewed_as_exact_planar_kinematic_qualification",
+      "scientific_disposition": "supported_for_declared_exact_planar_kinematic_triangle",
+      "supporting_claim_ids": [
+        "PD-CLAIM-313",
+        "PD-CLAIM-314"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py",
+        "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin_evidence.py"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:229",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:240",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:252",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:261"
+      ],
+      "negative_controls": [
+        "both exact assembly branches",
+        "181 phases per branch",
+        "three phase resolutions",
+        "three feasible geometries",
+        "three positive translation-coordinate scales",
+        "both exact triangle boundaries",
+        "five distance offsets crossed with five SVD tolerances",
+        "equivalent-centimetre transformation",
+        "two impossible geometries",
+        "manufactured row-dependency killswitch"
+      ],
+      "falsifiers": [
+        "Any registered sample violates closure, changes rank/nullity across global phase or assembly branch, or loses spectrum invariance.",
+        "Either exact boundary fails to add one velocity null mode, equivalent units change rank/condition, or the offset/tolerance matrix does not reproduce."
+      ],
+      "uncertainty_boundaries": [
+        "The result is local planar kinematics under declared coordinate scales; it neither qualifies anatomy nor identifies reactions.",
+        "The tolerance-dependent rank transition is numerical and is not a physical singularity threshold, anatomical limit, or human strategy."
+      ],
+      "remaining_scientific_gate": "Calibrated spatial anatomical closure and compliant forward contact, followed by comparison with governed participant trajectories."
     }
   ]
 }
