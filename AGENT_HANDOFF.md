@@ -8,6 +8,33 @@ is the single proximal-to-distal completion authority.
 
 - ADR-0041 assigns camera, observation, calibration, timing, session, reconstruction, and C3D contracts to Tools #4706; UpstreamDrift owns orchestration, UX, persistence, and biomechanics adapters; AffineDrift owns sanitized publication. Tools PR #4734 remains a protected candidate; do not repin `vendor/ud-tools` to a feature head, and let UpstreamDrift #9069 follow its immutable merge. Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation: there is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
 
+## Docker Workspace Rehydration (#9121)
+
+- Remote branch `fix/9121-docker-workspace-rehydration` repairs the tracked
+  primary-Dockerfile loss observed on protected run `32977374867`, job
+  `98205333755`. The production runtime job now restores its helper from
+  `HEAD`, verifies `HEAD == github.sha`, and rehydrates only `Dockerfile`,
+  `.dockerignore`, and the exact tracked roots consumed by the production
+  Dockerfile immediately before the unchanged Buildx action. Complete
+  preflight and post-restore Git comparison fail closed; the helper never
+  creates placeholder content.
+- TDD RED is commit `1a590a0dc75f5ba703060c572261aaeb25e81477`,
+  tree `87de972091ffc05e4759b88bf6e8954abaf36651`, validated by Repository
+  Management run `33013593244`, job `98325924109`, on OGLaptop-2. Exact serial
+  `-n 0` collection failed only with `ModuleNotFoundError` for the intentionally
+  absent `scripts.ci.rehydrate_tracked_paths` implementation.
+- Qualified GREEN is commit `4d68007e883a615dd4a090d7a5a218e6fd09a20c`,
+  tree `10f6fe44893bbdfe567bcae3688bf1685db85708`, validated by Repository
+  Management run `33014710713`, job `98329812868`, on OGLaptop-1. Focused Ruff,
+  Ruff format, Python syntax, and 11 tests passed with explicit `-n 0`.
+- DeskComputer hooks, pytest, lint, Docker builds, smoke, and size gates were
+  intentionally not run during the capacity drain. Git Data API commits retain
+  exact RED/GREEN parent and tree identity without invoking local hooks. No PR
+  was opened because this workflow change would trigger Docker and broader
+  protected checks while the drain directive is active. Issue #9121 remains
+  open until normal protected review, exact-head Docker runtime build, 4,000 MB
+  size gate, and all three runtime health probes pass on approved capacity.
+
 ## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.
