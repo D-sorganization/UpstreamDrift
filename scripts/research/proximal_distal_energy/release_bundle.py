@@ -96,6 +96,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_force_source_optimization",
             "tier": "planar_open_chain_coordinate_explicit_force_attribution",
         },
+        "local_linear_diagnostics": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_local_linear_diagnostics write",
+            "tier": "analytical_double_pendulum_local_first_order_rank",
+        },
         "forward_two_hand": {
             "command": "python -m scripts.research.proximal_distal_energy.run_forward_two_arm_study",
             "tier": "planar_constrained_forward",
