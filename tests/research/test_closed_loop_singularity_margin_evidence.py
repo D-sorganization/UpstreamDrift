@@ -59,8 +59,12 @@ def test_report_retains_all_declared_sensitivity_and_adverse_controls() -> None:
     assert nominal["minimum_nullity"] == nominal["maximum_nullity"] == 1
     assert nominal["maximum_closure_residual_m"] < 1e-12
     assert nominal["maximum_scaled_singular_value_spread_m"] < 1e-12
-    assert nominal["maximum_scaled_singular_value_spread_m"] == 2e-15
-    assert report["roundoff_diagnostic_significant_digits"] == 1
+    assert nominal["maximum_scaled_singular_value_spread_m"] == 1e-14
+    assert nominal["maximum_scaled_nullspace_residual_m"] == 1e-15
+    assert (
+        report["roundoff_diagnostic_reporting"]
+        == "conservative_power_of_ten_upper_bound"
+    )
     exact = report["exact_triangle_degeneracies"]
     assert exact["lower_rank_audit"]["rank"] == 3
     assert exact["upper_rank_audit"]["rank"] == 3

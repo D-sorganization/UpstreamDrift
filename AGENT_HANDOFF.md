@@ -11,7 +11,7 @@ is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers and source contracts.
 - Remote `main` is `41101daf751b38da99c88ce5f576dd77902937eb`; this branch merges that authority after protected PR #9110's `d16212ac7` squash.
 - The current branch publication is 245 pages, SHA-256
-  `987b65f48733bbd213d24d56767504a1da412f3d255ecb5d389f6c0369e3cb4b`,
+  `48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa`,
   with 194 URI links and 255 outline entries. Archival qualification remains
   false because the PDF is untagged and retains Type 3 and unembedded fonts.
 - The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
@@ -75,9 +75,9 @@ is the single proximal-to-distal completion authority.
   degeneracies are 3/2. A five-offset by five-tolerance matrix retains the
   observed numerical rank boundary without calling it physical.
 - Phase, scale, feasible/impossible geometry, equivalent-unit, and manufactured
-  rank controls pass. The cross-phase roundoff diagnostic is explicitly
-  one-significant-digit and approximately `2e-15` m, while decisions retain
-  full precision. This is planar kinematics only: no force, anatomy, passive
+  rank controls pass. Expected-zero SVD diagnostics use conservative
+  power-of-ten upper bounds (`1e-14` m for cross-phase spread), while decisions
+  retain full precision. This is planar kinematics only: no force, anatomy, passive
   torque, human occurrence, strategy, or coaching inference is authorized.
 
 ## Structural Campaign and Recovery Boundary (#8800)

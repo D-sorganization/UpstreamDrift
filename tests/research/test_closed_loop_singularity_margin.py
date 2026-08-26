@@ -76,7 +76,6 @@ def test_nominal_closed_orbit_is_regular_and_phase_invariant() -> None:
         rel=1e-12,
     )
     assert audit.maximum_scaled_singular_value_spread_m < 1e-12
-    assert audit.maximum_scaled_singular_value_spread_m == 2e-15
 
 
 def test_exact_triangle_degeneracies_add_one_velocity_null_mode() -> None:

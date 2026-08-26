@@ -13,7 +13,7 @@
     "lower_position_closure_residual_m": 9.18485e-19,
     "lower_rank_audit": {
       "angular_coordinate_scale_rad": 1.0,
-      "maximum_scaled_nullspace_residual_m": 1.82131e-16,
+      "maximum_scaled_nullspace_residual_m": 1e-15,
       "nullity": 2,
       "rank": 3,
       "scaled_condition_number": null,
@@ -29,7 +29,7 @@
     "upper_position_closure_residual_m": 9.18485e-19,
     "upper_rank_audit": {
       "angular_coordinate_scale_rad": 1.0,
-      "maximum_scaled_nullspace_residual_m": 1.6047e-16,
+      "maximum_scaled_nullspace_residual_m": 1e-15,
       "nullity": 2,
       "rank": 3,
       "scaled_condition_number": null,
@@ -59,8 +59,8 @@
         "maximum_nullity": 1,
         "maximum_rank": 4,
         "maximum_scaled_condition_number": 7.89166,
-        "maximum_scaled_nullspace_residual_m": 3.16775e-16,
-        "maximum_scaled_singular_value_spread_m": 2e-15,
+        "maximum_scaled_nullspace_residual_m": 1e-15,
+        "maximum_scaled_singular_value_spread_m": 1e-14,
         "maximum_smallest_scaled_singular_value_m": 0.159061,
         "minimum_nullity": 1,
         "minimum_rank": 4,
@@ -91,8 +91,8 @@
         "maximum_nullity": 1,
         "maximum_rank": 4,
         "maximum_scaled_condition_number": 6.45326,
-        "maximum_scaled_nullspace_residual_m": 3.91398e-16,
-        "maximum_scaled_singular_value_spread_m": 2e-15,
+        "maximum_scaled_nullspace_residual_m": 1e-15,
+        "maximum_scaled_singular_value_spread_m": 1e-14,
         "maximum_smallest_scaled_singular_value_m": 0.202095,
         "minimum_nullity": 1,
         "minimum_rank": 4,
@@ -123,8 +123,8 @@
         "maximum_nullity": 1,
         "maximum_rank": 4,
         "maximum_scaled_condition_number": 4.72602,
-        "maximum_scaled_nullspace_residual_m": 3.87143e-16,
-        "maximum_scaled_singular_value_spread_m": 2e-15,
+        "maximum_scaled_nullspace_residual_m": 1e-15,
+        "maximum_scaled_singular_value_spread_m": 1e-14,
         "maximum_smallest_scaled_singular_value_m": 0.28317,
         "minimum_nullity": 1,
         "minimum_rank": 4,
@@ -180,7 +180,7 @@
       "tolerance_cases": [
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-12,
@@ -191,7 +191,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-10,
@@ -202,7 +202,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-8,
@@ -213,7 +213,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-6,
@@ -224,7 +224,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.81948e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 0.0001,
@@ -242,7 +242,7 @@
       "tolerance_cases": [
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.29296e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-12,
@@ -253,7 +253,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.29296e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-10,
@@ -264,7 +264,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.29296e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-8,
@@ -275,7 +275,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.29296e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-6,
@@ -286,7 +286,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 0.000141107,
+          "maximum_scaled_nullspace_residual_m": 0.001,
           "nullity": 2,
           "rank": 3,
           "relative_tolerance": 0.0001,
@@ -304,7 +304,7 @@
       "tolerance_cases": [
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 2.25698e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-12,
@@ -315,7 +315,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 2.25698e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-10,
@@ -326,7 +326,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 2.25698e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-8,
@@ -337,7 +337,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 2.25698e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-6,
@@ -348,7 +348,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.41106e-5,
+          "maximum_scaled_nullspace_residual_m": 0.0001,
           "nullity": 2,
           "rank": 3,
           "relative_tolerance": 0.0001,
@@ -366,7 +366,7 @@
       "tolerance_cases": [
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.31109e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-12,
@@ -377,7 +377,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.31109e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-10,
@@ -388,7 +388,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.31109e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-8,
@@ -399,7 +399,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.41104e-6,
+          "maximum_scaled_nullspace_residual_m": 1e-5,
           "nullity": 2,
           "rank": 3,
           "relative_tolerance": 1e-6,
@@ -410,7 +410,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.41104e-6,
+          "maximum_scaled_nullspace_residual_m": 1e-5,
           "nullity": 2,
           "rank": 3,
           "relative_tolerance": 0.0001,
@@ -428,7 +428,7 @@
       "tolerance_cases": [
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.31589e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-12,
@@ -439,7 +439,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.31589e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-10,
@@ -450,7 +450,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.31589e-16,
+          "maximum_scaled_nullspace_residual_m": 1e-15,
           "nullity": 1,
           "rank": 4,
           "relative_tolerance": 1e-8,
@@ -461,7 +461,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.4112e-7,
+          "maximum_scaled_nullspace_residual_m": 1e-6,
           "nullity": 2,
           "rank": 3,
           "relative_tolerance": 1e-6,
@@ -472,7 +472,7 @@
         },
         {
           "angular_coordinate_scale_rad": 1.0,
-          "maximum_scaled_nullspace_residual_m": 1.4112e-7,
+          "maximum_scaled_nullspace_residual_m": 1e-6,
           "nullity": 2,
           "rank": 3,
           "relative_tolerance": 0.0001,
@@ -496,8 +496,8 @@
     "maximum_nullity": 1,
     "maximum_rank": 4,
     "maximum_scaled_condition_number": 6.45326,
-    "maximum_scaled_nullspace_residual_m": 5.57125e-16,
-    "maximum_scaled_singular_value_spread_m": 2e-15,
+    "maximum_scaled_nullspace_residual_m": 1e-15,
+    "maximum_scaled_singular_value_spread_m": 1e-14,
     "maximum_smallest_scaled_singular_value_m": 0.202095,
     "minimum_nullity": 1,
     "minimum_rank": 4,
@@ -524,8 +524,8 @@
         "maximum_nullity": 1,
         "maximum_rank": 4,
         "maximum_scaled_condition_number": 6.45326,
-        "maximum_scaled_nullspace_residual_m": 3.31422e-16,
-        "maximum_scaled_singular_value_spread_m": 1e-15,
+        "maximum_scaled_nullspace_residual_m": 1e-15,
+        "maximum_scaled_singular_value_spread_m": 1e-14,
         "maximum_smallest_scaled_singular_value_m": 0.202095,
         "minimum_nullity": 1,
         "minimum_rank": 4,
@@ -552,8 +552,8 @@
         "maximum_nullity": 1,
         "maximum_rank": 4,
         "maximum_scaled_condition_number": 6.45326,
-        "maximum_scaled_nullspace_residual_m": 4.24404e-16,
-        "maximum_scaled_singular_value_spread_m": 2e-15,
+        "maximum_scaled_nullspace_residual_m": 1e-15,
+        "maximum_scaled_singular_value_spread_m": 1e-14,
         "maximum_smallest_scaled_singular_value_m": 0.202095,
         "minimum_nullity": 1,
         "minimum_rank": 4,
@@ -580,8 +580,8 @@
         "maximum_nullity": 1,
         "maximum_rank": 4,
         "maximum_scaled_condition_number": 6.45326,
-        "maximum_scaled_nullspace_residual_m": 5.57125e-16,
-        "maximum_scaled_singular_value_spread_m": 2e-15,
+        "maximum_scaled_nullspace_residual_m": 1e-15,
+        "maximum_scaled_singular_value_spread_m": 1e-14,
         "maximum_smallest_scaled_singular_value_m": 0.202095,
         "minimum_nullity": 1,
         "minimum_rank": 4,
@@ -604,7 +604,7 @@
   ],
   "position_closure_tolerance_m": 1e-12,
   "relative_rank_tolerance": 1e-12,
-  "roundoff_diagnostic_significant_digits": 1,
+  "roundoff_diagnostic_reporting": "conservative_power_of_ten_upper_bound",
   "scale_controls": [
     {
       "lower_degeneracy_distance_m": 0.22,
@@ -612,8 +612,8 @@
       "maximum_nullity": 1,
       "maximum_rank": 4,
       "maximum_scaled_condition_number": 5.35441,
-      "maximum_scaled_nullspace_residual_m": 3.83022e-16,
-      "maximum_scaled_singular_value_spread_m": 2e-15,
+      "maximum_scaled_nullspace_residual_m": 1e-15,
+      "maximum_scaled_singular_value_spread_m": 1e-14,
       "maximum_smallest_scaled_singular_value_m": 0.194061,
       "minimum_nullity": 1,
       "minimum_rank": 4,
@@ -638,8 +638,8 @@
       "maximum_nullity": 1,
       "maximum_rank": 4,
       "maximum_scaled_condition_number": 6.45326,
-      "maximum_scaled_nullspace_residual_m": 3.91398e-16,
-      "maximum_scaled_singular_value_spread_m": 2e-15,
+      "maximum_scaled_nullspace_residual_m": 1e-15,
+      "maximum_scaled_singular_value_spread_m": 1e-14,
       "maximum_smallest_scaled_singular_value_m": 0.202095,
       "minimum_nullity": 1,
       "minimum_rank": 4,
@@ -664,8 +664,8 @@
       "maximum_nullity": 1,
       "maximum_rank": 4,
       "maximum_scaled_condition_number": 7.76682,
-      "maximum_scaled_nullspace_residual_m": 5.98322e-16,
-      "maximum_scaled_singular_value_spread_m": 3e-15,
+      "maximum_scaled_nullspace_residual_m": 1e-15,
+      "maximum_scaled_singular_value_spread_m": 1e-14,
       "maximum_smallest_scaled_singular_value_m": 0.206559,
       "minimum_nullity": 1,
       "minimum_rank": 4,
@@ -691,7 +691,7 @@
     "condition_number_after": 6.45326,
     "condition_number_before": 6.45326,
     "conversion": "metre residual/translation coordinates to centimetres",
-    "maximum_abs_scaled_spectrum_conversion_residual_cm": 2.84217e-14,
+    "maximum_abs_scaled_spectrum_conversion_residual_cm": 1e-13,
     "rank_after": 4,
     "rank_before": 4,
     "singular_value_scale_factor": 100.0

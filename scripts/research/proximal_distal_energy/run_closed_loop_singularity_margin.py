@@ -12,9 +12,9 @@ from typing import Any
 import numpy as np
 
 from scripts.research.proximal_distal_energy.closed_loop_singularity_margin import (
+    ClosedLoopOrbitAudit,
     PlanarClosedGeometry,
     PlanarCoordinateScale,
-    ROUND_OFF_DIAGNOSTIC_SIGNIFICANT_DIGITS,
     audit_closed_loop_orbit,
     audit_feasible_configuration,
     audit_triangle_degeneracies,
@@ -45,12 +45,35 @@ POSITION_CLOSURE_TOLERANCE_M = 1e-12
 PHASE_SAMPLE_COUNT = 181
 NEAR_BOUNDARY_OFFSETS_M = (1e-4, 1e-6, 1e-8, 1e-10, 1e-12)
 RELATIVE_TOLERANCES = (1e-12, 1e-10, 1e-8, 1e-6, 1e-4)
+ROUND_OFF_DIAGNOSTIC_REPORTING = "conservative_power_of_ten_upper_bound"
+
+
+def _roundoff_upper_bound(value: float) -> float:
+    """Bound an expected-zero floating diagnostic without platform false precision."""
+
+    if value < 0.0 or not math.isfinite(value):
+        raise ValueError("roundoff diagnostic must be finite and nonnegative")
+    if value == 0.0:
+        return 0.0
+    return 10.0 ** math.ceil(math.log10(value))
+
+
+def _orbit_payload(audit: ClosedLoopOrbitAudit) -> dict[str, object]:
+    """Serialize an orbit while conservatively bounding SVD roundoff fields."""
+
+    payload = asdict(audit)
+    for key in (
+        "maximum_scaled_nullspace_residual_m",
+        "maximum_scaled_singular_value_spread_m",
+    ):
+        payload[key] = _roundoff_upper_bound(float(payload[key]))
+    return payload
 
 
 def _audit_payload(audit: PlanarClosedLoopAudit) -> dict[str, object]:
     return {
         "angular_coordinate_scale_rad": audit.angular_coordinate_scale_rad,
-        "maximum_scaled_nullspace_residual_m": (
+        "maximum_scaled_nullspace_residual_m": _roundoff_upper_bound(
             audit.maximum_scaled_nullspace_residual_m
         ),
         "nullity": audit.nullity,
@@ -113,8 +136,8 @@ def _equivalent_unit_control() -> dict[str, object]:
         "condition_number_after": audit_cm.scaled_condition_number,
         "condition_number_before": audit_m.scaled_condition_number,
         "conversion": "metre residual/translation coordinates to centimetres",
-        "maximum_abs_scaled_spectrum_conversion_residual_cm": float(
-            np.max(np.abs(singular_values_cm - 100.0 * singular_values_m))
+        "maximum_abs_scaled_spectrum_conversion_residual_cm": _roundoff_upper_bound(
+            float(np.max(np.abs(singular_values_cm - 100.0 * singular_values_m)))
         ),
         "rank_after": audit_cm.rank,
         "rank_before": audit_m.rank,
@@ -161,7 +184,7 @@ def _scale_control() -> list[dict[str, object]]:
     return [
         {
             "translation_coordinate_scale_m": translation_scale_m,
-            **asdict(
+            **_orbit_payload(
                 audit_closed_loop_orbit(
                     GEOMETRY,
                     PlanarCoordinateScale(1.0, translation_scale_m),
@@ -183,7 +206,7 @@ def _geometry_control() -> list[dict[str, object]]:
     return [
         {
             "geometry_m": asdict(geometry),
-            "orbit": asdict(
+            "orbit": _orbit_payload(
                 audit_closed_loop_orbit(
                     geometry,
                     SCALE,
@@ -291,12 +314,12 @@ def build_report() -> dict[str, object]:
         "manufactured_matrix_killswitch": _manufactured_matrix_control(),
         "near_lower_boundary_sweep": _near_boundary_control(),
         "nominal_geometry_m": asdict(GEOMETRY),
-        "nominal_orbit": asdict(nominal),
+        "nominal_orbit": _orbit_payload(nominal),
         "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
         "phase_resolution_controls": [
             {
                 "phase_sample_count_per_branch": count,
-                "orbit": asdict(
+                "orbit": _orbit_payload(
                     audit_closed_loop_orbit(
                         GEOMETRY,
                         SCALE,
@@ -309,9 +332,7 @@ def build_report() -> dict[str, object]:
         ],
         "position_closure_tolerance_m": POSITION_CLOSURE_TOLERANCE_M,
         "relative_rank_tolerance": NOMINAL_RELATIVE_TOLERANCE,
-        "roundoff_diagnostic_significant_digits": (
-            ROUND_OFF_DIAGNOSTIC_SIGNIFICANT_DIGITS
-        ),
+        "roundoff_diagnostic_reporting": ROUND_OFF_DIAGNOSTIC_REPORTING,
         "scale_controls": _scale_control(),
         "schema_version": SCHEMA_VERSION,
         "unit_equivalence_control": _equivalent_unit_control(),

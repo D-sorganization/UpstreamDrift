@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "4fd1e0ce962b68039b69a2a206755770890bc295c48cd7223423f1b60d99de83"
+    "sha256": "91deafde1b889734d0b17c135077fd7e18a242221730d25da782aa1ba482e736"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -4437,8 +4437,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json": {
-      "sha256": "dfd280e5eae12f4f1250b92ff53e495f5cf227b6edc4cea306fa9eb31b957c43",
-      "bytes": 25908,
+      "sha256": "1228f5cd5738b9c6495bff642995e788598a56f86eb886cc71c75d1d76be6fe4",
+      "bytes": 25714,
       "referenced_by": [
         "PD-CLAIM-313",
         "PD-CLAIM-314"
@@ -5794,7 +5794,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "4e1be12a31f792039356758e0b081bf3692f86f685487f61d4ca3fdb63aa6fd1",
+      "sha256": "7a8b3d4cb229d57685d89a50eb57e54f047d988a423ea9d6bfeff40dfcb3a2f6",
       "bytes": 144066,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -6076,8 +6076,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py": {
-      "sha256": "ada6c8d23992d983c7ff08a41ac692c8f4aa242ceb6a34c6e6b5084ebfffc558",
-      "bytes": 11611,
+      "sha256": "53988a9eb3a506c13de2f13b30da1afe969dbeb4edb805fd849c2d3119c42a69",
+      "bytes": 10958,
       "referenced_by": [
         "PD-CLAIM-313",
         "PD-CLAIM-314"
@@ -6682,8 +6682,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py": {
-      "sha256": "6dc04bf84930c0bd1c4d89176558b6518ecdba63b689e2e57ffea3df9813f149",
-      "bytes": 15154,
+      "sha256": "b03529989d1eefae4f2b23f12f0f1a827f2e2b62814bf6c7093d6a2c8b36b700",
+      "bytes": 15984,
       "referenced_by": [
         "PD-CLAIM-313",
         "PD-CLAIM-314"
@@ -7598,16 +7598,16 @@
       ]
     },
     "tests/research/test_closed_loop_singularity_margin.py": {
-      "sha256": "fc02d73f1dfd6538c9b32a370a792d46e4731da59263d27949b6494abcdf4139",
-      "bytes": 8680,
+      "sha256": "9f5e935abfada4f26d4e82ee2dccea723f4705849b97684978bbb121cdd964ae",
+      "bytes": 8615,
       "referenced_by": [
         "PD-CLAIM-313",
         "PD-CLAIM-314"
       ]
     },
     "tests/research/test_closed_loop_singularity_margin_evidence.py": {
-      "sha256": "37931d275c2f8307c43938782140b4c40080e255b01ea9d201cf3239e92f4853",
-      "bytes": 4088,
+      "sha256": "6433b9fb423bd66a0d82539c155c3fca42e03cb9ed906eba80d04899c1c0fdaf",
+      "bytes": 4208,
       "referenced_by": [
         "PD-CLAIM-313",
         "PD-CLAIM-314"

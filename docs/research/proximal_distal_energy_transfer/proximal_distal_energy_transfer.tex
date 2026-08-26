@@ -505,7 +505,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, breakable, titlerule=0mm, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, arc=.35mm, left=2mm, colback=white, leftrule=.75mm, coltitle=black, bottomrule=.15mm, opacityback=0, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, leftrule=.75mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, left=2mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, breakable, bottomrule=.15mm, bottomtitle=1mm, opacityback=0, titlerule=0mm, toptitle=1mm, rightrule=.15mm, arc=.35mm, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2812,7 +2812,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, breakable, titlerule=0mm, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, arc=.35mm, left=2mm, colback=white, leftrule=.75mm, coltitle=black, bottomrule=.15mm, opacityback=0, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, leftrule=.75mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, left=2mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, breakable, bottomrule=.15mm, bottomtitle=1mm, opacityback=0, titlerule=0mm, toptitle=1mm, rightrule=.15mm, arc=.35mm, opacitybacktitle=0.6]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -10111,9 +10111,10 @@ separately declared 1 rad angular and 0.75 m translation coordinate
 scales, every sample has rank four and nullity one. The minimum scaled
 singular value is 0.202095 m, the scaled condition number is 6.45326,
 and the maximum singular-spectrum change under global phase rotation is
-approximately \(2\times10^{-15}\) m when this roundoff-only diagnostic
-is reported to one significant digit. Rank decisions and singular values
-are still evaluated before publication rounding.
+below the conservative \(10^{-14}\) m reporting bound. Expected-zero SVD
+residuals are published as power-of-ten upper bounds rather than
+platform-specific roundoff values; rank decisions and singular values
+are still evaluated at full precision before publication reporting.
 
 The triangle inequality supplies two exact geometric countermodels. At
 \(d=|L_L-L_T|=0.03\) m and \(d=L_L+L_T=1.53\) m, the triangle becomes
