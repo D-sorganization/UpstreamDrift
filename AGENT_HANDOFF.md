@@ -114,9 +114,10 @@ is the single proximal-to-distal completion authority.
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
 - #9099 branch `fix/9099-qapplication-lifecycle-regression` has no PR. Protected
-  `main` and bounded OGLaptop-4 run `33018178822`/job `98341732390` both pin
-  exit 139 to `tests/launchers/test_base.py:209`. Test-only `SELF` adds the
-  process-application ownership contract; the production fix remains pending.
+  `main` and OGLaptop-4 `33018178822`/job `98341732390` pin exit 139 to
+  `tests/launchers/test_base.py:209`. RED `33018492146`/job
+  `98342734690` fails the process-application ownership contract; `SELF`
+  restores the protected ownership fix. Exact GREEN qualification is pending.
 - #8358's Tools gateway and analyses are merged; UI, localized-perturbation, and presentation criteria remain unaudited. Merged #9096 changes no production API, schema, or vendor pin.
 - #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
 - #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound; fresh protected evidence is required, and no runner change or smoke exemption is authorized.

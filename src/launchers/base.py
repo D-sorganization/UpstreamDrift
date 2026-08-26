@@ -15,7 +15,7 @@ import sys
 from abc import abstractmethod
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from PyQt6.QtGui import QScreen
 from PyQt6.QtWidgets import (
@@ -359,6 +359,16 @@ class BaseLauncher(QMainWindow):
         main_layout.addStretch()
 
 
+def _resolve_application(
+    application_class: type[QApplication], argv: list[str]
+) -> tuple[QApplication, bool]:
+    """Return the process application and whether this caller owns its event loop."""
+    existing = application_class.instance()
+    if existing is not None:
+        return cast(QApplication, existing), False
+    return application_class(argv), True
+
+
 def run_launcher(launcher_class: type[BaseLauncher], **kwargs: Any) -> int:
     """Standard launcher entry point.
 
@@ -369,7 +379,7 @@ def run_launcher(launcher_class: type[BaseLauncher], **kwargs: Any) -> int:
     Returns:
         Exit code from QApplication
     """
-    app = QApplication(sys.argv)
+    app, owns_event_loop = _resolve_application(QApplication, sys.argv)
     app.setStyle("Fusion")
 
     window = launcher_class(**kwargs)
@@ -377,4 +387,6 @@ def run_launcher(launcher_class: type[BaseLauncher], **kwargs: Any) -> int:
     window.center_window()
     window.show()
 
+    if not owns_event_loop:
+        return 0
     return app.exec()
