@@ -42,7 +42,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 ## Hybrid-System Topology Contract (#9027)
 
 - PR #9049 branch `research/9027-hybrid-system-contract` is reconciled with
-  `main` `a66be9af1` in merge commit `SELF`. It defines typed topology for all
+  `main` `a66be9af1` in merge commit `ff4f8eb77`. It defines typed topology for all
   eight model tiers: continuous state, controls, algebraic constraints, modes,
   guards, resets, impacts, actuator dynamics, uncertain event surfaces,
   observables, limitations, falsifiers, and comparison blockers.
