@@ -37,19 +37,30 @@ actuator countermodels, manufactured fixtures, and killswitches are required.
 Structural or practical identifiability, global nonlinear properties, human
 validity, and coaching interpretation remain unavailable.
 
+Issue #9104 qualifies the exact and finite-record identifiability boundary for
+the declared analytical double pendulum. Its inverse-dynamics regressor has
+seven named base coefficients, while an analytic nonzero-minor witness proves
+that the eleven-entry reduced physical map has rank seven and nullity four.
+Three exact physical-parameter alternatives preserve every base coefficient.
+Finite-record rank and conditioning use positive coefficient and torque scales,
+equivalent-unit and scale audits, shortened-window adverse cases, and a
+zero-motion rank-zero killswitch. Gaussian Fisher intervals are oracle-
+kinematics lower bounds only and shall not be promoted to practical,
+participant, biological, or coaching identifiability.
+
 Epic #8557 has completed the current narrative-candidate adjudication contract:
-1,130 reviewed candidates and 306 atomic claims. Issue #8724 adds an exhaustive,
-snapshot-locked four-way outcome authority: 286 supported at their declared
+1,134 reviewed candidates and 309 atomic claims. Issue #8724 adds an exhaustive,
+snapshot-locked four-way outcome authority: 289 supported at their declared
 estimands and boundaries, five inconclusive, 15 untested, and none contradicted.
 The absence of a contradicted row does not erase adverse or null results that
-the paper reports accurately. This status is not scientific closure: all 43
+the paper reports accurately. This status is not scientific closure: all 46
 public release claims have a traceable review disposition, and
 each retains its applicable open
 model, equipment, anatomy, archival, or governed-human scientific boundary. The
-issue #8918 numeric authority binds all 382 numeric literals across 125 of the
-306 claims to reviewed statement digests, JSON Pointers, transforms, evidence
-scopes, and tolerances. It distinguishes 174 semantically matched local JSON
-values, 144 registered claim values that have not been independently
+issue #8918 numeric authority binds all 394 numeric literals across 128 of the
+309 claims to reviewed statement digests, JSON Pointers, transforms, evidence
+scopes, and tolerances. It distinguishes 181 semantically matched local JSON
+values, 149 registered claim values that have not been independently
 recomputed, 57 externally reported values, and seven protocol or notation
 values. Representative planar, spatial, articulated-shaft, and finite-ground
 headlines are independently recomputed from committed raw arrays, while the
@@ -3270,6 +3281,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-26 | 1.0.598 | Qualified #9104's double-pendulum identifiability boundary. The exact seven-coefficient inverse-dynamics factorization and analytic physical-map witness establish rank seven and nullity four for the declared eleven-entry reduced map, with three coefficient-preserving physical alternatives. Dimensionless finite-record evidence retains equivalent-unit and scale audits, shortened-window adverse cases, four torque-noise levels, and a zero-motion rank-zero killswitch. Oracle Gaussian Fisher intervals remain lower bounds under exact kinematics and do not establish practical, participant, biological, or coaching identifiability. Claim registration and report construction satisfy the current function-size and parameter architecture budgets without changing the governed scientific JSON. |
 | 2026-08-25 | 1.0.597 | Fixed issue #8827: Pose Studio's engine-status pill went stale after a silent mid-session downgrade to the mock kinematics service. `EngineController.set_pose` already tracked this correctly (catching `NotImplementedError` from a partial engine bridge, swapping in `MockKinematicsService`, and setting `EngineStatus.MOCK`), but `MainWidget._apply_pose` never re-read `EngineController.status` afterward — the pill only updated in `_on_engine_selected`, at initial engine selection. A user whose engine reported "live" at activation and then edited a joint mid-session (undo/redo, angle edit, or pose-library load all route through `_apply_pose`) would see a stale green "live" pill while the 3D view was actually being driven by the mock. `_apply_pose` now calls `self.engine_picker.set_status(self._engine_controller.status)` immediately after `set_pose`, so the pill reflects any downgrade in real time. New offscreen Qt test forces a live-engine service whose `set_pose` raises `NotImplementedError`, calls `_apply_pose`, and asserts the status pill reads `mock` (not the stale prior `live`) afterward. |
 | 2026-08-25 | 1.0.596 | Reconciled the #8358 Tools provider-contract regression with protected nondimensional-local-rank main. Refreshing one selected provider no longer evicts the downstream-owned `src.shared` namespace, and a regression preserves an already-imported UpstreamDrift perturbation gateway when Tools is first on `PYTHONPATH`. Existing contracts still require each selected provider to resolve from Tools. This changes no production import, public API, provider schema, vendor pin, workflow, or runner; it restores deterministic downstream compatibility verification for Tools PR #4734. |
 | 2026-08-25 | 1.0.595 | Registered #9092 as the nondimensional local-rank qualification slice downstream of #9027. Raw analytical linearizations remain trace evidence, while local rank and condition interpretation now require declared state/control/output/time scales, unit-invariance and scale-sensitivity gates, output/actuator countermodels, manufactured fixtures, and killswitches. Structural/practical identifiability, global nonlinear control, human validity, and coaching conclusions remain unavailable. |
@@ -4421,6 +4433,23 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Serial and batched execution, editable and vendored Tools providers,
   pendulum and non-pendulum adapters, and cross-engine topology/frame/unit
   rejection shall pass deterministic parity tests before R15 is promoted.
+
+### F-8557.30: Double-Pendulum Parameter Identifiability Boundary
+
+- The analytical inverse-dynamics authority shall name its base coefficients,
+  coordinates, units, signs, and physical domain and reconstruct the canonical
+  dynamics over independent manufactured states.
+- Physical-parameter rank and nullity shall be established by exact algebra or
+  a nondimensional independently checked equivalent, not solely by a floating-
+  point SVD of a dimensioned Jacobian. At least three nontrivial physical-
+  parameter alternatives shall preserve every base coefficient.
+- Finite-record rank, conditioning, and Fisher-information conclusions shall
+  use declared positive column and output scales and retain equivalent-unit,
+  scale, shortened-window, noise, rank-deficient, and zero-motion controls.
+- Full base-coefficient rank for a synthetic oracle record shall be labeled an
+  excitation result only. Oracle-kinematics uncertainty shall fail closed when
+  rank deficient and shall exclude practical, participant, biological, and
+  coaching inference.
 
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)

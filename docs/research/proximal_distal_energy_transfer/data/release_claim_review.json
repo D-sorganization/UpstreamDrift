@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 43,
-    "reviewed_release_claim_count": 43,
+    "release_claim_count": 46,
+    "reviewed_release_claim_count": 46,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 43,
-    "atomic_claim_count": 306
+    "scientifically_open_gate_count": 46,
+    "atomic_claim_count": 309
   },
   "release_claim_reviews": [
     {
@@ -2562,6 +2562,118 @@
         "This is a finite model-scenario grid, not continuous optimal control, a causal human estimate, or a technique recommendation."
       ],
       "remaining_scientific_gate": "Independent coordinate implementation, measured bilateral grip wrenches, and participant-held-out validation."
+    },
+    {
+      "release_claim_key": "double_pendulum_base_coefficient_excitation",
+      "published_status": "full_rank_for_registered_synthetic_record",
+      "audit_state": "reviewed_as_dimensionless_finite_record_excitation",
+      "scientific_disposition": "full_rank_for_registered_synthetic_record",
+      "supporting_claim_ids": [
+        "PD-CLAIM-309"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+        "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+        "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:237"
+      ],
+      "negative_controls": [
+        "equivalent coefficient-unit conversion",
+        "two positive scale alternatives",
+        "zero-motion rank killswitch",
+        "manufactured inverse-dynamics reconstruction"
+      ],
+      "falsifiers": [
+        "A clean replay changes the registered rank, equivalent units change a dimensionless rank decision, or the zero-motion killswitch has nonzero rank."
+      ],
+      "uncertainty_boundaries": [
+        "Rank and condition are finite-record, tolerance-, coordinate-, and scale-contract results; raw dimensional conditioning is not interpreted."
+      ],
+      "remaining_scientific_gate": "Independent trajectories, derivative pipelines, noise models, and held-out prediction under the same declared scale contract."
+    },
+    {
+      "release_claim_key": "double_pendulum_physical_parameter_identifiability",
+      "published_status": "structurally_non_identifiable_under_declared_model",
+      "audit_state": "reviewed_as_exact_structural_nonidentifiability",
+      "scientific_disposition": "structurally_non_identifiable_under_declared_model",
+      "supporting_claim_ids": [
+        "PD-CLAIM-308"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+        "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+        "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability_evidence.py"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:217"
+      ],
+      "negative_controls": [
+        "analytic nonzero-minor witness",
+        "three exact coefficient-preserving alternatives",
+        "independent finite-difference Jacobian comparison"
+      ],
+      "falsifiers": [
+        "The analytic rank witness vanishes inside the declared parameter domain or any registered alternative changes a base coefficient."
+      ],
+      "uncertainty_boundaries": [
+        "The exact result applies only to the declared eleven-entry reduced physical map; it does not test model adequacy or a richer sensor model."
+      ],
+      "remaining_scientific_gate": "A richer independently justified model or measurement set that breaks the registered exact invariance families."
+    },
+    {
+      "release_claim_key": "double_pendulum_practical_identifiability",
+      "published_status": "not_established_oracle_kinematics_lower_bound_only",
+      "audit_state": "reviewed_as_oracle_lower_bound_only",
+      "scientific_disposition": "not_established_oracle_kinematics_lower_bound_only",
+      "supporting_claim_ids": [
+        "PD-CLAIM-310"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+        "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+        "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+        "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability.py",
+        "tests/research/test_double_pendulum_identifiability_evidence.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:248"
+      ],
+      "negative_controls": [
+        "four torque-noise levels",
+        "four cumulative record windows",
+        "rank-deficient Fisher fail-closed case",
+        "explicit practical-identifiability non-promotion"
+      ],
+      "falsifiers": [
+        "The uncertainty calculation reports pseudo-precision for a deficient record or the paper promotes the oracle bound to practical inference."
+      ],
+      "uncertainty_boundaries": [
+        "The screen omits kinematic differentiation noise, correlated errors, model discrepancy, event uncertainty, unknown noise scale, priors, repeated participants, and held-out prediction."
+      ],
+      "remaining_scientific_gate": "Governed repeated-participant data with synchronized loads and kinematics, calibrated error models, and participant-held-out prediction."
     }
   ]
 }

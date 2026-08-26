@@ -1,0 +1,571 @@
+{
+  "base_coefficient_finite_record_status": "full_rank_for_registered_synthetic_record",
+  "base_coefficients": {
+    "alpha_proximal_inertia": 1.64297,
+    "beta_coupling_inertia": 0.198375,
+    "damping_distal": 0.25,
+    "damping_proximal": 0.4,
+    "delta_distal_inertia": 0.240235,
+    "gamma_distal_gravity": 2.12476,
+    "gamma_proximal_gravity": 22.4426
+  },
+  "classification": "exact_reduced_physical_map_with_finite_record_regressor_rank",
+  "exact_counterexamples": [
+    {
+      "alternative_parameters": {
+        "damping_distal_nm_s_rad": 0.25,
+        "damping_proximal_nm_s_rad": 0.4,
+        "gravity_m_s2": 9.09809,
+        "lower_com_m": 0.755714,
+        "lower_inertia_proximal_kg_m2": 0.240235,
+        "lower_mass_kg": 0.35,
+        "plane_inclination_rad": 0.488692,
+        "upper_com_m": 0.3375,
+        "upper_inertia_proximal_kg_m2": 1.20586,
+        "upper_length_m": 0.75,
+        "upper_mass_kg": 7.5
+      },
+      "base_coefficient_max_abs_difference": 0.0,
+      "changed_parameters": {
+        "gravity_m_s2": -0.708559,
+        "plane_inclination_rad": -0.122173
+      },
+      "name": "gravity_plane_tradeoff"
+    },
+    {
+      "alternative_parameters": {
+        "damping_distal_nm_s_rad": 0.25,
+        "damping_proximal_nm_s_rad": 0.4,
+        "gravity_m_s2": 9.80665,
+        "lower_com_m": 0.748232,
+        "lower_inertia_proximal_kg_m2": 0.240235,
+        "lower_mass_kg": 0.3535,
+        "plane_inclination_rad": 0.610865,
+        "upper_com_m": 0.33715,
+        "upper_inertia_proximal_kg_m2": 1.20389,
+        "upper_length_m": 0.75,
+        "upper_mass_kg": 7.5
+      },
+      "base_coefficient_max_abs_difference": 3.55271e-15,
+      "changed_parameters": {
+        "lower_com_m": -0.00748232,
+        "lower_mass_kg": 0.0035,
+        "upper_com_m": -0.00035,
+        "upper_inertia_proximal_kg_m2": -0.00196875
+      },
+      "name": "lower_mass_com_coupling"
+    },
+    {
+      "alternative_parameters": {
+        "damping_distal_nm_s_rad": 0.25,
+        "damping_proximal_nm_s_rad": 0.4,
+        "gravity_m_s2": 9.80665,
+        "lower_com_m": 0.755714,
+        "lower_inertia_proximal_kg_m2": 0.240235,
+        "lower_mass_kg": 0.35,
+        "plane_inclination_rad": 0.610865,
+        "upper_com_m": 0.306818,
+        "upper_inertia_proximal_kg_m2": 1.20586,
+        "upper_length_m": 0.75,
+        "upper_mass_kg": 8.25
+      },
+      "base_coefficient_max_abs_difference": 0.0,
+      "changed_parameters": {
+        "upper_com_m": -0.0306818,
+        "upper_mass_kg": 0.75
+      },
+      "name": "upper_mass_com_tradeoff"
+    }
+  ],
+  "falsifiers": [
+    "The analytical regressor fails to reconstruct canonical ODE inverse dynamics.",
+    "Any registered distinct physical counterexample changes a base coefficient.",
+    "The declared physical-map Jacobian does not have rank seven and nullity four.",
+    "The zero-motion killswitch retains a nonzero regressor rank.",
+    "The oracle-kinematics noise bound is promoted to practical or participant identifiability.",
+    "Equivalent coefficient units change the dimensionless rank decision."
+  ],
+  "finite_record_regressor": {
+    "cumulative_rank": [
+      {
+        "fraction": 0.1,
+        "rank": 7,
+        "retained_condition_number": 167192.0,
+        "sample_count": 35
+      },
+      {
+        "fraction": 0.3,
+        "rank": 7,
+        "retained_condition_number": 562.943,
+        "sample_count": 105
+      },
+      {
+        "fraction": 0.7,
+        "rank": 7,
+        "retained_condition_number": 304.534,
+        "sample_count": 245
+      },
+      {
+        "fraction": 1.0,
+        "rank": 7,
+        "retained_condition_number": 180.853,
+        "sample_count": 350
+      }
+    ],
+    "full_base_coefficient_rank": true,
+    "full_rank": true,
+    "matrix_shape": [700, 7],
+    "rank": 7,
+    "rank_basis": "nondimensional_base_coefficient_regressor",
+    "raw_dimensional_conditioning_status": "not_interpreted",
+    "retained_condition_number": 180.853,
+    "sample_count": 350,
+    "scale_sensitivity": [
+      {
+        "coefficient_scale_factors": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+        "full_rank": true,
+        "matrix_shape": [700, 7],
+        "name": "registered",
+        "rank": 7,
+        "retained_condition_number": 180.853,
+        "singular_values": [
+          38.4583, 13.6607, 12.4325, 0.863731, 0.689607, 0.520795, 0.21265
+        ],
+        "smallest_retained": 0.21265,
+        "threshold": 3.84583e-6
+      },
+      {
+        "coefficient_scale_factors": [0.5, 2.0, 0.5, 2.0, 0.5, 2.0, 0.5],
+        "full_rank": true,
+        "matrix_shape": [700, 7],
+        "name": "alternating_half_double",
+        "rank": 7,
+        "retained_condition_number": 403.099,
+        "singular_values": [
+          47.5727, 13.204, 7.41951, 1.08309, 0.905401, 0.399406, 0.118018
+        ],
+        "smallest_retained": 0.118018,
+        "threshold": 4.75727e-6
+      },
+      {
+        "coefficient_scale_factors": [2.0, 0.5, 2.0, 0.5, 2.0, 0.5, 2.0],
+        "full_rank": true,
+        "matrix_shape": [700, 7],
+        "name": "alternating_double_half",
+        "rank": 7,
+        "retained_condition_number": 391.238,
+        "singular_values": [
+          66.866, 26.9051, 7.03837, 1.63797, 0.652242, 0.372712, 0.170909
+        ],
+        "smallest_retained": 0.170909,
+        "threshold": 6.6866e-6
+      }
+    ],
+    "singular_values": [
+      38.4583, 13.6607, 12.4325, 0.863731, 0.689607, 0.520795, 0.21265
+    ],
+    "smallest_retained": 0.21265,
+    "threshold": 3.84583e-6,
+    "time_span_s": [0.0, 0.349],
+    "unit_invariance": {
+      "coefficient_coordinate_conversion_factors": [
+        1000.0, 1000.0, 1000.0, 100.0, 100.0, 60.0, 60.0
+      ],
+      "fixture": "equivalent_coefficient_units",
+      "max_abs_dimensionless_regressor_difference": 4.44089e-16,
+      "rank_after_conversion": 7,
+      "rank_before_conversion": 7
+    }
+  },
+  "inference_boundary": "Exact invariance families establish non-uniqueness only for the declared eleven-entry reduced equation-of-motion parameterization. Full rank of the seven-column regressor is specific to one noiseless registered synthetic record and tolerance. The registered Gaussian uncertainty screen is an oracle-kinematics lower bound under assumed iid torque noise, not practical identifiability. Neither result establishes model adequacy, participant parameters, human mechanism, or coaching guidance.",
+  "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9104",
+  "model_tier": "analytical_double_pendulum",
+  "noise_aware_lower_bound_screen": {
+    "assumptions": [
+      "positions, velocities, and accelerations are exact",
+      "the analytical model form and event alignment are exact",
+      "generalized-torque noise is independent, Gaussian, homoscedastic, and known",
+      "the bound applies only to the seven base coefficients"
+    ],
+    "classification": "oracle_kinematics_fisher_lower_bound",
+    "confidence_level": 0.95,
+    "full_record_cases": [
+      {
+        "ci95_relative_half_widths": {
+          "alpha_proximal_inertia": 0.00111077,
+          "beta_coupling_inertia": 0.000685744,
+          "damping_distal": 0.00733019,
+          "damping_proximal": 0.00865272,
+          "delta_distal_inertia": 0.000616122,
+          "gamma_distal_gravity": 0.0123266,
+          "gamma_proximal_gravity": 0.00543688
+        },
+        "coefficient_standard_errors": {
+          "alpha_proximal_inertia": 0.00093112,
+          "beta_coupling_inertia": 6.94066e-5,
+          "damping_distal": 0.000934991,
+          "damping_proximal": 0.00176589,
+          "delta_distal_inertia": 7.55187e-5,
+          "gamma_distal_gravity": 0.0133631,
+          "gamma_proximal_gravity": 0.0622551
+        },
+        "dimensionless_retained_condition_number": 180.853,
+        "dimensionless_singular_values": [
+          38.4583, 13.6607, 12.4325, 0.863731, 0.689607, 0.520795, 0.21265
+        ],
+        "full_rank": true,
+        "matrix_shape": [700, 7],
+        "max_abs_parameter_correlation": 0.936557,
+        "rank": 7,
+        "torque_noise_sd_nm": 0.1,
+        "worst_ci95_relative_half_width": 0.0123266,
+        "worst_conditioned_coefficient": "gamma_distal_gravity"
+      },
+      {
+        "ci95_relative_half_widths": {
+          "alpha_proximal_inertia": 0.00555385,
+          "beta_coupling_inertia": 0.00342872,
+          "damping_distal": 0.036651,
+          "damping_proximal": 0.0432636,
+          "delta_distal_inertia": 0.00308061,
+          "gamma_distal_gravity": 0.0616332,
+          "gamma_proximal_gravity": 0.0271844
+        },
+        "coefficient_standard_errors": {
+          "alpha_proximal_inertia": 0.0046556,
+          "beta_coupling_inertia": 0.000347033,
+          "damping_distal": 0.00467495,
+          "damping_proximal": 0.00882947,
+          "delta_distal_inertia": 0.000377594,
+          "gamma_distal_gravity": 0.0668155,
+          "gamma_proximal_gravity": 0.311275
+        },
+        "dimensionless_retained_condition_number": 180.853,
+        "dimensionless_singular_values": [
+          38.4583, 13.6607, 12.4325, 0.863731, 0.689607, 0.520795, 0.21265
+        ],
+        "full_rank": true,
+        "matrix_shape": [700, 7],
+        "max_abs_parameter_correlation": 0.936557,
+        "rank": 7,
+        "torque_noise_sd_nm": 0.5,
+        "worst_ci95_relative_half_width": 0.0616332,
+        "worst_conditioned_coefficient": "gamma_distal_gravity"
+      },
+      {
+        "ci95_relative_half_widths": {
+          "alpha_proximal_inertia": 0.0111077,
+          "beta_coupling_inertia": 0.00685744,
+          "damping_distal": 0.0733019,
+          "damping_proximal": 0.0865272,
+          "delta_distal_inertia": 0.00616122,
+          "gamma_distal_gravity": 0.123266,
+          "gamma_proximal_gravity": 0.0543688
+        },
+        "coefficient_standard_errors": {
+          "alpha_proximal_inertia": 0.0093112,
+          "beta_coupling_inertia": 0.000694066,
+          "damping_distal": 0.00934991,
+          "damping_proximal": 0.0176589,
+          "delta_distal_inertia": 0.000755187,
+          "gamma_distal_gravity": 0.133631,
+          "gamma_proximal_gravity": 0.622551
+        },
+        "dimensionless_retained_condition_number": 180.853,
+        "dimensionless_singular_values": [
+          38.4583, 13.6607, 12.4325, 0.863731, 0.689607, 0.520795, 0.21265
+        ],
+        "full_rank": true,
+        "matrix_shape": [700, 7],
+        "max_abs_parameter_correlation": 0.936557,
+        "rank": 7,
+        "torque_noise_sd_nm": 1.0,
+        "worst_ci95_relative_half_width": 0.123266,
+        "worst_conditioned_coefficient": "gamma_distal_gravity"
+      },
+      {
+        "ci95_relative_half_widths": {
+          "alpha_proximal_inertia": 0.0222154,
+          "beta_coupling_inertia": 0.0137149,
+          "damping_distal": 0.146604,
+          "damping_proximal": 0.173054,
+          "delta_distal_inertia": 0.0123224,
+          "gamma_distal_gravity": 0.246533,
+          "gamma_proximal_gravity": 0.108738
+        },
+        "coefficient_standard_errors": {
+          "alpha_proximal_inertia": 0.0186224,
+          "beta_coupling_inertia": 0.00138813,
+          "damping_distal": 0.0186998,
+          "damping_proximal": 0.0353179,
+          "delta_distal_inertia": 0.00151037,
+          "gamma_distal_gravity": 0.267262,
+          "gamma_proximal_gravity": 1.2451
+        },
+        "dimensionless_retained_condition_number": 180.853,
+        "dimensionless_singular_values": [
+          38.4583, 13.6607, 12.4325, 0.863731, 0.689607, 0.520795, 0.21265
+        ],
+        "full_rank": true,
+        "matrix_shape": [700, 7],
+        "max_abs_parameter_correlation": 0.936557,
+        "rank": 7,
+        "torque_noise_sd_nm": 2.0,
+        "worst_ci95_relative_half_width": 0.246533,
+        "worst_conditioned_coefficient": "gamma_distal_gravity"
+      }
+    ],
+    "inference_boundary": "These conditional Gaussian 95% half-widths are Cramer-Rao-style best-case lower bounds. They omit kinematic differentiation noise, correlated sensor errors, model discrepancy, event-time uncertainty, priors, repeated participants, and held-out data; therefore they cannot establish practical or participant identifiability.",
+    "reference_window_noise_sd_nm": 1.0,
+    "status": "conditional_lower_bound_only",
+    "window_cases": [
+      {
+        "ci95_relative_half_widths": {
+          "alpha_proximal_inertia": 24.5717,
+          "beta_coupling_inertia": 66.9023,
+          "damping_distal": 56.3269,
+          "damping_proximal": 30.8975,
+          "delta_distal_inertia": 55.3549,
+          "gamma_distal_gravity": 498.504,
+          "gamma_proximal_gravity": 93.8619
+        },
+        "coefficient_standard_errors": {
+          "alpha_proximal_inertia": 20.5976,
+          "beta_coupling_inertia": 6.77143,
+          "damping_distal": 7.18469,
+          "damping_proximal": 6.30572,
+          "delta_distal_inertia": 6.78492,
+          "gamma_distal_gravity": 540.42,
+          "gamma_proximal_gravity": 1074.77
+        },
+        "dimensionless_retained_condition_number": 167192.0,
+        "dimensionless_singular_values": [
+          10.5226, 0.997239, 0.0686028, 0.0343616, 0.00650294, 0.00246567,
+          6.29375e-5
+        ],
+        "fraction": 0.1,
+        "full_rank": true,
+        "matrix_shape": [70, 7],
+        "max_abs_parameter_correlation": 0.999999,
+        "rank": 7,
+        "sample_count": 35,
+        "torque_noise_sd_nm": 1.0,
+        "worst_ci95_relative_half_width": 498.504,
+        "worst_conditioned_coefficient": "gamma_distal_gravity"
+      },
+      {
+        "ci95_relative_half_widths": {
+          "alpha_proximal_inertia": 0.0981388,
+          "beta_coupling_inertia": 0.128119,
+          "damping_distal": 0.750269,
+          "damping_proximal": 0.705888,
+          "delta_distal_inertia": 0.0376034,
+          "gamma_distal_gravity": 0.541367,
+          "gamma_proximal_gravity": 0.568401
+        },
+        "coefficient_standard_errors": {
+          "alpha_proximal_inertia": 0.0822664,
+          "beta_coupling_inertia": 0.0129674,
+          "damping_distal": 0.0956993,
+          "damping_proximal": 0.144061,
+          "delta_distal_inertia": 0.00460909,
+          "gamma_distal_gravity": 0.586887,
+          "gamma_proximal_gravity": 6.50847
+        },
+        "dimensionless_retained_condition_number": 562.943,
+        "dimensionless_singular_values": [
+          17.7097, 2.21748, 1.16117, 0.225072, 0.0815814, 0.0490134, 0.0314591
+        ],
+        "fraction": 0.3,
+        "full_rank": true,
+        "matrix_shape": [210, 7],
+        "max_abs_parameter_correlation": 0.997212,
+        "rank": 7,
+        "sample_count": 105,
+        "torque_noise_sd_nm": 1.0,
+        "worst_ci95_relative_half_width": 0.750269,
+        "worst_conditioned_coefficient": "damping_distal"
+      },
+      {
+        "ci95_relative_half_widths": {
+          "alpha_proximal_inertia": 0.0186489,
+          "beta_coupling_inertia": 0.0216141,
+          "damping_distal": 0.257726,
+          "damping_proximal": 0.140372,
+          "delta_distal_inertia": 0.0116119,
+          "gamma_distal_gravity": 0.30636,
+          "gamma_proximal_gravity": 0.103928
+        },
+        "coefficient_standard_errors": {
+          "alpha_proximal_inertia": 0.0156327,
+          "beta_coupling_inertia": 0.00218764,
+          "damping_distal": 0.0328738,
+          "damping_proximal": 0.0286479,
+          "delta_distal_inertia": 0.00142329,
+          "gamma_distal_gravity": 0.332119,
+          "gamma_proximal_gravity": 1.19002
+        },
+        "dimensionless_retained_condition_number": 304.534,
+        "dimensionless_singular_values": [
+          24.7848, 10.8133, 1.78019, 0.59387, 0.358249, 0.237322, 0.0813858
+        ],
+        "fraction": 0.7,
+        "full_rank": true,
+        "matrix_shape": [490, 7],
+        "max_abs_parameter_correlation": 0.955952,
+        "rank": 7,
+        "sample_count": 245,
+        "torque_noise_sd_nm": 1.0,
+        "worst_ci95_relative_half_width": 0.30636,
+        "worst_conditioned_coefficient": "gamma_distal_gravity"
+      },
+      {
+        "ci95_relative_half_widths": {
+          "alpha_proximal_inertia": 0.0111077,
+          "beta_coupling_inertia": 0.00685744,
+          "damping_distal": 0.0733019,
+          "damping_proximal": 0.0865272,
+          "delta_distal_inertia": 0.00616122,
+          "gamma_distal_gravity": 0.123266,
+          "gamma_proximal_gravity": 0.0543688
+        },
+        "coefficient_standard_errors": {
+          "alpha_proximal_inertia": 0.0093112,
+          "beta_coupling_inertia": 0.000694066,
+          "damping_distal": 0.00934991,
+          "damping_proximal": 0.0176589,
+          "delta_distal_inertia": 0.000755187,
+          "gamma_distal_gravity": 0.133631,
+          "gamma_proximal_gravity": 0.622551
+        },
+        "dimensionless_retained_condition_number": 180.853,
+        "dimensionless_singular_values": [
+          38.4583, 13.6607, 12.4325, 0.863731, 0.689607, 0.520795, 0.21265
+        ],
+        "fraction": 1.0,
+        "full_rank": true,
+        "matrix_shape": [700, 7],
+        "max_abs_parameter_correlation": 0.936557,
+        "rank": 7,
+        "sample_count": 350,
+        "torque_noise_sd_nm": 1.0,
+        "worst_ci95_relative_half_width": 0.123266,
+        "worst_conditioned_coefficient": "gamma_distal_gravity"
+      }
+    ]
+  },
+  "nondimensional_scale_contract": {
+    "coefficient_coordinates": [
+      "alpha_proximal_inertia",
+      "beta_coupling_inertia",
+      "delta_distal_inertia",
+      "gamma_proximal_gravity",
+      "gamma_distal_gravity",
+      "damping_proximal",
+      "damping_distal"
+    ],
+    "coefficient_scale_derivation": "absolute registered base-coefficient values",
+    "coefficient_scales": [
+      1.64297, 0.198375, 0.240235, 22.4426, 2.12476, 0.4, 0.25
+    ],
+    "coefficient_units": [
+      "kg*m^2",
+      "kg*m^2",
+      "kg*m^2",
+      "N*m",
+      "N*m",
+      "N*m*s/rad",
+      "N*m*s/rad"
+    ],
+    "dimensionless_regressor_equation": "Y_bar = Y * diag(s_theta) / s_tau",
+    "rank_basis": "nondimensional_base_coefficient_regressor",
+    "torque_coordinate": "generalized_torque",
+    "torque_scale_derivation": "maximum absolute registered generalized torque with 1 N*m floor",
+    "torque_scale_nm": 60.0,
+    "torque_unit": "N*m"
+  },
+  "numeric_representation_contract": {
+    "canonical_significant_digits": 6,
+    "decision_precision": "full_precision_before_publication_rounding",
+    "scope": "published_json_floats_only"
+  },
+  "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
+  "participant_status": "not_evaluated",
+  "physical_parameter_map": {
+    "jacobian": [
+      [0.0, 0.0, 1.0, 0.5625, 0.525, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0, 0.566786, 0.2645, 0.2625, 0.0, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+      [
+        2.71118, 60.2485, 0.0, 6.02485, 2.8116, 0.0, 0.0, 2.28851, -15.7145,
+        0.0, 0.0
+      ],
+      [0.0, 0.0, 0.0, 6.07076, 0.0, 2.8116, 0.0, 0.216666, -1.48778, 0.0, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+      [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    ],
+    "jacobian_conditioning_status": "not_interpreted_dimensioned_columns",
+    "nullity": 4,
+    "rank": 7,
+    "rank_basis": "analytic_nonzero_minor",
+    "structural_rank_witness": {
+      "closed_form": "m2^2 * r1 * r2 * (g*cos(phi))^2",
+      "determinant": 2.01622,
+      "parameter_columns": [
+        "upper_inertia_proximal_kg_m2",
+        "upper_length_m",
+        "lower_inertia_proximal_kg_m2",
+        "upper_mass_kg",
+        "lower_com_m",
+        "damping_proximal_nm_s_rad",
+        "damping_distal_nm_s_rad"
+      ]
+    }
+  },
+  "physical_parameter_nonuniqueness_status": "established_by_exact_invariance_families",
+  "physical_parameter_status": "structurally_non_identifiable_under_declared_model",
+  "physical_parameters": {
+    "damping_distal_nm_s_rad": 0.25,
+    "damping_proximal_nm_s_rad": 0.4,
+    "gravity_m_s2": 9.80665,
+    "lower_com_m": 0.755714,
+    "lower_inertia_proximal_kg_m2": 0.240235,
+    "lower_mass_kg": 0.35,
+    "plane_inclination_rad": 0.610865,
+    "upper_com_m": 0.3375,
+    "upper_inertia_proximal_kg_m2": 1.20586,
+    "upper_length_m": 0.75,
+    "upper_mass_kg": 7.5
+  },
+  "practical_identifiability_status": "not_established_oracle_kinematics_lower_bound_only",
+  "reference_rollout": {
+    "delivery_event": {
+      "arm_angle_rad": 0.765795,
+      "clubhead_speed_m_s": 38.8538,
+      "nearest_sample_index": 349,
+      "nearest_sample_time_s": 0.349,
+      "time_s": 0.349256
+    },
+    "dt_s": 0.001,
+    "horizon_steps": 900,
+    "initial_q_rad": [-2.2, -1.57],
+    "model_parameters": "GolfModelParams.default()",
+    "program": {
+      "onset_s": 0.1,
+      "shoulder_torque_nm": 60.0,
+      "wrist_drive_nm": 15.0,
+      "wrist_restrain_nm": 10.0
+    },
+    "scope": "synthetic reference trajectory; not participant evidence"
+  },
+  "schema_version": "proximal-distal-double-pendulum-identifiability/v2",
+  "zero_motion_killswitch": {
+    "full_rank": false,
+    "matrix_shape": [16, 7],
+    "rank": 0,
+    "retained_condition_number": null,
+    "singular_values": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "smallest_retained": null,
+    "threshold": 1e-8
+  }
+}
