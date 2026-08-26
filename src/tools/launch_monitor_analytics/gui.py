@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
+import uuid
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -100,6 +102,7 @@ class MainWidget(QtWidgets.QWidget):
         self.project = LaunchMonitorProject("Untitled Launch Monitor Study")
         self.analysis_frame = pd.DataFrame()
         self._dirty = False
+        self._last_data_export: dict[str, str] | None = None
         self._build_ui()
         self._wire_actions()
         self._apply_theme_best_effort()
@@ -572,6 +575,7 @@ class MainWidget(QtWidgets.QWidget):
         self.project = LaunchMonitorProject("Untitled Launch Monitor Study")
         self.analysis_frame = pd.DataFrame()
         self._dirty = False
+        self._last_data_export = None
         self._refresh_all()
         self.status_label.setText("New empty project. Import launch-monitor exports.")
 
@@ -1004,6 +1008,42 @@ class MainWidget(QtWidgets.QWidget):
             except OSError as exc:
                 self._show_error("Could Not Save Project", exc)
 
+    def export_data(self, path: str | Path, *, as_parquet: bool = False) -> Path:
+        """Export the analysis view, stamping a shared export ID + hash.
+
+        Mirrors the ``ImportManifest`` provenance pattern: a fresh export
+        ID/timestamp is embedded in the artifact (a leading ``#`` comment
+        row for CSV, Parquet schema metadata for Parquet) and recorded on
+        ``self._last_data_export`` with the file's own SHA-256, so a later
+        ``export_manifest`` call can correlate the two on disk.
+        """
+        destination = Path(path)
+        export_id = uuid.uuid4().hex
+        exported_at = datetime.now(UTC).isoformat()
+        is_parquet = as_parquet or destination.suffix.lower() == ".parquet"
+        if is_parquet:
+            import pyarrow as pa
+            import pyarrow.parquet as pq
+
+            table = pa.Table.from_pandas(self.analysis_frame, preserve_index=False)
+            metadata = dict(table.schema.metadata or {})
+            metadata[b"export_id"] = export_id.encode("utf-8")
+            metadata[b"exported_at"] = exported_at.encode("utf-8")
+            table = table.replace_schema_metadata(metadata)
+            pq.write_table(table, destination)
+        else:
+            with destination.open("w", encoding="utf-8", newline="") as handle:
+                handle.write(f"# export_id={export_id} exported_at={exported_at}\n")
+                self.analysis_frame.to_csv(handle, index=False)
+        data_sha256 = hashlib.sha256(destination.read_bytes()).hexdigest()
+        self._last_data_export = {
+            "export_id": export_id,
+            "exported_at": exported_at,
+            "data_file": destination.name,
+            "data_sha256": data_sha256,
+        }
+        return destination
+
     def _on_export_data(self) -> None:
         path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(
             self,
@@ -1014,14 +1054,32 @@ class MainWidget(QtWidgets.QWidget):
         if not path:
             return
         try:
-            if "Parquet" in selected_filter or Path(path).suffix.lower() == ".parquet":
-                self.analysis_frame.to_parquet(path, index=False)
-            else:
-                self.analysis_frame.to_csv(path, index=False)
+            self.export_data(path, as_parquet="Parquet" in selected_filter)
         except (OSError, ValueError, ImportError) as exc:
             self._show_error("Could Not Export Data", exc)
             return
-        self.status_label.setText(f"Exported canonical analysis view to {path}.")
+        export_id = (self._last_data_export or {}).get("export_id", "")
+        self.status_label.setText(f"Exported analysis view to {path} (ID {export_id}).")
+
+    def export_manifest(self, path: str | Path) -> Path:
+        """Write the reproducibility manifest, correlated to the last export.
+
+        Embeds the last ``export_data`` call's ID, filename, and SHA-256
+        under ``data_export`` (``None`` if no export ran yet) so the pair
+        stays verifiably linked even once separated on disk.
+        """
+        destination = Path(path)
+        payload = {
+            "project": self.project.name,
+            "sessions": [asdict(session.manifest) for session in self.project.sessions],
+            "treatment_audit_log": self.project.audit_log,
+            "analysis_rows": len(self.analysis_frame),
+            "canonical_metrics": numeric_metric_columns(self.analysis_frame),
+            "scientific_boundary": self.scientific_boundary.text(),
+            "data_export": self._last_data_export,
+        }
+        destination.write_text(json.dumps(payload, indent=2, default=str), "utf-8")
+        return destination
 
     def _on_export_manifest(self) -> None:
         path, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -1032,18 +1090,8 @@ class MainWidget(QtWidgets.QWidget):
         )
         if not path:
             return
-        payload = {
-            "project": self.project.name,
-            "sessions": [asdict(session.manifest) for session in self.project.sessions],
-            "treatment_audit_log": self.project.audit_log,
-            "analysis_rows": len(self.analysis_frame),
-            "canonical_metrics": numeric_metric_columns(self.analysis_frame),
-            "scientific_boundary": self.scientific_boundary.text(),
-        }
         try:
-            Path(path).write_text(
-                json.dumps(payload, indent=2, default=str), encoding="utf-8"
-            )
+            self.export_manifest(path)
         except OSError as exc:
             self._show_error("Could Not Export Manifest", exc)
 
