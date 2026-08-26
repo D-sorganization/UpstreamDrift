@@ -105,17 +105,14 @@ class ForceVisualizer:
             except (RuntimeError, ValueError, OSError):
                 body2_name = f"body_{body2_id}"
 
+                # ⚡ Bolt: math.hypot avoids temporary allocations and is ~7x faster than np.linalg.norm for small 1D arrays
             contacts.append(
                 {
                     "position": contact.pos.copy(),
                     "normal": contact.frame[:3].copy(),
                     "normal_force": force[0],
-                    "friction_force": math.hypot(
-                        force[1], force[2]
-                    ),  # ⚡ Bolt: math.hypot avoids temporary allocations and is ~7x faster than np.linalg.norm for small 1D arrays
-                    "total_force": math.hypot(
-                        force[0], force[1], force[2]
-                    ),  # ⚡ Bolt: math.hypot avoids temporary allocations and is ~7x faster than np.linalg.norm for small 1D arrays
+                    "friction_force": math.hypot(force[1], force[2]),
+                    "total_force": math.hypot(force[0], force[1], force[2]),
                     "body1": body1_name,
                     "body2": body2_name,
                 }

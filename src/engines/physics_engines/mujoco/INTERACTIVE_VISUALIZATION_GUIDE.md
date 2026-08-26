@@ -131,6 +131,7 @@ for i in range(data.ncon):
     frame = contact.frame
 
     # Contact force (in contact frame)
+    import math
     force = np.zeros(6)
     mujoco.mj_contactForce(model, data, i, force)
 
@@ -323,12 +324,14 @@ Detailed contact force analysis:
 ```python
 def analyze_contacts(model, data):
     """Analyze all active contacts."""
+    import math
     contact_info = []
 
     for i in range(data.ncon):
         contact = data.contact[i]
 
         # Get contact force
+        import math
         force = np.zeros(6)
         mujoco.mj_contactForce(model, data, i, force)
 
@@ -385,6 +388,7 @@ def compute_stability_metrics(model, data):
     total_moment = np.zeros(3)
 
     for i in range(data.ncon):
+        import math
         force = np.zeros(6)
         mujoco.mj_contactForce(model, data, i, force)
         contact_pos = data.contact[i].pos
