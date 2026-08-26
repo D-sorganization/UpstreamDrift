@@ -11,7 +11,8 @@ All functions follow consistent interface and styling.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, TypeVar
 
 import numpy as np
 from matplotlib.axes import Axes
@@ -19,9 +20,15 @@ from matplotlib.figure import Figure
 
 from src.shared.python.plotting.base import RecorderInterface
 from src.shared.python.plotting.config import PlotConfig, resolve_figure
+from src.shared.python.plotting.identity import (
+    PlotIdentity,
+    resolve_and_apply_identity_footer,
+)
 
 if TYPE_CHECKING:
     pass
+
+_T = TypeVar("_T")
 
 
 def _retrieve_power_data(
@@ -48,11 +55,136 @@ def _retrieve_power_data(
         return None
 
 
+def _prepare_power_series(
+    recorder: RecorderInterface,
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """Retrieve and normalize power data to a 2D (times, powers[N, D]) pair.
+
+    DRY helper: eliminates duplicated fetch/validate/reshape logic shared
+    by plot_power_analysis and plot_cumulative_work.
+
+    Returns:
+        Tuple of (times, powers) with powers guaranteed 2D, or None if no
+        data is available.
+    """
+    result = _retrieve_power_data(recorder)
+    if result is None:
+        return None
+    times, powers = result
+    if len(times) == 0:
+        return None
+    if powers.ndim == 1:
+        powers = powers.reshape(-1, 1)
+    return times, powers
+
+
+def _retrieve_kinetic_potential(
+    recorder: RecorderInterface,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray] | None:
+    """Retrieve kinetic + potential energy series from recorder.
+
+    DRY helper: eliminates duplicated retrieval/validation logic shared by
+    plot_energy_breakdown and plot_energy_flow.
+
+    Returns:
+        Tuple of (times, kinetic, potential) or None if unavailable.
+    """
+    try:
+        times, kinetic = recorder.get_time_series("kinetic_energy")
+        _, potential = recorder.get_time_series("potential_energy")
+    except (KeyError, AttributeError):
+        return None
+
+    if len(times) == 0:
+        return None
+
+    return np.asarray(times), np.asarray(kinetic), np.asarray(potential)
+
+
+def _init_energy_figure(
+    recorder: RecorderInterface,
+    ax: Axes | None,
+    config: PlotConfig | None,
+    identity: PlotIdentity | None,
+) -> tuple[Figure, Axes, PlotConfig]:
+    """Validate recorder, resolve fig/ax/config, and stamp the identity footer.
+
+    DRY helper: every function in this module shares this exact preamble
+    (recorder validation, figure resolution, identity footer) before
+    branching into its own data retrieval.
+    """
+    if recorder is None:
+        raise ValueError("recorder must be provided")
+    fig, ax, config = resolve_figure(ax, config)
+    resolve_and_apply_identity_footer(fig, recorder, identity)
+    return fig, ax, config
+
+
+def _init_energy_plot(
+    recorder: RecorderInterface,
+    ax: Axes | None,
+    config: PlotConfig | None,
+    identity: PlotIdentity | None,
+    retrieve: Callable[[RecorderInterface], _T | None],
+    no_data_message: str,
+) -> tuple[Figure, Axes, PlotConfig, _T | None]:
+    """Init the figure/identity, then retrieve data or annotate "no data".
+
+    DRY helper shared by every ``plot_*`` function that can bail out early
+    when its data series is unavailable (breakdown, power analysis,
+    cumulative work, energy flow). Callers still need to check whether the
+    returned data is ``None`` and, if so, return ``(fig, ax)`` immediately.
+    """
+    fig, ax, config = _init_energy_figure(recorder, ax, config, identity)
+    data = retrieve(recorder)
+    if data is None:
+        ax.text(0.5, 0.5, no_data_message, ha="center", va="center")
+    return fig, ax, config, data
+
+
+def _kp_plot_init(
+    recorder: RecorderInterface,
+    ax: Axes | None,
+    config: PlotConfig | None,
+    identity: PlotIdentity | None,
+) -> tuple[Figure, Axes, PlotConfig, tuple[np.ndarray, np.ndarray, np.ndarray] | None]:
+    """Bind ``_init_energy_plot`` to the kinetic/potential retriever.
+
+    DRY helper shared by plot_energy_breakdown and plot_energy_flow, the
+    two functions that both start from a kinetic+potential energy series.
+    """
+    return _init_energy_plot(
+        recorder,
+        ax,
+        config,
+        identity,
+        _retrieve_kinetic_potential,
+        "No energy data available",
+    )
+
+
+def _init_power_plot(
+    recorder: RecorderInterface,
+    ax: Axes | None,
+    config: PlotConfig | None,
+    identity: PlotIdentity | None,
+) -> tuple[Figure, Axes, PlotConfig, tuple[np.ndarray, np.ndarray] | None]:
+    """Bind ``_init_energy_plot`` to the per-actuator power retriever.
+
+    DRY helper shared by plot_power_analysis and plot_cumulative_work, the
+    two functions that both start from a per-actuator power series.
+    """
+    return _init_energy_plot(
+        recorder, ax, config, identity, _prepare_power_series, "No power data available"
+    )
+
+
 def plot_energy_overview(  # noqa: C901
     recorder: RecorderInterface,
     ax: Axes | None = None,
     config: PlotConfig | None = None,
     show_components: bool = True,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot total, kinetic, and potential energy over time.
 
@@ -61,13 +193,13 @@ def plot_energy_overview(  # noqa: C901
         ax: Optional axes to plot on
         config: Plot configuration
         show_components: Whether to show KE/PE breakdown
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
     """
-    if recorder is None:
-        raise ValueError("recorder must be provided")
-    fig, ax, config = resolve_figure(ax, config)
+    fig, ax, config = _init_energy_figure(recorder, ax, config, identity)
 
     # Get energy data
     try:
@@ -134,6 +266,7 @@ def plot_energy_breakdown(
     recorder: RecorderInterface,
     ax: Axes | None = None,
     config: PlotConfig | None = None,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot stacked area chart of energy components.
 
@@ -141,27 +274,16 @@ def plot_energy_breakdown(
         recorder: Data source implementing RecorderInterface
         ax: Optional axes to plot on
         config: Plot configuration
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
     """
-    if recorder is None:
-        raise ValueError("recorder must be provided")
-    fig, ax, config = resolve_figure(ax, config)
-
-    try:
-        times, kinetic = recorder.get_time_series("kinetic_energy")
-        _, potential = recorder.get_time_series("potential_energy")
-    except (KeyError, AttributeError):
-        ax.text(0.5, 0.5, "No energy data available", ha="center", va="center")
+    fig, ax, config, result = _kp_plot_init(recorder, ax, config, identity)
+    if result is None:
         return fig, ax
-
-    if len(times) == 0:
-        ax.text(0.5, 0.5, "No energy data available", ha="center", va="center")
-        return fig, ax
-
-    kinetic = np.asarray(kinetic)
-    potential = np.asarray(potential)
+    times, kinetic, potential = result
 
     # Stacked area plot
     ax.fill_between(
@@ -196,6 +318,7 @@ def plot_power_analysis(
     joint_indices: list[int] | None = None,
     joint_names: list[str] | None = None,
     config: PlotConfig | None = None,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot instantaneous power for each actuator.
 
@@ -207,28 +330,16 @@ def plot_power_analysis(
         joint_indices: Indices of joints to plot
         joint_names: Names for legend
         config: Plot configuration
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
     """
-    if recorder is None:
-        raise ValueError("recorder must be provided")
-    fig, ax, config = resolve_figure(ax, config)
-
-    result = _retrieve_power_data(recorder)
+    fig, ax, config, result = _init_power_plot(recorder, ax, config, identity)
     if result is None:
-        ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
         return fig, ax
-
     times, powers = result
-
-    if len(times) == 0:
-        ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
-        return fig, ax
-
-    powers = np.asarray(powers)
-    if powers.ndim == 1:
-        powers = powers.reshape(-1, 1)
 
     n_joints = powers.shape[1]
     indices = joint_indices or list(range(min(n_joints, 6)))  # Limit to 6 for clarity
@@ -255,6 +366,7 @@ def plot_cumulative_work(
     joint_indices: list[int] | None = None,
     joint_names: list[str] | None = None,
     config: PlotConfig | None = None,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot cumulative work done by each actuator.
 
@@ -266,28 +378,16 @@ def plot_cumulative_work(
         joint_indices: Indices of joints to plot
         joint_names: Names for legend
         config: Plot configuration
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
     """
-    if recorder is None:
-        raise ValueError("recorder must be provided")
-    fig, ax, config = resolve_figure(ax, config)
-
-    result = _retrieve_power_data(recorder)
+    fig, ax, config, result = _init_power_plot(recorder, ax, config, identity)
     if result is None:
-        ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
         return fig, ax
-
     times, powers = result
-
-    if len(times) == 0:
-        ax.text(0.5, 0.5, "No power data available", ha="center", va="center")
-        return fig, ax
-
-    powers = np.asarray(powers)
-    if powers.ndim == 1:
-        powers = powers.reshape(-1, 1)
 
     # Compute cumulative work via trapezoidal integration
     n_joints = powers.shape[1]
@@ -319,6 +419,7 @@ def plot_energy_flow(
     recorder: RecorderInterface,
     ax: Axes | None = None,
     config: PlotConfig | None = None,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot energy flow: work in, dissipation, stored energy.
 
@@ -329,27 +430,16 @@ def plot_energy_flow(
         recorder: Data source implementing RecorderInterface
         ax: Optional axes to plot on
         config: Plot configuration
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
     """
-    if recorder is None:
-        raise ValueError("recorder must be provided")
-    fig, ax, config = resolve_figure(ax, config)
-
-    try:
-        times, kinetic = recorder.get_time_series("kinetic_energy")
-        _, potential = recorder.get_time_series("potential_energy")
-    except (KeyError, AttributeError):
-        ax.text(0.5, 0.5, "No energy data available", ha="center", va="center")
+    fig, ax, config, result = _kp_plot_init(recorder, ax, config, identity)
+    if result is None:
         return fig, ax
-
-    if len(times) == 0:
-        ax.text(0.5, 0.5, "No energy data available", ha="center", va="center")
-        return fig, ax
-
-    kinetic = np.asarray(kinetic)
-    potential = np.asarray(potential)
+    times, kinetic, potential = result
     total = kinetic + potential
 
     # Rate of energy change
