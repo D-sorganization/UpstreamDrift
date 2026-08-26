@@ -21,6 +21,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert list(manifest["presets"]) == [
         "double_pendulum",
         "pendulum_force_source_optimization",
+        "local_linear_diagnostics",
         "forward_two_hand",
         "moving_base_flexible_club",
         "forward_modal_shaft",
