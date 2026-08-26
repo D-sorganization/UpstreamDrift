@@ -65,7 +65,7 @@
     "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py": "bbe4de3fa99d66c9f694d2aa1a85decb8dedf269d59c82e64bf2c617c1daac07",
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py": "1df4b9c5b0c9550aa051f1b7d28b6b54702f56398d87bc07904ed93a03997119",
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": "26e8f8237a008eac7286236c9eb765e7694c81d10bc0852c23d937ee7ae90973",
-    "scripts/research/proximal_distal_energy/spatial_full_body.py": "862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "bb195bf720542f870eaaa514e1ae8b2a4e81ac89d6d89447fa9be4e43aa94743",
     "tests/research/test_articulated_manufactured_solution.py": "e5e1f4892444f40ca1c7a4ff3e46555897cda4b7808261ab66912f32bdb4ee9c"
   }
 }
