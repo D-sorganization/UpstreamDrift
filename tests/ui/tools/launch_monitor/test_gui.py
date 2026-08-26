@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import numpy as np
@@ -270,3 +272,70 @@ def test_window_file_menu_offers_the_corpus_load_action(qapp) -> None:  # noqa: 
         assert "Load &Private Corpus" in labels
     finally:
         window.deleteLater()
+
+
+def test_exported_data_and_manifest_share_a_verifiable_export_id(
+    widget, tmp_path
+) -> None:  # noqa: ANN001
+    """The data export and the reproducibility manifest must stay linkable.
+
+    Regression test for #8826: `_on_export_data` used to write a bare CSV
+    with no header, and `_on_export_manifest` wrote a wholly separate JSON
+    with no shared identifier, so the pair was unattributable once split
+    on disk. `export_data` now stamps an export ID into the CSV itself and
+    records the file's own SHA-256; `export_manifest` embeds both into a
+    `data_export` block.
+    """
+    widget.import_file(FIXTURES / "trackman.csv")
+
+    data_path = tmp_path / "launch_monitor_data.csv"
+    manifest_path = tmp_path / "launch_monitor_manifest.json"
+    widget.export_data(data_path)
+    widget.export_manifest(manifest_path)
+
+    data_bytes = data_path.read_bytes()
+    first_line = data_bytes.split(b"\n", 1)[0].decode("utf-8")
+    assert first_line.startswith("# export_id=")
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    data_export = manifest["data_export"]
+    assert data_export is not None
+    assert data_export["export_id"] in first_line
+
+    # The manifest's recorded hash must match the exported file's actual
+    # on-disk content -- the verifiable link the issue asked for.
+    assert data_export["data_sha256"] == hashlib.sha256(data_bytes).hexdigest()
+    assert data_export["data_file"] == data_path.name
+
+
+def test_export_data_parquet_embeds_export_id_in_schema_metadata(
+    widget, tmp_path
+) -> None:  # noqa: ANN001
+    pytest.importorskip("pyarrow")
+    import pyarrow.parquet as pq
+
+    widget.import_file(FIXTURES / "trackman.csv")
+    data_path = tmp_path / "launch_monitor_data.parquet"
+    manifest_path = tmp_path / "launch_monitor_manifest.json"
+
+    widget.export_data(data_path, as_parquet=True)
+    widget.export_manifest(manifest_path)
+
+    schema_metadata = pq.read_schema(data_path).metadata
+    embedded_export_id = schema_metadata[b"export_id"].decode("utf-8")
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["data_export"]["export_id"] == embedded_export_id
+    assert (
+        manifest["data_export"]["data_sha256"]
+        == hashlib.sha256(data_path.read_bytes()).hexdigest()
+    )
+
+
+def test_export_manifest_without_a_prior_data_export_is_still_valid(
+    widget, tmp_path
+) -> None:  # noqa: ANN001
+    manifest_path = tmp_path / "launch_monitor_manifest.json"
+    widget.export_manifest(manifest_path)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["data_export"] is None
