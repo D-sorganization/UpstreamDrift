@@ -247,9 +247,11 @@ the finding-by-finding record in
 | [`data/external_source_review.json`](data/external_source_review.json)                               | Work-deduplicated source, correction, claim-fit, and link-availability review                  |
 | [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap                    |
 | [`HYBRID_SYSTEM_CONTRACT.md`](HYBRID_SYSTEM_CONTRACT.md)                                             | Executable eight-tier hybrid topology, evidence boundary, and remaining qualification gates    |
+| [`LOCAL_LINEAR_DIAGNOSTICS.md`](LOCAL_LINEAR_DIAGNOSTICS.md)                                         | Local analytical observability/controllability ranks, conditioning, killswitches, and limits   |
 | [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                     | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions              |
 | [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json) | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs              |
 | [`data/hybrid_system_contract_v1.json`](data/hybrid_system_contract_v1.json)                         | Versioned states, modes, guards, resets, actuator/event contracts, and unavailable tiers       |
+| [`data/local_linear_diagnostics.json`](data/local_linear_diagnostics.json)                           | Trace-derived local matrices, SVD rank decisions, step sensitivity, and inference boundary     |
 | [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)               | Claim, alternative-explanation, model-discrepancy, and falsifier register                      |
 | [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)                   | Frozen human-data acquisition, split, analysis, and inference-boundary protocol                |
 | [`MEASURED_TRAJECTORY_ACQUISITION.md`](MEASURED_TRAJECTORY_ACQUISITION.md)                           | Fail-closed measured-trajectory authority, manifest, digest, frame, event, and loader contract |

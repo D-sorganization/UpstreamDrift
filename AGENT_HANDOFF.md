@@ -2,29 +2,20 @@
 
 Last updated: 2026-08-25
 
-This is current operational state, not history. Git and GitHub retain history.
-Epic #8557 is the single proximal-to-distal completion authority.
+This is current operational state, not history; Git and GitHub retain history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Markerless Mocap Program (#9063)
 
-- ADR-0041 and the executable acceptance program assign canonical camera,
-  observation, calibration, timing, session, reconstruction, and C3D contracts
-  to Tools #4706. UpstreamDrift owns orchestration, UX, persistence, and
-  biomechanics adapters; AffineDrift owns sanitized evidence publication.
-- Tools PR #4734 remains a protected candidate. Do not repin
-  `vendor/ud-tools` to a feature head. UpstreamDrift #9069 is the next consumer
-  slice after the immutable Tools authority merges.
-- Existing file ingestion/#4558 and duplicate-reader debt #8865 are inputs,
-  not live-lab implementation or physical-shop qualification. No camera,
-  inference, C3D round-trip, commercial, or human-performance claim is made.
-  There is no physical-lab qualification.
+- ADR-0041 assigns camera, observation, calibration, timing, session, reconstruction, and C3D contracts to Tools #4706; UpstreamDrift owns orchestration, UX, persistence, and biomechanics adapters; AffineDrift owns sanitized evidence publication.
+- Tools PR #4734 remains a protected candidate. Do not repin `vendor/ud-tools` to a feature head; UpstreamDrift #9069 follows its immutable merge.
+- Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation. There is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
 
 ## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `2091667158907427c1b59276041fcdbc4b92964c`.
+- Remote `main` is `4b533018c75a2ec094fc3d2bd791cdf2c330750f`.
   PR #9018 and its normalized-claim authority remain ancestors of `main`.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
@@ -34,7 +25,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
   125 numeric contracts, and 382/382 verified literals. Outcomes are 286
   supported only within declared estimands and boundaries, five inconclusive,
   15 untested, and zero contradicted. All 43 public release claims have review
-  dispositions and scientifically open gates. The bundle has 613 artifacts.
+  dispositions and scientifically open gates. The bundle has 617 artifacts.
 
 ## Coordinate Force-Source Attribution (#9059)
 
@@ -55,8 +46,8 @@ Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Hybrid-System Topology Contract (#9027)
 
-- PR #9049 branch `research/9027-hybrid-system-contract` is reconciled with
-  `main` `b5cc4cfd1` in merge commit `SELF`. It defines typed topology for all
+- PR #9049 is merged on `main` as protected squash `a4b7d3f9b`. It defines
+  typed topology for all
   eight model tiers: continuous state, controls, algebraic constraints, modes,
   guards, resets, impacts, actuator dynamics, uncertain event surfaces,
   observables, limitations, falsifiers, and comparison blockers.
@@ -66,8 +57,21 @@ Epic #8557 is the single proximal-to-distal completion authority.
   participant validity, or coaching interpretation.
 - Protected repair PR #9094 regenerated manufactured-solution evidence through
   the governed path and merged as `2091667158907427c1b59276041fcdbc4b92964c`.
-  The release bundle validates with 613 artifacts and 382/382 verified numeric
-  literals. This remains computational model evidence, not human validation.
+  The release bundle validates with 617 artifacts after #9100. This remains
+  computational model evidence, not human validation.
+
+## Nondimensional Local Rank (#9092)
+
+- PR #9100 is merged as `b8508197e3dc7262ad57ade830dd3db19a8657ac`.
+  It retains raw dimensional
+  matrices for traceability but interprets rank and condition only after
+  declared state, control, output, and time scaling.
+- Four synthetic operating points, three finite-difference multipliers, three
+  scale scenarios, and 16 countermodels in each class are registered. The
+  zero-input and zero-output killswitches return rank zero.
+- Published floats use six significant digits for cross-platform identity;
+  rank decisions are computed at full precision before serialization. These
+  local results do not establish structural/global rank or human strategy.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -101,14 +105,16 @@ Epic #8557 is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- PR #9049's prior head `17fd13068` passed every required check. Its optional
-  stack completed with the documented #8963 source-lock failure; the current
-  main reconciliation requires a fresh protected CI wave. #9092 owns the
-  dependent nondimensional local-rank slice.
+- #9027 contract PR #9049 and dependent nondimensional local-rank PR #9100 are
+  merged. Raw dimensional conditioning alone is not evidence.
 - PR #9032 is at remote head `d341a0c92`; required CI passed at last
   verification. Its optional source-lock failure is deliberate.
 - #8358's immutable Tools gateway and analysis methods are merged, but its UI,
   localized-perturbation, and presentation criteria remain unaudited.
+- The focused `fix/8358-perturbation-package-import` follow-up preserves
+  UpstreamDrift-owned `src.shared` modules while refreshing one Tools provider.
+  It is a test-harness compatibility repair for Tools PR #4734 and changes no
+  production API, provider schema, or vendor pin.
 - Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
   moving or partial campaign; the next public projection must pin a qualified
   UpstreamDrift merge commit.
