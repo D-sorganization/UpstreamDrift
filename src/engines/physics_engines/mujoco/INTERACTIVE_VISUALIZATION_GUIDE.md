@@ -135,7 +135,7 @@ for i in range(data.ncon):
     mujoco.mj_contactForce(model, data, i, force)
 
     normal_force = force[0]  # Normal component
-    friction_force = np.linalg.norm(force[1:3])  # Tangential
+    friction_force = math.hypot(force[1], force[2])  # Tangential
 ```
 
 #### 3. **Actuator Data**
@@ -343,7 +343,7 @@ def analyze_contacts(model, data):
             'body2': model.body(body2).name,
             'position': contact.pos.copy(),
             'normal_force': force[0],
-            'friction_force': np.linalg.norm(force[1:3]),
+            'friction_force': math.hypot(force[1], force[2]),
             'penetration': contact.dist
         })
 
