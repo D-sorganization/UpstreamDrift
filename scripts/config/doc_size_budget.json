@@ -20,6 +20,12 @@
       "expires_on": "2026-09-30"
     },
     {
+      "path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "owner": "@research-team",
+      "reason": "Issue #9097 preserves the checksum-locked scientific source and governed release artifacts until the temporary documentation-size exception is reviewed.",
+      "expires_on": "2026-09-30"
+    },
+    {
       "path": "docs/testing/functional-test-plan.md",
       "owner": "@docs-team",
       "reason": "Expanded functional test matrix tracked by consolidation commit #8129; split or archive after the backlog recovery window.",

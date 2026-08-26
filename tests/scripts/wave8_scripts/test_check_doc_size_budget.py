@@ -171,3 +171,30 @@ def test_iter_documents_only_doc_extensions(
     docs = mod._iter_documents()
     names = sorted(p.name for p in docs)
     assert names == ["a.md", "b.qmd"]
+
+
+def test_spatial_cross_exception_is_owned_narrow_and_expiring() -> None:
+    """Issue #9097's source-preserving waiver must remain bounded and temporary."""
+    target = (
+        mod.ROOT
+        / "docs"
+        / "research"
+        / "proximal_distal_energy_transfer"
+        / "chapters"
+        / "_ch06c_spatial_cross_formulation.qmd"
+    )
+    config = json.loads(mod.CONFIG_PATH.read_text(encoding="utf-8"))
+    matching = [
+        item
+        for item in config["exceptions"]
+        if item["path"] == target.relative_to(mod.ROOT).as_posix()
+    ]
+
+    assert len(matching) == 1
+    exception = mod.BudgetException.from_json(matching[0])
+    assert exception.owner == "@research-team"
+    assert exception.is_active(date.today())
+    assert exception.expires_on <= date.today() + timedelta(days=45)
+    assert "#9097" in matching[0]["reason"]
+    maximum = int(config["max_bytes"])
+    assert maximum < target.stat().st_size <= maximum + 1024

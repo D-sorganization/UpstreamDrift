@@ -10,7 +10,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `b5cc4cfd1a95638d5c5a4509f2e19236379cc729`.
+- Remote `main` is `a4b7d3f9b19864103d842c4a3e5c708c4ce1cba5`.
   PR #9018 and its normalized-claim authority remain ancestors of `main`.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
@@ -21,6 +21,19 @@ Epic #8557 is the single proximal-to-distal completion authority.
   supported only within declared estimands and boundaries, five inconclusive,
   15 untested, and zero contradicted. All 43 public release claims have review
   dispositions and scientifically open gates. The bundle has 613 artifacts.
+
+## Documentation Size Baseline (#9097)
+
+- The checksum-locked spatial cross-formulation chapter is 51,523 bytes,
+  323 bytes above the unchanged 51,200-byte documentation budget. Its single
+  exception is owned by `@research-team` and expires on 2026-09-30.
+- The chapter's canonical release SHA-256 remains
+  `95d10f58e836e996dd005fc500ff0d635545bdddf9325778b5b8f61447bd8ae7`.
+  `CHECKSUMS.sha256`, the release manifest, generated TeX/PDF, and public
+  projection are untouched; no publication or scientific claim changed.
+- Regression coverage caps this waiver at 1 KiB above the global budget and
+  at 45 days from validation. Expiry requires a governed review, source-safe
+  split, and release regeneration as applicable, not silent renewal.
 
 ## Coordinate Force-Source Attribution (#9059)
 
@@ -125,6 +138,8 @@ python -m pytest -n 0 -q tests/research/test_hybrid_system_contract.py tests/res
 python scripts/ci/check_architecture_budget.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
+python3 scripts/check_docs_governance.py
+python3 scripts/check_doc_size_budget.py
 ```
 
 Passing shared gates does not close a scientific child whose narrower evidence
