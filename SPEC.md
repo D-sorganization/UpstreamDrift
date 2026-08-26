@@ -2,6 +2,22 @@
 
 ## Current Scientific Audit State (2026-08-25)
 
+## Dependency Lock Provenance (#9120)
+
+`make sync-deps` is the one repository-owned dependency-artifact generation
+entry point. Both pip-tools invocations set its supported
+`CUSTOM_COMPILE_COMMAND` contract to the literal `make sync-deps`, so inherited
+index policy such as `PIP_NO_INDEX=1` can change resolution behavior but cannot
+change the generated provenance header. A focused contract compares the recipe
+bytes under normal and offline/no-index environments and requires both committed
+lockfiles to contain the canonical generated header. Canonical regeneration must
+retain the dependency-consistency clean-diff gate and prove pinned package bytes
+unchanged; generated headers must never be edited by hand.
+
+Full no-index resolution still requires a populated dependency cache or
+wheelhouse. Its absence is tracked separately by #9122 and must fail closed; it
+does not authorize network access to be hidden inside an offline qualification.
+
 ## Markerless Mocap Program (#9063)
 
 Issue #9065 establishes ADR-0041 and an executable acceptance program before
@@ -630,7 +646,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.607                                            |
+| **Spec Version**        | 1.0.608                                            |
 | **Last Spec Update**    | 2026-08-26                                         |
 
 ## 2. Purpose & Mission
@@ -3318,6 +3334,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-26 | 1.0.608 | Fixed #9120's environment-dependent pip-tools provenance. `make sync-deps` now supplies the literal repository-owned `CUSTOM_COMPILE_COMMAND=make sync-deps` to both runtime and development lock compilations. A focused normal-versus-offline dry-run contract proves the recipe bytes are invariant, and committed generated headers are enforced. Bounded canonical regeneration changed only those two headers: runtime and development pin digests remained byte-identical. Full no-index dependency resolution remains fail-closed when the cache lacks required distributions and is tracked separately by #9122; neither the clean-diff gate nor index policy is relaxed. |
 | 2026-08-26 | 1.0.607 | Normally reconciled #9107 with protected markerless-authority main `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c` after #9088 merged. The packaging-only wheel/source split, fixture-only smoke checkout, canonical BunkerShot3D identity, and bounded transfer/install assertions remain unchanged; the integrated ADR-0041 authority boundary introduces no camera, inference, C3D round-trip, physical-lab, or human-performance qualification. |
 | 2026-08-26 | 1.0.606 | Repaired #9107's wheel-smoke transport boundary after both matrix jobs exhausted their time while downloading the combined 771,541,995-byte wheel-plus-sdist artifact and never reached installation. The build now retains separate wheel and source artifacts; smoke jobs use a fixture-only sparse checkout, download only the selected wheel, and have a measured bounded 20-minute transfer/install/assertion budget. Runner selection, the built distributions, and both smoke assertions are unchanged. |
 | 2026-08-26 | 1.0.605 | Reconciled #9107 with current `main` and qualified the exact 384,333,159-byte wheel (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`) under Python 3.11. The branch-owned canonical BunkerShot3D import, one-object identity, duplicate exclusion, UI presence, and test-payload exclusion pass. Two broader inherited wheel-runtime failures remain explicit and unqualified: `src.api` collides with the co-installed Tools config alias and `sidekick --help` fails. No runner, workflow, vendor pin, runtime API, or scientific authority is changed to mask them. |
