@@ -35,7 +35,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
 - UpstreamDrift remote `main` is
-  `4f84a8a2dbdafac01a634ceb41b1e415ea7ec5bb`. The normalized-claim authority
+  `e4d6a7c513cae351df47ec1af9d88b66fea74656`. The normalized-claim authority
   from PR #9018 remains an ancestor; issue #8724 is closed.
 - The current computational publication is 244 pages with SHA-256
   `59faa25bce589777560d66bd9d5712b37fe0099979c91318c5875460ec6447b6`,
@@ -113,7 +113,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   2026-08-24 after a manual closure lacked a complete campaign, protected PR,
   or remote-main merge.
 - #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
-- PR #9022 is merged as current remote-main commit `76bf6ab1d`. Tools PR #4674
+- PR #9022 is merged as commit `76bf6ab1d`. Tools PR #4674
   is merged at immutable commit
   `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
   canonical JSON/CSV/HDF5 analysis authority.
@@ -127,6 +127,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   adds a forced-import-block regression. All five launcher tests pass on Python
   3.11 and 3.13; a new protected run is pending. Keep #8358 open because its
   broader UI, localized-perturbation, and presentation criteria remain unaudited.
+- The focused `fix/8358-perturbation-package-import` follow-up preserves
+  UpstreamDrift-owned `src.shared` modules while refreshing a selected Tools
+  provider. Ten shared-contract tests pass on Python 3.11 and 3.12 and on a
+  detached exact-head replay; keep #8358 open for its broader acceptance scope.
 - PR #9032 is open at `5edacb13c`; Standard CI passes, but optional-stack has
   a headless `DISPLAY` failure and human review remains absent.
 - Tools #4142 remains open until immutable UpstreamDrift consumption and
