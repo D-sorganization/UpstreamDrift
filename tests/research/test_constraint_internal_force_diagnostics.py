@@ -7,9 +7,11 @@ import pytest
 
 from scripts.research.proximal_distal_energy.bilateral_wrench_identifiability import (
     audit_linear_map,
+    full_hand_wrench_map,
     point_force_wrench_map,
 )
 from scripts.research.proximal_distal_energy.constraint_internal_force_diagnostics import (
+    normalized_full_hand_wrench_map,
     normalized_point_force_wrench_map,
     planar_closed_loop_audit,
 )
@@ -51,6 +53,22 @@ def test_coincident_contacts_create_three_invisible_force_modes() -> None:
 
     assert audit.rank == 3
     assert audit.nullity == 3
+
+
+def test_full_hand_wrench_map_normalizes_input_and_output_moments() -> None:
+    contacts = _contacts(0.2)
+    raw = full_hand_wrench_map(contacts)
+    normalized = normalized_full_hand_wrench_map(
+        contacts,
+        reference_length_m=0.1,
+    )
+    output_scale = np.diag((1.0, 1.0, 1.0, 10.0, 10.0, 10.0))
+    input_scale = np.diag((1.0, 1.0, 1.0, 0.1, 0.1, 0.1, 1.0, 1.0, 1.0, 0.1, 0.1, 0.1))
+
+    np.testing.assert_allclose(normalized, output_scale @ raw @ input_scale)
+    audit = audit_linear_map(normalized)
+    assert audit.rank == 6
+    assert audit.nullity == 6
 
 
 def test_near_coincident_rank_is_tolerance_sensitive() -> None:

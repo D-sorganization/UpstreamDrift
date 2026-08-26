@@ -16,6 +16,7 @@ import numpy.typing as npt
 
 from scripts.research.proximal_distal_energy.bilateral_wrench_identifiability import (
     audit_linear_map,
+    full_hand_wrench_map,
     point_force_wrench_map,
 )
 from scripts.research.proximal_distal_energy.mechanism_ladder import (
@@ -70,6 +71,42 @@ def normalized_point_force_wrench_map(
     normalized = matrix.copy()
     normalized[3:, :] /= length
     return normalized
+
+
+def normalized_full_hand_wrench_map(
+    contact_positions_m: npt.ArrayLike,
+    *,
+    reference_length_m: float,
+    reference_position_m: npt.ArrayLike = (0.0, 0.0, 0.0),
+) -> FloatArray:
+    """Return a dimensionless two-hand wrench allocation map.
+
+    Force inputs use an arbitrary common force scale. Moment inputs use that
+    force scale times ``reference_length_m``; moment outputs are divided by the
+    same length. The common force scale cancels, leaving a dimensionless map
+    whose conditioning is still conditional on the declared length.
+    """
+
+    length = _positive_finite(reference_length_m, name="reference_length_m")
+    matrix = full_hand_wrench_map(contact_positions_m, reference_position_m)
+    output_scale = np.diag((1.0, 1.0, 1.0, 1.0 / length, 1.0 / length, 1.0 / length))
+    input_scale = np.diag(
+        (
+            1.0,
+            1.0,
+            1.0,
+            length,
+            length,
+            length,
+            1.0,
+            1.0,
+            1.0,
+            length,
+            length,
+            length,
+        )
+    )
+    return output_scale @ matrix @ input_scale
 
 
 def planar_closed_loop_audit(
