@@ -1,11 +1,11 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "ea406841c4a500dcab41d3b4ed1d7763ee0a2f9cf559d15041faa4036b31dfe7",
-  "claim_count": 303,
+  "paper_source_digest": "f6a793330c5b8b941ce1b489decf10406426e628175ddf66e6cdd47418ea8dd1",
+  "claim_count": 306,
   "outcome_counts": {
     "inconclusive": 5,
-    "supported": 283,
+    "supported": 286,
     "untested": 15
   },
   "evidence_qualification_counts": {
@@ -16,7 +16,7 @@
     "hypothesis_or_prospective_protocol": 12,
     "independent_followup_open": 24,
     "original_full_text_checked": 18,
-    "project_executable_or_data": 274
+    "project_executable_or_data": 277
   },
   "evidence_tier_counts": {
     "bibliographic_record": 3,
@@ -24,13 +24,13 @@
     "external_methods_or_measurement": 10,
     "external_modeling_or_simulation": 15,
     "external_review_or_synthesis": 10,
-    "project_derivation_or_document": 88,
-    "project_executable_or_generated": 274,
+    "project_derivation_or_document": 91,
+    "project_executable_or_generated": 277,
     "prospective_or_unexecuted": 15
   },
   "source_independence_counts": {
     "multiple_independent_external_support": 20,
-    "project_only": 249,
+    "project_only": 252,
     "single_independent_external_support": 34
   },
   "model_tier_counts": {
@@ -40,7 +40,7 @@
     "declared_model_tier_unclassified": 12,
     "finite_ground_or_base": 16,
     "human_or_external_evidence": 46,
-    "planar_reduced": 128,
+    "planar_reduced": 131,
     "spatial_reduced": 76,
     "two_hand_or_bilateral": 92,
     "uncertainty_or_control": 8
@@ -51,7 +51,7 @@
     "governed_human_data_unavailable": 11,
     "independent_reimplementation_open": 12,
     "mixed_or_insufficient_evidence": 5,
-    "none_declared": 259,
+    "none_declared": 262,
     "prospective_experiment_open": 15,
     "statistical_reanalysis_or_replication_open": 9,
     "systematic_review_open": 2
@@ -96,6 +96,14 @@
       "single_independent_external_support_count": 2,
       "multiple_independent_external_support_count": 2,
       "concentration_flag": "mixed_independence"
+    },
+    {
+      "claim_family": "ch03ba_coordinate_force_sources",
+      "claim_count": 3,
+      "project_only_count": 3,
+      "single_independent_external_support_count": 0,
+      "multiple_independent_external_support_count": 0,
+      "concentration_flag": "project_authored_only"
     },
     {
       "claim_family": "ch03c_ground_reaction_drift",
@@ -13947,6 +13955,130 @@
       "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
+    },
+    {
+      "claim_id": "PD-CLAIM-305",
+      "adjudication_outcome": "supported",
+      "statement": "Christoffel first-kind monomials separate cross-speed Coriolis terms from squared-speed centripetal/centrifugal terms in the declared absolute-arm/relative-club coordinates, retain an independent velocity-bias residual, and report equal-and-opposite drives.",
+      "classification": "coordinate_explicit_velocity_bias_identity",
+      "published_status": "supported_with_coordinate_and_model_qualification",
+      "audit_status": "equations_executable_evidence_boundaries_and_falsifiers_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch03ba_coordinate_force_sources",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd:5"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf",
+        "scripts/research/proximal_distal_energy/force_source_optimization.py",
+        "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
+        "src/shared/python/biomechanics/force_source_attribution.py",
+        "tests/research/test_force_source_optimization.py",
+        "tests/unit/biomechanics/test_force_source_attribution.py"
+      ],
+      "model_domain": "Exact planar double-pendulum generalized coordinates with a frozen bounded torque-program grid and an impact-truncated endpoint mapping.",
+      "uncertainty_boundary": "The partition changes under coordinate transformation and does not introduce additional physical agents or identify muscle action.",
+      "falsifier": "The monomial sum fails to reconstruct the provider velocity bias, or a cross-speed term remains when either participating rate is zero.",
+      "adjudication": "The chapter is retained as coordinate-explicit model evidence and does not identify biological force, coaching technique, or a human optimum.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "claim_id": "PD-CLAIM-306",
+      "adjudication_outcome": "supported",
+      "statement": "Virtual-work least squares reports a minimum-norm force-only endpoint equivalent together with rank and unreconstructed generalized residual; signed/absolute tangent impulse, power, and work remain distinct observables.",
+      "classification": "endpoint_mapping_and_impulse_work_contract",
+      "published_status": "supported_with_coordinate_and_model_qualification",
+      "audit_status": "equations_executable_evidence_boundaries_and_falsifiers_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch03ba_coordinate_force_sources",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd:119"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf",
+        "scripts/research/proximal_distal_energy/force_source_optimization.py",
+        "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
+        "src/shared/python/biomechanics/force_source_attribution.py",
+        "tests/research/test_force_source_optimization.py",
+        "tests/unit/biomechanics/test_force_source_attribution.py"
+      ],
+      "model_domain": "Exact planar double-pendulum generalized coordinates with a frozen bounded torque-program grid and an impact-truncated endpoint mapping.",
+      "uncertainty_boundary": "A rank-deficient force-only equivalent is not a complete grip wrench, and generalized component work is not automatically subsystem transfer.",
+      "falsifier": "The mapped force and retained residual do not reconstruct the generalized drive, or undefined zero-speed tangent intervals contribute to integration.",
+      "adjudication": "The chapter is retained as coordinate-explicit model evidence and does not identify biological force, coaching technique, or a human optimum.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
+    },
+    {
+      "claim_id": "PD-CLAIM-307",
+      "adjudication_outcome": "supported",
+      "statement": "The frozen 135-program grid yields 91 impact-qualified programs and separate maxima for absolute Coriolis tangent impulse and clubhead speed; the maximum-impulse program has negative net Coriolis generalized work.",
+      "classification": "bounded_force_source_optimization_result",
+      "published_status": "supported_with_coordinate_and_model_qualification",
+      "audit_status": "equations_executable_evidence_boundaries_and_falsifiers_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch03ba_coordinate_force_sources",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd:189"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf",
+        "scripts/research/proximal_distal_energy/force_source_optimization.py",
+        "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
+        "src/shared/python/biomechanics/force_source_attribution.py",
+        "tests/research/test_force_source_optimization.py",
+        "tests/unit/biomechanics/test_force_source_attribution.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "model_domain": "Exact planar double-pendulum generalized coordinates with a frozen bounded torque-program grid and an impact-truncated endpoint mapping.",
+      "uncertainty_boundary": "This is a finite model-scenario grid, not continuous optimal control, a causal human estimate, or a technique recommendation.",
+      "falsifier": "A clean replay changes grid membership or either selected optimum, fails impact qualification, or violates the published mapping and ledger diagnostics.",
+      "adjudication": "The chapter is retained as coordinate-explicit model evidence and does not identify biological force, coaching technique, or a human optimum.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-25"
     }
   ]
 }

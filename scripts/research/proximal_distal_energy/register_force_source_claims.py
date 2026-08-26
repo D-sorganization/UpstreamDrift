@@ -98,10 +98,9 @@ def _claim(
     return claim
 
 
-def _build_claims(
-    candidates: list[dict[str, Any]],
-) -> tuple[list[dict[str, Any]], dict[str, tuple[str, ...]]]:
-    by_line = _chapter_candidates(candidates)
+def _claim_groups(
+    by_line: dict[int, dict[str, Any]],
+) -> tuple[dict[str, list[int]], dict[str, tuple[str, ...]]]:
     groups = {
         "PD-CLAIM-305": sorted(MECHANICS_LINES),
         "PD-CLAIM-306": sorted(MAPPING_LINES),
@@ -118,6 +117,14 @@ def _build_claims(
             for line, claim_id in EXTERNAL_LINES.items()
         }
     )
+    return groups, assignments
+
+
+def _build_claims(
+    candidates: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, tuple[str, ...]]]:
+    by_line = _chapter_candidates(candidates)
+    groups, assignments = _claim_groups(by_line)
     claims = [
         _claim(
             "PD-CLAIM-305",

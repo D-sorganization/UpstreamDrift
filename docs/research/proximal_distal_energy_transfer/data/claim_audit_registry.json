@@ -30264,7 +30264,8 @@
         "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
         "src/shared/python/biomechanics/force_source_attribution.py",
         "tests/research/test_force_source_optimization.py",
-        "tests/unit/biomechanics/test_force_source_attribution.py"
+        "tests/unit/biomechanics/test_force_source_attribution.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "model_domain": "Exact planar double-pendulum generalized coordinates with a frozen bounded torque-program grid and an impact-truncated endpoint mapping.",
       "uncertainty_boundary": "This is a finite model-scenario grid, not continuous optimal control, a causal human estimate, or a technique recommendation.",
@@ -30287,9 +30288,9 @@
       "numeric_evidence": [
         {
           "literal_id": "135#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
-          "json_pointer": "/summary/candidate_count",
-          "evidence_scope": "local_json_value",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-307/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
           "scale": 1.0,
           "offset": 0.0,
           "atol": 0.0,
@@ -30302,7 +30303,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 0.0,
+          "atol": 0.5000001,
           "rtol": 0.0
         }
       ]

@@ -188,10 +188,10 @@ def test_canonical_pdf_byte_identity_is_dependency_free() -> None:
     ]
 
     assert digest == (
-        "59faa25bce589777560d66bd9d5712b37fe0099979c91318c5875460ec6447b6"
+        "8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30"
     )
-    assert PDF.stat().st_size == 1_899_754
-    assert artifact == {"sha256": digest, "bytes": 1_899_754}
+    assert PDF.stat().st_size == 1_899_798
+    assert artifact == {"sha256": digest, "bytes": 1_899_798}
 
 
 @requires_fitz
@@ -207,9 +207,9 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
     )
 
     assert report["publication"]["sha256"] == (
-        "59faa25bce589777560d66bd9d5712b37fe0099979c91318c5875460ec6447b6"
+        "8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30"
     )
-    assert report["publication"]["bytes"] == 1_899_754
+    assert report["publication"]["bytes"] == 1_899_798
     assert report["publication"]["pages"] == 244
     assert report["publication"]["fast_web_access"] is True
     assert report["navigation"] == {

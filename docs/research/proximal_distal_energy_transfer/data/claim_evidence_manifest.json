@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "f5424024f097d628e2a83e67a2b32031d5e1d9e73063fc339eb9ff2ae58a1123"
+    "sha256": "5641809a2b2fb322f10bad25ab40841413a429dde9786c46c206f6665ab19c80"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -12,7 +12,7 @@
   },
   "summary": {
     "claim_count": 306,
-    "evidence_reference_count": 2253,
+    "evidence_reference_count": 2254,
     "local_artifact_count": 328,
     "external_url_count": 78
   },
@@ -3827,7 +3827,8 @@
         "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
         "src/shared/python/biomechanics/force_source_attribution.py",
         "tests/research/test_force_source_optimization.py",
-        "tests/unit/biomechanics/test_force_source_attribution.py"
+        "tests/unit/biomechanics/test_force_source_attribution.py",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "external_references": []
     }
@@ -4206,8 +4207,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json": {
-      "sha256": "b8be28cdf9c806107d7e6ca0134d2900981892ce91fb1065eafe217c04cab295",
-      "bytes": 298298,
+      "sha256": "9dca8d5c31554b2818ddb3c4ba303a7fa8eb60d3f3db96e7af57bbcd4cd848e4",
+      "bytes": 299456,
       "referenced_by": [
         "PD-CLAIM-003",
         "PD-CLAIM-006",
@@ -4309,7 +4310,8 @@
         "PD-CLAIM-292",
         "PD-CLAIM-294",
         "PD-CLAIM-295",
-        "PD-CLAIM-296"
+        "PD-CLAIM-296",
+        "PD-CLAIM-307"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json": {
@@ -5645,7 +5647,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "1c0dace9482070c1ad6c01c02fe2f110749b35887832bf4ebe45a6199308e017",
+      "sha256": "87145d560bbc1774be4371f8af5e48c9ab1c7f12168599b0cf559ffbc9549c42",
       "bytes": 137127,
       "referenced_by": [
         "PD-CLAIM-241"
