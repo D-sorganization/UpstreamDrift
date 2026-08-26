@@ -13,9 +13,6 @@ from typing import Any, cast
 
 import numpy as np
 import pandas as pd
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from matplotlib.dates import date2num
 from PyQt6 import QtCore, QtGui, QtWidgets
 
@@ -43,58 +40,17 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.tools.launch_monitor_analytics.flexible_analysis_widget import (
     FlexibleAnalysisWidget,
 )
+from src.tools.launch_monitor_analytics.plot_canvas import PlotCanvas
 from src.tools.launch_monitor_analytics.widgets import (
     DataFrameTable,
     ImportMappingDialog,
+    populate_combo as _populate_combo,
+    selected_text as _selected_text,
 )
 
 logger = get_logger(__name__)
 
-__all__ = ["LaunchMonitorAnalyticsWindow", "MainWidget", "main"]
-
-
-class PlotCanvas(FigureCanvasQTAgg):
-    """Small reusable matplotlib canvas."""
-
-    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
-        self.figure = Figure(figsize=(6.0, 4.0), tight_layout=True)
-        super().__init__(self.figure)
-        self.setParent(parent)
-        self.axes = self.figure.add_subplot(111)
-        self.empty("Import data to begin.")
-
-    def empty(self, message: str) -> None:
-        """Fully reset the canvas (dropping any colorbar axes) and show `message`.
-
-        Uses ``reset_axes`` rather than clearing the current axes in place
-        so that artifacts from a prior analysis -- most notably a
-        colorbar's own axes -- cannot survive onto the placeholder state.
-        """
-        axes = self.reset_axes()
-        axes.text(0.5, 0.5, message, ha="center", va="center", transform=axes.transAxes)
-        axes.set_axis_off()
-        self.draw_idle()
-
-    def reset_axes(self) -> Axes:
-        """Replace every axes, including colorbars from a prior analysis."""
-        self.figure.clear()
-        self.axes = self.figure.add_subplot(111)
-        return self.axes
-
-
-def _selected_text(list_widget: QtWidgets.QListWidget) -> tuple[str, ...]:
-    return tuple(item.text() for item in list_widget.selectedItems())
-
-
-def _populate_combo(combo: QtWidgets.QComboBox, values: list[str]) -> None:
-    previous = combo.currentText()
-    combo.blockSignals(True)
-    combo.clear()
-    combo.addItems(values)
-    previous_index = combo.findText(previous)
-    if previous_index >= 0:
-        combo.setCurrentIndex(previous_index)
-    combo.blockSignals(False)
+__all__ = ["LaunchMonitorAnalyticsWindow", "MainWidget", "PlotCanvas", "main"]
 
 
 class MainWidget(QtWidgets.QWidget):
