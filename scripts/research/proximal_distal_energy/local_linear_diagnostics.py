@@ -80,6 +80,16 @@ class RankTolerance:
 
 
 @dataclass(frozen=True, slots=True)
+class LinearizationPoint:
+    """State, control, and perturbation steps for one local audit."""
+
+    state: tuple[float, ...]
+    control: tuple[float, ...]
+    state_steps: tuple[float, ...]
+    control_steps: tuple[float, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class RankDiagnostic:
     """Inspectable numerical-rank result for one scaled matrix."""
 
@@ -317,10 +327,7 @@ def audit_local_linearization(
 def audit_double_pendulum_configuration_state(
     params: GolfModelParams,
     *,
-    state: npt.ArrayLike,
-    control: npt.ArrayLike,
-    state_steps: npt.ArrayLike,
-    control_steps: npt.ArrayLike,
+    point: LinearizationPoint,
     scales: NondimensionalScales,
     tolerance: RankTolerance,
     generalized_control_map: npt.ArrayLike | None = None,
@@ -328,7 +335,7 @@ def audit_double_pendulum_configuration_state(
 ) -> LocalLinearAudit:
     """Audit the ODE double pendulum under declared sensing and actuation maps."""
     backend = make_backend("ode", params)
-    command = _finite_vector("control", control)
+    command = _finite_vector("control", point.control)
     control_mapping = (
         np.eye(2, dtype=float)
         if generalized_control_map is None
@@ -359,10 +366,10 @@ def audit_double_pendulum_configuration_state(
     return audit_local_linearization(
         dynamics=dynamics,
         output=lambda candidate: measurement_mapping @ candidate,
-        state=state,
+        state=point.state,
         control=command,
-        state_steps=state_steps,
-        control_steps=control_steps,
+        state_steps=point.state_steps,
+        control_steps=point.control_steps,
         scales=scales,
         tolerance=tolerance,
     )

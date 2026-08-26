@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.local_linear_diagnostics import (
+    LinearizationPoint,
     NondimensionalScales,
     RankTolerance,
     audit_double_pendulum_configuration_state,
@@ -22,6 +23,15 @@ def _double_integrator_scales(unit_factor: float = 1.0) -> NondimensionalScales:
         control=(unit_factor,),
         output=(unit_factor,),
         characteristic_time_s=1.0,
+    )
+
+
+def _double_pendulum_point(control: tuple[float, ...]) -> LinearizationPoint:
+    return LinearizationPoint(
+        state=(-0.8, 1.1, 2.5, -1.2),
+        control=control,
+        state_steps=(1e-6, 1e-6, 1e-6, 1e-6),
+        control_steps=tuple(1e-5 for _ in control),
     )
 
 
@@ -86,10 +96,7 @@ def test_zero_input_and_zero_output_killswitches_lose_rank() -> None:
 def test_double_pendulum_configuration_output_has_full_local_linear_rank() -> None:
     result = audit_double_pendulum_configuration_state(
         GolfModelParams.default(),
-        state=np.array([-0.8, 1.1, 2.5, -1.2]),
-        control=np.array([35.0, -8.0]),
-        state_steps=np.full(4, 1e-6),
-        control_steps=np.full(2, 1e-5),
+        point=_double_pendulum_point((35.0, -8.0)),
         scales=NondimensionalScales(
             state=(1.0, 1.0, 10.0, 10.0),
             control=(60.0, 15.0),
@@ -213,14 +220,11 @@ def test_double_pendulum_accepts_declared_measurement_and_actuator_countermodels
     params = GolfModelParams.default()
     common = {
         "params": params,
-        "state": np.array([-0.8, 1.1, 2.5, -1.2]),
-        "state_steps": np.full(4, 1e-6),
         "tolerance": RankTolerance(absolute=1e-9, relative=1e-8),
     }
     shoulder_only = audit_double_pendulum_configuration_state(
         **common,
-        control=np.array([35.0]),
-        control_steps=np.array([1e-5]),
+        point=_double_pendulum_point((35.0,)),
         scales=NondimensionalScales(
             state=(1.0, 1.0, 10.0, 10.0),
             control=(60.0,),
@@ -232,8 +236,7 @@ def test_double_pendulum_accepts_declared_measurement_and_actuator_countermodels
     )
     zero_actuator = audit_double_pendulum_configuration_state(
         **common,
-        control=np.array([0.0]),
-        control_steps=np.array([1e-5]),
+        point=_double_pendulum_point((0.0,)),
         scales=NondimensionalScales(
             state=(1.0, 1.0, 10.0, 10.0),
             control=(1.0,),

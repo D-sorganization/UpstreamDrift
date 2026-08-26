@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
+from dataclasses import dataclass
 import json
 from pathlib import Path
 import sys
@@ -21,6 +22,7 @@ if str(SOURCE_ROOT) not in sys.path:
 
 from scripts.research.proximal_distal_energy.local_linear_diagnostics import (
     INFERENCE_BOUNDARY,
+    LinearizationPoint,
     LocalLinearAudit,
     NondimensionalScales,
     RankDiagnostic,
@@ -58,6 +60,42 @@ STEP_MULTIPLIERS = (0.1, 1.0, 10.0)
 BASE_STATE_STEPS = np.array([1e-6, 1e-6, 1e-5, 1e-5])
 BASE_CONTROL_STEPS = np.array([1e-4, 1e-4])
 RANK_TOLERANCE = RankTolerance(absolute=1e-8, relative=1e-7)
+
+
+@dataclass(frozen=True, slots=True)
+class ReferenceTrajectory:
+    """Registered rollout data required to construct local audit points."""
+
+    impact_time_s: float
+    time: np.ndarray
+    q: np.ndarray
+    v: np.ndarray
+    controls: np.ndarray
+    params: GolfModelParams
+    scale_scenarios: dict[str, NondimensionalScales]
+
+
+def _linearization_point(
+    state: np.ndarray,
+    control: np.ndarray,
+    *,
+    state_multiplier: float = 1.0,
+    control_steps: np.ndarray | None = None,
+) -> LinearizationPoint:
+    """Build the immutable point contract used by the local audit API."""
+    selected_control_steps = (
+        BASE_CONTROL_STEPS * state_multiplier
+        if control_steps is None
+        else control_steps
+    )
+    return LinearizationPoint(
+        state=tuple(float(value) for value in state),
+        control=tuple(float(value) for value in control),
+        state_steps=tuple(
+            float(value) for value in BASE_STATE_STEPS * state_multiplier
+        ),
+        control_steps=tuple(float(value) for value in selected_control_steps),
+    )
 
 
 def _scale_payload(scales: NondimensionalScales) -> dict[str, Any]:
@@ -133,31 +171,16 @@ def _audit_payload(audit: LocalLinearAudit, multiplier: float) -> dict[str, Any]
     }
 
 
-def _operating_point(
-    *,
-    name: str,
-    phase_fraction: float,
-    impact_time_s: float,
-    time: np.ndarray,
-    q: np.ndarray,
-    v: np.ndarray,
-    controls: np.ndarray,
-    params: GolfModelParams,
-    scale_scenarios: dict[str, NondimensionalScales],
-) -> dict[str, Any]:
-    target_time = phase_fraction * impact_time_s
-    index = int(np.argmin(np.abs(time - target_time)))
-    state = np.concatenate((q[index], v[index]))
-    control = controls[index]
-    nominal_scales = scale_scenarios["nominal"]
-    trials = [
+def _step_trials(
+    trajectory: ReferenceTrajectory, state: np.ndarray, control: np.ndarray
+) -> list[dict[str, Any]]:
+    """Audit finite-difference sensitivity at the nominal scale."""
+    nominal_scales = trajectory.scale_scenarios["nominal"]
+    return [
         _audit_payload(
             audit_double_pendulum_configuration_state(
-                params,
-                state=state,
-                control=control,
-                state_steps=BASE_STATE_STEPS * multiplier,
-                control_steps=BASE_CONTROL_STEPS * multiplier,
+                trajectory.params,
+                point=_linearization_point(state, control, state_multiplier=multiplier),
                 scales=nominal_scales,
                 tolerance=RANK_TOLERANCE,
             ),
@@ -165,27 +188,33 @@ def _operating_point(
         )
         for multiplier in STEP_MULTIPLIERS
     ]
-    ranks = {
-        (trial["observability"]["rank"], trial["controllability"]["rank"])
-        for trial in trials
-    }
-    scale_trials = []
-    for scenario_name, scales in scale_scenarios.items():
+
+
+def _scale_trials(
+    trajectory: ReferenceTrajectory, state: np.ndarray, control: np.ndarray
+) -> list[dict[str, Any]]:
+    """Audit the registered nondimensional scale scenarios."""
+    trials: list[dict[str, Any]] = []
+    for scenario_name, scales in trajectory.scale_scenarios.items():
         payload = _audit_payload(
             audit_double_pendulum_configuration_state(
-                params,
-                state=state,
-                control=control,
-                state_steps=BASE_STATE_STEPS,
-                control_steps=BASE_CONTROL_STEPS,
+                trajectory.params,
+                point=_linearization_point(state, control),
                 scales=scales,
                 tolerance=RANK_TOLERANCE,
             ),
             1.0,
         )
         payload["name"] = scenario_name
-        scale_trials.append(payload)
+        trials.append(payload)
+    return trials
 
+
+def _measurement_countermodels(
+    trajectory: ReferenceTrajectory, state: np.ndarray, control: np.ndarray
+) -> list[dict[str, Any]]:
+    """Evaluate declared sensing maps, including the zero-output killswitch."""
+    nominal_scales = trajectory.scale_scenarios["nominal"]
     measurement_definitions = (
         (
             "both_joint_angles",
@@ -200,7 +229,7 @@ def _operating_point(
         ),
         ("zero_output_killswitch", np.zeros((1, 4)), (1.0,)),
     )
-    measurement_countermodels = []
+    countermodels: list[dict[str, Any]] = []
     for scenario_name, output_map, output_scales in measurement_definitions:
         scales = NondimensionalScales(
             state=nominal_scales.state,
@@ -209,16 +238,13 @@ def _operating_point(
             characteristic_time_s=nominal_scales.characteristic_time_s,
         )
         audit = audit_double_pendulum_configuration_state(
-            params,
-            state=state,
-            control=control,
-            state_steps=BASE_STATE_STEPS,
-            control_steps=BASE_CONTROL_STEPS,
+            trajectory.params,
+            point=_linearization_point(state, control),
             scales=scales,
             tolerance=RANK_TOLERANCE,
             output_map=output_map,
         )
-        measurement_countermodels.append(
+        countermodels.append(
             {
                 "name": scenario_name,
                 "observability": _rank_payload(audit.observability),
@@ -227,7 +253,14 @@ def _operating_point(
                 "scales": _scale_payload(scales),
             }
         )
+    return countermodels
 
+
+def _actuator_countermodels(
+    trajectory: ReferenceTrajectory, state: np.ndarray, control: np.ndarray
+) -> list[dict[str, Any]]:
+    """Evaluate declared control maps, including the zero-input killswitch."""
+    nominal_scales = trajectory.scale_scenarios["nominal"]
     actuator_definitions = (
         ("both_generalized_torques", np.eye(2), control, nominal_scales.control),
         (
@@ -244,7 +277,7 @@ def _operating_point(
         ),
         ("zero_input_killswitch", np.zeros((2, 1)), np.zeros(1), (1.0,)),
     )
-    actuator_countermodels = []
+    countermodels: list[dict[str, Any]] = []
     for (
         scenario_name,
         control_map,
@@ -258,16 +291,17 @@ def _operating_point(
             characteristic_time_s=nominal_scales.characteristic_time_s,
         )
         audit = audit_double_pendulum_configuration_state(
-            params,
-            state=state,
-            control=scenario_control,
-            state_steps=BASE_STATE_STEPS,
-            control_steps=np.full(len(scenario_control), BASE_CONTROL_STEPS[0]),
+            trajectory.params,
+            point=_linearization_point(
+                state,
+                scenario_control,
+                control_steps=np.full(len(scenario_control), BASE_CONTROL_STEPS[0]),
+            ),
             scales=scales,
             tolerance=RANK_TOLERANCE,
             generalized_control_map=control_map,
         )
-        actuator_countermodels.append(
+        countermodels.append(
             {
                 "controllability": _rank_payload(audit.controllability),
                 "generalized_control_map": control_map.tolist(),
@@ -276,23 +310,135 @@ def _operating_point(
                 "scales": _scale_payload(scales),
             }
         )
+    return countermodels
+
+
+def _operating_point(
+    *, name: str, phase_fraction: float, trajectory: ReferenceTrajectory
+) -> dict[str, Any]:
+    """Build one registered operating-point evidence record."""
+    target_time = phase_fraction * trajectory.impact_time_s
+    index = int(np.argmin(np.abs(trajectory.time - target_time)))
+    state = np.concatenate((trajectory.q[index], trajectory.v[index]))
+    control = trajectory.controls[index]
+    trials = _step_trials(trajectory, state, control)
+    ranks = {
+        (trial["observability"]["rank"], trial["controllability"]["rank"])
+        for trial in trials
+    }
     return {
-        "actuator_countermodels": actuator_countermodels,
+        "actuator_countermodels": _actuator_countermodels(trajectory, state, control),
         "control_nm": control.tolist(),
-        "event_time_offset_s": float(time[index] - target_time),
+        "event_time_offset_s": float(trajectory.time[index] - target_time),
         "name": name,
         "phase_fraction_of_impact_time": phase_fraction,
-        "measurement_countermodels": measurement_countermodels,
+        "measurement_countermodels": _measurement_countermodels(
+            trajectory, state, control
+        ),
         "rank_stable_across_steps": len(ranks) == 1,
         "sample_index": index,
         "source": "registered_synthetic_reference_rollout",
         "state": {
-            "q_rad": q[index].tolist(),
-            "v_rad_s": v[index].tolist(),
+            "q_rad": trajectory.q[index].tolist(),
+            "v_rad_s": trajectory.v[index].tolist(),
         },
         "step_trials": trials,
-        "scale_trials": scale_trials,
-        "time_s": float(time[index]),
+        "scale_trials": _scale_trials(trajectory, state, control),
+        "time_s": float(trajectory.time[index]),
+    }
+
+
+def _scale_contract(
+    scale_scenarios: dict[str, NondimensionalScales],
+) -> dict[str, Any]:
+    """Describe how every nondimensional coordinate scale is obtained."""
+    return {
+        "characteristic_time_derivation": (
+            "delivery_event_time_s multiplied by the registered scenario time_factor"
+        ),
+        "control_coordinates": [
+            "shoulder_generalized_torque_nm",
+            "wrist_relative_generalized_torque_nm",
+        ],
+        "control_scale_derivation": (
+            "max(maximum absolute registered-rollout torque, 1 N*m)"
+        ),
+        "output_coordinates": [
+            "shoulder_angle_rad",
+            "wrist_relative_angle_rad",
+        ],
+        "scenario_order": list(scale_scenarios),
+        "scenarios": {
+            name: _scale_payload(scales) for name, scales in scale_scenarios.items()
+        },
+        "scope": (
+            "registered synthetic reference scales; sensitivity scenarios "
+            "are numerical adequacy checks, not population priors"
+        ),
+        "state_units": ["rad", "rad", "rad/s", "rad/s"],
+        "state_coordinates": [
+            "shoulder_angle_rad",
+            "wrist_relative_angle_rad",
+            "shoulder_rate_rad_s",
+            "wrist_relative_rate_rad_s",
+        ],
+        "state_scale_derivation": {
+            "angles": "pi rad",
+            "rates": (
+                "max(maximum absolute registered-rollout rate, 1 rad/s) "
+                "multiplied by the registered scenario rate_factor"
+            ),
+        },
+        "control_units": ["N*m", "N*m"],
+        "output_units": ["rad", "rad"],
+    }
+
+
+def _reference_rollout_payload(
+    *, impact_time_s: float, impact_speed_m_s: float, impact_arm_angle_rad: float
+) -> dict[str, Any]:
+    """Retain the deterministic synthetic trajectory provenance."""
+    return {
+        "delivery_event": {
+            "arm_angle_rad": impact_arm_angle_rad,
+            "clubhead_speed_m_s": impact_speed_m_s,
+            "time_s": impact_time_s,
+        },
+        "dt_s": DT,
+        "horizon_steps": HORIZON,
+        "initial_q_rad": list(INITIAL_Q),
+        "model_parameters": "GolfModelParams.default()",
+        "program": {
+            "onset_s": 0.10,
+            "shoulder_torque_nm": 60.0,
+            "wrist_drive_nm": 15.0,
+            "wrist_restrain_nm": 10.0,
+        },
+        "scope": "synthetic reference trajectory; not a participant or coaching strategy",
+    }
+
+
+def _summary_payload(
+    points: list[dict[str, Any]],
+    scale_scenarios: dict[str, NondimensionalScales],
+) -> dict[str, Any]:
+    """Summarize registered evidence counts without broadening inference."""
+    return {
+        "all_rank_decisions_stable": all(
+            point["rank_stable_across_steps"] for point in points
+        ),
+        "actuator_countermodel_count": sum(
+            len(point["actuator_countermodels"]) for point in points
+        ),
+        "control_dimension": 2,
+        "operating_point_count": len(points),
+        "output_dimension": 2,
+        "measurement_countermodel_count": sum(
+            len(point["measurement_countermodels"]) for point in points
+        ),
+        "scale_scenario_count": len(scale_scenarios),
+        "state_dimension": 4,
+        "step_multiplier_count": len(STEP_MULTIPLIERS),
     }
 
 
@@ -308,18 +454,17 @@ def build_report() -> dict[str, object]:
     scale_scenarios = _registered_scale_scenarios(
         impact_time_s=impact_time_s, v=v, controls=controls
     )
+    trajectory = ReferenceTrajectory(
+        impact_time_s=impact_time_s,
+        time=time,
+        q=q,
+        v=v,
+        controls=controls,
+        params=params,
+        scale_scenarios=scale_scenarios,
+    )
     points = [
-        _operating_point(
-            name=name,
-            phase_fraction=fraction,
-            impact_time_s=impact_time_s,
-            time=time,
-            q=q,
-            v=v,
-            controls=controls,
-            params=params,
-            scale_scenarios=scale_scenarios,
-        )
+        _operating_point(name=name, phase_fraction=fraction, trajectory=trajectory)
         for name, fraction in PHASES
     ]
     return {
@@ -341,87 +486,19 @@ def build_report() -> dict[str, object]:
             "outputs": ["shoulder_angle_rad", "wrist_relative_angle_rad"],
             "unmeasured_states": ["shoulder_rate_rad_s", "wrist_rate_rad_s"],
         },
-        "nondimensional_scale_contract": {
-            "characteristic_time_derivation": (
-                "delivery_event_time_s multiplied by the registered scenario time_factor"
-            ),
-            "control_coordinates": [
-                "shoulder_generalized_torque_nm",
-                "wrist_relative_generalized_torque_nm",
-            ],
-            "control_scale_derivation": (
-                "max(maximum absolute registered-rollout torque, 1 N*m)"
-            ),
-            "output_coordinates": [
-                "shoulder_angle_rad",
-                "wrist_relative_angle_rad",
-            ],
-            "scenario_order": list(scale_scenarios),
-            "scenarios": {
-                name: _scale_payload(scales) for name, scales in scale_scenarios.items()
-            },
-            "scope": (
-                "registered synthetic reference scales; sensitivity scenarios "
-                "are numerical adequacy checks, not population priors"
-            ),
-            "state_units": ["rad", "rad", "rad/s", "rad/s"],
-            "state_coordinates": [
-                "shoulder_angle_rad",
-                "wrist_relative_angle_rad",
-                "shoulder_rate_rad_s",
-                "wrist_relative_rate_rad_s",
-            ],
-            "state_scale_derivation": {
-                "angles": "pi rad",
-                "rates": (
-                    "max(maximum absolute registered-rollout rate, 1 rad/s) "
-                    "multiplied by the registered scenario rate_factor"
-                ),
-            },
-            "control_units": ["N*m", "N*m"],
-            "output_units": ["rad", "rad"],
-        },
         "model_tier": "analytical_double_pendulum",
+        "nondimensional_scale_contract": _scale_contract(scale_scenarios),
         "operating_points": points,
         "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
         "practical_identifiability_status": "not_evaluated",
-        "reference_rollout": {
-            "delivery_event": {
-                "arm_angle_rad": impact_arm_angle_rad,
-                "clubhead_speed_m_s": impact_speed_m_s,
-                "time_s": impact_time_s,
-            },
-            "dt_s": DT,
-            "horizon_steps": HORIZON,
-            "initial_q_rad": list(INITIAL_Q),
-            "model_parameters": "GolfModelParams.default()",
-            "program": {
-                "onset_s": 0.10,
-                "shoulder_torque_nm": 60.0,
-                "wrist_drive_nm": 15.0,
-                "wrist_restrain_nm": 10.0,
-            },
-            "scope": "synthetic reference trajectory; not a participant or coaching strategy",
-        },
+        "reference_rollout": _reference_rollout_payload(
+            impact_time_s=impact_time_s,
+            impact_speed_m_s=impact_speed_m_s,
+            impact_arm_angle_rad=impact_arm_angle_rad,
+        ),
         "schema_version": SCHEMA_VERSION,
         "structural_identifiability_status": "not_evaluated",
-        "summary": {
-            "all_rank_decisions_stable": all(
-                point["rank_stable_across_steps"] for point in points
-            ),
-            "actuator_countermodel_count": sum(
-                len(point["actuator_countermodels"]) for point in points
-            ),
-            "control_dimension": 2,
-            "operating_point_count": len(points),
-            "output_dimension": 2,
-            "measurement_countermodel_count": sum(
-                len(point["measurement_countermodels"]) for point in points
-            ),
-            "scale_scenario_count": len(scale_scenarios),
-            "state_dimension": 4,
-            "step_multiplier_count": len(STEP_MULTIPLIERS),
-        },
+        "summary": _summary_payload(points, scale_scenarios),
     }
 
 
