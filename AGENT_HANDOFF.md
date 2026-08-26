@@ -10,7 +10,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `e4d6a7c513cae351df47ec1af9d88b66fea74656`.
+- Remote `main` is `b5cc4cfd1a95638d5c5a4509f2e19236379cc729`.
   PR #9018 and its normalized-claim authority remain ancestors of `main`.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
@@ -42,7 +42,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 ## Hybrid-System Topology Contract (#9027)
 
 - PR #9049 branch `research/9027-hybrid-system-contract` is reconciled with
-  `main` `e4d6a7c51` in merge commit `SELF`. It defines typed topology for all
+  `main` `b5cc4cfd1` in merge commit `SELF`. It defines typed topology for all
   eight model tiers: continuous state, controls, algebraic constraints, modes,
   guards, resets, impacts, actuator dynamics, uncertain event surfaces,
   observables, limitations, falsifiers, and comparison blockers.
