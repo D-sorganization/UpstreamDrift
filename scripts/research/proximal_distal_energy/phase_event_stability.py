@@ -148,6 +148,37 @@ def _step_state(
     return np.concatenate((result.q, result.v)).astype(float, copy=False)
 
 
+def registered_step(
+    backend: SimulationBackend,
+    state: npt.ArrayLike,
+    control: npt.ArrayLike,
+    *,
+    time_s: float,
+    dt_s: float,
+) -> FloatArray:
+    """Advance the exact registered RK4 map with validated inputs.
+
+    The returned state is finite and independent of the caller's input arrays.
+    This public boundary lets later variational studies differentiate the same
+    step operator without copying its backend reset/control semantics.
+    """
+
+    vector = _vector("state", state, size=4)
+    command = _vector("control", control, size=2)
+    if not math.isfinite(time_s):
+        raise ValueError("time_s must be finite")
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("dt_s must be finite and positive")
+    advanced = _step_state(
+        backend,
+        vector.copy(),
+        command.copy(),
+        time_s=float(time_s),
+        dt_s=float(dt_s),
+    )
+    return _vector("advanced state", advanced, size=4).copy()
+
+
 def _step_jacobian(
     backend: SimulationBackend,
     state: FloatArray,
@@ -535,6 +566,7 @@ __all__ = [
     "normalized_transition",
     "periodicity_gate",
     "propagate_state_transition",
+    "registered_step",
     "rollout_state_history",
     "saltation_matrix",
     "state_derivative",
