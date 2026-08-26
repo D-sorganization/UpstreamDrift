@@ -7,11 +7,24 @@ lazy-loading: importing this module does not trigger the Drake/pydrake dependenc
 """
 
 import argparse
-import contextlib
 
-
-from src.shared.python.dashboard.window import UnifiedDashboardWindow
+from src.shared.python.dashboard.window import ModelLoadStatus, UnifiedDashboardWindow
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.ui.qt.utils import get_qapp
+
+logger = get_logger(__name__)
+
+# See mujoco_dashboard._EXPECTED_LOAD_ERRORS for rationale: narrower than
+# bare ``except Exception`` per ADR-0016 / narrow_catch while still covering
+# the realistic failure surface of this load boundary (issue #8829).
+_EXPECTED_LOAD_ERRORS: tuple[type[Exception], ...] = (
+    OSError,
+    ValueError,
+    RuntimeError,
+    KeyError,
+    AttributeError,
+    TypeError,
+)
 
 
 class DrakeDashboard(UnifiedDashboardWindow):
@@ -26,6 +39,7 @@ class DrakeDashboard(UnifiedDashboardWindow):
 
         engine = DrakePhysicsEngine()
         title = "Drake Golf Analysis Dashboard"
+        model_status = ModelLoadStatus(engine_name="Drake")
         if exercise_filter:
             title += f" - {exercise_filter.title()}"
             if not model_path:
@@ -44,14 +58,31 @@ class DrakeDashboard(UnifiedDashboardWindow):
                         )
                         if models:
                             model_path = models[0]
-                except Exception:  # noqa: BLE001
-                    pass
+                except _EXPECTED_LOAD_ERRORS as exc:
+                    logger.exception(
+                        "Drake model discovery failed for exercise %r",
+                        exercise_filter,
+                    )
+                    model_status = ModelLoadStatus(
+                        engine_name="Drake", loaded=False, error=str(exc)
+                    )
 
         if model_path:
-            with contextlib.suppress(Exception):
+            try:
                 engine.load_from_path(model_path)
+                model_status = ModelLoadStatus(
+                    engine_name="Drake", model_name=model_path
+                )
+            except _EXPECTED_LOAD_ERRORS as exc:
+                logger.exception("Drake failed to load model %s", model_path)
+                model_status = ModelLoadStatus(
+                    engine_name="Drake",
+                    model_name=model_path,
+                    loaded=False,
+                    error=str(exc),
+                )
 
-        super().__init__(engine, title=title)
+        super().__init__(engine, title=title, model_status=model_status)
 
 
 def main() -> None:
