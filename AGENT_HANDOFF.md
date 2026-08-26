@@ -10,7 +10,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `b5cc4cfd1a95638d5c5a4509f2e19236379cc729`.
+- Remote `main` is `b8508197e3dc7262ad57ade830dd3db19a8657ac`.
   PR #9018 and its normalized-claim authority remain ancestors of `main`.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
@@ -20,7 +20,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
   125 numeric contracts, and 382/382 verified literals. Outcomes are 286
   supported only within declared estimands and boundaries, five inconclusive,
   15 untested, and zero contradicted. All 43 public release claims have review
-  dispositions and scientifically open gates. The bundle has 613 artifacts.
+  dispositions and scientifically open gates. The bundle has 617 artifacts.
 
 ## Coordinate Force-Source Attribution (#9059)
 
@@ -41,8 +41,8 @@ Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Hybrid-System Topology Contract (#9027)
 
-- PR #9049 branch `research/9027-hybrid-system-contract` is reconciled with
-  `main` `b5cc4cfd1` in merge commit `SELF`. It defines typed topology for all
+- PR #9049 is merged on `main` as protected squash `a4b7d3f9b`. It defines
+  typed topology for all
   eight model tiers: continuous state, controls, algebraic constraints, modes,
   guards, resets, impacts, actuator dynamics, uncertain event surfaces,
   observables, limitations, falsifiers, and comparison blockers.
@@ -50,11 +50,23 @@ Epic #8557 is the single proximal-to-distal completion authority.
   calibrated and governed-human tiers are explicitly unavailable. This does
   not establish observability, controllability, stability, controller ranking,
   participant validity, or coaching interpretation.
-- The non-required optional lane exposes the pre-existing #8963 source lock:
-  committed manufactured-solution evidence does not match
-  `spatial_full_body.py`. Do not update the digest alone, rewrite the PDF or
-  release marker, or run a replacement campaign. Regenerate only after
-  governed campaign integration resolves the source-lock boundary.
+- Protected repair PR #9094 regenerated manufactured-solution evidence through
+  the governed path and merged as `2091667158907427c1b59276041fcdbc4b92964c`.
+  The release bundle validates with 617 artifacts after #9100. This remains
+  computational model evidence, not human validation.
+
+## Nondimensional Local Rank (#9092)
+
+- PR #9100 is merged as `b8508197e3dc7262ad57ade830dd3db19a8657ac`.
+  It retains raw dimensional
+  matrices for traceability but interprets rank and condition only after
+  declared state, control, output, and time scaling.
+- Four synthetic operating points, three finite-difference multipliers, three
+  scale scenarios, and 16 countermodels in each class are registered. The
+  zero-input and zero-output killswitches return rank zero.
+- Published floats use six significant digits for cross-platform identity;
+  rank decisions are computed at full precision before serialization. These
+  local results do not establish structural/global rank or human strategy.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -88,14 +100,16 @@ Epic #8557 is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- PR #9049's prior head `17fd13068` passed every required check. Its optional
-  stack completed with the documented #8963 source-lock failure; the current
-  main reconciliation requires a fresh protected CI wave. #9092 owns the
-  dependent nondimensional local-rank slice.
+- #9027 contract PR #9049 and dependent nondimensional local-rank PR #9100 are
+  merged. Raw dimensional conditioning alone is not evidence.
 - PR #9032 is at remote head `d341a0c92`; required CI passed at last
   verification. Its optional source-lock failure is deliberate.
 - #8358's immutable Tools gateway and analysis methods are merged, but its UI,
   localized-perturbation, and presentation criteria remain unaudited.
+- The focused `fix/8358-perturbation-package-import` follow-up preserves
+  UpstreamDrift-owned `src.shared` modules while refreshing one Tools provider.
+  It is a test-harness compatibility repair for Tools PR #4734 and changes no
+  production API, provider schema, or vendor pin.
 - Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
   moving or partial campaign; the next public projection must pin a qualified
   UpstreamDrift merge commit.
