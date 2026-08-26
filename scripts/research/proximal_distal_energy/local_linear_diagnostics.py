@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 import math
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -17,7 +18,7 @@ import numpy.typing as npt
 from src.shared.python.simulation_backends import GolfModelParams, make_backend
 
 
-FloatArray = npt.NDArray[np.float64]
+FloatArray: TypeAlias = npt.NDArray[np.float64]
 DynamicsFunction = Callable[[FloatArray, FloatArray], npt.ArrayLike]
 OutputFunction = Callable[[FloatArray], npt.ArrayLike]
 

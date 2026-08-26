@@ -60,7 +60,7 @@ BASE_CONTROL_STEPS = np.array([1e-4, 1e-4])
 RANK_TOLERANCE = RankTolerance(absolute=1e-8, relative=1e-7)
 
 
-def _scale_payload(scales: NondimensionalScales) -> dict[str, object]:
+def _scale_payload(scales: NondimensionalScales) -> dict[str, Any]:
     return {
         "characteristic_time_s": scales.characteristic_time_s,
         "control": list(scales.control),
@@ -96,7 +96,7 @@ def _registered_scale_scenarios(
     }
 
 
-def _rank_payload(diagnostic: RankDiagnostic) -> dict[str, object]:
+def _rank_payload(diagnostic: RankDiagnostic) -> dict[str, Any]:
     return {
         "full_rank": diagnostic.full_rank,
         "matrix_shape": list(diagnostic.matrix_shape),
@@ -108,7 +108,7 @@ def _rank_payload(diagnostic: RankDiagnostic) -> dict[str, object]:
     }
 
 
-def _audit_payload(audit: LocalLinearAudit, multiplier: float) -> dict[str, object]:
+def _audit_payload(audit: LocalLinearAudit, multiplier: float) -> dict[str, Any]:
     return {
         "control_steps": list(audit.control_steps),
         "controllability": _rank_payload(audit.controllability),
@@ -144,7 +144,7 @@ def _operating_point(
     controls: np.ndarray,
     params: GolfModelParams,
     scale_scenarios: dict[str, NondimensionalScales],
-) -> dict[str, object]:
+) -> dict[str, Any]:
     target_time = phase_fraction * impact_time_s
     index = int(np.argmin(np.abs(time - target_time)))
     state = np.concatenate((q[index], v[index]))
