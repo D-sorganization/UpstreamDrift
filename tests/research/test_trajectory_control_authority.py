@@ -10,7 +10,11 @@ from scripts.research.proximal_distal_energy.trajectory_control_authority import
     ControlScales,
     event_conditioned_gramian,
     frozen_local_gramian,
+    linearize_trajectory,
+    propagated_terminal_input_sensitivity,
     reachability_history,
+    direct_terminal_pulse_sensitivity,
+    scale_step_matrices,
     step_linearization,
 )
 from src.shared.python.simulation_backends import GolfModelParams
@@ -150,6 +154,81 @@ def test_frozen_local_countermodel_is_not_trajectory_varying_authority() -> None
 
     assert varying[0, 0] == pytest.approx(5.0)
     assert frozen[0, 0] == pytest.approx(2.0)
+
+
+def test_equivalent_state_and_control_units_preserve_scaled_step_matrices() -> None:
+    state_matrix = np.array(
+        [
+            [1.0, 0.1, 0.2, 0.0],
+            [0.0, 1.0, 0.0, 0.3],
+            [0.0, 0.0, 0.9, 0.2],
+            [0.1, 0.0, -0.2, 1.1],
+        ]
+    )
+    input_matrix = np.array([[0.1, 0.2], [0.0, 0.1], [0.5, -0.2], [0.3, 0.4]])
+    state_units = np.diag([100.0, 100.0, 0.01, 0.01])
+    control_units = np.diag([1000.0, 0.001])
+    state_scales = StateScales((2.0, 3.0, 4.0, 5.0))
+    control_scales = ControlScales((6.0, 7.0))
+
+    baseline = scale_step_matrices(
+        state_matrix,
+        input_matrix,
+        dt_s=0.02,
+        state_scales=state_scales,
+        control_scales=control_scales,
+    )
+    converted = scale_step_matrices(
+        state_units @ state_matrix @ np.linalg.inv(state_units),
+        state_units @ input_matrix @ np.linalg.inv(control_units),
+        dt_s=0.02,
+        state_scales=StateScales(tuple(state_units.diagonal() * state_scales.array)),
+        control_scales=ControlScales(
+            tuple(control_units.diagonal() * control_scales.array)
+        ),
+    )
+
+    for before, after in zip(baseline, converted, strict=True):
+        np.testing.assert_allclose(after, before, rtol=1e-13, atol=1e-13)
+
+
+def test_trajectory_linearization_matches_direct_terminal_pulse() -> None:
+    params = GolfModelParams.default()
+    controls = np.tile(np.array([60.0, -10.0]), (12, 1))
+    scales = StateScales((np.pi, np.pi, 10.0, 10.0))
+    control_scales = ControlScales((100.0, 100.0))
+    trajectory = linearize_trajectory(
+        params=params,
+        initial_state=np.array([-2.2, -1.57, 0.0, 0.0]),
+        controls=controls,
+        dt_s=1e-3,
+        state_steps=np.array([1e-6, 1e-6, 1e-5, 1e-5]),
+        control_steps=np.array([1e-4, 1e-4]),
+        state_scales=scales,
+        control_scales=control_scales,
+    )
+    predicted = propagated_terminal_input_sensitivity(
+        trajectory.scaled_state_matrices,
+        trajectory.scaled_energy_input_matrices,
+        pulse_step=4,
+        channel_index=1,
+    )
+    direct = direct_terminal_pulse_sensitivity(
+        params=params,
+        initial_state=trajectory.state[0],
+        controls=controls,
+        dt_s=1e-3,
+        state_scales=scales,
+        control_scales=control_scales,
+        pulse_step=4,
+        channel_index=1,
+        perturbation_scale=1e-6,
+    )
+
+    assert trajectory.state.shape == (13, 4)
+    assert trajectory.scaled_state_matrices.shape == (12, 4, 4)
+    assert trajectory.scaled_energy_input_matrices.shape == (12, 4, 2)
+    np.testing.assert_allclose(direct, predicted, rtol=3e-5, atol=3e-8)
 
 
 @pytest.mark.parametrize(

@@ -19,6 +19,7 @@ import numpy.typing as npt
 from scripts.research.proximal_distal_energy.phase_event_stability import (
     StateScales,
     registered_step,
+    rollout_state_history,
 )
 from src.shared.python.simulation_backends import GolfModelParams, make_backend
 
@@ -104,6 +105,41 @@ class EventConditionedGramian:
     tangent_gramian: FloatArray | None
 
 
+@dataclass(frozen=True, slots=True)
+class TrajectoryLinearization:
+    """Nominal trajectory and exact-discrete Jacobians at every step."""
+
+    time_s: FloatArray
+    state: FloatArray
+    controls: FloatArray
+    state_matrices: FloatArray
+    input_matrices: FloatArray
+    scaled_state_matrices: FloatArray
+    scaled_sample_input_matrices: FloatArray
+    scaled_energy_input_matrices: FloatArray
+
+    def __post_init__(self) -> None:
+        controls = np.asarray(self.controls, dtype=float)
+        step_count = controls.shape[0] if controls.ndim == 2 else -1
+        expected = {
+            "time_s": (step_count + 1,),
+            "state": (step_count + 1, 4),
+            "controls": (step_count, 2),
+            "state_matrices": (step_count, 4, 4),
+            "input_matrices": (step_count, 4, 2),
+            "scaled_state_matrices": (step_count, 4, 4),
+            "scaled_sample_input_matrices": (step_count, 4, 2),
+            "scaled_energy_input_matrices": (step_count, 4, 2),
+        }
+        if step_count < 1:
+            raise ValueError("controls must be a nonempty (N, 2) array")
+        for name, shape in expected.items():
+            array = np.asarray(getattr(self, name), dtype=float)
+            if array.shape != shape or not np.all(np.isfinite(array)):
+                raise ValueError(f"{name} must be finite with shape {shape}")
+            object.__setattr__(self, name, _readonly(array))
+
+
 def _central_jacobian(
     function: Callable[[FloatArray], npt.ArrayLike],
     point: FloatArray,
@@ -185,16 +221,110 @@ def step_linearization(
     input_matrix = _central_jacobian(
         input_map, command, u_steps, output_size=vector.size
     )
-    x_scale = state_scales.array
-    u_scale = control_scales.array
-    scaled_state = state_matrix * x_scale[np.newaxis, :] / x_scale[:, np.newaxis]
-    scaled_sample_input = input_matrix * u_scale[np.newaxis, :] / x_scale[:, np.newaxis]
+    scaled_state, scaled_sample_input, scaled_energy_input = scale_step_matrices(
+        state_matrix,
+        input_matrix,
+        dt_s=dt_s,
+        state_scales=state_scales,
+        control_scales=control_scales,
+    )
     return StepLinearization(
         state_matrix=state_matrix,
         input_matrix=input_matrix,
         scaled_state_matrix=scaled_state,
         scaled_sample_input_matrix=scaled_sample_input,
-        scaled_energy_input_matrix=scaled_sample_input / math.sqrt(dt_s),
+        scaled_energy_input_matrix=scaled_energy_input,
+    )
+
+
+def scale_step_matrices(
+    state_matrix: npt.ArrayLike,
+    input_matrix: npt.ArrayLike,
+    *,
+    dt_s: float,
+    state_scales: StateScales,
+    control_scales: ControlScales,
+) -> tuple[FloatArray, FloatArray, FloatArray]:
+    """Scale exact-discrete matrices in sample and energy coordinates."""
+
+    state = np.asarray(state_matrix, dtype=float)
+    control = np.asarray(input_matrix, dtype=float)
+    if state.shape != (4, 4) or not np.all(np.isfinite(state)):
+        raise ValueError("state_matrix must be finite with shape (4, 4)")
+    if control.shape != (4, 2) or not np.all(np.isfinite(control)):
+        raise ValueError("input_matrix must be finite with shape (4, 2)")
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("dt_s must be finite and positive")
+    x_scale = state_scales.array
+    u_scale = control_scales.array
+    scaled_state = state * x_scale[np.newaxis, :] / x_scale[:, np.newaxis]
+    scaled_sample = control * u_scale[np.newaxis, :] / x_scale[:, np.newaxis]
+    return (
+        _readonly(scaled_state),
+        _readonly(scaled_sample),
+        _readonly(scaled_sample / math.sqrt(dt_s)),
+    )
+
+
+def linearize_trajectory(
+    *,
+    params: GolfModelParams,
+    initial_state: npt.ArrayLike,
+    controls: npt.ArrayLike,
+    dt_s: float,
+    state_steps: npt.ArrayLike,
+    control_steps: npt.ArrayLike,
+    state_scales: StateScales,
+    control_scales: ControlScales,
+) -> TrajectoryLinearization:
+    """Linearize the exact RK4 map along every registered nominal step."""
+
+    initial = _finite_vector("initial_state", initial_state, size=4).copy()
+    commands = np.asarray(controls, dtype=float)
+    if (
+        commands.ndim != 2
+        or commands.shape[0] == 0
+        or commands.shape[1] != 2
+        or not np.all(np.isfinite(commands))
+    ):
+        raise ValueError("controls must be a nonempty finite (N, 2) array")
+    x_steps = _positive_vector("state_steps", state_steps, size=4)
+    u_steps = _positive_vector("control_steps", control_steps, size=2)
+    time_s, state = rollout_state_history(
+        params,
+        initial_state=initial,
+        controls=commands,
+        dt_s=dt_s,
+    )
+    linearizations = [
+        step_linearization(
+            params=params,
+            state=state[index],
+            control=command,
+            time_s=float(time_s[index]),
+            dt_s=dt_s,
+            state_steps=x_steps,
+            control_steps=u_steps,
+            state_scales=state_scales,
+            control_scales=control_scales,
+        )
+        for index, command in enumerate(commands)
+    ]
+    return TrajectoryLinearization(
+        time_s=time_s,
+        state=state,
+        controls=commands,
+        state_matrices=np.stack([item.state_matrix for item in linearizations]),
+        input_matrices=np.stack([item.input_matrix for item in linearizations]),
+        scaled_state_matrices=np.stack(
+            [item.scaled_state_matrix for item in linearizations]
+        ),
+        scaled_sample_input_matrices=np.stack(
+            [item.scaled_sample_input_matrix for item in linearizations]
+        ),
+        scaled_energy_input_matrices=np.stack(
+            [item.scaled_energy_input_matrix for item in linearizations]
+        ),
     )
 
 
@@ -270,6 +400,100 @@ def frozen_local_gramian(
     return _readonly(history[-1])
 
 
+def propagated_terminal_input_sensitivity(
+    state_matrices: npt.ArrayLike,
+    input_matrices: npt.ArrayLike,
+    *,
+    pulse_step: int,
+    channel_index: int,
+) -> FloatArray:
+    """Propagate one declared discrete input column to the terminal state."""
+
+    state, control = _trajectory_matrices(state_matrices, input_matrices)
+    if (
+        isinstance(pulse_step, bool)
+        or not isinstance(pulse_step, int)
+        or not 0 <= pulse_step < state.shape[0]
+    ):
+        raise ValueError("pulse_step must index a trajectory step")
+    if (
+        isinstance(channel_index, bool)
+        or not isinstance(channel_index, int)
+        or not 0 <= channel_index < control.shape[2]
+    ):
+        raise ValueError("channel_index must index an input channel")
+    sensitivity = control[pulse_step, :, channel_index].copy()
+    for step in range(pulse_step + 1, state.shape[0]):
+        sensitivity = state[step] @ sensitivity
+    return _readonly(sensitivity)
+
+
+def direct_terminal_pulse_sensitivity(
+    *,
+    params: GolfModelParams,
+    initial_state: npt.ArrayLike,
+    controls: npt.ArrayLike,
+    dt_s: float,
+    state_scales: StateScales,
+    control_scales: ControlScales,
+    pulse_step: int,
+    channel_index: int,
+    perturbation_scale: float,
+) -> FloatArray:
+    """Differentiate a complete rollout for one energy-normalized input pulse."""
+
+    initial = _finite_vector("initial_state", initial_state, size=4).copy()
+    commands = np.asarray(controls, dtype=float)
+    if (
+        commands.ndim != 2
+        or commands.shape[0] == 0
+        or commands.shape[1] != 2
+        or not np.all(np.isfinite(commands))
+    ):
+        raise ValueError("controls must be a nonempty finite (N, 2) array")
+    if (
+        isinstance(pulse_step, bool)
+        or not isinstance(pulse_step, int)
+        or not 0 <= pulse_step < commands.shape[0]
+    ):
+        raise ValueError("pulse_step must index a trajectory step")
+    if (
+        isinstance(channel_index, bool)
+        or not isinstance(channel_index, int)
+        or not 0 <= channel_index < commands.shape[1]
+    ):
+        raise ValueError("channel_index must index an input channel")
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("dt_s must be finite and positive")
+    if not math.isfinite(perturbation_scale) or perturbation_scale <= 0.0:
+        raise ValueError("perturbation_scale must be finite and positive")
+    physical_delta = (
+        control_scales.array[channel_index] * perturbation_scale / math.sqrt(dt_s)
+    )
+    upper = commands.copy()
+    lower = commands.copy()
+    upper[pulse_step, channel_index] += physical_delta
+    lower[pulse_step, channel_index] -= physical_delta
+    _, upper_state = rollout_state_history(
+        params,
+        initial_state=initial,
+        controls=upper,
+        dt_s=dt_s,
+    )
+    _, lower_state = rollout_state_history(
+        params,
+        initial_state=initial,
+        controls=lower,
+        dt_s=dt_s,
+    )
+    sensitivity = (
+        (upper_state[-1] - lower_state[-1])
+        / (2.0 * perturbation_scale)
+        / state_scales.array
+    )
+    return _readonly(sensitivity)
+
+
 def event_conditioned_gramian(
     gramian: npt.ArrayLike,
     *,
@@ -324,8 +548,13 @@ __all__ = [
     "ControlScales",
     "EventConditionedGramian",
     "StepLinearization",
+    "TrajectoryLinearization",
+    "direct_terminal_pulse_sensitivity",
     "event_conditioned_gramian",
     "frozen_local_gramian",
+    "linearize_trajectory",
+    "propagated_terminal_input_sensitivity",
     "reachability_history",
+    "scale_step_matrices",
     "step_linearization",
 ]
