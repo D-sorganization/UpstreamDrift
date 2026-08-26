@@ -762,7 +762,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -1252,7 +1252,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -1448,7 +1448,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -1488,7 +1488,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -1872,7 +1872,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.000000999999999e-7,
+          "atol": 5.000000999999999e-07,
           "rtol": 0.0
         },
         {
@@ -2357,7 +2357,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -2367,7 +2367,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         }
       ]
@@ -2433,7 +2433,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.000001e-6,
+          "atol": 5.000001e-06,
           "rtol": 0.0
         },
         {
@@ -2443,7 +2443,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.000001e-6,
+          "atol": 5.000001e-06,
           "rtol": 0.0
         }
       ]
@@ -2791,7 +2791,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -2801,7 +2801,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         }
       ]
@@ -2883,7 +2883,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -2893,7 +2893,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         }
       ]
@@ -3015,7 +3015,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.000001e-6,
+          "atol": 5.000001e-06,
           "rtol": 0.0
         },
         {
@@ -3461,7 +3461,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.000001e-6,
+          "atol": 5.000001e-06,
           "rtol": 0.0
         },
         {
@@ -3921,7 +3921,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -3931,7 +3931,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         }
       ]
@@ -4533,7 +4533,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1000.0,
           "offset": 0.0,
-          "atol": 5.0000009999999996e-5,
+          "atol": 5.0000009999999996e-05,
           "rtol": 0.0
         },
         {
@@ -4553,7 +4553,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.000001e-9,
+          "atol": 5.000001e-09,
           "rtol": 0.0
         }
       ]
@@ -4697,7 +4697,7 @@
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
-          "atol": 5.000000999999999e-7,
+          "atol": 5.000000999999999e-07,
           "rtol": 0.0
         },
         {
@@ -5068,6 +5068,198 @@
           "literal_id": "1e-4#1",
           "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
           "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/4/relative_tolerance",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-315",
+      "statement_sha256": "4c2d2c10790e9a07b5cb70c18ebd6e2a557b5a5faa7121a84f7fb1afee3812d2",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.125#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/registration/analysis_dt_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/step_refinement/0/state_step_multiplier",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/step_refinement/2/state_step_multiplier",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "6.87737e-6#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/step_refinement/0/event_transition_max_abs_residual_from_nominal",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3.45969e-7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/direct_transition_controls/0/maximum_abs_residual",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.349256#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/reference_event/time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.093456#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/finite_time_analysis/minimum_observed_amplification",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "8.33244#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/finite_time_analysis/maximum_observed_amplification",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-316",
+      "statement_sha256": "343440374f54b7cc1162854b74e9659a69ff9ed4dd8e757f43fae22b1fbf899f",
+      "numeric_evidence": [
+        {
+          "literal_id": "35.0258#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/event_time_sensitivity/implicit/transversality_per_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.137655#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/event_time_sensitivity/implicit/derivative_s_per_scaled_state/0",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.0240043#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/event_time_sensitivity/implicit/derivative_s_per_scaled_state/1",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.299636#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/event_time_sensitivity/implicit/derivative_s_per_scaled_state/2",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-0.243972#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/event_time_sensitivity/implicit/derivative_s_per_scaled_state/3",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5.98012e-5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/event_time_sensitivity/direct_trials/0/maximum_abs_residual_from_implicit_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.95#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/saltation_controls/corrupted_reset_diagonal",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.05#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/saltation_controls/corrupted_reset_max_abs_deviation_from_identity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.48546#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/periodicity_gate/normalized_residual",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1e-6#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+          "json_pointer": "/periodicity_gate/tolerance",
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,

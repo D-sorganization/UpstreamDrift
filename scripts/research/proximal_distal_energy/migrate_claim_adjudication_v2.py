@@ -36,10 +36,13 @@ PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST = (
 PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST = (
     "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a"
 )
-REVIEWED_SOURCE_DIGEST = (
+PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST = (
     "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe"
 )
-REVIEWED_CLAIM_COUNT = 313
+REVIEWED_SOURCE_DIGEST = (
+    "aa3fe6ce24c4f81e5364963d4aae7ad23b3b62edab85981918d831bc1adc1506"
+)
+REVIEWED_CLAIM_COUNT = 315
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -133,7 +136,7 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
 )
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 311-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 315-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -430,6 +433,8 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-312",
         "PD-CLAIM-313",
         "PD-CLAIM-314",
+        "PD-CLAIM-315",
+        "PD-CLAIM-316",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -507,7 +512,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1134-candidate paper inventory is adjudicated. Repeated "
+        "The complete 1148-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."
@@ -540,6 +545,7 @@ def migrate(root: Path) -> dict[str, int]:
         PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
         PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
         PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
+        PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }:
         raise ValueError(
@@ -560,6 +566,7 @@ def migrate(root: Path) -> dict[str, int]:
         PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
         PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
         PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
+        PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST,
     }:
         _reconcile_reviewer_projection(registry, inventory)
     else:

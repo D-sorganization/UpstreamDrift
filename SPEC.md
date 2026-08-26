@@ -12,6 +12,16 @@ tiers remain explicitly unavailable. This is a topology and evidence-boundary
 gate; observability, controllability, stability, controller ranking, participant
 validity, and coaching interpretation remain unqualified.
 
+Issue #9116 adds the next bounded #9027 analytical slice: dimensionless
+finite-time state-transition maps and transverse geometric-event sensitivity
+for the registered nonperiodic double-pendulum downswing. The computation
+retains step refinement, complete direct perturbation controls, equivalent
+units, near-grazing rejection, time-guard saltation controls, and an explicit
+periodicity gate. Floquet output is suppressed because the trajectory does not
+close. These local finite-window results do not establish asymptotic/global
+stability, neural timing demand, participant robustness, passive negative
+torque, human strategy, or coaching guidance.
+
 Issue #9059 adds a coordinate-explicit planar pendulum attribution contract on
 top of the pinned Tools source authority. It separates cross-speed Coriolis,
 squared-speed centripetal/centrifugal, gravity, damping, applied-drive, and

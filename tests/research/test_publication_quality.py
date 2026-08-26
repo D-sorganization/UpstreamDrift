@@ -188,10 +188,10 @@ def test_canonical_pdf_byte_identity_is_dependency_free() -> None:
     ]
 
     assert digest == (
-        "48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa"
+        "3997e95ef44731e4a33f655a634719cbfd18c4bcab0054e5d82d2821b700eb36"
     )
-    assert PDF.stat().st_size == 2_954_515
-    assert artifact == {"sha256": digest, "bytes": 2_954_515}
+    assert PDF.stat().st_size == 2_977_993
+    assert artifact == {"sha256": digest, "bytes": 2_977_993}
 
 
 @requires_fitz
@@ -207,10 +207,10 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
     )
 
     assert report["publication"]["sha256"] == (
-        "48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa"
+        "3997e95ef44731e4a33f655a634719cbfd18c4bcab0054e5d82d2821b700eb36"
     )
-    assert report["publication"]["bytes"] == 2_954_515
-    assert report["publication"]["pages"] == 245
+    assert report["publication"]["bytes"] == 2_977_993
+    assert report["publication"]["pages"] == 246
     assert report["publication"]["fast_web_access"] is False
     assert report["navigation"] == {
         "outline_entries": 255,
@@ -219,16 +219,16 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
         "invalid_uri_links": [],
         "invalid_internal_links": [],
     }
-    assert report["rendering"]["pages_rendered"] == 245
+    assert report["rendering"]["pages_rendered"] == 246
     assert report["rendering"]["errors"] == []
     assert report["accessibility"] == {
         "tagged": False,
-        "pages_with_extractable_text": 244,
+        "pages_with_extractable_text": 246,
         "font_inventory": {
-            "resources": 133,
-            "types": {"Type0": 17, "Type1": 2, "Type3": 114},
-            "type3_resources": 114,
-            "unembedded_resources": 2,
+            "resources": 207,
+            "types": {"Type0": 17, "Type1": 67, "Type3": 123},
+            "type3_resources": 123,
+            "unembedded_resources": 67,
         },
     }
     assert validate_publication_quality(report, profile="computational")["valid"]

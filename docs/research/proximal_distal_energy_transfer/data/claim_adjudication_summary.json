@@ -1,11 +1,11 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe",
-  "claim_count": 313,
+  "paper_source_digest": "aa3fe6ce24c4f81e5364963d4aae7ad23b3b62edab85981918d831bc1adc1506",
+  "claim_count": 315,
   "outcome_counts": {
     "inconclusive": 5,
-    "supported": 293,
+    "supported": 295,
     "untested": 15
   },
   "evidence_qualification_counts": {
@@ -16,7 +16,7 @@
     "hypothesis_or_prospective_protocol": 12,
     "independent_followup_open": 24,
     "original_full_text_checked": 18,
-    "project_executable_or_data": 284
+    "project_executable_or_data": 286
   },
   "evidence_tier_counts": {
     "bibliographic_record": 3,
@@ -24,23 +24,23 @@
     "external_methods_or_measurement": 10,
     "external_modeling_or_simulation": 15,
     "external_review_or_synthesis": 10,
-    "project_derivation_or_document": 98,
-    "project_executable_or_generated": 284,
+    "project_derivation_or_document": 100,
+    "project_executable_or_generated": 286,
     "prospective_or_unexecuted": 15
   },
   "source_independence_counts": {
     "multiple_independent_external_support": 20,
-    "project_only": 259,
+    "project_only": 261,
     "single_independent_external_support": 34
   },
   "model_tier_counts": {
     "articulated_spatial": 32,
     "compliant_shaft": 66,
-    "cross_tier_synthesis": 65,
+    "cross_tier_synthesis": 67,
     "declared_model_tier_unclassified": 12,
     "finite_ground_or_base": 16,
     "human_or_external_evidence": 46,
-    "planar_reduced": 138,
+    "planar_reduced": 140,
     "spatial_reduced": 76,
     "two_hand_or_bilateral": 94,
     "uncertainty_or_control": 10
@@ -51,7 +51,7 @@
     "governed_human_data_unavailable": 11,
     "independent_reimplementation_open": 12,
     "mixed_or_insufficient_evidence": 5,
-    "none_declared": 269,
+    "none_declared": 271,
     "prospective_experiment_open": 15,
     "statistical_reanalysis_or_replication_open": 9,
     "systematic_review_open": 2
@@ -251,8 +251,8 @@
     },
     {
       "claim_family": "ch07_model_ladder",
-      "claim_count": 19,
-      "project_only_count": 19,
+      "claim_count": 21,
+      "project_only_count": 21,
       "single_independent_external_support_count": 0,
       "multiple_independent_external_support_count": 0,
       "concentration_flag": "project_authored_only"
@@ -14384,6 +14384,99 @@
       "uncertainty_boundary": "The tolerance-dependent rank transition is numerical and is not a physical singularity threshold, anatomical limit, or human strategy.",
       "falsifier": "Either exact boundary fails to add one velocity null mode, equivalent units change rank/condition, or the offset/tolerance matrix does not reproduce.",
       "adjudication": "The result is retained as exact analytical planar kinematic evidence. It does not establish anatomy, dynamics, contact force, muscle action, passive torque, human occurrence, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "claim_id": "PD-CLAIM-315",
+      "adjudication_outcome": "supported",
+      "statement": "On the registered analytical downswing refined to 0.125 ms, state-step multipliers 0.1 through 10 change the event transition by at most 6.87737e-6, and three complete perturbation rollouts agree with the propagated fixed-horizon map within 3.45969e-7; at the 0.349256 s geometric event, the observed scaled gains span 0.093456 to 8.33244.",
+      "classification": "local_finite_time_state_transition_amplification",
+      "published_status": "supported_for_declared_local_nonperiodic_analytical_trajectory",
+      "audit_status": "nondimensional_transition_step_direct_event_grazing_saltation_unit_and_periodicity_controls_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "cross_tier_synthesis",
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch07_model_ladder",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:273",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:285"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+        "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_phase_event_stability.pdf",
+        "docs/research/proximal_distal_energy_transfer/PHASE_EVENT_STABILITY.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/phase_event_stability.py",
+        "scripts/research/proximal_distal_energy/run_phase_event_stability.py",
+        "scripts/research/proximal_distal_energy/make_phase_event_stability_figure.py",
+        "tests/research/test_phase_event_stability.py",
+        "tests/research/test_phase_event_stability_evidence.py"
+      ],
+      "model_domain": "One synthetic open-loop analytical double-pendulum downswing, integrated with the registered RK4 equations through the first positive club-vertical crossing.",
+      "uncertainty_boundary": "The gain spectrum is local to one scaled finite trajectory and is not an asymptotic, global, population, or coaching stability result.",
+      "falsifier": "Step refinement or direct perturbed rollouts exceed their registered residual gates, equivalent units change the scaled map, or the registered gain spectrum does not reproduce.",
+      "adjudication": "The result is retained as local finite-window analytical evidence. It does not establish asymptotic or global stability, neural timing demand, participant robustness, passive torque, human strategy, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "claim_id": "PD-CLAIM-316",
+      "adjudication_outcome": "supported",
+      "statement": "The registered club-vertical guard is transverse at 35.0258 per second, with scaled-state event-time derivatives (-0.137655, -0.0240043, -0.299636, -0.243972) s and direct-rollout discrepancy no greater than 5.98012e-5 s; a 0.95 reset corruption produces 0.05 saltation deviation, while the 1.48546 scaled periodicity residual exceeds 1e-6 and suppresses Floquet output.",
+      "classification": "transverse_event_sensitivity_and_floquet_suppression",
+      "published_status": "supported_for_declared_local_nonperiodic_analytical_trajectory",
+      "audit_status": "nondimensional_transition_step_direct_event_grazing_saltation_unit_and_periodicity_controls_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "cross_tier_synthesis",
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch07_model_ladder",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:298",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:307",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:315"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+        "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_phase_event_stability.pdf",
+        "docs/research/proximal_distal_energy_transfer/PHASE_EVENT_STABILITY.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/phase_event_stability.py",
+        "scripts/research/proximal_distal_energy/run_phase_event_stability.py",
+        "scripts/research/proximal_distal_energy/make_phase_event_stability_figure.py",
+        "tests/research/test_phase_event_stability.py",
+        "tests/research/test_phase_event_stability_evidence.py"
+      ],
+      "model_domain": "One synthetic open-loop analytical double-pendulum downswing, integrated with the registered RK4 equations through the first positive club-vertical crossing.",
+      "uncertainty_boundary": "The derivative applies only to the declared transverse geometric guard; it is not neural timing demand, impact validation, or human robustness. No periodic orbit is registered.",
+      "falsifier": "Implicit and direct derivatives disagree beyond tolerance, the near-grazing or reset controls fail, or Floquet output is emitted without state and mode closure.",
+      "adjudication": "The result is retained as local finite-window analytical evidence. It does not establish asymptotic or global stability, neural timing demand, participant robustness, passive torque, human strategy, or coaching guidance.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-26"
     }
