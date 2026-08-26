@@ -49,7 +49,7 @@ IMPACTED_PATHS = [
     "manuals/upstreamdrift",
 ]
 REQUIRED_UPDATE_FILES = [
-    "config/design_manual_governance.json",
+    "scripts/config/design_manual_governance.json",
     "manuals/upstreamdrift/calculation-registry.json",
     "SPEC.md",
     "AGENT_HANDOFF.md",

@@ -17,7 +17,9 @@ from scripts.check_design_manual_governance import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-POLICY_PATH = REPO_ROOT / "config" / "design_manual_governance.json"
+pytestmark = pytest.mark.unit
+
+POLICY_PATH = REPO_ROOT / "scripts" / "config" / "design_manual_governance.json"
 REGISTRY_PATH = REPO_ROOT / "manuals" / "upstreamdrift" / "calculation-registry.json"
 
 

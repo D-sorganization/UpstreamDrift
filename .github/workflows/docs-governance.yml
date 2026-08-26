@@ -5,7 +5,7 @@ on:
     paths:
       - "docs/**"
       - "manuals/upstreamdrift/**"
-      - "config/design_manual_governance.json"
+      - "scripts/config/design_manual_governance.json"
       - "scripts/check_design_manual_governance.py"
       - "scripts/design_manual_contract.py"
       - "scripts/check_docs_governance.py"
@@ -22,7 +22,7 @@ on:
     paths:
       - "docs/**"
       - "manuals/upstreamdrift/**"
-      - "config/design_manual_governance.json"
+      - "scripts/config/design_manual_governance.json"
       - "scripts/check_design_manual_governance.py"
       - "scripts/design_manual_contract.py"
       - "scripts/check_docs_governance.py"

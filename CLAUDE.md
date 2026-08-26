@@ -10,7 +10,7 @@
 
 `manuals/upstreamdrift` QMD is the only editable engineering design-manual
 source. Generated LaTeX, PDF, DOCX, and HTML are non-editable artifacts. Read
-`config/design_manual_governance.json`, update the calculation registry/SPEC/
+`scripts/config/design_manual_governance.json`, update the calculation registry/SPEC/
 handoff when their governed pathways change, and run
 `python3 -m scripts.check_design_manual_governance`. A successful render is not
 scientific, semantic, visual, accessibility, or publication approval.

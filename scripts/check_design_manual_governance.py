@@ -21,7 +21,7 @@ from scripts.design_manual_contract import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-POLICY_PATH = PurePosixPath("config/design_manual_governance.json")
+POLICY_PATH = PurePosixPath("scripts/config/design_manual_governance.json")
 
 
 def _object(value: object, label: str, fields: set[str]) -> dict[str, object]:
