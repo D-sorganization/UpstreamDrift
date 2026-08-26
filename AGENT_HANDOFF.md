@@ -9,7 +9,7 @@ is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `d16212ac7bf67ab486c447647db379d38a2540b0`, protected PR #9110's squash.
+- Remote `main` is `41101daf7bde97e6005a5a25b7c36bc329820a6c`; this branch merges that authority after protected PR #9110's `d16212ac7` squash.
 - The current branch publication is 245 pages, SHA-256
   `2c78d3e1017f929f0a29f00c153f076211717433686c0a646f568483904e82f7`,
   with 194 URI links and 255 outline entries. Archival qualification remains

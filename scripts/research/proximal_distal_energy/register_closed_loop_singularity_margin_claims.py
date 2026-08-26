@@ -102,7 +102,7 @@ def _claim(
     }
 
 
-def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]:
+def _nominal_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
     nominal_statement = (
         "For the exact 0.75 m/0.78 m/0.25 m planar triangle, all 362 registered "
         "branch-phase samples close within 1.66533e-16 m and retain rank 4/nullity "
@@ -110,7 +110,7 @@ def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]
         "value is 0.202095 m, condition number is 6.45326, and phase-spectrum "
         "spread is 2.22045e-15 m."
     )
-    nominal = _claim(
+    return _claim(
         claim_id="PD-CLAIM-313",
         candidates=[candidates["constructor"], candidates["nominal"]],
         statement=nominal_statement,
@@ -160,13 +160,16 @@ def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]
             ),
         ],
     )
+
+
+def _boundary_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
     boundary_statement = (
         "The exact 0.03 m and 1.53 m triangle boundaries have rank 3/nullity 2; "
         "at a 1e-8 m lower-bound offset, numerical rank remains 4 through relative "
         "tolerance 1e-6 and becomes 3 at 1e-4, while equivalent centimetre units "
         "preserve rank and condition number."
     )
-    boundary = _claim(
+    return _claim(
         claim_id="PD-CLAIM-314",
         candidates=[candidates["boundary"], candidates["controls"]],
         statement=boundary_statement,
@@ -219,7 +222,10 @@ def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]
             ),
         ],
     )
-    return nominal, boundary
+
+
+def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]:
+    return _nominal_claim(candidates), _boundary_claim(candidates)
 
 
 def _update_numeric_contracts(claims: tuple[dict[str, Any], ...]) -> None:
@@ -245,13 +251,7 @@ def _update_numeric_contracts(claims: tuple[dict[str, Any], ...]) -> None:
     )
 
 
-def main() -> None:
-    """Apply the frozen #9113 candidate review idempotently."""
-
-    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    current_ids = {candidate["candidate_id"] for candidate in inventory["candidates"]}
-
+def _find_candidates(inventory: dict[str, Any]) -> dict[str, dict[str, Any]]:
     def unique(
         fragment: str,
         *,
@@ -270,7 +270,7 @@ def main() -> None:
             raise ValueError(f"Expected one candidate containing {fragment!r}")
         return matches[0]
 
-    candidates = {
+    return {
         "constructor": unique("same-origin triangle directly"),
         "nominal": unique("All 362 registered samples"),
         "boundary": unique("triangle inequality supplies two exact"),
@@ -280,6 +280,14 @@ def main() -> None:
             source_suffix="_appendices.qmd",
         ),
     }
+
+
+def _reset_owned_records(
+    registry: dict[str, Any],
+    inventory: dict[str, Any],
+    candidates: dict[str, dict[str, Any]],
+) -> None:
+    current_ids = {candidate["candidate_id"] for candidate in inventory["candidates"]}
     selected_ids = {candidate["candidate_id"] for candidate in candidates.values()}
     registry["claims"] = [
         claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
@@ -291,8 +299,6 @@ def main() -> None:
         and review["candidate_id"] not in selected_ids
         and not set(review["claim_ids"]).intersection(CLAIM_IDS)
     ]
-    claims = _claims(candidates)
-    registry["claims"].extend(claims)
     registry["release_claim_inventory"] = [
         item
         for item in registry["release_claim_inventory"]
@@ -307,6 +313,13 @@ def main() -> None:
             "audit_state": "reviewed_as_exact_planar_kinematic_qualification",
         }
     )
+
+
+def _append_candidate_reviews(
+    registry: dict[str, Any],
+    inventory: dict[str, Any],
+    candidates: dict[str, dict[str, Any]],
+) -> None:
     assignments = {
         candidates["constructor"]["candidate_id"]: ["PD-CLAIM-313"],
         candidates["nominal"]["candidate_id"]: ["PD-CLAIM-313"],
@@ -358,6 +371,18 @@ def main() -> None:
         }
         for candidate in generated_summary_candidates
     )
+
+
+def main() -> None:
+    """Apply the frozen #9113 candidate review idempotently."""
+
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
+    candidates = _find_candidates(inventory)
+    claims = _claims(candidates)
+    _reset_owned_records(registry, inventory, candidates)
+    registry["claims"].extend(claims)
+    _append_candidate_reviews(registry, inventory, candidates)
     registry["paper"]["source_digest"] = inventory["source_digest"]
     registry["audit_scope"]["completion_status"] = "complete"
     registry["audit_scope"]["current_scope"] = (
