@@ -71,6 +71,29 @@ class OutputManager:
     and generating reports across all physics engines.
 
     PERFORMANCE: Includes async file I/O support to prevent blocking main thread.
+
+    Results directory schema (issue #8871):
+        ``save_simulation_results`` writes under
+        ``<base_path>/simulations/<engine>/<filename>.<format>``, where
+        ``<engine>`` is the physics engine name (e.g. ``mujoco``, ``drake``)
+        passed to the call, and ``<filename>`` is sanitized — a timestamp
+        suffix is appended automatically when the caller-supplied name has
+        no digits, so repeated saves never collide. Every save also captures
+        a :class:`~src.shared.python.data_io.provenance.ProvenanceInfo`
+        record (timestamp, git SHA, model file hash if ``model_path`` is
+        given, and any explicit ``parameters``) and embeds it in the output
+        file itself — a JSON-format save nests it under ``provenance``; a
+        CSV-format save gets a commented provenance header. See
+        ``output/README.md`` at the repo root for the full ``output/``
+        directory layout (``simulations/``, ``analysis/``, ``exports/``,
+        ``reports/``, ``cache/``) and file-naming conventions.
+
+        ``src.api.services.simulation_service.SimulationService`` is the
+        primary caller for on-disk persistence of REST API simulation runs:
+        it saves each completed run's data + analysis results here and
+        surfaces the resulting path(s) via ``SimulationResponse.export_paths``.
+        A failed run persists nothing, so ``export_paths`` stays empty in
+        that case.
     """
 
     @classmethod
