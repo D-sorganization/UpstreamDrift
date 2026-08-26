@@ -11,6 +11,9 @@ from scripts.research.proximal_distal_energy.torque_programs import (
 )
 from scripts.research.proximal_distal_energy.trajectory_control_authority import (
     ControlScales,
+    GuardCrossingConfig,
+    PulseSensitivityRequest,
+    StepLinearizationConfig,
     event_conditioned_gramian,
     frozen_local_gramian,
     linearize_trajectory,
@@ -33,6 +36,23 @@ def test_control_scales_require_two_finite_positive_values() -> None:
             ControlScales(values)
 
 
+def test_control_authority_configs_fail_closed_on_invalid_values() -> None:
+    scales = StateScales((np.pi, np.pi, 10.0, 10.0))
+    controls = ControlScales((100.0, 100.0))
+    with pytest.raises(ValueError, match="dt_s"):
+        StepLinearizationConfig(
+            dt_s=0.0,
+            state_steps=(1e-6, 1e-6, 1e-5, 1e-5),
+            control_steps=(1e-4, 1e-4),
+            state_scales=scales,
+            control_scales=controls,
+        )
+    with pytest.raises(ValueError, match="perturbation_scale"):
+        PulseSensitivityRequest(pulse_step=0, channel_index=0, perturbation_scale=0.0)
+    with pytest.raises(ValueError, match="guard_gradient"):
+        GuardCrossingConfig(guard_gradient=(0.0, 0.0, 0.0, 0.0))
+
+
 def test_exact_rk4_step_linearization_is_deterministic_and_input_immutable() -> None:
     params = GolfModelParams.default()
     state = np.array([-2.0, -1.3, 2.0, 5.0])
@@ -44,11 +64,13 @@ def test_exact_rk4_step_linearization_is_deterministic_and_input_immutable() -> 
         "state": state,
         "control": control,
         "time_s": 0.125,
-        "dt_s": 1e-3,
-        "state_steps": np.array([1e-6, 1e-6, 1e-5, 1e-5]),
-        "control_steps": np.array([1e-4, 1e-4]),
-        "state_scales": StateScales((np.pi, np.pi, 10.0, 10.0)),
-        "control_scales": ControlScales((100.0, 100.0)),
+        "config": StepLinearizationConfig(
+            dt_s=1e-3,
+            state_steps=(1e-6, 1e-6, 1e-5, 1e-5),
+            control_steps=(1e-4, 1e-4),
+            state_scales=StateScales((np.pi, np.pi, 10.0, 10.0)),
+            control_scales=ControlScales((100.0, 100.0)),
+        ),
     }
 
     first = step_linearization(**kwargs)
@@ -225,9 +247,11 @@ def test_trajectory_linearization_matches_direct_terminal_pulse() -> None:
         dt_s=1e-3,
         state_scales=scales,
         control_scales=control_scales,
-        pulse_step=4,
-        channel_index=1,
-        perturbation_scale=1e-6,
+        request=PulseSensitivityRequest(
+            pulse_step=4,
+            channel_index=1,
+            perturbation_scale=1e-6,
+        ),
     )
     variable_direct = direct_variable_terminal_pulse_sensitivity(
         params=params,
@@ -236,9 +260,11 @@ def test_trajectory_linearization_matches_direct_terminal_pulse() -> None:
         step_durations_s=np.full(controls.shape[0], 1e-3),
         state_scales=scales,
         control_scales=control_scales,
-        pulse_step=4,
-        channel_index=1,
-        perturbation_scale=1e-6,
+        request=PulseSensitivityRequest(
+            pulse_step=4,
+            channel_index=1,
+            perturbation_scale=1e-6,
+        ),
     )
 
     assert trajectory.state.shape == (13, 4)
@@ -272,9 +298,11 @@ def test_registered_guard_crossing_is_refined_inside_bracket() -> None:
         control=controls[index],
         time_before_s=trajectory.time_s[index],
         bracket_dt_s=1e-3,
-        guard_gradient=np.array([1.0, 1.0, 0.0, 0.0]),
-        guard_tolerance=1e-11,
-        time_tolerance_s=1e-12,
+        config=GuardCrossingConfig(
+            guard_gradient=(1.0, 1.0, 0.0, 0.0),
+            guard_tolerance=1e-11,
+            time_tolerance_s=1e-12,
+        ),
     )
 
     assert crossing.status == "transverse_candidate"

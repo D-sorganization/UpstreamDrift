@@ -34,6 +34,11 @@ from scripts.research.proximal_distal_energy.torque_programs import (
 from scripts.research.proximal_distal_energy.trajectory_control_authority import (
     ControlScales,
     EventConditionedGramian,
+    GuardCrossingConfig,
+    PulseSensitivityRequest,
+    RefinedCrossing,
+    StepLinearization,
+    StepLinearizationConfig,
     TrajectoryLinearization,
     direct_variable_terminal_pulse_sensitivity,
     event_conditioned_gramian,
@@ -102,6 +107,25 @@ class _Authority:
     event_cases: dict[str, EventConditionedGramian]
 
 
+@dataclass(frozen=True, slots=True)
+class _EvidenceParts:
+    """Intermediate results shared by the portable report and raw arrays."""
+
+    base: _Authority
+    additivity: float
+    zero_maximum: float
+    input_trials: list[dict[str, Any]]
+    input_arrays: list[np.ndarray]
+    integration_trials: list[dict[str, Any]]
+    integration_arrays: list[np.ndarray]
+    pulse_records: list[dict[str, Any]]
+    pulse_predicted: np.ndarray
+    pulse_observed: np.ndarray
+    frozen_records: list[dict[str, Any]]
+    varying_windows: np.ndarray
+    frozen_windows: np.ndarray
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -128,6 +152,65 @@ def _commands(dt_s: float) -> np.ndarray:
         raise ValueError("integration step must divide the source horizon")
     program = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10)
     return program.controls(horizon, dt_s)
+
+
+def _linearization_config(
+    dt_s: float, control_step_multiplier: float = 1.0
+) -> StepLinearizationConfig:
+    return StepLinearizationConfig(
+        dt_s=dt_s,
+        state_steps=tuple(STATE_STEPS),
+        control_steps=tuple(CONTROL_STEPS * control_step_multiplier),
+        state_scales=_state_scales(),
+        control_scales=CONTROL_SCALES,
+    )
+
+
+def _append_refined_event_step(
+    prefix: TrajectoryLinearization,
+    final_step: StepLinearization,
+    refined: RefinedCrossing,
+    event_control: np.ndarray,
+    dt_s: float,
+) -> tuple[TrajectoryLinearization, np.ndarray]:
+    """Append the exact partial event step to a full-step prefix."""
+
+    durations = np.concatenate(
+        (np.full(prefix.controls.shape[0], dt_s), [refined.partial_dt_s])
+    )
+    trajectory = TrajectoryLinearization(
+        time_s=np.concatenate((prefix.time_s, [refined.time_s])),
+        state=np.vstack((prefix.state, refined.state)),
+        controls=np.vstack((prefix.controls, event_control)),
+        state_matrices=np.concatenate(
+            (prefix.state_matrices, final_step.state_matrix[np.newaxis]), axis=0
+        ),
+        input_matrices=np.concatenate(
+            (prefix.input_matrices, final_step.input_matrix[np.newaxis]), axis=0
+        ),
+        scaled_state_matrices=np.concatenate(
+            (
+                prefix.scaled_state_matrices,
+                final_step.scaled_state_matrix[np.newaxis],
+            ),
+            axis=0,
+        ),
+        scaled_sample_input_matrices=np.concatenate(
+            (
+                prefix.scaled_sample_input_matrices,
+                final_step.scaled_sample_input_matrix[np.newaxis],
+            ),
+            axis=0,
+        ),
+        scaled_energy_input_matrices=np.concatenate(
+            (
+                prefix.scaled_energy_input_matrices,
+                final_step.scaled_energy_input_matrix[np.newaxis],
+            ),
+            axis=0,
+        ),
+    )
+    return trajectory, durations
 
 
 def _event_trajectory(
@@ -167,10 +250,12 @@ def _event_trajectory(
         control=controls[index],
         time_before_s=float(prefix.time_s[-1]),
         bracket_dt_s=dt_s,
-        guard_gradient=GUARD_GRADIENT,
-        guard_tolerance=GUARD_RESIDUAL_GATE / 10.0,
-        time_tolerance_s=1e-13,
-        transversality_threshold=TRANSVERSALITY_THRESHOLD_PER_S,
+        config=GuardCrossingConfig(
+            guard_gradient=tuple(GUARD_GRADIENT),
+            guard_tolerance=GUARD_RESIDUAL_GATE / 10.0,
+            time_tolerance_s=1e-13,
+            transversality_threshold=TRANSVERSALITY_THRESHOLD_PER_S,
+        ),
     )
     if refined.status != "transverse_candidate":
         raise ValueError("registered event must remain transverse")
@@ -179,47 +264,14 @@ def _event_trajectory(
         state=prefix.state[-1],
         control=controls[index],
         time_s=float(prefix.time_s[-1]),
-        dt_s=refined.partial_dt_s,
-        state_steps=STATE_STEPS,
-        control_steps=CONTROL_STEPS * control_step_multiplier,
-        state_scales=scales,
-        control_scales=CONTROL_SCALES,
+        config=_linearization_config(refined.partial_dt_s, control_step_multiplier),
     )
-    event_controls = np.vstack((prefix.controls, controls[index]))
-    durations = np.concatenate(
-        (np.full(prefix.controls.shape[0], dt_s), [refined.partial_dt_s])
-    )
-    trajectory = TrajectoryLinearization(
-        time_s=np.concatenate((prefix.time_s, [refined.time_s])),
-        state=np.vstack((prefix.state, refined.state)),
-        controls=event_controls,
-        state_matrices=np.concatenate(
-            (prefix.state_matrices, final_step.state_matrix[np.newaxis]), axis=0
-        ),
-        input_matrices=np.concatenate(
-            (prefix.input_matrices, final_step.input_matrix[np.newaxis]), axis=0
-        ),
-        scaled_state_matrices=np.concatenate(
-            (
-                prefix.scaled_state_matrices,
-                final_step.scaled_state_matrix[np.newaxis],
-            ),
-            axis=0,
-        ),
-        scaled_sample_input_matrices=np.concatenate(
-            (
-                prefix.scaled_sample_input_matrices,
-                final_step.scaled_sample_input_matrix[np.newaxis],
-            ),
-            axis=0,
-        ),
-        scaled_energy_input_matrices=np.concatenate(
-            (
-                prefix.scaled_energy_input_matrices,
-                final_step.scaled_energy_input_matrix[np.newaxis],
-            ),
-            axis=0,
-        ),
+    trajectory, durations = _append_refined_event_step(
+        prefix,
+        final_step,
+        refined,
+        controls[index],
+        dt_s,
     )
     flow = state_derivative(params, refined.state, controls[index])
     return _EventTrajectory(
@@ -326,7 +378,6 @@ def _frozen_countermodels(
     frozen_arrays: list[np.ndarray] = []
     records: list[dict[str, Any]] = []
     params = GolfModelParams.default()
-    scales = _state_scales()
     for window_index, (start, end) in enumerate(
         zip(indices[:-1], indices[1:], strict=True)
     ):
@@ -353,11 +404,7 @@ def _frozen_countermodels(
                 state=trajectory.state[start],
                 control=trajectory.controls[start],
                 time_s=float(trajectory.time_s[start]),
-                dt_s=float(event.step_durations_s[end - 1]),
-                state_steps=STATE_STEPS,
-                control_steps=CONTROL_STEPS,
-                state_scales=scales,
-                control_scales=CONTROL_SCALES,
+                config=_linearization_config(float(event.step_durations_s[end - 1])),
             )
             frozen_state[-1] = last.scaled_state_matrix
             frozen_input[-1] = last.scaled_energy_input_matrix
@@ -405,9 +452,11 @@ def _direct_pulses(
                 step_durations_s=durations,
                 state_scales=_state_scales(),
                 control_scales=CONTROL_SCALES,
-                pulse_step=pulse_step,
-                channel_index=channel_index,
-                perturbation_scale=PULSE_PERTURBATION_SCALE,
+                request=PulseSensitivityRequest(
+                    pulse_step=pulse_step,
+                    channel_index=channel_index,
+                    perturbation_scale=PULSE_PERTURBATION_SCALE,
+                ),
             )
             residual = float(np.max(np.abs(observed - predicted)))
             if residual >= DIRECT_PULSE_RESIDUAL_GATE:
@@ -467,6 +516,111 @@ def _source_identity() -> dict[str, Any]:
         "phase_event_report_sha256": _sha256(SOURCE_REPORT_PATH),
         "required_parent_pr": 9117,
         "required_parent_issue": 9116,
+    }
+
+
+def _report_payload(parts: _EvidenceParts) -> dict[str, Any]:
+    base = parts.base
+    event = base.trajectory
+    full_event = base.event_cases["full"]
+    if full_event.tangent_basis is None or full_event.tangent_gramian is None:
+        raise ValueError("event-conditioned authority must remain available")
+    source_event_time = float(_source_report()["reference_event"]["time_s"])
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "model_tier": "analytical_double_pendulum",
+        "source_identity": _source_identity(),
+        "registration": {
+            "state_coordinates": [
+                "shoulder_angle_rad",
+                "wrist_relative_angle_rad",
+                "shoulder_rate_rad_s",
+                "wrist_relative_rate_rad_s",
+            ],
+            "control_coordinates": ["shoulder_torque_nm", "wrist_torque_nm"],
+            "state_scales": list(_state_scales().values),
+            "control_scales_nm": list(CONTROL_SCALES.values),
+            "state_steps": STATE_STEPS.tolist(),
+            "control_steps_nm": CONTROL_STEPS.tolist(),
+            "base_dt_s": BASE_DT_S,
+            "input_normalization": "continuous_energy_equivalent_Bd_divided_by_sqrt_dt",
+            "rank_absolute_tolerance": RANK_ABSOLUTE_TOLERANCE,
+            "rank_relative_tolerance": RANK_RELATIVE_TOLERANCE,
+            "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
+            "guard_residual_gate": GUARD_RESIDUAL_GATE,
+            "transversality_threshold_per_s": TRANSVERSALITY_THRESHOLD_PER_S,
+        },
+        "event_conditioned_authority": {
+            "status": full_event.status,
+            "unique_crossing": event.crossing_count == 1,
+            "full_state_dimension": 4,
+            "tangent_dimension": int(full_event.tangent_basis.shape[1]),
+            "guard_normal_null_direction_is_actuator_loss": False,
+            "event_time_s": event.event_time_s,
+            "source_interpolated_event_time_s": source_event_time,
+            "exact_step_minus_source_event_time_s": event.event_time_s
+            - source_event_time,
+            "guard_residual": event.guard_residual,
+            "transversality_per_s": full_event.transversality_per_s,
+            "full_state": _spectrum_summary(base.histories["full"][-1]),
+            "event_tangent": _spectrum_summary(full_event.tangent_gramian),
+        },
+        "channel_cases": _channel_payload(base),
+        "frozen_local_countermodel": parts.frozen_records,
+        "falsification_controls": {
+            "zero_input": {"maximum_abs_gramian_entry": parts.zero_maximum},
+            "channel_additivity": {"maximum_abs_residual": parts.additivity},
+            "direct_pulses": parts.pulse_records,
+            "input_step_refinement": parts.input_trials,
+            "integration_step_refinement": parts.integration_trials,
+            "equivalent_units": {
+                "maximum_abs_residual": _equivalent_unit_residual(event)
+            },
+        },
+        "availability": {
+            "bounded_control_feasibility": "unavailable",
+            "controller_ranking": "unavailable",
+            "human_actuator_interpretation": "unavailable",
+            "coaching_recommendation": "unavailable",
+        },
+        "inference_boundary": INFERENCE_BOUNDARY,
+        "limitations": [
+            "The Jacobians differentiate the same analytical RK4 operator as the parent phase/event study; this is not independent model validation.",
+            "The trajectory is synthetic and open loop, with no participant, muscle, fatigue, delay, noise, or bilateral-wrench observations.",
+            "Gramian eigenvalues depend on the declared state, torque, energy, and rank scales; raw dimensional rankings are not reported.",
+            "The event is a geometric club-vertical guard, not measured club-ball impact.",
+        ],
+    }
+
+
+def _array_payload(parts: _EvidenceParts) -> dict[str, np.ndarray]:
+    base = parts.base
+    event = base.trajectory
+    trajectory = event.trajectory
+    full_event = base.event_cases["full"]
+    return {
+        "time_s": trajectory.time_s,
+        "step_durations_s": event.step_durations_s,
+        "state": trajectory.state,
+        "controls": trajectory.controls,
+        "physical_state_matrices": trajectory.state_matrices,
+        "physical_input_matrices": trajectory.input_matrices,
+        "scaled_state_matrices": trajectory.scaled_state_matrices,
+        "scaled_sample_input_matrices": trajectory.scaled_sample_input_matrices,
+        "scaled_energy_input_matrices": trajectory.scaled_energy_input_matrices,
+        "full_gramian_history": base.histories["full"],
+        "shoulder_gramian_history": base.histories["shoulder_only"],
+        "wrist_gramian_history": base.histories["wrist_only"],
+        "zero_gramian_history": base.histories["zero_input"],
+        "event_projection": full_event.projection,
+        "event_tangent_basis": full_event.tangent_basis,
+        "event_tangent_gramian": full_event.tangent_gramian,
+        "direct_pulse_predicted": parts.pulse_predicted,
+        "direct_pulse_observed": parts.pulse_observed,
+        "input_refinement_event_gramians": np.stack(parts.input_arrays),
+        "integration_refinement_event_gramians": np.stack(parts.integration_arrays),
+        "trajectory_varying_window_gramians": parts.varying_windows,
+        "frozen_local_window_gramians": parts.frozen_windows,
     }
 
 
@@ -544,99 +698,22 @@ def _build_parts() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     ):
         raise ValueError("event-conditioned authority must remain available")
 
-    event = base.trajectory
-    source_event_time = float(_source_report()["reference_event"]["time_s"])
-    report = {
-        "schema_version": SCHEMA_VERSION,
-        "model_tier": "analytical_double_pendulum",
-        "source_identity": _source_identity(),
-        "registration": {
-            "state_coordinates": [
-                "shoulder_angle_rad",
-                "wrist_relative_angle_rad",
-                "shoulder_rate_rad_s",
-                "wrist_relative_rate_rad_s",
-            ],
-            "control_coordinates": ["shoulder_torque_nm", "wrist_torque_nm"],
-            "state_scales": list(_state_scales().values),
-            "control_scales_nm": list(CONTROL_SCALES.values),
-            "state_steps": STATE_STEPS.tolist(),
-            "control_steps_nm": CONTROL_STEPS.tolist(),
-            "base_dt_s": BASE_DT_S,
-            "input_normalization": "continuous_energy_equivalent_Bd_divided_by_sqrt_dt",
-            "rank_absolute_tolerance": RANK_ABSOLUTE_TOLERANCE,
-            "rank_relative_tolerance": RANK_RELATIVE_TOLERANCE,
-            "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
-            "guard_residual_gate": GUARD_RESIDUAL_GATE,
-            "transversality_threshold_per_s": TRANSVERSALITY_THRESHOLD_PER_S,
-        },
-        "event_conditioned_authority": {
-            "status": full_event.status,
-            "unique_crossing": event.crossing_count == 1,
-            "full_state_dimension": 4,
-            "tangent_dimension": int(full_event.tangent_basis.shape[1]),
-            "guard_normal_null_direction_is_actuator_loss": False,
-            "event_time_s": event.event_time_s,
-            "source_interpolated_event_time_s": source_event_time,
-            "exact_step_minus_source_event_time_s": event.event_time_s
-            - source_event_time,
-            "guard_residual": event.guard_residual,
-            "transversality_per_s": full_event.transversality_per_s,
-            "full_state": _spectrum_summary(base_event_gramian),
-            "event_tangent": _spectrum_summary(full_event.tangent_gramian),
-        },
-        "channel_cases": _channel_payload(base),
-        "frozen_local_countermodel": frozen_records,
-        "falsification_controls": {
-            "zero_input": {"maximum_abs_gramian_entry": zero_maximum},
-            "channel_additivity": {"maximum_abs_residual": additivity},
-            "direct_pulses": pulse_records,
-            "input_step_refinement": input_trials,
-            "integration_step_refinement": integration_trials,
-            "equivalent_units": {
-                "maximum_abs_residual": _equivalent_unit_residual(event)
-            },
-        },
-        "availability": {
-            "bounded_control_feasibility": "unavailable",
-            "controller_ranking": "unavailable",
-            "human_actuator_interpretation": "unavailable",
-            "coaching_recommendation": "unavailable",
-        },
-        "inference_boundary": INFERENCE_BOUNDARY,
-        "limitations": [
-            "The Jacobians differentiate the same analytical RK4 operator as the parent phase/event study; this is not independent model validation.",
-            "The trajectory is synthetic and open loop, with no participant, muscle, fatigue, delay, noise, or bilateral-wrench observations.",
-            "Gramian eigenvalues depend on the declared state, torque, energy, and rank scales; raw dimensional rankings are not reported.",
-            "The event is a geometric club-vertical guard, not measured club-ball impact.",
-        ],
-    }
-    trajectory = event.trajectory
-    arrays = {
-        "time_s": trajectory.time_s,
-        "step_durations_s": event.step_durations_s,
-        "state": trajectory.state,
-        "controls": trajectory.controls,
-        "physical_state_matrices": trajectory.state_matrices,
-        "physical_input_matrices": trajectory.input_matrices,
-        "scaled_state_matrices": trajectory.scaled_state_matrices,
-        "scaled_sample_input_matrices": trajectory.scaled_sample_input_matrices,
-        "scaled_energy_input_matrices": trajectory.scaled_energy_input_matrices,
-        "full_gramian_history": full_history,
-        "shoulder_gramian_history": shoulder_history,
-        "wrist_gramian_history": wrist_history,
-        "zero_gramian_history": zero_history,
-        "event_projection": full_event.projection,
-        "event_tangent_basis": full_event.tangent_basis,
-        "event_tangent_gramian": full_event.tangent_gramian,
-        "direct_pulse_predicted": pulse_predicted,
-        "direct_pulse_observed": pulse_observed,
-        "input_refinement_event_gramians": np.stack(input_arrays),
-        "integration_refinement_event_gramians": np.stack(integration_arrays),
-        "trajectory_varying_window_gramians": varying_windows,
-        "frozen_local_window_gramians": frozen_windows,
-    }
-    return report, arrays
+    parts = _EvidenceParts(
+        base=base,
+        additivity=additivity,
+        zero_maximum=zero_maximum,
+        input_trials=input_trials,
+        input_arrays=input_arrays,
+        integration_trials=integration_trials,
+        integration_arrays=integration_arrays,
+        pulse_records=pulse_records,
+        pulse_predicted=pulse_predicted,
+        pulse_observed=pulse_observed,
+        frozen_records=frozen_records,
+        varying_windows=varying_windows,
+        frozen_windows=frozen_windows,
+    )
+    return _report_payload(parts), _array_payload(parts)
 
 
 def build_evidence() -> tuple[dict[str, Any], dict[str, np.ndarray]]:

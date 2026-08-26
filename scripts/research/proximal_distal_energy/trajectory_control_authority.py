@@ -71,6 +71,110 @@ class ControlScales:
 
 
 @dataclass(frozen=True, slots=True)
+class StepLinearizationConfig:
+    """Numerical and coordinate contract for exact-step differentiation."""
+
+    dt_s: float
+    state_steps: tuple[float, ...]
+    control_steps: tuple[float, ...]
+    state_scales: StateScales
+    control_scales: ControlScales
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.dt_s) or self.dt_s <= 0.0:
+            raise ValueError("dt_s must be finite and positive")
+        state_steps = tuple(float(value) for value in self.state_steps)
+        control_steps = tuple(float(value) for value in self.control_steps)
+        _positive_vector("state_steps", state_steps, size=4)
+        _positive_vector("control_steps", control_steps, size=2)
+        object.__setattr__(self, "state_steps", state_steps)
+        object.__setattr__(self, "control_steps", control_steps)
+
+    @property
+    def state_step_array(self) -> FloatArray:
+        """Return defensive state finite-difference steps."""
+
+        return np.asarray(self.state_steps, dtype=float)
+
+    @property
+    def control_step_array(self) -> FloatArray:
+        """Return defensive control finite-difference steps."""
+
+        return np.asarray(self.control_steps, dtype=float)
+
+
+@dataclass(frozen=True, slots=True)
+class PulseSensitivityRequest:
+    """Registered pulse location, channel, and dimensionless perturbation."""
+
+    pulse_step: int
+    channel_index: int
+    perturbation_scale: float
+
+    def __post_init__(self) -> None:
+        for name in ("pulse_step", "channel_index"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"{name} must be a nonnegative integer")
+        if not math.isfinite(self.perturbation_scale) or self.perturbation_scale <= 0.0:
+            raise ValueError("perturbation_scale must be finite and positive")
+
+    def validate_bounds(self, *, step_count: int, channel_count: int) -> None:
+        """Fail closed when the registered pulse does not index its trajectory."""
+
+        if self.pulse_step >= step_count:
+            raise ValueError("pulse_step must index a trajectory step")
+        if self.channel_index >= channel_count:
+            raise ValueError("channel_index must index an input channel")
+
+
+@dataclass(frozen=True, slots=True)
+class GuardCrossingConfig:
+    """Guard geometry and numerical root-refinement contract."""
+
+    guard_gradient: tuple[float, ...]
+    guard_offset: float = 0.0
+    guard_tolerance: float = 1e-10
+    time_tolerance_s: float = 1e-12
+    transversality_threshold: float = 1e-8
+    max_iterations: int = 80
+
+    def __post_init__(self) -> None:
+        gradient = tuple(float(value) for value in self.guard_gradient)
+        gradient_array = _finite_vector("guard_gradient", gradient, size=4)
+        if np.linalg.norm(gradient_array) == 0.0:
+            raise ValueError("guard_gradient must be nonzero")
+        for name in (
+            "guard_offset",
+            "guard_tolerance",
+            "time_tolerance_s",
+            "transversality_threshold",
+        ):
+            if not math.isfinite(getattr(self, name)):
+                raise ValueError("crossing controls must be finite")
+        for name in (
+            "guard_tolerance",
+            "time_tolerance_s",
+            "transversality_threshold",
+        ):
+            if getattr(self, name) <= 0.0:
+                raise ValueError(f"{name} must be positive")
+        if (
+            isinstance(self.max_iterations, bool)
+            or not isinstance(self.max_iterations, int)
+            or self.max_iterations < 1
+        ):
+            raise ValueError("max_iterations must be a positive integer")
+        object.__setattr__(self, "guard_gradient", gradient)
+
+    @property
+    def gradient_array(self) -> FloatArray:
+        """Return a defensive guard-gradient array."""
+
+        return np.asarray(self.guard_gradient, dtype=float)
+
+
+@dataclass(frozen=True, slots=True)
 class StepLinearization:
     """Physical and scaled Jacobians of one exact registered RK4 step."""
 
@@ -201,11 +305,7 @@ def step_linearization(
     state: npt.ArrayLike,
     control: npt.ArrayLike,
     time_s: float,
-    dt_s: float,
-    state_steps: npt.ArrayLike,
-    control_steps: npt.ArrayLike,
-    state_scales: StateScales,
-    control_scales: ControlScales,
+    config: StepLinearizationConfig,
 ) -> StepLinearization:
     """Differentiate the exact RK4 step in state and input coordinates.
 
@@ -217,12 +317,11 @@ def step_linearization(
 
     vector = _finite_vector("state", state, size=4).copy()
     command = _finite_vector("control", control, size=2).copy()
-    x_steps = _positive_vector("state_steps", state_steps, size=4)
-    u_steps = _positive_vector("control_steps", control_steps, size=2)
+    x_steps = config.state_step_array
+    u_steps = config.control_step_array
     if not math.isfinite(time_s):
         raise ValueError("time_s must be finite")
-    if not math.isfinite(dt_s) or dt_s <= 0.0:
-        raise ValueError("dt_s must be finite and positive")
+    dt_s = config.dt_s
     backend = make_backend("ode", params, dt=dt_s)
 
     def state_map(candidate: FloatArray) -> FloatArray:
@@ -253,8 +352,8 @@ def step_linearization(
         state_matrix,
         input_matrix,
         dt_s=dt_s,
-        state_scales=state_scales,
-        control_scales=control_scales,
+        state_scales=config.state_scales,
+        control_scales=config.control_scales,
     )
     return StepLinearization(
         state_matrix=state_matrix,
@@ -318,6 +417,13 @@ def linearize_trajectory(
         raise ValueError("controls must be a nonempty finite (N, 2) array")
     x_steps = _positive_vector("state_steps", state_steps, size=4)
     u_steps = _positive_vector("control_steps", control_steps, size=2)
+    config = StepLinearizationConfig(
+        dt_s=dt_s,
+        state_steps=tuple(x_steps),
+        control_steps=tuple(u_steps),
+        state_scales=state_scales,
+        control_scales=control_scales,
+    )
     time_s, state = rollout_state_history(
         params,
         initial_state=initial,
@@ -330,11 +436,7 @@ def linearize_trajectory(
             state=state[index],
             control=command,
             time_s=float(time_s[index]),
-            dt_s=dt_s,
-            state_steps=x_steps,
-            control_steps=u_steps,
-            state_scales=state_scales,
-            control_scales=control_scales,
+            config=config,
         )
         for index, command in enumerate(commands)
     ]
@@ -464,9 +566,7 @@ def direct_terminal_pulse_sensitivity(
     dt_s: float,
     state_scales: StateScales,
     control_scales: ControlScales,
-    pulse_step: int,
-    channel_index: int,
-    perturbation_scale: float,
+    request: PulseSensitivityRequest,
 ) -> FloatArray:
     """Differentiate a complete rollout for one energy-normalized input pulse."""
 
@@ -482,9 +582,7 @@ def direct_terminal_pulse_sensitivity(
         step_durations_s=np.full(commands.shape[0], dt_s),
         state_scales=state_scales,
         control_scales=control_scales,
-        pulse_step=pulse_step,
-        channel_index=channel_index,
-        perturbation_scale=perturbation_scale,
+        request=request,
     )
 
 
@@ -517,9 +615,7 @@ def direct_variable_terminal_pulse_sensitivity(
     step_durations_s: npt.ArrayLike,
     state_scales: StateScales,
     control_scales: ControlScales,
-    pulse_step: int,
-    channel_index: int,
-    perturbation_scale: float,
+    request: PulseSensitivityRequest,
 ) -> FloatArray:
     """Differentiate one pulse on a declared variable-step RK4 trajectory."""
 
@@ -535,33 +631,24 @@ def direct_variable_terminal_pulse_sensitivity(
     durations = _positive_vector(
         "step_durations_s", step_durations_s, size=commands.shape[0]
     )
-    if (
-        isinstance(pulse_step, bool)
-        or not isinstance(pulse_step, int)
-        or not 0 <= pulse_step < commands.shape[0]
-    ):
-        raise ValueError("pulse_step must index a trajectory step")
-    if (
-        isinstance(channel_index, bool)
-        or not isinstance(channel_index, int)
-        or not 0 <= channel_index < commands.shape[1]
-    ):
-        raise ValueError("channel_index must index an input channel")
-    if not math.isfinite(perturbation_scale) or perturbation_scale <= 0.0:
-        raise ValueError("perturbation_scale must be finite and positive")
+    request.validate_bounds(
+        step_count=commands.shape[0], channel_count=commands.shape[1]
+    )
     physical_delta = (
-        control_scales.array[channel_index]
-        * perturbation_scale
-        / math.sqrt(float(durations[pulse_step]))
+        control_scales.array[request.channel_index]
+        * request.perturbation_scale
+        / math.sqrt(float(durations[request.pulse_step]))
     )
     upper = commands.copy()
     lower = commands.copy()
-    upper[pulse_step, channel_index] += physical_delta
-    lower[pulse_step, channel_index] -= physical_delta
+    upper[request.pulse_step, request.channel_index] += physical_delta
+    lower[request.pulse_step, request.channel_index] -= physical_delta
     upper_state = _variable_final_state(params, initial, upper, durations)
     lower_state = _variable_final_state(params, initial, lower, durations)
     sensitivity = (
-        (upper_state - lower_state) / (2.0 * perturbation_scale) / state_scales.array
+        (upper_state - lower_state)
+        / (2.0 * request.perturbation_scale)
+        / state_scales.array
     )
     return _readonly(sensitivity)
 
@@ -573,12 +660,7 @@ def refine_guard_crossing(
     control: npt.ArrayLike,
     time_before_s: float,
     bracket_dt_s: float,
-    guard_gradient: npt.ArrayLike,
-    guard_offset: float = 0.0,
-    guard_tolerance: float = 1e-10,
-    time_tolerance_s: float = 1e-12,
-    transversality_threshold: float = 1e-8,
-    max_iterations: int = 80,
+    config: GuardCrossingConfig,
 ) -> RefinedCrossing:
     """Refine one negative-to-nonnegative guard bracket using exact RK4 steps.
 
@@ -588,33 +670,11 @@ def refine_guard_crossing(
 
     state = _finite_vector("state_before", state_before, size=4).copy()
     command = _finite_vector("control", control, size=2).copy()
-    gradient = _finite_vector("guard_gradient", guard_gradient, size=4)
-    if np.linalg.norm(gradient) == 0.0:
-        raise ValueError("guard_gradient must be nonzero")
-    scalar_values = {
-        "time_before_s": time_before_s,
-        "bracket_dt_s": bracket_dt_s,
-        "guard_offset": guard_offset,
-        "guard_tolerance": guard_tolerance,
-        "time_tolerance_s": time_tolerance_s,
-        "transversality_threshold": transversality_threshold,
-    }
-    if not all(math.isfinite(value) for value in scalar_values.values()):
+    gradient = config.gradient_array
+    if not math.isfinite(time_before_s) or not math.isfinite(bracket_dt_s):
         raise ValueError("crossing controls must be finite")
-    for name in (
-        "bracket_dt_s",
-        "guard_tolerance",
-        "time_tolerance_s",
-        "transversality_threshold",
-    ):
-        if scalar_values[name] <= 0.0:
-            raise ValueError(f"{name} must be positive")
-    if (
-        isinstance(max_iterations, bool)
-        or not isinstance(max_iterations, int)
-        or max_iterations < 1
-    ):
-        raise ValueError("max_iterations must be a positive integer")
+    if bracket_dt_s <= 0.0:
+        raise ValueError("bracket_dt_s must be positive")
 
     backend = make_backend("ode", params, dt=bracket_dt_s)
 
@@ -626,34 +686,34 @@ def refine_guard_crossing(
             time_s=time_before_s,
             dt_s=partial_dt_s,
         )
-        return float(gradient @ candidate - guard_offset), candidate
+        return float(gradient @ candidate - config.guard_offset), candidate
 
     lower = 0.0
     upper = float(bracket_dt_s)
-    lower_value = float(gradient @ state - guard_offset)
+    lower_value = float(gradient @ state - config.guard_offset)
     upper_value, event_state = guard_at(upper)
     if lower_value >= 0.0 or upper_value < 0.0:
         raise ValueError("registered guard bracket must be negative-to-nonnegative")
     residual = upper_value
     partial = upper
-    for _ in range(max_iterations):
+    for _ in range(config.max_iterations):
         partial = 0.5 * (lower + upper)
         residual, event_state = guard_at(partial)
-        if abs(residual) <= guard_tolerance:
+        if abs(residual) <= config.guard_tolerance:
             break
         if residual >= 0.0:
             upper = partial
         else:
             lower = partial
-        if upper - lower <= time_tolerance_s:
+        if upper - lower <= config.time_tolerance_s:
             break
-    if abs(residual) > guard_tolerance:
+    if abs(residual) > config.guard_tolerance:
         raise ValueError("guard root did not meet the registered residual tolerance")
     flow = state_derivative(params, event_state, command)
     transversality = float(gradient @ flow)
     status = (
         "near_grazing"
-        if abs(transversality) <= transversality_threshold
+        if abs(transversality) <= config.transversality_threshold
         else "transverse_candidate"
     )
     return RefinedCrossing(
@@ -719,8 +779,11 @@ def event_conditioned_gramian(
 __all__ = [
     "ControlScales",
     "EventConditionedGramian",
+    "GuardCrossingConfig",
+    "PulseSensitivityRequest",
     "RefinedCrossing",
     "StepLinearization",
+    "StepLinearizationConfig",
     "TrajectoryLinearization",
     "direct_terminal_pulse_sensitivity",
     "direct_variable_terminal_pulse_sensitivity",
