@@ -1,11 +1,11 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "53d11ff4dd10954807b69bbed0f6442b5efd93cf02ea6ed1c9c9da10b3d4ad1d",
-  "claim_count": 309,
+  "paper_source_digest": "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a",
+  "claim_count": 311,
   "outcome_counts": {
     "inconclusive": 5,
-    "supported": 289,
+    "supported": 291,
     "untested": 15
   },
   "evidence_qualification_counts": {
@@ -16,7 +16,7 @@
     "hypothesis_or_prospective_protocol": 12,
     "independent_followup_open": 24,
     "original_full_text_checked": 18,
-    "project_executable_or_data": 280
+    "project_executable_or_data": 282
   },
   "evidence_tier_counts": {
     "bibliographic_record": 3,
@@ -24,13 +24,13 @@
     "external_methods_or_measurement": 10,
     "external_modeling_or_simulation": 15,
     "external_review_or_synthesis": 10,
-    "project_derivation_or_document": 94,
-    "project_executable_or_generated": 280,
+    "project_derivation_or_document": 96,
+    "project_executable_or_generated": 282,
     "prospective_or_unexecuted": 15
   },
   "source_independence_counts": {
     "multiple_independent_external_support": 20,
-    "project_only": 255,
+    "project_only": 257,
     "single_independent_external_support": 34
   },
   "model_tier_counts": {
@@ -40,10 +40,10 @@
     "declared_model_tier_unclassified": 12,
     "finite_ground_or_base": 16,
     "human_or_external_evidence": 46,
-    "planar_reduced": 134,
+    "planar_reduced": 136,
     "spatial_reduced": 76,
-    "two_hand_or_bilateral": 92,
-    "uncertainty_or_control": 8
+    "two_hand_or_bilateral": 94,
+    "uncertainty_or_control": 10
   },
   "unresolved_replication_counts": {
     "external_validation_open": 1,
@@ -51,7 +51,7 @@
     "governed_human_data_unavailable": 11,
     "independent_reimplementation_open": 12,
     "mixed_or_insufficient_evidence": 5,
-    "none_declared": 265,
+    "none_declared": 267,
     "prospective_experiment_open": 15,
     "statistical_reanalysis_or_replication_open": 9,
     "systematic_review_open": 2
@@ -235,8 +235,8 @@
     },
     {
       "claim_family": "ch06d_uncertainty_control",
-      "claim_count": 8,
-      "project_only_count": 8,
+      "claim_count": 10,
+      "project_only_count": 10,
       "single_independent_external_support_count": 0,
       "multiple_independent_external_support_count": 0,
       "concentration_flag": "project_authored_only"
@@ -14213,6 +14213,93 @@
       "adjudication": "The result is retained as exact or registered synthetic model evidence; it does not identify participant anatomy, human strategy, or coaching advice.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-25"
+    },
+    {
+      "claim_id": "PD-CLAIM-311",
+      "adjudication_outcome": "supported",
+      "statement": "Under declared 1 rad angular and 0.75 m translational coordinate scales, the regular planar closure map has rank 4/nullity 1 and the constructed adverse alignment has rank 3/nullity 2.",
+      "classification": "scaled_planar_constraint_singularity",
+      "published_status": "supported_for_declared_analytical_maps",
+      "audit_status": "scaled_rank_adverse_geometry_tolerance_and_inference_boundary_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "planar_reduced",
+        "two_hand_or_bilateral",
+        "uncertainty_or_control"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch06d_uncertainty_control",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:135",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:143",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:159"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "scripts/research/proximal_distal_energy/constraint_internal_force_diagnostics.py",
+        "scripts/research/proximal_distal_energy/run_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics_evidence.py"
+      ],
+      "model_domain": "Instantaneous analytical planar closure and normalized bilateral wrench maps at declared geometries, scales, and SVD tolerances.",
+      "uncertainty_boundary": "Rank and nullity are local kinematic properties; conditioning depends on the declared scales, the adverse alignment is not a qualified closed anatomical pose, and no constraint force or human strategy is identified.",
+      "falsifier": "A clean recomputation changes either rank/nullity result, positive coordinate scaling changes exact rank, or the alignment is promoted without a feasible closed-state test.",
+      "adjudication": "The result is retained as scale-qualified analytical and registered synthetic evidence; it does not identify participant force, biological allocation, human strategy, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "claim_id": "PD-CLAIM-312",
+      "adjudication_outcome": "supported",
+      "statement": "With a declared 0.10 m wrench length, the separated 0.20 m point-force map has rank 5/nullity 1 and the coincident map has rank 3/nullity 3; the near-coincident numerical rank changes across declared SVD tolerances.",
+      "classification": "normalized_contact_geometry_rank_boundary",
+      "published_status": "supported_for_declared_analytical_maps",
+      "audit_status": "scaled_rank_adverse_geometry_tolerance_and_inference_boundary_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "planar_reduced",
+        "two_hand_or_bilateral",
+        "uncertainty_or_control"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch06d_uncertainty_control",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:152",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:159"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "scripts/research/proximal_distal_energy/constraint_internal_force_diagnostics.py",
+        "scripts/research/proximal_distal_energy/run_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics_evidence.py"
+      ],
+      "model_domain": "Instantaneous analytical planar closure and normalized bilateral wrench maps at declared geometries, scales, and SVD tolerances.",
+      "uncertainty_boundary": "The map establishes sensing/allocation ambiguity only; it does not show that a human produces the null-mode force, identify complete hand wrenches, or qualify compliant or distributed contact.",
+      "falsifier": "Coincident contacts retain moment observability above rank three, the separated map loses its axial null mode, or rank is reported without the geometry, normalization, and tolerance contract.",
+      "adjudication": "The result is retained as scale-qualified analytical and registered synthetic evidence; it does not identify participant force, biological allocation, human strategy, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
     }
   ]
 }

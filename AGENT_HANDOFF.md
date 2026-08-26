@@ -9,49 +9,36 @@ is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `4b533018c75a2ec094fc3d2bd791cdf2c330750f`; PR #9018 remains an ancestor.
+- Remote `main` is `6f9b068a54d841c56e4efbd34855705eaad5d473`, protected PR #9108's squash.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
   with 194 URI links and 254 outline entries. Archival qualification remains
   false because the PDF is untagged and retains Type 3 and unembedded fonts.
-- The complete audit contains 1,134 reviewed candidates, 309 atomic claims,
-  128 numeric contracts, and 394/394 verified literals. Outcomes are 289
+- The complete audit contains 1,138 reviewed candidates, 311 atomic claims,
+  130 numeric contracts, and 406/406 verified literals. Outcomes are 291
   supported only within declared estimands and boundaries, five inconclusive,
   15 untested, and zero contradicted. All 46 public release claims have review
-  dispositions and scientifically open gates. The bundle has 627 artifacts.
+  dispositions and scientifically open gates. The bundle has 632 artifacts.
 
 ## Coordinate Force-Source Attribution (#9059)
 
-- Tools protected squash `8dc4512184d8c29e10770ad81e4ce947f849b355`
-  is the reusable `force-attribution/v1` authority. UpstreamDrift consumes it
-  only through `vendor/ud-tools` and the thin biomechanics gateway.
-- The planar study evaluates 135 programs and retains 91 qualified impacts.
-  It separates absolute Coriolis impulse, signed impulse, generalized work,
-  component power/work, mapping residuals, and clubhead-speed optima.
-- The Christoffel cross-versus-squared split is explicitly tied to
-  shoulder-absolute/wrist-relative coordinates. The wrist force-only
-  virtual-work map is rank deficient, so its unreconstructed couple remains
-  evidence rather than being silently assigned to either hand.
-- The chapter, registered search, figure, claim records, release manifests,
-  and focused tests are now on `main`. This is synthetic planar evidence, not
-  a measured grip wrench, muscle attribution, human strategy, or coaching
-  authority.
+- Tools squash `8dc4512184` is the `force-attribution/v1` authority, consumed
+  through the vendor pin and thin biomechanics gateway. The 135-program grid
+  retains 91 qualified impacts and separates impulse, work, power, mapping
+  residuals, and speed optima in declared coordinates.
+- The force-only endpoint map is rank deficient; its residual couple remains
+  explicit. This is synthetic planar evidence, not a measured grip wrench,
+  muscle attribution, human strategy, or coaching authority.
 
 ## Hybrid-System Topology Contract (#9027)
 
-- PR #9049 is merged on `main` as protected squash `a4b7d3f9b`. It defines
-  typed topology for all
-  eight model tiers: continuous state, controls, algebraic constraints, modes,
-  guards, resets, impacts, actuator dynamics, uncertain event surfaces,
-  observables, limitations, falsifiers, and comparison blockers.
+- PR #9049 is merged as `a4b7d3f9b`. Its eight-tier typed topology covers
+  states, controls, constraints, modes, guards, resets, impacts, actuator
+  dynamics, uncertain events, observables, limitations, and blockers.
 - Three tiers are implemented, three are partial, and the participant-
   calibrated and governed-human tiers are explicitly unavailable. This does
   not establish observability, controllability, stability, controller ranking,
   participant validity, or coaching interpretation.
-- Protected repair PR #9094 regenerated manufactured-solution evidence through
-  the governed path and merged as `2091667158907427c1b59276041fcdbc4b92964c`.
-  The release bundle validates computationally; it remains model evidence, not
-  human validation.
 
 ## Double-Pendulum Rank and Identifiability (#9092, #9104)
 
@@ -64,15 +51,27 @@ is the single proximal-to-distal completion authority.
 - Published floats use six significant digits for cross-platform identity;
   rank decisions are computed at full precision before serialization. These
   local results do not establish structural/global rank or human strategy.
-- PR #9108 is the active protected delivery for #9104. It proves analytic
+- PR #9108 is merged as `6f9b068a5`. It proves analytic
   physical-map rank seven/nullity four, retains three exact nonunique families,
   and gives registered finite-record rank seven with condition 180.853;
   equivalent-unit change is `4.44089e-16`, while zero motion has rank zero.
 - Its Gaussian Fisher screen is an oracle-kinematics lower bound only: at 1 N m
   noise, the worst relative 95% half-width is 0.123266 for the full record and
   498.504 for the first 10%. Practical/participant identifiability remains
-  unestablished. The 309-claim projection is re-frozen at `53d11ff4`; 64
-  focused tests and computational release gates pass.
+  unestablished. Its protected 309-claim snapshot is preserved in migration
+  history and has been superseded by the current #9027 projection.
+
+## Scaled Constraint and Internal-Force Diagnostics (#9027)
+
+- PR #9110 on `research/9027-control-qualification` adds source-bound planar
+  closure and bilateral wrench-map audits. It requires explicit 1 rad/0.75 m
+  generalized-coordinate scales, a 0.10 m wrench scale, and `1e-12` rank tolerance.
+- Regular planar rank/nullity is 4/1; the constructed adverse alignment is
+  3/2 but is not a qualified anatomical pose. Separated/coincident point-force
+  maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
+- The 1,138-candidate, 311-claim projection is frozen at `9bd5ca45`; it never
+  identifies force, contact, strategy, or coaching. Numeric scaffolding is
+  reproducible; keep closed-loop singular margins as the next separate slice.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -106,9 +105,9 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9027 contract PR #9049 and dependent local-rank PR #9100 are merged. #9104
-  and PR #9108 are the active exact-map and finite-record delivery; raw
-  dimensional conditioning alone is not evidence.
+- #9027 contract PR #9049, local-rank PR #9100, and exact-map PR #9108 are
+  merged. The scaled constraint/internal-force slice is active here; selectively
+  requalify later stale control commits rather than merging them wholesale.
 - PR #9032 is at remote head `d341a0c92`; required CI passed at last
   verification. Its optional source-lock failure is deliberate.
 - #8358's Tools gateway and analyses are merged; UI, localized-perturbation,
@@ -156,8 +155,9 @@ python -m scripts.research.proximal_distal_energy.claim_audit validate
 python -m scripts.research.proximal_distal_energy.claim_evidence_integrity validate
 python -m scripts.research.proximal_distal_energy.hybrid_system_contract validate
 python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability validate
+python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python -m pytest -n 0 -q tests/research/test_double_pendulum_identifiability.py tests/research/test_double_pendulum_identifiability_evidence.py tests/research/test_double_pendulum_identifiability_claim_registration.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
+python -m pytest -n 0 -q tests/research/test_constraint_internal_force_diagnostics.py tests/research/test_constraint_internal_force_diagnostics_evidence.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
 python scripts/ci/check_architecture_budget.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py

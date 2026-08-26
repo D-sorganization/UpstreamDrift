@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "53d11ff4dd10954807b69bbed0f6442b5efd93cf02ea6ed1c9c9da10b3d4ad1d",
+  "source_digest": "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a",
   "source_count": 37,
-  "candidate_count": 1134,
+  "candidate_count": 1138,
   "candidates": [
     {
       "candidate_id": "PD-CAND-3b5468b6dbf7fa85",
@@ -13100,10 +13100,74 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-e13bf62d56be5ff5",
+      "candidate_id": "PD-CAND-e79a3ec448c72fdf",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
       "line_start": 135,
-      "line_end": 140,
+      "line_end": 141,
+      "text": "The cross-tier constraint audit keeps three right nullspaces separate. The planar closure nullspace contains locally feasible generalized velocities; the two-point-force nullspace contains bilateral force allocations invisible to a net club wrench; and the full two-hand-wrench nullspace contains allocations among twelve inputs that one six-component resultant cannot distinguish. Neither kinematic freedom nor a sensing ambiguity identifies a produced hand force.",
+      "text_sha256": "b6b669fbd7fb8149560d6cb226bf895588c2df32f0800515a64438c4f1c55af4",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-a66ea766358d45ef",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
+      "line_start": 143,
+      "line_end": 150,
+      "text": "At the declared regular planar geometry, the $4\\times5$ closure Jacobian has rank 4 and nullity 1. The constructed alignment with both arm angles zero and grip angle $\\pi/2$ has rank 3 and nullity 2. This is an analytical adverse geometry, not a closed anatomical pose. Near the alignment, rank remains 4 while conditioning degrades. Because angular and translational columns have different units, the reported singular values use explicit 1 rad angular and 0.75 m translational coordinate scales; alternative translation scales change the condition number without changing exact rank.",
+      "text_sha256": "8510847476cc19771e06483c1efbd0cb5451a4b977bcf6bbfae08c54e2c4ff84",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-de0f0e13f4cf78a4",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
+      "line_start": 152,
+      "line_end": 157,
+      "text": "The three-dimensional point-force map has rank 5/nullity 1 for separated contacts and rank 3/nullity 3 for coincident contacts. Its force and moment rows are normalized with a declared 0.10 m length. A 1 micrometre separation remains rank 5 at relative SVD tolerances $10^{-12}$ and $10^{-8}$ but is classified rank 3 at $10^{-6}$. Thus geometry, units, scaling, and tolerance are part of the result rather than incidental solver settings.",
+      "text_sha256": "589214c94b4c85a5689b838f29907ecc86a005284e91856e70f41201940308fb",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-f223f7bbcb85bdf9",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
+      "line_start": 159,
+      "line_end": 164,
+      "text": "The complete contract, source digests, scale alternatives, adverse cases, and reproduction commands are recorded in [`CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md`](../CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md) and `data/constraint_internal_force_diagnostics.json`. These diagnostics do not recover constraint multipliers, establish feasible spatial contact, observe a human internal-force strategy, or support coaching guidance.",
+      "text_sha256": "7cb21d91c5f25d57e8797ef2e108fd5f6bb0a2266b5faf875ff2da5c1b0fe86e",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-e13bf62d56be5ff5",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
+      "line_start": 168,
+      "line_end": 173,
       "text": "Eight programs were fixed before comparing results: passive wrist, early drive, late drive, restrain-then-drive, higher impedance, later release, lower drive, and early restrain. Five objectives are retained rather than collapsed prematurely: maximize the 10th-percentile delivery speed; minimize mean face/path error; minimize the 90th-percentile individual-hand force; minimize the effort proxy; and minimize delivery-speed dispersion.",
       "text_sha256": "0c5c7900d7de76aa46d8375b4c17bed00440b2610bb4711c7dc39ea4f67b6ddf",
       "citation_keys": [],
@@ -13119,8 +13183,8 @@
     {
       "candidate_id": "PD-CAND-4f3ad37e59405713",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 142,
-      "line_end": 148,
+      "line_start": 175,
+      "line_end": 181,
       "text": "Seven programs are nondominated on the training ensemble; all eight are nondominated on held-out samples. That instability is substantive evidence against a universal optimum: even the poor-speed early-drive program retains a held-out tradeoff in another objective. A balanced equal-range Chebyshev rule selects later release, a speed-priority rule selects early restrain, and a load-priority rule selects higher impedance. These are objective-specific selections, not interchangeable recommendations.",
       "text_sha256": "cdb4b0ef0a70123488ffab13b00e615dc0bd585453367e517853ef79487d3d5e",
       "citation_keys": [],
@@ -13136,8 +13200,8 @@
     {
       "candidate_id": "PD-CAND-a97a7bf30e5bb26f",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 150,
-      "line_end": 155,
+      "line_start": 183,
+      "line_end": 188,
       "text": "Held-out Pareto membership is itself small-sample sensitive. Across the six leave-one-case-out recalculations, passive wrist, early drive, late drive, and higher impedance remain nondominated six times; restrain-then-drive, lower drive, and early restrain remain five times; later release remains four. The full-sample statement that all eight are nondominated is exact, but it should not be read as a stable estimate of a population Pareto set.",
       "text_sha256": "5a0d9984b3e0fabd942a1b33aae4d07a0b5381c906d19e02d7098ad9afa64f7d",
       "citation_keys": [],
@@ -13152,8 +13216,8 @@
     {
       "candidate_id": "PD-CAND-f921a66d00d93aec",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 157,
-      "line_end": 157,
+      "line_start": 190,
+      "line_end": 190,
       "text": "![Training and Independently Held-Out Pareto Comparisons. Membership changes across ensembles, so no program is promoted as universally optimal.](figures/fig_control_pareto_train_holdout.pdf){#fig-control-pareto width=100%}",
       "text_sha256": "40a250d09a6b20a40c6e859e5b1f889a1b58a83d579eb742a9d8d02e22afbc73",
       "citation_keys": [],
@@ -13169,8 +13233,8 @@
     {
       "candidate_id": "PD-CAND-f922726ed1e71b00",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 159,
-      "line_end": 159,
+      "line_start": 192,
+      "line_end": 192,
       "text": "![Held-Out Strategy Tradeoffs Across Speed, Planar Delivery Error, Hand Load, Effort Proxy, and Dispersion.](figures/fig_control_strategy_tradeoffs.pdf){#fig-control-tradeoffs width=100%}",
       "text_sha256": "b973991376691f9a3da68485e2790da7aac04f5b7582fcc3ddf494d22ae22330",
       "citation_keys": [],
@@ -13185,8 +13249,8 @@
     {
       "candidate_id": "PD-CAND-4836d374086821c5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 163,
-      "line_end": 169,
+      "line_start": 196,
+      "line_end": 202,
       "text": "Hypothesis H4 asks whether a delayed actuator can benefit from an anticipatory opposing command. In the held-out ensemble, early restrain raises the 10th-percentile delivery speed to 4.706 m/s compared with 4.417 m/s for late drive, but worsens mean face/path error from 1.58 to 5.44 degrees. Thus H4 is supported only as a conditional lower-tail speed result for these bounded model schedules. It does not demonstrate human preactivation, neural timing, or a generally superior strategy.",
       "text_sha256": "dea3d06f58e40ae8897b461cfc71f58dd04dd2b3c381abc34d747067364e4d99",
       "citation_keys": [],
@@ -13202,8 +13266,8 @@
     {
       "candidate_id": "PD-CAND-f34d5609800d3c84",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 171,
-      "line_end": 175,
+      "line_start": 204,
+      "line_end": 208,
       "text": "Numerical closure remains materially below the reported effects across all rollouts: the maximum position-constraint residual is $9.99\\times10^{-11}$ m, velocity-constraint residual $2.40\\times10^{-15}$ m/s, KKT residual $1.90\\times10^{-13}$, and contact-power residual $6.40\\times10^{-14}$ W.",
       "text_sha256": "3d26877418b5c7a85ceb353097624642993306c555c33a8ec9d157d2a4003d68",
       "citation_keys": [],
@@ -13219,8 +13283,8 @@
     {
       "candidate_id": "PD-CAND-4724c2d7f98a3f33",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 179,
-      "line_end": 184,
+      "line_start": 212,
+      "line_end": 217,
       "text": "This phase supports four bounded conclusions: coupled uncertainty can change delivery materially; the chosen summaries cannot identify all 12 parameters; net wrench cannot identify individual planar hand forces; and command selection depends on the objective and evaluation ensemble. It does **not** support a universal program, physiological effort inference, human preactivation, or a coaching prescription.",
       "text_sha256": "32c07a590f93254fee592a47d736631dd6ab08c1dbb75fd8221c4de85b2bb4e0",
       "citation_keys": [],
@@ -13237,8 +13301,8 @@
     {
       "candidate_id": "PD-CAND-d54a6e58c85bab3c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd",
-      "line_start": 186,
-      "line_end": 193,
+      "line_start": 219,
+      "line_end": 226,
       "text": "The results would be challenged by a larger registered ensemble that reverses the H4 lower-tail speed ordering, a direct two-hand measurement that uniquely resolves the wrench null mode without extra assumptions, or an independently implemented model in which the declared tradeoffs disappear under the same observables and actuator bounds. The next experimental protocol should measure both hand wrenches, club kinematics, ground reaction, and synchronization uncertainty; estimating all internal forces from club motion alone is not an acceptable substitute.",
       "text_sha256": "a18b78c2643a93f3f06062366e9cf955caed761e497f16fbd22b3663bf99960f",
       "citation_keys": [],
@@ -18013,12 +18077,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-4018dc67ba8ab4f5",
+      "candidate_id": "PD-CAND-11518bcf919bffed",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 4,
       "line_end": 4,
-      "text": "The current census contains 309 material claims. The normalized outcome applies only to each claim's declared estimand, model domain, and uncertainty boundary. A `supported` model-conditional claim is not thereby independently replicated, empirically validated, or converted into a human strategy recommendation.",
-      "text_sha256": "1bcd6d5192f8ca5cc402d4b73ba39af392bd7fa4c1da0303ac4d8df16aa74f3e",
+      "text": "The current census contains 311 material claims. The normalized outcome applies only to each claim's declared estimand, model domain, and uncertainty boundary. A `supported` model-conditional claim is not thereby independently replicated, empirically validated, or converted into a human strategy recommendation.",
+      "text_sha256": "7ce0874ad3887f289a6da936f7c840e69120b921dda082390f0a6cc217328a79",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18061,12 +18125,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-36d4ac97c4116672",
+      "candidate_id": "PD-CAND-077e007135da1237",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 12,
       "line_end": 14,
-      "text": "| `inconclusive` | 5 | | `supported` | 289 | | `untested` | 15 |",
-      "text_sha256": "ebc8564ea906981c79c6983ccd04ccdbb926c0f010f2288bd30fc0de45978fdf",
+      "text": "| `inconclusive` | 5 | | `supported` | 291 | | `untested` | 15 |",
+      "text_sha256": "3780af0319eb02ae72b1dcc89ade7978bbc54d5a862f63499f5e1e79aa6c9ed0",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18107,12 +18171,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-44f91b4f5f376d4f",
+      "candidate_id": "PD-CAND-afc739da59a79cdf",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 26,
       "line_end": 33,
-      "text": "| `bibliographic_record` | 3 | | `external_empirical_human` | 34 | | `external_methods_or_measurement` | 10 | | `external_modeling_or_simulation` | 15 | | `external_review_or_synthesis` | 10 | | `project_derivation_or_document` | 94 | | `project_executable_or_generated` | 280 | | `prospective_or_unexecuted` | 15 |",
-      "text_sha256": "01d77fa92876be1927bb7721ff834a4761562f39675f130e2f4ae298f157c67d",
+      "text": "| `bibliographic_record` | 3 | | `external_empirical_human` | 34 | | `external_methods_or_measurement` | 10 | | `external_modeling_or_simulation` | 15 | | `external_review_or_synthesis` | 10 | | `project_derivation_or_document` | 96 | | `project_executable_or_generated` | 282 | | `prospective_or_unexecuted` | 15 |",
+      "text_sha256": "f62b595a253f599a44fca87d8616e1c0df3d759b7a0b64d9c02fdb5a4433a9b2",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18153,12 +18217,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-000afa39d6089e6f",
+      "candidate_id": "PD-CAND-43048ff0f70552c3",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 41,
       "line_end": 43,
-      "text": "| `multiple_independent_external_support` | 20 | | `project_only` | 255 | | `single_independent_external_support` | 34 |",
-      "text_sha256": "193ab989fe52068f07bee05fea427267de4fe79758111d2dcf1d7e97b0b9f60b",
+      "text": "| `multiple_independent_external_support` | 20 | | `project_only` | 257 | | `single_independent_external_support` | 34 |",
+      "text_sha256": "6d19f70178636344c273f9af8ea5bf4772f69db95eabd6f7490fdc6e75a173e1",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18197,12 +18261,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-43c4e06e7103087b",
+      "candidate_id": "PD-CAND-b7ebf4884a957a0a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 51,
       "line_end": 60,
-      "text": "| `articulated_spatial` | 32 | | `compliant_shaft` | 66 | | `cross_tier_synthesis` | 63 | | `declared_model_tier_unclassified` | 12 | | `finite_ground_or_base` | 16 | | `human_or_external_evidence` | 46 | | `planar_reduced` | 134 | | `spatial_reduced` | 76 | | `two_hand_or_bilateral` | 92 | | `uncertainty_or_control` | 8 |",
-      "text_sha256": "e125cb90270b00d737b9358a8d29d086af216375575b040efa7bd1d93a6f8806",
+      "text": "| `articulated_spatial` | 32 | | `compliant_shaft` | 66 | | `cross_tier_synthesis` | 63 | | `declared_model_tier_unclassified` | 12 | | `finite_ground_or_base` | 16 | | `human_or_external_evidence` | 46 | | `planar_reduced` | 136 | | `spatial_reduced` | 76 | | `two_hand_or_bilateral` | 94 | | `uncertainty_or_control` | 10 |",
+      "text_sha256": "3f155bf818dfb3bf1f57e655b2a57a7a6eda930b49414ee79b3fcbae68ae932a",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18241,12 +18305,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-f2518e167ae18e34",
+      "candidate_id": "PD-CAND-736a228f903fce32",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 68,
       "line_end": 76,
-      "text": "| `external_validation_open` | 1 | | `full_text_or_original_source_open` | 5 | | `governed_human_data_unavailable` | 11 | | `independent_reimplementation_open` | 12 | | `mixed_or_insufficient_evidence` | 5 | | `none_declared` | 265 | | `prospective_experiment_open` | 15 | | `statistical_reanalysis_or_replication_open` | 9 | | `systematic_review_open` | 2 |",
-      "text_sha256": "bba2a380b79e41fe64bf614846608ef84353c9d854ac1df993ad3697b7925142",
+      "text": "| `external_validation_open` | 1 | | `full_text_or_original_source_open` | 5 | | `governed_human_data_unavailable` | 11 | | `independent_reimplementation_open` | 12 | | `mixed_or_insufficient_evidence` | 5 | | `none_declared` | 267 | | `prospective_experiment_open` | 15 | | `statistical_reanalysis_or_replication_open` | 9 | | `systematic_review_open` | 2 |",
+      "text_sha256": "a75b249044680c27d35c3cd5fb77899374a2b8088622834de8008a771ecc0175",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18285,12 +18349,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-f7091f3b82570b27",
+      "candidate_id": "PD-CAND-36e3133e0ac5fa09",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 88,
       "line_end": 117,
-      "text": "| ch01 introduction | 3 | 0 / 2 / 1 | mixed independence | | ch02 mechanics | 33 | 5 / 17 / 11 | mixed independence | | ch03 evidence | 13 | 1 / 10 / 2 | mixed independence | | ch03 interaction forces | 10 | 8 / 1 / 1 | mixed independence | | ch03b hand path attribution | 11 | 7 / 2 / 2 | mixed independence | | ch03ba coordinate force sources | 3 | 3 / 0 / 0 | project authored only | | ch03c ground reaction drift | 8 | 4 / 2 / 2 | mixed independence | | ch03d shoulder velocity transfer | 18 | 18 / 0 / 0 | project authored only | | ch04 counterfactual ensemble | 6 | 6 / 0 / 0 | project authored only | | ch04 counterfactuals | 5 | 4 / 0 / 1 | mixed independence | | ch05 two hand wrench | 21 | 21 / 0 / 0 | project authored only | | ch05a interactive workbench | 1 | 1 / 0 / 0 | project authored only | | ch05b forward two hand | 15 | 15 / 0 / 0 | project authored only | | ch06 shaft contributions | 15 | 15 / 0 / 0 | project authored only | | ch06b coupled base flex | 14 | 14 / 0 / 0 | project authored only | | ch06bb shaft beam reference | 2 | 2 / 0 / 0 | project authored only | | ch06bbb forward modal shaft | 7 | 7 / 0 / 0 | project authored only | | ch06bc torque allocation preload | 7 | 7 / 0 / 0 | project authored only | | ch06c spatial cross formulation | 43 | 43 / 0 / 0 | project authored only | | ch06ca articulated ground | 4 | 4 / 0 / 0 | project authored only | | ch06cb spatial cross tail | 5 | 5 / 0 / 0 | project authored only | | ch06cc spatial forward contact | 8 | 8 / 0 / 0 | project authored only | | ch06d uncertainty control | 8 | 8 / 0 / 0 | project authored only | | ch06e experimental protocol | 1 | 1 / 0 / 0 | project authored only | | ch07 model ladder | 17 | 17 / 0 / 0 | project authored only | | ch07 results | 8 | 8 / 0 / 0 | project authored only | | ch07b frames biology engines | 5 | 5 / 0 / 0 | project authored only | | ch07c transmission robustness | 5 | 5 / 0 / 0 | project authored only | | ch08b momentum transfer questions | 10 | 10 / 0 / 0 | project authored only | | proximal distal energy transfer | 3 | 3 / 0 / 0 | project authored only |",
-      "text_sha256": "5b65ee8c9cff0d8240b90165ff05f9c6362db2a2782721a1b170244b48845708",
+      "text": "| ch01 introduction | 3 | 0 / 2 / 1 | mixed independence | | ch02 mechanics | 33 | 5 / 17 / 11 | mixed independence | | ch03 evidence | 13 | 1 / 10 / 2 | mixed independence | | ch03 interaction forces | 10 | 8 / 1 / 1 | mixed independence | | ch03b hand path attribution | 11 | 7 / 2 / 2 | mixed independence | | ch03ba coordinate force sources | 3 | 3 / 0 / 0 | project authored only | | ch03c ground reaction drift | 8 | 4 / 2 / 2 | mixed independence | | ch03d shoulder velocity transfer | 18 | 18 / 0 / 0 | project authored only | | ch04 counterfactual ensemble | 6 | 6 / 0 / 0 | project authored only | | ch04 counterfactuals | 5 | 4 / 0 / 1 | mixed independence | | ch05 two hand wrench | 21 | 21 / 0 / 0 | project authored only | | ch05a interactive workbench | 1 | 1 / 0 / 0 | project authored only | | ch05b forward two hand | 15 | 15 / 0 / 0 | project authored only | | ch06 shaft contributions | 15 | 15 / 0 / 0 | project authored only | | ch06b coupled base flex | 14 | 14 / 0 / 0 | project authored only | | ch06bb shaft beam reference | 2 | 2 / 0 / 0 | project authored only | | ch06bbb forward modal shaft | 7 | 7 / 0 / 0 | project authored only | | ch06bc torque allocation preload | 7 | 7 / 0 / 0 | project authored only | | ch06c spatial cross formulation | 43 | 43 / 0 / 0 | project authored only | | ch06ca articulated ground | 4 | 4 / 0 / 0 | project authored only | | ch06cb spatial cross tail | 5 | 5 / 0 / 0 | project authored only | | ch06cc spatial forward contact | 8 | 8 / 0 / 0 | project authored only | | ch06d uncertainty control | 10 | 10 / 0 / 0 | project authored only | | ch06e experimental protocol | 1 | 1 / 0 / 0 | project authored only | | ch07 model ladder | 17 | 17 / 0 / 0 | project authored only | | ch07 results | 8 | 8 / 0 / 0 | project authored only | | ch07b frames biology engines | 5 | 5 / 0 / 0 | project authored only | | ch07c transmission robustness | 5 | 5 / 0 / 0 | project authored only | | ch08b momentum transfer questions | 10 | 10 / 0 / 0 | project authored only | | proximal distal energy transfer | 3 | 3 / 0 / 0 | project authored only |",
+      "text_sha256": "1147bcf502e603b1d8c0a4ccdae6e10aaae38601f5c0412410ca97f44b64efd7",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -18470,12 +18534,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-03f3c700d6926e6a",
+      "candidate_id": "PD-CAND-7cc776acea2219eb",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd",
       "line_start": 138,
-      "line_end": 208,
-      "text": "- `data/e1_sweep.json` — one row per torque program plus provenance. - `data/representative_traces.npz` — representative state, control, counterfactual, energy, speed, and interface-power traces. - `data/results_summary.json` — representative impacts and phase budgets. - `data/e1b_bounded_sweep.json` — torque-velocity-bounded sweep. - `data/e1c_sensitivity.json` — alternative impact-definition results. - `data/e1d_parameter_sensitivity.json` — 13 one-at-a-time parameter cases. - `data/interaction_force_mechanisms.npz` — exact force, power, geometry, and matched-state killswitch arrays. - `data/interaction_force_summary.json` — headline force, work, and divergence metrics with counterfactual contracts. - `data/wscg_2024_hand_force_series.csv` — hash-verified values from the source presentation's embedded chart cache. - `data/wscg_2024_source_provenance.json` — source hashes, series inventory, and interpretation boundary. - `data/counterfactual_ensemble.json` — 96 baseline cut/horizon/timestep rows, gravity and damping ablations, convergence metrics, and WSCG DELTA checks. - `data/counterfactual_selected_traces.npz` — commanded and zero-torque state, force, and power traces for three representative cuts. - `data/wscg_two_hand_raw/*.csv` — portable, column-labeled exports of the archived BASE, ZTCF, and DELTA two-hand tables. - `data/two_hand_wscg_analysis.json` — source hashes, wrench-reconstruction residuals, reversal times, sensitivity results, and interpretation boundary. - `data/two_hand_wscg_analysis.npz` — local force modes, moment and power decompositions, poses, and geometry-counterfactual arrays. - `data/bilateral_wrench_identifiability_study.json` — three-dimensional point-force and full bilateral-wrench ranks, null spaces, grip-span sweep, proper-rotation audit, sensing boundary, and explicit nonhuman claims. - `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse- dynamics factorization, analytic physical-map rank witness, three exact nonunique parameter families, dimensionless finite-record rank, unit and scale audits, conditional noise bounds, and a zero-motion killswitch. - `data/shaft_contribution_study.json` — matched rigid/flexible results, termwise acceleration and power summaries, ablations, 120 robustness cases, endpoint windows, timestep convergence, and interpretation boundaries. - `data/shaft_contribution_traces.npz` — reference, rigid, and ablation state, speed, force, acceleration-contribution, power, work, and energy traces. - `data/mechanism_ladder_study.json` — common-schema invariance residuals, prescribed mobile-hub cases, closed-loop constraint diagnostics, and the fail-closed model-discrepancy table. - `data/mechanism_ladder_traces.npz` — three-link interface, mobile-hub, and closed-loop conditioning arrays used by the higher-order figures. - `data/forward_two_arm_study.json` — forward model parameters, command, closure, killswitch ensemble, negative control, and numerical sensitivities. - `data/forward_two_arm_study.npz` — baseline and representative branch states, contact forces, force modes, moments, power, energy, and solver residuals. - `data/moving_base_flexible_study.{json,npz}` — coupled base/flex branch, negative control, parameter screen, convergence, states, forces, and energy. - `data/shaft_beam_reference.{json,npz}` — synthetic modal identification, finite-element convergence, paired one/six-mode responses, and work--energy closure; not equipment calibration. - `data/spatial_full_body_study.{json,npz}` — common-model hashes, prescribed wrench interventions, two-formulation inverse dynamics, and spatial states. - `data/articulated_manufactured_solution.json` — independent analytical, MuJoCo, and Pinocchio inverse-dynamics residuals; three-level Richardson estimates; measured free-subtree conservation drift; and the corruption killswitch contract. - `data/articulated_native_constraint_discrepancy.{json,npz}` — one same-state MuJoCo-native bilateral `connect`/`mj_step` branch and one projected Kelvin--Voigt/shared-mass-and-bias branch, including the equality-disabled killswitch, six-row native-constraint gate, refinement, attachment separation, generalized force, and nonzero state discrepancy. - `data/uncertainty_control_study.{json,npz}` — declared design, actuator contract, uncertainty intervals, PRCC screen, identifiability audit, training/held-out program comparison, closure, and rollout arrays. - `data/experimental_protocol_v1.json` — frozen inclusion, measurement, processing, participant-split, prediction, and inference contract. - `data/experimental_protocol_{dry_run,readiness}.json` — synthetic-only intake fixture and fail-closed readiness classification; no human observations. - `release_manifest.json` and `CHECKSUMS.sha256` — exact release artifact inventory, model-tier presets, claim status, open gates, hashes, and sizes.",
-      "text_sha256": "7d1ee4738b64d2630bbe385482e1cc0aeea41d56b9ae525981091dd875773b3a",
+      "line_end": 212,
+      "text": "- `data/e1_sweep.json` — one row per torque program plus provenance. - `data/representative_traces.npz` — representative state, control, counterfactual, energy, speed, and interface-power traces. - `data/results_summary.json` — representative impacts and phase budgets. - `data/e1b_bounded_sweep.json` — torque-velocity-bounded sweep. - `data/e1c_sensitivity.json` — alternative impact-definition results. - `data/e1d_parameter_sensitivity.json` — 13 one-at-a-time parameter cases. - `data/interaction_force_mechanisms.npz` — exact force, power, geometry, and matched-state killswitch arrays. - `data/interaction_force_summary.json` — headline force, work, and divergence metrics with counterfactual contracts. - `data/wscg_2024_hand_force_series.csv` — hash-verified values from the source presentation's embedded chart cache. - `data/wscg_2024_source_provenance.json` — source hashes, series inventory, and interpretation boundary. - `data/counterfactual_ensemble.json` — 96 baseline cut/horizon/timestep rows, gravity and damping ablations, convergence metrics, and WSCG DELTA checks. - `data/counterfactual_selected_traces.npz` — commanded and zero-torque state, force, and power traces for three representative cuts. - `data/wscg_two_hand_raw/*.csv` — portable, column-labeled exports of the archived BASE, ZTCF, and DELTA two-hand tables. - `data/two_hand_wscg_analysis.json` — source hashes, wrench-reconstruction residuals, reversal times, sensitivity results, and interpretation boundary. - `data/two_hand_wscg_analysis.npz` — local force modes, moment and power decompositions, poses, and geometry-counterfactual arrays. - `data/bilateral_wrench_identifiability_study.json` — three-dimensional point-force and full bilateral-wrench ranks, null spaces, grip-span sweep, proper-rotation audit, sensing boundary, and explicit nonhuman claims. - `data/constraint_internal_force_diagnostics.json` — source-hash-bound planar closure and bilateral wrench-map ranks, explicit coordinate/wrench scales, singular and coincident-contact controls, tolerance sensitivity, and nonhuman inference boundaries. - `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse- dynamics factorization, analytic physical-map rank witness, three exact nonunique parameter families, dimensionless finite-record rank, unit and scale audits, conditional noise bounds, and a zero-motion killswitch. - `data/shaft_contribution_study.json` — matched rigid/flexible results, termwise acceleration and power summaries, ablations, 120 robustness cases, endpoint windows, timestep convergence, and interpretation boundaries. - `data/shaft_contribution_traces.npz` — reference, rigid, and ablation state, speed, force, acceleration-contribution, power, work, and energy traces. - `data/mechanism_ladder_study.json` — common-schema invariance residuals, prescribed mobile-hub cases, closed-loop constraint diagnostics, and the fail-closed model-discrepancy table. - `data/mechanism_ladder_traces.npz` — three-link interface, mobile-hub, and closed-loop conditioning arrays used by the higher-order figures. - `data/forward_two_arm_study.json` — forward model parameters, command, closure, killswitch ensemble, negative control, and numerical sensitivities. - `data/forward_two_arm_study.npz` — baseline and representative branch states, contact forces, force modes, moments, power, energy, and solver residuals. - `data/moving_base_flexible_study.{json,npz}` — coupled base/flex branch, negative control, parameter screen, convergence, states, forces, and energy. - `data/shaft_beam_reference.{json,npz}` — synthetic modal identification, finite-element convergence, paired one/six-mode responses, and work--energy closure; not equipment calibration. - `data/spatial_full_body_study.{json,npz}` — common-model hashes, prescribed wrench interventions, two-formulation inverse dynamics, and spatial states. - `data/articulated_manufactured_solution.json` — independent analytical, MuJoCo, and Pinocchio inverse-dynamics residuals; three-level Richardson estimates; measured free-subtree conservation drift; and the corruption killswitch contract. - `data/articulated_native_constraint_discrepancy.{json,npz}` — one same-state MuJoCo-native bilateral `connect`/`mj_step` branch and one projected Kelvin--Voigt/shared-mass-and-bias branch, including the equality-disabled killswitch, six-row native-constraint gate, refinement, attachment separation, generalized force, and nonzero state discrepancy. - `data/uncertainty_control_study.{json,npz}` — declared design, actuator contract, uncertainty intervals, PRCC screen, identifiability audit, training/held-out program comparison, closure, and rollout arrays. - `data/experimental_protocol_v1.json` — frozen inclusion, measurement, processing, participant-split, prediction, and inference contract. - `data/experimental_protocol_{dry_run,readiness}.json` — synthetic-only intake fixture and fail-closed readiness classification; no human observations. - `release_manifest.json` and `CHECKSUMS.sha256` — exact release artifact inventory, model-tier presets, claim status, open gates, hashes, and sizes.",
+      "text_sha256": "c9655eaf76b5ef6dbd1d8e84471f7517bc2644c9cb9290b3b0175baa127e428d",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,

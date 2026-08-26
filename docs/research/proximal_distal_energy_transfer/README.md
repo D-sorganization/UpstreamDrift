@@ -364,6 +364,7 @@ python3 -m scripts.research.proximal_distal_energy.make_torque_allocation_preloa
 python3 -m scripts.research.proximal_distal_energy.make_spatial_full_body_figures
 python3 -m scripts.research.proximal_distal_energy.make_spatial_forward_contact_figures
 python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figures
+python3 -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics validate
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification
 # document
