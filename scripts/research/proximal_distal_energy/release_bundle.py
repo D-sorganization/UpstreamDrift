@@ -100,6 +100,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_local_linear_diagnostics write",
             "tier": "analytical_double_pendulum_local_first_order_rank",
         },
+        "constraint_internal_force_diagnostics": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics write",
+            "tier": "scaled_cross_tier_constraint_and_wrench_map_rank",
+        },
         "double_pendulum_identifiability": {
             "command": "python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability write",
             "tier": "analytical_double_pendulum_exact_map_and_dimensionless_finite_record",

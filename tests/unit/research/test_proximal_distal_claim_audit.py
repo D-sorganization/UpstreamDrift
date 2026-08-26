@@ -512,7 +512,7 @@ def test_repository_registry_matches_release_claims_and_is_complete() -> None:
     assert result["open_release_claim_keys"] == []
     assert result["adjudication_outcome_counts"] == {
         "inconclusive": 5,
-        "supported": 289,
+        "supported": 291,
         "untested": 15,
     }
     assert result["evidence_locator_type_counts"]["bibliography_key"] >= 3
@@ -525,7 +525,7 @@ def test_v2_migration_is_snapshot_locked_and_reproducible(tmp_path: Path) -> Non
     target_data = _copy_reviewed_snapshot(root, tmp_path)
 
     assert migrate(tmp_path) == {
-        "supported": 289,
+        "supported": 291,
         "contradicted": 0,
         "inconclusive": 5,
         "untested": 15,

@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "53d11ff4dd10954807b69bbed0f6442b5efd93cf02ea6ed1c9c9da10b3d4ad1d",
+    "source_digest": "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1134-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; generated reviewer tables and editorial anchors are explicitly classified as nonclaims.",
+    "current_scope": "The complete 1138-candidate paper inventory is adjudicated, including scale-qualified constraint singularity and contact-geometry/tolerance boundaries.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -11481,15 +11481,15 @@
       "last_verified_on": "2026-08-25"
     },
     {
-      "candidate_id": "PD-CAND-03f3c700d6926e6a",
+      "candidate_id": "PD-CAND-077e007135da1237",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
-      "rationale": "This appendix paragraph inventories governed artifacts and adds no standalone scientific result.",
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
       "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-25"
+      "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-000afa39d6089e6f",
+      "candidate_id": "PD-CAND-11518bcf919bffed",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11505,7 +11505,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-36d4ac97c4116672",
+      "candidate_id": "PD-CAND-36e3133e0ac5fa09",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11521,7 +11521,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-4018dc67ba8ab4f5",
+      "candidate_id": "PD-CAND-43048ff0f70552c3",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11529,15 +11529,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-43c4e06e7103087b",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-44f91b4f5f376d4f",
+      "candidate_id": "PD-CAND-736a228f903fce32",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11577,6 +11569,14 @@
       "last_verified_on": "2026-08-23"
     },
     {
+      "candidate_id": "PD-CAND-afc739da59a79cdf",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
       "candidate_id": "PD-CAND-b06a3cbe5b2d0e01",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
@@ -11586,6 +11586,14 @@
     },
     {
       "candidate_id": "PD-CAND-b5b2526e23b77d70",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-b7ebf4884a957a0a",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -11633,22 +11641,6 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-f2518e167ae18e34",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-f7091f3b82570b27",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
       "candidate_id": "PD-CAND-fdcf5c685afbb41a",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
@@ -11663,6 +11655,55 @@
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-e79a3ec448c72fdf",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-311"
+      ],
+      "rationale": "This passage states or bounds the scale-qualified constraint and internal-force diagnostic.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-a66ea766358d45ef",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-311"
+      ],
+      "rationale": "This passage states or bounds the scale-qualified constraint and internal-force diagnostic.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-de0f0e13f4cf78a4",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-312"
+      ],
+      "rationale": "This passage states or bounds the scale-qualified constraint and internal-force diagnostic.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-f223f7bbcb85bdf9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-311",
+        "PD-CLAIM-312"
+      ],
+      "rationale": "This passage states or bounds the scale-qualified constraint and internal-force diagnostic.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-7cc776acea2219eb",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This appendix paragraph inventories governed artifacts and adds no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
     }
   ],
   "claims": [
@@ -30624,6 +30665,220 @@
           "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
           "json_pointer": "/claims/PD-CLAIM-310/1/value",
           "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-311",
+      "candidate_ids": [
+        "PD-CAND-e79a3ec448c72fdf",
+        "PD-CAND-a66ea766358d45ef",
+        "PD-CAND-f223f7bbcb85bdf9"
+      ],
+      "statement": "Under declared 1 rad angular and 0.75 m translational coordinate scales, the regular planar closure map has rank 4/nullity 1 and the constructed adverse alignment has rank 3/nullity 2.",
+      "classification": "scaled_planar_constraint_singularity",
+      "published_status": "supported_for_declared_analytical_maps",
+      "audit_status": "scaled_rank_adverse_geometry_tolerance_and_inference_boundary_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:135",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:143",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:159"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "scripts/research/proximal_distal_energy/constraint_internal_force_diagnostics.py",
+        "scripts/research/proximal_distal_energy/run_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics_evidence.py"
+      ],
+      "model_domain": "Instantaneous analytical planar closure and normalized bilateral wrench maps at declared geometries, scales, and SVD tolerances.",
+      "uncertainty_boundary": "Rank and nullity are local kinematic properties; conditioning depends on the declared scales, the adverse alignment is not a qualified closed anatomical pose, and no constraint force or human strategy is identified.",
+      "competing_explanations": [
+        "generalized-coordinate scaling",
+        "wrench force-moment scaling",
+        "rank tolerance",
+        "contact geometry",
+        "constraint or contact infeasibility"
+      ],
+      "negative_controls": [
+        "three positive translation-coordinate scales",
+        "three near-singular angular offsets",
+        "explicit rank tolerance",
+        "raw-versus-scaled rank equality",
+        "nonhuman inference gate"
+      ],
+      "falsifier": "A clean recomputation changes either rank/nullity result, positive coordinate scaling changes exact rank, or the alignment is promoted without a feasible closed-state test.",
+      "adjudication": "The result is retained as scale-qualified analytical and registered synthetic evidence; it does not identify participant force, biological allocation, human strategy, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/coordinate_scale_contract/angular_coordinate_scale_rad",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.75#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/coordinate_scale_contract/translation_coordinate_scale_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/regular_case/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/regular_case/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/exact_singular_case/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/exact_singular_case/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-312",
+      "candidate_ids": [
+        "PD-CAND-de0f0e13f4cf78a4",
+        "PD-CAND-f223f7bbcb85bdf9"
+      ],
+      "statement": "With a declared 0.10 m wrench length, the separated 0.20 m point-force map has rank 5/nullity 1 and the coincident map has rank 3/nullity 3; the near-coincident numerical rank changes across declared SVD tolerances.",
+      "classification": "normalized_contact_geometry_rank_boundary",
+      "published_status": "supported_for_declared_analytical_maps",
+      "audit_status": "scaled_rank_adverse_geometry_tolerance_and_inference_boundary_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:152",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06d_uncertainty_control.qmd:159"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "scripts/research/proximal_distal_energy/constraint_internal_force_diagnostics.py",
+        "scripts/research/proximal_distal_energy/run_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics_evidence.py"
+      ],
+      "model_domain": "Instantaneous analytical planar closure and normalized bilateral wrench maps at declared geometries, scales, and SVD tolerances.",
+      "uncertainty_boundary": "The map establishes sensing/allocation ambiguity only; it does not show that a human produces the null-mode force, identify complete hand wrenches, or qualify compliant or distributed contact.",
+      "competing_explanations": [
+        "generalized-coordinate scaling",
+        "wrench force-moment scaling",
+        "rank tolerance",
+        "contact geometry",
+        "constraint or contact infeasibility"
+      ],
+      "negative_controls": [
+        "coincident-contact killswitch",
+        "eight contact spans",
+        "three relative SVD tolerances",
+        "one axial measurement augmentation",
+        "full bilateral six-axis input map"
+      ],
+      "falsifier": "Coincident contacts retain moment observability above rank three, the separated map loses its axial null mode, or rank is reported without the geometry, normalization, and tolerance contract.",
+      "adjudication": "The result is retained as scale-qualified analytical and registered synthetic evidence; it does not identify participant force, biological allocation, human strategy, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/normalization/moment_rows_divided_by_reference_length_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/registered_span_case/span_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/registered_span_case/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/registered_span_case/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/coincident_contact_case/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/coincident_contact_case/nullity",
+          "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
           "atol": 0.0,
