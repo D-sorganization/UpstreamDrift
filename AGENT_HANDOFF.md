@@ -2,24 +2,27 @@
 
 Last updated: 2026-08-25
 
-This file records current operational state, not history. Git and GitHub retain
-history. Epic #8557 is the single proximal-to-distal completion authority.
+This records current operational state; Git and GitHub retain history. Epic #8557 is the single proximal-to-distal completion authority.
+
+## Markerless Mocap Program (#9063)
+
+- ADR-0041 and the acceptance program assign canonical contracts/reference
+  algorithms to Tools #4706; UpstreamDrift owns orchestration, UX, persistence,
+  and biomechanics adapters; AffineDrift owns sanitized evidence publication.
+- Tools PR #4734 is a candidate only. Do not repin `vendor/ud-tools` until its
+  protected merge is verified. UpstreamDrift #9069 is the next consumer slice.
+- Existing file ingestion/#4558 and duplicate-reader debt #8865 remain inputs,
+  not a live-lab implementation. There is no physical-lab qualification.
 
 ## Coordinate Force-Source Attribution (#9059)
 
-- Tools PR #4699 is the reusable source authority for
-  `force-attribution/v1`; UpstreamDrift consumes it only through
-  `vendor/ud-tools` and the thin biomechanics gateway. The vendor pin is the
-  protected Tools follow-up squash
+- Tools owns `force-attribution/v1`; UpstreamDrift consumes only through the
+  biomechanics gateway at protected Tools squash
   `8dc4512184d8c29e10770ad81e4ce947f849b355`, which includes the source
-  feature from PR #4699, its read-only provider-Protocol correction from
-  PR #4700, and the restored downstream dataset façade from PR #4701.
-- The registered planar study evaluates 135 programs and retains 91 qualified
-  impacts. It publishes separate absolute Coriolis-impulse, signed-impulse,
-  and clubhead-speed optima plus component power/work and mapping residuals.
-- The Christoffel cross-versus-squared split is explicitly tied to
-  shoulder-absolute/wrist-relative coordinates. The wrist force-only virtual-
-  work map is rank deficient, so its generalized residual remains evidence.
+  feature, provider correction, and restored dataset façade.
+- The 135-program study retains 91 qualified impacts. Cross/squared-speed
+  terms use shoulder-absolute/wrist-relative coordinates; the rank-deficient
+  wrist force-only map retains its generalized residual as evidence.
 - Do not repin this branch to a Tools feature head for release. Pin only the
   protected Tools merge commit, then run the focused scientific, release,
   render, and publication-quality gates before opening the protected PR.
@@ -34,9 +37,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   release bundle. AffineDrift is a generated, immutable, revision-pinned public
   projection. Tools owns reusable consumers; do not copy its solver or UI
   implementations into this repository or `vendor/ud-tools`.
-- UpstreamDrift remote `main` is
-  `4f84a8a2dbdafac01a634ceb41b1e415ea7ec5bb`. The normalized-claim authority
-  from PR #9018 remains an ancestor; issue #8724 is closed.
+- Remote `main` is `5fa4a6dd13ed12aee8b857d7fdf3022d1a6bf632`; PR #9018 remains an ancestor.
 - The current computational publication is 244 pages with SHA-256
   `59faa25bce589777560d66bd9d5712b37fe0099979c91318c5875460ec6447b6`,
   194 URI links, and 254 outline entries. Its new coordinate-source chapter
@@ -72,27 +73,6 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   and C: checkpoints. After recovery, verify identities, finish 27 nominal
   ground branches, then qualify the remaining registered structural corners.
 
-## Normalized Claim Adjudication (#8724)
-
-- Protected PR #9018 is merged on remote `main` as
-  `9e220712025564caf0ac5201a0ddcf69dd98299e`; #8724 is closed.
-- The authority contains 1,100 reviewed narrative candidates and 303 material
-  claims: 283 supported only within declared estimands and boundaries, five
-  inconclusive, 15 untested, and zero contradicted. Supported claims may report
-  null, mixed, or adverse findings; the count does not imply theory survival.
-- The schema and snapshot-locked migration require explicit normalized
-  outcomes, typed locators, reciprocal mappings, falsifiers, source digests,
-  reasons, reviewer identity, dates, and supported-scope contradiction checks.
-  Unfamiliar claims fail closed.
-- Reviewer JSON, CSV, and paper tables separately report normalized outcome,
-  evidence tier, source independence, model tier, unresolved replication, and
-  claim-family source concentration. Model evidence is never promoted to human
-  validation.
-- Deterministic release evidence covers 2,130 evidence references, 319 local
-  artifacts, 78 external URLs, and a 592-artifact release bundle. The merged
-  head passed 63 focused tests plus standard, optional-stack, publication,
-  security, title-case, file-size, architecture, Ruff, MyPy, and Bandit gates.
-
 ## Measured-Trajectory and Human-Evidence Boundaries
 
 - PR #9017 is merged at
@@ -112,9 +92,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   headline atlases and blocks the final #8752/#8668 audit. It was reopened on
   2026-08-24 after a manual closure lacked a complete campaign, protected PR,
   or remote-main merge.
-- #8443, #8448, #8449, #8450, #8595, #8668, #8684, and #8796 remain open.
-- PR #9022 is merged as current remote-main commit `76bf6ab1d`. Tools PR #4674
-  is merged at immutable commit
+- Tools PR #4674 is merged at immutable commit
   `17474249b9267d0e73a779c1d72f231e7b8de39c`; this is the #8358 gitlink and
   canonical JSON/CSV/HDF5 analysis authority.
 - Active #8358 PR #9039 is on `feat/8358-tools-variation-adapter`, updated to

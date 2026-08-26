@@ -2,6 +2,20 @@
 
 ## Current Scientific Audit State (2026-08-25)
 
+## Markerless Mocap Program (#9063)
+
+Issue #9065 establishes ADR-0041 and an executable acceptance program before
+live markerless capture begins. Canonical camera, capture, time, calibration,
+observation, reconstruction, session, and C3D exchange contracts belong to
+Tools #4706. UpstreamDrift owns application orchestration, persistence,
+biomechanics integration, and matching PyQt6/React/API workflows. AffineDrift
+owns sanitized evidence publication. Tools_Private is not a dependency of the
+open runtime. The first consumer under #9069 must pin a protected Tools merge,
+reject missing or incompatible schema authority, and adapt existing C3D and
+motion-pipeline paths instead of copying shared code. This M0 slice makes no
+camera, inference, C3D round-trip, commercial, or physical-lab qualification
+claim.
+
 Issue #9059 adds a coordinate-explicit planar pendulum attribution contract on
 top of the pinned Tools source authority. It separates cross-speed Coriolis,
 squared-speed centripetal/centrifugal, gravity, damping, applied-drive, and
