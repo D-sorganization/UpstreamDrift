@@ -6,9 +6,13 @@ import os
 import subprocess
 from pathlib import Path
 
+import pytest
+
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CANONICAL_COMPILE_COMMAND = "make sync-deps"
 LOCKFILES = ("requirements.lock", "requirements-dev.lock")
+pytestmark = pytest.mark.unit
 
 
 def _sync_deps_dry_run(*, offline: bool) -> bytes:
