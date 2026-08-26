@@ -2,6 +2,20 @@
 
 ## Current Scientific Audit State (2026-08-25)
 
+## Markerless Mocap Program (#9063)
+
+Issue #9065 establishes ADR-0041 and an executable acceptance program before
+live markerless capture begins. Canonical camera, capture, time, calibration,
+observation, reconstruction, session, and C3D exchange contracts belong to
+Tools #4706. UpstreamDrift owns application orchestration, persistence,
+biomechanics integration, and matching PyQt6/React/API workflows. AffineDrift
+owns sanitized evidence publication. Tools_Private is not a dependency of the
+open runtime. The first consumer under #9069 must pin a protected Tools merge,
+reject missing or incompatible schema authority, and adapt existing C3D and
+motion-pipeline paths instead of copying shared code. This M0 slice makes no
+camera, inference, C3D round-trip, commercial, or physical-lab qualification
+claim.
+
 Issue #9027 now has a versioned, executable hybrid-system topology contract for
 all eight model tiers. It binds implemented and partial tiers to existing source
 authorities and requires continuous states, controls, algebraic constraints,
@@ -11,6 +25,19 @@ implemented, three are partial, and the participant-calibrated and governed-huma
 tiers remain explicitly unavailable. This is a topology and evidence-boundary
 gate; observability, controllability, stability, controller ranking, participant
 validity, and coaching interpretation remain unqualified.
+
+Issue #9107 closes an external-install packaging gap exposed by the protected
+Tools downstream-consumer gate. The canonical BunkerShot3D public identity is
+`bunkershot3d`; the Hatch build hook now maps the Upstream-owned source package
+to that top-level destination for editable and wheel installs, while the wheel
+selection excludes `src.bunkershot3d`. This preserves exception and class
+identity without library-time `sys.path` mutation. Isolated editable and wheel
+probes must import `bunkershot3d.postproc.WrenchTrace` outside the checkout, and
+the built wheel must contain no second `src/bunkershot3d` payload.
+The build retains the source archive and wheel as separate immutable artifacts;
+smoke jobs minimally check out only their input fixture and download only the
+selected wheel. Their bounded 20-minute budget covers the measured cold fleet
+transfer plus clean installation and both unchanged runtime assertions.
 
 Issue #9059 adds a coordinate-explicit planar pendulum attribution contract on
 top of the pinned Tools source authority. It separates cross-speed Coriolis,
@@ -603,7 +630,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.604                                            |
+| **Spec Version**        | 1.0.608                                            |
 | **Last Spec Update**    | 2026-08-26                                         |
 
 ## 2. Purpose & Mission
@@ -3291,7 +3318,12 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-26 | 1.0.604 | Reconciled UP-D0 (#9066) with protected current main `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`. `manuals/upstreamdrift` QMD remains the sole editable engineering design-manual authority; existing user, ADR, and research products remain separate; generated HTML, LaTeX, PDF, and DOCX remain non-editable and unapproved. The versioned policy, fail-closed empty registry, ADR-0041, agent guidance, contract tests, and offline CI/pre-commit verifier enforce program-contract ownership, safe paths, Ruff formatting, TDD/DbC/DRY/LoD, impacted-path/freshness rules, immutable release evidence, visual and semantic review, and human approval. UP-D1 through UP-D8 remain explicit blockers; this governance scaffold makes no calculation-coverage or publication claim. |
+| 2026-08-26 | 1.0.608 | Reconciled UP-D0 (#9066) with protected current main `99acc997a97b3d97cb4ddd857b79bedd4a66f290`. `manuals/upstreamdrift` QMD remains the sole editable engineering design-manual authority; existing user, ADR, and research products remain separate; generated HTML, LaTeX, PDF, and DOCX remain non-editable and unapproved. The versioned policy, fail-closed empty registry, renumbered ADR-0042, agent guidance, contract tests, and offline CI/pre-commit verifier enforce program-contract ownership, safe paths, Ruff formatting, TDD/DbC/DRY/LoD, impacted-path/freshness rules, immutable release evidence, visual and semantic review, and human approval. ADR-0041 remains the protected markerless-mocap consumer authority; UP-D1 through UP-D8 remain explicit blockers, and this governance scaffold makes no calculation-coverage or publication claim. |
+| 2026-08-26 | 1.0.607 | Normally reconciled #9107 with protected markerless-authority main `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c` after #9088 merged. The packaging-only wheel/source split, fixture-only smoke checkout, canonical BunkerShot3D identity, and bounded transfer/install assertions remain unchanged; the integrated ADR-0041 authority boundary introduces no camera, inference, C3D round-trip, physical-lab, or human-performance qualification. |
+| 2026-08-26 | 1.0.606 | Repaired #9107's wheel-smoke transport boundary after both matrix jobs exhausted their time while downloading the combined 771,541,995-byte wheel-plus-sdist artifact and never reached installation. The build now retains separate wheel and source artifacts; smoke jobs use a fixture-only sparse checkout, download only the selected wheel, and have a measured bounded 20-minute transfer/install/assertion budget. Runner selection, the built distributions, and both smoke assertions are unchanged. |
+| 2026-08-26 | 1.0.605 | Reconciled #9107 with current `main` and qualified the exact 384,333,159-byte wheel (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`) under Python 3.11. The branch-owned canonical BunkerShot3D import, one-object identity, duplicate exclusion, UI presence, and test-payload exclusion pass. Two broader inherited wheel-runtime failures remain explicit and unqualified: `src.api` collides with the co-installed Tools config alias and `sidekick --help` fails. No runner, workflow, vendor pin, runtime API, or scientific authority is changed to mask them. |
+| 2026-08-26 | 1.0.604 | Fixed #9107's external-install packaging boundary. Hatch now force-includes the Upstream-owned `src/bunkershot3d` source under the one canonical top-level `bunkershot3d` destination for editable and wheel builds, while normal wheel selection excludes `src/bunkershot3d` so distinct class and exception identities cannot ship. The build hook filters test artifacts and fails closed if the canonical source root is absent. A RED unit contract, wheel smoke contract, isolated editable install, and isolated 383.7 MB wheel install prove `bunkershot3d.postproc.WrenchTrace` resolves outside the checkout with stable identity and no duplicate wheel payload. No library mutates `sys.path`; no Tools vendor pin, scientific claim, public schema, workflow, runner, or UI behavior changes. |
+| 2026-08-26 | 1.0.604 | Reconciled markerless-mocap authority issue #9065 with protected compatibility main `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`. ADR-0041 and its executable acceptance program retain Tools as canonical camera/observation/calibration/timing/session/reconstruction/C3D contract owner, UpstreamDrift as orchestration/UX/persistence/biomechanics owner, and AffineDrift as sanitized evidence-publication owner. No feature-head vendor pin, live-lab implementation, physical qualification, C3D round-trip, or human-performance claim is introduced. |
 | 2026-08-26 | 1.0.603 | Qualified #9113's feasible closed-loop singular-margin boundary. An exact same-origin planar triangle constructor now covers both assembly branches and a full global-phase orbit before interpreting the scaled closure Jacobian. The governed evidence retains exact lower/upper triangle degeneracies, a five-by-five distance/tolerance matrix, phase-resolution, positive-scale, feasible-geometry, equivalent-unit, impossible-geometry, and manufactured-rank controls. The result establishes only local planar kinematic closure and scale-qualified rank/nullity; it does not establish anatomy, dynamics, contact force, passive torque, human occurrence, or coaching guidance. |
 | 2026-08-26 | 1.0.600 | Qualified #9027's dimensionally explicit constraint-rank boundary. Planar closure diagnostics now declare generalized-coordinate scales, bilateral wrench diagnostics declare an input/output moment reference length, and positive rescaling is tested to preserve exact rank and nullity while numerical conditioning remains scale-dependent. Kinematic closure, point-force allocation, and full wrench measurement nullspaces remain separate governed estimands; reviewed numeric-pointer overrides make the scaffold reproduce all new contracts exactly. Constructed adverse alignments are mathematical controls rather than anatomical poses, and no constraint-force, muscle-action, human-strategy, or coaching inference is authorized. |
 | 2026-08-26 | 1.0.601 | Fixed issue #8823: the `ProvenanceRecord`/`ProvenanceValue` infrastructure in `src/shared/python/ux/provenance.py` and its `ProvenanceValueLabel` Qt wrapper in `src/shared/python/ui/provenance_value.py` had no real callers outside their own unit test — dead, tested, unwired infrastructure. `src/tools/swing_flight_pipeline/gui.py`'s `SwingFlightWidget` now renders its two headline computed values (Carry Distance, Launch Speed) as `ProvenanceValueLabel`s, rebuilt fresh on each `_run_pipeline()` call with a `ProvenanceRecord` naming the producing `engine_name`, a per-run `source` id, the deriving formula, and the consumed swing-state input ids — hovering or right-clicking either value now answers "why does this say 220.4 m?" without leaving the screen. A new `_update_provenance_labels` helper enforces, via an explicit `require()` precondition (not a silent default), that no headline value is ever rendered against an empty `engine_name`, echoing the honest-attribution guarantee issue #8819 already established for the engine combo. New unit tests assert the rendered `ProvenanceRecord` carries the correct engine/source/formula, that the run id increments across runs, that the tooltip/whatsThis describe the value, and that the precondition raises `PreconditionError` on an empty engine name. |

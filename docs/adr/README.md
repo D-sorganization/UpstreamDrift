@@ -45,7 +45,8 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0038](0038-launch-monitor-player-covariation-contract.md)    | Canonical Launch Monitor Player Covariation Contract                              | Accepted | 2026-08-20 |
 | [0039](0039-attested-launch-monitor-longitudinal-sessions.md) | Attested Launch Monitor Longitudinal Sessions                                     | Accepted | 2026-08-20 |
 | [0040](0040-data-free-launch-monitor-conformance-bundle.md)   | Data-Free Launch-Monitor Conformance Bundle                                       | Accepted | 2026-08-21 |
-| [0041](0041-engineering-design-manual-authority.md)           | Engineering Design Manual Authority and Release Boundary                          | Accepted | 2026-08-25 |
+| [0041](0041-markerless-mocap-consumer-authority.md)           | Markerless Mocap Consumer Authority                                               | Accepted | 2026-08-25 |
+| [0042](0042-engineering-design-manual-authority.md)           | Engineering Design Manual Authority and Release Boundary                          | Accepted | 2026-08-25 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.

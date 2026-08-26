@@ -1,4 +1,4 @@
-# ADR-0041: Engineering Design Manual Authority and Release Boundary
+# ADR-0042: Engineering Design Manual Authority and Release Boundary
 
 - Status: Accepted
 - Date: 2026-08-25
