@@ -19,6 +19,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 - Issue #9097 and PR #9101 are closed invalid/unmerged. The governed chapter's
   canonical LF Git blob is 50,623 bytes, below the 51,200-byte budget; only a
   Windows CRLF checkout measured 51,523. No exception or source edit is needed.
+- This branch includes protected `main` commit
+  `2091667158907427c1b59276041fcdbc4b92964c` from manufactured-evidence repair
+  PR #9094. Its 613-artifact release bundle and 306-claim authority validate;
+  that scientific merge does not approve this still-empty manual registry.
 
 ## Coordinate Force-Source Attribution (#9059)
 
@@ -43,10 +47,10 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
   governed-human tiers unavailable. This does not establish observability,
   controllability, stability, controller ranking, participant validity, or
   coaching interpretation.
-- The optional lane retains the pre-existing #8963 source lock: manufactured-
-  solution evidence does not match `spatial_full_body.py`. Do not update only a
-  digest or rewrite publication artifacts; regenerate through the governed
-  campaign after source-lock resolution.
+- Protected repair PR #9094 regenerated the manufactured-solution evidence
+  through its governed path and merged as `2091667158907427c1b59276041fcdbc4b92964c`.
+  The release bundle validates with 613 artifacts and 382/382 verified numeric
+  literals. This remains computational model evidence, not human validation.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
