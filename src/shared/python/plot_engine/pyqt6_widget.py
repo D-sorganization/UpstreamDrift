@@ -9,7 +9,6 @@ switching via PlotThemeManager.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
@@ -24,8 +23,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.shared.python.plotting.export import ExportConfig, export_figure
-from src.shared.python.plotting.identity import PlotIdentity
 from src.shared.python.theme.integration import get_theme_manager
 from src.shared.python.theme.matplotlib_style import apply_plot_theme
 
@@ -59,7 +56,6 @@ class PlotWidget(QWidget):
         self._theme_manager = theme_manager
         self._renderer = MatplotlibRenderer(theme_manager)
         self._current_spec: PlotSpec | None = None
-        self._identity: PlotIdentity | None = None
 
         self._setup_ui()
 
@@ -111,20 +107,6 @@ class PlotWidget(QWidget):
         """Get the current plot specification."""
         return self._current_spec
 
-    def set_identity(self, identity: PlotIdentity | None) -> None:
-        """Attach engine/model/run identity used for export metadata.
-
-        Optional: callers that know which physics engine/model/run
-        produced the plotted data can call this so exports carry that
-        provenance (see ``PlotIdentity``). Defaults to ``None`` (no
-        identity fields embedded beyond the export timestamp).
-        """
-        self._identity = identity
-
-    def get_identity(self) -> PlotIdentity | None:
-        """Return the identity currently attached to this widget's exports."""
-        return self._identity
-
     def refresh(self) -> None:
         """Re-render the current spec (e.g., after theme change)."""
         if self._current_spec:
@@ -144,7 +126,7 @@ class PlotWidget(QWidget):
         self.refresh()
 
     def _export_plot(self) -> None:
-        """Export the current plot to a file, embedding export metadata."""
+        """Export the current plot to a file."""
         if self._current_spec is None:
             return
 
@@ -156,28 +138,14 @@ class PlotWidget(QWidget):
         }
         filter_str = ext_map.get(fmt, "All Files (*)")
 
-        default_name = self._current_spec.title or "plot"
         path, _ = QFileDialog.getSaveFileName(
-            self, "Export Plot", f"{default_name}.{fmt}", filter_str
+            self, "Export Plot", f"plot.{fmt}", filter_str
         )
         if not path:
             return
 
-        save_path = Path(path)
-        export_config = ExportConfig(
-            output_dir=save_path.parent,
-            dpi=150,
-            bbox_inches="tight",
-            include_metadata=True,
-        )
-        export_figure(
-            self._figure,
-            save_path.stem,
-            config=export_config,
-            formats=[fmt],
-            identity=self._identity,
-        )
-        logger.info(f"Plot exported to {save_path}")
+        self._figure.savefig(path, format=fmt, dpi=150, bbox_inches="tight")
+        logger.info(f"Plot exported to {path}")
 
     def get_image_bytes(self, fmt: str = "png", dpi: int = 150) -> bytes:
         """Get the current plot as image bytes."""
