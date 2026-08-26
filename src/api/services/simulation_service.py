@@ -19,6 +19,8 @@ from src.shared.python.core.error_utils import (
     ModelLoadError,
 )
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
+from src.shared.python.data_io._format_handlers import OutputFormat
+from src.shared.python.data_io.output_manager import OutputManager
 from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -54,13 +56,22 @@ class SimulationStats:
 class SimulationService:
     """Service for managing physics simulations."""
 
-    def __init__(self, engine_manager: EngineManager) -> None:
+    def __init__(
+        self,
+        engine_manager: EngineManager,
+        output_manager: OutputManager | None = None,
+    ) -> None:
         """Initialize simulation service.
 
         Args:
             engine_manager: Engine manager instance
+            output_manager: Persists completed simulation results to disk
+                (issue #8871). Defaults to a project-root-relative
+                ``OutputManager()``; tests should inject one rooted at
+                ``tmp_path`` to avoid writing into the real ``output/`` tree.
         """
         self.engine_manager = engine_manager
+        self.output_manager = output_manager or OutputManager()
         self._stats = SimulationStats()
         self._active_recorder: GenericPhysicsRecorder | None = None
         self._active_joint_names: list[str] = []
@@ -335,6 +346,48 @@ class SimulationService:
             recorder.record_step()
             self._stats.frame_count += 1
 
+    def _persist_simulation_results(
+        self,
+        request: SimulationRequest,
+        simulation_data: dict[str, Any],
+        analysis_results: dict[str, Any] | None,
+        steps: int,
+    ) -> list[str]:
+        """Persist a completed run's results via ``OutputManager`` (issue #8871).
+
+        Provenance passed through to ``OutputManager.save_simulation_results``
+        (engine type, model path, duration/timestep) is limited to values the
+        request/result genuinely carry — nothing is inferred or guessed
+        (see the provenance-honesty theme from issues #8816-#8822).
+
+        Returns:
+            Single-element list with the saved file's path as a string, or
+            an empty list if the save itself failed. A persistence failure
+            must not fail an otherwise-successful simulation.
+        """
+        engine = str(request.engine_type).lower()
+        metadata: dict[str, Any] = {"duration": request.duration, "frames": steps}
+        if analysis_results:
+            metadata["analysis_results"] = analysis_results
+
+        try:
+            saved_path = self.output_manager.save_simulation_results(
+                simulation_data,
+                filename=f"simulation_{engine}",
+                format_type=OutputFormat.JSON,
+                engine=engine,
+                metadata=metadata,
+                model_path=request.model_path,
+                parameters={
+                    "duration": request.duration,
+                    "timestep": request.timestep,
+                },
+            )
+        except (FileNotFoundError, PermissionError, OSError, ValueError) as e:
+            logger.warning("Failed to persist simulation results: %s", e)
+            return []
+        return [str(saved_path)]
+
     def _run_simulation_sync(self, request: SimulationRequest) -> SimulationResponse:
         """Run the full CPU-bound simulation pipeline synchronously.
 
@@ -387,13 +440,17 @@ class SimulationService:
             status="completed", frames=steps, analysis_summary=analysis_summary
         )
 
+        export_paths = self._persist_simulation_results(
+            request, simulation_data, analysis_results, steps
+        )
+
         return SimulationResponse(
             success=True,
             duration=request.duration,
             frames=steps,
             data=simulation_data,
             analysis_results=analysis_results,
-            export_paths=[],
+            export_paths=export_paths,
         )
 
     async def run_simulation(self, request: SimulationRequest) -> SimulationResponse:
