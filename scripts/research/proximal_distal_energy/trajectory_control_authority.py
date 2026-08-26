@@ -20,6 +20,7 @@ from scripts.research.proximal_distal_energy.phase_event_stability import (
     StateScales,
     registered_step,
     rollout_state_history,
+    state_derivative,
 )
 from src.shared.python.simulation_backends import GolfModelParams, make_backend
 
@@ -138,6 +139,33 @@ class TrajectoryLinearization:
             if array.shape != shape or not np.all(np.isfinite(array)):
                 raise ValueError(f"{name} must be finite with shape {shape}")
             object.__setattr__(self, name, _readonly(array))
+
+
+@dataclass(frozen=True, slots=True)
+class RefinedCrossing:
+    """Exact-step guard root retained inside one registered crossing bracket."""
+
+    status: str
+    time_s: float
+    partial_dt_s: float
+    state: FloatArray
+    guard_residual: float
+    transversality_per_s: float
+
+    def __post_init__(self) -> None:
+        scalars = (
+            self.time_s,
+            self.partial_dt_s,
+            self.guard_residual,
+            self.transversality_per_s,
+        )
+        if not all(math.isfinite(value) for value in scalars):
+            raise ValueError("crossing scalars must be finite")
+        if self.partial_dt_s <= 0.0:
+            raise ValueError("partial_dt_s must be positive")
+        object.__setattr__(
+            self, "state", _readonly(_finite_vector("state", self.state, size=4))
+        )
 
 
 def _central_jacobian(
@@ -494,6 +522,106 @@ def direct_terminal_pulse_sensitivity(
     return _readonly(sensitivity)
 
 
+def refine_guard_crossing(
+    *,
+    params: GolfModelParams,
+    state_before: npt.ArrayLike,
+    control: npt.ArrayLike,
+    time_before_s: float,
+    bracket_dt_s: float,
+    guard_gradient: npt.ArrayLike,
+    guard_offset: float = 0.0,
+    guard_tolerance: float = 1e-10,
+    time_tolerance_s: float = 1e-12,
+    transversality_threshold: float = 1e-8,
+    max_iterations: int = 80,
+) -> RefinedCrossing:
+    """Refine one negative-to-nonnegative guard bracket using exact RK4 steps.
+
+    Unique-crossing classification remains a trajectory-level caller gate. This
+    helper only refines a bracket already shown to contain the declared crossing.
+    """
+
+    state = _finite_vector("state_before", state_before, size=4).copy()
+    command = _finite_vector("control", control, size=2).copy()
+    gradient = _finite_vector("guard_gradient", guard_gradient, size=4)
+    if np.linalg.norm(gradient) == 0.0:
+        raise ValueError("guard_gradient must be nonzero")
+    scalar_values = {
+        "time_before_s": time_before_s,
+        "bracket_dt_s": bracket_dt_s,
+        "guard_offset": guard_offset,
+        "guard_tolerance": guard_tolerance,
+        "time_tolerance_s": time_tolerance_s,
+        "transversality_threshold": transversality_threshold,
+    }
+    if not all(math.isfinite(value) for value in scalar_values.values()):
+        raise ValueError("crossing controls must be finite")
+    for name in (
+        "bracket_dt_s",
+        "guard_tolerance",
+        "time_tolerance_s",
+        "transversality_threshold",
+    ):
+        if scalar_values[name] <= 0.0:
+            raise ValueError(f"{name} must be positive")
+    if (
+        isinstance(max_iterations, bool)
+        or not isinstance(max_iterations, int)
+        or max_iterations < 1
+    ):
+        raise ValueError("max_iterations must be a positive integer")
+
+    backend = make_backend("ode", params, dt=bracket_dt_s)
+
+    def guard_at(partial_dt_s: float) -> tuple[float, FloatArray]:
+        candidate = registered_step(
+            backend,
+            state,
+            command,
+            time_s=time_before_s,
+            dt_s=partial_dt_s,
+        )
+        return float(gradient @ candidate - guard_offset), candidate
+
+    lower = 0.0
+    upper = float(bracket_dt_s)
+    lower_value = float(gradient @ state - guard_offset)
+    upper_value, event_state = guard_at(upper)
+    if lower_value >= 0.0 or upper_value < 0.0:
+        raise ValueError("registered guard bracket must be negative-to-nonnegative")
+    residual = upper_value
+    partial = upper
+    for _ in range(max_iterations):
+        partial = 0.5 * (lower + upper)
+        residual, event_state = guard_at(partial)
+        if abs(residual) <= guard_tolerance:
+            break
+        if residual >= 0.0:
+            upper = partial
+        else:
+            lower = partial
+        if upper - lower <= time_tolerance_s:
+            break
+    if abs(residual) > guard_tolerance:
+        raise ValueError("guard root did not meet the registered residual tolerance")
+    flow = state_derivative(params, event_state, command)
+    transversality = float(gradient @ flow)
+    status = (
+        "near_grazing"
+        if abs(transversality) <= transversality_threshold
+        else "transverse_candidate"
+    )
+    return RefinedCrossing(
+        status=status,
+        time_s=float(time_before_s + partial),
+        partial_dt_s=partial,
+        state=event_state,
+        guard_residual=residual,
+        transversality_per_s=transversality,
+    )
+
+
 def event_conditioned_gramian(
     gramian: npt.ArrayLike,
     *,
@@ -547,6 +675,7 @@ def event_conditioned_gramian(
 __all__ = [
     "ControlScales",
     "EventConditionedGramian",
+    "RefinedCrossing",
     "StepLinearization",
     "TrajectoryLinearization",
     "direct_terminal_pulse_sensitivity",
@@ -555,6 +684,7 @@ __all__ = [
     "linearize_trajectory",
     "propagated_terminal_input_sensitivity",
     "reachability_history",
+    "refine_guard_crossing",
     "scale_step_matrices",
     "step_linearization",
 ]

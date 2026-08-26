@@ -6,6 +6,9 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.phase_event_stability import StateScales
+from scripts.research.proximal_distal_energy.torque_programs import (
+    restrain_then_drive_program,
+)
 from scripts.research.proximal_distal_energy.trajectory_control_authority import (
     ControlScales,
     event_conditioned_gramian,
@@ -14,6 +17,7 @@ from scripts.research.proximal_distal_energy.trajectory_control_authority import
     propagated_terminal_input_sensitivity,
     reachability_history,
     direct_terminal_pulse_sensitivity,
+    refine_guard_crossing,
     scale_step_matrices,
     step_linearization,
 )
@@ -229,6 +233,43 @@ def test_trajectory_linearization_matches_direct_terminal_pulse() -> None:
     assert trajectory.scaled_state_matrices.shape == (12, 4, 4)
     assert trajectory.scaled_energy_input_matrices.shape == (12, 4, 2)
     np.testing.assert_allclose(direct, predicted, rtol=3e-5, atol=3e-8)
+
+
+def test_registered_guard_crossing_is_refined_inside_bracket() -> None:
+    params = GolfModelParams.default()
+    controls = restrain_then_drive_program(60.0, 15.0, 10.0, 0.10).controls(900, 1e-3)
+    trajectory = linearize_trajectory(
+        params=params,
+        initial_state=np.array([-2.2, -1.57, 0.0, 0.0]),
+        controls=controls,
+        dt_s=1e-3,
+        state_steps=np.array([1e-6, 1e-6, 1e-5, 1e-5]),
+        control_steps=np.array([1e-4, 1e-4]),
+        state_scales=StateScales((np.pi, np.pi, 10.0, 10.0)),
+        control_scales=ControlScales((100.0, 100.0)),
+    )
+    guard = trajectory.state[:, 0] + trajectory.state[:, 1]
+    indices = np.flatnonzero((guard[:-1] < 0.0) & (guard[1:] >= 0.0))
+    assert indices.size == 1
+    index = int(indices[0])
+
+    crossing = refine_guard_crossing(
+        params=params,
+        state_before=trajectory.state[index],
+        control=controls[index],
+        time_before_s=trajectory.time_s[index],
+        bracket_dt_s=1e-3,
+        guard_gradient=np.array([1.0, 1.0, 0.0, 0.0]),
+        guard_tolerance=1e-11,
+        time_tolerance_s=1e-12,
+    )
+
+    assert crossing.status == "transverse_candidate"
+    assert 0.0 < crossing.partial_dt_s <= 1e-3
+    assert crossing.time_s == pytest.approx(
+        trajectory.time_s[index] + crossing.partial_dt_s
+    )
+    assert abs(crossing.guard_residual) <= 1e-11
 
 
 @pytest.mark.parametrize(
