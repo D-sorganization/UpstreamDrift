@@ -33,6 +33,11 @@ significant digit, so the published $4\times10^{-7}$ value is a conservative
 cross-runtime upper bound; the complete direct-transition matrices remain in
 the NPZ evidence.
 
+The two equivalent-unit controls also pass their unrounded values through a
+fail-closed $10^{-12}$ gate. Nonzero JSON values are then rounded upward to the
+next power of ten, preventing runtime-specific machine-epsilon digits from
+becoming reviewer-facing precision while preserving a conservative bound.
+
 The first positive crossing of
 $h(\mathbf x)=\theta_s+\theta_w=0$ is interpolated on the common grid. Its
 implicit event-time derivative is accepted only when

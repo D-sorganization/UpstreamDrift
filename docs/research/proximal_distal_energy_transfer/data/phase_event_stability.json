@@ -45,6 +45,8 @@
     "refinement_residual_reporting_significant_digits": 2,
     "direct_transition_residual_gate": 0.0001,
     "direct_transition_residual_reporting_significant_digits": 1,
+    "equivalent_unit_residual_gate": 1e-12,
+    "equivalent_unit_residual_reporting_policy": "upper_power_of_ten",
     "direct_perturbation_scales": [
       5e-07,
       1e-06,
@@ -312,8 +314,8 @@
     "corrupted_reset_max_abs_deviation_from_identity": 0.05
   },
   "equivalent_unit_controls": {
-    "radian_to_degree_scaled_transition_max_abs_residual": 2.22045e-16,
-    "second_to_millisecond_exponent_roundtrip_max_abs_residual_per_s": 4.44089e-16
+    "radian_to_degree_scaled_transition_max_abs_residual": 1e-15,
+    "second_to_millisecond_exponent_roundtrip_max_abs_residual_per_s": 1e-15
   },
   "periodicity_gate": {
     "normalized_residual": 1.48546,

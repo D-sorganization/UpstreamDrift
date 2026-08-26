@@ -59,6 +59,8 @@ REFINEMENT_RESIDUAL_GATE = 1e-5
 REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS = 2
 DIRECT_TRANSITION_RESIDUAL_GATE = 1e-4
 DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS = 1
+EQUIVALENT_UNIT_RESIDUAL_GATE = 1e-12
+EQUIVALENT_UNIT_RESIDUAL_REPORTING_POLICY = "upper_power_of_ten"
 ANALYSIS_HORIZON = HORIZON * 8
 STATE_STEPS = np.array([1e-6, 1e-6, 1e-5, 1e-5], dtype=float)
 STEP_MULTIPLIERS = (0.1, 1.0, 10.0)
@@ -226,6 +228,24 @@ def canonicalize_direct_transition_residual(value: float) -> float:
         decimal_value.adjusted() - DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS + 1
     )
     return float(decimal_value.quantize(quantum, rounding=ROUND_CEILING))
+
+
+def canonicalize_equivalent_unit_residual(value: float) -> float:
+    """Return a portable decade upper bound for a machine-epsilon residual."""
+
+    if not np.isfinite(value) or value < 0.0:
+        raise ValueError("raw equivalent-unit residual must be finite and nonnegative")
+    if value >= EQUIVALENT_UNIT_RESIDUAL_GATE:
+        raise ValueError(
+            "raw equivalent-unit residual must remain below the registered gate"
+        )
+    if value == 0.0:
+        return 0.0
+    decimal_value = Decimal(str(value))
+    lower_decade = Decimal(1).scaleb(decimal_value.adjusted())
+    if decimal_value == lower_decade:
+        return float(lower_decade)
+    return float(Decimal(1).scaleb(decimal_value.adjusted() + 1))
 
 
 def _transition_refinement(
@@ -481,6 +501,10 @@ def _registration_payload(state: _AnalysisState) -> dict[str, Any]:
         "direct_transition_residual_reporting_significant_digits": (
             DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS
         ),
+        "equivalent_unit_residual_gate": EQUIVALENT_UNIT_RESIDUAL_GATE,
+        "equivalent_unit_residual_reporting_policy": (
+            EQUIVALENT_UNIT_RESIDUAL_REPORTING_POLICY
+        ),
         "direct_perturbation_scales": list(PERTURBATION_SCALES),
         "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
         "transversality_threshold_per_s": TRANSVERSALITY_THRESHOLD_PER_S,
@@ -541,9 +565,11 @@ def _control_payloads(parts: _EvidenceParts) -> dict[str, dict[str, Any]]:
         ),
     }
     equivalent_units = {
-        "radian_to_degree_scaled_transition_max_abs_residual": adverse.unit_residual,
+        "radian_to_degree_scaled_transition_max_abs_residual": (
+            canonicalize_equivalent_unit_residual(adverse.unit_residual)
+        ),
         "second_to_millisecond_exponent_roundtrip_max_abs_residual_per_s": (
-            adverse.time_unit_residual
+            canonicalize_equivalent_unit_residual(adverse.time_unit_residual)
         ),
     }
     periodicity = {
@@ -662,6 +688,16 @@ def validate_report(report: dict[str, Any]) -> dict[str, int]:
         != DIRECT_TRANSITION_RESIDUAL_GATE
     ):
         raise ValueError("direct-transition residual gate is not registered")
+    if (
+        report["registration"].get("equivalent_unit_residual_gate")
+        != EQUIVALENT_UNIT_RESIDUAL_GATE
+    ):
+        raise ValueError("equivalent-unit residual gate is not registered")
+    if (
+        report["registration"].get("equivalent_unit_residual_reporting_policy")
+        != EQUIVALENT_UNIT_RESIDUAL_REPORTING_POLICY
+    ):
+        raise ValueError("equivalent-unit reporting policy is not registered")
     event = report["event_time_sensitivity"]
     if event["implicit"]["status"] != "transverse":
         raise ValueError("registered event must remain transverse")

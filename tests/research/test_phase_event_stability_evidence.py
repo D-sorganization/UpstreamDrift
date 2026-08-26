@@ -17,11 +17,13 @@ from scripts.research.proximal_distal_energy.run_phase_event_stability import (
     ARRAY_PATH,
     DIRECT_TRANSITION_RESIDUAL_GATE,
     DIRECT_TRANSITION_RESIDUAL_SIGNIFICANT_DIGITS,
+    EQUIVALENT_UNIT_RESIDUAL_GATE,
     REFINEMENT_RESIDUAL_GATE,
     REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS,
     REPORT_PATH,
     build_report,
     canonicalize_direct_transition_residual,
+    canonicalize_equivalent_unit_residual,
     canonicalize_refinement_residual,
     validate_report,
 )
@@ -53,6 +55,15 @@ def test_direct_transition_residual_is_a_portable_conservative_upper_bound() -> 
     assert canonicalize_direct_transition_residual(3.46646e-7) == 4e-7
     with pytest.raises(ValueError, match="raw direct-transition residual"):
         canonicalize_direct_transition_residual(DIRECT_TRANSITION_RESIDUAL_GATE)
+
+
+def test_equivalent_unit_residual_is_a_portable_decade_upper_bound() -> None:
+    """Machine epsilon differences must not become release-facing digits."""
+
+    assert canonicalize_equivalent_unit_residual(2.22045e-16) == 1e-15
+    assert canonicalize_equivalent_unit_residual(8.88178e-16) == 1e-15
+    with pytest.raises(ValueError, match="raw equivalent-unit residual"):
+        canonicalize_equivalent_unit_residual(EQUIVALENT_UNIT_RESIDUAL_GATE)
 
 
 @pytest.fixture(scope="module")

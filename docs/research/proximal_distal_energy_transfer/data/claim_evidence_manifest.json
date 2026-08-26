@@ -4023,8 +4023,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/PHASE_EVENT_STABILITY.md": {
-      "sha256": "e8ec69afddb5166913845cc4de5b7e39937e374c5e6589a8f28481e34c409bca",
-      "bytes": 2999,
+      "sha256": "1b0f5855974fe796fc69134239a10e6e40cb03db5e5174681e082c8615307f30",
+      "bytes": 3305,
       "referenced_by": [
         "PD-CLAIM-315",
         "PD-CLAIM-316"
@@ -4966,16 +4966,16 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json": {
-      "sha256": "2a31053243d6ae375db6015f06d05697a81f8c897b2a8abd01dff3c9c6de3bc1",
-      "bytes": 8996,
+      "sha256": "ee594a499c4f0d9c11e50f6cc3161b7b47c641712f782e99a16b1270f7028fc0",
+      "bytes": 9099,
       "referenced_by": [
         "PD-CLAIM-315",
         "PD-CLAIM-316"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.npz": {
-      "sha256": "f5d075dacbd7f5b5d352521360dfada7ced7663bc6bb5e96d3a62ae4cd34c362",
-      "bytes": 938606,
+      "sha256": "3ec34ca51823849371b8045e668ce5357ef3f9c4be4309e4478e035921dc012e",
+      "bytes": 938642,
       "referenced_by": [
         "PD-CLAIM-315",
         "PD-CLAIM-316"
@@ -5858,7 +5858,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "c1c4a442daa12ed9e9bf447db5069aef2451deeb6aea4c39cb3d32aca32b2b68",
+      "sha256": "90fd16469671db224aee26e6341eab2dd982f03eaca19cbcebf071a875645daf",
       "bytes": 145960,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -6935,8 +6935,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/run_phase_event_stability.py": {
-      "sha256": "d9337ce4365930ff571544a4d43d0d7fc729d213db74c838b227bd496f81404f",
-      "bytes": 27686,
+      "sha256": "a0b80b90a5415117aa8be5929439e207770c3baf09440b741b12f52788920fc4",
+      "bytes": 29240,
       "referenced_by": [
         "PD-CLAIM-315",
         "PD-CLAIM-316"
@@ -7975,8 +7975,8 @@
       ]
     },
     "tests/research/test_phase_event_stability_evidence.py": {
-      "sha256": "5f0e50e84a8f5ff0cf83b8534e2cb22d5c486154b5d843351985950777be6bd8",
-      "bytes": 7260,
+      "sha256": "2926fa376646d661bc2a0eb1efee3f20f8516039dd5fad359cafe5cf65791e1e",
+      "bytes": 7789,
       "referenced_by": [
         "PD-CLAIM-315",
         "PD-CLAIM-316"

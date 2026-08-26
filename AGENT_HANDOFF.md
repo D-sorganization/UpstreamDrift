@@ -79,7 +79,8 @@ is the single proximal-to-distal completion authority.
   scaled periodicity residual is 1.48546 versus a `1e-6` tolerance.
 - Python 3.11/3.12 reproduce the report exactly. Step refinement is reported at
   two significant digits (`6.9e-6`), and direct-rollout agreement is an upward-
-  rounded `4e-7`; raw `1e-5`/`1e-4` gates and full NPZ arrays remain. Gains span 0.093456--8.33244; the event
+  rounded `4e-7`; raw `1e-5`/`1e-4` gates and full NPZ arrays remain. Unit
+  controls use a raw `1e-12` gate and conservative decade bounds. Gains span 0.093456--8.33244; the event
   denominator is 35.0258 s^-1 and direct/implicit agreement is `5.98e-5` s.
   These are local synthetic diagnostics, not asymptotic stability, neural
   timing demand, participant robustness, passive torque, or coaching evidence.
