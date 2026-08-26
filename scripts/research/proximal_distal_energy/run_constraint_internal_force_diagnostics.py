@@ -104,7 +104,6 @@ def _planar_audit(
         grip_angle_rad=grip_angle_rad,
         angular_coordinate_scale_rad=ANGULAR_COORDINATE_SCALE_RAD,
         translation_coordinate_scale_m=translation_scale_m,
-        relative_tolerance=RELATIVE_TOLERANCE,
     )
 
 

@@ -222,6 +222,31 @@ def _contact_claim(candidates: list[dict[str, Any]]) -> dict[str, Any]:
     return _claim(spec, candidates)
 
 
+def _update_numeric_contracts(new_claims: tuple[dict[str, Any], ...]) -> None:
+    """Replace the numeric contracts owned by this registration slice."""
+
+    contracts = json.loads(NUMERIC_CONTRACTS.read_text(encoding="utf-8"))
+    contracts["claims"] = [
+        contract
+        for contract in contracts["claims"]
+        if contract["claim_id"] not in CLAIM_IDS
+    ]
+    contracts["claims"].extend(
+        {
+            "claim_id": claim["claim_id"],
+            "statement_sha256": hashlib.sha256(
+                claim["statement"].encode("utf-8")
+            ).hexdigest(),
+            "numeric_evidence": claim["numeric_evidence"],
+        }
+        for claim in new_claims
+    )
+    NUMERIC_CONTRACTS.write_text(
+        json.dumps(contracts, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def main() -> None:
     """Apply the frozen #9027 candidate review idempotently."""
 
@@ -306,27 +331,7 @@ def main() -> None:
         "contact-geometry/tolerance boundaries."
     )
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
-
-    contracts = json.loads(NUMERIC_CONTRACTS.read_text(encoding="utf-8"))
-    contracts["claims"] = [
-        contract
-        for contract in contracts["claims"]
-        if contract["claim_id"] not in CLAIM_IDS
-    ]
-    contracts["claims"].extend(
-        {
-            "claim_id": claim["claim_id"],
-            "statement_sha256": hashlib.sha256(
-                claim["statement"].encode("utf-8")
-            ).hexdigest(),
-            "numeric_evidence": claim["numeric_evidence"],
-        }
-        for claim in new_claims
-    )
-    NUMERIC_CONTRACTS.write_text(
-        json.dumps(contracts, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    _update_numeric_contracts(new_claims)
 
 
 if __name__ == "__main__":

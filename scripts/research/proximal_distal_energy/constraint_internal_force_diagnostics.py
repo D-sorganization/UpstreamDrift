@@ -119,7 +119,6 @@ def planar_closed_loop_audit(
     lead_arm_length_m: float = 0.75,
     trail_arm_length_m: float = 0.78,
     grip_separation_m: float = 0.25,
-    relative_tolerance: float = 1e-12,
 ) -> PlanarClosedLoopAudit:
     """Audit one planar closure map under declared coordinate scales.
 
@@ -157,11 +156,11 @@ def planar_closed_loop_audit(
     scaled_jacobian = jacobian @ np.diag(coordinate_scales)
     audit = audit_linear_map(
         scaled_jacobian,
-        relative_tolerance=relative_tolerance,
+        relative_tolerance=1e-12,
     )
     raw_rank = audit_linear_map(
         jacobian,
-        relative_tolerance=relative_tolerance,
+        relative_tolerance=1e-12,
     ).rank
     if raw_rank != audit.rank:
         raise ValueError(
