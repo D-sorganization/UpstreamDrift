@@ -64,11 +64,15 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.empty("Import data to begin.")
 
     def empty(self, message: str) -> None:
-        self.axes.clear()
-        self.axes.text(
-            0.5, 0.5, message, ha="center", va="center", transform=self.axes.transAxes
-        )
-        self.axes.set_axis_off()
+        """Fully reset the canvas (dropping any colorbar axes) and show `message`.
+
+        Uses ``reset_axes`` rather than clearing the current axes in place
+        so that artifacts from a prior analysis -- most notably a
+        colorbar's own axes -- cannot survive onto the placeholder state.
+        """
+        axes = self.reset_axes()
+        axes.text(0.5, 0.5, message, ha="center", va="center", transform=axes.transAxes)
+        axes.set_axis_off()
         self.draw_idle()
 
     def reset_axes(self) -> Axes:
@@ -583,6 +587,7 @@ class MainWidget(QtWidgets.QWidget):
         self._refresh_session_tree()
         self.data_table.set_frame(self.analysis_frame)
         self.flexible_analysis.set_frame(self.analysis_frame)
+        self._reset_analysis_canvases()
         metrics = numeric_metric_columns(self.analysis_frame)
         for widget in (
             self.relationship_metrics,
@@ -622,6 +627,31 @@ class MainWidget(QtWidgets.QWidget):
         index = combo.findText(value)
         if index >= 0:
             combo.setCurrentIndex(index)
+
+    def _reset_analysis_canvases(self) -> None:
+        """Clear every analysis canvas so stale charts never outlive their data.
+
+        Called from ``_refresh_all``, the single choke point reached by
+        ``clear_project``, ``import_file``, ``load_private_corpus_sessions``,
+        ``load_project``, ``_remove_selected_sessions``, and
+        ``_run_treatment_ui``. Any of those changes the underlying
+        project/session set, so a chart built against the previous data
+        must not remain visible until (or unless) the user reruns that
+        specific analysis against the new data.
+        """
+        message = f"{self.project.name}: run an analysis to populate this chart."
+        for canvas in (
+            self.relationship_plot,
+            self.model_plot,
+            self.comparison_plot,
+            self.dispersion_plot,
+            self.trend_plot,
+        ):
+            canvas.empty(message)
+
+    def _title_with_project(self, text: str) -> str:
+        """Append the current project name so a chart's data identity is visible."""
+        return f"{text} — {self.project.name}"
 
     def _refresh_session_tree(self) -> None:
         self.session_tree.clear()
@@ -697,7 +727,7 @@ class MainWidget(QtWidgets.QWidget):
         )
         axes.set_xticks(range(len(metrics)), metrics, rotation=45, ha="right")
         axes.set_yticks(range(len(metrics)), metrics)
-        axes.set_title(f"{result.method.title()} Correlation")
+        axes.set_title(self._title_with_project(f"{result.method.title()} Correlation"))
         self.relationship_plot.figure.colorbar(image, ax=axes, fraction=0.046)
         self.relationship_plot.draw_idle()
         self.status_label.setText(
@@ -768,7 +798,7 @@ class MainWidget(QtWidgets.QWidget):
         )
         axes.set_ylim(0, 1)
         axes.set_ylabel("Explained Variance Ratio")
-        axes.set_title("Principal-Component Variance")
+        axes.set_title(self._title_with_project("Principal-Component Variance"))
         axes.grid(True, axis="y", alpha=0.25)
         self.relationship_plot.draw_idle()
         warning = ", ".join(vif.warning_metrics) or "none"
@@ -817,7 +847,11 @@ class MainWidget(QtWidgets.QWidget):
         axes.plot(bounds, bounds, linestyle="--", color="gray")
         axes.set_xlabel("Actual")
         axes.set_ylabel("Predicted")
-        axes.set_title(f"Held-Out {result.model.replace('_', ' ').title()} Predictions")
+        axes.set_title(
+            self._title_with_project(
+                f"Held-Out {result.model.replace('_', ' ').title()} Predictions"
+            )
+        )
         axes.grid(True, alpha=0.25)
         self.model_plot.draw_idle()
         self.status_label.setText(
@@ -845,7 +879,9 @@ class MainWidget(QtWidgets.QWidget):
         means = [item.mean for item in result.summaries]
         errors = [item.standard_deviation for item in result.summaries]
         axes.errorbar(labels, means, yerr=errors, fmt="o", capsize=5)
-        axes.set_title(f"{result.metric}: Mean and Standard Deviation")
+        axes.set_title(
+            self._title_with_project(f"{result.metric}: Mean and Standard Deviation")
+        )
         axes.grid(True, axis="y", alpha=0.25)
         self.comparison_plot.draw_idle()
         warning = next((item.warning for item in result.pairwise if item.warning), None)
@@ -904,7 +940,7 @@ class MainWidget(QtWidgets.QWidget):
         self.dispersion_table.set_frame(pd.DataFrame(rows))
         axes.set_xlabel(forward)
         axes.set_ylabel(lateral)
-        axes.set_title("95% Dispersion Ellipses")
+        axes.set_title(self._title_with_project("95% Dispersion Ellipses"))
         axes.grid(True, alpha=0.25)
         if len(groups) > 1:
             axes.legend(fontsize="small")
@@ -945,7 +981,9 @@ class MainWidget(QtWidgets.QWidget):
                 linestyle="--",
                 alpha=0.35,
             )
-        axes.set_title(f"{result.metric}: Longitudinal Change")
+        axes.set_title(
+            self._title_with_project(f"{result.metric}: Longitudinal Change")
+        )
         axes.legend(fontsize="small")
         axes.grid(True, alpha=0.25)
         self.trend_plot.draw_idle()
