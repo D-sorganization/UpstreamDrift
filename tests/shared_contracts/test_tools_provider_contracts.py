@@ -38,8 +38,9 @@ def _fresh_provider_import(name: str) -> Iterator[None]:
         f"src.shared.python.{name}",
         f"src.{name}",
         "shared",
-        "src.shared",
     ]
+    # ``src.shared`` is the downstream namespace. Clearing it wholesale also
+    # evicts UpstreamDrift-owned packages when Tools is first on PYTHONPATH.
     if name == "sidekick":
         # The alias finder canonicalises sidekick against the deprecated
         # upstream_drift_tools spellings too; a cached local copy of ANY of
@@ -80,6 +81,16 @@ def _assert_from_tools(path: Path) -> None:
             "/tools/",
         )
     ), f"Expected Tools-backed provider path, got: {path}"
+
+
+@pytest.mark.unit
+def test_fresh_provider_import_preserves_downstream_modules() -> None:
+    """Refreshing one Tools provider must not evict UpstreamDrift packages."""
+    module_name = "src.shared.python.perturbation.tools_variation_adapter"
+    module = importlib.import_module(module_name)
+
+    with _fresh_provider_import("swing_sim"):
+        assert sys.modules[module_name] is module
 
 
 def test_signal_toolkit_imports_resolve_from_tools_provider() -> None:
