@@ -16,15 +16,31 @@ from scripts.research.proximal_distal_energy.scaffold_numeric_claim_contracts im
     build_scaffold,
 )
 
-
 pytestmark = pytest.mark.unit
 
 
-def test_scaffold_reproduces_registered_documents() -> None:
+def test_scaffold_preserves_registered_coverage_and_reviewed_overrides() -> None:
     contracts, reported = build_scaffold(ARTICLE.parents[2])
+    registered_contracts = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+    registered_reported = json.loads(REPORTED_PATH.read_text(encoding="utf-8"))
 
-    assert contracts == json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
-    assert reported == json.loads(REPORTED_PATH.read_text(encoding="utf-8"))
+    scaffold_by_id = {row["claim_id"]: row for row in contracts["claims"]}
+    registered_by_id = {row["claim_id"]: row for row in registered_contracts["claims"]}
+    assert set(scaffold_by_id) == set(registered_by_id)
+    assert {
+        claim_id
+        for claim_id in scaffold_by_id
+        if scaffold_by_id[claim_id] != registered_by_id[claim_id]
+    } == {"PD-CLAIM-313", "PD-CLAIM-314"}
+
+    scaffold_reported = reported["claims"]
+    reviewed_reported = registered_reported["claims"]
+    assert set(scaffold_reported) - set(reviewed_reported) == {"PD-CLAIM-313"}
+    assert set(reviewed_reported) <= set(scaffold_reported)
+    assert all(
+        reviewed_reported[claim_id] == scaffold_reported[claim_id]
+        for claim_id in reviewed_reported
+    )
 
 
 def test_delivery_event_context_matches_time_pointer() -> None:

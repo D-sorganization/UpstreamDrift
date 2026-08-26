@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
+import uuid
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -11,9 +13,6 @@ from typing import Any, cast
 
 import numpy as np
 import pandas as pd
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from matplotlib.dates import date2num
 from PyQt6 import QtCore, QtGui, QtWidgets
 
@@ -41,54 +40,17 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.tools.launch_monitor_analytics.flexible_analysis_widget import (
     FlexibleAnalysisWidget,
 )
+from src.tools.launch_monitor_analytics.plot_canvas import PlotCanvas
 from src.tools.launch_monitor_analytics.widgets import (
     DataFrameTable,
     ImportMappingDialog,
+    populate_combo as _populate_combo,
+    selected_text as _selected_text,
 )
 
 logger = get_logger(__name__)
 
-__all__ = ["LaunchMonitorAnalyticsWindow", "MainWidget", "main"]
-
-
-class PlotCanvas(FigureCanvasQTAgg):
-    """Small reusable matplotlib canvas."""
-
-    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
-        self.figure = Figure(figsize=(6.0, 4.0), tight_layout=True)
-        super().__init__(self.figure)
-        self.setParent(parent)
-        self.axes = self.figure.add_subplot(111)
-        self.empty("Import data to begin.")
-
-    def empty(self, message: str) -> None:
-        self.axes.clear()
-        self.axes.text(
-            0.5, 0.5, message, ha="center", va="center", transform=self.axes.transAxes
-        )
-        self.axes.set_axis_off()
-        self.draw_idle()
-
-    def reset_axes(self) -> Axes:
-        """Replace every axes, including colorbars from a prior analysis."""
-        self.figure.clear()
-        self.axes = self.figure.add_subplot(111)
-        return self.axes
-
-
-def _selected_text(list_widget: QtWidgets.QListWidget) -> tuple[str, ...]:
-    return tuple(item.text() for item in list_widget.selectedItems())
-
-
-def _populate_combo(combo: QtWidgets.QComboBox, values: list[str]) -> None:
-    previous = combo.currentText()
-    combo.blockSignals(True)
-    combo.clear()
-    combo.addItems(values)
-    previous_index = combo.findText(previous)
-    if previous_index >= 0:
-        combo.setCurrentIndex(previous_index)
-    combo.blockSignals(False)
+__all__ = ["LaunchMonitorAnalyticsWindow", "MainWidget", "PlotCanvas", "main"]
 
 
 class MainWidget(QtWidgets.QWidget):
@@ -100,6 +62,7 @@ class MainWidget(QtWidgets.QWidget):
         self.project = LaunchMonitorProject("Untitled Launch Monitor Study")
         self.analysis_frame = pd.DataFrame()
         self._dirty = False
+        self._last_data_export: dict[str, str] | None = None
         self._build_ui()
         self._wire_actions()
         self._apply_theme_best_effort()
@@ -572,6 +535,7 @@ class MainWidget(QtWidgets.QWidget):
         self.project = LaunchMonitorProject("Untitled Launch Monitor Study")
         self.analysis_frame = pd.DataFrame()
         self._dirty = False
+        self._last_data_export = None
         self._refresh_all()
         self.status_label.setText("New empty project. Import launch-monitor exports.")
 
@@ -579,6 +543,7 @@ class MainWidget(QtWidgets.QWidget):
         self._refresh_session_tree()
         self.data_table.set_frame(self.analysis_frame)
         self.flexible_analysis.set_frame(self.analysis_frame)
+        self._reset_analysis_canvases()
         metrics = numeric_metric_columns(self.analysis_frame)
         for widget in (
             self.relationship_metrics,
@@ -618,6 +583,31 @@ class MainWidget(QtWidgets.QWidget):
         index = combo.findText(value)
         if index >= 0:
             combo.setCurrentIndex(index)
+
+    def _reset_analysis_canvases(self) -> None:
+        """Clear every analysis canvas so stale charts never outlive their data.
+
+        Called from ``_refresh_all``, the single choke point reached by
+        ``clear_project``, ``import_file``, ``load_private_corpus_sessions``,
+        ``load_project``, ``_remove_selected_sessions``, and
+        ``_run_treatment_ui``. Any of those changes the underlying
+        project/session set, so a chart built against the previous data
+        must not remain visible until (or unless) the user reruns that
+        specific analysis against the new data.
+        """
+        message = f"{self.project.name}: run an analysis to populate this chart."
+        for canvas in (
+            self.relationship_plot,
+            self.model_plot,
+            self.comparison_plot,
+            self.dispersion_plot,
+            self.trend_plot,
+        ):
+            canvas.empty(message)
+
+    def _title_with_project(self, text: str) -> str:
+        """Append the current project name so a chart's data identity is visible."""
+        return f"{text} — {self.project.name}"
 
     def _refresh_session_tree(self) -> None:
         self.session_tree.clear()
@@ -693,7 +683,7 @@ class MainWidget(QtWidgets.QWidget):
         )
         axes.set_xticks(range(len(metrics)), metrics, rotation=45, ha="right")
         axes.set_yticks(range(len(metrics)), metrics)
-        axes.set_title(f"{result.method.title()} Correlation")
+        axes.set_title(self._title_with_project(f"{result.method.title()} Correlation"))
         self.relationship_plot.figure.colorbar(image, ax=axes, fraction=0.046)
         self.relationship_plot.draw_idle()
         self.status_label.setText(
@@ -764,7 +754,7 @@ class MainWidget(QtWidgets.QWidget):
         )
         axes.set_ylim(0, 1)
         axes.set_ylabel("Explained Variance Ratio")
-        axes.set_title("Principal-Component Variance")
+        axes.set_title(self._title_with_project("Principal-Component Variance"))
         axes.grid(True, axis="y", alpha=0.25)
         self.relationship_plot.draw_idle()
         warning = ", ".join(vif.warning_metrics) or "none"
@@ -813,7 +803,11 @@ class MainWidget(QtWidgets.QWidget):
         axes.plot(bounds, bounds, linestyle="--", color="gray")
         axes.set_xlabel("Actual")
         axes.set_ylabel("Predicted")
-        axes.set_title(f"Held-Out {result.model.replace('_', ' ').title()} Predictions")
+        axes.set_title(
+            self._title_with_project(
+                f"Held-Out {result.model.replace('_', ' ').title()} Predictions"
+            )
+        )
         axes.grid(True, alpha=0.25)
         self.model_plot.draw_idle()
         self.status_label.setText(
@@ -841,7 +835,9 @@ class MainWidget(QtWidgets.QWidget):
         means = [item.mean for item in result.summaries]
         errors = [item.standard_deviation for item in result.summaries]
         axes.errorbar(labels, means, yerr=errors, fmt="o", capsize=5)
-        axes.set_title(f"{result.metric}: Mean and Standard Deviation")
+        axes.set_title(
+            self._title_with_project(f"{result.metric}: Mean and Standard Deviation")
+        )
         axes.grid(True, axis="y", alpha=0.25)
         self.comparison_plot.draw_idle()
         warning = next((item.warning for item in result.pairwise if item.warning), None)
@@ -900,7 +896,7 @@ class MainWidget(QtWidgets.QWidget):
         self.dispersion_table.set_frame(pd.DataFrame(rows))
         axes.set_xlabel(forward)
         axes.set_ylabel(lateral)
-        axes.set_title("95% Dispersion Ellipses")
+        axes.set_title(self._title_with_project("95% Dispersion Ellipses"))
         axes.grid(True, alpha=0.25)
         if len(groups) > 1:
             axes.legend(fontsize="small")
@@ -941,7 +937,9 @@ class MainWidget(QtWidgets.QWidget):
                 linestyle="--",
                 alpha=0.35,
             )
-        axes.set_title(f"{result.metric}: Longitudinal Change")
+        axes.set_title(
+            self._title_with_project(f"{result.metric}: Longitudinal Change")
+        )
         axes.legend(fontsize="small")
         axes.grid(True, alpha=0.25)
         self.trend_plot.draw_idle()
@@ -1004,6 +1002,42 @@ class MainWidget(QtWidgets.QWidget):
             except OSError as exc:
                 self._show_error("Could Not Save Project", exc)
 
+    def export_data(self, path: str | Path, *, as_parquet: bool = False) -> Path:
+        """Export the analysis view, stamping a shared export ID + hash.
+
+        Mirrors the ``ImportManifest`` provenance pattern: a fresh export
+        ID/timestamp is embedded in the artifact (a leading ``#`` comment
+        row for CSV, Parquet schema metadata for Parquet) and recorded on
+        ``self._last_data_export`` with the file's own SHA-256, so a later
+        ``export_manifest`` call can correlate the two on disk.
+        """
+        destination = Path(path)
+        export_id = uuid.uuid4().hex
+        exported_at = datetime.now(UTC).isoformat()
+        is_parquet = as_parquet or destination.suffix.lower() == ".parquet"
+        if is_parquet:
+            import pyarrow as pa
+            import pyarrow.parquet as pq
+
+            table = pa.Table.from_pandas(self.analysis_frame, preserve_index=False)
+            metadata = dict(table.schema.metadata or {})
+            metadata[b"export_id"] = export_id.encode("utf-8")
+            metadata[b"exported_at"] = exported_at.encode("utf-8")
+            table = table.replace_schema_metadata(metadata)
+            pq.write_table(table, destination)
+        else:
+            with destination.open("w", encoding="utf-8", newline="") as handle:
+                handle.write(f"# export_id={export_id} exported_at={exported_at}\n")
+                self.analysis_frame.to_csv(handle, index=False)
+        data_sha256 = hashlib.sha256(destination.read_bytes()).hexdigest()
+        self._last_data_export = {
+            "export_id": export_id,
+            "exported_at": exported_at,
+            "data_file": destination.name,
+            "data_sha256": data_sha256,
+        }
+        return destination
+
     def _on_export_data(self) -> None:
         path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(
             self,
@@ -1014,14 +1048,32 @@ class MainWidget(QtWidgets.QWidget):
         if not path:
             return
         try:
-            if "Parquet" in selected_filter or Path(path).suffix.lower() == ".parquet":
-                self.analysis_frame.to_parquet(path, index=False)
-            else:
-                self.analysis_frame.to_csv(path, index=False)
+            self.export_data(path, as_parquet="Parquet" in selected_filter)
         except (OSError, ValueError, ImportError) as exc:
             self._show_error("Could Not Export Data", exc)
             return
-        self.status_label.setText(f"Exported canonical analysis view to {path}.")
+        export_id = (self._last_data_export or {}).get("export_id", "")
+        self.status_label.setText(f"Exported analysis view to {path} (ID {export_id}).")
+
+    def export_manifest(self, path: str | Path) -> Path:
+        """Write the reproducibility manifest, correlated to the last export.
+
+        Embeds the last ``export_data`` call's ID, filename, and SHA-256
+        under ``data_export`` (``None`` if no export ran yet) so the pair
+        stays verifiably linked even once separated on disk.
+        """
+        destination = Path(path)
+        payload = {
+            "project": self.project.name,
+            "sessions": [asdict(session.manifest) for session in self.project.sessions],
+            "treatment_audit_log": self.project.audit_log,
+            "analysis_rows": len(self.analysis_frame),
+            "canonical_metrics": numeric_metric_columns(self.analysis_frame),
+            "scientific_boundary": self.scientific_boundary.text(),
+            "data_export": self._last_data_export,
+        }
+        destination.write_text(json.dumps(payload, indent=2, default=str), "utf-8")
+        return destination
 
     def _on_export_manifest(self) -> None:
         path, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -1032,18 +1084,8 @@ class MainWidget(QtWidgets.QWidget):
         )
         if not path:
             return
-        payload = {
-            "project": self.project.name,
-            "sessions": [asdict(session.manifest) for session in self.project.sessions],
-            "treatment_audit_log": self.project.audit_log,
-            "analysis_rows": len(self.analysis_frame),
-            "canonical_metrics": numeric_metric_columns(self.analysis_frame),
-            "scientific_boundary": self.scientific_boundary.text(),
-        }
         try:
-            Path(path).write_text(
-                json.dumps(payload, indent=2, default=str), encoding="utf-8"
-            )
+            self.export_manifest(path)
         except OSError as exc:
             self._show_error("Could Not Export Manifest", exc)
 

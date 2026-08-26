@@ -29,6 +29,10 @@ from scripts.research.proximal_distal_energy.local_linear_diagnostics import (
     RankTolerance,
     audit_double_pendulum_configuration_state,
 )
+from scripts.research.proximal_distal_energy.numeric_evidence import (
+    CANONICAL_SIGNIFICANT_DIGITS,
+    canonicalize_published_numbers,
+)
 from scripts.research.proximal_distal_energy.run_experiments import (
     DT,
     HORIZON,
@@ -60,7 +64,6 @@ STEP_MULTIPLIERS = (0.1, 1.0, 10.0)
 BASE_STATE_STEPS = np.array([1e-6, 1e-6, 1e-5, 1e-5])
 BASE_CONTROL_STEPS = np.array([1e-4, 1e-4])
 RANK_TOLERANCE = RankTolerance(absolute=1e-8, relative=1e-7)
-CANONICAL_SIGNIFICANT_DIGITS = 6
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,24 +100,6 @@ def _linearization_point(
         ),
         control_steps=tuple(float(value) for value in selected_control_steps),
     )
-
-
-def _canonicalize_numeric(value: Any) -> Any:
-    """Normalize published floats while retaining full-precision rank decisions."""
-    if isinstance(value, (float, np.floating)):
-        numeric = float(value)
-        if not np.isfinite(numeric):
-            raise ValueError("published local-rank evidence must be finite")
-        if numeric == 0.0:
-            return 0.0
-        return float(f"{numeric:.{CANONICAL_SIGNIFICANT_DIGITS}g}")
-    if isinstance(value, dict):
-        return {key: _canonicalize_numeric(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [_canonicalize_numeric(item) for item in value]
-    if isinstance(value, tuple):
-        return [_canonicalize_numeric(item) for item in value]
-    return value
 
 
 def _scale_payload(scales: NondimensionalScales) -> dict[str, Any]:
@@ -524,7 +509,10 @@ def build_report() -> dict[str, object]:
         "structural_identifiability_status": "not_evaluated",
         "summary": _summary_payload(points, scale_scenarios),
     }
-    return cast(dict[str, object], _canonicalize_numeric(report))
+    return cast(
+        dict[str, object],
+        canonicalize_published_numbers(report, context="published local-rank evidence"),
+    )
 
 
 def validate_report(report: dict[str, Any]) -> dict[str, int]:

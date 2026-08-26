@@ -4583,6 +4583,498 @@
           "rtol": 0.0
         }
       ]
+    },
+    {
+      "claim_id": "PD-CLAIM-308",
+      "statement_sha256": "3603af99072640c4e18599f1e710929c678a9fb7538d78a317bbd02e3d3e24e6",
+      "numeric_evidence": [
+        {
+          "literal_id": "7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/physical_parameter_map/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/physical_parameter_map/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-309",
+      "statement_sha256": "f85376e0183d4a6569793c3857f7779316041ef8f942ce57f5cbe741ffb1544d",
+      "numeric_evidence": [
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-309/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/finite_record_regressor/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "180.853#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/finite_record_regressor/cumulative_rank/3/retained_condition_number",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4.44089e-16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-309/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/zero_motion_killswitch/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-310",
+      "statement_sha256": "2628de707ac1feaaa28c389211c1511f1cb24f58ffd98209187cee565d251fdd",
+      "numeric_evidence": [
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/noise_aware_lower_bound_screen/full_record_cases/2/torque_noise_sd_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "95#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-310/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.123266#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/noise_aware_lower_bound_screen/full_record_cases/2/worst_ci95_relative_half_width",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000000999999999e-7,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "498.504#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/noise_aware_lower_bound_screen/window_cases/0/worst_ci95_relative_half_width",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-310/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-311",
+      "statement_sha256": "ed440255e65aaea3a0538a6fdfedc5273c0988cd047a6e3519af6096bdb499b2",
+      "numeric_evidence": [
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/coordinate_scale_contract/angular_coordinate_scale_rad",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.75#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/coordinate_scale_contract/translation_coordinate_scale_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/regular_case/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/regular_case/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/exact_singular_case/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/planar_closed_loop/exact_singular_case/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-312",
+      "statement_sha256": "2282ac732c6c284b683e6c0b24f383383b7158a06f177bba0ad9c71544e6f9d4",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/normalization/moment_rows_divided_by_reference_length_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/registered_span_case/span_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.005000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/registered_span_case/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/registered_span_case/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/coincident_contact_case/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+          "json_pointer": "/bilateral_point_force/coincident_contact_case/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-313",
+      "statement_sha256": "1f9dce4e4d03f2b18bce77192a18be143cc0677a5ff7dc3fe6be2f157ee662dc",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.75#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_geometry_m/lead_arm_length_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.78#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_geometry_m/trail_arm_length_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.25#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_geometry_m/grip_separation_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "362#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/sample_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.66533e-16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/maximum_closure_residual_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/minimum_rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/minimum_nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/coordinate_scale_contract/angular_coordinate_scale_rad",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.75#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/coordinate_scale_contract/translation_coordinate_scale_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.202095#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/minimum_smallest_scaled_singular_value_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "6.45326#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/maximum_scaled_condition_number",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1e-14#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/nominal_orbit/maximum_scaled_singular_value_spread_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-314",
+      "statement_sha256": "aeaaee1163ec1ca99d37bcef42067019d3010d71cb27e420594856c7460316e3",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.03#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/exact_triangle_degeneracies/lower_geometry_m/grip_separation_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.53#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/exact_triangle_degeneracies/upper_geometry_m/grip_separation_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/exact_triangle_degeneracies/lower_rank_audit/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/exact_triangle_degeneracies/lower_rank_audit/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1e-8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/distance_to_lower_degeneracy_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/3/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1e-6#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/3/relative_tolerance",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/4/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1e-4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+          "json_pointer": "/near_lower_boundary_sweep/2/tolerance_cases/4/relative_tolerance",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
     }
   ]
 }
