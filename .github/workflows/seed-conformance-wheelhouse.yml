@@ -1,0 +1,75 @@
+name: Seed approved Canonical Core wheelhouse
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    name: Seed exact reviewed wheels
+    timeout-minutes: 12
+    runs-on: d-sorg-fleet-docker
+    steps:
+      - name: Require approved OGLaptop runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${RUNNER_NAME:-}" in
+            d-sorg-local-Oglaptop-1|d-sorg-local-Oglaptop-2|d-sorg-local-Oglaptop-3|d-sorg-local-Oglaptop-4) ;;
+            *)
+              echo "::error::Wheelhouse seeding is restricted to approved OGLaptop 1-4 runners."
+              exit 2
+              ;;
+          esac
+
+      - name: Check out reviewed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set up exact CPython 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: ""
+
+      - name: Restore manifest-keyed wheelhouse
+        id: wheelhouse-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ${{ runner.temp }}/upstreamdrift-conformance-wheelhouse-v1
+          key: upstreamdrift-conformance-v1-${{ runner.os }}-${{ runner.arch }}-py3.11-${{ hashFiles('config/ci/conformance-wheelhouse-v1.json') }}
+
+      - name: Fetch only source-controlled wheel bytes
+        if: steps.wheelhouse-cache.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          PIP_CONFIG_FILE: /dev/null
+          PIP_DISABLE_PIP_VERSION_CHECK: "1"
+          PIP_NO_INPUT: "1"
+        run: |
+          set -euo pipefail
+          wheelhouse="$RUNNER_TEMP/upstreamdrift-conformance-wheelhouse-v1"
+          mkdir -p "$wheelhouse"
+          python -m pip download \
+            --index-url https://pypi.org/simple \
+            --require-hashes \
+            --only-binary=:all: \
+            --no-deps \
+            --dest "$wheelhouse" \
+            -r config/ci/conformance-bootstrap-py311.lock
+
+      - name: Verify exact bytes before cache save
+        shell: bash
+        run: >-
+          python scripts/ci/conformance_dependency_bootstrap.py verify
+          --manifest config/ci/conformance-wheelhouse-v1.json
+          --wheelhouse "$RUNNER_TEMP/upstreamdrift-conformance-wheelhouse-v1"
+
+      - name: Record approval boundary
+        shell: bash
+        run: |
+          echo "::notice::cache seeding does not approve package versions"
+          echo "Cache seeding does not approve package versions; canonical dependency review remains authoritative." >> "$GITHUB_STEP_SUMMARY"

@@ -8,6 +8,12 @@ is the single proximal-to-distal completion authority.
 
 - ADR-0041 assigns camera, observation, calibration, timing, session, reconstruction, and C3D contracts to Tools #4706; UpstreamDrift owns orchestration, UX, persistence, and biomechanics adapters; AffineDrift owns sanitized publication. Tools PR #4734 remains a protected candidate; do not repin `vendor/ud-tools` to a feature head, and let UpstreamDrift #9069 follow its immutable merge. Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation: there is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
 
+## Canonical Core Offline Bootstrap (#9122)
+
+- The isolated branch `fix/9122-offline-conformance-bootstrap` defines an exact seven-wheel CPython 3.11/Linux/x86_64 manifest and hash lock, a fail-closed verifier/installer, one shared composite action, and a manual-only OGLaptop 1-4 seed workflow. Cache seeding is artifact transport, not package approval, and #9120 remains the canonical dependency-resolution authority.
+- Authoritative RED is source `8daec8f15e3c6a8e11bf57a60fe21bbfeb5b1a4f`, tree `001d3c279b18f71c72717acff2e6459fec82b06a`, Repository_Management run `33016507882`, job `98336009020`, runner `d-sorg-local-Oglaptop-2`: syntax, Ruff, and format passed, then the exact serial `-n 0` contract produced ten intended failures for the absent implementation.
+- Do not seed the cache, alter runner services/routing, open a PR that triggers broad CI, or run DeskComputer validation during the capacity drain. Publish one consolidated implementation commit, cancel any automatic broad fan-out, and record the exact GREEN commit/tree/run/job/approved-runner evidence before protected review.
+
 ## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.

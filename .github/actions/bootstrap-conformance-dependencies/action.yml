@@ -1,0 +1,29 @@
+name: Bootstrap Canonical Core dependencies
+description: Restore, verify, and install the exact offline Canonical Core wheelhouse.
+
+runs:
+  using: composite
+  steps:
+    - name: Restore approved Canonical Core wheelhouse
+      id: wheelhouse-cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+      with:
+        path: ${{ runner.temp }}/upstreamdrift-conformance-wheelhouse-v1
+        key: upstreamdrift-conformance-v1-${{ runner.os }}-${{ runner.arch }}-py3.11-${{ hashFiles('config/ci/conformance-wheelhouse-v1.json') }}
+
+    - name: Require approved wheelhouse cache hit
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ "${{ steps.wheelhouse-cache.outputs.cache-hit }}" != "true" ]]; then
+          echo "::error::Approved Canonical Core wheelhouse cache is absent. Run the manual seed workflow after review."
+          exit 2
+        fi
+
+    - name: Verify and install approved wheelhouse without an index
+      shell: bash
+      run: >-
+        python scripts/ci/conformance_dependency_bootstrap.py install
+        --manifest config/ci/conformance-wheelhouse-v1.json
+        --lock config/ci/conformance-bootstrap-py311.lock
+        --wheelhouse "${{ runner.temp }}/upstreamdrift-conformance-wheelhouse-v1"

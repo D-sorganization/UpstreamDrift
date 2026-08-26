@@ -173,9 +173,9 @@ jobs:
                       else:
                           path.unlink(missing_ok=True)
           PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1" --default-timeout=100
-          python -m ensurepip --upgrade || true
-          pip install --force-reinstall "pydantic==2.12.5"
+
+      - name: Bootstrap verified Canonical Core dependencies
+        uses: ./.github/actions/bootstrap-conformance-dependencies
 
       - name: Guard JaxSim version pin (issue #6660)
         # Fail the build if the jaxsim pin drifts from the gated ==0.9.0,
@@ -308,10 +308,10 @@ jobs:
                       else:
                           path.unlink(missing_ok=True)
           PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1" --default-timeout=100
-          python -m ensurepip --upgrade || true
-          pip install --force-reinstall "pydantic==2.12.5"
           pip uninstall -y pytest-vcr pytest-recording || true
+
+      - name: Bootstrap verified Canonical Core dependencies
+        uses: ./.github/actions/bootstrap-conformance-dependencies
 
       - name: Run canonical conformance gate
         env:
