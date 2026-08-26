@@ -2,6 +2,17 @@
 
 This directory contains all simulation results, analysis outputs, and generated reports from the Golf Modeling Suite.
 
+## REST API Integration (Issue #8871)
+
+`src.api.services.simulation_service.SimulationService` persists every
+successfully completed `/simulate` run here via `OutputManager` — the same
+manager used by the desktop app and the video-pose pipeline, so files
+written from any of these paths share one schema. Each run's simulation
+data (and analysis results, if requested) is saved as JSON under
+`simulations/<engine>/`, and the resulting file path is returned to the
+caller in `SimulationResponse.export_paths`. A failed run persists nothing,
+so `export_paths` is empty in that case — it is never fabricated.
+
 ## Directory Structure
 
 ```

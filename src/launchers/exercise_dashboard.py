@@ -124,7 +124,11 @@ class ExerciseDashboard(QMainWindow):
                 self._current_widget = QLabel(f"Unknown engine: {name}")
 
             if self._current_widget:
-                # Remove window flags since we're embedding it
+                # Remove window flags since we're embedding it. This hides
+                # the title bar, so it can no longer be relied on to show
+                # which engine/model is active -- UnifiedDashboardWindow's
+                # in-body identity strip (ModelLoadStatus, issue #8829)
+                # exists precisely so that identity survives this step.
                 if isinstance(self._current_widget, QMainWindow):
                     self._current_widget.setWindowFlags(
                         self._current_widget.windowFlags()
