@@ -747,8 +747,8 @@
       "bytes": 278819
     },
     "docs/research/proximal_distal_energy_transfer/data/local_linear_diagnostics.json": {
-      "sha256": "3ef86e1375c5bb1e5e0c61bd31d7c5e36c68f2c99517dbd396aaec456a12f211",
-      "bytes": 209860
+      "sha256": "47d9b530b2596d4905c50f7abe6e2bddf54dbebd11e32c6f73ce4c513a943258",
+      "bytes": 210708
     },
     "docs/research/proximal_distal_energy_transfer/data/measured_trajectory_metric_registration.json": {
       "sha256": "dcd19bdcdd32df78649275babcb1f0e547022571e3fb8e36068139932ee79a00",
@@ -2499,8 +2499,8 @@
       "bytes": 11281
     },
     "scripts/research/proximal_distal_energy/run_local_linear_diagnostics.py": {
-      "sha256": "010bd45bcf38d01d1bb7ed61fde2b9ed8143bfdb1d9a7f616afc4f950a7e9d50",
-      "bytes": 17884
+      "sha256": "59bca4e1cc581f0473b5655a792de6cbf0ccc4fb1de42bb702c3ce6e355af66a",
+      "bytes": 19049
     },
     "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py": {
       "sha256": "00d97228a34d439b79c9653952260f3bb9b0a241572671d1fe1c130dccf56457",

@@ -336,12 +336,26 @@ def build_report() -> dict[str, object]:
         ],
         "global_nonlinear_status": "not_evaluated",
         "inference_boundary": INFERENCE_BOUNDARY,
-        "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
+        "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9092",
         "measurement_contract": {
             "outputs": ["shoulder_angle_rad", "wrist_relative_angle_rad"],
             "unmeasured_states": ["shoulder_rate_rad_s", "wrist_rate_rad_s"],
         },
         "nondimensional_scale_contract": {
+            "characteristic_time_derivation": (
+                "delivery_event_time_s multiplied by the registered scenario time_factor"
+            ),
+            "control_coordinates": [
+                "shoulder_generalized_torque_nm",
+                "wrist_relative_generalized_torque_nm",
+            ],
+            "control_scale_derivation": (
+                "max(maximum absolute registered-rollout torque, 1 N*m)"
+            ),
+            "output_coordinates": [
+                "shoulder_angle_rad",
+                "wrist_relative_angle_rad",
+            ],
             "scenario_order": list(scale_scenarios),
             "scenarios": {
                 name: _scale_payload(scales) for name, scales in scale_scenarios.items()
@@ -351,11 +365,25 @@ def build_report() -> dict[str, object]:
                 "are numerical adequacy checks, not population priors"
             ),
             "state_units": ["rad", "rad", "rad/s", "rad/s"],
+            "state_coordinates": [
+                "shoulder_angle_rad",
+                "wrist_relative_angle_rad",
+                "shoulder_rate_rad_s",
+                "wrist_relative_rate_rad_s",
+            ],
+            "state_scale_derivation": {
+                "angles": "pi rad",
+                "rates": (
+                    "max(maximum absolute registered-rollout rate, 1 rad/s) "
+                    "multiplied by the registered scenario rate_factor"
+                ),
+            },
             "control_units": ["N*m", "N*m"],
             "output_units": ["rad", "rad"],
         },
         "model_tier": "analytical_double_pendulum",
         "operating_points": points,
+        "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
         "practical_identifiability_status": "not_evaluated",
         "reference_rollout": {
             "delivery_event": {

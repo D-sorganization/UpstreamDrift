@@ -12,7 +12,7 @@
   ],
   "global_nonlinear_status": "not_evaluated",
   "inference_boundary": "This is a local first-order numerical rank diagnostic at one declared state, control, nondimensional scaling, finite-difference step, and tolerance. Raw dimensional matrices are retained for traceability but are not a basis for conditioning comparisons. It does not establish structural identifiability, practical identifiability, global nonlinear observability, or global controllability.",
-  "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
+  "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9092",
   "measurement_contract": {
     "outputs": [
       "shoulder_angle_rad",
@@ -25,9 +25,19 @@
   },
   "model_tier": "analytical_double_pendulum",
   "nondimensional_scale_contract": {
+    "characteristic_time_derivation": "delivery_event_time_s multiplied by the registered scenario time_factor",
+    "control_coordinates": [
+      "shoulder_generalized_torque_nm",
+      "wrist_relative_generalized_torque_nm"
+    ],
+    "control_scale_derivation": "max(maximum absolute registered-rollout torque, 1 N*m)",
     "control_units": [
       "N*m",
       "N*m"
+    ],
+    "output_coordinates": [
+      "shoulder_angle_rad",
+      "wrist_relative_angle_rad"
     ],
     "output_units": [
       "rad",
@@ -92,6 +102,16 @@
       }
     },
     "scope": "registered synthetic reference scales; sensitivity scenarios are numerical adequacy checks, not population priors",
+    "state_coordinates": [
+      "shoulder_angle_rad",
+      "wrist_relative_angle_rad",
+      "shoulder_rate_rad_s",
+      "wrist_relative_rate_rad_s"
+    ],
+    "state_scale_derivation": {
+      "angles": "pi rad",
+      "rates": "max(maximum absolute registered-rollout rate, 1 rad/s) multiplied by the registered scenario rate_factor"
+    },
     "state_units": [
       "rad",
       "rad",
@@ -8389,6 +8409,7 @@
       "time_s": 0.34900000000000003
     }
   ],
+  "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
   "practical_identifiability_status": "not_evaluated",
   "reference_rollout": {
     "delivery_event": {

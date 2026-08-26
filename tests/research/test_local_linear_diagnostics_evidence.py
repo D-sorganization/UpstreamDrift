@@ -95,6 +95,37 @@ def test_report_retains_local_only_inference_boundary() -> None:
     }
 
 
+def test_report_declares_machine_readable_scale_coordinates_units_and_rationale() -> (
+    None
+):
+    report = build_report()
+    contract = report["nondimensional_scale_contract"]
+
+    assert report["issue"].endswith("/9092")
+    assert report["parent_issue"].endswith("/9027")
+    assert contract["state_coordinates"] == [
+        "shoulder_angle_rad",
+        "wrist_relative_angle_rad",
+        "shoulder_rate_rad_s",
+        "wrist_relative_rate_rad_s",
+    ]
+    assert contract["state_units"] == ["rad", "rad", "rad/s", "rad/s"]
+    assert contract["control_coordinates"] == [
+        "shoulder_generalized_torque_nm",
+        "wrist_relative_generalized_torque_nm",
+    ]
+    assert contract["control_units"] == ["N*m", "N*m"]
+    assert contract["output_coordinates"] == [
+        "shoulder_angle_rad",
+        "wrist_relative_angle_rad",
+    ]
+    assert contract["output_units"] == ["rad", "rad"]
+    assert contract["state_scale_derivation"]["angles"] == "pi rad"
+    assert "registered-rollout rate" in contract["state_scale_derivation"]["rates"]
+    assert "registered-rollout torque" in contract["control_scale_derivation"]
+    assert "delivery_event_time_s" in contract["characteristic_time_derivation"]
+
+
 def test_all_trace_derived_points_pass_declared_step_rank_stability_gate() -> None:
     report = build_report()
 
