@@ -86,6 +86,27 @@ def test_wheel_installs_in_clean_venv(tmp_path: Path) -> None:
     )
 
 
+def test_canonical_bunkershot_package_imports_from_installed_wheel(
+    tmp_path: Path,
+) -> None:
+    """The canonical package must not depend on the repository's test path."""
+    python_bin = _venv_python(tmp_path)
+    _install_wheel(python_bin)
+    probe = """
+import importlib.util
+from bunkershot3d import WrenchTrace as public_trace
+from bunkershot3d.postproc.wrench_trace import WrenchTrace as module_trace
+
+assert public_trace is module_trace
+assert importlib.util.find_spec("src.bunkershot3d") is None
+"""
+    subprocess.run(
+        [str(python_bin), "-P", "-c", probe],
+        check=True,
+        cwd=str(tmp_path),
+    )
+
+
 def test_api_server_imports_from_core_only_install(tmp_path: Path) -> None:
     """A no-extras install must be able to import the API application (#8032).
 

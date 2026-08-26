@@ -12,7 +12,7 @@ is the single proximal-to-distal completion authority.
 
 - UpstreamDrift owns scientific sources, models, evidence, and release; AffineDrift
   is the immutable public projection and Tools owns consumers.
-- Remote `main` is `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c` (PR #9088 after #9114); active branch: `research/9116-phase-event-stability`.
+- Remote `main` is `99acc997a97b3d97cb4ddd857b79bedd4a66f290` (PR #9109); active branch: `research/9116-phase-event-stability`.
 - The 246-page publication is SHA-256 `f7c2f3f7f2040a9fa97a8810940521b6545d9af64f3d2114df004aaf0efabb4`,
   with 194 URI links and 255 outline entries; archival qualification is false.
 - The complete audit contains 1,148 reviewed candidates, 315 atomic claims,
@@ -117,11 +117,10 @@ is the single proximal-to-distal completion authority.
   #8595, #8668, #8684, and #8796 remain open.
 - #9049, #9100, #9108, #9110, and #9114 are merged; #9116 is active.
 - #8358's Tools gateway and analyses are merged; UI and presentation criteria
-  remain unaudited. Merged #9096 preserves `src.shared` modules while refreshing
-  one Tools provider and changes no production API, schema, or vendor pin.
-- Tools #4142 remains open. AffineDrift PR #3942 is merged. Do not project a
-  moving or partial campaign; the next public projection must pin a qualified
-  UpstreamDrift merge commit.
+  remain unaudited. Merged #9096 changes no production API, schema, or vendor pin.
+- #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
+- #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound. This branch also restores the tested Linux-only native PyInstaller release job after the consolidated matrix regressed that contract; fresh protected evidence is required, and no runner change or smoke exemption is authorized.
+- Tools #4142 remains open. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge commit.
 
 ## Scientific and Review Invariants
 
