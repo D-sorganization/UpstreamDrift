@@ -212,6 +212,56 @@ downswing angle, impact event, and torque program are defined
 specified intervention family rather than treating the literature as a
 prior proof of its ordering.
 
+### Which Double-Pendulum Parameters Are Identifiable? {#sec-double-pendulum-identifiability}
+
+The analytical model also permits an exact distinction between coefficient
+excitation and physical-parameter recovery. Its inverse dynamics factor as
+
+$$
+\tau=Y(q,\dot q,\ddot q)\,
+[\alpha,\beta,\delta,\gamma_1,\gamma_2,d_1,d_2]^\mathsf{T},
+$$
+
+where the seven base coefficients combine eleven reduced physical entries:
+two masses, two centers of mass, two proximal inertias, upper-link length,
+gravity, plane inclination, and two damping coefficients. The exact
+physical-to-base Jacobian has analytic row rank seven because one declared
+$7\times7$ minor has magnitude
+$m_2^2r_1r_2[g\cos(\phi)]^2>0$. Its nullity is therefore four. Three finite
+counterexample families independently preserve every base coefficient while
+changing mass--center-of-mass, lower-link coupling, or gravity--plane
+parameters. Consequently, even an arbitrarily long noiseless record governed
+by this model cannot uniquely recover the declared eleven-entry physical
+vector.
+
+The registered `restrain_then_drive@0.100s` synthetic record answers the
+separate excitation question. After scaling each coefficient by its registered
+base value and generalized torque by the registered 60 N m maximum, its
+$700\times7$ dimensionless regressor has rank seven with retained condition
+number 180.853 under the threshold
+$\max(10^{-8},10^{-7}\bar\sigma_1)$. Equivalent coefficient units change the
+dimensionless matrix by at most $4.45\times10^{-16}$ and preserve the rank.
+Two additional positive scale choices also preserve rank while changing the
+condition number, so every reported condition number remains inseparable from
+its declared scale contract.
+
+Full rank does not imply useful finite-noise recovery. Under deliberately
+favorable assumptions of exact kinematics, exact model form and event timing,
+and independent known Gaussian torque noise, a 1 N m noise standard deviation
+produces a worst relative 95% half-width of 0.123 for the full record but 499
+for its first 10%. These are Cramér--Rao-style oracle lower bounds. Kinematic
+differentiation noise, correlated sensor errors, model discrepancy, unknown
+noise scale, repeated participants, and held-out prediction can only weaken
+the practical inference. The result therefore establishes structural
+non-uniqueness of the declared physical map and finite-record excitation of
+seven base coefficients; it does not establish participant parameters, model
+adequacy, human mechanism, or coaching guidance. The derivation, unit and
+scale audits, adverse windows, exact counterexamples, and reproduction command
+are provided in
+[`DOUBLE_PENDULUM_IDENTIFIABILITY.md`](../DOUBLE_PENDULUM_IDENTIFIABILITY.md)
+and the registered
+[`double_pendulum_identifiability.json`](../data/double_pendulum_identifiability.json).
+
 ### Source-Level Contrast Matrix {#sec-release-contrast-matrix}
 
 The cited studies answer different questions. Keeping their contrasts

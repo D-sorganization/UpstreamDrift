@@ -46,7 +46,7 @@ from scripts.research.proximal_distal_energy.torque_programs import (
     restrain_then_drive_program,
 )
 from src.shared.python.simulation_backends import GolfModelParams, make_backend
-from src.shared.python.simulation_backends.protocol import SimState
+from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
 from src.shared.python.simulation_backends.ztcf_zvcf import drift_and_control_split
 
 logger = logging.getLogger(__name__)
@@ -115,6 +115,8 @@ def counterfactual_split(
     the club's absolute angular acceleration split is the row sum.
     """
     provider = make_backend("ode", params)
+    if not isinstance(provider, DynamicsProvider):
+        raise TypeError("the ODE backend must expose analytical dynamics primitives")
     drift = np.empty_like(v)
     control = np.empty_like(v)
     for k in range(q.shape[0]):
@@ -164,8 +166,11 @@ def _split_integrals(
     early_y = np.concatenate((values[before], [split_value]))
     late_t = np.concatenate(([split], times[after]))
     late_y = np.concatenate(([split_value], values[after]))
-    early = 0.0 if len(early_t) < 2 else float(np.trapezoid(early_y, early_t))
-    late = 0.0 if len(late_t) < 2 else float(np.trapezoid(late_y, late_t))
+    trapezoid = getattr(np, "trapezoid", None)
+    if trapezoid is None:
+        raise RuntimeError("NumPy must provide trapezoid integration")
+    early = 0.0 if len(early_t) < 2 else float(trapezoid(early_y, early_t))
+    late = 0.0 if len(late_t) < 2 else float(trapezoid(late_y, late_t))
     return early, late
 
 

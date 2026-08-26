@@ -4583,6 +4583,144 @@
           "rtol": 0.0
         }
       ]
+    },
+    {
+      "claim_id": "PD-CLAIM-308",
+      "statement_sha256": "3603af99072640c4e18599f1e710929c678a9fb7538d78a317bbd02e3d3e24e6",
+      "numeric_evidence": [
+        {
+          "literal_id": "7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/physical_parameter_map/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/physical_parameter_map/nullity",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-309",
+      "statement_sha256": "f85376e0183d4a6569793c3857f7779316041ef8f942ce57f5cbe741ffb1544d",
+      "numeric_evidence": [
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/nondimensional_scale_contract/torque_scale_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/finite_record_regressor/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "180.853#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/finite_record_regressor/retained_condition_number",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4.44089e-16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/finite_record_regressor/unit_invariance/max_abs_dimensionless_regressor_difference",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/zero_motion_killswitch/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-310",
+      "statement_sha256": "2628de707ac1feaaa28c389211c1511f1cb24f58ffd98209187cee565d251fdd",
+      "numeric_evidence": [
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/noise_aware_lower_bound_screen/reference_window_noise_sd_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "95#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/noise_aware_lower_bound_screen/confidence_level",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.123266#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/noise_aware_lower_bound_screen/full_record_cases/2/worst_ci95_relative_half_width",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "498.504#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/noise_aware_lower_bound_screen/window_cases/0/worst_ci95_relative_half_width",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "json_pointer": "/noise_aware_lower_bound_screen/window_cases/0/fraction",
+          "evidence_scope": "local_json_value",
+          "scale": 100.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
     }
   ]
 }
