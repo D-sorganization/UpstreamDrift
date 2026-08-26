@@ -9,7 +9,7 @@ is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `4b533018c75a2ec094fc3d2bd791cdf2c330750f`; PR #9018 remains an ancestor.
+- Remote `main` is `6f9b068a54d841c56e4efbd34855705eaad5d473`, protected PR #9108's squash.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
   with 194 URI links and 254 outline entries. Archival qualification remains
@@ -64,7 +64,7 @@ is the single proximal-to-distal completion authority.
 - Published floats use six significant digits for cross-platform identity;
   rank decisions are computed at full precision before serialization. These
   local results do not establish structural/global rank or human strategy.
-- PR #9108 is the active protected delivery for #9104. It proves analytic
+- PR #9108 is merged as `6f9b068a5`. It proves analytic
   physical-map rank seven/nullity four, retains three exact nonunique families,
   and gives registered finite-record rank seven with condition 180.853;
   equivalent-unit change is `4.44089e-16`, while zero motion has rank zero.
@@ -106,9 +106,9 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9027 contract PR #9049 and dependent local-rank PR #9100 are merged. #9104
-  and PR #9108 are the active exact-map and finite-record delivery; raw
-  dimensional conditioning alone is not evidence.
+- #9027 contract PR #9049, local-rank PR #9100, and exact-map PR #9108 are
+  merged. Continue #9027 from fresh current main; selectively requalify the
+  stale control branch rather than merging its overlapping claims wholesale.
 - PR #9032 is at remote head `d341a0c92`; required CI passed at last
   verification. Its optional source-lock failure is deliberate.
 - #8358's Tools gateway and analyses are merged; UI and presentation criteria
