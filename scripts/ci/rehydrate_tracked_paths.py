@@ -207,7 +207,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         paths=_PROFILES[args.profile],
     )
     restored_summary = ", ".join(restored)
-    print(f"Verified {args.profile} context at {args.expected_head}: {restored_summary}")
+    print(
+        f"Verified {args.profile} context at {args.expected_head}: {restored_summary}"
+    )
     return 0
 
 
