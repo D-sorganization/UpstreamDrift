@@ -10,7 +10,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 - UpstreamDrift owns scientific sources, models, evidence registers, and the
   release bundle. AffineDrift is an immutable, revision-pinned public
   projection. Tools owns reusable consumers and source contracts.
-- Remote `main` is `5fa4a6dd13ed12aee8b857d7fdf3022d1a6bf632`.
+- Remote `main` is `a66be9af17128f2f87bf50711a82e0a79ae31dce`.
   PR #9018 and its normalized-claim authority remain ancestors of `main`.
 - The current publication is 244 pages, SHA-256
   `8d3ad31bb33ea988ddc8942802bc806c17f956689f6d476ffd774d40b4bd7e30`,
@@ -42,7 +42,7 @@ Epic #8557 is the single proximal-to-distal completion authority.
 ## Hybrid-System Topology Contract (#9027)
 
 - PR #9049 branch `research/9027-hybrid-system-contract` is reconciled with
-  `main` `5fa4a6dd1` in merge commit `SELF`. It defines typed topology for all
+  `main` `a66be9af1` in merge commit `SELF`. It defines typed topology for all
   eight model tiers: continuous state, controls, algebraic constraints, modes,
   guards, resets, impacts, actuator dynamics, uncertain event surfaces,
   observables, limitations, falsifiers, and comparison blockers.
@@ -88,6 +88,10 @@ Epic #8557 is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
+- PR #9049's prior head `17fd13068` passed every required check. Its optional
+  stack completed with the documented #8963 source-lock failure; the current
+  main reconciliation requires a fresh protected CI wave. #9092 owns the
+  dependent nondimensional local-rank slice.
 - PR #9032 is at remote head `d341a0c92`; required CI passed at last
   verification. Its optional source-lock failure is deliberate.
 - #8358's immutable Tools gateway and analysis methods are merged, but its UI,
