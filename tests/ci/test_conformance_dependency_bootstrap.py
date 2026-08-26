@@ -10,13 +10,10 @@ from unittest.mock import Mock
 
 import pytest
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / "config" / "ci" / "conformance-wheelhouse-v1.json"
 LOCK_PATH = REPO_ROOT / "config" / "ci" / "conformance-bootstrap-py311.lock"
-ACTION_PATH = (
-    REPO_ROOT / ".github" / "actions" / "bootstrap-conformance-dependencies"
-)
+ACTION_PATH = REPO_ROOT / ".github" / "actions" / "bootstrap-conformance-dependencies"
 WORKFLOW_ROOT = REPO_ROOT / ".github" / "workflows"
 
 EXPECTED_VERSIONS = {
@@ -74,13 +71,11 @@ def test_repository_governs_exact_core_wheel_set() -> None:
         assert artifact["sha256"].isalnum()
         assert artifact["size"] > 0
         assert artifact["filename"].endswith(".whl")
-        requirement = f'{artifact["distribution"]}=={artifact["version"]}'
+        requirement = f"{artifact['distribution']}=={artifact['version']}"
         assert requirement in lock
-        assert f'--hash=sha256:{artifact["sha256"]}' in lock
+        assert f"--hash=sha256:{artifact['sha256']}" in lock
         assert artifact["provenance"]["repository"] == "PyPI"
-        assert artifact["provenance"]["json_url"].startswith(
-            "https://pypi.org/pypi/"
-        )
+        assert artifact["provenance"]["json_url"].startswith("https://pypi.org/pypi/")
 
 
 def test_shared_action_restores_then_installs_verified_wheelhouse() -> None:
@@ -95,9 +90,9 @@ def test_shared_action_restores_then_installs_verified_wheelhouse() -> None:
 
 def test_seed_workflow_is_manual_bounded_and_hash_checked() -> None:
     """Cache population must be manual and use the source-controlled hash lock."""
-    workflow = (
-        WORKFLOW_ROOT / "seed-conformance-wheelhouse.yml"
-    ).read_text(encoding="utf-8")
+    workflow = (WORKFLOW_ROOT / "seed-conformance-wheelhouse.yml").read_text(
+        encoding="utf-8"
+    )
 
     assert "workflow_dispatch:" in workflow
     assert "pull_request:" not in workflow
@@ -131,8 +126,7 @@ def test_cross_engine_workflows_share_offline_bootstrap(
     assert workflow.count(action_ref) == expected_calls
     assert 'pip install --force-reinstall "pydantic==2.12.5"' not in workflow
     assert (
-        'pip install --force-reinstall --no-cache-dir "numpy==2.2.6" '
-        '"scipy==1.14.1"'
+        'pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1"'
     ) not in workflow
 
 
