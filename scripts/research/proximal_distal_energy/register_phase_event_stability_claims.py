@@ -111,7 +111,7 @@ def _finite_time_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
     statement = (
         "On the registered analytical downswing refined to 0.125 ms, state-step "
         "multipliers 0.1 through 10 change the event transition by at most "
-        "6.87737e-6, and three complete perturbation rollouts agree with the "
+        "6.9e-6, and three complete perturbation rollouts agree with the "
         "propagated fixed-horizon map within 3.45969e-7; at the 0.349256 s "
         "geometric event, the observed scaled gains span 0.093456 to 8.33244."
     )
@@ -140,7 +140,7 @@ def _finite_time_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
             _numeric_entry("0.1#1", "/step_refinement/0/state_step_multiplier"),
             _numeric_entry("10#1", "/step_refinement/2/state_step_multiplier"),
             _numeric_entry(
-                "6.87737e-6#1",
+                "6.9e-6#1",
                 "/step_refinement/0/event_transition_max_abs_residual_from_nominal",
             ),
             _numeric_entry(

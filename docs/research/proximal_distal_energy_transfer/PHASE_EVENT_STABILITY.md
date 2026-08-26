@@ -20,6 +20,13 @@ one-step Jacobian central-differences the actual discrete RK4 map, and the
 state-transition matrix is the ordered product of those step maps. Positive
 state scales make gains dimensionless.
 
+The machine-readable JSON reports the step-refinement residual to two
+significant digits, the resolution supported across the registered Python
+runtimes. The convergence decision is evaluated from the unrounded computation,
+and the full-precision transition arrays remain available in the NPZ evidence;
+the reporting projection therefore limits claimed numerical precision without
+relaxing the registered $10^{-5}$ convergence gate.
+
 The first positive crossing of
 $h(\mathbf x)=\theta_s+\theta_w=0$ is interpolated on the common grid. Its
 implicit event-time derivative is accepted only when

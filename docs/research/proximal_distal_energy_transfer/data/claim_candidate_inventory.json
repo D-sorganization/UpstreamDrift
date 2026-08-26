@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "aa3fe6ce24c4f81e5364963d4aae7ad23b3b62edab85981918d831bc1adc1506",
+  "source_digest": "7f066b6aa5f65190950fd6ff3514e7dd0ad2fea1d1c1e9db2dd86c50b6b9f33c",
   "source_count": 37,
   "candidate_count": 1148,
   "candidates": [
@@ -14290,12 +14290,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-d157549e0f4f586f",
+      "candidate_id": "PD-CAND-5b746c085e60f7db",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd",
       "line_start": 285,
       "line_end": 294,
-      "text": "Its singular values are finite-window perturbation gains. The associated rates $\\log\\sigma_i/t$ are finite-time exponents, not asymptotic Lyapunov exponents. The computation refines the paper's 1 ms reference integration to 0.125 ms for this derivative audit. Central-difference step multipliers from 0.1 to 10 change the event transition by at most $6.88\\times10^{-6}$, while three complete symmetric perturbation rollouts agree with the propagated map within $3.46\\times10^{-7}$. At the 0.349256 s geometric delivery event, the largest observed scaled gain is 8.33244 and the smallest is 0.093456. Thus the local map amplifies some perturbation directions while contracting others; a single label such as “stable swing” would discard that anisotropy.",
-      "text_sha256": "7fbfcc0b66e0c2d6f3cd785779cece1ffbe09d21a7281bc0e579e6a81a7deb64",
+      "text": "Its singular values are finite-window perturbation gains. The associated rates $\\log\\sigma_i/t$ are finite-time exponents, not asymptotic Lyapunov exponents. The computation refines the paper's 1 ms reference integration to 0.125 ms for this derivative audit. Central-difference step multipliers from 0.1 to 10 change the event transition by at most $6.9\\times10^{-6}$, while three complete symmetric perturbation rollouts agree with the propagated map within $3.46\\times10^{-7}$. At the 0.349256 s geometric delivery event, the largest observed scaled gain is 8.33244 and the smallest is 0.093456. Thus the local map amplifies some perturbation directions while contracting others; a single label such as “stable swing” would discard that anisotropy.",
+      "text_sha256": "98ceab48cc77dfbca16a6c083714c46e0eaf53cde8645701fd791d69e1a14afb",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,

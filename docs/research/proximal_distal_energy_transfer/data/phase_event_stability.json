@@ -41,6 +41,8 @@
       1.0,
       10.0
     ],
+    "refinement_residual_gate": 1e-05,
+    "refinement_residual_reporting_significant_digits": 2,
     "direct_perturbation_scales": [
       5e-07,
       1e-06,
@@ -193,7 +195,7 @@
   },
   "step_refinement": [
     {
-      "event_transition_max_abs_residual_from_nominal": 6.87737e-06,
+      "event_transition_max_abs_residual_from_nominal": 6.9e-06,
       "state_step_multiplier": 0.1
     },
     {
@@ -201,7 +203,7 @@
       "state_step_multiplier": 1.0
     },
     {
-      "event_transition_max_abs_residual_from_nominal": 8.79523e-07,
+      "event_transition_max_abs_residual_from_nominal": 8.8e-07,
       "state_step_multiplier": 10.0
     }
   ],

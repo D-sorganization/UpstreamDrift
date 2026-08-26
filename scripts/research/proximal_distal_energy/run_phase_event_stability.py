@@ -54,6 +54,8 @@ REPORT_PATH = DATA_DIR / "phase_event_stability.json"
 ARRAY_PATH = DATA_DIR / "phase_event_stability.npz"
 SCHEMA_VERSION = "proximal-distal-phase-event-stability/v1"
 ANALYSIS_DT_S = DT / 8.0
+REFINEMENT_RESIDUAL_GATE = 1e-5
+REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS = 2
 ANALYSIS_HORIZON = HORIZON * 8
 STATE_STEPS = np.array([1e-6, 1e-6, 1e-5, 1e-5], dtype=float)
 STEP_MULTIPLIERS = (0.1, 1.0, 10.0)
@@ -177,6 +179,27 @@ def _checkpoint_payload(
     return records
 
 
+def canonicalize_refinement_residual(value: float) -> float:
+    """Project a convergence diagnostic at its cross-runtime resolution.
+
+    The full transition matrices remain in the NPZ evidence. This projection
+    prevents platform-level finite-difference variation from being published
+    as reproducible precision while preserving the registered convergence gate.
+    """
+
+    if value >= REFINEMENT_RESIDUAL_GATE:
+        raise ValueError(
+            "raw step-refinement residual must remain below the registered gate"
+        )
+    return float(
+        canonicalize_published_numbers(
+            value,
+            significant_digits=REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS,
+            context="phase/event step-refinement residual",
+        )
+    )
+
+
 def _transition_refinement(
     params: GolfModelParams,
     initial: np.ndarray,
@@ -198,15 +221,17 @@ def _transition_refinement(
     event_state = _interpolate(nominal.time_s, nominal.state, event_time_s)
     trials = [
         {
-            "event_transition_max_abs_residual_from_nominal": float(
-                np.max(
-                    np.abs(
-                        _interpolate(
-                            rollouts[multiplier].time_s,
-                            rollouts[multiplier].transition,
-                            event_time_s,
+            "event_transition_max_abs_residual_from_nominal": canonicalize_refinement_residual(
+                float(
+                    np.max(
+                        np.abs(
+                            _interpolate(
+                                rollouts[multiplier].time_s,
+                                rollouts[multiplier].transition,
+                                event_time_s,
+                            )
+                            - event_transition
                         )
-                        - event_transition
                     )
                 )
             ),
@@ -417,6 +442,10 @@ def _registration_payload(state: _AnalysisState) -> dict[str, Any]:
         "state_scales": state.scales.values,
         "state_steps": STATE_STEPS.tolist(),
         "state_step_multipliers": list(STEP_MULTIPLIERS),
+        "refinement_residual_gate": REFINEMENT_RESIDUAL_GATE,
+        "refinement_residual_reporting_significant_digits": (
+            REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS
+        ),
         "direct_perturbation_scales": list(PERTURBATION_SCALES),
         "guard": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
         "transversality_threshold_per_s": TRANSVERSALITY_THRESHOLD_PER_S,
@@ -576,6 +605,16 @@ def validate_report(report: dict[str, Any]) -> dict[str, int]:
         raise ValueError("unexpected phase/event stability schema")
     if report.get("model_tier") != "analytical_double_pendulum":
         raise ValueError("model tier must remain analytical double pendulum")
+    if (
+        report["registration"].get("refinement_residual_reporting_significant_digits")
+        != REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS
+    ):
+        raise ValueError("step-refinement reporting precision is not registered")
+    if (
+        report["registration"].get("refinement_residual_gate")
+        != REFINEMENT_RESIDUAL_GATE
+    ):
+        raise ValueError("step-refinement residual gate is not registered")
     event = report["event_time_sensitivity"]
     if event["implicit"]["status"] != "transverse":
         raise ValueError("registered event must remain transverse")

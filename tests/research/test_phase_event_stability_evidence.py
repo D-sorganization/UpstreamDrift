@@ -15,14 +15,31 @@ import pytest
 
 from scripts.research.proximal_distal_energy.run_phase_event_stability import (
     ARRAY_PATH,
+    REFINEMENT_RESIDUAL_GATE,
+    REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS,
     REPORT_PATH,
     build_report,
+    canonicalize_refinement_residual,
     validate_report,
 )
 
 pytestmark = pytest.mark.scientific
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_refinement_residual_projection_is_portable_across_registered_runtimes() -> (
+    None
+):
+    """Published diagnostics must not claim digits that vary by Python runtime."""
+
+    assert REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS == 2
+    assert canonicalize_refinement_residual(6.85575e-6) == 6.9e-6
+    assert canonicalize_refinement_residual(6.87737e-6) == 6.9e-6
+    assert canonicalize_refinement_residual(8.78627e-7) == 8.8e-7
+    assert canonicalize_refinement_residual(8.79523e-7) == 8.8e-7
+    with pytest.raises(ValueError, match="raw step-refinement residual"):
+        canonicalize_refinement_residual(REFINEMENT_RESIDUAL_GATE)
 
 
 @pytest.fixture(scope="module")
@@ -112,6 +129,14 @@ def test_variational_predictions_converge_and_match_direct_rollouts(
     registered_report: dict[str, Any],
 ) -> None:
     report = registered_report
+
+    assert (
+        report["registration"]["refinement_residual_reporting_significant_digits"]
+        == REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS
+    )
+    assert (
+        report["registration"]["refinement_residual_gate"] == REFINEMENT_RESIDUAL_GATE
+    )
 
     assert (
         max(

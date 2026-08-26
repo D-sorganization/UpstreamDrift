@@ -286,7 +286,7 @@ Its singular values are finite-window perturbation gains. The associated
 rates $\log\sigma_i/t$ are finite-time exponents, not asymptotic Lyapunov
 exponents. The computation refines the paper's 1 ms reference integration to
 0.125 ms for this derivative audit. Central-difference step multipliers from
-0.1 to 10 change the event transition by at most $6.88\times10^{-6}$, while
+0.1 to 10 change the event transition by at most $6.9\times10^{-6}$, while
 three complete symmetric perturbation rollouts agree with the propagated map
 within $3.46\times10^{-7}$. At the 0.349256 s geometric delivery event, the
 largest observed scaled gain is 8.33244 and the smallest is 0.093456. Thus the

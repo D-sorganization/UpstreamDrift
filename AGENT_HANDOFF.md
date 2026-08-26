@@ -10,12 +10,10 @@ is the single proximal-to-distal completion authority.
 
 ## Repository and Publication Authority
 
-- UpstreamDrift owns scientific sources, models, evidence registers, and the release
-  bundle; AffineDrift is an immutable public projection; Tools owns consumers.
-- Remote `main` is `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c`, including
-  PR #9088 after #9114. Active branch: `research/9116-phase-event-stability`.
-- The current branch publication is 246 pages, SHA-256
-  `3997e95ef44731e4a33f655a634719cbfd18c4bcab0054e5d82d2821b700eb36`,
+- UpstreamDrift owns scientific sources, models, evidence, and release; AffineDrift
+  is the immutable public projection and Tools owns consumers.
+- Remote `main` is `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c` (PR #9088 after #9114); active branch: `research/9116-phase-event-stability`.
+- The 246-page publication is SHA-256 `f7c2f3f7f2040a9fa97a8810940521b6545d9af64f3d2114df004aaf0efabb4`,
   with 194 URI links and 255 outline entries; archival qualification is false.
 - The complete audit contains 1,148 reviewed candidates, 315 atomic claims,
   134 numeric contracts, and 445/445 verified literals. Outcomes are 295
@@ -79,8 +77,10 @@ is the single proximal-to-distal completion authority.
   finite-window gains from transverse event-time derivatives, rejects grazing
   guards, tests saltation controls, and suppresses Floquet output because the
   scaled periodicity residual is 1.48546 versus a `1e-6` tolerance.
-- Maximum/minimum observed gains are 8.33244/0.093456. The event denominator is
-  35.0258 s^-1; direct and implicit derivatives agree within `5.98e-5` s.
+- Python 3.11/3.12 reproduce the report exactly. Its step-refinement scalar is
+  published at two significant digits (`6.9e-6`); full-precision arrays and the
+  `1e-5` gate remain unchanged. Gains span 0.093456--8.33244; the event
+  denominator is 35.0258 s^-1 and direct/implicit agreement is `5.98e-5` s.
   These are local synthetic diagnostics, not asymptotic stability, neural
   timing demand, participant robustness, passive torque, or coaching evidence.
 
