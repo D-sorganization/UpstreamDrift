@@ -71,7 +71,7 @@ is the single proximal-to-distal completion authority.
 - Its Gaussian Fisher screen is an oracle-kinematics lower bound only: at 1 N m
   noise, the worst relative 95% half-width is 0.123266 for the full record and
   498.504 for the first 10%. Practical/participant identifiability remains
-  unestablished. The 309-claim projection is re-frozen at `53d11ff4`; 63
+  unestablished. The 309-claim projection is re-frozen at `53d11ff4`; 64
   focused tests and computational release gates pass.
 
 ## Structural Campaign and Recovery Boundary (#8800)

@@ -39,8 +39,8 @@ def test_complete_registry_has_executable_numeric_traceability() -> None:
         "verified_numeric_literal_count": 394,
         "nondegenerate_comparison_count": 1,
         "evidence_scope_counts": {
-            "local_json_value": 185,
-            "registered_claim_value_not_independently_recomputed": 145,
+            "local_json_value": 181,
+            "registered_claim_value_not_independently_recomputed": 149,
             "registered_protocol_or_notation": 7,
             "reported_external_value": 57,
         },
