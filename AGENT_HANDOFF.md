@@ -148,7 +148,7 @@ history. Epic #8557 is the single proximal-to-distal completion authority.
 
 ## Repository and Review Rules
 
-- PRs target `main`; use full PRs, never drafts. Human review is required.
+- PRs target `main`; use full PRs, never drafts. Required protected checks govern merge readiness. Do not require or request a named maintainer review when the live ruleset requires zero approving reviews; optional review remains available for risk, expertise, or unresolved feedback.
 - Never force-push, admin-merge, bypass hooks/checks, add quarantine debt, or
   edit `vendor/ud-tools`.
 - Use TDD, DbC, DRY, and LoD. Edit canonical sources and regenerate governed
