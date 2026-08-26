@@ -470,6 +470,59 @@ def direct_terminal_pulse_sensitivity(
 ) -> FloatArray:
     """Differentiate a complete rollout for one energy-normalized input pulse."""
 
+    commands = np.asarray(controls, dtype=float)
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("dt_s must be finite and positive")
+    if commands.ndim != 2:
+        raise ValueError("controls must be a nonempty finite (N, 2) array")
+    return direct_variable_terminal_pulse_sensitivity(
+        params=params,
+        initial_state=initial_state,
+        controls=commands,
+        step_durations_s=np.full(commands.shape[0], dt_s),
+        state_scales=state_scales,
+        control_scales=control_scales,
+        pulse_step=pulse_step,
+        channel_index=channel_index,
+        perturbation_scale=perturbation_scale,
+    )
+
+
+def _variable_final_state(
+    params: GolfModelParams,
+    initial_state: FloatArray,
+    controls: FloatArray,
+    step_durations_s: FloatArray,
+) -> FloatArray:
+    backend = make_backend("ode", params, dt=float(step_durations_s[0]))
+    state = initial_state.copy()
+    time_s = 0.0
+    for command, duration in zip(controls, step_durations_s, strict=True):
+        state = registered_step(
+            backend,
+            state,
+            command,
+            time_s=time_s,
+            dt_s=float(duration),
+        )
+        time_s += float(duration)
+    return state
+
+
+def direct_variable_terminal_pulse_sensitivity(
+    *,
+    params: GolfModelParams,
+    initial_state: npt.ArrayLike,
+    controls: npt.ArrayLike,
+    step_durations_s: npt.ArrayLike,
+    state_scales: StateScales,
+    control_scales: ControlScales,
+    pulse_step: int,
+    channel_index: int,
+    perturbation_scale: float,
+) -> FloatArray:
+    """Differentiate one pulse on a declared variable-step RK4 trajectory."""
+
     initial = _finite_vector("initial_state", initial_state, size=4).copy()
     commands = np.asarray(controls, dtype=float)
     if (
@@ -479,6 +532,9 @@ def direct_terminal_pulse_sensitivity(
         or not np.all(np.isfinite(commands))
     ):
         raise ValueError("controls must be a nonempty finite (N, 2) array")
+    durations = _positive_vector(
+        "step_durations_s", step_durations_s, size=commands.shape[0]
+    )
     if (
         isinstance(pulse_step, bool)
         or not isinstance(pulse_step, int)
@@ -491,33 +547,21 @@ def direct_terminal_pulse_sensitivity(
         or not 0 <= channel_index < commands.shape[1]
     ):
         raise ValueError("channel_index must index an input channel")
-    if not math.isfinite(dt_s) or dt_s <= 0.0:
-        raise ValueError("dt_s must be finite and positive")
     if not math.isfinite(perturbation_scale) or perturbation_scale <= 0.0:
         raise ValueError("perturbation_scale must be finite and positive")
     physical_delta = (
-        control_scales.array[channel_index] * perturbation_scale / math.sqrt(dt_s)
+        control_scales.array[channel_index]
+        * perturbation_scale
+        / math.sqrt(float(durations[pulse_step]))
     )
     upper = commands.copy()
     lower = commands.copy()
     upper[pulse_step, channel_index] += physical_delta
     lower[pulse_step, channel_index] -= physical_delta
-    _, upper_state = rollout_state_history(
-        params,
-        initial_state=initial,
-        controls=upper,
-        dt_s=dt_s,
-    )
-    _, lower_state = rollout_state_history(
-        params,
-        initial_state=initial,
-        controls=lower,
-        dt_s=dt_s,
-    )
+    upper_state = _variable_final_state(params, initial, upper, durations)
+    lower_state = _variable_final_state(params, initial, lower, durations)
     sensitivity = (
-        (upper_state[-1] - lower_state[-1])
-        / (2.0 * perturbation_scale)
-        / state_scales.array
+        (upper_state - lower_state) / (2.0 * perturbation_scale) / state_scales.array
     )
     return _readonly(sensitivity)
 
@@ -679,6 +723,7 @@ __all__ = [
     "StepLinearization",
     "TrajectoryLinearization",
     "direct_terminal_pulse_sensitivity",
+    "direct_variable_terminal_pulse_sensitivity",
     "event_conditioned_gramian",
     "frozen_local_gramian",
     "linearize_trajectory",

@@ -17,6 +17,7 @@ from scripts.research.proximal_distal_energy.trajectory_control_authority import
     propagated_terminal_input_sensitivity,
     reachability_history,
     direct_terminal_pulse_sensitivity,
+    direct_variable_terminal_pulse_sensitivity,
     refine_guard_crossing,
     scale_step_matrices,
     step_linearization,
@@ -228,11 +229,23 @@ def test_trajectory_linearization_matches_direct_terminal_pulse() -> None:
         channel_index=1,
         perturbation_scale=1e-6,
     )
+    variable_direct = direct_variable_terminal_pulse_sensitivity(
+        params=params,
+        initial_state=trajectory.state[0],
+        controls=controls,
+        step_durations_s=np.full(controls.shape[0], 1e-3),
+        state_scales=scales,
+        control_scales=control_scales,
+        pulse_step=4,
+        channel_index=1,
+        perturbation_scale=1e-6,
+    )
 
     assert trajectory.state.shape == (13, 4)
     assert trajectory.scaled_state_matrices.shape == (12, 4, 4)
     assert trajectory.scaled_energy_input_matrices.shape == (12, 4, 2)
     np.testing.assert_allclose(direct, predicted, rtol=3e-5, atol=3e-8)
+    np.testing.assert_array_equal(variable_direct, direct)
 
 
 def test_registered_guard_crossing_is_refined_inside_bracket() -> None:
