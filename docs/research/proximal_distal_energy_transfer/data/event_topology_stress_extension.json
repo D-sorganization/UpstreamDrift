@@ -1,0 +1,983 @@
+{
+  "availability": {
+    "coaching_recommendation": "unavailable",
+    "controller_ranking": "suppressed",
+    "fatigue_interpretation": "unavailable",
+    "human_motor_noise": "unavailable",
+    "target_accuracy": "unavailable"
+  },
+  "inference_boundary": "This adaptive Phase B maps topology failure under fixed synthetic dimensionless stress levels after Phase A retained topology through 1%. It does not estimate human motor noise, fatigue, strength, injury, skill, target accuracy, controller superiority, or coaching guidance.",
+  "qualification": {
+    "all_summaries_adequate": true,
+    "first_registered_scale_with_topology_loss": 0.02,
+    "human_or_strategy_ranking_available": false
+  },
+  "registration": {
+    "base_dt_s": 0.002,
+    "common_horizon_s": 0.6,
+    "confidence": 0.95,
+    "control_scales_nm": [
+      100.0,
+      100.0
+    ],
+    "delays_s": [
+      0.0,
+      0.02,
+      0.04,
+      0.06,
+      0.08,
+      0.1,
+      0.12,
+      0.14,
+      0.16,
+      0.18,
+      0.2
+    ],
+    "fixed_stop_rule_completed": true,
+    "guard_offset_scale": 3.14159,
+    "maximum_interval_half_width": 0.1,
+    "perturbations_are_human_noise_estimates": false,
+    "phase": "adaptive_phase_b_stress_to_failure",
+    "preregistration_comment": "https://github.com/D-sorganization/UpstreamDrift/issues/9125#issuecomment-5431171920",
+    "required_independent_pairs": 96,
+    "seed": 9125,
+    "state_scales": [
+      3.14159,
+      3.14159,
+      10.0,
+      10.0
+    ],
+    "trigger": "phase_a_all_topologies_preserved_through_fraction_0p01"
+  },
+  "scenarios": [
+    {
+      "command_sd_nm": [
+        2.0,
+        2.0
+      ],
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.989583,
+          "preservation_interval": [
+            0.943334,
+            0.998159
+          ],
+          "preserved_pair_count": 95,
+          "topology_counts": {
+            "absent": 1,
+            "unique_transverse": 191
+          }
+        }
+      ],
+      "guard_offset_sd": 0.0628319,
+      "independent_pair_count": 96,
+      "initial_state_sd": [
+        0.0628319,
+        0.0628319,
+        0.2,
+        0.2
+      ],
+      "name": "fraction_0p02",
+      "replicate_count": 192,
+      "scale_fraction": 0.02
+    },
+    {
+      "command_sd_nm": [
+        5.0,
+        5.0
+      ],
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.989583,
+          "preservation_interval": [
+            0.943334,
+            0.998159
+          ],
+          "preserved_pair_count": 95,
+          "topology_counts": {
+            "absent": 1,
+            "unique_transverse": 191
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.989583,
+          "preservation_interval": [
+            0.943334,
+            0.998159
+          ],
+          "preserved_pair_count": 95,
+          "topology_counts": {
+            "absent": 1,
+            "unique_transverse": 191
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.989583,
+          "preservation_interval": [
+            0.943334,
+            0.998159
+          ],
+          "preserved_pair_count": 95,
+          "topology_counts": {
+            "absent": 1,
+            "unique_transverse": 191
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.96875,
+          "preservation_interval": [
+            0.912113,
+            0.989316
+          ],
+          "preserved_pair_count": 93,
+          "topology_counts": {
+            "absent": 3,
+            "unique_transverse": 189
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.916667,
+          "preservation_interval": [
+            0.844101,
+            0.957169
+          ],
+          "preserved_pair_count": 88,
+          "topology_counts": {
+            "absent": 8,
+            "unique_transverse": 184
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.822917,
+          "preservation_interval": [
+            0.73459,
+            0.886395
+          ],
+          "preserved_pair_count": 79,
+          "topology_counts": {
+            "absent": 17,
+            "unique_transverse": 175
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.71875,
+          "preservation_interval": [
+            0.621741,
+            0.798926
+          ],
+          "preserved_pair_count": 69,
+          "topology_counts": {
+            "absent": 27,
+            "unique_transverse": 165
+          }
+        }
+      ],
+      "guard_offset_sd": 0.15708,
+      "independent_pair_count": 96,
+      "initial_state_sd": [
+        0.15708,
+        0.15708,
+        0.5,
+        0.5
+      ],
+      "name": "fraction_0p05",
+      "replicate_count": 192,
+      "scale_fraction": 0.05
+    },
+    {
+      "command_sd_nm": [
+        10.0,
+        10.0
+      ],
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.989583,
+          "preservation_interval": [
+            0.943334,
+            0.998159
+          ],
+          "preserved_pair_count": 95,
+          "topology_counts": {
+            "absent": 1,
+            "unique_transverse": 191
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.989583,
+          "preservation_interval": [
+            0.943334,
+            0.998159
+          ],
+          "preserved_pair_count": 95,
+          "topology_counts": {
+            "absent": 1,
+            "unique_transverse": 191
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.979167,
+          "preservation_interval": [
+            0.927193,
+            0.994268
+          ],
+          "preserved_pair_count": 94,
+          "topology_counts": {
+            "absent": 2,
+            "unique_transverse": 190
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.9375,
+          "preservation_interval": [
+            0.870291,
+            0.971043
+          ],
+          "preserved_pair_count": 90,
+          "topology_counts": {
+            "absent": 6,
+            "unique_transverse": 186
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.875,
+          "preservation_interval": [
+            0.794115,
+            0.927028
+          ],
+          "preserved_pair_count": 84,
+          "topology_counts": {
+            "absent": 12,
+            "unique_transverse": 180
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.833333,
+          "preservation_interval": [
+            0.74629,
+            0.894726
+          ],
+          "preserved_pair_count": 80,
+          "topology_counts": {
+            "absent": 16,
+            "unique_transverse": 176
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.739583,
+          "preservation_interval": [
+            0.643789,
+            0.816941
+          ],
+          "preserved_pair_count": 71,
+          "topology_counts": {
+            "absent": 25,
+            "unique_transverse": 167
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.65625,
+          "preservation_interval": [
+            0.55688,
+            0.743596
+          ],
+          "preserved_pair_count": 63,
+          "topology_counts": {
+            "absent": 33,
+            "unique_transverse": 159
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.614583,
+          "preservation_interval": [
+            0.514607,
+            0.705742
+          ],
+          "preserved_pair_count": 59,
+          "topology_counts": {
+            "absent": 37,
+            "unique_transverse": 155
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.541667,
+          "preservation_interval": [
+            0.442316,
+            0.637812
+          ],
+          "preserved_pair_count": 52,
+          "topology_counts": {
+            "absent": 44,
+            "unique_transverse": 148
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.479167,
+          "preservation_interval": [
+            0.381974,
+            0.577962
+          ],
+          "preserved_pair_count": 46,
+          "topology_counts": {
+            "absent": 50,
+            "unique_transverse": 142
+          }
+        }
+      ],
+      "guard_offset_sd": 0.314159,
+      "independent_pair_count": 96,
+      "initial_state_sd": [
+        0.314159,
+        0.314159,
+        1.0,
+        1.0
+      ],
+      "name": "fraction_0p1",
+      "replicate_count": 192,
+      "scale_fraction": 0.1
+    },
+    {
+      "command_sd_nm": [
+        20.0,
+        20.0
+      ],
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.739583,
+          "preservation_interval": [
+            0.643789,
+            0.816941
+          ],
+          "preserved_pair_count": 71,
+          "topology_counts": {
+            "absent": 24,
+            "multiple": 1,
+            "unique_transverse": 167
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.697917,
+          "preservation_interval": [
+            0.599915,
+            0.780688
+          ],
+          "preserved_pair_count": 67,
+          "topology_counts": {
+            "absent": 29,
+            "unique_transverse": 163
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.666667,
+          "preservation_interval": [
+            0.567565,
+            0.752943
+          ],
+          "preserved_pair_count": 64,
+          "topology_counts": {
+            "absent": 32,
+            "unique_transverse": 160
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.645833,
+          "preservation_interval": [
+            0.546243,
+            0.734202
+          ],
+          "preserved_pair_count": 62,
+          "topology_counts": {
+            "absent": 34,
+            "unique_transverse": 158
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.572917,
+          "preservation_interval": [
+            0.473043,
+            0.667179
+          ],
+          "preserved_pair_count": 55,
+          "topology_counts": {
+            "absent": 41,
+            "unique_transverse": 151
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.520833,
+          "preservation_interval": [
+            0.422038,
+            0.618026
+          ],
+          "preserved_pair_count": 50,
+          "topology_counts": {
+            "absent": 46,
+            "unique_transverse": 146
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.479167,
+          "preservation_interval": [
+            0.381974,
+            0.577962
+          ],
+          "preserved_pair_count": 46,
+          "topology_counts": {
+            "absent": 51,
+            "unique_transverse": 141
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.416667,
+          "preservation_interval": [
+            0.323116,
+            0.51663
+          ],
+          "preserved_pair_count": 40,
+          "topology_counts": {
+            "absent": 58,
+            "unique_transverse": 134
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.333333,
+          "preservation_interval": [
+            0.247057,
+            0.432435
+          ],
+          "preserved_pair_count": 32,
+          "topology_counts": {
+            "absent": 66,
+            "unique_transverse": 126
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.260417,
+          "preservation_interval": [
+            0.183059,
+            0.356211
+          ],
+          "preserved_pair_count": 25,
+          "topology_counts": {
+            "absent": 73,
+            "unique_transverse": 119
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.197917,
+          "preservation_interval": [
+            0.130527,
+            0.288552
+          ],
+          "preserved_pair_count": 19,
+          "topology_counts": {
+            "absent": 80,
+            "unique_transverse": 112
+          }
+        }
+      ],
+      "guard_offset_sd": 0.628319,
+      "independent_pair_count": 96,
+      "initial_state_sd": [
+        0.628319,
+        0.628319,
+        2.0,
+        2.0
+      ],
+      "name": "fraction_0p2",
+      "replicate_count": 192,
+      "scale_fraction": 0.2
+    },
+    {
+      "command_sd_nm": [
+        50.0,
+        50.0
+      ],
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.208333,
+          "preservation_interval": [
+            0.139108,
+            0.300002
+          ],
+          "preserved_pair_count": 20,
+          "topology_counts": {
+            "absent": 85,
+            "multiple": 15,
+            "unique_transverse": 92
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.197917,
+          "preservation_interval": [
+            0.130527,
+            0.288552
+          ],
+          "preserved_pair_count": 19,
+          "topology_counts": {
+            "absent": 85,
+            "multiple": 14,
+            "unique_transverse": 93
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.166667,
+          "preservation_interval": [
+            0.105274,
+            0.25371
+          ],
+          "preserved_pair_count": 16,
+          "topology_counts": {
+            "absent": 90,
+            "multiple": 13,
+            "unique_transverse": 89
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.145833,
+          "preservation_interval": [
+            0.0889021,
+            0.230018
+          ],
+          "preserved_pair_count": 14,
+          "topology_counts": {
+            "absent": 94,
+            "multiple": 11,
+            "unique_transverse": 87
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.135417,
+          "preservation_interval": [
+            0.0808771,
+            0.218011
+          ],
+          "preserved_pair_count": 13,
+          "topology_counts": {
+            "absent": 99,
+            "multiple": 9,
+            "unique_transverse": 84
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.114583,
+          "preservation_interval": [
+            0.0651987,
+            0.193626
+          ],
+          "preserved_pair_count": 11,
+          "topology_counts": {
+            "absent": 101,
+            "multiple": 8,
+            "unique_transverse": 83
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.104167,
+          "preservation_interval": [
+            0.0575715,
+            0.181222
+          ],
+          "preserved_pair_count": 10,
+          "topology_counts": {
+            "absent": 103,
+            "multiple": 8,
+            "unique_transverse": 81
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.0625,
+          "preservation_interval": [
+            0.0289567,
+            0.129709
+          ],
+          "preserved_pair_count": 6,
+          "topology_counts": {
+            "absent": 109,
+            "multiple": 8,
+            "unique_transverse": 75
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.03125,
+          "preservation_interval": [
+            0.0106841,
+            0.0878868
+          ],
+          "preserved_pair_count": 3,
+          "topology_counts": {
+            "absent": 113,
+            "multiple": 6,
+            "unique_transverse": 73
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.0208333,
+          "preservation_interval": [
+            0.00573197,
+            0.0728071
+          ],
+          "preserved_pair_count": 2,
+          "topology_counts": {
+            "absent": 114,
+            "multiple": 6,
+            "unique_transverse": 72
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.0208333,
+          "preservation_interval": [
+            0.00573197,
+            0.0728071
+          ],
+          "preserved_pair_count": 2,
+          "topology_counts": {
+            "absent": 118,
+            "multiple": 7,
+            "unique_transverse": 67
+          }
+        }
+      ],
+      "guard_offset_sd": 1.5708,
+      "independent_pair_count": 96,
+      "initial_state_sd": [
+        1.5708,
+        1.5708,
+        5.0,
+        5.0
+      ],
+      "name": "fraction_0p5",
+      "replicate_count": 192,
+      "scale_fraction": 0.5
+    }
+  ],
+  "schema_version": "proximal-distal-event-topology-stress-extension/v1",
+  "source_identity": {
+    "preregistration_comment": "https://github.com/D-sorganization/UpstreamDrift/issues/9125#issuecomment-5431171920",
+    "required_phase_a_array_sha256": "7e0cc0241d2ac1f3be2b2dab038b0e1437db8c54a23f0ca1292f6fa9a6316ed0",
+    "required_phase_a_report_sha256": "7e7b9d04c6b3956d973cc40f6b0351c1714dc4252ed21de9df4b21a23be203e2",
+    "required_phase_a_schema": "proximal-distal-event-topology-robustness/v1",
+    "source_sha256": {
+      "scripts/research/proximal_distal_energy/run_event_topology_robustness.py": "c573224fb1a2ce84d661382a484288d905a762b8c39502c9c448216deb3eb961",
+      "scripts/research/proximal_distal_energy/run_event_topology_stress_extension.py": "e6309aed59f04d86cb0e6f9cb5fc1cdc1c26ff0963da96987299f6191c7f8c82"
+    }
+  }
+}

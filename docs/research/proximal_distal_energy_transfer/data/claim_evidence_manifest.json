@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "ab3c9750f0e59e33cc157052623b59a49a050bdcdaf6b4b2d4e169a790184b47"
+    "sha256": "6c8bb932ac97f796727e1960a1ebe8d2bb20e0c294b3f2cf1a72cdfce2aaa516"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -11,9 +11,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 319,
-    "evidence_reference_count": 2378,
-    "local_artifact_count": 380,
+    "claim_count": 322,
+    "evidence_reference_count": 2426,
+    "local_artifact_count": 396,
     "external_url_count": 78
   },
   "claims": {
@@ -3748,53 +3748,6 @@
       ],
       "external_references": []
     },
-    "PD-CLAIM-235": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-        "scripts/research/proximal_distal_energy/rotating_base_two_hand.py"
-      ],
-      "external_references": []
-    },
-    "PD-CLAIM-236": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
-      ],
-      "external_references": []
-    },
-    "PD-CLAIM-237": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
-      ],
-      "external_references": []
-    },
-    "PD-CLAIM-238": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
-      ],
-      "external_references": []
-    },
-    "PD-CLAIM-239": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json"
-      ],
-      "external_references": []
-    },
-    "PD-CLAIM-240": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
-        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
-      ],
-      "external_references": []
-    },
-    "PD-CLAIM-241": {
-      "local_references": [
-        "docs/research/proximal_distal_energy_transfer/COMPANION_WORKBENCH.md",
-        "docs/research/proximal_distal_energy_transfer/release_manifest.json"
-      ],
-      "external_references": []
-    },
     "PD-CLAIM-305": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
@@ -4020,6 +3973,116 @@
         "tests/research/test_bounded_event_reachability_evidence.py"
       ],
       "external_references": []
+    },
+    "PD-CLAIM-235": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+        "scripts/research/proximal_distal_energy/rotating_base_two_hand.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-236": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-237": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-238": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-239": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-240": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-241": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/COMPANION_WORKBENCH.md",
+        "docs/research/proximal_distal_energy_transfer/release_manifest.json"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-321": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.npz",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.npz",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_event_topology_robustness.pdf",
+        "docs/research/proximal_distal_energy_transfer/EVENT_TOPOLOGY_ROBUSTNESS.md",
+        "scripts/research/proximal_distal_energy/event_topology_robustness.py",
+        "scripts/research/proximal_distal_energy/event_robustness_noise.py",
+        "scripts/research/proximal_distal_energy/event_robustness_study.py",
+        "scripts/research/proximal_distal_energy/event_robustness_summary.py",
+        "scripts/research/proximal_distal_energy/event_topology_channel_controls.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_robustness.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_stress_extension.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_channel_matrix.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-322": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.npz",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.npz",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_event_topology_robustness.pdf",
+        "docs/research/proximal_distal_energy_transfer/EVENT_TOPOLOGY_ROBUSTNESS.md",
+        "scripts/research/proximal_distal_energy/event_topology_robustness.py",
+        "scripts/research/proximal_distal_energy/event_robustness_noise.py",
+        "scripts/research/proximal_distal_energy/event_robustness_study.py",
+        "scripts/research/proximal_distal_energy/event_robustness_summary.py",
+        "scripts/research/proximal_distal_energy/event_topology_channel_controls.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_robustness.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_stress_extension.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_channel_matrix.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-323": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.npz",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.npz",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_event_topology_robustness.pdf",
+        "docs/research/proximal_distal_energy_transfer/EVENT_TOPOLOGY_ROBUSTNESS.md",
+        "scripts/research/proximal_distal_energy/event_topology_robustness.py",
+        "scripts/research/proximal_distal_energy/event_robustness_noise.py",
+        "scripts/research/proximal_distal_energy/event_robustness_study.py",
+        "scripts/research/proximal_distal_energy/event_robustness_summary.py",
+        "scripts/research/proximal_distal_energy/event_topology_channel_controls.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_robustness.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_stress_extension.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_channel_matrix.py"
+      ],
+      "external_references": []
     }
   },
   "local_artifacts": {
@@ -4057,6 +4120,15 @@
         "PD-CLAIM-310"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/EVENT_TOPOLOGY_ROBUSTNESS.md": {
+      "sha256": "312e9c5e547ab8dc7028438b706cbe438b35cb77a0138090295933c3c3001d2c",
+      "bytes": 7865,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/EXPERIMENTAL_FALSIFICATION_PROTOCOL.md": {
       "sha256": "2e3a82bc17686ae4aa5e2e092cc1943ef525b14826f7d6d1e95fbc2222598cac",
       "bytes": 6531,
@@ -4071,8 +4143,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
-      "sha256": "fe2be59b10eb463b122723eb050a19564256532b6f8d8ffb94a77f6479b52c89",
-      "bytes": 48544,
+      "sha256": "d84313bfa65117b80a1e70aca57205410fc0a354975bf5fa46c4119b8f819046",
+      "bytes": 50076,
       "referenced_by": [
         "PD-CLAIM-313",
         "PD-CLAIM-314",
@@ -4728,6 +4800,60 @@
         "PD-CLAIM-212",
         "PD-CLAIM-213",
         "PD-CLAIM-214"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json": {
+      "sha256": "301ec25b2b8d6d8b060980d543fa704a0398c0a163ae4d6b0be8ddf6735f07aa",
+      "bytes": 108676,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.npz": {
+      "sha256": "0b8cc7c15ff6a936d3769a240b6ee1e726d6bd17c7f772f3ddcbe913b1726fe2",
+      "bytes": 2153339,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json": {
+      "sha256": "bdba13a7c3c102d66174f3144b94972a4a92862d14a1bf84366186b379ab9328",
+      "bytes": 19716,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.npz": {
+      "sha256": "7e0cc0241d2ac1f3be2b2dab038b0e1437db8c54a23f0ca1292f6fa9a6316ed0",
+      "bytes": 2755759,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json": {
+      "sha256": "57bd7d47e664ffb98fee3754f1237c78b4990a73cf6de706268bc1632cbac8f3",
+      "bytes": 26320,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.npz": {
+      "sha256": "b79683e34956ddd179ff012844715ef8f42e1e331fbe5fd71d2bfa40dfa9157c",
+      "bytes": 4610641,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/experimental_protocol_dry_run.json": {
@@ -5865,6 +5991,15 @@
         "PD-CLAIM-100"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_event_topology_robustness.pdf": {
+      "sha256": "43694b7c5909c2ec988f2044616848f8e0fdc0d9e63e970f8fc870c62be0161e",
+      "bytes": 30847,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf": {
       "sha256": "f378c755208c26d044e8f776e6477cd7a1fcecfb752300925f747f5ca26b0a80",
       "bytes": 33776,
@@ -5992,8 +6127,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "e4c23f7cadbd322992245abae85da640e23d2d90639ad59e55a4261b6a0f07ba",
-      "bytes": 151283,
+      "sha256": "36d0f0b9e9251d796b59847b36d76cc57a83cd648c8992e4d591fb3486e035af",
+      "bytes": 155487,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -6373,6 +6508,51 @@
         "PD-CLAIM-308",
         "PD-CLAIM-309",
         "PD-CLAIM-310"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/event_robustness_noise.py": {
+      "sha256": "c791ebd1fe0ca70711922ca7459c2c781603ab33d104227577832c6a7e3cf637",
+      "bytes": 4949,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/event_robustness_study.py": {
+      "sha256": "d1f8e1a4d07be424dcb403810691f4e8ac4aba9c8cfad5d67dd2b81c67a3f46d",
+      "bytes": 4928,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/event_robustness_summary.py": {
+      "sha256": "f5ce8b23e5c67f5d901ee0fdf922eb410f39eea662d52f134c1430c348b62b02",
+      "bytes": 5036,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/event_topology_channel_controls.py": {
+      "sha256": "5f22488241ebee492538a71d7cd0e88e90fd11447a7a6df6cd7245727e4aeae7",
+      "bytes": 4162,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/event_topology_robustness.py": {
+      "sha256": "2d8d7efc6a07efac38c287878ce4517e603f2b982aa41ba84c7dd9d4e01fe323",
+      "bytes": 17561,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
       ]
     },
     "scripts/research/proximal_distal_energy/experimental_protocol.py": {
@@ -6991,6 +7171,33 @@
         "PD-CLAIM-308",
         "PD-CLAIM-309",
         "PD-CLAIM-310"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/run_event_topology_channel_matrix.py": {
+      "sha256": "8c46122338a1bdb4aab2646c33e6c21e7550b3385c1ed2be294af9a6a11daebf",
+      "bytes": 25080,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/run_event_topology_robustness.py": {
+      "sha256": "c573224fb1a2ce84d661382a484288d905a762b8c39502c9c448216deb3eb961",
+      "bytes": 17270,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/run_event_topology_stress_extension.py": {
+      "sha256": "e6309aed59f04d86cb0e6f9cb5fc1cdc1c26ff0963da96987299f6191c7f8c82",
+      "bytes": 9349,
+      "referenced_by": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
       ]
     },
     "scripts/research/proximal_distal_energy/run_force_source_optimization.py": {

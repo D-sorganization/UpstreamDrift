@@ -13,10 +13,10 @@ completion from local files or an open pull request.
   immutable source-pinned projections.
 - Protected PR #9144 completed #9123 at squash
   `5a330ed9b9f74c77a540d37beb90d2df622e719d`, verified on remote `main`.
-- The current #9124-integrated paper is 249 pages and 1,946,712 bytes at
-  SHA-256 `1afd5354ceb3f93ab04a5b3d3ca182d512b66f443e19cf822bec0b38b1f836f6`.
-- It contains 319 adjudicated claims, 138 numeric contracts, 463/463 verified
-  numeric literals, 2,378 evidence references, and 667 release artifacts.
+- The current #9125-integrated paper is 250 pages and 1,958,661 bytes at
+  SHA-256 `6ca47ab88331cbb728a0f464f1a1200cf16553328148f40e42192f66d56a1647`.
+- It contains 322 adjudicated claims, 141 numeric contracts, 482/482 verified
+  numeric literals, 2,426 evidence references, and 684 release artifacts.
 - The PDF is computationally qualified but not archival-accessibility
   qualified: it is untagged and retains Type 3 and two unembedded resources.
 
@@ -41,9 +41,11 @@ completion from local files or an open pull request.
   protected-RK4 replay. The study retains 32/38 feasible cases and a maximum
   feasible residual of `8.82244e-11`, but its 24.9517% multistart spread fails
   the 5% optimality gate; every channel/controller ranking remains suppressed.
-- #9125 core now uses explicit zero delay prehistory and requires both,
-  shoulder-only, wrist-only, and zero-command topology outcomes. Governed
-  evidence, figures, paper claims, and release registration remain pending.
+- #9125 now has regenerated Phase A/B/C JSON and NPZ evidence, a reviewer
+  figure, explicit global topology types, antithetic common-random-number
+  perturbations, a fixed stress-to-failure ladder, four channel masks, and
+  step/horizon controls. Its governed claims and release registration are
+  locally complete; protected delivery remains pending in PR #9136.
 - #9126 now rejects every solver identity except the implemented projected
   iLQR kernel; collocation NMPC is explicitly unavailable. Plant transport is
   rebound to the protected public backend. Full comparative evaluation,
@@ -53,7 +55,7 @@ completion from local files or an open pull request.
   pin is advanced to protected provider `3dfbd32cc`; focused API and React
   parity tests pass, but full web/build and provider-consumer gates remain.
 - The current consolidated branch has complete local paper/release integration
-  for #9124, but not #9125 or #9126. The handoff, issue closures, and `parity`
+  for #9124 and #9125, but not #9126. The handoff, issue closures, and `parity`
   status must not overstate implementation, protected delivery, or validation.
 
 ## Required Order

@@ -436,6 +436,54 @@ topology, delay, fatigue, noise, bilateral contact, passive negative torque,
 human actuation, participant behavior, or coaching benefit. Those remain
 separate model and governed-data falsification gates.
 
+### Global Event Topology, Delay, and Perturbation Robustness {#sec-ladder-event-topology-robustness}
+
+The local crossing bracket is removed in the next registered test. A
+direction-aware global search retains every guard crossing over a common
+horizon and types absent, unique, multiple, grazing, initial-on-guard, and
+numerical-failure outcomes. It never substitutes the crossing nearest the
+nominal event. Causal delay uses an explicit linear-nodal policy, zero
+prehistory and posthistory commands, and a 0.60 s horizon long enough to retain
+the complete program at every delay from 0 to 200 ms.
+
+Phase A applies matched synthetic perturbations to the initial state, sampled
+command, and event surface at dimensionless fractions 0.001, 0.005, and 0.01.
+All 6,336 nonzero replays retain one positive transverse crossing. Each cell
+preserves 96 of 96 independent antithetic pairs, with a 95% Wilson interval
+[0.961524, 1.0]. This establishes topology preservation only for the declared
+small model stresses. It does not establish event-target accuracy or human
+robustness.
+
+A separately preregistered Phase B extends the artificial stress ladder to
+0.02, 0.05, 0.10, 0.20, and 0.50. The first topology loss occurs at fraction
+0.02 and 200 ms, where one outcome is absent and 191 remain unique transverse.
+At fraction 0.50 and 200 ms, 118 are absent, seven have multiple crossings,
+and 67 remain unique transverse. Only 2 of 96 pairs preserve nominal topology.
+These dimensionless stresses map a synthetic failure region; they are not
+percentages of human motor variability.
+
+Phase C applies the same 1% perturbation design through four generalized-
+coordinate masks: both torques, shoulder only, wrist only, and zero authority.
+Both and shoulder-only cases retain a unique positive crossing throughout. The
+wrist-only nominal crossing is unique through 40 ms and absent from 60 through
+200 ms; zero authority is absent throughout and cannot acquire command torque
+through noise. Once wrist-only absence becomes nominal, its pairwise topology-
+preservation fraction rises again. Preserved absence is not crossing success.
+
+![Channel Masks Expose Topology Loss and Horizon Truncation](figures/fig_event_topology_robustness.pdf){#fig-event-topology-robustness width=100%}
+
+Topology identity agrees across 1, 2, and 4 ms RK4 steps for every channel and
+delay. The 0.60 and 0.80 s horizons also agree. The 0.40 s horizon alone misses
+the wrist-only crossing that occurs at 0.579326 s on both expanded horizons;
+the discrepancy is therefore typed as horizon truncation rather than a
+mechanics threshold.
+
+Event topology, event time/state, transversality, and clubhead speed remain
+separate from the parent bounded study's feasibility, target error, bound
+status, and control objective. Phase C has no independently registered
+work/power quadrature. It supports no anatomical isolation, human noise or
+fatigue interpretation, channel ranking, or coaching recommendation.
+
 ## Three-Dimensional Frame Audit {#sec-ladder-three-dimensional}
 
 Planar vectors can be embedded in three dimensions and expressed in arbitrary

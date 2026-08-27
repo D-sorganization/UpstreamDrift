@@ -40,6 +40,17 @@ def _spec(
 
 
 REVIEW_SPECS: dict[str, dict[str, Any]] = {
+    "global_event_topology_robustness": _spec(
+        "reviewed_as_synthetic_global_topology_robustness",
+        "supported_for_registered_synthetic_topology_model_scenarios",
+        ("PD-CLAIM-321", "PD-CLAIM-322", "PD-CLAIM-323"),
+        (
+            "Repeat the global topology, delay, and event-surface tests on "
+            "independent model tiers and governed participant trajectories; "
+            "add validated work/power quadrature before any energetic, human, "
+            "anatomical, strategy, or coaching interpretation."
+        ),
+    ),
     "bounded_nonlinear_event_reachability": _spec(
         "reviewed_as_local_bounded_feasibility_with_failed_optimality_gate",
         "supported_for_registered_local_bounded_model_scenario",

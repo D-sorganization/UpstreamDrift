@@ -27,6 +27,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "phase_event_stability",
         "trajectory_control_authority",
         "bounded_event_reachability",
+        "event_topology_robustness",
+        "event_topology_stress_extension",
+        "event_topology_channel_matrix",
         "double_pendulum_identifiability",
         "forward_two_hand",
         "moving_base_flexible_club",
@@ -77,6 +80,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     )
     assert manifest["claims"]["bounded_nonlinear_event_reachability"] == (
         "supported_for_registered_local_bounded_model_scenario"
+    )
+    assert manifest["claims"]["global_event_topology_robustness"] == (
+        "supported_for_registered_synthetic_topology_model_scenarios"
     )
     assert manifest["claims"]["double_pendulum_base_coefficient_excitation"] == (
         "full_rank_for_registered_synthetic_record"

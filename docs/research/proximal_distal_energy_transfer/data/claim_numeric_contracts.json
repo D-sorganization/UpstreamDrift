@@ -5471,6 +5471,214 @@
           "rtol": 0.0
         }
       ]
+    },
+    {
+      "claim_id": "PD-CLAIM-321",
+      "statement_sha256": "cfab6346d340c039c9cdc652d894105061cd3ad6688eb39102cfc3aa2d6f057d",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.01#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+          "json_pointer": "/scenarios/3/scale_fraction",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+          "json_pointer": "/scenarios/3/delay_summaries/10/delay_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "192#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+          "json_pointer": "/scenarios/3/delay_summaries/10/topology_counts/unique_transverse",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "96#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+          "json_pointer": "/scenarios/3/delay_summaries/10/preserved_pair_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "96#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+          "json_pointer": "/scenarios/3/delay_summaries/10/independent_pair_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-322",
+      "statement_sha256": "1af2243332e4a6b28e79c5e9b21a89f551bd206b2b314e2a3a0602fe3e65af31",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.50#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+          "json_pointer": "/scenarios/4/scale_fraction",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.20#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+          "json_pointer": "/scenarios/4/delay_summaries/10/delay_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "118#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+          "json_pointer": "/scenarios/4/delay_summaries/10/topology_counts/absent",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+          "json_pointer": "/scenarios/4/delay_summaries/10/topology_counts/multiple",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "67#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+          "json_pointer": "/scenarios/4/delay_summaries/10/topology_counts/unique_transverse",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+          "json_pointer": "/scenarios/4/delay_summaries/10/preserved_pair_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "96#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+          "json_pointer": "/scenarios/4/delay_summaries/10/independent_pair_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-323",
+      "statement_sha256": "53ff4558b4d1b80eb021106efaaff6c9c3c2ce1cf5ebeeb59b71b53807838baa",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.001#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+          "json_pointer": "/registration/step_sizes_s/0",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.002#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+          "json_pointer": "/registration/step_sizes_s/1",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.004#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+          "json_pointer": "/registration/step_sizes_s/2",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+          "json_pointer": "/registration/horizons_s/1",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.80#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+          "json_pointer": "/registration/horizons_s/2",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.40#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+          "json_pointer": "/registration/horizons_s/0",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.579326#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+          "json_pointer": "/horizon_controls/7/events/0/event_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
     }
   ]
 }

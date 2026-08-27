@@ -126,6 +126,18 @@ _RELEASE_METADATA: dict[str, Any] = {
                 "same_bracket_event_reachability"
             ),
         },
+        "event_topology_robustness": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_event_topology_robustness write",
+            "tier": "analytical_double_pendulum_global_delay_noise_topology",
+        },
+        "event_topology_stress_extension": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_event_topology_stress_extension write",
+            "tier": "analytical_double_pendulum_adaptive_topology_failure_region",
+        },
+        "event_topology_channel_matrix": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_event_topology_channel_matrix write",
+            "tier": "analytical_double_pendulum_channel_mask_topology_controls",
+        },
         "double_pendulum_identifiability": {
             "command": "python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability write",
             "tier": "analytical_double_pendulum_exact_map_and_dimensionless_finite_record",
@@ -288,6 +300,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "bounded_nonlinear_event_reachability": (
             "supported_for_registered_local_bounded_model_scenario"
+        ),
+        "global_event_topology_robustness": (
+            "supported_for_registered_synthetic_topology_model_scenarios"
         ),
         "double_pendulum_base_coefficient_excitation": (
             "full_rank_for_registered_synthetic_record"

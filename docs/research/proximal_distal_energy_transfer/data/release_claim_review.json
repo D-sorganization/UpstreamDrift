@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 50,
-    "reviewed_release_claim_count": 50,
+    "release_claim_count": 51,
+    "reviewed_release_claim_count": 51,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 50,
-    "atomic_claim_count": 319
+    "scientifically_open_gate_count": 51,
+    "atomic_claim_count": 322
   },
   "release_claim_reviews": [
     {
@@ -416,7 +416,7 @@
         "tests/research/test_spatial_forward_contact.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:490",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:538",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:215"
       ],
@@ -1683,9 +1683,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:186",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:196",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:265",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:490",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:503",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:599",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:538",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:551",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:647",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620"
@@ -1765,9 +1765,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:186",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:196",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:265",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:490",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:503",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:599",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:538",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:551",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:647",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620",
@@ -1853,9 +1853,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:186",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:196",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:265",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:490",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:503",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:599",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:538",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:551",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:647",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620",
@@ -2165,11 +2165,11 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:646",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:667",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:675",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:515",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:521",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:563",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:683",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:498",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:546",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
       ],
@@ -2231,7 +2231,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:778",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:789",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:798",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:672",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:720",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48"
       ],
       "negative_controls": [
@@ -2298,8 +2298,8 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:856",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:871",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:895",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:691",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:672",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:739",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:720",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:882",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
       ],
@@ -2365,17 +2365,17 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:895",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:545",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:521",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:593",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:33",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:672",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:720",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:41",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:609",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:657",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:16",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:670",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:718",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:25",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:83",
@@ -2383,9 +2383,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:62",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:73",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:97",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:691",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:739",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:130",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:515",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:563",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:155",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
@@ -2491,9 +2491,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:509",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:519",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:484",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:498",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:599",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:532",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:546",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:647",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100"
       ],
       "negative_controls": [
@@ -2871,7 +2871,6 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:389",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:403",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:410",
-        "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd:10",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:424",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:432"
       ],
@@ -2896,6 +2895,68 @@
         "Independent feasibility survives; minimum effort, controller superiority, and biological allocation do not."
       ],
       "remaining_scientific_gate": "Map larger target domains and event-bracket transitions, add registered delay, noise, and adverse-load continuation, establish optimizer adequacy, and test participant-held-out predictions before any human feasibility or strategy interpretation."
+    },
+    {
+      "release_claim_key": "global_event_topology_robustness",
+      "published_status": "supported_for_registered_synthetic_topology_model_scenarios",
+      "audit_state": "reviewed_as_synthetic_global_topology_robustness",
+      "scientific_disposition": "supported_for_registered_synthetic_topology_model_scenarios",
+      "supporting_claim_ids": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.npz",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.npz",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+        "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_event_topology_robustness.pdf",
+        "docs/research/proximal_distal_energy_transfer/EVENT_TOPOLOGY_ROBUSTNESS.md",
+        "scripts/research/proximal_distal_energy/event_topology_robustness.py",
+        "scripts/research/proximal_distal_energy/event_robustness_noise.py",
+        "scripts/research/proximal_distal_energy/event_robustness_study.py",
+        "scripts/research/proximal_distal_energy/event_robustness_summary.py",
+        "scripts/research/proximal_distal_energy/event_topology_channel_controls.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_robustness.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_stress_extension.py",
+        "scripts/research/proximal_distal_energy/run_event_topology_channel_matrix.py"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:441",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:449",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:457",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:465",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:475",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:481"
+      ],
+      "negative_controls": [
+        "complete direction-aware global enumeration",
+        "common 0.60 s horizon",
+        "zero-perturbation exact replay",
+        "96 independent antithetic pairs",
+        "public fixed Phase B registration before execution",
+        "all five stress levels executed",
+        "raw absent and multiple crossings retained",
+        "pair-level Wilson interval adequacy",
+        "both, shoulder-only, wrist-only, and zero coordinate masks",
+        "command and command-noise masks applied together",
+        "1, 2, and 4 ms physical integration steps",
+        "0.40, 0.60, and 0.80 s global horizons"
+      ],
+      "falsifiers": [
+        "Any raw replay in the registered cell changes status, crossing count, or direction, or the pair-level adequacy gate fails.",
+        "Raw arrays fail to reproduce the registered counts, the fixed stop rule is incomplete, or source/seed/pair adequacy drifts.",
+        "Any registered step changes topology identity, expanded horizons disagree, zero authority acquires command noise, or the wrist event is not retained at the reported expanded-horizon time."
+      ],
+      "uncertainty_boundaries": [
+        "This is pair-level topology preservation, not target accuracy, human robustness, or a success probability.",
+        "The fixed Phase B ladder is an artificial stress-to-failure map, not a human tolerance or biological noise calibration.",
+        "Channel masks are generalized-coordinate countermodels, and the horizon result is truncation evidence rather than strategy ranking."
+      ],
+      "remaining_scientific_gate": "Repeat the global topology, delay, and event-surface tests on independent model tiers and governed participant trajectories; add validated work/power quadrature before any energetic, human, anatomical, strategy, or coaching interpretation."
     }
   ]
 }

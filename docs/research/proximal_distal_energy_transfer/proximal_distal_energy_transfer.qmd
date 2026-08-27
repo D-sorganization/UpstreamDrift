@@ -191,6 +191,14 @@ abstract: |
   fail the 5% optimality gate. The result therefore supports only local
   model-scenario feasibility and supplies no controller, effort, human, or
   coaching ranking.
+  A global direction-aware extension then retains every event crossing under
+  causal delay and matched state, command, and event-surface perturbations.
+  All 6,336 registered small-stress replays preserve one positive transverse
+  crossing, but a preregistered stress extension exposes absent and multiple
+  crossings from 2% synthetic dimensionless stress. Channel, step-size, and
+  horizon controls distinguish topology loss from search-window truncation.
+  These open-loop model stresses do not estimate human variability, anatomy,
+  fatigue, controller superiority, or a coaching strategy.
   A phase-resolved proximal-motion study evaluates 126 rate cases under
   relative-rate, absolute-rate, and exact total-kinetic-energy matching, plus
   45 identical-state acceleration interventions. The large pre-impact rate

@@ -54,8 +54,11 @@ PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST = (
 PRE_BOUNDED_EVENT_REVIEWED_SOURCE_DIGEST = (
     "12bc44109474ecf9e63f29e9e371ee2da7fc434c8d9a5feddea4f408a29b9329"
 )
-REVIEWED_SOURCE_DIGEST = (
+PRE_EVENT_TOPOLOGY_REVIEWED_SOURCE_DIGEST = (
     "c4e9c1d32831ccb486b69f1fa73c70aedffce3a584828b0a0f56b326aeaa65d7"
+)
+REVIEWED_SOURCE_DIGEST = (
+    "15e6d235a301b2121971e46d5a9489bf7e8a900048fd43a7c837a86a8e99da7f"
 )
 MIGRATABLE_SOURCE_DIGESTS = frozenset(
     {
@@ -72,11 +75,12 @@ MIGRATABLE_SOURCE_DIGESTS = frozenset(
         PRE_DIRECT_TRANSITION_PRECISION_REVIEWED_SOURCE_DIGEST,
         PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST,
         PRE_BOUNDED_EVENT_REVIEWED_SOURCE_DIGEST,
+        PRE_EVENT_TOPOLOGY_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }
 )
 PRECURRENT_SOURCE_DIGESTS = MIGRATABLE_SOURCE_DIGESTS - {REVIEWED_SOURCE_DIGEST}
-REVIEWED_CLAIM_COUNT = 319
+REVIEWED_CLAIM_COUNT = 322
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -151,21 +155,14 @@ PRE_CONSTRAINT_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
 )
 REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
-        "PD-CAND-0d006242beae5a2a",
         "PD-CAND-165a6caf21ef85e2",
-        "PD-CAND-241636180b4cbaf6",
         "PD-CAND-39f42d06f3e621a5",
-        "PD-CAND-41e6cfc2c7a6bcd0",
-        "PD-CAND-501b961b26980f64",
         "PD-CAND-9345c1e6be2ef186",
         "PD-CAND-9906005bff75ba72",
         "PD-CAND-aa6efbe9274b5d53",
         "PD-CAND-ab4689630944a0fe",
-        "PD-CAND-af704879ef4215eb",
-        "PD-CAND-b4dabee7bff0d4ea",
         "PD-CAND-b06a3cbe5b2d0e01",
         "PD-CAND-b5b2526e23b77d70",
-        "PD-CAND-b7a1f0c00dbfb322",
         "PD-CAND-bcfcc2b3a9631de1",
         "PD-CAND-be8a26a0593eab4f",
         "PD-CAND-c6f7607002d58a93",
@@ -177,7 +174,7 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
 )
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 319-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 322-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -405,6 +402,9 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-239",
         "PD-CLAIM-240",
         "PD-CLAIM-241",
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323",
         "PD-CLAIM-242",
         "PD-CLAIM-243",
         "PD-CLAIM-244",
