@@ -130,6 +130,39 @@ threshold choice.
 
 ![Identifiability Audit. The net planar wrench cannot uniquely allocate both hand forces, and six summary observables cannot identify the full 12-parameter vector.](figures/fig_identifiability_audit.pdf){#fig-identifiability-audit width=94%}
 
+## Constraint Rank Is Not Force Identification
+
+The cross-tier constraint audit keeps three right nullspaces separate. The
+planar closure nullspace contains locally feasible generalized velocities; the
+two-point-force nullspace contains bilateral force allocations invisible to a
+net club wrench; and the full two-hand-wrench nullspace contains allocations
+among twelve inputs that one six-component resultant cannot distinguish.
+Neither kinematic freedom nor a sensing ambiguity identifies a produced hand
+force.
+
+At the declared regular planar geometry, the $4\times5$ closure Jacobian has
+rank 4 and nullity 1. The constructed alignment with both arm angles zero and
+grip angle $\pi/2$ has rank 3 and nullity 2. This is an analytical adverse
+geometry, not a closed anatomical pose. Near the alignment, rank remains 4
+while conditioning degrades. Because angular and translational columns have
+different units, the reported singular values use explicit 1 rad angular and
+0.75 m translational coordinate scales; alternative translation scales change
+the condition number without changing exact rank.
+
+The three-dimensional point-force map has rank 5/nullity 1 for separated
+contacts and rank 3/nullity 3 for coincident contacts. Its force and moment rows
+are normalized with a declared 0.10 m length. A 1 micrometre separation remains
+rank 5 at relative SVD tolerances $10^{-12}$ and $10^{-8}$ but is classified
+rank 3 at $10^{-6}$. Thus geometry, units, scaling, and tolerance are part of
+the result rather than incidental solver settings.
+
+The complete contract, source digests, scale alternatives, adverse cases, and
+reproduction commands are recorded in
+[`CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md`](../CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md)
+and `data/constraint_internal_force_diagnostics.json`. These diagnostics do not
+recover constraint multipliers, establish feasible spatial contact, observe a
+human internal-force strategy, or support coaching guidance.
+
 ## Preselected Programs and Held-Out Evaluation
 
 Eight programs were fixed before comparing results: passive wrist, early

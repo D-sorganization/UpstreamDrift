@@ -46,7 +46,79 @@ REVIEWED_POINTER_OVERRIDES = {
         ),
         "json_pointer": "/rows/66/horizon_s",
         "scale": 1000.0,
-    }
+    },
+    ("PD-CLAIM-311", "1#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/planar_closed_loop/coordinate_scale_contract/angular_coordinate_scale_rad",
+        "scale": 1.0,
+        "atol": 0.5000001,
+    },
+    ("PD-CLAIM-311", "0.75#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/planar_closed_loop/coordinate_scale_contract/translation_coordinate_scale_m",
+        "scale": 1.0,
+        "atol": 0.005000001,
+    },
+    ("PD-CLAIM-311", "4#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/planar_closed_loop/regular_case/rank",
+        "scale": 1.0,
+        "atol": 0.0,
+    },
+    ("PD-CLAIM-311", "1#2"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/planar_closed_loop/regular_case/nullity",
+        "scale": 1.0,
+        "atol": 0.0,
+    },
+    ("PD-CLAIM-311", "3#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/planar_closed_loop/exact_singular_case/rank",
+        "scale": 1.0,
+        "atol": 0.0,
+    },
+    ("PD-CLAIM-311", "2#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/planar_closed_loop/exact_singular_case/nullity",
+        "scale": 1.0,
+        "atol": 0.0,
+    },
+    ("PD-CLAIM-312", "0.10#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/bilateral_point_force/normalization/moment_rows_divided_by_reference_length_m",
+        "scale": 1.0,
+        "atol": 0.005000001,
+    },
+    ("PD-CLAIM-312", "0.20#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/bilateral_point_force/registered_span_case/span_m",
+        "scale": 1.0,
+        "atol": 0.005000001,
+    },
+    ("PD-CLAIM-312", "5#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/bilateral_point_force/registered_span_case/rank",
+        "scale": 1.0,
+        "atol": 0.0,
+    },
+    ("PD-CLAIM-312", "1#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/bilateral_point_force/registered_span_case/nullity",
+        "scale": 1.0,
+        "atol": 0.0,
+    },
+    ("PD-CLAIM-312", "3#1"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/bilateral_point_force/coincident_contact_case/rank",
+        "scale": 1.0,
+        "atol": 0.0,
+    },
+    ("PD-CLAIM-312", "3#2"): {
+        "artifact": "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "json_pointer": "/bilateral_point_force/coincident_contact_case/nullity",
+        "scale": 1.0,
+        "atol": 0.0,
+    },
 }
 
 
@@ -113,7 +185,7 @@ def _override_entry(
         "evidence_scope": "local_json_value",
         "scale": override["scale"],
         "offset": 0.0,
-        "atol": tolerance,
+        "atol": override.get("atol", tolerance),
         "rtol": 0.0,
     }
 

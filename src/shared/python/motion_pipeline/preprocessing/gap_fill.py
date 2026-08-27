@@ -5,10 +5,10 @@ Part of issue #4564. Handles marker occlusion and missing keypoints
 using interpolation and reconstruction strategies.
 
 The PCA reconstruction inner loop (SVD on the visible-row submatrix plus
-per-row least-squares) is routed through the Rust ``upstream-mocap-preproc``
-kernel when available; the pure-Python implementation in
-``_gap_fill_pure_python.py`` is preserved as a fallback for environments
-that do not ship the wheel.
+per-row least-squares), and the LINEAR/CUBIC marker interpolation (issue
+#8927), are routed through the Rust ``upstream-mocap-preproc`` kernel when
+available; the pure-Python implementation in ``_gap_fill_pure_python.py`` is
+preserved as a fallback for environments that do not ship the wheel.
 """
 
 from __future__ import annotations
@@ -109,6 +109,12 @@ def _gap_fill_markers(
     # fallback for any frames it cannot reconstruct.
     if strategy == GapFillStrategy.PCA:
         filled_frames = _pca_reconstruct_markers(traj.frames, gap_indices, max_gap)
+    elif strategy in (GapFillStrategy.LINEAR, GapFillStrategy.CUBIC):
+        # LINEAR is the pipeline default (pipeline.py GapFillStep), so this
+        # is the hottest path — dispatch to Rust when available (issue #8927).
+        filled_frames = _interp_reconstruct_markers(
+            traj.frames, gap_indices, strategy, max_gap
+        )
     else:
         filled_frames = _fill_gaps_markers(traj.frames, gap_indices, strategy, max_gap)
 
@@ -143,24 +149,47 @@ def _find_gaps_keypoints(frames: list[KeypointFrame]) -> list[tuple[int, int]]:
 
 
 def _find_gaps_markers(frames: list[MarkerFrame]) -> list[tuple[int, int]]:
-    """Find gap indices in marker frames."""
-    gaps = []
-    gap_start = None
+    """Find gap indices (contiguous occluded-frame runs) in marker frames.
+
+    Vectorized (issue #8927): builds an ``(n_frames, n_markers)`` occlusion
+    matrix and reduces it with ``ndarray.any(axis=1)``, then finds run
+    boundaries via a numpy diff instead of the previous per-frame Python
+    ``any()`` call plus a hand-rolled ``gap_start``/``gap_end`` state
+    machine.
+    """
+    n_frames = len(frames)
+    if n_frames == 0:
+        return []
+
+    marker_names = list(frames[0].markers.keys())
+    n_markers = max(len(marker_names), 1)
+    reference_keys = frames[0].markers.keys()
+    occ_matrix = np.zeros((n_frames, n_markers), dtype=bool)
 
     for i, frame in enumerate(frames):
-        # Check if any marker is occluded
-        has_occluded = any(m.occluded for m in frame.markers.values())
+        markers = frame.markers
+        if markers.keys() == reference_keys:
+            # Fast path: uniform marker schema, fully vectorizable reduction.
+            for j, name in enumerate(marker_names):
+                occ_matrix[i, j] = markers[name].occluded
+        else:
+            # Rare non-uniform schema: fall back to a per-frame scan, but
+            # still fold the result into the same matrix/any() reduction.
+            occ_matrix[i, 0] = any(m.occluded for m in markers.values())
 
-        if has_occluded and gap_start is None:
-            gap_start = i
-        elif not has_occluded and gap_start is not None:
-            gaps.append((gap_start, i - 1))
-            gap_start = None
+    has_occluded = np.asarray(occ_matrix.any(axis=1))
+    return _runs_from_bool_mask(has_occluded)
 
-    if gap_start is not None:
-        gaps.append((gap_start, len(frames) - 1))
 
-    return gaps
+def _runs_from_bool_mask(mask: np.ndarray) -> list[tuple[int, int]]:
+    """Return inclusive ``(start, end)`` index pairs for contiguous True-runs."""
+    if not mask.any():
+        return []
+    padded = np.concatenate(([False], mask, [False]))
+    edges = np.diff(padded.astype(np.int8))
+    starts = np.flatnonzero(edges == 1)
+    ends = np.flatnonzero(edges == -1) - 1
+    return list(zip(starts.tolist(), ends.tolist(), strict=True))
 
 
 def _fill_gaps_keypoints(
@@ -409,6 +438,116 @@ def _nearest_interp_markers(
 
 # Import Marker and Keypoint for type hints / construction
 from ..contracts import Keypoint, Marker
+
+
+def _interp_reconstruct_markers(
+    frames: list[MarkerFrame],
+    gap_indices: list[tuple[int, int]],
+    strategy: GapFillStrategy,
+    max_gap: int,
+) -> list[MarkerFrame]:
+    """Fill LINEAR/CUBIC marker gaps.
+
+    Dispatches to the Rust ``upstream_mocap_preproc.linear_gap_fill`` /
+    ``cubic_gap_fill`` kernels when available (mirrors the
+    ``_pca_reconstruct_markers`` dispatch pattern below), otherwise falls
+    back to the pure-Python per-gap interpolation in ``_fill_gaps_markers``.
+    """
+    if _RUST_AVAILABLE and frames:
+        return _interp_reconstruct_markers_rust(frames, gap_indices, strategy, max_gap)
+    return _fill_gaps_markers(list(frames), gap_indices, strategy, max_gap)
+
+
+def _interp_reconstruct_markers_rust(
+    frames: list[MarkerFrame],
+    gap_indices: list[tuple[int, int]],
+    strategy: GapFillStrategy,
+    max_gap: int,
+) -> list[MarkerFrame]:
+    """Rust-backed linear/cubic interpolation.
+
+    Stacks the trajectory into an ``(n_frames, n_markers, 3)`` array plus an
+    ``(n_frames, n_markers)`` occlusion mask via ``_stack_marker_matrix``,
+    calls the matching Rust kernel, then unstacks the result back into
+    ``MarkerFrame`` objects via ``_unstack_marker_matrix``.
+
+    The Rust kernel enforces ``max_gap`` per marker column independently
+    (each point's own contiguous occluded run). The pre-Rust Python
+    ``_fill_gaps_markers``/``_find_gaps_markers`` path is more conservative:
+    it unions occlusion across *all* markers into shared gap windows first
+    (``gap_indices``) and skips a window entirely if that combined window
+    exceeds ``max_gap``, even for a marker whose own run within it is short.
+    To keep the Rust dispatch behaviorally identical to that existing
+    fallback (issue #8927 is a performance change, not a semantics change),
+    frames belonging to an oversized combined window are excluded from the
+    unstack step via ``_large_gap_frames``, the same helper
+    ``_pca_reconstruct_markers`` already uses for this purpose.
+    """
+    marker_names = list(frames[0].markers.keys())
+    n_frames = len(frames)
+    n_markers = len(marker_names)
+
+    matrix, occ_mask = _stack_marker_matrix(frames, marker_names)
+    data = matrix.reshape(n_frames, n_markers, 3)
+    mask = occ_mask.reshape(n_frames, n_markers, 3).any(axis=2)
+
+    kernel = (
+        _rust_kernel.linear_gap_fill  # type: ignore[union-attr]
+        if strategy == GapFillStrategy.LINEAR
+        else _rust_kernel.cubic_gap_fill  # type: ignore[union-attr]
+    )
+    filled, filled_mask = kernel(data, mask, int(max_gap))
+    filled_matrix = np.asarray(filled).reshape(n_frames, n_markers * 3)
+    filled_mask = np.asarray(filled_mask).copy()
+
+    skip_frames = _large_gap_frames(gap_indices, max_gap)
+    if skip_frames:
+        skip_idx = np.fromiter(skip_frames, dtype=np.intp, count=len(skip_frames))
+        filled_mask[skip_idx, :] = True  # treat as "kernel could not fill"
+
+    return _unstack_marker_matrix(frames, marker_names, filled_matrix, filled_mask)
+
+
+def _unstack_marker_matrix(
+    frames: list[MarkerFrame],
+    marker_names: list[str],
+    filled_matrix: np.ndarray,
+    filled_mask: np.ndarray,
+) -> list[MarkerFrame]:
+    """Inverse of ``_stack_marker_matrix``: rebuild frames from a filled matrix.
+
+    ``filled_mask`` is the kernel's post-fill occlusion mask (``(n_frames,
+    n_markers)``): still ``True`` where the kernel could not fill an entry
+    (e.g. the gap exceeded ``max_gap``, or there was no anchor on one side).
+    Only markers that were occluded going in *and* got filled
+    (``not filled_mask[i, j]``) are replaced; everything else keeps its
+    original value/occlusion state.
+    """
+    filled_frames = list(frames)
+    for i, frame in enumerate(frames):
+        new_markers: dict[str, Marker] | None = None
+        for j, name in enumerate(marker_names):
+            marker = frame.markers.get(name)
+            if marker is None or not marker.occluded or filled_mask[i, j]:
+                continue
+            if new_markers is None:
+                new_markers = dict(frame.markers)
+            base = 3 * j
+            new_markers[name] = Marker(
+                name=name,
+                x=float(filled_matrix[i, base]),
+                y=float(filled_matrix[i, base + 1]),
+                z=float(filled_matrix[i, base + 2]),
+                residual=None,
+                occluded=False,
+            )
+        if new_markers is not None:
+            filled_frames[i] = MarkerFrame(
+                timestamp=frame.timestamp,
+                markers=new_markers,
+                frame_index=frame.frame_index,
+            )
+    return filled_frames
 
 
 def _pca_reconstruct_markers(

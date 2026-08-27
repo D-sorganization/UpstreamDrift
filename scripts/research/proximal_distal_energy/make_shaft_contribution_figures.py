@@ -241,9 +241,11 @@ def fig_physics_ablations(record: dict) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(11.0, 7.2))
     for ax, (key, title) in zip(axes.flat, metrics, strict=True):
         values = [
-            rows[name]["impact"][key]
-            if key in rows[name]["impact"]
-            else rows[name]["energy"][key]
+            (
+                rows[name]["impact"][key]
+                if key in rows[name]["impact"]
+                else rows[name]["energy"][key]
+            )
             for name in names
         ]
         ax.bar(

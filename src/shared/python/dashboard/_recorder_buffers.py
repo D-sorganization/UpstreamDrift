@@ -70,10 +70,25 @@ class _BuffersMixin:
 
             for key, arr in self.data.items():
                 if isinstance(arr, np.ndarray):
+                    # Some buffers (e.g. com_position, ground_forces,
+                    # ztcf_accel, entries in induced_accelerations) are
+                    # allocated directly at ``max_samples`` rather than the
+                    # growable ``current_capacity`` (see
+                    # ``_initialize_array_buffers`` /
+                    # ``_ensure_buffers_allocated``). When ``new_capacity``
+                    # is still below ``max_samples``, such a buffer is
+                    # already larger than ``new_capacity`` and must be left
+                    # untouched — resizing it down would corrupt already
+                    # recorded samples past ``new_capacity`` and, more
+                    # immediately, raise a shape-mismatch when copying the
+                    # (larger) source array into the (smaller) destination
+                    # slice below.
+                    if arr.shape[0] >= new_capacity:
+                        continue
                     new_shape = list(arr.shape)
                     new_shape[0] = new_capacity
                     new_arr = np.zeros(new_shape, dtype=arr.dtype)
-                    new_arr[: self.current_capacity] = arr
+                    new_arr[: arr.shape[0]] = arr
                     self.data[key] = new_arr
 
             self.current_capacity = new_capacity

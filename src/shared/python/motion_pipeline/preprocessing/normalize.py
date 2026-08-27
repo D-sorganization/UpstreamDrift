@@ -2,14 +2,38 @@
 Coordinate normalization for motion capture data.
 
 Part of issue #4564. World-up axis conversion, unit conversion, origin re-centering.
+
+Vectorized per issue #8925: the per-marker/per-keypoint transform, unit
+conversion, centering and up-axis detection passes are implemented as
+array ops over ``(frames, points, xyz)`` ndarrays (via the shared
+``_frame_arrays`` helpers) instead of per-element Python loops that
+allocated a ``np.array`` and constructed a validated Pydantic object for
+every marker/keypoint in every frame. Final frame reconstruction uses
+``model_construct`` (skips Pydantic validation) since the arithmetic
+applied — a fixed rotation/permutation matmul, a finite scalar unit
+scale, and a finite centroid subtraction — is finite-preserving given
+already-validated finite input, mirroring the precedent in
+``sources/c3d_adapter.py``.
 """
 
 from __future__ import annotations
 
 from enum import Enum
+
 import numpy as np
 
-from ..contracts import KeypointFrame, KeypointSequence, MarkerFrame, MarkerTrajectory
+from ..contracts import (
+    KeypointFrame,
+    KeypointSequence,
+    MarkerFrame,
+    MarkerTrajectory,
+)
+from ._frame_arrays import (
+    array_to_keypoint_frames,
+    array_to_marker_frames,
+    keypoints_to_array,
+    markers_to_array,
+)
 
 
 class UpAxis(str, Enum):
@@ -83,6 +107,38 @@ def convert_units(
     raise ValueError(f"Unsupported data type: {type(data)}")
 
 
+def _keypoint_z_mask(frames: list[KeypointFrame]) -> np.ndarray:
+    """Return an ``(frames, keypoints)`` bool mask of ``kp.z is not None``."""
+    if not frames:
+        return np.zeros((0, 0), dtype=bool)
+    return np.array(
+        [[kp.z is not None for kp in frame.keypoints] for frame in frames],
+        dtype=bool,
+    )
+
+
+def _keypoint_centroid_from_first_frame(
+    data: np.ndarray, mask: np.ndarray
+) -> np.ndarray:
+    """Centroid of frame 0, matching the original per-element semantics.
+
+    x/y average over all keypoints; z averages only keypoints whose z is
+    not None (mirrors ``np.mean([]) -> nan`` when frame 0 has no z values,
+    exactly as the original list-comprehension implementation did).
+    """
+    first = data[0]
+    first_mask = mask[0]
+    centroid_x = np.mean(first[:, 0])
+    centroid_y = np.mean(first[:, 1])
+    centroid_z = np.mean(first[first_mask, 2])
+    return np.array([centroid_x, centroid_y, centroid_z])
+
+
+def _marker_centroid_from_first_frame(data: np.ndarray) -> np.ndarray:
+    """Centroid of frame 0 markers (all axes averaged over all markers)."""
+    return np.mean(data[0], axis=0)
+
+
 def _normalize_keypoints(
     seq: KeypointSequence,
     target_up: UpAxis,
@@ -100,35 +156,20 @@ def _normalize_keypoints(
     # Compute transformation matrix
     transform = _get_up_axis_transform(source_up, target_up)
 
-    # Apply transformation
-    new_frames = []
-    for frame in seq.frames:
-        new_keypoints = []
-        for kp in frame.keypoints:
-            pos = np.array([kp.x, kp.y, kp.z if kp.z is not None else 0.0])
-            new_pos = transform @ pos
+    data = keypoints_to_array(seq.frames)
+    mask = _keypoint_z_mask(seq.frames)
 
-            new_kp = Keypoint(
-                x=new_pos[0],
-                y=new_pos[1],
-                z=new_pos[2] if kp.z is not None else None,
-                confidence=kp.confidence,
-                name=kp.name,
-            )
-            new_keypoints.append(new_kp)
-
-        new_frames.append(
-            KeypointFrame(
-                timestamp=frame.timestamp,
-                keypoints=new_keypoints,
-                schema_name=frame.schema_name,
-                frame_index=frame.frame_index,
-            )
-        )
-
-    # Center origin if requested
+    # Single vectorized expression: transform + (optional) centering, in
+    # place of the old per-element matmul loop followed by a second full
+    # Python-loop centering pass.
+    transformed = data @ transform.T
     if center_origin:
-        new_frames = _center_keypoints_origin(new_frames)
+        centroid = _keypoint_centroid_from_first_frame(transformed, mask)
+        transformed = transformed - centroid
+
+    new_frames = array_to_keypoint_frames(
+        seq.frames, transformed, use_model_construct=True
+    )
 
     return KeypointSequence(
         id=seq.id,
@@ -161,34 +202,17 @@ def _normalize_markers(
     # Compute transformation matrix
     transform = _get_up_axis_transform(source_up, target_up)
 
-    # Apply transformation
-    new_frames = []
-    for frame in traj.frames:
-        new_markers = {}
-        for name, marker in frame.markers.items():
-            pos = np.array([marker.x, marker.y, marker.z])
-            new_pos = transform @ pos
+    data = markers_to_array(traj.frames)
 
-            new_markers[name] = Marker(
-                name=name,
-                x=new_pos[0],
-                y=new_pos[1],
-                z=new_pos[2],
-                residual=marker.residual,
-                occluded=marker.occluded,
-            )
-
-        new_frames.append(
-            MarkerFrame(
-                timestamp=frame.timestamp,
-                markers=new_markers,
-                frame_index=frame.frame_index,
-            )
-        )
-
-    # Center origin if requested
+    # Single vectorized expression: transform + (optional) centering.
+    transformed = data @ transform.T
     if center_origin:
-        new_frames = _center_markers_origin(new_frames)
+        centroid = _marker_centroid_from_first_frame(transformed)
+        transformed = transformed - centroid
+
+    new_frames = array_to_marker_frames(
+        traj.frames, transformed, use_model_construct=True
+    )
 
     return MarkerTrajectory(
         id=traj.id,
@@ -221,28 +245,10 @@ def _convert_keypoint_units(
     # Compute scale factor
     scale = _get_unit_scale(source_unit, target_unit)
 
-    # Apply scale
-    new_frames = []
-    for frame in seq.frames:
-        new_keypoints = []
-        for kp in frame.keypoints:
-            new_kp = Keypoint(
-                x=kp.x * scale,
-                y=kp.y * scale,
-                z=kp.z * scale if kp.z is not None else None,
-                confidence=kp.confidence,
-                name=kp.name,
-            )
-            new_keypoints.append(new_kp)
+    data = keypoints_to_array(seq.frames)
+    scaled = data * scale
 
-        new_frames.append(
-            KeypointFrame(
-                timestamp=frame.timestamp,
-                keypoints=new_keypoints,
-                schema_name=frame.schema_name,
-                frame_index=frame.frame_index,
-            )
-        )
+    new_frames = array_to_keypoint_frames(seq.frames, scaled, use_model_construct=True)
 
     return KeypointSequence(
         id=seq.id,
@@ -273,27 +279,10 @@ def _convert_marker_units(
     # Compute scale factor
     scale = _get_unit_scale(source_unit, target_unit)
 
-    # Apply scale
-    new_frames = []
-    for frame in traj.frames:
-        new_markers = {}
-        for name, marker in frame.markers.items():
-            new_markers[name] = Marker(
-                name=name,
-                x=marker.x * scale,
-                y=marker.y * scale,
-                z=marker.z * scale,
-                residual=marker.residual,
-                occluded=marker.occluded,
-            )
+    data = markers_to_array(traj.frames)
+    scaled = data * scale
 
-        new_frames.append(
-            MarkerFrame(
-                timestamp=frame.timestamp,
-                markers=new_markers,
-                frame_index=frame.frame_index,
-            )
-        )
+    new_frames = array_to_marker_frames(traj.frames, scaled, use_model_construct=True)
 
     return MarkerTrajectory(
         id=traj.id,
@@ -315,13 +304,13 @@ def _detect_up_axis_keypoints(frames: list[KeypointFrame]) -> UpAxis:
     if not frames:
         return UpAxis.Y_UP
 
-    all_x = [kp.x for f in frames for kp in f.keypoints]
-    all_y = [kp.y for f in frames for kp in f.keypoints]
-    all_z = [kp.z for f in frames for kp in f.keypoints if kp.z is not None]
+    data = keypoints_to_array(frames)
+    mask = _keypoint_z_mask(frames)
 
-    var_x = np.var(all_x)
-    var_y = np.var(all_y)
-    var_z = np.var(all_z) if all_z else 0
+    var_x = np.var(data[..., 0])
+    var_y = np.var(data[..., 1])
+    z_values = data[..., 2][mask]
+    var_z = np.var(z_values) if z_values.size else 0
 
     if var_y > var_x and var_y > var_z:
         return UpAxis.Y_UP
@@ -335,13 +324,11 @@ def _detect_up_axis_markers(frames: list[MarkerFrame]) -> UpAxis:
     if not frames:
         return UpAxis.Y_UP
 
-    all_x = [m.x for f in frames for m in f.markers.values()]
-    all_y = [m.y for f in frames for m in f.markers.values()]
-    all_z = [m.z for f in frames for m in f.markers.values()]
+    data = markers_to_array(frames)
 
-    var_x = np.var(all_x)
-    var_y = np.var(all_y)
-    var_z = np.var(all_z)
+    var_x = np.var(data[..., 0])
+    var_y = np.var(data[..., 1])
+    var_z = np.var(data[..., 2])
 
     if var_y > var_x and var_y > var_z:
         return UpAxis.Y_UP
@@ -425,36 +412,12 @@ def _center_keypoints_origin(frames: list[KeypointFrame]) -> list[KeypointFrame]
     if not frames:
         return frames
 
-    # Compute centroid of first frame
-    first_frame = frames[0]
-    centroid_x = np.mean([kp.x for kp in first_frame.keypoints])
-    centroid_y = np.mean([kp.y for kp in first_frame.keypoints])
-    centroid_z = np.mean([kp.z for kp in first_frame.keypoints if kp.z is not None])
+    data = keypoints_to_array(frames)
+    mask = _keypoint_z_mask(frames)
+    centroid = _keypoint_centroid_from_first_frame(data, mask)
+    centered = data - centroid
 
-    # Center all frames
-    new_frames = []
-    for frame in frames:
-        new_keypoints = []
-        for kp in frame.keypoints:
-            new_kp = Keypoint(
-                x=kp.x - centroid_x,
-                y=kp.y - centroid_y,
-                z=(kp.z - centroid_z) if kp.z is not None else None,
-                confidence=kp.confidence,
-                name=kp.name,
-            )
-            new_keypoints.append(new_kp)
-
-        new_frames.append(
-            KeypointFrame(
-                timestamp=frame.timestamp,
-                keypoints=new_keypoints,
-                schema_name=frame.schema_name,
-                frame_index=frame.frame_index,
-            )
-        )
-
-    return new_frames
+    return array_to_keypoint_frames(frames, centered)
 
 
 def _center_markers_origin(frames: list[MarkerFrame]) -> list[MarkerFrame]:
@@ -462,37 +425,8 @@ def _center_markers_origin(frames: list[MarkerFrame]) -> list[MarkerFrame]:
     if not frames:
         return frames
 
-    # Compute centroid of first frame
-    first_frame = frames[0]
-    all_markers = list(first_frame.markers.values())
-    centroid_x = np.mean([m.x for m in all_markers])
-    centroid_y = np.mean([m.y for m in all_markers])
-    centroid_z = np.mean([m.z for m in all_markers])
+    data = markers_to_array(frames)
+    centroid = _marker_centroid_from_first_frame(data)
+    centered = data - centroid
 
-    # Center all frames
-    new_frames = []
-    for frame in frames:
-        new_markers = {}
-        for name, marker in frame.markers.items():
-            new_markers[name] = Marker(
-                name=name,
-                x=marker.x - centroid_x,
-                y=marker.y - centroid_y,
-                z=marker.z - centroid_z,
-                residual=marker.residual,
-                occluded=marker.occluded,
-            )
-
-        new_frames.append(
-            MarkerFrame(
-                timestamp=frame.timestamp,
-                markers=new_markers,
-                frame_index=frame.frame_index,
-            )
-        )
-
-    return new_frames
-
-
-# Import for type hints
-from ..contracts import Keypoint, Marker
+    return array_to_marker_frames(frames, centered)

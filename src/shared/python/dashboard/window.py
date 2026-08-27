@@ -9,6 +9,7 @@ Provides a unified interface for:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 from PyQt6 import QtCore, QtWidgets
@@ -30,15 +31,45 @@ from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
 logger = get_logger(__name__)
 
 
+@dataclass(frozen=True)
+class ModelLoadStatus:
+    """Describes whether an engine-specific dashboard's model loaded.
+
+    The window title is not a reliable place to communicate this: it is
+    the ONLY place the engine name previously appeared, and it is stripped
+    when the dashboard is embedded as a tab (issue #8829). Callers such as
+    ``MuJoCoDashboard``/``PinocchioDashboard``/``DrakeDashboard`` build one
+    of these after attempting to load a starting model and pass it to
+    :class:`UnifiedDashboardWindow` so the in-body identity strip can show
+    the engine name, the model that loaded (if any), and a visible warning
+    when a load silently failed instead of just swallowing the exception.
+    """
+
+    engine_name: str
+    model_name: str | None = None
+    loaded: bool = True
+    error: str | None = None
+
+
 class UnifiedDashboardWindow(QtWidgets.QMainWindow):
     """Main window for the unified physics dashboard."""
 
-    def __init__(self, engine: PhysicsEngine, title: str = "Physics Dashboard") -> None:
+    def __init__(
+        self,
+        engine: PhysicsEngine,
+        title: str = "Physics Dashboard",
+        model_status: ModelLoadStatus | None = None,
+    ) -> None:
         """Initialize the dashboard.
 
         Args:
             engine: The physics engine instance to control and analyze.
             title: Window title.
+            model_status: Optional engine/model identity and load outcome,
+                rendered as an in-body strip (and warning banner on
+                failure) that stays visible even when this window is
+                embedded and its title bar is hidden. See
+                :class:`ModelLoadStatus`.
         """
         if engine is None:
             raise ValueError("engine must be provided")
@@ -50,6 +81,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         )
         self.resize(1200, 800)
 
+        self.model_status = model_status
         self.engine = engine
         self.recorder = GenericPhysicsRecorder(self.engine)
         self.runner = SimulationRunner(self.engine, self.recorder)
@@ -76,7 +108,15 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
 
-        main_layout = QtWidgets.QHBoxLayout(central_widget)
+        outer_layout = QtWidgets.QVBoxLayout(central_widget)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+
+        self._build_identity_strip(outer_layout)
+
+        body = QtWidgets.QWidget()
+        outer_layout.addWidget(body, stretch=1)
+        main_layout = QtWidgets.QHBoxLayout(body)
 
         # --- Left Panel: Live View & Controls ---
         left_panel = QtWidgets.QWidget()
@@ -114,6 +154,51 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         right_panel.addTab(self.export_tab, "Export")
 
         main_layout.addWidget(right_panel, stretch=2)
+
+    def _build_identity_strip(self, outer_layout: QtWidgets.QVBoxLayout) -> None:
+        """Add an in-body engine/model identity label (and failure banner).
+
+        The window title is stripped when this dashboard is embedded as a
+        tab (see ``ExerciseDashboard._on_engine_changed``), so it cannot be
+        the only place the engine name is visible. This strip lives inside
+        the dashboard's own layout and therefore survives embedding
+        (issue #8829).
+        """
+        status = self.model_status
+        if status is None:
+            # Backward-compatible default: still identify the engine even
+            # when the caller didn't build a ModelLoadStatus.
+            engine_label = type(self.engine).__name__
+            self.identity_label = QtWidgets.QLabel(f"Engine: {engine_label}")
+            self.identity_label.setObjectName("dashboard-identity-strip")
+            outer_layout.addWidget(self.identity_label)
+            self.status_banner = None
+            return
+
+        if status.loaded:
+            model_part = f" | Model: {status.model_name}" if status.model_name else ""
+        else:
+            model_part = " | Model: not loaded"
+        self.identity_label = QtWidgets.QLabel(
+            f"Engine: {status.engine_name}{model_part}"
+        )
+        self.identity_label.setObjectName("dashboard-identity-strip")
+        self.identity_label.setAccessibleName("Dashboard engine and model identity")
+        outer_layout.addWidget(self.identity_label)
+
+        self.status_banner = None
+        if not status.loaded:
+            banner_text = "Model failed to load"
+            if status.error:
+                banner_text += f": {status.error}"
+            self.status_banner = QtWidgets.QLabel(banner_text)
+            self.status_banner.setObjectName("dashboard-status-banner")
+            self.status_banner.setWordWrap(True)
+            self.status_banner.setStyleSheet(
+                "background-color: #7a4a00; color: white; padding: 4px;"
+            )
+            self.status_banner.setAccessibleName("Model load failure warning")
+            outer_layout.addWidget(self.status_banner)
 
     def _setup_plotting_tab(self, parent: QtWidgets.QWidget) -> None:
         """Setup standard plotting tab."""

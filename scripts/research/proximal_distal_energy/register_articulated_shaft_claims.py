@@ -219,10 +219,7 @@ def _attach(
     )
 
 
-def main() -> None:
-    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    valid_ids = {candidate["candidate_id"] for candidate in inventory["candidates"]}
+def _clean_registry_claims(registry: dict[str, Any], valid_ids: set[str]) -> None:
     registry["claims"] = [
         claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
     ]
@@ -232,15 +229,13 @@ def main() -> None:
             for candidate_id in claim.get("candidate_ids", [])
             if candidate_id in valid_ids
         ]
-    selected = _selected(inventory["candidates"])
-    new_claims = _claims(selected)
-    registry["claims"].extend(new_claims)
-    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
-    reviews = {
-        review["candidate_id"]: review
-        for review in registry["candidate_reviews"]
-        if review["candidate_id"] in valid_ids
-    }
+
+
+def _apply_shaft_reviews(
+    reviews: dict[str, dict[str, Any]],
+    claims: dict[str, dict[str, Any]],
+    selected: dict[str, Any],
+) -> None:
     primary = {
         "law": ("PD-CLAIM-289",),
         "mass": ("PD-CLAIM-289",),
@@ -292,6 +287,9 @@ def main() -> None:
     }
     for name, claim_ids in repeated.items():
         _attach(claims, reviews, selected[name], claim_ids)
+
+
+def _update_retained_claim_statements(claims: dict[str, dict[str, Any]]) -> None:
     claims["PD-CLAIM-128"]["statement"] = (
         "The discrepancy matrix records explicit branch capabilities rather than "
         "cumulative triangular inheritance; twelve bounded findings are supported "
@@ -303,7 +301,11 @@ def main() -> None:
         "passive first-mode shaft atlas establishes state-dependent elastic response; "
         "neither establishes physical grip, equipment, timing, human, or strategy benefit."
     )
-    registry["candidate_reviews"] = list(reviews.values())
+
+
+def _update_release_inventory_and_scope(
+    registry: dict[str, Any], source_digest: str
+) -> None:
     release = {
         item["release_claim_key"]: item for item in registry["release_claim_inventory"]
     }
@@ -318,7 +320,26 @@ def main() -> None:
         "and passive first-mode shaft tiers pass registered 50 ms gates, with mixed "
         "load/work-matched shaft outcomes and explicit calibration boundaries."
     )
-    registry["paper"]["source_digest"] = inventory["source_digest"]
+    registry["paper"]["source_digest"] = source_digest
+
+
+def main() -> None:
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
+    valid_ids = {candidate["candidate_id"] for candidate in inventory["candidates"]}
+    _clean_registry_claims(registry, valid_ids)
+    selected = _selected(inventory["candidates"])
+    registry["claims"].extend(_claims(selected))
+    claims = {claim["claim_id"]: claim for claim in registry["claims"]}
+    reviews = {
+        review["candidate_id"]: review
+        for review in registry["candidate_reviews"]
+        if review["candidate_id"] in valid_ids
+    }
+    _apply_shaft_reviews(reviews, claims, selected)
+    _update_retained_claim_statements(claims)
+    registry["candidate_reviews"] = list(reviews.values())
+    _update_release_inventory_and_scope(registry, inventory["source_digest"])
     registry["claims"] = list(claims.values())
     REGISTRY.write_text(json.dumps(registry, indent=2) + "\n", encoding="utf-8")
 

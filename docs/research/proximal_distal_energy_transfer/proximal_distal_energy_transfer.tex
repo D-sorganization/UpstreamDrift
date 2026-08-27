@@ -446,7 +446,14 @@ proxy relative to clock timing but raises peak hand force; higher
 impedance changes the tradeoff, and all four registered programs remain
 Pareto-nondominated. A local task-Jacobian partition exposes five
 task-null input directions, but this is a model property rather than
-evidence of a neural synergy or human self-stabilization. A
+evidence of a neural synergy or human self-stabilization. An exact
+double-pendulum identifiability audit separates coefficient excitation
+from physical-parameter recovery. The registered synthetic trajectory
+excites all seven dimensionless base-coefficient directions, while the
+eleven-entry physical map has analytic rank seven, nullity four, and
+three exact nonunique parameter families. The associated Fisher screen
+is an oracle-kinematics lower bound only; it does not identify
+participant anatomy, equipment, or practical measurement performance. A
 phase-resolved proximal-motion study evaluates 126 rate cases under
 relative-rate, absolute-rate, and exact total-kinetic-energy matching,
 plus 45 identical-state acceleration interventions. The large pre-impact
@@ -498,7 +505,7 @@ with the document for independent inspection and reuse.
 }
 \listoffigures
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable, rightrule=.15mm, bottomrule=.15mm, colback=white, leftrule=.75mm, opacityback=0, arc=.35mm, opacitybacktitle=0.6, coltitle=black, toptitle=1mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, left=2mm, toprule=.15mm, bottomtitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, leftrule=.75mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, left=2mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, breakable, bottomrule=.15mm, bottomtitle=1mm, opacityback=0, titlerule=0mm, toptitle=1mm, rightrule=.15mm, arc=.35mm, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -948,6 +955,59 @@ and torque program are defined (\citeproc{ref-white2006}{White 2006}).
 The numerical study in Section~\ref{sec-results} therefore tests one
 specified intervention family rather than treating the literature as a
 prior proof of its ordering.
+
+\subsection{Which Double-Pendulum Parameters Are
+Identifiable?}\label{sec-double-pendulum-identifiability}
+
+The analytical model also permits an exact distinction between
+coefficient excitation and physical-parameter recovery. Its inverse
+dynamics factor as
+
+\[
+\tau=Y(q,\dot q,\ddot q)\,
+[\alpha,\beta,\delta,\gamma_1,\gamma_2,d_1,d_2]^\mathsf{T},
+\]
+
+where the seven base coefficients combine eleven reduced physical
+entries: two masses, two centers of mass, two proximal inertias,
+upper-link length, gravity, plane inclination, and two damping
+coefficients. The exact physical-to-base Jacobian has analytic row rank
+seven because one declared \(7\times7\) minor has magnitude
+\(m_2^2r_1r_2[g\cos(\phi)]^2>0\). Its nullity is therefore four. Three
+finite counterexample families independently preserve every base
+coefficient while changing mass--center-of-mass, lower-link coupling, or
+gravity--plane parameters. Consequently, even an arbitrarily long
+noiseless record governed by this model cannot uniquely recover the
+declared eleven-entry physical vector.
+
+The registered \texttt{restrain\_then\_drive@0.100s} synthetic record
+answers the separate excitation question. After scaling each coefficient
+by its registered base value and generalized torque by the registered 60
+N m maximum, its \(700\times7\) dimensionless regressor has rank seven
+with retained condition number 180.853 under the threshold
+\(\max(10^{-8},10^{-7}\bar\sigma_1)\). Equivalent coefficient units
+change the dimensionless matrix by at most \(4.45\times10^{-16}\) and
+preserve the rank. Two additional positive scale choices also preserve
+rank while changing the condition number, so every reported condition
+number remains inseparable from its declared scale contract.
+
+Full rank does not imply useful finite-noise recovery. Under
+deliberately favorable assumptions of exact kinematics, exact model form
+and event timing, and independent known Gaussian torque noise, a 1 N m
+noise standard deviation produces a worst relative 95\% half-width of
+0.123 for the full record but 499 for its first 10\%. These are
+Cramér--Rao-style oracle lower bounds. Kinematic differentiation noise,
+correlated sensor errors, model discrepancy, unknown noise scale,
+repeated participants, and held-out prediction can only weaken the
+practical inference. The result therefore establishes structural
+non-uniqueness of the declared physical map and finite-record excitation
+of seven base coefficients; it does not establish participant
+parameters, model adequacy, human mechanism, or coaching guidance. The
+derivation, unit and scale audits, adverse windows, exact
+counterexamples, and reproduction command are provided in
+\href{../DOUBLE_PENDULUM_IDENTIFIABILITY.md}{\texttt{DOUBLE\_PENDULUM\_IDENTIFIABILITY.md}}
+and the registered
+\href{../data/double_pendulum_identifiability.json}{\texttt{double\_pendulum\_identifiability.json}}.
 
 \subsection{Source-Level Contrast
 Matrix}\label{sec-release-contrast-matrix}
@@ -2636,6 +2696,309 @@ implication is therefore diagnostic rather than prescriptive: evaluate
 how the complete force vector, couple, and interface velocity evolve
 together, and distinguish the state-dependent reaction from the current
 command before interpreting a large hand-path force as greater effort.
+
+\chapter{Coordinate-Explicit Coriolis, Centripetal, and Gravity
+Attribution}\label{sec-coordinate-force-sources}
+
+\section{Why the Names Need a Contract}\label{sec-force-source-contract}
+
+The words \emph{Coriolis}, \emph{centripetal}, and \emph{centrifugal}
+can make a multibody equation sound as though three additional physical
+agents have appeared. They have not. The physical system still contains
+applied torques, gravity, damping, constraints, and body-to-body
+reactions. Coriolis and squared-speed terms are velocity-dependent parts
+of the same equations after a coordinate system has been chosen. They
+explain how an achieved configuration and motion redirect the effects of
+earlier and current loading.
+
+This chapter uses the fixed convention
+
+\begin{equation}\phantomsection\label{eq-source-equation}{
+M(q)\ddot q+h(q,\dot q)+g(q)+d(\dot q)=\tau,
+}\end{equation}
+
+where \(h\) is the complete velocity bias. An equation term \(r_k\) is
+reported with its equal-and-opposite generalized \textbf{drive}
+\(Q_k=-r_k\). Thus a positive drive accelerates the declared positive
+coordinate, whereas a positive left-hand-side term resists it. Every
+figure and data field follows this sign rule.
+
+The first-kind Christoffel symbols are
+
+\begin{equation}\phantomsection\label{eq-source-christoffel}{
+\Gamma_{ijk}
+=\frac{1}{2}\left(
+\frac{\partial M_{ij}}{\partial q_k}
++\frac{\partial M_{ik}}{\partial q_j}
+-\frac{\partial M_{jk}}{\partial q_i}
+\right),
+\qquad
+h_i=\sum_{j,k}\Gamma_{ijk}\dot q_j\dot q_k.
+}\end{equation}
+
+The registered monomial convention assigns
+
+\begin{equation}\phantomsection\label{eq-source-monomial-split}{
+h_i^{\mathrm{sq}}=\sum_j\Gamma_{ijj}\dot q_j^2,
+\qquad
+h_i^{\mathrm{cor}}=2\sum_{j<k}\Gamma_{ijk}\dot q_j\dot q_k.
+}\end{equation}
+
+The cross-speed terms are called \textbf{Coriolis terms} and the
+squared-speed terms are called \textbf{centripetal/centrifugal terms}.
+Their sum is checked against the provider's independently evaluated
+\(h\). Any discrepancy is retained as \texttt{velocity\_residual}; it is
+never hidden in one of the named sources. The total \(h\) is
+mechanically meaningful within the model, but the cross-versus-squared
+partition changes under a change of generalized coordinates. A
+coordinate label is therefore part of every reported result.
+
+\section{What the Terms Mean in This
+Pendulum}\label{sec-two-link-source-meaning}
+
+The double-pendulum study declares \(q_1\) as the absolute arm angle and
+\(q_2\) as the club angle relative to the arm, so the club's absolute
+angle is \(q_1+q_2\). Let \(K=m_2 l_1 l_{c2}\) be the inertial coupling
+coefficient. For this coordinate choice, the velocity terms reduce to
+
+\begin{equation}\phantomsection\label{eq-two-link-source-terms}{
+h^{\mathrm{cor}}
+=
+\begin{bmatrix}
+-2K\sin(q_2)\dot q_1\dot q_2\\
+0
+\end{bmatrix},
+\qquad
+h^{\mathrm{sq}}
+=
+\begin{bmatrix}
+-K\sin(q_2)\dot q_2^2\\
+ K\sin(q_2)\dot q_1^2
+\end{bmatrix}.
+}\end{equation}
+
+This form gives the names operational meaning:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The Coriolis cross term exists only while both the arm and the
+  relative wrist angle are moving. If either rate is zero, it vanishes.
+  Its sign also changes with link geometry through \(\sin(q_2)\) and
+  with either rate.
+\item
+  The squared-speed terms remain when only one rate is nonzero. The
+  \(\dot q_1^2\) term is the generalized wrist-coordinate consequence of
+  carrying the distal mass around the proximal pivot; the \(\dot q_2^2\)
+  term is its reciprocal contribution to the proximal equation.
+\item
+  In an inertial free-body diagram, \textbf{centripetal} denotes the
+  inward force required to bend a mass trajectory. \textbf{Centrifugal}
+  is the outward inertial interpretation used in a rotating frame or
+  generalized-coordinate balance. These are two descriptions of one
+  interaction, not forces to add together.
+\item
+  Gravity is configuration dependent rather than speed dependent. Its
+  drive is \(-g(q)\) under Equation Equation~\ref{eq-source-equation},
+  and its power can be positive or negative depending on the direction
+  of motion.
+\end{enumerate}
+
+The equations do not say that a golfer consciously creates a Coriolis
+force. Applied moments and external forces create and reshape the state;
+the linked system's geometry and velocity then determine the
+velocity-bias terms. In that limited, useful sense, earlier proximal
+work can be expressed later as a motion-dependent distal drive. The flow
+is state mediated, not force free.
+
+\begin{tcolorbox}[enhanced jigsaw, colback=white, leftrule=.75mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, left=2mm, toprule=.15mm, colframe=quarto-callout-note-color-frame, breakable, bottomrule=.15mm, bottomtitle=1mm, opacityback=0, titlerule=0mm, toptitle=1mm, rightrule=.15mm, arc=.35mm, opacitybacktitle=0.6]
+
+Imagine swinging a partly folded two-section ruler. Pulling and turning
+it builds motion. As the hinge opens, the same moving mass must be
+redirected, so the ruler pushes back through the hinge. The cross-speed
+part appears only when the whole ruler is turning \emph{and} the hinge
+is opening. The squared-speed part is the inward-turning demand
+associated with either rotation by itself. Gravity tilts the balance
+throughout. These labels help audit the motion; they do not identify
+which muscle supplied the original energy.
+
+\end{tcolorbox}
+
+\section{From a Generalized Drive to Force Along the Hand
+Path}\label{sec-source-hand-path-map}
+
+MacKenzie, McCourt, and Champoux found that signed linear work per metre
+of hand travel was strongly associated with clubhead speed in their
+sample (\citeproc{ref-mackenzie2020energy}{MacKenzie, McCourt, and
+Champoux 2020}). That observable motivates a hand-path projection, but
+it does not authorize relabeling every generalized term as a measured
+hand force.
+
+For endpoint position \(x_H(q)\) and Jacobian
+\(J_H=\partial x_H/\partial q\), virtual work requires
+
+\begin{equation}\phantomsection\label{eq-source-virtual-work}{
+Q_k=J_H^T F_{H,k}+r_k,
+}\end{equation}
+
+where \(F_{H,k}\) is the minimum-norm force-only equivalent and \(r_k\)
+is the unreconstructed generalized residual. Both are reported. The
+wrist point in this fixed-hub model depends only on \(q_1\):
+
+\begin{equation}\phantomsection\label{eq-source-wrist-jacobian}{
+J_H=
+\begin{bmatrix}
+l_1\cos q_1&0\\
+l_1\sin q_1&0
+\end{bmatrix}.
+}\end{equation}
+
+Its rank is one. A two-coordinate generalized drive containing a wrist
+couple therefore cannot be represented exactly by a single planar force
+at that point. The contract reports
+\texttt{rank\_deficient\_force\_only} and the residual in N m. The
+mapped force is useful for a declared along-path comparison, while the
+residual prevents that comparison from masquerading as a complete grip
+wrench.
+
+When hand speed exceeds the numerical threshold, the achieved path
+tangent is
+
+\begin{equation}\phantomsection\label{eq-source-tangent}{
+e_t=\frac{\dot x_H}{\lVert\dot x_H\rVert},
+\qquad F_{\parallel,k}=F_{H,k}\cdot e_t.
+}\end{equation}
+
+Zero-speed samples have no tangent and remain undefined. Trajectory
+integration uses only intervals whose two endpoints have a defined
+tangent, and publishes valid duration divided by total duration.
+
+\section{Impulse, Power, and Energy Answer Different
+Questions}\label{sec-source-metrics}
+
+For each source \(k\), the implementation reports
+
+\[
+I_{\parallel,k}=\int F_{\parallel,k}\,dt,
+\qquad
+I_{|\parallel|,k}=\int |F_{\parallel,k}|\,dt,
+\]
+
+\begin{equation}\phantomsection\label{eq-source-integrals}{
+P_{q,k}=Q_k^T\dot q,
+\qquad
+W_{q,k}=\int P_{q,k}\,dt.
+}\end{equation}
+
+Signed impulse measures directional accumulation; absolute impulse
+measures how much action occurred before cancellation. Power measures
+instantaneous energy rate. Work measures its time integral. A large
+impulse can do little work if it is nearly normal to velocity, and a
+shorter high-power interval can do substantial work. These quantities
+must not be substituted for one another.
+
+The generalized work of a Coriolis or squared-speed equation term is a
+coordinate-explicit kinetic-energy attribution. It is not automatically
+the energy transferred from arm to club as physical subsystems. That
+latter claim requires the club free-body balance and wrist
+reaction-force power developed in Section~\ref{sec-interaction-forces}.
+The two views are complementary: one audits the joint-coordinate
+equation; the other audits energy crossing a named physical interface.
+
+\section{Registered Optimization Example}\label{sec-source-optimization}
+
+The executable study evaluates a complete, frozen 135-program grid:
+three shoulder torques (60, 80, and 100 N m), three early
+wrist-restraining magnitudes (0, 5, and 10 N m), and fifteen drive-onset
+times from 0.000 to 0.350 s, all followed by a 15 N m wrist drive. Each
+trajectory is integrated with the ODE reference backend and truncated at
+the first club-vertical crossing inside the registered delivery zone.
+Forty-four programs fail that impact gate and are excluded rather than
+rewarded for additional rotations; 91 qualify.
+
+The primary example maximizes \textbf{absolute} Coriolis tangent impulse
+because the signed values reverse within a swing. A signed companion
+objective is published so direction and cancellation remain visible. The
+grid maximum is not a continuous optimal-control solution and not a
+human technique recommendation.
+
+The two grid-selected programs are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Maximum absolute Coriolis impulse:} shoulder torque 100 N m,
+  early wrist restraint 10 N m, drive onset 0.100 s, absolute/signed
+  Coriolis tangent impulse 13.817/-6.825 N s, and impact speed 46.780
+  m/s.
+\item
+  \textbf{Maximum clubhead speed:} shoulder torque 100 N m, early wrist
+  restraint 5 N m, drive onset 0.125 s, absolute/signed Coriolis tangent
+  impulse 13.701/-7.033 N s, and impact speed 46.913 m/s.
+\end{itemize}
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_force_source_optimization.pdf}
+
+}
+
+\caption{\label{fig-source-optimization}The registered search compares
+absolute Coriolis tangent impulse with impact clubhead speed and signed
+component work. The two highlighted optima are close but not identical.}
+
+\end{figure}%
+
+For the maximum-impulse program, Coriolis generalized work is -100.69 J,
+squared-speed work is -33.73 J, gravity work is +25.56 J, and
+applied-drive work is +358.20 J through impact. The negative Coriolis
+work does not mean the term was absent: its absolute tangent impulse is
+the largest in the grid, but its generalized drive opposes the
+instantaneous generalized velocity on net. That contrast is precisely
+why impulse and energy-transfer claims are reported separately.
+
+The force-only wrist mapping is rank deficient for every sample. In the
+two highlighted programs, the maximum retained generalized residual is
+54.44 and 52.81 N m, respectively; the hand-path tangent is defined for
+more than 99.6\% of the impact-truncated duration. These diagnostics are
+part of the result, not footnotes to discard.
+
+\section{What a Researcher Can Optimize
+Next}\label{sec-source-next-optimization}
+
+The reusable objective returns the negative signed or absolute component
+impulse for minimizer-compatible software. A defensible next study can
+vary a smooth torque history, segment parameters, or event-triggered
+timing while constraining impact validity, torque, torque rate, joint
+range, work, peak force, and mapping residual. It should report at least
+a Pareto surface over
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  clubhead speed or task outcome;
+\item
+  signed and absolute Coriolis hand-path impulse;
+\item
+  net force-work-per-path-length using the MacKenzie-compatible
+  definition;
+\item
+  actuator work and peak applied moment;
+\item
+  physical wrist-interface work from the subsystem balance; and
+\item
+  robustness on held-out parameter and initial-state distributions.
+\end{enumerate}
+
+Optimizing only one named equation term can produce a mechanically
+extreme trajectory, exploit cancellation, or move work into the
+actuators. The term is most informative as an explanatory coordinate
+within a constrained, multi-objective experiment---not as an isolated
+coaching target.
 
 \chapter{Ground-Reaction Drift
 Attribution}\label{ground-reaction-drift-attribution}
@@ -9013,6 +9376,43 @@ observables cannot identify the full 12-parameter vector.}
 
 \end{figure}%
 
+\section{Constraint Rank Is Not Force
+Identification}\label{constraint-rank-is-not-force-identification}
+
+The cross-tier constraint audit keeps three right nullspaces separate.
+The planar closure nullspace contains locally feasible generalized
+velocities; the two-point-force nullspace contains bilateral force
+allocations invisible to a net club wrench; and the full two-hand-wrench
+nullspace contains allocations among twelve inputs that one
+six-component resultant cannot distinguish. Neither kinematic freedom
+nor a sensing ambiguity identifies a produced hand force.
+
+At the declared regular planar geometry, the \(4\times5\) closure
+Jacobian has rank 4 and nullity 1. The constructed alignment with both
+arm angles zero and grip angle \(\pi/2\) has rank 3 and nullity 2. This
+is an analytical adverse geometry, not a closed anatomical pose. Near
+the alignment, rank remains 4 while conditioning degrades. Because
+angular and translational columns have different units, the reported
+singular values use explicit 1 rad angular and 0.75 m translational
+coordinate scales; alternative translation scales change the condition
+number without changing exact rank.
+
+The three-dimensional point-force map has rank 5/nullity 1 for separated
+contacts and rank 3/nullity 3 for coincident contacts. Its force and
+moment rows are normalized with a declared 0.10 m length. A 1 micrometre
+separation remains rank 5 at relative SVD tolerances \(10^{-12}\) and
+\(10^{-8}\) but is classified rank 3 at \(10^{-6}\). Thus geometry,
+units, scaling, and tolerance are part of the result rather than
+incidental solver settings.
+
+The complete contract, source digests, scale alternatives, adverse
+cases, and reproduction commands are recorded in
+\href{../CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md}{\texttt{CONSTRAINT\_INTERNAL\_FORCE\_DIAGNOSTICS.md}}
+and \texttt{data/constraint\_internal\_force\_diagnostics.json}. These
+diagnostics do not recover constraint multipliers, establish feasible
+spatial contact, observe a human internal-force strategy, or support
+coaching guidance.
+
 \section{Preselected Programs and Held-Out
 Evaluation}\label{preselected-programs-and-held-out-evaluation}
 
@@ -9688,6 +10088,55 @@ constrained and coupled-base models in
 Section~\ref{sec-forward-two-hand} and
 Section~\ref{sec-coupled-base-flex} solve contact reactions dynamically;
 their evidence is not supplied by this rank audit.
+
+\subsection{Feasible Closed-Loop Orbits and Singular
+Margins}\label{sec-ladder-feasible-closure}
+
+The preceding sweep samples Jacobians without first proving that every
+pose belongs to an exactly closed two-contact configuration. A separate
+analytical control now constructs the same-origin triangle directly. For
+arm lengths \(L_L=0.75\) m and \(L_T=0.78\) m and grip separation
+\(d=0.25\) m, the relative arm angle satisfies
+
+\begin{equation}\phantomsection\label{eq-ladder-exact-triangle}{
+\cos(\theta_T-\theta_L)=
+\frac{L_L^2+L_T^2-d^2}{2L_LL_T}.
+}\end{equation}
+
+Both signs of the inverse cosine define the two assembly branches, while
+a global phase rotates the entire triangle without changing its internal
+geometry. All 362 registered samples---181 phases on each branch---close
+both contacts to at most \(1.66533\times10^{-16}\) m. Under the
+separately declared 1 rad angular and 0.75 m translation coordinate
+scales, every sample has rank four and nullity one. The minimum scaled
+singular value is 0.202095 m, the scaled condition number is 6.45326,
+and the maximum singular-spectrum change under global phase rotation is
+below the conservative \(10^{-14}\) m reporting bound. Expected-zero SVD
+residuals are published as power-of-ten upper bounds rather than
+platform-specific roundoff values; rank decisions and singular values
+are still evaluated at full precision before publication reporting.
+
+The triangle inequality supplies two exact geometric countermodels. At
+\(d=|L_L-L_T|=0.03\) m and \(d=L_L+L_T=1.53\) m, the triangle becomes
+collinear; both exact boundaries have rank three and nullity two. A
+near-boundary sweep keeps position closure exact while varying the
+distance to the lower boundary from \(10^{-4}\) to \(10^{-12}\) m and
+the relative SVD tolerance from \(10^{-12}\) to \(10^{-4}\). For
+example, the \(10^{-8}\) m offset remains rank four through a
+\(10^{-6}\) tolerance but is classified rank three at \(10^{-4}\). This
+is a numerical classification dependence, not a physical failure
+threshold.
+
+An equivalent centimetre representation preserves rank, nullity, and
+condition number while multiplying the scaled singular values by 100, as
+required by the unit change. Three positive translation scales, three
+feasible geometries, three phase-grid resolutions, impossible-triangle
+rejections, and a manufactured row-dependency killswitch are retained in
+\texttt{data/closed\_loop\_singularity\_margin.json}. These controls
+establish only an exact planar kinematic result. They do not establish
+anatomical shoulder closure, contact-force magnitude, constraint
+multipliers, muscle action, passive negative torque, human occurrence,
+or coaching guidance.
 
 \section{Three-Dimensional Frame
 Audit}\label{sec-ladder-three-dimensional}
@@ -12738,7 +13187,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 303 material claims. The normalized outcome
+The current census contains 313 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -12767,7 +13216,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 283 \\
+\texttt{supported} & 293 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -12793,8 +13242,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 88 \\
-\texttt{project\_executable\_or\_generated} & 253 \\
+\texttt{project\_derivation\_or\_document} & 98 \\
+\texttt{project\_executable\_or\_generated} & 284 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -12815,7 +13264,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 249 \\
+\texttt{project\_only} & 259 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -12836,14 +13285,14 @@ Model Tier & Claim Count \\
 \endlastfoot
 \texttt{articulated\_spatial} & 32 \\
 \texttt{compliant\_shaft} & 66 \\
-\texttt{cross\_tier\_synthesis} & 63 \\
+\texttt{cross\_tier\_synthesis} & 65 \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
-\texttt{planar\_reduced} & 128 \\
+\texttt{planar\_reduced} & 138 \\
 \texttt{spatial\_reduced} & 76 \\
-\texttt{two\_hand\_or\_bilateral} & 92 \\
-\texttt{uncertainty\_or\_control} & 8 \\
+\texttt{two\_hand\_or\_bilateral} & 94 \\
+\texttt{uncertainty\_or\_control} & 10 \\
 \end{longtable}
 
 \subsection{Unresolved Replication
@@ -12867,7 +13316,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 259 \\
+\texttt{none\_declared} & 269 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -12913,10 +13362,12 @@ Flag
 \bottomrule\noalign{}
 \endlastfoot
 ch01 introduction & 3 & 0 / 2 / 1 & mixed independence \\
-ch02 mechanics & 30 & 2 / 17 / 11 & mixed independence \\
+ch02 mechanics & 33 & 5 / 17 / 11 & mixed independence \\
 ch03 evidence & 13 & 1 / 10 / 2 & mixed independence \\
 ch03 interaction forces & 10 & 8 / 1 / 1 & mixed independence \\
 ch03b hand path attribution & 11 & 7 / 2 / 2 & mixed independence \\
+ch03ba coordinate force sources & 3 & 3 / 0 / 0 & project authored
+only \\
 ch03c ground reaction drift & 8 & 4 / 2 / 2 & mixed independence \\
 ch03d shoulder velocity transfer & 18 & 18 / 0 / 0 & project authored
 only \\
@@ -12937,9 +13388,9 @@ ch06ca articulated ground & 4 & 4 / 0 / 0 & project authored only \\
 ch06cb spatial cross tail & 5 & 5 / 0 / 0 & project authored only \\
 ch06cc spatial forward contact & 8 & 8 / 0 / 0 & project authored
 only \\
-ch06d uncertainty control & 8 & 8 / 0 / 0 & project authored only \\
+ch06d uncertainty control & 10 & 10 / 0 / 0 & project authored only \\
 ch06e experimental protocol & 1 & 1 / 0 / 0 & project authored only \\
-ch07 model ladder & 17 & 17 / 0 / 0 & project authored only \\
+ch07 model ladder & 19 & 19 / 0 / 0 & project authored only \\
 ch07 results & 8 & 8 / 0 / 0 & project authored only \\
 ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
 ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\
@@ -13199,6 +13650,23 @@ Recorded outputs:
   three-dimensional point-force and full bilateral-wrench ranks, null
   spaces, grip-span sweep, proper-rotation audit, sensing boundary, and
   explicit nonhuman claims.
+\item
+  \texttt{data/constraint\_internal\_force\_diagnostics.json} ---
+  source-hash-bound planar closure and bilateral wrench-map ranks,
+  explicit coordinate/wrench scales, singular and coincident-contact
+  controls, tolerance sensitivity, and nonhuman inference boundaries.
+\item
+  \texttt{data/closed\_loop\_singularity\_margin.json} --- exact
+  same-origin closure on both assembly branches, full-phase scaled
+  singular margins, exact triangle degeneracies, and phase, geometry,
+  scale, unit, tolerance, impossible- geometry, and manufactured-rank
+  controls.
+\item
+  \texttt{data/double\_pendulum\_identifiability.json} --- exact
+  seven-coefficient inverse- dynamics factorization, analytic
+  physical-map rank witness, three exact nonunique parameter families,
+  dimensionless finite-record rank, unit and scale audits, conditional
+  noise bounds, and a zero-motion killswitch.
 \item
   \texttt{data/shaft\_contribution\_study.json} --- matched
   rigid/flexible results, termwise acceleration and power summaries,

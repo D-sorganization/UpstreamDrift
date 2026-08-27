@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import math
 import numpy as np
@@ -291,6 +291,62 @@ def fit_functional_swing_plane(
     )
 
 
+# Canonical key order for a swing-plane wrench decomposition. Shared between
+# the single-wrench decompose_wrench_in_swing_plane() below and the batched
+# array-based decomposition in dashboard/_recorder_analysis.py so the two
+# implementations can't drift (issue #8931 DRY gate).
+WRENCH_DECOMPOSITION_KEYS: tuple[str, ...] = (
+    "force_in_plane",
+    "force_out_of_plane",
+    "force_along_grip",
+    "torque_in_plane",
+    "torque_out_of_plane",
+    "torque_about_grip",
+)
+
+
+def build_wrench_decomposition(
+    force_in_plane: Any,
+    force_out_of_plane: Any,
+    force_along_grip: Any,
+    torque_in_plane: Any,
+    torque_out_of_plane: Any,
+    torque_about_grip: Any,
+) -> dict[str, Any]:
+    """Assemble the canonical wrench-decomposition dict.
+
+    Shared by the per-wrench (`decompose_wrench_in_swing_plane`) and the
+    batched array-based (`dashboard/_recorder_analysis.py`) implementations
+    so the field ordering/naming lives in exactly one place (issue #8931).
+
+    Args:
+        force_in_plane: Force magnitude tangent to swing plane.
+        force_out_of_plane: Force perpendicular to swing plane.
+        force_along_grip: Force along grip axis.
+        torque_in_plane: Torque magnitude tangent to swing plane.
+        torque_out_of_plane: Torque perpendicular to swing plane.
+        torque_about_grip: Moment about grip axis.
+
+    Returns:
+        Dict keyed by WRENCH_DECOMPOSITION_KEYS; values may be scalars
+        (single-wrench case) or arrays (batched case).
+    """
+    return dict(
+        zip(
+            WRENCH_DECOMPOSITION_KEYS,
+            (
+                force_in_plane,
+                force_out_of_plane,
+                force_along_grip,
+                torque_in_plane,
+                torque_out_of_plane,
+                torque_about_grip,
+            ),
+            strict=True,
+        )
+    )
+
+
 def decompose_wrench_in_swing_plane(
     wrench: WrenchInFrame,
     swing_plane: SwingPlaneFrame,
@@ -332,14 +388,14 @@ def decompose_wrench_in_swing_plane(
     torque_in_plane = float(np.sqrt(torque_in_plane_x**2 + torque_in_plane_y**2))
     torque_about_grip = float(np.dot(tau, swing_plane.grip_axis))
 
-    return {
-        "force_in_plane": force_in_plane,
-        "force_out_of_plane": force_out_of_plane,
-        "force_along_grip": force_along_grip,
-        "torque_in_plane": torque_in_plane,
-        "torque_out_of_plane": torque_out_of_plane,
-        "torque_about_grip": torque_about_grip,
-    }
+    return build_wrench_decomposition(
+        force_in_plane,
+        force_out_of_plane,
+        force_along_grip,
+        torque_in_plane,
+        torque_out_of_plane,
+        torque_about_grip,
+    )
 
 
 class ReferenceFrameTransformer:

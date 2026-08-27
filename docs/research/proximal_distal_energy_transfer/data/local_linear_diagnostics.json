@@ -1,0 +1,8453 @@
+{
+  "classification": "local_first_order_numerical_rank",
+  "conditioning_contract": {
+    "interpreted_basis": "nondimensional_matrices",
+    "raw_dimensional_conditioning_status": "not_interpreted",
+    "unit_invariance_fixture": "equivalent_length_units"
+  },
+  "falsifiers": [
+    "A manufactured observable or controllable linear fixture fails its exact rank expectation.",
+    "The zero-input or zero-output killswitch retains the corresponding full-rank decision.",
+    "Any operating-point rank decision changes across the registered 0.1x, 1x, and 10x finite-difference steps."
+  ],
+  "global_nonlinear_status": "not_evaluated",
+  "inference_boundary": "This is a local first-order numerical rank diagnostic at one declared state, control, nondimensional scaling, finite-difference step, and tolerance. Raw dimensional matrices are retained for traceability but are not a basis for conditioning comparisons. It does not establish structural identifiability, practical identifiability, global nonlinear observability, or global controllability.",
+  "issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9092",
+  "measurement_contract": {
+    "outputs": [
+      "shoulder_angle_rad",
+      "wrist_relative_angle_rad"
+    ],
+    "unmeasured_states": [
+      "shoulder_rate_rad_s",
+      "wrist_rate_rad_s"
+    ]
+  },
+  "model_tier": "analytical_double_pendulum",
+  "nondimensional_scale_contract": {
+    "characteristic_time_derivation": "delivery_event_time_s multiplied by the registered scenario time_factor",
+    "control_coordinates": [
+      "shoulder_generalized_torque_nm",
+      "wrist_relative_generalized_torque_nm"
+    ],
+    "control_scale_derivation": "max(maximum absolute registered-rollout torque, 1 N*m)",
+    "control_units": [
+      "N*m",
+      "N*m"
+    ],
+    "output_coordinates": [
+      "shoulder_angle_rad",
+      "wrist_relative_angle_rad"
+    ],
+    "output_units": [
+      "rad",
+      "rad"
+    ],
+    "scenario_order": [
+      "short_time_high_rate",
+      "nominal",
+      "long_time_low_rate"
+    ],
+    "scenarios": {
+      "long_time_low_rate": {
+        "characteristic_time_s": 0.698512,
+        "control": [
+          60.0,
+          15.0
+        ],
+        "output": [
+          3.14159,
+          3.14159
+        ],
+        "state": [
+          3.14159,
+          3.14159,
+          16.2568,
+          18.2638
+        ]
+      },
+      "nominal": {
+        "characteristic_time_s": 0.349256,
+        "control": [
+          60.0,
+          15.0
+        ],
+        "output": [
+          3.14159,
+          3.14159
+        ],
+        "state": [
+          3.14159,
+          3.14159,
+          32.5135,
+          36.5277
+        ]
+      },
+      "short_time_high_rate": {
+        "characteristic_time_s": 0.174628,
+        "control": [
+          60.0,
+          15.0
+        ],
+        "output": [
+          3.14159,
+          3.14159
+        ],
+        "state": [
+          3.14159,
+          3.14159,
+          65.027,
+          73.0553
+        ]
+      }
+    },
+    "scope": "registered synthetic reference scales; sensitivity scenarios are numerical adequacy checks, not population priors",
+    "state_coordinates": [
+      "shoulder_angle_rad",
+      "wrist_relative_angle_rad",
+      "shoulder_rate_rad_s",
+      "wrist_relative_rate_rad_s"
+    ],
+    "state_scale_derivation": {
+      "angles": "pi rad",
+      "rates": "max(maximum absolute registered-rollout rate, 1 rad/s) multiplied by the registered scenario rate_factor"
+    },
+    "state_units": [
+      "rad",
+      "rad",
+      "rad/s",
+      "rad/s"
+    ]
+  },
+  "numeric_representation_contract": {
+    "canonical_significant_digits": 6,
+    "rank_decision_precision": "full_precision_before_publication_rounding",
+    "scope": "published_json_floats_only"
+  },
+  "operating_points": [
+    {
+      "actuator_countermodels": [
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 35.6229,
+            "singular_values": [
+              20.4335,
+              5.15354,
+              2.08368,
+              0.573606
+            ],
+            "smallest_retained": 0.573606,
+            "threshold": 2.04335e-06
+          },
+          "generalized_control_map": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "both_generalized_torques",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 14.3189,
+            "singular_values": [
+              7.7133,
+              2.26302,
+              1.73119,
+              0.538678
+            ],
+            "smallest_retained": 0.538678,
+            "threshold": 7.7133e-07
+          },
+          "generalized_control_map": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "name": "shoulder_torque_only",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 49.9759,
+            "singular_values": [
+              6.11063,
+              1.69004,
+              0.452195,
+              0.122272
+            ],
+            "smallest_retained": 0.122272,
+            "threshold": 6.11063e-07
+          },
+          "generalized_control_map": [
+            [
+              0.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "name": "wrist_torque_only",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": false,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 0,
+            "retained_condition_number": null,
+            "singular_values": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "smallest_retained": null,
+            "threshold": 1e-08
+          },
+          "generalized_control_map": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "name": "zero_input_killswitch",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              1.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        }
+      ],
+      "control_nm": [
+        60.0,
+        -10.0
+      ],
+      "event_time_offset_s": 0.0,
+      "measurement_countermodels": [
+        {
+          "name": "both_joint_angles",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 17.1481,
+            "singular_values": [
+              25.4481,
+              6.64429,
+              5.34703,
+              1.48402
+            ],
+            "smallest_retained": 1.48402,
+            "threshold": 2.54481e-06
+          },
+          "output_map": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "shoulder_angle_only",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 12.2416,
+            "singular_values": [
+              6.12323,
+              1.92472,
+              1.63703,
+              0.500199
+            ],
+            "smallest_retained": 0.500199,
+            "threshold": 6.12323e-07
+          },
+          "output_map": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "wrist_relative_angle_only",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 745.98,
+            "singular_values": [
+              25.216,
+              6.52231,
+              0.178846,
+              0.0338025
+            ],
+            "smallest_retained": 0.0338025,
+            "threshold": 2.5216e-06
+          },
+          "output_map": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "zero_output_killswitch",
+          "observability": {
+            "full_rank": false,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 0,
+            "retained_condition_number": null,
+            "singular_values": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "smallest_retained": null,
+            "threshold": 1e-08
+          },
+          "output_map": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              1.0
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        }
+      ],
+      "name": "initial_state",
+      "phase_fraction_of_impact_time": 0.0,
+      "rank_stable_across_steps": true,
+      "sample_index": 0,
+      "scale_trials": [
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 14.6292,
+            "singular_values": [
+              1.51143,
+              0.395103,
+              0.363187,
+              0.103316
+            ],
+            "smallest_retained": 0.103316,
+            "threshold": 1.51143e-07
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              0.415196,
+              -0.103867,
+              -0.0336143,
+              0.0272845,
+              0.040239,
+              0.107568
+            ],
+            [
+              0.0,
+              0.0,
+              -0.415469,
+              0.710019,
+              0.109138,
+              -0.156331,
+              0.597309,
+              -1.07056
+            ],
+            [
+              0.114867,
+              -0.0287357,
+              -0.00929966,
+              0.00754847,
+              0.0111324,
+              0.0297595,
+              0.00802944,
+              -0.0172869
+            ],
+            [
+              -0.102311,
+              0.174845,
+              0.0268757,
+              -0.0384973,
+              0.14709,
+              -0.26363,
+              -0.072354,
+              0.117293
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.114867,
+              -0.0287357
+            ],
+            [
+              -0.102311,
+              0.174845
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.0794287,
+              0.0559595,
+              -0.0497964,
+              0.0349882
+            ],
+            [
+              -0.0170166,
+              -0.385803,
+              0.0443533,
+              -0.21289
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.712893,
+              -0.713362
+            ],
+            [
+              -0.713362,
+              4.87642
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "short_time_high_rate",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 7.22331,
+            "singular_values": [
+              7.49169,
+              3.76782,
+              1.8969,
+              1.03715
+            ],
+            "smallest_retained": 1.03715,
+            "threshold": 7.49169e-07
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.287101,
+              0.20227,
+              -0.179993,
+              0.126468
+            ],
+            [
+              -0.0691015,
+              -1.56668,
+              0.180111,
+              -0.864511
+            ],
+            [
+              -0.0164487,
+              -0.0588639,
+              1.05232,
+              0.788165
+            ],
+            [
+              0.029017,
+              0.34361,
+              -0.297086,
+              -6.1717
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.174628,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              65.027,
+              73.0553
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              9.41472,
+              6.63291,
+              -0.285157,
+              0.178341
+            ],
+            [
+              -2.266,
+              -51.3753,
+              0.285345,
+              -1.21911
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 35.6229,
+            "singular_values": [
+              20.4335,
+              5.15354,
+              2.08368,
+              0.573606
+            ],
+            "smallest_retained": 0.573606,
+            "threshold": 2.04335e-06
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.66078,
+              -0.415469,
+              -0.268915,
+              0.218276,
+              0.643825,
+              1.72109
+            ],
+            [
+              0.0,
+              0.0,
+              -1.66188,
+              2.84008,
+              0.873104,
+              -1.25065,
+              9.55694,
+              -17.1289
+            ],
+            [
+              0.459469,
+              -0.114943,
+              -0.0743973,
+              0.0603877,
+              0.178119,
+              0.476151,
+              0.256942,
+              -0.553181
+            ],
+            [
+              -0.409245,
+              0.699382,
+              0.215006,
+              -0.307979,
+              2.35344,
+              -4.21807,
+              -2.31533,
+              3.75337
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.459469,
+              -0.114943
+            ],
+            [
+              -0.409245,
+              0.699382
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.317715,
+              0.223838,
+              -0.0995929,
+              0.0699765
+            ],
+            [
+              -0.0680662,
+              -1.54321,
+              0.0887065,
+              -0.42578
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.712893,
+              -0.713362
+            ],
+            [
+              -0.713362,
+              4.87642
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "nominal",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 17.1481,
+            "singular_values": [
+              25.4481,
+              6.64429,
+              5.34703,
+              1.48402
+            ],
+            "smallest_retained": 1.48402,
+            "threshold": 2.54481e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              1.1484,
+              0.80908,
+              -0.359986,
+              0.252935
+            ],
+            [
+              -0.276406,
+              -6.26674,
+              0.360223,
+              -1.72902
+            ],
+            [
+              -0.131589,
+              -0.470912,
+              4.20928,
+              3.15266
+            ],
+            [
+              0.232136,
+              2.74888,
+              -1.18834,
+              -24.6868
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              9.41472,
+              6.63291,
+              -0.285157,
+              0.178341
+            ],
+            [
+              -2.266,
+              -51.3753,
+              0.285345,
+              -1.21911
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 55.0865,
+            "singular_values": [
+              346.045,
+              75.974,
+              23.1006,
+              6.28185
+            ],
+            "smallest_retained": 6.28185,
+            "threshold": 3.46045e-05
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              6.64314,
+              -1.66188,
+              -2.15132,
+              1.74621,
+              10.3012,
+              27.5374
+            ],
+            [
+              0.0,
+              0.0,
+              -6.64751,
+              11.3603,
+              6.98483,
+              -10.0052,
+              152.911,
+              -274.063
+            ],
+            [
+              1.83787,
+              -0.459771,
+              -0.595178,
+              0.483102,
+              2.8499,
+              7.61842,
+              8.22214,
+              -17.7018
+            ],
+            [
+              -1.63698,
+              2.79753,
+              1.72005,
+              -2.46383,
+              37.6551,
+              -67.4892,
+              -74.0905,
+              120.108
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.83787,
+              -0.459771
+            ],
+            [
+              -1.63698,
+              2.79753
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              1.27086,
+              0.895353,
+              -0.199186,
+              0.139953
+            ],
+            [
+              -0.272265,
+              -6.17285,
+              0.177413,
+              -0.851559
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.712893,
+              -0.713362
+            ],
+            [
+              -0.713362,
+              4.87642
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "long_time_low_rate",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 22.8357,
+            "singular_values": [
+              102.373,
+              25.5851,
+              16.414,
+              4.48304
+            ],
+            "smallest_retained": 4.48304,
+            "threshold": 1.02373e-05
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              4.59362,
+              3.23632,
+              -0.719972,
+              0.505871
+            ],
+            [
+              -1.10562,
+              -25.0669,
+              0.720446,
+              -3.45805
+            ],
+            [
+              -1.05271,
+              -3.76729,
+              16.8371,
+              12.6106
+            ],
+            [
+              1.85709,
+              21.991,
+              -4.75337,
+              -98.7473
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.698512,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              16.2568,
+              18.2638
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              9.41472,
+              6.63291,
+              -0.285157,
+              0.178341
+            ],
+            [
+              -2.266,
+              -51.3753,
+              0.285345,
+              -1.21911
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        }
+      ],
+      "source": "registered_synthetic_reference_rollout",
+      "state": {
+        "q_rad": [
+          -2.2,
+          -1.57
+        ],
+        "v_rad_s": [
+          0.0,
+          0.0
+        ]
+      },
+      "step_trials": [
+        {
+          "control_steps": [
+            1e-05,
+            1e-05
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 35.6229,
+            "singular_values": [
+              20.4335,
+              5.15354,
+              2.08368,
+              0.573606
+            ],
+            "smallest_retained": 0.573606,
+            "threshold": 2.04335e-06
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.66078,
+              -0.415469,
+              -0.268915,
+              0.218276,
+              0.643825,
+              1.72109
+            ],
+            [
+              0.0,
+              0.0,
+              -1.66188,
+              2.84008,
+              0.873104,
+              -1.25065,
+              9.55694,
+              -17.1289
+            ],
+            [
+              0.459469,
+              -0.114943,
+              -0.0743973,
+              0.0603877,
+              0.178119,
+              0.476151,
+              0.256942,
+              -0.553181
+            ],
+            [
+              -0.409245,
+              0.699382,
+              0.215006,
+              -0.307979,
+              2.35344,
+              -4.21807,
+              -2.31533,
+              3.75337
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.459469,
+              -0.114943
+            ],
+            [
+              -0.409245,
+              0.699382
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.317715,
+              0.223838,
+              -0.0995929,
+              0.0699765
+            ],
+            [
+              -0.0680662,
+              -1.54321,
+              0.0887065,
+              -0.42578
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.712893,
+              -0.713362
+            ],
+            [
+              -0.713362,
+              4.87642
+            ]
+          ],
+          "multiplier": 0.1,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 17.1481,
+            "singular_values": [
+              25.4481,
+              6.64429,
+              5.34703,
+              1.48402
+            ],
+            "smallest_retained": 1.48402,
+            "threshold": 2.54481e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              1.1484,
+              0.80908,
+              -0.359986,
+              0.252935
+            ],
+            [
+              -0.276406,
+              -6.26674,
+              0.360223,
+              -1.72902
+            ],
+            [
+              -0.131589,
+              -0.470912,
+              4.20928,
+              3.15266
+            ],
+            [
+              0.232136,
+              2.74888,
+              -1.18834,
+              -24.6868
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              9.41472,
+              6.63291,
+              -0.285157,
+              0.178341
+            ],
+            [
+              -2.266,
+              -51.3753,
+              0.285345,
+              -1.21911
+            ]
+          ],
+          "state_steps": [
+            1e-07,
+            1e-07,
+            1e-06,
+            1e-06
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 35.6229,
+            "singular_values": [
+              20.4335,
+              5.15354,
+              2.08368,
+              0.573606
+            ],
+            "smallest_retained": 0.573606,
+            "threshold": 2.04335e-06
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.66078,
+              -0.415469,
+              -0.268915,
+              0.218276,
+              0.643825,
+              1.72109
+            ],
+            [
+              0.0,
+              0.0,
+              -1.66188,
+              2.84008,
+              0.873104,
+              -1.25065,
+              9.55694,
+              -17.1289
+            ],
+            [
+              0.459469,
+              -0.114943,
+              -0.0743973,
+              0.0603877,
+              0.178119,
+              0.476151,
+              0.256942,
+              -0.553181
+            ],
+            [
+              -0.409245,
+              0.699382,
+              0.215006,
+              -0.307979,
+              2.35344,
+              -4.21807,
+              -2.31533,
+              3.75337
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.459469,
+              -0.114943
+            ],
+            [
+              -0.409245,
+              0.699382
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.317715,
+              0.223838,
+              -0.0995929,
+              0.0699765
+            ],
+            [
+              -0.0680662,
+              -1.54321,
+              0.0887065,
+              -0.42578
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.712893,
+              -0.713362
+            ],
+            [
+              -0.713362,
+              4.87642
+            ]
+          ],
+          "multiplier": 1.0,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 17.1481,
+            "singular_values": [
+              25.4481,
+              6.64429,
+              5.34703,
+              1.48402
+            ],
+            "smallest_retained": 1.48402,
+            "threshold": 2.54481e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              1.1484,
+              0.80908,
+              -0.359986,
+              0.252935
+            ],
+            [
+              -0.276406,
+              -6.26674,
+              0.360223,
+              -1.72902
+            ],
+            [
+              -0.131589,
+              -0.470912,
+              4.20928,
+              3.15266
+            ],
+            [
+              0.232136,
+              2.74888,
+              -1.18834,
+              -24.6868
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              9.41472,
+              6.63291,
+              -0.285157,
+              0.178341
+            ],
+            [
+              -2.266,
+              -51.3753,
+              0.285345,
+              -1.21911
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.001,
+            0.001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 35.6229,
+            "singular_values": [
+              20.4335,
+              5.15354,
+              2.08368,
+              0.573606
+            ],
+            "smallest_retained": 0.573606,
+            "threshold": 2.04335e-06
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.66078,
+              -0.415469,
+              -0.268915,
+              0.218276,
+              0.643825,
+              1.72109
+            ],
+            [
+              0.0,
+              0.0,
+              -1.66188,
+              2.84008,
+              0.873104,
+              -1.25065,
+              9.55694,
+              -17.1289
+            ],
+            [
+              0.459469,
+              -0.114943,
+              -0.0743973,
+              0.0603877,
+              0.178119,
+              0.476151,
+              0.256942,
+              -0.553181
+            ],
+            [
+              -0.409245,
+              0.699382,
+              0.215006,
+              -0.307979,
+              2.35344,
+              -4.21807,
+              -2.31533,
+              3.75337
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.459469,
+              -0.114943
+            ],
+            [
+              -0.409245,
+              0.699382
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.317715,
+              0.223838,
+              -0.0995929,
+              0.0699765
+            ],
+            [
+              -0.0680662,
+              -1.54321,
+              0.0887065,
+              -0.42578
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.712893,
+              -0.713362
+            ],
+            [
+              -0.713362,
+              4.87642
+            ]
+          ],
+          "multiplier": 10.0,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 17.1481,
+            "singular_values": [
+              25.4481,
+              6.64429,
+              5.34703,
+              1.48402
+            ],
+            "smallest_retained": 1.48402,
+            "threshold": 2.54481e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              1.1484,
+              0.80908,
+              -0.359986,
+              0.252935
+            ],
+            [
+              -0.276406,
+              -6.26674,
+              0.360223,
+              -1.72902
+            ],
+            [
+              -0.131589,
+              -0.470912,
+              4.20928,
+              3.15266
+            ],
+            [
+              0.232136,
+              2.74888,
+              -1.18834,
+              -24.6868
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              9.41472,
+              6.63291,
+              -0.285157,
+              0.178341
+            ],
+            [
+              -2.266,
+              -51.3753,
+              0.285345,
+              -1.21911
+            ]
+          ],
+          "state_steps": [
+            1e-05,
+            1e-05,
+            0.0001,
+            0.0001
+          ]
+        }
+      ],
+      "time_s": 0.0
+    },
+    {
+      "actuator_countermodels": [
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 15.2613,
+            "singular_values": [
+              9.06894,
+              6.45218,
+              2.15042,
+              0.594243
+            ],
+            "smallest_retained": 0.594243,
+            "threshold": 9.06894e-07
+          },
+          "generalized_control_map": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "both_generalized_torques",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 11.8037,
+            "singular_values": [
+              5.82845,
+              3.99962,
+              1.45159,
+              0.493782
+            ],
+            "smallest_retained": 0.493782,
+            "threshold": 5.82845e-07
+          },
+          "generalized_control_map": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "name": "shoulder_torque_only",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 57.8053,
+            "singular_values": [
+              12.5054,
+              1.65102,
+              0.839238,
+              0.216336
+            ],
+            "smallest_retained": 0.216336,
+            "threshold": 1.25054e-06
+          },
+          "generalized_control_map": [
+            [
+              0.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "name": "wrist_torque_only",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": false,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 0,
+            "retained_condition_number": null,
+            "singular_values": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "smallest_retained": null,
+            "threshold": 1e-08
+          },
+          "generalized_control_map": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "name": "zero_input_killswitch",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              1.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        }
+      ],
+      "control_nm": [
+        60.0,
+        15.0
+      ],
+      "event_time_offset_s": 0.000223253,
+      "measurement_countermodels": [
+        {
+          "name": "both_joint_angles",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 13.7969,
+            "singular_values": [
+              13.8189,
+              7.31096,
+              6.16421,
+              1.00159
+            ],
+            "smallest_retained": 1.00159,
+            "threshold": 1.38189e-06
+          },
+          "output_map": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "shoulder_angle_only",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 10.2151,
+            "singular_values": [
+              9.54276,
+              3.41433,
+              1.89759,
+              0.934185
+            ],
+            "smallest_retained": 0.934185,
+            "threshold": 9.54276e-07
+          },
+          "output_map": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "wrist_relative_angle_only",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 37.9204,
+            "singular_values": [
+              11.1648,
+              6.01029,
+              3.91844,
+              0.294428
+            ],
+            "smallest_retained": 0.294428,
+            "threshold": 1.11648e-06
+          },
+          "output_map": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "zero_output_killswitch",
+          "observability": {
+            "full_rank": false,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 0,
+            "retained_condition_number": null,
+            "singular_values": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "smallest_retained": null,
+            "threshold": 1e-08
+          },
+          "output_map": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              1.0
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        }
+      ],
+      "name": "early_downswing",
+      "phase_fraction_of_impact_time": 0.3,
+      "rank_stable_across_steps": true,
+      "sample_index": 105,
+      "scale_trials": [
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 7.07989,
+            "singular_values": [
+              1.05024,
+              0.615742,
+              0.180001,
+              0.148341
+            ],
+            "smallest_retained": 0.148341,
+            "threshold": 1.05024e-07
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              0.427531,
+              -0.0630134,
+              0.037075,
+              0.055506,
+              0.265309,
+              -0.337268
+            ],
+            [
+              0.0,
+              0.0,
+              -0.252053,
+              0.643233,
+              0.706745,
+              -0.250253,
+              -0.036283,
+              0.0408413
+            ],
+            [
+              0.11828,
+              -0.0174331,
+              0.0102571,
+              0.0153562,
+              0.0733996,
+              -0.0933078,
+              -0.083,
+              0.0233236
+            ],
+            [
+              -0.0620693,
+              0.158399,
+              0.174039,
+              -0.061626,
+              -0.00893486,
+              0.0100573,
+              0.075349,
+              -0.117304
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.11828,
+              -0.0174331
+            ],
+            [
+              -0.0620693,
+              0.158399
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.0434909,
+              -0.133458,
+              0.146027,
+              0.113017
+            ],
+            [
+              0.0229542,
+              -0.0373164,
+              1.34493,
+              -0.241034
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.734072,
+              -0.432777
+            ],
+            [
+              -0.432777,
+              4.41774
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "short_time_high_rate",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 6.8485,
+            "singular_values": [
+              6.85036,
+              4.40518,
+              1.33611,
+              1.00027
+            ],
+            "smallest_retained": 1.00027,
+            "threshold": 6.85036e-07
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.157201,
+              -0.482396,
+              0.527825,
+              0.40851
+            ],
+            [
+              0.0932133,
+              -0.151536,
+              5.46156,
+              -0.9788
+            ],
+            [
+              0.0323326,
+              -0.0856868,
+              1.19471,
+              -1.99774
+            ],
+            [
+              0.215061,
+              -0.692365,
+              -0.181961,
+              0.237811
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.174628,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              65.027,
+              73.0553
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              5.155,
+              -15.8189,
+              0.836217,
+              0.576067
+            ],
+            [
+              3.05668,
+              -4.96922,
+              8.65257,
+              -1.38027
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 15.2613,
+            "singular_values": [
+              9.06894,
+              6.45218,
+              2.15042,
+              0.594243
+            ],
+            "smallest_retained": 0.594243,
+            "threshold": 9.06894e-07
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.71012,
+              -0.252053,
+              0.2966,
+              0.444048,
+              4.24494,
+              -5.39629
+            ],
+            [
+              0.0,
+              0.0,
+              -1.00821,
+              2.57293,
+              5.65396,
+              -2.00202,
+              -0.580528,
+              0.65346
+            ],
+            [
+              0.473119,
+              -0.0697325,
+              0.0820567,
+              0.122849,
+              1.17439,
+              -1.49292,
+              -2.656,
+              0.746355
+            ],
+            [
+              -0.248277,
+              0.633597,
+              1.39231,
+              -0.493008,
+              -0.142958,
+              0.160918,
+              2.41117,
+              -3.75374
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.473119,
+              -0.0697325
+            ],
+            [
+              -0.248277,
+              0.633597
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.173964,
+              -0.533833,
+              0.292054,
+              0.226035
+            ],
+            [
+              0.0918168,
+              -0.149266,
+              2.68987,
+              -0.482068
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.734072,
+              -0.432777
+            ],
+            [
+              -0.432777,
+              4.41774
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "nominal",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 13.7969,
+            "singular_values": [
+              13.8189,
+              7.31096,
+              6.16421,
+              1.00159
+            ],
+            "smallest_retained": 1.00159,
+            "threshold": 1.38189e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.628805,
+              -1.92958,
+              1.05565,
+              0.81702
+            ],
+            [
+              0.372853,
+              -0.606144,
+              10.9231,
+              -1.9576
+            ],
+            [
+              0.258661,
+              -0.685495,
+              4.77885,
+              -7.99097
+            ],
+            [
+              1.72048,
+              -5.53892,
+              -0.727842,
+              0.951246
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              5.155,
+              -15.8189,
+              0.836217,
+              0.576067
+            ],
+            [
+              3.05668,
+              -4.96922,
+              8.65257,
+              -1.38027
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 115.169,
+            "singular_values": [
+              195.309,
+              64.1355,
+              41.9001,
+              1.69585
+            ],
+            "smallest_retained": 1.69585,
+            "threshold": 1.95309e-05
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              6.8405,
+              -1.00821,
+              2.3728,
+              3.55238,
+              67.919,
+              -86.3407
+            ],
+            [
+              0.0,
+              0.0,
+              -4.03286,
+              10.2917,
+              45.2317,
+              -16.0162,
+              -9.28845,
+              10.4554
+            ],
+            [
+              1.89247,
+              -0.27893,
+              0.656454,
+              0.982794,
+              18.7903,
+              -23.8868,
+              -84.9921,
+              23.8834
+            ],
+            [
+              -0.993109,
+              2.53439,
+              11.1385,
+              -3.94406,
+              -2.28732,
+              2.57468,
+              77.1574,
+              -120.12
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.89247,
+              -0.27893
+            ],
+            [
+              -0.993109,
+              2.53439
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.695855,
+              -2.13533,
+              0.584107,
+              0.452069
+            ],
+            [
+              0.367267,
+              -0.597063,
+              5.37973,
+              -0.964136
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.734072,
+              -0.432777
+            ],
+            [
+              -0.432777,
+              4.41774
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "long_time_low_rate",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 47.2453,
+            "singular_values": [
+              47.5949,
+              40.9687,
+              16.0589,
+              1.0074
+            ],
+            "smallest_retained": 1.0074,
+            "threshold": 4.75949e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              2.51522,
+              -7.71833,
+              2.1113,
+              1.63404
+            ],
+            [
+              1.49141,
+              -2.42458,
+              21.8462,
+              -3.9152
+            ],
+            [
+              2.06929,
+              -5.48396,
+              19.1154,
+              -31.9639
+            ],
+            [
+              13.7639,
+              -44.3114,
+              -2.91137,
+              3.80498
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.698512,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              16.2568,
+              18.2638
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              5.155,
+              -15.8189,
+              0.836217,
+              0.576067
+            ],
+            [
+              3.05668,
+              -4.96922,
+              8.65257,
+              -1.38027
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        }
+      ],
+      "source": "registered_synthetic_reference_rollout",
+      "state": {
+        "q_rad": [
+          -1.86098,
+          -2.091
+        ],
+        "v_rad_s": [
+          6.38191,
+          -8.23328
+        ]
+      },
+      "step_trials": [
+        {
+          "control_steps": [
+            1e-05,
+            1e-05
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 15.2613,
+            "singular_values": [
+              9.06894,
+              6.45218,
+              2.15042,
+              0.594243
+            ],
+            "smallest_retained": 0.594243,
+            "threshold": 9.06894e-07
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.71012,
+              -0.252053,
+              0.2966,
+              0.444048,
+              4.24494,
+              -5.39629
+            ],
+            [
+              0.0,
+              0.0,
+              -1.00821,
+              2.57293,
+              5.65396,
+              -2.00202,
+              -0.580528,
+              0.65346
+            ],
+            [
+              0.473119,
+              -0.0697325,
+              0.0820567,
+              0.122849,
+              1.17439,
+              -1.49292,
+              -2.656,
+              0.746355
+            ],
+            [
+              -0.248277,
+              0.633597,
+              1.39231,
+              -0.493008,
+              -0.142958,
+              0.160918,
+              2.41117,
+              -3.75374
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.473119,
+              -0.0697325
+            ],
+            [
+              -0.248277,
+              0.633597
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.173964,
+              -0.533833,
+              0.292054,
+              0.226035
+            ],
+            [
+              0.0918168,
+              -0.149266,
+              2.68987,
+              -0.482068
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.734072,
+              -0.432777
+            ],
+            [
+              -0.432777,
+              4.41774
+            ]
+          ],
+          "multiplier": 0.1,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 13.7969,
+            "singular_values": [
+              13.8189,
+              7.31096,
+              6.16421,
+              1.00159
+            ],
+            "smallest_retained": 1.00159,
+            "threshold": 1.38189e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.628805,
+              -1.92958,
+              1.05565,
+              0.81702
+            ],
+            [
+              0.372853,
+              -0.606144,
+              10.9231,
+              -1.9576
+            ],
+            [
+              0.258661,
+              -0.685495,
+              4.77885,
+              -7.99097
+            ],
+            [
+              1.72048,
+              -5.53892,
+              -0.727842,
+              0.951246
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              5.155,
+              -15.8189,
+              0.836217,
+              0.576067
+            ],
+            [
+              3.05668,
+              -4.96922,
+              8.65257,
+              -1.38027
+            ]
+          ],
+          "state_steps": [
+            1e-07,
+            1e-07,
+            1e-06,
+            1e-06
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 15.2613,
+            "singular_values": [
+              9.06894,
+              6.45218,
+              2.15042,
+              0.594243
+            ],
+            "smallest_retained": 0.594243,
+            "threshold": 9.06894e-07
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.71012,
+              -0.252053,
+              0.2966,
+              0.444048,
+              4.24494,
+              -5.39629
+            ],
+            [
+              0.0,
+              0.0,
+              -1.00821,
+              2.57293,
+              5.65396,
+              -2.00202,
+              -0.580528,
+              0.65346
+            ],
+            [
+              0.473119,
+              -0.0697325,
+              0.0820567,
+              0.122849,
+              1.17439,
+              -1.49292,
+              -2.656,
+              0.746355
+            ],
+            [
+              -0.248277,
+              0.633597,
+              1.39231,
+              -0.493008,
+              -0.142958,
+              0.160918,
+              2.41117,
+              -3.75374
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.473119,
+              -0.0697325
+            ],
+            [
+              -0.248277,
+              0.633597
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.173964,
+              -0.533833,
+              0.292054,
+              0.226035
+            ],
+            [
+              0.0918168,
+              -0.149266,
+              2.68987,
+              -0.482068
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.734072,
+              -0.432777
+            ],
+            [
+              -0.432777,
+              4.41774
+            ]
+          ],
+          "multiplier": 1.0,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 13.7969,
+            "singular_values": [
+              13.8189,
+              7.31096,
+              6.16421,
+              1.00159
+            ],
+            "smallest_retained": 1.00159,
+            "threshold": 1.38189e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.628805,
+              -1.92958,
+              1.05565,
+              0.81702
+            ],
+            [
+              0.372853,
+              -0.606144,
+              10.9231,
+              -1.9576
+            ],
+            [
+              0.258661,
+              -0.685495,
+              4.77885,
+              -7.99097
+            ],
+            [
+              1.72048,
+              -5.53892,
+              -0.727842,
+              0.951246
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              5.155,
+              -15.8189,
+              0.836217,
+              0.576067
+            ],
+            [
+              3.05668,
+              -4.96922,
+              8.65257,
+              -1.38027
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.001,
+            0.001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 15.2613,
+            "singular_values": [
+              9.06894,
+              6.45218,
+              2.15042,
+              0.594243
+            ],
+            "smallest_retained": 0.594243,
+            "threshold": 9.06894e-07
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.71012,
+              -0.252053,
+              0.2966,
+              0.444048,
+              4.24494,
+              -5.39629
+            ],
+            [
+              0.0,
+              0.0,
+              -1.00821,
+              2.57293,
+              5.65396,
+              -2.00202,
+              -0.580528,
+              0.65346
+            ],
+            [
+              0.473119,
+              -0.0697325,
+              0.0820567,
+              0.122849,
+              1.17439,
+              -1.49292,
+              -2.656,
+              0.746355
+            ],
+            [
+              -0.248277,
+              0.633597,
+              1.39231,
+              -0.493008,
+              -0.142958,
+              0.160918,
+              2.41117,
+              -3.75374
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.473119,
+              -0.0697325
+            ],
+            [
+              -0.248277,
+              0.633597
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.173964,
+              -0.533833,
+              0.292054,
+              0.226035
+            ],
+            [
+              0.0918168,
+              -0.149266,
+              2.68987,
+              -0.482068
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.734072,
+              -0.432777
+            ],
+            [
+              -0.432777,
+              4.41774
+            ]
+          ],
+          "multiplier": 10.0,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 13.7969,
+            "singular_values": [
+              13.8189,
+              7.31096,
+              6.16421,
+              1.00159
+            ],
+            "smallest_retained": 1.00159,
+            "threshold": 1.38189e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              0.628805,
+              -1.92958,
+              1.05565,
+              0.81702
+            ],
+            [
+              0.372853,
+              -0.606144,
+              10.9231,
+              -1.9576
+            ],
+            [
+              0.258661,
+              -0.685495,
+              4.77885,
+              -7.99097
+            ],
+            [
+              1.72048,
+              -5.53892,
+              -0.727842,
+              0.951246
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              5.155,
+              -15.8189,
+              0.836217,
+              0.576067
+            ],
+            [
+              3.05668,
+              -4.96922,
+              8.65257,
+              -1.38027
+            ]
+          ],
+          "state_steps": [
+            1e-05,
+            1e-05,
+            0.0001,
+            0.0001
+          ]
+        }
+      ],
+      "time_s": 0.105
+    },
+    {
+      "actuator_countermodels": [
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 65.9115,
+            "singular_values": [
+              34.6853,
+              19.8121,
+              5.56169,
+              0.526241
+            ],
+            "smallest_retained": 0.526241,
+            "threshold": 3.46853e-06
+          },
+          "generalized_control_map": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "both_generalized_torques",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 67.4545,
+            "singular_values": [
+              24.4819,
+              9.34603,
+              2.65976,
+              0.362939
+            ],
+            "smallest_retained": 0.362939,
+            "threshold": 2.44819e-06
+          },
+          "generalized_control_map": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "name": "shoulder_torque_only",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 236.71,
+            "singular_values": [
+              32.6402,
+              7.50038,
+              0.933843,
+              0.137891
+            ],
+            "smallest_retained": 0.137891,
+            "threshold": 3.26402e-06
+          },
+          "generalized_control_map": [
+            [
+              0.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "name": "wrist_torque_only",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": false,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 0,
+            "retained_condition_number": null,
+            "singular_values": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "smallest_retained": null,
+            "threshold": 1e-08
+          },
+          "generalized_control_map": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "name": "zero_input_killswitch",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              1.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        }
+      ],
+      "control_nm": [
+        60.0,
+        15.0
+      ],
+      "event_time_offset_s": -0.000479077,
+      "measurement_countermodels": [
+        {
+          "name": "both_joint_angles",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 37.1155,
+            "singular_values": [
+              48.4066,
+              41.3756,
+              5.44708,
+              1.30421
+            ],
+            "smallest_retained": 1.30421,
+            "threshold": 4.84066e-06
+          },
+          "output_map": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "shoulder_angle_only",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 103.909,
+            "singular_values": [
+              37.9521,
+              4.75622,
+              1.2217,
+              0.365242
+            ],
+            "smallest_retained": 0.365242,
+            "threshold": 3.79521e-06
+          },
+          "output_map": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "wrist_relative_angle_only",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 134.403,
+            "singular_values": [
+              46.9065,
+              20.4296,
+              2.04697,
+              0.348999
+            ],
+            "smallest_retained": 0.348999,
+            "threshold": 4.69065e-06
+          },
+          "output_map": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "zero_output_killswitch",
+          "observability": {
+            "full_rank": false,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 0,
+            "retained_condition_number": null,
+            "singular_values": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "smallest_retained": null,
+            "threshold": 1e-08
+          },
+          "output_map": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              1.0
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        }
+      ],
+      "name": "mid_downswing",
+      "phase_fraction_of_impact_time": 0.7,
+      "rank_stable_across_steps": true,
+      "sample_index": 244,
+      "scale_trials": [
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 18.9055,
+            "singular_values": [
+              2.09693,
+              1.15326,
+              0.594934,
+              0.110916
+            ],
+            "smallest_retained": 0.110916,
+            "threshold": 2.09693e-07
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              0.444378,
+              -0.0423017,
+              -0.0770341,
+              -0.380101,
+              -0.695332,
+              -0.615639
+            ],
+            [
+              0.0,
+              0.0,
+              -0.169207,
+              0.622191,
+              1.18944,
+              -0.0758438,
+              -0.581559,
+              1.2929
+            ],
+            [
+              0.122941,
+              -0.0117031,
+              -0.0213121,
+              -0.105158,
+              -0.192369,
+              -0.170321,
+              -0.252474,
+              -0.082954
+            ],
+            [
+              -0.041668,
+              0.153217,
+              0.292906,
+              -0.0186769,
+              -0.143211,
+              0.318384,
+              0.623246,
+              -0.500034
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.122941,
+              -0.0117031
+            ],
+            [
+              -0.041668,
+              0.153217
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.121933,
+              -0.374029,
+              -0.416759,
+              -0.718164
+            ],
+            [
+              0.105285,
+              0.926929,
+              2.40341,
+              0.0616799
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.762999,
+              -0.290529
+            ],
+            [
+              -0.290529,
+              4.27322
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "short_time_high_rate",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 13.2673,
+            "singular_values": [
+              13.8574,
+              10.7309,
+              2.37384,
+              1.04447
+            ],
+            "smallest_retained": 1.04447,
+            "threshold": 1.38574e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.440738,
+              -1.35196,
+              -1.50641,
+              -2.59586
+            ],
+            [
+              0.427547,
+              3.76411,
+              9.75985,
+              0.250472
+            ],
+            [
+              -0.0896251,
+              -1.84274,
+              -7.20418,
+              -4.56835
+            ],
+            [
+              -1.16368,
+              -3.4183,
+              -1.92011,
+              8.2917
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.174628,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              65.027,
+              73.0553
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -14.4528,
+              -44.3339,
+              -2.38655,
+              -3.6606
+            ],
+            [
+              14.0203,
+              123.434,
+              15.4622,
+              0.353208
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 65.9115,
+            "singular_values": [
+              34.6853,
+              19.8121,
+              5.56169,
+              0.526241
+            ],
+            "smallest_retained": 0.526241,
+            "threshold": 3.46853e-06
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.77751,
+              -0.169207,
+              -0.616273,
+              -3.04081,
+              -11.1253,
+              -9.85022
+            ],
+            [
+              0.0,
+              0.0,
+              -0.676828,
+              2.48876,
+              9.51556,
+              -0.606751,
+              -9.30494,
+              20.6865
+            ],
+            [
+              0.491762,
+              -0.0468124,
+              -0.170497,
+              -0.841263,
+              -3.0779,
+              -2.72514,
+              -8.07915,
+              -2.65453
+            ],
+            [
+              -0.166672,
+              0.612869,
+              2.34325,
+              -0.149415,
+              -2.29138,
+              5.09414,
+              19.9439,
+              -16.0011
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.491762,
+              -0.0468124
+            ],
+            [
+              -0.166672,
+              0.612869
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.487733,
+              -1.49612,
+              -0.833517,
+              -1.43633
+            ],
+            [
+              0.421142,
+              3.70772,
+              4.80682,
+              0.12336
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.762999,
+              -0.290529
+            ],
+            [
+              -0.290529,
+              4.27322
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "nominal",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 37.1155,
+            "singular_values": [
+              48.4066,
+              41.3756,
+              5.44708,
+              1.30421
+            ],
+            "smallest_retained": 1.30421,
+            "threshold": 4.84066e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.76295,
+              -5.40783,
+              -3.01281,
+              -5.19172
+            ],
+            [
+              1.71019,
+              15.0564,
+              19.5197,
+              0.500944
+            ],
+            [
+              -0.717001,
+              -14.7419,
+              -28.8167,
+              -18.2734
+            ],
+            [
+              -9.30944,
+              -27.3464,
+              -7.68046,
+              33.1668
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -14.4528,
+              -44.3339,
+              -2.38655,
+              -3.6606
+            ],
+            [
+              14.0203,
+              123.434,
+              15.4622,
+              0.353208
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 293.151,
+            "singular_values": [
+              898.949,
+              374.798,
+              50.0206,
+              3.0665
+            ],
+            "smallest_retained": 3.0665,
+            "threshold": 8.98949e-05
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              7.11005,
+              -0.676828,
+              -4.93018,
+              -24.3265,
+              -178.005,
+              -157.604
+            ],
+            [
+              0.0,
+              0.0,
+              -2.70731,
+              9.95505,
+              76.1245,
+              -4.854,
+              -148.879,
+              330.983
+            ],
+            [
+              1.96705,
+              -0.18725,
+              -1.36397,
+              -6.7301,
+              -49.2464,
+              -43.6022,
+              -258.533,
+              -84.9449
+            ],
+            [
+              -0.666688,
+              2.45148,
+              18.746,
+              -1.19532,
+              -36.6621,
+              81.5062,
+              638.204,
+              -512.035
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.96705,
+              -0.18725
+            ],
+            [
+              -0.666688,
+              2.45148
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.95093,
+              -5.98447,
+              -1.66703,
+              -2.87266
+            ],
+            [
+              1.68457,
+              14.8309,
+              9.61363,
+              0.24672
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.762999,
+              -0.290529
+            ],
+            [
+              -0.290529,
+              4.27322
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "long_time_low_rate",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 110.054,
+            "singular_values": [
+              291.41,
+              159.158,
+              12.5254,
+              2.64789
+            ],
+            "smallest_retained": 2.64789,
+            "threshold": 2.9141e-05
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -7.0518,
+              -21.6313,
+              -6.02563,
+              -10.3834
+            ],
+            [
+              6.84076,
+              60.2257,
+              39.0394,
+              1.00189
+            ],
+            [
+              -5.73601,
+              -117.935,
+              -115.267,
+              -73.0936
+            ],
+            [
+              -74.4756,
+              -218.771,
+              -30.7218,
+              132.667
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.698512,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              16.2568,
+              18.2638
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -14.4528,
+              -44.3339,
+              -2.38655,
+              -3.6606
+            ],
+            [
+              14.0203,
+              123.434,
+              15.4622,
+              0.353208
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        }
+      ],
+      "source": "registered_synthetic_reference_rollout",
+      "state": {
+        "q_rad": [
+          -0.449921,
+          -2.4187
+        ],
+        "v_rad_s": [
+          13.3204,
+          5.32084
+        ]
+      },
+      "step_trials": [
+        {
+          "control_steps": [
+            1e-05,
+            1e-05
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 65.9115,
+            "singular_values": [
+              34.6853,
+              19.8121,
+              5.56169,
+              0.526241
+            ],
+            "smallest_retained": 0.526241,
+            "threshold": 3.46853e-06
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.77751,
+              -0.169207,
+              -0.616273,
+              -3.04081,
+              -11.1253,
+              -9.85022
+            ],
+            [
+              0.0,
+              0.0,
+              -0.676828,
+              2.48876,
+              9.51556,
+              -0.606751,
+              -9.30494,
+              20.6865
+            ],
+            [
+              0.491762,
+              -0.0468124,
+              -0.170497,
+              -0.841263,
+              -3.0779,
+              -2.72514,
+              -8.07915,
+              -2.65453
+            ],
+            [
+              -0.166672,
+              0.612869,
+              2.34325,
+              -0.149415,
+              -2.29138,
+              5.09414,
+              19.9439,
+              -16.0011
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.491762,
+              -0.0468124
+            ],
+            [
+              -0.166672,
+              0.612869
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.487733,
+              -1.49612,
+              -0.833517,
+              -1.43633
+            ],
+            [
+              0.421142,
+              3.70772,
+              4.80682,
+              0.12336
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.762999,
+              -0.290529
+            ],
+            [
+              -0.290529,
+              4.27322
+            ]
+          ],
+          "multiplier": 0.1,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 37.1155,
+            "singular_values": [
+              48.4066,
+              41.3756,
+              5.44708,
+              1.30421
+            ],
+            "smallest_retained": 1.30421,
+            "threshold": 4.84066e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.76295,
+              -5.40783,
+              -3.01281,
+              -5.19172
+            ],
+            [
+              1.71019,
+              15.0564,
+              19.5197,
+              0.500944
+            ],
+            [
+              -0.717001,
+              -14.7419,
+              -28.8167,
+              -18.2734
+            ],
+            [
+              -9.30944,
+              -27.3464,
+              -7.68046,
+              33.1668
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -14.4528,
+              -44.3339,
+              -2.38655,
+              -3.6606
+            ],
+            [
+              14.0203,
+              123.434,
+              15.4622,
+              0.353208
+            ]
+          ],
+          "state_steps": [
+            1e-07,
+            1e-07,
+            1e-06,
+            1e-06
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 65.9115,
+            "singular_values": [
+              34.6853,
+              19.8121,
+              5.56169,
+              0.526241
+            ],
+            "smallest_retained": 0.526241,
+            "threshold": 3.46853e-06
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.77751,
+              -0.169207,
+              -0.616273,
+              -3.04081,
+              -11.1253,
+              -9.85022
+            ],
+            [
+              0.0,
+              0.0,
+              -0.676828,
+              2.48876,
+              9.51556,
+              -0.606751,
+              -9.30494,
+              20.6865
+            ],
+            [
+              0.491762,
+              -0.0468124,
+              -0.170497,
+              -0.841263,
+              -3.0779,
+              -2.72514,
+              -8.07915,
+              -2.65453
+            ],
+            [
+              -0.166672,
+              0.612869,
+              2.34325,
+              -0.149415,
+              -2.29138,
+              5.09414,
+              19.9439,
+              -16.0011
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.491762,
+              -0.0468124
+            ],
+            [
+              -0.166672,
+              0.612869
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.487733,
+              -1.49612,
+              -0.833517,
+              -1.43633
+            ],
+            [
+              0.421142,
+              3.70772,
+              4.80682,
+              0.12336
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.762999,
+              -0.290529
+            ],
+            [
+              -0.290529,
+              4.27322
+            ]
+          ],
+          "multiplier": 1.0,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 37.1155,
+            "singular_values": [
+              48.4066,
+              41.3756,
+              5.44708,
+              1.30421
+            ],
+            "smallest_retained": 1.30421,
+            "threshold": 4.84066e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.76295,
+              -5.40783,
+              -3.01281,
+              -5.19172
+            ],
+            [
+              1.71019,
+              15.0564,
+              19.5197,
+              0.500944
+            ],
+            [
+              -0.717001,
+              -14.7419,
+              -28.8167,
+              -18.2734
+            ],
+            [
+              -9.30944,
+              -27.3464,
+              -7.68046,
+              33.1668
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -14.4528,
+              -44.3339,
+              -2.38655,
+              -3.6606
+            ],
+            [
+              14.0203,
+              123.434,
+              15.4622,
+              0.353208
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.001,
+            0.001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 65.9115,
+            "singular_values": [
+              34.6853,
+              19.8121,
+              5.56169,
+              0.526241
+            ],
+            "smallest_retained": 0.526241,
+            "threshold": 3.46853e-06
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.77751,
+              -0.169207,
+              -0.616273,
+              -3.04081,
+              -11.1253,
+              -9.85022
+            ],
+            [
+              0.0,
+              0.0,
+              -0.676828,
+              2.48876,
+              9.51556,
+              -0.606751,
+              -9.30494,
+              20.6865
+            ],
+            [
+              0.491762,
+              -0.0468124,
+              -0.170497,
+              -0.841263,
+              -3.0779,
+              -2.72514,
+              -8.07915,
+              -2.65453
+            ],
+            [
+              -0.166672,
+              0.612869,
+              2.34325,
+              -0.149415,
+              -2.29138,
+              5.09414,
+              19.9439,
+              -16.0011
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.491762,
+              -0.0468124
+            ],
+            [
+              -0.166672,
+              0.612869
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.487733,
+              -1.49612,
+              -0.833517,
+              -1.43633
+            ],
+            [
+              0.421142,
+              3.70772,
+              4.80682,
+              0.12336
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.762999,
+              -0.290529
+            ],
+            [
+              -0.290529,
+              4.27322
+            ]
+          ],
+          "multiplier": 10.0,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 37.1155,
+            "singular_values": [
+              48.4066,
+              41.3756,
+              5.44708,
+              1.30421
+            ],
+            "smallest_retained": 1.30421,
+            "threshold": 4.84066e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.76295,
+              -5.40783,
+              -3.01281,
+              -5.19172
+            ],
+            [
+              1.71019,
+              15.0564,
+              19.5197,
+              0.500944
+            ],
+            [
+              -0.717001,
+              -14.7419,
+              -28.8167,
+              -18.2734
+            ],
+            [
+              -9.30944,
+              -27.3464,
+              -7.68046,
+              33.1668
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -14.4528,
+              -44.3339,
+              -2.38655,
+              -3.6606
+            ],
+            [
+              14.0203,
+              123.434,
+              15.4622,
+              0.353208
+            ]
+          ],
+          "state_steps": [
+            1e-05,
+            1e-05,
+            0.0001,
+            0.0001
+          ]
+        }
+      ],
+      "time_s": 0.244
+    },
+    {
+      "actuator_countermodels": [
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 402.038,
+            "singular_values": [
+              149.378,
+              70.759,
+              1.72179,
+              0.371553
+            ],
+            "smallest_retained": 0.371553,
+            "threshold": 1.49378e-05
+          },
+          "generalized_control_map": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "name": "both_generalized_torques",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 42956.0,
+            "singular_values": [
+              115.722,
+              26.2641,
+              0.0994699,
+              0.00269397
+            ],
+            "smallest_retained": 0.00269397,
+            "threshold": 1.15722e-05
+          },
+          "generalized_control_map": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "name": "shoulder_torque_only",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 263.09,
+            "singular_values": [
+              100.954,
+              25.448,
+              1.52999,
+              0.383722
+            ],
+            "smallest_retained": 0.383722,
+            "threshold": 1.00954e-05
+          },
+          "generalized_control_map": [
+            [
+              0.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "name": "wrist_torque_only",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "controllability": {
+            "full_rank": false,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 0,
+            "retained_condition_number": null,
+            "singular_values": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "smallest_retained": null,
+            "threshold": 1e-08
+          },
+          "generalized_control_map": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "name": "zero_input_killswitch",
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              1.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        }
+      ],
+      "control_nm": [
+        60.0,
+        15.0
+      ],
+      "event_time_offset_s": -0.000255824,
+      "measurement_countermodels": [
+        {
+          "name": "both_joint_angles",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 121.373,
+            "singular_values": [
+              124.232,
+              51.3891,
+              6.2662,
+              1.02355
+            ],
+            "smallest_retained": 1.02355,
+            "threshold": 1.24232e-05
+          },
+          "output_map": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "shoulder_angle_only",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 65.5003,
+            "singular_values": [
+              65.2693,
+              20.506,
+              2.11916,
+              0.996474
+            ],
+            "smallest_retained": 0.996474,
+            "threshold": 6.52693e-06
+          },
+          "output_map": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "wrist_relative_angle_only",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 911.536,
+            "singular_values": [
+              111.197,
+              32.5701,
+              1.77781,
+              0.121988
+            ],
+            "smallest_retained": 0.121988,
+            "threshold": 1.11197e-05
+          },
+          "output_map": [
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        },
+        {
+          "name": "zero_output_killswitch",
+          "observability": {
+            "full_rank": false,
+            "matrix_shape": [
+              4,
+              4
+            ],
+            "rank": 0,
+            "retained_condition_number": null,
+            "singular_values": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "smallest_retained": null,
+            "threshold": 1e-08
+          },
+          "output_map": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              1.0
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          }
+        }
+      ],
+      "name": "delivery_event_nearest_sample",
+      "phase_fraction_of_impact_time": 1.0,
+      "rank_stable_across_steps": true,
+      "sample_index": 349,
+      "scale_trials": [
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 92.0927,
+            "singular_values": [
+              9.22595,
+              3.06134,
+              0.302824,
+              0.100181
+            ],
+            "smallest_retained": 0.100181,
+            "threshold": 9.22595e-07
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              0.441619,
+              -0.175662,
+              0.209463,
+              -0.829473,
+              -3.43916,
+              3.29117
+            ],
+            [
+              0.0,
+              0.0,
+              -0.702648,
+              0.885574,
+              0.40036,
+              0.917796,
+              4.99241,
+              -5.76921
+            ],
+            [
+              0.122177,
+              -0.0485982,
+              0.0579494,
+              -0.22948,
+              -0.951471,
+              0.910528,
+              0.0833724,
+              1.5898
+            ],
+            [
+              -0.17303,
+              0.218077,
+              0.0985904,
+              0.226011,
+              1.2294,
+              -1.42069,
+              -1.43674,
+              -0.641232
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.122177,
+              -0.0485982
+            ],
+            [
+              -0.17303,
+              0.218077
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.0956275,
+              0.977523,
+              -1.48448,
+              -1.38311
+            ],
+            [
+              0.0690143,
+              -1.18284,
+              3.32365,
+              1.77706
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.758262,
+              -1.20645
+            ],
+            [
+              -1.20645,
+              6.08214
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "short_time_high_rate",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 30.7767,
+            "singular_values": [
+              30.9005,
+              18.6886,
+              2.06666,
+              1.00402
+            ],
+            "smallest_retained": 1.00402,
+            "threshold": 3.09005e-06
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.345653,
+              3.53333,
+              -5.36576,
+              -4.99934
+            ],
+            [
+              0.280256,
+              -4.80333,
+              13.4968,
+              7.21635
+            ],
+            [
+              0.168088,
+              0.668278,
+              -9.90011,
+              12.8856
+            ],
+            [
+              -0.792635,
+              4.65765,
+              4.9619,
+              -25.3492
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.174628,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              65.027,
+              73.0553
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -11.3348,
+              115.866,
+              -8.50081,
+              -7.04991
+            ],
+            [
+              9.19026,
+              -157.513,
+              21.3826,
+              10.1763
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 402.038,
+            "singular_values": [
+              149.378,
+              70.759,
+              1.72179,
+              0.371553
+            ],
+            "smallest_retained": 0.371553,
+            "threshold": 1.49378e-05
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.76648,
+              -0.702648,
+              1.6757,
+              -6.63579,
+              -55.0266,
+              52.6588
+            ],
+            [
+              0.0,
+              0.0,
+              -2.81059,
+              3.5423,
+              3.20288,
+              7.34236,
+              79.8786,
+              -92.3074
+            ],
+            [
+              0.488709,
+              -0.194393,
+              0.463595,
+              -1.83584,
+              -15.2235,
+              14.5684,
+              2.66792,
+              50.8735
+            ],
+            [
+              -0.692121,
+              0.872307,
+              0.788723,
+              1.80809,
+              19.6705,
+              -22.7311,
+              -45.9758,
+              -20.5194
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.488709,
+              -0.194393
+            ],
+            [
+              -0.692121,
+              0.872307
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.38251,
+              3.91009,
+              -2.96896,
+              -2.76621
+            ],
+            [
+              0.276057,
+              -4.73137,
+              6.64731,
+              3.55412
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.758262,
+              -1.20645
+            ],
+            [
+              -1.20645,
+              6.08214
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "nominal",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 121.373,
+            "singular_values": [
+              124.232,
+              51.3891,
+              6.2662,
+              1.02355
+            ],
+            "smallest_retained": 1.02355,
+            "threshold": 1.24232e-05
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.38261,
+              14.1333,
+              -10.7315,
+              -9.99868
+            ],
+            [
+              1.12102,
+              -19.2133,
+              26.9936,
+              14.4327
+            ],
+            [
+              1.34471,
+              5.34623,
+              -39.6004,
+              51.5423
+            ],
+            [
+              -6.34108,
+              37.2612,
+              19.8476,
+              -101.397
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -11.3348,
+              115.866,
+              -8.50081,
+              -7.04991
+            ],
+            [
+              9.19026,
+              -157.513,
+              21.3826,
+              10.1763
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 2119.34,
+            "singular_values": [
+              2639.13,
+              1985.12,
+              13.1806,
+              1.24526
+            ],
+            "smallest_retained": 1.24526,
+            "threshold": 0.000263913
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              7.06591,
+              -2.81059,
+              13.4056,
+              -53.0863,
+              -880.426,
+              842.54
+            ],
+            [
+              0.0,
+              0.0,
+              -11.2424,
+              14.1692,
+              25.623,
+              58.7389,
+              1278.06,
+              -1476.92
+            ],
+            [
+              1.95484,
+              -0.777571,
+              3.70876,
+              -14.6867,
+              -243.576,
+              233.095,
+              85.3733,
+              1627.95
+            ],
+            [
+              -2.76848,
+              3.48923,
+              6.30978,
+              14.4647,
+              314.728,
+              -363.698,
+              -1471.22,
+              -656.622
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.95484,
+              -0.777571
+            ],
+            [
+              -2.76848,
+              3.48923
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.53004,
+              15.6404,
+              -5.93792,
+              -5.53242
+            ],
+            [
+              1.10423,
+              -18.9255,
+              13.2946,
+              7.10823
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.758262,
+              -1.20645
+            ],
+            [
+              -1.20645,
+              6.08214
+            ]
+          ],
+          "multiplier": 1.0,
+          "name": "long_time_low_rate",
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 489.802,
+            "singular_values": [
+              545.747,
+              217.691,
+              18.4152,
+              1.11422
+            ],
+            "smallest_retained": 1.11422,
+            "threshold": 5.45747e-05
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -5.53045,
+              56.5333,
+              -21.4631,
+              -19.9974
+            ],
+            [
+              4.4841,
+              -76.8533,
+              53.9873,
+              28.8654
+            ],
+            [
+              10.7576,
+              42.7698,
+              -158.402,
+              206.169
+            ],
+            [
+              -50.7287,
+              298.089,
+              79.3904,
+              -405.587
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.698512,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              16.2568,
+              18.2638
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -11.3348,
+              115.866,
+              -8.50081,
+              -7.04991
+            ],
+            [
+              9.19026,
+              -157.513,
+              21.3826,
+              10.1763
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        }
+      ],
+      "source": "registered_synthetic_reference_rollout",
+      "state": {
+        "q_rad": [
+          0.764066,
+          -0.773034
+        ],
+        "v_rad_s": [
+          6.813,
+          28.1809
+        ]
+      },
+      "step_trials": [
+        {
+          "control_steps": [
+            1e-05,
+            1e-05
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 402.038,
+            "singular_values": [
+              149.378,
+              70.759,
+              1.72179,
+              0.371553
+            ],
+            "smallest_retained": 0.371553,
+            "threshold": 1.49378e-05
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.76648,
+              -0.702648,
+              1.6757,
+              -6.63579,
+              -55.0266,
+              52.6588
+            ],
+            [
+              0.0,
+              0.0,
+              -2.81059,
+              3.5423,
+              3.20288,
+              7.34236,
+              79.8786,
+              -92.3074
+            ],
+            [
+              0.488709,
+              -0.194393,
+              0.463595,
+              -1.83584,
+              -15.2235,
+              14.5684,
+              2.66792,
+              50.8735
+            ],
+            [
+              -0.692121,
+              0.872307,
+              0.788723,
+              1.80809,
+              19.6705,
+              -22.7311,
+              -45.9758,
+              -20.5194
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.488709,
+              -0.194393
+            ],
+            [
+              -0.692121,
+              0.872307
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.38251,
+              3.91009,
+              -2.96896,
+              -2.76621
+            ],
+            [
+              0.276057,
+              -4.73137,
+              6.64731,
+              3.55412
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.758262,
+              -1.20645
+            ],
+            [
+              -1.20645,
+              6.08214
+            ]
+          ],
+          "multiplier": 0.1,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 121.373,
+            "singular_values": [
+              124.232,
+              51.3891,
+              6.2662,
+              1.02355
+            ],
+            "smallest_retained": 1.02355,
+            "threshold": 1.24232e-05
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.38261,
+              14.1333,
+              -10.7315,
+              -9.99868
+            ],
+            [
+              1.12102,
+              -19.2133,
+              26.9936,
+              14.4327
+            ],
+            [
+              1.34471,
+              5.34623,
+              -39.6004,
+              51.5423
+            ],
+            [
+              -6.34108,
+              37.2612,
+              19.8476,
+              -101.397
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -11.3348,
+              115.866,
+              -8.50081,
+              -7.04991
+            ],
+            [
+              9.19026,
+              -157.513,
+              21.3826,
+              10.1763
+            ]
+          ],
+          "state_steps": [
+            1e-07,
+            1e-07,
+            1e-06,
+            1e-06
+          ]
+        },
+        {
+          "control_steps": [
+            0.0001,
+            0.0001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 402.038,
+            "singular_values": [
+              149.378,
+              70.759,
+              1.72179,
+              0.371553
+            ],
+            "smallest_retained": 0.371553,
+            "threshold": 1.49378e-05
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.76648,
+              -0.702648,
+              1.6757,
+              -6.63579,
+              -55.0266,
+              52.6588
+            ],
+            [
+              0.0,
+              0.0,
+              -2.81059,
+              3.5423,
+              3.20288,
+              7.34236,
+              79.8786,
+              -92.3074
+            ],
+            [
+              0.488709,
+              -0.194393,
+              0.463595,
+              -1.83584,
+              -15.2235,
+              14.5684,
+              2.66792,
+              50.8735
+            ],
+            [
+              -0.692121,
+              0.872307,
+              0.788723,
+              1.80809,
+              19.6705,
+              -22.7311,
+              -45.9758,
+              -20.5194
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.488709,
+              -0.194393
+            ],
+            [
+              -0.692121,
+              0.872307
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.38251,
+              3.91009,
+              -2.96896,
+              -2.76621
+            ],
+            [
+              0.276057,
+              -4.73137,
+              6.64731,
+              3.55412
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.758262,
+              -1.20645
+            ],
+            [
+              -1.20645,
+              6.08214
+            ]
+          ],
+          "multiplier": 1.0,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 121.373,
+            "singular_values": [
+              124.232,
+              51.3891,
+              6.2662,
+              1.02355
+            ],
+            "smallest_retained": 1.02355,
+            "threshold": 1.24232e-05
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.38261,
+              14.1333,
+              -10.7315,
+              -9.99868
+            ],
+            [
+              1.12102,
+              -19.2133,
+              26.9936,
+              14.4327
+            ],
+            [
+              1.34471,
+              5.34623,
+              -39.6004,
+              51.5423
+            ],
+            [
+              -6.34108,
+              37.2612,
+              19.8476,
+              -101.397
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -11.3348,
+              115.866,
+              -8.50081,
+              -7.04991
+            ],
+            [
+              9.19026,
+              -157.513,
+              21.3826,
+              10.1763
+            ]
+          ],
+          "state_steps": [
+            1e-06,
+            1e-06,
+            1e-05,
+            1e-05
+          ]
+        },
+        {
+          "control_steps": [
+            0.001,
+            0.001
+          ],
+          "controllability": {
+            "full_rank": true,
+            "matrix_shape": [
+              4,
+              8
+            ],
+            "rank": 4,
+            "retained_condition_number": 402.038,
+            "singular_values": [
+              149.378,
+              70.759,
+              1.72179,
+              0.371553
+            ],
+            "smallest_retained": 0.371553,
+            "threshold": 1.49378e-05
+          },
+          "controllability_matrix": [
+            [
+              0.0,
+              0.0,
+              1.76648,
+              -0.702648,
+              1.6757,
+              -6.63579,
+              -55.0266,
+              52.6588
+            ],
+            [
+              0.0,
+              0.0,
+              -2.81059,
+              3.5423,
+              3.20288,
+              7.34236,
+              79.8786,
+              -92.3074
+            ],
+            [
+              0.488709,
+              -0.194393,
+              0.463595,
+              -1.83584,
+              -15.2235,
+              14.5684,
+              2.66792,
+              50.8735
+            ],
+            [
+              -0.692121,
+              0.872307,
+              0.788723,
+              1.80809,
+              19.6705,
+              -22.7311,
+              -45.9758,
+              -20.5194
+            ]
+          ],
+          "dimensionless_input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.488709,
+              -0.194393
+            ],
+            [
+              -0.692121,
+              0.872307
+            ]
+          ],
+          "dimensionless_output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "dimensionless_state_matrix": [
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -0.38251,
+              3.91009,
+              -2.96896,
+              -2.76621
+            ],
+            [
+              0.276057,
+              -4.73137,
+              6.64731,
+              3.55412
+            ]
+          ],
+          "input_matrix": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.758262,
+              -1.20645
+            ],
+            [
+              -1.20645,
+              6.08214
+            ]
+          ],
+          "multiplier": 10.0,
+          "observability": {
+            "full_rank": true,
+            "matrix_shape": [
+              8,
+              4
+            ],
+            "rank": 4,
+            "retained_condition_number": 121.373,
+            "singular_values": [
+              124.232,
+              51.3891,
+              6.2662,
+              1.02355
+            ],
+            "smallest_retained": 1.02355,
+            "threshold": 1.24232e-05
+          },
+          "observability_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              3.61458,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              4.06084
+            ],
+            [
+              -1.38261,
+              14.1333,
+              -10.7315,
+              -9.99868
+            ],
+            [
+              1.12102,
+              -19.2133,
+              26.9936,
+              14.4327
+            ],
+            [
+              1.34471,
+              5.34623,
+              -39.6004,
+              51.5423
+            ],
+            [
+              -6.34108,
+              37.2612,
+              19.8476,
+              -101.397
+            ]
+          ],
+          "output_matrix": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "rank_basis": "nondimensional",
+          "rank_tolerance": {
+            "absolute": 1e-08,
+            "relative": 1e-07
+          },
+          "raw_dimensional_conditioning_status": "not_interpreted",
+          "scales": {
+            "characteristic_time_s": 0.349256,
+            "control": [
+              60.0,
+              15.0
+            ],
+            "output": [
+              3.14159,
+              3.14159
+            ],
+            "state": [
+              3.14159,
+              3.14159,
+              32.5135,
+              36.5277
+            ]
+          },
+          "state_matrix": [
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              -11.3348,
+              115.866,
+              -8.50081,
+              -7.04991
+            ],
+            [
+              9.19026,
+              -157.513,
+              21.3826,
+              10.1763
+            ]
+          ],
+          "state_steps": [
+            1e-05,
+            1e-05,
+            0.0001,
+            0.0001
+          ]
+        }
+      ],
+      "time_s": 0.349
+    }
+  ],
+  "parent_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/9027",
+  "practical_identifiability_status": "not_evaluated",
+  "reference_rollout": {
+    "delivery_event": {
+      "arm_angle_rad": 0.765795,
+      "clubhead_speed_m_s": 38.8538,
+      "time_s": 0.349256
+    },
+    "dt_s": 0.001,
+    "horizon_steps": 900,
+    "initial_q_rad": [
+      -2.2,
+      -1.57
+    ],
+    "model_parameters": "GolfModelParams.default()",
+    "program": {
+      "onset_s": 0.1,
+      "shoulder_torque_nm": 60.0,
+      "wrist_drive_nm": 15.0,
+      "wrist_restrain_nm": 10.0
+    },
+    "scope": "synthetic reference trajectory; not a participant or coaching strategy"
+  },
+  "schema_version": "proximal-distal-local-linear-diagnostics/v2",
+  "structural_identifiability_status": "not_evaluated",
+  "summary": {
+    "actuator_countermodel_count": 16,
+    "all_rank_decisions_stable": true,
+    "control_dimension": 2,
+    "measurement_countermodel_count": 16,
+    "operating_point_count": 4,
+    "output_dimension": 2,
+    "scale_scenario_count": 3,
+    "state_dimension": 4,
+    "step_multiplier_count": 3
+  }
+}

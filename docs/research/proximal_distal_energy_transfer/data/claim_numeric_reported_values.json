@@ -4933,6 +4933,124 @@
         "independent_validation": false,
         "boundary": "Registered claim value lacking an unambiguous semantic JSON path; the numeric pointer gate does not independently recompute physics."
       }
+    ],
+    "PD-CLAIM-307": [
+      {
+        "literal_id": "135#1",
+        "text": "135",
+        "value": 135.0,
+        "evidence_scope": "registered_claim_value_not_independently_recomputed",
+        "source_references": [
+          "docs/research/proximal_distal_energy_transfer/data/force_source_optimization.json",
+          "docs/research/proximal_distal_energy_transfer/figures/fig_force_source_optimization.pdf",
+          "scripts/research/proximal_distal_energy/force_source_optimization.py",
+          "scripts/research/proximal_distal_energy/run_force_source_optimization.py",
+          "src/shared/python/biomechanics/force_source_attribution.py",
+          "tests/research/test_force_source_optimization.py",
+          "tests/unit/biomechanics/test_force_source_attribution.py"
+        ],
+        "source_locations": [
+          "docs/research/proximal_distal_energy_transfer/chapters/_ch03ba_coordinate_force_sources.qmd:189"
+        ],
+        "independent_validation": false,
+        "boundary": "Registered claim value lacking an unambiguous semantic JSON path; the numeric pointer gate does not independently recompute physics."
+      }
+    ],
+    "PD-CLAIM-309": [
+      {
+        "literal_id": "60#1",
+        "text": "60",
+        "value": 60.0,
+        "evidence_scope": "registered_claim_value_not_independently_recomputed",
+        "source_references": [
+          "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+          "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+          "tests/research/test_double_pendulum_identifiability.py",
+          "tests/research/test_double_pendulum_identifiability_evidence.py"
+        ],
+        "source_locations": [
+          "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:237"
+        ],
+        "independent_validation": false,
+        "boundary": "Registered claim value lacking an unambiguous semantic JSON path; the numeric pointer gate does not independently recompute physics."
+      },
+      {
+        "literal_id": "4.44089e-16#1",
+        "text": "4.44089e-16",
+        "value": 4.44089e-16,
+        "evidence_scope": "registered_claim_value_not_independently_recomputed",
+        "source_references": [
+          "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+          "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+          "tests/research/test_double_pendulum_identifiability.py",
+          "tests/research/test_double_pendulum_identifiability_evidence.py"
+        ],
+        "source_locations": [
+          "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:237"
+        ],
+        "independent_validation": false,
+        "boundary": "Registered claim value lacking an unambiguous semantic JSON path; the numeric pointer gate does not independently recompute physics."
+      }
+    ],
+    "PD-CLAIM-310": [
+      {
+        "literal_id": "95#1",
+        "text": "95",
+        "value": 95.0,
+        "evidence_scope": "registered_claim_value_not_independently_recomputed",
+        "source_references": [
+          "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+          "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+          "tests/research/test_double_pendulum_identifiability.py",
+          "tests/research/test_double_pendulum_identifiability_evidence.py"
+        ],
+        "source_locations": [
+          "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:248"
+        ],
+        "independent_validation": false,
+        "boundary": "Registered claim value lacking an unambiguous semantic JSON path; the numeric pointer gate does not independently recompute physics."
+      },
+      {
+        "literal_id": "10#1",
+        "text": "10",
+        "value": 10.0,
+        "evidence_scope": "registered_claim_value_not_independently_recomputed",
+        "source_references": [
+          "docs/research/proximal_distal_energy_transfer/data/double_pendulum_identifiability.json",
+          "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_contract.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_reporting.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_identifiability_validation.py",
+          "scripts/research/proximal_distal_energy/double_pendulum_physical_parameters.py",
+          "scripts/research/proximal_distal_energy/run_double_pendulum_identifiability.py",
+          "tests/research/test_double_pendulum_identifiability.py",
+          "tests/research/test_double_pendulum_identifiability_evidence.py"
+        ],
+        "source_locations": [
+          "docs/research/proximal_distal_energy_transfer/chapters/_ch02_mechanics.qmd:248"
+        ],
+        "independent_validation": false,
+        "boundary": "Registered claim value lacking an unambiguous semantic JSON path; the numeric pointer gate does not independently recompute physics."
+      }
     ]
   }
 }

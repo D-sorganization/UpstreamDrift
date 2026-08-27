@@ -93,10 +93,9 @@ def _maximum_prebranch_state_difference(
     return float(max(differences))
 
 
-def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    """Execute baseline and same-state driver-killswitch branches."""
-
-    params = SpatialContactParameters()
+def _collect_study_traces(
+    params: SpatialContactParameters,
+) -> dict[str, SpatialForwardTrace]:
     traces: dict[str, SpatialForwardTrace] = {}
     for engine in ("mujoco", "pinocchio"):
         traces[f"{engine}_baseline"] = run_engine_trace(
@@ -105,19 +104,14 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         traces[f"{engine}_killswitch"] = run_engine_trace(
             engine, params, disable_driver_after_killswitch=True
         )
+    return traces
 
-    baseline_gate = compare_engine_traces(
-        traces["mujoco_baseline"], traces["pinocchio_baseline"], params
-    )
-    killswitch_gate = compare_engine_traces(
-        traces["mujoco_killswitch"], traces["pinocchio_killswitch"], params
-    )
-    summaries = {key: summarize_trace(value, params) for key, value in traces.items()}
-    energy_refinement = {
-        params.time_step: summaries["mujoco_killswitch"][
-            "energy_balance_residual_max_j"
-        ]
-    }
+
+def _evaluate_time_step_refinement(
+    params: SpatialContactParameters,
+    base_residual: float,
+) -> tuple[list[float], list[float]]:
+    energy_refinement = {params.time_step: base_residual}
     for time_step in (0.0005, 0.000125):
         refinement_params = replace(params, time_step=time_step)
         refinement_trace = run_engine_trace(
@@ -128,24 +122,14 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         )["energy_balance_residual_max_j"]
     ordered_steps = sorted(energy_refinement, reverse=True)
     ordered_residuals = [energy_refinement[value] for value in ordered_steps]
-    prebranch_difference = max(
-        _maximum_prebranch_state_difference(
-            traces[f"{engine}_baseline"],
-            traces[f"{engine}_killswitch"],
-            params.killswitch_time,
-        )
-        for engine in ("mujoco", "pinocchio")
-    )
-    identities = {
-        engine: engine_identity_record(traces[f"{engine}_baseline"].engine_identity)
-        for engine in ("mujoco", "pinocchio")
-    }
-    digests = {
-        key: trace.model_digest
-        for key, trace in traces.items()
-        if key.endswith("baseline")
-    }
-    numerical_gates = {
+    return ordered_steps, ordered_residuals
+
+
+def _build_numerical_gates(
+    baseline_gate: dict[str, Any],
+    killswitch_gate: dict[str, Any],
+) -> dict[str, Any]:
+    return {
         "trajectory_gate_passed": bool(
             baseline_gate["trajectory_gate_passed"]
             and killswitch_gate["trajectory_gate_passed"]
@@ -161,7 +145,13 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "baseline": baseline_gate,
         "same_state_killswitch": killswitch_gate,
     }
-    mechanism_tests = {
+
+
+def _build_mechanism_tests(
+    summaries: dict[str, Any],
+    prebranch_difference: float,
+) -> dict[str, Any]:
+    return {
         "same_state_prebranch_max_state_difference": prebranch_difference,
         "same_state_killswitch_negative_duration_s": min(
             summaries["mujoco_killswitch"]["post_killswitch_negative_duration_s"],
@@ -181,7 +171,18 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "direct_club_force_or_torque_command": "none",
         "baseline_and_killswitch_trace_summaries": summaries,
     }
-    record: dict[str, Any] = {
+
+
+def _build_study_record(
+    params: SpatialContactParameters,
+    identities: dict[str, Any],
+    digests: dict[str, str],
+    numerical_gates: dict[str, Any],
+    ordered_steps: list[float],
+    ordered_residuals: list[float],
+    mechanism_tests: dict[str, Any],
+) -> dict[str, Any]:
+    return {
         "schema_version": SCHEMA_VERSION,
         "study_id": STUDY_ID,
         "model_tier": "reduced_spatial_two_hand_forward_compliant_contact",
@@ -248,6 +249,53 @@ def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "source_sha256": _source_hashes(),
         "array_artifact": NPZ_PATH.name,
     }
+
+
+def run_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    """Execute baseline and same-state driver-killswitch branches."""
+
+    params = SpatialContactParameters()
+    traces = _collect_study_traces(params)
+
+    baseline_gate = compare_engine_traces(
+        traces["mujoco_baseline"], traces["pinocchio_baseline"], params
+    )
+    killswitch_gate = compare_engine_traces(
+        traces["mujoco_killswitch"], traces["pinocchio_killswitch"], params
+    )
+    summaries = {key: summarize_trace(value, params) for key, value in traces.items()}
+    ordered_steps, ordered_residuals = _evaluate_time_step_refinement(
+        params,
+        summaries["mujoco_killswitch"]["energy_balance_residual_max_j"],
+    )
+    prebranch_difference = max(
+        _maximum_prebranch_state_difference(
+            traces[f"{engine}_baseline"],
+            traces[f"{engine}_killswitch"],
+            params.killswitch_time,
+        )
+        for engine in ("mujoco", "pinocchio")
+    )
+    identities = {
+        engine: engine_identity_record(traces[f"{engine}_baseline"].engine_identity)
+        for engine in ("mujoco", "pinocchio")
+    }
+    digests = {
+        key: trace.model_digest
+        for key, trace in traces.items()
+        if key.endswith("baseline")
+    }
+    numerical_gates = _build_numerical_gates(baseline_gate, killswitch_gate)
+    mechanism_tests = _build_mechanism_tests(summaries, prebranch_difference)
+    record = _build_study_record(
+        params,
+        identities,
+        digests,
+        numerical_gates,
+        ordered_steps,
+        ordered_residuals,
+        mechanism_tests,
+    )
     arrays: dict[str, np.ndarray] = {}
     for prefix, trace in traces.items():
         arrays.update(_trace_arrays(prefix, trace))

@@ -175,6 +175,13 @@ abstract: |
   local task-Jacobian partition exposes five task-null input directions, but
   this is a model property rather than evidence of a neural synergy or human
   self-stabilization.
+  An exact double-pendulum identifiability audit separates coefficient
+  excitation from physical-parameter recovery. The registered synthetic
+  trajectory excites all seven dimensionless base-coefficient directions,
+  while the eleven-entry physical map has analytic rank seven, nullity four,
+  and three exact nonunique parameter families. The associated Fisher screen
+  is an oracle-kinematics lower bound only; it does not identify participant
+  anatomy, equipment, or practical measurement performance.
   A phase-resolved proximal-motion study evaluates 126 rate cases under
   relative-rate, absolute-rate, and exact total-kinetic-energy matching, plus
   45 identical-state acceleration interventions. The large pre-impact rate
@@ -265,6 +272,8 @@ format:
 {{< include chapters/_ch03_interaction_forces.qmd >}}
 
 {{< include chapters/_ch03b_hand_path_attribution.qmd >}}
+
+{{< include chapters/_ch03ba_coordinate_force_sources.qmd >}}
 
 {{< include chapters/_ch03c_ground_reaction_drift.qmd >}}
 

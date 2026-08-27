@@ -4,6 +4,7 @@ These tests verify the simulation service using Design by Contract principles.
 """
 
 from enum import Enum
+from pathlib import Path
 from typing import Any, NoReturn
 from unittest.mock import MagicMock, patch
 
@@ -59,6 +60,27 @@ def mock_engine_manager() -> MagicMock:
     manager._load_engine = MagicMock()
     manager.get_active_physics_engine = MagicMock(return_value=None)
     return manager
+
+
+@pytest.fixture(autouse=True)
+def _isolate_output_manager(tmp_path, monkeypatch) -> None:
+    """Root the service's default OutputManager under tmp_path (issue #8871).
+
+    ``SimulationService`` now persists completed runs via ``OutputManager``
+    (see ``_persist_simulation_results``). Without this, every test that
+    exercises a successful ``run_simulation`` would write real files into
+    the repo's tracked ``output/`` tree. Tests that want to assert on the
+    written files should construct their own ``OutputManager(base_path=...)``
+    and pass it explicitly instead of relying on this default.
+    """
+    from src.shared.python.data_io.output_manager import (
+        OutputManager as RealOutputManager,
+    )
+
+    monkeypatch.setattr(
+        "src.api.services.simulation_service.OutputManager",
+        lambda *_a, **_k: RealOutputManager(base_path=tmp_path),
+    )
 
 
 @pytest.fixture
@@ -313,6 +335,79 @@ class TestRunSimulation:
 
             await service.run_simulation(request)
             assert mock_engine.set_control.call_count >= 1
+
+
+@pytest.mark.unit
+class TestExportPathsPersistence:
+    """export_paths must reflect what OutputManager actually wrote (issue #8871)."""
+
+    async def test_success_populates_export_paths_with_existing_files(
+        self, mock_engine_manager, tmp_path
+    ) -> None:
+        """On success, export_paths is non-empty and every path exists on disk."""
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+        from src.shared.python.data_io.output_manager import OutputManager
+
+        mock_engine = MagicMock(spec=PhysicsEngine)
+        mock_engine.load_from_path = MagicMock()
+        mock_engine.step = MagicMock()
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
+
+        with (
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
+            patch("src.api.services.simulation_service.EngineType", MockEngineType),
+        ):
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
+            mock_recorder.is_recording = False
+            mock_recorder.record_step = MagicMock()
+            mock_recorder.get_time_series = MagicMock(
+                return_value=(np.array([0.0, 0.001]), np.array([[0], [0.1]]))
+            )
+            MockRecorder.return_value = mock_recorder
+
+            output_manager = OutputManager(base_path=tmp_path)
+            service = SimulationService(mock_engine_manager, output_manager)
+            request = SimulationRequest(
+                engine_type="mujoco",
+                duration=0.01,
+                timestep=0.001,
+            )
+
+            result = await service.run_simulation(request)
+
+            assert result.success is True
+            assert result.export_paths
+            for path_str in result.export_paths:
+                path = Path(path_str)
+                assert path.is_file(), f"export path does not exist: {path}"
+                assert tmp_path in path.parents
+
+    async def test_failure_leaves_export_paths_empty(
+        self, mock_engine_manager, tmp_path
+    ) -> None:
+        """On failure, nothing was persisted, so export_paths stays empty."""
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+        from src.shared.python.data_io.output_manager import OutputManager
+
+        mock_engine_manager.get_active_physics_engine = MagicMock(return_value=None)
+
+        with patch("src.api.services.simulation_service.EngineType", MockEngineType):
+            output_manager = OutputManager(base_path=tmp_path)
+            service = SimulationService(mock_engine_manager, output_manager)
+            request = SimulationRequest(engine_type="mujoco", duration=1.0)
+
+            result = await service.run_simulation(request)
+
+            assert result.success is False
+            assert not result.export_paths
+            # Nothing should have been written under the isolated output tree.
+            assert list(tmp_path.rglob("*.json")) == []
 
 
 class MockTaskManager:

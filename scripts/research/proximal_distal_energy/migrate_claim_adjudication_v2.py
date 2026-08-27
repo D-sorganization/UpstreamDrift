@@ -18,14 +18,29 @@ from .claim_audit import SCHEMA_VERSION, build_candidate_inventory
 PRE_ADJUDICATION_SOURCE_DIGEST = (
     "ad5a9e7338f9f8ef9517464f8c8cf9f70a2dc033de50312de760417438a1d6d5"
 )
+LEGACY_REVIEWED_SOURCE_DIGEST = (
+    "f6a793330c5b8b941ce1b489decf10406426e628175ddf66e6cdd47418ea8dd1"
+)
 PRIOR_REVIEWED_SOURCE_DIGEST = (
-    "7407e8f00842ecdf95769d65ac7d2fe3f8d495cb0d11d405640e7582e6b8560a"
+    "d6902ef0535d09743a28a538b5a0c267bf215c6fd508c258afdc873cac261e8d"
+)
+PRE_SUMMARY_REVIEWED_SOURCE_DIGEST = (
+    "09319b54ecadc62dd1c265421370d3a8f53854b341e831783605619d892b250b"
+)
+PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST = (
+    "53d11ff4dd10954807b69bbed0f6442b5efd93cf02ea6ed1c9c9da10b3d4ad1d"
+)
+PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST = (
+    "e1a06c08ffe31fe6ec872b8de222179239c87f1e1f7eab3d48cf20f88c673d49"
+)
+PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST = (
+    "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a"
 )
 REVIEWED_SOURCE_DIGEST = (
-    "ea406841c4a500dcab41d3b4ed1d7763ee0a2f9cf559d15041faa4036b31dfe7"
+    "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe"
 )
-REVIEWED_CLAIM_COUNT = 303
-REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
+REVIEWED_CLAIM_COUNT = 313
+LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
         "PD-CAND-aeecc7c4cec6b96f",
@@ -52,11 +67,73 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     }
 )
 PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = (
-    REVIEWER_PROJECTION_CANDIDATE_IDS - {"PD-CAND-b2e277593764ee20"}
-) | {"PD-CAND-bb48a75174a745ce"}
+    LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS
+    - {
+        "PD-CAND-aeecc7c4cec6b96f",
+        "PD-CAND-87d26eacc282b21c",
+        "PD-CAND-b2e277593764ee20",
+        "PD-CAND-9519d7e6dfb308ef",
+        "PD-CAND-f1e25f4b524e7a06",
+        "PD-CAND-0acfb3375ef769f8",
+        "PD-CAND-f5697c26aed70275",
+    }
+) | {
+    "PD-CAND-77f607e78b74eddc",
+    "PD-CAND-929f26183c2056d8",
+    "PD-CAND-37582fe0fbc00cc7",
+    "PD-CAND-063c7e05fb640e5d",
+    "PD-CAND-22fe542413fe1075",
+    "PD-CAND-9248119a2458c1b1",
+    "PD-CAND-a83d791d65049fc2",
+}
+PRE_CONSTRAINT_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
+    {
+        "PD-CAND-000afa39d6089e6f",
+        "PD-CAND-165a6caf21ef85e2",
+        "PD-CAND-36d4ac97c4116672",
+        "PD-CAND-39f42d06f3e621a5",
+        "PD-CAND-4018dc67ba8ab4f5",
+        "PD-CAND-43c4e06e7103087b",
+        "PD-CAND-44f91b4f5f376d4f",
+        "PD-CAND-9345c1e6be2ef186",
+        "PD-CAND-9906005bff75ba72",
+        "PD-CAND-aa6efbe9274b5d53",
+        "PD-CAND-ab4689630944a0fe",
+        "PD-CAND-b06a3cbe5b2d0e01",
+        "PD-CAND-b5b2526e23b77d70",
+        "PD-CAND-bcfcc2b3a9631de1",
+        "PD-CAND-be8a26a0593eab4f",
+        "PD-CAND-c6f7607002d58a93",
+        "PD-CAND-cd8822807d808531",
+        "PD-CAND-d2f2b5b07b466265",
+        "PD-CAND-f2518e167ae18e34",
+        "PD-CAND-f7091f3b82570b27",
+        "PD-CAND-fdcf5c685afbb41a",
+        "PD-CAND-feff7c3d6f4ddc55",
+    }
+)
+REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
+    {
+        "PD-CAND-165a6caf21ef85e2",
+        "PD-CAND-39f42d06f3e621a5",
+        "PD-CAND-9345c1e6be2ef186",
+        "PD-CAND-9906005bff75ba72",
+        "PD-CAND-aa6efbe9274b5d53",
+        "PD-CAND-ab4689630944a0fe",
+        "PD-CAND-b06a3cbe5b2d0e01",
+        "PD-CAND-b5b2526e23b77d70",
+        "PD-CAND-bcfcc2b3a9631de1",
+        "PD-CAND-be8a26a0593eab4f",
+        "PD-CAND-c6f7607002d58a93",
+        "PD-CAND-cd8822807d808531",
+        "PD-CAND-d2f2b5b07b466265",
+        "PD-CAND-fdcf5c685afbb41a",
+        "PD-CAND-feff7c3d6f4ddc55",
+    }
+)
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 303-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 311-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -343,6 +420,16 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304",
+        "PD-CLAIM-305",
+        "PD-CLAIM-306",
+        "PD-CLAIM-307",
+        "PD-CLAIM-308",
+        "PD-CLAIM-309",
+        "PD-CLAIM-310",
+        "PD-CLAIM-311",
+        "PD-CLAIM-312",
+        "PD-CLAIM-313",
+        "PD-CLAIM-314",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -386,7 +473,13 @@ def _reconcile_reviewer_projection(
 ) -> None:
     candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}
     reviews = {item["candidate_id"]: item for item in registry["candidate_reviews"]}
-    for candidate_id in PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS:
+    prior_projection_ids = (
+        LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS
+        | PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS
+        | PRE_CONSTRAINT_REVIEWER_PROJECTION_CANDIDATE_IDS
+        | REVIEWER_PROJECTION_CANDIDATE_IDS
+    )
+    for candidate_id in prior_projection_ids:
         reviews.pop(candidate_id, None)
     unknown_reviews = set(reviews) - candidate_ids
     if unknown_reviews:
@@ -414,7 +507,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1100-candidate paper inventory is adjudicated. Repeated "
+        "The complete 1134-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."
@@ -441,7 +534,12 @@ def migrate(root: Path) -> dict[str, int]:
     claims = registry.get("claims")
     if digest not in {
         PRE_ADJUDICATION_SOURCE_DIGEST,
+        LEGACY_REVIEWED_SOURCE_DIGEST,
         PRIOR_REVIEWED_SOURCE_DIGEST,
+        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }:
         raise ValueError(
@@ -454,7 +552,15 @@ def migrate(root: Path) -> dict[str, int]:
     inventory = build_candidate_inventory(paper_path, repository_root=root.resolve())
     if inventory["source_digest"] != REVIEWED_SOURCE_DIGEST:
         raise ValueError("Reviewer projection differs from the reviewed paper snapshot")
-    if digest in {PRE_ADJUDICATION_SOURCE_DIGEST, PRIOR_REVIEWED_SOURCE_DIGEST}:
+    if digest in {
+        PRE_ADJUDICATION_SOURCE_DIGEST,
+        LEGACY_REVIEWED_SOURCE_DIGEST,
+        PRIOR_REVIEWED_SOURCE_DIGEST,
+        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
+    }:
         _reconcile_reviewer_projection(registry, inventory)
     else:
         candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}

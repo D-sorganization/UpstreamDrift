@@ -414,3 +414,167 @@ def test_pure_python_gap_fill_module_delegates_to_canonical_module() -> None:
     """The pure fallback module is a compatibility facade, not a drifted copy."""
     assert _gap_fill_pure_python.gap_fill is gap_fill_module.gap_fill
     assert _gap_fill_pure_python.GapFillStrategy is gap_fill_module.GapFillStrategy
+
+
+# ---------------------------------------------------------------------------
+# Rust dispatch for the default LINEAR strategy (issue #8927)
+#
+# The Rust wheel is not necessarily installed in every dev/CI environment
+# (see test_rust_parity.py, which skips via importorskip). These tests
+# monkeypatch the module's Rust-availability guard with a fake kernel so the
+# dispatch plumbing (_interp_reconstruct_markers -> _stack_marker_matrix ->
+# kernel -> _unstack_marker_matrix) is exercised deterministically
+# regardless of whether the compiled wheel is present.
+# ---------------------------------------------------------------------------
+
+
+class _FakeRustGapFillKernel:
+    """Records calls and returns a caller-supplied (data, mask) pair."""
+
+    def __init__(self, data: np.ndarray, mask: np.ndarray) -> None:
+        self._data = data
+        self._mask = mask
+        self.linear_calls: list[tuple[np.ndarray, np.ndarray, int]] = []
+        self.cubic_calls: list[tuple[np.ndarray, np.ndarray, int]] = []
+
+    def linear_gap_fill(self, data: np.ndarray, mask: np.ndarray, max_gap: int):
+        self.linear_calls.append((np.array(data), np.array(mask), max_gap))
+        return self._data, self._mask
+
+    def cubic_gap_fill(self, data: np.ndarray, mask: np.ndarray, max_gap: int):
+        self.cubic_calls.append((np.array(data), np.array(mask), max_gap))
+        return self._data, self._mask
+
+
+def test_gap_fill_markers_linear_dispatches_to_rust_kernel_when_available(
+    monkeypatch,
+) -> None:
+    """Default LINEAR strategy must call the Rust kernel, not the Python loop."""
+    from src.shared.python.motion_pipeline.contracts import Marker, MarkerFrame
+
+    frames = []
+    for i in range(10):
+        occ = 4 <= i <= 6
+        m1 = Marker(name="M1", x=float(i), y=0.0, z=0.0, occluded=occ)
+        m2 = Marker(name="M2", x=float(i) * 2.0, y=1.0, z=0.0, occluded=False)
+        frames.append(
+            MarkerFrame(timestamp=i / 30.0, markers={"M1": m1, "M2": m2}, frame_index=i)
+        )
+    traj = MarkerTrajectory(id="traj_rust_dispatch", frames=frames)
+
+    n_frames, n_markers = 10, 2
+    fake_filled = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
+    fake_filled[4:7, 0, :] = 999.0  # distinctive sentinel for the filled gap
+    fake_mask = np.zeros((n_frames, n_markers), dtype=bool)  # kernel filled everything
+
+    kernel = _FakeRustGapFillKernel(fake_filled, fake_mask)
+    monkeypatch.setattr(gap_fill_module, "_RUST_AVAILABLE", True)
+    monkeypatch.setattr(gap_fill_module, "_rust_kernel", kernel)
+
+    out = gap_fill(traj, strategy=GapFillStrategy.LINEAR, max_gap=10)
+
+    # The Rust kernel was actually invoked (this is the regression #8927 fixes:
+    # previously nothing ever called linear_gap_fill).
+    assert len(kernel.linear_calls) == 1
+    assert len(kernel.cubic_calls) == 0
+    called_data, called_mask, called_max_gap = kernel.linear_calls[0]
+    assert called_data.shape == (n_frames, n_markers, 3)
+    assert called_mask.shape == (n_frames, n_markers)
+    assert called_max_gap == 10
+    # The occlusion mask handed to Rust reflects M1's occluded window.
+    assert called_mask[4:7, 0].all()
+    assert not called_mask[:, 1].any()
+
+    # The kernel's output was correctly unstacked back into markers.
+    assert isinstance(out, MarkerTrajectory)
+    for i in range(4, 7):
+        assert out.frames[i].markers["M1"].x == pytest.approx(999.0)
+        assert out.frames[i].markers["M1"].occluded is False
+    # Untouched marker/frames pass through unchanged.
+    assert out.frames[0].markers["M1"].x == pytest.approx(0.0)
+
+
+def test_gap_fill_markers_cubic_dispatches_to_rust_kernel_when_available(
+    monkeypatch,
+) -> None:
+    from src.shared.python.motion_pipeline.contracts import Marker, MarkerFrame
+
+    frames = []
+    for i in range(10):
+        occ = 4 <= i <= 6
+        m1 = Marker(name="M1", x=float(i), y=0.0, z=0.0, occluded=occ)
+        frames.append(
+            MarkerFrame(timestamp=i / 30.0, markers={"M1": m1}, frame_index=i)
+        )
+    traj = MarkerTrajectory(id="traj_rust_cubic_dispatch", frames=frames)
+
+    n_frames, n_markers = 10, 1
+    fake_filled = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
+    fake_filled[4:7, 0, :] = 42.0
+    fake_mask = np.zeros((n_frames, n_markers), dtype=bool)
+
+    kernel = _FakeRustGapFillKernel(fake_filled, fake_mask)
+    monkeypatch.setattr(gap_fill_module, "_RUST_AVAILABLE", True)
+    monkeypatch.setattr(gap_fill_module, "_rust_kernel", kernel)
+
+    out = gap_fill(traj, strategy=GapFillStrategy.CUBIC, max_gap=10)
+
+    assert len(kernel.cubic_calls) == 1
+    assert len(kernel.linear_calls) == 0
+    assert isinstance(out, MarkerTrajectory)
+    for i in range(4, 7):
+        assert out.frames[i].markers["M1"].x == pytest.approx(42.0)
+
+
+def test_gap_fill_markers_linear_falls_back_to_python_when_rust_unavailable(
+    monkeypatch,
+) -> None:
+    """When the Rust wheel isn't available, LINEAR still fills via the Python loop."""
+    monkeypatch.setattr(gap_fill_module, "_RUST_AVAILABLE", False)
+    traj = make_marker_trajectory_with_occlusion(num_frames=20, occluded_range=(5, 8))
+    out = gap_fill(traj, strategy=GapFillStrategy.LINEAR, max_gap=10)
+    assert isinstance(out, MarkerTrajectory)
+    for i in range(5, 9):
+        assert out.frames[i].markers["M1"].occluded is False
+
+
+def test_find_gaps_markers_matches_reference_scan() -> None:
+    """Vectorized _find_gaps_markers matches a naive per-frame reference scan."""
+    from src.shared.python.motion_pipeline.contracts import Marker, MarkerFrame
+
+    rng = np.random.default_rng(42)
+    n_frames, n_markers = 60, 5
+    occ = rng.random((n_frames, n_markers)) < 0.3
+    frames = []
+    for i in range(n_frames):
+        markers = {
+            f"M{j}": Marker(
+                name=f"M{j}", x=float(i), y=0.0, z=0.0, occluded=bool(occ[i, j])
+            )
+            for j in range(n_markers)
+        }
+        frames.append(MarkerFrame(timestamp=i / 30.0, markers=markers, frame_index=i))
+
+    def _reference_find_gaps(frames_):
+        gaps = []
+        gap_start = None
+        for i, frame in enumerate(frames_):
+            has_occluded = any(m.occluded for m in frame.markers.values())
+            if has_occluded and gap_start is None:
+                gap_start = i
+            elif not has_occluded and gap_start is not None:
+                gaps.append((gap_start, i - 1))
+                gap_start = None
+        if gap_start is not None:
+            gaps.append((gap_start, len(frames_) - 1))
+        return gaps
+
+    expected = _reference_find_gaps(frames)
+    got = gap_fill_module._find_gaps_markers(frames)
+    assert got == expected
+
+
+def test_find_gaps_markers_empty_and_no_occlusion() -> None:
+    assert gap_fill_module._find_gaps_markers([]) == []
+    traj = make_marker_trajectory(num_frames=5)
+    assert gap_fill_module._find_gaps_markers(traj.frames) == []
