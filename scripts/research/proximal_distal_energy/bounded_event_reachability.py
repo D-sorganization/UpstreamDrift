@@ -1,378 +1,488 @@
-"""Bounded nonlinear event-reaching feasibility qualification (#9124).
+"""Bounded nonlinear replay at a declared delivery guard.
 
-Quantifies where the linear variational authority from #9123 accurately predicts
-finite-amplitude nonlinear reachability under explicit torque and rate bounds,
-and maps the boundary where saturation and nonlinear dynamics diverge from the linear Gramian.
+This module is the independent replay boundary for issue #9124.  It evaluates
+finite control perturbations about a registered nominal torque history through
+the exact analytical-double-pendulum RK4 operator.  Bounds are model-scenario
+constraints, not human strength evidence.  The module does not establish
+global reachability, controller optimality, physiological feasibility, passive
+torque, or a coaching strategy.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+import math
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
-from scipy.optimize import minimize
 
+from scripts.research.proximal_distal_energy.phase_event_stability import (
+    StateScales,
+    first_positive_crossing,
+    rollout_state_history,
+)
 from scripts.research.proximal_distal_energy.trajectory_control_authority import (
-    discrete_control_jacobian,
-    discrete_rk4_step,
-    discrete_state_jacobian,
-    generate_nominal_downswing_trajectory,
-    orthonormal_tangent_basis,
-    transverse_event_projector,
+    ControlScales,
+    GuardCrossingConfig,
+    refine_guard_crossing,
 )
-from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
-    DoublePendulumParameters,
-)
+from src.shared.python.simulation_backends import GolfModelParams
 
-FloatArray = npt.NDArray[np.float64]
-
-INFERENCE_BOUNDARY = (
-    "This bounded reaching qualification establishes only numerical feasibility "
-    "under declared mathematical scenario bounds for the analytical double pendulum. "
-    "It cannot establish human strength capacity, fatigue limits, muscle recruitment, "
-    "controller ranking, or coaching technique recommendations."
-)
+FloatArray: TypeAlias = npt.NDArray[np.float64]
 
 
-class FeasibilityOutcome(str, Enum):
-    """Typed classification of a bounded event-reaching trial."""
+def _finite_vector(name: str, value: npt.ArrayLike, *, size: int) -> FloatArray:
+    array = np.asarray(value, dtype=float)
+    if array.shape != (size,) or not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must contain {size} finite values")
+    return array
 
-    FEASIBLE = "FEASIBLE"
-    BOUND_SATURATED = "BOUND_SATURATED"
-    INFEASIBLE = "INFEASIBLE"
-    WRONG_CROSSING = "WRONG_CROSSING"
-    GRAZING = "GRAZING"
-    NUMERICAL_FAILURE = "NUMERICAL_FAILURE"
+
+def _control_history(name: str, value: npt.ArrayLike) -> FloatArray:
+    array = np.asarray(value, dtype=float)
+    if (
+        array.ndim != 2
+        or array.shape[0] < 1
+        or array.shape[1] != 2
+        or not np.all(np.isfinite(array))
+    ):
+        raise ValueError(f"{name} must be a nonempty finite (N, 2) array")
+    return array
+
+
+def _readonly(value: npt.ArrayLike) -> FloatArray:
+    array = np.asarray(value, dtype=float).copy()
+    if not np.all(np.isfinite(array)):
+        raise ValueError("result contains non-finite values")
+    array.setflags(write=False)
+    return array
+
+
+class EventReplayStatus(str, Enum):
+    """Topology/numerics classification from independent direct replay."""
+
+    TRANSVERSE = "transverse"
+    GRAZING = "grazing"
+    ABSENT = "absent"
+    MULTIPLE = "multiple"
+    NUMERICAL_FAILURE = "numerical_failure"
+
+
+class FeasibilityStatus(str, Enum):
+    """Target feasibility classification without conflating failure modes."""
+
+    FEASIBLE = "feasible"
+    INFEASIBLE = "infeasible"
+    WRONG_CROSSING = "wrong_crossing"
+    GRAZING = "grazing"
+    NUMERICAL_FAILURE = "numerical_failure"
+
+
+class ConstraintStatus(str, Enum):
+    """Independent perturbation-bound classification."""
+
+    INTERIOR = "interior"
+    BOUND_SATURATED = "bound_saturated"
+    BOUND_VIOLATION = "bound_violation"
+
+
+class AuthorityStatus(str, Enum):
+    """Whether the declared bounds permit any incremental control."""
+
+    AVAILABLE = "available"
+    ZERO_INCREMENTAL_AUTHORITY = "zero_incremental_authority"
 
 
 @dataclass(frozen=True, slots=True)
-class TorqueBounds:
-    """Torque magnitude and rate limits per channel."""
+class ControlPerturbationBounds:
+    """Per-channel amplitude and slew limits for incremental torque.
 
-    max_shoulder_torque_nm: float = 200.0
-    max_wrist_torque_nm: float = 30.0
-    max_shoulder_rate_nm_s: float = 2000.0
-    max_wrist_rate_nm_s: float = 500.0
+    Rate is evaluated from a declared zero perturbation immediately before the
+    horizon.  Therefore the first sample is part of the slew-rate contract.
+    """
+
+    lower_nm: tuple[float, ...]
+    upper_nm: tuple[float, ...]
+    max_rate_nm_per_s: tuple[float, ...]
+    activity_tolerance: float = 1e-9
+    violation_tolerance: float = 1e-9
+
+    def __post_init__(self) -> None:
+        lower = tuple(float(value) for value in self.lower_nm)
+        upper = tuple(float(value) for value in self.upper_nm)
+        rate = tuple(float(value) for value in self.max_rate_nm_per_s)
+        for name, values in (
+            ("lower_nm", lower),
+            ("upper_nm", upper),
+            ("max_rate_nm_per_s", rate),
+        ):
+            if len(values) != 2 or not all(math.isfinite(value) for value in values):
+                raise ValueError(f"{name} must contain two finite values")
+        if any(low > 0.0 or high < 0.0 for low, high in zip(lower, upper, strict=True)):
+            raise ValueError("perturbation bounds must contain zero")
+        if any(low > high for low, high in zip(lower, upper, strict=True)):
+            raise ValueError("lower perturbation bounds cannot exceed upper bounds")
+        if any(value < 0.0 for value in rate):
+            raise ValueError("maximum perturbation rate must be nonnegative")
+        for name in ("activity_tolerance", "violation_tolerance"):
+            value = getattr(self, name)
+            if not math.isfinite(value) or value < 0.0:
+                raise ValueError(f"{name} must be finite and nonnegative")
+        object.__setattr__(self, "lower_nm", lower)
+        object.__setattr__(self, "upper_nm", upper)
+        object.__setattr__(self, "max_rate_nm_per_s", rate)
+
+    @classmethod
+    def zero(cls) -> ControlPerturbationBounds:
+        """Return an explicit zero-incremental-authority countermodel."""
+
+        return cls(
+            lower_nm=(0.0, 0.0),
+            upper_nm=(0.0, 0.0),
+            max_rate_nm_per_s=(0.0, 0.0),
+        )
 
     @property
-    def torque_vector(self) -> FloatArray:
-        return np.array(
-            [self.max_shoulder_torque_nm, self.max_wrist_torque_nm],
-            dtype=np.float64,
-        )
+    def lower_array(self) -> FloatArray:
+        return np.asarray(self.lower_nm, dtype=float)
+
+    @property
+    def upper_array(self) -> FloatArray:
+        return np.asarray(self.upper_nm, dtype=float)
+
+    @property
+    def rate_array(self) -> FloatArray:
+        return np.asarray(self.max_rate_nm_per_s, dtype=float)
+
+    @property
+    def is_zero_authority(self) -> bool:
+        return self.lower_nm == (0.0, 0.0) and self.upper_nm == (0.0, 0.0)
 
 
 @dataclass(frozen=True, slots=True)
-class ReachingTrialResult:
-    """Outcome of solving a bounded event-reaching problem."""
+class EventReplay:
+    """Exact direct-replay event record, including unavailable outcomes."""
 
-    target_tangent: tuple[float, float, float]
-    channel_mode: str
-    outcome: FeasibilityOutcome
-    terminal_tangent_residual_norm: float
-    linear_prediction_residual_norm: float
-    discrepancy_ratio: float
-    is_bound_saturated: bool
-    max_torque_fraction: float
-    replay_exact_match: bool
-    objective_value: float
+    status: EventReplayStatus
+    crossing_count: int
+    time_s: float | None
+    state: FloatArray | None
+    guard_residual: float | None
+    transversality_per_s: float | None
+    message: str = ""
+
+    def __post_init__(self) -> None:
+        if self.crossing_count < 0:
+            raise ValueError("crossing_count must be nonnegative")
+        if self.state is not None:
+            object.__setattr__(
+                self,
+                "state",
+                _readonly(_finite_vector("event state", self.state, size=4)),
+            )
+        for name in ("time_s", "guard_residual", "transversality_per_s"):
+            value = getattr(self, name)
+            if value is not None and not math.isfinite(value):
+                raise ValueError(f"{name} must be finite when available")
 
 
 @dataclass(frozen=True, slots=True)
-class BoundedReachabilitySummary:
-    """Complete qualification summary for issue #9124."""
+class BoundedEventReachabilityProblem:
+    """Immutable matched contract for one bounded event target."""
 
-    small_amplitude_max_discrepancy: float
-    finite_amplitude_saturation_detected: bool
-    zero_authority_delta_norm: float
-    shoulder_only_feasible_count: int
-    wrist_only_feasible_count: int
-    both_channels_feasible_count: int
-    total_trials: int
-    inference_boundary: str = INFERENCE_BOUNDARY
+    params: GolfModelParams
+    initial_state: tuple[float, ...]
+    nominal_controls: FloatArray
+    dt_s: float
+    state_scales: StateScales
+    control_scales: ControlScales
+    bounds: ControlPerturbationBounds
+    guard: GuardCrossingConfig
+    target_event_state: tuple[float, ...]
+    tangent_tolerance: float
+
+    def __post_init__(self) -> None:
+        initial = tuple(float(value) for value in self.initial_state)
+        target = tuple(float(value) for value in self.target_event_state)
+        _finite_vector("initial_state", initial, size=4)
+        target_array = _finite_vector("target_event_state", target, size=4)
+        controls = _control_history("nominal_controls", self.nominal_controls)
+        if not math.isfinite(self.dt_s) or self.dt_s <= 0.0:
+            raise ValueError("dt_s must be finite and positive")
+        if not math.isfinite(self.tangent_tolerance) or self.tangent_tolerance < 0.0:
+            raise ValueError("tangent_tolerance must be finite and nonnegative")
+        guard_residual = float(
+            self.guard.gradient_array @ target_array - self.guard.guard_offset
+        )
+        if abs(guard_residual) > self.guard.guard_tolerance:
+            raise ValueError("target_event_state must lie on the guard")
+        object.__setattr__(self, "initial_state", initial)
+        object.__setattr__(self, "target_event_state", target)
+        object.__setattr__(self, "nominal_controls", _readonly(controls))
 
 
-def solve_bounded_reaching(
-    nominal_states: FloatArray,
-    nominal_controls: FloatArray,
-    target_tangent: FloatArray,
-    dt: float,
-    bounds: TorqueBounds,
-    channel_mask: FloatArray,
-    params: DoublePendulumParameters | None = None,
-    guard_gradient: FloatArray | None = None,
-) -> ReachingTrialResult:
-    """Solve the bounded reaching optimization problem for a tangent target."""
-    K = len(nominal_controls)
-    dim_x = nominal_states.shape[1]
-    n = (
-        guard_gradient
-        if guard_gradient is not None
-        else np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
+@dataclass(frozen=True, slots=True)
+class BoundedReachabilityOutcome:
+    """Reviewer-facing result of one independently replayed candidate."""
+
+    feasibility_status: FeasibilityStatus
+    constraint_status: ConstraintStatus
+    authority_status: AuthorityStatus
+    event: EventReplay | None
+    event_tangent_residual: float | None
+    full_state_residual: float | None
+    scaled_control_energy: float
+    peak_scaled_control: float
+    amplitude_bound_active: bool
+    rate_bound_active: bool
+    maximum_amplitude_violation_nm: float
+    maximum_rate_violation_nm_per_s: float
+
+
+@dataclass(frozen=True, slots=True)
+class _BoundDiagnostics:
+    status: ConstraintStatus
+    amplitude_active: bool
+    rate_active: bool
+    maximum_amplitude_violation_nm: float
+    maximum_rate_violation_nm_per_s: float
+
+
+def replay_guard_event(
+    *,
+    params: GolfModelParams,
+    initial_state: npt.ArrayLike,
+    controls: npt.ArrayLike,
+    dt_s: float,
+    guard: GuardCrossingConfig,
+) -> EventReplay:
+    """Replay controls and refine the unique declared positive crossing."""
+
+    initial = _finite_vector("initial_state", initial_state, size=4).copy()
+    commands = _control_history("controls", controls).copy()
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("dt_s must be finite and positive")
+    try:
+        time_s, state = rollout_state_history(
+            params,
+            initial_state=initial,
+            controls=commands,
+            dt_s=dt_s,
+        )
+        crossing = first_positive_crossing(
+            time_s,
+            state @ guard.gradient_array - guard.guard_offset,
+        )
+        if crossing.crossing_count == 0:
+            return EventReplay(EventReplayStatus.ABSENT, 0, None, None, None, None)
+        if crossing.crossing_count != 1 or crossing.sample_index is None:
+            return EventReplay(
+                EventReplayStatus.MULTIPLE,
+                crossing.crossing_count,
+                crossing.time_s,
+                None,
+                None,
+                None,
+            )
+        index = crossing.sample_index
+        refined = refine_guard_crossing(
+            params=params,
+            state_before=state[index],
+            control=commands[index],
+            time_before_s=float(time_s[index]),
+            bracket_dt_s=dt_s,
+            config=guard,
+        )
+    except (ArithmeticError, RuntimeError, ValueError) as exc:
+        return EventReplay(
+            EventReplayStatus.NUMERICAL_FAILURE,
+            0,
+            None,
+            None,
+            None,
+            None,
+            message=str(exc),
+        )
+    status = (
+        EventReplayStatus.GRAZING
+        if refined.status == "near_grazing"
+        else EventReplayStatus.TRANSVERSE
     )
-    Q = orthonormal_tangent_basis(n)
-    P, is_transverse, _ = transverse_event_projector(
-        nominal_states[-1], nominal_controls[-1], guard_gradient=n, params=params
+    return EventReplay(
+        status=status,
+        crossing_count=1,
+        time_s=refined.time_s,
+        state=refined.state,
+        guard_residual=refined.guard_residual,
+        transversality_per_s=refined.transversality_per_s,
     )
 
-    target_norm = float(np.linalg.norm(target_tangent))
 
-    if not is_transverse:
-        return ReachingTrialResult(
-            target_tangent=(
-                float(target_tangent[0]),
-                float(target_tangent[1]),
-                float(target_tangent[2]),
+def _bound_diagnostics(
+    perturbations: FloatArray,
+    *,
+    dt_s: float,
+    bounds: ControlPerturbationBounds,
+) -> _BoundDiagnostics:
+    lower = bounds.lower_array
+    upper = bounds.upper_array
+    rate_limit = bounds.rate_array
+    amplitude_excess = np.maximum(
+        np.maximum(lower[np.newaxis, :] - perturbations, 0.0),
+        np.maximum(perturbations - upper[np.newaxis, :], 0.0),
+    )
+    rates = np.diff(np.vstack((np.zeros((1, 2)), perturbations)), axis=0) / dt_s
+    rate_excess = np.maximum(np.abs(rates) - rate_limit[np.newaxis, :], 0.0)
+    amplitude_violation = float(np.max(amplitude_excess))
+    rate_violation = float(np.max(rate_excess))
+    violation = (
+        amplitude_violation > bounds.violation_tolerance
+        or rate_violation > bounds.violation_tolerance
+    )
+    amplitude_active = bool(
+        np.any(
+            np.isclose(
+                perturbations,
+                lower[np.newaxis, :],
+                rtol=0.0,
+                atol=bounds.activity_tolerance,
+            )
+            | np.isclose(
+                perturbations,
+                upper[np.newaxis, :],
+                rtol=0.0,
+                atol=bounds.activity_tolerance,
+            )
+        )
+    )
+    rate_active = bool(
+        np.any(
+            np.isclose(
+                np.abs(rates),
+                rate_limit[np.newaxis, :],
+                rtol=0.0,
+                atol=bounds.activity_tolerance,
+            )
+        )
+    )
+    status = (
+        ConstraintStatus.BOUND_VIOLATION
+        if violation
+        else (
+            ConstraintStatus.BOUND_SATURATED
+            if amplitude_active or rate_active
+            else ConstraintStatus.INTERIOR
+        )
+    )
+    return _BoundDiagnostics(
+        status=status,
+        amplitude_active=amplitude_active,
+        rate_active=rate_active,
+        maximum_amplitude_violation_nm=amplitude_violation,
+        maximum_rate_violation_nm_per_s=rate_violation,
+    )
+
+
+def _event_residuals(
+    problem: BoundedEventReachabilityProblem,
+    event_state: FloatArray,
+) -> tuple[float, float]:
+    scales = problem.state_scales.array
+    scaled_difference = (
+        event_state - np.asarray(problem.target_event_state, dtype=float)
+    ) / scales
+    scaled_gradient = problem.guard.gradient_array * scales
+    _, _, right = np.linalg.svd(scaled_gradient.reshape(1, -1), full_matrices=True)
+    tangent_basis = right[1:].T
+    tangent_residual = float(np.linalg.norm(tangent_basis.T @ scaled_difference))
+    return tangent_residual, float(np.linalg.norm(scaled_difference))
+
+
+def evaluate_bounded_candidate(
+    problem: BoundedEventReachabilityProblem,
+    perturbations: npt.ArrayLike,
+) -> BoundedReachabilityOutcome:
+    """Classify one bounded finite perturbation through independent replay."""
+
+    delta = _control_history("perturbations", perturbations).copy()
+    if delta.shape != problem.nominal_controls.shape:
+        raise ValueError("perturbations must match nominal_controls shape")
+    diagnostics = _bound_diagnostics(delta, dt_s=problem.dt_s, bounds=problem.bounds)
+    scaled_delta = delta / problem.control_scales.array[np.newaxis, :]
+    energy = float(problem.dt_s * np.sum(np.square(scaled_delta)))
+    peak = float(np.max(np.abs(scaled_delta)))
+    authority = (
+        AuthorityStatus.ZERO_INCREMENTAL_AUTHORITY
+        if problem.bounds.is_zero_authority
+        else AuthorityStatus.AVAILABLE
+    )
+
+    def outcome(
+        feasibility: FeasibilityStatus,
+        *,
+        event: EventReplay | None = None,
+        tangent_residual: float | None = None,
+        full_residual: float | None = None,
+    ) -> BoundedReachabilityOutcome:
+        return BoundedReachabilityOutcome(
+            feasibility_status=feasibility,
+            constraint_status=diagnostics.status,
+            authority_status=authority,
+            event=event,
+            event_tangent_residual=tangent_residual,
+            full_state_residual=full_residual,
+            scaled_control_energy=energy,
+            peak_scaled_control=peak,
+            amplitude_bound_active=diagnostics.amplitude_active,
+            rate_bound_active=diagnostics.rate_active,
+            maximum_amplitude_violation_nm=(diagnostics.maximum_amplitude_violation_nm),
+            maximum_rate_violation_nm_per_s=(
+                diagnostics.maximum_rate_violation_nm_per_s
             ),
-            channel_mode="unknown",
-            outcome=FeasibilityOutcome.GRAZING,
-            terminal_tangent_residual_norm=float("nan"),
-            linear_prediction_residual_norm=target_norm,
-            discrepancy_ratio=float("nan"),
-            is_bound_saturated=False,
-            max_torque_fraction=0.0,
-            replay_exact_match=False,
-            objective_value=float("nan"),
         )
 
-    # 4D target in state space from 3D tangent target
-    delta_z_target_4d = Q @ target_tangent
-
-    # Check if channel mask is zero or bounds are zero
-    is_zero_authority = np.allclose(channel_mask, 0.0) or np.allclose(
-        bounds.torque_vector, 0.0
+    if diagnostics.status is ConstraintStatus.BOUND_VIOLATION:
+        return outcome(FeasibilityStatus.INFEASIBLE)
+    event = replay_guard_event(
+        params=problem.params,
+        initial_state=problem.initial_state,
+        controls=problem.nominal_controls + delta,
+        dt_s=problem.dt_s,
+        guard=problem.guard,
     )
-    if is_zero_authority:
-        z_replay = nominal_states[0].copy()
-        for k in range(K):
-            z_replay = discrete_rk4_step(z_replay, nominal_controls[k], dt, params)
-        terminal_delta = z_replay - nominal_states[-1]
-        tangent_residual = Q.T @ P @ (terminal_delta - delta_z_target_4d)
-        res_norm = float(np.linalg.norm(tangent_residual))
-        return ReachingTrialResult(
-            target_tangent=(
-                float(target_tangent[0]),
-                float(target_tangent[1]),
-                float(target_tangent[2]),
-            ),
-            channel_mode="zero_authority",
-            outcome=(
-                FeasibilityOutcome.BOUND_SATURATED
-                if target_norm > 1e-6
-                else FeasibilityOutcome.FEASIBLE
-            ),
-            terminal_tangent_residual_norm=res_norm,
-            linear_prediction_residual_norm=target_norm,
-            discrepancy_ratio=1.0 if target_norm > 1e-6 else 0.0,
-            is_bound_saturated=True,
-            max_torque_fraction=0.0,
-            replay_exact_match=True,
-            objective_value=res_norm**2,
-        )
-
-    # Compute Jacobians and input sensitivity matrix for first-order optimal initial guess
-    A_list = [
-        discrete_state_jacobian(nominal_states[k], nominal_controls[k], dt, params)
-        for k in range(K)
-    ]
-    B_list = [
-        discrete_control_jacobian(nominal_states[k], nominal_controls[k], dt, params)
-        for k in range(K)
-    ]
-
-    Phi = [np.eye(dim_x, dtype=np.float64) for _ in range(K + 1)]
-    for k in range(K - 1, -1, -1):
-        Phi[k] = Phi[k + 1] @ A_list[k]
-
-    # Masked input sensitivities S_m[k] = Phi(K, k+1) * B[k] * diag(channel_mask)
-    S_masked_list = [Phi[k + 1] @ B_list[k] @ np.diag(channel_mask) for k in range(K)]
-    S_total = np.hstack(S_masked_list)  # (4, 2K)
-
-    # Tangent reachability Gramian W_tan = P S_total S_total^T P^T
-    W_tan = P @ S_total @ S_total.T @ P.T
-    du_linear_flat = (
-        S_total.T @ P.T @ np.linalg.pinv(W_tan, rcond=1e-8) @ delta_z_target_4d
+    if event.status is EventReplayStatus.NUMERICAL_FAILURE:
+        return outcome(FeasibilityStatus.NUMERICAL_FAILURE, event=event)
+    if event.status in (EventReplayStatus.ABSENT, EventReplayStatus.MULTIPLE):
+        return outcome(FeasibilityStatus.WRONG_CROSSING, event=event)
+    if event.status is EventReplayStatus.GRAZING:
+        return outcome(FeasibilityStatus.GRAZING, event=event)
+    if event.state is None:
+        raise AssertionError("transverse replay must provide an event state")
+    tangent_residual, full_residual = _event_residuals(problem, event.state)
+    feasibility = (
+        FeasibilityStatus.FEASIBLE
+        if tangent_residual <= problem.tangent_tolerance
+        else FeasibilityStatus.INFEASIBLE
     )
-    du_linear = du_linear_flat.reshape(K, 2) * channel_mask
-
-    # Bound clipping check
-    u_bounds = []
-    exceeds_bounds = False
-    for k in range(K):
-        for ch in range(2):
-            if channel_mask[ch] > 0.5:
-                max_u = bounds.torque_vector[ch]
-                nom = nominal_controls[k, ch]
-                lower = -max_u - nom
-                upper = max_u - nom
-                u_bounds.append((lower, upper))
-                if du_linear[k, ch] < lower or du_linear[k, ch] > upper:
-                    exceeds_bounds = True
-            else:
-                u_bounds.append((0.0, 0.0))
-
-    def rollout_terminal_state(du_mat: FloatArray) -> FloatArray:
-        z = nominal_states[0].copy()
-        for k in range(K):
-            u = nominal_controls[k] + du_mat[k] * channel_mask
-            z = discrete_rk4_step(z, u, dt, params)
-        return z
-
-    if not exceeds_bounds:
-        # Linear initial guess is directly inside bounds
-        du_opt = du_linear
-    else:
-        # Clamp linear initial guess and solve bounded optimization
-        du_clamped = np.zeros_like(du_linear)
-        for k in range(K):
-            for ch in range(2):
-                if channel_mask[ch] > 0.5:
-                    max_u = bounds.torque_vector[ch]
-                    nom = nominal_controls[k, ch]
-                    du_clamped[k, ch] = np.clip(
-                        du_linear[k, ch], -max_u - nom, max_u - nom
-                    )
-
-        def loss(du_flat: FloatArray) -> float:
-            du_m = du_flat.reshape(K, 2)
-            z_term = rollout_terminal_state(du_m)
-            delta_z = z_term - nominal_states[-1]
-            tangent_err = Q.T @ P @ (delta_z - delta_z_target_4d)
-            return float(np.dot(tangent_err, tangent_err))
-
-        opt = minimize(
-            loss,
-            du_clamped.flatten(),
-            method="L-BFGS-B",
-            bounds=u_bounds,
-            options={"maxiter": 40, "ftol": 1e-9},
-        )
-        du_opt = opt.x.reshape(K, 2) * channel_mask
-
-    z_final = rollout_terminal_state(du_opt)
-    delta_z_actual = z_final - nominal_states[-1]
-    tangent_err_opt = Q.T @ P @ (delta_z_actual - delta_z_target_4d)
-    residual_norm = float(np.linalg.norm(tangent_err_opt))
-
-    # Check max torque fraction used
-    max_frac = 0.0
-    for ch in range(2):
-        if bounds.torque_vector[ch] > 0 and channel_mask[ch] > 0.5:
-            applied = np.abs(nominal_controls[:, ch] + du_opt[:, ch])
-            frac = float(np.max(applied) / bounds.torque_vector[ch])
-            max_frac = max(max_frac, frac)
-
-    is_saturated = max_frac >= 0.999
-    discrepancy = residual_norm / (target_norm + 1e-12)
-
-    if residual_norm <= 0.05 * (target_norm + 1.0) and not is_saturated:
-        outcome = FeasibilityOutcome.FEASIBLE
-    elif is_saturated or exceeds_bounds:
-        outcome = FeasibilityOutcome.BOUND_SATURATED
-    else:
-        outcome = FeasibilityOutcome.FEASIBLE
-
-    # Replay verification
-    replay_z = rollout_terminal_state(du_opt)
-    replay_match = bool(np.allclose(replay_z, z_final, atol=1e-12))
-
-    return ReachingTrialResult(
-        target_tangent=(
-            float(target_tangent[0]),
-            float(target_tangent[1]),
-            float(target_tangent[2]),
-        ),
-        channel_mode=(
-            "both"
-            if np.all(channel_mask > 0.5)
-            else ("shoulder" if channel_mask[0] > 0.5 else "wrist")
-        ),
-        outcome=outcome,
-        terminal_tangent_residual_norm=residual_norm,
-        linear_prediction_residual_norm=target_norm,
-        discrepancy_ratio=discrepancy,
-        is_bound_saturated=is_saturated,
-        max_torque_fraction=max_frac,
-        replay_exact_match=replay_match,
-        objective_value=residual_norm**2,
+    return outcome(
+        feasibility,
+        event=event,
+        tangent_residual=tangent_residual,
+        full_residual=full_residual,
     )
 
 
-def run_bounded_reachability_suite() -> BoundedReachabilitySummary:
-    """Run small-amplitude, finite-amplitude, and channel comparison suites."""
-    states, controls = generate_nominal_downswing_trajectory(dt=0.002, steps=60)
-    dt = 0.002
-    bounds = TorqueBounds(max_shoulder_torque_nm=200.0, max_wrist_torque_nm=30.0)
-
-    # 1. Small-amplitude continuation: eps = [1e-4, 1e-3, 1e-2]
-    direction = np.array([0.05, 0.1, -0.05], dtype=np.float64)
-    direction /= np.linalg.norm(direction)
-
-    small_eps_list = [1e-4, 1e-3, 1e-2]
-    small_discrepancies = []
-    for eps in small_eps_list:
-        target = eps * direction
-        res = solve_bounded_reaching(
-            states, controls, target, dt, bounds, np.array([1.0, 1.0])
-        )
-        small_discrepancies.append(res.discrepancy_ratio)
-
-    max_small_discrepancy = float(np.max(small_discrepancies))
-
-    # 2. Finite-amplitude continuation: test large target causing saturation
-    large_target = 8.0 * direction
-    large_res = solve_bounded_reaching(
-        states, controls, large_target, dt, bounds, np.array([1.0, 1.0])
-    )
-    saturation_detected = bool(
-        large_res.is_bound_saturated
-        or large_res.outcome == FeasibilityOutcome.BOUND_SATURATED
-    )
-
-    # 3. Channel comparisons at moderate target
-    mod_target = 0.05 * direction
-    res_both = solve_bounded_reaching(
-        states, controls, mod_target, dt, bounds, np.array([1.0, 1.0])
-    )
-    res_shoulder = solve_bounded_reaching(
-        states, controls, mod_target, dt, bounds, np.array([1.0, 0.0])
-    )
-    res_wrist = solve_bounded_reaching(
-        states, controls, mod_target, dt, bounds, np.array([0.0, 1.0])
-    )
-
-    # 4. Zero authority control
-    res_zero = solve_bounded_reaching(
-        states, controls, mod_target, dt, bounds, np.array([0.0, 0.0])
-    )
-
-    both_feas = (
-        1
-        if res_both.outcome
-        in (FeasibilityOutcome.FEASIBLE, FeasibilityOutcome.BOUND_SATURATED)
-        else 0
-    )
-    sh_feas = (
-        1
-        if res_shoulder.outcome
-        in (FeasibilityOutcome.FEASIBLE, FeasibilityOutcome.BOUND_SATURATED)
-        else 0
-    )
-    wr_feas = (
-        1
-        if res_wrist.outcome
-        in (FeasibilityOutcome.FEASIBLE, FeasibilityOutcome.BOUND_SATURATED)
-        else 0
-    )
-
-    return BoundedReachabilitySummary(
-        small_amplitude_max_discrepancy=max_small_discrepancy,
-        finite_amplitude_saturation_detected=saturation_detected,
-        zero_authority_delta_norm=res_zero.terminal_tangent_residual_norm,
-        shoulder_only_feasible_count=sh_feas,
-        wrist_only_feasible_count=wr_feas,
-        both_channels_feasible_count=both_feas,
-        total_trials=len(small_eps_list) + 5,
-    )
+__all__ = [
+    "AuthorityStatus",
+    "BoundedEventReachabilityProblem",
+    "BoundedReachabilityOutcome",
+    "ConstraintStatus",
+    "ControlPerturbationBounds",
+    "EventReplay",
+    "EventReplayStatus",
+    "FeasibilityStatus",
+    "evaluate_bounded_candidate",
+    "replay_guard_event",
+]
