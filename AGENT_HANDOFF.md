@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-26
+Last updated: 2026-08-27
 This is current operational state; Git/GitHub retain history, and epic #8557
 is the single proximal-to-distal completion authority.
 
@@ -11,8 +11,8 @@ is the single proximal-to-distal completion authority.
 ## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.
-- Remote `main` is `fe609edede7a1e9a7427a61ee1bf23ed39fcc43c`; this branch integrates protected #9114 and markerless-authority #9088 before requalifying #9107's packaging boundary.
-- The current branch publication is 245 pages, SHA-256 `48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa`, with 194 URI links and 255 outline entries. Archival qualification remains false because the PDF is untagged and retains Type 3 and unembedded fonts.
+- Remote `main` is protected #9134 squash `f3832b04454c97a7a0999906972f394474107dd7`; #8358 is closed. #9135 is the isolated publication-pagination follow-up.
+- The current #9135 candidate is 245 pages, 1,912,422 bytes, SHA-256 `3eb37e4e5181d6c5f2931813257ae2cbd67e72cb5d851c48c3db2f6a6a44c931`, web-linearized, with 194 URI links, 255 outline entries, and extractable text on every page. Archival qualification remains false because the PDF is untagged and retains Type 3 and unembedded fonts.
 - The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
   132 numeric contracts, and 427/427 verified literals. Outcomes are 293
   supported only within declared estimands and boundaries, five inconclusive,
@@ -21,8 +21,9 @@ is the single proximal-to-distal completion authority.
 
 ## Coordinate Force-Source Attribution (#9059)
 
-- Tools squash `8dc4512184` is the `force-attribution/v1` authority, consumed
-  through the vendor pin and thin biomechanics gateway. The 135-program grid
+- Tools squash `8dc4512184` is the `force-attribution/v1` authority, retained
+  as an ancestor of the current vendor pin and consumed through the thin
+  biomechanics gateway. The 135-program grid
   retains 91 qualified impacts and separates impulse, work, power, mapping
   residuals, and speed optima in declared coordinates.
 - The force-only endpoint map is rank deficient; its residual couple remains
@@ -114,10 +115,10 @@ is the single proximal-to-distal completion authority.
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
 - #9049, #9100, #9108, #9110, and #9114 are merged; #9114 completed #9113's singular-margin slice.
-- #8358's Tools gateway and analyses are merged; UI, localized-perturbation, and presentation criteria remain unaudited. Merged #9096 changes no production API, schema, or vendor pin.
+- #8358's gateway, localized adapters, cross-engine evidence, and Tools-owned presentation are complete in protected #9134. #9135 moves the opening evidence callout under Chapter 1, regenerates the PDF/release locks, and adds a same-page regression before AffineDrift #3930 pins the next immutable source.
 - #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
 - #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound; fresh protected evidence is required, and no runner change or smoke exemption is authorized.
-- Tools #4142 remains open. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge commit.
+- Tools #4142 is closed with R10-R15 protected evidence. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge.
 
 ## Scientific and Review Invariants
 

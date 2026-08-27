@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe",
+    "source_digest": "cee6346b000295f370e96a56aac667501f0804e34c3f5375866f813dafa7b8b2",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
