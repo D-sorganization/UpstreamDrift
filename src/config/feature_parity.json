@@ -164,12 +164,11 @@
     "simulation.swing_objective_lab": {
       "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",
       "pyqt": "src/launchers/adapters/swing_objective_lab_embed.py",
-      "api": null,
-      "web": null,
-      "status": "gap",
-      "issue": 9128,
+      "api": "src/api/routes/swing_objectives.py",
+      "web": "ui/src/pages/SwingObjectiveLab.tsx",
+      "status": "parity",
       "tiles": ["swing_objective_lab"],
-      "notes": "PyQt6-only surface provided by the Tools pendulum_simulator tile (Tools epic #4766). The engine already emits a versioned JSON payload (swing-objective-comparison v1.0.0), so the model layer a web surface needs is done; only the API route and React page are missing."
+      "notes": "Parity achieved via #9128: API route /tools/swing-objectives/compare and React surface ui/src/pages/SwingObjectiveLab.tsx."
     },
     "settings.preferences": {
       "title": "Settings/preferences surface + persistence",

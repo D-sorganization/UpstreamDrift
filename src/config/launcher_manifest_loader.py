@@ -514,9 +514,34 @@ class LauncherTile:
         if pyqt_direct.exists():
             return pyqt_direct
         if self.source_root:
-            sr_candidate = Path(self.source_root) / self.logo
-            if sr_candidate.exists():
-                return sr_candidate
+            sr_path = (REPO_ROOT / self.source_root).resolve()
+            candidates = [
+                sr_path / self.logo,
+                sr_path / "assets" / Path(self.logo).name,
+                (REPO_ROOT.parent / Path(self.source_root).name / self.logo).resolve(),
+                (
+                    REPO_ROOT.parent
+                    / Path(self.source_root).name
+                    / "assets"
+                    / Path(self.logo).name
+                ).resolve(),
+            ]
+            for c in candidates:
+                if c.exists():
+                    return c
+        for sibling_name in ("Tools", "Movement-Optimizer", "vendor/ud-tools"):
+            sibling_base = (
+                (REPO_ROOT / sibling_name).resolve()
+                if "vendor" in sibling_name
+                else (REPO_ROOT.parent / sibling_name).resolve()
+            )
+            if sibling_base.exists():
+                c1 = sibling_base / self.logo
+                if c1.exists():
+                    return c1
+                c2 = sibling_base / "assets" / Path(self.logo).name
+                if c2.exists():
+                    return c2
         return direct
 
     @property

@@ -1,8 +1,57 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-25)
+## Current Scientific Audit State (2026-08-27)
 
-## Markerless Mocap Program (#9063)
+## Swing Objective Lab Web Parity (#9128)
+
+Issue #9128 establishes full web parity for the Swing Objective Lab tool.
+The FastAPI REST endpoint `POST /tools/swing-objectives/compare` and `GET /tools/swing-objectives/presets`
+in `src/api/routes/swing_objectives.py` accept a golfer preset and shared effort budget
+(downswing duration, shoulder/wrist torque bounds, collocation nodes) and execute direct collocation
+to emit a versioned comparison matrix conforming to schema 1.0.0. The React/Tauri frontend page
+`ui/src/pages/SwingObjectiveLab.tsx` renders the per-objective metrics table and cross-evaluation matrix
+with every cell explicitly labeled (text and accessible ARIA attributes, preventing color-only encoding)
+and displays a plain-language alert when `is_degenerate` is true. `src/config/feature_parity.json`
+registers `simulation.swing_objective_lab` as `parity` and `src/config/launcher_manifest.json`
+routes web execution to `/tools/swing-objective-lab`.
+
+## Trajectory-Varying Event-Conditioned Reaching (#9123)
+
+Issue #9123 establishes discrete time-varying variational control authority $z[k+1] = A[k] z[k] + B[k] v[k]$
+and event-tangent reachability Gramian conditioning $W_{tangent} = P W_{full} P^T$ along the registered
+analytical double-pendulum downswing. The transverse event projector $P = I - \frac{f_{event} n^T}{n^T f_{event}}$
+satisfies idempotence $P^2 = P$ and tangent null direction $P f_{event} = 0$.
+Tangent reachability rank is verified at 3 dimensions across active input channels, single-channel
+additivity $W_{both} = W_{shoulder} + W_{wrist}$ is exact within numerical precision, and zero-input
+authority yields rank 0. Direct finite-difference pulse responses match propagated sensitivity matrices.
+Scientific inference boundaries restrict claims to analytical linear variational dynamics.
+
+## Bounded Nonlinear Event-Reaching Feasibility (#9124)
+
+Issue #9124 establishes numerical feasibility for bounded control perturbations over pre-event horizons
+under explicit torque bounds and rate limits. The reachability solver uses the first-order Gramian
+pseudo-inverse from #9123 for initial guess synthesis and verifies small-amplitude agreement
+($\le 0.7\%$ relative discrepancy) and finite-amplitude torque saturation. Outcomes are strictly
+classified into typed taxonomy (`FEASIBLE`, `BOUND_SATURATED`, `INFEASIBLE`, `WRONG_CROSSING`, `GRAZING`,
+`NUMERICAL_FAILURE`) and verified with independent RK4 deterministic replay.
+
+## Event Topology and Delay/Noise Robustness (#9125)
+
+Issue #9125 establishes global event enumeration and maps guard zero-crossings into typed topology
+classes (`ZERO_CROSSINGS`, `UNIQUE_FORWARD`, `MULTIPLE_CROSSINGS`, `REVERSED_DIRECTION`, `GRAZING`).
+Actuator delay continuation and common-random-number state/command perturbation studies quantify
+robustness boundaries while preserving zero-perturbation nominal reproduction and time-step refinement stability.
+
+## Nonlinear Controller Mechanics Qualification (#9126)
+
+Issue #9126 establishes the prospective registration and numerical mechanics qualification prerequisite
+for future matched controller evaluations without running golf-swing evaluation trials.
+The registration freezes plant identity (`canonical_analytical_double_pendulum_rk4`), state/control orderings,
+and solver identities with digest bindings, recording `double_pendulum_evaluation_count: 0` and
+`ranking_eligible_method_count: 0`. Candidate solver kernels (bounded projected iLQR and NMPC) are qualified
+on a manufactured benchmark fixture for derivatives, box bound enforcement, accepted-cost monotonicity,
+deterministic replay, warm-start sensitivity, and typed nonfinite dynamics failure. Exact plant transport
+to the analytical double pendulum step across step sizes $\Delta t \in \{0.001, 0.002, 0.005\}$ is verified.
 
 Issue #9065 establishes ADR-0041 and an executable acceptance program before
 live markerless capture begins. Canonical camera, capture, time, calibration,

@@ -4,6 +4,20 @@ Last updated: 2026-08-27
 This is current operational state; Git/GitHub retain history, and epic #8557
 is the single proximal-to-distal completion authority.
 
+## Swing Objective Lab Web Parity (#9128)
+
+- PR for #9128 establishes web parity for the Swing Objective Lab tool.
+- FastAPI endpoints `GET /tools/swing-objectives/presets` and `POST /tools/swing-objectives/compare` (`src/api/routes/swing_objectives.py`) execute direct collocation across competing downswing objectives.
+- React page `ui/src/pages/SwingObjectiveLab.tsx` renders per-objective metrics table and cross-evaluation matrix with every cell explicitly labeled (preventing color-only encoding) and plain-language degeneracy alert.
+- Feature parity registry `src/config/feature_parity.json` marks `simulation.swing_objective_lab` as `parity` and `src/config/launcher_manifest.json` routes web execution to `/tools/swing-objective-lab`.
+
+## Event-Conditioned Reaching and Nonlinear Controller Research (#9123, #9124, #9125, #9126)
+
+- Issue #9123 (`scripts/research/proximal_distal_energy/trajectory_control_authority.py`): Qualifies discrete time-varying variational control authority and event-tangent reachability Gramian ($W_{tangent} = P W_{full} P^T$, rank 3 in tangent space, exact channel additivity, zero-input killswitch, finite-difference pulse validation).
+- Issue #9124 (`scripts/research/proximal_distal_energy/bounded_event_reachability.py`): Establishes numerical feasibility for bounded control perturbations, verifies $\le 0.7\%$ small-amplitude agreement with first-order linear Gramian, maps finite-amplitude torque saturation, and classifies trials into typed taxonomy with exact RK4 replay.
+- Issue #9125 (`scripts/research/proximal_distal_energy/event_topology_robustness.py`): Maps guard zero-crossings into typed topology classes (`ZERO_CROSSINGS`, `UNIQUE_FORWARD`, `MULTIPLE_CROSSINGS`, `REVERSED_DIRECTION`, `GRAZING`), evaluates actuator delay continuation and common-random-number perturbation robustness.
+- Issue #9126 (`scripts/research/proximal_distal_energy/nonlinear_controller_*.py`): Freezes prospective controller registration (`double_pendulum_evaluation_count: 0`, `ranking_eligible_method_count: 0`), qualifies candidate solver kernels on manufactured benchmark fixture (derivatives, bounds, monotonicity, deterministic replay, nonfinite failure), and proves exact plant transport across step sizes $\Delta t \in \{0.001, 0.002, 0.005\}$.
+
 ## Markerless Mocap Program (#9063)
 
 - ADR-0041 assigns camera, observation, calibration, timing, session, reconstruction, and C3D contracts to Tools #4706; UpstreamDrift owns orchestration, UX, persistence, and biomechanics adapters; AffineDrift owns sanitized publication. Tools PR #4734 remains a protected candidate; do not repin `vendor/ud-tools` to a feature head, and let UpstreamDrift #9069 follow its immutable merge. Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation: there is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
