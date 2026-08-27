@@ -301,3 +301,40 @@ def test_variation_gateway_executes_immutable_tools_contracts(
         assert [(interval.start_index, interval.end_index) for interval in quiet] == [
             (0, 1)
         ]
+
+
+@pytest.mark.integration
+def test_rate_of_closure_provider_exposes_governed_analysis_policy() -> None:
+    """The immutable provider must expose the reviewed R14.3 policy surface."""
+    with _fresh_provider_import("rate_of_closure"):
+        package = importlib.import_module("rate_of_closure")
+        _assert_from_tools(Path(package.__file__).resolve())
+        policy = importlib.import_module("rate_of_closure.variation.analysis_policy")
+        _assert_from_tools(Path(policy.__file__).resolve())
+
+        assert policy.ANALYSIS_EXECUTIONS == (
+            "all_together",
+            "individual",
+            "both",
+        )
+        assert policy.planned_analysis_runs(20, 3, "all_together") == 20
+        assert policy.planned_analysis_runs(20, 3, "individual") == 60
+        assert policy.planned_analysis_runs(20, 3, "both") == 80
+
+        manifest_path = (
+            Path(package.__file__).resolve().parent / "visual_baselines.v1.json"
+        )
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        variation = next(
+            entry
+            for entry in manifest["baselines"]
+            if entry["surface"] == "pyqt" and entry["tab_id"] == "variation"
+        )
+        assert variation["sha256"] == (
+            "22f6640e896e9ea5c740e9db7e3d3201cdf7264f2cf1cff33966b539354f1d40"
+        )
+        assert variation["tolerance"] == {
+            "changed_channel_threshold": 1,
+            "max_mean_channel_delta_microunits": 200,
+            "max_changed_pixel_fraction_microunits": 250,
+        }

@@ -1,6 +1,6 @@
 # Agent Handoff — UpstreamDrift
 
-Last updated: 2026-08-26
+Last updated: 2026-08-27
 This is current operational state; Git/GitHub retain history, and epic #8557
 is the single proximal-to-distal completion authority.
 
@@ -10,21 +10,21 @@ is the single proximal-to-distal completion authority.
 
 ## Repository and Publication Authority
 
-- UpstreamDrift owns scientific sources, models, evidence, and release; AffineDrift
-  is the immutable public projection and Tools owns consumers.
-- Remote `main` is `99acc997a97b3d97cb4ddd857b79bedd4a66f290` (PR #9109); active branch: `research/9116-phase-event-stability`.
-- The 246-page publication is SHA-256 `64f552741217fc627af0cdbbe4066fd430a7ed8a5d2ca05ad9f109cce794c52b`,
-  with 194 URI links and 255 outline entries; archival qualification is false.
+- UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.
+- Remote `main` is protected #9141 squash `11c629cb2fe700c6d2f631d7e5f2da92da5cefcf`; #8358, #9135, and the AffineDrift #3930 projection are complete.
+- PR #9117's reconciled candidate is 246 pages, 1,923,372 bytes, SHA-256 `0e590a556660fcc5656ad4add657bcfb4e90a8c5b15abc98ccf031118d61f050`, web-linearized, with 194 URI links, 255 outline entries, and extractable text on every page. Archival qualification remains false because the PDF is untagged and retains Type 3 and unembedded fonts.
 - The complete audit contains 1,148 reviewed candidates, 315 atomic claims,
   134 numeric contracts, and 445/445 verified literals. Outcomes are 295
   supported only within declared estimands and boundaries, five inconclusive,
-  15 untested, and zero contradicted; 48 release claims are reviewed and open.
+  15 untested, and zero contradicted. All 48 release claims are reviewed; the bundle has 644 artifacts.
 
 ## Coordinate Force-Source Attribution (#9059)
 
-- Tools squash `8dc4512184` is the `force-attribution/v1` authority, consumed
-  through the vendor pin and thin biomechanics gateway. Its 135-program grid
-  retains 91 impacts and separates impulse, work, power, residuals, and optima.
+- Tools squash `8dc4512184` is the `force-attribution/v1` authority, retained
+  as an ancestor of the current vendor pin and consumed through the thin
+  biomechanics gateway. The 135-program grid
+  retains 91 qualified impacts and separates impulse, work, power, mapping
+  residuals, and speed optima in declared coordinates.
 - The force-only endpoint map is rank deficient; its residual couple remains
   explicit. This is synthetic planar evidence, not a measured grip wrench,
   muscle attribution, human strategy, or coaching authority.
@@ -60,30 +60,22 @@ is the single proximal-to-distal completion authority.
   unestablished. Its protected 309-claim snapshot is preserved in migration
   history and has been superseded by the current #9027 projection.
 
-## Closed-Loop Margins and Phase/Event Stability (#9027, #9113, #9116)
+## Constraints, Closed-Loop Margins, and Phase/Event Stability (#9027)
 
-- PR #9110 is merged as `d16212ac7`. It adds source-bound planar
-  closure and bilateral wrench-map audits. It requires explicit 1 rad/0.75 m
-  generalized-coordinate scales, a 0.10 m wrench scale, and `1e-12` rank tolerance.
+- PR #9110 (`d16212ac7`) adds scaled planar-closure and bilateral wrench-map
+  audits using 1 rad/0.75 m coordinate scales, a 0.10 m wrench scale, and a
+  `1e-12` rank tolerance.
 - Regular planar rank/nullity is 4/1; the constructed adverse alignment is
   3/2 but is not a qualified anatomical pose. Separated/coincident point-force
   maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
-- #9113/#9114 is merged as `847b9abd3`. Both exact triangle branches and 181
-  phases each close below `1.67e-16` m with rank/nullity 4/1; exact 0.03 m and
-  1.53 m degeneracies are 3/2. Controls retain numerical rank/tolerance
-  dependence without labeling it a physical or anatomical threshold.
-- #9116 is published in PR #9117 with the Python 3.11/3.12 portability fix; it also reconciles the lock-header and architecture-budget gates.
-  It propagates the exact discrete RK4 variational map at 0.125 ms and separates
-  finite-window gains from transverse event-time derivatives, rejects grazing
-  guards, tests saltation controls, and suppresses Floquet output because the
-  scaled periodicity residual is 1.48546 versus a `1e-6` tolerance.
-- Python 3.11/3.12 reproduce the report exactly. Step refinement is reported at
-  two significant digits (`6.9e-6`), and direct-rollout agreement is an upward-
-  rounded `4e-7`; raw `1e-5`/`1e-4` gates and full NPZ arrays remain. Unit
-  controls use a raw `1e-12` gate and conservative decade bounds. Gains span 0.093456--8.33244; the event
-  denominator is 35.0258 s^-1 and direct/implicit agreement is `5.98e-5` s.
-  These are local synthetic diagnostics, not asymptotic stability, neural
-  timing demand, participant robustness, passive torque, or coaching evidence.
+- PR #9114 (`847b9abd39e6fd7cffaa917cf4fdb43a563cb276`) closes both triangle branches over 181 phases each below `1.67e-16` m; exact 0.03 m and 1.53 m degeneracies retain rank/nullity 3/2.
+- PR #9117 propagates the exact-discrete RK4 variational map at 0.125 ms,
+  separates finite-window gain from transverse event-time sensitivity, rejects
+  grazing guards, tests saltation and equivalent-unit killswitches, and
+  suppresses Floquet output because periodicity residual 1.48546 exceeds `1e-6`.
+  Gains span 0.093456--8.33244; direct event-time agreement is `5.98e-5` s.
+  These are local synthetic diagnostics, not asymptotic stability, neural timing
+  demand, participant robustness, passive torque, or coaching evidence.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -116,12 +108,16 @@ is the single proximal-to-distal completion authority.
 
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
-- #9049, #9100, #9108, #9110, and #9114 are merged; #9116 is active.
-- #8358's Tools gateway and analyses are merged; UI and presentation criteria
-  remain unaudited. Merged #9096 changes no production API, schema, or vendor pin.
+- #9049, #9100, #9108, #9110, and #9114 are merged; #9114 completed #9113's singular-margin slice.
+- #8358 is complete in protected PR #9134 (`f3832b04454c97a7a0999906972f394474107dd7`).
+  PR #9137 is current `main` at `7ab5f26e9e716eb97a2b9c28bfd3b27271aec89b`
+  with the qualified 245-page PDF and complete 636-artifact release.
 - #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
-- #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound. This branch also restores the tested Linux-only native PyInstaller release job after the consolidated matrix regressed that contract; fresh protected evidence is required, and no runner change or smoke exemption is authorized.
-- Tools #4142 remains open. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge commit.
+- #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound; fresh protected evidence is required, and no runner change or smoke exemption is authorized.
+- Tools #4142 is closed; provider commit `3dfbd32cc778536269670c055955073853c0f60a`
+  remains an ancestor of Tools `main`. AffineDrift PR #3986 is merged as
+  `bec7a92025bdc777cd0a9008a57ecd5c5765cf6f`, closing #3930 with a complete
+  immutable projection of this UpstreamDrift release.
 
 ## Scientific and Review Invariants
 
@@ -141,9 +137,10 @@ is the single proximal-to-distal completion authority.
 
 ```powershell
 python -m scripts.research.proximal_distal_energy.claim_audit validate
-python -m scripts.research.proximal_distal_energy.run_phase_event_stability validate
+python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics validate
+python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python -m pytest -n 0 -q tests/research/test_phase_event_stability.py tests/research/test_phase_event_stability_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py tests/unit/research/test_proximal_distal_claim_audit.py
+python -m pytest -n 0 -q tests/research/test_closed_loop_singularity_margin.py tests/research/test_closed_loop_singularity_margin_evidence.py tests/research/test_constraint_internal_force_diagnostics.py tests/research/test_constraint_internal_force_diagnostics_evidence.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
 python scripts/ci/check_file_size_budget.py
 ```
 

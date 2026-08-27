@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "ca16c2ea2551ae5a06a0b67e184cdddcd5ff931c6343a85aa6c600544cae003c",
+    "source_digest": "0cf9bd034c322ebe4ded8bb3fd7c60f301156cea135b2498eb6457251b94ba60",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11692,62 +11692,6 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-0b9c5f118079c7fd",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-12c480318f0379d1",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-cbe28db4bafbcf1f",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-fe11f03cf6c448b7",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-d9ac66db136d78d6",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-583b0ca09a9734fa",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-625922eee0f308a2",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
       "candidate_id": "PD-CAND-f32681bfc71daddb",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -11810,6 +11754,62 @@
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This appendix paragraph inventories governed artifacts.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-0b9c5f118079c7fd",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-12c480318f0379d1",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-cbe28db4bafbcf1f",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-fe11f03cf6c448b7",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-d9ac66db136d78d6",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-583b0ca09a9734fa",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-625922eee0f308a2",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-26"
     }
