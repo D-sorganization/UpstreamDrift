@@ -26,6 +26,7 @@ def run_qualification() -> dict[str, object]:
         "nominal_first_crossing_time_s": summary.nominal_first_crossing_time_s,
         "max_tolerated_delay_s": summary.max_tolerated_delay_s,
         "noise_robustness_retained_unique_fraction": summary.noise_robustness_retained_unique_fraction,
+        "channel_topologies": dict(summary.channel_topologies),
         "channel_coverage_passed": summary.channel_coverage_passed,
         "step_refinement_stable": summary.step_refinement_stable,
         "total_trials": summary.total_trials,
@@ -51,6 +52,8 @@ def main() -> int:
     if not evidence["zero_perturbation_reproduces_nominal"]:
         return 1
     if not evidence["step_refinement_stable"]:
+        return 1
+    if not evidence["channel_coverage_passed"]:
         return 1
     if evidence["noise_robustness_retained_unique_fraction"] < 0.75:
         return 1
