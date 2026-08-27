@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
+from copy import deepcopy
 from dataclasses import dataclass
 import hashlib
 import json
@@ -74,6 +75,8 @@ DIRECT_PULSE_RESIDUAL_GATE = 1e-4
 INPUT_REFINEMENT_GATE = 1e-3
 INTEGRATION_REFINEMENT_GATE = 5e-2
 EQUIVALENT_UNIT_RESIDUAL_GATE = 1e-12
+REPRODUCIBILITY_FLOOR_FRACTION = 1e-3
+ROUND_OFF_REPRODUCIBILITY_FLOOR_FRACTION = 1e-1
 RANK_ABSOLUTE_TOLERANCE = 1e-12
 RANK_RELATIVE_TOLERANCE = 1e-9
 PULSE_PERTURBATION_SCALE = 1e-6
@@ -737,6 +740,98 @@ def build_report() -> dict[str, Any]:
     return report
 
 
+def reports_reproducibly_equivalent(
+    registered: dict[str, Any], expected: dict[str, Any]
+) -> bool:
+    """Compare reports while ignoring only sub-resolution solver residue.
+
+    The registered JSON preserves the generated residuals for auditability, but
+    finite-difference and linear-algebra kernels can vary at their numerical
+    noise floor across operating systems.  Scientific outputs remain exact;
+    only diagnostics below their declared reproducibility floor are normalized
+    before comparison. Pure round-off controls use one-tenth of their gate;
+    perturbation and refinement controls use one-thousandth.
+    """
+
+    left = deepcopy(registered)
+    right = deepcopy(expected)
+    controls = (
+        (
+            "event_conditioned_authority",
+            "guard_residual",
+            GUARD_RESIDUAL_GATE * ROUND_OFF_REPRODUCIBILITY_FLOOR_FRACTION,
+        ),
+        (
+            "falsification_controls.channel_additivity",
+            "maximum_abs_residual",
+            ADDITIVITY_RESIDUAL_GATE * ROUND_OFF_REPRODUCIBILITY_FLOOR_FRACTION,
+        ),
+        (
+            "falsification_controls.equivalent_units",
+            "maximum_abs_residual",
+            EQUIVALENT_UNIT_RESIDUAL_GATE * ROUND_OFF_REPRODUCIBILITY_FLOOR_FRACTION,
+        ),
+    )
+
+    def resolve_parent(payload: dict[str, Any], dotted_parent: str) -> Any:
+        parent: Any = payload
+        for segment in dotted_parent.split("."):
+            if not isinstance(parent, dict) or segment not in parent:
+                return None
+            parent = parent[segment]
+        return parent
+
+    for parent, key, floor in controls:
+        left_parent = resolve_parent(left, parent)
+        right_parent = resolve_parent(right, parent)
+        if not isinstance(left_parent, dict) or not isinstance(right_parent, dict):
+            return False
+        left_value = left_parent.get(key)
+        right_value = right_parent.get(key)
+        if not isinstance(left_value, (int, float)) or not isinstance(
+            right_value, (int, float)
+        ):
+            return False
+        if left_value == right_value:
+            continue
+        if abs(float(left_value)) >= floor or abs(float(right_value)) >= floor:
+            return False
+        left_parent[key] = right_parent[key] = 0.0
+
+    sequence_controls = (
+        ("direct_pulses", "maximum_abs_residual", DIRECT_PULSE_RESIDUAL_GATE),
+        (
+            "input_step_refinement",
+            "relative_event_gramian_residual",
+            INPUT_REFINEMENT_GATE,
+        ),
+        (
+            "integration_step_refinement",
+            "relative_event_gramian_residual",
+            INTEGRATION_REFINEMENT_GATE,
+        ),
+    )
+    for sequence_key, value_key, gate in sequence_controls:
+        left_items = left.get("falsification_controls", {}).get(sequence_key, [])
+        right_items = right.get("falsification_controls", {}).get(sequence_key, [])
+        if len(left_items) != len(right_items):
+            return False
+        for left_item, right_item in zip(left_items, right_items, strict=True):
+            left_value = left_item.get(value_key)
+            right_value = right_item.get(value_key)
+            if not isinstance(left_value, (int, float)) or not isinstance(
+                right_value, (int, float)
+            ):
+                return False
+            if left_value == right_value:
+                continue
+            floor = gate * REPRODUCIBILITY_FLOOR_FRACTION
+            if abs(float(left_value)) >= floor or abs(float(right_value)) >= floor:
+                return False
+            left_item[value_key] = right_item[value_key] = 0.0
+    return left == right
+
+
 def validate_report(report: dict[str, Any]) -> dict[str, int]:
     """Fail closed when provenance, controls, or inference boundaries drift."""
 
@@ -837,7 +932,7 @@ def main() -> None:
         return
     registered = json.loads(REPORT_PATH.read_text(encoding="utf-8"))
     expected = build_report()
-    if registered != expected:
+    if not reports_reproducibly_equivalent(registered, expected):
         raise ValueError("registered trajectory control-authority report is stale")
     print(json.dumps(validate_report(registered), sort_keys=True))
 

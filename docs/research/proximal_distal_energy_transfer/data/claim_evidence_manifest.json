@@ -5922,7 +5922,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "7b1edbe8cccf007c462b01d02fbc1b8276a2d1226fe0a8686ffd01775f8a6a88",
+      "sha256": "ef635627f41aa8cb069475205ed19fd911fcdeacb5e36e6c4ebb2a435d133bec",
       "bytes": 147946,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -7147,8 +7147,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/run_trajectory_control_authority.py": {
-      "sha256": "9b7009cf740a156e13f0a8df3b9ccc1e9587b17f943193ded8e088f792ca0b73",
-      "bytes": 33472,
+      "sha256": "7450abfa869731bcef195930c1890a915244cd49575b4a12f5825ccc74af7fb4",
+      "bytes": 37293,
       "referenced_by": [
         "PD-CLAIM-317",
         "PD-CLAIM-318"
@@ -8233,8 +8233,8 @@
       ]
     },
     "tests/research/test_trajectory_control_authority_evidence.py": {
-      "sha256": "7a6e831046aedbe6ee62f730448945d9eea9739ee1a93a1a8cf301257c3953ba",
-      "bytes": 6449,
+      "sha256": "1fda5967f63e552a228f5892492fd97a1e744d69bb110c82fe6a18da4ef9d5da",
+      "bytes": 7353,
       "referenced_by": [
         "PD-CLAIM-317",
         "PD-CLAIM-318"

@@ -21,6 +21,7 @@ from scripts.research.proximal_distal_energy.run_trajectory_control_authority im
     SOURCE_ARRAY_PATH,
     SOURCE_REPORT_PATH,
     build_report,
+    reports_reproducibly_equivalent,
     validate_report,
 )
 
@@ -41,7 +42,7 @@ def registered_report() -> dict[str, Any]:
 def test_registered_report_is_deterministic_and_retains_source_identity(
     registered_report: dict[str, Any],
 ) -> None:
-    assert registered_report == build_report()
+    assert reports_reproducibly_equivalent(registered_report, build_report())
     assert registered_report["source_identity"] == {
         "phase_event_array_sha256": _sha256(SOURCE_ARRAY_PATH),
         "phase_event_report_schema": "proximal-distal-phase-event-stability/v1",
@@ -56,6 +57,26 @@ def test_registered_report_is_deterministic_and_retains_source_identity(
         "integration_refinement_count": 3,
         "input_refinement_count": 3,
     }
+
+
+def test_reproducibility_comparison_tolerates_only_sub_resolution_residue(
+    registered_report: dict[str, Any],
+) -> None:
+    expected = deepcopy(registered_report)
+    expected["falsification_controls"]["channel_additivity"][
+        "maximum_abs_residual"
+    ] *= 1.5
+    assert reports_reproducibly_equivalent(registered_report, expected)
+
+    changed_result = deepcopy(registered_report)
+    changed_result["event_conditioned_authority"]["event_tangent"]["rank"] = 2
+    assert not reports_reproducibly_equivalent(registered_report, changed_result)
+
+    resolved_residue = deepcopy(registered_report)
+    resolved_residue["falsification_controls"]["channel_additivity"][
+        "maximum_abs_residual"
+    ] = ADDITIVITY_RESIDUAL_GATE * 1e-1
+    assert not reports_reproducibly_equivalent(registered_report, resolved_residue)
 
 
 def test_registered_controls_pass_raw_falsification_gates(

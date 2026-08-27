@@ -2737,8 +2737,8 @@
       "bytes": 9747
     },
     "scripts/research/proximal_distal_energy/run_trajectory_control_authority.py": {
-      "sha256": "9b7009cf740a156e13f0a8df3b9ccc1e9587b17f943193ded8e088f792ca0b73",
-      "bytes": 33472
+      "sha256": "7450abfa869731bcef195930c1890a915244cd49575b4a12f5825ccc74af7fb4",
+      "bytes": 37293
     },
     "scripts/research/proximal_distal_energy/run_transmission_robustness_study.py": {
       "sha256": "e8ae5fe19bf0a7c4b4dda66f5749ca362fa54ddc7eadc9dc924b7cca7a1084c7",

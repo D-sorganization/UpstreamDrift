@@ -35,6 +35,9 @@ Updated: 2026-08-27
 
 - Implemented files include `trajectory_control_authority.py`, its governed
   runner, JSON/NPZ evidence, publication figure, claim registration, and tests.
+- Cross-platform validation preserves exact scientific outputs while treating
+  only declared sub-resolution solver residuals as portability-equivalent;
+  changes at or above those floors still fail closed.
 - Required estimands are exact-step state/input Jacobians, trajectory-varying
   continuous-energy-equivalent Gramians, channel masks, and event-tangent
   projection at the registered transverse delivery event.
