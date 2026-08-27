@@ -51,8 +51,11 @@ PRE_DIRECT_TRANSITION_PRECISION_REVIEWED_SOURCE_DIGEST = (
 PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST = (
     "0cf9bd034c322ebe4ded8bb3fd7c60f301156cea135b2498eb6457251b94ba60"
 )
-REVIEWED_SOURCE_DIGEST = (
+PRE_BOUNDED_EVENT_REVIEWED_SOURCE_DIGEST = (
     "12bc44109474ecf9e63f29e9e371ee2da7fc434c8d9a5feddea4f408a29b9329"
+)
+REVIEWED_SOURCE_DIGEST = (
+    "c4e9c1d32831ccb486b69f1fa73c70aedffce3a584828b0a0f56b326aeaa65d7"
 )
 MIGRATABLE_SOURCE_DIGESTS = frozenset(
     {
@@ -68,11 +71,12 @@ MIGRATABLE_SOURCE_DIGESTS = frozenset(
         PRE_REFINEMENT_PRECISION_REVIEWED_SOURCE_DIGEST,
         PRE_DIRECT_TRANSITION_PRECISION_REVIEWED_SOURCE_DIGEST,
         PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST,
+        PRE_BOUNDED_EVENT_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }
 )
 PRECURRENT_SOURCE_DIGESTS = MIGRATABLE_SOURCE_DIGESTS - {REVIEWED_SOURCE_DIGEST}
-REVIEWED_CLAIM_COUNT = 317
+REVIEWED_CLAIM_COUNT = 319
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -147,14 +151,21 @@ PRE_CONSTRAINT_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
 )
 REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
+        "PD-CAND-0d006242beae5a2a",
         "PD-CAND-165a6caf21ef85e2",
+        "PD-CAND-241636180b4cbaf6",
         "PD-CAND-39f42d06f3e621a5",
+        "PD-CAND-41e6cfc2c7a6bcd0",
+        "PD-CAND-501b961b26980f64",
         "PD-CAND-9345c1e6be2ef186",
         "PD-CAND-9906005bff75ba72",
         "PD-CAND-aa6efbe9274b5d53",
         "PD-CAND-ab4689630944a0fe",
+        "PD-CAND-af704879ef4215eb",
+        "PD-CAND-b4dabee7bff0d4ea",
         "PD-CAND-b06a3cbe5b2d0e01",
         "PD-CAND-b5b2526e23b77d70",
+        "PD-CAND-b7a1f0c00dbfb322",
         "PD-CAND-bcfcc2b3a9631de1",
         "PD-CAND-be8a26a0593eab4f",
         "PD-CAND-c6f7607002d58a93",
@@ -166,7 +177,7 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
 )
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 315-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 319-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -467,6 +478,8 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-316",
         "PD-CLAIM-317",
         "PD-CLAIM-318",
+        "PD-CLAIM-319",
+        "PD-CLAIM-320",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -544,7 +557,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1154-candidate paper inventory is adjudicated. Repeated "
+        f"The complete {inventory['candidate_count']}-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."

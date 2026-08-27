@@ -13,10 +13,10 @@ completion from local files or an open pull request.
   immutable source-pinned projections.
 - Protected PR #9144 completed #9123 at squash
   `5a330ed9b9f74c77a540d37beb90d2df622e719d`, verified on remote `main`.
-- The #9123 paper is 247 pages and 1,935,834 bytes at SHA-256
-  `1783ba69c72f56bba1d3a0e43136afc9b6651d31e4bc453f9d2df61ffdcb1dcb`.
-- It contains 317 adjudicated claims, 136 numeric contracts, 455/455 verified
-  numeric literals, 2,352 evidence references, and 652 release artifacts.
+- The current #9124-integrated paper is 249 pages and 1,946,712 bytes at
+  SHA-256 `1afd5354ceb3f93ab04a5b3d3ca182d512b66f443e19cf822bec0b38b1f836f6`.
+- It contains 319 adjudicated claims, 138 numeric contracts, 463/463 verified
+  numeric literals, 2,378 evidence references, and 667 release artifacts.
 - The PDF is computationally qualified but not archival-accessibility
   qualified: it is untagged and retains Type 3 and two unembedded resources.
 
@@ -36,10 +36,11 @@ completion from local files or an open pull request.
 
 ## Open Correctness Findings
 
-- #9124 source now enforces amplitude/rate limits, typed guard outcomes, and
-  independent protected-RK4 replay. Its regenerated study retains 32/38
-  feasible transverse cases, but its 24.9517% multistart spread fails the 5%
-  ranking gate. Paper/release registration remains pending.
+- #9124 source, governed evidence, figure, claims, paper, and release bundle
+  now enforce amplitude/rate limits, typed guard outcomes, and independent
+  protected-RK4 replay. The study retains 32/38 feasible cases and a maximum
+  feasible residual of `8.82244e-11`, but its 24.9517% multistart spread fails
+  the 5% optimality gate; every channel/controller ranking remains suppressed.
 - #9125 core now uses explicit zero delay prehistory and requires both,
   shoulder-only, wrist-only, and zero-command topology outcomes. Governed
   evidence, figures, paper claims, and release registration remain pending.
@@ -51,16 +52,15 @@ completion from local files or an open pull request.
   OpenAPI types, and the current `WorkspaceShell` interface. The vendored Tools
   pin is advanced to protected provider `3dfbd32cc`; focused API and React
   parity tests pass, but full web/build and provider-consumer gates remain.
-- The current consolidated branch has no complete paper/release integration
-  for #9124–#9126. The handoff, issue closures, and `parity` status must not
-  overstate implementation or validation.
+- The current consolidated branch has complete local paper/release integration
+  for #9124, but not #9125 or #9126. The handoff, issue closures, and `parity`
+  status must not overstate implementation, protected delivery, or validation.
 
 ## Required Order
 
 1. Finish the merge from protected `main`, retaining protected #9123 sources.
-2. Reconcile #9124 from its stronger replay/multiple-shooting branch, refactor
-   to architecture budgets, and verify bounds, event topology, solver replay,
-   continuation, killswitches, adverse targets, and deterministic manifests.
+2. Preserve #9124's governed multiple-shooting evidence and verified release;
+   do not infer optimality or ranking from its local feasibility result.
 3. Correct and qualify #9125 event-topology robustness, including delays,
    channel coverage, common-random-number perturbations, and typed failures.
 4. Correct #9126 solver identity and keep prospective registrations, human

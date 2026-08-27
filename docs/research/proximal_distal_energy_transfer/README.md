@@ -17,6 +17,16 @@ variability, and model-conditional perturbation rejection. Start with
 the chapter “Transmission Pathways, Robust Speed, and Task Stability.” These
 results do not establish human self-stabilization or a universal strategy.
 
+The bounded nonlinear event-reachability study tests whether finite
+event-tangent targets can be reached under declared shoulder/wrist torque and
+slew scenarios. Thirty-two of 38 registered outcomes are replay-feasible; the
+six displaced zero-authority cases are correctly infeasible. Mesh, integration
+step, and adverse-initial-state controls converge, while a 24.95% multistart
+objective spread fails the 5% optimality gate. Feasibility evidence is retained,
+but channel rankings and human or coaching interpretations are suppressed. See
+[`BOUNDED_EVENT_REACHABILITY.md`](BOUNDED_EVENT_REACHABILITY.md) and
+[`data/bounded_event_reachability.json`](data/bounded_event_reachability.json).
+
 Open research materials for a study of proximal-to-distal (P→D) energy
 transfer in the golf swing. The study combines a literature synthesis
 with a coordinate-explicit Christoffel decomposition that separates
@@ -255,10 +265,13 @@ the finding-by-finding record in
 | [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap                    |
 | [`HYBRID_SYSTEM_CONTRACT.md`](HYBRID_SYSTEM_CONTRACT.md)                                             | Executable eight-tier hybrid topology, evidence boundary, and remaining qualification gates    |
 | [`LOCAL_LINEAR_DIAGNOSTICS.md`](LOCAL_LINEAR_DIAGNOSTICS.md)                                         | Local analytical observability/controllability ranks, conditioning, killswitches, and limits   |
+| [`BOUNDED_EVENT_REACHABILITY.md`](BOUNDED_EVENT_REACHABILITY.md)                                     | Registered bounded nonlinear event-reaching results, falsification controls, and limits        |
 | [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                     | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions              |
 | [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json) | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs              |
 | [`data/hybrid_system_contract_v1.json`](data/hybrid_system_contract_v1.json)                         | Versioned states, modes, guards, resets, actuator/event contracts, and unavailable tiers       |
 | [`data/local_linear_diagnostics.json`](data/local_linear_diagnostics.json)                           | Trace-derived local matrices, SVD rank decisions, step sensitivity, and inference boundary     |
+| [`data/bounded_event_reachability.json`](data/bounded_event_reachability.json)                       | Human-readable registered outcomes, controls, qualification gates, and inference boundary      |
+| [`data/bounded_event_reachability.npz`](data/bounded_event_reachability.npz)                         | Exact numeric arrays for deterministic replay and independent comparison                       |
 | [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)               | Claim, alternative-explanation, model-discrepancy, and falsifier register                      |
 | [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)                   | Frozen human-data acquisition, split, analysis, and inference-boundary protocol                |
 | [`MEASURED_TRAJECTORY_ACQUISITION.md`](MEASURED_TRAJECTORY_ACQUISITION.md)                           | Fail-closed measured-trajectory authority, manifest, digest, frame, event, and loader contract |
@@ -289,6 +302,9 @@ python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_phase_event_stability write
 python3 -m scripts.research.proximal_distal_energy.run_trajectory_control_authority write
+python3 -m scripts.research.proximal_distal_energy.run_bounded_event_reachability write
+python3 -m scripts.research.proximal_distal_energy.make_bounded_event_reachability_figure
+python3 scripts/research/proximal_distal_energy/register_bounded_event_reachability_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
 python3 -m scripts.research.proximal_distal_energy.run_grf_drift_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis

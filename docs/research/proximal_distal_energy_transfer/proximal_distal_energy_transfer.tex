@@ -454,11 +454,20 @@ eleven-entry physical map has analytic rank seven, nullity four, and
 three exact nonunique parameter families. The associated Fisher screen
 is an oracle-kinematics lower bound only; it does not identify
 participant anatomy, equipment, or practical measurement performance. A
-phase-resolved proximal-motion study evaluates 126 rate cases under
-relative-rate, absolute-rate, and exact total-kinetic-energy matching,
-plus 45 identical-state acceleration interventions. The large pre-impact
-rate trend nearly vanishes under energy matching, and increasing
-proximal acceleration raises interface power while reducing club angular
+bounded nonlinear follow-up then solves finite event-surface targets
+with exact-RK4 multiple shooting and independent replay. Both torque
+channels, shoulder only, and wrist only reach every registered small
+tangent target; the zero-authority killswitch rejects exactly the six
+displaced targets. Mesh, integration-step, and adverse-state controls
+converge, but two multistarts differ by 24.9517\% in their scaled
+control-energy objective and fail the 5\% optimality gate. The result
+therefore supports only local model-scenario feasibility and supplies no
+controller, effort, human, or coaching ranking. A phase-resolved
+proximal-motion study evaluates 126 rate cases under relative-rate,
+absolute-rate, and exact total-kinetic-energy matching, plus 45
+identical-state acceleration interventions. The large pre-impact rate
+trend nearly vanishes under energy matching, and increasing proximal
+acceleration raises interface power while reducing club angular
 acceleration before impact. A separate 60-program grid is more
 adversarial: among 26 valid impacts, release-state proximal velocity
 correlates negatively with impact speed and positively with negative
@@ -507,7 +516,7 @@ with the document for independent inspection and reuse.
 
 \chapter{Introduction}\label{sec-intro}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, opacityback=0, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomtitle=1mm, coltitle=black, titlerule=0mm, colframe=quarto-callout-note-color-frame, left=2mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, bottomrule=.15mm, colback=white, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, toptitle=1mm, opacityback=0, leftrule=.75mm, opacitybacktitle=0.6, arc=.35mm, breakable, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, rightrule=.15mm, coltitle=black, toprule=.15mm, bottomrule=.15mm, left=2mm, colback=white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2812,7 +2821,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, opacityback=0, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, bottomtitle=1mm, coltitle=black, titlerule=0mm, colframe=quarto-callout-note-color-frame, left=2mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, bottomrule=.15mm, colback=white, rightrule=.15mm, toprule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, toptitle=1mm, opacityback=0, leftrule=.75mm, opacitybacktitle=0.6, arc=.35mm, breakable, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, rightrule=.15mm, coltitle=black, toprule=.15mm, bottomrule=.15mm, left=2mm, colback=white]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -10284,6 +10293,73 @@ neural allocation, passive negative torque, robustness to delay, fatigue
 or noise, or a coaching benefit. Those remain separate falsification
 gates.
 
+\subsection{Bounded Nonlinear Event
+Reachability}\label{sec-ladder-bounded-event-reachability}
+
+The next registered test replaces infinitesimal authority with finite
+bounded control perturbations. It uses four-interval multiple shooting
+and propagates every interval with the same exact RK4 operator as the
+parent trajectory. The decision variables are the two torque
+perturbations in each interval, the intermediate states, and a final
+partial-step duration constrained to the nominal crossing bracket. For
+scaled control perturbation \(\delta\mathbf u_j\) and interval duration
+\(\Delta t_j\), the declared objective is
+
+\begin{equation}\phantomsection\label{eq-ladder-bounded-event-objective}{
+J_u=\sum_j \Delta t_j
+\left\|\mathbf S_u^{-1}\delta\mathbf u_j\right\|_2^2,
+}\end{equation}
+
+subject to exact step continuity, the three-coordinate event-tangent
+target, \(\pm20\) N m scenario bounds on each enabled torque channel,
+and 10,000 N m s\(^{-1}\) scenario slew limits. These bounds are model
+scenarios, not measurements of human torque or torque-rate capacity. An
+independently replayed trajectory, rather than the optimizer's internal
+state nodes, determines the final feasibility type.
+
+The continuation matrix crosses seven symmetric tangent targets (\(0\),
+\(\pm0.5\), \(\pm1.0\), and \(\pm2.0\) mrad) with four matched channel
+masks: both torques, shoulder only, wrist only, and zero incremental
+authority. All 28 events remain unique and transverse. Thirty-two of the
+38 total registered replays are feasible. The six infeasible outcomes
+are exactly the six displaced targets under the zero-authority
+killswitch; its nominal target remains feasible. Both enabled channels,
+either channel alone, the three- and five-segment meshes, 1, 2, and 4 ms
+RK4 steps, and both adverse initial states reach their registered
+targets. Across feasible cases, the largest independent event-tangent
+residual is \(8.83\times10^{-11}\), below the declared
+\(2\times10^{-6}\) gate.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_bounded_event_reachability.pdf}
+
+}
+
+\caption{\label{fig-bounded-event-reachability}Bounded Event
+Reachability Separates Feasibility From Optimality}
+
+\end{figure}%
+
+Feasibility does not qualify an optimum. Two converged starts for the
+same both-channel target return scaled objectives of
+\(2.05356\times10^{-8}\) and \(2.56595\times10^{-8}\), a 24.9517\%
+relative spread against the preregistered 5\% gate. The study therefore
+releases the registered local feasibility result but suppresses channel,
+controller, effort, and optimality rankings. The fact that both
+one-channel masks reach all registered targets also supplies no basis
+for preferring a shoulder- or wrist-dominant strategy.
+
+The result is restricted to one synthetic planar trajectory, one event
+guard, small tangent offsets, and an event time confined to the nominal
+crossing bracket. It does not map global nonlinear reachability,
+alternative crossing topology, delay, fatigue, noise, bilateral contact,
+passive negative torque, human actuation, participant behavior, or
+coaching benefit. Those remain separate model and governed-data
+falsification gates.
+
 \section{Three-Dimensional Frame
 Audit}\label{sec-ladder-three-dimensional}
 
@@ -13333,7 +13409,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 317 material claims. The normalized outcome
+The current census contains 319 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -13362,7 +13438,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 297 \\
+\texttt{supported} & 299 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -13388,8 +13464,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 102 \\
-\texttt{project\_executable\_or\_generated} & 288 \\
+\texttt{project\_derivation\_or\_document} & 104 \\
+\texttt{project\_executable\_or\_generated} & 290 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -13410,7 +13486,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 263 \\
+\texttt{project\_only} & 265 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -13431,11 +13507,11 @@ Model Tier & Claim Count \\
 \endlastfoot
 \texttt{articulated\_spatial} & 32 \\
 \texttt{compliant\_shaft} & 66 \\
-\texttt{cross\_tier\_synthesis} & 69 \\
+\texttt{cross\_tier\_synthesis} & 71 \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
-\texttt{planar\_reduced} & 142 \\
+\texttt{planar\_reduced} & 144 \\
 \texttt{spatial\_reduced} & 76 \\
 \texttt{two\_hand\_or\_bilateral} & 94 \\
 \texttt{uncertainty\_or\_control} & 10 \\
@@ -13462,7 +13538,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 273 \\
+\texttt{none\_declared} & 275 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -13507,7 +13583,7 @@ Flag
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-ch01 introduction & 3 & 0 / 2 / 1 & mixed independence \\
+ch01 introduction & 1 & 0 / 1 / 0 & external support concentrated \\
 ch02 mechanics & 33 & 5 / 17 / 11 & mixed independence \\
 ch03 evidence & 13 & 1 / 10 / 2 & mixed independence \\
 ch03 interaction forces & 10 & 8 / 1 / 1 & mixed independence \\
@@ -13522,28 +13598,29 @@ ch04 counterfactuals & 5 & 4 / 0 / 1 & mixed independence \\
 ch05 two hand wrench & 21 & 21 / 0 / 0 & project authored only \\
 ch05a interactive workbench & 1 & 1 / 0 / 0 & project authored only \\
 ch05b forward two hand & 15 & 15 / 0 / 0 & project authored only \\
+ch06 methods & 1 & 1 / 0 / 0 & project authored only \\
 ch06 shaft contributions & 15 & 15 / 0 / 0 & project authored only \\
 ch06b coupled base flex & 14 & 14 / 0 / 0 & project authored only \\
 ch06bb shaft beam reference & 2 & 2 / 0 / 0 & project authored only \\
 ch06bbb forward modal shaft & 7 & 7 / 0 / 0 & project authored only \\
 ch06bc torque allocation preload & 7 & 7 / 0 / 0 & project authored
 only \\
-ch06c spatial cross formulation & 43 & 43 / 0 / 0 & project authored
+ch06c spatial cross formulation & 44 & 44 / 0 / 0 & project authored
 only \\
-ch06ca articulated ground & 4 & 4 / 0 / 0 & project authored only \\
-ch06cb spatial cross tail & 5 & 5 / 0 / 0 & project authored only \\
+ch06ca articulated ground & 1 & 1 / 0 / 0 & project authored only \\
+ch06cb spatial cross tail & 6 & 6 / 0 / 0 & project authored only \\
 ch06cc spatial forward contact & 8 & 8 / 0 / 0 & project authored
 only \\
 ch06d uncertainty control & 10 & 10 / 0 / 0 & project authored only \\
 ch06e experimental protocol & 1 & 1 / 0 / 0 & project authored only \\
-ch07 model ladder & 23 & 23 / 0 / 0 & project authored only \\
-ch07 results & 8 & 8 / 0 / 0 & project authored only \\
+ch06f open release & 1 & 1 / 0 / 0 & project authored only \\
+ch07 model ladder & 26 & 26 / 0 / 0 & project authored only \\
+ch07 results & 7 & 7 / 0 / 0 & project authored only \\
 ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
 ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\
 ch08b momentum transfer questions & 10 & 10 / 0 / 0 & project authored
 only \\
-proximal distal energy transfer & 3 & 3 / 0 / 0 & project authored
-only \\
+ch09 conclusions & 4 & 2 / 1 / 1 & mixed independence \\
 \end{longtable}
 
 Evidence-tier, model-tier, and unresolved-replication labels are
@@ -13819,6 +13896,12 @@ Recorded outputs:
   Gramians, event-tangent projection, channel masks, direct nonlinear
   pulse controls, frozen-local countermodels, refinement, additivity,
   zero-input, and equivalent-unit gates.
+\item
+  \texttt{data/bounded\_event\_reachability.\{json,npz\}} --- finite
+  event-tangent continuation, exact-RK4 multiple shooting and
+  independent replay, four channel masks, declared amplitude/slew
+  limits, typed failures, and multistart, mesh, step, zero-authority,
+  and adverse-state controls.
 \item
   \texttt{data/double\_pendulum\_identifiability.json} --- exact
   seven-coefficient inverse- dynamics factorization, analytic

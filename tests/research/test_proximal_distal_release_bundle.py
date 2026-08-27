@@ -26,6 +26,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "closed_loop_singularity_margin",
         "phase_event_stability",
         "trajectory_control_authority",
+        "bounded_event_reachability",
         "double_pendulum_identifiability",
         "forward_two_hand",
         "moving_base_flexible_club",
@@ -73,6 +74,9 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     )
     assert manifest["claims"]["trajectory_varying_event_control_authority"] == (
         "supported_for_declared_local_first_order_analytical_trajectory"
+    )
+    assert manifest["claims"]["bounded_nonlinear_event_reachability"] == (
+        "supported_for_registered_local_bounded_model_scenario"
     )
     assert manifest["claims"]["double_pendulum_base_coefficient_excitation"] == (
         "full_rank_for_registered_synthetic_record"
@@ -161,6 +165,16 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         ),
         "tier": (
             "analytical_double_pendulum_trajectory_varying_event_conditioned_authority"
+        ),
+    }
+    assert manifest["presets"]["bounded_event_reachability"] == {
+        "command": (
+            "python -m scripts.research.proximal_distal_energy."
+            "run_bounded_event_reachability write"
+        ),
+        "tier": (
+            "analytical_double_pendulum_bounded_nonlinear_same_bracket_"
+            "event_reachability"
         ),
     }
     allocation_command = manifest["presets"]["torque_allocation_preload"]["command"]

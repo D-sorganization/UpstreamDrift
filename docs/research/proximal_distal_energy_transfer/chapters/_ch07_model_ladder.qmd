@@ -384,6 +384,58 @@ reachability, controller superiority, human strength or neural allocation,
 passive negative torque, robustness to delay, fatigue or noise, or a coaching
 benefit. Those remain separate falsification gates.
 
+### Bounded Nonlinear Event Reachability {#sec-ladder-bounded-event-reachability}
+
+The next registered test replaces infinitesimal authority with finite bounded
+control perturbations. It uses four-interval multiple shooting and propagates
+every interval with the same exact RK4 operator as the parent trajectory. The
+decision variables are the two torque perturbations in each interval, the
+intermediate states, and a final partial-step duration constrained to the
+nominal crossing bracket. For scaled control perturbation
+$\delta\mathbf u_j$ and interval duration $\Delta t_j$, the declared objective
+is
+
+$$
+J_u=\sum_j \Delta t_j
+\left\|\mathbf S_u^{-1}\delta\mathbf u_j\right\|_2^2,
+$$ {#eq-ladder-bounded-event-objective}
+
+subject to exact step continuity, the three-coordinate event-tangent target,
+$\pm20$ N m scenario bounds on each enabled torque channel, and 10,000
+N m s$^{-1}$ scenario slew limits. These bounds are model scenarios, not
+measurements of human torque or torque-rate capacity. An independently
+replayed trajectory, rather than the optimizer's internal state nodes,
+determines the final feasibility type.
+
+The continuation matrix crosses seven symmetric tangent targets
+($0$, $\pm0.5$, $\pm1.0$, and $\pm2.0$ mrad) with four matched channel masks:
+both torques, shoulder only, wrist only, and zero incremental authority. All 28
+events remain unique and transverse. Thirty-two of the 38 total registered
+replays are feasible. The six infeasible outcomes are exactly the six displaced
+targets under the zero-authority killswitch; its nominal target remains
+feasible. Both enabled channels, either channel alone, the three- and
+five-segment meshes, 1, 2, and 4 ms RK4 steps, and both adverse initial states
+reach their registered targets. Across feasible cases, the largest independent
+event-tangent residual is $8.83\times10^{-11}$, below the declared
+$2\times10^{-6}$ gate.
+
+![Bounded Event Reachability Separates Feasibility From Optimality](figures/fig_bounded_event_reachability.pdf){#fig-bounded-event-reachability width=100%}
+
+Feasibility does not qualify an optimum. Two converged starts for the same
+both-channel target return scaled objectives of $2.05356\times10^{-8}$ and
+$2.56595\times10^{-8}$, a 24.9517% relative spread against the preregistered 5%
+gate. The study therefore releases the registered local feasibility result but
+suppresses channel, controller, effort, and optimality rankings. The fact that
+both one-channel masks reach all registered targets also supplies no basis for
+preferring a shoulder- or wrist-dominant strategy.
+
+The result is restricted to one synthetic planar trajectory, one event guard,
+small tangent offsets, and an event time confined to the nominal crossing
+bracket. It does not map global nonlinear reachability, alternative crossing
+topology, delay, fatigue, noise, bilateral contact, passive negative torque,
+human actuation, participant behavior, or coaching benefit. Those remain
+separate model and governed-data falsification gates.
+
 ## Three-Dimensional Frame Audit {#sec-ladder-three-dimensional}
 
 Planar vectors can be embedded in three dimensions and expressed in arbitrary

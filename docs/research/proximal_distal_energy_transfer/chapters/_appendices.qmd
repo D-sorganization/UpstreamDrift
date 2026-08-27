@@ -180,6 +180,10 @@ Recorded outputs:
   event-tangent projection, channel masks, direct nonlinear pulse controls,
   frozen-local countermodels, refinement, additivity, zero-input, and
   equivalent-unit gates.
+- `data/bounded_event_reachability.{json,npz}` — finite event-tangent
+  continuation, exact-RK4 multiple shooting and independent replay, four
+  channel masks, declared amplitude/slew limits, typed failures, and
+  multistart, mesh, step, zero-authority, and adverse-state controls.
 - `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse-
   dynamics factorization, analytic physical-map rank witness, three exact
   nonunique parameter families, dimensionless finite-record rank, unit and

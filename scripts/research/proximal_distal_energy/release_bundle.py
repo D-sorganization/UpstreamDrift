@@ -119,6 +119,13 @@ _RELEASE_METADATA: dict[str, Any] = {
                 "event_conditioned_authority"
             ),
         },
+        "bounded_event_reachability": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_bounded_event_reachability write",
+            "tier": (
+                "analytical_double_pendulum_bounded_nonlinear_"
+                "same_bracket_event_reachability"
+            ),
+        },
         "double_pendulum_identifiability": {
             "command": "python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability write",
             "tier": "analytical_double_pendulum_exact_map_and_dimensionless_finite_record",
@@ -278,6 +285,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "trajectory_varying_event_control_authority": (
             "supported_for_declared_local_first_order_analytical_trajectory"
+        ),
+        "bounded_nonlinear_event_reachability": (
+            "supported_for_registered_local_bounded_model_scenario"
         ),
         "double_pendulum_base_coefficient_excitation": (
             "full_rank_for_registered_synthetic_record"
