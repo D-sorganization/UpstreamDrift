@@ -630,8 +630,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.607                                            |
-| **Last Spec Update**    | 2026-08-26                                         |
+| **Spec Version**        | 1.0.608                                            |
+| **Last Spec Update**    | 2026-08-27                                         |
 
 ## 2. Purpose & Mission
 
@@ -3043,6 +3043,7 @@ overlapping fixture names in nested conftests.
 
 | Tool       | Version | Purpose                                                                            | Blocking? |
 | ---------- | ------- | ---------------------------------------------------------------------------------- | --------- |
+| 2026-08-27 | 1.0.608 | Optimized `max_linear_speed` array operations in `trajectory.py` using `np.einsum` to avoid intermediate array allocations and square root calculations. |
 | 2026-08-19 | 1.0.544 | Mapped the data authority's new `lateral_carry_yd`, `flight_time_s`, and `captured_at` corpus columns onto the canonical `lateral_carry`/`flight_time`/`captured_at` fields in `launch_monitor.corpus`, making the Dispersion (20,099 shots) and Trends (8,488 shots) tabs runnable against corpus data for the first time. Column selection now filters against the dataset schema so an older pinned corpus still loads. |
 | 2026-08-18 | 1.0.544 | Bumped `vendor/ud-tools` to the heavy-hit epic merge (Tools #4562/#4568): the coupled ball-head-hands impact model quantifying hand/body influence (<1% ball-speed effect for physiological hands, rigid-shaft upper bound reported), the `swing_sim.body_chain/1` golfer-model interchange with runtime-free MJCF/URDF/.osim parsers (MuJoCo, Drake, Pinocchio, OpenSim), and the `golf_club.impact_coupling_report/1` counterfactual wire. Launcher-manifest smoke test green on the new pin. |
 | 2026-08-18 | 1.0.543 | Bumped `vendor/ud-tools` 6472d03 -> ac59066: Tools' Club Fitting Tester epic C1-C5 (Tools #4549/#4557) - shared mesh inertia tensor, shaft forward-dynamics delivery deltas, the `golf_club.fitting_document/1` OEM wire, the `swing_sim.delivery_trajectory/1` biomech interchange with Drake/MuJoCo/OpenSim export adapters, and the counterfactual fitting engine emitting `golf_club.fitting_report/1`. Launcher-manifest smoke test green on the new pin. |
