@@ -515,7 +515,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1134-candidate paper inventory is adjudicated. Repeated "
+        "The complete 1148-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."
@@ -532,6 +532,37 @@ def _outcome(claim_id: str) -> str:
     if claim_id in CONTRADICTED_CLAIM_IDS:
         return "contradicted"
     raise ValueError(f"{claim_id}: no explicit reviewed adjudication outcome")
+
+
+def _validate_claim_outcome_partition(claims: list[dict[str, Any]]) -> None:
+    """Require every registered claim to have one unambiguous reviewed outcome."""
+    claim_ids = {claim.get("claim_id") for claim in claims}
+    reviewed_claim_ids = (
+        SUPPORTED_CLAIM_IDS
+        | UNTESTED_CLAIM_IDS
+        | INCONCLUSIVE_CLAIM_IDS
+        | CONTRADICTED_CLAIM_IDS
+    )
+    unreviewed = sorted(claim_ids - reviewed_claim_ids)
+    if unreviewed:
+        raise ValueError(
+            f"Registry contains claims without explicit reviewed outcomes: {unreviewed}"
+        )
+    missing = sorted(reviewed_claim_ids - claim_ids)
+    if missing:
+        raise ValueError(
+            f"Reviewed outcome IDs are missing from the registry: {missing}"
+        )
+    overlaps = (
+        (SUPPORTED_CLAIM_IDS & UNTESTED_CLAIM_IDS)
+        | (SUPPORTED_CLAIM_IDS & INCONCLUSIVE_CLAIM_IDS)
+        | (SUPPORTED_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
+        | (UNTESTED_CLAIM_IDS & INCONCLUSIVE_CLAIM_IDS)
+        | (UNTESTED_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
+        | (INCONCLUSIVE_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
+    )
+    if overlaps:
+        raise ValueError(f"Claim IDs have conflicting outcomes: {sorted(overlaps)}")
 
 
 def migrate(root: Path) -> dict[str, int]:
@@ -580,33 +611,7 @@ def migrate(root: Path) -> dict[str, int]:
         if reviewed_ids != candidate_ids:
             raise ValueError("Reconciled reviewer projection coverage is incomplete")
 
-    claim_ids = {claim.get("claim_id") for claim in claims}
-    reviewed_claim_ids = (
-        SUPPORTED_CLAIM_IDS
-        | UNTESTED_CLAIM_IDS
-        | INCONCLUSIVE_CLAIM_IDS
-        | CONTRADICTED_CLAIM_IDS
-    )
-    unreviewed = sorted(claim_ids - reviewed_claim_ids)
-    if unreviewed:
-        raise ValueError(
-            f"Registry contains claims without explicit reviewed outcomes: {unreviewed}"
-        )
-    missing = sorted(reviewed_claim_ids - claim_ids)
-    if missing:
-        raise ValueError(
-            f"Reviewed outcome IDs are missing from the registry: {missing}"
-        )
-    overlaps = (
-        (SUPPORTED_CLAIM_IDS & UNTESTED_CLAIM_IDS)
-        | (SUPPORTED_CLAIM_IDS & INCONCLUSIVE_CLAIM_IDS)
-        | (SUPPORTED_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
-        | (UNTESTED_CLAIM_IDS & INCONCLUSIVE_CLAIM_IDS)
-        | (UNTESTED_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
-        | (INCONCLUSIVE_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
-    )
-    if overlaps:
-        raise ValueError(f"Claim IDs have conflicting outcomes: {sorted(overlaps)}")
+    _validate_claim_outcome_partition(claims)
 
     counts = dict.fromkeys(("supported", "contradicted", "inconclusive", "untested"), 0)
     migrated_claims: list[dict[str, Any]] = []
