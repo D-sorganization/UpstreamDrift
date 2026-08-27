@@ -5,6 +5,6 @@
 ## 2026-08-25 - [Optimize Argmax of Vector Magnitude]
 **Learning:** Calculating the `argmax` (or `argmin`) of vector magnitudes (e.g., `np.argmax(np.linalg.norm(arr, axis=1))`) incurs significant overhead due to intermediate array creations in `np.linalg.norm` and unnecessary square root calculations. Since square root is monotonically increasing, the index of the maximum magnitude is strictly the same as the index of the maximum squared magnitude. Using `np.einsum('ij,ij->i', arr, arr)` to directly compute the array of squared magnitudes yields the exact same index without any temporary allocations or root evaluations, which provides measurable speedup.
 **Action:** Replace `np.argmax(np.linalg.norm(arr, axis=1))` with `np.argmax(np.einsum('ij,ij->i', arr, arr))` to safely and efficiently optimize. Coerce `arr` with `np.asarray` first if it might not natively be a NumPy ndarray.
-## 2024-05-19 - Fast multidimensional array magnitude
+## 2024-05-19 - Fast Multidimensional Array Magnitude
 **Learning:** `np.linalg.norm(..., axis=1)` is known to be relatively slow due to internal overhead and intermediate array allocations. Replacing it with `np.sqrt(np.einsum('ij,ij->i', ...))` is a highly effective optimization that provides a significant speedup (often 2x-4x faster for small-to-medium arrays) while keeping the code readable.
 **Action:** When computing vector norms along an axis (other than small 2D vectors where `np.hypot` is best), use `np.sqrt(np.einsum)` instead of `np.linalg.norm` to avoid intermediate allocations and speed up the computation.
