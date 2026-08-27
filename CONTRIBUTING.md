@@ -5,7 +5,7 @@ Thank you for your interest in contributing to UpstreamDrift.
 `CLAUDE.md` is the authoritative source for repository rules and quality gates.
 This guide focuses on contribution flow and the minimum local steps to prepare a PR.
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Fork** the repository
 2. **Clone** your fork locally
@@ -15,7 +15,7 @@ This guide focuses on contribution flow and the minimum local steps to prepare a
 6. **Commit** with a descriptive message
 7. **Push** and create a Pull Request
 
-## 📋 Development Setup
+## Development Setup
 
 ```bash
 # Clone the repository
@@ -92,7 +92,7 @@ cd ui && npm run build
 # ui/dist is then included in `pip install -e .` builds via build_hooks.py.
 ```
 
-## ✅ Code Standards
+## Code Standards
 
 ### Python
 
@@ -130,7 +130,7 @@ python3 -m pytest
 > `.github/workflows/ci-standard.yml` is the canonical enforcement surface.
 > The coverage threshold is the `fail_under` value in `pyproject.toml [tool.coverage.report]`.
 
-## 🎯 Physics Engine Guidelines
+## Physics Engine Guidelines
 
 Current support tiers:
 
@@ -152,14 +152,14 @@ When adding engine-specific code:
   `src.shared.python.motion_matching.load_club_target`; this is enforced by
   `scripts/ci/check_no_engine_loader.py` and is a CI gate (issue #4254).
 
-## 🧪 Testing
+## Testing
 
 - 1,563+ tests in the test suite
 - Add tests for new functionality
 - Run `pytest` before submitting PR
 - Use existing test fixtures where possible
 
-## 📝 Commit Messages
+## Commit Messages
 
 Follow conventional commits:
 
@@ -170,13 +170,13 @@ Follow conventional commits:
 
 Example: `feat(mujoco): Add contact force visualization`
 
-## 📖 Documentation
+## Documentation
 
 - Update CHANGELOG.md under [Unreleased]
 - Add docstrings with parameter descriptions
 - Update engine-specific docs if applicable
 
-## 🤝 Pull Request Process
+## Pull Request Process
 
 1. Ensure CI passes (ruff check, ruff format, mypy, pytest)
 2. Update documentation

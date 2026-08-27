@@ -1,3 +1,5 @@
+# Introduction {#sec-intro}
+
 ::: {.callout-note}
 ## Scope and Evidence Categories
 
@@ -9,8 +11,6 @@ claims that remain to be tested in higher-fidelity models or human data.
 The distinction matters because agreement between a simplified model and
 prior literature is not independent empirical confirmation.
 :::
-
-# Introduction {#sec-intro}
 
 ## Motivation
 

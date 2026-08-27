@@ -58,6 +58,7 @@ from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 
+from bunkershot3d.geometry import TriangleMesh
 from bunkershot3d.solvers import (
     EnvelopeStatus,
     FidelityTier,
@@ -424,6 +425,13 @@ class ShotScene:
         head_point_body_m: ``(P, 3)`` head surface points in body axes [m];
             the solver's own element centroids, so the drawn head is the
             head that was integrated over.
+        head_mesh_body: The lofted, watertight head, in body axes -- the
+            same :class:`~bunkershot3d.geometry.TriangleMesh` the solver
+            discretised into ``head_point_body_m``, kept whole so a renderer
+            can draw the head as a solid rather than as its element cloud
+            (issue #8706 defect 1). Posed per frame by
+            :meth:`head_mesh_world_m`, the same pose that places
+            ``head_point_body_m``.
         sole_index: ``(K,)`` indices into ``head_point_body_m`` of the sole
             elements -- the ones whose outward normal points downward.
         sole_reference_body_m: ``(3,)`` the point the sole depth is measured
@@ -440,6 +448,7 @@ class ShotScene:
     position_m: NDArray[np.float64]
     orientation: NDArray[np.float64]
     head_point_body_m: NDArray[np.float64]
+    head_mesh_body: TriangleMesh
     sole_index: NDArray[np.int64]
     sole_reference_body_m: NDArray[np.float64]
     sole_depth_m: NDArray[np.float64]
@@ -481,6 +490,13 @@ class ShotScene:
             )
         if points.shape[0] == 0:
             raise ValueError("a shot scene needs at least one head point to draw")
+        if not isinstance(self.head_mesh_body, TriangleMesh):
+            raise ValueError(
+                "head_mesh_body must be the lofted TriangleMesh, not the "
+                f"element cloud; got {type(self.head_mesh_body).__name__}"
+            )
+        if self.head_mesh_body.n_faces == 0:
+            raise ValueError("a shot scene needs a head mesh with at least one face")
         sole = np.asarray(self.sole_index, dtype=np.int64).reshape(-1)
         if sole.size == 0:
             raise ValueError(
@@ -544,6 +560,11 @@ class ShotScene:
         return int(self.head_point_body_m.shape[0])
 
     @property
+    def n_head_mesh_faces(self) -> int:
+        """Number of triangles in the lofted head mesh."""
+        return self.head_mesh_body.n_faces
+
+    @property
     def status(self) -> EnvelopeStatus:
         """How much of this scene may be believed."""
         return self.verdict.status
@@ -585,6 +606,28 @@ class ShotScene:
         """
         index = self._check_frame(frame)
         rotated = self.head_point_body_m @ self.orientation[index].T
+        return np.asarray(rotated + self.position_m[index], dtype=np.float64)
+
+    def head_mesh_world_m(self, frame: int) -> NDArray[np.float64]:
+        """Return the lofted head mesh's vertices at one sample, world axes.
+
+        Posed the same way :meth:`head_world_m` poses the element cloud
+        (``v R^T + p``), so the solid a renderer draws and the centroids the
+        solver integrated over never disagree about where the head is. The
+        face topology (``head_mesh_body.faces``) does not depend on the
+        frame -- only these vertex positions do.
+
+        Args:
+            frame: The sample index.
+
+        Returns:
+            ``(V, 3)`` world vertices, in ``head_mesh_body.faces`` order.
+
+        Raises:
+            ValueError: If the index is outside the recorded shot.
+        """
+        index = self._check_frame(frame)
+        rotated = self.head_mesh_body.vertices @ self.orientation[index].T
         return np.asarray(rotated + self.position_m[index], dtype=np.float64)
 
     def sole_world_m(self, frame: int) -> NDArray[np.float64]:
@@ -708,9 +751,11 @@ def shot_scene(
 
     No solving and no re-simulation: the pose is the pose the march
     recorded, the surface is recovered from the same trace, and the divot is
-    accumulated from where the head's own sole points went. The head is
-    drawn from the solver's element centroids, so the head on screen is the
-    head that was integrated over.
+    accumulated from where the head's own sole points went. The scene
+    carries both the solver's own element centroids -- so a marker overlay
+    stays the head that was integrated over -- and the lofted watertight
+    mesh a renderer draws as a solid (issue #8706 defect 1); ``build`` has
+    already lofted it, so this never re-lofts.
 
     Args:
         build: The lofted head.
@@ -757,6 +802,7 @@ def shot_scene(
         position_m=positions,
         orientation=rotations,
         head_point_body_m=points_body,
+        head_mesh_body=build.loft.mesh,
         sole_index=sole_index,
         sole_reference_body_m=reference_body,
         sole_depth_m=result.sole_depths_m,

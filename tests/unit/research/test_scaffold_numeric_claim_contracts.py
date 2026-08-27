@@ -31,11 +31,23 @@ def test_scaffold_preserves_registered_coverage_and_reviewed_overrides() -> None
         claim_id
         for claim_id in scaffold_by_id
         if scaffold_by_id[claim_id] != registered_by_id[claim_id]
-    } == {"PD-CLAIM-313", "PD-CLAIM-314"}
+    } == {
+        "PD-CLAIM-313",
+        "PD-CLAIM-314",
+        "PD-CLAIM-315",
+        "PD-CLAIM-316",
+        "PD-CLAIM-317",
+        "PD-CLAIM-318",
+    }
 
     scaffold_reported = reported["claims"]
     reviewed_reported = registered_reported["claims"]
-    assert set(scaffold_reported) - set(reviewed_reported) == {"PD-CLAIM-313"}
+    assert set(scaffold_reported) - set(reviewed_reported) == {
+        "PD-CLAIM-313",
+        "PD-CLAIM-315",
+        "PD-CLAIM-316",
+        "PD-CLAIM-317",
+    }
     assert set(reviewed_reported) <= set(scaffold_reported)
     assert all(
         reviewed_reported[claim_id] == scaffold_reported[claim_id]

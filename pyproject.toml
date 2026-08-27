@@ -139,6 +139,16 @@ all-engines = ["upstream-drift[drake,pinocchio]"]
 # Opt-in: the renderer degrades with an install hint when absent.
 visualization = ["rerun-sdk>=0.15.0,<1.0.0"]
 
+# BunkerShot3D's VTK/PyVista viewport renderer (ADR-0027, issue #8706, epic
+# #8699). PyVista wraps VTK, which the ADR-0027 provider layer in
+# src/shared/python/visualization/viewport.py already detects
+# (ViewportProvider.VTK); installing this extra is what makes that provider
+# selectable -- the layer itself needs no change. Opt-in and NOT a dependency
+# of `bunkershot3d`: src/tools/bunker_shot_gui/render3d_vtk.py imports
+# pyvista lazily and degrades with an install hint when it is absent, so the
+# default install stays matplotlib-only via src/tools/bunker_shot_gui/render3d.py.
+viz3d = ["pyvista>=0.44"]
+
 # Trajectory optimization backends (epic #8390 B3/#8398). Opt-in: the
 # CasADi swing backend degrades with an install hint when absent.
 optimal-control = ["casadi>=3.6.0,<4.0.0"]
@@ -313,7 +323,7 @@ simscape_3d_golf_model = "src.launchers.adapters.simscape_embed"
 
 [project.urls]
 Homepage = "https://github.com/D-sorganization/UpstreamDrift"
-Documentation = "https://upstream-drift.readthedocs.io"
+Documentation = "https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/README.md"
 Repository = "https://github.com/D-sorganization/UpstreamDrift"
 
 [build-system]
@@ -670,6 +680,7 @@ markers = [
     "requires_jaxsim: tests that require the optional JaxSim/JAX stack (skipped when `import jaxsim` fails)",
     "requires_nimble: offline Nimble gradient-oracle tests (skipped when `import nimblephysics` fails)",
     "requires_rerun: tests that require the optional rerun-sdk visualization stack (skipped when `import rerun` fails)",
+    "requires_pyvista: tests that require the optional pyvista viz3d stack (skipped when `import pyvista` fails)",
     "requires_casadi: tests that require the optional casadi stack (skipped when `import casadi` fails)",
     "requires_crocoddyl: tests that require the optional crocoddyl stack (skipped when `import crocoddyl` fails)",
     "requires_sdformat: tests that require gz/ign/sdf sdformat CLI tooling (skipped when executables are absent)",
