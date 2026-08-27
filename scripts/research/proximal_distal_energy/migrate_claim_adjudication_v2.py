@@ -36,8 +36,11 @@ PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST = (
 PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST = (
     "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a"
 )
-PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST = (
+PRE_PAGINATION_REVIEWED_SOURCE_DIGEST = (
     "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe"
+)
+PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST = (
+    "cee6346b000295f370e96a56aac667501f0804e34c3f5375866f813dafa7b8b2"
 )
 PRE_REFINEMENT_PRECISION_REVIEWED_SOURCE_DIGEST = (
     "aa3fe6ce24c4f81e5364963d4aae7ad23b3b62edab85981918d831bc1adc1506"
@@ -45,8 +48,11 @@ PRE_REFINEMENT_PRECISION_REVIEWED_SOURCE_DIGEST = (
 PRE_DIRECT_TRANSITION_PRECISION_REVIEWED_SOURCE_DIGEST = (
     "7f066b6aa5f65190950fd6ff3514e7dd0ad2fea1d1c1e9db2dd86c50b6b9f33c"
 )
+PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST = (
+    "0cf9bd034c322ebe4ded8bb3fd7c60f301156cea135b2498eb6457251b94ba60"
+)
 REVIEWED_SOURCE_DIGEST = (
-    "ca16c2ea2551ae5a06a0b67e184cdddcd5ff931c6343a85aa6c600544cae003c"
+    "12bc44109474ecf9e63f29e9e371ee2da7fc434c8d9a5feddea4f408a29b9329"
 )
 MIGRATABLE_SOURCE_DIGESTS = frozenset(
     {
@@ -57,14 +63,16 @@ MIGRATABLE_SOURCE_DIGESTS = frozenset(
         PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
         PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
         PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
+        PRE_PAGINATION_REVIEWED_SOURCE_DIGEST,
         PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST,
         PRE_REFINEMENT_PRECISION_REVIEWED_SOURCE_DIGEST,
         PRE_DIRECT_TRANSITION_PRECISION_REVIEWED_SOURCE_DIGEST,
+        PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }
 )
 PRECURRENT_SOURCE_DIGESTS = MIGRATABLE_SOURCE_DIGESTS - {REVIEWED_SOURCE_DIGEST}
-REVIEWED_CLAIM_COUNT = 315
+REVIEWED_CLAIM_COUNT = 317
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -457,6 +465,8 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-314",
         "PD-CLAIM-315",
         "PD-CLAIM-316",
+        "PD-CLAIM-317",
+        "PD-CLAIM-318",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -534,7 +544,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1148-candidate paper inventory is adjudicated. Repeated "
+        "The complete 1154-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."
@@ -551,6 +561,42 @@ def _outcome(claim_id: str) -> str:
     if claim_id in CONTRADICTED_CLAIM_IDS:
         return "contradicted"
     raise ValueError(f"{claim_id}: no explicit reviewed adjudication outcome")
+
+
+def _validate_claim_outcome_partition(claims: list[dict[str, Any]]) -> None:
+    """Require every registered claim to have one unambiguous reviewed outcome."""
+    claim_ids: set[str] = set()
+    for claim in claims:
+        claim_id = claim.get("claim_id")
+        if not isinstance(claim_id, str) or not claim_id:
+            raise ValueError("Registry claim IDs must be non-empty strings")
+        claim_ids.add(claim_id)
+    reviewed_claim_ids = (
+        SUPPORTED_CLAIM_IDS
+        | UNTESTED_CLAIM_IDS
+        | INCONCLUSIVE_CLAIM_IDS
+        | CONTRADICTED_CLAIM_IDS
+    )
+    unreviewed = sorted(claim_ids - reviewed_claim_ids)
+    if unreviewed:
+        raise ValueError(
+            f"Registry contains claims without explicit reviewed outcomes: {unreviewed}"
+        )
+    missing = sorted(reviewed_claim_ids - claim_ids)
+    if missing:
+        raise ValueError(
+            f"Reviewed outcome IDs are missing from the registry: {missing}"
+        )
+    overlaps = (
+        (SUPPORTED_CLAIM_IDS & UNTESTED_CLAIM_IDS)
+        | (SUPPORTED_CLAIM_IDS & INCONCLUSIVE_CLAIM_IDS)
+        | (SUPPORTED_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
+        | (UNTESTED_CLAIM_IDS & INCONCLUSIVE_CLAIM_IDS)
+        | (UNTESTED_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
+        | (INCONCLUSIVE_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
+    )
+    if overlaps:
+        raise ValueError(f"Claim IDs have conflicting outcomes: {sorted(overlaps)}")
 
 
 def migrate(root: Path) -> dict[str, int]:
@@ -578,33 +624,7 @@ def migrate(root: Path) -> dict[str, int]:
         if reviewed_ids != candidate_ids:
             raise ValueError("Reconciled reviewer projection coverage is incomplete")
 
-    claim_ids = {claim.get("claim_id") for claim in claims}
-    reviewed_claim_ids = (
-        SUPPORTED_CLAIM_IDS
-        | UNTESTED_CLAIM_IDS
-        | INCONCLUSIVE_CLAIM_IDS
-        | CONTRADICTED_CLAIM_IDS
-    )
-    unreviewed = sorted(claim_ids - reviewed_claim_ids)
-    if unreviewed:
-        raise ValueError(
-            f"Registry contains claims without explicit reviewed outcomes: {unreviewed}"
-        )
-    missing = sorted(reviewed_claim_ids - claim_ids)
-    if missing:
-        raise ValueError(
-            f"Reviewed outcome IDs are missing from the registry: {missing}"
-        )
-    overlaps = (
-        (SUPPORTED_CLAIM_IDS & UNTESTED_CLAIM_IDS)
-        | (SUPPORTED_CLAIM_IDS & INCONCLUSIVE_CLAIM_IDS)
-        | (SUPPORTED_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
-        | (UNTESTED_CLAIM_IDS & INCONCLUSIVE_CLAIM_IDS)
-        | (UNTESTED_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
-        | (INCONCLUSIVE_CLAIM_IDS & CONTRADICTED_CLAIM_IDS)
-    )
-    if overlaps:
-        raise ValueError(f"Claim IDs have conflicting outcomes: {sorted(overlaps)}")
+    _validate_claim_outcome_partition(claims)
 
     counts = dict.fromkeys(("supported", "contradicted", "inconclusive", "untested"), 0)
     migrated_claims: list[dict[str, Any]] = []

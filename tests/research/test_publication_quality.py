@@ -188,10 +188,26 @@ def test_canonical_pdf_byte_identity_is_dependency_free() -> None:
     ]
 
     assert digest == (
-        "64f552741217fc627af0cdbbe4066fd430a7ed8a5d2ca05ad9f109cce794c52b"
+        "1783ba69c72f56bba1d3a0e43136afc9b6651d31e4bc453f9d2df61ffdcb1dcb"
     )
-    assert PDF.stat().st_size == 2_978_030
-    assert artifact == {"sha256": digest, "bytes": 2_978_030}
+    assert PDF.stat().st_size == 1_935_834
+    assert artifact == {"sha256": digest, "bytes": 1_935_834}
+
+
+@requires_fitz
+def test_opening_evidence_callout_is_not_split_across_pages() -> None:
+    assert fitz is not None
+    opening = "Scope and Evidence Categories"
+    closing = "prior literature is not independent empirical confirmation."
+    with fitz.open(PDF) as document:
+        page_text = [page.get_text() for page in document]
+
+    opening_pages = {index for index, text in enumerate(page_text) if opening in text}
+    closing_pages = {index for index, text in enumerate(page_text) if closing in text}
+    assert opening_pages == closing_pages, (
+        "The opening evidence-category callout must render on one page; "
+        f"opening={sorted(opening_pages)}, closing={sorted(closing_pages)}"
+    )
 
 
 @requires_fitz
@@ -207,11 +223,11 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
     )
 
     assert report["publication"]["sha256"] == (
-        "64f552741217fc627af0cdbbe4066fd430a7ed8a5d2ca05ad9f109cce794c52b"
+        "1783ba69c72f56bba1d3a0e43136afc9b6651d31e4bc453f9d2df61ffdcb1dcb"
     )
-    assert report["publication"]["bytes"] == 2_978_030
-    assert report["publication"]["pages"] == 246
-    assert report["publication"]["fast_web_access"] is False
+    assert report["publication"]["bytes"] == 1_935_834
+    assert report["publication"]["pages"] == 247
+    assert report["publication"]["fast_web_access"] is True
     assert report["navigation"] == {
         "outline_entries": 255,
         "uri_links": 194,
@@ -219,16 +235,16 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
         "invalid_uri_links": [],
         "invalid_internal_links": [],
     }
-    assert report["rendering"]["pages_rendered"] == 246
+    assert report["rendering"]["pages_rendered"] == 247
     assert report["rendering"]["errors"] == []
     assert report["accessibility"] == {
         "tagged": False,
-        "pages_with_extractable_text": 246,
+        "pages_with_extractable_text": 247,
         "font_inventory": {
-            "resources": 207,
-            "types": {"Type0": 17, "Type1": 67, "Type3": 123},
-            "type3_resources": 123,
-            "unembedded_resources": 67,
+            "resources": 136,
+            "types": {"Type0": 17, "Type1": 2, "Type3": 117},
+            "type3_resources": 117,
+            "unembedded_resources": 2,
         },
     }
     assert validate_publication_quality(report, profile="computational")["valid"]

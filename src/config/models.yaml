@@ -189,6 +189,22 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "swing_objective_lab"
+    name: "Swing Objective Lab"
+    description: "Compare downswings optimized for clubhead speed against centrifugal, Coriolis, energy, and impulse transfer"
+    type: "special_app"
+    path: "src/double_pendulum_golf/swing_objectives/__main__.py"
+    provider: "tools"
+    source_root: "../Tools/src/pendulum_simulator"
+    working_dir: "."
+    python_paths:
+      - "src"
+    launcher:
+      category: "simulation"
+      logo: "pendulum.svg"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "shot_tracer"
     name: "Shot Tracer"
     description: "Multi-model golf ball trajectory comparison (Waterloo, MacDonald, Nathan)"

@@ -21,9 +21,11 @@ from scripts.research.proximal_distal_energy.run_phase_event_stability import (
     REFINEMENT_RESIDUAL_GATE,
     REFINEMENT_RESIDUAL_SIGNIFICANT_DIGITS,
     REPORT_PATH,
+    TRANSVERSALITY_THRESHOLD_PER_S,
     build_report,
     canonicalize_direct_transition_residual,
     canonicalize_equivalent_unit_residual,
+    canonicalize_near_grazing_transversality,
     canonicalize_refinement_residual,
     validate_report,
 )
@@ -64,6 +66,15 @@ def test_equivalent_unit_residual_is_a_portable_decade_upper_bound() -> None:
     assert canonicalize_equivalent_unit_residual(8.88178e-16) == 1e-15
     with pytest.raises(ValueError, match="raw equivalent-unit residual"):
         canonicalize_equivalent_unit_residual(EQUIVALENT_UNIT_RESIDUAL_GATE)
+
+
+def test_near_grazing_transversality_canonicalization_is_fail_closed() -> None:
+    """Roundoff at a constructed orthogonal guard must not vary by runtime."""
+
+    assert canonicalize_near_grazing_transversality(-6.71921e-15) == 0.0
+    assert canonicalize_near_grazing_transversality(6.71921e-15) == 0.0
+    with pytest.raises(ValueError, match="outside the near-grazing threshold"):
+        canonicalize_near_grazing_transversality(TRANSVERSALITY_THRESHOLD_PER_S)
 
 
 @pytest.fixture(scope="module")

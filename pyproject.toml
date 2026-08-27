@@ -313,7 +313,7 @@ simscape_3d_golf_model = "src.launchers.adapters.simscape_embed"
 
 [project.urls]
 Homepage = "https://github.com/D-sorganization/UpstreamDrift"
-Documentation = "https://upstream-drift.readthedocs.io"
+Documentation = "https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/README.md"
 Repository = "https://github.com/D-sorganization/UpstreamDrift"
 
 [build-system]

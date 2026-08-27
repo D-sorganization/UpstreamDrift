@@ -598,6 +598,12 @@ def _array_payload(parts: _EvidenceParts) -> dict[str, np.ndarray]:
     event = base.trajectory
     trajectory = event.trajectory
     full_event = base.event_cases["full"]
+    if (
+        full_event.projection is None
+        or full_event.tangent_basis is None
+        or full_event.tangent_gramian is None
+    ):
+        raise ValueError("full event case must retain its transverse projection")
     return {
         "time_s": trajectory.time_s,
         "step_durations_s": event.step_durations_s,
@@ -817,7 +823,7 @@ def write_evidence() -> None:
     REPORT_PATH.write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
-    np.savez_compressed(ARRAY_PATH, **arrays)
+    np.savez_compressed(ARRAY_PATH, **arrays)  # type: ignore[arg-type]
 
 
 def main() -> None:

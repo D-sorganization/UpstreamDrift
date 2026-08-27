@@ -61,6 +61,10 @@ FALLBACK_ADAPTER_MODULES = (
     # ("3D_Golf_Model") that is not a valid dotted-import identifier, so
     # it is reached through an importable shim (issue #8856).
     "src.launchers.adapters.simscape_embed",
+    # Swing Objective Lab: the widget ships in the Tools pendulum_simulator
+    # provider, so the adapter lives here rather than making the provider
+    # import UpstreamDrift (Tools epic #4766).
+    "src.launchers.adapters.swing_objective_lab_embed",
 )
 
 # Registry state tracking

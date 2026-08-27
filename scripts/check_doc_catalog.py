@@ -83,11 +83,30 @@ def _documentation_url() -> str:
     return ""
 
 
+DOCS_HUB_LINK = re.compile(r"\[[Dd]ocumentation [Hh]ub\]\((?P<target>[^)\s]+)\)")
+# The Documentation URL in pyproject may be an https link to the hub file on the
+# forge; the README normally links the same file by repository-relative path.
+# Both are the same destination, so accept either.
+CANONICAL_HUB_PATH = "docs/README.md"
+
+
 def _readme_links_rendered_docs(docs_url: str) -> bool:
+    """Return True when the README links the same docs hub pyproject declares.
+
+    Accepts the declared URL verbatim, or the repository-relative path to the
+    same file when the declared URL is a forge link to it. The contract is that
+    the README and the package metadata agree on where documentation lives -
+    not that a particular spelling is used.
+    """
     if not README_PATH.exists() or not docs_url:
         return False
     readme = README_PATH.read_text(encoding="utf-8")
-    return "[Documentation Hub](" + docs_url + ")" in readme
+    accepted = {docs_url}
+    if docs_url.startswith("https://") and docs_url.endswith(CANONICAL_HUB_PATH):
+        accepted.add(CANONICAL_HUB_PATH)
+    return any(
+        match.group("target") in accepted for match in DOCS_HUB_LINK.finditer(readme)
+    )
 
 
 def _catalog_errors() -> list[str]:

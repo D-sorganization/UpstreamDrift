@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-trajectory-control-authority/v1",
   "model_tier": "analytical_double_pendulum",
   "source_identity": {
-    "phase_event_array_sha256": "3ec34ca51823849371b8045e668ce5357ef3f9c4be4309e4478e035921dc012e",
+    "phase_event_array_sha256": "f5d075dacbd7f5b5d352521360dfada7ced7663bc6bb5e96d3a62ae4cd34c362",
     "phase_event_report_schema": "proximal-distal-phase-event-stability/v1",
     "phase_event_report_sha256": "ee594a499c4f0d9c11e50f6cc3161b7b47c641712f782e99a16b1270f7028fc0",
     "required_parent_pr": 9117,

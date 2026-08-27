@@ -156,12 +156,7 @@ def registered_step(
     time_s: float,
     dt_s: float,
 ) -> FloatArray:
-    """Advance the exact registered RK4 map with validated inputs.
-
-    The returned state is finite and independent of the caller's input arrays.
-    This public boundary lets later variational studies differentiate the same
-    step operator without copying its backend reset/control semantics.
-    """
+    """Advance the registered RK4 map through a validated public boundary."""
 
     vector = _vector("state", state, size=4)
     command = _vector("control", control, size=2)

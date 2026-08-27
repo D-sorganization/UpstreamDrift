@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation hub
+    url: https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/README.md
+    about: Installation, engine selection, motion capture, and API reference.
+  - name: Troubleshooting
+    url: https://github.com/D-sorganization/UpstreamDrift/tree/main/docs/troubleshooting
+    about: Installation failures, configuration problems, and known cross-engine deviations.
+  - name: Security vulnerabilities
+    url: https://github.com/D-sorganization/UpstreamDrift/blob/main/SECURITY.md
+    about: Report vulnerabilities privately. Do not open a public issue.
