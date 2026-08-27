@@ -69,19 +69,13 @@ is the single proximal-to-distal completion authority.
 - Regular planar rank/nullity is 4/1; the constructed adverse alignment is
   3/2 but is not a qualified anatomical pose. Separated/coincident point-force
   maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
-- #9113 is implemented in open PR #9114 on
-  `research/9113-closed-loop-margins`. Exact triangle
-  closure covers both branches and 181 phases each; all 362 nominal samples
-  close below `1.67e-16` m with rank/nullity 4/1. Exact 0.03 m and 1.53 m
-  degeneracies are 3/2. A five-offset by five-tolerance matrix retains the
-  observed numerical rank boundary without calling it physical.
-- Phase, scale, feasible/impossible geometry, equivalent-unit, and manufactured
-  rank controls pass. Python 3.12 CI exposed platform SVD roundoff; the corrected
-  publication bounds all expected-zero SVD diagnostics by conservative powers
-  of ten, including exact null singular values, while rank decisions retain raw
-  precision. The 58-test focused gate and 636-artifact release validation pass.
-  This is planar kinematics only: no force, anatomy, passive torque, human
-  occurrence, strategy, or coaching inference is authorized.
+- PR #9114 is merged as `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`.
+  Exact triangle closure covers both branches and 181 phases each; all 362
+  nominal samples close below `1.67e-16` m with rank/nullity 4/1. Exact 0.03 m
+  and 1.53 m degeneracies are 3/2. Phase, scale, geometry, equivalent-unit, and
+  manufactured-rank controls pass. This is planar kinematics only: no force,
+  anatomy, passive torque, human occurrence, strategy, or coaching inference
+  is authorized.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 
@@ -115,10 +109,15 @@ is the single proximal-to-distal completion authority.
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
 - #9049, #9100, #9108, #9110, and #9114 are merged; #9114 completed #9113's singular-margin slice.
-- #8358's gateway, localized adapters, cross-engine evidence, and Tools-owned presentation are complete in protected #9134. #9135 moves the opening evidence callout under Chapter 1, regenerates the PDF/release locks, and adds a same-page regression before AffineDrift #3930 pins the next immutable source.
+- #8358 is complete in protected PR #9134 (`f3832b04454c97a7a0999906972f394474107dd7`).
+  PR #9137 is current `main` at `7ab5f26e9e716eb97a2b9c28bfd3b27271aec89b`
+  with the qualified 245-page PDF and complete 636-artifact release.
 - #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
 - #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound; fresh protected evidence is required, and no runner change or smoke exemption is authorized.
-- Tools #4142 is closed with R10-R15 protected evidence. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge.
+- Tools #4142 is closed; provider commit `3dfbd32cc778536269670c055955073853c0f60a`
+  remains an ancestor of Tools `main`. AffineDrift PR #3986 is merged as
+  `bec7a92025bdc777cd0a9008a57ecd5c5765cf6f`, closing #3930 with a complete
+  immutable projection of this UpstreamDrift release.
 
 ## Scientific and Review Invariants
 

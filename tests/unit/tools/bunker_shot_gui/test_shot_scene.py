@@ -18,13 +18,23 @@ because they are properties of the *data* and a renderer cannot restore them:
 * the divot section is the **swept lower envelope of the head**, not transported
   sand. F0 never moves a grain, so the only honest divot at this tier is a
   statement about where the head has been.
+
+A third property is pinned here too, added for the "cloud of dots" half of
+issue #8706's own defect 1: the scene carries the lofted, watertight
+:class:`~bunkershot3d.geometry.TriangleMesh` alongside the element centroids,
+posed by :meth:`~.shot3d.ShotScene.head_mesh_world_m` the same way the
+centroids are -- so a renderer can draw the head as the solid it is rather
+than as the point cloud that used to stand in for it.
 """
 
 from __future__ import annotations
 
+import dataclasses
+
 import numpy as np
 import pytest
 
+from bunkershot3d.geometry import TriangleMesh
 from bunkershot3d.solvers import EnvelopeStatus, FidelityTier
 from src.shared.python.visualization.viewport import ViewportOverlayPayload
 from src.tools.bunker_shot_gui.shot3d import (
@@ -86,6 +96,75 @@ class TestThePoseComesFromTheRecordedShot:
     ) -> None:
         with pytest.raises(ValueError, match="outside the recorded shot"):
             nominal_scene.head_world_m(nominal_scene.n_frames)
+
+
+class TestTheSceneCarriesTheLoftedHeadMesh:
+    """#8706 defect 1: the head was a cloud of dots, not a solid.
+
+    The scene used to hand a renderer only the solver's element centroids,
+    which is what made a scatter the only thing there was to draw. The
+    watertight mesh those centroids were themselves discretised from was
+    already sitting in the ``HeadBuild`` the whole time; this pins that it
+    now travels with the scene, posed the same way.
+    """
+
+    def test_the_mesh_is_the_lofted_triangle_mesh(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        assert isinstance(nominal_scene.head_mesh_body, TriangleMesh)
+        assert nominal_scene.head_mesh_body.n_faces > 0
+
+    def test_the_mesh_has_a_face_per_non_degenerate_element(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        """``SurfaceElements.from_mesh`` is one element per non-degenerate
+        face, so the mesh can only ever have as many faces as there are
+        elements, or a few more from the degenerate ones the solver drops.
+        Never fewer -- a coarser stand-in mesh would be exactly the #8706
+        defect this scene exists to rule out."""
+        assert nominal_scene.n_head_mesh_faces >= nominal_scene.n_head_points
+
+    def test_the_property_matches_the_mesh_itself(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        assert nominal_scene.n_head_mesh_faces == nominal_scene.head_mesh_body.n_faces
+
+    def test_the_mesh_is_posed_by_the_recorded_pose(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        """``v R^T + p``, the same formula :meth:`head_world_m` poses the
+        element centroids with -- so the solid a renderer draws and the
+        centroids the solver integrated over never disagree about where
+        the head is."""
+        frame = 0
+        expected = (
+            nominal_scene.head_mesh_body.vertices @ nominal_scene.orientation[frame].T
+            + nominal_scene.position_m[frame]
+        )
+        assert np.allclose(nominal_scene.head_mesh_world_m(frame), expected)
+
+    def test_the_posed_mesh_moves_with_the_shot(self, nominal_scene: ShotScene) -> None:
+        first = nominal_scene.head_mesh_world_m(0)
+        last = nominal_scene.head_mesh_world_m(nominal_scene.n_frames - 1)
+        assert first.shape == last.shape == nominal_scene.head_mesh_body.vertices.shape
+        assert not np.allclose(first, last)
+
+    def test_a_mesh_frame_outside_the_record_is_refused(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        with pytest.raises(ValueError, match="outside the recorded shot"):
+            nominal_scene.head_mesh_world_m(nominal_scene.n_frames)
+
+    def test_a_scene_refuses_a_head_mesh_that_is_not_a_triangle_mesh(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        """The element cloud is not a substitute for the mesh: a scene built
+        with, say, the centroids in this slot would silently put the #8706
+        defect back."""
+        with pytest.raises(ValueError, match="TriangleMesh"):
+            dataclasses.replace(
+                nominal_scene, head_mesh_body=nominal_scene.head_point_body_m
+            )
 
 
 class TestTheSandSurfaceIsAHeightNotABed:
