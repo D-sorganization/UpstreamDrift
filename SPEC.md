@@ -4532,3 +4532,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Model Explorer: propagate load_model boolean success status to caller slots and guard status bar updates against failed loads (#9041).
 - Decomposed 13 oversized proximal-distal research registration, authority, and study orchestrator functions below 100 lines and <= 8 parameters without altering numerical outputs or claim evidence (#8963).
 - Split `src/tools/launch_monitor_analytics/gui.py` back under the 1200-line file-size budget after the #8825 stale-canvas fix: extracted `PlotCanvas` to a new `plot_canvas.py` module and the module-level `_selected_text`/`_populate_combo` helpers into `widgets.py` (`PlotCanvas` re-exported from `gui.py` for compatibility, no behavior change).
+- Replaced `np.linalg.norm(vectors, axis=1)` with `np.sqrt(np.einsum('ij,ij->i', vectors, vectors))` in `src/bunkershot3d/geometry/mesh.py` for performance. (spec-exempt: micro-optimization)
