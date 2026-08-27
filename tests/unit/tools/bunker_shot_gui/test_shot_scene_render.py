@@ -14,13 +14,30 @@ the three properties that make the picture safe to show someone:
   fixed exactly this bug for the sole load field, where per-grid
   auto-scaling made two grinds look identical however far apart they were;
 * the frame says the sand is a free-surface height rather than a grain bed.
+
+Two more properties are pinned here for #8706's own two defects, and both
+need a real rendered frame rather than an unrasterised one, since both
+defects were only visible once pixels existed:
+
+* the head is a solid :class:`~mpl_toolkits.mplot3d.art3d.Poly3DCollection`
+  built from the lofted mesh, not a scatter of element centroids
+  (defect 1) -- checked, after a real draw, by counting the collection's
+  own rendered faces against the scene's;
+* the footer caption never runs off the figure it is drawn on (defect 2) --
+  checked by measuring the caption Text artist's actual window extent
+  against the figure's, the same measurement
+  :mod:`~src.tools.bunker_shot_gui.render3d` itself uses to wrap it, so this
+  is a real regression test for "...not where sand h", not a guess at one.
 """
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
+from matplotlib.text import Text
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from src.tools.bunker_shot_gui.render3d import (
     SceneScale,
@@ -31,6 +48,9 @@ from src.tools.bunker_shot_gui.render3d import (
 from src.tools.bunker_shot_gui.shot3d import CameraPreset, ShotScene
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
+
+_STILL_FIGSIZE = (9.0, 6.5)
+"""The size the #8706 defect 2 bug report was filed against."""
 
 
 @pytest.fixture(scope="session")
@@ -46,6 +66,44 @@ def _texts(figure: Figure) -> str:
     return "\n".join(
         text.get_text() for axes in figure.axes for text in axes.texts
     ) + "\n".join(axes.get_title() for axes in figure.axes)
+
+
+def _draw(figure: Figure) -> None:
+    """Force a real Agg draw, so paths and text extents are populated.
+
+    Everything else in this file asserts on artists before a draw, which is
+    enough for their properties -- but a ``Poly3DCollection``'s per-face
+    paths and a ``Text``'s window extent are only computed by a draw, the
+    same way :func:`~.render3d._figure_renderer` forces one for a bare
+    figure rather than trusting an unrasterised state.
+    """
+    FigureCanvasAgg(figure).draw()
+
+
+def _footer_caption(figure: Figure) -> Text:
+    """Find the footer caption among a figure's texts, by its own content.
+
+    Identified rather than reached for by attribute name: every other test
+    in this file goes through the same public ``axes.texts``, and the
+    caption is the only text carrying the divot's own wording.
+    """
+    for axes in figure.axes:
+        for text in axes.texts:
+            if "F0 moves no sand" in text.get_text():
+                return text
+    raise AssertionError("no footer caption text found in the figure")
+
+
+def _head_mesh_collection(figure: Figure) -> Poly3DCollection:
+    """Find the clubhead's solid mesh collection among a figure's axes."""
+    for axes in figure.axes:
+        for collection in axes.collections:
+            if (
+                isinstance(collection, Poly3DCollection)
+                and collection.get_label() == "clubhead (lofted mesh)"
+            ):
+                return collection
+    raise AssertionError("no clubhead mesh collection found in the figure")
 
 
 class TestTheFrameIsDrawnInThreeDimensions:
@@ -277,3 +335,135 @@ class TestTheRendererIsTheDegradedOne:
         assert np.allclose(
             artists.payload.trajectory_xyz, nominal_scene.sole_reference_world_m
         )
+
+
+class TestTheHeadIsDrawnAsASolid:
+    """#8706 defect 1: the head used to render as a cloud of dots.
+
+    ``render3d.py`` used to draw the element centroids as a marker-only
+    line -- twice, once labelled "head surface" and once "sole elements" --
+    which is what made the clubhead look like a scatter rather than a
+    wedge. It is now a :class:`~mpl_toolkits.mplot3d.art3d.Poly3DCollection`
+    built from ``scene.head_mesh_body``, the same watertight mesh the F0
+    solver discretised, posed by :meth:`~.shot3d.ShotScene.head_mesh_world_m`.
+    """
+
+    def test_the_head_is_a_poly3dcollection_not_a_scatter(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        figure = shot_scene_still(nominal_scene)
+        assert _head_mesh_collection(figure) is not None
+
+    def test_the_rendered_face_count_matches_the_scenes_mesh(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        figure = shot_scene_still(nominal_scene)
+        _draw(figure)
+        collection = _head_mesh_collection(figure)
+        assert len(collection.get_paths()) == nominal_scene.n_head_mesh_faces
+
+    def test_the_mesh_is_translucent_so_the_divot_behind_it_still_reads(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        """An opaque solid would hide the divot floor behind it from every
+        camera that looks along the swing -- the whole point of drawing a
+        solid at all is to still be able to see past it."""
+        figure = shot_scene_still(nominal_scene)
+        collection = _head_mesh_collection(figure)
+        alpha = collection.get_alpha()
+        assert alpha is not None
+        assert 0.0 < alpha < 1.0
+
+    def test_updating_a_frame_moves_the_mesh_without_adding_collections(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        """Built once, mutated through ``set_verts`` -- never rebuilt per
+        frame, matching the existing build-once/mutate pattern this module
+        already used for the trail and the divot floor."""
+        figure = Figure(figsize=(6.0, 4.0))
+        artists = draw_scene_frame(figure, nominal_scene, frame=0)
+        axes = figure.axes[0]
+        before = len(axes.collections)
+        for frame in range(nominal_scene.n_frames):
+            artists.update(frame)
+        assert len(axes.collections) == before
+
+    def test_the_mesh_is_reposed_by_the_frame(self, nominal_scene: ShotScene) -> None:
+        figure = Figure(figsize=(6.0, 4.0))
+        artists = draw_scene_frame(figure, nominal_scene, frame=0)
+        _draw(figure)
+        first_paths = [
+            path.vertices.copy() for path in _head_mesh_collection(figure).get_paths()
+        ]
+        artists.update(nominal_scene.n_frames - 1)
+        _draw(figure)
+        last_paths = [
+            path.vertices.copy() for path in _head_mesh_collection(figure).get_paths()
+        ]
+        assert not all(
+            np.array_equal(a, b) for a, b in zip(first_paths, last_paths, strict=True)
+        )
+
+
+class TestTheFooterCaptionFitsTheFigure:
+    """#8706 defect 2: the caption used to clip mid-word at the right edge.
+
+    ``"...not where sand h"`` was the literal symptom -- an unwrapped
+    caption running past the figure's own right edge. Every check here
+    renders a real frame and measures the caption's actual rendered extent,
+    the same measurement ``render3d._recompute_note`` itself uses to decide
+    where to wrap, so this is a regression test for the pixels rather than
+    a guess about them.
+    """
+
+    @pytest.mark.parametrize("preset", list(CameraPreset))
+    def test_the_caption_never_runs_past_the_figures_right_edge(
+        self, nominal_scene: ShotScene, preset: CameraPreset
+    ) -> None:
+        figure = shot_scene_still(nominal_scene, camera=preset, figsize=_STILL_FIGSIZE)
+        _draw(figure)
+        renderer = figure.canvas.get_renderer()
+        caption = _footer_caption(figure)
+        bbox = caption.get_window_extent(renderer=renderer)
+        assert bbox.x1 <= figure.bbox.x1 + 1.0
+
+    @pytest.mark.parametrize("preset", list(CameraPreset))
+    def test_the_caption_stays_within_the_figures_left_edge_too(
+        self, nominal_scene: ShotScene, preset: CameraPreset
+    ) -> None:
+        figure = shot_scene_still(nominal_scene, camera=preset, figsize=_STILL_FIGSIZE)
+        _draw(figure)
+        renderer = figure.canvas.get_renderer()
+        bbox = _footer_caption(figure).get_window_extent(renderer=renderer)
+        assert bbox.x0 >= -1.0
+
+    def test_a_long_line_actually_wraps_into_more_than_one_row(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        """Proof the wrap is doing something, not just that nothing clips:
+        a figure narrow enough that even a short caption has to wrap."""
+        figure = shot_scene_still(
+            nominal_scene, camera=CameraPreset.SOLE_LEVEL, figsize=(4.0, 4.0)
+        )
+        caption = _footer_caption(figure)
+        assert caption.get_text().count("\n") > 2
+
+    def test_wrapping_never_drops_or_mangles_a_word(
+        self, nominal_scene: ShotScene
+    ) -> None:
+        """Wrapping only ever breaks at a space (see
+        ``render3d._wrap_to_pixels``), so collapsing the wrapped
+        whitespace back down must reproduce the three source lines
+        word for word -- proof nothing was clipped, not just that the
+        box it was clipped against moved."""
+        preset = CameraPreset.SOLE_LEVEL
+        figure = shot_scene_still(nominal_scene, camera=preset, figsize=_STILL_FIGSIZE)
+        caption = _footer_caption(figure)
+        expected = " ".join(
+            (
+                f"{preset.label} - {preset.description}",
+                nominal_scene.surface.describe(),
+                nominal_scene.divot.describe(),
+            )
+        ).split()
+        assert caption.get_text().split() == expected

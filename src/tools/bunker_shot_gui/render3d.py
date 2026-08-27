@@ -43,6 +43,25 @@ is the head's swept envelope. Neither is resolved sand, and both say so, in
 the axes rather than in a caption -- :class:`~.shot3d.SandSurface` and
 :class:`~.shot3d.DivotSection` compose those sentences and this module
 draws them.
+
+Two defects fixed here, both visible only in a rendered frame (issue #8706)
+------------------------------------------------------------------------
+
+The head used to be drawn as a scatter of the solver's own element
+centroids -- a cloud of dots standing in for a solid wedge. It is now the
+lofted, watertight mesh itself, posed every frame and drawn as a single
+translucent :class:`~mpl_toolkits.mplot3d.art3d.Poly3DCollection`, built
+once and mutated through the public ``set_verts`` the same way every other
+artist here is mutated rather than rebuilt.
+
+The footer caption used to run unwrapped off the right edge of the figure,
+clipped mid-word. It is now word-wrapped to how wide it actually renders in
+*this* figure's own font -- measured, not guessed at a character count --
+and the world box itself now fills most of the canvas rather than a
+fraction of it, within the one hard constraint mplot3d imposes on a 3-D
+panel: :meth:`~mpl_toolkits.mplot3d.axes3d.Axes3D.apply_aspect` always
+shrinks it to a square in physical inches, so a landscape figure keeps some
+white margin either side of it regardless.
 """
 
 from __future__ import annotations
@@ -50,9 +69,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+from matplotlib.backend_bases import RendererBase
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.text import Text
+from matplotlib.ticker import FixedLocator, MaxNLocator
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from numpy.typing import NDArray
 
@@ -80,15 +102,78 @@ _MM_PER_M = 1e3
 _SURFACE_COLOUR = "#d9c9a3"
 _SURFACE_ALPHA = 0.35
 _HEAD_COLOUR = "#5a5a5a"
+_HEAD_MESH_EDGE_COLOUR = "#f0f0f0"
+_HEAD_MESH_ALPHA = 0.62
+"""Translucent, not opaque: the divot floor behind the head must stay
+visible through it (issue #8706 defect 1), which an opaque solid would
+hide from every camera that looks along the swing."""
+_HEAD_MESH_LINEWIDTH = 0.15
 _SOLE_COLOUR = "#1f4e79"
+_SOLE_ALPHA = 0.55
 _PATH_COLOUR = "#9b1c1c"
 _FLOOR_COLOUR = "#6b4a1e"
 
-_HEAD_MARKER_PT = 1.2
-_SOLE_MARKER_PT = 2.4
+_SOLE_MARKER_PT = 1.6
+"""De-emphasised now that the head itself is the solid mesh: this cloud
+is kept only to mark which faces the solver classed as sole, not to stand
+in for the head's shape the way it used to (issue #8706 defect 1)."""
 
 _PADDING = 0.08
 """Slack added around the world box, as a fraction of its own span."""
+
+_TITLE_FONTSIZE = 8.0
+_LABEL_FONTSIZE = 7.0
+_TICK_FONTSIZE = 6.0
+_NOTE_FONTSIZE = 6.0
+_LABELPAD = 9.0
+_LABELPAD_Y = 34.0
+"""Extra padding the across-track label alone needs.
+
+At :attr:`~.shot3d.CameraPreset.SOLE_LEVEL` the eye sights along this axis,
+foreshortening it to nearly a point, so its ticks bunch up tightly and the
+common labelpad is not enough clearance for the label to sit clear of them
+-- the exact collision issue #8706 defect 2 named. The other two labels
+are never this foreshortened at any of the three presets, so they keep the
+common value.
+"""
+_TICK_PAD = 2.0
+_MAX_TICKS = 3
+"""Ticks per axis. Fewer numbers is fewer chances for two of them to
+collide when a camera foreshortens an axis toward a point (issue #8706
+defect 2, worst at :attr:`~.shot3d.CameraPreset.SOLE_LEVEL`)."""
+
+_BOX_ZOOM = 1.35
+"""How much of its allotted rectangle the 3-D box itself fills.
+
+mplot3d's own default (``zoom=1``) leaves the box well short of the axes
+rectangle it is drawn in, which is most of where the "60% empty canvas"
+half of defect 2 came from -- the rectangle was already close to the
+figure's own bounds; the box inside it was not.
+"""
+
+_FIGURE_MARGINS: dict[str, float] = {
+    "left": 0.02,
+    "right": 0.98,
+    "top": 0.95,
+    "bottom": 0.21,
+}
+"""Figure-fraction margins the whole frame is drawn within (issue #8706
+defect 2). Tight on three sides so the scene fills the canvas rather than
+sitting in a wide white border; generous on the bottom, which is not
+white border but the caption's own reserved band -- see
+:data:`_NOTE_TOP_MARGIN_FIG_FRACTION`.
+"""
+
+_NOTE_WIDTH_FRACTION = 0.97
+"""Fraction of the axes width the wrapped footer caption may use."""
+
+_NOTE_TOP_MARGIN_FIG_FRACTION = 0.02
+"""How far the caption's *last* line sits above the physical bottom of the
+figure, in figure fraction. The caption is anchored here and grows
+*upward* into the band :data:`_FIGURE_MARGINS`'s ``bottom`` reserves for
+it, rather than being anchored at the top of that band and risking a long
+wrap climbing back up into the tick labels above it.
+"""
 
 
 def _check_range(name: str, bounds: tuple[float, float]) -> tuple[float, float]:
@@ -229,18 +314,91 @@ def scene_scale(scenes: tuple[ShotScene, ...]) -> SceneScale:
     return merged
 
 
+def _figure_renderer(figure: Figure) -> RendererBase:
+    """Return a renderer that can measure text extents on ``figure``.
+
+    A figure a caller has already embedded -- the Qt workbench, through its
+    own ``FigureCanvasQTAgg`` -- carries a canvas that already supports
+    ``get_renderer``, and reusing it measures against the exact font this
+    figure will actually draw with. A bare :class:`~matplotlib.figure.Figure`
+    (a still, or a test) starts with matplotlib's base canvas, which cannot
+    measure anything; attaching an Agg canvas to it is exactly what
+    :meth:`~matplotlib.figure.Figure.savefig` would do to it regardless, so
+    doing it here first costs nothing that was not already going to happen.
+
+    Args:
+        figure: The figure the caption is being wrapped for.
+
+    Returns:
+        A renderer :meth:`~matplotlib.text.Text.get_window_extent` accepts.
+    """
+    get_renderer = getattr(figure.canvas, "get_renderer", None)
+    if get_renderer is not None:
+        return get_renderer()
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    return FigureCanvasAgg(figure).get_renderer()
+
+
+def _wrap_to_pixels(
+    probe: Text, renderer: RendererBase, line: str, max_width_px: float
+) -> list[str]:
+    """Word-wrap one line to a pixel budget, measured in ``probe``'s font.
+
+    The #8706 defect this fixes clipped a caption mid-word ("...not where
+    sand h"), so wrapping only ever breaks at a space -- a single word wider
+    than the budget is left whole on its own row rather than sliced.
+
+    Args:
+        probe: A ``Text`` artist already attached to the figure being
+            measured, so its font, size and family are what will actually be
+            drawn. Its content is overwritten by every candidate row this
+            probes; the caller is responsible for setting the text it
+            actually wants shown once wrapping is done.
+        renderer: A renderer ``probe`` can measure against, from
+            :func:`_figure_renderer`.
+        max_width_px: The budget one rendered row may not exceed.
+
+    Returns:
+        One or more rows, each within the budget except a single
+        unsplittable word.
+    """
+    words = line.split()
+    if not words:
+        return [""]
+    rows: list[str] = []
+    current = words[0]
+    for word in words[1:]:
+        candidate = f"{current} {word}"
+        probe.set_text(candidate)
+        width = probe.get_window_extent(renderer=renderer).width
+        if width <= max_width_px:
+            current = candidate
+        else:
+            rows.append(current)
+            current = word
+    rows.append(current)
+    return rows
+
+
 class ShotSceneArtists:
     """Axes built once for one scene, and the artists a frame change touches.
 
     The same pattern :class:`~.render.ShotFrameArtists` established: building
     a 3-D axes, its surface patch and its labels costs far more than the
     transport interval, so everything that does not depend on the sample is
-    built once and only the frame-varying artists are mutated -- two point
-    clouds, one trail, one divot profile, one stamp and one title.
+    built once and only the frame-varying artists are mutated -- the head
+    mesh, the sole point cloud, one trail, one divot profile, one stamp and
+    one title.
 
-    Every artist is a :class:`~matplotlib.lines.Line2D` in 3-D and is updated
-    through the public ``set_data_3d``. Nothing here reaches into a
-    collection's private offsets.
+    The head is a :class:`~mpl_toolkits.mplot3d.art3d.Poly3DCollection`
+    built once from ``scene.head_mesh_body.faces`` and re-posed every frame
+    through the public ``set_verts`` (issue #8706 defect 1) -- never
+    rebuilt, so a whole shot's worth of frames costs one collection, not
+    one per sample. Everything else here is a
+    :class:`~matplotlib.lines.Line2D` in 3-D, updated through the public
+    ``set_data_3d``. Nothing here reaches into a collection's private
+    offsets.
 
     The axis limits are set once from the injected :class:`SceneScale`, and
     ``autoscale`` is switched off, so no update path can reintroduce the
@@ -283,13 +441,20 @@ class ShotSceneArtists:
         self._fallback = viewport_fallback()
 
         figure.clear()
+        # Tight on three sides, generous on the fourth: the scene fills the
+        # canvas instead of sitting in a wide white border, and the bottom
+        # band left over is the wrapped caption's own reserved space, not
+        # waste (issue #8706 defect 2).
+        figure.subplots_adjust(**_FIGURE_MARGINS)
         axes = figure.add_subplot(111, projection="3d")
         self._axes: Axes3D = axes
         self._build_surface()
         self._floor = self._build_floor()
         self._trail = self._new_line(_PATH_COLOUR, 1.2, "sole reference path")
-        self._head = self._new_points(_HEAD_COLOUR, _HEAD_MARKER_PT, "head surface")
-        self._sole = self._new_points(_SOLE_COLOUR, _SOLE_MARKER_PT, "sole elements")
+        self._head_mesh = self._build_head_mesh()
+        self._sole = self._new_points(
+            _SOLE_COLOUR, _SOLE_MARKER_PT, "sole elements", alpha=_SOLE_ALPHA
+        )
         self._label_axes()
         self._stamp: Text = stamp_axes(
             axes,
@@ -304,7 +469,7 @@ class ShotSceneArtists:
             transform=axes.transAxes,
             ha="left",
             va="bottom",
-            fontsize=6,
+            fontsize=_NOTE_FONTSIZE,
             color="#333333",
             zorder=9,
         )
@@ -341,7 +506,9 @@ class ShotSceneArtists:
         )
         return line
 
-    def _new_points(self, colour: str, size: float, label: str) -> Line2D:
+    def _new_points(
+        self, colour: str, size: float, label: str, *, alpha: float = 1.0
+    ) -> Line2D:
         """Add an empty 3-D point cloud, drawn as a marker-only line.
 
         A ``Line2D`` rather than a scatter because ``set_data_3d`` is public
@@ -358,8 +525,39 @@ class ShotSceneArtists:
             marker=".",
             markersize=size,
             label=label,
+            alpha=alpha,
         )
         return line
+
+    def _build_head_mesh(self) -> Poly3DCollection:
+        """Draw the lofted head as a solid, once (issue #8706 defect 1).
+
+        Built from ``scene.head_mesh_body`` -- the same watertight
+        :class:`~bunkershot3d.geometry.TriangleMesh` the F0 solver
+        discretised -- rather than from the element centroids a scatter used
+        to stand in for. Its topology (``faces``) never changes, so the
+        placeholder vertices here are replaced by the first
+        :meth:`update` call and every one after only moves them, through the
+        public ``set_verts``: one collection for a whole shot, not one per
+        frame.
+
+        Returns:
+            The collection, added to the axes and ready for
+            :meth:`~matplotlib.mplot3d.art3d.Poly3DCollection.set_verts`.
+        """
+        mesh = self._scene.head_mesh_body
+        placeholder = np.zeros((mesh.faces.shape[0], 3, 3), dtype=np.float64)
+        collection = Poly3DCollection(
+            placeholder,
+            facecolor=_HEAD_COLOUR,
+            edgecolor=_HEAD_MESH_EDGE_COLOUR,
+            linewidths=_HEAD_MESH_LINEWIDTH,
+            alpha=_HEAD_MESH_ALPHA,
+            zsort="max",
+            label="clubhead (lofted mesh)",
+        )
+        self._axes.add_collection3d(collection)
+        return collection
 
     def _build_surface(self) -> None:
         """Draw the free surface, once, as a flat translucent plane."""
@@ -387,12 +585,34 @@ class ShotSceneArtists:
         )
 
     def _label_axes(self) -> None:
-        """Label and bound the world box, in millimetres, once."""
+        """Label and bound the world box, in millimetres, once.
+
+        ``labelpad`` and a coarser tick locator are the fix for the second
+        half of issue #8706 defect 2: at
+        :attr:`~.shot3d.CameraPreset.SOLE_LEVEL`, the eye sights straight
+        down the across-track axis, foreshortening it toward a point, and
+        the default label placement and tick density collide there into
+        unreadable mush. Neither the camera's stated angles nor the world
+        box itself change -- both are pinned elsewhere -- only how much room
+        each axis's own label and ticks are given.
+        """
         axes = self._axes
-        axes.set_xlabel("world x, along the target line [mm]", fontsize=7)
-        axes.set_ylabel("world y, across the target line [mm]", fontsize=7)
-        axes.set_zlabel("world z, up [mm]", fontsize=7)
-        axes.tick_params(labelsize=6)
+        # mplot3d's own default (``zoom=1``) leaves the box well short of
+        # its allotted rectangle; the rest of that rectangle is where most
+        # of defect 2's "60% empty canvas" was coming from.
+        axes.set_box_aspect(None, zoom=_BOX_ZOOM)
+        axes.set_xlabel(
+            "world x, along the target line [mm]",
+            fontsize=_LABEL_FONTSIZE,
+            labelpad=_LABELPAD,
+        )
+        self._set_y_label()
+        axes.set_zlabel(
+            "world z, up [mm]", fontsize=_LABEL_FONTSIZE, labelpad=_LABELPAD
+        )
+        axes.tick_params(labelsize=_TICK_FONTSIZE, pad=_TICK_PAD)
+        for axis in (axes.xaxis, axes.yaxis, axes.zaxis):
+            axis.set_major_locator(MaxNLocator(nbins=_MAX_TICKS, prune="both"))
         axes.set_xlim(*(value * _MM_PER_M for value in self._scale.x_m))
         axes.set_ylim(*(value * _MM_PER_M for value in self._scale.y_m))
         axes.set_zlim(*(value * _MM_PER_M for value in self._scale.z_m))
@@ -401,6 +621,37 @@ class ShotSceneArtists:
         # designs would each be framed to their own divot.
         axes.set_autoscale_on(False)
         axes.legend(loc="upper right", fontsize=5, framealpha=0.6)
+
+    def _set_y_label(self) -> None:
+        """(Re)draw the across-track label with a pad tuned to this camera.
+
+        Only :attr:`~.shot3d.CameraPreset.SOLE_LEVEL` sights down this axis
+        far enough to foreshorten it into its own tick labels, so only that
+        preset needs :data:`_LABELPAD_Y`'s wider clearance. Giving every
+        camera that pad moved the label into the caption's own space at the
+        other two -- a second collision this fixes rather than trades for
+        (issue #8706 defect 2).
+        """
+        axes = self._axes
+        y_axis = axes.yaxis
+        sighting_down_y = self._camera is CameraPreset.SOLE_LEVEL
+        labelpad = _LABELPAD_Y if sighting_down_y else _LABELPAD
+        axes.set_ylabel(
+            "world y, across the target line [mm]",
+            fontsize=_LABEL_FONTSIZE,
+            labelpad=labelpad,
+        )
+        # A foreshortened axis crowds every one of its ticks toward the
+        # same near-corner point regardless of how few bins are asked
+        # for -- MaxNLocator keeps returning the same "nice" -80/0/80 no
+        # matter the ``nbins`` hint, since none of them sit exactly on
+        # the (padded) limits for ``prune`` to drop. Sighting down the
+        # axis this hard, one reference tick at the origin says as much
+        # as three crowded ones did.
+        if sighting_down_y:
+            y_axis.set_major_locator(FixedLocator([0.0]))
+        else:
+            y_axis.set_major_locator(MaxNLocator(nbins=_MAX_TICKS, prune="both"))
 
     # ------------------------------------------------------------ the frame
 
@@ -416,16 +667,63 @@ class ShotSceneArtists:
         chosen = CameraPreset(camera)
         self._camera = chosen
         self._axes.view_init(elev=chosen.elevation_deg, azim=chosen.azimuth_deg)
+        self._set_y_label()
+        self._recompute_note()
         self._refresh_note()
 
-    def _refresh_note(self) -> None:
-        """Rewrite the qualifier under the stamp."""
+    def _recompute_note(self) -> None:
+        """Wrap the qualifier under the stamp to this figure's own width.
+
+        Issue #8706 defect 2: the caption used to run off unwrapped and was
+        clipped mid-word at the figure's right edge ("...not where sand h").
+        Each source line is word-wrapped to how wide it actually renders in
+        this figure's font -- not a guessed character count, which would be
+        wrong the moment the font, DPI or figure size were not what was
+        guessed for -- and the result is cached on ``self`` so
+        :meth:`_refresh_note` can re-apply it every frame without
+        re-measuring: none of the three source lines depends on which
+        sample is showing, only on the camera, so this only needs to run
+        when the camera changes.
+        """
         scene = self._scene
-        self._note.set_text(
-            f"{self._camera.label} - {self._camera.description}\n"
-            f"{scene.surface.describe()}\n"
-            f"{scene.divot.describe()}"
+        lines = (
+            f"{self._camera.label} - {self._camera.description}",
+            scene.surface.describe(),
+            scene.divot.describe(),
         )
+        axes = self._axes
+        figure = axes.figure
+        renderer = _figure_renderer(figure)
+        # Measured, not assumed from the ``subplots_adjust`` fractions:
+        # ``Axes3D.apply_aspect`` always shrinks the panel to a square in
+        # physical inches (mplot3d's own rule, not something this module
+        # chooses), so on a wide figure the axes are already narrower than
+        # the rectangle they were given. Budgeting against the rectangle
+        # instead of the real panel is exactly how the first pass at this
+        # fix still let a line run off the edge unwrapped -- and
+        # ``apply_aspect`` has to be forced here because matplotlib only
+        # calls it as a side effect of a full draw, which has not happened
+        # yet when a still is built.
+        axes.apply_aspect()
+        axes_bbox = axes.get_window_extent(renderer=renderer)
+        budget_px = axes_bbox.width * _NOTE_WIDTH_FRACTION
+        wrapped: list[str] = []
+        for line in lines:
+            wrapped.extend(_wrap_to_pixels(self._note, renderer, line, budget_px))
+        self._note_text = "\n".join(wrapped)
+        # Anchored a fixed distance above the *figure's* own bottom edge,
+        # not the axes': because the panel can sit well inside the
+        # rectangle subplots_adjust was given, an axes-fraction anchor
+        # would put the caption back under the tick labels the reserved
+        # bottom margin exists to clear.
+        target_px = _NOTE_TOP_MARGIN_FIG_FRACTION * figure.bbox.height
+        anchor_y = (target_px - axes_bbox.y0) / axes_bbox.height
+        self._note_position = (0.02, anchor_y)
+
+    def _refresh_note(self) -> None:
+        """Re-apply the caption :meth:`_recompute_note` last wrapped."""
+        self._note.set_text(self._note_text)
+        self._note.set_position(self._note_position)
 
     def _check_frame(self, frame: int) -> int:
         """Validate a frame index against the scene.
@@ -468,9 +766,9 @@ class ShotSceneArtists:
         """
         index = self._check_frame(frame)
         scene = self._scene
-        head = scene.head_world_m(index) * _MM_PER_M
-        self._head.set_data_3d(head[:, 0], head[:, 1], head[:, 2])
-        sole = head[scene.sole_index]
+        mesh_vertices = scene.head_mesh_world_m(index) * _MM_PER_M
+        self._head_mesh.set_verts(mesh_vertices[scene.head_mesh_body.faces])
+        sole = scene.head_world_m(index)[scene.sole_index] * _MM_PER_M
         self._sole.set_data_3d(sole[:, 0], sole[:, 1], sole[:, 2])
         trail = scene.sole_reference_world_m[: index + 1] * _MM_PER_M
         self._trail.set_data_3d(trail[:, 0], trail[:, 1], trail[:, 2])
@@ -481,7 +779,8 @@ class ShotSceneArtists:
         self._axes.set_title(
             f"{moment_ms:.2f} ms - sole {depth_mm:+.2f} mm below the free surface "
             f"- divot section {float(scene.divot.section_area_m2[index]) * 1e4:.2f} cm^2",
-            fontsize=8,
+            fontsize=_TITLE_FONTSIZE,
+            pad=4.0,
         )
         # The stamp follows the band when there is one: a shot that starts
         # inside the stated envelope and leaves it must not carry the worst
