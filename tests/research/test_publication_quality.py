@@ -188,10 +188,26 @@ def test_canonical_pdf_byte_identity_is_dependency_free() -> None:
     ]
 
     assert digest == (
-        "48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa"
+        "3eb37e4e5181d6c5f2931813257ae2cbd67e72cb5d851c48c3db2f6a6a44c931"
     )
-    assert PDF.stat().st_size == 2_954_515
-    assert artifact == {"sha256": digest, "bytes": 2_954_515}
+    assert PDF.stat().st_size == 1_912_422
+    assert artifact == {"sha256": digest, "bytes": 1_912_422}
+
+
+@requires_fitz
+def test_opening_evidence_callout_is_not_split_across_pages() -> None:
+    assert fitz is not None
+    opening = "Scope and Evidence Categories"
+    closing = "prior literature is not independent empirical confirmation."
+    with fitz.open(PDF) as document:
+        page_text = [page.get_text() for page in document]
+
+    opening_pages = {index for index, text in enumerate(page_text) if opening in text}
+    closing_pages = {index for index, text in enumerate(page_text) if closing in text}
+    assert opening_pages == closing_pages, (
+        "The opening evidence-category callout must render on one page; "
+        f"opening={sorted(opening_pages)}, closing={sorted(closing_pages)}"
+    )
 
 
 @requires_fitz
@@ -207,11 +223,11 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
     )
 
     assert report["publication"]["sha256"] == (
-        "48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa"
+        "3eb37e4e5181d6c5f2931813257ae2cbd67e72cb5d851c48c3db2f6a6a44c931"
     )
-    assert report["publication"]["bytes"] == 2_954_515
+    assert report["publication"]["bytes"] == 1_912_422
     assert report["publication"]["pages"] == 245
-    assert report["publication"]["fast_web_access"] is False
+    assert report["publication"]["fast_web_access"] is True
     assert report["navigation"] == {
         "outline_entries": 255,
         "uri_links": 194,
@@ -223,7 +239,7 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
     assert report["rendering"]["errors"] == []
     assert report["accessibility"] == {
         "tagged": False,
-        "pages_with_extractable_text": 244,
+        "pages_with_extractable_text": 245,
         "font_inventory": {
             "resources": 133,
             "types": {"Type0": 17, "Type1": 2, "Type3": 114},

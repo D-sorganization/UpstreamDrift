@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe",
+  "paper_source_digest": "cee6346b000295f370e96a56aac667501f0804e34c3f5375866f813dafa7b8b2",
   "claim_count": 313,
   "outcome_counts": {
     "inconclusive": 5,
