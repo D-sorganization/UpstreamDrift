@@ -630,7 +630,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.612                                            |
+| **Spec Version**        | 1.0.613                                            |
 | **Last Spec Update**    | 2026-08-27                                         |
 
 ## 2. Purpose & Mission
@@ -4540,3 +4540,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Decomposed 13 oversized proximal-distal research registration, authority, and study orchestrator functions below 100 lines and <= 8 parameters without altering numerical outputs or claim evidence (#8963).
 - Split `src/tools/launch_monitor_analytics/gui.py` back under the 1200-line file-size budget after the #8825 stale-canvas fix: extracted `PlotCanvas` to a new `plot_canvas.py` module and the module-level `_selected_text`/`_populate_combo` helpers into `widgets.py` (`PlotCanvas` re-exported from `gui.py` for compatibility, no behavior change).
 - Replaced `np.linalg.norm(vectors, axis=1)` with `np.sqrt(np.einsum('ij,ij->i', vectors, vectors))` in `src/bunkershot3d/geometry/mesh.py` for performance. (spec-exempt: micro-optimization)
+- Performance: Optimized 2D vector norm calculation in `drift_control_transfer.py` using `np.hypot` to avoid intermediate array allocations and improve speed. (spec-exempt: micro-optimization)

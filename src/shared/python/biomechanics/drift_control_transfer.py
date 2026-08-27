@@ -302,7 +302,7 @@ def compute_path_frame(
         raise ValueError("velocity must have shape (T, J, 2)")
     if not np.all(np.isfinite(velocity_array)):
         raise ValueError("velocity must contain only finite values")
-    speed = np.linalg.norm(velocity_array, axis=2)
+    speed = np.hypot(velocity_array[..., 0], velocity_array[..., 1])  # noqa: E501 ⚡ Bolt: np.hypot is faster and safer
     valid = speed > speed_epsilon
     tangent = np.zeros_like(velocity_array)
     tangent[valid] = velocity_array[valid] / speed[valid, None]
