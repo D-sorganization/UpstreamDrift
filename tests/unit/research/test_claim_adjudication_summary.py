@@ -97,6 +97,34 @@ def test_reviewer_chapter_has_pdf_breaks_and_wrappable_family_rows() -> None:
 
 
 @pytest.mark.unit
+def test_reviewer_chapter_links_are_portable_permalinks_not_relative_paths() -> None:
+    """Regression test for UD#9142.
+
+    A relative ``data/...`` link only resolves inside UD's own docs tree; the
+    generated chapter is also published verbatim into AffineDrift, where no
+    sibling ``data/`` directory exists at the chapter's level, and a
+    dangling relative link there fails AffineDrift's pre-build link check.
+    """
+    root = Path(__file__).resolve().parents[3]
+    chapter = (
+        root / "docs/research/proximal_distal_energy_transfer/chapters/"
+        "_claim_adjudication_summary.qmd"
+    ).read_text(encoding="utf-8")
+
+    assert "](data/" not in chapter
+    assert (
+        "[reviewer JSON](https://github.com/D-sorganization/UpstreamDrift/"
+        "blob/main/docs/research/proximal_distal_energy_transfer/data/"
+        "claim_adjudication_summary.json)" in chapter
+    )
+    assert (
+        "[reviewer CSV](https://github.com/D-sorganization/UpstreamDrift/"
+        "blob/main/docs/research/proximal_distal_energy_transfer/data/"
+        "claim_adjudication_summary.csv)" in chapter
+    )
+
+
+@pytest.mark.unit
 def test_byte_governed_summary_is_excluded_from_prettier() -> None:
     root = Path(__file__).resolve().parents[3]
     precommit = (root / ".pre-commit-config.yaml").read_text(encoding="utf-8")

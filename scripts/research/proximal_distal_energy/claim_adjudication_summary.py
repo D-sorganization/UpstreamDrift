@@ -12,6 +12,37 @@ from typing import Any
 
 SUMMARY_SCHEMA_VERSION = "proximal-distal-claim-adjudication-summary-v2"
 
+# This chapter is published verbatim into AffineDrift
+# (articles/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd),
+# where no sibling `data/` directory exists. A relative `data/...` link only
+# resolves inside UD's own docs tree, so it dangles there and fails
+# AffineDrift's pre-build link check (see UD#9142 and the precedent fix in
+# AffineDrift#3983/#3987). Every other hand-authored chapter in this book
+# (e.g. `_ch09_conclusions.qmd`, `_ch07_model_ladder.qmd`) references its
+# `data/...` artifacts the same way: a GitHub blob permalink on `main`
+# instead of a relative path. Match that convention here so the link is
+# portable to any repo that mirrors this chapter, not just this docs tree.
+# AffineDrift's publish step is responsible for pinning `blob/main` links to
+# a specific commit SHA at publication time, as it already does for the
+# hand-authored siblings.
+UPSTREAM_DATA_REF = "main"
+
+
+def _upstream_data_permalink(filename: str) -> str:
+    """Build a GitHub permalink for a docs/data/ artifact.
+
+    Used instead of a relative ``data/...`` link so the reference stays valid
+    when this generated chapter is republished into AffineDrift, which has no
+    sibling ``data/`` directory at the chapter's level. Matches the
+    `blob/main` link form already used by every other hand-authored chapter
+    in this book for its own ``data/...`` references.
+    """
+    return (
+        "https://github.com/D-sorganization/UpstreamDrift/blob/"
+        f"{UPSTREAM_DATA_REF}/docs/research/proximal_distal_energy_transfer/"
+        f"data/{filename}"
+    )
+
 
 def _repository_root() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -386,8 +417,10 @@ def _reviewer_qmd(summary: dict[str, Any]) -> str:
         "survived every adverse test. Claims that accurately report null, mixed, "
         "or adverse model results can themselves be supported. The complete "
         "finding-level reasons, falsifiers, locators, and boundaries are available "
-        "in the [reviewer JSON](data/claim_adjudication_summary.json) and "
-        "[reviewer CSV](data/claim_adjudication_summary.csv).",
+        "in the [reviewer JSON]"
+        f"({_upstream_data_permalink('claim_adjudication_summary.json')}) and "
+        "[reviewer CSV]"
+        f"({_upstream_data_permalink('claim_adjudication_summary.csv')}).",
         "",
     ]
     tables = (

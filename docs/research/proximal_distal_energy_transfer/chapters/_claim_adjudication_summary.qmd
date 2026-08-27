@@ -3,7 +3,7 @@
 
 The current census contains 317 material claims. The normalized outcome applies only to each claim's declared estimand, model domain, and uncertainty boundary. A `supported` model-conditional claim is not thereby independently replicated, empirically validated, or converted into a human strategy recommendation.
 
-The absence of a `contradicted` row does not mean that every mechanism survived every adverse test. Claims that accurately report null, mixed, or adverse model results can themselves be supported. The complete finding-level reasons, falsifiers, locators, and boundaries are available in the [reviewer JSON](data/claim_adjudication_summary.json) and [reviewer CSV](data/claim_adjudication_summary.csv).
+The absence of a `contradicted` row does not mean that every mechanism survived every adverse test. Claims that accurately report null, mixed, or adverse model results can themselves be supported. The complete finding-level reasons, falsifiers, locators, and boundaries are available in the [reviewer JSON](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.json) and [reviewer CSV](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.csv).
 
 ### Outcome Counts
 
