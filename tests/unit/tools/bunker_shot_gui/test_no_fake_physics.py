@@ -124,6 +124,7 @@ def test_the_gui_imports_the_real_solver() -> None:
         "model",
         "render",
         "render3d",
+        "render3d_vtk",
         "render_traces",
         "report",
         "shot3d",
@@ -140,6 +141,56 @@ def test_the_headless_layer_imports_no_qt(module: str) -> None:
     assert leaked == "", (
         f"importing {module} pulled in a Qt binding: {leaked}. The workbench "
         "model must stay runnable where PyQt6 does not load."
+    )
+
+
+def test_render3d_vtk_import_touches_no_gl_or_mujoco() -> None:
+    """Issue #9138 (PR): a bare import must reach no GL-touching library.
+
+    ``render3d_vtk``'s own docstring says PyVista is imported lazily, inside
+    ``require_pyvista``, and that importing the module is always safe. On a
+    CI runner with no working GL driver that used to be false: ``import
+    render3d_vtk`` crashed with ``AttributeError: 'NoneType' object has no
+    attribute 'glGetError'``. Not from PyVista -- from an eager sibling
+    import. ``render3d_vtk`` reaches ``bunkershot3d.solvers`` (directly, and
+    via ``.bridge``/``.shot3d``), and ``bunkershot3d/__init__.py`` eagerly
+    imports ``backends``, whose MPM driver eagerly ``import mujoco``s;
+    ``mujoco`` touches an OpenGL/OSMesa binding (PyOpenGL's
+    ``OpenGL.raw.GL._errors``) at *that* import, not at first render.
+
+    ``test_the_headless_layer_imports_no_qt`` above only proves the process
+    did not crash and leaked no Qt binding; a machine with a working GPU
+    would pass it even with every sibling imported eagerly. This checks
+    ``sys.modules`` directly, so it fails even where the underlying GL
+    binding happens to succeed.
+    """
+    completed = subprocess.run(  # noqa: S603 - fixed argv, no shell
+        [
+            sys.executable,
+            "-c",
+            "import sys\n"
+            "import src.tools.bunker_shot_gui.render3d_vtk\n"
+            "watched = {\n"
+            "    'pyvista', 'vtk', 'vtkmodules', 'mujoco', 'bunkershot3d', 'OpenGL',\n"
+            "}\n"
+            "leaked = sorted(n for n in sys.modules if n.split('.')[0] in watched)\n"
+            "print(','.join(leaked))\n",
+        ],
+        cwd=str(REPO_ROOT),
+        env=_child_env(),
+        capture_output=True,
+        text=True,
+        timeout=180,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    leaked = completed.stdout.strip()
+    assert leaked == "", (
+        f"importing render3d_vtk pulled in {leaked!r}. PyVista must stay "
+        "lazy (inside require_pyvista), and every sibling import that "
+        "reaches bunkershot3d/mujoco (.bridge, .render, .report, .shot3d, "
+        ".traces) must be deferred into the function or method that "
+        "actually needs it, not left at module scope."
     )
 
 
