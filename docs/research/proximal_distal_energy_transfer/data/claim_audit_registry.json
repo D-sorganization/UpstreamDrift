@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "0cf9bd034c322ebe4ded8bb3fd7c60f301156cea135b2498eb6457251b94ba60",
+    "source_digest": "12bc44109474ecf9e63f29e9e371ee2da7fc434c8d9a5feddea4f408a29b9329",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1148-candidate paper inventory is adjudicated, including local finite-time and event-sensitivity evidence.",
+    "current_scope": "The complete 1154-candidate paper inventory is adjudicated, including trajectory-varying event-control evidence.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -281,6 +281,11 @@
       "release_claim_key": "phase_event_finite_time_stability",
       "published_status": "supported_for_declared_local_nonperiodic_analytical_trajectory",
       "audit_state": "reviewed_as_local_finite_window_and_transverse_event_qualification"
+    },
+    {
+      "release_claim_key": "trajectory_varying_event_control_authority",
+      "published_status": "supported_for_declared_local_first_order_analytical_trajectory",
+      "audit_state": "reviewed_as_local_trajectory_varying_event_conditioned_authority"
     }
   ],
   "candidate_reviews": [
@@ -11750,7 +11755,66 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-8d194df1b4c7b5e3",
+      "candidate_id": "PD-CAND-61d950959490c63b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-317"
+      ],
+      "rationale": "This passage states or bounds the trajectory-control qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-9be647f9ff66dc2b",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-317"
+      ],
+      "rationale": "This passage states or bounds the trajectory-control qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-5e5dff503fc74f9c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-317"
+      ],
+      "rationale": "This passage states or bounds the trajectory-control qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-d53322965add2aa7",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-317",
+        "PD-CLAIM-318"
+      ],
+      "rationale": "This passage states or bounds the trajectory-control qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-e5964f2e286b23dd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-318"
+      ],
+      "rationale": "This passage states or bounds the trajectory-control qualification.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-711ac54262ca2055",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is the governed figure caption.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-e13a6bd439619b91",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This appendix paragraph inventories governed artifacts.",
@@ -11758,7 +11822,7 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-0b9c5f118079c7fd",
+      "candidate_id": "PD-CAND-722bacbea0cdd3d3",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
@@ -11766,7 +11830,7 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-12c480318f0379d1",
+      "candidate_id": "PD-CAND-f7373df999ae2fa7",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
@@ -11774,7 +11838,7 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-cbe28db4bafbcf1f",
+      "candidate_id": "PD-CAND-0925ede18f41d9fd",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
@@ -11782,7 +11846,7 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-fe11f03cf6c448b7",
+      "candidate_id": "PD-CAND-17fcda8ab7a96874",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
@@ -11790,7 +11854,7 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-d9ac66db136d78d6",
+      "candidate_id": "PD-CAND-a3a842df678245a1",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
@@ -11798,7 +11862,7 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-583b0ca09a9734fa",
+      "candidate_id": "PD-CAND-dedfec5c8a23c776",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
@@ -11806,7 +11870,7 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-625922eee0f308a2",
+      "candidate_id": "PD-CAND-8957050da29bc65b",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This deterministic census paragraph summarizes the governed claim registry.",
@@ -31573,6 +31637,214 @@
           "literal_id": "1e-6#1",
           "artifact": "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
           "json_pointer": "/periodicity_gate/tolerance",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-317",
+      "candidate_ids": [
+        "PD-CAND-61d950959490c63b",
+        "PD-CAND-9be647f9ff66dc2b",
+        "PD-CAND-5e5dff503fc74f9c",
+        "PD-CAND-d53322965add2aa7"
+      ],
+      "statement": "At the registered 35.0258 per second transverse event, the exact-step trajectory-varying Gramian has fixed-time rank 4 and event-tangent rank 3; channel additivity closes within 5.17275e-12, six direct nonlinear pulses within 4.11321e-8, input-step refinement within 4.11814e-10, integration-step refinement within 1.26519e-7, and equivalent units within 3.33067e-16.",
+      "classification": "local_trajectory_varying_event_conditioned_authority",
+      "published_status": "supported_for_declared_local_first_order_analytical_trajectory",
+      "audit_status": "exact_step_event_projection_channel_direct_pulse_refinement_unit_and_frozen_local_controls_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:329",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:342",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:356",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:369"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+        "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_trajectory_control_authority.pdf",
+        "docs/research/proximal_distal_energy_transfer/TRAJECTORY_CONTROL_AUTHORITY.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/trajectory_control_authority.py",
+        "scripts/research/proximal_distal_energy/run_trajectory_control_authority.py",
+        "scripts/research/proximal_distal_energy/make_trajectory_control_authority_figure.py",
+        "tests/research/test_trajectory_control_authority.py",
+        "tests/research/test_trajectory_control_authority_evidence.py"
+      ],
+      "model_domain": "One synthetic open-loop analytical double-pendulum downswing, linearized along the registered exact RK4 trajectory through the first positive club-vertical crossing.",
+      "uncertainty_boundary": "Ranks and spectra depend on the declared scales, tolerance, model, trajectory, and event. They are not effort, strength, or strategy rankings.",
+      "competing_explanations": [
+        "state and control scaling",
+        "finite-difference step",
+        "integration timestep",
+        "event-time projection",
+        "frozen operating-point approximation",
+        "nonlinear saturation and actuator bounds",
+        "open-loop program and structural model discrepancy"
+      ],
+      "negative_controls": [
+        "zero-input Gramian killswitch",
+        "shoulder-plus-wrist channel additivity",
+        "six direct nonlinear torque pulses",
+        "three input differentiation steps",
+        "three integration timesteps",
+        "equivalent torque and state units"
+      ],
+      "falsifier": "The exact event loses transversality, zero input is nonzero, channel additivity or direct nonlinear pulses exceed their gates, or step and equivalent-unit controls do not reproduce.",
+      "adjudication": "The result is retained as local first-order analytical evidence. It does not establish bounded nonlinear reachability, controller superiority, human capacity or strategy, passive torque, robustness, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "35.0258#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/event_conditioned_authority/transversality_per_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/event_conditioned_authority/full_state/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/event_conditioned_authority/event_tangent/rank",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "5.17275e-12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/falsification_controls/channel_additivity/maximum_abs_residual",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4.11321e-8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/falsification_controls/direct_pulses/1/maximum_abs_residual",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4.11814e-10#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/falsification_controls/input_step_refinement/2/relative_event_gramian_residual",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.26519e-7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/falsification_controls/integration_step_refinement/0/relative_event_gramian_residual",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3.33067e-16#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/falsification_controls/equivalent_units/maximum_abs_residual",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-318",
+      "candidate_ids": [
+        "PD-CAND-d53322965add2aa7",
+        "PD-CAND-e5964f2e286b23dd"
+      ],
+      "statement": "Across four matched phase windows, the frozen-local and trajectory-varying Gramians differ by relative norms from 0.136042 to 0.297782, so the frozen operating-point countermodel does not reproduce the registered finite-window authority.",
+      "classification": "frozen_local_countermodel_divergence",
+      "published_status": "supported_for_declared_local_first_order_analytical_trajectory",
+      "audit_status": "exact_step_event_projection_channel_direct_pulse_refinement_unit_and_frozen_local_controls_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:369",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:381"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+        "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_trajectory_control_authority.pdf",
+        "docs/research/proximal_distal_energy_transfer/TRAJECTORY_CONTROL_AUTHORITY.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/trajectory_control_authority.py",
+        "scripts/research/proximal_distal_energy/run_trajectory_control_authority.py",
+        "scripts/research/proximal_distal_energy/make_trajectory_control_authority_figure.py",
+        "tests/research/test_trajectory_control_authority.py",
+        "tests/research/test_trajectory_control_authority_evidence.py"
+      ],
+      "model_domain": "One synthetic open-loop analytical double-pendulum downswing, linearized along the registered exact RK4 trajectory through the first positive club-vertical crossing.",
+      "uncertainty_boundary": "This rejects equivalence only for four matched windows on the registered trajectory. It is not a global nonlinear reachability or controller-ranking result.",
+      "competing_explanations": [
+        "state and control scaling",
+        "finite-difference step",
+        "integration timestep",
+        "event-time projection",
+        "frozen operating-point approximation",
+        "nonlinear saturation and actuator bounds",
+        "open-loop program and structural model discrepancy"
+      ],
+      "negative_controls": [
+        "four identical phase and horizon windows",
+        "same state and control scales",
+        "same continuous-energy input normalization",
+        "trajectory-varying direct-pulse qualification"
+      ],
+      "falsifier": "Matched-window recomputation makes every frozen-local difference numerically negligible, or the trajectory-varying result fails its direct-pulse and refinement gates.",
+      "adjudication": "The result is retained as local first-order analytical evidence. It does not establish bounded nonlinear reachability, controller superiority, human capacity or strategy, passive torque, robustness, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.136042#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/frozen_local_countermodel/1/relative_gramian_difference",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.297782#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+          "json_pointer": "/frozen_local_countermodel/2/relative_gramian_difference",
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,

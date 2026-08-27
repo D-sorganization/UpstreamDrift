@@ -112,6 +112,13 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_phase_event_stability write",
             "tier": "analytical_double_pendulum_local_finite_time_event_sensitivity",
         },
+        "trajectory_control_authority": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_trajectory_control_authority write",
+            "tier": (
+                "analytical_double_pendulum_trajectory_varying_"
+                "event_conditioned_authority"
+            ),
+        },
         "double_pendulum_identifiability": {
             "command": "python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability write",
             "tier": "analytical_double_pendulum_exact_map_and_dimensionless_finite_record",
@@ -268,6 +275,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "phase_event_finite_time_stability": (
             "supported_for_declared_local_nonperiodic_analytical_trajectory"
+        ),
+        "trajectory_varying_event_control_authority": (
+            "supported_for_declared_local_first_order_analytical_trajectory"
         ),
         "double_pendulum_base_coefficient_excitation": (
             "full_rank_for_registered_synthetic_record"

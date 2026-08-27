@@ -1,11 +1,11 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "0cf9bd034c322ebe4ded8bb3fd7c60f301156cea135b2498eb6457251b94ba60",
-  "claim_count": 315,
+  "paper_source_digest": "12bc44109474ecf9e63f29e9e371ee2da7fc434c8d9a5feddea4f408a29b9329",
+  "claim_count": 317,
   "outcome_counts": {
     "inconclusive": 5,
-    "supported": 295,
+    "supported": 297,
     "untested": 15
   },
   "evidence_qualification_counts": {
@@ -16,7 +16,7 @@
     "hypothesis_or_prospective_protocol": 12,
     "independent_followup_open": 24,
     "original_full_text_checked": 18,
-    "project_executable_or_data": 286
+    "project_executable_or_data": 288
   },
   "evidence_tier_counts": {
     "bibliographic_record": 3,
@@ -24,23 +24,23 @@
     "external_methods_or_measurement": 10,
     "external_modeling_or_simulation": 15,
     "external_review_or_synthesis": 10,
-    "project_derivation_or_document": 100,
-    "project_executable_or_generated": 286,
+    "project_derivation_or_document": 102,
+    "project_executable_or_generated": 288,
     "prospective_or_unexecuted": 15
   },
   "source_independence_counts": {
     "multiple_independent_external_support": 20,
-    "project_only": 261,
+    "project_only": 263,
     "single_independent_external_support": 34
   },
   "model_tier_counts": {
     "articulated_spatial": 32,
     "compliant_shaft": 66,
-    "cross_tier_synthesis": 67,
+    "cross_tier_synthesis": 69,
     "declared_model_tier_unclassified": 12,
     "finite_ground_or_base": 16,
     "human_or_external_evidence": 46,
-    "planar_reduced": 140,
+    "planar_reduced": 142,
     "spatial_reduced": 76,
     "two_hand_or_bilateral": 94,
     "uncertainty_or_control": 10
@@ -51,7 +51,7 @@
     "governed_human_data_unavailable": 11,
     "independent_reimplementation_open": 12,
     "mixed_or_insufficient_evidence": 5,
-    "none_declared": 271,
+    "none_declared": 273,
     "prospective_experiment_open": 15,
     "statistical_reanalysis_or_replication_open": 9,
     "systematic_review_open": 2
@@ -251,8 +251,8 @@
     },
     {
       "claim_family": "ch07_model_ladder",
-      "claim_count": 21,
-      "project_only_count": 21,
+      "claim_count": 23,
+      "project_only_count": 23,
       "single_independent_external_support_count": 0,
       "multiple_independent_external_support_count": 0,
       "concentration_flag": "project_authored_only"
@@ -14477,6 +14477,100 @@
       "uncertainty_boundary": "The derivative applies only to the declared transverse geometric guard; it is not neural timing demand, impact validation, or human robustness. No periodic orbit is registered.",
       "falsifier": "Implicit and direct derivatives disagree beyond tolerance, the near-grazing or reset controls fail, or Floquet output is emitted without state and mode closure.",
       "adjudication": "The result is retained as local finite-window analytical evidence. It does not establish asymptotic or global stability, neural timing demand, participant robustness, passive torque, human strategy, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "claim_id": "PD-CLAIM-317",
+      "adjudication_outcome": "supported",
+      "statement": "At the registered 35.0258 per second transverse event, the exact-step trajectory-varying Gramian has fixed-time rank 4 and event-tangent rank 3; channel additivity closes within 5.17275e-12, six direct nonlinear pulses within 4.11321e-8, input-step refinement within 4.11814e-10, integration-step refinement within 1.26519e-7, and equivalent units within 3.33067e-16.",
+      "classification": "local_trajectory_varying_event_conditioned_authority",
+      "published_status": "supported_for_declared_local_first_order_analytical_trajectory",
+      "audit_status": "exact_step_event_projection_channel_direct_pulse_refinement_unit_and_frozen_local_controls_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "cross_tier_synthesis",
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch07_model_ladder",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:329",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:342",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:356",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:369"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+        "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_trajectory_control_authority.pdf",
+        "docs/research/proximal_distal_energy_transfer/TRAJECTORY_CONTROL_AUTHORITY.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/trajectory_control_authority.py",
+        "scripts/research/proximal_distal_energy/run_trajectory_control_authority.py",
+        "scripts/research/proximal_distal_energy/make_trajectory_control_authority_figure.py",
+        "tests/research/test_trajectory_control_authority.py",
+        "tests/research/test_trajectory_control_authority_evidence.py"
+      ],
+      "model_domain": "One synthetic open-loop analytical double-pendulum downswing, linearized along the registered exact RK4 trajectory through the first positive club-vertical crossing.",
+      "uncertainty_boundary": "Ranks and spectra depend on the declared scales, tolerance, model, trajectory, and event. They are not effort, strength, or strategy rankings.",
+      "falsifier": "The exact event loses transversality, zero input is nonzero, channel additivity or direct nonlinear pulses exceed their gates, or step and equivalent-unit controls do not reproduce.",
+      "adjudication": "The result is retained as local first-order analytical evidence. It does not establish bounded nonlinear reachability, controller superiority, human capacity or strategy, passive torque, robustness, or coaching guidance.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "claim_id": "PD-CLAIM-318",
+      "adjudication_outcome": "supported",
+      "statement": "Across four matched phase windows, the frozen-local and trajectory-varying Gramians differ by relative norms from 0.136042 to 0.297782, so the frozen operating-point countermodel does not reproduce the registered finite-window authority.",
+      "classification": "frozen_local_countermodel_divergence",
+      "published_status": "supported_for_declared_local_first_order_analytical_trajectory",
+      "audit_status": "exact_step_event_projection_channel_direct_pulse_refinement_unit_and_frozen_local_controls_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "cross_tier_synthesis",
+        "planar_reduced"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch07_model_ladder",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:369",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:381"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+        "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_trajectory_control_authority.pdf",
+        "docs/research/proximal_distal_energy_transfer/TRAJECTORY_CONTROL_AUTHORITY.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/trajectory_control_authority.py",
+        "scripts/research/proximal_distal_energy/run_trajectory_control_authority.py",
+        "scripts/research/proximal_distal_energy/make_trajectory_control_authority_figure.py",
+        "tests/research/test_trajectory_control_authority.py",
+        "tests/research/test_trajectory_control_authority_evidence.py"
+      ],
+      "model_domain": "One synthetic open-loop analytical double-pendulum downswing, linearized along the registered exact RK4 trajectory through the first positive club-vertical crossing.",
+      "uncertainty_boundary": "This rejects equivalence only for four matched windows on the registered trajectory. It is not a global nonlinear reachability or controller-ranking result.",
+      "falsifier": "Matched-window recomputation makes every frozen-local difference numerically negligible, or the trajectory-varying result fails its direct-pulse and refinement gates.",
+      "adjudication": "The result is retained as local first-order analytical evidence. It does not establish bounded nonlinear reachability, controller superiority, human capacity or strategy, passive torque, robustness, or coaching guidance.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-26"
     }

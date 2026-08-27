@@ -42,10 +42,37 @@ PRE_PAGINATION_REVIEWED_SOURCE_DIGEST = (
 PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST = (
     "cee6346b000295f370e96a56aac667501f0804e34c3f5375866f813dafa7b8b2"
 )
-REVIEWED_SOURCE_DIGEST = (
+PRE_REFINEMENT_PRECISION_REVIEWED_SOURCE_DIGEST = (
+    "aa3fe6ce24c4f81e5364963d4aae7ad23b3b62edab85981918d831bc1adc1506"
+)
+PRE_DIRECT_TRANSITION_PRECISION_REVIEWED_SOURCE_DIGEST = (
+    "7f066b6aa5f65190950fd6ff3514e7dd0ad2fea1d1c1e9db2dd86c50b6b9f33c"
+)
+PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST = (
     "0cf9bd034c322ebe4ded8bb3fd7c60f301156cea135b2498eb6457251b94ba60"
 )
-REVIEWED_CLAIM_COUNT = 315
+REVIEWED_SOURCE_DIGEST = (
+    "12bc44109474ecf9e63f29e9e371ee2da7fc434c8d9a5feddea4f408a29b9329"
+)
+MIGRATABLE_SOURCE_DIGESTS = frozenset(
+    {
+        PRE_ADJUDICATION_SOURCE_DIGEST,
+        LEGACY_REVIEWED_SOURCE_DIGEST,
+        PRIOR_REVIEWED_SOURCE_DIGEST,
+        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
+        PRE_PAGINATION_REVIEWED_SOURCE_DIGEST,
+        PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST,
+        PRE_REFINEMENT_PRECISION_REVIEWED_SOURCE_DIGEST,
+        PRE_DIRECT_TRANSITION_PRECISION_REVIEWED_SOURCE_DIGEST,
+        PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST,
+        REVIEWED_SOURCE_DIGEST,
+    }
+)
+PRECURRENT_SOURCE_DIGESTS = MIGRATABLE_SOURCE_DIGESTS - {REVIEWED_SOURCE_DIGEST}
+REVIEWED_CLAIM_COUNT = 317
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -139,7 +166,7 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
 )
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 311-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 315-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -438,6 +465,8 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-314",
         "PD-CLAIM-315",
         "PD-CLAIM-316",
+        "PD-CLAIM-317",
+        "PD-CLAIM-318",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -515,7 +544,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1148-candidate paper inventory is adjudicated. Repeated "
+        "The complete 1154-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."
@@ -536,7 +565,12 @@ def _outcome(claim_id: str) -> str:
 
 def _validate_claim_outcome_partition(claims: list[dict[str, Any]]) -> None:
     """Require every registered claim to have one unambiguous reviewed outcome."""
-    claim_ids = {claim.get("claim_id") for claim in claims}
+    claim_ids: set[str] = set()
+    for claim in claims:
+        claim_id = claim.get("claim_id")
+        if not isinstance(claim_id, str) or not claim_id:
+            raise ValueError("Registry claim IDs must be non-empty strings")
+        claim_ids.add(claim_id)
     reviewed_claim_ids = (
         SUPPORTED_CLAIM_IDS
         | UNTESTED_CLAIM_IDS
@@ -571,18 +605,7 @@ def migrate(root: Path) -> dict[str, int]:
     registry: dict[str, Any] = json.loads(registry_path.read_text(encoding="utf-8"))
     digest = registry.get("paper", {}).get("source_digest")
     claims = registry.get("claims")
-    if digest not in {
-        PRE_ADJUDICATION_SOURCE_DIGEST,
-        LEGACY_REVIEWED_SOURCE_DIGEST,
-        PRIOR_REVIEWED_SOURCE_DIGEST,
-        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
-        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
-        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
-        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
-        PRE_PAGINATION_REVIEWED_SOURCE_DIGEST,
-        PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST,
-        REVIEWED_SOURCE_DIGEST,
-    }:
+    if digest not in MIGRATABLE_SOURCE_DIGESTS:
         raise ValueError(
             "Paper digest differs from the explicitly reviewed v2 snapshot"
         )
@@ -593,17 +616,7 @@ def migrate(root: Path) -> dict[str, int]:
     inventory = build_candidate_inventory(paper_path, repository_root=root.resolve())
     if inventory["source_digest"] != REVIEWED_SOURCE_DIGEST:
         raise ValueError("Reviewer projection differs from the reviewed paper snapshot")
-    if digest in {
-        PRE_ADJUDICATION_SOURCE_DIGEST,
-        LEGACY_REVIEWED_SOURCE_DIGEST,
-        PRIOR_REVIEWED_SOURCE_DIGEST,
-        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
-        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
-        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
-        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
-        PRE_PAGINATION_REVIEWED_SOURCE_DIGEST,
-        PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST,
-    }:
+    if digest in PRECURRENT_SOURCE_DIGESTS:
         _reconcile_reviewer_projection(registry, inventory)
     else:
         candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}
