@@ -27,10 +27,19 @@ PRIOR_REVIEWED_SOURCE_DIGEST = (
 PRE_SUMMARY_REVIEWED_SOURCE_DIGEST = (
     "09319b54ecadc62dd1c265421370d3a8f53854b341e831783605619d892b250b"
 )
-REVIEWED_SOURCE_DIGEST = (
+PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST = (
     "53d11ff4dd10954807b69bbed0f6442b5efd93cf02ea6ed1c9c9da10b3d4ad1d"
 )
-REVIEWED_CLAIM_COUNT = 309
+PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST = (
+    "e1a06c08ffe31fe6ec872b8de222179239c87f1e1f7eab3d48cf20f88c673d49"
+)
+PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST = (
+    "9bd5ca45a5e0e96021122ab02a2745da94eb560135541640de3e064fc098519a"
+)
+REVIEWED_SOURCE_DIGEST = (
+    "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe"
+)
+REVIEWED_CLAIM_COUNT = 313
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -77,7 +86,7 @@ PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS = (
     "PD-CAND-9248119a2458c1b1",
     "PD-CAND-a83d791d65049fc2",
 }
-REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
+PRE_CONSTRAINT_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-000afa39d6089e6f",
         "PD-CAND-165a6caf21ef85e2",
@@ -103,9 +112,28 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
         "PD-CAND-feff7c3d6f4ddc55",
     }
 )
+REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
+    {
+        "PD-CAND-165a6caf21ef85e2",
+        "PD-CAND-39f42d06f3e621a5",
+        "PD-CAND-9345c1e6be2ef186",
+        "PD-CAND-9906005bff75ba72",
+        "PD-CAND-aa6efbe9274b5d53",
+        "PD-CAND-ab4689630944a0fe",
+        "PD-CAND-b06a3cbe5b2d0e01",
+        "PD-CAND-b5b2526e23b77d70",
+        "PD-CAND-bcfcc2b3a9631de1",
+        "PD-CAND-be8a26a0593eab4f",
+        "PD-CAND-c6f7607002d58a93",
+        "PD-CAND-cd8822807d808531",
+        "PD-CAND-d2f2b5b07b466265",
+        "PD-CAND-fdcf5c685afbb41a",
+        "PD-CAND-feff7c3d6f4ddc55",
+    }
+)
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 309-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 311-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -398,6 +426,10 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-308",
         "PD-CLAIM-309",
         "PD-CLAIM-310",
+        "PD-CLAIM-311",
+        "PD-CLAIM-312",
+        "PD-CLAIM-313",
+        "PD-CLAIM-314",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -444,6 +476,7 @@ def _reconcile_reviewer_projection(
     prior_projection_ids = (
         LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS
         | PRIOR_REVIEWER_PROJECTION_CANDIDATE_IDS
+        | PRE_CONSTRAINT_REVIEWER_PROJECTION_CANDIDATE_IDS
         | REVIEWER_PROJECTION_CANDIDATE_IDS
     )
     for candidate_id in prior_projection_ids:
@@ -504,6 +537,9 @@ def migrate(root: Path) -> dict[str, int]:
         LEGACY_REVIEWED_SOURCE_DIGEST,
         PRIOR_REVIEWED_SOURCE_DIGEST,
         PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }:
         raise ValueError(
@@ -521,6 +557,9 @@ def migrate(root: Path) -> dict[str, int]:
         LEGACY_REVIEWED_SOURCE_DIGEST,
         PRIOR_REVIEWED_SOURCE_DIGEST,
         PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
     }:
         _reconcile_reviewer_projection(registry, inventory)
     else:

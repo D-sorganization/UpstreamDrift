@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "dcd44491a94e74044abda4e853ef73d9447c0a912b8d1e75a6066540199dd66f"
+    "sha256": "91deafde1b889734d0b17c135077fd7e18a242221730d25da782aa1ba482e736"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -11,9 +11,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 309,
-    "evidence_reference_count": 2286,
-    "local_artifact_count": 338,
+    "claim_count": 313,
+    "evidence_reference_count": 2312,
+    "local_artifact_count": 350,
     "external_url_count": 78
   },
   "claims": {
@@ -3878,6 +3878,52 @@
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "external_references": []
+    },
+    "PD-CLAIM-311": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "scripts/research/proximal_distal_energy/constraint_internal_force_diagnostics.py",
+        "scripts/research/proximal_distal_energy/run_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics_evidence.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-312": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "scripts/research/proximal_distal_energy/constraint_internal_force_diagnostics.py",
+        "scripts/research/proximal_distal_energy/run_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics.py",
+        "tests/research/test_constraint_internal_force_diagnostics_evidence.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-313": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py",
+        "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin_evidence.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-314": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json",
+        "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py",
+        "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin.py",
+        "tests/research/test_closed_loop_singularity_margin_evidence.py"
+      ],
+      "external_references": []
     }
   },
   "local_artifacts": {
@@ -3886,6 +3932,16 @@
       "bytes": 7786,
       "referenced_by": [
         "PD-CLAIM-241"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md": {
+      "sha256": "ccbedb6483bb3104404a9f48a8c89e25d76a548c1c1d83f315228f2117ea5971",
+      "bytes": 6350,
+      "referenced_by": [
+        "PD-CLAIM-311",
+        "PD-CLAIM-312",
+        "PD-CLAIM-313",
+        "PD-CLAIM-314"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md": {
@@ -3908,6 +3964,14 @@
         "PD-CLAIM-079",
         "PD-CLAIM-094",
         "PD-CLAIM-199"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
+      "sha256": "4933e0bb9a58c6250de93329dc47a6a06b50140f2a4b58315217883bfa13b82f",
+      "bytes": 45013,
+      "referenced_by": [
+        "PD-CLAIM-313",
+        "PD-CLAIM-314"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
@@ -4372,6 +4436,14 @@
         "PD-CLAIM-310"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/data/closed_loop_singularity_margin.json": {
+      "sha256": "73f5e9ed04c99210c6f1dc6b3ea684e31b03f1620c31f965dd94cb2ed2839959",
+      "bytes": 25690,
+      "referenced_by": [
+        "PD-CLAIM-313",
+        "PD-CLAIM-314"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/data/closed_state_forward_bridge.json": {
       "sha256": "5cc95b0fbc4069a39fd0c48002aa0e9a6df5d178ac95bd1efe7820ce90e5f267",
       "bytes": 36927,
@@ -4404,6 +4476,14 @@
         "PD-CLAIM-268",
         "PD-CLAIM-269",
         "PD-CLAIM-270"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/constraint_internal_force_diagnostics.json": {
+      "sha256": "5c561b85537bdea982498667c2cab17f1582837dd8bb43340a51b7152f3673bc",
+      "bytes": 16926,
+      "referenced_by": [
+        "PD-CLAIM-311",
+        "PD-CLAIM-312"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json": {
@@ -5714,8 +5794,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "54112db36d4ae7076236ccca6ac9dee0a46b66dd663b6eb1b4ec96ddff95189b",
-      "bytes": 141661,
+      "sha256": "3be5d09065267b88e66c85c629a84a59c8add5d214986d45d8b3b32253efea1f",
+      "bytes": 144066,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -5995,6 +6075,14 @@
         "PD-CLAIM-259"
       ]
     },
+    "scripts/research/proximal_distal_energy/closed_loop_singularity_margin.py": {
+      "sha256": "53988a9eb3a506c13de2f13b30da1afe969dbeb4edb805fd849c2d3119c42a69",
+      "bytes": 10958,
+      "referenced_by": [
+        "PD-CLAIM-313",
+        "PD-CLAIM-314"
+      ]
+    },
     "scripts/research/proximal_distal_energy/closed_state_forward_bridge.py": {
       "sha256": "c40fe682dc2d67367481b99b2fb77571d5c018cac0cbc4efd5fc445379e7c1aa",
       "bytes": 20489,
@@ -6010,6 +6098,14 @@
         "PD-CLAIM-268",
         "PD-CLAIM-269",
         "PD-CLAIM-270"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/constraint_internal_force_diagnostics.py": {
+      "sha256": "674f94e64197e2c773f904d13b2860a9dd450e3d52a766f8c0b34d75b044f6f4",
+      "bytes": 6846,
+      "referenced_by": [
+        "PD-CLAIM-311",
+        "PD-CLAIM-312"
       ]
     },
     "scripts/research/proximal_distal_energy/counterfactual_ensemble.py": {
@@ -6585,6 +6681,14 @@
         "PD-CLAIM-259"
       ]
     },
+    "scripts/research/proximal_distal_energy/run_closed_loop_singularity_margin.py": {
+      "sha256": "378784b97e54c638f4379d2c1516fb81888cf90858a37c0988ef57f80bb0d310",
+      "bytes": 16595,
+      "referenced_by": [
+        "PD-CLAIM-313",
+        "PD-CLAIM-314"
+      ]
+    },
     "scripts/research/proximal_distal_energy/run_closed_state_forward_bridge.py": {
       "sha256": "2036e603bdacfeb14ce7c105d2a9a86ac89bde40161e1a049bf3ceba99af0ef3",
       "bytes": 2304,
@@ -6600,6 +6704,14 @@
         "PD-CLAIM-268",
         "PD-CLAIM-269",
         "PD-CLAIM-270"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/run_constraint_internal_force_diagnostics.py": {
+      "sha256": "ea7774e67cac327ae0438ab248b847be099ad6614a7dcebada31e238f492b5ca",
+      "bytes": 16804,
+      "referenced_by": [
+        "PD-CLAIM-311",
+        "PD-CLAIM-312"
       ]
     },
     "scripts/research/proximal_distal_energy/run_counterfactual_ensemble.py": {
@@ -7485,6 +7597,22 @@
         "PD-CLAIM-259"
       ]
     },
+    "tests/research/test_closed_loop_singularity_margin.py": {
+      "sha256": "9f5e935abfada4f26d4e82ee2dccea723f4705849b97684978bbb121cdd964ae",
+      "bytes": 8615,
+      "referenced_by": [
+        "PD-CLAIM-313",
+        "PD-CLAIM-314"
+      ]
+    },
+    "tests/research/test_closed_loop_singularity_margin_evidence.py": {
+      "sha256": "b3415ef69feac54aee3f55abd7ff81c4b1485e97eb533c7cf9272968af782b43",
+      "bytes": 4673,
+      "referenced_by": [
+        "PD-CLAIM-313",
+        "PD-CLAIM-314"
+      ]
+    },
     "tests/research/test_closed_state_forward_bridge.py": {
       "sha256": "0d76832d155b36a88307026f1785a10dea62f311094e943ae79cc3cef0a4a2c1",
       "bytes": 2854,
@@ -7500,6 +7628,22 @@
         "PD-CLAIM-268",
         "PD-CLAIM-269",
         "PD-CLAIM-270"
+      ]
+    },
+    "tests/research/test_constraint_internal_force_diagnostics.py": {
+      "sha256": "869cc480574463d1d129823f13dbb2f0bfbef5a027afccf28cd01b2920415cdf",
+      "bytes": 4952,
+      "referenced_by": [
+        "PD-CLAIM-311",
+        "PD-CLAIM-312"
+      ]
+    },
+    "tests/research/test_constraint_internal_force_diagnostics_evidence.py": {
+      "sha256": "d28e519e70f263c067eceac0b95742c5e23d720ae54b85b6d9d5e5819e7a4f70",
+      "bytes": 3654,
+      "referenced_by": [
+        "PD-CLAIM-311",
+        "PD-CLAIM-312"
       ]
     },
     "tests/research/test_double_pendulum_identifiability.py": {

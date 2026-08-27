@@ -336,6 +336,10 @@ include = [
     "scripts/packaging/pinned_tools_provenance.py",
 ]
 exclude = [
+    # Canonical top-level package registered by build_hooks.py. Keeping this
+    # copy under the literal `src` wheel package would create a second module
+    # identity (`src.bunkershot3d`) with distinct exception/class objects.
+    "src/bunkershot3d/**/*",
     "src/**/__pycache__/**",
     "src/**/test_*.py",
     "src/**/tests/**",

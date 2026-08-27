@@ -39,15 +39,26 @@ def test_package_workflow_builds_distribution_with_ui_bundle_enabled() -> None:
     assert "SKIP_UI_BUILD" not in content
 
 
-def test_package_workflow_checks_out_exact_recursive_tools_tree() -> None:
-    """Every source checkout must materialize the pinned Tools submodule."""
+def test_package_workflow_limits_recursive_checkout_to_the_build_job() -> None:
+    """Only the source-owning build needs submodules; wheel smoke stays minimal."""
     workflow = _load_workflow(PACKAGE_WORKFLOW)
-    checkout_steps = _checkout_steps(workflow)
+    build_checkout = next(
+        step
+        for step in workflow["jobs"]["build-wheel"]["steps"]
+        if str(step.get("uses", "")).startswith("actions/checkout@")
+    )
+    smoke_checkout = next(
+        step
+        for step in workflow["jobs"]["smoke-test-wheel"]["steps"]
+        if str(step.get("uses", "")).startswith("actions/checkout@")
+    )
 
-    assert len(checkout_steps) == 2
-    for checkout in checkout_steps:
-        assert checkout["with"]["submodules"] == "recursive"
-        assert checkout["with"]["persist-credentials"] is False
+    assert build_checkout["with"]["submodules"] == "recursive"
+    assert build_checkout["with"]["persist-credentials"] is False
+    assert smoke_checkout["with"]["submodules"] is False
+    assert smoke_checkout["with"]["persist-credentials"] is False
+    assert smoke_checkout["with"]["sparse-checkout"] == "tests/fixtures/wgs.json"
+    assert smoke_checkout["with"]["sparse-checkout-cone-mode"] is False
 
 
 def test_package_workflow_tracks_canonical_and_extension_sources() -> None:
@@ -99,6 +110,42 @@ def test_package_workflow_preserves_time_for_verified_artifact_upload() -> None:
     workflow = _load_workflow(PACKAGE_WORKFLOW)
 
     assert workflow["jobs"]["build-wheel"]["timeout-minutes"] >= 30
+
+
+def test_package_workflow_transfers_only_the_wheel_to_smoke_jobs() -> None:
+    """Smoke jobs must not download the independently retained source archive."""
+    workflow = _load_workflow(PACKAGE_WORKFLOW)
+    build_steps = workflow["jobs"]["build-wheel"]["steps"]
+    upload_steps = [
+        step
+        for step in build_steps
+        if str(step.get("uses", "")).startswith("actions/upload-artifact@")
+    ]
+    download_step = next(
+        step
+        for step in workflow["jobs"]["smoke-test-wheel"]["steps"]
+        if str(step.get("uses", "")).startswith("actions/download-artifact@")
+    )
+
+    assert {step["with"]["name"] for step in upload_steps} == {
+        "sidekick-wheel",
+        "sidekick-sdist",
+    }
+    assert (
+        next(step for step in upload_steps if step["with"]["name"] == "sidekick-wheel")[
+            "with"
+        ]["path"]
+        == "dist/${{ steps.build-dist.outputs.wheel_filename }}"
+    )
+    assert (
+        next(step for step in upload_steps if step["with"]["name"] == "sidekick-sdist")[
+            "with"
+        ]["path"]
+        == "dist/*.tar.gz"
+    )
+    assert download_step["with"]["name"] == "sidekick-wheel"
+    assert workflow["jobs"]["smoke-test-wheel"]["timeout-minutes"] >= 20
+    assert "sidekick-dist" not in PACKAGE_WORKFLOW.read_text(encoding="utf-8")
 
 
 def test_package_workflow_does_not_cache_the_fast_frontend_install() -> None:

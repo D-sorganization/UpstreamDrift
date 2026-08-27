@@ -70,6 +70,7 @@ _TOOLS_DIRECTORY_DESTINATIONS = {
 }
 _TOOLS_FILE_DESTINATIONS = {"contracts.py": "contracts.py"}
 _UPSTREAM_EXTENSION_PACKAGES = ("sidekick", "chat")
+_UPSTREAM_CANONICAL_PACKAGES = ("bunkershot3d",)
 _TOOLS_PROVENANCE_PATHS = (
     "src/shared",
     "src/sidekick",
@@ -412,6 +413,36 @@ class UIBuildHook(BuildHookInterface):
                     ("shared", "python", package_name, *relative.parts)
                 )
 
+    def _register_upstream_packages(self, version: str, build_data: dict) -> None:
+        """Expose Upstream-owned packages under their canonical import roots.
+
+        The wheel otherwise packages the whole ``src`` directory as the literal
+        top-level package ``src``.  Repository tests add ``src/`` to their import
+        path, which masks that layout mismatch for packages whose public name is
+        intentionally top-level.  Registering each source file explicitly keeps
+        editable and wheel installs aligned without library-time ``sys.path``
+        mutation or a second supported module identity.
+        """
+        if not version:
+            raise ValueError("Version parameter must not be empty")
+        if build_data is None:
+            raise ValueError("Build data dictionary must be provided")
+
+        source_root = Path(self.root) / "src"
+        force_include = build_data.setdefault("force_include", {})
+        for package_name in _UPSTREAM_CANONICAL_PACKAGES:
+            package_root = source_root / package_name
+            if not package_root.is_dir():
+                raise RuntimeError(
+                    f"Canonical Upstream package root is missing: {package_name}"
+                )
+            for path in sorted(package_root.rglob("*")):
+                if not path.is_file():
+                    continue
+                relative = path.relative_to(package_root)
+                if not self._is_test_artifact(relative):
+                    force_include[str(path)] = "/".join((package_name, *relative.parts))
+
     def initialize(self, version: str, build_data: dict) -> None:
         """Initialize build hook."""
         if not version:
@@ -421,6 +452,7 @@ class UIBuildHook(BuildHookInterface):
 
         self._ensure_ui_bundle(version)
         self._register_ui_bundle(version, build_data)
+        self._register_upstream_packages(version, build_data)
         self._register_tools_packages(version, build_data)
 
     def _ensure_ui_bundle(self, version: str) -> None:

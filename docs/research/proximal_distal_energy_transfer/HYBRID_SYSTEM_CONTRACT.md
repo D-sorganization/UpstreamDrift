@@ -69,14 +69,21 @@ first-order numerical observability and controllability rank for declared
 synthetic states, outputs, controls, steps, and tolerances. It leaves every
 structural, practical, global nonlinear, and human inference unavailable.
 
+The cross-tier
+[constraint and internal-force diagnostic](CONSTRAINT_INTERNAL_FORCE_DIAGNOSTICS.md)
+now separates scaled kinematic closure from normalized point-force and full
+hand-wrench allocation maps. It retains singular, near-singular, coincident,
+scale, and tolerance controls while explicitly withholding constraint-force,
+anatomical, participant, and strategy inference.
+
 ## Remaining Nonlinear-Control Work
 
 This contract is the dependency for, not the result of, the remaining #9027
 analyses. Subsequent protected slices must add:
 
-1. extend the analytical local-rank audit across eligible tiers and add
-   constraint-rank, structural-identifiability, and practical-identifiability
-   reports;
+1. extend the analytical local-rank and scaled constraint audits across
+   eligible feasible trajectories and add structural- and
+   practical-identifiability reports;
 2. event-time sensitivity and finite-time stability methods only where their
    assumptions are satisfied;
 3. matched open-loop, state-triggered, impedance, robust-control, stochastic,

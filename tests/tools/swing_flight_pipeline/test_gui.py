@@ -21,6 +21,8 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
+from src.shared.python.contracts import PreconditionError  # noqa: E402
+from src.shared.python.ui.provenance_value import ProvenanceValueLabel  # noqa: E402
 from src.tools.swing_flight_pipeline.gui import (  # noqa: E402
     SwingFlightWidget,
     SwingFlightWindow,
@@ -217,6 +219,83 @@ def test_run_pipeline_success_populates_result(widget):
     assert "Engine: manual" in text
     assert "220.0 m" in text
     assert "Trajectory: 3 points" in text
+
+    # issue #8823 — the headline carry/launch-speed values must be rendered
+    # as ProvenanceValueLabel, each carrying a real ProvenanceRecord with the
+    # correct engine/source/formula, not a plain QLabel.
+    assert isinstance(widget._carry_label, ProvenanceValueLabel)
+    carry_pv = widget._carry_label.provenance_value
+    assert carry_pv.value == pytest.approx(220.0)
+    assert carry_pv.record.engine == "manual"
+    assert carry_pv.record.source == "manual:run-1"
+    assert "carry_m" in carry_pv.record.formula
+    assert carry_pv.record.inputs
+    assert "220.0 m" in widget._carry_label.text()
+
+    assert isinstance(widget._launch_speed_label, ProvenanceValueLabel)
+    speed_pv = widget._launch_speed_label.provenance_value
+    assert speed_pv.value == pytest.approx(63.0)
+    assert speed_pv.record.engine == "manual"
+    assert speed_pv.record.source == "manual:run-1"
+    assert "LaunchConditions.velocity" in speed_pv.record.formula
+    assert "63.0 m/s" in widget._launch_speed_label.text()
+
+
+# ---------------------------------------------------------------------------
+# Provenance labels (#8823)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_provenance_labels_absent_before_first_run(widget):
+    assert widget._carry_label is None
+    assert widget._launch_speed_label is None
+
+
+@pytest.mark.unit
+def test_provenance_run_id_increments_across_runs(widget):
+    with _install_mock_pipeline_module():
+        widget._run_pipeline()
+        first_source = widget._carry_label.provenance_value.record.source
+        widget._run_pipeline()
+        second_source = widget._carry_label.provenance_value.record.source
+
+    assert first_source == "manual:run-1"
+    assert second_source == "manual:run-2"
+    assert first_source != second_source
+
+
+@pytest.mark.unit
+def test_provenance_label_tooltip_describes_the_value(widget):
+    with _install_mock_pipeline_module():
+        widget._run_pipeline()
+
+    tooltip = widget._carry_label.toolTip()
+    assert "formula:" in tooltip
+    assert "source: manual:run-1" in tooltip
+    assert widget._carry_label.whatsThis() == tooltip
+
+
+@pytest.mark.unit
+def test_update_provenance_labels_requires_non_empty_engine_name(widget):
+    result = _MockResult(
+        swing_state=_MockSwingState(engine_name=""),
+        impact_state=_MockImpactState(
+            ball_velocity=np.array([60.0, 0.0, 20.0]),
+            ball_angular_velocity=np.array([0.0, 300.0, 0.0]),
+        ),
+        launch_conditions=_MockLaunch(
+            velocity=63.0, launch_angle=12.5, spin_rate=300.0
+        ),
+        carry_m=220.0,
+        max_height_m=28.0,
+        flight_time_s=6.2,
+        landing_angle_deg=42.0,
+        trajectory=[],
+    )
+
+    with pytest.raises(PreconditionError):
+        widget._update_provenance_labels(result)
 
 
 def test_run_pipeline_passes_ui_parameters_to_swing_state(widget):
