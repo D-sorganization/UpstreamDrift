@@ -161,6 +161,16 @@
       "tiles": ["shot_tracer"],
       "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API."
     },
+    "simulation.swing_objective_lab": {
+      "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",
+      "pyqt": "src/launchers/adapters/swing_objective_lab_embed.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 9128,
+      "tiles": ["swing_objective_lab"],
+      "notes": "PyQt6-only surface provided by the Tools pendulum_simulator tile (Tools epic #4766). The engine already emits a versioned JSON payload (swing-objective-comparison v1.0.0), so the model layer a web surface needs is done; only the API route and React page are missing."
+    },
     "settings.preferences": {
       "title": "Settings/preferences surface + persistence",
       "pyqt": "src/launchers/settings_dialog.py",

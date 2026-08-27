@@ -199,7 +199,6 @@ models:
     working_dir: "."
     python_paths:
       - "src"
-    embed_adapter: "src/double_pendulum_golf/swing_objectives/_embed_adapter.py::get_dockable_ui"
     launcher:
       category: "simulation"
       logo: "pendulum.svg"
