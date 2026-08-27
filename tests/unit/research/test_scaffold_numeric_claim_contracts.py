@@ -36,6 +36,8 @@ def test_scaffold_preserves_registered_coverage_and_reviewed_overrides() -> None
         "PD-CLAIM-314",
         "PD-CLAIM-315",
         "PD-CLAIM-316",
+        "PD-CLAIM-317",
+        "PD-CLAIM-318",
     }
 
     scaffold_reported = reported["claims"]
@@ -44,6 +46,7 @@ def test_scaffold_preserves_registered_coverage_and_reviewed_overrides() -> None
         "PD-CLAIM-313",
         "PD-CLAIM-315",
         "PD-CLAIM-316",
+        "PD-CLAIM-317",
     }
     assert set(reviewed_reported) <= set(scaffold_reported)
     assert all(
