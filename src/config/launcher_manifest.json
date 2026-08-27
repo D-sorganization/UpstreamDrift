@@ -612,6 +612,31 @@
       }
     },
     {
+      "id": "swing_objective_lab",
+      "name": "Swing Objective Lab",
+      "description": "Compare downswings optimized for clubhead speed against ones optimized for centrifugal release, Coriolis transfer, energy transfer, or grip impulse",
+      "category": "physics_engine",
+      "type": "special_app",
+      "path": "src/double_pendulum_golf/swing_objectives/__main__.py",
+      "provider": "tools",
+      "source_root": "../Tools/src/pendulum_simulator",
+      "working_dir": ".",
+      "python_paths": ["src"],
+      "logo": "pendulum.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "pendulum",
+        "trajectory_optimization",
+        "objective_comparison",
+        "proximal_distal",
+        "counterfactuals"
+      ],
+      "order": 100,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
       "id": "chat_assistant",
       "name": "AI Assistant",
       "description": "Chat-based AI assistant with calculator, workspace, and data explorer integration",

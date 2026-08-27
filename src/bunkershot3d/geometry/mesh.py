@@ -102,12 +102,15 @@ class TriangleMesh:
 
     def face_areas(self) -> NDArray[np.float64]:
         """Triangle areas in m^2."""
-        return np.linalg.norm(self.face_area_vectors(), axis=1)
+        vectors = self.face_area_vectors()
+        # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=1)
+        return np.sqrt(np.einsum("ij,ij->i", vectors, vectors))
 
     def face_normals(self) -> NDArray[np.float64]:
         """Unit outward normals; degenerate faces yield a zero row."""
         vectors = self.face_area_vectors()
-        norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+        # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=1)
+        norms = np.sqrt(np.einsum("ij,ij->i", vectors, vectors))[:, None]
         safe = np.where(norms > 0.0, norms, 1.0)
         return np.where(norms > 0.0, vectors / safe, 0.0)
 
