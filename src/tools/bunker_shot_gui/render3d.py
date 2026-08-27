@@ -66,15 +66,16 @@ white margin either side of it regardless.
 
 from __future__ import annotations
 
+from typing import cast
+
 from dataclasses import dataclass
 
 import numpy as np
 from matplotlib.backend_bases import RendererBase
 from matplotlib.figure import Figure
-from matplotlib.lines import Line2D
 from matplotlib.text import Text
 from matplotlib.ticker import FixedLocator, MaxNLocator
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from mpl_toolkits.mplot3d.art3d import Line3D, Poly3DCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from numpy.typing import NDArray
 
@@ -499,16 +500,18 @@ class ShotSceneArtists:
 
     # ------------------------------------------------------------- building
 
-    def _new_line(self, colour: str, width: float, label: str) -> Line2D:
+    def _new_line(self, colour: str, width: float, label: str) -> Line3D:
         """Add an empty 3-D polyline."""
         (line,) = self._axes.plot(
             [], [], [], color=colour, linewidth=width, label=label
         )
-        return line
+        # plot() on a 3-D axes returns a Line3D at runtime; the stubs type it
+        # as Line2D, which lacks the public set_data_3d update path.
+        return cast(Line3D, line)
 
     def _new_points(
         self, colour: str, size: float, label: str, *, alpha: float = 1.0
-    ) -> Line2D:
+    ) -> Line3D:
         """Add an empty 3-D point cloud, drawn as a marker-only line.
 
         A ``Line2D`` rather than a scatter because ``set_data_3d`` is public
@@ -527,7 +530,9 @@ class ShotSceneArtists:
             label=label,
             alpha=alpha,
         )
-        return line
+        # plot() on a 3-D axes returns a Line3D at runtime; the stubs type it
+        # as Line2D, which lacks the public set_data_3d update path.
+        return cast(Line3D, line)
 
     def _build_head_mesh(self) -> Poly3DCollection:
         """Draw the lofted head as a solid, once (issue #8706 defect 1).
@@ -578,7 +583,7 @@ class ShotSceneArtists:
             linewidth=0.0,
         )
 
-    def _build_floor(self) -> Line2D:
+    def _build_floor(self) -> Line3D:
         """Add the divot profile, drawn along the track at the sole's own y."""
         return self._new_line(
             _FLOOR_COLOUR, 1.6, "divot floor (swept envelope of the head)"
