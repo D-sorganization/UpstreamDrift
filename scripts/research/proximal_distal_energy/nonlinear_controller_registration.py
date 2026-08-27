@@ -77,9 +77,9 @@ class ProspectiveControllerRegistration:
             candidate_solvers=(
                 "matched_open_loop_baseline",
                 "bounded_projected_ilqr",
-                "bounded_nmpc_collocation",
             ),
             unavailable_solvers=(
+                "bounded_nmpc_collocation",
                 "second_order_ddp",
                 "risk_sensitive_control",
                 "scenario_stochastic_mpc",
@@ -98,7 +98,8 @@ def validate_registration() -> dict[str, Any]:
         reg.double_pendulum_evaluation_count == 0
         and reg.ranking_eligible_method_count == 0
         and len(reg.candidate_solvers) >= 2
-        and len(reg.unavailable_solvers) >= 3
+        and len(reg.unavailable_solvers) >= 4
+        and "bounded_nmpc_collocation" in reg.unavailable_solvers
     )
 
     data = asdict(reg)

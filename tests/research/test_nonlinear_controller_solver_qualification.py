@@ -54,3 +54,8 @@ def test_solver_qualification_battery() -> None:
     assert evidence["deterministic_replay_passed"] is True
     assert evidence["warm_start_benefit_detected"] is True
     assert evidence["typed_nonfinite_failure_passed"] is True
+
+
+def test_solver_qualification_rejects_unimplemented_solver_identity() -> None:
+    with pytest.raises(ValueError, match="only implemented solver"):
+        qualify_solver_kernel("bounded_nmpc_collocation")

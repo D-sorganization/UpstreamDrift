@@ -17,11 +17,12 @@ import numpy as np
 import numpy.typing as npt
 
 from scripts.research.proximal_distal_energy.trajectory_control_authority import (
-    continuous_dynamics,
-    discrete_rk4_step,
+    registered_step,
 )
-from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
-    DoublePendulumParameters,
+from src.shared.python.simulation_backends import (
+    GolfModelParams,
+    SimState,
+    make_backend,
 )
 
 FloatArray = npt.NDArray[np.float64]
@@ -60,16 +61,32 @@ def plant_step_interface(
     state: FloatArray,
     control: FloatArray,
     dt: float,
-    params: DoublePendulumParameters | None = None,
+    params: GolfModelParams | None = None,
 ) -> FloatArray:
     """Solver abstraction for stepping the canonical plant."""
-    return discrete_rk4_step(state, control, dt, params)
+    model = GolfModelParams.default() if params is None else params
+    backend = make_backend("ode", model, dt=dt)
+    return registered_step(backend, state, control, time_s=0.0, dt_s=dt)
+
+
+def _canonical_backend_step(
+    state: FloatArray,
+    control: FloatArray,
+    dt: float,
+    params: GolfModelParams,
+) -> FloatArray:
+    """Advance one step through the canonical public backend rollout API."""
+
+    backend = make_backend("ode", params, dt=dt)
+    backend.reset(SimState(q=state[:2], v=state[2:], time=0.0))
+    trace = backend.rollout(control[np.newaxis, :], horizon=1, dt=dt)
+    return np.concatenate((trace.q[-1], trace.v[-1]))
 
 
 def evaluate_plant_transport() -> PlantTransportQualificationSummary:
     """Verify solver plant transport across registered step sizes."""
     step_sizes = (0.001, 0.002, 0.005)
-    params = DoublePendulumParameters.default()
+    params = GolfModelParams.default()
 
     # Test state and control operating point
     test_state = np.array([1.2, 0.8, 4.0, -2.5], dtype=np.float64)
@@ -79,7 +96,7 @@ def evaluate_plant_transport() -> PlantTransportQualificationSummary:
 
     for dt in step_sizes:
         # Reference RK4 step
-        ref_step = discrete_rk4_step(test_state, test_control, dt, params)
+        ref_step = _canonical_backend_step(test_state, test_control, dt, params)
         # Interface RK4 step
         iface_step = plant_step_interface(test_state, test_control, dt, params)
 

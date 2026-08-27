@@ -22,6 +22,8 @@ def test_prospective_registration_structure_and_digest() -> None:
     assert reg.planning_horizon_steps == 60
     assert reg.double_pendulum_evaluation_count == 0
     assert reg.ranking_eligible_method_count == 0
+    assert "bounded_nmpc_collocation" not in reg.candidate_solvers
+    assert "bounded_nmpc_collocation" in reg.unavailable_solvers
     assert len(reg.source_digest) == 64
 
 

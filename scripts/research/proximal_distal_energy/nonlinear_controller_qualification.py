@@ -10,14 +10,16 @@ import argparse
 import json
 import math
 import sys
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from typing import Any
-from collections.abc import Callable
 
 import numpy as np
 import numpy.typing as npt
 
 FloatArray = npt.NDArray[np.float64]
+
+PROJECTED_ILQR_SOLVER_NAME = "bounded_projected_ilqr"
 
 INFERENCE_BOUNDARY = (
     "This qualification establishes solver convergence, bound adherence, "
@@ -150,9 +152,15 @@ class ProjectedILQRSolver:
 
 
 def qualify_solver_kernel(
-    solver_name: str = "bounded_projected_ilqr",
+    solver_name: str = PROJECTED_ILQR_SOLVER_NAME,
 ) -> SolverQualificationResult:
     """Run manufactured qualification battery on candidate solver."""
+    if solver_name != PROJECTED_ILQR_SOLVER_NAME:
+        raise ValueError(
+            f"unsupported solver {solver_name!r}; the only implemented solver is "
+            f"{PROJECTED_ILQR_SOLVER_NAME!r}"
+        )
+
     solver = ProjectedILQRSolver(horizon=15, dt=0.01, u_bounds=(-1.5, 1.5), max_iter=20)
     x0 = np.array([0.5, -0.2], dtype=np.float64)
     x_target = np.array([0.0, 0.0], dtype=np.float64)

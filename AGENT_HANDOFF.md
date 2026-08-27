@@ -36,16 +36,17 @@ completion from local files or an open pull request.
 
 ## Open Correctness Findings
 
-- #9124 must enforce sample-to-sample torque-rate bounds from an explicit zero
-  perturbation history, locate the unique positive transverse guard crossing,
-  distinguish wrong/multiple/grazing/no crossing, and independently replay
-  every retained multiple-shooting result through the protected RK4 operator.
-- #9125 currently applies the first nominal command during nominally delayed
-  samples and omits wrist-only topology from its coverage gate. Use an explicit
-  pre-delay history and require every registered channel topology.
-- #9126 currently relabels the iLQR implementation when another solver name is
-  requested. Dispatch only implemented solvers or reject unsupported names;
-  no solver or controller ranking is currently qualified.
+- #9124 source now enforces amplitude/rate limits, typed guard outcomes, and
+  independent protected-RK4 replay. Its regenerated study retains 32/38
+  feasible transverse cases, but its 24.9517% multistart spread fails the 5%
+  ranking gate. Paper/release registration remains pending.
+- #9125 core now uses explicit zero delay prehistory and requires both,
+  shoulder-only, wrist-only, and zero-command topology outcomes. Governed
+  evidence, figures, paper claims, and release registration remain pending.
+- #9126 now rejects every solver identity except the implemented projected
+  iLQR kernel; collocation NMPC is explicitly unavailable. Plant transport is
+  rebound to the protected public backend. Full comparative evaluation,
+  governed evidence, and every solver/controller ranking remain unavailable.
 - #9128 currently calls unmounted `/tools/...` frontend endpoints. Use the
   mounted `/api/tools/...` contract, regenerate TypeScript API types, and make
   the page conform to the current `WorkspaceShell` interface.
