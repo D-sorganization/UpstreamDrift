@@ -437,6 +437,7 @@ class LayoutManager:
                 "swing_flight_pipeline",
                 "ball_flight_simulator",
                 "putting_green_gui",
+                "swing_objective_lab",
             ]:
                 mapped_cats.add("Simulation")
             elif t == "document" or model_id in ["project_map", "library_tool"]:

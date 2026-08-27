@@ -11,7 +11,11 @@
       "path": "src/tools/model_explorer/launch_model_explorer.py",
       "logo": "urdf_icon.svg",
       "status": "utility",
-      "capabilities": ["model_browsing", "urdf_generation", "open_in_engine"],
+      "capabilities": [
+        "model_browsing",
+        "urdf_generation",
+        "open_in_engine"
+      ],
       "order": 1,
       "web": {
         "mode": "route",
@@ -184,7 +188,11 @@
       "logo": "putting_green.svg",
       "status": "simulator",
       "web_route": "/tools/putting-green",
-      "capabilities": ["surface_modeling", "ball_physics", "terrain"],
+      "capabilities": [
+        "surface_modeling",
+        "ball_physics",
+        "terrain"
+      ],
       "order": 7,
       "web": {
         "mode": "route",
@@ -200,7 +208,11 @@
       "path": "src/launchers/matlab_suite_dialog.py",
       "logo": "matlab_logo.svg",
       "status": "external",
-      "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
+      "capabilities": [
+        "simscape_2d",
+        "simscape_3d",
+        "analysis_tools"
+      ],
       "order": 8,
       "web": {
         "mode": "native-window"
@@ -215,8 +227,20 @@
       "path": "src/tools/starting_pose_matcher/__main__.py",
       "logo": "motion_target_preview.svg",
       "status": "utility",
-      "capabilities": ["c3d", "mocap", "club", "body", "preview"],
-      "tags": ["c3d", "mocap", "club", "body", "preview"],
+      "capabilities": [
+        "c3d",
+        "mocap",
+        "club",
+        "body",
+        "preview"
+      ],
+      "tags": [
+        "c3d",
+        "mocap",
+        "club",
+        "body",
+        "preview"
+      ],
       "order": 9,
       "web": {
         "mode": "native-window"
@@ -257,7 +281,10 @@
       "path": "src/video_analyzer/launch_video_analyzer.py",
       "provider": "tools",
       "working_dir": ".",
-      "python_paths": ["src", "src/shared/python"],
+      "python_paths": [
+        "src",
+        "src/shared/python"
+      ],
       "logo": "video_analyzer.svg",
       "status": "external",
       "web_route": "/tools/video-analyzer",
@@ -282,7 +309,10 @@
       "path": "src/media_processing/video_processor/apps/web/launch_platform.py",
       "provider": "tools",
       "working_dir": "src/media_processing/video_processor/apps/web",
-      "python_paths": ["src", "src/shared/python"],
+      "python_paths": [
+        "src",
+        "src/shared/python"
+      ],
       "logo": "video_analyzer.svg",
       "status": "external",
       "web_route": "/tools/video-processor",
@@ -306,11 +336,19 @@
       "path": "src/data_explorer/data_explorer_app.py",
       "provider": "tools",
       "working_dir": ".",
-      "python_paths": ["src", "src/shared/python"],
+      "python_paths": [
+        "src",
+        "src/shared/python"
+      ],
       "logo": "data_explorer.svg",
       "status": "external",
       "web_route": "/tools/data-explorer",
-      "capabilities": ["data_import", "filtering", "visualization", "export"],
+      "capabilities": [
+        "data_import",
+        "filtering",
+        "visualization",
+        "export"
+      ],
       "order": 13,
       "web": {
         "mode": "route",
@@ -357,7 +395,10 @@
       "path": "src/rate_of_closure/launch_pyqt6.py",
       "provider": "tools",
       "working_dir": ".",
-      "python_paths": ["src", "src/shared/python"],
+      "python_paths": [
+        "src",
+        "src/shared/python"
+      ],
       "logo": "rate_of_closure.svg",
       "status": "external",
       "capabilities": [
@@ -443,7 +484,10 @@
       "path": "src/launchers/_shot_tracer_gui.py",
       "logo": "golf_logo.svg",
       "status": "gui_ready",
-      "capabilities": ["trajectory_visualization", "multi_model_comparison"],
+      "capabilities": [
+        "trajectory_visualization",
+        "multi_model_comparison"
+      ],
       "web_route": "/ball-flight",
       "order": 18,
       "web": {
@@ -460,7 +504,11 @@
       "path": "src/tools/pose_studio/__main__.py",
       "logo": "pose_studio.svg",
       "status": "gui_ready",
-      "capabilities": ["pose_editing", "retargeting", "joint_manipulation"],
+      "capabilities": [
+        "pose_editing",
+        "retargeting",
+        "joint_manipulation"
+      ],
       "order": 19,
       "web": {
         "mode": "native-window"
@@ -475,7 +523,11 @@
       "path": "src/tools/golf_simulation_suite/__main__.py",
       "logo": "golf_logo.svg",
       "status": "gui_ready",
-      "capabilities": ["full_simulation", "parameter_sweep", "batch_runs"],
+      "capabilities": [
+        "full_simulation",
+        "parameter_sweep",
+        "batch_runs"
+      ],
       "order": 20,
       "web": {
         "mode": "native-window"
@@ -596,7 +648,9 @@
       "provider": "tools",
       "source_root": "../Tools/src/pendulum_simulator",
       "working_dir": ".",
-      "python_paths": ["src"],
+      "python_paths": [
+        "src"
+      ],
       "logo": "pendulum.svg",
       "status": "gui_ready",
       "capabilities": [
@@ -607,6 +661,33 @@
         "force_vectors"
       ],
       "order": 26,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
+      "id": "swing_objective_lab",
+      "name": "Swing Objective Lab",
+      "description": "Compare downswings optimized for clubhead speed against ones optimized for centrifugal release, Coriolis transfer, energy transfer, or grip impulse",
+      "category": "physics_engine",
+      "type": "special_app",
+      "path": "src/double_pendulum_golf/swing_objectives/__main__.py",
+      "provider": "tools",
+      "source_root": "../Tools/src/pendulum_simulator",
+      "working_dir": ".",
+      "python_paths": [
+        "src"
+      ],
+      "logo": "pendulum.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "pendulum",
+        "trajectory_optimization",
+        "objective_comparison",
+        "proximal_distal",
+        "counterfactuals"
+      ],
+      "order": 100,
       "web": {
         "mode": "native-window"
       }
@@ -734,7 +815,10 @@
       "logo": "biomechanics.svg",
       "status": "experimental",
       "default_launch": "tab",
-      "shell_surfaces": ["pyqt6", "react"],
+      "shell_surfaces": [
+        "pyqt6",
+        "react"
+      ],
       "capabilities": [
         "canonical_core",
         "estimation",
@@ -758,7 +842,10 @@
       "logo": "biomechanics.svg",
       "status": "experimental",
       "default_launch": "tab",
-      "shell_surfaces": ["pyqt6", "react"],
+      "shell_surfaces": [
+        "pyqt6",
+        "react"
+      ],
       "capabilities": [
         "canonical_core",
         "comparison",
@@ -781,7 +868,11 @@
       "web_route": "/api/analysis",
       "logo": "data_explorer.svg",
       "status": "ready",
-      "capabilities": ["swing_metrics", "biomechanics", "api"],
+      "capabilities": [
+        "swing_metrics",
+        "biomechanics",
+        "api"
+      ],
       "order": 34,
       "web": {
         "mode": "route",
@@ -798,7 +889,11 @@
       "web_route": "/tools/motion-pipeline",
       "logo": "c3d_icon.svg",
       "status": "experimental",
-      "capabilities": ["markerless_mocap", "forward_dynamics", "pipeline"],
+      "capabilities": [
+        "markerless_mocap",
+        "forward_dynamics",
+        "pipeline"
+      ],
       "order": 35,
       "web": {
         "mode": "unavailable",
@@ -815,7 +910,11 @@
       "web_route": "/api/perturbation",
       "logo": "data_explorer.svg",
       "status": "experimental",
-      "capabilities": ["perturbation", "robustness", "cross_engine"],
+      "capabilities": [
+        "perturbation",
+        "robustness",
+        "cross_engine"
+      ],
       "order": 36,
       "web": {
         "mode": "unavailable",
@@ -832,7 +931,11 @@
       "web_route": "/api/force-overlays",
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
-      "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
+      "capabilities": [
+        "force_visualization",
+        "joint_torques",
+        "3d_overlay"
+      ],
       "order": 37,
       "web": {
         "mode": "unavailable",
@@ -849,7 +952,11 @@
       "web_route": "/ws/realtime",
       "logo": "data_explorer.svg",
       "status": "experimental",
-      "capabilities": ["websocket", "realtime", "pubsub"],
+      "capabilities": [
+        "websocket",
+        "realtime",
+        "pubsub"
+      ],
       "order": 38,
       "web": {
         "mode": "unavailable",
@@ -866,7 +973,11 @@
       "web_route": "/api/aip",
       "logo": "golf_logo.svg",
       "status": "experimental",
-      "capabilities": ["ai_methods", "protocol", "dispatch"],
+      "capabilities": [
+        "ai_methods",
+        "protocol",
+        "dispatch"
+      ],
       "order": 39,
       "web": {
         "mode": "unavailable",
@@ -883,7 +994,11 @@
       "web_route": "/api/actuator-controls",
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
-      "capabilities": ["actuator_tuning", "control_schemes", "realtime"],
+      "capabilities": [
+        "actuator_tuning",
+        "control_schemes",
+        "realtime"
+      ],
       "order": 40,
       "web": {
         "mode": "unavailable",
@@ -900,7 +1015,11 @@
       "web_route": "/docs/unreal-integration",
       "logo": "golf_logo.svg",
       "status": "external",
-      "capabilities": ["streaming", "vr", "visualization"],
+      "capabilities": [
+        "streaming",
+        "vr",
+        "visualization"
+      ],
       "order": 41,
       "web": {
         "mode": "unavailable",
@@ -917,7 +1036,11 @@
       "web_route": "/docs/robotics",
       "logo": "drake.svg",
       "status": "experimental",
-      "capabilities": ["locomotion", "contact", "planning"],
+      "capabilities": [
+        "locomotion",
+        "contact",
+        "planning"
+      ],
       "order": 42,
       "web": {
         "mode": "unavailable",
@@ -941,7 +1064,11 @@
       "web_route": "/tools/calculators",
       "logo": "data_explorer.svg",
       "status": "external",
-      "capabilities": ["process_calculators", "engineering", "analysis"],
+      "capabilities": [
+        "process_calculators",
+        "engineering",
+        "analysis"
+      ],
       "order": 43,
       "web": {
         "mode": "native-window"
@@ -957,7 +1084,11 @@
       "web_route": "/docs/pid-generator",
       "logo": "data_explorer.svg",
       "status": "experimental",
-      "capabilities": ["pid_generation", "isa_5_1", "diagrams"],
+      "capabilities": [
+        "pid_generation",
+        "isa_5_1",
+        "diagrams"
+      ],
       "order": 44,
       "web": {
         "mode": "unavailable",
@@ -1000,7 +1131,13 @@
       "hidden": true,
       "hidden_reason": "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries.",
       "hidden_owner": "@launcher",
-      "capabilities": ["c3d", "mocap", "club", "body", "preview"],
+      "capabilities": [
+        "c3d",
+        "mocap",
+        "club",
+        "body",
+        "preview"
+      ],
       "order": 99,
       "web": {
         "mode": "native-window"
