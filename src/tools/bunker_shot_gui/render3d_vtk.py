@@ -24,8 +24,26 @@ surface rather than a scatter that only *looks* three-dimensional from one
 angle.
 
 PyVista is imported lazily, inside :func:`require_pyvista`, never at module
-load. Importing this module is always safe; only constructing
-:class:`VtkSceneArtists` requires the extra, and it fails with an install
+load. So is everything else this module needs at runtime from its own
+package and from :mod:`bunkershot3d`: the sibling modules that carry the
+real value objects (:mod:`.bridge`, :mod:`.render`, :mod:`.report`,
+:mod:`.shot3d`, :mod:`.traces`) all import ``bunkershot3d.solvers``, and
+``bunkershot3d`` eagerly imports ``mujoco`` for its grain-scale backends --
+and ``mujoco`` touches an OpenGL/OSMesa binding *at that import*, not at
+first render. A CI runner with no working GL driver raises there (PyOpenGL's
+``_ErrorChecker`` construction fails with
+``AttributeError: 'NoneType' object has no attribute 'glGetError'``, seen in
+PR #9138's ``unit-test-gate``), so a bare ``import render3d_vtk`` must never
+reach it. Every name this module needs from those siblings at runtime is
+therefore imported inside the function or method that uses it, mirroring
+:func:`require_pyvista`; only type annotations -- safe, thanks to
+``from __future__ import annotations`` -- reference them at module scope,
+under ``TYPE_CHECKING``.
+
+Importing this module is always safe; only constructing
+:class:`VtkSceneArtists` -- or calling :func:`draw_scene_frame_vtk` /
+:func:`shot_scene_still_vtk`, which construct one -- requires the extra
+(and the rest of the package), and a missing PyVista fails with an install
 hint that mirrors the viewport layer's own degradation reasons rather than a
 bare ``ModuleNotFoundError``.
 
@@ -48,18 +66,17 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from bunkershot3d.solvers import EnvelopeStatus
-from src.shared.python.visualization.viewport import ViewportOverlayPayload
-
-from .bridge import HeadBuild
-from .render import ViewportFallback, validity_stamp
-from .render3d import SceneScale, scene_scale
-from .report import status_colour
-from .shot3d import CameraPreset, ShotScene, viewport_payload
-from .traces import ValidityBand
-
 if TYPE_CHECKING:  # pragma: no cover - typing only
     import pyvista as pv
+
+    from bunkershot3d.solvers import EnvelopeStatus
+    from src.shared.python.visualization.viewport import ViewportOverlayPayload
+
+    from .bridge import HeadBuild
+    from .render import ViewportFallback
+    from .render3d import SceneScale
+    from .shot3d import CameraPreset, ShotScene
+    from .traces import ValidityBand
 
 __all__ = [
     "RENDERER",
@@ -135,6 +152,34 @@ def require_pyvista() -> ModuleType:
     # mypy to see the real one (this whole extra is optional).
     module.OFF_SCREEN = True  # type: ignore[attr-defined]
     return module
+
+
+def _coerce_camera(camera: CameraPreset | str | None) -> CameraPreset:
+    """Resolve a ``camera`` argument, importing :class:`~.shot3d.CameraPreset`
+    lazily.
+
+    Deferred for the same reason :func:`require_pyvista` defers ``pyvista``:
+    see the module docstring. :mod:`.shot3d` imports ``bunkershot3d``, whose
+    grain-scale backends import ``mujoco`` at module load, and ``mujoco``
+    touches an OpenGL/OSMesa binding at *that* import -- a probe that raises
+    on a CI runner with no working GL driver. Nothing about picking or
+    validating a camera preset needs that price paid merely for importing
+    this module, so this is the one place ``CameraPreset`` is imported for
+    real.
+
+    Args:
+        camera: The caller's preset, its string name, or ``None`` for the
+            default down-the-line view.
+
+    Returns:
+        A concrete :class:`~.shot3d.CameraPreset`.
+
+    Raises:
+        ValueError: If ``camera`` is a string that names no preset.
+    """
+    from .shot3d import CameraPreset
+
+    return CameraPreset.DOWN_THE_LINE if camera is None else CameraPreset(camera)
 
 
 def _hex_to_rgb01(colour: str) -> tuple[float, float, float]:
@@ -254,7 +299,7 @@ class VtkSceneArtists:
         build: HeadBuild,
         scale: SceneScale,
         *,
-        camera: CameraPreset = CameraPreset.DOWN_THE_LINE,
+        camera: CameraPreset | str | None = None,
         band: ValidityBand | None = None,
         off_screen: bool = True,
         window_size: tuple[int, int] = _DEFAULT_WINDOW_SIZE,
@@ -266,7 +311,8 @@ class VtkSceneArtists:
             build: The lofted head the scene's centroids came from -- the
                 source of the solid mesh this renderer exists to draw.
             scale: The fixed world box and depth ramp.
-            camera: Which named view to open on.
+            camera: Which named view to open on; ``None`` (the default)
+                opens the down-the-line view.
             band: The per-sample validity band, when there is one.
             off_screen: Whether the underlying ``Plotter`` renders headless.
                 ``False`` is for interactive debugging only; every shipped
@@ -275,20 +321,27 @@ class VtkSceneArtists:
 
         Raises:
             PyVistaNotAvailableError: If ``pyvista`` is not installed.
-            ValueError: If the band does not describe this scene.
+            ValueError: If the band does not describe this scene, or
+                ``camera`` is a string that names no preset.
         """
         if band is not None and band.n_frames != scene.n_frames:
             raise ValueError(
                 "the scene and the validity band must come from one shot; got "
                 f"{scene.n_frames} poses against {band.n_frames} verdicts"
             )
+        # Deferred like ``pv`` below: see the module docstring for why a
+        # sibling import as ordinary-looking as ``.shot3d.viewport_payload``
+        # or ``.render.ViewportFallback`` must not happen at module load.
+        from .render import ViewportFallback
+        from .shot3d import viewport_payload
+
         pv = require_pyvista()
         self._pv = pv
         self._scene = scene
         self._build = build
         self._scale = scale
         self._band = band
-        self._camera = CameraPreset(camera)
+        self._camera = _coerce_camera(camera)
         self._payload = viewport_payload(scene)
         self._fallback = ViewportFallback(
             provider="VTK/PyVista", reason="", renderer=RENDERER
@@ -484,6 +537,12 @@ class VtkSceneArtists:
         :mod:`~.render3d` stamps, with the same coloured backing PyVista's
         ``vtkTextProperty`` can carry directly.
         """
+        # Deferred: see the module docstring. By the time this method runs,
+        # :func:`require_pyvista` has already paid the pyvista half of that
+        # price; this pays the ``bunkershot3d``/``mujoco`` half, only here.
+        from .render import validity_stamp
+        from .report import status_colour
+
         scene = self._scene
         text = validity_stamp(status, scene.fidelity_tier)
         full = text if not extra else f"{text}\n{extra}"
@@ -534,7 +593,7 @@ class VtkSceneArtists:
         Raises:
             ValueError: If the name is not one of the three.
         """
-        chosen = CameraPreset(camera)
+        chosen = _coerce_camera(camera)
         self._camera = chosen
         eye, focal, up = _camera_geometry(self._scale, chosen)
         self._plotter.camera_position = (eye, focal, up)
@@ -630,7 +689,7 @@ def draw_scene_frame_vtk(
     *,
     frame: int = 0,
     scale: SceneScale | None = None,
-    camera: CameraPreset = CameraPreset.DOWN_THE_LINE,
+    camera: CameraPreset | str | None = None,
     band: ValidityBand | None = None,
     off_screen: bool = True,
     window_size: tuple[int, int] = _DEFAULT_WINDOW_SIZE,
@@ -649,7 +708,8 @@ def draw_scene_frame_vtk(
         scale: The fixed world box, from :func:`~.render3d.scene_scale`.
             Defaults to this scene's own, which is correct for a single
             design and wrong for a comparison -- pass the merged scale there.
-        camera: Which named view to open on.
+        camera: Which named view to open on; ``None`` (the default) opens
+            the down-the-line view.
         band: The per-sample validity band, when there is one.
         off_screen: Whether the plotter renders headless.
         window_size: Pixel size of the render target.
@@ -659,10 +719,18 @@ def draw_scene_frame_vtk(
 
     Raises:
         PyVistaNotAvailableError: If ``pyvista`` is not installed.
-        ValueError: If the frame is outside the shot, or the band does not
-            describe the same shot as the scene.
+        ValueError: If the frame is outside the shot, the band does not
+            describe the same shot as the scene, or ``camera`` is a string
+            that names no preset.
     """
-    limits = scene_scale((scene,)) if scale is None else scale
+    if scale is None:
+        # Deferred: see the module docstring -- ``.render3d`` is another of
+        # the siblings that reaches ``bunkershot3d``/``mujoco``.
+        from .render3d import scene_scale
+
+        limits = scene_scale((scene,))
+    else:
+        limits = scale
     artists = VtkSceneArtists(
         scene,
         build,
@@ -682,7 +750,7 @@ def shot_scene_still_vtk(
     *,
     frame: int | None = None,
     scale: SceneScale | None = None,
-    camera: CameraPreset = CameraPreset.DOWN_THE_LINE,
+    camera: CameraPreset | str | None = None,
     band: ValidityBand | None = None,
     window_size: tuple[int, int] = _DEFAULT_WINDOW_SIZE,
 ) -> VtkSceneArtists:
@@ -695,7 +763,8 @@ def shot_scene_still_vtk(
         build: The lofted head backing the scene's centroids.
         frame: Which sample to show; defaults to the deepest moment.
         scale: The fixed world box; see :func:`draw_scene_frame_vtk`.
-        camera: Which named view.
+        camera: Which named view; ``None`` (the default) opens the
+            down-the-line view.
         band: The per-sample validity band, when there is one.
         window_size: Pixel size of the render target.
 
@@ -705,7 +774,8 @@ def shot_scene_still_vtk(
 
     Raises:
         PyVistaNotAvailableError: If ``pyvista`` is not installed.
-        ValueError: If the frame is outside the shot.
+        ValueError: If the frame is outside the shot, or ``camera`` is a
+            string that names no preset.
     """
     chosen = int(np.argmax(scene.sole_depth_m)) if frame is None else frame
     return draw_scene_frame_vtk(

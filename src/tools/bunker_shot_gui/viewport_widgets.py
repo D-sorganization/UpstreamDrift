@@ -57,6 +57,7 @@ import numpy as np
 from bunkershot3d.fields.schema import SandFieldSeries
 from matplotlib.image import AxesImage
 from numpy.typing import NDArray
+from PyQt6 import sip
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -72,7 +73,8 @@ from src.shared.python.visualization.viewport import (
 
 from .bridge import HeadBuild
 from .crosstier import CrossTierComparison
-from .render import ViewportFallback, viewport_fallback
+from .render import RENDERER as MATPLOTLIB_RENDERER
+from .render import ViewportFallback
 from .render3d import SceneScale, ShotSceneArtists, scene_scale
 from .render3d_vtk import VtkSceneArtists
 from .render_crosstier import CrossTierArtists
@@ -110,6 +112,25 @@ _IDLE_CROSS_TIER = (
     "recorded pose."
 )
 
+_MATPLOTLIB_FALLBACK = ViewportFallback(
+    provider=None, reason="", renderer=MATPLOTLIB_RENDERER
+)
+"""What :class:`ShotViewportWidget` actually drew when the frame is not VTK.
+
+Deliberately **not** :func:`~.render.viewport_fallback`: that function
+answers "which 3-D *provider* is installed", worded for
+:class:`~.widgets.SoleLoadFieldWidget`'s 2-D plan view -- its degraded
+:meth:`~.render.ViewportFallback.describe` says the frame was "drawn as a
+matplotlib plan view of the sole" and lists every unavailable provider by
+name, VTK/PyVista included. That sentence is wrong here even when it is
+technically true: this widget's matplotlib path is
+:class:`~.render3d.ShotSceneArtists`, an actual (if depth-buffer-less) 3-D
+scatter, never a plan view, and it draws through this path whenever no
+``build`` was supplied *or* a real VTK attempt raised -- provider
+availability alone is not the question once a caller has looked at the
+pixels on screen. See :meth:`ShotViewportWidget._describe_fallback`.
+"""
+
 
 class ShotViewportWidget(QWidget):
     """The head moving through the sand, scrubbed by somebody else's cursor.
@@ -139,7 +160,7 @@ class ShotViewportWidget(QWidget):
         self._scale: SceneScale | None = None
         self._band: ValidityBand | None = None
         self._frame = 0
-        self._fallback: ViewportFallback = viewport_fallback()
+        self._fallback: ViewportFallback = _MATPLOTLIB_FALLBACK
 
         layout, self._heading, self._canvas = build_canvas_column(
             self,
@@ -202,8 +223,8 @@ class ShotViewportWidget(QWidget):
 
     @property
     def renderer_note(self) -> str:
-        """What the ADR-0027 viewport layer left this view drawing with."""
-        return self._fallback.describe()
+        """What actually drew the current frame -- never mere availability."""
+        return self._describe_fallback()
 
     # --------------------------------------------------------------- content
 
@@ -246,7 +267,7 @@ class ShotViewportWidget(QWidget):
             self._fallback = self._vtk_artists.fallback
             self._show_vtk_image(image)
         else:
-            self._fallback = viewport_fallback()
+            self._fallback = _MATPLOTLIB_FALLBACK
             self._artists = ShotSceneArtists(
                 self._canvas.fig, scene, self._scale, camera=self.camera, band=band
             )
@@ -261,10 +282,11 @@ class ShotViewportWidget(QWidget):
         self._scale = None
         self._band = None
         self._frame = 0
-        self._fallback = viewport_fallback()
+        self._fallback = _MATPLOTLIB_FALLBACK
         self._refresh_renderer_note()
-        self._canvas.fig.clear()
-        self._canvas.draw_idle()
+        if self._canvas_is_alive():
+            self._canvas.fig.clear()
+            self._canvas.draw()
 
     # --------------------------------------------------------- VTK dispatch
 
@@ -315,6 +337,8 @@ class ShotViewportWidget(QWidget):
 
     def _show_vtk_image(self, image: NDArray[np.uint8]) -> None:
         """Blit a rendered VTK frame into the shared matplotlib canvas."""
+        if not self._canvas_is_alive():
+            return
         figure = self._canvas.fig
         if self._vtk_image is None:
             figure.clear()
@@ -324,13 +348,43 @@ class ShotViewportWidget(QWidget):
             self._vtk_image = axes.imshow(image)
         else:
             self._vtk_image.set_data(image)
-        self._canvas.draw_idle()
+        self._canvas.draw()
+
+    def _canvas_is_alive(self) -> bool:
+        """Whether the underlying Qt canvas C++ object still exists.
+
+        A ``draw_idle()`` repaint is deferred to a later turn of the Qt
+        event loop, and can fire after this widget's canvas has already
+        been destroyed -- observed in CI as ``RuntimeError: wrapped C/C++
+        object of type FigureCanvasQTAgg has been deleted`` (PR #9138). The
+        redraw methods below call the synchronous ``draw()`` instead, which
+        removes the deferred callback that made this possible in the first
+        place; this guard is the second line of defence for any caller
+        (a queued signal, a stale ``_on_camera`` connection) that still
+        reaches a repaint after the widget is gone.
+        """
+        return not sip.isdeleted(self._canvas)
+
+    def _describe_fallback(self) -> str:
+        """One line naming the renderer that actually drew the current frame.
+
+        Unlike :meth:`~.render.ViewportFallback.describe`, which reports
+        whether a 3-D *provider* is installed -- worded for the sole-field
+        view's plan-view fallback -- this reports whether VTK/PyVista was
+        *used*: :attr:`_fallback` only ever names it when
+        :meth:`_try_vtk` already produced a real offscreen render (see
+        :data:`_MATPLOTLIB_FALLBACK`). Provider availability alone must
+        never make this say VTK/PyVista.
+        """
+        if not self._fallback.degraded:
+            return f"3-D viewport: {self._fallback.provider} (ADR-0027)"
+        return f"3-D viewport: {self._fallback.renderer}"
 
     def _refresh_renderer_note(self) -> None:
         """Rewrite the renderer label to match what actually drew the frame."""
-        suffix = " (no 3-D viewport installed)" if self._fallback.degraded else ""
-        self._note.setText(f"Renderer: {self._fallback.renderer}{suffix}")
-        self._note.setToolTip(self._fallback.describe())
+        note = self._describe_fallback()
+        self._note.setText(f"Renderer: {self._fallback.renderer}")
+        self._note.setToolTip(note)
 
     # ------------------------------------------------------------- following
 
@@ -367,10 +421,10 @@ class ShotViewportWidget(QWidget):
             self._vtk_artists.set_camera(self.camera)
             self._redraw()
             return
-        if self._artists is None:
+        if self._artists is None or not self._canvas_is_alive():
             return
         self._artists.set_camera(self.camera)
-        self._canvas.draw_idle()
+        self._canvas.draw()
 
     def _redraw(self) -> None:
         """Repaint the canvas at the current frame."""
@@ -378,10 +432,10 @@ class ShotViewportWidget(QWidget):
             self._vtk_artists.update(self._frame)
             self._show_vtk_image(self._vtk_artists.image_array())
             return
-        if self._artists is None:
+        if self._artists is None or not self._canvas_is_alive():
             return
         self._artists.update(self._frame)
-        self._canvas.draw_idle()
+        self._canvas.draw()
 
 
 class TracePanelWidget(QWidget):
