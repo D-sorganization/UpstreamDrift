@@ -27,12 +27,36 @@ of a *declared approach* with its own frame count and its own time base. So
 :class:`~.slices.CursorMap` and says in the frame that it has done so. That
 is the honest way to keep one transport; a second slider would have been the
 dishonest way to avoid the question.
+
+Who draws the 3-D scene is a runtime choice, not a build-time one
+-------------------------------------------------------------------
+
+ADR-0027's viewport layer is consulted at draw time, not import time, so a
+:class:`ShotViewportWidget` does not know at construction whether PyVista is
+installed. :meth:`~ShotViewportWidget.set_shot` asks
+:func:`~src.shared.python.visualization.viewport.select_viewport_provider`
+for the VTK provider and, when it is available *and* a
+:class:`~.bridge.HeadBuild` was handed in, renders through
+:mod:`~.render3d_vtk` instead of the :mod:`~.render3d` matplotlib fallback.
+:mod:`~.render3d_vtk` still only produces pixels -- an offscreen VTK render
+-- so this widget hosts them the same way it hosts the matplotlib figure: one
+:class:`~.widgets.MplCanvas`, with the VTK frame blitted in via ``imshow``
+rather than a second, competing Qt render surface. A VTK failure that only
+shows up at render time (no GPU, no display, a broken driver) is caught here
+and degrades to the matplotlib path exactly as an absent provider would --
+never a crash, and never silently. Omitting ``build`` (as every caller does
+today) keeps this view on the matplotlib path unconditionally, so nothing
+about the existing wiring changes where PyVista is absent.
 """
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 from bunkershot3d.fields.schema import SandFieldSeries
+from matplotlib.image import AxesImage
+from numpy.typing import NDArray
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -41,9 +65,16 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.visualization.viewport import (
+    ViewportProvider,
+    select_viewport_provider,
+)
+
+from .bridge import HeadBuild
 from .crosstier import CrossTierComparison
-from .render import viewport_fallback
+from .render import ViewportFallback, viewport_fallback
 from .render3d import SceneScale, ShotSceneArtists, scene_scale
+from .render3d_vtk import VtkSceneArtists
 from .render_crosstier import CrossTierArtists
 from .render_slice import SliceArtists
 from .render_traces import TracePanelArtists
@@ -57,6 +88,8 @@ from .slices import (
 )
 from .traces import ShotTraces, ValidityBand
 from .widgets import build_canvas_column
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "CrossTierWidget",
@@ -101,10 +134,12 @@ class ShotViewportWidget(QWidget):
         self._title = str(title)
         self._scene: ShotScene | None = None
         self._artists: ShotSceneArtists | None = None
+        self._vtk_artists: VtkSceneArtists | None = None
+        self._vtk_image: AxesImage | None = None
         self._scale: SceneScale | None = None
         self._band: ValidityBand | None = None
         self._frame = 0
-        self._fallback = viewport_fallback()
+        self._fallback: ViewportFallback = viewport_fallback()
 
         layout, self._heading, self._canvas = build_canvas_column(
             self,
@@ -128,13 +163,10 @@ class ShotViewportWidget(QWidget):
         controls.addWidget(self._camera_box, stretch=1)
         layout.addLayout(controls)
 
-        self._note = QLabel(
-            f"Renderer: {self._fallback.renderer}"
-            + (" (no 3-D viewport installed)" if self._fallback.degraded else "")
-        )
-        self._note.setToolTip(self._fallback.describe())
+        self._note = QLabel("")
         self._note.setWordWrap(True)
         layout.addWidget(self._note)
+        self._refresh_renderer_note()
 
     # ------------------------------------------------------------ accessors
 
@@ -181,6 +213,7 @@ class ShotViewportWidget(QWidget):
         *,
         scale: SceneScale | None = None,
         band: ValidityBand | None = None,
+        build: HeadBuild | None = None,
     ) -> None:
         """Load one scene and open on its deepest moment.
 
@@ -191,6 +224,11 @@ class ShotViewportWidget(QWidget):
             band: The per-sample validity band, so the in-frame stamp can
                 follow the regime rather than carry the worst verdict on
                 every frame.
+            build: The lofted head the scene's centroids came from. Optional,
+                and only ever the reason this view renders through
+                :mod:`~.render3d_vtk` instead of :mod:`~.render3d`: without
+                it there is no mesh to pose, so the view stays on the
+                matplotlib path even when a VTK provider is installed.
 
         Raises:
             ValueError: If the band does not describe the same shot.
@@ -198,21 +236,101 @@ class ShotViewportWidget(QWidget):
         self._scene = scene
         self._scale = scene_scale((scene,)) if scale is None else scale
         self._band = band
-        self._artists = ShotSceneArtists(
-            self._canvas.fig, scene, self._scale, camera=self.camera, band=band
-        )
         self._frame = int(scene.sole_depth_m.argmax())
-        self._redraw()
+        self._close_vtk()
+
+        outcome = self._try_vtk(scene, build, self._scale, band)
+        if outcome is not None:
+            self._vtk_artists, image = outcome
+            self._artists = None
+            self._fallback = self._vtk_artists.fallback
+            self._show_vtk_image(image)
+        else:
+            self._fallback = viewport_fallback()
+            self._artists = ShotSceneArtists(
+                self._canvas.fig, scene, self._scale, camera=self.camera, band=band
+            )
+            self._redraw()
+        self._refresh_renderer_note()
 
     def clear(self) -> None:
         """Drop the scene, so nothing stale stays on screen after a refusal."""
         self._scene = None
         self._artists = None
+        self._close_vtk()
         self._scale = None
         self._band = None
         self._frame = 0
+        self._fallback = viewport_fallback()
+        self._refresh_renderer_note()
         self._canvas.fig.clear()
         self._canvas.draw_idle()
+
+    # --------------------------------------------------------- VTK dispatch
+
+    def _try_vtk(
+        self,
+        scene: ShotScene,
+        build: HeadBuild | None,
+        scale: SceneScale,
+        band: ValidityBand | None,
+    ) -> tuple[VtkSceneArtists, NDArray[np.uint8]] | None:
+        """Attempt the VTK/PyVista path; ``None`` means "use matplotlib".
+
+        Two independent things can make VTK unavailable: the ADR-0027
+        provider check (pyvista, and so vtk, not installed) and, more
+        subtly, an installed pyvista that still cannot open an offscreen
+        render target on this machine (no GPU, no display, a broken
+        driver). The first is reported by
+        :func:`~src.shared.python.visualization.viewport.select_viewport_provider`;
+        the second only shows up by actually rendering, which is why this
+        method renders the opening frame before returning rather than only
+        constructing the artists.
+        """
+        if build is None:
+            return None
+        if select_viewport_provider(ViewportProvider.VTK).selected is None:
+            return None
+        try:
+            artists = VtkSceneArtists(
+                scene, build, scale, camera=self.camera, band=band
+            )
+            artists.update(self._frame)
+            image = artists.image_array()
+        except Exception as error:  # noqa: BLE001 - viewport degradation, not a bug
+            logger.warning(
+                "VTK/PyVista viewport degraded to matplotlib for %r: %s",
+                self._title,
+                error,
+            )
+            return None
+        return artists, image
+
+    def _close_vtk(self) -> None:
+        """Release any VTK render window this view is holding."""
+        if self._vtk_artists is not None:
+            self._vtk_artists.close()
+        self._vtk_artists = None
+        self._vtk_image = None
+
+    def _show_vtk_image(self, image: NDArray[np.uint8]) -> None:
+        """Blit a rendered VTK frame into the shared matplotlib canvas."""
+        figure = self._canvas.fig
+        if self._vtk_image is None:
+            figure.clear()
+            axes = figure.add_subplot(111)
+            axes.set_axis_off()
+            figure.subplots_adjust(left=0.0, right=1.0, top=1.0, bottom=0.0)
+            self._vtk_image = axes.imshow(image)
+        else:
+            self._vtk_image.set_data(image)
+        self._canvas.draw_idle()
+
+    def _refresh_renderer_note(self) -> None:
+        """Rewrite the renderer label to match what actually drew the frame."""
+        suffix = " (no 3-D viewport installed)" if self._fallback.degraded else ""
+        self._note.setText(f"Renderer: {self._fallback.renderer}{suffix}")
+        self._note.setToolTip(self._fallback.describe())
 
     # ------------------------------------------------------------- following
 
@@ -245,6 +363,10 @@ class ShotViewportWidget(QWidget):
 
     def _on_camera(self, _index: int) -> None:
         """Point the scene at the newly selected view."""
+        if self._vtk_artists is not None:
+            self._vtk_artists.set_camera(self.camera)
+            self._redraw()
+            return
         if self._artists is None:
             return
         self._artists.set_camera(self.camera)
@@ -252,6 +374,10 @@ class ShotViewportWidget(QWidget):
 
     def _redraw(self) -> None:
         """Repaint the canvas at the current frame."""
+        if self._vtk_artists is not None:
+            self._vtk_artists.update(self._frame)
+            self._show_vtk_image(self._vtk_artists.image_array())
+            return
         if self._artists is None:
             return
         self._artists.update(self._frame)

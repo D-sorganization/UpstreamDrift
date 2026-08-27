@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import pytest
 
+from src.tools.bunker_shot_gui.bridge import HeadBuild
 from src.tools.bunker_shot_gui.design import (
     SandCondition,
     SolverSetup,
@@ -21,6 +22,7 @@ from src.tools.bunker_shot_gui.design import (
     WedgeDesign,
 )
 from src.tools.bunker_shot_gui.model import WorkbenchModel
+from src.tools.bunker_shot_gui.shot3d import ShotScene
 
 
 @pytest.fixture(scope="session")
@@ -72,6 +74,27 @@ def quasi_static_swing() -> SwingSetup:
 def nominal_shot(model, nominal_design, firm_sand, tour_swing):  # type: ignore[no-untyped-def]
     """One real F0 shot for the nominal design."""
     return model.run_shot(nominal_design.geometry(), firm_sand.sand_state(), tour_swing)
+
+
+@pytest.fixture(scope="session")
+def nominal_build(model, nominal_design) -> HeadBuild:  # type: ignore[no-untyped-def]
+    """The lofted head :func:`nominal_shot` was solved against.
+
+    Free of the solver: :meth:`~.model.WorkbenchModel.head_build` is
+    ``lru_cache``-backed, so this is the same object ``nominal_shot`` and
+    ``nominal_evaluation`` already forced -- not a second loft. A
+    :class:`~.bridge.HeadBuild` is what a real 3-D renderer needs beyond the
+    scene's own centroids: the watertight mesh they came from.
+    """
+    return model.head_build(nominal_design.geometry())
+
+
+@pytest.fixture(scope="session")
+def nominal_scene(nominal_shot) -> ShotScene:  # type: ignore[no-untyped-def]
+    """The 3-D scene of the nominal shot (issue #8706)."""
+    scene = nominal_shot.scene
+    assert scene is not None, nominal_shot.unavailable
+    return scene
 
 
 @pytest.fixture(scope="session")
