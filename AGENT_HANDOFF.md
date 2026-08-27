@@ -115,10 +115,10 @@ is the single proximal-to-distal completion authority.
 - #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
   #8595, #8668, #8684, and #8796 remain open.
 - #9049, #9100, #9108, #9110, and #9114 are merged; #9114 completed #9113's singular-margin slice.
-- #8358's gateway and engine analyses are merged. Open PR #9134 repins Tools from `8dc4512184` to protected R14.3 squash `3dfbd32cc7` and adds a RED-first consumer contract for the governed execution-policy modes, exact run accounting, and reviewed PyQt variation baseline. Localized-perturbation and remaining presentation criteria still require separate audits; do not close the epic from this slice.
+- #8358's gateway, localized adapters, cross-engine evidence, and Tools-owned presentation are audited. Open PR #9134 repins protected Tools squash `3dfbd32cc7` and qualifies the governed policies and PyQt baseline, completing #8358.
 - #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
 - #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound; fresh protected evidence is required, and no runner change or smoke exemption is authorized.
-- Tools #4142 remains open. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge commit.
+- Tools #4142 is closed with R10-R15 protected evidence. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge.
 
 ## Scientific and Review Invariants
 
