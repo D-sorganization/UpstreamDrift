@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 47,
-    "reviewed_release_claim_count": 47,
+    "release_claim_count": 48,
+    "reviewed_release_claim_count": 48,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 47,
-    "atomic_claim_count": 313
+    "scientifically_open_gate_count": 48,
+    "atomic_claim_count": 315
   },
   "release_claim_reviews": [
     {
@@ -2720,6 +2720,55 @@
         "The tolerance-dependent rank transition is numerical and is not a physical singularity threshold, anatomical limit, or human strategy."
       ],
       "remaining_scientific_gate": "Calibrated spatial anatomical closure and compliant forward contact, followed by comparison with governed participant trajectories."
+    },
+    {
+      "release_claim_key": "phase_event_finite_time_stability",
+      "published_status": "supported_for_declared_local_nonperiodic_analytical_trajectory",
+      "audit_state": "reviewed_as_local_finite_window_and_transverse_event_qualification",
+      "scientific_disposition": "supported_for_declared_local_nonperiodic_analytical_trajectory",
+      "supporting_claim_ids": [
+        "PD-CLAIM-315",
+        "PD-CLAIM-316"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.json",
+        "docs/research/proximal_distal_energy_transfer/data/phase_event_stability.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_phase_event_stability.pdf",
+        "docs/research/proximal_distal_energy_transfer/PHASE_EVENT_STABILITY.md",
+        "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
+        "scripts/research/proximal_distal_energy/phase_event_stability.py",
+        "scripts/research/proximal_distal_energy/run_phase_event_stability.py",
+        "scripts/research/proximal_distal_energy/make_phase_event_stability_figure.py",
+        "tests/research/test_phase_event_stability.py",
+        "tests/research/test_phase_event_stability_evidence.py"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:273",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:285",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:299",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:308",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:316"
+      ],
+      "negative_controls": [
+        "three central-difference step multipliers",
+        "three complete symmetric perturbation scales",
+        "equivalent radian/degree state coordinates",
+        "equivalent second/millisecond exponent coordinates",
+        "three direct event perturbation scales",
+        "constructed near-grazing guard",
+        "time-only identity-reset saltation",
+        "corrupted-reset saltation killswitch",
+        "scaled state-closure periodicity gate"
+      ],
+      "falsifiers": [
+        "Step refinement or direct perturbed rollouts exceed their registered residual gates, equivalent units change the scaled map, or the registered gain spectrum does not reproduce.",
+        "Implicit and direct derivatives disagree beyond tolerance, the near-grazing or reset controls fail, or Floquet output is emitted without state and mode closure."
+      ],
+      "uncertainty_boundaries": [
+        "The gain spectrum is local to one scaled finite trajectory and is not an asymptotic, global, population, or coaching stability result.",
+        "The derivative applies only to the declared transverse geometric guard; it is not neural timing demand, impact validation, or human robustness. No periodic orbit is registered."
+      ],
+      "remaining_scientific_gate": "Independent variational implementation, registered delay/noise and failure-region studies, then participant-held-out event and outcome predictions before any human robustness interpretation."
     }
   ]
 }

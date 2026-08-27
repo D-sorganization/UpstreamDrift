@@ -40,6 +40,16 @@ def _spec(
 
 
 REVIEW_SPECS: dict[str, dict[str, Any]] = {
+    "phase_event_finite_time_stability": _spec(
+        "reviewed_as_local_finite_window_and_transverse_event_qualification",
+        "supported_for_declared_local_nonperiodic_analytical_trajectory",
+        ("PD-CLAIM-315", "PD-CLAIM-316"),
+        (
+            "Independent variational implementation, registered delay/noise and "
+            "failure-region studies, then participant-held-out event and outcome "
+            "predictions before any human robustness interpretation."
+        ),
+    ),
     "feasible_closed_loop_singularity_margin": _spec(
         "reviewed_as_exact_planar_kinematic_qualification",
         "supported_for_declared_exact_planar_kinematic_triangle",

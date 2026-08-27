@@ -507,7 +507,7 @@ with the document for independent inspection and reuse.
 
 \chapter{Introduction}\label{sec-intro}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomrule=.15mm, arc=.35mm, opacitybacktitle=0.6, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomtitle=1mm, colback=white, colframe=quarto-callout-note-color-frame, opacityback=0, titlerule=0mm, rightrule=.15mm, toprule=.15mm, left=2mm]
+\begin{tcolorbox}[enhanced jigsaw, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, breakable, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, left=2mm, coltitle=black, rightrule=.15mm, toprule=.15mm, colback=white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2812,7 +2812,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomrule=.15mm, arc=.35mm, opacitybacktitle=0.6, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, bottomtitle=1mm, colback=white, colframe=quarto-callout-note-color-frame, opacityback=0, titlerule=0mm, rightrule=.15mm, toprule=.15mm, left=2mm]
+\begin{tcolorbox}[enhanced jigsaw, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, breakable, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, left=2mm, coltitle=black, rightrule=.15mm, toprule=.15mm, colback=white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, arc=.35mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, titlerule=0mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -10138,6 +10138,76 @@ anatomical shoulder closure, contact-force magnitude, constraint
 multipliers, muscle action, passive negative torque, human occurrence,
 or coaching guidance.
 
+\subsection{Phase/Event Sensitivity and Finite-Time
+Amplification}\label{sec-ladder-phase-event}
+
+Local rank at isolated states does not show how perturbations grow along
+a finite downswing, and event-time uncertainty is not interchangeable
+with state amplification. The registered analytical trajectory therefore
+propagates the discrete variational map of the same RK4 step operator
+through the first positive club-vertical crossing. With declared state
+scale matrix \(\mathbf S_x\), the dimensionless transition map is
+
+\begin{equation}\phantomsection\label{eq-ladder-scaled-transition}{
+\widetilde{\boldsymbol\Phi}(t,0)
+=\mathbf S_x^{-1}\boldsymbol\Phi(t,0)\mathbf S_x.
+}\end{equation}
+
+Its singular values are finite-window perturbation gains. The associated
+rates \(\log\sigma_i/t\) are finite-time exponents, not asymptotic
+Lyapunov exponents. The computation refines the paper's 1 ms reference
+integration to 0.125 ms for this derivative audit. Central-difference
+step multipliers from 0.1 to 10 change the event transition by at most
+\(6.9\times10^{-6}\), while three complete symmetric perturbation
+rollouts agree with the propagated map within a registered conservative
+upper bound of \(4\times10^{-7}\). At the 0.349256 s geometric delivery
+event, the largest observed scaled gain is 8.33244 and the smallest is
+0.093456. Thus the local map amplifies some perturbation directions
+while contracting others; a single label such as ``stable swing'' would
+discard that anisotropy.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_phase_event_stability.pdf}
+
+}
+
+\caption{\label{fig-phase-event-stability}Finite-Time Amplification and
+Event Sensitivity Remain Distinct Estimands}
+
+\end{figure}%
+
+For the state guard \(h(\mathbf x)=\theta_s+\theta_w=0\), the
+transverse-event derivative is obtained from the implicit relation
+
+\begin{equation}\phantomsection\label{eq-ladder-event-sensitivity}{
+\frac{\partial t_e}{\partial \mathbf z_0}
+=-\frac{\nabla h^\mathsf T\boldsymbol\Phi(t_e,0)\mathbf S_x}
+{\nabla h^\mathsf T\mathbf f(\mathbf x_e,\mathbf u_e)}.
+}\end{equation}
+
+The denominator is 35.0258 s\(^{-1}\) for the registered crossing. The
+four scaled-state derivatives are
+\((-0.137655,-0.0240043,-0.299636,-0.243972)\) s; direct perturbed-event
+estimates agree within \(5.98\times10^{-5}\) s. A constructed guard
+whose configuration normal is orthogonal to the event velocity has zero
+transversality and returns a typed near-grazing outcome rather than a
+derivative. Absent, multiple, and out-of-window crossings are likewise
+ineligible.
+
+The time-only delivery guard in the hybrid contract has an identity
+reset and continuous pre-event flow, so its manufactured saltation
+matrix is exactly the identity; a reset corruption to 0.95 produces the
+expected 0.05 deviation. The event state remains 1.48546 scaled units
+from the initial state, far above the \(10^{-6}\) periodicity tolerance.
+Floquet multipliers are therefore suppressed: no periodic orbit, orbital
+stability, basin, or bifurcation claim is available from this downswing.
+These diagnostics use one synthetic open-loop model. They do not measure
+neural timing demand, fatigue tolerance, participant robustness, passive
+negative torque, technique, or coaching efficacy.
+
 \section{Three-Dimensional Frame
 Audit}\label{sec-ladder-three-dimensional}
 
@@ -13187,7 +13257,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 313 material claims. The normalized outcome
+The current census contains 315 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -13216,7 +13286,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 293 \\
+\texttt{supported} & 295 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -13242,8 +13312,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 98 \\
-\texttt{project\_executable\_or\_generated} & 284 \\
+\texttt{project\_derivation\_or\_document} & 100 \\
+\texttt{project\_executable\_or\_generated} & 286 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -13264,7 +13334,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 259 \\
+\texttt{project\_only} & 261 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -13285,11 +13355,11 @@ Model Tier & Claim Count \\
 \endlastfoot
 \texttt{articulated\_spatial} & 32 \\
 \texttt{compliant\_shaft} & 66 \\
-\texttt{cross\_tier\_synthesis} & 65 \\
+\texttt{cross\_tier\_synthesis} & 67 \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
-\texttt{planar\_reduced} & 138 \\
+\texttt{planar\_reduced} & 140 \\
 \texttt{spatial\_reduced} & 76 \\
 \texttt{two\_hand\_or\_bilateral} & 94 \\
 \texttt{uncertainty\_or\_control} & 10 \\
@@ -13316,7 +13386,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 269 \\
+\texttt{none\_declared} & 271 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -13390,7 +13460,7 @@ ch06cc spatial forward contact & 8 & 8 / 0 / 0 & project authored
 only \\
 ch06d uncertainty control & 10 & 10 / 0 / 0 & project authored only \\
 ch06e experimental protocol & 1 & 1 / 0 / 0 & project authored only \\
-ch07 model ladder & 19 & 19 / 0 / 0 & project authored only \\
+ch07 model ladder & 21 & 21 / 0 / 0 & project authored only \\
 ch07 results & 8 & 8 / 0 / 0 & project authored only \\
 ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
 ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\
@@ -13661,6 +13731,12 @@ Recorded outputs:
   singular margins, exact triangle degeneracies, and phase, geometry,
   scale, unit, tolerance, impossible- geometry, and manufactured-rank
   controls.
+\item
+  \texttt{data/phase\_event\_stability.\{json,npz\}} --- nondimensional
+  finite-time state transitions, singular gains and exponents,
+  transverse-event derivatives, direct perturbation controls,
+  near-grazing rejection, saltation controls, equivalent-unit checks,
+  and the fail-closed periodicity/Floquet gate.
 \item
   \texttt{data/double\_pendulum\_identifiability.json} --- exact
   seven-coefficient inverse- dynamics factorization, analytic
