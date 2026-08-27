@@ -128,7 +128,14 @@ executable. It adds a reduced Hill-type agonist--antagonist redundancy surface
 and continuous activation/series-force comparison of persistent-direction and
 complete-role-reversal preparation histories. A question-to-engine ladder then
 connects MuJoCo, Pinocchio, Drake, OpenSim, and MyoSuite to common observables
-without promoting optional backend capability to human validation.
+without promoting optional backend capability to human validation. The
+analytical trajectory tier also distinguishes initial-state amplification from
+torque-input authority. Exact RK4 input Jacobians,
+continuous-energy-equivalent finite-window Gramians, and event-tangent
+projection are qualified by direct nonlinear pulses, step and unit checks,
+channel additivity, a zero-input killswitch, and a matched-window frozen-local
+countermodel. These local diagnostics do not rank controllers or identify a
+human strategy.
 
 The public-facing technical article is available on
 [affinedrift.com](https://affinedrift.com/articles/proximal-distal-energy-transfer.html).
@@ -150,7 +157,7 @@ comprehensive open modeling program are tracked in
 [#8557](https://github.com/D-sorganization/UpstreamDrift/issues/8557), with the
 durable execution contract in
 [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md).
-The current normalized authority covers 303 material claims: 283 are supported
+The current normalized authority covers 317 material claims: 297 are supported
 only at their declared estimands and boundaries, five are inconclusive, 15 are
 untested, and none is classified as contradicted. That zero does not imply that
 all mechanisms survived adverse tests: accurately reported null, mixed, and
@@ -280,6 +287,8 @@ python3 -m scripts.research.proximal_distal_energy.run_counterfactual_ensemble
 python3 -m scripts.research.proximal_distal_energy.run_two_hand_wscg_analysis
 python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
+python3 -m scripts.research.proximal_distal_energy.run_phase_event_stability write
+python3 -m scripts.research.proximal_distal_energy.run_trajectory_control_authority write
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
 python3 -m scripts.research.proximal_distal_energy.run_grf_drift_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
@@ -356,6 +365,8 @@ python3 -m scripts.research.proximal_distal_energy.make_advanced_biological_brid
 python3 -m scripts.research.proximal_distal_energy.make_two_hand_wscg_figures
 python3 -m scripts.research.proximal_distal_energy.make_shaft_contribution_figures
 python3 -m scripts.research.proximal_distal_energy.make_mechanism_ladder_figures
+python3 -m scripts.research.proximal_distal_energy.make_phase_event_stability_figure
+python3 -m scripts.research.proximal_distal_energy.make_trajectory_control_authority_figure
 python3 -m scripts.research.proximal_distal_energy.make_forward_two_arm_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_flexible_figures
 python3 -m scripts.research.proximal_distal_energy.make_moving_base_modal_shaft_figures

@@ -1,359 +1,798 @@
-"""Trajectory-varying event-conditioned control authority qualification (#9123).
+"""Trajectory-varying finite-window control-authority mechanics.
 
-Computes the discrete time-varying variational map z[k+1] = A[k] z[k] + B[k] v[k]
-along the registered analytical double-pendulum downswing and conditions terminal
-authority onto the transverse delivery event surface.
+These helpers construct exact-discrete local Jacobians and scaled reachability
+Gramians along a declared trajectory. They do not establish global nonlinear
+reachability, bounded-control feasibility, human actuator capacity, controller
+superiority, passive torque, robustness, or coaching strategy.
 """
 
 from __future__ import annotations
 
-import math
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+import math
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
 
-from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
-    DoublePendulumDynamics,
-    DoublePendulumParameters,
-    DoublePendulumState,
+from scripts.research.proximal_distal_energy.phase_event_stability import (
+    StateScales,
+    registered_step,
+    rollout_state_history,
+    state_derivative,
 )
+from src.shared.python.simulation_backends import GolfModelParams, make_backend
 
-FloatArray = npt.NDArray[np.float64]
+FloatArray: TypeAlias = npt.NDArray[np.float64]
 
-INFERENCE_BOUNDARY = (
-    "This qualification establishes only trajectory-varying linear variational "
-    "authority and event-tangent conditioning for the declared analytical double pendulum. "
-    "It cannot establish bounded nonlinear feasibility, human strength limits, "
-    "muscle recruitment, passive biological torque, controller ranking, or coaching advice."
-)
+
+def _finite_vector(name: str, value: npt.ArrayLike, *, size: int) -> FloatArray:
+    array = np.asarray(value, dtype=float)
+    if array.shape != (size,) or not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must contain {size} finite values")
+    return array
+
+
+def _positive_vector(name: str, value: npt.ArrayLike, *, size: int) -> FloatArray:
+    array = _finite_vector(name, value, size=size)
+    if np.any(array <= 0.0):
+        raise ValueError(f"{name} must contain {size} finite positive values")
+    return array
+
+
+def _readonly(value: npt.ArrayLike) -> FloatArray:
+    array = np.asarray(value, dtype=float).copy()
+    if not np.all(np.isfinite(array)):
+        raise ValueError("result contains non-finite values")
+    array.setflags(write=False)
+    return array
 
 
 @dataclass(frozen=True, slots=True)
-class TrajectoryAuthorityResult:
-    """Reachability Gramian diagnostics for full state and event tangent space."""
+class ControlScales:
+    """Positive characteristic scales for shoulder and wrist torque."""
 
-    step_count: int
+    values: tuple[float, ...]
+
+    def __post_init__(self) -> None:
+        values = tuple(float(value) for value in self.values)
+        if len(values) != 2 or any(
+            not math.isfinite(value) or value <= 0.0 for value in values
+        ):
+            raise ValueError("control scales must contain two finite positive values")
+        object.__setattr__(self, "values", values)
+
+    @property
+    def array(self) -> FloatArray:
+        """Return a defensive NumPy representation."""
+
+        return np.asarray(self.values, dtype=float)
+
+
+@dataclass(frozen=True, slots=True)
+class StepLinearizationConfig:
+    """Numerical and coordinate contract for exact-step differentiation."""
+
     dt_s: float
-    nominal_event_time_s: float
-    nominal_event_velocity: tuple[float, float, float, float]
-    transverse_inner_product: float
-    is_transverse: bool
-    full_gramian_both: FloatArray
-    full_gramian_shoulder: FloatArray
-    full_gramian_wrist: FloatArray
-    full_gramian_zero: FloatArray
-    tangent_gramian_both: FloatArray
-    tangent_gramian_shoulder: FloatArray
-    tangent_gramian_wrist: FloatArray
-    tangent_gramian_zero: FloatArray
-    frozen_gramian_both: FloatArray
-    full_rank_both: int
-    full_rank_shoulder: int
-    full_rank_wrist: int
-    full_rank_zero: int
-    tangent_rank_both: int
-    tangent_rank_shoulder: int
-    tangent_rank_wrist: int
-    tangent_rank_zero: int
-    additivity_residual_norm: float
-    pulse_agreement_relative_error: float
-    inference_boundary: str = INFERENCE_BOUNDARY
+    state_steps: tuple[float, ...]
+    control_steps: tuple[float, ...]
+    state_scales: StateScales
+    control_scales: ControlScales
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.dt_s) or self.dt_s <= 0.0:
+            raise ValueError("dt_s must be finite and positive")
+        state_steps = tuple(float(value) for value in self.state_steps)
+        control_steps = tuple(float(value) for value in self.control_steps)
+        _positive_vector("state_steps", state_steps, size=4)
+        _positive_vector("control_steps", control_steps, size=2)
+        object.__setattr__(self, "state_steps", state_steps)
+        object.__setattr__(self, "control_steps", control_steps)
+
+    @property
+    def state_step_array(self) -> FloatArray:
+        """Return defensive state finite-difference steps."""
+
+        return np.asarray(self.state_steps, dtype=float)
+
+    @property
+    def control_step_array(self) -> FloatArray:
+        """Return defensive control finite-difference steps."""
+
+        return np.asarray(self.control_steps, dtype=float)
 
 
-def continuous_dynamics(
-    state: FloatArray,
-    control: FloatArray,
-    params: DoublePendulumParameters | None = None,
-) -> FloatArray:
-    """Continuous dynamics f(z, v) for the analytical double pendulum.
+@dataclass(frozen=True, slots=True)
+class PulseSensitivityRequest:
+    """Registered pulse location, channel, and dimensionless perturbation."""
 
-    State: [theta1, theta2, omega1, omega2] (angles and velocities).
-    Control: [tau1, tau2] (shoulder, wrist torques).
-    """
-    p = params or DoublePendulumParameters.default()
-    dyn = DoublePendulumDynamics(parameters=p)
-    theta1, theta2, omega1, omega2 = state
-    dp_state = DoublePendulumState(
-        theta1=float(theta1),
-        theta2=float(theta2),
-        omega1=float(omega1),
-        omega2=float(omega2),
-    )
-    drift, g_mat = dyn.control_affine(dp_state)
-    u = np.array([float(control[0]), float(control[1])], dtype=np.float64)
-    return np.array(drift, dtype=np.float64) + np.array(g_mat, dtype=np.float64) @ u
+    pulse_step: int
+    channel_index: int
+    perturbation_scale: float
 
+    def __post_init__(self) -> None:
+        for name in ("pulse_step", "channel_index"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"{name} must be a nonnegative integer")
+        if not math.isfinite(self.perturbation_scale) or self.perturbation_scale <= 0.0:
+            raise ValueError("perturbation_scale must be finite and positive")
 
-def discrete_rk4_step(
-    state: FloatArray,
-    control: FloatArray,
-    dt: float,
-    params: DoublePendulumParameters | None = None,
-) -> FloatArray:
-    """Exact discrete RK4 step for analytical double pendulum."""
-    k1 = continuous_dynamics(state, control, params)
-    k2 = continuous_dynamics(state + 0.5 * dt * k1, control, params)
-    k3 = continuous_dynamics(state + 0.5 * dt * k2, control, params)
-    k4 = continuous_dynamics(state + dt * k3, control, params)
-    return state + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+    def validate_bounds(self, *, step_count: int, channel_count: int) -> None:
+        """Fail closed when the registered pulse does not index its trajectory."""
+
+        if self.pulse_step >= step_count:
+            raise ValueError("pulse_step must index a trajectory step")
+        if self.channel_index >= channel_count:
+            raise ValueError("channel_index must index an input channel")
 
 
-def discrete_state_jacobian(
-    state: FloatArray,
-    control: FloatArray,
-    dt: float,
-    params: DoublePendulumParameters | None = None,
-    step: float = 1e-6,
-) -> FloatArray:
-    """Central-difference Jacobian A[k] = dF/dz of the discrete RK4 step."""
-    dim = len(state)
-    A = np.zeros((dim, dim), dtype=np.float64)
-    for i in range(dim):
-        dx = np.zeros(dim, dtype=np.float64)
-        dx[i] = step
-        upper = discrete_rk4_step(state + dx, control, dt, params)
-        lower = discrete_rk4_step(state - dx, control, dt, params)
-        A[:, i] = (upper - lower) / (2.0 * step)
-    return A
+@dataclass(frozen=True, slots=True)
+class GuardCrossingConfig:
+    """Guard geometry and numerical root-refinement contract."""
+
+    guard_gradient: tuple[float, ...]
+    guard_offset: float = 0.0
+    guard_tolerance: float = 1e-10
+    time_tolerance_s: float = 1e-12
+    transversality_threshold: float = 1e-8
+    max_iterations: int = 80
+
+    def __post_init__(self) -> None:
+        gradient = tuple(float(value) for value in self.guard_gradient)
+        gradient_array = _finite_vector("guard_gradient", gradient, size=4)
+        if np.linalg.norm(gradient_array) == 0.0:
+            raise ValueError("guard_gradient must be nonzero")
+        for name in (
+            "guard_offset",
+            "guard_tolerance",
+            "time_tolerance_s",
+            "transversality_threshold",
+        ):
+            if not math.isfinite(getattr(self, name)):
+                raise ValueError("crossing controls must be finite")
+        for name in (
+            "guard_tolerance",
+            "time_tolerance_s",
+            "transversality_threshold",
+        ):
+            if getattr(self, name) <= 0.0:
+                raise ValueError(f"{name} must be positive")
+        if (
+            isinstance(self.max_iterations, bool)
+            or not isinstance(self.max_iterations, int)
+            or self.max_iterations < 1
+        ):
+            raise ValueError("max_iterations must be a positive integer")
+        object.__setattr__(self, "guard_gradient", gradient)
+
+    @property
+    def gradient_array(self) -> FloatArray:
+        """Return a defensive guard-gradient array."""
+
+        return np.asarray(self.guard_gradient, dtype=float)
 
 
-def discrete_control_jacobian(
-    state: FloatArray,
-    control: FloatArray,
-    dt: float,
-    params: DoublePendulumParameters | None = None,
-    step: float = 1e-5,
-) -> FloatArray:
-    """Central-difference Jacobian B[k] = dF/dv of the discrete RK4 step."""
-    state_dim = len(state)
-    ctrl_dim = len(control)
-    B = np.zeros((state_dim, ctrl_dim), dtype=np.float64)
-    for j in range(ctrl_dim):
-        du = np.zeros(ctrl_dim, dtype=np.float64)
-        du[j] = step
-        upper = discrete_rk4_step(state, control + du, dt, params)
-        lower = discrete_rk4_step(state, control - du, dt, params)
-        B[:, j] = (upper - lower) / (2.0 * step)
-    return B
+@dataclass(frozen=True, slots=True)
+class StepLinearization:
+    """Physical and scaled Jacobians of one exact registered RK4 step."""
+
+    state_matrix: FloatArray
+    input_matrix: FloatArray
+    scaled_state_matrix: FloatArray
+    scaled_sample_input_matrix: FloatArray
+    scaled_energy_input_matrix: FloatArray
+
+    def __post_init__(self) -> None:
+        expected = {
+            "state_matrix": (4, 4),
+            "input_matrix": (4, 2),
+            "scaled_state_matrix": (4, 4),
+            "scaled_sample_input_matrix": (4, 2),
+            "scaled_energy_input_matrix": (4, 2),
+        }
+        for name, shape in expected.items():
+            array = np.asarray(getattr(self, name), dtype=float)
+            if array.shape != shape or not np.all(np.isfinite(array)):
+                raise ValueError(f"{name} must be finite with shape {shape}")
+            object.__setattr__(self, name, _readonly(array))
 
 
-def transverse_event_projector(
-    event_state: FloatArray,
-    event_control: FloatArray,
-    guard_gradient: FloatArray | None = None,
-    params: DoublePendulumParameters | None = None,
-    transverse_tolerance: float = 1e-3,
-) -> tuple[FloatArray, bool, float]:
-    """Build transverse event-state projector P = I - (f n^T)/(n^T f).
+@dataclass(frozen=True, slots=True)
+class EventConditionedGramian:
+    """Arrival-state projection and explicit event-tangent authority."""
 
-    For delivery event h(z) = theta1 = 0, n = [1, 0, 0, 0]^T.
-    """
-    n = (
-        guard_gradient
-        if guard_gradient is not None
-        else np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
-    )
-    f = continuous_dynamics(event_state, event_control, params)
-    inner = float(np.dot(n, f))
-    is_transverse = abs(inner) >= transverse_tolerance
-
-    if not is_transverse:
-        # Fails closed on near-grazing
-        return np.eye(len(event_state), dtype=np.float64), False, inner
-
-    P = np.eye(len(event_state), dtype=np.float64) - np.outer(f, n) / inner
-    return P, True, inner
+    status: str
+    transversality_per_s: float
+    projection: FloatArray | None
+    tangent_basis: FloatArray | None
+    tangent_gramian: FloatArray | None
 
 
-def orthonormal_tangent_basis(
-    guard_gradient: FloatArray | None = None,
-) -> FloatArray:
-    """Return an orthonormal basis Q in R^(4x3) for the subspace orthogonal to n."""
-    n = (
-        guard_gradient
-        if guard_gradient is not None
-        else np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
-    )
-    n_unit = n / np.linalg.norm(n)
-    # Q consists of standard orthonormal basis vectors orthogonal to n_unit
-    # For n = [1, 0, 0, 0], Q is [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
-    basis: list[FloatArray] = []
-    eye = np.eye(len(n), dtype=np.float64)
-    for i in range(len(n)):
-        v = eye[:, i] - np.dot(eye[:, i], n_unit) * n_unit
-        norm = np.linalg.norm(v)
-        if norm > 1e-8:
-            v_unit = v / norm
-            # Orthogonalize against existing basis
-            for b in basis:
-                v_unit -= np.dot(v_unit, b) * b
-            norm_post = np.linalg.norm(v_unit)
-            if norm_post > 1e-8:
-                basis.append(v_unit / norm_post)
-    return np.column_stack(basis[:3])
+@dataclass(frozen=True, slots=True)
+class TrajectoryLinearization:
+    """Nominal trajectory and exact-discrete Jacobians at every step."""
+
+    time_s: FloatArray
+    state: FloatArray
+    controls: FloatArray
+    state_matrices: FloatArray
+    input_matrices: FloatArray
+    scaled_state_matrices: FloatArray
+    scaled_sample_input_matrices: FloatArray
+    scaled_energy_input_matrices: FloatArray
+
+    def __post_init__(self) -> None:
+        controls = np.asarray(self.controls, dtype=float)
+        step_count = controls.shape[0] if controls.ndim == 2 else -1
+        expected = {
+            "time_s": (step_count + 1,),
+            "state": (step_count + 1, 4),
+            "controls": (step_count, 2),
+            "state_matrices": (step_count, 4, 4),
+            "input_matrices": (step_count, 4, 2),
+            "scaled_state_matrices": (step_count, 4, 4),
+            "scaled_sample_input_matrices": (step_count, 4, 2),
+            "scaled_energy_input_matrices": (step_count, 4, 2),
+        }
+        if step_count < 1:
+            raise ValueError("controls must be a nonempty (N, 2) array")
+        for name, shape in expected.items():
+            array = np.asarray(getattr(self, name), dtype=float)
+            if array.shape != shape or not np.all(np.isfinite(array)):
+                raise ValueError(f"{name} must be finite with shape {shape}")
+            object.__setattr__(self, name, _readonly(array))
 
 
-def matrix_rank(A: FloatArray, tol: float = 1e-9) -> int:
-    """Compute numerical SVD rank."""
-    s = np.linalg.svd(A, compute_uv=False)
-    return int(np.sum(s > tol))
+@dataclass(frozen=True, slots=True)
+class RefinedCrossing:
+    """Exact-step guard root retained inside one registered crossing bracket."""
 
+    status: str
+    time_s: float
+    partial_dt_s: float
+    state: FloatArray
+    guard_residual: float
+    transversality_per_s: float
 
-def compute_trajectory_authority(
-    nominal_states: FloatArray,
-    nominal_controls: FloatArray,
-    dt: float,
-    params: DoublePendulumParameters | None = None,
-    guard_gradient: FloatArray | None = None,
-) -> TrajectoryAuthorityResult:
-    """Evaluate trajectory-varying reachability and event-conditioned Gramians."""
-    K = len(nominal_controls)
-    dim_x = nominal_states.shape[1]
-    dim_u = nominal_controls.shape[1]
-
-    # Compute Jacobians A[k] and B[k]
-    A_list = [
-        discrete_state_jacobian(nominal_states[k], nominal_controls[k], dt, params)
-        for k in range(K)
-    ]
-    B_list = [
-        discrete_control_jacobian(nominal_states[k], nominal_controls[k], dt, params)
-        for k in range(K)
-    ]
-
-    # Compute propagated transition matrices Phi(K, k+1)
-    # Phi(K, K) = I
-    Phi_from_k1 = [np.eye(dim_x, dtype=np.float64) for _ in range(K + 1)]
-    for k in range(K - 1, -1, -1):
-        Phi_from_k1[k] = Phi_from_k1[k + 1] @ A_list[k]
-
-    # Input sensitivities S[k] = Phi(K, k+1) * B[k]
-    S_list = [Phi_from_k1[k + 1] @ B_list[k] for k in range(K)]
-
-    # Compute Gramians for channel masks
-    masks = {
-        "both": np.eye(dim_u, dtype=np.float64),
-        "shoulder": np.diag([1.0, 0.0]),
-        "wrist": np.diag([0.0, 1.0]),
-        "zero": np.zeros((dim_u, dim_u), dtype=np.float64),
-    }
-
-    full_gramians = {}
-    for key, mask in masks.items():
-        W = np.zeros((dim_x, dim_x), dtype=np.float64)
-        for k in range(K):
-            S_m = S_list[k] @ mask
-            W += S_m @ S_m.T
-        full_gramians[key] = W
-
-    # Event projector at final state
-    event_state = nominal_states[-1]
-    event_control = nominal_controls[-1]
-    P, is_transverse, inner = transverse_event_projector(
-        event_state, event_control, guard_gradient, params
-    )
-    f_event = continuous_dynamics(event_state, event_control, params)
-
-    tangent_gramians = {key: P @ full_gramians[key] @ P.T for key in masks}
-
-    # Frozen-local countermodel: use state/control at midpoint
-    mid = K // 2
-    A0 = A_list[mid]
-    B0 = B_list[mid]
-    W_frozen = np.zeros((dim_x, dim_x), dtype=np.float64)
-    A0_pow = np.eye(dim_x, dtype=np.float64)
-    for _ in range(K):
-        term = A0_pow @ B0
-        W_frozen += term @ term.T
-        A0_pow = A0_pow @ A0
-
-    # Additivity check
-    add_residual = float(
-        np.linalg.norm(
-            full_gramians["both"] - (full_gramians["shoulder"] + full_gramians["wrist"])
+    def __post_init__(self) -> None:
+        scalars = (
+            self.time_s,
+            self.partial_dt_s,
+            self.guard_residual,
+            self.transversality_per_s,
         )
+        if not all(math.isfinite(value) for value in scalars):
+            raise ValueError("crossing scalars must be finite")
+        if self.partial_dt_s <= 0.0:
+            raise ValueError("partial_dt_s must be positive")
+        object.__setattr__(
+            self, "state", _readonly(_finite_vector("state", self.state, size=4))
+        )
+
+
+def _central_jacobian(
+    function: Callable[[FloatArray], npt.ArrayLike],
+    point: FloatArray,
+    steps: FloatArray,
+    *,
+    output_size: int,
+) -> FloatArray:
+    jacobian = np.empty((output_size, point.size), dtype=float)
+    for column, step in enumerate(steps):
+        upper = point.copy()
+        lower = point.copy()
+        upper[column] += step
+        lower[column] -= step
+        upper_value = _finite_vector(
+            "step output",
+            function(upper),
+            size=output_size,
+        )
+        lower_value = _finite_vector(
+            "step output",
+            function(lower),
+            size=output_size,
+        )
+        jacobian[:, column] = (upper_value - lower_value) / (2.0 * step)
+    return jacobian
+
+
+def step_linearization(
+    *,
+    params: GolfModelParams,
+    state: npt.ArrayLike,
+    control: npt.ArrayLike,
+    time_s: float,
+    config: StepLinearizationConfig,
+) -> StepLinearization:
+    """Differentiate the exact RK4 step in state and input coordinates.
+
+    ``scaled_sample_input_matrix`` maps a dimensionless, piecewise-constant
+    control sample to scaled state. ``scaled_energy_input_matrix`` divides that
+    matrix by ``sqrt(dt_s)`` so a unit discrete input has the same quadratic
+    cost as a unit-energy piecewise-constant continuous input.
+    """
+
+    vector = _finite_vector("state", state, size=4).copy()
+    command = _finite_vector("control", control, size=2).copy()
+    x_steps = config.state_step_array
+    u_steps = config.control_step_array
+    if not math.isfinite(time_s):
+        raise ValueError("time_s must be finite")
+    dt_s = config.dt_s
+    backend = make_backend("ode", params, dt=dt_s)
+
+    def state_map(candidate: FloatArray) -> FloatArray:
+        return registered_step(
+            backend,
+            candidate,
+            command,
+            time_s=time_s,
+            dt_s=dt_s,
+        )
+
+    def input_map(candidate: FloatArray) -> FloatArray:
+        return registered_step(
+            backend,
+            vector,
+            candidate,
+            time_s=time_s,
+            dt_s=dt_s,
+        )
+
+    state_matrix = _central_jacobian(
+        state_map, vector, x_steps, output_size=vector.size
+    )
+    input_matrix = _central_jacobian(
+        input_map, command, u_steps, output_size=vector.size
+    )
+    scaled_state, scaled_sample_input, scaled_energy_input = scale_step_matrices(
+        state_matrix,
+        input_matrix,
+        dt_s=dt_s,
+        state_scales=config.state_scales,
+        control_scales=config.control_scales,
+    )
+    return StepLinearization(
+        state_matrix=state_matrix,
+        input_matrix=input_matrix,
+        scaled_state_matrix=scaled_state,
+        scaled_sample_input_matrix=scaled_sample_input,
+        scaled_energy_input_matrix=scaled_energy_input,
     )
 
-    # Finite-difference pulse validation at midpoint
-    pulse_channel = 0
-    pulse_magnitude = 1.0  # 1 N*m pulse for 1 step
-    du = np.zeros(dim_u, dtype=np.float64)
-    du[pulse_channel] = pulse_magnitude
 
-    # Propagate linear prediction: delta_z = S[mid] * du
-    linear_pred = S_list[mid] @ du
+def scale_step_matrices(
+    state_matrix: npt.ArrayLike,
+    input_matrix: npt.ArrayLike,
+    *,
+    dt_s: float,
+    state_scales: StateScales,
+    control_scales: ControlScales,
+) -> tuple[FloatArray, FloatArray, FloatArray]:
+    """Scale exact-discrete matrices in sample and energy coordinates."""
 
-    # Non-linear direct propagation with pulse
-    z_pert = nominal_states[mid].copy()
-    z_pert = discrete_rk4_step(z_pert, nominal_controls[mid] + du, dt, params)
-    for k in range(mid + 1, K):
-        z_pert = discrete_rk4_step(z_pert, nominal_controls[k], dt, params)
-    actual_delta = z_pert - nominal_states[-1]
-
-    pulse_err = float(
-        np.linalg.norm(actual_delta - linear_pred)
-        / (np.linalg.norm(linear_pred) + 1e-12)
+    state = np.asarray(state_matrix, dtype=float)
+    control = np.asarray(input_matrix, dtype=float)
+    if state.shape != (4, 4) or not np.all(np.isfinite(state)):
+        raise ValueError("state_matrix must be finite with shape (4, 4)")
+    if control.shape != (4, 2) or not np.all(np.isfinite(control)):
+        raise ValueError("input_matrix must be finite with shape (4, 2)")
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("dt_s must be finite and positive")
+    x_scale = state_scales.array
+    u_scale = control_scales.array
+    scaled_state = state * x_scale[np.newaxis, :] / x_scale[:, np.newaxis]
+    scaled_sample = control * u_scale[np.newaxis, :] / x_scale[:, np.newaxis]
+    return (
+        _readonly(scaled_state),
+        _readonly(scaled_sample),
+        _readonly(scaled_sample / math.sqrt(dt_s)),
     )
 
-    Q = orthonormal_tangent_basis(guard_gradient)
-    tangent_ranks = {key: matrix_rank(Q.T @ tangent_gramians[key] @ Q) for key in masks}
 
-    return TrajectoryAuthorityResult(
-        step_count=K,
-        dt_s=dt,
-        nominal_event_time_s=float(K * dt),
-        nominal_event_velocity=(
-            float(f_event[0]),
-            float(f_event[1]),
-            float(f_event[2]),
-            float(f_event[3]),
+def linearize_trajectory(
+    *,
+    params: GolfModelParams,
+    initial_state: npt.ArrayLike,
+    controls: npt.ArrayLike,
+    dt_s: float,
+    state_steps: npt.ArrayLike,
+    control_steps: npt.ArrayLike,
+    state_scales: StateScales,
+    control_scales: ControlScales,
+) -> TrajectoryLinearization:
+    """Linearize the exact RK4 map along every registered nominal step."""
+
+    initial = _finite_vector("initial_state", initial_state, size=4).copy()
+    commands = np.asarray(controls, dtype=float)
+    if (
+        commands.ndim != 2
+        or commands.shape[0] == 0
+        or commands.shape[1] != 2
+        or not np.all(np.isfinite(commands))
+    ):
+        raise ValueError("controls must be a nonempty finite (N, 2) array")
+    x_steps = _positive_vector("state_steps", state_steps, size=4)
+    u_steps = _positive_vector("control_steps", control_steps, size=2)
+    config = StepLinearizationConfig(
+        dt_s=dt_s,
+        state_steps=tuple(x_steps),
+        control_steps=tuple(u_steps),
+        state_scales=state_scales,
+        control_scales=control_scales,
+    )
+    time_s, state = rollout_state_history(
+        params,
+        initial_state=initial,
+        controls=commands,
+        dt_s=dt_s,
+    )
+    linearizations = [
+        step_linearization(
+            params=params,
+            state=state[index],
+            control=command,
+            time_s=float(time_s[index]),
+            config=config,
+        )
+        for index, command in enumerate(commands)
+    ]
+    return TrajectoryLinearization(
+        time_s=time_s,
+        state=state,
+        controls=commands,
+        state_matrices=np.stack([item.state_matrix for item in linearizations]),
+        input_matrices=np.stack([item.input_matrix for item in linearizations]),
+        scaled_state_matrices=np.stack(
+            [item.scaled_state_matrix for item in linearizations]
         ),
-        transverse_inner_product=inner,
-        is_transverse=is_transverse,
-        full_gramian_both=full_gramians["both"],
-        full_gramian_shoulder=full_gramians["shoulder"],
-        full_gramian_wrist=full_gramians["wrist"],
-        full_gramian_zero=full_gramians["zero"],
-        tangent_gramian_both=tangent_gramians["both"],
-        tangent_gramian_shoulder=tangent_gramians["shoulder"],
-        tangent_gramian_wrist=tangent_gramians["wrist"],
-        tangent_gramian_zero=tangent_gramians["zero"],
-        frozen_gramian_both=W_frozen,
-        full_rank_both=matrix_rank(full_gramians["both"]),
-        full_rank_shoulder=matrix_rank(full_gramians["shoulder"]),
-        full_rank_wrist=matrix_rank(full_gramians["wrist"]),
-        full_rank_zero=matrix_rank(full_gramians["zero"]),
-        tangent_rank_both=tangent_ranks["both"],
-        tangent_rank_shoulder=tangent_ranks["shoulder"],
-        tangent_rank_wrist=tangent_ranks["wrist"],
-        tangent_rank_zero=tangent_ranks["zero"],
-        additivity_residual_norm=add_residual,
-        pulse_agreement_relative_error=pulse_err,
+        scaled_sample_input_matrices=np.stack(
+            [item.scaled_sample_input_matrix for item in linearizations]
+        ),
+        scaled_energy_input_matrices=np.stack(
+            [item.scaled_energy_input_matrix for item in linearizations]
+        ),
     )
 
 
-def generate_nominal_downswing_trajectory(
-    dt: float = 0.002,
-    steps: int = 140,
-    params: DoublePendulumParameters | None = None,
+def _trajectory_matrices(
+    state_matrices: npt.ArrayLike,
+    input_matrices: npt.ArrayLike,
 ) -> tuple[FloatArray, FloatArray]:
-    """Generate a nominal downswing rollout for authority qualification."""
-    p = params or DoublePendulumParameters.default()
-    # Starting configuration: arm cocked, wrists hinged, zero velocity
-    state = np.array([2.5, 1.5, 0.0, 0.0], dtype=np.float64)
-    states = [state.copy()]
-    controls = []
+    state = np.asarray(state_matrices, dtype=float)
+    control = np.asarray(input_matrices, dtype=float)
+    if (
+        state.ndim != 3
+        or state.shape[0] == 0
+        or state.shape[1] == 0
+        or state.shape[1] != state.shape[2]
+    ):
+        raise ValueError("state_matrices must be a nonempty stack of square matrices")
+    if control.ndim != 3 or control.shape[0] != state.shape[0]:
+        raise ValueError("input_matrices must have the same step count")
+    if control.shape[1] != state.shape[1] or control.shape[2] == 0:
+        raise ValueError("input_matrices must match the state dimension")
+    if not np.all(np.isfinite(state)) or not np.all(np.isfinite(control)):
+        raise ValueError("state and input matrices must be finite")
+    return state, control
 
-    for step_idx in range(steps):
-        t = step_idx * dt
-        # Nominal control profile: initial shoulder drive then late wrist uncocking
-        tau1 = 150.0 * max(0.0, 1.0 - t / 0.25)
-        tau2 = 20.0 * (1.0 if t > 0.15 else 0.0)
-        u = np.array([tau1, tau2], dtype=np.float64)
-        controls.append(u)
-        state = discrete_rk4_step(state, u, dt, p)
-        states.append(state.copy())
 
-    return np.array(states), np.array(controls)
+def reachability_history(
+    state_matrices: npt.ArrayLike,
+    input_matrices: npt.ArrayLike,
+    *,
+    channel_mask: npt.ArrayLike | None = None,
+) -> FloatArray:
+    """Propagate the discrete LTV reachability Gramian from zero authority."""
+
+    state, control = _trajectory_matrices(state_matrices, input_matrices)
+    mask = (
+        np.ones(control.shape[2], dtype=float)
+        if channel_mask is None
+        else _finite_vector("channel_mask", channel_mask, size=control.shape[2])
+    )
+    if np.any((mask != 0.0) & (mask != 1.0)):
+        raise ValueError("channel_mask entries must be zero or one")
+    masked = control * mask[np.newaxis, np.newaxis, :]
+    history = np.zeros((state.shape[0] + 1, state.shape[1], state.shape[1]))
+    for index, (state_matrix, input_matrix) in enumerate(
+        zip(state, masked, strict=True)
+    ):
+        propagated = state_matrix @ history[index] @ state_matrix.T
+        injected = input_matrix @ input_matrix.T
+        history[index + 1] = 0.5 * (propagated + injected + (propagated + injected).T)
+    return _readonly(history)
+
+
+def frozen_local_gramian(
+    state_matrix: npt.ArrayLike,
+    input_matrix: npt.ArrayLike,
+    *,
+    step_count: int,
+) -> FloatArray:
+    """Repeat one frozen discrete linearization as an explicit countermodel."""
+
+    if (
+        isinstance(step_count, bool)
+        or not isinstance(step_count, int)
+        or step_count < 1
+    ):
+        raise ValueError("step_count must be a positive integer")
+    state = np.asarray(state_matrix, dtype=float)
+    control = np.asarray(input_matrix, dtype=float)
+    history = reachability_history(
+        np.repeat(state[np.newaxis, :, :], step_count, axis=0),
+        np.repeat(control[np.newaxis, :, :], step_count, axis=0),
+    )
+    return _readonly(history[-1])
+
+
+def propagated_terminal_input_sensitivity(
+    state_matrices: npt.ArrayLike,
+    input_matrices: npt.ArrayLike,
+    *,
+    pulse_step: int,
+    channel_index: int,
+) -> FloatArray:
+    """Propagate one declared discrete input column to the terminal state."""
+
+    state, control = _trajectory_matrices(state_matrices, input_matrices)
+    if (
+        isinstance(pulse_step, bool)
+        or not isinstance(pulse_step, int)
+        or not 0 <= pulse_step < state.shape[0]
+    ):
+        raise ValueError("pulse_step must index a trajectory step")
+    if (
+        isinstance(channel_index, bool)
+        or not isinstance(channel_index, int)
+        or not 0 <= channel_index < control.shape[2]
+    ):
+        raise ValueError("channel_index must index an input channel")
+    sensitivity = control[pulse_step, :, channel_index].copy()
+    for step in range(pulse_step + 1, state.shape[0]):
+        sensitivity = state[step] @ sensitivity
+    return _readonly(sensitivity)
+
+
+def direct_terminal_pulse_sensitivity(
+    *,
+    params: GolfModelParams,
+    initial_state: npt.ArrayLike,
+    controls: npt.ArrayLike,
+    dt_s: float,
+    state_scales: StateScales,
+    control_scales: ControlScales,
+    request: PulseSensitivityRequest,
+) -> FloatArray:
+    """Differentiate a complete rollout for one energy-normalized input pulse."""
+
+    commands = np.asarray(controls, dtype=float)
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("dt_s must be finite and positive")
+    if commands.ndim != 2:
+        raise ValueError("controls must be a nonempty finite (N, 2) array")
+    return direct_variable_terminal_pulse_sensitivity(
+        params=params,
+        initial_state=initial_state,
+        controls=commands,
+        step_durations_s=np.full(commands.shape[0], dt_s),
+        state_scales=state_scales,
+        control_scales=control_scales,
+        request=request,
+    )
+
+
+def _variable_final_state(
+    params: GolfModelParams,
+    initial_state: FloatArray,
+    controls: FloatArray,
+    step_durations_s: FloatArray,
+) -> FloatArray:
+    backend = make_backend("ode", params, dt=float(step_durations_s[0]))
+    state = initial_state.copy()
+    time_s = 0.0
+    for command, duration in zip(controls, step_durations_s, strict=True):
+        state = registered_step(
+            backend,
+            state,
+            command,
+            time_s=time_s,
+            dt_s=float(duration),
+        )
+        time_s += float(duration)
+    return state
+
+
+def direct_variable_terminal_pulse_sensitivity(
+    *,
+    params: GolfModelParams,
+    initial_state: npt.ArrayLike,
+    controls: npt.ArrayLike,
+    step_durations_s: npt.ArrayLike,
+    state_scales: StateScales,
+    control_scales: ControlScales,
+    request: PulseSensitivityRequest,
+) -> FloatArray:
+    """Differentiate one pulse on a declared variable-step RK4 trajectory."""
+
+    initial = _finite_vector("initial_state", initial_state, size=4).copy()
+    commands = np.asarray(controls, dtype=float)
+    if (
+        commands.ndim != 2
+        or commands.shape[0] == 0
+        or commands.shape[1] != 2
+        or not np.all(np.isfinite(commands))
+    ):
+        raise ValueError("controls must be a nonempty finite (N, 2) array")
+    durations = _positive_vector(
+        "step_durations_s", step_durations_s, size=commands.shape[0]
+    )
+    request.validate_bounds(
+        step_count=commands.shape[0], channel_count=commands.shape[1]
+    )
+    physical_delta = (
+        control_scales.array[request.channel_index]
+        * request.perturbation_scale
+        / math.sqrt(float(durations[request.pulse_step]))
+    )
+    upper = commands.copy()
+    lower = commands.copy()
+    upper[request.pulse_step, request.channel_index] += physical_delta
+    lower[request.pulse_step, request.channel_index] -= physical_delta
+    upper_state = _variable_final_state(params, initial, upper, durations)
+    lower_state = _variable_final_state(params, initial, lower, durations)
+    sensitivity = (
+        (upper_state - lower_state)
+        / (2.0 * request.perturbation_scale)
+        / state_scales.array
+    )
+    return _readonly(sensitivity)
+
+
+def refine_guard_crossing(
+    *,
+    params: GolfModelParams,
+    state_before: npt.ArrayLike,
+    control: npt.ArrayLike,
+    time_before_s: float,
+    bracket_dt_s: float,
+    config: GuardCrossingConfig,
+) -> RefinedCrossing:
+    """Refine one negative-to-nonnegative guard bracket using exact RK4 steps.
+
+    Unique-crossing classification remains a trajectory-level caller gate. This
+    helper only refines a bracket already shown to contain the declared crossing.
+    """
+
+    state = _finite_vector("state_before", state_before, size=4).copy()
+    command = _finite_vector("control", control, size=2).copy()
+    gradient = config.gradient_array
+    if not math.isfinite(time_before_s) or not math.isfinite(bracket_dt_s):
+        raise ValueError("crossing controls must be finite")
+    if bracket_dt_s <= 0.0:
+        raise ValueError("bracket_dt_s must be positive")
+
+    backend = make_backend("ode", params, dt=bracket_dt_s)
+
+    def guard_at(partial_dt_s: float) -> tuple[float, FloatArray]:
+        candidate = registered_step(
+            backend,
+            state,
+            command,
+            time_s=time_before_s,
+            dt_s=partial_dt_s,
+        )
+        return float(gradient @ candidate - config.guard_offset), candidate
+
+    lower = 0.0
+    upper = float(bracket_dt_s)
+    lower_value = float(gradient @ state - config.guard_offset)
+    upper_value, event_state = guard_at(upper)
+    if lower_value >= 0.0 or upper_value < 0.0:
+        raise ValueError("registered guard bracket must be negative-to-nonnegative")
+    residual = upper_value
+    partial = upper
+    for _ in range(config.max_iterations):
+        partial = 0.5 * (lower + upper)
+        residual, event_state = guard_at(partial)
+        if abs(residual) <= config.guard_tolerance:
+            break
+        if residual >= 0.0:
+            upper = partial
+        else:
+            lower = partial
+        if upper - lower <= config.time_tolerance_s:
+            break
+    if abs(residual) > config.guard_tolerance:
+        raise ValueError("guard root did not meet the registered residual tolerance")
+    flow = state_derivative(params, event_state, command)
+    transversality = float(gradient @ flow)
+    status = (
+        "near_grazing"
+        if abs(transversality) <= config.transversality_threshold
+        else "transverse_candidate"
+    )
+    return RefinedCrossing(
+        status=status,
+        time_s=float(time_before_s + partial),
+        partial_dt_s=partial,
+        state=event_state,
+        guard_residual=residual,
+        transversality_per_s=transversality,
+    )
+
+
+def event_conditioned_gramian(
+    gramian: npt.ArrayLike,
+    *,
+    event_flow: npt.ArrayLike,
+    guard_gradient: npt.ArrayLike,
+    transversality_threshold: float,
+) -> EventConditionedGramian:
+    """Project arrival authority into an orthonormal event-tangent basis."""
+
+    matrix = np.asarray(gramian, dtype=float)
+    if (
+        matrix.ndim != 2
+        or matrix.shape[0] == 0
+        or matrix.shape[0] != matrix.shape[1]
+        or not np.all(np.isfinite(matrix))
+    ):
+        raise ValueError("gramian must be a nonempty finite square matrix")
+    if not np.allclose(matrix, matrix.T, rtol=1e-12, atol=1e-14):
+        raise ValueError("gramian must be symmetric")
+    dimension = matrix.shape[0]
+    flow = _finite_vector("event_flow", event_flow, size=dimension)
+    gradient = _finite_vector("guard_gradient", guard_gradient, size=dimension)
+    if np.linalg.norm(gradient) == 0.0:
+        raise ValueError("guard_gradient must be nonzero")
+    if not math.isfinite(transversality_threshold) or transversality_threshold <= 0.0:
+        raise ValueError("transversality_threshold must be finite and positive")
+    denominator = float(gradient @ flow)
+    if abs(denominator) <= transversality_threshold:
+        return EventConditionedGramian(
+            status="near_grazing",
+            transversality_per_s=denominator,
+            projection=None,
+            tangent_basis=None,
+            tangent_gramian=None,
+        )
+    projection = np.eye(dimension) - np.outer(flow, gradient) / denominator
+    _, _, right = np.linalg.svd(gradient.reshape(1, -1), full_matrices=True)
+    tangent_basis = right[1:].T
+    projected = projection @ matrix @ projection.T
+    tangent = tangent_basis.T @ projected @ tangent_basis
+    tangent = 0.5 * (tangent + tangent.T)
+    return EventConditionedGramian(
+        status="transverse",
+        transversality_per_s=denominator,
+        projection=_readonly(projection),
+        tangent_basis=_readonly(tangent_basis),
+        tangent_gramian=_readonly(tangent),
+    )
+
+
+__all__ = [
+    "ControlScales",
+    "EventConditionedGramian",
+    "GuardCrossingConfig",
+    "PulseSensitivityRequest",
+    "RefinedCrossing",
+    "StepLinearization",
+    "StepLinearizationConfig",
+    "TrajectoryLinearization",
+    "direct_terminal_pulse_sensitivity",
+    "direct_variable_terminal_pulse_sensitivity",
+    "event_conditioned_gramian",
+    "frozen_local_gramian",
+    "linearize_trajectory",
+    "propagated_terminal_input_sensitivity",
+    "reachability_history",
+    "refine_guard_crossing",
+    "scale_step_matrices",
+    "step_linearization",
+]

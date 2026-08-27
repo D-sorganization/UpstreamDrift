@@ -1,162 +1,117 @@
-# Agent Handoff — UpstreamDrift
+# Agent Handoff: Proximal–Distal Research Program
 
-Last updated: 2026-08-27
-This is current operational state; Git/GitHub retain history, and epic #8557
-is the single proximal-to-distal completion authority.
+Updated: 2026-08-27
 
-## Swing Objective Lab Web Parity (#9128)
+Epic #8557 is the canonical completion authority. This worktree is the active
+integration vehicle for issues #9124, #9125, #9126, and #9128. Do not infer
+completion from local files or an open pull request.
 
-- PR for #9128 establishes web parity for the Swing Objective Lab tool.
-- FastAPI endpoints `GET /tools/swing-objectives/presets` and `POST /tools/swing-objectives/compare` (`src/api/routes/swing_objectives.py`) execute direct collocation across competing downswing objectives.
-- React page `ui/src/pages/SwingObjectiveLab.tsx` renders per-objective metrics table and cross-evaluation matrix with every cell explicitly labeled (preventing color-only encoding) and plain-language degeneracy alert.
-- Feature parity registry `src/config/feature_parity.json` marks `simulation.swing_objective_lab` as `parity` and `src/config/launcher_manifest.json` routes web execution to `/tools/swing-objective-lab`.
+## Protected Authority
 
-## Event-Conditioned Reaching and Nonlinear Controller Research (#9123, #9124, #9125, #9126)
+- UpstreamDrift owns scientific sources, evidence, and the paper. Tools owns
+  reusable mechanics and UI-neutral provider contracts. AffineDrift publishes
+  immutable source-pinned projections.
+- Protected PR #9144 completed #9123 at squash
+  `5a330ed9b9f74c77a540d37beb90d2df622e719d`, verified on remote `main`.
+- The #9123 paper is 247 pages and 1,935,834 bytes at SHA-256
+  `1783ba69c72f56bba1d3a0e43136afc9b6651d31e4bc453f9d2df61ffdcb1dcb`.
+- It contains 317 adjudicated claims, 136 numeric contracts, 455/455 verified
+  numeric literals, 2,352 evidence references, and 652 release artifacts.
+- The PDF is computationally qualified but not archival-accessibility
+  qualified: it is untagged and retains Type 3 and two unembedded resources.
 
-- Issue #9123 (`scripts/research/proximal_distal_energy/trajectory_control_authority.py`): Qualifies discrete time-varying variational control authority and event-tangent reachability Gramian ($W_{tangent} = P W_{full} P^T$, rank 3 in tangent space, exact channel additivity, zero-input killswitch, finite-difference pulse validation).
-- Issue #9124 (`scripts/research/proximal_distal_energy/bounded_event_reachability.py`): Establishes numerical feasibility for bounded control perturbations, verifies $\le 0.7\%$ small-amplitude agreement with first-order linear Gramian, maps finite-amplitude torque saturation, and classifies trials into typed taxonomy with exact RK4 replay.
-- Issue #9125 (`scripts/research/proximal_distal_energy/event_topology_robustness.py`): Maps guard zero-crossings into typed topology classes (`ZERO_CROSSINGS`, `UNIQUE_FORWARD`, `MULTIPLE_CROSSINGS`, `REVERSED_DIRECTION`, `GRAZING`), evaluates actuator delay continuation and common-random-number perturbation robustness.
-- Issue #9126 (`scripts/research/proximal_distal_energy/nonlinear_controller_*.py`): Freezes prospective controller registration (`double_pendulum_evaluation_count: 0`, `ranking_eligible_method_count: 0`), qualifies candidate solver kernels on manufactured benchmark fixture (derivatives, bounds, monotonicity, deterministic replay, nonfinite failure), and proves exact plant transport across step sizes $\Delta t \in \{0.001, 0.002, 0.005\}$.
+## Active Integration
 
-## Markerless Mocap Program (#9063)
+- Worktree: `UpstreamDrift-worktrees/9128-consolidated-research`.
+- Branch: `feat/9128-swing-objective-web-parity-and-research`.
+- Existing protected-flow PR: #9136. Preserve its squash auto-merge request;
+  do not merge until every scientific and software gate below is satisfied.
+- PR #9136 is being reconciled with protected #9123. Protected #9123
+  trajectory-authority sources and tests take precedence over its earlier,
+  incorrect fixed-horizon implementation.
+- A clean prior #9124 worktree at
+  `UpstreamDrift-worktrees/9124-bounded-event-reachability` contains the more
+  complete event-replay and multiple-shooting implementation. Reuse only the
+  #9124-owned files, then rebind them to protected #9123 source identities.
 
-- ADR-0041 assigns camera, observation, calibration, timing, session, reconstruction, and C3D contracts to Tools #4706; UpstreamDrift owns orchestration, UX, persistence, and biomechanics adapters; AffineDrift owns sanitized publication. Tools PR #4734 remains a protected candidate; do not repin `vendor/ud-tools` to a feature head, and let UpstreamDrift #9069 follow its immutable merge. Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation: there is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
+## Open Correctness Findings
 
-## Repository and Publication Authority
+- #9124 must enforce sample-to-sample torque-rate bounds from an explicit zero
+  perturbation history, locate the unique positive transverse guard crossing,
+  distinguish wrong/multiple/grazing/no crossing, and independently replay
+  every retained multiple-shooting result through the protected RK4 operator.
+- #9125 currently applies the first nominal command during nominally delayed
+  samples and omits wrist-only topology from its coverage gate. Use an explicit
+  pre-delay history and require every registered channel topology.
+- #9126 currently relabels the iLQR implementation when another solver name is
+  requested. Dispatch only implemented solvers or reject unsupported names;
+  no solver or controller ranking is currently qualified.
+- #9128 currently calls unmounted `/tools/...` frontend endpoints. Use the
+  mounted `/api/tools/...` contract, regenerate TypeScript API types, and make
+  the page conform to the current `WorkspaceShell` interface.
+- The current consolidated branch has no complete paper/release integration
+  for #9124–#9126. The handoff, issue closures, and `parity` status must not
+  overstate implementation or validation.
 
-- UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.
-- Remote `main` was refreshed to `3e69d5e33733cd018755ea5b9ccf01383f4c5da7` and integrated before the isolated #8358 consumer branch was published.
-- The current branch publication is 245 pages, SHA-256 `48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa`, with 194 URI links and 255 outline entries. Archival qualification remains false because the PDF is untagged and retains Type 3 and unembedded fonts.
-- The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
-  132 numeric contracts, and 427/427 verified literals. Outcomes are 293
-  supported only within declared estimands and boundaries, five inconclusive,
-  15 untested, and zero contradicted. All 47 public release claims have review
-  dispositions and scientifically open gates. The bundle has 636 artifacts.
+## Required Order
 
-## Coordinate Force-Source Attribution (#9059)
+1. Finish the merge from protected `main`, retaining protected #9123 sources.
+2. Reconcile #9124 from its stronger replay/multiple-shooting branch, refactor
+   to architecture budgets, and verify bounds, event topology, solver replay,
+   continuation, killswitches, adverse targets, and deterministic manifests.
+3. Correct and qualify #9125 event-topology robustness, including delays,
+   channel coverage, common-random-number perturbations, and typed failures.
+4. Correct #9126 solver identity and keep prospective registrations, human
+   limits, and rankings unavailable until the registered comparisons exist.
+5. Correct #9128 API routing/types/shell contracts and test desktop/web parity
+   without moving research authority into the UI.
+6. Regenerate claims, numeric contracts, release artifacts, TeX, PDF, and
+   reviewer figures only after the source results are final. Visually inspect
+   affected pages and re-run the computational publication profile.
+7. Shepherd #9136 through protected CI, verify its squash on remote `main`,
+   close only actually completed issues, and update epic #8557.
 
-- Tools squash `8dc4512184` is the `force-attribution/v1` authority, retained
-  as an ancestor of the current vendor pin and consumed through the thin
-  biomechanics gateway. The 135-program grid
-  retains 91 qualified impacts and separates impulse, work, power, mapping
-  residuals, and speed optima in declared coordinates.
-- The force-only endpoint map is rank deficient; its residual couple remains
-  explicit. This is synthetic planar evidence, not a measured grip wrench,
-  muscle attribution, human strategy, or coaching authority.
+## Scientific Boundaries
 
-## Hybrid-System Topology Contract (#9027)
+- Keep energy transfer, momentum redistribution, joint work, interaction-force
+  power, event time, and clubhead speed distinct.
+- Torque and torque-rate bounds are declared model scenarios, not measured
+  human capacity. Synthetic traces do not establish participant behavior.
+- Local linear authority, bounded nonlinear feasibility, topology robustness,
+  controller qualification, and UI parity are separate evidence tiers.
+- No current result establishes passive negative torque, muscle strategy,
+  fatigue resistance, controller superiority, coaching efficacy, or a
+  universal clubhead-speed prescription.
 
-- PR #9049 is merged as `a4b7d3f9b`. Its eight-tier typed topology covers
-  states, controls, constraints, modes, guards, resets, impacts, actuator
-  dynamics, uncertain events, observables, limitations, and blockers.
-- Three tiers are implemented, three are partial, and the participant-
-  calibrated and governed-human tiers are explicitly unavailable. This does
-  not establish observability, controllability, stability, controller ranking,
-  participant validity, or coaching interpretation.
+## Validation
 
-## Double-Pendulum Rank and Identifiability (#9092, #9104)
-
-- PR #9100 is merged as protected squash `b8508197e`. It retains raw dimensional
-  matrices for traceability but interprets rank and condition only after
-  declared state, control, output, and time scaling.
-- Four synthetic operating points, three finite-difference multipliers, three
-  scale scenarios, and 16 countermodels in each class are registered. The
-  zero-input and zero-output killswitches return rank zero.
-- Published floats use six significant digits for cross-platform identity;
-  rank decisions are computed at full precision before serialization. These
-  local results do not establish structural/global rank or human strategy.
-- PR #9108 is merged as `6f9b068a5`. It proves analytic
-  physical-map rank seven/nullity four, retains three exact nonunique families,
-  and gives registered finite-record rank seven with condition 180.853;
-  equivalent-unit change is `4.44089e-16`, while zero motion has rank zero.
-- Its Gaussian Fisher screen is an oracle-kinematics lower bound only: at 1 N m
-  noise, the worst relative 95% half-width is 0.123266 for the full record and
-  498.504 for the first 10%. Practical/participant identifiability remains
-  unestablished. Its protected 309-claim snapshot is preserved in migration
-  history and has been superseded by the current #9027 projection.
-
-## Scaled Constraints and Feasible Closed-Loop Margins (#9027, #9113)
-
-- PR #9110 is merged as `d16212ac7`. It adds source-bound planar
-  closure and bilateral wrench-map audits. It requires explicit 1 rad/0.75 m
-  generalized-coordinate scales, a 0.10 m wrench scale, and `1e-12` rank tolerance.
-- Regular planar rank/nullity is 4/1; the constructed adverse alignment is
-  3/2 but is not a qualified anatomical pose. Separated/coincident point-force
-  maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
-- #9113 is implemented in open PR #9114 on
-  `research/9113-closed-loop-margins`. Exact triangle
-  closure covers both branches and 181 phases each; all 362 nominal samples
-  close below `1.67e-16` m with rank/nullity 4/1. Exact 0.03 m and 1.53 m
-  degeneracies are 3/2. A five-offset by five-tolerance matrix retains the
-  observed numerical rank boundary without calling it physical.
-- Phase, scale, feasible/impossible geometry, equivalent-unit, and manufactured
-  rank controls pass. Python 3.12 CI exposed platform SVD roundoff; the corrected
-  publication bounds all expected-zero SVD diagnostics by conservative powers
-  of ten, including exact null singular values, while rank decisions retain raw
-  precision. The 58-test focused gate and 636-artifact release validation pass.
-  This is planar kinematics only: no force, anatomy, passive torque, human
-  occurrence, strategy, or coaching inference is authorized.
-
-## Structural Campaign and Recovery Boundary (#8800)
-
-- The separate #8752 constitutive campaign completed on ControlTower and was
-  transferred at branch commit `2fa6cf886`; it is not on remote `main`.
-- #8800 is frozen at source `1bd4d57da7bd257b76b42b3cc19524b283b5f748`.
-  The seven-corner plan is 93/830; 737 checkpoints and 27 nominal ground
-  branches are absent. `release_evidence=false`; a persisted `running` state
-  is stale and no campaign process is active.
-- Checkpoints remain under `C:\Users\diete\Campaigns\UpstreamDrift-8800-1bd4d57da`.
-  ControlTower's WSL VHDX is unreadable (`0x80070570`); preserve it and the C:
-  checkpoints. Do not retry mounts, run CHKDSK, mutate frozen plans, or start
-  a replacement campaign without an explicit recoverability decision.
-- DeskComputer is fully runner-drained and must not run uncertainty campaigns
-  or large parallel tests. Use serial bounded tests with `-n 0` only.
-
-## Human-Evidence Boundaries
-
-- PR #9017 is merged at `ce6fce1c2b8a6e50e410d16d31e219fabcb154e1`
-  and provides fail-closed participant split, processing, frame-transform, and
-  event-detector authorities for #9004.
-- #9004 remains open because no qualifying governed participant trajectory
-  dataset or held-out human outcome is registered. Simscape exports, fixtures,
-  tutorials, GolfDB labels, and launch-monitor records are not substitutes.
-- #8556 remains externally blocked by the absence of governed synchronized
-  bilateral six-axis grip-wrench participant data. Synthetic traces and
-  paper-level curves must never substitute for human validation.
-
-## Active Dependencies
-
-- #8800 blocks the final #8752/#8668 audit. #8443, #8448, #8449, #8450,
-  #8595, #8668, #8684, and #8796 remain open.
-- #9049, #9100, #9108, #9110, and #9114 are merged; #9114 completed #9113's singular-margin slice.
-- #8358's gateway, localized adapters, cross-engine evidence, and Tools-owned presentation are audited. Open PR #9134 repins protected Tools squash `3dfbd32cc7` and qualifies the governed policies and PyQt baseline, completing #8358.
-- #9107 exposes one canonical top-level `bunkershot3d` identity, excludes `src.bunkershot3d`, and passed 36 build-hook/unit contracts plus an isolated exact-wheel probe (`ec3b6c6223f08ebfe1a256f5a3eda3b00209a081fe2cbbe01bd9a0e8ae6f0d18`). Full wheel runtime remains unqualified because inherited `src.api`/Tools-config alias and `sidekick --help` failures remain.
-- #9107 now transfers separate immutable wheel/source artifacts through a fixture-only sparse smoke checkout within a 20-minute bound; fresh protected evidence is required, and no runner change or smoke exemption is authorized.
-- Tools #4142 is closed with R10-R15 protected evidence. AffineDrift PR #3942 is merged; the next public projection must pin a qualified UpstreamDrift merge.
-
-## Scientific and Review Invariants
-
-- Distinguish energy transfer, momentum redistribution, joint work,
-  constraint forces, and clubhead speed. Preserve falsifiers, adverse cases,
-  identifiability limits, uncertainty, countermodels, and unavailable states.
-- Model evidence is never promoted to human validation. No current result
-  establishes anatomy, physiology, equipment calibration, injury, coaching
-  efficacy, or a universal speed benefit.
-- PRs target `main`; use full PRs and let required protected checks govern
-  readiness. The live ruleset requires zero approvals, so do not request a
-  named maintainer as a standing gate. Never force-push, admin-merge, bypass
-  checks, add quarantine debt, or edit the vendor pin independently of a
-  protected Tools authority.
-
-## Focused Validation
+Use Python 3.12 with
+`PYTHONPATH=C:/Users/diete/AppData/Local/Temp/codex-precommit-wmi;<worktree>/src`.
+Run Python tests serially (`-n 0`) and web tests with at most two workers.
 
 ```powershell
+python -m scripts.research.proximal_distal_energy.run_trajectory_control_authority validate
+python -m scripts.research.proximal_distal_energy.run_bounded_event_reachability validate
 python -m scripts.research.proximal_distal_energy.claim_audit validate
-python -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics validate
-python -m scripts.research.proximal_distal_energy.run_closed_loop_singularity_margin validate
 python -m scripts.research.proximal_distal_energy.qualify_open_release validate
-python -m pytest -n 0 -q tests/research/test_closed_loop_singularity_margin.py tests/research/test_closed_loop_singularity_margin_evidence.py tests/research/test_constraint_internal_force_diagnostics.py tests/research/test_constraint_internal_force_diagnostics_evidence.py tests/research/test_numeric_evidence.py tests/research/test_proximal_distal_release_bundle.py tests/research/test_claim_numeric_registry.py
+python -m pytest -n 0 -q tests/research/test_trajectory_control_authority.py tests/research/test_trajectory_control_authority_evidence.py
+python -m pytest -n 0 -q tests/research/test_bounded_event_multiple_shooting.py tests/research/test_bounded_event_reachability.py tests/research/test_bounded_event_reachability_evidence.py
+python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
+python scripts/ci/check_architecture_budget.py
 ```
 
-Passing shared gates does not close narrower scientific or external-data gates.
+Also run Ruff, MyPy, API type generation/freshness, affected frontend tests,
+provider-consumer contracts, release qualification, and responsive/rendered
+inspection. Use the GitHub App setup script immediately before every GitHub
+operation. Never force-push, bypass checks, alter protection, or add quarantine.
+
+## Frozen External Boundary
+
+- #8800 remains frozen at source
+  `1bd4d57da7bd257b76b42b3cc19524b283b5f748`: 93/830 checkpoints exist.
+- ControlTower's WSL VHDX remains unreadable (`0x80070570`). Do not retry WSL,
+  repair/mount/copy/mutate the VHDX, restart services, or replace the campaign
+  without explicit user approval and a recoverability plan.
+- DeskComputer remains runner-drained. Do not run large parallel campaigns or
+  reactivate its runners.

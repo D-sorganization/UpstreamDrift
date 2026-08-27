@@ -11,6 +11,7 @@ This module provides:
 
 from __future__ import annotations
 
+import math
 from collections import deque
 from collections.abc import Callable
 from typing import Any
@@ -109,8 +110,12 @@ class ForceVisualizer:
                     "position": contact.pos.copy(),
                     "normal": contact.frame[:3].copy(),
                     "normal_force": force[0],
-                    "friction_force": np.linalg.norm(force[1:3]),
-                    "total_force": np.linalg.norm(force[:3]),
+                    "friction_force": math.hypot(
+                        *force[1:3]
+                    ),  # ⚡ Bolt: math.hypot(*slice) is faster than np.linalg.norm(slice)
+                    "total_force": math.hypot(
+                        *force[:3]
+                    ),  # ⚡ Bolt: math.hypot(*slice) is faster than np.linalg.norm(slice)
                     "body1": body1_name,
                     "body2": body2_name,
                 }
