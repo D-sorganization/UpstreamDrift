@@ -18,12 +18,12 @@ pytestmark = pytest.mark.integration
 @pytest.fixture
 def client() -> TestClient:
     app = FastAPI()
-    app.include_router(router)
+    app.include_router(router, prefix="/api")
     return TestClient(app)
 
 
 def test_list_presets(client: TestClient) -> None:
-    response = client.get("/tools/swing-objectives/presets")
+    response = client.get("/api/tools/swing-objectives/presets")
     assert response.status_code == 200
     data = response.json()
     assert "presets" in data
@@ -39,7 +39,7 @@ def test_compare_swing_objectives_default(client: TestClient) -> None:
         "wrist_torque_nm": 20.0,
         "node_count": 21,
     }
-    response = client.post("/tools/swing-objectives/compare", json=payload)
+    response = client.post("/api/tools/swing-objectives/compare", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert data["schema_version"] == COMPARISON_SCHEMA_VERSION
@@ -62,7 +62,7 @@ def test_compare_swing_objectives_subset_keys(client: TestClient) -> None:
         "node_count": 15,
         "objective_keys": ["clubhead_speed", "centrifugal"],
     }
-    response = client.post("/tools/swing-objectives/compare", json=payload)
+    response = client.post("/api/tools/swing-objectives/compare", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert data["schema_version"] == COMPARISON_SCHEMA_VERSION
@@ -78,7 +78,7 @@ def test_compare_invalid_duration(client: TestClient) -> None:
         "wrist_torque_nm": 20.0,
         "node_count": 21,
     }
-    response = client.post("/tools/swing-objectives/compare", json=payload)
+    response = client.post("/api/tools/swing-objectives/compare", json=payload)
     assert response.status_code in (400, 422)
 
 
@@ -89,5 +89,5 @@ def test_compare_invalid_node_count(client: TestClient) -> None:
         "wrist_torque_nm": 20.0,
         "node_count": 2,
     }
-    response = client.post("/tools/swing-objectives/compare", json=payload)
+    response = client.post("/api/tools/swing-objectives/compare", json=payload)
     assert response.status_code in (400, 422)

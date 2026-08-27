@@ -168,7 +168,7 @@
       "web": "ui/src/pages/SwingObjectiveLab.tsx",
       "status": "parity",
       "tiles": ["swing_objective_lab"],
-      "notes": "Parity achieved via #9128: API route /tools/swing-objectives/compare and React surface ui/src/pages/SwingObjectiveLab.tsx."
+      "notes": "Parity implementation via #9128: canonical API route /api/tools/swing-objectives/compare and React surface ui/src/pages/SwingObjectiveLab.tsx; scientific equivalence remains evidence-gated."
     },
     "settings.preferences": {
       "title": "Settings/preferences surface + persistence",

@@ -47,9 +47,10 @@ completion from local files or an open pull request.
   iLQR kernel; collocation NMPC is explicitly unavailable. Plant transport is
   rebound to the protected public backend. Full comparative evaluation,
   governed evidence, and every solver/controller ranking remain unavailable.
-- #9128 currently calls unmounted `/tools/...` frontend endpoints. Use the
-  mounted `/api/tools/...` contract, regenerate TypeScript API types, and make
-  the page conform to the current `WorkspaceShell` interface.
+- #9128 now uses the mounted `/api/tools/...` frontend contract, generated
+  OpenAPI types, and the current `WorkspaceShell` interface. The vendored Tools
+  pin is advanced to protected provider `3dfbd32cc`; focused API and React
+  parity tests pass, but full web/build and provider-consumer gates remain.
 - The current consolidated branch has no complete paper/release integration
   for #9124–#9126. The handoff, issue closures, and `parity` status must not
   overstate implementation or validation.
