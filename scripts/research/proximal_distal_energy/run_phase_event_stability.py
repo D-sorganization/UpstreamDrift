@@ -248,6 +248,16 @@ def canonicalize_equivalent_unit_residual(value: float) -> float:
     return float(Decimal(1).scaleb(decimal_value.adjusted() + 1))
 
 
+def canonicalize_near_grazing_transversality(value: float) -> float:
+    """Project a verified near-zero guard derivative to exact zero."""
+
+    if not np.isfinite(value):
+        raise ValueError("near-grazing transversality must be finite")
+    if abs(value) >= TRANSVERSALITY_THRESHOLD_PER_S:
+        raise ValueError("transversality is outside the near-grazing threshold")
+    return 0.0
+
+
 def _transition_refinement(
     params: GolfModelParams,
     initial: np.ndarray,
@@ -546,7 +556,9 @@ def _event_sensitivity_payload(parts: _EvidenceParts) -> dict[str, Any]:
         "direct_trials": parts.direct_event_trials,
         "constructed_near_grazing_control": {
             "status": grazing.status,
-            "transversality_per_s": grazing.transversality_per_s,
+            "transversality_per_s": canonicalize_near_grazing_transversality(
+                grazing.transversality_per_s
+            ),
             "derivative_s_per_scaled_state": None,
             "construction": "configuration guard normal orthogonal to event configuration velocity",
         },
