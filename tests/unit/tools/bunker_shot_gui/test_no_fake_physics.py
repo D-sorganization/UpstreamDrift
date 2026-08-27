@@ -124,6 +124,7 @@ def test_the_gui_imports_the_real_solver() -> None:
         "model",
         "render",
         "render3d",
+        "render3d_vtk",
         "render_traces",
         "report",
         "shot3d",
