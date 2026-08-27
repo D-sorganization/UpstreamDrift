@@ -171,6 +171,10 @@ Recorded outputs:
   both assembly branches, full-phase scaled singular margins, exact triangle
   degeneracies, and phase, geometry, scale, unit, tolerance, impossible-
   geometry, and manufactured-rank controls.
+- `data/phase_event_stability.{json,npz}` — nondimensional finite-time state
+  transitions, singular gains and exponents, transverse-event derivatives,
+  direct perturbation controls, near-grazing rejection, saltation controls,
+  equivalent-unit checks, and the fail-closed periodicity/Floquet gate.
 - `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse-
   dynamics factorization, analytic physical-map rank witness, three exact
   nonunique parameter families, dimensionless finite-record rank, unit and

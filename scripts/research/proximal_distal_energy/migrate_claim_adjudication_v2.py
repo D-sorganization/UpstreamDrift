@@ -39,10 +39,13 @@ PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST = (
 PRE_PAGINATION_REVIEWED_SOURCE_DIGEST = (
     "b27e560775fa9a8ad6bec5cfa328d7ba1877b2e069fba066b0d1e224b11844fe"
 )
-REVIEWED_SOURCE_DIGEST = (
+PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST = (
     "cee6346b000295f370e96a56aac667501f0804e34c3f5375866f813dafa7b8b2"
 )
-REVIEWED_CLAIM_COUNT = 313
+REVIEWED_SOURCE_DIGEST = (
+    "0cf9bd034c322ebe4ded8bb3fd7c60f301156cea135b2498eb6457251b94ba60"
+)
+REVIEWED_CLAIM_COUNT = 315
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -433,6 +436,8 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-312",
         "PD-CLAIM-313",
         "PD-CLAIM-314",
+        "PD-CLAIM-315",
+        "PD-CLAIM-316",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(
@@ -510,7 +515,7 @@ def _reconcile_reviewer_projection(
     registry["candidate_reviews"] = list(reviews.values())
     registry["paper"]["source_digest"] = REVIEWED_SOURCE_DIGEST
     registry["audit_scope"]["current_scope"] = (
-        "The complete 1134-candidate paper inventory is adjudicated. Repeated "
+        "The complete 1148-candidate paper inventory is adjudicated. Repeated "
         "methods, summary, limitation, provenance, and model-tier passages inherit "
         "the primary claim boundaries; generated reviewer tables and editorial "
         "anchors are explicitly classified as nonclaims."
@@ -529,50 +534,8 @@ def _outcome(claim_id: str) -> str:
     raise ValueError(f"{claim_id}: no explicit reviewed adjudication outcome")
 
 
-def migrate(root: Path) -> dict[str, int]:
-    """Migrate the frozen registry and inventory or fail before writing."""
-    registry_path, inventory_path = _paths(root.resolve())
-    registry: dict[str, Any] = json.loads(registry_path.read_text(encoding="utf-8"))
-    digest = registry.get("paper", {}).get("source_digest")
-    claims = registry.get("claims")
-    if digest not in {
-        PRE_ADJUDICATION_SOURCE_DIGEST,
-        LEGACY_REVIEWED_SOURCE_DIGEST,
-        PRIOR_REVIEWED_SOURCE_DIGEST,
-        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
-        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
-        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
-        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
-        PRE_PAGINATION_REVIEWED_SOURCE_DIGEST,
-        REVIEWED_SOURCE_DIGEST,
-    }:
-        raise ValueError(
-            "Paper digest differs from the explicitly reviewed v2 snapshot"
-        )
-    if not isinstance(claims, list) or len(claims) != REVIEWED_CLAIM_COUNT:
-        raise ValueError("Claim count differs from the explicitly reviewed v2 snapshot")
-
-    paper_path = root.resolve() / registry["paper"]["source"]
-    inventory = build_candidate_inventory(paper_path, repository_root=root.resolve())
-    if inventory["source_digest"] != REVIEWED_SOURCE_DIGEST:
-        raise ValueError("Reviewer projection differs from the reviewed paper snapshot")
-    if digest in {
-        PRE_ADJUDICATION_SOURCE_DIGEST,
-        LEGACY_REVIEWED_SOURCE_DIGEST,
-        PRIOR_REVIEWED_SOURCE_DIGEST,
-        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
-        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
-        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
-        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
-        PRE_PAGINATION_REVIEWED_SOURCE_DIGEST,
-    }:
-        _reconcile_reviewer_projection(registry, inventory)
-    else:
-        candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}
-        reviewed_ids = {item["candidate_id"] for item in registry["candidate_reviews"]}
-        if reviewed_ids != candidate_ids:
-            raise ValueError("Reconciled reviewer projection coverage is incomplete")
-
+def _validate_claim_outcome_partition(claims: list[dict[str, Any]]) -> None:
+    """Require every registered claim to have one unambiguous reviewed outcome."""
     claim_ids = {claim.get("claim_id") for claim in claims}
     reviewed_claim_ids = (
         SUPPORTED_CLAIM_IDS
@@ -600,6 +563,55 @@ def migrate(root: Path) -> dict[str, int]:
     )
     if overlaps:
         raise ValueError(f"Claim IDs have conflicting outcomes: {sorted(overlaps)}")
+
+
+def migrate(root: Path) -> dict[str, int]:
+    """Migrate the frozen registry and inventory or fail before writing."""
+    registry_path, inventory_path = _paths(root.resolve())
+    registry: dict[str, Any] = json.loads(registry_path.read_text(encoding="utf-8"))
+    digest = registry.get("paper", {}).get("source_digest")
+    claims = registry.get("claims")
+    if digest not in {
+        PRE_ADJUDICATION_SOURCE_DIGEST,
+        LEGACY_REVIEWED_SOURCE_DIGEST,
+        PRIOR_REVIEWED_SOURCE_DIGEST,
+        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
+        PRE_PAGINATION_REVIEWED_SOURCE_DIGEST,
+        PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST,
+        REVIEWED_SOURCE_DIGEST,
+    }:
+        raise ValueError(
+            "Paper digest differs from the explicitly reviewed v2 snapshot"
+        )
+    if not isinstance(claims, list) or len(claims) != REVIEWED_CLAIM_COUNT:
+        raise ValueError("Claim count differs from the explicitly reviewed v2 snapshot")
+
+    paper_path = root.resolve() / registry["paper"]["source"]
+    inventory = build_candidate_inventory(paper_path, repository_root=root.resolve())
+    if inventory["source_digest"] != REVIEWED_SOURCE_DIGEST:
+        raise ValueError("Reviewer projection differs from the reviewed paper snapshot")
+    if digest in {
+        PRE_ADJUDICATION_SOURCE_DIGEST,
+        LEGACY_REVIEWED_SOURCE_DIGEST,
+        PRIOR_REVIEWED_SOURCE_DIGEST,
+        PRE_SUMMARY_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_REVIEWED_SOURCE_DIGEST,
+        PRE_CONSTRAINT_SUMMARY_SOURCE_DIGEST,
+        PRE_SINGULAR_MARGIN_REVIEWED_SOURCE_DIGEST,
+        PRE_PAGINATION_REVIEWED_SOURCE_DIGEST,
+        PRE_PHASE_EVENT_REVIEWED_SOURCE_DIGEST,
+    }:
+        _reconcile_reviewer_projection(registry, inventory)
+    else:
+        candidate_ids = {item["candidate_id"] for item in inventory["candidates"]}
+        reviewed_ids = {item["candidate_id"] for item in registry["candidate_reviews"]}
+        if reviewed_ids != candidate_ids:
+            raise ValueError("Reconciled reviewer projection coverage is incomplete")
+
+    _validate_claim_outcome_partition(claims)
 
     counts = dict.fromkeys(("supported", "contradicted", "inconclusive", "untested"), 0)
     migrated_claims: list[dict[str, Any]] = []

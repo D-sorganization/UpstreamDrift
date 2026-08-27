@@ -11,13 +11,12 @@ is the single proximal-to-distal completion authority.
 ## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.
-- Remote `main` is protected #9134 squash `f3832b04454c97a7a0999906972f394474107dd7`; #8358 is closed. #9135 is the isolated publication-pagination follow-up.
-- The current #9135 candidate is 245 pages, 1,912,422 bytes, SHA-256 `3eb37e4e5181d6c5f2931813257ae2cbd67e72cb5d851c48c3db2f6a6a44c931`, web-linearized, with 194 URI links, 255 outline entries, and extractable text on every page. Archival qualification remains false because the PDF is untagged and retains Type 3 and unembedded fonts.
-- The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
-  132 numeric contracts, and 427/427 verified literals. Outcomes are 293
+- Remote `main` is protected #9141 squash `11c629cb2fe700c6d2f631d7e5f2da92da5cefcf`; #8358, #9135, and the AffineDrift #3930 projection are complete.
+- PR #9117's reconciled candidate is 246 pages, 1,923,372 bytes, SHA-256 `0e590a556660fcc5656ad4add657bcfb4e90a8c5b15abc98ccf031118d61f050`, web-linearized, with 194 URI links, 255 outline entries, and extractable text on every page. Archival qualification remains false because the PDF is untagged and retains Type 3 and unembedded fonts.
+- The complete audit contains 1,148 reviewed candidates, 315 atomic claims,
+  134 numeric contracts, and 445/445 verified literals. Outcomes are 295
   supported only within declared estimands and boundaries, five inconclusive,
-  15 untested, and zero contradicted. All 47 public release claims have review
-  dispositions and scientifically open gates. The bundle has 636 artifacts.
+  15 untested, and zero contradicted. All 48 release claims are reviewed; the bundle has 644 artifacts.
 
 ## Coordinate Force-Source Attribution (#9059)
 
@@ -61,21 +60,22 @@ is the single proximal-to-distal completion authority.
   unestablished. Its protected 309-claim snapshot is preserved in migration
   history and has been superseded by the current #9027 projection.
 
-## Scaled Constraints and Feasible Closed-Loop Margins (#9027, #9113)
+## Constraints, Closed-Loop Margins, and Phase/Event Stability (#9027)
 
-- PR #9110 is merged as `d16212ac7`. It adds source-bound planar
-  closure and bilateral wrench-map audits. It requires explicit 1 rad/0.75 m
-  generalized-coordinate scales, a 0.10 m wrench scale, and `1e-12` rank tolerance.
+- PR #9110 (`d16212ac7`) adds scaled planar-closure and bilateral wrench-map
+  audits using 1 rad/0.75 m coordinate scales, a 0.10 m wrench scale, and a
+  `1e-12` rank tolerance.
 - Regular planar rank/nullity is 4/1; the constructed adverse alignment is
   3/2 but is not a qualified anatomical pose. Separated/coincident point-force
   maps are 5/1 and 3/3; near-coincident rank is tolerance sensitive.
-- PR #9114 is merged as `847b9abd39e6fd7cffaa917cf4fdb43a563cb276`.
-  Exact triangle closure covers both branches and 181 phases each; all 362
-  nominal samples close below `1.67e-16` m with rank/nullity 4/1. Exact 0.03 m
-  and 1.53 m degeneracies are 3/2. Phase, scale, geometry, equivalent-unit, and
-  manufactured-rank controls pass. This is planar kinematics only: no force,
-  anatomy, passive torque, human occurrence, strategy, or coaching inference
-  is authorized.
+- PR #9114 (`847b9abd39e6fd7cffaa917cf4fdb43a563cb276`) closes both triangle branches over 181 phases each below `1.67e-16` m; exact 0.03 m and 1.53 m degeneracies retain rank/nullity 3/2.
+- PR #9117 propagates the exact-discrete RK4 variational map at 0.125 ms,
+  separates finite-window gain from transverse event-time sensitivity, rejects
+  grazing guards, tests saltation and equivalent-unit killswitches, and
+  suppresses Floquet output because periodicity residual 1.48546 exceeds `1e-6`.
+  Gains span 0.093456--8.33244; direct event-time agreement is `5.98e-5` s.
+  These are local synthetic diagnostics, not asymptotic stability, neural timing
+  demand, participant robustness, passive torque, or coaching evidence.
 
 ## Structural Campaign and Recovery Boundary (#8800)
 

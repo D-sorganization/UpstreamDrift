@@ -188,10 +188,10 @@ def test_canonical_pdf_byte_identity_is_dependency_free() -> None:
     ]
 
     assert digest == (
-        "3eb37e4e5181d6c5f2931813257ae2cbd67e72cb5d851c48c3db2f6a6a44c931"
+        "0e590a556660fcc5656ad4add657bcfb4e90a8c5b15abc98ccf031118d61f050"
     )
-    assert PDF.stat().st_size == 1_912_422
-    assert artifact == {"sha256": digest, "bytes": 1_912_422}
+    assert PDF.stat().st_size == 1_923_372
+    assert artifact == {"sha256": digest, "bytes": 1_923_372}
 
 
 @requires_fitz
@@ -223,10 +223,10 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
     )
 
     assert report["publication"]["sha256"] == (
-        "3eb37e4e5181d6c5f2931813257ae2cbd67e72cb5d851c48c3db2f6a6a44c931"
+        "0e590a556660fcc5656ad4add657bcfb4e90a8c5b15abc98ccf031118d61f050"
     )
-    assert report["publication"]["bytes"] == 1_912_422
-    assert report["publication"]["pages"] == 245
+    assert report["publication"]["bytes"] == 1_923_372
+    assert report["publication"]["pages"] == 246
     assert report["publication"]["fast_web_access"] is True
     assert report["navigation"] == {
         "outline_entries": 255,
@@ -235,15 +235,15 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
         "invalid_uri_links": [],
         "invalid_internal_links": [],
     }
-    assert report["rendering"]["pages_rendered"] == 245
+    assert report["rendering"]["pages_rendered"] == 246
     assert report["rendering"]["errors"] == []
     assert report["accessibility"] == {
         "tagged": False,
-        "pages_with_extractable_text": 245,
+        "pages_with_extractable_text": 246,
         "font_inventory": {
-            "resources": 133,
-            "types": {"Type0": 17, "Type1": 2, "Type3": 114},
-            "type3_resources": 114,
+            "resources": 135,
+            "types": {"Type0": 17, "Type1": 2, "Type3": 116},
+            "type3_resources": 116,
             "unembedded_resources": 2,
         },
     }
