@@ -11,7 +11,7 @@ is the single proximal-to-distal completion authority.
 ## Repository and Publication Authority
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and the release bundle. AffineDrift is an immutable, revision-pinned public projection; Tools owns reusable consumers and source contracts.
-- Remote `main` was refreshed to `f5083f33cdd67b9bda46662d724b547814900d33` before the isolated #8358 consumer branch was created.
+- Remote `main` was refreshed to `3e69d5e33733cd018755ea5b9ccf01383f4c5da7` and integrated before the isolated #8358 consumer branch was published.
 - The current branch publication is 245 pages, SHA-256 `48800a40a899406a13787c93c8282f33688eec819f664c961ff42f093efa28fa`, with 194 URI links and 255 outline entries. Archival qualification remains false because the PDF is untagged and retains Type 3 and unembedded fonts.
 - The complete audit contains 1,142 reviewed candidates, 313 atomic claims,
   132 numeric contracts, and 427/427 verified literals. Outcomes are 293
