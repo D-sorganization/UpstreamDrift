@@ -168,7 +168,7 @@ class TestSaveCustomThemeRequest:
 class TestThemeOperationResponse:
     def test_success_true(self) -> None:
         resp = ThemeOperationResponse(success=True, message="done")
-        assert resp.solver_status == "success"
+        assert resp.success is True
 
     def test_theme_name_optional(self) -> None:
         resp = ThemeOperationResponse(success=True, message="ok")
