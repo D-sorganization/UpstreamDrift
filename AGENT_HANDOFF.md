@@ -99,14 +99,19 @@ are not completion evidence.
   slip, opening, rotation equivariance, exact constitutive ledgers, and
   decreasing total-energy/coupling-work defects over three time refinements.
   This is an engineering comparator, not anatomy or human evidence.
+- The JSON-safe stateful evaluator retains complete node/interval state, load,
+  regime, gap, energy, dissipation, and numerical-defect histories. It gates
+  passive energy, coupling work, virtual power, and exact constitutive closure;
+  step-boundary events explicitly make no substep-time or impulse claim. No
+  stateful campaign or result interpretation exists yet.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
 
 ## Immediate Order
 
-1. Freeze a JSON-safe evaluator and prospective plan for the stateful model,
-   including full state/energy/event histories and adverse opening/slip cases.
+1. Commit the stateful evaluator, then bind its exact SHA in a prospective plan
+   with adverse opening/slip/preload cases before any execution.
 2. Specify a pilot-disclosed rigid refinement extension without weakening or
    relabeling the original failures.
 3. Add matched rigid/shaft/base branches and causal killswitch runs, keeping

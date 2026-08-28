@@ -94,6 +94,8 @@ def test_forward_trace_separates_node_and_interval_timestamps() -> None:
     assert trace["interval_time_start_s"].shape == (4,)
     assert trace["node_q"].shape[0] == 5
     assert trace["interval_generalized_contact_force"].shape[0] == 4
+    assert trace["interval_force_on_club_n"].shape == (4, 2, 3, 3)
+    assert trace["interval_friction_limit_n"].shape == (4, 2, 3)
     assert trace["node_elastic_displacement_m"].shape == (5, 2, 3, 3)
     assert trace["interval_regime"].shape == (4, 2, 3)
     np.testing.assert_allclose(
