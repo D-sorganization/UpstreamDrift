@@ -1,0 +1,142 @@
+"""Manufactured tests for event-aligned articulated forward attribution."""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+from scripts.research.proximal_distal_energy.articulated_forward_attribution import (
+    integrate_forward_attribution,
+    scale_forward_attribution_inputs,
+)
+
+
+def test_constant_force_closes_impulse_and_work() -> None:
+    time_s = np.array([0.0, 0.5, 1.0])
+    velocity = np.array([[0.0], [1.0], [2.0]])
+    mass = np.ones((3, 1, 1))
+    force = np.full((3, 1, 1), 2.0)
+
+    result = integrate_forward_attribution(
+        time_s=time_s,
+        mass_matrices=mass,
+        mass_matrix_rates=np.zeros_like(mass),
+        velocities=velocity,
+        generalized_forces=force,
+        contribution_names=("contact",),
+        segment_ids=np.zeros(3, dtype=np.int64),
+        event_impulses=np.empty((0, 1)),
+        event_work_j=np.empty(0),
+    )
+
+    np.testing.assert_allclose(result.continuous_impulses[0], [2.0])
+    np.testing.assert_allclose(result.generalized_work_j, [2.0])
+    np.testing.assert_allclose(result.momentum_change, [2.0])
+    np.testing.assert_allclose(result.transport_impulse, [0.0])
+    assert result.momentum_closure_residual == pytest.approx(0.0)
+    assert result.work_closure_residual_j == pytest.approx(0.0)
+
+
+def test_variable_mass_retains_euler_lagrange_transport_term() -> None:
+    time_s = np.array([0.0, 0.5, 1.0])
+    mass_scalar = 1.0 + time_s
+    velocity_scalar = 2.0 + time_s
+    mass = mass_scalar[:, None, None]
+    velocity = velocity_scalar[:, None]
+    force = mass_scalar[:, None, None]
+
+    result = integrate_forward_attribution(
+        time_s=time_s,
+        mass_matrices=mass,
+        mass_matrix_rates=np.ones_like(mass),
+        velocities=velocity,
+        generalized_forces=force,
+        contribution_names=("active",),
+        segment_ids=np.zeros(3, dtype=np.int64),
+        event_impulses=np.empty((0, 1)),
+        event_work_j=np.empty(0),
+    )
+
+    np.testing.assert_allclose(result.continuous_impulses[0], [1.5])
+    np.testing.assert_allclose(result.transport_impulse, [2.5])
+    np.testing.assert_allclose(result.momentum_change, [4.0])
+    assert result.momentum_closure_residual == pytest.approx(0.0)
+
+
+def test_duplicate_event_time_separates_continuous_and_impulsive_terms() -> None:
+    result = integrate_forward_attribution(
+        time_s=np.array([0.0, 1.0, 1.0, 2.0]),
+        mass_matrices=np.ones((4, 1, 1)),
+        mass_matrix_rates=np.zeros((4, 1, 1)),
+        velocities=np.array([[0.0], [1.0], [3.0], [4.0]]),
+        generalized_forces=np.ones((4, 1, 1)),
+        contribution_names=("contact",),
+        segment_ids=np.array([0, 0, 1, 1]),
+        event_impulses=np.array([[2.0]]),
+        event_work_j=np.array([4.0]),
+    )
+
+    np.testing.assert_allclose(result.continuous_impulses[0], [2.0])
+    np.testing.assert_allclose(result.total_event_impulse, [2.0])
+    np.testing.assert_allclose(result.momentum_change, [4.0])
+    assert result.continuous_work_j == pytest.approx(4.0)
+    assert result.total_event_work_j == pytest.approx(4.0)
+    assert result.kinetic_energy_change_j == pytest.approx(8.0)
+    assert result.work_closure_residual_j == pytest.approx(0.0)
+
+
+def test_coordinate_scaling_preserves_work_and_transforms_impulse() -> None:
+    arguments = {
+        "time_s": np.array([0.0, 0.5, 1.0]),
+        "mass_matrices": np.repeat(np.eye(2)[None, :, :], 3, axis=0),
+        "mass_matrix_rates": np.zeros((3, 2, 2)),
+        "velocities": np.array([[0.0, 1.0], [1.0, 2.0], [2.0, 3.0]]),
+        "generalized_forces": np.repeat(np.array([[[2.0, 3.0]]]), 3, axis=0),
+        "contribution_names": ("contact",),
+        "segment_ids": np.zeros(3, dtype=np.int64),
+        "event_impulses": np.empty((0, 2)),
+        "event_work_j": np.empty(0),
+    }
+    reference = integrate_forward_attribution(**arguments)
+    scaled_arguments = scale_forward_attribution_inputs(
+        **arguments,
+        coordinate_scale=np.array([2.0, 0.5]),
+    )
+    scaled = integrate_forward_attribution(**scaled_arguments)
+
+    np.testing.assert_allclose(scaled.generalized_work_j, reference.generalized_work_j)
+    np.testing.assert_allclose(scaled.continuous_work_j, reference.continuous_work_j)
+    np.testing.assert_allclose(
+        scaled.continuous_impulses[0],
+        reference.continuous_impulses[0] / np.array([2.0, 0.5]),
+    )
+
+
+def test_duplicate_time_without_event_boundary_is_rejected() -> None:
+    with pytest.raises(ValueError, match="duplicate times require"):
+        integrate_forward_attribution(
+            time_s=np.array([0.0, 1.0, 1.0]),
+            mass_matrices=np.ones((3, 1, 1)),
+            mass_matrix_rates=np.zeros((3, 1, 1)),
+            velocities=np.ones((3, 1)),
+            generalized_forces=np.ones((3, 1, 1)),
+            contribution_names=("contact",),
+            segment_ids=np.zeros(3, dtype=np.int64),
+            event_impulses=np.empty((0, 1)),
+            event_work_j=np.empty(0),
+        )
+
+
+def test_event_count_must_match_segment_transitions() -> None:
+    with pytest.raises(ValueError, match="one row per segment transition"):
+        integrate_forward_attribution(
+            time_s=np.array([0.0, 1.0, 1.0]),
+            mass_matrices=np.ones((3, 1, 1)),
+            mass_matrix_rates=np.zeros((3, 1, 1)),
+            velocities=np.ones((3, 1)),
+            generalized_forces=np.ones((3, 1, 1)),
+            contribution_names=("contact",),
+            segment_ids=np.array([0, 0, 1]),
+            event_impulses=np.empty((0, 1)),
+            event_work_j=np.empty(0),
+        )
