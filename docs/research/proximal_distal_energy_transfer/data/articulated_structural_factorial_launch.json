@@ -1,10 +1,11 @@
 {
-  "schema_version": "articulated-structural-factorial-launch/1.0.0",
-  "plan_sha256": "b6a2e6bf19bbf12df3366b68c239688648af38f2e18b8e500229934a505d9bf5",
-  "execution_revision": "7b7862f3b3a9e69c055ba920ac4c68da72177f39",
+  "schema_version": "articulated-structural-factorial-launch/1.1.0",
+  "plan_sha256": "2f0f5acb705eb4470181d6293d4a5855ce015edcd56e7f52ea52cdae749c1915",
+  "execution_revision": "d6bffd0c6ae6e7d90fdc18778799c0bd4b592dae",
   "registered_case_count": 2304,
   "worker_count": 1,
   "maximum_python_process_count": 1,
   "checkpoint_policy": "one_atomic_checkpoint_per_attempt",
+  "parity_sidecar_policy": "one_sha256_bound_npz_per_completed_attempt",
   "status": "ready_for_disclosed_timing_probe_then_registered_execution"
 }
