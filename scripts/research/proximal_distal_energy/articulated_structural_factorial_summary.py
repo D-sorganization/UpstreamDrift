@@ -14,6 +14,9 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_corruption_audit import (
+    validate_corruption_audit,
+)
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
     StructuralCheckpoint,
     load_registered_checkpoints,
@@ -343,6 +346,28 @@ def _runtime_session_identity(
     return runtime_identity
 
 
+def _corruption_audit_identity(
+    *,
+    plan: Mapping[str, object],
+    launch: Mapping[str, object],
+    checkpoint_dir: Path,
+    corruption_audit_path: Path | None,
+) -> str | None:
+    if corruption_audit_path is None:
+        return None
+    audit = _mapping(
+        json.loads(corruption_audit_path.read_text(encoding="utf-8")),
+        name="corruption audit",
+    )
+    validate_corruption_audit(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=checkpoint_dir,
+        audit=audit,
+    )
+    return hashlib.sha256(corruption_audit_path.read_bytes()).hexdigest()
+
+
 def _required_list(value: object, *, name: str) -> list[Any]:
     if not isinstance(value, list) or not value:
         raise ValueError(f"{name} must be a nonempty list")
@@ -444,6 +469,7 @@ def summarize_structural_factorial(
     plan_path: Path | None = None,
     launch_path: Path | None = None,
     runtime_audit_path: Path | None = None,
+    corruption_audit_path: Path | None = None,
 ) -> dict[str, object]:
     """Validate a complete run and compute preregistered factorial coefficients."""
 
@@ -454,6 +480,12 @@ def summarize_structural_factorial(
         plan_path=plan_path,
         launch_path=launch_path,
         runtime_audit_path=runtime_audit_path,
+    )
+    corruption_identity = _corruption_audit_identity(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=checkpoint_dir,
+        corruption_audit_path=corruption_audit_path,
     )
     checkpoints = load_registered_checkpoints(
         plan=plan, launch=launch, checkpoint_dir=checkpoint_dir
@@ -480,6 +512,7 @@ def summarize_structural_factorial(
     all_refinement = bool(refinement) and all(bool(row["passes"]) for row in refinement)
     promotion = bool(
         runtime_identity is not None
+        and corruption_identity is not None
         and counts.get("completed", 0) == len(checkpoints)
         and all_numerical
         and all_refinement
@@ -488,12 +521,13 @@ def summarize_structural_factorial(
     )
     aggregates = _contrast_aggregates(plan=plan, contrasts=contrasts)
     return {
-        "schema_version": "articulated-structural-factorial-summary/1.2.0",
+        "schema_version": "articulated-structural-factorial-summary/1.3.0",
         "identity": {
             "plan_sha256": plan_sha256(plan),
             "execution_revision": launch["execution_revision"],
             "checkpoint_set_sha256": _checkpoint_set_sha256(checkpoints),
             "runtime_identity_sha256": runtime_identity,
+            "corruption_audit_sha256": corruption_identity,
         },
         "inventory": {
             "registered_case_count": len(checkpoints),
@@ -505,6 +539,7 @@ def summarize_structural_factorial(
             "all_refinement_groups_pass": all_refinement,
             "cross_engine_parity_complete_and_passed": parity_complete,
             "runtime_session_qualified": runtime_identity is not None,
+            "corruption_sentinel_passed": corruption_identity is not None,
             "promotion_eligible": promotion,
         },
         "refinement": refinement,
@@ -532,6 +567,7 @@ def main() -> None:
     parser.add_argument("--launch", type=Path, required=True)
     parser.add_argument("--checkpoint-dir", type=Path, required=True)
     parser.add_argument("--runtime-audit", type=Path)
+    parser.add_argument("--corruption-audit", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     plan = json.loads(args.plan.read_text(encoding="utf-8"))
@@ -545,6 +581,7 @@ def main() -> None:
         plan_path=args.plan if args.runtime_audit is not None else None,
         launch_path=args.launch if args.runtime_audit is not None else None,
         runtime_audit_path=args.runtime_audit,
+        corruption_audit_path=args.corruption_audit,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     temporary = args.output.with_suffix(".tmp")

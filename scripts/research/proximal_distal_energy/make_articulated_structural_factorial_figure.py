@@ -11,7 +11,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 
-SCHEMA = "articulated-structural-factorial-summary/1.2.0"
+SCHEMA = "articulated-structural-factorial-summary/1.3.0"
 OUTCOME_LABELS = {
     "final_club_translation_speed_m_s": "Club Translation Speed Effect (m/s)",
     "club_linear_momentum_change_kg_m_s": "Club Momentum-Change Effect (kg m/s)",

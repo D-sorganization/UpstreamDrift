@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -13,6 +14,9 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_pl
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_launcher import (
     bind_execution_session,
+)
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_corruption_audit import (
+    audit_checkpoint_corruption,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
     StructuralCase,
@@ -123,8 +127,10 @@ def test_summary_recovers_registered_walsh_coefficients_and_suppresses_parity(
     assert summary["gates"]["all_refinement_groups_pass"] is True
     assert summary["gates"]["cross_engine_parity_complete_and_passed"] is False
     assert summary["gates"]["runtime_session_qualified"] is False
+    assert summary["gates"]["corruption_sentinel_passed"] is False
     assert summary["gates"]["promotion_eligible"] is False
     assert summary["identity"]["runtime_identity_sha256"] is None
+    assert summary["identity"]["corruption_audit_sha256"] is None
     coefficients = [
         row["walsh_coefficient"]
         for row in summary["factorial_contrasts"]
@@ -248,6 +254,18 @@ def test_summary_accepts_a_qualified_bound_runtime_but_retains_other_gates(
         checkpoint_dir=checkpoint_dir,
         evaluator=_evaluation,
     )
+    corruption_audit_path = tmp_path / "corruption-audit.json"
+    corruption_audit_path.write_text(
+        json.dumps(
+            audit_checkpoint_corruption(
+                plan=plan,
+                launch=launch,
+                checkpoint_dir=checkpoint_dir,
+                audit_revision="d" * 40,
+            )
+        ),
+        encoding="utf-8",
+    )
 
     summary = summarize_structural_factorial(
         plan=plan,
@@ -256,8 +274,14 @@ def test_summary_accepts_a_qualified_bound_runtime_but_retains_other_gates(
         plan_path=plan_path,
         launch_path=launch_path,
         runtime_audit_path=audit_path,
+        corruption_audit_path=corruption_audit_path,
     )
 
     assert summary["gates"]["runtime_session_qualified"] is True
+    assert summary["gates"]["corruption_sentinel_passed"] is True
     assert summary["identity"]["runtime_identity_sha256"] == runtime_identity
+    assert (
+        summary["identity"]["corruption_audit_sha256"]
+        == hashlib.sha256(corruption_audit_path.read_bytes()).hexdigest()
+    )
     assert summary["gates"]["promotion_eligible"] is False

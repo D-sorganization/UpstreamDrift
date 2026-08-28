@@ -10,6 +10,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_corruption_audit import (
     audit_checkpoint_corruption,
+    validate_corruption_audit,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_plan import (
     StructuralFactorialPlan,
@@ -96,6 +97,26 @@ def test_corruption_audit_rejects_only_the_copy_and_preserves_source(
         "observed_rejection": "completed checkpoint parity sidecar is missing or corrupt",
         "passes": True,
     }
+    assert (
+        len(
+            validate_corruption_audit(
+                plan=plan,
+                launch=launch,
+                checkpoint_dir=tmp_path,
+                audit=audit,
+            )
+        )
+        == 64
+    )
+
+    tampered = {**audit, "sentinel": {**audit["sentinel"], "passes": False}}
+    with pytest.raises(ValueError, match="exact rejection gate"):
+        validate_corruption_audit(
+            plan=plan,
+            launch=launch,
+            checkpoint_dir=tmp_path,
+            audit=tampered,
+        )
 
 
 def test_corruption_audit_requires_a_completed_checkpoint(tmp_path: Path) -> None:

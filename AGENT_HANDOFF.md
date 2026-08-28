@@ -107,7 +107,7 @@ are not completion evidence.
   one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 12:09 UTC.
 - Audit v1.2 digest `9507556034f2009d7d7cbfbdc2d01e9613024eeb9d8b4bedaac453711801bbd7`
   qualifies operators; launch/summary bind it. A copied-sidecar sentinel proves
-  hash rejection; Linux needs clean source plus `pin`/`pin-pink`.
+  hash rejection and summary revalidates it; Linux needs `pin`/`pin-pink`.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.

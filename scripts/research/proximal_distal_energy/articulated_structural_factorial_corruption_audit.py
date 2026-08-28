@@ -33,6 +33,72 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _canonical_sha256(value: Mapping[str, object]) -> str:
+    encoded = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def validate_corruption_audit(
+    *,
+    plan: Mapping[str, object],
+    launch: Mapping[str, object],
+    checkpoint_dir: Path,
+    audit: Mapping[str, object],
+) -> str:
+    """Return the canonical digest only for an intact live sentinel audit."""
+
+    if audit.get("schema_version") != SCHEMA:
+        raise ValueError("corruption audit schema is invalid")
+    if audit.get("classification") != "corruption_killswitch_not_scientific_evidence":
+        raise ValueError("corruption audit classification is invalid")
+    identity = _mapping(audit.get("identity"), name="corruption audit identity")
+    audit_revision = identity.get("audit_revision")
+    if (
+        identity.get("plan_sha256") != plan_sha256(plan)
+        or identity.get("execution_revision") != launch.get("execution_revision")
+        or not isinstance(audit_revision, str)
+        or _SHA40.fullmatch(audit_revision) is None
+    ):
+        raise ValueError("corruption audit identity does not match this execution")
+    source = _mapping(audit.get("source_checkpoint"), name="source checkpoint")
+    json_name = source.get("json_file")
+    npz_name = source.get("parity_sidecar_file")
+    if (
+        not isinstance(json_name, str)
+        or Path(json_name).name != json_name
+        or not isinstance(npz_name, str)
+        or Path(npz_name).name != npz_name
+    ):
+        raise ValueError("corruption audit source filenames are invalid")
+    json_path, npz_path = checkpoint_dir / json_name, checkpoint_dir / npz_name
+    if (
+        not json_path.is_file()
+        or not npz_path.is_file()
+        or source.get("json_sha256") != _sha256(json_path)
+        or source.get("parity_sidecar_sha256") != _sha256(npz_path)
+    ):
+        raise ValueError("corruption audit source checkpoint identity is invalid")
+    payload = _mapping(
+        json.loads(json_path.read_text(encoding="utf-8")), name="source checkpoint"
+    )
+    checkpoint_identity = _mapping(
+        payload.get("identity"), name="source checkpoint identity"
+    )
+    if checkpoint_identity.get("case_key") != source.get("case_key"):
+        raise ValueError("corruption audit source case identity is invalid")
+    sentinel = _mapping(audit.get("sentinel"), name="corruption sentinel")
+    if sentinel != {
+        "operation": "flip_middle_byte_in_copied_parity_sidecar",
+        "source_checkpoint_unchanged": True,
+        "observed_rejection": _EXPECTED_REJECTION,
+        "passes": True,
+    }:
+        raise ValueError("corruption sentinel did not pass its exact rejection gate")
+    return _canonical_sha256(audit)
+
+
 def audit_checkpoint_corruption(
     *,
     plan: Mapping[str, object],
@@ -150,4 +216,4 @@ if __name__ == "__main__":
     raise SystemExit(main())
 
 
-__all__ = ["audit_checkpoint_corruption"]
+__all__ = ["audit_checkpoint_corruption", "validate_corruption_audit"]

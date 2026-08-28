@@ -461,9 +461,10 @@ Before evaluating a case, the launcher atomically writes
 `execution-session.json` inside an empty checkpoint directory. That record binds
 the exact plan, launch, runtime-audit files, execution revision, and validated
 runtime identity. A populated unbound directory or any resume identity drift
-fails before evaluator import. The summary revalidates the same files and
-session when `--runtime-audit` is supplied; without it, runtime qualification
-and promotion eligibility remain false even if numerical gates pass.
+fails before evaluator import. For promotion, the summary revalidates the same
+files/session through `--runtime-audit` and the copied-sidecar sentinel through
+`--corruption-audit`; either missing gate leaves promotion false even when the
+numerical gates pass.
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study
