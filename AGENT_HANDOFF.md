@@ -38,9 +38,9 @@ partial campaign checkpoints are not completion evidence.
   Windows wheel in the project environment, and an isolated conda-forge attempt
   exposed binary incompatibility. Do not commit or treat those local runtime
   attempts as evidence.
-- PR #9152 is open at exact head
-  `55eee6cb5bdeb985dfe93a8611e83f0f7f6c88c0`, with squash auto-merge
-  enabled. Ubuntu native-evidence run `33139951819`, job
+- PR #9152 is open with squash auto-merge enabled. Resolve its current exact
+  head from `git rev-parse origin/feat/9151-articulated-drift-attribution`
+  before acting. Ubuntu native-evidence run `33139951819`, job
   `98748338285`, passed from exact head `cb8af2cd846da351fdfa5c4bbee15f9ee6e62ad9`.
   Its downloaded JSON/NPZ reports MuJoCo 3.12.0, Pinocchio 4.1.0, 234 states,
   zero failed engine-states, and all registered gates passed. Independent NPZ
@@ -68,7 +68,7 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Inspect exact protected checks on PR #9152 head `55eee6cb5`, fix only
+1. Inspect exact protected checks on PR #9152's current remote head, fix only
    actionable source failures, preserve
    squash auto-merge, and verify the squash commit on remote main.
 2. Refresh AffineDrift only from that immutable qualified UpstreamDrift squash,
