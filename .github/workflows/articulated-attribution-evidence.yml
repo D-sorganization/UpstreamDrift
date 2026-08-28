@@ -1,0 +1,77 @@
+name: Articulated Attribution Evidence
+
+on:
+  pull_request:
+    paths:
+      - "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py"
+      - "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py"
+      - "tests/research/test_articulated_drift_contact_attribution.py"
+      - ".github/workflows/articulated-attribution-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: articulated-attribution-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate Native-Engine Evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Qualified Native Stack
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip uninstall -y pinocchio || true
+          python -m pip install -e ".[pinocchio]" pytest pytest-xdist
+          python - <<'PY'
+          import mujoco
+          import pinocchio
+
+          version = tuple(int(part) for part in pinocchio.__version__.split(".")[:2])
+          assert (2, 6) <= version < (5, 0), pinocchio.__version__
+          print("mujoco", mujoco.__version__)
+          print("pinocchio", pinocchio.__version__)
+          PY
+
+      - name: Run Focused Contracts
+        run: >-
+          python -m pytest -n 0 -q
+          tests/research/test_articulated_drift_contact_attribution.py
+
+      - name: Generate Deterministic Evidence
+        run: >-
+          python -m
+          scripts.research.proximal_distal_energy.run_articulated_drift_contact_attribution
+
+      - name: Verify Registered Gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json")
+          record = json.loads(path.read_text(encoding="utf-8"))
+          assert record["design"]["state_count"] == 234
+          assert record["results"]["all_registered_gates_passed"] is True
+          assert record["claim_boundary"]["human_transfer_or_strategy"] == "untested"
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: articulated-drift-contact-attribution-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json
+            docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz
