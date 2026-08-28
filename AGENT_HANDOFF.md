@@ -93,17 +93,20 @@ are not completion evidence.
   dissipation, and explicit stored-energy release on opening. The distributed
   adapter projects state into the changing tangent plane, retains projection
   release, combines native generalized loads, and closes every station ledger.
-  Kernel/adapter tests cover stick, slip, opening, rotation equivariance, and
-  fail-closed inputs. This is an engineering comparator, not anatomy; a frozen
-  time-integration contract remains next.
+  Its distinct forward integrator freezes left-node kinematics, an
+  end-of-increment radial-return force, and semi-implicit mechanical stepping;
+  node states and interval responses cannot be confused. Tests cover stick,
+  slip, opening, rotation equivariance, exact constitutive ledgers, and
+  decreasing total-energy/coupling-work defects over three time refinements.
+  This is an engineering comparator, not anatomy or human evidence.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
 
 ## Immediate Order
 
-1. Commit the stateful friction kernel, then integrate it behind a distinct
-   distributed-contact model identity with full state/energy/event histories.
+1. Freeze a JSON-safe evaluator and prospective plan for the stateful model,
+   including full state/energy/event histories and adverse opening/slip cases.
 2. Specify a pilot-disclosed rigid refinement extension without weakening or
    relabeling the original failures.
 3. Add matched rigid/shaft/base branches and causal killswitch runs, keeping
