@@ -4887,7 +4887,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json": {
-      "sha256": "301ec25b2b8d6d8b060980d543fa704a0398c0a163ae4d6b0be8ddf6735f07aa",
+      "sha256": "c51a7eb2b4e12ad8ebf899491eb1ea2d3224569311c0632be5b770166ccf46cb",
       "bytes": 108676,
       "referenced_by": [
         "PD-CLAIM-321",
@@ -4923,7 +4923,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json": {
-      "sha256": "57bd7d47e664ffb98fee3754f1237c78b4990a73cf6de706268bc1632cbac8f3",
+      "sha256": "503eb7e3fd73d23e76602c799b3c92420a3b5f145b77520b51321f2cc05da4d7",
       "bytes": 26320,
       "referenced_by": [
         "PD-CLAIM-321",
@@ -6238,7 +6238,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "14ccbc21cda3b984e00d05aea629a4371145e205f511d13d418f9d594c6d4bce",
+      "sha256": "91a5c35bad5ea2bd5fc2737b8e0408d1256fac2f026927399e6e6b83018d9b9f",
       "bytes": 158178,
       "referenced_by": [
         "PD-CLAIM-241"
