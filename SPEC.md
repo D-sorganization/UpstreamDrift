@@ -2,6 +2,16 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## Tools Green-Surface Adapter Consumption (#9143)
+
+Issue #9143 consumes the Tools `swing_sim.putting` green-surface adapter (Tools #4800 P9) via the `vendor/ud-tools` vendor boundary.
+The `vendor/ud-tools` submodule is updated to the latest Tools `main` squash commit (`b46f58df52df86b6c5a3db44460b26ac8919da70`),
+providing runtime-free format adapter functions `green_surface_from_ud_json` and `green_surface_to_ud_json` alongside the `UdGreenTopography`
+container. Bi-directional interchange with UpstreamDrift's native `GreenSurface` (`src/engines/physics_engines/putting_green/python/green_surface.py`)
+and its `_surface_io` JSON format is verified by consumer integration tests in `tests/unit/putting/test_putting_green_consumer.py`,
+confirming exact node elevation and gradient matching on planar and regular grids, byte-deterministic roundtrips, fail-closed refusal
+of non-conservative slope regions and scattered contours, and flat/sloped roll dynamics consistency.
+
 ## Swing Objective Lab Web Parity (#9128)
 
 Issue #9128 establishes full web parity for the Swing Objective Lab tool.
@@ -704,7 +714,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.617                                            |
+| **Spec Version**        | 1.0.621                                            |
 | **Last Spec Update**    | 2026-08-27                                         |
 
 ## 2. Purpose & Mission
@@ -3393,6 +3403,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-27 | 1.0.621 | Consumed the Tools green-surface adapter across the vendor boundary (issue #9143, Tools #4800 P9). Bumped the `vendor/ud-tools` submodule to the latest Tools main squash (`b46f58df52df86b6c5a3db44460b26ac8919da70`), pulling in `shared.python.swing_sim.putting.ud_adapter`, `UdGreenTopography`, `green_surface_from_ud_json`, and `green_surface_to_ud_json` alongside recent variation fixes (#4692/#4693/#4694/#4697). Added consumer integration tests in `tests/unit/putting/test_putting_green_consumer.py` covering vendor boundary import resolution, bi-directional topography JSON serialization/deserialization between Tools heightfields and UpstreamDrift `GreenSurface`, fail-closed rejection of scattered contours/slopes/unknown fields, and roll physics consistency on imported flat and sloped green surfaces. |
 | 2026-08-27 | 1.0.620 | Established UpstreamDrift engineering design-manual authority (UP-D0, issue #9066). `manuals/upstreamdrift` QMD is the sole editable authority; existing user, ADR, and research products remain separate; generated HTML, LaTeX, PDF, and DOCX remain non-editable and unapproved. The versioned policy, fail-closed empty registry, agent guidance, contract tests, and offline CI/pre-commit verifier enforce program-contract ownership, safe paths, Ruff formatting, TDD/DbC/DRY/LoD, impacted-path/freshness rules, immutable release evidence, visual and semantic review, and human approval. UP-D1 through UP-D8 remain explicit blockers, and this governance scaffold makes no calculation-coverage or publication claim. |
 | 2026-08-27 | 1.0.619 | Integrated #9126's outcome-blind nonlinear-controller prerequisite. The registration freezes nine families, 24 evaluation trials, eight disjoint tuning trials, plant/event/failure/random-stream contracts, and single-worker checkpoint identity. One bounded projected first-order iLQR kernel passes manufactured derivative, in-rollout bound, descent, replay, initialization-sensitivity, and typed-failure gates; collocation NMPC remains explicitly unavailable. Twelve shared-equation plant-step cases pass over 0.5, 1, and 2 ms. The regenerated web-linearized 251-page paper is 1,962,456 bytes at SHA-256 `92bfaca850ac459cc431e573be8c0288af51ceab4d28759d02c67c602274ee8b`, with 325 adjudicated claims, 144 numeric contracts, and 498/498 verified numeric literals. Zero registered controller evaluations have run and zero methods are ranking-eligible. |
 | 2026-08-27 | 1.0.618 | Integrated #9125's global event-topology, delay, perturbation, stress, channel-mask, refinement, and horizon evidence. Phase A retains one positive transverse crossing in all 6,336 nonzero small-stress replays; Phase B first exposes topology loss at 0.02 synthetic dimensionless stress and 200 ms delay; Phase C distinguishes wrist-only crossing absence from 0.40 s horizon truncation and prevents zero authority from acquiring command noise. The regenerated web-linearized 250-page paper is 1,958,661 bytes at SHA-256 `6ca47ab88331cbb728a0f464f1a1200cf16553328148f40e42192f66d56a1647`, with 322 adjudicated claims, 141 numeric contracts, and 482/482 verified numeric literals. These are open-loop synthetic topology results, not human tolerance, anatomical, strategy-ranking, or coaching evidence. |
