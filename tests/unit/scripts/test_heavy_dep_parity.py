@@ -42,6 +42,7 @@ def test_structural_runtime_audit_is_hosted_exact_revision_and_artifact_bound() 
     assert "articulated_structural_factorial_runtime_audit" in workflow
     assert "structural-runtime-audit-${{ github.run_id }}" in workflow
     assert "inputs.structural_runtime_audit != true" in workflow
+    assert "submodule update --init --depth 1 vendor/ud-tools" in workflow
     assert "python -m pip install -e ./execution-source" in workflow
 
 

@@ -115,7 +115,9 @@ are not completion evidence.
   separately, installs `pin`/MuJoCo, and uploads the exact audit without using
   this workstation or a fleet runner. It must pass before a Linux campaign.
 - Hosted run 33172008965 reached the exact source but failed before audit on a
-  missing core `defusedxml`; the lane now installs the frozen source package.
+  missing core `defusedxml`. Run 33172324660 then reached the package build and
+  failed on its absent pinned Tools gitlink; the lane now initializes that exact
+  submodule before installing the frozen source package.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
