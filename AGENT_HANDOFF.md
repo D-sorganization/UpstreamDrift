@@ -33,23 +33,40 @@ partial campaign checkpoints are not completion evidence.
   `019fe886-6614-70a2-a596-e5b0dea725d0`.
 - Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
 - Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
-  `e732757c9` and published through `be26a50c9`.
+  `e732757c9`. Remote recovery currently ends at `43d7955a3`; local committed
+  implementation continues through `efc55a3bc` and must be pushed normally.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
-- Ten manufactured tests cover constant force/work, variable mass transport,
+- Eleven manufactured tests cover constant force/work, variable mass transport,
   event separation, coordinate scaling, malformed topology, mass-rate
-  differentiation, planted-force corruption, signed cancellation, and
-  denominator suppression. An eleventh MuJoCo test replays a
+  differentiation (including the directional `dM/dq qdot` operator),
+  planted-force corruption, signed cancellation, and denominator suppression.
+  A twelfth MuJoCo test replays a
   five-sample rigid articulated contact trace into configuration, velocity,
   contact, and zero-active contributions with exact pointwise force closure.
+- Distributed traces now retain signed station gaps. Five manufactured event
+  tests plus a registered 50 ms MuJoCo probe locate opening and reattachment
+  roots to both `1e-10 m` gap and `1e-12 s` bracket tolerances on a declared
+  linear state interpolant. Event-aligned replay duplicates pre/post states,
+  prevents cross-event quadrature, and registers zero discrete impulse/work
+  for the continuous tension law.
+- Twenty-six affected focused tests, Ruff, and format pass. Focused MyPy first
+  exposed inherited scientific-script typing debt, then the installed MyPy
+  crashed internally under `--follow-imports=skip`; do not misreport this as a
+  green type gate.
+- A bounded, non-governed MuJoCo probe on the registered state showed monotone
+  closure contraction at the frozen 5 ms resolutions: momentum relative
+  residual `9.89e-3 -> 4.69e-3 -> 2.28e-3`, work relative residual
+  `4.09e-3 -> 1.14e-3 -> 3.30e-4`. These are design diagnostics, not released
+  evidence. Python 3.12 has no robotics Pinocchio; parity remains unexecuted.
 - No PR exists yet. The current remote branch is a recoverable implementation
   foundation, not completion of #9153.
 
 ## Immediate Order
 
-1. Add exact event records and active-set segmentation adapters for the
-   distributed-grip opening/reattachment and stick/slip authorities.
+1. Add stick/slip event surfaces and build a versioned serial smoke manifest
+   with typed native-runtime failures and three-resolution promotion gates.
 2. Add matched rigid/shaft/base branches, causal forward killswitch runs kept
    separate from same-trajectory attribution, refinement/parity/adverse cases,
    and a serial smoke manifest.
@@ -90,6 +107,7 @@ portable tests. Run Python tests with `-n 0`.
 
 ```powershell
 python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution.py
+python -m pytest -n 0 -q tests/research/test_articulated_contact_events.py tests/research/test_articulated_distributed_grip.py tests/research/test_articulated_distributed_forward.py
 python -m ruff check scripts/research/proximal_distal_energy/articulated_forward_attribution.py scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py tests/research/test_articulated_forward_attribution.py
 python -m ruff format --check scripts/research/proximal_distal_energy/articulated_forward_attribution.py scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py tests/research/test_articulated_forward_attribution.py
 python scripts/check_document_title_case.py --changed-from origin/main
