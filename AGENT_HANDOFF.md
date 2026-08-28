@@ -20,8 +20,8 @@ are not completion evidence.
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`.
   Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`; branch:
   `feat/9153-forward-impulse-work`. No PR exists yet.
-- Remote feature-branch authority before this slice is
-  `9d4817912755ce75e189f9baf13e388b494b7bf9`.
+- Remote feature branch is verified at
+  `7ef30c925f932ba545d30064e2039583ad5332ff`.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -87,8 +87,10 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Commit the release manifest/checksums bound to source commit `623e8cea1`,
-   push both new commits, and verify the remote feature head exactly.
+1. Audit the existing articulated rigid, passive-shaft, and finite-base
+   authorities to define one prospective matched structural matrix. Freeze the
+   matching variables, tolerances, causal interventions, and resource budget
+   before running it.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. Continue matched rigid/shaft/base branches and causal killswitch runs.
