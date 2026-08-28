@@ -24,6 +24,16 @@ This convention applies to Markdown, Quarto, LaTeX, Word, and PDF outputs; edit
 the canonical source and regenerate rendered artifacts. Run
 `python scripts/check_document_title_case.py` for a full tracked-document audit.
 
+### Engineering Design Manual Authority
+
+The sole editable source for the calculation-level engineering design manual is
+`manuals/upstreamdrift` QMD. Generated LaTeX, PDF, DOCX, and HTML are
+non-editable artifacts; correct QMD and regenerate them through the qualified
+toolchain. Before changing calculations, public scientific pathways, or manual
+governance, read `scripts/config/design_manual_governance.json` and run
+`python3 -m scripts.check_design_manual_governance`. Missing inventory,
+freshness, provenance, page review, or approval keeps release blocked.
+
 ---
 
 ## A. Before you write new code — discovery workflow

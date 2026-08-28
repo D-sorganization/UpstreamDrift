@@ -2,6 +2,15 @@
 
 Updated: 2026-08-27
 
+## Engineering Design Manual Authority (#9064)
+
+- UP-D0 (#9066) makes `manuals/upstreamdrift` QMD the sole editable engineering-manual authority. `python3 -m scripts.check_design_manual_governance` enforces its versioned policy, empty fail-closed registry, program-contract ownership, agent context, and absent publication projection. Generated LaTeX/PDF/DOCX/HTML remain non-editable and unapproved; UP-D1 (#9067) must inventory the repository, and UP-D2-D8 retain traceability, rendering, freshness, visual/accessibility, digest, and human-approval blockers.
+- Issue #9097 and PR #9101 are closed invalid/unmerged: the canonical LF chapter blob is 50,623 bytes, below the 51,200-byte budget; only Windows CRLF expansion measured 51,523. No exception or source edit is authorized.
+
+## Markerless Mocap Program (#9063)
+
+- ADR-0041 assigns camera/observation/calibration/timing/session/reconstruction/C3D contracts to Tools #4706, UpstreamDrift owns orchestration/UX/persistence/biomechanics adapters, and AffineDrift owns sanitized publication. Stale Tools PR #4734 is not a delivery candidate; its fresh current-main replacement must consume protected packaging merge `99acc997a97b3d97cb4ddd857b79bedd4a66f290` without repinning `vendor/ud-tools`, and UpstreamDrift #9069 must follow the immutable Tools merge. Existing ingestion #4558 and duplicate-reader debt #8865 are inputs, not live-lab implementation; there is no physical-lab qualification or camera, inference, C3D round-trip, commercial, or human-performance claim.
+
 ## Authority and Working State
 
 - UpstreamDrift owns scientific sources, models, evidence registers, and release

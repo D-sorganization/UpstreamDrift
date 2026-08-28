@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "manual_id": "upstreamdrift",
+  "repository": "D-sorganization/UpstreamDrift",
+  "release_status": "blocked-inventory-required",
+  "inventory_commit": null,
+  "blockers": [
+    {
+      "id": "UP-D1-inventory-required",
+      "owner": "UpstreamDrift issue #9067",
+      "resolution": "Inventory and classify every in-scope calculation and module before any coverage or release claim."
+    }
+  ],
+  "calculations": []
+}
