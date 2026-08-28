@@ -12,6 +12,8 @@ _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _AUTHORITY_KEYS = (
     "closed_state_npz",
+    "shaft_structural_basis_json",
+    "shaft_structural_basis_npz",
     "shaft_atlas_json",
     "shaft_atlas_npz",
     "ground_atlas_json",
@@ -120,7 +122,7 @@ class StructuralFactorialPlan:
             * len(_ENGINES)
         )
         return {
-            "schema_version": "articulated-structural-factorial-plan/1.0.0",
+            "schema_version": "articulated-structural-factorial-plan/1.1.0",
             "study_id": "prospective-rigid-shaft-ground-pathway-factorial",
             "identity": {
                 "design_authority_revision": self.design_authority_revision,
@@ -130,6 +132,11 @@ class StructuralFactorialPlan:
             "preregistration": {
                 "timing": "before_combined_runner_implementation_or_execution",
                 "status": "design_frozen_execution_not_started",
+                "amendment": (
+                    "v1.1 adds the byte-identical regenerated shaft-basis NPZ and its "
+                    "updated formatting-only source provenance after the disclosed "
+                    "timing probe failed closed; no outcome was produced"
+                ),
                 "reason": (
                     "the shaft and ground atlases used post-registered outcome matching; "
                     "this design instead identifies pathway contrasts by exact within-state "

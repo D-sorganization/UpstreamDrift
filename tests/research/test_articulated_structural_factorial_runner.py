@@ -23,10 +23,12 @@ PLAN_REVISION = "a" * 40
 EXECUTION_REVISION = "b" * 40
 HASHES = {
     "closed_state_npz": "1" * 64,
-    "shaft_atlas_json": "2" * 64,
-    "shaft_atlas_npz": "3" * 64,
-    "ground_atlas_json": "4" * 64,
-    "ground_atlas_npz": "5" * 64,
+    "shaft_structural_basis_json": "2" * 64,
+    "shaft_structural_basis_npz": "3" * 64,
+    "shaft_atlas_json": "4" * 64,
+    "shaft_atlas_npz": "5" * 64,
+    "ground_atlas_json": "6" * 64,
+    "ground_atlas_npz": "7" * 64,
 }
 pytestmark = pytest.mark.scientific
 

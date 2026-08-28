@@ -22,10 +22,12 @@ PLAN_PATH = (
 )
 AUTHORITY_HASHES = {
     "closed_state_npz": "1" * 64,
-    "shaft_atlas_json": "2" * 64,
-    "shaft_atlas_npz": "3" * 64,
-    "ground_atlas_json": "4" * 64,
-    "ground_atlas_npz": "5" * 64,
+    "shaft_structural_basis_json": "2" * 64,
+    "shaft_structural_basis_npz": "3" * 64,
+    "shaft_atlas_json": "4" * 64,
+    "shaft_atlas_npz": "5" * 64,
+    "ground_atlas_json": "6" * 64,
+    "ground_atlas_npz": "7" * 64,
 }
 
 pytestmark = pytest.mark.scientific
@@ -41,7 +43,8 @@ def _plan() -> StructuralFactorialPlan:
 def test_plan_is_a_complete_outcome_blind_binary_factorial() -> None:
     manifest = _plan().to_manifest()
 
-    assert manifest["schema_version"] == "articulated-structural-factorial-plan/1.0.0"
+    assert manifest["schema_version"] == "articulated-structural-factorial-plan/1.1.0"
+    assert "no outcome was produced" in manifest["preregistration"]["amendment"]
     design = manifest["design"]
     assert design["factors"] == [
         "shaft_bending",

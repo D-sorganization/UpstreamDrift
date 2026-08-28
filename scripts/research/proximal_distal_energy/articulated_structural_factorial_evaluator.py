@@ -55,6 +55,10 @@ ROOT = Path(__file__).resolve().parents[3]
 AUTHORITY_PATHS = {
     "closed_state_npz": ROOT
     / "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+    "shaft_structural_basis_json": ROOT
+    / "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
+    "shaft_structural_basis_npz": ROOT
+    / "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.npz",
     "shaft_atlas_json": ROOT
     / "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_atlas.json",
     "shaft_atlas_npz": ROOT

@@ -1,5 +1,5 @@
 {
-  "schema_version": "articulated-structural-factorial-plan/1.0.0",
+  "schema_version": "articulated-structural-factorial-plan/1.1.0",
   "study_id": "prospective-rigid-shaft-ground-pathway-factorial",
   "identity": {
     "design_authority_revision": "01b82082d9e5fcad88293fbeb56994de0c77a8be",
@@ -8,13 +8,16 @@
       "ground_atlas_json": "253d88d7d4842ff53333b6234e6cf1cc48f3879a9fc27dbe42f01bb6f8c38830",
       "ground_atlas_npz": "0e85e2d2afa0fbb3858b83ae17e52df1a94d9fa32a764a0b0296ff60b82a0312",
       "shaft_atlas_json": "2b074dabe952d98c3ac6e5e1582f65710f47b0566e4c5eccc5dfbc471a8b7864",
-      "shaft_atlas_npz": "bf49e945b838fc0307f5f50d58fcfad6b9755a0ff389a4e8eb9943bd49dcbf3b"
+      "shaft_atlas_npz": "bf49e945b838fc0307f5f50d58fcfad6b9755a0ff389a4e8eb9943bd49dcbf3b",
+      "shaft_structural_basis_json": "5cd74490235b01d59d9303b77d5d625aff53ed50847bef43651526c1834ae14e",
+      "shaft_structural_basis_npz": "b4fdce37b3123f500aa33500aa9a181162a33a3e9960a4ad598eb2e2d1ba5c81"
     },
     "issue": 9153
   },
   "preregistration": {
     "timing": "before_combined_runner_implementation_or_execution",
     "status": "design_frozen_execution_not_started",
+    "amendment": "v1.1 adds the byte-identical regenerated shaft-basis NPZ and its updated formatting-only source provenance after the disclosed timing probe failed closed; no outcome was produced",
     "reason": "the shaft and ground atlases used post-registered outcome matching; this design instead identifies pathway contrasts by exact within-state intervention",
     "prior_results_retained": {
       "shaft_post_registered_matched_cells": 126,
