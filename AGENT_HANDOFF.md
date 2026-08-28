@@ -8,8 +8,8 @@ partial campaign checkpoints are not completion evidence.
 ## Protected Authority
 
 - UpstreamDrift remote `main` is
-  `85cce4d3307bb7ad3953d9fc6e583e370803515c`, the protected squash of
-  #9152 for #9151.
+  `e732757c90538acae7d7c4531dc1a05dc321b94f`, the protected squash of
+  #9147 for #9142. It contains the #9152/#9151 authority.
 - The qualified paper has 252 pages and SHA-256
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
 - Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
@@ -26,31 +26,36 @@ partial campaign checkpoints are not completion evidence.
   merged through protected squashes `b2d7f721`, `d7a95e2a`, and `da0759c7`.
   The trusted rendered-evidence run remains capacity-pending; do not rerun it.
 
-## Active Publication Integrity Slice: #9142 / PR #9147
+## Active Scientific Slice: #9153
 
-- #9142 prevents the generated claim-adjudication chapter from emitting
-  repository-relative `data/` links that break when AffineDrift republishes the
-  chapter. PR #9147 owns the implementation; do not create a duplicate PR.
-- Worktree: `UpstreamDrift-worktrees/9142-portable-links`.
-- Local branch: `fix/9142-portable-links`, tracking the PR branch through a
-  merge-only reconciliation with current `origin/main`; never force-push.
-- The source now emits portable UpstreamDrift `blob/main` links, while the
-  AffineDrift publication boundary remains responsible for immutable SHA
-  rewriting. The focused five-test generator/committed-artifact suite passes.
-- Release manifests were regenerated after reconciling #9151. Complete serial
-  validation, commit the merge, push to the existing PR branch, preserve squash
-  auto-merge, inspect actionable hosted failures, and verify its squash on
-  remote `main` before closing this slice.
+- #9153 is the leased #8557 child for event-aligned forward impulse/work
+  attribution. Lease owner: `codex`, session
+  `019fe886-6614-70a2-a596-e5b0dea725d0`.
+- Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
+- Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
+  `e732757c9`; three local commits are saved through `e41105424`.
+- The pure kernel separates continuous generalized-force impulse/work,
+  independently evaluated `Mdot v` momentum transport, and registered event
+  impulse/work. Duplicate event times are integrated as separate segments.
+- Eight manufactured tests cover constant force/work, variable mass transport,
+  event separation, coordinate scaling, malformed topology, mass-rate
+  differentiation, and planted-force corruption. A ninth MuJoCo test replays a
+  five-sample rigid articulated contact trace into configuration, velocity,
+  contact, and zero-active contributions with exact pointwise force closure.
+- No branch has been pushed and no PR exists yet. The current work is an
+  implementation foundation, not completion of #9153.
 
 ## Immediate Order
 
-1. Finish and protected-merge #9147 without changing scientific content.
-2. Register the next #8557 child for matched forward impulse/work attribution
-   through contact transitions. Its contract must freeze event surfaces,
-   contact-state matching, impulse/work estimands, shaft/base coupling,
-   uncertainty, adverse loads, killswitches, and evidence promotion rules.
-3. Implement that child from a clean leased worktree only after its issue and
-   dependency order are visible in #8557.
+1. Add denominator adequacy and cancellation reporting without inventing an
+   invariant impulse fraction; retain coordinate-wise units/scaling.
+2. Add exact event records and active-set segmentation adapters for the
+   distributed-grip opening/reattachment and stick/slip authorities.
+3. Add matched rigid/shaft/base branches, causal forward killswitch runs kept
+   separate from same-trajectory attribution, refinement/parity/adverse cases,
+   and a serial smoke manifest.
+4. Generate JSON/NPZ evidence, figures, paper/claim/reviewer integrations, and
+   release manifests; then run full governed gates and protected delivery.
 
 ## Scientific Boundaries
 
@@ -85,9 +90,9 @@ Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` for
 portable tests. Run Python tests with `-n 0`.
 
 ```powershell
-python -m pytest -n 0 -q tests/research/test_articulated_drift_contact_attribution.py
-python -m ruff check scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py tests/research/test_articulated_drift_contact_attribution.py
-python -m ruff format --check scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py tests/research/test_articulated_drift_contact_attribution.py
+python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution.py
+python -m ruff check scripts/research/proximal_distal_energy/articulated_forward_attribution.py scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py tests/research/test_articulated_forward_attribution.py
+python -m ruff format --check scripts/research/proximal_distal_energy/articulated_forward_attribution.py scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py tests/research/test_articulated_forward_attribution.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
