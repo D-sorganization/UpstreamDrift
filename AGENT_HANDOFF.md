@@ -13,11 +13,8 @@ are not completion evidence.
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
   Its computational evidence gates pass, but tagged-PDF and font-resource gates
   remain open, so it is not an archival accessibility release.
-- AffineDrift #3993 pins #9152 at protected squash `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`;
-  handoff correction #3995 merged as `6cc909273d63147392b17078a35c6c4da034e1da`.
-- Tools #4669 merged as `f9730033fd279ba8b4abe03bab2aadd950400b47`;
-  UpstreamDrift #8358 is closed. Tools #4142 remains the reusable-variation
-  authority. R14.6 merged through `b2d7f721`, `d7a95e2a`, and `da0759c7`.
+- AffineDrift #3993/#3995 and Tools #4669 are protected; Tools #4142 remains
+  the reusable-variation authority.
 
 ## Active Scientific Slice: #9153
 
@@ -28,9 +25,8 @@ are not completion evidence.
   evaluated `Mdot v` momentum transport, kinetic geometry work
   `0.5 v^T Mdot v`, and registered event impulse/work. It handles duplicate
   event times, coordinate scaling, cancellation, and denominator suppression.
-- Distributed traces retain signed station gaps. Opening and reattachment roots
-  are located on a declared linear state interpolant to the frozen gap/time
-  tolerances. Stick/slip surfaces and distributed forward execution remain next.
+- Distributed traces retain signed gaps and separate opening/reattachment from
+  regularized Coulomb-limit entry/exit on a declared linear state interpolant.
 - Plan revision 5 freezes source `9a91a957f793a0f2b1e891b7367624544ab33b88`,
   data SHA-256 `9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779`,
   42 rigid-smoke cases, the later 18-state screen, contact/model/frame/unit
@@ -92,20 +88,24 @@ are not completion evidence.
 - Eleven checkpoints from a stopped mistyped execution identity are preserved
   at `C:/Users/diete/Campaigns/UpstreamDrift-9153-distributed-smoke-invalid-execution-d2800c556d8`;
   they are excluded from evidence and must not be merged with the valid run.
+- A new stateful elastic--perfectly-plastic tangential countermodel uses a
+  Coulomb radial return, retained elastic displacement, plastic-slip
+  dissipation, and explicit stored-energy release on opening. Its pure kernel
+  passes stick, slip, opening, rotation-equivariance, and fail-closed tests. It
+  is an engineering comparator, not anatomy; forward integration remains next.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
 
 ## Immediate Order
 
-1. Commit and push the governed distributed evidence without amending results.
+1. Commit the stateful friction kernel, then integrate it behind a distinct
+   distributed-contact model identity with full state/energy/event histories.
 2. Specify a pilot-disclosed rigid refinement extension without weakening or
    relabeling the original failures.
-3. Define a separate stateful tangential-compliance countermodel before any
-   true stick/slip claim.
-4. Add matched rigid/shaft/base branches and causal killswitch runs, keeping
+3. Add matched rigid/shaft/base branches and causal killswitch runs, keeping
    counterfactual outcomes distinct from same-trajectory attribution.
-5. Execute refinement/parity/adverse cases serially, then generate governed
+4. Execute refinement/parity/adverse cases serially, then generate governed
    figures, paper/claim/reviewer integrations, and protected delivery.
 
 ## Scientific Boundaries
