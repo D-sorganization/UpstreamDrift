@@ -38,7 +38,9 @@ partial campaign checkpoints are not completion evidence.
   Windows wheel in the project environment, and an isolated conda-forge attempt
   exposed binary incompatibility. Do not commit or treat those local runtime
   attempts as evidence.
-- PR #9152 is open. Ubuntu native-evidence run `33139951819`, job
+- PR #9152 is open at exact head
+  `55eee6cb5bdeb985dfe93a8611e83f0f7f6c88c0`, with squash auto-merge
+  enabled. Ubuntu native-evidence run `33139951819`, job
   `98748338285`, passed from exact head `cb8af2cd846da351fdfa5c4bbee15f9ee6e62ad9`.
   Its downloaded JSON/NPZ reports MuJoCo 3.12.0, Pinocchio 4.1.0, 234 states,
   zero failed engine-states, and all registered gates passed. Independent NPZ
@@ -66,14 +68,10 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Regenerate final release, checksum, and claim-evidence manifests; run focused
-   tests, claim/numeric/evidence integrity, title/file/architecture gates, and
-   full computational publication qualification serially.
-2. Commit the complete evidence/publication slice, update PR #9152 to
-   `Closes #9151`, and push through the GitHub App setup.
-3. Inspect exact protected checks, fix only actionable source failures, preserve
+1. Inspect exact protected checks on PR #9152 head `55eee6cb5`, fix only
+   actionable source failures, preserve
    squash auto-merge, and verify the squash commit on remote main.
-4. Refresh AffineDrift only from that immutable qualified UpstreamDrift squash,
+2. Refresh AffineDrift only from that immutable qualified UpstreamDrift squash,
    then verify its protected merge and public paper links.
 
 ## Scientific Boundaries
@@ -125,8 +123,10 @@ or create redundant CI reruns.
 
 ## Other Repository Programs
 
-- `manuals/upstreamdrift` QMD remains the sole editable engineering-manual
-  authority; generated manual formats are non-editable and unapproved.
+- UP-D0 (#9066) establishes `manuals/upstreamdrift` QMD as the sole editable
+  engineering-manual authority; generated manual formats are non-editable and
+  unapproved. UP-D1 (#9067) must inventory and classify every in-scope
+  calculation and module before any manual coverage or release claim.
 - Markerless mocap still follows Tools provider -> Upstream orchestration ->
   Affine sanitized projection. Camera candidates are not procurement or lab
   qualification.
