@@ -126,6 +126,8 @@ class DistributedGripSnapshot:
     normal_force_on_club_n: FloatArray | None = None
     tangential_force_on_club_n: FloatArray | None = None
     slipping_station: NDArray[np.bool_] | None = None
+    station_extension_m: FloatArray | None = None
+    station_signed_gap_m: FloatArray | None = None
     normal_power_w: float = 0.0
     tangential_power_w: float = 0.0
     normal_dissipation_power_w: float = 0.0
@@ -300,6 +302,7 @@ class _KinematicsBuffers:
     active: NDArray[np.bool_]
     slipping: NDArray[np.bool_]
     extensions: FloatArray
+    signed_gaps: FloatArray
     tangential_norms: FloatArray
     sliding_speeds: FloatArray
     coulomb_utilization: FloatArray
@@ -351,6 +354,8 @@ def _build_distributed_snapshot(
         normal_force_on_club_n=buf.normal_forces,
         tangential_force_on_club_n=buf.tangential_forces,
         slipping_station=buf.slipping,
+        station_extension_m=buf.extensions,
+        station_signed_gap_m=buf.signed_gaps,
         normal_power_w=float(buf.normal_power),
         tangential_power_w=float(buf.tangential_power),
         normal_dissipation_power_w=float(buf.normal_dissipation),
@@ -394,6 +399,9 @@ def _evaluate_all_stations(
             buf.normal_forces[h_idx, s_idx] = f_norm
             buf.active[h_idx, s_idx] = snap.active
             buf.extensions[h_idx, s_idx] = snap.extension_m
+            buf.signed_gaps[h_idx, s_idx] = float(np.linalg.norm(disp)) - (
+                references[h_idx, s_idx] + config.slack_distance_m
+            )
             buf.storage += snap.storage_power_w
             normal_diss = snap.dissipation_power_w
             buf.normal_dissipation += normal_diss
@@ -454,6 +462,7 @@ def evaluate_distributed_grip_kinematics(
         active=np.zeros(references.shape, dtype=bool),
         slipping=np.zeros(references.shape, dtype=bool),
         extensions=np.zeros(references.shape),
+        signed_gaps=np.zeros(references.shape),
         tangential_norms=np.zeros(references.shape),
         sliding_speeds=np.zeros(references.shape),
         coulomb_utilization=np.zeros(references.shape),

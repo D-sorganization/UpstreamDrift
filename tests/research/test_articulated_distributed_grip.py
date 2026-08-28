@@ -139,6 +139,12 @@ def test_multi_fiber_projection_closes_power_and_passivity() -> None:
     )
 
     assert snapshot.force_on_club_n.shape == (2, 5, 3)
+    assert snapshot.station_signed_gap_m.shape == (2, 5)
+    assert np.array_equal(snapshot.station_signed_gap_m > 0.0, snapshot.active_station)
+    assert np.allclose(
+        snapshot.station_extension_m,
+        np.maximum(snapshot.station_signed_gap_m, 0.0),
+    )
     assert snapshot.active_station_count > 0
     assert snapshot.action_reaction_residual_n <= 1.0e-12
     assert snapshot.coincident_couple_residual_nm <= 1.0e-12
