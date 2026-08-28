@@ -63,6 +63,10 @@ partial campaign checkpoints are not completion evidence.
   hash-bound ten-parameter native control evaluator. It expires 2026-09-30 and
   must be removed when the next forward-attribution slice can regenerate native
   evidence after introducing a cohesive evaluator context.
+- The four tests in `test_articulated_drift_contact_attribution.py` remain in
+  the suite-marker baseline because that file is hash-bound to the successful
+  native evidence. Mark them `scientific` and remove those baseline entries only
+  with the next native regeneration; do not rewrite the recorded source hash.
 - Do not close #9151 until this complete publication slice passes protected CI,
   squash-merges, and the merge commit is verified on remote main.
 
