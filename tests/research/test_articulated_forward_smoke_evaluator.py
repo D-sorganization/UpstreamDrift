@@ -46,6 +46,22 @@ def test_wrong_pinocchio_package_is_a_typed_unavailable_engine(
         require_registered_native_engine("pinocchio")
 
 
+def test_native_dll_initialization_failure_is_typed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fail_import(_name: str) -> object:
+        raise OSError("planted native DLL initialization failure")
+
+    monkeypatch.setattr(
+        "scripts.research.proximal_distal_energy."
+        "articulated_forward_smoke_evaluator.import_module",
+        fail_import,
+    )
+
+    with pytest.raises(NativeEngineUnavailable, match="native DLL"):
+        require_registered_native_engine("mujoco")
+
+
 def test_source_hash_mismatch_fails_before_native_evaluation() -> None:
     manifest = _manifest()
     identity = manifest["identity"]

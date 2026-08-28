@@ -95,7 +95,7 @@ def require_registered_native_engine(engine: str) -> dict[str, str]:
         raise ValueError("engine must be 'mujoco' or 'pinocchio'")
     try:
         module = import_module(engine)
-    except ImportError as exc:
+    except (ImportError, OSError) as exc:
         raise NativeEngineUnavailable(
             engine=engine,
             detail=f"registered native module is unavailable: {exc}",
