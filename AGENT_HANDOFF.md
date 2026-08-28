@@ -52,6 +52,12 @@ are not completion evidence.
   individual closure tolerances. Momentum refines in all seven variants. Work
   refinement fails nominal (`0.829 > 0.8`) and high damping (`1.235 > 0.8`).
   Promotion is false for refinement and unavailable native parity.
+- A bounded post-result diagnostic (not preregistered evidence) extended only
+  nominal and high damping to 0.125/0.0625 ms. Their work residuals continued
+  downward (`6.63e-5 -> 3.42e-5` and `9.91e-5 -> 5.12e-5`), with fine-step
+  ratios near 0.52. This supports a coarse-grid transient explanation but does
+  not erase the frozen smoke failures. Any confirmatory extension must disclose
+  this pilot and use unseen steps or states.
 - The aggregator validates complete plan/source/data/execution/case/schema
   identities, retains every failure, inventories exact bytes, and refuses
   promotion if parity is unavailable or not yet evaluated. A freshness test
@@ -62,9 +68,11 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Commit and push the governed aggregator and complete smoke evidence.
-2. Diagnose the two work-refinement failures without weakening frozen gates;
-   add distributed stick/slip events and the distributed forward evaluator.
+1. Specify a pilot-disclosed confirmatory refinement extension without
+   weakening or relabeling the original failures.
+2. Add distributed stick/slip events and the distributed forward evaluator.
+   Treat the current viscous/Coulomb regularization as a model limitation: do
+   not label tangential motion as true static sticking without a stateful law.
 3. Add matched rigid/shaft/base branches and causal killswitch runs, keeping
    counterfactual outcomes distinct from same-trajectory attribution.
 4. Execute refinement/parity/adverse cases serially, then generate governed
