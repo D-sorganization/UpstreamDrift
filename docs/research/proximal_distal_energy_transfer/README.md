@@ -415,6 +415,11 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
   --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
   --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6
+# bind package and native-engine identities without evaluating outcomes
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit \
+  --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+  --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+  --output C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/runtime-audit.json
 # inspect a partial run without promoting it or starting another worker
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_status \
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
@@ -427,9 +432,9 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --output C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/summary.json
 
 The registered Windows execution treats robotics Pinocchio absence as a typed
-missing cell. The system Python currently resolves the unrelated
-`pinocchio==0.1` package, while the qualified robotics package is distributed
-as `pin` and its current dependency stack has no compatible Windows wheel.
+missing cell. The system Python resolves the unrelated `pinocchio==0.4.3`
+distribution, whose module advertises version 0.1, while the qualified robotics
+package is distributed as `pin` and lacks a compatible current Windows wheel.
 Do not replace that runtime during an active campaign or reinterpret typed
 missing cells as parity. A later cross-engine pass requires an identity-bound
 Linux, WSL, or container runtime containing robotics Pinocchio 2.6 or newer.

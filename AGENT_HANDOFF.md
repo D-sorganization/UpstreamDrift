@@ -105,8 +105,8 @@ are not completion evidence.
   26 records include 14 validated JSON/NPZ pairs and 12 typed unavailables.
   Active-ground timings revise runtime to 24--48 h; the process uses about one
   CPU core and 117 MB, with atomic resume and empty stderr.
-- Windows resolves unrelated `pinocchio==0.1`; current robotics `pin` wheels
-  are unavailable there. Preserve typed absence; later parity needs bound Linux.
+- Windows resolves unrelated `pinocchio` distribution 0.4.3/module 0.1; current
+  robotics `pin` is unavailable. Preserve absence; parity needs bound Linux.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.
