@@ -343,6 +343,99 @@ def _runtime_session_identity(
     return runtime_identity
 
 
+def _required_list(value: object, *, name: str) -> list[Any]:
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{name} must be a nonempty list")
+    return value
+
+
+def _contrast_aggregates(
+    *, plan: Mapping[str, object], contrasts: Sequence[Mapping[str, object]]
+) -> list[dict[str, object]]:
+    design = _mapping(plan.get("design"), name="design")
+    analysis = _mapping(plan.get("analysis"), name="analysis")
+    expected_blocks = int(
+        np.prod(
+            [
+                len(_required_list(design.get("states"), name="design.states")),
+                len(
+                    _required_list(
+                        design.get("velocity_factors"),
+                        name="design.velocity_factors",
+                    )
+                ),
+                len(_required_list(design.get("engines"), name="design.engines")),
+                len(
+                    _required_list(
+                        design.get("time_steps_s"), name="design.time_steps_s"
+                    )
+                ),
+                len(_required_list(design.get("horizons_s"), name="design.horizons_s")),
+            ]
+        )
+    )
+    definitions: list[tuple[str, Mapping[str, Any]]] = []
+    for estimand_class, key in (
+        ("primary", "primary_contrasts"),
+        ("exploratory", "exploratory_higher_order_contrasts"),
+    ):
+        for raw in _required_list(analysis.get(key), name=f"analysis.{key}"):
+            definitions.append(
+                (estimand_class, _mapping(raw, name=f"analysis.{key} item"))
+            )
+    grouped: dict[tuple[str, str], list[float]] = defaultdict(list)
+    for row in contrasts:
+        grouped[(str(row["contrast_id"]), str(row["outcome"]))].append(
+            float(row["walsh_coefficient"])
+        )
+    aggregates: list[dict[str, object]] = []
+    for estimand_class, definition in definitions:
+        contrast_id = str(definition["contrast_id"])
+        order = len(_required_list(definition.get("factors"), name="contrast.factors"))
+        for outcome in (*_DIRECT_OUTCOMES, "terminal_total_dissipation_j"):
+            values = np.asarray(grouped[(contrast_id, outcome)], dtype=float)
+            count = int(values.size)
+            coefficient_range: dict[str, float | None]
+            effect_range: dict[str, float | None]
+            if count:
+                coefficient_range = {
+                    "minimum": float(np.min(values)),
+                    "median": float(np.median(values)),
+                    "maximum": float(np.max(values)),
+                }
+                effect_range = {
+                    "minimum": float(2.0 * np.min(values)),
+                    "median": float(2.0 * np.median(values)),
+                    "maximum": float(2.0 * np.max(values)),
+                }
+            else:
+                coefficient_range = {"minimum": None, "median": None, "maximum": None}
+                effect_range = {"minimum": None, "median": None, "maximum": None}
+            aggregates.append(
+                {
+                    "contrast_id": contrast_id,
+                    "estimand_class": estimand_class,
+                    "order": order,
+                    "outcome": outcome,
+                    "expected_block_count": expected_blocks,
+                    "eligible_block_count": count,
+                    "missing_block_count": expected_blocks - count,
+                    "support_fraction": count / expected_blocks,
+                    "exact_sign_counts": {
+                        "negative": int(np.count_nonzero(values < 0.0)),
+                        "zero": int(np.count_nonzero(values == 0.0)),
+                        "positive": int(np.count_nonzero(values > 0.0)),
+                    },
+                    "sign_reversal": bool(
+                        np.any(values < 0.0) and np.any(values > 0.0)
+                    ),
+                    "walsh_coefficient": coefficient_range,
+                    "high_minus_low_effect": effect_range,
+                }
+            )
+    return aggregates
+
+
 def summarize_structural_factorial(
     *,
     plan: Mapping[str, object],
@@ -393,24 +486,9 @@ def summarize_structural_factorial(
         and parity_complete
         and contrasts
     )
-    sign_ranges = []
-    grouped_coefficients: dict[tuple[str, str], list[float]] = defaultdict(list)
-    for row in contrasts:
-        grouped_coefficients[(str(row["contrast_id"]), str(row["outcome"]))].append(
-            float(row["walsh_coefficient"])
-        )
-    for (contrast_id, outcome), values in sorted(grouped_coefficients.items()):
-        sign_ranges.append(
-            {
-                "contrast_id": contrast_id,
-                "outcome": outcome,
-                "minimum": min(values),
-                "maximum": max(values),
-                "sign_reversal": min(values) < 0.0 < max(values),
-            }
-        )
+    aggregates = _contrast_aggregates(plan=plan, contrasts=contrasts)
     return {
-        "schema_version": "articulated-structural-factorial-summary/1.1.0",
+        "schema_version": "articulated-structural-factorial-summary/1.2.0",
         "identity": {
             "plan_sha256": plan_sha256(plan),
             "execution_revision": launch["execution_revision"],
@@ -434,9 +512,10 @@ def summarize_structural_factorial(
         "contrast_convention": {
             "walsh_coefficient": "mean(outcome * coded contrast sign)",
             "high_minus_low_effect": "two times the Walsh coefficient",
+            "sign_counts": "exact algebraic sign with no tolerance",
         },
         "factorial_contrasts": contrasts,
-        "contrast_sign_ranges": sign_ranges,
+        "contrast_aggregates": aggregates,
         "claim_boundary": {
             "causal_scope": "declared synthetic pathway interventions only",
             "human_or_coaching_inference": False,

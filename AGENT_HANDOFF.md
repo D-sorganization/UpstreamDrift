@@ -93,6 +93,7 @@ are not completion evidence.
   summary separately labels the high-minus-low effect as twice the coefficient.
   Peak load/dissipated work are mediators, not filters; higher orders are
   exploratory.
+  Aggregates retain exact signs/zeros, median/range, and expected/missing support.
 - First probe failed closed on a stale formatting-only shaft-source hash.
   `7b7862f3b` repaired provenance; the regenerated NPZ is byte-identical.
 - The passing non-evidence probe took 4.02 s at 0.2 ms with residual 0.00291.

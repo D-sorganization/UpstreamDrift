@@ -142,7 +142,33 @@ def test_summary_recovers_registered_walsh_coefficients_and_suppresses_parity(
     assert summary["contrast_convention"] == {
         "walsh_coefficient": "mean(outcome * coded contrast sign)",
         "high_minus_low_effect": "two times the Walsh coefficient",
+        "sign_counts": "exact algebraic sign with no tolerance",
     }
+    aggregate = next(
+        row
+        for row in summary["contrast_aggregates"]
+        if row["contrast_id"] == "shaft_bending"
+        and row["outcome"] == "final_club_translation_speed_m_s"
+    )
+    assert aggregate == {
+        "contrast_id": "shaft_bending",
+        "estimand_class": "primary",
+        "order": 1,
+        "outcome": "final_club_translation_speed_m_s",
+        "expected_block_count": 3,
+        "eligible_block_count": 3,
+        "missing_block_count": 0,
+        "support_fraction": 1.0,
+        "exact_sign_counts": {"negative": 0, "zero": 0, "positive": 3},
+        "sign_reversal": False,
+        "walsh_coefficient": {"minimum": 1.0, "median": 1.0, "maximum": 1.0},
+        "high_minus_low_effect": {
+            "minimum": 2.0,
+            "median": 2.0,
+            "maximum": 2.0,
+        },
+    }
+    assert len(summary["contrast_aggregates"]) == 75
 
 
 def test_summary_fails_closed_when_a_registered_checkpoint_is_missing(
