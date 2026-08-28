@@ -1,7 +1,7 @@
 {
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "12bc44109474ecf9e63f29e9e371ee2da7fc434c8d9a5feddea4f408a29b9329",
+  "source_digest": "64fa5c28ee88085454e9ab5791e848d4f267b65705a0b988ae62adff0d9979f9",
   "source_count": 37,
   "candidate_count": 1154,
   "candidates": [
@@ -18353,12 +18353,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-ab4689630944a0fe",
+      "candidate_id": "PD-CAND-a9f37172857a4493",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 6,
       "line_end": 6,
-      "text": "The absence of a `contradicted` row does not mean that every mechanism survived every adverse test. Claims that accurately report null, mixed, or adverse model results can themselves be supported. The complete finding-level reasons, falsifiers, locators, and boundaries are available in the [reviewer JSON](data/claim_adjudication_summary.json) and [reviewer CSV](data/claim_adjudication_summary.csv).",
-      "text_sha256": "9a679b53732a6bfa5fceac2b9a2a0d65f643108764beecf0b130b59219d0ce12",
+      "text": "The absence of a `contradicted` row does not mean that every mechanism survived every adverse test. Claims that accurately report null, mixed, or adverse model results can themselves be supported. The complete finding-level reasons, falsifiers, locators, and boundaries are available in the [reviewer JSON](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.json) and [reviewer CSV](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.csv).",
+      "text_sha256": "c814230d4d31c1a82ac0d3ca0b2213e863de690ba0297b76a17175badd4c32ea",
       "citation_keys": [],
       "has_numeric_content": false,
       "has_assertive_language": true,
