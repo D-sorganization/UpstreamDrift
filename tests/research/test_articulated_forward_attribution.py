@@ -5,11 +5,27 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from scripts.research.proximal_distal_energy.articulated_contact_projection import (
+    ArticulatedContactProjectionConfig,
+)
 from scripts.research.proximal_distal_energy.articulated_forward_attribution import (
     differentiate_mass_matrices,
     integrate_forward_attribution,
     require_forward_attribution_closure,
     scale_forward_attribution_inputs,
+)
+from scripts.research.proximal_distal_energy.articulated_forward_contract import (
+    ArticulatedForwardContactConfig,
+)
+from scripts.research.proximal_distal_energy.articulated_forward_integration import (
+    ForwardIntegrationCase,
+)
+from scripts.research.proximal_distal_energy.articulated_rigid_forward_attribution import (
+    attribute_rigid_contact_trajectory,
+)
+from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
+    build_subject_scaled_model,
+    default_synthetic_profiles,
 )
 
 
@@ -176,3 +192,44 @@ def test_planted_force_corruption_fails_closed() -> None:
             momentum_tolerance=1.0e-12,
             work_tolerance_j=1.0,
         )
+
+
+def test_rigid_contact_trace_replays_registered_force_contributions() -> None:
+    model, metadata = build_subject_scaled_model(default_synthetic_profiles()[0])
+    q = np.zeros(model.nq)
+    case = ForwardIntegrationCase(
+        q=q,
+        qd=np.zeros(model.nq),
+        grip_span_m=0.18,
+        hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
+        time_step_s=0.0005,
+        contact_stiffness=1800.0,
+        contact_damping=18.0,
+        initial_club_displacement_m=0.001,
+        initial_club_velocity_m_s=0.05,
+        engine="mujoco",
+    )
+
+    evidence = attribute_rigid_contact_trajectory(
+        model,
+        case,
+        ArticulatedForwardContactConfig(
+            duration_s=0.002,
+            time_steps_s=(0.001, 0.0005),
+        ),
+        ArticulatedContactProjectionConfig(
+            contact_stiffness=case.contact_stiffness,
+            contact_damping=case.contact_damping,
+        ),
+    )
+
+    assert evidence.attribution.contribution_names == (
+        "configuration",
+        "velocity",
+        "contact",
+        "active",
+    )
+    assert evidence.generalized_forces.shape == (5, 4, model.nq)
+    assert np.allclose(evidence.generalized_forces[:, 3], 0.0)
+    assert np.max(np.abs(evidence.pointwise_force_closure_residual)) <= 1.0e-12
+    assert np.all(np.isfinite(evidence.attribution.generalized_work_j))
