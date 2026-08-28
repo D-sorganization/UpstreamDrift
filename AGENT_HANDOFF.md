@@ -33,8 +33,8 @@ partial campaign checkpoints are not completion evidence.
   `019fe886-6614-70a2-a596-e5b0dea725d0`.
 - Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
 - Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
-  `e732757c9`. Remote recovery currently ends at `a6365f4a6`; local committed
-  implementation continues through `db9d003a0` and must be pushed normally.
+  `e732757c9`. Remote recovery currently ends at `37bcdc528`; local committed
+  implementation continues through `2a1e3ccba` and must be pushed normally.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
@@ -74,7 +74,9 @@ partial campaign checkpoints are not completion evidence.
   retains native import/DLL failures. The registered nominal 0.5 ms MuJoCo case
   has momentum residual `3.43e-3` but work residual `1.31e-2`, so it correctly
   fails the frozen 1% work gate. Do not relax the gate or change the state.
-- Forty affected focused tests, Ruff, and format pass. Focused MyPy first
+- The registered wrapper now runs or resumes the exact 42 cases through the
+  atomic runner; no case campaign had been launched at this handoff update.
+- Forty-one affected focused tests, Ruff, and format pass. Focused MyPy first
   exposed inherited scientific-script typing debt, then the installed MyPy
   crashed internally under `--follow-imports=skip`; do not misreport this as a
   green type gate.
