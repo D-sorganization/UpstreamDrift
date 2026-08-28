@@ -20,8 +20,7 @@ are not completion evidence.
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`.
   Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`; branch:
   `feat/9153-forward-impulse-work`. No PR exists yet.
-- Execution sources and launch are verified through
-  `5544c85590cf258dce0c9c7a5bb9e690683c7c1b`.
+- Execution sources and launch are verified through `5544c8559`.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -106,7 +105,8 @@ are not completion evidence.
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
   `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; its first
-  JSON/NPZ pair passed. Estimated serial runtime is 2.5--3.5 h.
+  JSON/NPZ pair passed. Active-ground timings revise runtime to 24--48 h; the
+  process uses about one CPU core and 111 MB, with atomic resume.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.
