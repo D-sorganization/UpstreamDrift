@@ -415,6 +415,11 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
   --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
   --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_summary \
+  --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+  --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+  --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/checkpoints \
+  --output C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/summary.json
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study

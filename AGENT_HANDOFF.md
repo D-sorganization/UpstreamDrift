@@ -113,12 +113,13 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Monitor PID 31684 without a second run. Verify equal JSON/NPZ counts and an
-   empty `stderr.log`; resume only with the exact v1.2 plan/launch/directory.
+1. Monitor PID 31684 without a second run. Each completed JSON requires an NPZ;
+   typed-unavailable JSON does not. Keep `stderr.log` empty and resume only with
+   the exact v1.2 plan/launch/directory.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
-3. Implement the registered contrast summary while execution proceeds; retain
-   sign reversals, numerical failures, and typed missing cells.
+3. The contrast summary is implemented locally; after completion, validate the
+   checkpoint set and retain sign reversals, failures, and typed missing cells.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
 4. Project only protected UpstreamDrift evidence into AffineDrift; continue

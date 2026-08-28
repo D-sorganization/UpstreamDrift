@@ -1,0 +1,138 @@
+"""Deterministic factorial contrasts and promotion gates."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_plan import (
+    StructuralFactorialPlan,
+)
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
+    StructuralCase,
+    StructuralEvaluation,
+    build_launch_manifest,
+    run_serial_cases,
+)
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_summary import (
+    summarize_structural_factorial,
+)
+
+pytestmark = pytest.mark.scientific
+HASHES = {
+    "closed_state_npz": "1" * 64,
+    "shaft_structural_basis_json": "2" * 64,
+    "shaft_structural_basis_npz": "3" * 64,
+    "shaft_atlas_json": "4" * 64,
+    "shaft_atlas_npz": "5" * 64,
+    "ground_atlas_json": "6" * 64,
+    "ground_atlas_npz": "7" * 64,
+}
+
+
+def _fixture_plan() -> dict[str, object]:
+    plan = StructuralFactorialPlan(
+        design_authority_revision="a" * 40,
+        authority_sha256=HASHES,
+    ).to_manifest()
+    design = dict(plan["design"])  # type: ignore[arg-type]
+    design["states"] = design["states"][:1]
+    design["velocity_factors"] = design["velocity_factors"][:1]
+    design["engines"] = ["mujoco"]
+    design["horizons_s"] = [0.05]
+    design["registered_engine_attempt_count"] = 48
+    design["expected_native_attempt_count"] = 48
+    plan["design"] = design
+    return plan
+
+
+def _evaluation(case: StructuralCase) -> StructuralEvaluation:
+    levels = [int(value) for value in case.cell_id]
+    value = 10.0 + 2.0 * levels[0] + 3.0 * levels[1]
+    residual = 10.0 * case.time_step_s
+    return StructuralEvaluation(
+        result={
+            "horizons": [
+                {
+                    "horizon_s": 0.05,
+                    "final_club_translation_speed_m_s": value,
+                    "club_linear_momentum_change_kg_m_s": value,
+                    "signed_contact_impulse_n_s": value,
+                    "signed_contact_work_j": value,
+                    "terminal_contact_dissipation_j": value / 3.0,
+                    "terminal_shaft_dissipation_j": value / 3.0,
+                    "terminal_ground_dissipation_j": value / 3.0,
+                    "peak_grip_force_n": value,
+                }
+            ],
+            "numerical": {
+                "normalized_work_energy_residual": residual,
+                "maximum_virtual_power_residual_w": 0.0,
+                "maximum_shaft_power_residual_w": 0.0,
+                "maximum_ground_power_residual_w": 0.0,
+                "maximum_small_deflection_ratio": 0.01,
+                "maximum_twist_angle_rad": 0.01,
+                "maximum_base_translation_m": 0.01,
+                "maximum_base_pitch_rad": 0.01,
+            },
+        },
+        parity_arrays={
+            "time_s": np.array([0.0, 0.05]),
+            "q": np.zeros((2, 20)),
+            "qd": np.zeros((2, 20)),
+            "elastic_coordinates": np.zeros((2, 0)),
+            "base_coordinates": np.zeros((2, 0)),
+            "net_club_force_n": np.zeros((2, 3)),
+            "maximum_station_force_n": np.zeros(2),
+            "active_station_count": np.zeros(2, dtype=int),
+            "ground_force_n": np.zeros((2, 3)),
+        },
+    )
+
+
+def test_summary_recovers_registered_walsh_coefficients_and_suppresses_parity(
+    tmp_path: Path,
+) -> None:
+    plan = _fixture_plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    run_serial_cases(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=tmp_path,
+        evaluator=_evaluation,
+    )
+
+    summary = summarize_structural_factorial(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=tmp_path,
+    )
+
+    assert summary["inventory"]["registered_case_count"] == 48
+    assert summary["gates"]["all_individual_numerical_pass"] is True
+    assert summary["gates"]["all_refinement_groups_pass"] is True
+    assert summary["gates"]["cross_engine_parity_complete_and_passed"] is False
+    assert summary["gates"]["promotion_eligible"] is False
+    coefficients = [
+        row["walsh_coefficient"]
+        for row in summary["factorial_contrasts"]
+        if row["contrast_id"] == "shaft_bending"
+        and row["outcome"] == "final_club_translation_speed_m_s"
+    ]
+    assert coefficients == pytest.approx([1.0, 1.0, 1.0])
+
+
+def test_summary_fails_closed_when_a_registered_checkpoint_is_missing(
+    tmp_path: Path,
+) -> None:
+    plan = _fixture_plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+
+    with pytest.raises(FileNotFoundError, match="registered checkpoint is missing"):
+        summarize_structural_factorial(
+            plan=plan,
+            launch=launch,
+            checkpoint_dir=tmp_path,
+        )
