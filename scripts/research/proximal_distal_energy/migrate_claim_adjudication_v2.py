@@ -57,8 +57,11 @@ PRE_BOUNDED_EVENT_REVIEWED_SOURCE_DIGEST = (
 PRE_EVENT_TOPOLOGY_REVIEWED_SOURCE_DIGEST = (
     "c4e9c1d32831ccb486b69f1fa73c70aedffce3a584828b0a0f56b326aeaa65d7"
 )
-REVIEWED_SOURCE_DIGEST = (
+PRE_NONLINEAR_CONTROLLER_REVIEWED_SOURCE_DIGEST = (
     "15e6d235a301b2121971e46d5a9489bf7e8a900048fd43a7c837a86a8e99da7f"
+)
+REVIEWED_SOURCE_DIGEST = (
+    "5b353163c0d285e580282e40e28e1cf38597edc681199c53d507b92a7a1be70d"
 )
 MIGRATABLE_SOURCE_DIGESTS = frozenset(
     {
@@ -76,11 +79,12 @@ MIGRATABLE_SOURCE_DIGESTS = frozenset(
         PRE_PROTECTED_RECONCILIATION_REVIEWED_SOURCE_DIGEST,
         PRE_BOUNDED_EVENT_REVIEWED_SOURCE_DIGEST,
         PRE_EVENT_TOPOLOGY_REVIEWED_SOURCE_DIGEST,
+        PRE_NONLINEAR_CONTROLLER_REVIEWED_SOURCE_DIGEST,
         REVIEWED_SOURCE_DIGEST,
     }
 )
 PRECURRENT_SOURCE_DIGESTS = MIGRATABLE_SOURCE_DIGESTS - {REVIEWED_SOURCE_DIGEST}
-REVIEWED_CLAIM_COUNT = 322
+REVIEWED_CLAIM_COUNT = 325
 LEGACY_REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
     {
         "PD-CAND-9345c1e6be2ef186",
@@ -174,7 +178,7 @@ REVIEWER_PROJECTION_CANDIDATE_IDS = frozenset(
 )
 
 # These sets are the exhaustive finding-level review authority for the locked
-# 322-claim snapshot. They are intentionally explicit: no claim can inherit an
+# 325-claim snapshot. They are intentionally explicit: no claim can inherit an
 # outcome merely because it is absent from an exception list.
 SUPPORTED_CLAIM_IDS = frozenset(
     {
@@ -480,6 +484,9 @@ SUPPORTED_CLAIM_IDS = frozenset(
         "PD-CLAIM-318",
         "PD-CLAIM-319",
         "PD-CLAIM-320",
+        "PD-CLAIM-324",
+        "PD-CLAIM-325",
+        "PD-CLAIM-326",
     }
 )
 UNTESTED_CLAIM_IDS = frozenset(

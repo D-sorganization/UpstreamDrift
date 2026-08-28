@@ -484,6 +484,47 @@ status, and control objective. Phase C has no independently registered
 work/power quadrature. It supports no anatomical isolation, human noise or
 fatigue interpretation, channel ranking, or coaching recommendation.
 
+### Prospective Nonlinear-Controller Qualification {#sec-ladder-nonlinear-controller-qualification}
+
+The next step freezes a matched nonlinear-controller comparison without
+executing it. The registration digest-binds the analytical ODE plant and the
+trajectory-authority, bounded-reachability, and channel-topology parent
+artifacts. It declares nine controller families, 24 outcome-blind evaluation
+trials, eight disjoint tuning trials, common state and torque coordinates,
+scales, bounds, event logic, failure types, and a paired random-stream rule.
+Every family remains ineligible for ranking. Any comparability, adequacy,
+replay, convergence, optimality, event, or held-out failure suppresses the
+entire ranking rather than assigning a failed case a terminal score.
+
+Before exposing the registered double-pendulum evaluation grid, one solver
+kernel is tested on a separate damped nonlinear fixture. Bounded projected
+first-order iLQR enforces the declared input bound inside each rollout, reduces
+the objective through nonincreasing accepted iterations, replays its states,
+controls, status, and cost exactly, and satisfies the frozen cold/warm
+sensitivity gate. The independent directional-derivative discrepancy is
+$1.05\times10^{-11}$, and the maximum observed bound violation is zero. A
+nonfinite dynamics return produces a typed failure with no trajectory.
+Collocation NMPC remains unimplemented; a bounded shooting method is not
+relabeled as that absent solver.
+
+A separate transport test then applies four states and controls at 0.5, 1, and
+2 ms. All 12 controller-facing RK4 steps match the canonical ODE backend
+exactly in the locked environment; repeated calls are identical, caller inputs
+are unchanged, and four wrong-size or nonfinite cases raise `ValueError`
+without a trajectory. Exact equality here is code-path parity, not independent
+physics validation, because both paths share the analytical equations and
+parameter authority.
+
+These artifacts qualify registration, one manufactured solver kernel, and
+plant-step transport only. They contain zero registered double-pendulum
+controller evaluations and make zero methods ranking-eligible. Plant-specific
+derivatives, typed event and integration outcomes, outcome-blind tuning,
+matched replay, held-out execution, failure-region mapping, and adequate
+optimality evidence remain open. No result in this section establishes
+controller superiority, a clubhead-speed benefit, global optimality, human
+control, anatomy, fatigue, passive biological torque, safety, or coaching
+guidance.
+
 ## Three-Dimensional Frame Audit {#sec-ladder-three-dimensional}
 
 Planar vectors can be embedded in three dimensions and expressed in arbitrary

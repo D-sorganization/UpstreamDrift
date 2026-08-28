@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from scripts.research.proximal_distal_energy.run_event_topology_channel_matrix import (
     BASE_DT_S,
     COMMON_HORIZON_S,

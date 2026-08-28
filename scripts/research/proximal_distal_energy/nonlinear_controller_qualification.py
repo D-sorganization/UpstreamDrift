@@ -1,249 +1,356 @@
-"""Manufactured nonlinear solver qualification (#9126).
+"""Qualify prospective nonlinear-control kernels on a manufactured fixture.
 
-Qualifies candidate nonlinear MPC and projected iLQR solver kernels on a
-manufactured mathematical fixture before plant transport.
+The held-out double-pendulum grid is deliberately not imported or executed.
+Passing this module qualifies solver mechanics only, not golf performance.
 """
 
 from __future__ import annotations
 
-import argparse
+from argparse import ArgumentParser
+from collections.abc import Callable
+import hashlib
 import json
 import math
-import sys
-from collections.abc import Callable
-from dataclasses import asdict, dataclass
-from typing import Any
+from pathlib import Path
 
 import numpy as np
-import numpy.typing as npt
 
-FloatArray = npt.NDArray[np.float64]
+from .nonlinear_controller_kernels import solve_projected_ilqr
+from .nonlinear_controller_numerics import (
+    BoxBounds,
+    FloatArray,
+    QuadraticTrackingCost,
+    SolverResult,
+    central_dynamics_jacobians,
+    manufactured_step,
+    monotonic,
+)
 
-PROJECTED_ILQR_SOLVER_NAME = "bounded_projected_ilqr"
-
-INFERENCE_BOUNDARY = (
-    "This qualification establishes solver convergence, bound adherence, "
-    "monotonicity, and replay mechanics on a manufactured mathematical benchmark. "
-    "It does not evaluate golf swing performance, human intent, or controller ranking."
+Solver = Callable[..., SolverResult]
+ROOT = Path(__file__).resolve().parents[3]
+ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
+REPORT_PATH = ARTICLE / "data/nonlinear_controller_solver_qualification.json"
+REGISTRATION_PATH = ARTICLE / "data/nonlinear_controller_comparison_registration.json"
+ENVIRONMENT_LOCK_PATH = ROOT / "requirements.lock"
+SCHEMA_VERSION = "proximal-distal-nonlinear-controller-qualification/v1"
+SOURCE_RELATIVE_PATHS = (
+    REGISTRATION_PATH.relative_to(ROOT),
+    Path("scripts/research/proximal_distal_energy/nonlinear_controller_numerics.py"),
+    Path("scripts/research/proximal_distal_energy/nonlinear_controller_kernels.py"),
+)
+DERIVATIVE_ERROR_LIMIT = 1.0e-8
+BOUND_VIOLATION_LIMIT = 1.0e-12
+COLD_WARM_COST_LIMIT = 0.02
+ACCEPTED_COST_INCREASE_TOLERANCE = 1.0e-10
+PROJECTED_ILQR_SOLVER_NAME = "bounded_projected_first_order_ilqr_kernel"
+UNAVAILABLE_SOLVERS = (
+    "bounded_nmpc_collocation",
+    "second_order_ddp",
+    "risk_sensitive_control",
+    "scenario_stochastic_mpc",
 )
 
 
-def manufactured_dynamics(x: FloatArray, u: FloatArray, dt: float = 0.01) -> FloatArray:
-    """Nonlinear manufactured 2D benchmark dynamics with trigonometric and cubic coupling."""
-    if not np.all(np.isfinite(x)) or not np.all(np.isfinite(u)):
-        return np.full_like(x, np.nan)
-    x0, x1 = x[0], x[1]
-    u0 = u[0]
-    next_x0 = x0 + dt * math.sin(x1)
-    next_x1 = x1 + dt * (u0 - 0.5 * (x1**3))
-    return np.array([next_x0, next_x1], dtype=np.float64)
-
-
-def manufactured_cost(x: FloatArray, u: FloatArray, x_target: FloatArray) -> float:
-    """Quadratic running cost."""
-    dx = x - x_target
-    return float(np.dot(dx, dx) + 0.1 * np.dot(u, u))
-
-
-@dataclass(frozen=True, slots=True)
-class SolverQualificationResult:
-    """Results from testing candidate solver mechanics on manufactured fixture."""
-
-    solver_name: str
-    derivatives_passed: bool
-    bounds_respected: bool
-    cost_monotonicity_passed: bool
-    deterministic_replay_passed: bool
-    warm_start_benefit_detected: bool
-    typed_nonfinite_failure_passed: bool
-    iterations_run: int
-    final_cost: float
-
-
-class ProjectedILQRSolver:
-    """Projected first-order iLQR solver with box control constraints."""
-
-    def __init__(
-        self,
-        horizon: int = 20,
-        dt: float = 0.01,
-        u_bounds: tuple[float, float] = (-2.0, 2.0),
-        max_iter: int = 25,
-    ) -> None:
-        self.horizon = horizon
-        self.dt = dt
-        self.u_min, self.u_max = u_bounds
-        self.max_iter = max_iter
-
-    def solve(
-        self,
-        x0: FloatArray,
-        x_target: FloatArray,
-        warm_start_u: FloatArray | None = None,
-    ) -> tuple[FloatArray, list[float], bool]:
-        """Run projected gradient / iLQR iterations."""
-        H = self.horizon
-        dt = self.dt
-        u = (
-            warm_start_u.copy()
-            if warm_start_u is not None
-            else np.zeros((H, 1), dtype=np.float64)
+def build_qualification(root: Path = ROOT) -> dict[str, object]:
+    """Build deterministic manufactured-fixture solver evidence."""
+    root = root.resolve()
+    registration = root / REGISTRATION_PATH.relative_to(ROOT)
+    environment_lock = root / ENVIRONMENT_LOCK_PATH.relative_to(ROOT)
+    initial = np.array([0.55, -0.10])
+    horizon = 24
+    cost = _fixture_cost()
+    bounds = BoxBounds(np.array([-0.40]), np.array([0.40]))
+    solvers = [
+        _qualify_solver(
+            PROJECTED_ILQR_SOLVER_NAME,
+            solve_projected_ilqr,
+            initial,
+            horizon,
+            cost,
+            bounds,
         )
-        u = np.clip(u, self.u_min, self.u_max)
+    ]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "classification": "manufactured_nonlinear_solver_qualification",
+        "evidence_status": "solver_mechanics_only_no_golf_evaluation",
+        "registration_authority": {
+            "path": registration.relative_to(root).as_posix(),
+            "sha256": _sha256(registration),
+        },
+        "source_authorities": [
+            _authority(root, path) for path in SOURCE_RELATIVE_PATHS
+        ],
+        "environment_authority": {
+            "path": environment_lock.relative_to(root).as_posix(),
+            "sha256": _sha256(environment_lock),
+            "supported_python_lanes": ["3.11", "3.12"],
+            "replay_rule": (
+                "exact equality is required in the locked supported environment"
+            ),
+        },
+        "fixture": _fixture_record(initial, horizon, bounds),
+        "qualification_thresholds": {
+            "directional_derivative_max_abs_error": DERIVATIVE_ERROR_LIMIT,
+            "maximum_bound_violation": BOUND_VIOLATION_LIMIT,
+            "cold_warm_relative_cost_difference": COLD_WARM_COST_LIMIT,
+            "accepted_cost_increase_tolerance": (ACCEPTED_COST_INCREASE_TOLERANCE),
+        },
+        "directional_derivative_max_abs_error": _directional_error(),
+        "solvers": solvers,
+        "unavailable_solvers": list(UNAVAILABLE_SOLVERS),
+        "qualified_solver_count": len(solvers),
+        "double_pendulum_evaluation_count": 0,
+        "ranking_eligible_method_count": 0,
+        "ranking_rule": (
+            "no solver is ranking-eligible before frozen held-out execution"
+        ),
+        "inference_boundary": (
+            "Manufactured-fixture qualification checks solver mechanics only. It "
+            "does not qualify the double-pendulum comparison, establish golf "
+            "performance, identify human control, or support coaching guidance."
+        ),
+    }
 
-        def rollout(controls: FloatArray) -> tuple[FloatArray, float, bool]:
-            x_traj = [x0.copy()]
-            total_cost = 0.0
-            x_cur = x0.copy()
-            for k in range(H):
-                total_cost += manufactured_cost(x_cur, controls[k], x_target)
-                x_next = manufactured_dynamics(x_cur, controls[k], dt)
-                if not np.all(np.isfinite(x_next)):
-                    return np.array(x_traj), float("inf"), False
-                x_cur = x_next
-                x_traj.append(x_cur.copy())
-            total_cost += float(np.dot(x_cur - x_target, x_cur - x_target) * 5.0)
-            return np.array(x_traj), total_cost, True
 
-        _, current_cost, valid = rollout(u)
-        if not valid or not math.isfinite(current_cost):
-            return u, [float("inf")], False
-
-        cost_history = [current_cost]
-        learning_rate = 0.1
-
-        for _ in range(self.max_iter):
-            # Compute numerical gradient with respect to u
-            grad = np.zeros_like(u)
-            eps = 1e-5
-            for k in range(H):
-                u_pert = u.copy()
-                u_pert[k, 0] += eps
-                u_pert = np.clip(u_pert, self.u_min, self.u_max)
-                _, cost_p, val_p = rollout(u_pert)
-                if val_p:
-                    grad[k, 0] = (cost_p - current_cost) / eps
-
-            # Line search with projection
-            alpha = learning_rate
-            accepted = False
-            best_u = u.copy()
-            best_cost = current_cost
-
-            for _ in range(8):
-                u_step = np.clip(u - alpha * grad, self.u_min, self.u_max)
-                _, step_cost, val_step = rollout(u_step)
-                if val_step and step_cost <= current_cost + 1e-12:
-                    accepted = True
-                    best_u = u_step
-                    best_cost = step_cost
-                    break
-                alpha *= 0.5
-
-            if accepted:
-                u = best_u
-                current_cost = best_cost
-                cost_history.append(current_cost)
-            else:
-                cost_history.append(current_cost)
-                break
-
-        return u, cost_history, True
+def validate_qualification(
+    report: dict[str, object], root: Path = ROOT
+) -> dict[str, int]:
+    """Fail closed on replay, bounds, descent, sensitivity, or scope drift."""
+    if report != build_qualification(root):
+        raise ValueError("qualification differs from deterministic authority")
+    solvers = report.get("solvers")
+    if not isinstance(solvers, list) or len(solvers) != 1:
+        raise ValueError("exactly one implemented solver kernel must be qualified")
+    if int(report.get("qualified_solver_count", -1)) != len(solvers):
+        raise ValueError("qualified solver count drifted")
+    derivative_error = float(
+        report.get("directional_derivative_max_abs_error", math.inf)
+    )
+    if derivative_error > DERIVATIVE_ERROR_LIMIT:
+        raise ValueError("manufactured derivative agreement gate failed")
+    for solver in solvers:
+        if not isinstance(solver, dict) or not _solver_gates_pass(solver):
+            name = solver.get("name") if isinstance(solver, dict) else "unknown"
+            raise ValueError(f"{name}: qualification gate failed")
+    evaluations = int(report.get("double_pendulum_evaluation_count", -1))
+    eligible = sum(solver.get("eligible_for_ranking") is True for solver in solvers)
+    if evaluations != 0 or eligible != 0:
+        raise ValueError("manufactured qualification cannot rank golf controllers")
+    if int(report.get("ranking_eligible_method_count", -1)) != eligible:
+        raise ValueError("ranking-eligible method count drifted")
+    return {
+        "solver_count": len(solvers),
+        "qualified_solver_count": len(solvers),
+        "double_pendulum_evaluation_count": evaluations,
+        "ranking_eligible_count": eligible,
+    }
 
 
 def qualify_solver_kernel(
     solver_name: str = PROJECTED_ILQR_SOLVER_NAME,
-) -> SolverQualificationResult:
-    """Run manufactured qualification battery on candidate solver."""
+) -> dict[str, object]:
+    """Qualify the sole implemented kernel and reject unavailable identities."""
+
     if solver_name != PROJECTED_ILQR_SOLVER_NAME:
         raise ValueError(
             f"unsupported solver {solver_name!r}; the only implemented solver is "
             f"{PROJECTED_ILQR_SOLVER_NAME!r}"
         )
-
-    solver = ProjectedILQRSolver(horizon=15, dt=0.01, u_bounds=(-1.5, 1.5), max_iter=20)
-    x0 = np.array([0.5, -0.2], dtype=np.float64)
-    x_target = np.array([0.0, 0.0], dtype=np.float64)
-
-    # 1. Monotonicity and bounds check (cold start)
-    u_cold, cost_hist_cold, success_cold = solver.solve(x0, x_target)
-    bounds_ok = bool(np.all(u_cold >= -1.50001) and np.all(u_cold <= 1.50001))
-
-    monotonic_ok = True
-    for i in range(len(cost_hist_cold) - 1):
-        if cost_hist_cold[i + 1] > cost_hist_cold[i] + 1e-10:
-            monotonic_ok = False
-            break
-
-    # 2. Deterministic replay check
-    u_replay, cost_hist_replay, _ = solver.solve(x0, x_target)
-    replay_ok = bool(
-        np.allclose(u_cold, u_replay, atol=1e-14) and cost_hist_cold == cost_hist_replay
-    )
-
-    # 3. Warm start sensitivity check
-    u_warm, cost_hist_warm, _ = solver.solve(x0, x_target, warm_start_u=u_cold)
-    warm_start_ok = bool(cost_hist_warm[0] <= cost_hist_cold[0] + 1e-10)
-
-    # 4. Typed nonfinite-dynamics failure check
-    x_nan = np.array([np.nan, 0.0], dtype=np.float64)
-    _, cost_nan, success_nan = solver.solve(x_nan, x_target)
-    nonfinite_handled_ok = not success_nan or math.isinf(cost_nan[0])
-
-    # 5. Derivatives check on manufactured dynamics
-    eps = 1e-6
-    x_test = np.array([0.3, 0.4])
-    u_test = np.array([0.5])
-    f_nominal = manufactured_dynamics(x_test, u_test, dt=0.01)
-    df_dx0_num = (
-        manufactured_dynamics(x_test + np.array([eps, 0.0]), u_test, 0.01)[0]
-        - f_nominal[0]
-    ) / eps
-    derivatives_ok = bool(abs(df_dx0_num - 1.0) < 1e-4)
-
-    return SolverQualificationResult(
-        solver_name=solver_name,
-        derivatives_passed=derivatives_ok,
-        bounds_respected=bounds_ok,
-        cost_monotonicity_passed=monotonic_ok,
-        deterministic_replay_passed=replay_ok,
-        warm_start_benefit_detected=warm_start_ok,
-        typed_nonfinite_failure_passed=nonfinite_handled_ok,
-        iterations_run=int(len(cost_hist_cold)),
-        final_cost=float(cost_hist_cold[-1]),
+    initial = np.array([0.55, -0.10])
+    return _qualify_solver(
+        solver_name,
+        solve_projected_ilqr,
+        initial,
+        24,
+        _fixture_cost(),
+        BoxBounds(np.array([-0.40]), np.array([0.40])),
     )
 
 
-def validate_qualification() -> dict[str, Any]:
-    res = qualify_solver_kernel()
-    all_passed = (
-        res.derivatives_passed
-        and res.bounds_respected
-        and res.cost_monotonicity_passed
-        and res.deterministic_replay_passed
-        and res.warm_start_benefit_detected
-        and res.typed_nonfinite_failure_passed
+def _qualify_solver(
+    name: str,
+    solver: Solver,
+    initial: FloatArray,
+    horizon: int,
+    cost: QuadraticTrackingCost,
+    bounds: BoxBounds,
+) -> dict[str, object]:
+    zero = np.zeros((horizon, 1))
+    cold = _solve(solver, initial, horizon, cost, bounds, zero)
+    replay = _solve(solver, initial, horizon, cost, bounds, zero)
+    if not cold.success or cold.controls is None:
+        raise ValueError(f"{name}: cold qualification failed")
+    warm_seed = np.vstack((np.zeros((1, 1)), cold.controls[:-1]))
+    warm = _solve(solver, initial, horizon, cost, bounds, warm_seed)
+    return _solver_record(name, cold, replay, warm, bounds)
+
+
+def _solve(
+    solver: Solver,
+    initial: FloatArray,
+    horizon: int,
+    cost: QuadraticTrackingCost,
+    bounds: BoxBounds,
+    seed: FloatArray,
+) -> SolverResult:
+    return solver(
+        manufactured_step,
+        initial,
+        horizon=horizon,
+        cost=cost,
+        bounds=bounds,
+        initial_controls=seed,
     )
-    data = asdict(res)
-    data["status"] = "PASSED" if all_passed else "FAILED"
-    data["inference_boundary"] = INFERENCE_BOUNDARY
-    return data
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate #9126 solver qualification.")
+def _solver_record(
+    name: str,
+    cold: SolverResult,
+    replay: SolverResult,
+    warm: SolverResult,
+    bounds: BoxBounds,
+) -> dict[str, object]:
+    if cold.controls is None or replay.controls is None or warm.controls is None:
+        raise ValueError(f"{name}: missing successful controls")
+    if cold.cost is None or warm.cost is None:
+        raise ValueError(f"{name}: missing successful cost")
+    scale = max(abs(cold.cost), 1.0)
+    sensitivity = abs(warm.cost - cold.cost) / scale
+    violation = max(
+        float(np.max(bounds.lower - cold.controls)),
+        float(np.max(cold.controls - bounds.upper)),
+        0.0,
+    )
+    return {
+        "name": name,
+        "status": "manufactured_fixture_qualified",
+        "eligible_for_ranking": False,
+        "cold_cost": cold.cost,
+        "warm_cost": warm.cost,
+        "cold_warm_relative_cost_difference": sensitivity,
+        "cold_warm_sensitivity_passed": bool(
+            warm.success and sensitivity <= COLD_WARM_COST_LIMIT
+        ),
+        "accepted_costs": list(cold.accepted_costs),
+        "accepted_costs_monotonic": monotonic(cold.accepted_costs),
+        "maximum_bound_violation": violation,
+        "deterministic_replay_passed": _replay_matches(cold, replay),
+        "control_sha256": hashlib.sha256(cold.controls.tobytes()).hexdigest(),
+        "remaining_gate": (
+            "matched_double_pendulum_typed_outcomes_replay_and_held_out_execution"
+        ),
+    }
+
+
+def _replay_matches(cold: SolverResult, replay: SolverResult) -> bool:
+    return bool(
+        replay.success
+        and np.array_equal(cold.controls, replay.controls)
+        and np.array_equal(cold.states, replay.states)
+        and cold.cost == replay.cost
+    )
+
+
+def _solver_gates_pass(solver: dict[str, object]) -> bool:
+    gates = (
+        solver.get("status") == "manufactured_fixture_qualified",
+        solver.get("deterministic_replay_passed") is True,
+        solver.get("cold_warm_sensitivity_passed") is True,
+        solver.get("accepted_costs_monotonic") is True,
+        float(solver.get("maximum_bound_violation", math.inf)) <= BOUND_VIOLATION_LIMIT,
+    )
+    return all(gates)
+
+
+def _fixture_record(
+    initial: FloatArray, horizon: int, bounds: BoxBounds
+) -> dict[str, object]:
+    return {
+        "name": "damped_nonlinear_pendulum_discrete_fixture",
+        "state": ["angle_rad", "rate_rad_s"],
+        "control": ["torque_like_input"],
+        "step_s": 0.04,
+        "horizon_steps": horizon,
+        "initial_state": initial.tolist(),
+        "control_lower": bounds.lower.tolist(),
+        "control_upper": bounds.upper.tolist(),
+    }
+
+
+def _directional_error() -> float:
+    state = np.array([0.31, -0.22])
+    control = np.array([0.17])
+    state_map, control_map = central_dynamics_jacobians(
+        manufactured_step,
+        state,
+        control,
+        state_steps=np.array([1.0e-5, 2.0e-5]),
+        control_steps=np.array([1.0e-5]),
+    )
+    state_direction = np.array([0.6, -0.8])
+    control_direction = np.array([0.35])
+    step = 2.0e-6
+    observed = (
+        manufactured_step(
+            state + step * state_direction, control + step * control_direction
+        )
+        - manufactured_step(
+            state - step * state_direction, control - step * control_direction
+        )
+    ) / (2.0 * step)
+    predicted = state_map @ state_direction + control_map @ control_direction
+    return float(np.max(np.abs(predicted - observed)))
+
+
+def _fixture_cost() -> QuadraticTrackingCost:
+    return QuadraticTrackingCost(
+        np.diag([4.0, 0.4]),
+        np.diag([0.08]),
+        np.diag([18.0, 2.0]),
+        np.zeros(2),
+        np.zeros(1),
+    )
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _authority(root: Path, relative_path: Path) -> dict[str, str]:
+    return {
+        "path": relative_path.as_posix(),
+        "sha256": _sha256(root / relative_path),
+    }
+
+
+def main() -> None:
+    parser = ArgumentParser(description=__doc__)
     parser.add_argument(
-        "action", nargs="?", default="validate", choices=["validate", "report"]
+        "command", choices=("write", "validate"), nargs="?", default="validate"
     )
     args = parser.parse_args()
+    if args.command == "write":
+        report = build_qualification(ROOT)
+        REPORT_PATH.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    else:
+        report = json.loads(REPORT_PATH.read_text(encoding="utf-8"))
+    print(json.dumps(validate_qualification(report, ROOT), indent=2))
 
-    evidence = validate_qualification()
-    print(json.dumps(evidence, indent=2))
 
-    if evidence["status"] != "PASSED":
-        return 1
-    return 0
+__all__ = [
+    "REPORT_PATH",
+    "BoxBounds",
+    "QuadraticTrackingCost",
+    "build_qualification",
+    "central_dynamics_jacobians",
+    "manufactured_step",
+    "PROJECTED_ILQR_SOLVER_NAME",
+    "qualify_solver_kernel",
+    "solve_projected_ilqr",
+    "validate_qualification",
+]
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

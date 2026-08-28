@@ -524,7 +524,7 @@ available with the document for independent inspection and reuse.
 
 \chapter{Introduction}\label{sec-intro}
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toprule=.15mm, leftrule=.75mm, breakable, colback=white, left=2mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, titlerule=0mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, rightrule=.15mm, opacitybacktitle=0.6, bottomrule=.15mm, coltitle=black, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, bottomtitle=1mm, breakable, left=2mm, toptitle=1mm, leftrule=.75mm, opacitybacktitle=0.6, rightrule=.15mm, bottomrule=.15mm, opacityback=0, titlerule=0mm, toprule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2829,7 +2829,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toprule=.15mm, leftrule=.75mm, breakable, colback=white, left=2mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, titlerule=0mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, rightrule=.15mm, opacitybacktitle=0.6, bottomrule=.15mm, coltitle=black, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, bottomtitle=1mm, breakable, left=2mm, toptitle=1mm, leftrule=.75mm, opacitybacktitle=0.6, rightrule=.15mm, bottomrule=.15mm, opacityback=0, titlerule=0mm, toprule=.15mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -10432,6 +10432,51 @@ registered work/power quadrature. It supports no anatomical isolation,
 human noise or fatigue interpretation, channel ranking, or coaching
 recommendation.
 
+\subsection{Prospective Nonlinear-Controller
+Qualification}\label{sec-ladder-nonlinear-controller-qualification}
+
+The next step freezes a matched nonlinear-controller comparison without
+executing it. The registration digest-binds the analytical ODE plant and
+the trajectory-authority, bounded-reachability, and channel-topology
+parent artifacts. It declares nine controller families, 24 outcome-blind
+evaluation trials, eight disjoint tuning trials, common state and torque
+coordinates, scales, bounds, event logic, failure types, and a paired
+random-stream rule. Every family remains ineligible for ranking. Any
+comparability, adequacy, replay, convergence, optimality, event, or
+held-out failure suppresses the entire ranking rather than assigning a
+failed case a terminal score.
+
+Before exposing the registered double-pendulum evaluation grid, one
+solver kernel is tested on a separate damped nonlinear fixture. Bounded
+projected first-order iLQR enforces the declared input bound inside each
+rollout, reduces the objective through nonincreasing accepted
+iterations, replays its states, controls, status, and cost exactly, and
+satisfies the frozen cold/warm sensitivity gate. The independent
+directional-derivative discrepancy is \(1.05\times10^{-11}\), and the
+maximum observed bound violation is zero. A nonfinite dynamics return
+produces a typed failure with no trajectory. Collocation NMPC remains
+unimplemented; a bounded shooting method is not relabeled as that absent
+solver.
+
+A separate transport test then applies four states and controls at 0.5,
+1, and 2 ms. All 12 controller-facing RK4 steps match the canonical ODE
+backend exactly in the locked environment; repeated calls are identical,
+caller inputs are unchanged, and four wrong-size or nonfinite cases
+raise \texttt{ValueError} without a trajectory. Exact equality here is
+code-path parity, not independent physics validation, because both paths
+share the analytical equations and parameter authority.
+
+These artifacts qualify registration, one manufactured solver kernel,
+and plant-step transport only. They contain zero registered
+double-pendulum controller evaluations and make zero methods
+ranking-eligible. Plant-specific derivatives, typed event and
+integration outcomes, outcome-blind tuning, matched replay, held-out
+execution, failure-region mapping, and adequate optimality evidence
+remain open. No result in this section establishes controller
+superiority, a clubhead-speed benefit, global optimality, human control,
+anatomy, fatigue, passive biological torque, safety, or coaching
+guidance.
+
 \section{Three-Dimensional Frame
 Audit}\label{sec-ladder-three-dimensional}
 
@@ -13481,7 +13526,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 322 material claims. The normalized outcome
+The current census contains 325 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -13510,7 +13555,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 302 \\
+\texttt{supported} & 305 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -13536,8 +13581,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 107 \\
-\texttt{project\_executable\_or\_generated} & 293 \\
+\texttt{project\_derivation\_or\_document} & 110 \\
+\texttt{project\_executable\_or\_generated} & 296 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -13558,7 +13603,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 268 \\
+\texttt{project\_only} & 271 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -13579,11 +13624,11 @@ Model Tier & Claim Count \\
 \endlastfoot
 \texttt{articulated\_spatial} & 32 \\
 \texttt{compliant\_shaft} & 66 \\
-\texttt{cross\_tier\_synthesis} & 74 \\
+\texttt{cross\_tier\_synthesis} & 77 \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
-\texttt{planar\_reduced} & 147 \\
+\texttt{planar\_reduced} & 150 \\
 \texttt{spatial\_reduced} & 76 \\
 \texttt{two\_hand\_or\_bilateral} & 94 \\
 \texttt{uncertainty\_or\_control} & 10 \\
@@ -13610,7 +13655,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 278 \\
+\texttt{none\_declared} & 281 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -13685,7 +13730,7 @@ only \\
 ch06d uncertainty control & 10 & 10 / 0 / 0 & project authored only \\
 ch06e experimental protocol & 1 & 1 / 0 / 0 & project authored only \\
 ch06f open release & 2 & 2 / 0 / 0 & project authored only \\
-ch07 model ladder & 29 & 29 / 0 / 0 & project authored only \\
+ch07 model ladder & 32 & 32 / 0 / 0 & project authored only \\
 ch07 results & 7 & 7 / 0 / 0 & project authored only \\
 ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
 ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\
@@ -13987,6 +14032,21 @@ Recorded outputs:
   shoulder-only, wrist-only, and zero-authority delay/noise maps;
   event-state and speed arrays; integration-step refinement; and
   global-horizon truncation controls.
+\item
+  \texttt{data/nonlinear\_controller\_comparison\_registration.json} ---
+  outcome-blind tuning/evaluation split, nine declared families, matched
+  plant, constraints, objectives, typed failures, ranking suppression,
+  and single-worker identity.
+\item
+  \texttt{data/nonlinear\_controller\_solver\_qualification.json} ---
+  one bounded projected first-order iLQR kernel with derivative, bound,
+  descent, replay, initialization-sensitivity, and typed
+  nonfinite-dynamics gates; collocation NMPC remains unavailable.
+\item
+  \texttt{data/nonlinear\_controller\_plant\_transport.json} --- 12
+  controller-to-ODE parity cases across three integration steps, exact
+  replay, immutable inputs, typed invalid cases, and zero ranking
+  authority.
 \item
   \texttt{data/double\_pendulum\_identifiability.json} --- exact
   seven-coefficient inverse- dynamics factorization, analytic

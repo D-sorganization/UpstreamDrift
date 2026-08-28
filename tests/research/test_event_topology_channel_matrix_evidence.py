@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
+
+pytestmark = pytest.mark.unit
 
 from scripts.research.proximal_distal_energy.run_event_topology_channel_matrix import (
     ARRAY_PATH,

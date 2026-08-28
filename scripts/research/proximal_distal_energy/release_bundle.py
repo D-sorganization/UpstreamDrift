@@ -138,6 +138,18 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_event_topology_channel_matrix write",
             "tier": "analytical_double_pendulum_channel_mask_topology_controls",
         },
+        "nonlinear_controller_registration": {
+            "command": "python -m scripts.research.proximal_distal_energy.nonlinear_controller_registration write",
+            "tier": "prospective_outcome_blind_controller_comparison_contract",
+        },
+        "nonlinear_controller_solver_qualification": {
+            "command": "python -m scripts.research.proximal_distal_energy.nonlinear_controller_qualification write",
+            "tier": "manufactured_projected_first_order_ilqr_mechanics",
+        },
+        "nonlinear_controller_plant_transport": {
+            "command": "python -m scripts.research.proximal_distal_energy.nonlinear_controller_plant_transport write",
+            "tier": "shared_equation_double_pendulum_step_transport",
+        },
         "double_pendulum_identifiability": {
             "command": "python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability write",
             "tier": "analytical_double_pendulum_exact_map_and_dimensionless_finite_record",
@@ -303,6 +315,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "global_event_topology_robustness": (
             "supported_for_registered_synthetic_topology_model_scenarios"
+        ),
+        "nonlinear_controller_numerical_qualification": (
+            "supported_as_registered_numerical_prerequisite_without_evaluation"
         ),
         "double_pendulum_base_coefficient_excitation": (
             "full_rank_for_registered_synthetic_record"

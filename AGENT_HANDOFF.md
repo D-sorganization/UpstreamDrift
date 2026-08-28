@@ -13,10 +13,10 @@ completion from local files or an open pull request.
   immutable source-pinned projections.
 - Protected PR #9144 completed #9123 at squash
   `5a330ed9b9f74c77a540d37beb90d2df622e719d`, verified on remote `main`.
-- The current #9125-integrated paper is 250 pages and 1,958,661 bytes at
-  SHA-256 `6ca47ab88331cbb728a0f464f1a1200cf16553328148f40e42192f66d56a1647`.
-- It contains 322 adjudicated claims, 141 numeric contracts, 482/482 verified
-  numeric literals, 2,426 evidence references, and 684 release artifacts.
+- The current #9126-integrated paper is 251 pages and 1,962,456 bytes at
+  SHA-256 `92bfaca850ac459cc431e573be8c0288af51ceab4d28759d02c67c602274ee8b`.
+- It contains 325 adjudicated claims, 144 numeric contracts, 498/498 verified
+  numeric literals, 2,468 evidence references, and 693 release artifacts.
 - The PDF is computationally qualified but not archival-accessibility
   qualified: it is untagged and retains Type 3 and two unembedded resources.
 
@@ -26,6 +26,9 @@ completion from local files or an open pull request.
 - Branch: `feat/9128-swing-objective-web-parity-and-research`.
 - Existing protected-flow PR: #9136. Preserve its squash auto-merge request;
   do not merge until every scientific and software gate below is satisfied.
+- Remote PR head `7da562063` contains the complete #9125 slice. Hosted checks
+  were newly queued/in progress after that push; no actionable failure was
+  observed and no redundant rerun was requested.
 - PR #9136 is being reconciled with protected #9123. Protected #9123
   trajectory-authority sources and tests take precedence over its earlier,
   incorrect fixed-horizon implementation.
@@ -46,17 +49,21 @@ completion from local files or an open pull request.
   perturbations, a fixed stress-to-failure ladder, four channel masks, and
   step/horizon controls. Its governed claims and release registration are
   locally complete; protected delivery remains pending in PR #9136.
-- #9126 now rejects every solver identity except the implemented projected
-  iLQR kernel; collocation NMPC is explicitly unavailable. Plant transport is
-  rebound to the protected public backend. Full comparative evaluation,
-  governed evidence, and every solver/controller ranking remain unavailable.
+- #9126 now has a digest-bound 24-evaluation/8-tuning prospective registration,
+  one manufactured projected first-order iLQR qualification, 12 canonical ODE
+  transport cases, three governed reports, three atomic claims, paper/report
+  integration, and a refreshed 693-artifact release. Collocation NMPC is
+  explicitly unavailable. Zero controller evaluations and zero rankings are
+  retained. Verify its exact commit, hosted checks, and protected-delivery state
+  on PR #9136 rather than inferring delivery from this checkout.
 - #9128 now uses the mounted `/api/tools/...` frontend contract, generated
   OpenAPI types, and the current `WorkspaceShell` interface. The vendored Tools
   pin is advanced to protected provider `3dfbd32cc`; focused API and React
   parity tests pass, but full web/build and provider-consumer gates remain.
 - The current consolidated branch has complete local paper/release integration
-  for #9124 and #9125, but not #9126. The handoff, issue closures, and `parity`
-  status must not overstate implementation, protected delivery, or validation.
+  through #9126, but #9126 still needs final gates, commit, push, and protected
+  delivery. The handoff, issue closures, and `parity` status must not overstate
+  implementation, protected delivery, or validation.
 
 ## Required Order
 
@@ -65,8 +72,8 @@ completion from local files or an open pull request.
    do not infer optimality or ranking from its local feasibility result.
 3. Correct and qualify #9125 event-topology robustness, including delays,
    channel coverage, common-random-number perturbations, and typed failures.
-4. Correct #9126 solver identity and keep prospective registrations, human
-   limits, and rankings unavailable until the registered comparisons exist.
+4. Finish #9126 final gates and protected delivery while keeping human limits,
+   controller outcomes, collocation NMPC, and rankings explicitly unavailable.
 5. Correct #9128 API routing/types/shell contracts and test desktop/web parity
    without moving research authority into the UI.
 6. Regenerate claims, numeric contracts, release artifacts, TeX, PDF, and
@@ -92,6 +99,10 @@ completion from local files or an open pull request.
 Use Python 3.12 with
 `PYTHONPATH=C:/Users/diete/AppData/Local/Temp/codex-precommit-wmi;<worktree>/src`.
 Run Python tests serially (`-n 0`) and web tests with at most two workers.
+On Windows, `check_doc_size_budget.py` can count CRLF worktree bytes; the
+normalized Git blob for `_ch06c_spatial_cross_formulation.qmd` is 50,623 bytes,
+although this worktree reports 51,523 bytes. Hosted Linux CI evaluates the
+under-budget normalized content.
 
 ```powershell
 python -m scripts.research.proximal_distal_energy.run_trajectory_control_authority validate

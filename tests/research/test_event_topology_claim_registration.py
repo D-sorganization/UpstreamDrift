@@ -3,6 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 from scripts.research.proximal_distal_energy.claim_numeric_audit import (
     audit_claim_numeric_evidence,
 )

@@ -3,6 +3,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from scripts.research.proximal_distal_energy.event_robustness_noise import (
     CommonRandomPerturbations,
 )

@@ -5679,6 +5679,184 @@
           "rtol": 0.0
         }
       ]
+    },
+    {
+      "claim_id": "PD-CLAIM-324",
+      "statement_sha256": "83bbf2202daec3666e7697bcb250c54cf6568a0600e2bc263761390cd1951a10",
+      "numeric_evidence": [
+        {
+          "literal_id": "9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/controller_family_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "24#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/evaluation_trial_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/tuning_trial_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/controller_evaluation_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/ranking_eligible_method_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-325",
+      "statement_sha256": "feef23bfb4abd4fd21f5da1c4b7a9e4ec64ec2c113bd2f660325f95431e2e8b0",
+      "numeric_evidence": [
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/qualified_solver_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.0477729794899915e-11#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/directional_derivative_max_abs_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/solvers/0/maximum_bound_violation",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/double_pendulum_evaluation_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/ranking_eligible_method_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-326",
+      "statement_sha256": "e679b7cadeada6d939d6bfbdc827fb069a94e83a613fc1a44f4ece50f4d68ef9",
+      "numeric_evidence": [
+        {
+          "literal_id": "12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/parity_case_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/step_size_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/invalid_input_case_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/maximum_state_parity_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/controller_evaluation_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/ranking_eligible_method_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
     }
   ]
 }

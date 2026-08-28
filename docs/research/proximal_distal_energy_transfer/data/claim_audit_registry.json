@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "15e6d235a301b2121971e46d5a9489bf7e8a900048fd43a7c837a86a8e99da7f",
+    "source_digest": "5b353163c0d285e580282e40e28e1cf38597edc681199c53d507b92a7a1be70d",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1167-candidate paper inventory is adjudicated, including global event-topology robustness evidence.",
+    "current_scope": "The complete 1171-candidate paper inventory is adjudicated, including nonlinear-controller numerical prerequisites.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -296,6 +296,11 @@
       "release_claim_key": "global_event_topology_robustness",
       "published_status": "supported_for_registered_synthetic_topology_model_scenarios",
       "audit_state": "reviewed_as_synthetic_global_topology_robustness"
+    },
+    {
+      "release_claim_key": "nonlinear_controller_numerical_qualification",
+      "published_status": "supported_as_registered_numerical_prerequisite_without_evaluation",
+      "audit_state": "reviewed_as_numerical_prerequisite_without_ranking"
     }
   ],
   "candidate_reviews": [
@@ -11940,66 +11945,108 @@
       "last_verified_on": "2026-08-26"
     },
     {
-      "candidate_id": "PD-CAND-cdbb920fa60aa070",
+      "candidate_id": "PD-CAND-f935eab041d4ed40",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-c5b073ea9a96b9a9",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-86e97d3f95b99005",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-7f2808efa7ef03ce",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-40fbcbc85ef0bb54",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-72b328cbb28da60f",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-8d6ccb5874f0daa5",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This deterministic census summarizes the governed claim registry.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-d4cc055868be6aef",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-324"
+      ],
+      "rationale": "This passage states or bounds the registered numerical prerequisite.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-e2d8a3fa6faf114f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-324",
+        "PD-CLAIM-325",
+        "PD-CLAIM-326"
+      ],
+      "rationale": "This passage states or bounds the registered numerical prerequisite.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-d1fad4101ce33aa0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-325"
+      ],
+      "rationale": "This passage states or bounds the registered numerical prerequisite.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-59d1144a2a437060",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-326"
+      ],
+      "rationale": "This passage states or bounds the registered numerical prerequisite.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-7a0731a67be14969",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This appendix candidate inventories governed artifacts.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-6f903476b4412e96",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-bc6050bb4202c54a",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-92c72d6ea7c2b124",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-5fe1346fb02957a6",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-6c4b2d59bfc36d08",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-e413f8fe4c2bd6bc",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census summarizes the governed claim registry.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-ee5940f7378dca79",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This deterministic census summarizes the governed claim registry.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-26"
     }
@@ -12177,7 +12224,7 @@
       "audit_status": "two_native_engines_branch_power_geometry_and_refinement_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:538",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:579",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:215"
       ],
@@ -18370,7 +18417,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:214",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:216",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:221",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:624"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:665"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -18455,11 +18502,11 @@
       "audit_status": "nonzero_power_rotation_and_nonclaims_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:489",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:495",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:497",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:502",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:632"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:530",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:536",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:538",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:543",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:673"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -18502,10 +18549,10 @@
       "audit_status": "dimensions_states_cross_formulation_and_geometry_controls_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:511",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:518",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:524",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:641",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:552",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:559",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:565",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:682",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:67"
       ],
       "evidence_artifacts": [
@@ -18590,7 +18637,7 @@
       "audit_status": "engine_identity_branch_geometry_gates_and_refinement_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:532"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:573"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -18704,21 +18751,21 @@
       "audit_status": "capability_cells_findings_and_open_nonclaims_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:561",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:563",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:718",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:739",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:593",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:720",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:602",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:604",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:759",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:780",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:634",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:155",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:546",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:587",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12"
       ],
       "evidence_artifacts": [
@@ -18759,9 +18806,9 @@
       "audit_status": "tier_mechanisms_strengths_and_nonclaims_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:601",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:609",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:617"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:642",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:650",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:658"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -18803,10 +18850,10 @@
       "audit_status": "open_status_and_minimum_gate_contract_checked",
       "adjudication_outcome": "untested",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:666",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:675",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:680",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:689",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:707",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:716",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:721",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:730",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:152"
       ],
       "evidence_artifacts": [
@@ -18848,9 +18895,9 @@
       "audit_status": "multi_observable_objective_and_nonprescription_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:698",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:704",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:710"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:739",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:745",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:751"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json",
@@ -18891,7 +18938,7 @@
       "audit_status": "all_tier_limitations_and_failure_criteria_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:718",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:759",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:63",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:12"
       ],
@@ -22172,10 +22219,10 @@
       "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:532",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:546",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:647",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:573",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:587",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:688",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:3",
@@ -22416,8 +22463,8 @@
       "audit_status": "two_native_engines_contact_power_branch_geometry_refinement_and_boundaries_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:538",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:579",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:186",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:190",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:196"
@@ -27670,8 +27717,8 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:667",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:675",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:563",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:604",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.json",
@@ -27737,9 +27784,9 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:683",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:546",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:563",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:587",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:604",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
       ],
@@ -27983,7 +28030,7 @@
       "adjudication_outcome": "supported",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:798",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:720",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195"
       ],
@@ -28264,9 +28311,9 @@
       "adjudication_outcome": "supported",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:895",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:739",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:780",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:720",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:882",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
@@ -28384,17 +28431,17 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:895",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:593",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:634",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:33",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:720",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:41",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:657",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:698",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:16",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:718",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:759",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:25",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:3"
       ],
@@ -28544,7 +28591,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:73",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:657",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:698",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:97"
       ],
       "evidence_artifacts": [
@@ -28643,22 +28690,22 @@
       "audit_status": "finite_ground_mechanism_and_adverse_match_checked",
       "adjudication_outcome": "inconclusive",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:739",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:780",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:130",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:563",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:593",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:569",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:604",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:634",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:720",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:55",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:657",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:698",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:155",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:718",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:759",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:108",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:118"
       ],
@@ -29150,9 +29197,9 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:186",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:196",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:265",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:538",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:551",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:647",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:579",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:592",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:688",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620"
@@ -30043,9 +30090,9 @@
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:519",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:532",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:546",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:647",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:573",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:587",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:688",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100"
       ],
       "evidence_artifacts": [
@@ -32536,6 +32583,325 @@
           "literal_id": "0.579326#1",
           "artifact": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
           "json_pointer": "/horizon_controls/7/events/0/event_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-324",
+      "candidate_ids": [
+        "PD-CAND-d4cc055868be6aef",
+        "PD-CAND-e2d8a3fa6faf114f"
+      ],
+      "statement": "The prospective registration declares 9 controller families, 24 evaluation trials, 8 disjoint tuning trials, 0 controller evaluations, and 0 ranking-eligible methods.",
+      "classification": "prospective_outcome_blind_controller_registration",
+      "published_status": "supported_as_registered_numerical_prerequisite_without_evaluation",
+      "audit_status": "registration_manufactured_solver_and_shared_equation_plant_transport_recomputed",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:489",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:518"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_registration.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_numerics.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_kernels.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_qualification.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_plant_transport.py",
+        "tests/research/test_nonlinear_controller_comparison_registration.py",
+        "tests/research/test_nonlinear_controller_solver_qualification.py",
+        "tests/research/test_nonlinear_controller_plant_transport.py"
+      ],
+      "model_domain": "One prospective analytical double-pendulum comparison, one manufactured damped-pendulum solver fixture, and shared-equation RK4 transport to the canonical ODE backend.",
+      "uncertainty_boundary": "The finite synthetic registration is not controller performance, global optimality, human control, anatomy, fatigue, or coaching evidence.",
+      "competing_explanations": [
+        "shared equations rather than independent physics validation",
+        "manufactured numerical behavior rather than golf performance",
+        "finite trial registration rather than global optimality",
+        "solver convergence rather than model adequacy",
+        "synthetic coordinate torques rather than human actuation"
+      ],
+      "negative_controls": [
+        "three current parent digests",
+        "disjoint outcome-blind split",
+        "typed failure taxonomy",
+        "single-worker checkpoint identity"
+      ],
+      "falsifier": "The deterministic report changes, tuning and evaluation overlap, a parent digest drifts, or any method becomes ranking-eligible.",
+      "adjudication": "The result is retained only as a numerical prerequisite. No controller comparison, human inference, passive-torque claim, or coaching recommendation is released.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "9#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/controller_family_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "24#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/evaluation_trial_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "8#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/tuning_trial_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/controller_evaluation_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+          "json_pointer": "/ranking_eligible_method_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-325",
+      "candidate_ids": [
+        "PD-CAND-d1fad4101ce33aa0",
+        "PD-CAND-e2d8a3fa6faf114f"
+      ],
+      "statement": "The manufactured fixture qualifies 1 solver kernel with a maximum directional-derivative discrepancy of 1.0477729794899915e-11, maximum bound violation 0.0, 0 double-pendulum evaluations, and 0 ranking-eligible methods.",
+      "classification": "manufactured_nonlinear_solver_mechanics_qualification",
+      "published_status": "supported_as_registered_numerical_prerequisite_without_evaluation",
+      "audit_status": "registration_manufactured_solver_and_shared_equation_plant_transport_recomputed",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:499",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:518"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_registration.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_numerics.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_kernels.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_qualification.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_plant_transport.py",
+        "tests/research/test_nonlinear_controller_comparison_registration.py",
+        "tests/research/test_nonlinear_controller_solver_qualification.py",
+        "tests/research/test_nonlinear_controller_plant_transport.py"
+      ],
+      "model_domain": "One prospective analytical double-pendulum comparison, one manufactured damped-pendulum solver fixture, and shared-equation RK4 transport to the canonical ODE backend.",
+      "uncertainty_boundary": "Manufactured solver mechanics are not golf performance, model adequacy, human control, passive torque, or coaching evidence.",
+      "competing_explanations": [
+        "shared equations rather than independent physics validation",
+        "manufactured numerical behavior rather than golf performance",
+        "finite trial registration rather than global optimality",
+        "solver convergence rather than model adequacy",
+        "synthetic coordinate torques rather than human actuation"
+      ],
+      "negative_controls": [
+        "independent directional derivative",
+        "native or in-rollout bounds",
+        "exact replay",
+        "typed nonfinite dynamics failure"
+      ],
+      "falsifier": "Derivatives, bounds, accepted-cost descent, replay, cold/warm sensitivity, typed failure, or zero-evaluation gates fail.",
+      "adjudication": "The result is retained only as a numerical prerequisite. No controller comparison, human inference, passive-torque claim, or coaching recommendation is released.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "1#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/qualified_solver_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.0477729794899915e-11#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/directional_derivative_max_abs_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/solvers/0/maximum_bound_violation",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/double_pendulum_evaluation_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+          "json_pointer": "/ranking_eligible_method_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-326",
+      "candidate_ids": [
+        "PD-CAND-59d1144a2a437060",
+        "PD-CAND-e2d8a3fa6faf114f"
+      ],
+      "statement": "The plant-transport report contains 12 parity cases across 3 step sizes and 4 invalid-input controls, with maximum state parity error 0.0, 0 controller evaluations, and 0 ranking-eligible methods.",
+      "classification": "shared_equation_controller_plant_transport_parity",
+      "published_status": "supported_as_registered_numerical_prerequisite_without_evaluation",
+      "audit_status": "registration_manufactured_solver_and_shared_equation_plant_transport_recomputed",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:510",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:518"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json",
+        "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md",
+        "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_registration.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_numerics.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_kernels.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_qualification.py",
+        "scripts/research/proximal_distal_energy/nonlinear_controller_plant_transport.py",
+        "tests/research/test_nonlinear_controller_comparison_registration.py",
+        "tests/research/test_nonlinear_controller_solver_qualification.py",
+        "tests/research/test_nonlinear_controller_plant_transport.py"
+      ],
+      "model_domain": "One prospective analytical double-pendulum comparison, one manufactured damped-pendulum solver fixture, and shared-equation RK4 transport to the canonical ODE backend.",
+      "uncertainty_boundary": "Shared-equation code-path parity is not independent physics validation, controller performance, human evidence, or coaching authority.",
+      "competing_explanations": [
+        "shared equations rather than independent physics validation",
+        "manufactured numerical behavior rather than golf performance",
+        "finite trial registration rather than global optimality",
+        "solver convergence rather than model adequacy",
+        "synthetic coordinate torques rather than human actuation"
+      ],
+      "negative_controls": [
+        "0.5, 1, and 2 ms steps",
+        "four state and torque cases",
+        "deterministic replay and input immutability",
+        "wrong-size and nonfinite typed failures"
+      ],
+      "falsifier": "Any step differs from the canonical ODE backend beyond the gate, replay or input immutability fails, or an invalid input emits a trajectory.",
+      "adjudication": "The result is retained only as a numerical prerequisite. No controller comparison, human inference, passive-torque claim, or coaching recommendation is released.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26",
+      "numeric_evidence": [
+        {
+          "literal_id": "12#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/parity_case_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "3#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/step_size_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "4#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/invalid_input_case_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/maximum_state_parity_error",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/controller_evaluation_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json",
+          "json_pointer": "/ranking_eligible_method_count",
           "evidence_scope": "local_json_value",
           "scale": 1.0,
           "offset": 0.0,
