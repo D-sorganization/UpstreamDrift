@@ -1,0 +1,3967 @@
+{
+  "availability": {
+    "anatomical_channel_attribution": "unavailable",
+    "coaching_recommendation": "unavailable",
+    "controller_ranking": "suppressed",
+    "human_motor_noise": "unavailable",
+    "work_power": "unavailable"
+  },
+  "channel_maps": [
+    {
+      "channel": "both",
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        }
+      ],
+      "mask": [
+        1.0,
+        1.0
+      ],
+      "noise_scale_fraction": 0.01,
+      "nominal_by_delay": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8543,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.765808,
+                -0.765808,
+                6.78504,
+                28.2407
+              ],
+              "event_time_s": 0.349256,
+              "guard_residual": -1.68372e-11,
+              "near_grazing": false,
+              "sample_index": 174,
+              "transversality_per_s": 35.0258
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8911,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.829523,
+                -0.829523,
+                6.99071,
+                28.1674
+              ],
+              "event_time_s": 0.366614,
+              "guard_residual": -8.12569e-11,
+              "near_grazing": false,
+              "sample_index": 183,
+              "transversality_per_s": 35.1581
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8658,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.897204,
+                -0.897204,
+                7.23559,
+                28.0129
+              ],
+              "event_time_s": 0.383897,
+              "guard_residual": -1.26388e-12,
+              "near_grazing": false,
+              "sample_index": 191,
+              "transversality_per_s": 35.2485
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.06,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.77,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.969053,
+                -0.969053,
+                7.52383,
+                27.7718
+              ],
+              "event_time_s": 0.401116,
+              "guard_residual": -2.17026e-11,
+              "near_grazing": false,
+              "sample_index": 200,
+              "transversality_per_s": 35.2956
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.08,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.5939,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.04527,
+                -1.04527,
+                7.85942,
+                27.4391
+              ],
+              "event_time_s": 0.418283,
+              "guard_residual": -8.69296e-11,
+              "near_grazing": false,
+              "sample_index": 209,
+              "transversality_per_s": 35.2985
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.1,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.3258,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.12604,
+                -1.12604,
+                8.24601,
+                27.0102
+              ],
+              "event_time_s": 0.435413,
+              "guard_residual": 9.57656e-12,
+              "near_grazing": false,
+              "sample_index": 217,
+              "transversality_per_s": 35.2562
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.12,
+          "events": [
+            {
+              "clubhead_speed_m_s": 37.9521,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.21149,
+                -1.21149,
+                8.68659,
+                26.4815
+              ],
+              "event_time_s": 0.452524,
+              "guard_residual": 7.90465e-11,
+              "near_grazing": false,
+              "sample_index": 226,
+              "transversality_per_s": 35.1681
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.14,
+          "events": [
+            {
+              "clubhead_speed_m_s": 37.4574,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.30169,
+                -1.30169,
+                9.18306,
+                25.8501
+              ],
+              "event_time_s": 0.469633,
+              "guard_residual": 8.57638e-11,
+              "near_grazing": false,
+              "sample_index": 234,
+              "transversality_per_s": 35.0332
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.16,
+          "events": [
+            {
+              "clubhead_speed_m_s": 36.8247,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.39659,
+                -1.39659,
+                9.73562,
+                25.1146
+              ],
+              "event_time_s": 0.486758,
+              "guard_residual": -4.93845e-11,
+              "near_grazing": false,
+              "sample_index": 243,
+              "transversality_per_s": 34.8502
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.18,
+          "events": [
+            {
+              "clubhead_speed_m_s": 36.0368,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.49599,
+                -1.49599,
+                10.3421,
+                24.2751
+              ],
+              "event_time_s": 0.503917,
+              "guard_residual": -5.50744e-11,
+              "near_grazing": false,
+              "sample_index": 251,
+              "transversality_per_s": 34.6172
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.2,
+          "events": [
+            {
+              "clubhead_speed_m_s": 35.077,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.59946,
+                -1.59946,
+                10.9968,
+                23.334
+              ],
+              "event_time_s": 0.521122,
+              "guard_residual": -1.90337e-11,
+              "near_grazing": false,
+              "sample_index": 260,
+              "transversality_per_s": 34.3308
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        }
+      ],
+      "replicate_count": 192
+    },
+    {
+      "channel": "shoulder_only",
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "unique_transverse": 192
+          }
+        }
+      ],
+      "mask": [
+        1.0,
+        0.0
+      ],
+      "noise_scale_fraction": 0.01,
+      "nominal_by_delay": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.1538,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.16897,
+                -1.16897,
+                10.1917,
+                20.2402
+              ],
+              "event_time_s": 0.369901,
+              "guard_residual": 8.78995e-11,
+              "near_grazing": false,
+              "sample_index": 184,
+              "transversality_per_s": 30.432
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.109,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.18937,
+                -1.18937,
+                10.2652,
+                20.221
+              ],
+              "event_time_s": 0.385796,
+              "guard_residual": 2.43785e-11,
+              "near_grazing": false,
+              "sample_index": 192,
+              "transversality_per_s": 30.4862
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.0319,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.21081,
+                -1.21081,
+                10.3409,
+                20.1759
+              ],
+              "event_time_s": 0.401509,
+              "guard_residual": -9.28968e-12,
+              "near_grazing": false,
+              "sample_index": 200,
+              "transversality_per_s": 30.5168
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.06,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.9214,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.23356,
+                -1.23356,
+                10.42,
+                20.1041
+              ],
+              "event_time_s": 0.417045,
+              "guard_residual": -1.2442e-11,
+              "near_grazing": false,
+              "sample_index": 208,
+              "transversality_per_s": 30.5242
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.08,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.7758,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.2579,
+                -1.2579,
+                10.5041,
+                20.0046
+              ],
+              "event_time_s": 0.43241,
+              "guard_residual": 2.03166e-11,
+              "near_grazing": false,
+              "sample_index": 216,
+              "transversality_per_s": 30.5086
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.1,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.5928,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.28417,
+                -1.28417,
+                10.5947,
+                19.8755
+              ],
+              "event_time_s": 0.447615,
+              "guard_residual": 5.31248e-11,
+              "near_grazing": false,
+              "sample_index": 223,
+              "transversality_per_s": 30.4703
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.12,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.3695,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.3127,
+                -1.3127,
+                10.6939,
+                19.7149
+              ],
+              "event_time_s": 0.462673,
+              "guard_residual": -9.96203e-12,
+              "near_grazing": false,
+              "sample_index": 231,
+              "transversality_per_s": 30.4088
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.14,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.1023,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.34382,
+                -1.34382,
+                10.8034,
+                19.5203
+              ],
+              "event_time_s": 0.477597,
+              "guard_residual": 3.03757e-13,
+              "near_grazing": false,
+              "sample_index": 238,
+              "transversality_per_s": 30.3237
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.16,
+          "events": [
+            {
+              "clubhead_speed_m_s": 32.7869,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.37784,
+                -1.37784,
+                10.9253,
+                19.2887
+              ],
+              "event_time_s": 0.492406,
+              "guard_residual": 1.21503e-11,
+              "near_grazing": false,
+              "sample_index": 246,
+              "transversality_per_s": 30.214
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.18,
+          "events": [
+            {
+              "clubhead_speed_m_s": 32.4187,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.41499,
+                -1.41499,
+                11.0612,
+                19.0171
+              ],
+              "event_time_s": 0.507117,
+              "guard_residual": -1.32117e-11,
+              "near_grazing": false,
+              "sample_index": 253,
+              "transversality_per_s": 30.0784
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.2,
+          "events": [
+            {
+              "clubhead_speed_m_s": 31.9927,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.45544,
+                -1.45544,
+                11.2123,
+                18.7027
+              ],
+              "event_time_s": 0.521751,
+              "guard_residual": -4.39946e-11,
+              "near_grazing": false,
+              "sample_index": 260,
+              "transversality_per_s": 29.915
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        }
+      ],
+      "replicate_count": 192
+    },
+    {
+      "channel": "wrist_only",
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.875,
+          "preservation_interval": [
+            0.794115,
+            0.927028
+          ],
+          "preserved_pair_count": 84,
+          "topology_counts": {
+            "absent": 12,
+            "unique_transverse": 180
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.677083,
+          "preservation_interval": [
+            0.578298,
+            0.762242
+          ],
+          "preserved_pair_count": 65,
+          "topology_counts": {
+            "absent": 31,
+            "unique_transverse": 161
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.375,
+          "preservation_interval": [
+            0.284726,
+            0.474893
+          ],
+          "preserved_pair_count": 36,
+          "topology_counts": {
+            "absent": 60,
+            "unique_transverse": 132
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.0625,
+          "preservation_interval": [
+            0.0289567,
+            0.129709
+          ],
+          "preserved_pair_count": 6,
+          "topology_counts": {
+            "absent": 102,
+            "unique_transverse": 90
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.510417,
+          "preservation_interval": [
+            0.41196,
+            0.608071
+          ],
+          "preserved_pair_count": 49,
+          "topology_counts": {
+            "absent": 145,
+            "unique_transverse": 47
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 0.885417,
+          "preservation_interval": [
+            0.806374,
+            0.934801
+          ],
+          "preserved_pair_count": 85,
+          "topology_counts": {
+            "absent": 181,
+            "unique_transverse": 11
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        }
+      ],
+      "mask": [
+        0.0,
+        1.0
+      ],
+      "noise_scale_fraction": 0.01,
+      "nominal_by_delay": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 13.5286,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.896581,
+                0.896581,
+                4.79671,
+                6.19087
+              ],
+              "event_time_s": 0.579326,
+              "guard_residual": 8.37116e-11,
+              "near_grazing": false,
+              "sample_index": 289,
+              "transversality_per_s": 10.9876
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 14.3741,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.829222,
+                0.829222,
+                4.39768,
+                7.54136
+              ],
+              "event_time_s": 0.585953,
+              "guard_residual": 6.42399e-11,
+              "near_grazing": false,
+              "sample_index": 292,
+              "transversality_per_s": 11.939
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 15.2081,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.756066,
+                0.756066,
+                3.95691,
+                8.95518
+              ],
+              "event_time_s": 0.59297,
+              "guard_residual": 9.36257e-11,
+              "near_grazing": false,
+              "sample_index": 296,
+              "transversality_per_s": 12.9121
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.06,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.08,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.1,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.12,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.14,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.16,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.18,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.2,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        }
+      ],
+      "replicate_count": 192
+    },
+    {
+      "channel": "zero",
+      "delay_summaries": [
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.0,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.02,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.04,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.06,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.08,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.1,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.12,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.14,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.16,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.18,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        },
+        {
+          "adequacy_passed": true,
+          "delay_s": 0.2,
+          "independent_pair_count": 96,
+          "preservation_fraction": 1.0,
+          "preservation_interval": [
+            0.961524,
+            1.0
+          ],
+          "preserved_pair_count": 96,
+          "topology_counts": {
+            "absent": 192
+          }
+        }
+      ],
+      "mask": [
+        0.0,
+        0.0
+      ],
+      "noise_scale_fraction": 0.01,
+      "nominal_by_delay": [
+        {
+          "crossing_count": 0,
+          "delay_s": 0.0,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.02,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.04,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.06,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.08,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.1,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.12,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.14,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.16,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.18,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.2,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        }
+      ],
+      "replicate_count": 192
+    }
+  ],
+  "horizon_control_summary": [
+    {
+      "channel": "both",
+      "expanded_horizon_identity_stable": true,
+      "interpretation": "no_change",
+      "original_horizon_differs": false
+    },
+    {
+      "channel": "shoulder_only",
+      "expanded_horizon_identity_stable": true,
+      "interpretation": "no_change",
+      "original_horizon_differs": false
+    },
+    {
+      "channel": "wrist_only",
+      "expanded_horizon_identity_stable": true,
+      "interpretation": "original_horizon_truncation",
+      "original_horizon_differs": true
+    },
+    {
+      "channel": "zero",
+      "expanded_horizon_identity_stable": true,
+      "interpretation": "no_change",
+      "original_horizon_differs": false
+    }
+  ],
+  "horizon_controls": [
+    {
+      "channel": "both",
+      "crossing_count": 1,
+      "events": [
+        {
+          "clubhead_speed_m_s": 38.8543,
+          "direction": "negative_to_nonnegative",
+          "event_state": [
+            0.765808,
+            -0.765808,
+            6.78504,
+            28.2407
+          ],
+          "event_time_s": 0.349256,
+          "guard_residual": -1.68372e-11,
+          "near_grazing": false,
+          "sample_index": 174,
+          "transversality_per_s": 35.0258
+        }
+      ],
+      "horizon_s": 0.4,
+      "numerical_message": "",
+      "status": "unique_transverse"
+    },
+    {
+      "channel": "both",
+      "crossing_count": 1,
+      "events": [
+        {
+          "clubhead_speed_m_s": 38.8543,
+          "direction": "negative_to_nonnegative",
+          "event_state": [
+            0.765808,
+            -0.765808,
+            6.78504,
+            28.2407
+          ],
+          "event_time_s": 0.349256,
+          "guard_residual": -1.68372e-11,
+          "near_grazing": false,
+          "sample_index": 174,
+          "transversality_per_s": 35.0258
+        }
+      ],
+      "horizon_s": 0.6,
+      "numerical_message": "",
+      "status": "unique_transverse"
+    },
+    {
+      "channel": "both",
+      "crossing_count": 1,
+      "events": [
+        {
+          "clubhead_speed_m_s": 38.8543,
+          "direction": "negative_to_nonnegative",
+          "event_state": [
+            0.765808,
+            -0.765808,
+            6.78504,
+            28.2407
+          ],
+          "event_time_s": 0.349256,
+          "guard_residual": -1.68372e-11,
+          "near_grazing": false,
+          "sample_index": 174,
+          "transversality_per_s": 35.0258
+        }
+      ],
+      "horizon_s": 0.8,
+      "numerical_message": "",
+      "status": "unique_transverse"
+    },
+    {
+      "channel": "shoulder_only",
+      "crossing_count": 1,
+      "events": [
+        {
+          "clubhead_speed_m_s": 34.1538,
+          "direction": "negative_to_nonnegative",
+          "event_state": [
+            1.16897,
+            -1.16897,
+            10.1917,
+            20.2402
+          ],
+          "event_time_s": 0.369901,
+          "guard_residual": 8.78995e-11,
+          "near_grazing": false,
+          "sample_index": 184,
+          "transversality_per_s": 30.432
+        }
+      ],
+      "horizon_s": 0.4,
+      "numerical_message": "",
+      "status": "unique_transverse"
+    },
+    {
+      "channel": "shoulder_only",
+      "crossing_count": 1,
+      "events": [
+        {
+          "clubhead_speed_m_s": 34.1538,
+          "direction": "negative_to_nonnegative",
+          "event_state": [
+            1.16897,
+            -1.16897,
+            10.1917,
+            20.2402
+          ],
+          "event_time_s": 0.369901,
+          "guard_residual": 8.78995e-11,
+          "near_grazing": false,
+          "sample_index": 184,
+          "transversality_per_s": 30.432
+        }
+      ],
+      "horizon_s": 0.6,
+      "numerical_message": "",
+      "status": "unique_transverse"
+    },
+    {
+      "channel": "shoulder_only",
+      "crossing_count": 1,
+      "events": [
+        {
+          "clubhead_speed_m_s": 34.1538,
+          "direction": "negative_to_nonnegative",
+          "event_state": [
+            1.16897,
+            -1.16897,
+            10.1917,
+            20.2402
+          ],
+          "event_time_s": 0.369901,
+          "guard_residual": 8.78995e-11,
+          "near_grazing": false,
+          "sample_index": 184,
+          "transversality_per_s": 30.432
+        }
+      ],
+      "horizon_s": 0.8,
+      "numerical_message": "",
+      "status": "unique_transverse"
+    },
+    {
+      "channel": "wrist_only",
+      "crossing_count": 0,
+      "events": [],
+      "horizon_s": 0.4,
+      "numerical_message": "",
+      "status": "absent"
+    },
+    {
+      "channel": "wrist_only",
+      "crossing_count": 1,
+      "events": [
+        {
+          "clubhead_speed_m_s": 13.5286,
+          "direction": "negative_to_nonnegative",
+          "event_state": [
+            -0.896581,
+            0.896581,
+            4.79671,
+            6.19087
+          ],
+          "event_time_s": 0.579326,
+          "guard_residual": 8.37116e-11,
+          "near_grazing": false,
+          "sample_index": 289,
+          "transversality_per_s": 10.9876
+        }
+      ],
+      "horizon_s": 0.6,
+      "numerical_message": "",
+      "status": "unique_transverse"
+    },
+    {
+      "channel": "wrist_only",
+      "crossing_count": 1,
+      "events": [
+        {
+          "clubhead_speed_m_s": 13.5286,
+          "direction": "negative_to_nonnegative",
+          "event_state": [
+            -0.896581,
+            0.896581,
+            4.79671,
+            6.19087
+          ],
+          "event_time_s": 0.579326,
+          "guard_residual": 8.37116e-11,
+          "near_grazing": false,
+          "sample_index": 289,
+          "transversality_per_s": 10.9876
+        }
+      ],
+      "horizon_s": 0.8,
+      "numerical_message": "",
+      "status": "unique_transverse"
+    },
+    {
+      "channel": "zero",
+      "crossing_count": 0,
+      "events": [],
+      "horizon_s": 0.4,
+      "numerical_message": "",
+      "status": "absent"
+    },
+    {
+      "channel": "zero",
+      "crossing_count": 0,
+      "events": [],
+      "horizon_s": 0.6,
+      "numerical_message": "",
+      "status": "absent"
+    },
+    {
+      "channel": "zero",
+      "crossing_count": 0,
+      "events": [],
+      "horizon_s": 0.8,
+      "numerical_message": "",
+      "status": "absent"
+    }
+  ],
+  "inference_boundary": "Phase C uses synthetic open-loop generalized-coordinate channel masks. They are not anatomical isolation, human motor-noise, fatigue, strength, injury, strategy-ranking, or coaching evidence.",
+  "outcome_separation": {
+    "feasibility_target_error_bounds_objective": "source_linked_from_phase_9124",
+    "speed_cannot_rescue_failed_topology_or_parent_feasibility": true,
+    "topology_and_event_kinematics": "retained_in_phase_c",
+    "work_power": "unavailable_without_independent_quadrature_contract"
+  },
+  "parent_bounded_outcomes": {
+    "constraint_status_counts": {
+      "bound_saturated": 21,
+      "interior": 7
+    },
+    "feasibility_status_counts": {
+      "feasible": 22,
+      "infeasible": 6
+    },
+    "fields_are_source_linked_not_recomputed": true,
+    "maximum_target_residual": 0.00063662,
+    "solver_status_counts": {
+      "converged": 22,
+      "infeasible": 6
+    },
+    "source_schema": "proximal-distal-bounded-event-reachability/v1",
+    "source_sha256": "c63b15db3c814ed5cb48df332a6a34558aa15e194c40f68b838be3b53271a33b",
+    "trial_count": 28
+  },
+  "qualification": {
+    "all_step_topology_identities_stable": true,
+    "expanded_horizon_topology_stable": true,
+    "original_horizon_truncation_channels": [
+      "wrist_only"
+    ],
+    "preservation_is_success_probability": false,
+    "zero_authority_command_nonzero_count": 0
+  },
+  "registration": {
+    "base_dt_s": 0.002,
+    "common_horizon_s": 0.6,
+    "delays_s": [
+      0.0,
+      0.02,
+      0.04,
+      0.06,
+      0.08,
+      0.1,
+      0.12,
+      0.14,
+      0.16,
+      0.18,
+      0.2
+    ],
+    "fixed_stop_rule_completed": true,
+    "horizons_s": [
+      0.4,
+      0.6,
+      0.8
+    ],
+    "independent_pair_count": 96,
+    "noise_scale_fraction": 0.01,
+    "preregistration_comment": "https://github.com/D-sorganization/UpstreamDrift/issues/9125#issuecomment-5431439586",
+    "replicate_count": 192,
+    "seed": 9125,
+    "step_sizes_s": [
+      0.001,
+      0.002,
+      0.004
+    ]
+  },
+  "schema_version": "proximal-distal-event-topology-channel-matrix/v1",
+  "source_identity": {
+    "required_parent_array_sha256": "b79683e34956ddd179ff012844715ef8f42e1e331fbe5fd71d2bfa40dfa9157c",
+    "required_parent_report_sha256": "503eb7e3fd73d23e76602c799b3c92420a3b5f145b77520b51321f2cc05da4d7",
+    "required_parent_schema": "proximal-distal-event-topology-stress-extension/v1",
+    "source_sha256": {
+      "scripts/research/proximal_distal_energy/event_topology_channel_controls.py": "5f22488241ebee492538a71d7cd0e88e90fd11447a7a6df6cd7245727e4aeae7",
+      "scripts/research/proximal_distal_energy/run_event_topology_channel_matrix.py": "8c46122338a1bdb4aab2646c33e6c21e7550b3385c1ed2be294af9a6a11daebf"
+    }
+  },
+  "step_refinement": [
+    {
+      "channel": "both",
+      "dt_s": 0.001,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8543,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.765808,
+                -0.765808,
+                6.78504,
+                28.2407
+              ],
+              "event_time_s": 0.349256,
+              "guard_residual": 9.13364e-11,
+              "near_grazing": false,
+              "sample_index": 349,
+              "transversality_per_s": 35.0258
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8911,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.829523,
+                -0.829523,
+                6.9907,
+                28.1674
+              ],
+              "event_time_s": 0.366614,
+              "guard_residual": 2.76531e-11,
+              "near_grazing": false,
+              "sample_index": 366,
+              "transversality_per_s": 35.1581
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8658,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.897204,
+                -0.897204,
+                7.23559,
+                28.0129
+              ],
+              "event_time_s": 0.383897,
+              "guard_residual": -8.22928e-11,
+              "near_grazing": false,
+              "sample_index": 383,
+              "transversality_per_s": 35.2485
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.06,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.77,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.969053,
+                -0.969053,
+                7.52383,
+                27.7718
+              ],
+              "event_time_s": 0.401116,
+              "guard_residual": 2.77277e-11,
+              "near_grazing": false,
+              "sample_index": 401,
+              "transversality_per_s": 35.2956
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.08,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.5939,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.04527,
+                -1.04527,
+                7.85942,
+                27.4391
+              ],
+              "event_time_s": 0.418283,
+              "guard_residual": 9.10001e-11,
+              "near_grazing": false,
+              "sample_index": 418,
+              "transversality_per_s": 35.2985
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.1,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.3258,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.12604,
+                -1.12604,
+                8.24601,
+                27.0102
+              ],
+              "event_time_s": 0.435413,
+              "guard_residual": -2.35032e-11,
+              "near_grazing": false,
+              "sample_index": 435,
+              "transversality_per_s": 35.2562
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.12,
+          "events": [
+            {
+              "clubhead_speed_m_s": 37.9521,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.21149,
+                -1.21149,
+                8.68659,
+                26.4815
+              ],
+              "event_time_s": 0.452524,
+              "guard_residual": -1.85914e-11,
+              "near_grazing": false,
+              "sample_index": 452,
+              "transversality_per_s": 35.1681
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.14,
+          "events": [
+            {
+              "clubhead_speed_m_s": 37.4574,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.30169,
+                -1.30169,
+                9.18306,
+                25.8501
+              ],
+              "event_time_s": 0.469633,
+              "guard_residual": 1.94471e-11,
+              "near_grazing": false,
+              "sample_index": 469,
+              "transversality_per_s": 35.0332
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.16,
+          "events": [
+            {
+              "clubhead_speed_m_s": 36.8248,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.39659,
+                -1.39659,
+                9.73562,
+                25.1146
+              ],
+              "event_time_s": 0.486758,
+              "guard_residual": 5.95834e-12,
+              "near_grazing": false,
+              "sample_index": 486,
+              "transversality_per_s": 34.8502
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.18,
+          "events": [
+            {
+              "clubhead_speed_m_s": 36.0368,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.49599,
+                -1.49599,
+                10.3421,
+                24.2751
+              ],
+              "event_time_s": 0.503917,
+              "guard_residual": -7.4396e-12,
+              "near_grazing": false,
+              "sample_index": 503,
+              "transversality_per_s": 34.6172
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.2,
+          "events": [
+            {
+              "clubhead_speed_m_s": 35.077,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.59946,
+                -1.59946,
+                10.9968,
+                23.334
+              ],
+              "event_time_s": 0.521122,
+              "guard_residual": -1.80593e-11,
+              "near_grazing": false,
+              "sample_index": 521,
+              "transversality_per_s": 34.3308
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "both",
+      "dt_s": 0.002,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8543,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.765808,
+                -0.765808,
+                6.78504,
+                28.2407
+              ],
+              "event_time_s": 0.349256,
+              "guard_residual": -1.68372e-11,
+              "near_grazing": false,
+              "sample_index": 174,
+              "transversality_per_s": 35.0258
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8911,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.829523,
+                -0.829523,
+                6.99071,
+                28.1674
+              ],
+              "event_time_s": 0.366614,
+              "guard_residual": -8.12569e-11,
+              "near_grazing": false,
+              "sample_index": 183,
+              "transversality_per_s": 35.1581
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8658,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.897204,
+                -0.897204,
+                7.23559,
+                28.0129
+              ],
+              "event_time_s": 0.383897,
+              "guard_residual": -1.26388e-12,
+              "near_grazing": false,
+              "sample_index": 191,
+              "transversality_per_s": 35.2485
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.06,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.77,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.969053,
+                -0.969053,
+                7.52383,
+                27.7718
+              ],
+              "event_time_s": 0.401116,
+              "guard_residual": -2.17026e-11,
+              "near_grazing": false,
+              "sample_index": 200,
+              "transversality_per_s": 35.2956
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.08,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.5939,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.04527,
+                -1.04527,
+                7.85942,
+                27.4391
+              ],
+              "event_time_s": 0.418283,
+              "guard_residual": -8.69296e-11,
+              "near_grazing": false,
+              "sample_index": 209,
+              "transversality_per_s": 35.2985
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.1,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.3258,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.12604,
+                -1.12604,
+                8.24601,
+                27.0102
+              ],
+              "event_time_s": 0.435413,
+              "guard_residual": 9.57656e-12,
+              "near_grazing": false,
+              "sample_index": 217,
+              "transversality_per_s": 35.2562
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.12,
+          "events": [
+            {
+              "clubhead_speed_m_s": 37.9521,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.21149,
+                -1.21149,
+                8.68659,
+                26.4815
+              ],
+              "event_time_s": 0.452524,
+              "guard_residual": 7.90465e-11,
+              "near_grazing": false,
+              "sample_index": 226,
+              "transversality_per_s": 35.1681
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.14,
+          "events": [
+            {
+              "clubhead_speed_m_s": 37.4574,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.30169,
+                -1.30169,
+                9.18306,
+                25.8501
+              ],
+              "event_time_s": 0.469633,
+              "guard_residual": 8.57638e-11,
+              "near_grazing": false,
+              "sample_index": 234,
+              "transversality_per_s": 35.0332
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.16,
+          "events": [
+            {
+              "clubhead_speed_m_s": 36.8247,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.39659,
+                -1.39659,
+                9.73562,
+                25.1146
+              ],
+              "event_time_s": 0.486758,
+              "guard_residual": -4.93845e-11,
+              "near_grazing": false,
+              "sample_index": 243,
+              "transversality_per_s": 34.8502
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.18,
+          "events": [
+            {
+              "clubhead_speed_m_s": 36.0368,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.49599,
+                -1.49599,
+                10.3421,
+                24.2751
+              ],
+              "event_time_s": 0.503917,
+              "guard_residual": -5.50744e-11,
+              "near_grazing": false,
+              "sample_index": 251,
+              "transversality_per_s": 34.6172
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.2,
+          "events": [
+            {
+              "clubhead_speed_m_s": 35.077,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.59946,
+                -1.59946,
+                10.9968,
+                23.334
+              ],
+              "event_time_s": 0.521122,
+              "guard_residual": -1.90337e-11,
+              "near_grazing": false,
+              "sample_index": 260,
+              "transversality_per_s": 34.3308
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "both",
+      "dt_s": 0.004,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8543,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.765808,
+                -0.765808,
+                6.78505,
+                28.2407
+              ],
+              "event_time_s": 0.349256,
+              "guard_residual": -4.85323e-11,
+              "near_grazing": false,
+              "sample_index": 87,
+              "transversality_per_s": 35.0258
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8911,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.829523,
+                -0.829523,
+                6.99071,
+                28.1674
+              ],
+              "event_time_s": 0.366614,
+              "guard_residual": 7.58782e-11,
+              "near_grazing": false,
+              "sample_index": 91,
+              "transversality_per_s": 35.1581
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.8658,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.897204,
+                -0.897204,
+                7.23559,
+                28.0129
+              ],
+              "event_time_s": 0.383897,
+              "guard_residual": 6.65479e-12,
+              "near_grazing": false,
+              "sample_index": 95,
+              "transversality_per_s": 35.2485
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.06,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.77,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                0.969053,
+                -0.969053,
+                7.52383,
+                27.7718
+              ],
+              "event_time_s": 0.401116,
+              "guard_residual": -4.81439e-11,
+              "near_grazing": false,
+              "sample_index": 100,
+              "transversality_per_s": 35.2956
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.08,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.5939,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.04527,
+                -1.04527,
+                7.85942,
+                27.4391
+              ],
+              "event_time_s": 0.418283,
+              "guard_residual": -7.10134e-11,
+              "near_grazing": false,
+              "sample_index": 104,
+              "transversality_per_s": 35.2985
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.1,
+          "events": [
+            {
+              "clubhead_speed_m_s": 38.3258,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.12604,
+                -1.12604,
+                8.24602,
+                27.0102
+              ],
+              "event_time_s": 0.435413,
+              "guard_residual": 5.38274e-11,
+              "near_grazing": false,
+              "sample_index": 108,
+              "transversality_per_s": 35.2562
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.12,
+          "events": [
+            {
+              "clubhead_speed_m_s": 37.9521,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.21149,
+                -1.21149,
+                8.6866,
+                26.4815
+              ],
+              "event_time_s": 0.452524,
+              "guard_residual": 3.36833e-11,
+              "near_grazing": false,
+              "sample_index": 113,
+              "transversality_per_s": 35.1681
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.14,
+          "events": [
+            {
+              "clubhead_speed_m_s": 37.4574,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.30169,
+                -1.30169,
+                9.18306,
+                25.8501
+              ],
+              "event_time_s": 0.469633,
+              "guard_residual": 6.56712e-11,
+              "near_grazing": false,
+              "sample_index": 117,
+              "transversality_per_s": 35.0332
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.16,
+          "events": [
+            {
+              "clubhead_speed_m_s": 36.8247,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.39659,
+                -1.39659,
+                9.73562,
+                25.1146
+              ],
+              "event_time_s": 0.486758,
+              "guard_residual": 2.1525e-11,
+              "near_grazing": false,
+              "sample_index": 121,
+              "transversality_per_s": 34.8502
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.18,
+          "events": [
+            {
+              "clubhead_speed_m_s": 36.0368,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.49599,
+                -1.49599,
+                10.3421,
+                24.2751
+              ],
+              "event_time_s": 0.503917,
+              "guard_residual": 7.17841e-11,
+              "near_grazing": false,
+              "sample_index": 125,
+              "transversality_per_s": 34.6172
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.2,
+          "events": [
+            {
+              "clubhead_speed_m_s": 35.077,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.59946,
+                -1.59946,
+                10.9968,
+                23.334
+              ],
+              "event_time_s": 0.521122,
+              "guard_residual": -2.33131e-11,
+              "near_grazing": false,
+              "sample_index": 130,
+              "transversality_per_s": 34.3308
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "shoulder_only",
+      "dt_s": 0.001,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.1538,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.16897,
+                -1.16897,
+                10.1917,
+                20.2402
+              ],
+              "event_time_s": 0.369901,
+              "guard_residual": 8.52851e-11,
+              "near_grazing": false,
+              "sample_index": 369,
+              "transversality_per_s": 30.432
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.109,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.18937,
+                -1.18937,
+                10.2652,
+                20.221
+              ],
+              "event_time_s": 0.385796,
+              "guard_residual": -9.95348e-11,
+              "near_grazing": false,
+              "sample_index": 385,
+              "transversality_per_s": 30.4862
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.0319,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.21081,
+                -1.21081,
+                10.3409,
+                20.1759
+              ],
+              "event_time_s": 0.401509,
+              "guard_residual": 9.39651e-11,
+              "near_grazing": false,
+              "sample_index": 401,
+              "transversality_per_s": 30.5168
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.06,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.9214,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.23356,
+                -1.23356,
+                10.42,
+                20.1041
+              ],
+              "event_time_s": 0.417045,
+              "guard_residual": -6.6972e-11,
+              "near_grazing": false,
+              "sample_index": 417,
+              "transversality_per_s": 30.5242
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.08,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.7758,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.2579,
+                -1.2579,
+                10.5041,
+                20.0046
+              ],
+              "event_time_s": 0.43241,
+              "guard_residual": 9.31302e-11,
+              "near_grazing": false,
+              "sample_index": 432,
+              "transversality_per_s": 30.5086
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.1,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.5928,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.28417,
+                -1.28417,
+                10.5947,
+                19.8755
+              ],
+              "event_time_s": 0.447615,
+              "guard_residual": -1.70974e-14,
+              "near_grazing": false,
+              "sample_index": 447,
+              "transversality_per_s": 30.4703
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.12,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.3695,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.3127,
+                -1.3127,
+                10.6939,
+                19.7149
+              ],
+              "event_time_s": 0.462673,
+              "guard_residual": 8.47771e-11,
+              "near_grazing": false,
+              "sample_index": 462,
+              "transversality_per_s": 30.4088
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.14,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.1023,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.34382,
+                -1.34382,
+                10.8034,
+                19.5203
+              ],
+              "event_time_s": 0.477597,
+              "guard_residual": 4.69504e-11,
+              "near_grazing": false,
+              "sample_index": 477,
+              "transversality_per_s": 30.3237
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.16,
+          "events": [
+            {
+              "clubhead_speed_m_s": 32.7869,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.37784,
+                -1.37784,
+                10.9253,
+                19.2887
+              ],
+              "event_time_s": 0.492406,
+              "guard_residual": 6.54732e-11,
+              "near_grazing": false,
+              "sample_index": 492,
+              "transversality_per_s": 30.214
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.18,
+          "events": [
+            {
+              "clubhead_speed_m_s": 32.4187,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.41499,
+                -1.41499,
+                11.0612,
+                19.0171
+              ],
+              "event_time_s": 0.507117,
+              "guard_residual": -1.97331e-12,
+              "near_grazing": false,
+              "sample_index": 507,
+              "transversality_per_s": 30.0784
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.2,
+          "events": [
+            {
+              "clubhead_speed_m_s": 31.9927,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.45544,
+                -1.45544,
+                11.2123,
+                18.7027
+              ],
+              "event_time_s": 0.521751,
+              "guard_residual": 8.46692e-11,
+              "near_grazing": false,
+              "sample_index": 521,
+              "transversality_per_s": 29.915
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "shoulder_only",
+      "dt_s": 0.002,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.1538,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.16897,
+                -1.16897,
+                10.1917,
+                20.2402
+              ],
+              "event_time_s": 0.369901,
+              "guard_residual": 8.78995e-11,
+              "near_grazing": false,
+              "sample_index": 184,
+              "transversality_per_s": 30.432
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.109,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.18937,
+                -1.18937,
+                10.2652,
+                20.221
+              ],
+              "event_time_s": 0.385796,
+              "guard_residual": 2.43785e-11,
+              "near_grazing": false,
+              "sample_index": 192,
+              "transversality_per_s": 30.4862
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.0319,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.21081,
+                -1.21081,
+                10.3409,
+                20.1759
+              ],
+              "event_time_s": 0.401509,
+              "guard_residual": -9.28968e-12,
+              "near_grazing": false,
+              "sample_index": 200,
+              "transversality_per_s": 30.5168
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.06,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.9214,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.23356,
+                -1.23356,
+                10.42,
+                20.1041
+              ],
+              "event_time_s": 0.417045,
+              "guard_residual": -1.2442e-11,
+              "near_grazing": false,
+              "sample_index": 208,
+              "transversality_per_s": 30.5242
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.08,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.7758,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.2579,
+                -1.2579,
+                10.5041,
+                20.0046
+              ],
+              "event_time_s": 0.43241,
+              "guard_residual": 2.03166e-11,
+              "near_grazing": false,
+              "sample_index": 216,
+              "transversality_per_s": 30.5086
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.1,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.5928,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.28417,
+                -1.28417,
+                10.5947,
+                19.8755
+              ],
+              "event_time_s": 0.447615,
+              "guard_residual": 5.31248e-11,
+              "near_grazing": false,
+              "sample_index": 223,
+              "transversality_per_s": 30.4703
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.12,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.3695,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.3127,
+                -1.3127,
+                10.6939,
+                19.7149
+              ],
+              "event_time_s": 0.462673,
+              "guard_residual": -9.96203e-12,
+              "near_grazing": false,
+              "sample_index": 231,
+              "transversality_per_s": 30.4088
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.14,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.1023,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.34382,
+                -1.34382,
+                10.8034,
+                19.5203
+              ],
+              "event_time_s": 0.477597,
+              "guard_residual": 3.03757e-13,
+              "near_grazing": false,
+              "sample_index": 238,
+              "transversality_per_s": 30.3237
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.16,
+          "events": [
+            {
+              "clubhead_speed_m_s": 32.7869,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.37784,
+                -1.37784,
+                10.9253,
+                19.2887
+              ],
+              "event_time_s": 0.492406,
+              "guard_residual": 1.21503e-11,
+              "near_grazing": false,
+              "sample_index": 246,
+              "transversality_per_s": 30.214
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.18,
+          "events": [
+            {
+              "clubhead_speed_m_s": 32.4187,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.41499,
+                -1.41499,
+                11.0612,
+                19.0171
+              ],
+              "event_time_s": 0.507117,
+              "guard_residual": -1.32117e-11,
+              "near_grazing": false,
+              "sample_index": 253,
+              "transversality_per_s": 30.0784
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.2,
+          "events": [
+            {
+              "clubhead_speed_m_s": 31.9927,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.45544,
+                -1.45544,
+                11.2123,
+                18.7027
+              ],
+              "event_time_s": 0.521751,
+              "guard_residual": -4.39946e-11,
+              "near_grazing": false,
+              "sample_index": 260,
+              "transversality_per_s": 29.915
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "shoulder_only",
+      "dt_s": 0.004,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.1538,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.16897,
+                -1.16897,
+                10.1917,
+                20.2402
+              ],
+              "event_time_s": 0.369901,
+              "guard_residual": -3.62232e-11,
+              "near_grazing": false,
+              "sample_index": 92,
+              "transversality_per_s": 30.4319
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.109,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.18937,
+                -1.18937,
+                10.2652,
+                20.221
+              ],
+              "event_time_s": 0.385796,
+              "guard_residual": -6.05724e-11,
+              "near_grazing": false,
+              "sample_index": 96,
+              "transversality_per_s": 30.4862
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 34.0319,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.21081,
+                -1.21081,
+                10.3409,
+                20.1759
+              ],
+              "event_time_s": 0.401509,
+              "guard_residual": -8.45002e-11,
+              "near_grazing": false,
+              "sample_index": 100,
+              "transversality_per_s": 30.5168
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.06,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.9214,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.23356,
+                -1.23356,
+                10.42,
+                20.1041
+              ],
+              "event_time_s": 0.417045,
+              "guard_residual": 2.5977e-12,
+              "near_grazing": false,
+              "sample_index": 104,
+              "transversality_per_s": 30.5242
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.08,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.7758,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.2579,
+                -1.2579,
+                10.5041,
+                20.0045
+              ],
+              "event_time_s": 0.43241,
+              "guard_residual": 8.02054e-11,
+              "near_grazing": false,
+              "sample_index": 108,
+              "transversality_per_s": 30.5086
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.1,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.5928,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.28417,
+                -1.28417,
+                10.5947,
+                19.8755
+              ],
+              "event_time_s": 0.447615,
+              "guard_residual": -5.9506e-11,
+              "near_grazing": false,
+              "sample_index": 111,
+              "transversality_per_s": 30.4703
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.12,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.3695,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.3127,
+                -1.3127,
+                10.6939,
+                19.7149
+              ],
+              "event_time_s": 0.462673,
+              "guard_residual": 6.94023e-11,
+              "near_grazing": false,
+              "sample_index": 115,
+              "transversality_per_s": 30.4088
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.14,
+          "events": [
+            {
+              "clubhead_speed_m_s": 33.1023,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.34382,
+                -1.34382,
+                10.8034,
+                19.5203
+              ],
+              "event_time_s": 0.477597,
+              "guard_residual": -9.64939e-11,
+              "near_grazing": false,
+              "sample_index": 119,
+              "transversality_per_s": 30.3237
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.16,
+          "events": [
+            {
+              "clubhead_speed_m_s": 32.7869,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.37784,
+                -1.37784,
+                10.9253,
+                19.2887
+              ],
+              "event_time_s": 0.492406,
+              "guard_residual": 3.01354e-11,
+              "near_grazing": false,
+              "sample_index": 123,
+              "transversality_per_s": 30.214
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.18,
+          "events": [
+            {
+              "clubhead_speed_m_s": 32.4187,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.41499,
+                -1.41499,
+                11.0612,
+                19.0171
+              ],
+              "event_time_s": 0.507117,
+              "guard_residual": -9.32658e-11,
+              "near_grazing": false,
+              "sample_index": 126,
+              "transversality_per_s": 30.0784
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.2,
+          "events": [
+            {
+              "clubhead_speed_m_s": 31.9927,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                1.45544,
+                -1.45544,
+                11.2123,
+                18.7027
+              ],
+              "event_time_s": 0.521751,
+              "guard_residual": -8.69611e-11,
+              "near_grazing": false,
+              "sample_index": 130,
+              "transversality_per_s": 29.915
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "wrist_only",
+      "dt_s": 0.001,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 13.5286,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.896581,
+                0.896581,
+                4.79671,
+                6.19087
+              ],
+              "event_time_s": 0.579326,
+              "guard_residual": 5.41353e-11,
+              "near_grazing": false,
+              "sample_index": 579,
+              "transversality_per_s": 10.9876
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 14.3741,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.829222,
+                0.829222,
+                4.39768,
+                7.54136
+              ],
+              "event_time_s": 0.585953,
+              "guard_residual": 9.36281e-11,
+              "near_grazing": false,
+              "sample_index": 585,
+              "transversality_per_s": 11.939
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 15.2081,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.756066,
+                0.756066,
+                3.95691,
+                8.95518
+              ],
+              "event_time_s": 0.59297,
+              "guard_residual": 4.64575e-11,
+              "near_grazing": false,
+              "sample_index": 592,
+              "transversality_per_s": 12.9121
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.06,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.08,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.1,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.12,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.14,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.16,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.18,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.2,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "wrist_only",
+      "dt_s": 0.002,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 13.5286,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.896581,
+                0.896581,
+                4.79671,
+                6.19087
+              ],
+              "event_time_s": 0.579326,
+              "guard_residual": 8.37116e-11,
+              "near_grazing": false,
+              "sample_index": 289,
+              "transversality_per_s": 10.9876
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 14.3741,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.829222,
+                0.829222,
+                4.39768,
+                7.54136
+              ],
+              "event_time_s": 0.585953,
+              "guard_residual": 6.42399e-11,
+              "near_grazing": false,
+              "sample_index": 292,
+              "transversality_per_s": 11.939
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 15.2081,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.756066,
+                0.756066,
+                3.95691,
+                8.95518
+              ],
+              "event_time_s": 0.59297,
+              "guard_residual": 9.36257e-11,
+              "near_grazing": false,
+              "sample_index": 296,
+              "transversality_per_s": 12.9121
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.06,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.08,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.1,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.12,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.14,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.16,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.18,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.2,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "wrist_only",
+      "dt_s": 0.004,
+      "outcomes": [
+        {
+          "crossing_count": 1,
+          "delay_s": 0.0,
+          "events": [
+            {
+              "clubhead_speed_m_s": 13.5286,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.896581,
+                0.896581,
+                4.79671,
+                6.19087
+              ],
+              "event_time_s": 0.579326,
+              "guard_residual": 6.01574e-11,
+              "near_grazing": false,
+              "sample_index": 144,
+              "transversality_per_s": 10.9876
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.02,
+          "events": [
+            {
+              "clubhead_speed_m_s": 14.3741,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.829222,
+                0.829222,
+                4.39768,
+                7.54136
+              ],
+              "event_time_s": 0.585953,
+              "guard_residual": 6.92802e-11,
+              "near_grazing": false,
+              "sample_index": 146,
+              "transversality_per_s": 11.939
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 1,
+          "delay_s": 0.04,
+          "events": [
+            {
+              "clubhead_speed_m_s": 15.2081,
+              "direction": "negative_to_nonnegative",
+              "event_state": [
+                -0.756066,
+                0.756066,
+                3.95691,
+                8.95518
+              ],
+              "event_time_s": 0.59297,
+              "guard_residual": 3.61113e-11,
+              "near_grazing": false,
+              "sample_index": 148,
+              "transversality_per_s": 12.9121
+            }
+          ],
+          "numerical_message": "",
+          "status": "unique_transverse"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.06,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.08,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.1,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.12,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.14,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.16,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.18,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.2,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "zero",
+      "dt_s": 0.001,
+      "outcomes": [
+        {
+          "crossing_count": 0,
+          "delay_s": 0.0,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.02,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.04,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.06,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.08,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.1,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.12,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.14,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.16,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.18,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.2,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "zero",
+      "dt_s": 0.002,
+      "outcomes": [
+        {
+          "crossing_count": 0,
+          "delay_s": 0.0,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.02,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.04,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.06,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.08,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.1,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.12,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.14,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.16,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.18,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.2,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    },
+    {
+      "channel": "zero",
+      "dt_s": 0.004,
+      "outcomes": [
+        {
+          "crossing_count": 0,
+          "delay_s": 0.0,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.02,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.04,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.06,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.08,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.1,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.12,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.14,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.16,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.18,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        },
+        {
+          "crossing_count": 0,
+          "delay_s": 0.2,
+          "events": [],
+          "numerical_message": "",
+          "status": "absent"
+        }
+      ],
+      "zero_delay_control_residual_nm": 0.0
+    }
+  ],
+  "step_refinement_summary": [
+    {
+      "channel": "both",
+      "maximum_clubhead_speed_residual_m_s": 1.52278e-06,
+      "maximum_event_state_residual": 3.79534e-06,
+      "maximum_event_time_residual_s": 4.92856e-09,
+      "maximum_transversality_residual_per_s": 2.16248e-06,
+      "topology_identity_all_match": true
+    },
+    {
+      "channel": "shoulder_only",
+      "maximum_clubhead_speed_residual_m_s": 7.33022e-07,
+      "maximum_event_state_residual": 1.74516e-06,
+      "maximum_event_time_residual_s": 1.13994e-09,
+      "maximum_transversality_residual_per_s": 1.15452e-06,
+      "topology_identity_all_match": true
+    },
+    {
+      "channel": "wrist_only",
+      "maximum_clubhead_speed_residual_m_s": 1.45762e-07,
+      "maximum_event_state_residual": 8.96988e-08,
+      "maximum_event_time_residual_s": 9.68575e-10,
+      "maximum_transversality_residual_per_s": 1.16237e-07,
+      "topology_identity_all_match": true
+    },
+    {
+      "channel": "zero",
+      "maximum_clubhead_speed_residual_m_s": 0.0,
+      "maximum_event_state_residual": 0.0,
+      "maximum_event_time_residual_s": 0.0,
+      "maximum_transversality_residual_per_s": 0.0,
+      "topology_identity_all_match": true
+    }
+  ]
+}

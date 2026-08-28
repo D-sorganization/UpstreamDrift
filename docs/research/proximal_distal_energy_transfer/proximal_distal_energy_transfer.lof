@@ -1,0 +1,157 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Double-Pendulum Club Free-Body Diagram}}{24}{figure.caption.9}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Wrist Reaction-Force Vectors Through the Downswing}}{26}{figure.caption.17}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Geometry Controls Which Inertial Forces Can Transfer Power}}{27}{figure.caption.20}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Exact Inertial Components and Total Wrist Force}}{28}{figure.caption.21}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Force-Power Pathways and Cumulative Wrist-Force Work}}{29}{figure.caption.22}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Commanded and Zero-Torque Futures From a Matched Late-Downswing State}}{29}{figure.caption.23}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Registered WSCG Two-Hand BASE and Counterfactual Hand-Force Series}}{31}{figure.caption.25}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Signed Force Along the Achieved Hand Path for the Three Reference Cases}}{37}{figure.caption.38}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Total, Drift, Control, and Zero-Velocity Control-Preserved Force Vectors at Normalized Time Quartiles}}{38}{figure.caption.39}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Signed Target-Direction Impulse and Force-Work Attribution}}{39}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Phase-Resolved Drift Work Shares and Cancellation for Every Joint}}{40}{figure.caption.41}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Instantaneous Drift Power Shares and Cancellation for Every Joint}}{41}{figure.caption.43}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Quadrature Sensitivity and Additive Closure Diagnostics}}{42}{figure.caption.44}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Common-Resultant and Differential Two-Hand Force Modes}}{43}{figure.caption.47}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Residual-Couple Preview Test for the Archived Two-Hand Model}}{45}{figure.caption.49}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces The registered search compares absolute Coriolis tangent impulse with impact clubhead speed and signed component work. The two highlighted optima are close but not identical.}}{50}{figure.caption.58}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Pointwise Support-Reaction Attribution}}{54}{figure.caption.63}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Support-Reaction Vectors Along the Achieved Trajectory}}{55}{figure.caption.64}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Falsification Ladder for Human Ground-Reaction Attribution}}{56}{figure.caption.65}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {7.1}{\ignorespaces Drift interface power across proximal angular-velocity sweeps. Each panel states the velocity-matching rule; the large late-swing benefit is not invariant to that rule.}}{59}{figure.caption.66}%
+\contentsline {figure}{\numberline {7.2}{\ignorespaces Negative interface power across phase and velocity-matching rule. Shading marks states in which the modeled wrist reaction removes mechanical energy from the club at that instant.}}{60}{figure.caption.67}%
+\contentsline {figure}{\numberline {7.3}{\ignorespaces Signed finite-range slope of drift interface power with proximal angular velocity. Positive cells indicate that faster proximal motion increases drift-mediated interface power within the declared local sweep.}}{61}{figure.caption.68}%
+\contentsline {figure}{\numberline {7.4}{\ignorespaces Identical-state proximal-acceleration interventions. The left panel reports interface-force power; the right exposes the proximal torque needed to impose the acceleration.}}{62}{figure.caption.69}%
+\contentsline {figure}{\numberline {7.5}{\ignorespaces Release-state proximal velocity against impact speed and negative interface work, followed by impact speed against net actuator work, for every valid- impact trajectory. Color denotes release time in the first two panels; gray connectors identify the approximate work-matched pairs in the third.}}{63}{figure.caption.70}%
+\contentsline {figure}{\numberline {7.6}{\ignorespaces Independent primary matches retain favorable and adverse higher-rate outcomes. The sensitivity panel reports the mean higher-minus-lower rate speed difference and the number of favorable pairs over all independent pairs in each tolerance cell.}}{64}{figure.caption.71}%
+\contentsline {figure}{\numberline {7.7}{\ignorespaces Registered impact speed across the complete timing grid. An X denotes a program that fails to reach club vertical inside the declared delivery window.}}{64}{figure.caption.72}%
+\contentsline {figure}{\numberline {7.8}{\ignorespaces Nondominated speed, braking-work, and peak-force outcomes. Open red markers identify programs for which no sampled alternative is at least as good on all three objectives and strictly better on one.}}{65}{figure.caption.73}%
+\contentsline {figure}{\numberline {7.9}{\ignorespaces Delivery speed across the rotating-base grid. An X identifies a retained row outside the registered 100 N peak-grip-force or 0.08 J work-closure envelope; lines are descriptive connections, not fitted human response curves.}}{66}{figure.caption.74}%
+\contentsline {figure}{\numberline {7.10}{\ignorespaces Torso rate, delivery speed, bilateral contact power, and force-generated couple for the three initial-rate levels under the relative-rate, zero-torso- torque program. The wrist command changes at 25 ms, producing the visible but auditable discontinuity.}}{67}{figure.caption.75}%
+\contentsline {figure}{\numberline {7.11}{\ignorespaces Delivery-speed changes under exact same-state command killswitches and shaft- stiffness sensitivity. A positive bar means the continued baseline command finishes faster than the corresponding command-zero branch.}}{68}{figure.caption.76}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {8.1}{\ignorespaces Matched-State Counterfactual Divergence by Cut Time and Horizon}}{72}{figure.caption.79}%
+\contentsline {figure}{\numberline {8.2}{\ignorespaces Commanded and Zero-Torque State, Force, and Power Futures}}{73}{figure.caption.80}%
+\contentsline {figure}{\numberline {8.3}{\ignorespaces Timestep Sensitivity of Matched-State Divergence Metrics}}{74}{figure.caption.81}%
+\contentsline {figure}{\numberline {8.4}{\ignorespaces Whole-Model Gravity and Damping Variants of the Killswitch Comparison}}{75}{figure.caption.82}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {9.1}{\ignorespaces Reference Transport Changes the Moment but Preserves the Wrench}}{79}{figure.caption.87}%
+\contentsline {figure}{\numberline {9.2}{\ignorespaces A Large Opposed-Force Mode Can Coexist With a Modest Resultant}}{80}{figure.caption.91}%
+\contentsline {figure}{\numberline {9.3}{\ignorespaces Bilateral Wrench Identifiability Is Geometry and Sensor Dependent}}{81}{figure.caption.94}%
+\contentsline {figure}{\numberline {9.4}{\ignorespaces Synthetic Bilateral Point-Force Sensor Qualification}}{82}{figure.caption.95}%
+\contentsline {figure}{\numberline {9.5}{\ignorespaces The Negative ZTCF Couple Is Generated by Contact Forces}}{84}{figure.caption.96}%
+\contentsline {figure}{\numberline {9.6}{\ignorespaces Late Equivalent-Couple Reversal Timing}}{85}{figure.caption.97}%
+\contentsline {figure}{\numberline {9.7}{\ignorespaces Opposing Local Hand Forces Persist in Pointwise ZTCF}}{86}{figure.caption.98}%
+\contentsline {figure}{\numberline {9.8}{\ignorespaces Three-Dimensional View of the Archived Two-Hand Force System}}{87}{figure.caption.99}%
+\contentsline {figure}{\numberline {9.9}{\ignorespaces Geometric Counterfactuals at Peak Negative ZTCF}}{88}{figure.caption.100}%
+\contentsline {figure}{\numberline {9.10}{\ignorespaces Negative Couple Sign Does Not Alone Determine Energy-Transfer Sign}}{89}{figure.caption.103}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {10.1}{\ignorespaces Forward Two-Hand Interaction-Force Mechanism. The force-generated couple is separated from direct wrist torque (upper left). A zero-command branch starts from the exact 200 ms state and retains a negative couple for the full 50 ms window (upper right). Contact power and common/differential force modes show why moment sign, power sign, and force magnitude are different observables.}}{96}{figure.caption.114}%
+\contentsline {figure}{\numberline {10.2}{\ignorespaces Two-Hand Force Vectors Through the Couple Reversal. Blue and red arrows are the right- and left-hand forces on the club; all panels use the same force scale. Black denotes the floating club, colored links denote the two arms, and the black point is the declared club center.}}{96}{figure.caption.115}%
+\contentsline {figure}{\numberline {10.3}{\ignorespaces Forward Solver Closure and Sensitivity Audit. Work--energy residual and maximum projection correction contract under timestep refinement (top). Integrated control work overlays the mechanical-energy change, while the closed-loop position residual remains below its declared limit (bottom).}}{97}{figure.caption.116}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {12.1}{\ignorespaces Matched Mass Distribution With and Without a Shaft-Flex Coordinate}}{101}{figure.caption.118}%
+\contentsline {figure}{\numberline {12.2}{\ignorespaces Momentum, Gravity, Damping, Control, and Shaft Terms Sum Exactly}}{102}{figure.caption.122}%
+\contentsline {figure}{\numberline {12.3}{\ignorespaces Shaft Strain Energy Is Small but Explicitly Closed}}{104}{figure.caption.126}%
+\contentsline {figure}{\numberline {12.4}{\ignorespaces Matched Rigid and Flexible Deliveries Differ Modestly in the Reference Case}}{105}{figure.caption.127}%
+\contentsline {figure}{\numberline {12.5}{\ignorespaces Flexible and Rigid Centerlines Separate Near Delivery}}{106}{figure.caption.128}%
+\contentsline {figure}{\numberline {12.6}{\ignorespaces Ablations Change Delivery More Than Reference Shaft Flex}}{107}{figure.caption.129}%
+\contentsline {figure}{\numberline {12.7}{\ignorespaces Stiffness and Torque-Cut-Time Slices at Reference Damping}}{107}{figure.caption.130}%
+\contentsline {figure}{\numberline {12.8}{\ignorespaces Impact Definition and Numerical Resolution}}{108}{figure.caption.131}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {13.1}{\ignorespaces Endogenous Base Motion, Club Flex, and Two-Hand Interaction Forces}}{111}{figure.caption.137}%
+\contentsline {figure}{\numberline {13.2}{\ignorespaces Coupled Transfer Observables}}{113}{figure.caption.146}%
+\contentsline {figure}{\numberline {13.3}{\ignorespaces Counterfactual and Numerical Falsification Tests}}{114}{figure.caption.147}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {14.1}{\ignorespaces The Same Net Club-Moment Task Can Be Divided Between Direct Wrist Moment and a Two-Hand Force Couple}}{117}{figure.caption.149}%
+\contentsline {figure}{\numberline {14.2}{\ignorespaces Modeled Demand Minima Vary With Geometry and Objective}}{118}{figure.caption.150}%
+\contentsline {figure}{\numberline {14.3}{\ignorespaces Continuous Preparation History and Command Transition}}{119}{figure.caption.153}%
+\contentsline {figure}{\numberline {14.4}{\ignorespaces Transmission Continuity for Persistent-Direction and Role-Reversal Programs}}{120}{figure.caption.154}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {15.1}{\ignorespaces Synthetic Identification and Beam Convergence}}{123}{figure.caption.156}%
+\contentsline {figure}{\numberline {15.2}{\ignorespaces Reduced and Higher-Order Tip Responses}}{123}{figure.caption.158}%
+\contentsline {figure}{\numberline {15.3}{\ignorespaces Beam Input, Damping, and Energy Closure}}{124}{figure.caption.160}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {16.1}{\ignorespaces Forward Geometry, Distributed Shaft, and Achieved Grip Forces}}{126}{figure.caption.167}%
+\contentsline {figure}{\numberline {16.2}{\ignorespaces Mode-Truncation Response Under Smooth and Short Inputs}}{128}{figure.caption.169}%
+\contentsline {figure}{\numberline {16.3}{\ignorespaces Same-State Killswitch, Geometry Controls, and Numerical Closure}}{129}{figure.caption.170}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {17.1}{\ignorespaces Spatial Full-Body Common State and Two-Hand Force Geometry}}{132}{figure.caption.171}%
+\contentsline {figure}{\numberline {17.2}{\ignorespaces Independent Inverse-Dynamics Formulations Agree at the Same Spatial State}}{135}{figure.caption.179}%
+\contentsline {figure}{\numberline {17.3}{\ignorespaces Spatial Interventions Expose Both Support and Remaining Falsifiers}}{135}{figure.caption.180}%
+\contentsline {figure}{\numberline {17.4}{\ignorespaces Subject-Scaled Spatial Contact-Geometry Audit}}{136}{figure.caption.181}%
+\contentsline {figure}{\numberline {17.5}{\ignorespaces Subject-Scaled Bilateral Closed-Contact Feasibility}}{137}{figure.caption.182}%
+\contentsline {figure}{\numberline {17.6}{\ignorespaces Closed Subject States Enter Paired Native Operators Without Preload}}{138}{figure.caption.183}%
+\contentsline {figure}{\numberline {17.7}{\ignorespaces Inertia-and-Bias Transport Validity Horizon and Adverse-Load Map}}{139}{figure.caption.184}%
+\contentsline {figure}{\numberline {17.8}{\ignorespaces Native Articulated Dynamics Across All Closed States}}{140}{figure.caption.185}%
+\contentsline {figure}{\numberline {17.9}{\ignorespaces Native Equality Dynamics and Projected Compliant Contact Are Distinct Formulations}}{142}{figure.caption.186}%
+\contentsline {figure}{\numberline {17.10}{\ignorespaces Articulated Contact Projection and Initial Acceleration Across All Closed States}}{143}{figure.caption.188}%
+\contentsline {figure}{\numberline {17.11}{\ignorespaces Bounded Articulated Bilateral-Attachment Forward Dynamics Across Registered States and Controls}}{145}{figure.caption.190}%
+\contentsline {figure}{\numberline {17.12}{\ignorespaces Typed Unilateral Slack and Reattachment Across Natural-State and Boundary-Crossing Controls}}{146}{figure.caption.192}%
+\contentsline {figure}{\numberline {17.13}{\ignorespaces Distributed Grip Friction and Contact Events Across Nested Articulated Horizons}}{148}{figure.caption.196}%
+\contentsline {figure}{\numberline {17.14}{\ignorespaces Passive Articulated Shaft Bending and Torsion Under Distributed Grip Loading}}{150}{figure.caption.199}%
+\contentsline {figure}{\numberline {17.15}{\ignorespaces Finite Ground Reaction and Intrinsic Free Moment in the Articulated Model}}{152}{figure.caption.202}%
+\contentsline {figure}{\numberline {17.16}{\ignorespaces Scapular Mobility and Bilateral Contact Geometry}}{153}{figure.caption.203}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {18.1}{\ignorespaces Achieved Spatial Contact Geometry and Projected Compliant-Force Vectors}}{157}{figure.caption.206}%
+\contentsline {figure}{\numberline {18.2}{\ignorespaces MuJoCo and Pinocchio Inertia-and-Bias Transport Satisfies Declared Gates}}{159}{figure.caption.211}%
+\contentsline {figure}{\numberline {18.3}{\ignorespaces Post-Killswitch Interaction Dynamics Persist Without Direct Club Actuation}}{160}{figure.caption.212}%
+\contentsline {figure}{\numberline {18.4}{\ignorespaces Conservation and Negative Controls Bound the Forward-Contact Claim}}{161}{figure.caption.213}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {19.1}{\ignorespaces Uncertainty Intervals and PRCC Screening. Left: 5th--95th percentile ranges, normalized only for visual comparison. Right: partial rank correlations for the six registered outputs.}}{164}{figure.caption.214}%
+\contentsline {figure}{\numberline {19.2}{\ignorespaces Identifiability Audit. The net planar wrench cannot uniquely allocate both hand forces, and six summary observables cannot identify the full 12-parameter vector.}}{165}{figure.caption.215}%
+\contentsline {figure}{\numberline {19.3}{\ignorespaces Training and Independently Held-Out Pareto Comparisons. Membership changes across ensembles, so no program is promoted as universally optimal.}}{166}{figure.caption.216}%
+\contentsline {figure}{\numberline {19.4}{\ignorespaces Held-Out Strategy Tradeoffs Across Speed, Planar Delivery Error, Hand Load, Effort Proxy, and Dispersion.}}{167}{figure.caption.217}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {22.1}{\ignorespaces A Mechanism Ladder Must Add Degrees of Freedom Without Redefining Transfer}}{174}{figure.caption.218}%
+\contentsline {figure}{\numberline {22.2}{\ignorespaces Frame and Reference-Transport Contracts Close at Floating-Point Scale}}{175}{figure.caption.222}%
+\contentsline {figure}{\numberline {22.3}{\ignorespaces The Same Reference-Explicit Observables Extend to a Third Coordinate}}{176}{figure.caption.224}%
+\contentsline {figure}{\numberline {22.4}{\ignorespaces Prescribed Hub Motion Changes Reaction Force and Power Without Changing the Relative Trace}}{176}{figure.caption.226}%
+\contentsline {figure}{\numberline {22.5}{\ignorespaces Closed-Loop Geometry Restricts Motion but Does Not Determine Contact Force}}{178}{figure.caption.229}%
+\contentsline {figure}{\numberline {22.6}{\ignorespaces A Proper 3-D Frame Rotation Changes Components, Not Wrench Power}}{179}{figure.caption.231}%
+\contentsline {figure}{\numberline {22.7}{\ignorespaces Model Discrepancy Matrix: Executed Mechanisms and the Remaining Boundary}}{181}{figure.caption.232}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {23.1}{\ignorespaces Phase-Resolved Geometry of the Advanced Model}}{184}{figure.caption.233}%
+\contentsline {figure}{\numberline {23.2}{\ignorespaces Power Is Invariant Under Consistent Frame and Reference-Point Changes}}{185}{figure.caption.238}%
+\contentsline {figure}{\numberline {23.3}{\ignorespaces Different Muscle Activations Produce the Same Net Joint Moment}}{186}{figure.caption.242}%
+\contentsline {figure}{\numberline {23.4}{\ignorespaces Activation and Net Moment Through Persistent and Role-Reversal Programs}}{187}{figure.caption.245}%
+\contentsline {figure}{\numberline {23.5}{\ignorespaces Engine Roles and Their Canonical Comparison Surface}}{188}{figure.caption.246}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {24.1}{\ignorespaces The transmission ledger distinguishes pathway identity from kinematic sequence, torque sign from power sign, pointwise drift from a forward future, and model robustness from human stability.}}{191}{figure.caption.247}%
+\contentsline {figure}{\numberline {24.2}{\ignorespaces Held-out lower-tail speed and dispersion do not select the same program, and face/path error trades against peak hand force. Marker size in the left panel increases with peak-force exposure.}}{192}{figure.caption.248}%
+\contentsline {figure}{\numberline {24.3}{\ignorespaces State-triggered handoff reduces speed and face/path amplification relative to clock timing but amplifies peak hand force. The right panel expresses paired mean changes as percentages so unlike units are not visually conflated.}}{193}{figure.caption.249}%
+\contentsline {figure}{\numberline {24.4}{\ignorespaces The local outcome Jacobian identifies task-sensitive input directions and a five-dimensional null space. This is a model input--outcome partition, not evidence of a neural synergy.}}{193}{figure.caption.250}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {29.1}{\ignorespaces E1 sweep: clubhead speed at impact versus wrist-drive onset time, for drive-only and restrain-then-drive profiles at two shoulder-torque levels. Dashed line: fully passive wrist baseline.}}{205}{figure.caption.254}%
+\contentsline {figure}{\numberline {29.2}{\ignorespaces E1b: the timing sweep repeated with linear torque-velocity bounds on the shoulder and wrist drives.}}{207}{figure.caption.255}%
+\contentsline {figure}{\numberline {29.3}{\ignorespaces Kinematic sequence (arm and club angular speeds) for the four representative programs at \(\mittau _s = 60\) N·m. Dotted vertical line: impact.}}{208}{figure.caption.256}%
+\contentsline {figure}{\numberline {29.4}{\ignorespaces Stick-figure montage of the grid-selected restrain-then-drive swing in the swing plane (downswing progression at equal time steps).}}{209}{figure.caption.257}%
+\contentsline {figure}{\numberline {29.5}{\ignorespaces Segmental kinetic energies up to impact for the four representative programs.}}{210}{figure.caption.258}%
+\contentsline {figure}{\numberline {29.6}{\ignorespaces Early-half versus late-half energy budget (club kinetic-energy gain, wrist actuator work, integrated joint-force transfer) for the representative programs.}}{210}{figure.caption.259}%
+\contentsline {figure}{\numberline {29.7}{\ignorespaces Left: wrist-interface powers for the best restrain-then-drive swing. Right: segmental energy-balance check --- club mechanical-energy rate versus the sum of interface powers. The right-panel equality is pointwise after replacing sampled-velocity differentiation with analytic COM acceleration.}}{211}{figure.caption.260}%
+\contentsline {figure}{\numberline {29.8}{\ignorespaces Pointwise drift (ZTCF) versus control decomposition of club absolute angular acceleration, for the early-drive (left) and best restrain-then-drive (right) programs.}}{211}{figure.caption.261}%
+\contentsline {figure}{\numberline {29.9}{\ignorespaces Finite Command Rise-Time Sensitivity of the Tested E1 Programs}}{212}{figure.caption.262}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {31.1}{\ignorespaces Geometry Atlas for Force Power, Relative-Link Projection, and Bilateral Force-Couple Sign.}}{218}{figure.caption.263}%
+\contentsline {figure}{\numberline {31.2}{\ignorespaces Trajectory-Level Recovery Under Matched Initial-State Perturbations. Bands show the held-out engineering envelope; labels above the recovery bars give 90th-percentile individual-hand force.}}{219}{figure.caption.264}%
+\contentsline {figure}{\numberline {31.3}{\ignorespaces Task Viability and Realized Trigger Timing Across the Common Phase Grid and Declared Adverse Loads. Green cells satisfy common speed, face/path, force, effort, and numerical guards; recovery is reported separately and is absent in all registered cases.}}{220}{figure.caption.265}%
+\contentsline {figure}{\numberline {31.4}{\ignorespaces Typed Slack Dynamic Audit. Mechanical force-displacement loops, the delayed control boundary, local scaled-sensitivity ranks, and normalized outputs are shown for the registered synthetic excitations.}}{222}{figure.caption.266}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }

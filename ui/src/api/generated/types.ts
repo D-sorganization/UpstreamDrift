@@ -1369,6 +1369,36 @@ export interface ForceVectorResponse {
 }
 
 /**
+ * Golfer preset description and initial physical parameters.
+ */
+export interface GolferPresetInfo {
+  /** Human-readable preset name */
+  name: string;
+  /** Lumped arm mass in kg */
+  arm_mass_kg: number;
+  /** Equivalent shaft mass in kg */
+  shaft_mass_kg: number;
+  /** Equivalent head mass in kg */
+  clubhead_mass_kg: number;
+  /** Arm length hub-to-hands in m */
+  arm_length_m: number;
+  /** Club length hands-to-head in m */
+  club_length_m: number;
+  /** Arm angle at top of backswing in rad */
+  top_arm_angle_rad: number;
+  /** Wrist cock at top of backswing in rad */
+  top_wrist_cock_rad: number;
+  /** Default downswing duration in s */
+  duration_s: number;
+  /** Default peak hub torque in N*m */
+  hub_torque_nm: number;
+  /** Default peak wrist torque in N*m */
+  wrist_torque_nm: number;
+  /** Default collocation node count */
+  node_count: number;
+}
+
+/**
  * Response with slope contour data for visualization.
  */
 export interface GreenContourResponse {
@@ -2089,6 +2119,13 @@ export interface PooledAssociationV1 {
 }
 
 /**
+ * Available golfer presets.
+ */
+export interface PresetListResponse {
+  presets: GolferPresetInfo[];
+}
+
+/**
  * Request body for ``POST /realtime/publish``.
  */
 export interface PublishRequest {
@@ -2519,6 +2556,21 @@ export interface SurfaceMaterialResponse {
 }
 
 /**
+ * Wire payload matching comparison schema 1.0.0.
+ */
+export interface SwingComparisonResponse {
+  schema_version: string;
+  objective_keys: string[];
+  units: Record<string, string>;
+  raw_values: Record<string, Record<string, number>>;
+  matrix: number[][];
+  torque_saturation: Record<string, number[]>;
+  swing_distance: number[][];
+  is_degenerate: boolean;
+  diagnostics: Record<string, Record<string, unknown>>;
+}
+
+/**
  * Request model for swing capture import.
  */
 export interface SwingImportRequest {
@@ -2543,6 +2595,38 @@ export interface SwingImportResponse {
   joint_names: string[];
   phases?: Record<string, number> | null;
   rl_export_path?: string | null;
+}
+
+/**
+ * Request to optimize downswings across competing objectives.
+ */
+export interface SwingObjectiveCompareRequest {
+  /** Optional preset key or name */
+  preset_name?: string | null;
+  /** Arm mass in kg */
+  arm_mass_kg: number;
+  /** Equivalent shaft mass in kg */
+  shaft_mass_kg?: number | null;
+  /** Equivalent head mass in kg */
+  clubhead_mass_kg?: number | null;
+  /** Arm length in m */
+  arm_length_m: number;
+  /** Club length in m */
+  club_length_m: number;
+  /** Top arm angle in rad */
+  top_arm_angle_rad: number;
+  /** Top wrist cock angle in rad */
+  top_wrist_cock_rad: number;
+  /** Downswing duration in s */
+  duration_s: number;
+  /** Max hub torque in N*m */
+  hub_torque_nm: number;
+  /** Max wrist torque in N*m */
+  wrist_torque_nm: number;
+  /** Collocation node count */
+  node_count: number;
+  /** Optional subset of objective keys to compare (minimum 2) */
+  objective_keys?: string[] | null;
 }
 
 /**
