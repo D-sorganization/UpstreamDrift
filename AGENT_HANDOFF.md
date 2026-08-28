@@ -33,8 +33,8 @@ partial campaign checkpoints are not completion evidence.
   `019fe886-6614-70a2-a596-e5b0dea725d0`.
 - Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
 - Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
-  `e732757c9`. Remote recovery currently ends at `0ba50aee3`; local committed
-  implementation continues through `500032bbb` and must be pushed normally.
+  `e732757c9`. Remote recovery and local committed implementation both end at
+  `659394211` before this handoff update.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
@@ -83,6 +83,14 @@ partial campaign checkpoints are not completion evidence.
   `2.12e-4`. Revision 5 explicitly records the post-diagnostic amendment and
   superseded plan; do not delete or relabel the original checkpoints.
 - The registered wrapper runs or resumes all 42 cases through the atomic runner.
+- The corrected serial run at execution `659394211` is preserved under
+  `C:/Users/diete/Campaigns/UpstreamDrift-9153-rigid-smoke-659394211`: 21
+  MuJoCo cases completed and pass every individual frozen closure tolerance;
+  21 Pinocchio cases retain typed native-unavailability records. Momentum
+  residuals contract in every MuJoCo variant. Work refinement passes five of
+  seven variants but fails nominal (coarse-to-medium ratio `0.829 > 0.8`) and
+  high damping (nonmonotonic ratio `1.235 > 0.8`). Promotion is therefore false
+  independent of the missing cross-engine parity.
 - Forty-two affected focused tests, Ruff, and format pass. Focused MyPy first
   exposed inherited scientific-script typing debt, then the installed MyPy
   crashed internally under `--follow-imports=skip`; do not misreport this as a
@@ -99,9 +107,10 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Push the corrected plan/kernel, rerun the bounded rigid evaluator under a
-   new execution identity, aggregate all three resolutions without changing
-   gates, and retain native failures; then
+1. Implement a governed aggregator that validates every checkpoint identity,
+   retains the nominal/high-damping work-refinement failures, and suppresses
+   promotion while Pinocchio parity is unavailable; diagnose refinement without
+   changing gates. Then
    connect the distributed evaluator and add missing stick/slip event surfaces.
 2. Add matched rigid/shaft/base branches and causal forward killswitch runs kept
    separate from same-trajectory attribution, refinement/parity/adverse cases,
