@@ -18,6 +18,14 @@ performance, timing, slack, coaching, or safety inference. Its next gate is
 matched forward impulse/work attribution through contact transitions,
 shaft/base coupling, uncertainty, and adverse loads.
 
+## Qt/Sip Worker-Poisoning & Segmentation Fault Prevention (#9099)
+
+Issue #9099 fixes worker-poisoning access violations and segmentation faults occurring during test suite execution with pytest and PyQt6.
+The launcher entry point `run_launcher` in `src/launchers/base.py` (and launcher scripts `src/launchers/upstream_drift_launcher_main.py`,
+`src/launchers/exercise_dashboard.py`, `src/launchers/_shot_tracer_gui.py`) now verifies `QApplication.instance()` before creating a new
+`QApplication(sys.argv)` instance. When an active Qt application context already exists (such as pytest's `qapp` session fixture),
+the existing application instance is safely reused, preventing double-initialization memory corruption and C++ access violations.
+
 ## Tools Green-Surface Adapter Consumption (#9143)
 
 Issue #9143 consumes the Tools `swing_sim.putting` green-surface adapter (Tools #4800 P9) via the `vendor/ud-tools` vendor boundary.
