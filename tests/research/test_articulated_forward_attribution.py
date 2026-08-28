@@ -9,6 +9,7 @@ from scripts.research.proximal_distal_energy.articulated_contact_projection impo
     ArticulatedContactProjectionConfig,
 )
 from scripts.research.proximal_distal_energy.articulated_forward_attribution import (
+    differentiate_mass_along_velocity,
     differentiate_mass_matrices,
     integrate_forward_attribution,
     require_forward_attribution_closure,
@@ -174,6 +175,20 @@ def test_mass_matrix_rate_is_differentiated_within_each_segment() -> None:
     )
 
     np.testing.assert_allclose(rates[:, 0, 0], 2.0)
+
+
+def test_mass_rate_directional_derivative_is_independent_of_event_sampling() -> None:
+    positions = np.array([[0.5], [1.0]])
+    velocities = np.array([[3.0], [-2.0]])
+
+    rates = differentiate_mass_along_velocity(
+        positions=positions,
+        velocities=velocities,
+        mass_evaluator=lambda q: np.array([[1.0 + 2.0 * q[0]]]),
+        directional_step_s=1.0e-6,
+    )
+
+    np.testing.assert_allclose(rates[:, 0, 0], [6.0, -4.0], atol=1.0e-9)
 
 
 def test_planted_force_corruption_fails_closed() -> None:

@@ -7,6 +7,7 @@ same-trajectory attribution into a causal forward counterfactual.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -121,6 +122,45 @@ def differentiate_mass_matrices(
         rates[indices] = np.gradient(
             mass[indices], segment_time, axis=0, edge_order=edge_order
         )
+    return rates
+
+
+def differentiate_mass_along_velocity(
+    *,
+    positions: FloatArray,
+    velocities: FloatArray,
+    mass_evaluator: Callable[[FloatArray], FloatArray],
+    directional_step_s: float = 1.0e-6,
+) -> FloatArray:
+    """Evaluate ``Mdot = dM/dq qdot`` by a centered directional derivative."""
+
+    q = np.asarray(positions, dtype=np.float64)
+    qd = np.asarray(velocities, dtype=np.float64)
+    if q.ndim != 2 or q.shape != qd.shape or not np.all(np.isfinite(q)):
+        raise ValueError("positions and velocities must share one finite 2-D shape")
+    if not np.all(np.isfinite(qd)):
+        raise ValueError("positions and velocities must share one finite 2-D shape")
+    if not callable(mass_evaluator):
+        raise TypeError("mass_evaluator must be callable")
+    if not np.isfinite(directional_step_s) or directional_step_s <= 0.0:
+        raise ValueError("directional_step_s must be finite and positive")
+    sample_count, coordinate_count = q.shape
+    rates = np.empty((sample_count, coordinate_count, coordinate_count))
+    for index in range(sample_count):
+        offset = directional_step_s * qd[index]
+        forward = _finite_array(
+            "forward mass matrix",
+            mass_evaluator(q[index] + offset),
+            (coordinate_count, coordinate_count),
+        )
+        backward = _finite_array(
+            "backward mass matrix",
+            mass_evaluator(q[index] - offset),
+            (coordinate_count, coordinate_count),
+        )
+        rates[index] = (forward - backward) / (2.0 * directional_step_s)
+    if not np.allclose(rates, np.swapaxes(rates, 1, 2), rtol=1.0e-8, atol=1.0e-10):
+        raise ValueError("directional mass-matrix rates must be symmetric")
     return rates
 
 
@@ -359,6 +399,7 @@ def scale_forward_attribution_inputs(
 
 __all__ = [
     "ForwardAttribution",
+    "differentiate_mass_along_velocity",
     "differentiate_mass_matrices",
     "integrate_forward_attribution",
     "require_forward_attribution_closure",

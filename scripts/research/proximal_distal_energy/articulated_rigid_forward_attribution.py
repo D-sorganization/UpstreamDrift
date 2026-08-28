@@ -14,7 +14,7 @@ from scripts.research.proximal_distal_energy.articulated_contact_projection impo
 )
 from scripts.research.proximal_distal_energy.articulated_forward_attribution import (
     ForwardAttribution,
-    differentiate_mass_matrices,
+    differentiate_mass_along_velocity,
     integrate_forward_attribution,
 )
 from scripts.research.proximal_distal_energy.articulated_forward_contract import (
@@ -115,10 +115,14 @@ def attribute_rigid_contact_trajectory(
             - (snapshot.generalized_contact_force - bias)
         )
     segments = np.zeros(sample_count, dtype=np.int64)
-    mass_rates = differentiate_mass_matrices(
-        time_s=time,
-        mass_matrices=masses,
-        segment_ids=segments,
+
+    def evaluate_mass(position: FloatArray) -> FloatArray:
+        return operator(position, np.zeros(model.nq))[0]
+
+    mass_rates = differentiate_mass_along_velocity(
+        positions=positions,
+        velocities=velocities,
+        mass_evaluator=evaluate_mass,
     )
     attribution = integrate_forward_attribution(
         time_s=time,
