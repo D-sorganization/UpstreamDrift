@@ -89,33 +89,32 @@ are not completion evidence.
   at `C:/Users/diete/Campaigns/UpstreamDrift-9153-distributed-smoke-invalid-execution-d2800c556d8`;
   they are excluded from evidence and must not be merged with the valid run.
 - A new stateful elastic--perfectly-plastic tangential countermodel uses a
-  Coulomb radial return, retained elastic displacement, plastic-slip
-  dissipation, and explicit stored-energy release on opening. The distributed
-  adapter projects state into the changing tangent plane, retains projection
-  release, combines native generalized loads, and closes every station ledger.
-  Its distinct forward integrator freezes left-node kinematics, an
-  end-of-increment radial-return force, and semi-implicit mechanical stepping;
-  node states and interval responses cannot be confused. Tests cover stick,
-  slip, opening, rotation equivariance, exact constitutive ledgers, and
-  decreasing total-energy/coupling-work defects over three time refinements.
-  This is an engineering comparator, not anatomy or human evidence.
+  Coulomb radial return, retained elastic state, plastic/opening/projection
+  dissipation, and exact station ledgers. Its timestamp-explicit integrator uses
+  left-node kinematics, end-increment force, and semi-implicit mechanics while
+  separating node/interval histories. Three-resolution tests require decreasing
+  energy/coupling defects. This is an engineering comparator, not anatomy.
 - The JSON-safe stateful evaluator retains complete node/interval state, load,
-  regime, gap, energy, dissipation, and numerical-defect histories. It gates
-  passive energy, coupling work, virtual power, and exact constitutive closure;
+  regime, energy, and defect histories and gates all declared closures;
   step-boundary events make no substep-time or impulse claim.
 - The amended 54-case plan binds evaluator `6124cf402` and native-preload
   launcher `92c68aa91`; raw/canonical hashes are `8106a78c425119f1`/
   `ae01fa154c7b38a4`. Prior execution `b2ab7ed66` retained 54 typed-unavailable
   checkpoints after MuJoCo DLL error 1114 and absent Pinocchio; it produced no
   trajectories, is not evidence, and must remain separate from the amendment.
+- Qualified execution `715a4f385` completed 27 MuJoCo cases and retained 27
+  typed Pinocchio absences. Energy defects contract in all variants; coupling
+  refinement fails frictionless preload release (ratios 1/1) and the low-mu
+  slip probe (fine ratio 0.834 > 0.8). No execution failures occurred;
+  checkpoint-set SHA-256 is `1e6eeeabcb2d461a`; promotion is false.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
 
 ## Immediate Order
 
-1. Commit the native-preload launcher, amend/re-hash the plan with the failed
-   execution disclosure and launcher SHA, then execute its new identity.
+1. Commit the stateful aggregator, publish all 54 exact checkpoints plus summary,
+   and add a freshness test before interpreting or integrating results.
 2. Specify a pilot-disclosed rigid refinement extension without weakening or
    relabeling the original failures.
 3. Add matched rigid/shaft/base branches and causal killswitch runs, keeping
