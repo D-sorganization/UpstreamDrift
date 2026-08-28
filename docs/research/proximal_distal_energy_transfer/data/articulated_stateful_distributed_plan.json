@@ -5,12 +5,29 @@
   "preregistration": {
     "timing": "before_registered_stateful_campaign",
     "bound_evaluator_revision": "6124cf4026383b9846bc9b95ef509e4f9a1426a2",
+    "bound_launcher_revision": "92c68aa91ac53a00b9ba6383464151aac071fbd7",
+    "runtime_amendment": {
+      "timing": "after_all-unavailable_runtime-qualification_execution_before_any_stateful_trajectory",
+      "reason": "Windows MuJoCo must load before NumPy to avoid bundled-plugin DLL error 1114",
+      "supersedes_raw_plan_sha256": "38778f598c3734786bc7b128e4aeddda490081cb7bc77d69bcc85741ddd3e7fb",
+      "supersedes_canonical_plan_sha256": "2f07ff3621e82e3bd1b1788441a83b8042ed5e490858107f033d17a07dd5acb8",
+      "scientific_design_changed": false
+    },
     "pilot_disclosure": [
       "development tests exercised one nominal 5 ms trajectory and one forced-open trajectory",
       "the earlier regularized-friction campaign and event probe informed the stateful adverse-case design",
       "no stateful multi-variant campaign result was inspected before this plan"
     ],
     "pilot_exclusion": "development-test and prior regularized-model outputs are not registered stateful campaign evidence"
+  },
+  "prior_execution": {
+    "execution_revision": "b2ab7ed6658a52727a4b161a9d93de06f771cdaf",
+    "checkpoint_count": 54,
+    "status_counts": { "unavailable": 54 },
+    "mujoco_failure": "Windows DLL initialization error 1114 after NumPy loaded first",
+    "pinocchio_failure": "registered robotics Pinocchio unavailable",
+    "trajectory_evidence_created": false,
+    "retention": "preserve separately; never merge with amended execution"
   },
   "identity": {
     "source_revision": "6124cf4026383b9846bc9b95ef509e4f9a1426a2",
@@ -22,6 +39,7 @@
     "case_checkpointing": "atomic_per_case",
     "resume_identity": "source_revision+source_data_sha256+schema_version+execution_revision+case_key",
     "eligible_machine": "serial_cpu_runtime_with_qualified_native_engine",
+    "native_preload_order": ["mujoco", "pinocchio", "numerical_stack"],
     "estimated_registered_case_count": 54,
     "launch_status": "not_started"
   },

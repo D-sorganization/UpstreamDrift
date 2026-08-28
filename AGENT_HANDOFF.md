@@ -103,14 +103,11 @@ are not completion evidence.
   regime, gap, energy, dissipation, and numerical-defect histories. It gates
   passive energy, coupling work, virtual power, and exact constitutive closure;
   step-boundary events make no substep-time or impulse claim.
-- The prospective 54-case stateful plan binds evaluator commit `6124cf402`,
-  one source state, nine adverse/killswitch variants, three decreasing steps,
-  and both native engines under atomic one-worker execution. Raw/canonical plan
-  hashes are `38778f598c373478`/`2f07ff3621e82e3b`. Execution `b2ab7ed66`
-  retained 54 typed-unavailable checkpoints: standalone NumPy loaded before
-  MuJoCo, triggering Windows DLL error 1114; Pinocchio was unavailable. This is
-  no scientific evidence. A standard-library-only launcher now preloads MuJoCo;
-  preserve the failed directory and amend the plan before any new execution.
+- The amended 54-case plan binds evaluator `6124cf402` and native-preload
+  launcher `92c68aa91`; raw/canonical hashes are `8106a78c425119f1`/
+  `ae01fa154c7b38a4`. Prior execution `b2ab7ed66` retained 54 typed-unavailable
+  checkpoints after MuJoCo DLL error 1114 and absent Pinocchio; it produced no
+  trajectories, is not evidence, and must remain separate from the amendment.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.

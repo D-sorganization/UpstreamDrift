@@ -16,8 +16,9 @@ PLAN = (
     "articulated_stateful_distributed_plan.json"
 )
 EVALUATOR_REVISION = "6124cf4026383b9846bc9b95ef509e4f9a1426a2"
-RAW_SHA256 = "38778f598c3734786bc7b128e4aeddda490081cb7bc77d69bcc85741ddd3e7fb"
-CANONICAL_SHA256 = "2f07ff3621e82e3bd1b1788441a83b8042ed5e490858107f033d17a07dd5acb8"
+LAUNCHER_REVISION = "92c68aa91ac53a00b9ba6383464151aac071fbd7"
+RAW_SHA256 = "8106a78c425119f14f7824b15c21f6b08a4c8e6ac6fd07826dbab3aeb0155758"
+CANONICAL_SHA256 = "ae01fa154c7b38a47f02fbe44b8456bbef48b6b3f22a3ecc451dd7fc329fc68d"
 
 
 def _manifest() -> dict[str, object]:
@@ -31,12 +32,19 @@ def test_plan_binds_immutable_evaluator_and_atomic_serial_execution() -> None:
 
     assert manifest["identity"]["source_revision"] == EVALUATOR_REVISION
     assert manifest["preregistration"]["bound_evaluator_revision"] == EVALUATOR_REVISION
+    assert manifest["preregistration"]["bound_launcher_revision"] == (LAUNCHER_REVISION)
     assert manifest["preregistration"]["timing"] == (
         "before_registered_stateful_campaign"
     )
     assert manifest["execution"]["worker_count"] == 1
     assert manifest["execution"]["case_checkpointing"] == "atomic_per_case"
     assert manifest["execution"]["launch_status"] == "not_started"
+    assert manifest["execution"]["native_preload_order"] == [
+        "mujoco",
+        "pinocchio",
+        "numerical_stack",
+    ]
+    assert manifest["prior_execution"]["trajectory_evidence_created"] is False
 
 
 def test_plan_expands_exact_adverse_and_killswitch_case_matrix() -> None:
