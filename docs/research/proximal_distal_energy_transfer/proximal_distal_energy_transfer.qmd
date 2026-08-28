@@ -316,6 +316,8 @@ format:
 
 {{< include chapters/_ch06c_spatial_cross_formulation.qmd >}}
 
+{{< include chapters/_ch06cd_articulated_attribution.qmd >}}
+
 {{< include chapters/_ch06ca_articulated_ground.qmd >}}
 
 {{< include chapters/_ch06cb_spatial_cross_tail.qmd >}}

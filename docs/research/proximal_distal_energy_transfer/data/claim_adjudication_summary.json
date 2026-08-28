@@ -1,11 +1,11 @@
 {
   "schema_version": "proximal-distal-claim-adjudication-summary-v2",
   "source_registry": "claim_audit_registry.json",
-  "paper_source_digest": "5b353163c0d285e580282e40e28e1cf38597edc681199c53d507b92a7a1be70d",
-  "claim_count": 325,
+  "paper_source_digest": "71a28cc854e86abf8d1cc72812cbd0af424807a9fe7d1f86869ec4228aaa570f",
+  "claim_count": 328,
   "outcome_counts": {
     "inconclusive": 5,
-    "supported": 305,
+    "supported": 308,
     "untested": 15
   },
   "evidence_qualification_counts": {
@@ -16,7 +16,7 @@
     "hypothesis_or_prospective_protocol": 13,
     "independent_followup_open": 24,
     "original_full_text_checked": 18,
-    "project_executable_or_data": 296
+    "project_executable_or_data": 299
   },
   "evidence_tier_counts": {
     "bibliographic_record": 3,
@@ -24,17 +24,17 @@
     "external_methods_or_measurement": 10,
     "external_modeling_or_simulation": 15,
     "external_review_or_synthesis": 10,
-    "project_derivation_or_document": 110,
-    "project_executable_or_generated": 296,
+    "project_derivation_or_document": 113,
+    "project_executable_or_generated": 299,
     "prospective_or_unexecuted": 15
   },
   "source_independence_counts": {
     "multiple_independent_external_support": 20,
-    "project_only": 271,
+    "project_only": 274,
     "single_independent_external_support": 34
   },
   "model_tier_counts": {
-    "articulated_spatial": 32,
+    "articulated_spatial": 35,
     "compliant_shaft": 66,
     "cross_tier_synthesis": 77,
     "declared_model_tier_unclassified": 12,
@@ -51,7 +51,7 @@
     "governed_human_data_unavailable": 11,
     "independent_reimplementation_open": 12,
     "mixed_or_insufficient_evidence": 5,
-    "none_declared": 281,
+    "none_declared": 284,
     "prospective_experiment_open": 15,
     "statistical_reanalysis_or_replication_open": 9,
     "systematic_review_open": 2
@@ -229,6 +229,14 @@
       "claim_family": "ch06cc_spatial_forward_contact",
       "claim_count": 8,
       "project_only_count": 8,
+      "single_independent_external_support_count": 0,
+      "multiple_independent_external_support_count": 0,
+      "concentration_flag": "project_authored_only"
+    },
+    {
+      "claim_family": "ch06cd_articulated_attribution",
+      "claim_count": 3,
+      "project_only_count": 3,
       "single_independent_external_support_count": 0,
       "multiple_independent_external_support_count": 0,
       "concentration_flag": "project_authored_only"
@@ -15009,6 +15017,140 @@
       "adjudication": "The result is retained only as a numerical prerequisite. No controller comparison, human inference, passive-torque claim, or coaching recommendation is released.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-26"
+    },
+    {
+      "claim_id": "PD-CLAIM-327",
+      "adjudication_outcome": "supported",
+      "statement": "The articulated same-state acceleration and generalized power close under a configuration, velocity-dependent bias, bilateral-contact, and zero applied-input decomposition across the registered native-engine atlas.",
+      "classification": "articulated_same_state_attribution_qualification",
+      "published_status": "supported_for_declared_pointwise_synthetic_matrix",
+      "audit_status": "articulated_same_state_drift_contact_attribution_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "articulated_spatial"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch06cd_articulated_attribution",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:21",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:28",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:37",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:44",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:53"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
+      "uncertainty_boundary": "The decomposition is operational and state-specific; it does not identify anatomical force sources or a forward causal effect.",
+      "falsifier": "Any registered closure, pathway killswitch, coordinate-scaling, corruption-detection, or cross-engine tolerance fails.",
+      "adjudication": "All registered same-state closure, pathway, scaling, corruption, and native-operator gates pass; interpretation remains pointwise.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "claim_id": "PD-CLAIM-328",
+      "adjudication_outcome": "supported",
+      "statement": "Contact is positively aligned with total mass-metric acceleration but contributes negative generalized power throughout the registered atlas, so acceleration alignment does not identify positive work or transfer.",
+      "classification": "articulated_acceleration_power_sign_distinction",
+      "published_status": "supported_for_declared_pointwise_synthetic_matrix",
+      "audit_status": "articulated_same_state_drift_contact_attribution_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "articulated_spatial"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch06cd_articulated_attribution",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:62"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
+      "uncertainty_boundary": "The signs arise under an imposed synthetic perturbation and are neither forward work nor human performance evidence.",
+      "falsifier": "Any retained state has nonpositive contact acceleration projection, nonnegative contact power, or inadequate unreported denominators.",
+      "adjudication": "All registered same-state closure, pathway, scaling, corruption, and native-operator gates pass; interpretation remains pointwise.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "claim_id": "PD-CLAIM-329",
+      "adjudication_outcome": "supported",
+      "statement": "The same-state attribution does not establish forward persistence, accumulated impulse or work, biological torque or effort, human transfer, slack management, timing economy, coaching strategy, or safety.",
+      "classification": "articulated_same_state_attribution_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "articulated_same_state_drift_contact_attribution_checked",
+      "evidence_qualifications": [
+        "project_executable_or_data"
+      ],
+      "evidence_tiers": [
+        "project_derivation_or_document",
+        "project_executable_or_generated"
+      ],
+      "source_independence": "project_only",
+      "model_tiers": [
+        "articulated_spatial"
+      ],
+      "unresolved_replication_classes": [
+        "none_declared"
+      ],
+      "claim_family": "ch06cd_articulated_attribution",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:75"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
+      "uncertainty_boundary": "Matched forward attribution through contact transitions, coupled structures, uncertainty, and adverse loading remains open.",
+      "falsifier": "A forward, biological, human, equipment, coaching, or safety claim is attributed to this pointwise gate alone.",
+      "adjudication": "All registered same-state closure, pathway, scaling, corruption, and native-operator gates pass; interpretation remains pointwise.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
     }
   ]
 }

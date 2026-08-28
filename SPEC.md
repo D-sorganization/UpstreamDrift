@@ -2,6 +2,22 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## Articulated Same-State Drift and Contact Attribution (#9151)
+
+Issue #9151 qualifies a pointwise articulated decomposition across all 234
+registered subject-scaled closed states. Configuration-dependent bias,
+velocity-dependent bias, bilateral contact, and zero applied input close both
+generalized acceleration and generalized power. MuJoCo and robotics Pinocchio
+pass the declared native-operator parity, pathway-killswitch,
+coordinate-scaling, geometry, denominator, and corrupted-force gates. Contact
+aligns positively with total mass-metric acceleration while contributing
+negative generalized power in every registered state, demonstrating that an
+acceleration projection is not a positive-work or transfer fraction. The
+result takes no forward step and supplies no biological source, human
+performance, timing, slack, coaching, or safety inference. Its next gate is
+matched forward impulse/work attribution through contact transitions,
+shaft/base coupling, uncertainty, and adverse loads.
+
 ## Tools Green-Surface Adapter Consumption (#9143)
 
 Issue #9143 consumes the Tools `swing_sim.putting` green-surface adapter (Tools #4800 P9) via the `vendor/ud-tools` vendor boundary.
@@ -3403,7 +3419,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-27 | 1.0.622 | Emit portable permalinks for claim-adjudication data links (#9142). `claim_adjudication_summary.py` now builds absolute permalinks for `claim_adjudication_summary.json` and `claim_adjudication_summary.csv` against `UPSTREAM_DATA_REF` (`main`), ensuring published copies in AffineDrift resolve correctly without depending on a co-located `data/` directory. |
+| 2026-08-27 | 1.0.622 | Emit portable source links for claim-adjudication data (#9142). `claim_adjudication_summary.py` now builds absolute `blob/main` links for `claim_adjudication_summary.json` and `claim_adjudication_summary.csv`; AffineDrift rewrites that declared form to the protected source SHA. The explicit editorial-only claim-census migration verifies that the candidate count remains 1,180 and replaces only the generated reviewer candidate whose URL text changed. |
 | 2026-08-27 | 1.0.621 | Consumed the Tools green-surface adapter across the vendor boundary (issue #9143, Tools #4800 P9). Bumped the `vendor/ud-tools` submodule to the latest Tools main squash (`b46f58df52df86b6c5a3db44460b26ac8919da70`), pulling in `shared.python.swing_sim.putting.ud_adapter`, `UdGreenTopography`, `green_surface_from_ud_json`, and `green_surface_to_ud_json` alongside recent variation fixes (#4692/#4693/#4694/#4697). Added consumer integration tests in `tests/unit/putting/test_putting_green_consumer.py` covering vendor boundary import resolution, bi-directional topography JSON serialization/deserialization between Tools heightfields and UpstreamDrift `GreenSurface`, fail-closed rejection of scattered contours/slopes/unknown fields, and roll physics consistency on imported flat and sloped green surfaces. |
 | 2026-08-27 | 1.0.620 | Established UpstreamDrift engineering design-manual authority (UP-D0, issue #9066). `manuals/upstreamdrift` QMD is the sole editable authority; existing user, ADR, and research products remain separate; generated HTML, LaTeX, PDF, and DOCX remain non-editable and unapproved. The versioned policy, fail-closed empty registry, agent guidance, contract tests, and offline CI/pre-commit verifier enforce program-contract ownership, safe paths, Ruff formatting, TDD/DbC/DRY/LoD, impacted-path/freshness rules, immutable release evidence, visual and semantic review, and human approval. UP-D1 through UP-D8 remain explicit blockers, and this governance scaffold makes no calculation-coverage or publication claim. |
 | 2026-08-27 | 1.0.619 | Integrated #9126's outcome-blind nonlinear-controller prerequisite. The registration freezes nine families, 24 evaluation trials, eight disjoint tuning trials, plant/event/failure/random-stream contracts, and single-worker checkpoint identity. One bounded projected first-order iLQR kernel passes manufactured derivative, in-rollout bound, descent, replay, initialization-sensitivity, and typed-failure gates; collocation NMPC remains explicitly unavailable. Twelve shared-equation plant-step cases pass over 0.5, 1, and 2 ms. The regenerated web-linearized 251-page paper is 1,962,456 bytes at SHA-256 `92bfaca850ac459cc431e573be8c0288af51ceab4d28759d02c67c602274ee8b`, with 325 adjudicated claims, 144 numeric contracts, and 498/498 verified numeric literals. Zero registered controller evaluations have run and zero methods are ranking-eligible. |

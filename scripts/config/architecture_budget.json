@@ -350,6 +350,15 @@
       "issue": 9014,
       "reason": "Issue #9014: pre-existing function exceeds budget due to logic layout; PR only optimizes array summation via count_nonzero.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+      "symbol": "_evaluate_controls",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9151,
+      "reason": "Issue #9151: the native evidence artifact is hash-bound to this preregistered control evaluator. A context-object decomposition would invalidate the exact successful Ubuntu evidence source digest and requires a fresh native rerun; retain the explicit operator inputs temporarily and remove this exception with the next forward-attribution implementation.",
+      "expires_on": "2026-09-30"
     }
   ]
 }

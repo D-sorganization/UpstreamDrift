@@ -206,6 +206,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_contact_projection",
             "tier": "subject_scaled_articulated_contact_initial_acceleration",
         },
+        "articulated_drift_contact_attribution": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_articulated_drift_contact_attribution",
+            "tier": "subject_scaled_articulated_same_state_drift_and_contact_attribution",
+        },
         "articulated_forward_contact": {
             "command": "python -m scripts.research.proximal_distal_energy.run_articulated_forward_contact",
             "tier": "bounded_subject_scaled_articulated_bilateral_attachment_forward_dynamics",
@@ -401,6 +405,9 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "subject_scaled_articulated_contact_projection": (
             "same_state_bilateral_contact_projection_and_initial_acceleration_qualified"
+        ),
+        "subject_scaled_articulated_drift_contact_attribution": (
+            "same_state_configuration_velocity_contact_and_zero_input_attribution_qualified"
         ),
         "bounded_articulated_forward_contact": (
             "five_millisecond_bilateral_attachment_forward_gate_qualified"

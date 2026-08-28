@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "dc07b321b913fc2d4af2f74a838b76b5f63cda527fa274f9d34f8efecb5e11a6"
+    "sha256": "f855e8cf9bce4e33bbff53080f6bd2d58e3f2c4e1f71bc1e324b7be6101e750b"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -11,9 +11,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 325,
-    "evidence_reference_count": 2468,
-    "local_artifact_count": 410,
+    "claim_count": 328,
+    "evidence_reference_count": 2495,
+    "local_artifact_count": 419,
     "external_url_count": 78
   },
   "claims": {
@@ -4140,6 +4140,48 @@
         "tests/research/test_nonlinear_controller_plant_transport.py"
       ],
       "external_references": []
+    },
+    "PD-CLAIM-327": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-328": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-329": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
+      ],
+      "external_references": []
     }
   },
   "local_artifacts": {
@@ -4200,7 +4242,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md": {
-      "sha256": "4c9549bd78c237a672180ba2431b4b95c984dd11a52caae8e5f0e56a18a7009c",
+      "sha256": "ade312f13cf1b4b3216c87459f750f5ad7a8a82062c10fd11f31553db61c0d07",
       "bytes": 51032,
       "referenced_by": [
         "PD-CLAIM-313",
@@ -4214,8 +4256,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "049b4888fa338cf54d344c75c095cd1769b4d4b8b25d7792680df5b1d556370d",
-      "bytes": 27247,
+      "sha256": "1bcfe0b348cd2af9a6d429ba7c346dfe557a81257e1f26cd36076d4f90d95c94",
+      "bytes": 27454,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -4408,6 +4450,24 @@
         "PD-CLAIM-286",
         "PD-CLAIM-287",
         "PD-CLAIM-288"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json": {
+      "sha256": "f9edb978879256c080fb54e29e01dfff95715bcc2b4f7e612f61c282d330c07b",
+      "bytes": 4932,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz": {
+      "sha256": "274a4b12946ba7e0ca095ac645a05873ac121ae8cae1ab0f31e9f4d280e3eb5b",
+      "bytes": 356080,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_forward_contact.json": {
@@ -5975,6 +6035,15 @@
         "PD-CLAIM-288"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf": {
+      "sha256": "235402be67583acc9d90a698af1f7f37fc260dabeab5cd98f7e58954349e65e5",
+      "bytes": 28842,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_forward_contact.pdf": {
       "sha256": "853c05f77fb3f6de92b9750da939d57c0520adf9994ff016c532184404ec9aca",
       "bytes": 32161,
@@ -6238,8 +6307,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "f75c390e6fc858aa7d9e3a3a170c95a93357bb4846dec44dea1586a50bbca1f4",
-      "bytes": 158178,
+      "sha256": "27a5cf174e5452ac2124faa2799563b7cb86eda86146abdc807f0fe78dba334a",
+      "bytes": 160489,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -6296,6 +6365,15 @@
         "PD-CLAIM-286",
         "PD-CLAIM-287",
         "PD-CLAIM-288"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py": {
+      "sha256": "e7dac294da347b49155ccf18b4a1853497bdfa38e4b62fd861a4d5202695446d",
+      "bytes": 31556,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_forward_contact.py": {
@@ -6768,6 +6846,15 @@
         "PD-CLAIM-279"
       ]
     },
+    "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py": {
+      "sha256": "fe7f97b2acb67061144ebc88b934d29e4d811228a7c6826c7c27d0ef305c5569",
+      "bytes": 4554,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
+      ]
+    },
     "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py": {
       "sha256": "58553b916fdf641d3c78e383c179b33cc1e6512b1245516fc4a9561cd7236585",
       "bytes": 3619,
@@ -7056,6 +7143,15 @@
         "PD-CLAIM-279"
       ]
     },
+    "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py": {
+      "sha256": "8a4a43b95f612c0d7a5d577c8e53b8c89d321c6b31480b1dda25f5fa21f32893",
+      "bytes": 9313,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
+      ]
+    },
     "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py": {
       "sha256": "ea904fa87d59636b261d8794b8246337d95bea1921172dd18e5c33575dab984e",
       "bytes": 8485,
@@ -7146,6 +7242,15 @@
         "PD-CLAIM-277",
         "PD-CLAIM-278",
         "PD-CLAIM-279"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py": {
+      "sha256": "bce22951219072ef520e08f83487b9b9a66656d884c2b4b8b8930672b16b450d",
+      "bytes": 893,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
       ]
     },
     "scripts/research/proximal_distal_energy/run_articulated_forward_contact.py": {
@@ -8034,6 +8139,24 @@
         "PD-CLAIM-286",
         "PD-CLAIM-287",
         "PD-CLAIM-288"
+      ]
+    },
+    "tests/research/test_articulated_drift_contact_attribution.py": {
+      "sha256": "5c990b06aab49a7e743681c63a155e0b58465ea7e7e2e80097c5f04ada63d0b8",
+      "bytes": 4658,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
+      ]
+    },
+    "tests/research/test_articulated_drift_contact_attribution_evidence.py": {
+      "sha256": "795a9d637aba2babaaf6ae07f4d806a1d46b75f5431ac4e2990c7944609544f7",
+      "bytes": 2623,
+      "referenced_by": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
       ]
     },
     "tests/research/test_articulated_forward_contact.py": {
