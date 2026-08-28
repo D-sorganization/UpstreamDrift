@@ -69,3 +69,28 @@ def test_distributed_smoke_retains_events_closure_and_claim_boundaries() -> None
         "causal_counterfactual": False,
         "smoke_state_representative_of_humans": False,
     }
+
+
+def test_distributed_variant_can_kill_friction_without_changing_the_base_law() -> None:
+    manifest = _manifest()
+    nominal = manifest["design"]["variant_parameters"][0]
+    nominal["friction_coefficient_factor"] = 0.0
+
+    result = evaluate_distributed_smoke_case(
+        StudyCase(
+            source_case_index=4,
+            source_sample_index=6,
+            source_time_s=0.12,
+            engine="mujoco",
+            variant="nominal",
+            time_step_s=0.001,
+            case_key="distributed-frictionless-test",
+        ),
+        manifest,
+    )
+
+    assert result["contact_model"]["friction_coefficient"] == 0.0
+    assert not any(
+        record["kind"].startswith("friction_limit")
+        for record in result["events"]["records"]
+    )

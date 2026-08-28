@@ -130,7 +130,7 @@ def require_registered_native_engine(engine: str) -> dict[str, str]:
     return {"name": engine, "version": version, "operator": "native"}
 
 
-def _variant(design: Mapping[str, Any], name: str) -> ForwardVariant:
+def _variant_parameter_row(design: Mapping[str, Any], name: str) -> Mapping[str, Any]:
     rows = design.get("variant_parameters")
     if not isinstance(rows, list):
         raise ValueError("design.variant_parameters must be a list")
@@ -139,7 +139,11 @@ def _variant(design: Mapping[str, Any], name: str) -> ForwardVariant:
     ]
     if len(matches) != 1:
         raise ValueError("case variant must have exactly one registered parameter row")
-    row = matches[0]
+    return matches[0]
+
+
+def _variant(design: Mapping[str, Any], name: str) -> ForwardVariant:
+    row = _variant_parameter_row(design, name)
     return ForwardVariant(
         name=name,
         stiffness_factor=_number(row, "stiffness_factor"),
@@ -316,7 +320,7 @@ def evaluate_rigid_smoke_case(
 
 
 def _distributed_grip(
-    design: Mapping[str, Any], integration_case: Any
+    design: Mapping[str, Any], integration_case: Any, variant_row: Mapping[str, Any]
 ) -> DistributedGripConfig:
     law = _mapping(
         design.get("distributed_contact_law"),
@@ -331,12 +335,21 @@ def _distributed_grip(
         raise ValueError("station_count_per_hand must be an integer")
     return DistributedGripConfig(
         station_count_per_hand=station_count,
-        station_width_m=_number(law, "station_width_m", positive=False),
+        station_width_m=(
+            _number(law, "station_width_m", positive=False)
+            * float(variant_row.get("station_width_factor", 1.0))
+        ),
         total_stiffness_n_m=float(integration_case.contact_stiffness),
         total_damping_n_s_m=float(integration_case.contact_damping),
         tangential_damping_n_s_m=_number(law, "tangential_damping_n_s_m"),
-        friction_coefficient=_number(law, "friction_coefficient", positive=False),
-        slack_distance_m=_number(law, "slack_distance_m", positive=False),
+        friction_coefficient=(
+            _number(law, "friction_coefficient", positive=False)
+            * float(variant_row.get("friction_coefficient_factor", 1.0))
+        ),
+        slack_distance_m=(
+            _number(law, "slack_distance_m", positive=False)
+            * float(variant_row.get("slack_distance_factor", 1.0))
+        ),
     )
 
 
@@ -386,6 +399,7 @@ def evaluate_distributed_smoke_case(
     model, metadata = build_subject_scaled_model(profiles[profile_index])
     rigid_config = _configuration(manifest)
     design = _mapping(manifest.get("design"), name="design")
+    variant_row = _variant_parameter_row(design, case.variant)
     variant = _variant(design, case.variant)
     rigid_case = build_forward_integration_case(
         authority=authority,
@@ -397,7 +411,12 @@ def evaluate_distributed_smoke_case(
         hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
         engine=case.engine,
     )
-    grip = _distributed_grip(design, rigid_case)
+    grip = _distributed_grip(design, rigid_case, variant_row)
+    full_state_velocity_factor = float(
+        variant_row.get("full_state_velocity_factor", 1.0)
+    )
+    if not math.isfinite(full_state_velocity_factor):
+        raise ValueError("full_state_velocity_factor must be finite")
     distributed_case = DistributedIntegrationCase(
         q=rigid_case.q,
         qd=rigid_case.qd,
@@ -408,6 +427,7 @@ def evaluate_distributed_smoke_case(
         initial_club_velocity_m_s=rigid_case.initial_club_velocity_m_s,
         engine=rigid_case.engine,
         grip=grip,
+        initial_state_velocity_factor=full_state_velocity_factor,
     )
     distributed_config = DistributedForwardConfig(
         duration_s=rigid_config.duration_s,
@@ -457,6 +477,9 @@ def evaluate_distributed_smoke_case(
         "contact_model": {
             "name": "distributed_tension_with_regularized_coulomb_limit",
             "station_count_per_hand": grip.station_count_per_hand,
+            "station_width_m": grip.station_width_m,
+            "friction_coefficient": grip.friction_coefficient,
+            "slack_distance_m": grip.slack_distance_m,
             "static_stick_modeled": False,
         },
         "contributions": {
