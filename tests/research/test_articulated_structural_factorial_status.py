@@ -11,6 +11,8 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_pl
     StructuralFactorialPlan,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
+    NativeEngineUnavailable,
+    StructuralCase,
     StructuralEvaluation,
     build_launch_manifest,
     build_registered_cases,
@@ -93,3 +95,39 @@ def test_partial_status_rejects_unregistered_case_files(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="unregistered case files"):
         structural_factorial_status(plan=plan, launch=launch, checkpoint_dir=tmp_path)
+
+
+def test_partial_status_exposes_typed_engine_unavailability(tmp_path: Path) -> None:
+    plan = _tiny_plan()
+    design = dict(plan["design"])  # type: ignore[arg-type]
+    design["factorial_cells"] = design["factorial_cells"][:1]
+    design["time_steps_s"] = design["time_steps_s"][:1]
+    design["engines"] = ["mujoco", "pinocchio"]
+    design["registered_engine_attempt_count"] = 2
+    design["expected_native_attempt_count"] = 1
+    plan["design"] = design
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+
+    def evaluate(case: StructuralCase) -> StructuralEvaluation:
+        if case.engine == "pinocchio":
+            raise NativeEngineUnavailable(
+                engine="pinocchio", detail="qualified robotics runtime absent"
+            )
+        return _evaluation(case)
+
+    run_serial_cases(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=tmp_path,
+        evaluator=evaluate,
+    )
+
+    status = structural_factorial_status(
+        plan=plan, launch=launch, checkpoint_dir=tmp_path
+    )
+
+    assert status["observed_engine_status_counts"] == {
+        "mujoco": {"completed": 1},
+        "pinocchio": {"unavailable": 1},
+    }
+    assert status["observed_failure_code_counts"] == {"native_engine_unavailable": 1}

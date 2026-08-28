@@ -93,20 +93,20 @@ are not completion evidence.
   computed as exact within-state Walsh contrasts. Peak load and dissipated work
   are reported mediators, not post-hoc eligibility filters. Higher-order
   contrasts are explicitly exploratory.
-- A disclosed first probe failed closed on a stale formatting-only shaft-source
-  hash and produced no outcome. Commit `7b7862f3b` repaired that provenance;
-  the regenerated NPZ is byte-identical.
+- First probe failed closed on a stale formatting-only shaft-source hash.
+  `7b7862f3b` repaired provenance; the regenerated NPZ is byte-identical.
 - The passing non-evidence probe took 4.02 s at 0.2 ms with residual 0.00291.
-  Execution was stopped after 12 JSON-only checkpoints when audit found they
-  could not support the registered full-trajectory engine-parity gate. Retain
-  `Campaigns/UpstreamDrift-9153-structural-factorial-7b7862f3b` as ineligible.
+  It stopped after 12 JSON-only checkpoints failed the trajectory-parity need.
+  Retain `Campaigns/UpstreamDrift-9153-structural-factorial-7b7862f3b` as ineligible.
 - Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
   `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; its first
-  20 records include 11 validated JSON/NPZ pairs and nine typed unavailables.
+  26 records include 14 validated JSON/NPZ pairs and 12 typed unavailables.
   Active-ground timings revise runtime to 24--48 h; the process uses about one
   CPU core and 117 MB, with atomic resume and empty stderr.
+- Windows resolves unrelated `pinocchio==0.1`; current robotics `pin` wheels
+  are unavailable there. Preserve typed absence; later parity needs bound Linux.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.

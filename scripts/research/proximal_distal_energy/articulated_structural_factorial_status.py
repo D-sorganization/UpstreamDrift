@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from collections import Counter
+from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 import json
@@ -35,6 +35,23 @@ def structural_factorial_status(
         plan=plan, launch=launch, checkpoint_dir=checkpoint_dir
     )
     status_counts = Counter(checkpoint.status for checkpoint in checkpoints)
+    engine_status_counts: dict[str, Counter[str]] = defaultdict(Counter)
+    failure_code_counts: Counter[str] = Counter()
+    for checkpoint in checkpoints:
+        engine_status_counts[checkpoint.case.engine][checkpoint.status] += 1
+        if checkpoint.status != "completed":
+            payload = _mapping(
+                json.loads(checkpoint.path.read_text(encoding="utf-8")),
+                name="checkpoint",
+            )
+            outcome = _mapping(payload.get("outcome"), name="checkpoint.outcome")
+            failure = _mapping(
+                outcome.get("failure"), name="checkpoint.outcome.failure"
+            )
+            code = failure.get("code")
+            if not isinstance(code, str) or not code:
+                raise ValueError("non-completed checkpoint must declare a failure code")
+            failure_code_counts[code] += 1
     completed_paths = {
         checkpoint.path.with_suffix(".npz").name
         for checkpoint in checkpoints
@@ -57,6 +74,11 @@ def structural_factorial_status(
         "registered_case_count": len(cases),
         "retained_checkpoint_count": len(checkpoints),
         "status_counts": dict(sorted(status_counts.items())),
+        "observed_engine_status_counts": {
+            engine: dict(sorted(counts.items()))
+            for engine, counts in sorted(engine_status_counts.items())
+        },
+        "observed_failure_code_counts": dict(sorted(failure_code_counts.items())),
         "validated_completed_sidecar_count": len(completed_paths),
         "inflight_or_orphan_sidecar_count": len(inflight),
         "missing_case_count": len(cases) - len(checkpoints),
