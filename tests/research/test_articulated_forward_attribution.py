@@ -53,6 +53,10 @@ def test_constant_force_closes_impulse_and_work() -> None:
     np.testing.assert_allclose(result.transport_impulse, [0.0])
     assert result.momentum_closure_residual == pytest.approx(0.0)
     assert result.work_closure_residual_j == pytest.approx(0.0)
+    assert result.momentum_reference_norm == pytest.approx(2.0)
+    assert result.momentum_closure_relative_residual == pytest.approx(0.0)
+    assert result.work_reference_j == pytest.approx(2.0)
+    assert result.work_closure_relative_residual == pytest.approx(0.0)
 
 
 def test_variable_mass_retains_euler_lagrange_transport_term() -> None:
@@ -186,6 +190,7 @@ def test_planted_force_corruption_fails_closed() -> None:
     )
 
     assert result.momentum_closure_residual > 0.0
+    assert result.momentum_closure_relative_residual > 0.0
     with pytest.raises(ValueError, match="momentum closure"):
         require_forward_attribution_closure(
             result,

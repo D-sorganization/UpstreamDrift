@@ -30,7 +30,11 @@ class ForwardAttribution:
     momentum_change: FloatArray
     kinetic_energy_change_j: float
     momentum_closure_residual: float
+    momentum_reference_norm: float
+    momentum_closure_relative_residual: float
     work_closure_residual_j: float
+    work_reference_j: float
+    work_closure_relative_residual: float
     impulse_component_names: tuple[str, ...]
     impulse_shares: FloatArray
     impulse_share_adequacy: NDArray[np.bool_]
@@ -242,7 +246,6 @@ def integrate_forward_attribution(
     momentum_residual = float(
         np.linalg.norm(momentum_change - reconstructed_momentum_change)
     )
-
     kinetic_energy = 0.5 * np.einsum("si,sij,sj->s", velocity, mass, velocity)
     kinetic_energy_change = float(kinetic_energy[-1] - kinetic_energy[0])
     total_event_work = float(np.sum(event_work))
@@ -253,6 +256,12 @@ def integrate_forward_attribution(
         (continuous_impulses, transport_impulse[None, :], total_event_impulse[None, :]),
         axis=0,
     )
+    momentum_reference = max(
+        float(np.linalg.norm(momentum_change)),
+        float(np.sum(np.linalg.norm(impulse_components, axis=1))),
+        share_denominator_floor,
+    )
+    momentum_relative_residual = momentum_residual / momentum_reference
     impulse_adequacy = np.abs(momentum_change) >= share_denominator_floor
     impulse_shares = np.full(impulse_components.shape, np.nan)
     impulse_cancellation = np.full(coordinate_count, np.nan)
@@ -263,6 +272,12 @@ def integrate_forward_attribution(
         np.abs(impulse_components[:, impulse_adequacy]), axis=0
     ) / np.abs(momentum_change[impulse_adequacy])
     work_components = np.concatenate((generalized_work, np.array([total_event_work])))
+    work_reference = max(
+        abs(kinetic_energy_change),
+        float(np.sum(np.abs(work_components))),
+        share_denominator_floor,
+    )
+    work_relative_residual = work_residual / work_reference
     work_adequate = abs(kinetic_energy_change) >= share_denominator_floor
     work_shares = (
         work_components / kinetic_energy_change
@@ -284,7 +299,11 @@ def integrate_forward_attribution(
         momentum_change=np.asarray(momentum_change, dtype=np.float64),
         kinetic_energy_change_j=kinetic_energy_change,
         momentum_closure_residual=momentum_residual,
+        momentum_reference_norm=momentum_reference,
+        momentum_closure_relative_residual=momentum_relative_residual,
         work_closure_residual_j=work_residual,
+        work_reference_j=work_reference,
+        work_closure_relative_residual=work_relative_residual,
         impulse_component_names=contribution_names + ("mass_transport", "event"),
         impulse_shares=impulse_shares,
         impulse_share_adequacy=impulse_adequacy,
