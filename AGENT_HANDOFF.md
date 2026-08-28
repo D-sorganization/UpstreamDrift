@@ -69,6 +69,12 @@ are not completion evidence.
   entry/exit records in addition to opening/reattachment. A registered 50 ms,
   three-station probe locates 4 openings, 8 reattachments, and 4 limit entries
   while retaining zero discrete impulse/work for the continuous law.
+- A JSON-safe distributed smoke evaluator now reuses the frozen source hash,
+  source-state time, subject-scaled model, native operator, registered variants,
+  and event-aligned attribution kernel. It reports closure, contributions,
+  club outcomes, complete typed event records, and explicit nonhuman/noncausal/
+  no-static-stick boundaries. Freeze its campaign manifest only after this
+  evaluator checkpoint is committed and remote.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
