@@ -350,6 +350,12 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         ("PD-CLAIM-277", "PD-CLAIM-278", "PD-CLAIM-279"),
         "Integrate a bounded articulated bilateral-contact horizon and repeat contact-loss, adverse-load, refinement, power, and work-energy controls.",
     ),
+    "subject_scaled_articulated_drift_contact_attribution": _spec(
+        "reviewed_as_pointwise_synthetic_attribution_result",
+        "same_state_drift_contact_attribution_qualified_with_power_sign_boundary",
+        ("PD-CLAIM-327", "PD-CLAIM-328", "PD-CLAIM-329"),
+        "Integrate matched forward trajectories and attribute impulse and work through contact transitions, shaft/base coupling, uncertainty, and adverse loading.",
+    ),
     "bounded_articulated_forward_contact": _spec(
         "reviewed_as_right_censored_synthetic_forward_result",
         "five_millisecond_bilateral_attachment_forward_gate_qualified",

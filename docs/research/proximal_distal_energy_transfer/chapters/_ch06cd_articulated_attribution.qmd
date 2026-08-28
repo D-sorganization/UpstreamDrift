@@ -1,0 +1,84 @@
+#### Articulated Same-State Drift and Contact Attribution
+
+The contact-projection gate establishes that bilateral contact forces enter the
+articulated equations consistently, but it does not identify how much of the
+resulting acceleration is associated with configuration-dependent drift,
+velocity-dependent bias, contact, or applied input. The next registered gate
+therefore evaluates all four contributions at exactly the same state. With
+$h(q,\dot q)$ denoting native bias, $Q_c$ the bilateral contact generalized
+force, and $\tau_a$ the applied generalized input,
+
+$$
+\begin{aligned}
+\ddot q_{\mathrm{configuration}} &= M^{-1}[-h(q,0)],\\
+\ddot q_{\mathrm{velocity}} &= M^{-1}\{-h(q,\dot q)+h(q,0)\},\\
+\ddot q_{\mathrm{contact}} &= M^{-1}Q_c,\\
+\ddot q_{\mathrm{active}} &= M^{-1}\tau_a,\\
+\ddot q &= \sum_i \ddot q_i .
+\end{aligned}
+$$ {#eq-articulated-drift-attribution}
+
+The baseline sets $\tau_a=0$ exactly. “Configuration” is an operational name
+for $-h(q,0)$, not a claim that gravity is the only configuration-dependent
+effect in every formulation. “Velocity” is the finite native bias difference
+$-[h(q,\dot q)-h(q,0)]$, so it includes all velocity-dependent terms returned
+by the engine rather than a manually selected Coriolis term. This distinction
+keeps the decomposition reproducible across the two native operators.
+
+Two complementary signed observables are reported. The mass-metric acceleration
+projection is
+
+$$
+s_i^{(a)}=
+\frac{\ddot q_i^\mathsf{T}M\ddot q}
+     {\ddot q^\mathsf{T}M\ddot q},
+$$ {#eq-articulated-acceleration-share}
+
+and the generalized-power contribution is $P_i=Q_i^\mathsf{T}\dot q$, with a
+signed power share reported only when the total-power denominator is adequate.
+These are algebraic projections at one state. They are not fractions of stored
+energy, impulse, accumulated work, anatomical effort, or clubhead-speed gain.
+They can be negative or exceed one when contributions cancel; the release
+therefore also records denominator suppression and cancellation indexes.
+
+The atlas reuses the six synthetic subject profiles, three grip spans, and
+thirteen closed states per case, for 234 states and twenty generalized
+coordinates. Each state receives the declared 1 mm club-translation and
+0.05 m/s club-velocity perturbation. MuJoCo 3.12.0 and Pinocchio 4.1.0 evaluate
+the mass, bias, contact, and acceleration operators independently; no forward
+step is taken. Zero-contact, zero-velocity, gravity-off, coincident/reversed
+moment-arm, coordinate-rescaling, and deliberately corrupted-force controls
+are all registered before interpreting the attribution.
+
+All registered gates pass. The maximum acceleration closure residual is
+$7.65\times10^{-13}$ and the maximum power closure residual is
+$2.13\times10^{-14}$ W. The worst cross-engine contribution discrepancy is
+$3.91\times10^{-12}$ relative, while coordinate rescaling changes physical
+power by at most $1.42\times10^{-14}$ W and a reported share by at most
+$1.22\times10^{-15}$. Each pathway killswitch collapses its intended
+contribution exactly, and the corrupted-force sentinel exceeds its detection
+floor.
+
+Across both engines, the configuration term supplies 75.5--91.0% of the
+mass-metric total-acceleration projection, contact supplies 9.41--23.5%, and
+the velocity-dependent term spans -2.79--1.08%; the active-input contribution
+is identically zero. The sign of the velocity projection is mixed across the
+atlas. More importantly, the contact acceleration projection is positive in
+every state while contact generalized power is negative in every state,
+spanning -0.2713 to -0.2685 W. Total generalized power is also negative. Thus
+positive alignment with the total acceleration does not imply positive work,
+energy transfer, or a speed benefit. The two observables answer different
+questions and cannot be substituted for one another.
+
+![Articulated Same-State Drift and Contact Attribution](figures/fig_articulated_drift_contact_attribution.pdf){#fig-articulated-drift-contact-attribution width=96%}
+
+The machine-readable [JSON summary](data/articulated_drift_contact_attribution.json)
+and [NPZ arrays](data/articulated_drift_contact_attribution.npz) retain every
+state, engine, contribution, denominator, control, and gate. This result is a
+pointwise synthetic mechanics attribution under an imposed perturbation. It
+does not establish persistence through contact transitions, accumulated
+impulse or work, zero-velocity constraint force, biological torque or effort,
+human transfer, slack management, timing economy, coaching strategy, or
+safety. The next falsification gate is a matched forward attribution of impulse
+and work through contact transitions, shaft/base coupling, uncertainty, and
+adverse loading.
