@@ -151,6 +151,12 @@ def _canonical_sha256(value: Mapping[str, object]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def manifest_sha256(manifest: Mapping[str, object]) -> str:
+    """Return the canonical JSON identity used by every checkpoint."""
+
+    return _canonical_sha256(manifest)
+
+
 def _study_identity(
     *,
     manifest: Mapping[str, object],
@@ -210,6 +216,8 @@ def _load_resumed_checkpoint(
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError(f"checkpoint is unreadable: {path.name}") from exc
     root = _require_mapping(payload, name="checkpoint")
+    if root.get("checkpoint_schema_version") != _CHECKPOINT_SCHEMA_VERSION:
+        raise ValueError("checkpoint schema version does not match the reader")
     actual_identity = _require_mapping(root.get("identity"), name="checkpoint.identity")
     for name, expected in expected_identity.items():
         if actual_identity.get(name) != expected:
@@ -307,10 +315,43 @@ def run_serial_cases(
     return tuple(checkpoints)
 
 
+def load_registered_checkpoints(
+    *,
+    manifest: Mapping[str, object],
+    execution_revision: str,
+    checkpoint_dir: Path,
+) -> tuple[CaseCheckpoint, ...]:
+    """Load one complete run while revalidating every registered identity."""
+
+    if not isinstance(checkpoint_dir, Path):
+        raise TypeError("checkpoint_dir must be a pathlib.Path")
+    checkpoints: list[CaseCheckpoint] = []
+    for case in build_registered_cases(manifest):
+        path = _checkpoint_path(checkpoint_dir, case)
+        if not path.is_file():
+            raise FileNotFoundError(
+                f"registered checkpoint is missing for {case.case_key}: {path}"
+            )
+        checkpoints.append(
+            _load_resumed_checkpoint(
+                path=path,
+                case=case,
+                expected_identity=_study_identity(
+                    manifest=manifest,
+                    execution_revision=execution_revision,
+                    case=case,
+                ),
+            )
+        )
+    return tuple(checkpoints)
+
+
 __all__ = [
     "CaseCheckpoint",
     "NativeEngineUnavailable",
     "StudyCase",
     "build_registered_cases",
+    "load_registered_checkpoints",
+    "manifest_sha256",
     "run_serial_cases",
 ]

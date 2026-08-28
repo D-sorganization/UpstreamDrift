@@ -11,6 +11,7 @@ from scripts.research.proximal_distal_energy.articulated_forward_attribution_run
     NativeEngineUnavailable,
     StudyCase,
     build_registered_cases,
+    load_registered_checkpoints,
     run_serial_cases,
 )
 from scripts.research.proximal_distal_energy.articulated_forward_attribution_study import (
@@ -71,6 +72,13 @@ def test_serial_runner_writes_atomic_checkpoints_and_resumes(tmp_path: Path) -> 
     assert payload["identity"]["execution_revision"] == EXECUTION_REVISION
     assert payload["identity"]["case_key"] == first[0].case.case_key
     assert payload["outcome"]["status"] == "completed"
+    loaded = load_registered_checkpoints(
+        manifest=_manifest(),
+        execution_revision=EXECUTION_REVISION,
+        checkpoint_dir=tmp_path,
+    )
+    assert len(loaded) == 42
+    assert all(item.resumed for item in loaded)
 
 
 def test_native_unavailability_is_typed_and_retained(tmp_path: Path) -> None:
@@ -134,3 +142,32 @@ def test_unexpected_evaluator_error_propagates_without_checkpoint(
         )
 
     assert not tuple(tmp_path.glob("case-*.json"))
+
+
+def test_checkpoint_loader_fails_closed_on_incomplete_run(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError, match="registered checkpoint is missing"):
+        load_registered_checkpoints(
+            manifest=_manifest(),
+            execution_revision=EXECUTION_REVISION,
+            checkpoint_dir=tmp_path,
+        )
+
+
+def test_checkpoint_loader_fails_closed_on_schema_drift(tmp_path: Path) -> None:
+    checkpoints = run_serial_cases(
+        manifest=_manifest(),
+        execution_revision=EXECUTION_REVISION,
+        checkpoint_dir=tmp_path,
+        evaluator=lambda _case: {"retained": True},
+    )
+    path = checkpoints[0].path
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["checkpoint_schema_version"] = "unexpected"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="checkpoint schema version"):
+        load_registered_checkpoints(
+            manifest=_manifest(),
+            execution_revision=EXECUTION_REVISION,
+            checkpoint_dir=tmp_path,
+        )
