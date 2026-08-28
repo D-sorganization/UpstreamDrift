@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "issue": 9153,
+  "parent_epic": 8557,
+  "identity": {
+    "source_revision": "4c6b2120faa8d7d4917c6d0a64c8fff4964d3e04",
+    "source_data_sha256": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "random_seed": 9153
+  },
+  "execution": {
+    "worker_count": 1,
+    "case_checkpointing": "atomic_per_case",
+    "resume_identity": "source_revision+source_data_sha256+schema_version+case_key",
+    "eligible_machine": "serial_cpu_runtime_with_qualified_native_engine"
+  },
+  "design": {
+    "duration_s": 0.005,
+    "time_steps_s": [0.001, 0.0005, 0.00025],
+    "engines": ["mujoco", "pinocchio"],
+    "variants": [
+      "nominal",
+      "stiffness_low",
+      "stiffness_high",
+      "damping_low",
+      "damping_high",
+      "velocity_reversed",
+      "zero_preload"
+    ],
+    "event_path_model": "linear_state_interpolant",
+    "event_kinds": ["opening", "reattachment", "stick", "slip"]
+  },
+  "estimands": {
+    "same_trajectory_attribution": "integrals evaluated on one retained realized state history",
+    "forward_counterfactual": "outcome difference between separately integrated matched interventions",
+    "momentum_balance": "delta(Mv)=integral(sum(Q)+Mdot*v)dt+sum(J)",
+    "generalized_work": "integral(v_transpose*Q)dt plus event work",
+    "outcomes": [
+      "clubhead_speed",
+      "clubhead_direction",
+      "face_path_proxy",
+      "contact_load",
+      "event_timing"
+    ]
+  },
+  "tolerances": {
+    "momentum_relative": 0.02,
+    "work_relative": 0.01,
+    "refinement_ratio_limit": 0.8,
+    "event_gap_m": 1e-10,
+    "event_time_s": 1e-12
+  },
+  "promotion": {
+    "all_retained_cases_close": true,
+    "all_native_operators_available": true,
+    "typed_failures_retained": true,
+    "same_trajectory_and_counterfactual_separate": true,
+    "human_or_coaching_claims": false,
+    "incomplete_controltower_checkpoints_allowed": false
+  }
+}

@@ -2,11 +2,25 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_forward_attribution_study import (
     ForwardAttributionStudyPlan,
     assess_closure_refinement,
+)
+
+
+ROOT = Path(__file__).resolve().parents[2]
+PLAN_PATH = (
+    ROOT
+    / "docs"
+    / "research"
+    / "proximal_distal_energy_transfer"
+    / "data"
+    / "articulated_forward_attribution_plan.json"
 )
 
 
@@ -28,6 +42,16 @@ def test_study_plan_emits_versioned_serial_manifest() -> None:
         manifest["estimands"]["same_trajectory_attribution"]
         != manifest["estimands"]["forward_counterfactual"]
     )
+
+
+def test_committed_plan_matches_the_preregistered_generator() -> None:
+    committed = json.loads(PLAN_PATH.read_text(encoding="utf-8"))
+    generated = ForwardAttributionStudyPlan(
+        source_revision=committed["identity"]["source_revision"],
+        source_data_sha256=committed["identity"]["source_data_sha256"],
+    ).to_manifest()
+
+    assert committed == generated
 
 
 def test_study_plan_rejects_parallel_local_execution_and_unfrozen_identity() -> None:
