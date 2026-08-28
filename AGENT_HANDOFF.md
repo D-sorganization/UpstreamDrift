@@ -103,7 +103,7 @@ are not completion evidence.
 - Registered execution is active under PID 31684 at
   `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; use the status
   CLI for counts. Runtime is 24--48 h, one CPU/117 MB, atomic, empty stderr.
-- Runtime audit v1.1 rejects wrong Pin and dirty/nonlaunch source checkouts.
+- Runtime audit v1.2 rejects wrong Pin, source drift, and invalid native dynamics.
   Heavy image/workflow require `pin`/`pin-pink` plus API gate; parity needs a
   clean `d6bffd0c6` Linux checkout.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
@@ -126,12 +126,12 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current stateful tests: 30 passed. Wider
-event/distributed/attribution tests: 44 passed. Ruff, format, title case,
-file-size, claim audit, numeric coverage, reviewer census, and evidence
-integrity pass. The architecture gate reports only pre-existing #9153
-over-budget functions in the earlier event/attribution scripts; new stateful
-and publication files add no violation.
+Use Python 3.12 and serial pytest. Current structural/container slice: 49 pass;
+Ruff/Black and configured pre-push gates pass. Direct MyPy under local 3.13
+stops in NumPy stubs because its configured language target rejects `type`;
+it does not reach project analysis. Architecture reports only pre-existing
+#9153 over-budget functions in earlier event/attribution scripts; new files add
+no violation.
 
 Never force-push, bypass checks/review, relax a tolerance after seeing results,
 or create redundant CI reruns. Run the GitHub App setup script immediately

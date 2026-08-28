@@ -442,6 +442,8 @@ Linux, WSL, or container runtime containing robotics Pinocchio 2.6 or newer.
 The governed heavy-test Dockerfile and workflow install the `pin` and
 `pin-pink` distributions and run the native dynamics API check; a successful
 image build and runtime audit are still required before using that environment.
+The audit also requires a finite, symmetric, positive-definite native mass
+matrix and finite bias vector for the governed 20-coordinate articulated model.
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study

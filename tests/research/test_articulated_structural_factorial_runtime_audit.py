@@ -27,6 +27,10 @@ def _source(*, revision: str = "a" * 40, clean: bool = True) -> dict[str, object
     return {"revision": revision, "tree_sha": "b" * 40, "tracked_clean": clean}
 
 
+def _smoke(_name: str) -> dict[str, object]:
+    return {"model_nq": 4, "passes": True}
+
+
 def test_runtime_audit_qualifies_every_registered_native_engine() -> None:
     plan = _plan()
 
@@ -38,6 +42,7 @@ def test_runtime_audit_qualifies_every_registered_native_engine() -> None:
         launch=_launch(plan),
         source_checkout=_source(),
         engine_probe=probe,
+        operator_probe=_smoke,
     )
 
     assert result["qualified_for_registered_engines"] is True
@@ -57,6 +62,7 @@ def test_runtime_audit_qualifies_every_registered_native_engine() -> None:
                 "version": "3.0.0",
                 "operator": "native",
             },
+            "operator_smoke": {"model_nq": 4, "passes": True},
         },
         "pinocchio": {
             "status": "qualified",
@@ -65,6 +71,7 @@ def test_runtime_audit_qualifies_every_registered_native_engine() -> None:
                 "version": "3.0.0",
                 "operator": "native",
             },
+            "operator_smoke": {"model_nq": 4, "passes": True},
         },
     }
     assert len(str(result["runtime_identity_sha256"])) == 64
@@ -85,6 +92,7 @@ def test_runtime_audit_retains_typed_unavailability_without_qualification() -> N
         launch=_launch(plan),
         source_checkout=_source(),
         engine_probe=probe,
+        operator_probe=_smoke,
     )
 
     assert result["qualified_for_registered_engines"] is False
@@ -104,7 +112,12 @@ def test_runtime_audit_rejects_launch_identity_drift() -> None:
     launch["plan_sha256"] = "0" * 64
 
     with pytest.raises(ValueError, match="launch plan identity"):
-        audit_structural_runtime(plan=plan, launch=launch, source_checkout=_source())
+        audit_structural_runtime(
+            plan=plan,
+            launch=launch,
+            source_checkout=_source(),
+            operator_probe=_smoke,
+        )
 
 
 @pytest.mark.parametrize(
@@ -127,8 +140,35 @@ def test_runtime_audit_rejects_source_checkout_drift(
         launch=_launch(plan),
         source_checkout=source,
         engine_probe=probe,
+        operator_probe=_smoke,
     )
 
     assert result["source_checkout"]["matches_launch_revision"] is matches  # type: ignore[index]
     assert result["qualified_for_registered_engines"] is True
+    assert result["qualified_for_execution"] is False
+
+
+def test_runtime_audit_rejects_native_operator_smoke_failure() -> None:
+    plan = _plan()
+
+    def probe(name: str) -> dict[str, str]:
+        return {"name": name, "version": "3.0.0", "operator": "native"}
+
+    def smoke(name: str) -> dict[str, object]:
+        return {"engine": name, "passes": name == "mujoco"}
+
+    result = audit_structural_runtime(
+        plan=plan,
+        launch=_launch(plan),
+        source_checkout=_source(),
+        engine_probe=probe,
+        operator_probe=smoke,
+    )
+
+    engines = result["engines"]
+    assert isinstance(engines, dict)
+    assert engines["mujoco"]["status"] == "qualified"
+    assert engines["pinocchio"]["status"] == "incompatible"
+    assert engines["pinocchio"]["failure"] == {"code": "native_operator_smoke_failed"}
+    assert result["qualified_for_registered_engines"] is False
     assert result["qualified_for_execution"] is False

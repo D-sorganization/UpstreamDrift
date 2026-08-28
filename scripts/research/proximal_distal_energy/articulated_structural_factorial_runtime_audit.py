@@ -14,6 +14,11 @@ import re
 import subprocess
 from typing import Any
 
+import numpy as np
+
+from scripts.research.proximal_distal_energy.articulated_forward_integration import (
+    native_dynamics_operator,
+)
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_evaluator import (
     require_native_engine,
 )
@@ -21,11 +26,16 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     NativeEngineUnavailable,
     plan_sha256,
 )
+from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
+    build_subject_scaled_model,
+    default_synthetic_profiles,
+)
 
-_SCHEMA = "articulated-structural-factorial-runtime-audit/1.1.0"
+_SCHEMA = "articulated-structural-factorial-runtime-audit/1.2.0"
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _DISTRIBUTIONS = ("numpy", "scipy", "mujoco", "pin", "pinocchio")
 EngineProbe = Callable[[str], Mapping[str, str]]
+OperatorProbe = Callable[[str], Mapping[str, object]]
 
 
 def _mapping(value: object, *, name: str) -> Mapping[str, Any]:
@@ -64,12 +74,41 @@ def _canonical_sha256(value: Mapping[str, object]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _native_operator_smoke(engine: str) -> dict[str, object]:
+    model, _ = build_subject_scaled_model(default_synthetic_profiles()[0])
+    operator = native_dynamics_operator(engine, model)
+    q = np.zeros(model.nq, dtype=np.float64)
+    qd = np.zeros(model.nq, dtype=np.float64)
+    matrix, bias = operator(q, qd)
+    matrix = np.asarray(matrix, dtype=np.float64)
+    bias = np.asarray(bias, dtype=np.float64)
+    symmetry_error = float(np.max(np.abs(matrix - matrix.T)))
+    minimum_eigenvalue = float(np.min(np.linalg.eigvalsh(matrix)))
+    passes = bool(
+        matrix.shape == (model.nq, model.nq)
+        and bias.shape == (model.nq,)
+        and np.all(np.isfinite(matrix))
+        and np.all(np.isfinite(bias))
+        and symmetry_error <= 1.0e-10
+        and minimum_eigenvalue > 1.0e-12
+    )
+    return {
+        "model_nq": model.nq,
+        "mass_matrix_shape": list(matrix.shape),
+        "bias_shape": list(bias.shape),
+        "maximum_symmetry_error": symmetry_error,
+        "minimum_mass_matrix_eigenvalue": minimum_eigenvalue,
+        "passes": passes,
+    }
+
+
 def audit_structural_runtime(
     *,
     plan: Mapping[str, object],
     launch: Mapping[str, object],
     source_checkout: Mapping[str, object],
     engine_probe: EngineProbe | None = None,
+    operator_probe: OperatorProbe | None = None,
 ) -> dict[str, object]:
     """Return an identity-bound runtime audit without evaluating outcomes."""
 
@@ -94,6 +133,7 @@ def audit_structural_runtime(
         )
     source_matches = observed_revision == revision and tracked_clean
     probe = engine_probe or require_native_engine
+    smoke_probe = operator_probe or _native_operator_smoke
     engines: dict[str, dict[str, object]] = {}
     for name in _registered_engines(plan):
         try:
@@ -116,7 +156,37 @@ def audit_structural_runtime(
             version = identity.get("version")
             if not isinstance(version, str) or not version:
                 raise ValueError("qualified engine identity must declare a version")
-            engines[name] = {"status": "qualified", "identity": identity}
+            try:
+                smoke = dict(smoke_probe(name))
+            except (
+                ImportError,
+                RuntimeError,
+                ValueError,
+                TypeError,
+                AttributeError,
+            ) as exc:
+                engines[name] = {
+                    "status": "incompatible",
+                    "identity": identity,
+                    "failure": {
+                        "code": "native_operator_smoke_error",
+                        "detail": str(exc),
+                    },
+                }
+            else:
+                if smoke.get("passes") is not True:
+                    engines[name] = {
+                        "status": "incompatible",
+                        "identity": identity,
+                        "operator_smoke": smoke,
+                        "failure": {"code": "native_operator_smoke_failed"},
+                    }
+                else:
+                    engines[name] = {
+                        "status": "qualified",
+                        "identity": identity,
+                        "operator_smoke": smoke,
+                    }
     platform_record: dict[str, object] = {
         "python_implementation": platform.python_implementation(),
         "python_version": platform.python_version(),
