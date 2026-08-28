@@ -33,7 +33,7 @@ partial campaign checkpoints are not completion evidence.
   `019fe886-6614-70a2-a596-e5b0dea725d0`.
 - Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
 - Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
-  `e732757c9`; three local commits are saved through `e41105424`.
+  `e732757c9` and published through `be26a50c9`.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
@@ -43,8 +43,8 @@ partial campaign checkpoints are not completion evidence.
   denominator suppression. An eleventh MuJoCo test replays a
   five-sample rigid articulated contact trace into configuration, velocity,
   contact, and zero-active contributions with exact pointwise force closure.
-- No branch has been pushed and no PR exists yet. The current work is an
-  implementation foundation, not completion of #9153.
+- No PR exists yet. The current remote branch is a recoverable implementation
+  foundation, not completion of #9153.
 
 ## Immediate Order
 
