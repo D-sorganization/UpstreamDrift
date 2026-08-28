@@ -74,6 +74,63 @@ def _canonical_sha256(value: Mapping[str, object]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _audit_digest_payload(audit: Mapping[str, object]) -> dict[str, object]:
+    return {
+        name: audit[name]
+        for name in (
+            "identity",
+            "platform",
+            "distributions",
+            "engines",
+            "source_checkout",
+        )
+    }
+
+
+def validate_runtime_audit(
+    *,
+    plan: Mapping[str, object],
+    launch: Mapping[str, object],
+    audit: Mapping[str, object],
+) -> str:
+    """Return the digest only for an intact audit qualified for this launch."""
+
+    if audit.get("schema_version") != _SCHEMA:
+        raise ValueError("runtime audit schema is invalid")
+    if audit.get("classification") != "runtime_qualification_not_scientific_evidence":
+        raise ValueError("runtime audit classification is invalid")
+    expected_identity = {
+        "plan_sha256": plan_sha256(plan),
+        "execution_revision": launch.get("execution_revision"),
+    }
+    if audit.get("identity") != expected_identity:
+        raise ValueError("runtime audit identity does not match the launch")
+    source = _mapping(audit.get("source_checkout"), name="source_checkout")
+    if (
+        source.get("revision") != launch.get("execution_revision")
+        or source.get("tracked_clean") is not True
+        or source.get("matches_launch_revision") is not True
+    ):
+        raise ValueError("runtime audit source checkout is not launch-qualified")
+    engines = _mapping(audit.get("engines"), name="engines")
+    registered = _registered_engines(plan)
+    if set(engines) != set(registered) or any(
+        _mapping(engines[name], name=f"engines.{name}").get("status") != "qualified"
+        for name in registered
+    ):
+        raise ValueError("runtime audit does not qualify every registered engine")
+    if audit.get("qualified_for_registered_engines") is not True:
+        raise ValueError("runtime audit is not qualified for registered engines")
+    if audit.get("qualified_for_execution") is not True:
+        raise ValueError("runtime audit is not qualified for execution")
+    digest = audit.get("runtime_identity_sha256")
+    if not isinstance(digest, str) or digest != _canonical_sha256(
+        _audit_digest_payload(audit)
+    ):
+        raise ValueError("runtime audit digest is invalid")
+    return digest
+
+
 def _native_operator_smoke(engine: str) -> dict[str, object]:
     model, _ = build_subject_scaled_model(default_synthetic_profiles()[0])
     operator = native_dynamics_operator(engine, model)
@@ -281,4 +338,4 @@ if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
 
 
-__all__ = ["audit_structural_runtime"]
+__all__ = ["audit_structural_runtime", "validate_runtime_audit"]

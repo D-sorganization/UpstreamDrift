@@ -10,6 +10,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit import (
     audit_structural_runtime,
+    validate_runtime_audit,
 )
 
 pytestmark = pytest.mark.scientific
@@ -172,3 +173,54 @@ def test_runtime_audit_rejects_native_operator_smoke_failure() -> None:
     assert engines["pinocchio"]["failure"] == {"code": "native_operator_smoke_failed"}
     assert result["qualified_for_registered_engines"] is False
     assert result["qualified_for_execution"] is False
+
+
+def test_runtime_audit_validator_accepts_only_intact_qualified_identity() -> None:
+    plan = _plan()
+    launch = _launch(plan)
+
+    def probe(name: str) -> dict[str, str]:
+        return {"name": name, "version": "3.0.0", "operator": "native"}
+
+    audit = audit_structural_runtime(
+        plan=plan,
+        launch=launch,
+        source_checkout=_source(),
+        engine_probe=probe,
+        operator_probe=_smoke,
+    )
+
+    assert (
+        validate_runtime_audit(plan=plan, launch=launch, audit=audit)
+        == audit["runtime_identity_sha256"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ({"qualified_for_execution": False}, "not qualified"),
+        ({"runtime_identity_sha256": "0" * 64}, "digest"),
+        ({"identity": {"plan_sha256": "0" * 64}}, "identity"),
+    ],
+)
+def test_runtime_audit_validator_fails_closed_on_tampering(
+    mutation: dict[str, object], message: str
+) -> None:
+    plan = _plan()
+    launch = _launch(plan)
+
+    def probe(name: str) -> dict[str, str]:
+        return {"name": name, "version": "3.0.0", "operator": "native"}
+
+    audit = audit_structural_runtime(
+        plan=plan,
+        launch=launch,
+        source_checkout=_source(),
+        engine_probe=probe,
+        operator_probe=_smoke,
+    )
+    audit.update(mutation)
+
+    with pytest.raises(ValueError, match=message):
+        validate_runtime_audit(plan=plan, launch=launch, audit=audit)

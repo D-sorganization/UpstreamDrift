@@ -410,17 +410,18 @@ python3 -m scripts.research.proximal_distal_energy.generate_articulated_structur
   --design-authority-revision 01b82082d9e5fcad88293fbeb56994de0c77a8be
 python3 -m scripts.research.proximal_distal_energy.generate_articulated_structural_factorial_launch \
   --execution-revision d6bffd0c6ae6e7d90fdc18778799c0bd4b592dae
-# execute only after the disclosed timing probe confirms the serial resource envelope
-python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_launcher \
-  --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
-  --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
-  --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6
-# bind package and native-engine identities without evaluating outcomes
+# bind the clean source, package, and native-engine identities before execution
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit \
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
   --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
   --source-root /path/to/clean/execution-revision-checkout \
   --output C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/runtime-audit.json
+# execute only after the disclosed timing probe and launch-specific audit pass
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_launcher \
+  --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+  --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+  --runtime-audit C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/runtime-audit.json \
+  --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/checkpoints
 # inspect a partial run without promoting it or starting another worker
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_status \
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
