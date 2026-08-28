@@ -95,8 +95,7 @@ are not completion evidence.
   contrasts are explicitly exploratory.
 - A disclosed first probe failed closed on a stale formatting-only shaft-source
   hash and produced no outcome. Commit `7b7862f3b` repaired that provenance;
-  the regenerated NPZ is byte-identical. Launch manifest `147846241` binds the
-  runner to exact execution revision `7b7862f3b3a9e69c055ba920ac4c68da72177f39`.
+  the regenerated NPZ is byte-identical.
 - The passing non-evidence probe took 4.02 s at 0.2 ms with residual 0.00291.
   Execution was stopped after 12 JSON-only checkpoints when audit found they
   could not support the registered full-trajectory engine-parity gate. Retain
@@ -105,17 +104,18 @@ are not completion evidence.
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
   `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; its first
-  JSON/NPZ pair passed. Active-ground timings revise runtime to 24--48 h; the
-  process uses about one CPU core and 111 MB, with atomic resume.
+  20 records include 11 validated JSON/NPZ pairs and nine typed unavailables.
+  Active-ground timings revise runtime to 24--48 h; the process uses about one
+  CPU core and 117 MB, with atomic resume and empty stderr.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.
 
 ## Immediate Order
 
-1. Monitor PID 31684 without a second run. Each completed JSON requires an NPZ;
-   typed-unavailable JSON does not. Keep `stderr.log` empty and resume only with
-   the exact v1.2 plan/launch/directory.
+1. Monitor PID 31684 with `articulated_structural_factorial_status`; do not
+   start a second run. Keep `stderr.log` empty and resume only with the exact
+   v1.2 plan/launch/directory. Completed JSON requires NPZ; unavailable does not.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the

@@ -271,6 +271,14 @@ def _path(directory: Path, case: StructuralCase) -> Path:
     return directory / f"case-{digest}.json"
 
 
+def checkpoint_path(directory: Path, case: StructuralCase) -> Path:
+    """Return the deterministic JSON path for one registered case."""
+
+    if not isinstance(directory, Path):
+        raise TypeError("directory must be a pathlib.Path")
+    return _path(directory, case)
+
+
 def _sidecar_path(path: Path) -> Path:
     return path.with_suffix(".npz")
 
@@ -453,6 +461,38 @@ def load_registered_checkpoints(
     return tuple(checkpoints)
 
 
+def load_available_checkpoints(
+    *,
+    plan: Mapping[str, object],
+    launch: Mapping[str, object],
+    checkpoint_dir: Path,
+) -> tuple[StructuralCheckpoint, ...]:
+    """Validate every checkpoint currently visible without requiring completion."""
+
+    plan_hash, execution_revision = _validate_launch(plan=plan, launch=launch)
+    cases = build_registered_cases(plan)
+    known_json = {_path(checkpoint_dir, case).name for case in cases}
+    known_npz = {Path(name).with_suffix(".npz").name for name in known_json}
+    visible_json = {path.name for path in checkpoint_dir.glob("case-*.json")}
+    visible_npz = {path.name for path in checkpoint_dir.glob("case-*.npz")}
+    unknown = (visible_json - known_json) | (visible_npz - known_npz)
+    if unknown:
+        raise ValueError("checkpoint directory contains unregistered case files")
+    checkpoints = []
+    for case in cases:
+        path = _path(checkpoint_dir, case)
+        if path.is_file():
+            checkpoints.append(
+                _load(
+                    path=path,
+                    case=case,
+                    plan_hash=plan_hash,
+                    execution_revision=execution_revision,
+                )
+            )
+    return tuple(checkpoints)
+
+
 __all__ = [
     "NativeEngineUnavailable",
     "StructuralCase",
@@ -460,6 +500,8 @@ __all__ = [
     "StructuralEvaluation",
     "build_launch_manifest",
     "build_registered_cases",
+    "checkpoint_path",
+    "load_available_checkpoints",
     "load_registered_checkpoints",
     "plan_sha256",
     "run_serial_cases",
