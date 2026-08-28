@@ -20,8 +20,8 @@ are not completion evidence.
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`.
   Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`; branch:
   `feat/9153-forward-impulse-work`. No PR exists yet.
-- Remote/local branch head before the paper-integration commit is
-  `96f29243470fd7df4675ad19fce5a19d8d6249a3`.
+- Remote/local branch head is `97b6395ca6805fd5f92764a2913ded498f792dd7`.
+  The tree is clean and the remote branch was verified at that exact head.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -67,13 +67,21 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Commit the release manifest/checksums bound to immutable source commit
-   `572f387cd` and push both new commits.
-2. Open a protected PR only after local release validation is green. Preserve
-   all refinement/parity failures and do not weaken thresholds.
-3. Continue #9153 with a pilot-disclosed rigid refinement extension, then
-   matched rigid/shaft/base branches and causal killswitch runs.
-4. Project only protected UpstreamDrift evidence into AffineDrift; continue
+1. Freeze the pilot-disclosed rigid refinement extension against source head
+   `97b6395ca`, using all 18 previously declared screening states, only the two
+   original failing variants, and unseen 0.2/0.1/0.05 ms steps. The contract is
+   serial, 216 registered cases (108 native attempts plus typed Pinocchio
+   absence), with atomic checkpoints and no ControlTower dependency.
+2. Commit and push the manifest before execution. Run it only from that exact
+   immutable execution revision; preserve the original failure and pilot as
+   separate evidence.
+3. Aggregate and integrate the extension only after identity, checkpoint,
+   closure, refinement, and claim-boundary validation. Do not weaken the 0.8
+   threshold after seeing results.
+4. Then continue matched rigid/shaft/base branches and causal killswitch runs.
+   Open a protected PR only after the full #9153 acceptance set is locally
+   green.
+5. Project only protected UpstreamDrift evidence into AffineDrift; continue
    Tools only through its provider contract and protected flow.
 
 ## Validation

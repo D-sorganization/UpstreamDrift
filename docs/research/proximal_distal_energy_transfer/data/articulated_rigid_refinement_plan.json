@@ -1,0 +1,231 @@
+{
+  "schema_version": "rigid-refinement-extension/1.0.0",
+  "issue": 9153,
+  "parent_epic": 8557,
+  "preregistration": {
+    "timing": "after_disclosed_development_pilot_before_extension_execution",
+    "reason": "the original rigid smoke failed the frozen work-refinement gate for nominal and damping_high",
+    "original_smoke_result": {
+      "nominal_work_refinement_ratios": [
+        0.8291266315013308, 0.5859514678225363
+      ],
+      "damping_high_work_refinement_ratios": [
+        1.2354797329442686, 0.6009489640811517
+      ],
+      "refinement_ratio_limit": 0.8,
+      "status": "failed_and_retained"
+    },
+    "pilot_steps_s": [0.00025, 0.000125, 6.25e-5],
+    "pilot_disclosure": "a post-result development-only run on the original smoke state showed contraction at finer steps",
+    "pilot_exclusion": "pilot outputs are not confirmatory campaign evidence",
+    "confirmatory_steps_disjoint": true,
+    "state_selection": "all 18 previously declared screening states; no state was selected from the pilot outcome",
+    "bound_evaluator_revision": "97b6395ca6805fd5f92764a2913ded498f792dd7"
+  },
+  "identity": {
+    "source_revision": "97b6395ca6805fd5f92764a2913ded498f792dd7",
+    "source_data_sha256": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "random_seed": 9153
+  },
+  "execution": {
+    "worker_count": 1,
+    "case_checkpointing": "atomic_per_case",
+    "resume_identity": "source_revision+source_data_sha256+schema_version+execution_revision+case_key",
+    "eligible_machine": "serial_cpu_runtime_with_qualified_native_engine",
+    "estimated_registered_case_count": 216,
+    "estimated_native_attempt_count": 108,
+    "estimated_runtime_s": 90,
+    "resource_contract": "DeskComputer serial CPU; one Python process; no ControlTower use",
+    "launch_status": "not_started"
+  },
+  "design": {
+    "duration_s": 0.005,
+    "time_steps_s": [0.0002, 0.0001, 5e-5],
+    "engines": ["mujoco", "pinocchio"],
+    "variants": ["nominal", "damping_high"],
+    "variant_parameters": [
+      {
+        "name": "nominal",
+        "stiffness_factor": 1.0,
+        "damping_factor": 1.0,
+        "displacement_factor": 1.0,
+        "velocity_factor": 1.0
+      },
+      {
+        "name": "damping_high",
+        "stiffness_factor": 1.0,
+        "damping_factor": 2.0,
+        "displacement_factor": 1.0,
+        "velocity_factor": 1.0
+      }
+    ],
+    "smoke_states": [
+      {
+        "source_case_index": 0,
+        "source_sample_index": 0,
+        "source_time_s": 0.0,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 0,
+        "source_sample_index": 6,
+        "source_time_s": 0.12,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 0,
+        "source_sample_index": 12,
+        "source_time_s": 0.24,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 4,
+        "source_sample_index": 0,
+        "source_time_s": 0.0,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 4,
+        "source_sample_index": 6,
+        "source_time_s": 0.12,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 4,
+        "source_sample_index": 12,
+        "source_time_s": 0.24,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 8,
+        "source_sample_index": 0,
+        "source_time_s": 0.0,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 8,
+        "source_sample_index": 6,
+        "source_time_s": 0.12,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 8,
+        "source_sample_index": 12,
+        "source_time_s": 0.24,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 9,
+        "source_sample_index": 0,
+        "source_time_s": 0.0,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 9,
+        "source_sample_index": 6,
+        "source_time_s": 0.12,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 9,
+        "source_sample_index": 12,
+        "source_time_s": 0.24,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 13,
+        "source_sample_index": 0,
+        "source_time_s": 0.0,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 13,
+        "source_sample_index": 6,
+        "source_time_s": 0.12,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 13,
+        "source_sample_index": 12,
+        "source_time_s": 0.24,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 17,
+        "source_sample_index": 0,
+        "source_time_s": 0.0,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 17,
+        "source_sample_index": 6,
+        "source_time_s": 0.12,
+        "role": "prospective_screening_state"
+      },
+      {
+        "source_case_index": 17,
+        "source_sample_index": 12,
+        "source_time_s": 0.24,
+        "role": "prospective_screening_state"
+      }
+    ],
+    "screening_case_indices": [0, 4, 8, 9, 13, 17],
+    "screening_sample_indices": [0, 6, 12],
+    "model_authority": {
+      "path": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+      "state_schema": "18_cases_x_13_samples_x_20_coordinates"
+    },
+    "contact_law": {
+      "name": "bilateral_kelvin_voigt_point_attachment_always_active",
+      "contact_stiffness_n_m": 1800.0,
+      "contact_damping_n_s_m": 18.0,
+      "initial_club_displacement_m": 0.001,
+      "initial_club_velocity_m_s": 0.05,
+      "unilateral_contact": false
+    },
+    "event_path_model": "linear_state_interpolant",
+    "event_kinds": ["opening", "reattachment", "stick", "slip"]
+  },
+  "estimands": {
+    "same_trajectory_attribution": "integrals evaluated on one retained realized state history",
+    "forward_counterfactual": "outcome difference between separately integrated matched interventions",
+    "momentum_balance": "delta(Mv)=integral(sum(Q)+Mdot*v)dt+sum(J)",
+    "generalized_work": "integral(v_transpose*Q)dt plus integral(0.5*v_transpose*Mdot*v)dt plus event work",
+    "outcomes": [
+      "clubhead_speed",
+      "clubhead_direction",
+      "face_path_proxy",
+      "contact_load",
+      "event_timing"
+    ]
+  },
+  "tolerances": {
+    "momentum_relative": 0.02,
+    "work_relative": 0.01,
+    "pointwise_force_closure": 1e-10,
+    "trajectory_energy_relative": 0.02,
+    "refinement_ratio_limit": 0.8,
+    "event_gap_m": 1e-10,
+    "event_time_s": 1e-12
+  },
+  "reporting": {
+    "units": "SI",
+    "world_frame": "source_authority_world_xyz",
+    "clubhead_body": "clubhead_mass",
+    "club_face_proxy_axis": "club_local_positive_x",
+    "face_path_proxy": "angle between club local +x axis and clubhead velocity in the world frame"
+  },
+  "promotion": {
+    "all_retained_cases_close": true,
+    "all_native_operators_available": true,
+    "typed_failures_retained": true,
+    "same_trajectory_and_counterfactual_separate": true,
+    "kinetic_transport_work_retained": true,
+    "human_or_coaching_claims": false,
+    "incomplete_controltower_checkpoints_allowed": false,
+    "original_rigid_smoke_failure_erased": false,
+    "all_screening_states_retained": true,
+    "cross_engine_parity_required": true,
+    "pilot_outputs_eligible": false
+  }
+}
