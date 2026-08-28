@@ -1,14 +1,16 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.4.0",
   "issue": 9153,
   "parent_epic": 8557,
   "preregistration": {
-    "revision": 4,
-    "amendment_timing": "before_registered_outcome_generation",
-    "amendment": "freeze numeric contact, variant, model, frame, and proxy conventions"
+    "revision": 5,
+    "amendment_timing": "after_initial_smoke_diagnosis_before_corrected_rerun",
+    "amendment": "retain the omitted one-half v-transpose Mdot v kinetic transport work term",
+    "supersedes_plan_sha256": "cdb4f61e3c6e814906f6c43b68d62ca601c044d0a35598ff9a35e86dee3331f1",
+    "preserved_diagnostic_execution_revision": "0ba50aee3ab1fe1d445cd003e2428e048685d4f0"
   },
   "identity": {
-    "source_revision": "5484a5af23cb8be26fd4f3a8a2de9ba2da6788af",
+    "source_revision": "9a91a957f793a0f2b1e891b7367624544ab33b88",
     "source_data_sha256": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "random_seed": 9153
   },
@@ -111,7 +113,7 @@
     "same_trajectory_attribution": "integrals evaluated on one retained realized state history",
     "forward_counterfactual": "outcome difference between separately integrated matched interventions",
     "momentum_balance": "delta(Mv)=integral(sum(Q)+Mdot*v)dt+sum(J)",
-    "generalized_work": "integral(v_transpose*Q)dt plus event work",
+    "generalized_work": "integral(v_transpose*Q)dt plus integral(0.5*v_transpose*Mdot*v)dt plus event work",
     "outcomes": [
       "clubhead_speed",
       "clubhead_direction",
@@ -141,6 +143,7 @@
     "all_native_operators_available": true,
     "typed_failures_retained": true,
     "same_trajectory_and_counterfactual_separate": true,
+    "kinetic_transport_work_retained": true,
     "human_or_coaching_claims": false,
     "incomplete_controltower_checkpoints_allowed": false
   }
