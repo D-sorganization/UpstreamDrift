@@ -10,8 +10,14 @@ import pytest
 from scripts.research.proximal_distal_energy import (
     articulated_structural_factorial_launcher as launcher,
 )
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
+    build_launch_manifest,
+)
 
 pytestmark = pytest.mark.scientific
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 
 
 def test_launcher_reports_statuses_without_owning_execution_logic(
@@ -49,3 +55,21 @@ def test_launcher_reports_statuses_without_owning_execution_logic(
     assert result["case_count"] == 2
     assert result["status_counts"] == {"completed": 1, "unavailable": 1}
     assert result["resumed_count"] == 1
+
+
+def test_committed_launch_exactly_binds_the_immutable_runner() -> None:
+    plan = json.loads(
+        (DATA / "articulated_structural_factorial_plan.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    committed = json.loads(
+        (DATA / "articulated_structural_factorial_launch.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert committed == build_launch_manifest(
+        plan=plan,
+        execution_revision="3be6bc8582f22418fc5373e81494be7b892e8df5",
+    )

@@ -408,6 +408,13 @@ python3 -m scripts.research.proximal_distal_energy.run_articulated_ground_postho
 python3 -m scripts.research.proximal_distal_energy.make_articulated_ground_figure
 python3 -m scripts.research.proximal_distal_energy.generate_articulated_structural_factorial_plan \
   --design-authority-revision 01b82082d9e5fcad88293fbeb56994de0c77a8be
+python3 -m scripts.research.proximal_distal_energy.generate_articulated_structural_factorial_launch \
+  --execution-revision 3be6bc8582f22418fc5373e81494be7b892e8df5
+# execute only after the disclosed timing probe confirms the serial resource envelope
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_launcher \
+  --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+  --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+  --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-3be6bc858
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study

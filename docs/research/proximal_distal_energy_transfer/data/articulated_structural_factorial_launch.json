@@ -1,0 +1,10 @@
+{
+  "schema_version": "articulated-structural-factorial-launch/1.0.0",
+  "plan_sha256": "31961ac37fe800a72b789291f2d91b29687af8e34533aa872dc3adb24f9094ac",
+  "execution_revision": "3be6bc8582f22418fc5373e81494be7b892e8df5",
+  "registered_case_count": 2304,
+  "worker_count": 1,
+  "maximum_python_process_count": 1,
+  "checkpoint_policy": "one_atomic_checkpoint_per_attempt",
+  "status": "ready_for_disclosed_timing_probe_then_registered_execution"
+}
