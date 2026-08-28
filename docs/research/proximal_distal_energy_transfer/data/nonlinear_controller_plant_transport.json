@@ -1,0 +1,292 @@
+{
+  "schema_version": "proximal-distal-nonlinear-controller-plant-transport/v2",
+  "classification": "canonical_double_pendulum_plant_transport",
+  "evidence_status": "plant_transport_qualified_no_controller_evaluation",
+  "state_contract": [
+    "shoulder_angle_rad",
+    "wrist_relative_angle_rad",
+    "shoulder_rate_rad_s",
+    "wrist_relative_rate_rad_s"
+  ],
+  "control_contract": [
+    "shoulder_torque_nm",
+    "wrist_torque_nm"
+  ],
+  "integration_contract": {
+    "method": "fixed_step_rk4_constant_control",
+    "step_sizes_s": [
+      0.0005,
+      0.001,
+      0.002
+    ],
+    "reference_backend": "ode"
+  },
+  "step_sizes_s": [
+    0.0005,
+    0.001,
+    0.002
+  ],
+  "registration_authority": {
+    "path": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
+    "sha256": "e964b68173c062559a6daad35a39240d4289b9bb5c50244883e3c251a059f11f"
+  },
+  "parameter_authority": {
+    "canonical_json": {
+      "upper": {
+        "length_m": 0.75,
+        "mass_kg": 7.5,
+        "center_of_mass_ratio": 0.45,
+        "inertia_about_com_kg_m2": 0.3515625
+      },
+      "lower": {
+        "length_m": 1.0,
+        "shaft_mass_kg": 0.15,
+        "clubhead_mass_kg": 0.2,
+        "shaft_com_ratio": 0.43
+      },
+      "plane_inclination_deg": 35.0,
+      "damping_shoulder": 0.4,
+      "damping_wrist": 0.25,
+      "gravity_m_s2": 9.80665,
+      "gravity_enabled": true,
+      "constrained_to_plane": true
+    },
+    "sha256": "29f9f2424a9cedc725e9262f4e06f4726461ac73faa014b0c9fa2faff4c1a4c2"
+  },
+  "source_authorities": [
+    {
+      "path": "src/shared/python/simulation_backends/model_params.py",
+      "sha256": "78aeb9c060f4b455b34b5dff5fcfe49847e7a2a3e545ec71060528a55e16be10"
+    },
+    {
+      "path": "src/shared/python/simulation_backends/ode_backend.py",
+      "sha256": "08a548780f6b4ea9d769146200b80c434345d35a3b53c10d726a3d60f3eaf66c"
+    },
+    {
+      "path": "src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py",
+      "sha256": "3c516a8d2812ac2d1a0390de802ccd4d6df622cba90f02a45aebfb0b2b053935"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/nonlinear_controller_numerics.py",
+      "sha256": "b77109257e756da63e3046e1a54d912d5ca8a79d59a8c0faf7ee87480a7021f7"
+    }
+  ],
+  "environment_authority": {
+    "path": "requirements.lock",
+    "sha256": "dd50c15d631dc490325b0aedeeca465f8de42edbecb32925335f525cf4e0f151"
+  },
+  "parity_thresholds": {
+    "maximum_state_error": 1e-12
+  },
+  "parity_cases": [
+    {
+      "step_s": 0.0005,
+      "state": [
+        -2.2,
+        -1.57,
+        0.0,
+        0.0
+      ],
+      "control": [
+        0.0,
+        0.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.0005,
+      "state": [
+        -1.4,
+        -1.1,
+        3.5,
+        -2.0
+      ],
+      "control": [
+        60.0,
+        -15.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.0005,
+      "state": [
+        -0.35,
+        -0.65,
+        12.0,
+        8.0
+      ],
+      "control": [
+        60.0,
+        15.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.0005,
+      "state": [
+        0.1,
+        0.2,
+        -4.0,
+        3.0
+      ],
+      "control": [
+        -60.0,
+        15.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.001,
+      "state": [
+        -2.2,
+        -1.57,
+        0.0,
+        0.0
+      ],
+      "control": [
+        0.0,
+        0.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.001,
+      "state": [
+        -1.4,
+        -1.1,
+        3.5,
+        -2.0
+      ],
+      "control": [
+        60.0,
+        -15.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.001,
+      "state": [
+        -0.35,
+        -0.65,
+        12.0,
+        8.0
+      ],
+      "control": [
+        60.0,
+        15.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.001,
+      "state": [
+        0.1,
+        0.2,
+        -4.0,
+        3.0
+      ],
+      "control": [
+        -60.0,
+        15.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.002,
+      "state": [
+        -2.2,
+        -1.57,
+        0.0,
+        0.0
+      ],
+      "control": [
+        0.0,
+        0.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.002,
+      "state": [
+        -1.4,
+        -1.1,
+        3.5,
+        -2.0
+      ],
+      "control": [
+        60.0,
+        -15.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.002,
+      "state": [
+        -0.35,
+        -0.65,
+        12.0,
+        8.0
+      ],
+      "control": [
+        60.0,
+        15.0
+      ],
+      "maximum_state_error": 0.0
+    },
+    {
+      "step_s": 0.002,
+      "state": [
+        0.1,
+        0.2,
+        -4.0,
+        3.0
+      ],
+      "control": [
+        -60.0,
+        15.0
+      ],
+      "maximum_state_error": 0.0
+    }
+  ],
+  "parity_case_count": 12,
+  "maximum_state_parity_error": 0.0,
+  "deterministic_replay_passed": true,
+  "input_immutability_passed": true,
+  "invalid_input_cases": [
+    {
+      "case": "wrong_state_size",
+      "typed_failure": "ValueError",
+      "trajectory_emitted": false
+    },
+    {
+      "case": "wrong_control_size",
+      "typed_failure": "ValueError",
+      "trajectory_emitted": false
+    },
+    {
+      "case": "nonfinite_state",
+      "typed_failure": "ValueError",
+      "trajectory_emitted": false
+    },
+    {
+      "case": "nonfinite_control",
+      "typed_failure": "ValueError",
+      "trajectory_emitted": false
+    }
+  ],
+  "invalid_input_case_count": 4,
+  "step_size_count": 3,
+  "invalid_input_policy": "raise_value_error_without_trajectory",
+  "controller_evaluation_count": 0,
+  "ranking_eligible_method_count": 0,
+  "eligible_for_ranking": false,
+  "remaining_gates": [
+    "prospective_outcome_blind_tuning",
+    "typed_plant_outcomes",
+    "matched_solver_replay",
+    "frozen_held_out_execution",
+    "event_retention_and_failure_region_map",
+    "optimality_adequacy_or_ranking_suppression"
+  ],
+  "inference_boundary": "Plant parity establishes numerical transport only. It does not qualify a controller, compare policies, identify human control, establish passive torque, or support a coaching recommendation."
+}

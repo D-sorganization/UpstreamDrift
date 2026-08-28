@@ -427,7 +427,9 @@ def _reconcile_reciprocal_claim_reviews(
         retained_ids = [
             candidate_id
             for candidate_id in claim.get("candidate_ids", [])
-            if reviews_by_id[candidate_id]["disposition"] == "material_claims_mapped"
+            if candidate_id in by_id
+            and candidate_id in reviews_by_id
+            and reviews_by_id[candidate_id]["disposition"] == "material_claims_mapped"
         ]
         claim["candidate_ids"] = list(dict.fromkeys(retained_ids))
         claim["source_locations"] = [

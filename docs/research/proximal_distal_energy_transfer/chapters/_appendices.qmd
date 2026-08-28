@@ -180,6 +180,29 @@ Recorded outputs:
   event-tangent projection, channel masks, direct nonlinear pulse controls,
   frozen-local countermodels, refinement, additivity, zero-input, and
   equivalent-unit gates.
+- `data/bounded_event_reachability.{json,npz}` — finite event-tangent
+  continuation, exact-RK4 multiple shooting and independent replay, four
+  channel masks, declared amplitude/slew limits, typed failures, and
+  multistart, mesh, step, zero-authority, and adverse-state controls.
+- `data/event_topology_robustness.{json,npz}` — global direction-aware event
+  enumeration, eleven-delay continuation, matched small synthetic
+  perturbations, pair-level adequacy intervals, and full retained events.
+- `data/event_topology_stress_extension.{json,npz}` — separately
+  preregistered fixed stress-to-failure ladder with absent and multiple
+  crossings retained rather than selected away.
+- `data/event_topology_channel_matrix.{json,npz}` — both, shoulder-only,
+  wrist-only, and zero-authority delay/noise maps; event-state and speed arrays;
+  integration-step refinement; and global-horizon truncation controls.
+- `data/nonlinear_controller_comparison_registration.json` — outcome-blind
+  tuning/evaluation split, nine declared families, matched plant, constraints,
+  objectives, typed failures, ranking suppression, and single-worker identity.
+- `data/nonlinear_controller_solver_qualification.json` — one bounded projected
+  first-order iLQR kernel with derivative, bound, descent, replay,
+  initialization-sensitivity, and typed nonfinite-dynamics gates; collocation
+  NMPC remains unavailable.
+- `data/nonlinear_controller_plant_transport.json` — 12 controller-to-ODE
+  parity cases across three integration steps, exact replay, immutable inputs,
+  typed invalid cases, and zero ranking authority.
 - `data/double_pendulum_identifiability.json` — exact seven-coefficient inverse-
   dynamics factorization, analytic physical-map rank witness, three exact
   nonunique parameter families, dimensionless finite-record rank, unit and

@@ -384,6 +384,147 @@ reachability, controller superiority, human strength or neural allocation,
 passive negative torque, robustness to delay, fatigue or noise, or a coaching
 benefit. Those remain separate falsification gates.
 
+### Bounded Nonlinear Event Reachability {#sec-ladder-bounded-event-reachability}
+
+The next registered test replaces infinitesimal authority with finite bounded
+control perturbations. It uses four-interval multiple shooting and propagates
+every interval with the same exact RK4 operator as the parent trajectory. The
+decision variables are the two torque perturbations in each interval, the
+intermediate states, and a final partial-step duration constrained to the
+nominal crossing bracket. For scaled control perturbation
+$\delta\mathbf u_j$ and interval duration $\Delta t_j$, the declared objective
+is
+
+$$
+J_u=\sum_j \Delta t_j
+\left\|\mathbf S_u^{-1}\delta\mathbf u_j\right\|_2^2,
+$$ {#eq-ladder-bounded-event-objective}
+
+subject to exact step continuity, the three-coordinate event-tangent target,
+$\pm20$ N m scenario bounds on each enabled torque channel, and 10,000
+N m s$^{-1}$ scenario slew limits. These bounds are model scenarios, not
+measurements of human torque or torque-rate capacity. An independently
+replayed trajectory, rather than the optimizer's internal state nodes,
+determines the final feasibility type.
+
+The continuation matrix crosses seven symmetric tangent targets
+($0$, $\pm0.5$, $\pm1.0$, and $\pm2.0$ mrad) with four matched channel masks:
+both torques, shoulder only, wrist only, and zero incremental authority. All 28
+events remain unique and transverse. Thirty-two of the 38 total registered
+replays are feasible. The six infeasible outcomes are exactly the six displaced
+targets under the zero-authority killswitch; its nominal target remains
+feasible. Both enabled channels, either channel alone, the three- and
+five-segment meshes, 1, 2, and 4 ms RK4 steps, and both adverse initial states
+reach their registered targets. Across feasible cases, the largest independent
+event-tangent residual is $8.83\times10^{-11}$, below the declared
+$2\times10^{-6}$ gate.
+
+![Bounded Event Reachability Separates Feasibility From Optimality](figures/fig_bounded_event_reachability.pdf){#fig-bounded-event-reachability width=100%}
+
+Feasibility does not qualify an optimum. Two converged starts for the same
+both-channel target return scaled objectives of $2.05356\times10^{-8}$ and
+$2.56595\times10^{-8}$, a 24.9517% relative spread against the preregistered 5%
+gate. The study therefore releases the registered local feasibility result but
+suppresses channel, controller, effort, and optimality rankings. The fact that
+both one-channel masks reach all registered targets also supplies no basis for
+preferring a shoulder- or wrist-dominant strategy.
+
+The result is restricted to one synthetic planar trajectory, one event guard,
+small tangent offsets, and an event time confined to the nominal crossing
+bracket. It does not map global nonlinear reachability, alternative crossing
+topology, delay, fatigue, noise, bilateral contact, passive negative torque,
+human actuation, participant behavior, or coaching benefit. Those remain
+separate model and governed-data falsification gates.
+
+### Global Event Topology, Delay, and Perturbation Robustness {#sec-ladder-event-topology-robustness}
+
+The local crossing bracket is removed in the next registered test. A
+direction-aware global search retains every guard crossing over a common
+horizon and types absent, unique, multiple, grazing, initial-on-guard, and
+numerical-failure outcomes. It never substitutes the crossing nearest the
+nominal event. Causal delay uses an explicit linear-nodal policy, zero
+prehistory and posthistory commands, and a 0.60 s horizon long enough to retain
+the complete program at every delay from 0 to 200 ms.
+
+Phase A applies matched synthetic perturbations to the initial state, sampled
+command, and event surface at dimensionless fractions 0.001, 0.005, and 0.01.
+All 6,336 nonzero replays retain one positive transverse crossing. Each cell
+preserves 96 of 96 independent antithetic pairs, with a 95% Wilson interval
+[0.961524, 1.0]. This establishes topology preservation only for the declared
+small model stresses. It does not establish event-target accuracy or human
+robustness.
+
+A separately preregistered Phase B extends the artificial stress ladder to
+0.02, 0.05, 0.10, 0.20, and 0.50. The first topology loss occurs at fraction
+0.02 and 200 ms, where one outcome is absent and 191 remain unique transverse.
+At fraction 0.50 and 200 ms, 118 are absent, seven have multiple crossings,
+and 67 remain unique transverse. Only 2 of 96 pairs preserve nominal topology.
+These dimensionless stresses map a synthetic failure region; they are not
+percentages of human motor variability.
+
+Phase C applies the same 1% perturbation design through four generalized-
+coordinate masks: both torques, shoulder only, wrist only, and zero authority.
+Both and shoulder-only cases retain a unique positive crossing throughout. The
+wrist-only nominal crossing is unique through 40 ms and absent from 60 through
+200 ms; zero authority is absent throughout and cannot acquire command torque
+through noise. Once wrist-only absence becomes nominal, its pairwise topology-
+preservation fraction rises again. Preserved absence is not crossing success.
+
+![Channel Masks Expose Topology Loss and Horizon Truncation](figures/fig_event_topology_robustness.pdf){#fig-event-topology-robustness width=100%}
+
+Topology identity agrees across 1, 2, and 4 ms RK4 steps for every channel and
+delay. The 0.60 and 0.80 s horizons also agree. The 0.40 s horizon alone misses
+the wrist-only crossing that occurs at 0.579326 s on both expanded horizons;
+the discrepancy is therefore typed as horizon truncation rather than a
+mechanics threshold.
+
+Event topology, event time/state, transversality, and clubhead speed remain
+separate from the parent bounded study's feasibility, target error, bound
+status, and control objective. Phase C has no independently registered
+work/power quadrature. It supports no anatomical isolation, human noise or
+fatigue interpretation, channel ranking, or coaching recommendation.
+
+### Prospective Nonlinear-Controller Qualification {#sec-ladder-nonlinear-controller-qualification}
+
+The next step freezes a matched nonlinear-controller comparison without
+executing it. The registration digest-binds the analytical ODE plant and the
+trajectory-authority, bounded-reachability, and channel-topology parent
+artifacts. It declares nine controller families, 24 outcome-blind evaluation
+trials, eight disjoint tuning trials, common state and torque coordinates,
+scales, bounds, event logic, failure types, and a paired random-stream rule.
+Every family remains ineligible for ranking. Any comparability, adequacy,
+replay, convergence, optimality, event, or held-out failure suppresses the
+entire ranking rather than assigning a failed case a terminal score.
+
+Before exposing the registered double-pendulum evaluation grid, one solver
+kernel is tested on a separate damped nonlinear fixture. Bounded projected
+first-order iLQR enforces the declared input bound inside each rollout, reduces
+the objective through nonincreasing accepted iterations, replays its states,
+controls, status, and cost exactly, and satisfies the frozen cold/warm
+sensitivity gate. The independent directional-derivative discrepancy is
+$1.05\times10^{-11}$, and the maximum observed bound violation is zero. A
+nonfinite dynamics return produces a typed failure with no trajectory.
+Collocation NMPC remains unimplemented; a bounded shooting method is not
+relabeled as that absent solver.
+
+A separate transport test then applies four states and controls at 0.5, 1, and
+2 ms. All 12 controller-facing RK4 steps match the canonical ODE backend
+exactly in the locked environment; repeated calls are identical, caller inputs
+are unchanged, and four wrong-size or nonfinite cases raise `ValueError`
+without a trajectory. Exact equality here is code-path parity, not independent
+physics validation, because both paths share the analytical equations and
+parameter authority.
+
+These artifacts qualify registration, one manufactured solver kernel, and
+plant-step transport only. They contain zero registered double-pendulum
+controller evaluations and make zero methods ranking-eligible. Plant-specific
+derivatives, typed event and integration outcomes, outcome-blind tuning,
+matched replay, held-out execution, failure-region mapping, and adequate
+optimality evidence remain open. No result in this section establishes
+controller superiority, a clubhead-speed benefit, global optimality, human
+control, anatomy, fatigue, passive biological torque, safety, or coaching
+guidance.
+
 ## Three-Dimensional Frame Audit {#sec-ladder-three-dimensional}
 
 Planar vectors can be embedded in three dimensions and expressed in arbitrary

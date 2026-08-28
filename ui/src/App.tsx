@@ -67,6 +67,11 @@ const BallFlightPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import('./pages/Settings').then((m) => ({ default: m.SettingsPage })),
 );
+const SwingObjectiveLabPage = lazy(() =>
+  import('./pages/SwingObjectiveLab').then((m) => ({
+    default: m.SwingObjectiveLabPage,
+  })),
+);
 /** Themed full-viewport fallback shown while a route chunk loads (#7433). */
 function PageLoadingFallback() {
   return (
@@ -119,6 +124,7 @@ function RoutedContent() {
           />
           {/* Shot Tracer / ball-flight comparison (#7456) */}
           <Route path="/ball-flight" element={<BallFlightPage />} />
+          <Route path="/tools/swing-objective-lab" element={<SwingObjectiveLabPage />} />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
           {/* Settings (#7457): server-persisted preferences surface */}

@@ -71,6 +71,14 @@ def test_release_review_preserves_untested_and_adverse_conclusions() -> None:
         rows["distributed_modal_shaft_coupled_forward"]["scientific_disposition"]
         == "mechanism_supported_but_quantitative_screen_failed"
     )
+    assert rows["global_event_topology_robustness"]["scientific_disposition"] == (
+        "supported_for_registered_synthetic_topology_model_scenarios"
+    )
+    assert rows["global_event_topology_robustness"]["supporting_claim_ids"] == [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323",
+    ]
 
 
 def test_release_review_fails_closed_on_missing_atomic_evidence() -> None:

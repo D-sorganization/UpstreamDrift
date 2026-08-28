@@ -182,6 +182,23 @@ abstract: |
   and three exact nonunique parameter families. The associated Fisher screen
   is an oracle-kinematics lower bound only; it does not identify participant
   anatomy, equipment, or practical measurement performance.
+  A bounded nonlinear follow-up then solves finite event-surface targets with
+  exact-RK4 multiple shooting and independent replay. Both torque channels,
+  shoulder only, and wrist only reach every registered small tangent target;
+  the zero-authority killswitch rejects exactly the six displaced targets.
+  Mesh, integration-step, and adverse-state controls converge, but two
+  multistarts differ by 24.9517% in their scaled control-energy objective and
+  fail the 5% optimality gate. The result therefore supports only local
+  model-scenario feasibility and supplies no controller, effort, human, or
+  coaching ranking.
+  A global direction-aware extension then retains every event crossing under
+  causal delay and matched state, command, and event-surface perturbations.
+  All 6,336 registered small-stress replays preserve one positive transverse
+  crossing, but a preregistered stress extension exposes absent and multiple
+  crossings from 2% synthetic dimensionless stress. Channel, step-size, and
+  horizon controls distinguish topology loss from search-window truncation.
+  These open-loop model stresses do not estimate human variability, anatomy,
+  fatigue, controller superiority, or a coaching strategy.
   A phase-resolved proximal-motion study evaluates 126 rate cases under
   relative-rate, absolute-rate, and exact total-kinetic-energy matching, plus
   45 identical-state acceleration interventions. The large pre-impact rate

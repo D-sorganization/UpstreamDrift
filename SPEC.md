@@ -1,8 +1,72 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-25)
+## Current Scientific Audit State (2026-08-27)
 
-## Markerless Mocap Program (#9063)
+## Swing Objective Lab Web Parity (#9128)
+
+Issue #9128 establishes full web parity for the Swing Objective Lab tool.
+The FastAPI REST endpoint `POST /tools/swing-objectives/compare` and `GET /tools/swing-objectives/presets`
+in `src/api/routes/swing_objectives.py` accept a golfer preset and shared effort budget
+(downswing duration, shoulder/wrist torque bounds, collocation nodes) and execute direct collocation
+to emit a versioned comparison matrix conforming to schema 1.0.0. The React/Tauri frontend page
+`ui/src/pages/SwingObjectiveLab.tsx` renders the per-objective metrics table and cross-evaluation matrix
+with every cell explicitly labeled (text and accessible ARIA attributes, preventing color-only encoding)
+and displays a plain-language alert when `is_degenerate` is true. `src/config/feature_parity.json`
+registers `simulation.swing_objective_lab` as `parity` and `src/config/launcher_manifest.json`
+routes web execution to `/tools/swing-objective-lab`.
+
+## Trajectory-Varying Event-Conditioned Reaching (#9123)
+
+Issue #9123 establishes discrete time-varying variational control authority $z[k+1] = A[k] z[k] + B[k] v[k]$
+and event-tangent reachability Gramian conditioning $W_{tangent} = P W_{full} P^T$ along the registered
+analytical double-pendulum downswing. The transverse event projector $P = I - \frac{f_{event} n^T}{n^T f_{event}}$
+satisfies idempotence $P^2 = P$ and tangent null direction $P f_{event} = 0$.
+Tangent reachability rank is verified at 3 dimensions across active input channels, single-channel
+additivity $W_{both} = W_{shoulder} + W_{wrist}$ is exact within numerical precision, and zero-input
+authority yields rank 0. Direct finite-difference pulse responses match propagated sensitivity matrices.
+Scientific inference boundaries restrict claims to analytical linear variational dynamics.
+
+## Bounded Nonlinear Event-Reaching Feasibility (#9124)
+
+Issue #9124 establishes numerical feasibility for bounded control perturbations over pre-event horizons
+under explicit torque-amplitude and slew-rate bounds. Four-interval multiple shooting propagates every
+state with the protected exact-RK4 parent trajectory and independently replays the resulting controls
+to the geometric event. The registered continuation matrix contains 38 target/channel cases: 32 are
+feasible, while the six infeasible cases are displaced targets under the zero-authority killswitch;
+all nominal zero-offset cases remain feasible. Feasible event-tangent residuals are at most
+$8.83\times10^{-11}$, below the registered $2\times10^{-6}$ gate. Mesh, integration-step,
+adverse-initial-state, and channel-mask controls pass, but the two converged multistart objectives differ
+by 24.9517%, failing the preregistered 5% optimality gate. The result therefore establishes only local
+bounded feasibility for one synthetic planar trajectory and suppresses channel, controller, effort,
+human-capacity, passive-torque, and coaching rankings.
+
+## Event Topology and Delay/Noise Robustness (#9125)
+
+Issue #9125 establishes direction-aware global event enumeration over a common horizon and retains
+absent, unique, multiple, reversed, grazing, initial-on-guard, and numerical-failure outcomes. Phase A
+uses eleven causal delays, matched state/command/event-surface perturbations, 192 antithetic replicates
+per nonzero cell, and 96 independent pairs; all 6,336 nonzero small-stress replays retain one positive
+transverse crossing. A separately preregistered Phase B executes every fixed stress level and first
+exposes topology loss at 0.02 synthetic dimensionless stress and 200 ms delay. Phase C applies both,
+shoulder-only, wrist-only, and zero generalized-coordinate masks, preserves topology identity across
+1, 2, and 4 ms RK4 steps, and uses 0.40, 0.60, and 0.80 s horizons to identify wrist-only truncation.
+Topology preservation is not target feasibility, work, power, human robustness, anatomical isolation,
+channel superiority, or coaching guidance.
+
+## Nonlinear Controller Mechanics Qualification (#9126)
+
+Issue #9126 freezes a matched analytical-double-pendulum controller comparison
+before evaluation, with 24 outcome-blind evaluation trials, eight disjoint
+tuning trials, common plant, coordinate, scaling, bound, event, failure, and
+random-stream contracts, and fail-closed ranking suppression. One bounded
+projected first-order iLQR kernel passes manufactured derivative, in-rollout
+bound, accepted-cost descent, exact replay, initialization-sensitivity, and
+typed nonfinite-dynamics gates. Collocation NMPC remains unimplemented and is
+rejected by identity rather than inferred from a bounded shooting method.
+Twelve controller-facing RK4 steps match the canonical public ODE backend over
+0.5, 1, and 2 ms. These results qualify only a numerical prerequisite and
+shared-equation transport: zero registered controller evaluations have run and
+zero methods are ranking-eligible.
 
 Issue #9065 establishes ADR-0041 and an executable acceptance program before
 live markerless capture begins. Canonical camera, capture, time, calibration,
@@ -3329,7 +3393,10 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-27 | 1.0.617 | Established UpstreamDrift engineering design-manual authority (UP-D0, issue #9066). `manuals/upstreamdrift` QMD is the sole editable authority; existing user, ADR, and research products remain separate; generated HTML, LaTeX, PDF, and DOCX remain non-editable and unapproved. The versioned policy, fail-closed empty registry, agent guidance, contract tests, and offline CI/pre-commit verifier enforce program-contract ownership, safe paths, Ruff formatting, TDD/DbC/DRY/LoD, impacted-path/freshness rules, immutable release evidence, visual and semantic review, and human approval. UP-D1 through UP-D8 remain explicit blockers, and this governance scaffold makes no calculation-coverage or publication claim. |
+| 2026-08-27 | 1.0.620 | Established UpstreamDrift engineering design-manual authority (UP-D0, issue #9066). `manuals/upstreamdrift` QMD is the sole editable authority; existing user, ADR, and research products remain separate; generated HTML, LaTeX, PDF, and DOCX remain non-editable and unapproved. The versioned policy, fail-closed empty registry, agent guidance, contract tests, and offline CI/pre-commit verifier enforce program-contract ownership, safe paths, Ruff formatting, TDD/DbC/DRY/LoD, impacted-path/freshness rules, immutable release evidence, visual and semantic review, and human approval. UP-D1 through UP-D8 remain explicit blockers, and this governance scaffold makes no calculation-coverage or publication claim. |
+| 2026-08-27 | 1.0.619 | Integrated #9126's outcome-blind nonlinear-controller prerequisite. The registration freezes nine families, 24 evaluation trials, eight disjoint tuning trials, plant/event/failure/random-stream contracts, and single-worker checkpoint identity. One bounded projected first-order iLQR kernel passes manufactured derivative, in-rollout bound, descent, replay, initialization-sensitivity, and typed-failure gates; collocation NMPC remains explicitly unavailable. Twelve shared-equation plant-step cases pass over 0.5, 1, and 2 ms. The regenerated web-linearized 251-page paper is 1,962,456 bytes at SHA-256 `92bfaca850ac459cc431e573be8c0288af51ceab4d28759d02c67c602274ee8b`, with 325 adjudicated claims, 144 numeric contracts, and 498/498 verified numeric literals. Zero registered controller evaluations have run and zero methods are ranking-eligible. |
+| 2026-08-27 | 1.0.618 | Integrated #9125's global event-topology, delay, perturbation, stress, channel-mask, refinement, and horizon evidence. Phase A retains one positive transverse crossing in all 6,336 nonzero small-stress replays; Phase B first exposes topology loss at 0.02 synthetic dimensionless stress and 200 ms delay; Phase C distinguishes wrist-only crossing absence from 0.40 s horizon truncation and prevents zero authority from acquiring command noise. The regenerated web-linearized 250-page paper is 1,958,661 bytes at SHA-256 `6ca47ab88331cbb728a0f464f1a1200cf16553328148f40e42192f66d56a1647`, with 322 adjudicated claims, 141 numeric contracts, and 482/482 verified numeric literals. These are open-loop synthetic topology results, not human tolerance, anatomical, strategy-ranking, or coaching evidence. |
+| 2026-08-27 | 1.0.617 | Integrated #9124's bounded nonlinear event-reachability evidence into the governed proximal-distal release. Exact-RK4 multiple shooting and independent replay qualify 32 of 38 registered target/channel cases with maximum feasible event-tangent residual `8.82244e-11`; the six infeasible cases are displaced zero-authority targets. Mesh, integration-step, adverse-initial-state, nominal, and channel-mask controls pass, while a 24.9517% multistart objective spread fails the 5% optimality gate and suppresses every channel/controller ranking. The regenerated web-linearized 249-page paper is 1,946,712 bytes at SHA-256 `1afd5354ceb3f93ab04a5b3d3ca182d512b66f443e19cf822bec0b38b1f836f6`, with 319 adjudicated claims, 138 numeric contracts, and 463/463 verified numeric literals. |
 | 2026-08-27 | 1.0.616 | Fixed #9145: `bunkershot3d/__init__.py` eagerly imported `backends` (both via the package's own `from . import (...)` block and via `from .backends import ChronoDriver, LiggghtsDriver, MPMDriver`), and `backends` imports mujoco at module load, which touches a PyOpenGL binding at import time -- so importing *any* name from `bunkershot3d`, even a pure-dataclass leaf like `EnvelopeStatus`, dragged in mujoco and OpenGL and crashed with `AttributeError: 'NoneType' object has no attribute 'glGetError'` on GL-less machines. This is what broke `unit-test-gate` on PR #9138, with the traceback misleadingly pointing at OpenGL rather than the real cause. Dropped `backends` from the eager import block and the eager driver re-export; the driver classes and the `backends` submodule now resolve lazily through a module-level `__getattr__` (PEP 562), so the public API (`bunkershot3d.ChronoDriver`/`LiggghtsDriver`/`MPMDriver`/`backends`) is unchanged and only the import-time cost moved to first *use*. Added `tests/bunkershot3d/test_package_import_stays_headless_9145.py`, which shells out to a fresh interpreter (so it isn't fooled by modules other tests already imported) and asserts `mujoco`/`OpenGL`/`vtk`/`pyvista` stay out of `sys.modules` after `import bunkershot3d` and after `from bunkershot3d.solvers import EnvelopeStatus`, mirroring the check added for `render3d_vtk.py` in #9138 but at the package boundary. Confirmed red on the pre-fix code and green after; full `tests/bunkershot3d/` suite, `test_public_api_8608.py`, and `ruff check`/`ruff format` all pass. |
 | 2026-08-27 | 1.0.615 | Qualified #9123's trajectory-varying event-conditioned control-authority boundary on the protected #9117 phase/event baseline. The exact discrete RK4 state/input maps, continuous-energy-equivalent Gramians, event-tangent projection, separated torque channels, nonlinear pulse checks, frozen-local countermodel, timestep and differentiation refinement, zero-input, additivity, and equivalent-unit controls expose local first-order authority and its falsifiers. The regenerated, web-linearized 247-page paper is 1,935,834 bytes at SHA-256 `1783ba69c72f56bba1d3a0e43136afc9b6651d31e4bc453f9d2df61ffdcb1dcb`. The evidence does not establish bounded nonlinear reachability, physiological actuator limits, participant behavior, passive torque, controller ranking, or coaching guidance. |
 | 2026-08-27 | 1.0.614 | Fixed two real CI test failures on PR #9138 (BunkerShot3D PyVista/VTK backend), verified against the actual `unit-test-gate` job log rather than re-derived from symptoms. (1) `render3d_vtk.py`'s docstring claimed importing the module never requires GL; true for PyVista itself but not for its sibling imports -- `.bridge`/`.render`/`.report`/`.shot3d`/`.traces` all reach `bunkershot3d.solvers`, and `bunkershot3d/__init__.py` eagerly imports `backends`, whose MPM driver eagerly `import mujoco`s, and `mujoco` touches an OpenGL/OSMesa binding at *that* import, which raised `AttributeError: 'NoneType' object has no attribute 'glGetError'` on the GL-less runner. Every sibling name this module needs at runtime is now imported inside the function/method that uses it (mirroring the existing `require_pyvista()` pattern); only type annotations reference them at module scope, under `TYPE_CHECKING`. (2) `ShotViewportWidget._refresh_renderer_note` derived its note from `.render.viewport_fallback()`, worded for the unrelated sole-field 2-D plan-view widget, so it claimed "VTK/PyVista" even when nothing was ever attempted; it now derives its own note from what actually rendered the frame via a local `_MATPLOTLIB_FALLBACK` constant. Also fixed a `RuntimeError: wrapped C/C++ object of type FigureCanvasQTAgg has been deleted` surfacing under the same path: deferred `draw_idle()` repaints now call the synchronous `draw()`, plus a `sip.isdeleted()` guard. Simulated the third environment (pyvista present, GL init fails) by monkeypatching `pyvista.Plotter` to raise the exact CI `AttributeError` through `ShotViewportWidget.set_shot`; added `test_render3d_vtk_import_touches_no_gl_or_mujoco`, which checks `sys.modules` after a bare import rather than only process exit code. `ruff`/`ruff format`/CI-mode mypy clean; full `tests/unit/tools/bunker_shot_gui/` + `tests/tools/bunker_shot_gui/` suite (718 tests) passes. |

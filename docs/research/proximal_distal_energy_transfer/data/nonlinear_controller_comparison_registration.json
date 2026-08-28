@@ -1,0 +1,545 @@
+{
+  "schema_version": "proximal-distal-nonlinear-controller-registration/v2",
+  "classification": "prospective_controller_comparison_registration",
+  "evidence_status": "no_controller_outcome_generated",
+  "parent_authorities": [
+    {
+      "path": "docs/research/proximal_distal_energy_transfer/data/trajectory_control_authority.json",
+      "sha256": "ea0f381ffca423f14b5a3c985404085d9a71bd8235c89e20a9d266729684c64a"
+    },
+    {
+      "path": "docs/research/proximal_distal_energy_transfer/data/bounded_event_reachability.json",
+      "sha256": "c63b15db3c814ed5cb48df332a6a34558aa15e194c40f68b838be3b53271a33b"
+    },
+    {
+      "path": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
+      "sha256": "0fd5833a8f09c3bbb5350689b4d4796a15bc4ab5add19be5e99d85cfa17230af"
+    }
+  ],
+  "plant_and_solver_source_authorities": [
+    {
+      "path": "src/shared/python/simulation_backends/model_params.py",
+      "sha256": "78aeb9c060f4b455b34b5dff5fcfe49847e7a2a3e545ec71060528a55e16be10"
+    },
+    {
+      "path": "src/shared/python/simulation_backends/ode_backend.py",
+      "sha256": "08a548780f6b4ea9d769146200b80c434345d35a3b53c10d726a3d60f3eaf66c"
+    },
+    {
+      "path": "src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py",
+      "sha256": "3c516a8d2812ac2d1a0390de802ccd4d6df622cba90f02a45aebfb0b2b053935"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/nonlinear_controller_numerics.py",
+      "sha256": "b77109257e756da63e3046e1a54d912d5ca8a79d59a8c0faf7ee87480a7021f7"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/nonlinear_controller_kernels.py",
+      "sha256": "12cc774cabb68055024da3a54341079ee8b209a38467ed7cb26a8cd578a312fa"
+    }
+  ],
+  "environment_authority": {
+    "path": "requirements.lock",
+    "sha256": "dd50c15d631dc490325b0aedeeca465f8de42edbecb32925335f525cf4e0f151",
+    "supported_python_lanes": [
+      "3.11",
+      "3.12"
+    ]
+  },
+  "controller_families": [
+    {
+      "name": "registered_open_loop",
+      "class": "simple_baseline",
+      "status": "reference_pending_current_parent_matched_execution",
+      "eligible_for_ranking": false
+    },
+    {
+      "name": "perfect_state_ltv",
+      "class": "finite_horizon_linear_feedback",
+      "status": "reference_pending_current_parent_matched_execution",
+      "eligible_for_ranking": false
+    },
+    {
+      "name": "delayed_noisy_ltv",
+      "class": "finite_horizon_linear_feedback_adverse_observation",
+      "status": "reference_pending_current_parent_matched_execution",
+      "eligible_for_ranking": false
+    },
+    {
+      "name": "zero_command_killswitch",
+      "class": "negative_control",
+      "status": "reference_pending_current_parent_matched_execution",
+      "eligible_for_ranking": false
+    },
+    {
+      "name": "bounded_nmpc_collocation",
+      "class": "direct_collocation_nonlinear_mpc",
+      "status": "not_implemented",
+      "eligible_for_ranking": false
+    },
+    {
+      "name": "first_order_ilqr",
+      "class": "iterative_linear_quadratic_regulation",
+      "status": "prospective_pending_current_parent_qualification",
+      "eligible_for_ranking": false
+    },
+    {
+      "name": "second_order_ddp",
+      "class": "differential_dynamic_programming",
+      "status": "not_implemented",
+      "eligible_for_ranking": false
+    },
+    {
+      "name": "risk_sensitive_control",
+      "class": "risk_sensitive_optimal_feedback",
+      "status": "not_implemented",
+      "eligible_for_ranking": false
+    },
+    {
+      "name": "scenario_stochastic_mpc",
+      "class": "scenario_based_stochastic_mpc",
+      "status": "not_implemented",
+      "eligible_for_ranking": false
+    }
+  ],
+  "controller_family_count": 9,
+  "matched_comparison_contract": {
+    "model_tier": "analytical_double_pendulum",
+    "plant_backend": "ode",
+    "state_coordinates": [
+      "shoulder_angle_rad",
+      "wrist_relative_angle_rad",
+      "shoulder_rate_rad_s",
+      "wrist_relative_rate_rad_s"
+    ],
+    "control_coordinates": [
+      "shoulder_torque_nm",
+      "wrist_torque_nm"
+    ],
+    "state_scales": [
+      3.14159,
+      3.14159,
+      10.0,
+      10.0
+    ],
+    "control_lower_nm": [
+      -60.0,
+      -15.0
+    ],
+    "control_upper_nm": [
+      60.0,
+      15.0
+    ],
+    "simulation_horizon_steps": 400,
+    "simulation_step_s": 0.001,
+    "event_definition": "theta_shoulder + theta_wrist_relative = 0, positive crossing",
+    "event_interpolation": "first transverse linear guard crossing",
+    "random_stream_rule": "seed 9126 and identical perturbation/noise stream per paired controller-trial comparison",
+    "evaluation_trial_ids": [
+      "eval_angle_common_minus_r0p025",
+      "eval_angle_common_plus_r0p025",
+      "eval_angle_relative_minus_r0p025",
+      "eval_angle_relative_plus_r0p025",
+      "eval_rate_common_minus_r0p025",
+      "eval_rate_common_plus_r0p025",
+      "eval_rate_relative_minus_r0p025",
+      "eval_rate_relative_plus_r0p025",
+      "eval_angle_common_minus_r0p05",
+      "eval_angle_common_plus_r0p05",
+      "eval_angle_relative_minus_r0p05",
+      "eval_angle_relative_plus_r0p05",
+      "eval_rate_common_minus_r0p05",
+      "eval_rate_common_plus_r0p05",
+      "eval_rate_relative_minus_r0p05",
+      "eval_rate_relative_plus_r0p05",
+      "eval_angle_common_minus_r0p1",
+      "eval_angle_common_plus_r0p1",
+      "eval_angle_relative_minus_r0p1",
+      "eval_angle_relative_plus_r0p1",
+      "eval_rate_common_minus_r0p1",
+      "eval_rate_common_plus_r0p1",
+      "eval_rate_relative_minus_r0p1",
+      "eval_rate_relative_plus_r0p1"
+    ],
+    "evaluation_trials": [
+      {
+        "trial_id": "eval_angle_common_minus_r0p025",
+        "scaled_state_perturbation": [
+          -0.025,
+          -0.025,
+          -0.0,
+          -0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_common_plus_r0p025",
+        "scaled_state_perturbation": [
+          0.025,
+          0.025,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_relative_minus_r0p025",
+        "scaled_state_perturbation": [
+          -0.025,
+          0.025,
+          -0.0,
+          -0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_relative_plus_r0p025",
+        "scaled_state_perturbation": [
+          0.025,
+          -0.025,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "trial_id": "eval_rate_common_minus_r0p025",
+        "scaled_state_perturbation": [
+          -0.0,
+          -0.0,
+          -0.025,
+          -0.025
+        ]
+      },
+      {
+        "trial_id": "eval_rate_common_plus_r0p025",
+        "scaled_state_perturbation": [
+          0.0,
+          0.0,
+          0.025,
+          0.025
+        ]
+      },
+      {
+        "trial_id": "eval_rate_relative_minus_r0p025",
+        "scaled_state_perturbation": [
+          -0.0,
+          -0.0,
+          -0.025,
+          0.025
+        ]
+      },
+      {
+        "trial_id": "eval_rate_relative_plus_r0p025",
+        "scaled_state_perturbation": [
+          0.0,
+          0.0,
+          0.025,
+          -0.025
+        ]
+      },
+      {
+        "trial_id": "eval_angle_common_minus_r0p05",
+        "scaled_state_perturbation": [
+          -0.05,
+          -0.05,
+          -0.0,
+          -0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_common_plus_r0p05",
+        "scaled_state_perturbation": [
+          0.05,
+          0.05,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_relative_minus_r0p05",
+        "scaled_state_perturbation": [
+          -0.05,
+          0.05,
+          -0.0,
+          -0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_relative_plus_r0p05",
+        "scaled_state_perturbation": [
+          0.05,
+          -0.05,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "trial_id": "eval_rate_common_minus_r0p05",
+        "scaled_state_perturbation": [
+          -0.0,
+          -0.0,
+          -0.05,
+          -0.05
+        ]
+      },
+      {
+        "trial_id": "eval_rate_common_plus_r0p05",
+        "scaled_state_perturbation": [
+          0.0,
+          0.0,
+          0.05,
+          0.05
+        ]
+      },
+      {
+        "trial_id": "eval_rate_relative_minus_r0p05",
+        "scaled_state_perturbation": [
+          -0.0,
+          -0.0,
+          -0.05,
+          0.05
+        ]
+      },
+      {
+        "trial_id": "eval_rate_relative_plus_r0p05",
+        "scaled_state_perturbation": [
+          0.0,
+          0.0,
+          0.05,
+          -0.05
+        ]
+      },
+      {
+        "trial_id": "eval_angle_common_minus_r0p1",
+        "scaled_state_perturbation": [
+          -0.1,
+          -0.1,
+          -0.0,
+          -0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_common_plus_r0p1",
+        "scaled_state_perturbation": [
+          0.1,
+          0.1,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_relative_minus_r0p1",
+        "scaled_state_perturbation": [
+          -0.1,
+          0.1,
+          -0.0,
+          -0.0
+        ]
+      },
+      {
+        "trial_id": "eval_angle_relative_plus_r0p1",
+        "scaled_state_perturbation": [
+          0.1,
+          -0.1,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "trial_id": "eval_rate_common_minus_r0p1",
+        "scaled_state_perturbation": [
+          -0.0,
+          -0.0,
+          -0.1,
+          -0.1
+        ]
+      },
+      {
+        "trial_id": "eval_rate_common_plus_r0p1",
+        "scaled_state_perturbation": [
+          0.0,
+          0.0,
+          0.1,
+          0.1
+        ]
+      },
+      {
+        "trial_id": "eval_rate_relative_minus_r0p1",
+        "scaled_state_perturbation": [
+          -0.0,
+          -0.0,
+          -0.1,
+          0.1
+        ]
+      },
+      {
+        "trial_id": "eval_rate_relative_plus_r0p1",
+        "scaled_state_perturbation": [
+          0.0,
+          0.0,
+          0.1,
+          -0.1
+        ]
+      }
+    ],
+    "failure_types": [
+      "retained_event",
+      "event_lost",
+      "integration_failure",
+      "solver_failure",
+      "gate_failure"
+    ],
+    "paired_estimand_rule": "delivery comparisons use only jointly retained evaluation pairs; event-loss and typed failures remain separately reported",
+    "ranking_rule": "suppress all controller rankings when any comparability, adequacy, replay, convergence, optimality, event, or held-out gate fails",
+    "no_retuning_rule": "all solver, horizon, scaling, and objective choices freeze after the disjoint tuning set and before evaluation execution"
+  },
+  "tuning_set": {
+    "purpose": "solver qualification and hyperparameter freezing only",
+    "trial_ids": [
+      "tune_diag_all_minus_r0p075",
+      "tune_diag_all_plus_r0p075",
+      "tune_diag_cross_minus_r0p075",
+      "tune_diag_cross_plus_r0p075",
+      "tune_angle_rate_split_minus_r0p075",
+      "tune_angle_rate_split_plus_r0p075",
+      "tune_alternating_minus_r0p075",
+      "tune_alternating_plus_r0p075"
+    ],
+    "trials": [
+      {
+        "trial_id": "tune_diag_all_minus_r0p075",
+        "scaled_state_perturbation": [
+          -0.075,
+          -0.075,
+          -0.075,
+          -0.075
+        ]
+      },
+      {
+        "trial_id": "tune_diag_all_plus_r0p075",
+        "scaled_state_perturbation": [
+          0.075,
+          0.075,
+          0.075,
+          0.075
+        ]
+      },
+      {
+        "trial_id": "tune_diag_cross_minus_r0p075",
+        "scaled_state_perturbation": [
+          -0.075,
+          0.075,
+          0.075,
+          -0.075
+        ]
+      },
+      {
+        "trial_id": "tune_diag_cross_plus_r0p075",
+        "scaled_state_perturbation": [
+          0.075,
+          -0.075,
+          -0.075,
+          0.075
+        ]
+      },
+      {
+        "trial_id": "tune_angle_rate_split_minus_r0p075",
+        "scaled_state_perturbation": [
+          -0.075,
+          -0.075,
+          0.075,
+          0.075
+        ]
+      },
+      {
+        "trial_id": "tune_angle_rate_split_plus_r0p075",
+        "scaled_state_perturbation": [
+          0.075,
+          0.075,
+          -0.075,
+          -0.075
+        ]
+      },
+      {
+        "trial_id": "tune_alternating_minus_r0p075",
+        "scaled_state_perturbation": [
+          -0.075,
+          0.075,
+          -0.075,
+          0.075
+        ]
+      },
+      {
+        "trial_id": "tune_alternating_plus_r0p075",
+        "scaled_state_perturbation": [
+          0.075,
+          -0.075,
+          0.075,
+          -0.075
+        ]
+      }
+    ],
+    "evaluation_outcomes_blinded_until_freeze": true
+  },
+  "tuning_trial_count": 8,
+  "evaluation_trial_count": 24,
+  "objective_program": {
+    "primary": {
+      "name": "registered_trajectory_tracking",
+      "channels": [
+        "integrated_scaled_state_tracking_error",
+        "integrated_scaled_control_deviation",
+        "terminal_scaled_state_tracking_error"
+      ],
+      "delivery_speed_is_optimized": false,
+      "delivery_speed_is_reported_as_outcome": true
+    },
+    "secondary": {
+      "status": "prospective_after_primary_qualification",
+      "channels": [
+        "delivery_speed",
+        "event_time",
+        "effort_proxy",
+        "peak_torque_fraction",
+        "event_retention"
+      ],
+      "dominance_rule": "report nondominated held-out points only after every primary qualification and comparability gate passes"
+    }
+  },
+  "solver_qualification_gates": [
+    "manufactured discrete nonlinear dynamics fixture passes",
+    "central derivatives agree with an independent directional difference",
+    "every optimization enforces torque bounds during the solve",
+    "accepted iterations monotonically reduce the declared objective",
+    "cold-start and warm-start solutions satisfy the sensitivity gate",
+    "deterministic replay reproduces controls states status and cost",
+    "nonfinite dynamics produce a typed failure without a trajectory",
+    "canonical plant transport passes all registered step sizes",
+    "held-out evaluation executes without hyperparameter changes"
+  ],
+  "falsifiers": [
+    "A controller receives a different plant, trial, bound, horizon, event detector, or random stream.",
+    "Evaluation outcomes influence solver tuning or objective weights.",
+    "A failed solve, integration, or lost event receives a fabricated terminal score.",
+    "Post-hoc clipping is described as an in-solver constraint.",
+    "A ranking is emitted after any required gate fails.",
+    "A local model result is promoted to participant control or coaching guidance."
+  ],
+  "execution_contract": {
+    "maximum_workers": 1,
+    "checkpoint_granularity": "one controller-trial pair",
+    "resume_requires_exact_identity_match": true,
+    "identity_fields": [
+      "source_revision",
+      "registration_sha256",
+      "parent_authority_sha256s",
+      "environment_lock_sha256",
+      "solver_name_and_version",
+      "objective_digest",
+      "evaluation_trial_id"
+    ],
+    "launch_authority": "separate operator-approved run after protected parent merge verification",
+    "deskcomputer_policy": "registration_and_bounded_serial_tests_only",
+    "campaign_policy": "no campaign is launched by this registration command"
+  },
+  "controller_evaluation_count": 0,
+  "ranking_eligible_method_count": 0,
+  "inference_boundary": "This registration creates no controller-performance result. Later local model outcomes cannot establish global optimality, participant control, motor intent, anatomical feasibility, passive biological torque, injury risk, fatigue response, or coaching guidance."
+}

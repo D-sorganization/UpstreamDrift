@@ -631,9 +631,11 @@
         "proximal_distal",
         "counterfactuals"
       ],
+      "web_route": "/tools/swing-objective-lab",
       "order": 100,
       "web": {
-        "mode": "native-window"
+        "mode": "route",
+        "route": "/tools/swing-objective-lab"
       }
     },
     {

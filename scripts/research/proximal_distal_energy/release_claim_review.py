@@ -40,6 +40,39 @@ def _spec(
 
 
 REVIEW_SPECS: dict[str, dict[str, Any]] = {
+    "nonlinear_controller_numerical_qualification": _spec(
+        "reviewed_as_numerical_prerequisite_without_ranking",
+        "supported_as_registered_numerical_prerequisite_without_evaluation",
+        ("PD-CLAIM-324", "PD-CLAIM-325", "PD-CLAIM-326"),
+        (
+            "Protect and merge the frozen registration, then separately authorize "
+            "checkpointed held-out execution with no retuning, typed event and "
+            "integration outcomes, independent plant evidence, and ranking "
+            "suppression whenever any registered gate fails."
+        ),
+    ),
+    "global_event_topology_robustness": _spec(
+        "reviewed_as_synthetic_global_topology_robustness",
+        "supported_for_registered_synthetic_topology_model_scenarios",
+        ("PD-CLAIM-321", "PD-CLAIM-322", "PD-CLAIM-323"),
+        (
+            "Repeat the global topology, delay, and event-surface tests on "
+            "independent model tiers and governed participant trajectories; "
+            "add validated work/power quadrature before any energetic, human, "
+            "anatomical, strategy, or coaching interpretation."
+        ),
+    ),
+    "bounded_nonlinear_event_reachability": _spec(
+        "reviewed_as_local_bounded_feasibility_with_failed_optimality_gate",
+        "supported_for_registered_local_bounded_model_scenario",
+        ("PD-CLAIM-319", "PD-CLAIM-320"),
+        (
+            "Map larger target domains and event-bracket transitions, add "
+            "registered delay, noise, and adverse-load continuation, establish "
+            "optimizer adequacy, and test participant-held-out predictions before "
+            "any human feasibility or strategy interpretation."
+        ),
+    ),
     "trajectory_varying_event_control_authority": _spec(
         "reviewed_as_local_trajectory_varying_event_conditioned_authority",
         "supported_for_declared_local_first_order_analytical_trajectory",

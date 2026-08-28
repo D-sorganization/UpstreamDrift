@@ -119,6 +119,37 @@ _RELEASE_METADATA: dict[str, Any] = {
                 "event_conditioned_authority"
             ),
         },
+        "bounded_event_reachability": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_bounded_event_reachability write",
+            "tier": (
+                "analytical_double_pendulum_bounded_nonlinear_"
+                "same_bracket_event_reachability"
+            ),
+        },
+        "event_topology_robustness": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_event_topology_robustness write",
+            "tier": "analytical_double_pendulum_global_delay_noise_topology",
+        },
+        "event_topology_stress_extension": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_event_topology_stress_extension write",
+            "tier": "analytical_double_pendulum_adaptive_topology_failure_region",
+        },
+        "event_topology_channel_matrix": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_event_topology_channel_matrix write",
+            "tier": "analytical_double_pendulum_channel_mask_topology_controls",
+        },
+        "nonlinear_controller_registration": {
+            "command": "python -m scripts.research.proximal_distal_energy.nonlinear_controller_registration write",
+            "tier": "prospective_outcome_blind_controller_comparison_contract",
+        },
+        "nonlinear_controller_solver_qualification": {
+            "command": "python -m scripts.research.proximal_distal_energy.nonlinear_controller_qualification write",
+            "tier": "manufactured_projected_first_order_ilqr_mechanics",
+        },
+        "nonlinear_controller_plant_transport": {
+            "command": "python -m scripts.research.proximal_distal_energy.nonlinear_controller_plant_transport write",
+            "tier": "shared_equation_double_pendulum_step_transport",
+        },
         "double_pendulum_identifiability": {
             "command": "python -m scripts.research.proximal_distal_energy.run_double_pendulum_identifiability write",
             "tier": "analytical_double_pendulum_exact_map_and_dimensionless_finite_record",
@@ -278,6 +309,15 @@ _RELEASE_METADATA: dict[str, Any] = {
         ),
         "trajectory_varying_event_control_authority": (
             "supported_for_declared_local_first_order_analytical_trajectory"
+        ),
+        "bounded_nonlinear_event_reachability": (
+            "supported_for_registered_local_bounded_model_scenario"
+        ),
+        "global_event_topology_robustness": (
+            "supported_for_registered_synthetic_topology_model_scenarios"
+        ),
+        "nonlinear_controller_numerical_qualification": (
+            "supported_as_registered_numerical_prerequisite_without_evaluation"
         ),
         "double_pendulum_base_coefficient_excitation": (
             "full_rank_for_registered_synthetic_record"

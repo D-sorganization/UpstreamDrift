@@ -17,6 +17,37 @@ variability, and model-conditional perturbation rejection. Start with
 the chapter “Transmission Pathways, Robust Speed, and Task Stability.” These
 results do not establish human self-stabilization or a universal strategy.
 
+The bounded nonlinear event-reachability study tests whether finite
+event-tangent targets can be reached under declared shoulder/wrist torque and
+slew scenarios. Thirty-two of 38 registered outcomes are replay-feasible; the
+six displaced zero-authority cases are correctly infeasible. Mesh, integration
+step, and adverse-initial-state controls converge, while a 24.95% multistart
+objective spread fails the 5% optimality gate. Feasibility evidence is retained,
+but channel rankings and human or coaching interpretations are suppressed. See
+[`BOUNDED_EVENT_REACHABILITY.md`](BOUNDED_EVENT_REACHABILITY.md) and
+[`data/bounded_event_reachability.json`](data/bounded_event_reachability.json).
+
+The global event-topology extension retains every directed crossing under
+causal delay, matched state/command/event-surface perturbations, and four
+coordinate-authority masks. It separates topology preservation from crossing
+existence and identifies a wrist-only 0.40 s horizon truncation. All registered
+1, 2, and 4 ms step controls preserve topology identity. The synthetic stress
+ladder, channel masks, and event speeds do not establish human variability,
+anatomical isolation, channel superiority, or coaching guidance. See
+[`EVENT_TOPOLOGY_ROBUSTNESS.md`](EVENT_TOPOLOGY_ROBUSTNESS.md) and
+[`data/event_topology_channel_matrix.json`](data/event_topology_channel_matrix.json).
+
+The nonlinear-controller prerequisite freezes a matched, outcome-blind
+comparison before evaluation. One bounded projected first-order iLQR kernel
+passes manufactured derivative, in-rollout bound, descent, replay,
+initialization-sensitivity, and typed-failure gates; collocation NMPC remains
+unimplemented. Twelve shared-equation plant-step cases pass at 0.5, 1, and
+2 ms, while every controller remains ranking-ineligible and no registered
+double-pendulum evaluation has run. See
+[`NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md`](NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md),
+[`NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md`](NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md),
+and [`NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md`](NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md).
+
 Open research materials for a study of proximal-to-distal (P→D) energy
 transfer in the golf swing. The study combines a literature synthesis
 with a coordinate-explicit Christoffel decomposition that separates
@@ -239,41 +270,57 @@ the finding-by-finding record in
 
 ## Layout
 
-| Path                                                                                                 | What it is                                                                                     |
-| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)                         | Master Quarto document (front matter + chapter includes)                                       |
-| [`chapters/`](chapters/)                                                                             | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                                          |
-| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)                             | Canonical source, terminology, and estimand contract for hand-path attribution                 |
-| [`TERMINOLOGY_AND_CONVENTIONS.md`](TERMINOLOGY_AND_CONVENTIONS.md)                                   | Normative scientific vocabulary, frame, wrench, power, and evidence-status rules               |
-| [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                                       | Completed review, implemented expansion, and falsifiable next-model roadmap                    |
-| [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                                     | Falsifiable prediction and named spatial-interface evidence contract                           |
-| [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                                     | Atomic claim, candidate-inventory, source, alternative, and adjudication contract              |
-| [`data/claim_adjudication_summary.json`](data/claim_adjudication_summary.json)                       | Complete normalized outcomes, qualification axes, and claim-family concentration               |
-| [`data/claim_adjudication_summary.csv`](data/claim_adjudication_summary.csv)                         | Accessible one-row-per-claim reviewer export                                                   |
-| [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json)                             | Claim-complete local hashes and external-support URL inventory                                 |
-| [`data/external_source_review.json`](data/external_source_review.json)                               | Work-deduplicated source, correction, claim-fit, and link-availability review                  |
-| [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                             | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap                    |
-| [`HYBRID_SYSTEM_CONTRACT.md`](HYBRID_SYSTEM_CONTRACT.md)                                             | Executable eight-tier hybrid topology, evidence boundary, and remaining qualification gates    |
-| [`LOCAL_LINEAR_DIAGNOSTICS.md`](LOCAL_LINEAR_DIAGNOSTICS.md)                                         | Local analytical observability/controllability ranks, conditioning, killswitches, and limits   |
-| [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                     | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions              |
-| [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json) | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs              |
-| [`data/hybrid_system_contract_v1.json`](data/hybrid_system_contract_v1.json)                         | Versioned states, modes, guards, resets, actuator/event contracts, and unavailable tiers       |
-| [`data/local_linear_diagnostics.json`](data/local_linear_diagnostics.json)                           | Trace-derived local matrices, SVD rank decisions, step sensitivity, and inference boundary     |
-| [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)               | Claim, alternative-explanation, model-discrepancy, and falsifier register                      |
-| [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)                   | Frozen human-data acquisition, split, analysis, and inference-boundary protocol                |
-| [`MEASURED_TRAJECTORY_ACQUISITION.md`](MEASURED_TRAJECTORY_ACQUISITION.md)                           | Fail-closed measured-trajectory authority, manifest, digest, frame, event, and loader contract |
-| [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                                     | Claim-first figure, evidence, and download index by model tier                                 |
-| [`COMPANION_WORKBENCH.md`](COMPANION_WORKBENCH.md)                                                   | Interactive PyQt6 and React/Tauri model guide, experiments, and evidence boundary              |
-| [`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md)                                                   | PDF quality profiles, source authority, protected publication, and handoff                     |
-| [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)                           | Verified disposition and remediation record for the independent technical review               |
-| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                                           | Artifact and recurring-field definitions with interpretation boundaries                        |
-| [`release_manifest.json`](release_manifest.json)                                                     | Hash-pinned presets, claim status, artifacts, and open release gates                           |
-| [`references.bib`](references.bib)                                                                   | Linked bibliography plus a clearly labeled project-originated presentation source              |
-| [`figures/`](figures/)                                                                               | Figures generated from the recorded analyses (PDF and SVG)                                     |
-| [`data/`](data/)                                                                                     | Recorded experiment outputs with provenance (JSON + NPZ)                                       |
-| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex)                         | LaTeX generated from the Quarto source (`keep-tex: true`)                                      |
-| [`sources/wscg_2024/`](sources/wscg_2024/)                                                           | Hash-registered WSCG presentation sources and interpretation boundaries                        |
-| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf)                         | Rendered scientific PDF                                                                        |
+| Path                                                                                                               | What it is                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| [`proximal_distal_energy_transfer.qmd`](proximal_distal_energy_transfer.qmd)                                       | Master Quarto document (front matter + chapter includes)                                       |
+| [`chapters/`](chapters/)                                                                                           | Chapter source files (`_ch01`–`_ch09`, `_appendices`)                                          |
+| [`HAND_PATH_ATTRIBUTION_CONTRACT.md`](HAND_PATH_ATTRIBUTION_CONTRACT.md)                                           | Canonical source, terminology, and estimand contract for hand-path attribution                 |
+| [`TERMINOLOGY_AND_CONVENTIONS.md`](TERMINOLOGY_AND_CONVENTIONS.md)                                                 | Normative scientific vocabulary, frame, wrench, power, and evidence-status rules               |
+| [`ADVANCED_EXPANSION_REVIEW.md`](ADVANCED_EXPANSION_REVIEW.md)                                                     | Completed review, implemented expansion, and falsifiable next-model roadmap                    |
+| [`EVIDENCE_SCHEMA_V2.md`](EVIDENCE_SCHEMA_V2.md)                                                                   | Falsifiable prediction and named spatial-interface evidence contract                           |
+| [`CLAIM_AUDIT_SCHEMA.md`](CLAIM_AUDIT_SCHEMA.md)                                                                   | Atomic claim, candidate-inventory, source, alternative, and adjudication contract              |
+| [`data/claim_adjudication_summary.json`](data/claim_adjudication_summary.json)                                     | Complete normalized outcomes, qualification axes, and claim-family concentration               |
+| [`data/claim_adjudication_summary.csv`](data/claim_adjudication_summary.csv)                                       | Accessible one-row-per-claim reviewer export                                                   |
+| [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json)                                           | Claim-complete local hashes and external-support URL inventory                                 |
+| [`data/external_source_review.json`](data/external_source_review.json)                                             | Work-deduplicated source, correction, claim-fit, and link-availability review                  |
+| [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                                           | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap                    |
+| [`HYBRID_SYSTEM_CONTRACT.md`](HYBRID_SYSTEM_CONTRACT.md)                                                           | Executable eight-tier hybrid topology, evidence boundary, and remaining qualification gates    |
+| [`LOCAL_LINEAR_DIAGNOSTICS.md`](LOCAL_LINEAR_DIAGNOSTICS.md)                                                       | Local analytical observability/controllability ranks, conditioning, killswitches, and limits   |
+| [`BOUNDED_EVENT_REACHABILITY.md`](BOUNDED_EVENT_REACHABILITY.md)                                                   | Registered bounded nonlinear event-reaching results, falsification controls, and limits        |
+| [`EVENT_TOPOLOGY_ROBUSTNESS.md`](EVENT_TOPOLOGY_ROBUSTNESS.md)                                                     | Global event enumeration, delay/noise stress boundaries, channel masks, and numerical controls |
+| [`MOMENTUM_TRANSFER_QUESTION_PROGRAM.md`](MOMENTUM_TRANSFER_QUESTION_PROGRAM.md)                                   | Drift, geometry, timing, robustness, proximal-velocity, and typed-slack questions              |
+| [`data/momentum_transfer_experiment_registry.json`](data/momentum_transfer_experiment_registry.json)               | Frozen interventions, controls, outcomes, uncertainty, falsifiers, and data needs              |
+| [`data/hybrid_system_contract_v1.json`](data/hybrid_system_contract_v1.json)                                       | Versioned states, modes, guards, resets, actuator/event contracts, and unavailable tiers       |
+| [`data/local_linear_diagnostics.json`](data/local_linear_diagnostics.json)                                         | Trace-derived local matrices, SVD rank decisions, step sensitivity, and inference boundary     |
+| [`data/bounded_event_reachability.json`](data/bounded_event_reachability.json)                                     | Human-readable registered outcomes, controls, qualification gates, and inference boundary      |
+| [`data/bounded_event_reachability.npz`](data/bounded_event_reachability.npz)                                       | Exact numeric arrays for deterministic replay and independent comparison                       |
+| [`data/event_topology_robustness.json`](data/event_topology_robustness.json)                                       | Portable Phase A delay and matched-perturbation evidence                                       |
+| [`data/event_topology_robustness.npz`](data/event_topology_robustness.npz)                                         | Full-precision Phase A draws, events, states, and pair identities                              |
+| [`data/event_topology_stress_extension.json`](data/event_topology_stress_extension.json)                           | Portable preregistered Phase B stress-to-failure evidence                                      |
+| [`data/event_topology_stress_extension.npz`](data/event_topology_stress_extension.npz)                             | Full-precision Phase B topology, event, and perturbation arrays                                |
+| [`data/event_topology_channel_matrix.json`](data/event_topology_channel_matrix.json)                               | Portable Phase C channel, step-refinement, horizon, and outcome-separation evidence            |
+| [`data/event_topology_channel_matrix.npz`](data/event_topology_channel_matrix.npz)                                 | Full-precision Phase C perturbation, event-state, topology, and clubhead-speed arrays          |
+| [`NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md`](NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md)               | Prospective matched comparison, ranking suppression, and execution boundary                    |
+| [`NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md`](NONLINEAR_CONTROLLER_SOLVER_QUALIFICATION.md)                     | Manufactured projected-iLQR mechanics, falsifiers, and unavailable-solver boundary             |
+| [`NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md`](NONLINEAR_CONTROLLER_PLANT_TRANSPORT.md)                               | Controller-facing state/control transport and canonical ODE parity limits                      |
+| [`data/nonlinear_controller_comparison_registration.json`](data/nonlinear_controller_comparison_registration.json) | Digest-bound outcome-blind comparison registration                                             |
+| [`data/nonlinear_controller_solver_qualification.json`](data/nonlinear_controller_solver_qualification.json)       | Deterministic manufactured solver qualification evidence                                       |
+| [`data/nonlinear_controller_plant_transport.json`](data/nonlinear_controller_plant_transport.json)                 | Deterministic shared-equation plant-step transport evidence                                    |
+| [`MODEL_COMPLETION_FALSIFICATION_MATRIX.md`](MODEL_COMPLETION_FALSIFICATION_MATRIX.md)                             | Claim, alternative-explanation, model-discrepancy, and falsifier register                      |
+| [`EXPERIMENTAL_FALSIFICATION_PROTOCOL.md`](EXPERIMENTAL_FALSIFICATION_PROTOCOL.md)                                 | Frozen human-data acquisition, split, analysis, and inference-boundary protocol                |
+| [`MEASURED_TRAJECTORY_ACQUISITION.md`](MEASURED_TRAJECTORY_ACQUISITION.md)                                         | Fail-closed measured-trajectory authority, manifest, digest, frame, event, and loader contract |
+| [`REVIEWER_WORKBENCH.md`](REVIEWER_WORKBENCH.md)                                                                   | Claim-first figure, evidence, and download index by model tier                                 |
+| [`COMPANION_WORKBENCH.md`](COMPANION_WORKBENCH.md)                                                                 | Interactive PyQt6 and React/Tauri model guide, experiments, and evidence boundary              |
+| [`PUBLICATION_QUALITY.md`](PUBLICATION_QUALITY.md)                                                                 | PDF quality profiles, source authority, protected publication, and handoff                     |
+| [`ADVERSARIAL_REVIEW_ADJUDICATION.md`](ADVERSARIAL_REVIEW_ADJUDICATION.md)                                         | Verified disposition and remediation record for the independent technical review               |
+| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md)                                                                         | Artifact and recurring-field definitions with interpretation boundaries                        |
+| [`release_manifest.json`](release_manifest.json)                                                                   | Hash-pinned presets, claim status, artifacts, and open release gates                           |
+| [`references.bib`](references.bib)                                                                                 | Linked bibliography plus a clearly labeled project-originated presentation source              |
+| [`figures/`](figures/)                                                                                             | Figures generated from the recorded analyses (PDF and SVG)                                     |
+| [`data/`](data/)                                                                                                   | Recorded experiment outputs with provenance (JSON + NPZ)                                       |
+| [`proximal_distal_energy_transfer.tex`](proximal_distal_energy_transfer.tex)                                       | LaTeX generated from the Quarto source (`keep-tex: true`)                                      |
+| [`sources/wscg_2024/`](sources/wscg_2024/)                                                                         | Hash-registered WSCG presentation sources and interpretation boundaries                        |
+| [`proximal_distal_energy_transfer.pdf`](proximal_distal_energy_transfer.pdf)                                       | Rendered scientific PDF                                                                        |
 
 ## Reproducing Everything
 
@@ -289,6 +336,18 @@ python3 -m scripts.research.proximal_distal_energy.run_shaft_contribution_study
 python3 -m scripts.research.proximal_distal_energy.run_mechanism_ladder_study
 python3 -m scripts.research.proximal_distal_energy.run_phase_event_stability write
 python3 -m scripts.research.proximal_distal_energy.run_trajectory_control_authority write
+python3 -m scripts.research.proximal_distal_energy.run_bounded_event_reachability write
+python3 -m scripts.research.proximal_distal_energy.make_bounded_event_reachability_figure
+python3 scripts/research/proximal_distal_energy/register_bounded_event_reachability_claims.py
+python3 -m scripts.research.proximal_distal_energy.run_event_topology_robustness write
+python3 -m scripts.research.proximal_distal_energy.run_event_topology_stress_extension write
+python3 -m scripts.research.proximal_distal_energy.run_event_topology_channel_matrix write
+python3 -m scripts.research.proximal_distal_energy.make_event_topology_robustness_figure
+python3 scripts/research/proximal_distal_energy/register_event_topology_robustness_claims.py
+python3 -m scripts.research.proximal_distal_energy.nonlinear_controller_registration write
+python3 -m scripts.research.proximal_distal_energy.nonlinear_controller_qualification write
+python3 -m scripts.research.proximal_distal_energy.nonlinear_controller_plant_transport write
+python3 scripts/research/proximal_distal_energy/register_nonlinear_controller_claims.py
 python3 -m scripts.research.proximal_distal_energy.run_hand_path_attribution_study
 python3 -m scripts.research.proximal_distal_energy.run_grf_drift_study
 python3 -m scripts.research.proximal_distal_energy.two_hand_preactivation_hypothesis
