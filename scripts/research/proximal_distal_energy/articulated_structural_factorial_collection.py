@@ -30,6 +30,9 @@ class StructuralSliceSource:
 
     run_id: int
     artifact_name: str
+    run_conclusion: str
+    requested_case_start: int
+    requested_case_stop: int
     directory: Path
 
     def __post_init__(self) -> None:
@@ -41,6 +44,17 @@ class StructuralSliceSource:
             raise TypeError("artifact_name must be a string")
         if not self.artifact_name.strip():
             raise ValueError("artifact_name must be nonempty")
+        if self.run_conclusion not in {"success", "cancelled", "failure"}:
+            raise ValueError("run_conclusion must be success, cancelled, or failure")
+        if (
+            isinstance(self.requested_case_start, bool)
+            or not isinstance(self.requested_case_start, int)
+            or isinstance(self.requested_case_stop, bool)
+            or not isinstance(self.requested_case_stop, int)
+            or self.requested_case_start < 0
+            or self.requested_case_stop <= self.requested_case_start
+        ):
+            raise ValueError("requested case range must satisfy 0 <= start < stop")
         if not isinstance(self.directory, Path):
             raise TypeError("directory must be a pathlib.Path")
 
@@ -106,6 +120,9 @@ def collect_structural_slices(
     if len({source.run_id for source in ordered}) != len(ordered):
         raise ValueError("slice run IDs must be unique")
 
+    registered_cases = build_registered_cases(plan)
+    registered_count = len(registered_cases)
+    case_indices = {case.case_key: index for index, case in enumerate(registered_cases)}
     session = _session_bytes(ordered[0], launch)
     source_records: list[dict[str, object]] = []
     checkpoint_sources: dict[str, StructuralSliceSource] = {}
@@ -124,6 +141,21 @@ def collect_structural_slices(
         )
         if not checkpoints:
             raise ValueError("slice contains no registered checkpoints")
+        if source.requested_case_stop > registered_count:
+            raise ValueError("requested case range exceeds the registered case count")
+        indices = [case_indices[checkpoint.case.case_key] for checkpoint in checkpoints]
+        expected_prefix = list(
+            range(
+                source.requested_case_start, source.requested_case_start + len(indices)
+            )
+        )
+        if indices != expected_prefix or indices[-1] >= source.requested_case_stop:
+            raise ValueError("slice checkpoints are not a contiguous requested prefix")
+        if (
+            source.run_conclusion == "success"
+            and len(indices) != source.requested_case_stop - source.requested_case_start
+        ):
+            raise ValueError("successful slice is incomplete")
         files: list[dict[str, str]] = []
         for checkpoint in checkpoints:
             name = checkpoint.path.name
@@ -140,12 +172,17 @@ def collect_structural_slices(
             {
                 "run_id": source.run_id,
                 "artifact_name": source.artifact_name,
+                "run_conclusion": source.run_conclusion,
+                "requested_case_range": [
+                    source.requested_case_start,
+                    source.requested_case_stop,
+                ],
+                "observed_case_range": [indices[0], indices[-1] + 1],
                 "checkpoint_count": len(checkpoints),
                 "files": sorted(files, key=lambda item: item["name"]),
             }
         )
 
-    registered_count = len(build_registered_cases(plan))
     manifest: dict[str, object] = {
         "schema_version": _SCHEMA,
         "classification": "execution_collection_not_scientific_summary",
@@ -194,15 +231,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--source",
         action="append",
-        nargs=3,
+        nargs=6,
         required=True,
-        metavar=("RUN_ID", "ARTIFACT_NAME", "DIRECTORY"),
+        metavar=(
+            "RUN_ID",
+            "ARTIFACT_NAME",
+            "CONCLUSION",
+            "CASE_START",
+            "CASE_STOP",
+            "DIRECTORY",
+        ),
     )
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args(argv)
     sources = tuple(
-        StructuralSliceSource(int(run_id), artifact_name, Path(directory))
-        for run_id, artifact_name, directory in args.source
+        StructuralSliceSource(
+            int(run_id),
+            artifact_name,
+            conclusion,
+            int(case_start),
+            int(case_stop),
+            Path(directory),
+        )
+        for run_id, artifact_name, conclusion, case_start, case_stop, directory in args.source
     )
     manifest = collect_structural_slices(
         plan=_read_mapping(args.plan, name="plan"),

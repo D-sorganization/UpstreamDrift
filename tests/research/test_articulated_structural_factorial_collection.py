@@ -111,8 +111,12 @@ def test_collection_is_deterministic_complete_and_source_preserving(
         plan=plan,
         launch=launch,
         sources=(
-            StructuralSliceSource(202, "structural-checkpoints-202", second),
-            StructuralSliceSource(101, "structural-checkpoints-101", first),
+            StructuralSliceSource(
+                202, "structural-checkpoints-202", "success", 2, 4, second
+            ),
+            StructuralSliceSource(
+                101, "structural-checkpoints-101", "success", 0, 2, first
+            ),
         ),
         output_dir=output,
     )
@@ -120,6 +124,7 @@ def test_collection_is_deterministic_complete_and_source_preserving(
     assert manifest["complete"] is True
     assert manifest["combined_checkpoint_count"] == 4
     assert [source["run_id"] for source in manifest["sources"]] == [101, 202]
+    assert manifest["sources"][0]["observed_case_range"] == [0, 2]
     assert json.loads((output / "collection-manifest.json").read_text()) == manifest
     assert (
         len(
@@ -149,8 +154,12 @@ def test_collection_rejects_session_drift_and_overlap(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     sources = (
-        StructuralSliceSource(101, "structural-checkpoints-101", first),
-        StructuralSliceSource(202, "structural-checkpoints-202", drifted),
+        StructuralSliceSource(
+            101, "structural-checkpoints-101", "success", 0, 2, first
+        ),
+        StructuralSliceSource(
+            202, "structural-checkpoints-202", "success", 2, 4, drifted
+        ),
     )
     with pytest.raises(ValueError, match="execution-session bytes"):
         collect_structural_slices(
@@ -162,8 +171,12 @@ def test_collection_rejects_session_drift_and_overlap(tmp_path: Path) -> None:
 
     overlap = _slice(tmp_path / "overlap", plan=plan, launch=launch, start=1, stop=3)
     sources = (
-        StructuralSliceSource(101, "structural-checkpoints-101", first),
-        StructuralSliceSource(303, "structural-checkpoints-303", overlap),
+        StructuralSliceSource(
+            101, "structural-checkpoints-101", "success", 0, 2, first
+        ),
+        StructuralSliceSource(
+            303, "structural-checkpoints-303", "success", 1, 3, overlap
+        ),
     )
     with pytest.raises(ValueError, match="overlapping checkpoint"):
         collect_structural_slices(
@@ -184,7 +197,7 @@ def test_collection_rejects_corrupt_or_unexpected_slice_files(tmp_path: Path) ->
         collect_structural_slices(
             plan=plan,
             launch=launch,
-            sources=(StructuralSliceSource(101, "artifact", source),),
+            sources=(StructuralSliceSource(101, "artifact", "success", 0, 2, source),),
             output_dir=tmp_path / "corrupt-output",
         )
 
@@ -194,7 +207,7 @@ def test_collection_rejects_corrupt_or_unexpected_slice_files(tmp_path: Path) ->
         collect_structural_slices(
             plan=plan,
             launch=launch,
-            sources=(StructuralSliceSource(202, "artifact", source),),
+            sources=(StructuralSliceSource(202, "artifact", "success", 2, 4, source),),
             output_dir=tmp_path / "unexpected-output",
         )
 
@@ -220,6 +233,9 @@ def test_collection_cli_retains_explicit_workflow_provenance(
             "--source",
             "33174130362",
             "structural-checkpoints-33174130362",
+            "success",
+            "0",
+            "2",
             str(source),
             "--output-dir",
             str(output),
@@ -230,3 +246,33 @@ def test_collection_cli_retains_explicit_workflow_provenance(
     printed = json.loads(capsys.readouterr().out)
     assert printed["sources"][0]["run_id"] == 33174130362
     assert (output / "collection-manifest.json").is_file()
+
+
+def test_collection_accepts_only_a_contiguous_cancelled_prefix(tmp_path: Path) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    prefix = _slice(tmp_path / "prefix", plan=plan, launch=launch, start=1, stop=3)
+
+    manifest = collect_structural_slices(
+        plan=plan,
+        launch=launch,
+        sources=(StructuralSliceSource(404, "partial", "cancelled", 1, 4, prefix),),
+        output_dir=tmp_path / "accepted-prefix",
+    )
+    assert manifest["sources"][0]["observed_case_range"] == [1, 3]
+    assert manifest["sources"][0]["run_conclusion"] == "cancelled"
+
+    incomplete_success = _slice(
+        tmp_path / "incomplete-success", plan=plan, launch=launch, start=1, stop=3
+    )
+    with pytest.raises(ValueError, match="successful slice is incomplete"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=(
+                StructuralSliceSource(
+                    505, "incomplete", "success", 1, 4, incomplete_success
+                ),
+            ),
+            output_dir=tmp_path / "rejected-success",
+        )

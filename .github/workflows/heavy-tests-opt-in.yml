@@ -81,7 +81,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' && (inputs.structural_runtime_audit == true || inputs.structural_campaign_slice == true) }}
     name: Structural Runtime Audit or Campaign Slice
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     permissions:
       contents: read
     steps:
