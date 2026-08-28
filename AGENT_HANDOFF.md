@@ -33,8 +33,8 @@ partial campaign checkpoints are not completion evidence.
   `019fe886-6614-70a2-a596-e5b0dea725d0`.
 - Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
 - Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
-  `e732757c9`. Remote recovery currently ends at `37bcdc528`; local committed
-  implementation continues through `2a1e3ccba` and must be pushed normally.
+  `e732757c9`. Remote recovery currently ends at `0ba50aee3`; local committed
+  implementation continues through `500032bbb` and must be pushed normally.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
@@ -51,32 +51,39 @@ partial campaign checkpoints are not completion evidence.
   linear state interpolant. Event-aligned replay duplicates pre/post states,
   prevents cross-event quadrature, and registers zero discrete impulse/work
   for the continuous tension law.
-- A committed serial study plan now freezes source revision `5484a5af2`, input
+- A committed serial study plan now freezes source revision `9a91a957f`, input
   SHA-256 `9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779`,
   three time steps, two native engines, seven variants, event/root tolerances,
   distinct attribution/counterfactual estimands, atomic checkpoints, and
-  fail-closed promotion. Pre-outcome revision 4 retains the exact execution
+  fail-closed promotion. Revision 5 retains the exact execution
   revision in resume identity and binds the 42-case smoke to authority case 4,
   sample 6 (0.12 s), a runtime/pipeline qualification state only. It separately
   declares the prior 18-state screening population and freezes numeric variant,
   contact, model, frame, unit, clubhead, and face/path-proxy conventions. Plan
   SHA-256 is
-  `cdb4f61e3c6e814906f6c43b68d62ca601c044d0a35598ff9a35e86dee3331f1`;
+  `2cd22750542d4cc5360ed37b5c4fe88a88e1e679dcd5c5c29d9739eaff253f1b`;
   a freshness test requires the committed JSON to match its generator.
 - The serial runner expands all 42 engine/variant/step cases, writes fsync plus
   atomic-replace JSON checkpoints, resumes only exact plan/source/data/code
   identities, retains typed native-engine absence, and propagates unexpected
-  evaluator failures without a false completed checkpoint. It has not run the
-  registered scientific cases.
+  evaluator failures without a false completed checkpoint. The first diagnostic
+  execution is preserved below; the corrected rerun is still pending.
 - The bounded rigid evaluator verifies the source hash and source-state time,
   qualifies the requested native API, reuses the existing atlas case builder,
   reports JSON-safe impulse/work/shares/closure and declared club outcomes, and
   retains native import/DLL failures. The registered nominal 0.5 ms MuJoCo case
   has momentum residual `3.43e-3` but work residual `1.31e-2`, so it correctly
-  fails the frozen 1% work gate. Do not relax the gate or change the state.
-- The registered wrapper now runs or resumes the exact 42 cases through the
-  atomic runner; no case campaign had been launched at this handoff update.
-- Forty-one affected focused tests, Ruff, and format pass. Focused MyPy first
+  failed the frozen 1% work gate because the ledger omitted kinetic geometry
+  work. The preserved diagnostic run at execution `0ba50aee3` has 21 MuJoCo
+  completions and 21 typed Pinocchio unavailability records under
+  `C:/Users/diete/Campaigns/UpstreamDrift-9153-rigid-smoke-0ba50aee3`.
+- The corrected identity now retains `0.5 v^T Mdot v` as kinetic transport
+  work. A manufactured variable-mass/constant-velocity case closes exactly;
+  the unchanged nominal 0.5 ms smoke work residual falls from `1.31e-2` to
+  `2.12e-4`. Revision 5 explicitly records the post-diagnostic amendment and
+  superseded plan; do not delete or relabel the original checkpoints.
+- The registered wrapper runs or resumes all 42 cases through the atomic runner.
+- Forty-two affected focused tests, Ruff, and format pass. Focused MyPy first
   exposed inherited scientific-script typing debt, then the installed MyPy
   crashed internally under `--follow-imports=skip`; do not misreport this as a
   green type gate.
@@ -92,8 +99,9 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Run the bounded rigid evaluator through the atomic runner, aggregate all
-   three resolutions without changing gates, and retain native failures; then
+1. Push the corrected plan/kernel, rerun the bounded rigid evaluator under a
+   new execution identity, aggregate all three resolutions without changing
+   gates, and retain native failures; then
    connect the distributed evaluator and add missing stick/slip event surfaces.
 2. Add matched rigid/shaft/base branches and causal forward killswitch runs kept
    separate from same-trajectory attribution, refinement/parity/adverse cases,
