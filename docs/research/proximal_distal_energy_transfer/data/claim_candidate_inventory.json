@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "5b353163c0d285e580282e40e28e1cf38597edc681199c53d507b92a7a1be70d",
-  "source_count": 37,
-  "candidate_count": 1171,
+  "source_digest": "b4765576d762976c037c70677c3fcc94236f102d262ad5f58fd192d8b429e968",
+  "source_count": 38,
+  "candidate_count": 1180,
   "candidates": [
     {
       "candidate_id": "PD-CAND-54741e44f52ea561",
@@ -11700,6 +11700,146 @@
       "line_end": 900,
       "text": "At this shaft-only tier, the contact fibers remain frictionless, memoryless engineering lines with state-registered free lengths, and ground reaction and free moment are absent. Shaft deformation does not establish tissue loading, timing economy, impact performance, or coaching strategy. The finite-base extension below retains the same initial-energy, matched-load/work, killswitch, reversal, power, refinement, and two-engine controls.",
       "text_sha256": "8ce0fafe0eb45155559b6967edcf9bd8da0487be688cdb202d836ba513d91363",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-bdc4db8f2d715a37",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 3,
+      "line_end": 9,
+      "text": "The contact-projection gate establishes that bilateral contact forces enter the articulated equations consistently, but it does not identify how much of the resulting acceleration is associated with configuration-dependent drift, velocity-dependent bias, contact, or applied input. The next registered gate therefore evaluates all four contributions at exactly the same state. With $h(q,\\dot q)$ denoting native bias, $Q_c$ the bilateral contact generalized force, and $\\tau_a$ the applied generalized input,",
+      "text_sha256": "b89156d77cc7794d6682c26a98e046e70687b89fc59621d2a55425ce3ee57400",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": true,
+      "priority_score": 2,
+      "triage_flags": [
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-dec82f9f77fba635",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 21,
+      "line_end": 26,
+      "text": "The baseline sets $\\tau_a=0$ exactly. “Configuration” is an operational name for $-h(q,0)$, not a claim that gravity is the only configuration-dependent effect in every formulation. “Velocity” is the finite native bias difference $-[h(q,\\dot q)-h(q,0)]$, so it includes all velocity-dependent terms returned by the engine rather than a manually selected Coriolis term. This distinction keeps the decomposition reproducible across the two native operators.",
+      "text_sha256": "da418599ba010d4ce87e35ff66086370df63d4e02c0b0ad63b7f0a6c1198bd4d",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-1d1d796e7fdebe2c",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 28,
+      "line_end": 29,
+      "text": "Two complementary signed observables are reported. The mass-metric acceleration projection is",
+      "text_sha256": "ed03178fb9507cd0e9ba5942d24216c68c432ded99b7f8a8fc91cd90ca0e33ce",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-1e61f3f291520a43",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 37,
+      "line_end": 42,
+      "text": "and the generalized-power contribution is $P_i=Q_i^\\mathsf{T}\\dot q$, with a signed power share reported only when the total-power denominator is adequate. These are algebraic projections at one state. They are not fractions of stored energy, impulse, accumulated work, anatomical effort, or clubhead-speed gain. They can be negative or exceed one when contributions cancel; the release therefore also records denominator suppression and cancellation indexes.",
+      "text_sha256": "bafba4aaffdb442c23cf3a5691bdafe7d053714ce81afd2d1703e3bf022b360f",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-c8f33495e0f1cabb",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 44,
+      "line_end": 51,
+      "text": "The atlas reuses the six synthetic subject profiles, three grip spans, and thirteen closed states per case, for 234 states and twenty generalized coordinates. Each state receives the declared 1 mm club-translation and 0.05 m/s club-velocity perturbation. MuJoCo 3.12.0 and Pinocchio 4.1.0 evaluate the mass, bias, contact, and acceleration operators independently; no forward step is taken. Zero-contact, zero-velocity, gravity-off, coincident/reversed moment-arm, coordinate-rescaling, and deliberately corrupted-force controls are all registered before interpreting the attribution.",
+      "text_sha256": "579ead01ff79e148a7e84906dfa3f99df3b09d8b877abff5d3d86304b3a28f44",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-0e4fbc3218d9fc55",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 53,
+      "line_end": 60,
+      "text": "All registered gates pass. The maximum acceleration closure residual is $7.65\\times10^{-13}$ and the maximum power closure residual is $2.13\\times10^{-14}$ W. The worst cross-engine contribution discrepancy is $3.91\\times10^{-12}$ relative, while coordinate rescaling changes physical power by at most $1.42\\times10^{-14}$ W and a reported share by at most $1.22\\times10^{-15}$. Each pathway killswitch collapses its intended contribution exactly, and the corrupted-force sentinel exceeds its detection floor.",
+      "text_sha256": "14c32bb7c7de3adc922063e9b114c00cc242cb4ee4ecda6cf91f541229a72cd0",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-b62859dd4866bf58",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 62,
+      "line_end": 71,
+      "text": "Across both engines, the configuration term supplies 75.5--91.0% of the mass-metric total-acceleration projection, contact supplies 9.41--23.5%, and the velocity-dependent term spans -2.79--1.08%; the active-input contribution is identically zero. The sign of the velocity projection is mixed across the atlas. More importantly, the contact acceleration projection is positive in every state while contact generalized power is negative in every state, spanning -0.2713 to -0.2685 W. Total generalized power is also negative. Thus positive alignment with the total acceleration does not imply positive work, energy transfer, or a speed benefit. The two observables answer different questions and cannot be substituted for one another.",
+      "text_sha256": "47f520af695bacc64fd4c4f238f054564fa2347d4202973ea6f0d3145d4e9047",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-9b3d65a5059b94ad",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 73,
+      "line_end": 73,
+      "text": "![Articulated Same-State Drift and Contact Attribution](figures/fig_articulated_drift_contact_attribution.pdf){#fig-articulated-drift-contact-attribution width=96%}",
+      "text_sha256": "20eacfa1e33fa0b36309605637f3d46179107c69e0490d27ae1caa17284beb1f",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-1b74a19dcac4064d",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd",
+      "line_start": 75,
+      "line_end": 84,
+      "text": "The machine-readable [JSON summary](data/articulated_drift_contact_attribution.json) and [NPZ arrays](data/articulated_drift_contact_attribution.npz) retain every state, engine, contribution, denominator, control, and gate. This result is a pointwise synthetic mechanics attribution under an imposed perturbation. It does not establish persistence through contact transitions, accumulated impulse or work, zero-velocity constraint force, biological torque or effort, human transfer, slack management, timing economy, coaching strategy, or safety. The next falsification gate is a matched forward attribution of impulse and work through contact transitions, shaft/base coupling, uncertainty, and adverse loading.",
+      "text_sha256": "16bd82f05b04e32c5a35c722c219dc88457cdc6a69f5678170df546304f1a585",
       "citation_keys": [],
       "has_numeric_content": false,
       "has_assertive_language": true,

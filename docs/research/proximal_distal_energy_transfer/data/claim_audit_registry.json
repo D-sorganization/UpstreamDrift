@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "5b353163c0d285e580282e40e28e1cf38597edc681199c53d507b92a7a1be70d",
+    "source_digest": "b4765576d762976c037c70677c3fcc94236f102d262ad5f58fd192d8b429e968",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1171-candidate paper inventory is adjudicated, including nonlinear-controller numerical prerequisites.",
+    "current_scope": "The complete paper inventory is adjudicated. Articulated same-state configuration, velocity, contact, and zero-input attribution passes its registered pointwise gates. Forward impulse/work and governed human validation remain open.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -301,6 +301,11 @@
       "release_claim_key": "nonlinear_controller_numerical_qualification",
       "published_status": "supported_as_registered_numerical_prerequisite_without_evaluation",
       "audit_state": "reviewed_as_numerical_prerequisite_without_ranking"
+    },
+    {
+      "release_claim_key": "subject_scaled_articulated_drift_contact_attribution",
+      "published_status": "same_state_configuration_velocity_contact_and_zero_input_attribution_qualified",
+      "audit_state": "reviewed_as_pointwise_synthetic_attribution_result"
     }
   ],
   "candidate_reviews": [
@@ -12049,6 +12054,94 @@
       "rationale": "This appendix candidate inventories governed artifacts.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-bdc4db8f2d715a37",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-dec82f9f77fba635",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-1d1d796e7fdebe2c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-1e61f3f291520a43",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-c8f33495e0f1cabb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-9b3d65a5059b94ad",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure points to registered evidence without a standalone claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-b62859dd4866bf58",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-328"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-0e4fbc3218d9fc55",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-1b74a19dcac4064d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-329"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
     }
   ],
   "claims": [
@@ -32909,6 +33002,154 @@
           "rtol": 0.0
         }
       ]
+    },
+    {
+      "claim_id": "PD-CLAIM-327",
+      "candidate_ids": [
+        "PD-CAND-bdc4db8f2d715a37",
+        "PD-CAND-dec82f9f77fba635",
+        "PD-CAND-1d1d796e7fdebe2c",
+        "PD-CAND-1e61f3f291520a43",
+        "PD-CAND-c8f33495e0f1cabb",
+        "PD-CAND-0e4fbc3218d9fc55"
+      ],
+      "statement": "The articulated same-state acceleration and generalized power close under a configuration, velocity-dependent bias, bilateral-contact, and zero applied-input decomposition across the registered native-engine atlas.",
+      "classification": "articulated_same_state_attribution_qualification",
+      "published_status": "supported_for_declared_pointwise_synthetic_matrix",
+      "audit_status": "articulated_same_state_drift_contact_attribution_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:21",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:28",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:37",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:44",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:53"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py",
+        ".github/workflows/articulated-attribution-evidence.yml"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
+      "uncertainty_boundary": "The decomposition is operational and state-specific; it does not identify anatomical force sources or a forward causal effect.",
+      "competing_explanations": [
+        "same-state imposed perturbation rather than forward persistence",
+        "synthetic bilateral Kelvin-Voigt contact",
+        "engineering segment and contact parameters",
+        "signed projection cancellation and denominator choice"
+      ],
+      "negative_controls": [
+        "zero-contact pathway killswitch",
+        "zero-velocity bias killswitch",
+        "gravity-off configuration killswitch",
+        "coincident and reversed moment-arm controls",
+        "coordinate-scaling invariance",
+        "deliberately corrupted generalized-force sentinel"
+      ],
+      "falsifier": "Any registered closure, pathway killswitch, coordinate-scaling, corruption-detection, or cross-engine tolerance fails.",
+      "adjudication": "All registered same-state closure, pathway, scaling, corruption, and native-operator gates pass; interpretation remains pointwise.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "claim_id": "PD-CLAIM-328",
+      "candidate_ids": [
+        "PD-CAND-b62859dd4866bf58"
+      ],
+      "statement": "Contact is positively aligned with total mass-metric acceleration but contributes negative generalized power throughout the registered atlas, so acceleration alignment does not identify positive work or transfer.",
+      "classification": "articulated_acceleration_power_sign_distinction",
+      "published_status": "supported_for_declared_pointwise_synthetic_matrix",
+      "audit_status": "articulated_same_state_drift_contact_attribution_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:62"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py",
+        ".github/workflows/articulated-attribution-evidence.yml"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
+      "uncertainty_boundary": "The signs arise under an imposed synthetic perturbation and are neither forward work nor human performance evidence.",
+      "competing_explanations": [
+        "same-state imposed perturbation rather than forward persistence",
+        "synthetic bilateral Kelvin-Voigt contact",
+        "engineering segment and contact parameters",
+        "signed projection cancellation and denominator choice"
+      ],
+      "negative_controls": [
+        "zero-contact pathway killswitch",
+        "zero-velocity bias killswitch",
+        "gravity-off configuration killswitch",
+        "coincident and reversed moment-arm controls",
+        "coordinate-scaling invariance",
+        "deliberately corrupted generalized-force sentinel"
+      ],
+      "falsifier": "Any retained state has nonpositive contact acceleration projection, nonnegative contact power, or inadequate unreported denominators.",
+      "adjudication": "All registered same-state closure, pathway, scaling, corruption, and native-operator gates pass; interpretation remains pointwise.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "claim_id": "PD-CLAIM-329",
+      "candidate_ids": [
+        "PD-CAND-1b74a19dcac4064d"
+      ],
+      "statement": "The same-state attribution does not establish forward persistence, accumulated impulse or work, biological torque or effort, human transfer, slack management, timing economy, coaching strategy, or safety.",
+      "classification": "articulated_same_state_attribution_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "articulated_same_state_drift_contact_attribution_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:75"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py",
+        ".github/workflows/articulated-attribution-evidence.yml"
+      ],
+      "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
+      "uncertainty_boundary": "Matched forward attribution through contact transitions, coupled structures, uncertainty, and adverse loading remains open.",
+      "competing_explanations": [
+        "same-state imposed perturbation rather than forward persistence",
+        "synthetic bilateral Kelvin-Voigt contact",
+        "engineering segment and contact parameters",
+        "signed projection cancellation and denominator choice"
+      ],
+      "negative_controls": [
+        "zero-contact pathway killswitch",
+        "zero-velocity bias killswitch",
+        "gravity-off configuration killswitch",
+        "coincident and reversed moment-arm controls",
+        "coordinate-scaling invariance",
+        "deliberately corrupted generalized-force sentinel"
+      ],
+      "falsifier": "A forward, biological, human, equipment, coaching, or safety claim is attributed to this pointwise gate alone.",
+      "adjudication": "All registered same-state closure, pathway, scaling, corruption, and native-operator gates pass; interpretation remains pointwise.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
     }
   ]
 }

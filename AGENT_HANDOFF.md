@@ -28,7 +28,7 @@ partial campaign checkpoints are not completion evidence.
 - Branch: `feat/9151-articulated-drift-attribution` from current remote main.
 - Objective: carry the formal same-state configuration, velocity, contact, and
   applied-input decomposition into all 234 subject-scaled articulated states.
-- Pure Python 3.12 contracts are implemented test-first and pass six focused
+- Pure Python 3.12 contracts are implemented test-first and pass eight focused
   tests. They close acceleration and power exactly, provide coordinate-invariant
   mass-metric shares, report cancellation, and suppress inadequate ratios.
 - The native atlas binds those contracts to MuJoCo and robotics Pinocchio, zero
@@ -38,27 +38,37 @@ partial campaign checkpoints are not completion evidence.
   Windows wheel in the project environment, and an isolated conda-forge attempt
   exposed binary incompatibility. Do not commit or treat those local runtime
   attempts as evidence.
-- `.github/workflows/articulated-attribution-evidence.yml` owns the necessary
-  Linux native-stack generation artifact. After the first protected push,
-  download the exact JSON/NPZ artifact, independently verify it, commit it on
-  the same PR, then add figure, claims, paper, release, and evidence tests.
-- Do not close #9151 after the code-only push. It closes only after protected
-  merge of generated evidence and publication integration.
+- PR #9152 is open. Ubuntu native-evidence run `33139951819`, job
+  `98748338285`, passed from exact head `cb8af2cd846da351fdfa5c4bbee15f9ee6e62ad9`.
+  Its downloaded JSON/NPZ reports MuJoCo 3.12.0, Pinocchio 4.1.0, 234 states,
+  zero failed engine-states, and all registered gates passed. Independent NPZ
+  inspection found every numeric array finite and every per-state gate true.
+- The evidence, four-panel PDF/SVG figure, chapter, claims PD-CLAIM-327--329,
+  data dictionary, release preset/claim, release review, and evidence/release
+  tests are now integrated locally. The optimized paper has 252 pages and the
+  new section/figure were visually inspected on pages 148--149 without clipping
+  or an intervening float. The final 702-artifact release, checksum, and
+  2,498-reference claim-evidence manifests validate locally; computational PDF
+  qualification renders all 252 pages and passes, while tagged-PDF and font
+  resources remain explicitly reported archival gaps.
+- Architecture remains green through a narrow #9151 exception for the
+  hash-bound ten-parameter native control evaluator. It expires 2026-09-30 and
+  must be removed when the next forward-attribution slice can regenerate native
+  evidence after introducing a cohesive evaluator context.
+- Do not close #9151 until this complete publication slice passes protected CI,
+  squash-merges, and the merge commit is verified on remote main.
 
 ## Immediate Order
 
-1. Validate code/workflow/file budgets and commit the implementation slice.
-2. Push through the GitHub App setup and open a full PR referencing #9151; add
-   `Closes #9151` only when every acceptance artifact is included.
-3. Let the necessary Ubuntu native-evidence job run once. Do not duplicate it
-   for capacity.
-4. Download and inspect its exact artifact; retain engine versions and source
-   hashes. Fix scientific failures rather than loosening preregistered gates.
-5. Commit JSON/NPZ, accessible figure/table, claim/numeric registrations, paper
-   text, model matrix, data dictionary, release manifest, and this handoff.
-6. Rebuild and visually inspect the PDF, run focused and full qualification,
-   then preserve squash auto-merge and verify the squash on remote main.
-7. Refresh AffineDrift only from that immutable qualified UpstreamDrift squash.
+1. Regenerate final release, checksum, and claim-evidence manifests; run focused
+   tests, claim/numeric/evidence integrity, title/file/architecture gates, and
+   full computational publication qualification serially.
+2. Commit the complete evidence/publication slice, update PR #9152 to
+   `Closes #9151`, and push through the GitHub App setup.
+3. Inspect exact protected checks, fix only actionable source failures, preserve
+   squash auto-merge, and verify the squash commit on remote main.
+4. Refresh AffineDrift only from that immutable qualified UpstreamDrift squash,
+   then verify its protected merge and public paper links.
 
 ## Scientific Boundaries
 

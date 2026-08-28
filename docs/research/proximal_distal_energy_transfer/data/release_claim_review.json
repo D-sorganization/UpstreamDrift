@@ -3,11 +3,11 @@
   "authority": "D-sorganization/UpstreamDrift#8557",
   "interpretation": "Review completion means every release claim has traceable atomic support, controls, falsifiers, boundaries, and a remaining gate. It does not mean every scientific claim is validated.",
   "summary": {
-    "release_claim_count": 52,
-    "reviewed_release_claim_count": 52,
+    "release_claim_count": 53,
+    "reviewed_release_claim_count": 53,
     "open_release_review_count": 0,
-    "scientifically_open_gate_count": 52,
-    "atomic_claim_count": 325
+    "scientifically_open_gate_count": 53,
+    "atomic_claim_count": 328
   },
   "release_claim_reviews": [
     {
@@ -3015,6 +3015,58 @@
         "Shared-equation code-path parity is not independent physics validation, controller performance, human evidence, or coaching authority."
       ],
       "remaining_scientific_gate": "Protect and merge the frozen registration, then separately authorize checkpointed held-out execution with no retuning, typed event and integration outcomes, independent plant evidence, and ranking suppression whenever any registered gate fails."
+    },
+    {
+      "release_claim_key": "subject_scaled_articulated_drift_contact_attribution",
+      "published_status": "same_state_configuration_velocity_contact_and_zero_input_attribution_qualified",
+      "audit_state": "reviewed_as_pointwise_synthetic_attribution_result",
+      "scientific_disposition": "same_state_drift_contact_attribution_qualified_with_power_sign_boundary",
+      "supporting_claim_ids": [
+        "PD-CLAIM-327",
+        "PD-CLAIM-328",
+        "PD-CLAIM-329"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.npz",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_drift_contact_attribution.pdf",
+        "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py",
+        "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+        "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
+        "tests/research/test_articulated_drift_contact_attribution.py",
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py",
+        ".github/workflows/articulated-attribution-evidence.yml"
+      ],
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:21",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:28",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:37",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:44",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:53",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:62",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06cd_articulated_attribution.qmd:75"
+      ],
+      "negative_controls": [
+        "zero-contact pathway killswitch",
+        "zero-velocity bias killswitch",
+        "gravity-off configuration killswitch",
+        "coincident and reversed moment-arm controls",
+        "coordinate-scaling invariance",
+        "deliberately corrupted generalized-force sentinel"
+      ],
+      "falsifiers": [
+        "Any registered closure, pathway killswitch, coordinate-scaling, corruption-detection, or cross-engine tolerance fails.",
+        "Any retained state has nonpositive contact acceleration projection, nonnegative contact power, or inadequate unreported denominators.",
+        "A forward, biological, human, equipment, coaching, or safety claim is attributed to this pointwise gate alone."
+      ],
+      "uncertainty_boundaries": [
+        "The decomposition is operational and state-specific; it does not identify anatomical force sources or a forward causal effect.",
+        "The signs arise under an imposed synthetic perturbation and are neither forward work nor human performance evidence.",
+        "Matched forward attribution through contact transitions, coupled structures, uncertainty, and adverse loading remains open."
+      ],
+      "remaining_scientific_gate": "Integrate matched forward trajectories and attribute impulse and work through contact transitions, shaft/base coupling, uncertainty, and adverse loading."
     }
   ]
 }

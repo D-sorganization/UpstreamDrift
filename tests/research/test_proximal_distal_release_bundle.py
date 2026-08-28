@@ -47,6 +47,7 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "articulated_inertia_cross_engine",
         "articulated_native_constraint_discrepancy",
         "articulated_contact_projection",
+        "articulated_drift_contact_attribution",
         "articulated_forward_contact",
         "articulated_slack_atlas",
         "articulated_distributed_grip_atlas",
@@ -117,6 +118,11 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     )
     assert manifest["claims"]["typed_articulated_slack"] == (
         "five_millisecond_typed_attachment_event_gate_qualified"
+    )
+    assert manifest["claims"][
+        "subject_scaled_articulated_drift_contact_attribution"
+    ] == (
+        "same_state_configuration_velocity_contact_and_zero_input_attribution_qualified"
     )
     assert manifest["claims"]["distributed_grip_discretization"] == (
         "fifty_millisecond_distributed_fiber_gate_qualified"
