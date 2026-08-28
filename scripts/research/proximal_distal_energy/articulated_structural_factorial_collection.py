@@ -127,6 +127,7 @@ def collect_structural_slices(
     source_records: list[dict[str, object]] = []
     checkpoint_sources: dict[str, StructuralSliceSource] = {}
     checkpoint_files: dict[str, tuple[Path, ...]] = {}
+    combined_indices: list[int] = []
     for source in ordered:
         if not source.directory.is_dir():
             raise ValueError("slice source directory does not exist")
@@ -156,6 +157,7 @@ def collect_structural_slices(
             and len(indices) != source.requested_case_stop - source.requested_case_start
         ):
             raise ValueError("successful slice is incomplete")
+        combined_indices.extend(indices)
         files: list[dict[str, str]] = []
         for checkpoint in checkpoints:
             name = checkpoint.path.name
@@ -183,6 +185,9 @@ def collect_structural_slices(
             }
         )
 
+    if sorted(combined_indices) != list(range(len(combined_indices))):
+        raise ValueError("combined slices must form a gap-free prefix from case zero")
+    next_missing_case_index = len(combined_indices)
     manifest: dict[str, object] = {
         "schema_version": _SCHEMA,
         "classification": "execution_collection_not_scientific_summary",
@@ -193,7 +198,8 @@ def collect_structural_slices(
         "combined_checkpoint_count": len(checkpoint_files),
         "registered_case_count": registered_count,
         "missing_case_count": registered_count - len(checkpoint_files),
-        "complete": len(checkpoint_files) == registered_count,
+        "next_missing_case_index": next_missing_case_index,
+        "complete": next_missing_case_index == registered_count,
     }
 
     output_dir.parent.mkdir(parents=True, exist_ok=True)

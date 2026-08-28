@@ -123,6 +123,7 @@ def test_collection_is_deterministic_complete_and_source_preserving(
 
     assert manifest["complete"] is True
     assert manifest["combined_checkpoint_count"] == 4
+    assert manifest["next_missing_case_index"] == 4
     assert [source["run_id"] for source in manifest["sources"]] == [101, 202]
     assert manifest["sources"][0]["observed_case_range"] == [0, 2]
     assert json.loads((output / "collection-manifest.json").read_text()) == manifest
@@ -251,16 +252,20 @@ def test_collection_cli_retains_explicit_workflow_provenance(
 def test_collection_accepts_only_a_contiguous_cancelled_prefix(tmp_path: Path) -> None:
     plan = _plan()
     launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    initial = _slice(tmp_path / "initial", plan=plan, launch=launch, start=0, stop=1)
     prefix = _slice(tmp_path / "prefix", plan=plan, launch=launch, start=1, stop=3)
 
     manifest = collect_structural_slices(
         plan=plan,
         launch=launch,
-        sources=(StructuralSliceSource(404, "partial", "cancelled", 1, 4, prefix),),
+        sources=(
+            StructuralSliceSource(101, "initial", "success", 0, 1, initial),
+            StructuralSliceSource(404, "partial", "cancelled", 1, 4, prefix),
+        ),
         output_dir=tmp_path / "accepted-prefix",
     )
-    assert manifest["sources"][0]["observed_case_range"] == [1, 3]
-    assert manifest["sources"][0]["run_conclusion"] == "cancelled"
+    assert manifest["sources"][1]["observed_case_range"] == [1, 3]
+    assert manifest["sources"][1]["run_conclusion"] == "cancelled"
 
     incomplete_success = _slice(
         tmp_path / "incomplete-success", plan=plan, launch=launch, start=1, stop=3
@@ -270,9 +275,30 @@ def test_collection_accepts_only_a_contiguous_cancelled_prefix(tmp_path: Path) -
             plan=plan,
             launch=launch,
             sources=(
+                StructuralSliceSource(101, "initial", "success", 0, 1, initial),
                 StructuralSliceSource(
                     505, "incomplete", "success", 1, 4, incomplete_success
                 ),
             ),
             output_dir=tmp_path / "rejected-success",
+        )
+
+
+def test_collection_requires_one_gap_free_prefix_from_case_zero(tmp_path: Path) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    first = _slice(tmp_path / "first", plan=plan, launch=launch, start=0, stop=2)
+    after_gap = _slice(
+        tmp_path / "after-gap", plan=plan, launch=launch, start=3, stop=4
+    )
+
+    with pytest.raises(ValueError, match="gap-free prefix from case zero"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=(
+                StructuralSliceSource(101, "first", "success", 0, 2, first),
+                StructuralSliceSource(202, "after-gap", "success", 3, 4, after_gap),
+            ),
+            output_dir=tmp_path / "gapped-output",
         )
