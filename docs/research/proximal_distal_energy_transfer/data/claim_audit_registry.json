@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "82f8013b8764705195e5886c418f90150023a363c07d6a09d7f497e6fcd530bd",
+    "source_digest": "8113b54959f393a0f3f855ad52aea41f88afaf794f672e18751a0f20ce0244db",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1185-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; editorial anchors are explicitly classified as nonclaims.",
+    "current_scope": "The complete 1189-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; editorial anchors are explicitly classified as nonclaims.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -11204,6 +11204,44 @@
       "last_verified_on": "2026-08-28"
     },
     {
+      "candidate_id": "PD-CAND-4d803195350fda45",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-333"
+      ],
+      "rationale": "This passage states or bounds the rigid-refinement extension.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_id": "PD-CAND-f0830816a808b6dc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-334"
+      ],
+      "rationale": "This passage states or bounds the rigid-refinement extension.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_id": "PD-CAND-365b08207b737942",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-335"
+      ],
+      "rationale": "This passage states or bounds the rigid-refinement extension.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_id": "PD-CAND-f3671a89b1cc8f43",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include visualizes governed evidence without adding a standalone claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
       "candidate_id": "PD-CAND-54741e44f52ea561",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -12064,7 +12102,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-b0641d03e93755f7",
+      "candidate_id": "PD-CAND-a0d32d6bf87a92c0",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
@@ -12072,7 +12110,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-b7ea1a1164b87356",
+      "candidate_id": "PD-CAND-d699db60209c3576",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
@@ -12080,7 +12118,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-20af63f5d2ff25b2",
+      "candidate_id": "PD-CAND-f85e184b81c0ca51",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
@@ -12088,7 +12126,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-84d3386527bcbe32",
+      "candidate_id": "PD-CAND-fd2e69a500e094a9",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
@@ -12096,7 +12134,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-c59bfe4254b7d64a",
+      "candidate_id": "PD-CAND-76210c02812dad06",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
@@ -12104,7 +12142,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-1191b12cde026193",
+      "candidate_id": "PD-CAND-50e05dee5787cfed",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
@@ -12112,7 +12150,7 @@
       "last_verified_on": "2026-08-13"
     },
     {
-      "candidate_id": "PD-CAND-a0f5e79432f64e0c",
+      "candidate_id": "PD-CAND-7304888038310db0",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
@@ -25938,7 +25976,7 @@
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:283"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:324"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -25991,11 +26029,11 @@
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:294",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:306",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:317",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:319",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:329"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:335",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:347",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:358",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:360",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:370"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -28290,7 +28328,7 @@
       "adjudication_outcome": "supported",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:842",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:269"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:310"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -28373,7 +28411,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:856",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:871",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:269"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:310"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -28463,7 +28501,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:882",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:269"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:310"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -32936,6 +32974,160 @@
       ],
       "falsifier": "Any biological, equipment, coaching, safety, timing-economy, or slack-benefit claim is attributed to this synthetic five-millisecond campaign alone.",
       "adjudication": "The executed outcomes, including the two frozen refinement failures and unavailable native parity, are retained without threshold changes or human, anatomical, equipment, or coaching promotion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "claim_id": "PD-CLAIM-333",
+      "candidate_ids": [
+        "PD-CAND-4d803195350fda45"
+      ],
+      "statement": "The rigid-refinement extension prospectively evaluates the complete declared screening matrix for the two original failing variants at step sizes disjoint from the disclosed pilot.",
+      "classification": "prospective_rigid_refinement_design",
+      "published_status": "promotion_withheld",
+      "audit_status": "rigid_refinement_extension_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:271"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_rigid_refinement_screening_states.pdf",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_plan.py",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_launcher.py",
+        "scripts/research/proximal_distal_energy/make_rigid_refinement_figure.py",
+        "tests/research/test_articulated_rigid_refinement_plan.py",
+        "tests/research/test_articulated_rigid_refinement_evidence.py",
+        "tests/research/test_make_rigid_refinement_figure.py"
+      ],
+      "model_domain": "Eighteen declared synthetic screening states, nominal and high-damping rigid-contact variants, three unseen time steps, a five-millisecond horizon, and two registered native engines.",
+      "uncertainty_boundary": "The state set is synthetic, the horizon is five milliseconds, and the development pilot is not confirmatory evidence.",
+      "competing_explanations": [
+        "state-dependent quadrature error rather than physical work",
+        "semi-implicit transient behavior rather than asymptotic convergence",
+        "synthetic source-state geometry rather than a participant distribution",
+        "unavailable native parity rather than cross-engine agreement"
+      ],
+      "negative_controls": [
+        "all 18 previously declared screening states",
+        "high-damping comparison at every state",
+        "step sizes disjoint from the post-result pilot",
+        "unchanged 0.800 refinement ceiling",
+        "typed native-engine absence retained as a failed promotion gate"
+      ],
+      "falsifier": "The committed manifest, state set, variants, steps, threshold, or pilot exclusion differs from the published contract.",
+      "adjudication": "The complete checkpoint inventory retains all three state-dependent failures, the original smoke failure, the excluded pilot, and unavailable native parity without threshold changes.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "claim_id": "PD-CLAIM-334",
+      "candidate_ids": [
+        "PD-CAND-f0830816a808b6dc"
+      ],
+      "statement": "All 108 MuJoCo cases satisfy individual closure tolerances, but three state--variant groups fail the frozen work-refinement gate; all 108 Pinocchio cases remain typed unavailable.",
+      "classification": "state_dependent_rigid_refinement_result",
+      "published_status": "promotion_withheld",
+      "audit_status": "rigid_refinement_extension_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:282"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_rigid_refinement_screening_states.pdf",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_plan.py",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_launcher.py",
+        "scripts/research/proximal_distal_energy/make_rigid_refinement_figure.py",
+        "tests/research/test_articulated_rigid_refinement_plan.py",
+        "tests/research/test_articulated_rigid_refinement_evidence.py",
+        "tests/research/test_make_rigid_refinement_figure.py"
+      ],
+      "model_domain": "Eighteen declared synthetic screening states, nominal and high-damping rigid-contact variants, three unseen time steps, a five-millisecond horizon, and two registered native engines.",
+      "uncertainty_boundary": "This is numerical-attribution evidence, not a physical-transfer, human, equipment, or coaching result.",
+      "competing_explanations": [
+        "state-dependent quadrature error rather than physical work",
+        "semi-implicit transient behavior rather than asymptotic convergence",
+        "synthetic source-state geometry rather than a participant distribution",
+        "unavailable native parity rather than cross-engine agreement"
+      ],
+      "negative_controls": [
+        "all 18 previously declared screening states",
+        "high-damping comparison at every state",
+        "step sizes disjoint from the post-result pilot",
+        "unchanged 0.800 refinement ceiling",
+        "typed native-engine absence retained as a failed promotion gate"
+      ],
+      "falsifier": "A reproduced checkpoint changes a retained residual or status, suppresses a failed group, treats native absence as parity, or promotes the campaign.",
+      "adjudication": "The complete checkpoint inventory retains all three state-dependent failures, the original smoke failure, the excluded pilot, and unavailable native parity without threshold changes.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28",
+      "numeric_evidence": [
+        {
+          "literal_id": "108#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json",
+          "json_pointer": "/counts/completed",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "108#2",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json",
+          "json_pointer": "/counts/unavailable",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "claim_id": "PD-CLAIM-335",
+      "candidate_ids": [
+        "PD-CAND-365b08207b737942"
+      ],
+      "statement": "The screening extension does not support a blanket claim that finer steps resolve the original work-refinement failure and requires an independently registered integrator or quadrature comparison.",
+      "classification": "rigid_refinement_inference_boundary",
+      "published_status": "promotion_withheld",
+      "audit_status": "rigid_refinement_extension_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:300"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_rigid_refinement_screening_states.pdf",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_plan.py",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_launcher.py",
+        "scripts/research/proximal_distal_energy/make_rigid_refinement_figure.py",
+        "tests/research/test_articulated_rigid_refinement_plan.py",
+        "tests/research/test_articulated_rigid_refinement_evidence.py",
+        "tests/research/test_make_rigid_refinement_figure.py"
+      ],
+      "model_domain": "Eighteen declared synthetic screening states, nominal and high-damping rigid-contact variants, three unseen time steps, a five-millisecond horizon, and two registered native engines.",
+      "uncertainty_boundary": "The three failures may reflect integrator, quadrature, event, or short-horizon state dependence and do not identify a physical mechanism.",
+      "competing_explanations": [
+        "state-dependent quadrature error rather than physical work",
+        "semi-implicit transient behavior rather than asymptotic convergence",
+        "synthetic source-state geometry rather than a participant distribution",
+        "unavailable native parity rather than cross-engine agreement"
+      ],
+      "negative_controls": [
+        "all 18 previously declared screening states",
+        "high-damping comparison at every state",
+        "step sizes disjoint from the post-result pilot",
+        "unchanged 0.800 refinement ceiling",
+        "typed native-engine absence retained as a failed promotion gate"
+      ],
+      "falsifier": "The paper presents the extension as convergence, cross-engine parity, a physical mechanism, or a human strategy without the missing prospective evidence.",
+      "adjudication": "The complete checkpoint inventory retains all three state-dependent failures, the original smoke failure, the excluded pilot, and unavailable native parity without threshold changes.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-28"
     },

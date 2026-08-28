@@ -7,7 +7,7 @@
     "reviewed_release_claim_count": 53,
     "open_release_review_count": 0,
     "scientifically_open_gate_count": 53,
-    "atomic_claim_count": 331
+    "atomic_claim_count": 334
   },
   "release_claim_reviews": [
     {
@@ -470,7 +470,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:186",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:188",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:195",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:283"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:324"
       ],
       "negative_controls": [
         "same state and matched club task",
@@ -553,7 +553,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06bc_torque_allocation_preload.qmd:220",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:135",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:152",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:283"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:324"
       ],
       "negative_controls": [
         "proper rotation and reference transport",
@@ -1303,7 +1303,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:476",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:479",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:492",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:283"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:324"
       ],
       "negative_controls": [
         "energy matching",
@@ -2292,7 +2292,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:821",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:834",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:842",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:269",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:310",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:856",

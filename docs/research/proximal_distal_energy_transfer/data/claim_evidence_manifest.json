@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "4c05110cc484c36a7aba98b425228c163ac9e5a8a7fa2a192936611e91464927"
+    "sha256": "f89957b0cfce95f0877f4085670958d34404ea3fcb29c45ca31bc6ead1b5f48a"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -11,9 +11,9 @@
     "network_access_required": false
   },
   "summary": {
-    "claim_count": 331,
-    "evidence_reference_count": 2537,
-    "local_artifact_count": 433,
+    "claim_count": 334,
+    "evidence_reference_count": 2564,
+    "local_artifact_count": 442,
     "external_url_count": 78
   },
   "claims": {
@@ -4193,6 +4193,48 @@
       ],
       "external_references": []
     },
+    "PD-CLAIM-333": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_rigid_refinement_screening_states.pdf",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_plan.py",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_launcher.py",
+        "scripts/research/proximal_distal_energy/make_rigid_refinement_figure.py",
+        "tests/research/test_articulated_rigid_refinement_plan.py",
+        "tests/research/test_articulated_rigid_refinement_evidence.py",
+        "tests/research/test_make_rigid_refinement_figure.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-334": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_rigid_refinement_screening_states.pdf",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_plan.py",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_launcher.py",
+        "scripts/research/proximal_distal_energy/make_rigid_refinement_figure.py",
+        "tests/research/test_articulated_rigid_refinement_plan.py",
+        "tests/research/test_articulated_rigid_refinement_evidence.py",
+        "tests/research/test_make_rigid_refinement_figure.py"
+      ],
+      "external_references": []
+    },
+    "PD-CLAIM-335": {
+      "local_references": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_rigid_refinement_screening_states.pdf",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_plan.py",
+        "scripts/research/proximal_distal_energy/articulated_rigid_refinement_launcher.py",
+        "scripts/research/proximal_distal_energy/make_rigid_refinement_figure.py",
+        "tests/research/test_articulated_rigid_refinement_plan.py",
+        "tests/research/test_articulated_rigid_refinement_evidence.py",
+        "tests/research/test_make_rigid_refinement_figure.py"
+      ],
+      "external_references": []
+    },
     "PD-CLAIM-235": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
@@ -4436,8 +4478,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd": {
-      "sha256": "92a5c1509445aadf67121edbef304e36e95bc87c8cb7387c37b06050438552d7",
-      "bytes": 25434,
+      "sha256": "bb4df021a1b655ed69c7ddf9ba9964afccafd707214f8bb21d97278695dba79d",
+      "bytes": 28109,
       "referenced_by": [
         "PD-CLAIM-242",
         "PD-CLAIM-243",
@@ -4630,6 +4672,24 @@
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/summary.json": {
+      "sha256": "b2feebc261c61517bda314267d1c9013f7b273d28d1ce59c6448fdb0d60c8664",
+      "bytes": 82916,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
+      ]
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement_plan.json": {
+      "sha256": "237b5a2dd96f7874bc9fa350296a804b424e30208d6274908f90683a5fc00fc6",
+      "bytes": 7598,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_atlas.json": {
@@ -6281,6 +6341,15 @@
         "PD-CLAIM-316"
       ]
     },
+    "docs/research/proximal_distal_energy_transfer/figures/fig_rigid_refinement_screening_states.pdf": {
+      "sha256": "95061de4744ca0d1905e0bd7a909f6d6aa229862a8fd7555724b90c7192a8cae",
+      "bytes": 37073,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/figures/fig_scapulothoracic_contact_screen.pdf": {
       "sha256": "c812deb805ee74d51b356dc8e2125bf53d0ca5a33a9a3f9409ff05d0b6033433",
       "bytes": 26772,
@@ -6555,6 +6624,24 @@
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_rigid_refinement_launcher.py": {
+      "sha256": "f1c0ae13ba7ccdbb92440fcd2726e5a147adda6fb5204a6be4db6d1639a002df",
+      "bytes": 1998,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_rigid_refinement_plan.py": {
+      "sha256": "e93df3741fc5dbce410c3c144f20ece8c77e027392f6d1767361494c54d6638e",
+      "bytes": 5143,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_shaft.py": {
@@ -7105,6 +7192,15 @@
       "referenced_by": [
         "PD-CLAIM-315",
         "PD-CLAIM-316"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/make_rigid_refinement_figure.py": {
+      "sha256": "efa9a89c72f7b30c5ae2ddec907ffa484a94c11b9917d8bea8f134f08d1de88e",
+      "bytes": 6607,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
       ]
     },
     "scripts/research/proximal_distal_energy/make_scapulothoracic_contact_figures.py": {
@@ -8424,6 +8520,24 @@
         "PD-CLAIM-304"
       ]
     },
+    "tests/research/test_articulated_rigid_refinement_evidence.py": {
+      "sha256": "1ffc5423d95f633765cd7eeacb9ed0cb17538c296bddc89ea0e7396c0900a7f5",
+      "bytes": 2271,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
+      ]
+    },
+    "tests/research/test_articulated_rigid_refinement_plan.py": {
+      "sha256": "b5d9ac4af640cae3385baf1cc5d7b6b332566ca19f30c625224b344af2a29928",
+      "bytes": 3116,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
+      ]
+    },
     "tests/research/test_articulated_shaft.py": {
       "sha256": "6a46ad7aba60db597c99cb96369dfd90dbabba8db30b644c926415a45b28e4f9",
       "bytes": 3923,
@@ -8739,6 +8853,15 @@
         "PD-CLAIM-067",
         "PD-CLAIM-068",
         "PD-CLAIM-072"
+      ]
+    },
+    "tests/research/test_make_rigid_refinement_figure.py": {
+      "sha256": "a374a371f5ea79b45aa8739684522cbc72832d4dafe7797658cd2ee78e8720b4",
+      "bytes": 1212,
+      "referenced_by": [
+        "PD-CLAIM-333",
+        "PD-CLAIM-334",
+        "PD-CLAIM-335"
       ]
     },
     "tests/research/test_make_stateful_distributed_figure.py": {

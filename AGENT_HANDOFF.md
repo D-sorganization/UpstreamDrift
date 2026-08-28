@@ -61,27 +61,36 @@ are not completion evidence.
   255 pages,
   SHA-256 `0a781df90cd7393799cbc5e94621dfddd502f0284fb09cc0e23acf251197687e`,
   196 URI links, and clean visual review on the new section/figure pages.
-- Claim governance is green at 1,185 candidates and 331 material claims:
-  311 supported at declared scope, five inconclusive, and 15 untested.
+- Claim governance is green at 1,189 candidates and 334 material claims:
+  314 supported at declared scope, five inconclusive, and 15 untested.
   Promotion failures and human boundaries are explicit.
+
+## Rigid Refinement Extension
+
+- Prospective plan commit `9d4817912755ce75e189f9baf13e388b494b7bf9` is
+  verified on the remote feature branch. It retains the original failures and
+  excludes the disclosed pilot steps.
+- The serial campaign completed 216/216 atomic checkpoints: 108 MuJoCo
+  complete, 108 Pinocchio typed unavailable, and zero execution failures.
+  Checkpoint-set SHA-256 is
+  `743999ac8afd516b2cea4e8f7ac43e56f87f66d9cdba1a2b5bad95081421e7c7`;
+  repository formatting excludes this byte-for-byte execution evidence.
+- All individual closure tolerances pass. Thirty-three of 36 MuJoCo groups
+  pass refinement; nominal case 4/sample 0 and case 13/samples 0 and 12 fail
+  the unchanged 0.8 work-refinement gate. Promotion remains false.
+- Published checkpoint evidence, a four-panel governed figure, a paper section,
+  and claims PD-CLAIM-333--335 are implemented locally but not yet committed.
 
 ## Immediate Order
 
-1. Freeze the pilot-disclosed rigid refinement extension against source head
-   `97b6395ca`, using all 18 previously declared screening states, only the two
-   original failing variants, and unseen 0.2/0.1/0.05 ms steps. The contract is
-   serial, 216 registered cases (108 native attempts plus typed Pinocchio
-   absence), with atomic checkpoints and no ControlTower dependency.
-2. Commit and push the manifest before execution. Run it only from that exact
-   immutable execution revision; preserve the original failure and pilot as
-   separate evidence.
-3. Aggregate and integrate the extension only after identity, checkpoint,
-   closure, refinement, and claim-boundary validation. Do not weaken the 0.8
-   threshold after seeing results.
-4. Then continue matched rigid/shaft/base branches and causal killswitch runs.
+1. Finish claim-evidence regeneration, rebuild and inspect the paper, qualify
+   the release, then commit and push the completed refinement evidence slice.
+2. Preserve all three refinement failures, typed Pinocchio absence, original
+   smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
+3. Continue matched rigid/shaft/base branches and causal killswitch runs.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
-5. Project only protected UpstreamDrift evidence into AffineDrift; continue
+4. Project only protected UpstreamDrift evidence into AffineDrift; continue
    Tools only through its provider contract and protected flow.
 
 ## Validation

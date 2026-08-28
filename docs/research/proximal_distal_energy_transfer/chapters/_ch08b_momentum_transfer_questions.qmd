@@ -266,6 +266,47 @@ where the algorithm converges, where its registered coupling ledger does not,
 and which engine evidence is missing. Promotion remains false until the
 refinement and native-parity failures are resolved prospectively.
 
+### Rigid Refinement Across Screening States
+
+The original rigid smoke failed the frozen 0.800 work-refinement gate for the
+nominal and high-damping variants. A disclosed development pilot on that same
+state suggested that finer grids might contract, but those post-result outputs
+were not eligible as confirmatory evidence. The prospective extension therefore
+retains the original failures, excludes the pilot step sizes, and evaluates all
+18 previously declared screening states rather than selecting a favorable
+state. It crosses those states with the two original failing variants, unseen
+0.20, 0.10, and 0.05 ms steps, and the two registered native engines. The exact
+contract is published in
+[`articulated_rigid_refinement_plan.json`](../data/articulated_rigid_refinement_plan.json).
+
+All 216 registered cases were retained atomically: 108 MuJoCo cases completed,
+108 Pinocchio cases were typed unavailable, and none failed during execution.
+Every completed case satisfies the frozen pointwise, momentum, work, and
+trajectory-energy closure tolerances. Momentum-refinement ratios lie between
+0.49485 and 0.49849. Work-refinement behavior is more state dependent: 33 of
+36 MuJoCo state--variant groups pass, while nominal case 4 at 0.00 s and nominal
+case 13 at 0.00 and 0.24 s fail. Their maximum successive work-residual ratios
+are 1.492, 0.852, and 1.827, respectively, against the unchanged 0.800 ceiling.
+All 18 high-damping groups pass. The exact 216-file inventory and deterministic
+summary are published in
+[`articulated_rigid_refinement/`](../data/articulated_rigid_refinement/).
+
+![Rigid Refinement Across Screening States. The heatmaps and statewise scatter
+retain all three nominal refinement failures; the high-damping variant passes
+at every screened state. All individual closure tolerances pass, but
+nonmonotonic work-residual contraction and unavailable Pinocchio parity keep
+promotion false.](figures/fig_rigid_refinement_screening_states.pdf){#fig-rigid-refinement-screening-states width=100%}
+
+This extension does not support a blanket claim that finer steps resolve the
+original failure. Instead, it localizes the remaining numerical vulnerability
+to state-dependent nominal trajectories and makes the next falsifier explicit:
+an independently registered integrator or quadrature comparison must reproduce
+or remove those three nonmonotonic cases without changing the states,
+tolerances, or ledger definition. The result concerns numerical attribution in
+a five-millisecond engineering model. It does not establish a physical transfer
+mechanism, a human movement pattern, or a coaching strategy, and native
+cross-engine parity remains unavailable.
+
 The following articulated shaft atlas then retains the five-fiber grip and
 adds rigid, bending-only, torsion-only, and coupled passive-club branches. Its
 384 trajectories pass the registered 0.25/0.125 ms work--energy,

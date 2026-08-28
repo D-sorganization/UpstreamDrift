@@ -389,6 +389,14 @@ python3 -m scripts.research.proximal_distal_energy.articulated_stateful_summary 
   --checkpoint-dir docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_smoke \
   --output docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_smoke/summary.json
 python3 -m scripts.research.proximal_distal_energy.make_stateful_distributed_figure
+python3 -m scripts.research.proximal_distal_energy.generate_articulated_rigid_refinement_plan \
+  --source-revision 97b6395ca6805fd5f92764a2913ded498f792dd7 \
+  --source-data-sha256 9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779
+python3 -m scripts.research.proximal_distal_energy.articulated_rigid_refinement_launcher \
+  --plan docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement_plan.json \
+  --execution-revision 9d4817912755ce75e189f9baf13e388b494b7bf9 \
+  --checkpoint-dir docs/research/proximal_distal_energy_transfer/data/articulated_rigid_refinement/checkpoints
+python3 -m scripts.research.proximal_distal_energy.make_rigid_refinement_figure
 python3 -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis
 python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic
 python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas

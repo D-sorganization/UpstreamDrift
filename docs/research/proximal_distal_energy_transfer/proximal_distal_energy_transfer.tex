@@ -524,7 +524,7 @@ available with the document for independent inspection and reuse.
 
 \chapter{Introduction}\label{sec-intro}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, breakable, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, left=2mm, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, bottomrule=.15mm, bottomtitle=1mm, colback=white, titlerule=0mm, rightrule=.15mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, breakable, rightrule=.15mm, toprule=.15mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, leftrule=.75mm, coltitle=black, opacitybacktitle=0.6, titlerule=0mm, colframe=quarto-callout-note-color-frame, arc=.35mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, opacityback=0, left=2mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2829,7 +2829,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, breakable, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, left=2mm, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, bottomrule=.15mm, bottomtitle=1mm, colback=white, titlerule=0mm, rightrule=.15mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, breakable, rightrule=.15mm, toprule=.15mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, leftrule=.75mm, coltitle=black, opacitybacktitle=0.6, titlerule=0mm, colframe=quarto-callout-note-color-frame, arc=.35mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, opacityback=0, left=2mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -13342,6 +13342,62 @@ algorithm converges, where its registered coupling ledger does not, and
 which engine evidence is missing. Promotion remains false until the
 refinement and native-parity failures are resolved prospectively.
 
+\subsection{Rigid Refinement Across Screening
+States}\label{rigid-refinement-across-screening-states}
+
+The original rigid smoke failed the frozen 0.800 work-refinement gate
+for the nominal and high-damping variants. A disclosed development pilot
+on that same state suggested that finer grids might contract, but those
+post-result outputs were not eligible as confirmatory evidence. The
+prospective extension therefore retains the original failures, excludes
+the pilot step sizes, and evaluates all 18 previously declared screening
+states rather than selecting a favorable state. It crosses those states
+with the two original failing variants, unseen 0.20, 0.10, and 0.05 ms
+steps, and the two registered native engines. The exact contract is
+published in
+\href{../data/articulated_rigid_refinement_plan.json}{\texttt{articulated\_rigid\_refinement\_plan.json}}.
+
+All 216 registered cases were retained atomically: 108 MuJoCo cases
+completed, 108 Pinocchio cases were typed unavailable, and none failed
+during execution. Every completed case satisfies the frozen pointwise,
+momentum, work, and trajectory-energy closure tolerances.
+Momentum-refinement ratios lie between 0.49485 and 0.49849.
+Work-refinement behavior is more state dependent: 33 of 36 MuJoCo
+state--variant groups pass, while nominal case 4 at 0.00 s and nominal
+case 13 at 0.00 and 0.24 s fail. Their maximum successive work-residual
+ratios are 1.492, 0.852, and 1.827, respectively, against the unchanged
+0.800 ceiling. All 18 high-damping groups pass. The exact 216-file
+inventory and deterministic summary are published in
+\href{../data/articulated_rigid_refinement/}{\texttt{articulated\_rigid\_refinement/}}.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_rigid_refinement_screening_states.pdf}
+
+}
+
+\caption{\label{fig-rigid-refinement-screening-states}Rigid Refinement
+Across Screening States. The heatmaps and statewise scatter retain all
+three nominal refinement failures; the high-damping variant passes at
+every screened state. All individual closure tolerances pass, but
+nonmonotonic work-residual contraction and unavailable Pinocchio parity
+keep promotion false.}
+
+\end{figure}%
+
+This extension does not support a blanket claim that finer steps resolve
+the original failure. Instead, it localizes the remaining numerical
+vulnerability to state-dependent nominal trajectories and makes the next
+falsifier explicit: an independently registered integrator or quadrature
+comparison must reproduce or remove those three nonmonotonic cases
+without changing the states, tolerances, or ledger definition. The
+result concerns numerical attribution in a five-millisecond engineering
+model. It does not establish a physical transfer mechanism, a human
+movement pattern, or a coaching strategy, and native cross-engine parity
+remains unavailable.
+
 The following articulated shaft atlas then retains the five-fiber grip
 and adds rigid, bending-only, torsion-only, and coupled passive-club
 branches. Its 384 trajectories pass the registered 0.25/0.125 ms
@@ -13707,7 +13763,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 331 material claims. The normalized outcome
+The current census contains 334 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -13739,7 +13795,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 311 \\
+\texttt{supported} & 314 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -13765,8 +13821,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 116 \\
-\texttt{project\_executable\_or\_generated} & 302 \\
+\texttt{project\_derivation\_or\_document} & 119 \\
+\texttt{project\_executable\_or\_generated} & 305 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -13787,7 +13843,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 277 \\
+\texttt{project\_only} & 280 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -13808,7 +13864,7 @@ Model Tier & Claim Count \\
 \endlastfoot
 \texttt{articulated\_spatial} & 38 \\
 \texttt{compliant\_shaft} & 66 \\
-\texttt{cross\_tier\_synthesis} & 80 \\
+\texttt{cross\_tier\_synthesis} & 83 \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
@@ -13839,7 +13895,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 287 \\
+\texttt{none\_declared} & 290 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -13920,7 +13976,7 @@ ch07 model ladder & 32 & 32 / 0 / 0 & project authored only \\
 ch07 results & 7 & 7 / 0 / 0 & project authored only \\
 ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
 ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\
-ch08b momentum transfer questions & 13 & 13 / 0 / 0 & project authored
+ch08b momentum transfer questions & 16 & 16 / 0 / 0 & project authored
 only \\
 ch09 conclusions & 2 & 2 / 0 / 0 & project authored only \\
 \end{longtable}
