@@ -280,13 +280,15 @@ def _contrast_records(
                         )
                     )
                     signed.append(sign * _outcome(row, outcome_name))
+                coefficient = float(np.mean(signed))
                 records.append(
                     {
                         "block": list(block),
                         "contrast_id": contrast["contrast_id"],
                         "order": len(selected),
                         "outcome": outcome_name,
-                        "walsh_coefficient": float(np.mean(signed)),
+                        "walsh_coefficient": coefficient,
+                        "high_minus_low_effect": 2.0 * coefficient,
                     }
                 )
     return records
@@ -408,7 +410,7 @@ def summarize_structural_factorial(
             }
         )
     return {
-        "schema_version": "articulated-structural-factorial-summary/1.0.0",
+        "schema_version": "articulated-structural-factorial-summary/1.1.0",
         "identity": {
             "plan_sha256": plan_sha256(plan),
             "execution_revision": launch["execution_revision"],
@@ -429,6 +431,10 @@ def summarize_structural_factorial(
         },
         "refinement": refinement,
         "cross_engine_parity": parity,
+        "contrast_convention": {
+            "walsh_coefficient": "mean(outcome * coded contrast sign)",
+            "high_minus_low_effect": "two times the Walsh coefficient",
+        },
         "factorial_contrasts": contrasts,
         "contrast_sign_ranges": sign_ranges,
         "claim_boundary": {

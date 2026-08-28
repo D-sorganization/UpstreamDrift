@@ -132,6 +132,17 @@ def test_summary_recovers_registered_walsh_coefficients_and_suppresses_parity(
         and row["outcome"] == "final_club_translation_speed_m_s"
     ]
     assert coefficients == pytest.approx([1.0, 1.0, 1.0])
+    effects = [
+        row["high_minus_low_effect"]
+        for row in summary["factorial_contrasts"]
+        if row["contrast_id"] == "shaft_bending"
+        and row["outcome"] == "final_club_translation_speed_m_s"
+    ]
+    assert effects == pytest.approx([2.0, 2.0, 2.0])
+    assert summary["contrast_convention"] == {
+        "walsh_coefficient": "mean(outcome * coded contrast sign)",
+        "high_minus_low_effect": "two times the Walsh coefficient",
+    }
 
 
 def test_summary_fails_closed_when_a_registered_checkpoint_is_missing(

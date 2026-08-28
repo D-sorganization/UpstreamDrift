@@ -89,10 +89,10 @@ are not completion evidence.
 - Plan v1.1 freezes the outcome-blind 2^4 shaft-bending, shaft-torsion,
   base-translation, and free-moment matrix: 12 states, two directions, three
   steps, two engines, four horizons, and 2,304 registered engine attempts.
-- Primary estimands are the four main effects and six two-factor interactions
-  computed as exact within-state Walsh contrasts. Peak load and dissipated work
-  are reported mediators, not post-hoc eligibility filters. Higher-order
-  contrasts are explicitly exploratory.
+- Primary estimands are four main and six two-factor Walsh coefficients; the
+  summary separately labels the high-minus-low effect as twice the coefficient.
+  Peak load/dissipated work are mediators, not filters; higher orders are
+  exploratory.
 - First probe failed closed on a stale formatting-only shaft-source hash.
   `7b7862f3b` repaired provenance; the regenerated NPZ is byte-identical.
 - The passing non-evidence probe took 4.02 s at 0.2 ms with residual 0.00291.
