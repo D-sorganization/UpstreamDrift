@@ -6,7 +6,9 @@ import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_forward_attribution import (
+    differentiate_mass_matrices,
     integrate_forward_attribution,
+    require_forward_attribution_closure,
     scale_forward_attribution_inputs,
 )
 
@@ -139,4 +141,38 @@ def test_event_count_must_match_segment_transitions() -> None:
             segment_ids=np.array([0, 0, 1]),
             event_impulses=np.empty((0, 1)),
             event_work_j=np.empty(0),
+        )
+
+
+def test_mass_matrix_rate_is_differentiated_within_each_segment() -> None:
+    time_s = np.array([0.0, 0.5, 1.0, 1.0, 1.5, 2.0])
+    scalar_mass = 1.0 + 2.0 * time_s
+    rates = differentiate_mass_matrices(
+        time_s=time_s,
+        mass_matrices=scalar_mass[:, None, None],
+        segment_ids=np.array([0, 0, 0, 1, 1, 1]),
+    )
+
+    np.testing.assert_allclose(rates[:, 0, 0], 2.0)
+
+
+def test_planted_force_corruption_fails_closed() -> None:
+    result = integrate_forward_attribution(
+        time_s=np.array([0.0, 0.5, 1.0]),
+        mass_matrices=np.ones((3, 1, 1)),
+        mass_matrix_rates=np.zeros((3, 1, 1)),
+        velocities=np.array([[0.0], [1.0], [2.0]]),
+        generalized_forces=np.array([[[2.0]], [[2.2]], [[2.0]]]),
+        contribution_names=("contact",),
+        segment_ids=np.zeros(3, dtype=np.int64),
+        event_impulses=np.empty((0, 1)),
+        event_work_j=np.empty(0),
+    )
+
+    assert result.momentum_closure_residual > 0.0
+    with pytest.raises(ValueError, match="momentum closure"):
+        require_forward_attribution_closure(
+            result,
+            momentum_tolerance=1.0e-12,
+            work_tolerance_j=1.0,
         )

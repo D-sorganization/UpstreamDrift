@@ -80,6 +80,66 @@ def _trapezoid(
     return np.tensordot(widths, averages, axes=(0, 0))
 
 
+def differentiate_mass_matrices(
+    *,
+    time_s: FloatArray,
+    mass_matrices: FloatArray,
+    segment_ids: IntArray,
+) -> FloatArray:
+    """Differentiate mass matrices without crossing registered events."""
+
+    time, segments = _validate_time_and_segments(time_s, segment_ids)
+    mass = np.asarray(mass_matrices, dtype=np.float64)
+    if mass.ndim != 3 or mass.shape[0] != time.size or mass.shape[1] != mass.shape[2]:
+        raise ValueError(
+            "mass_matrices must have shape (samples, coordinates, coordinates)"
+        )
+    mass = _finite_array("mass_matrices", mass, mass.shape)
+    rates = np.empty_like(mass)
+    for segment in np.unique(segments):
+        indices = np.flatnonzero(segments == segment)
+        if indices.size < 2 or np.any(np.diff(indices) != 1):
+            raise ValueError(
+                "each segment must contain at least two contiguous samples"
+            )
+        segment_time = time[indices]
+        if np.any(np.diff(segment_time) <= 0.0):
+            raise ValueError("time must increase strictly within each segment")
+        edge_order = 2 if indices.size >= 3 else 1
+        rates[indices] = np.gradient(
+            mass[indices], segment_time, axis=0, edge_order=edge_order
+        )
+    return rates
+
+
+def require_forward_attribution_closure(
+    result: ForwardAttribution,
+    *,
+    momentum_tolerance: float,
+    work_tolerance_j: float,
+) -> None:
+    """Fail closed when a registered integrated balance exceeds tolerance."""
+
+    if not isinstance(result, ForwardAttribution):
+        raise TypeError("result must be a ForwardAttribution")
+    for name, value in (
+        ("momentum_tolerance", momentum_tolerance),
+        ("work_tolerance_j", work_tolerance_j),
+    ):
+        if not np.isfinite(value) or value <= 0.0:
+            raise ValueError(f"{name} must be finite and positive")
+    if result.momentum_closure_residual > momentum_tolerance:
+        raise ValueError(
+            "momentum closure residual exceeds the registered tolerance: "
+            f"{result.momentum_closure_residual:.6e} > {momentum_tolerance:.6e}"
+        )
+    if result.work_closure_residual_j > work_tolerance_j:
+        raise ValueError(
+            "work closure residual exceeds the registered tolerance: "
+            f"{result.work_closure_residual_j:.6e} > {work_tolerance_j:.6e}"
+        )
+
+
 def integrate_forward_attribution(
     *,
     time_s: FloatArray,
@@ -234,6 +294,8 @@ def scale_forward_attribution_inputs(
 
 __all__ = [
     "ForwardAttribution",
+    "differentiate_mass_matrices",
     "integrate_forward_attribution",
+    "require_forward_attribution_closure",
     "scale_forward_attribution_inputs",
 ]
