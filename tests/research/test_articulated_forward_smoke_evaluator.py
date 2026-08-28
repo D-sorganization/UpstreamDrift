@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -16,6 +17,7 @@ from scripts.research.proximal_distal_energy.articulated_forward_attribution_stu
 from scripts.research.proximal_distal_energy.articulated_forward_smoke_evaluator import (
     evaluate_rigid_smoke_case,
     require_registered_native_engine,
+    run_registered_rigid_smoke,
 )
 
 
@@ -107,3 +109,24 @@ def test_mujoco_smoke_case_returns_json_safe_attribution_and_outcomes() -> None:
         "times_s": [],
     }
     json.dumps(result, allow_nan=False)
+
+
+def test_registered_smoke_wrapper_uses_atomic_runner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest = _manifest()
+    monkeypatch.setattr(
+        "scripts.research.proximal_distal_energy."
+        "articulated_forward_smoke_evaluator.evaluate_rigid_smoke_case",
+        lambda case, _manifest: {"case_key": case.case_key},
+    )
+
+    checkpoints = run_registered_rigid_smoke(
+        manifest=manifest,
+        execution_revision="c" * 40,
+        checkpoint_dir=tmp_path,
+    )
+
+    assert len(checkpoints) == 42
+    assert all(item.status == "completed" for item in checkpoints)

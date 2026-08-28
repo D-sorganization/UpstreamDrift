@@ -19,8 +19,10 @@ from scripts.research.proximal_distal_energy.articulated_forward_atlas import (
     load_forward_authority,
 )
 from scripts.research.proximal_distal_energy.articulated_forward_attribution_runner import (
+    CaseCheckpoint,
     NativeEngineUnavailable,
     StudyCase,
+    run_serial_cases,
 )
 from scripts.research.proximal_distal_energy.articulated_forward_contract import (
     ArticulatedForwardContactConfig,
@@ -301,4 +303,24 @@ def evaluate_rigid_smoke_case(
     }
 
 
-__all__ = ["evaluate_rigid_smoke_case", "require_registered_native_engine"]
+def run_registered_rigid_smoke(
+    *,
+    manifest: Mapping[str, object],
+    execution_revision: str,
+    checkpoint_dir: Path,
+) -> tuple[CaseCheckpoint, ...]:
+    """Run or resume the exact serial rigid smoke through atomic checkpoints."""
+
+    return run_serial_cases(
+        manifest=manifest,
+        execution_revision=execution_revision,
+        checkpoint_dir=checkpoint_dir,
+        evaluator=lambda case: evaluate_rigid_smoke_case(case, manifest),
+    )
+
+
+__all__ = [
+    "evaluate_rigid_smoke_case",
+    "require_registered_native_engine",
+    "run_registered_rigid_smoke",
+]
