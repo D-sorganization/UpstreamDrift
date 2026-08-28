@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "71a28cc854e86abf8d1cc72812cbd0af424807a9fe7d1f86869ec4228aaa570f",
+    "source_digest": "82f8013b8764705195e5886c418f90150023a363c07d6a09d7f497e6fcd530bd",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -11,7 +11,7 @@
     "release_review_completion_status": "complete",
     "authority": "D-sorganization/UpstreamDrift#8557",
     "candidate_policy": "Every narrative candidate must be adjudicated as material or non-material before completion.",
-    "current_scope": "The complete 1180-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; generated reviewer tables and editorial anchors are explicitly classified as nonclaims.",
+    "current_scope": "The complete 1185-candidate paper inventory is adjudicated. Repeated methods, summary, limitation, provenance, and model-tier passages inherit the primary claim boundaries; editorial anchors are explicitly classified as nonclaims.",
     "normalized_adjudication_status": "complete",
     "normalized_adjudication_policy": "Finding-level supported, contradicted, inconclusive, or untested outcome; never inferred from published_status or audit_status."
   },
@@ -9341,21 +9341,6 @@
       "last_verified_on": "2026-08-16"
     },
     {
-      "candidate_id": "PD-CAND-b927f3a0c6a4132b",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-243",
-        "PD-CLAIM-247",
-        "PD-CLAIM-253",
-        "PD-CLAIM-273",
-        "PD-CLAIM-292",
-        "PD-CLAIM-296"
-      ],
-      "rationale": "Repeated summary inherits claim bounds.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-14"
-    },
-    {
       "candidate_id": "PD-CAND-12eb97d219020156",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -10823,6 +10808,402 @@
       "last_verified_on": "2026-08-26"
     },
     {
+      "candidate_id": "PD-CAND-b0db20cffe7edea1",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-321",
+        "PD-CLAIM-322",
+        "PD-CLAIM-323"
+      ],
+      "rationale": "This passage states or bounds the registered topology result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-487f9fa592564d86",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-321"
+      ],
+      "rationale": "This passage states or bounds the registered topology result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-9d665f94de53c60d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-322"
+      ],
+      "rationale": "This passage states or bounds the registered topology result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-8f7b7955a23c26e0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-323"
+      ],
+      "rationale": "This passage states or bounds the registered topology result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-20b25c7667c5a6e9",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-323"
+      ],
+      "rationale": "This passage states or bounds the registered topology result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-cc5f3bfdb0e25d73",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-323"
+      ],
+      "rationale": "This passage states or bounds the registered topology result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-d5f46345a6366c1b",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This candidate is the governed topology figure caption.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-d4cc055868be6aef",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-324"
+      ],
+      "rationale": "This passage states or bounds the registered numerical prerequisite.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-e2d8a3fa6faf114f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-324",
+        "PD-CLAIM-325",
+        "PD-CLAIM-326"
+      ],
+      "rationale": "This passage states or bounds the registered numerical prerequisite.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-d1fad4101ce33aa0",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-325"
+      ],
+      "rationale": "This passage states or bounds the registered numerical prerequisite.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-59d1144a2a437060",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-326"
+      ],
+      "rationale": "This passage states or bounds the registered numerical prerequisite.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-7a0731a67be14969",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This appendix candidate inventories governed artifacts.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-26"
+    },
+    {
+      "candidate_id": "PD-CAND-bdc4db8f2d715a37",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-dec82f9f77fba635",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-1d1d796e7fdebe2c",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-1e61f3f291520a43",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-c8f33495e0f1cabb",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-9b3d65a5059b94ad",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure points to registered evidence without a standalone claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-b62859dd4866bf58",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-328"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-0e4fbc3218d9fc55",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-327"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-1b74a19dcac4064d",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-329"
+      ],
+      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-27"
+    },
+    {
+      "candidate_id": "PD-CAND-165a6caf21ef85e2",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-39f42d06f3e621a5",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-9345c1e6be2ef186",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-9906005bff75ba72",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-a9f37172857a4493",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-aa6efbe9274b5d53",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-b06a3cbe5b2d0e01",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-b5b2526e23b77d70",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-bcfcc2b3a9631de1",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-be8a26a0593eab4f",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-c6f7607002d58a93",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-cd8822807d808531",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-d2f2b5b07b466265",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-fdcf5c685afbb41a",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-feff7c3d6f4ddc55",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-23"
+    },
+    {
+      "candidate_id": "PD-CAND-86c909985053d788",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-243",
+        "PD-CLAIM-247",
+        "PD-CLAIM-253",
+        "PD-CLAIM-273",
+        "PD-CLAIM-292",
+        "PD-CLAIM-296",
+        "PD-CLAIM-330",
+        "PD-CLAIM-331",
+        "PD-CLAIM-332"
+      ],
+      "rationale": "The updated question table carries existing bounded answers and the new fail-closed stateful result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_id": "PD-CAND-8e4bfff39eeef6cc",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-330",
+        "PD-CLAIM-332"
+      ],
+      "rationale": "This passage states or bounds the stateful distributed-grip campaign.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_id": "PD-CAND-3eb949059db928bd",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-330"
+      ],
+      "rationale": "This passage states or bounds the stateful distributed-grip campaign.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_id": "PD-CAND-cc8a3a122d4643e8",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-331"
+      ],
+      "rationale": "This passage states or bounds the stateful distributed-grip campaign.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_id": "PD-CAND-45b26240d460559f",
+      "disposition": "material_claims_mapped",
+      "claim_ids": [
+        "PD-CLAIM-331",
+        "PD-CLAIM-332"
+      ],
+      "rationale": "This passage states or bounds the stateful distributed-grip campaign.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_id": "PD-CAND-e444a0c1712aa4eb",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "The figure include visualizes governed evidence without adding a standalone claim.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
       "candidate_id": "PD-CAND-54741e44f52ea561",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -11683,6 +12064,62 @@
       "last_verified_on": "2026-08-13"
     },
     {
+      "candidate_id": "PD-CAND-b0641d03e93755f7",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-b7ea1a1164b87356",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-20af63f5d2ff25b2",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-84d3386527bcbe32",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-c59bfe4254b7d64a",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-1191b12cde026193",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
+      "candidate_id": "PD-CAND-a0f5e79432f64e0c",
+      "disposition": "editorial_or_navigation",
+      "claim_ids": [],
+      "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13"
+    },
+    {
       "candidate_id": "PD-CAND-601f18c64a7c62fa",
       "disposition": "material_claims_mapped",
       "claim_ids": [
@@ -11758,390 +12195,6 @@
       "rationale": "This heading, equation fragment, figure/table anchor, command block, navigation statement, or repository pointer asserts no standalone scientific result.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-13"
-    },
-    {
-      "candidate_id": "PD-CAND-b0db20cffe7edea1",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-321",
-        "PD-CLAIM-322",
-        "PD-CLAIM-323"
-      ],
-      "rationale": "This passage states or bounds the registered topology result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-487f9fa592564d86",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-321"
-      ],
-      "rationale": "This passage states or bounds the registered topology result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-9d665f94de53c60d",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-322"
-      ],
-      "rationale": "This passage states or bounds the registered topology result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-8f7b7955a23c26e0",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-323"
-      ],
-      "rationale": "This passage states or bounds the registered topology result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-20b25c7667c5a6e9",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-323"
-      ],
-      "rationale": "This passage states or bounds the registered topology result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-cc5f3bfdb0e25d73",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-323"
-      ],
-      "rationale": "This passage states or bounds the registered topology result.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-d5f46345a6366c1b",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This candidate is the governed topology figure caption.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-d4cc055868be6aef",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-324"
-      ],
-      "rationale": "This passage states or bounds the registered numerical prerequisite.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-e2d8a3fa6faf114f",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-324",
-        "PD-CLAIM-325",
-        "PD-CLAIM-326"
-      ],
-      "rationale": "This passage states or bounds the registered numerical prerequisite.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-d1fad4101ce33aa0",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-325"
-      ],
-      "rationale": "This passage states or bounds the registered numerical prerequisite.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-59d1144a2a437060",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-326"
-      ],
-      "rationale": "This passage states or bounds the registered numerical prerequisite.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-7a0731a67be14969",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "This appendix candidate inventories governed artifacts.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-26"
-    },
-    {
-      "candidate_id": "PD-CAND-bdc4db8f2d715a37",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-327"
-      ],
-      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-dec82f9f77fba635",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-327"
-      ],
-      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-1d1d796e7fdebe2c",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-327"
-      ],
-      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-1e61f3f291520a43",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-327"
-      ],
-      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-c8f33495e0f1cabb",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-327"
-      ],
-      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-9b3d65a5059b94ad",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "The figure points to registered evidence without a standalone claim.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-b62859dd4866bf58",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-328"
-      ],
-      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-0e4fbc3218d9fc55",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-327"
-      ],
-      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-1b74a19dcac4064d",
-      "disposition": "material_claims_mapped",
-      "claim_ids": [
-        "PD-CLAIM-329"
-      ],
-      "rationale": "This passage states or bounds the articulated same-state attribution gate.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-27"
-    },
-    {
-      "candidate_id": "PD-CAND-05707d54a6de45ec",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-123f2ade588fd4b1",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-165a6caf21ef85e2",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-2e9522c0abcc2b2e",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-39f42d06f3e621a5",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-5c439e1412704d16",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-6c60f865c75a423f",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-7471a3296fbe4f2f",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-9345c1e6be2ef186",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-9906005bff75ba72",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-a9f37172857a4493",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-aa6efbe9274b5d53",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-b06a3cbe5b2d0e01",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-b5b2526e23b77d70",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-bcfcc2b3a9631de1",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-bd2c606b14e67b76",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-be8a26a0593eab4f",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-c6f7607002d58a93",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-cd8822807d808531",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-d2f2b5b07b466265",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-fdcf5c685afbb41a",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
-    },
-    {
-      "candidate_id": "PD-CAND-feff7c3d6f4ddc55",
-      "disposition": "editorial_or_navigation",
-      "claim_ids": [],
-      "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-23"
     }
   ],
   "claims": [
@@ -25451,7 +25504,7 @@
     {
       "claim_id": "PD-CLAIM-243",
       "candidate_ids": [
-        "PD-CAND-b927f3a0c6a4132b"
+        "PD-CAND-86c909985053d788"
       ],
       "statement": "The seven-question table retains observable-specific drift attribution and bounded current answers after adding the geometry and recovery studies.",
       "classification": "critical_question_answer_map",
@@ -25756,7 +25809,7 @@
       "candidate_ids": [
         "PD-CAND-f68d06799fe605bf",
         "PD-CAND-db74be00a06f8889",
-        "PD-CAND-b927f3a0c6a4132b"
+        "PD-CAND-86c909985053d788"
       ],
       "statement": "Energy-, work-, and load-controlled planar evidence rejects maximizing proximal velocity as a general rule at those tiers, while five distinct slack classes require separate state, energy, and measurement tests.",
       "classification": "nonmonotonic_velocity_and_typed_slack_boundary",
@@ -25810,7 +25863,7 @@
         "PD-CAND-c4c001fab108c8b8",
         "PD-CAND-5bb964996c957e8b",
         "PD-CAND-c6f3dffde5c055ae",
-        "PD-CAND-b927f3a0c6a4132b",
+        "PD-CAND-86c909985053d788",
         "PD-CAND-0e5d5314a405698d"
       ],
       "statement": "Typed scalar and articulated point-contact audits separate slack classes, and a 576-trajectory finite-friction distributed-fiber atlas exposes station-count and active-set sensitivity while an instantaneous ideal-stick projection supplies a kinetic capture bound; none establishes physical class identity or benefit.",
@@ -25885,7 +25938,7 @@
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:225"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:283"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -25938,11 +25991,11 @@
       "audit_status": "evidence_boundary_and_falsification_contract_checked",
       "adjudication_outcome": "supported",
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:236",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:248",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:259",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:261",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:271"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:294",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:306",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:317",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:319",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:329"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
@@ -28237,7 +28290,7 @@
       "adjudication_outcome": "supported",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:842",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:269"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -28320,7 +28373,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:856",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:871",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:269"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -28394,7 +28447,7 @@
         "PD-CAND-66d5d2a169f5d47a",
         "PD-CAND-6c690d4f4d4a97b0",
         "PD-CAND-95c12aebd9fa8926",
-        "PD-CAND-b927f3a0c6a4132b",
+        "PD-CAND-86c909985053d788",
         "PD-CAND-bf1c55e354cd8bd6"
       ],
       "statement": "Among 126 coupled--rigid cells matched within 5% for peak load and dissipated work, final-speed differences include 82 negative and 44 positive values, rejecting a universal passive-shaft speed benefit in the declared model.",
@@ -28410,7 +28463,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:882",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:269"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json",
@@ -28772,10 +28825,10 @@
         "PD-CAND-7b5028710ab0e10f",
         "PD-CAND-934c0eef653e994d",
         "PD-CAND-a0ea93e52f20179e",
-        "PD-CAND-b927f3a0c6a4132b",
         "PD-CAND-b9431c1dd8029d1e",
         "PD-CAND-d9d8aaabb54bc6a5",
-        "PD-CAND-f4f69978365ee95f"
+        "PD-CAND-f4f69978365ee95f",
+        "PD-CAND-86c909985053d788"
       ],
       "statement": "None of 384 coupled--fixed cells meets the preregistered 5% peak-load and total-work match; a post-hoc non-ground-work screen admits 60 cells with both speed-difference signs, leaving the isolated delivery effect unidentified.",
       "classification": "articulated_ground_adverse_matching_result",
@@ -28797,10 +28850,10 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:698",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:64",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:155",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:759",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:108",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:118"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06ca_articulated_ground.qmd:118",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json",
@@ -28995,8 +29048,8 @@
       "claim_id": "PD-CLAIM-273",
       "candidate_ids": [
         "PD-CAND-959f63a01ba11134",
-        "PD-CAND-b927f3a0c6a4132b",
-        "PD-CAND-b30af9f570f239dc"
+        "PD-CAND-b30af9f570f239dc",
+        "PD-CAND-86c909985053d788"
       ],
       "statement": "The 50 ms validity-horizon result strengthens the reduced hand-carriage reference; the articulated tier reproduces its registered logic only through 5 ms, and neither establishes calibrated anatomy/equipment, passive human transfer, timing economy, slack benefit, or coaching strategy.",
       "classification": "closed_state_forward_horizon_inference_boundary",
@@ -29005,8 +29058,8 @@
       "adjudication_outcome": "supported",
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:396",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:117",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/forward_contact_validity_horizon.json",
@@ -31884,442 +31937,6 @@
       ]
     },
     {
-      "candidate_ids": [
-        "PD-CAND-3f24b7bec1a13566",
-        "PD-CAND-3c07c3b67ea18ea3",
-        "PD-CAND-22fff2ffb5e930ab"
-      ],
-      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
-      "adjudication_outcome": "supported",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:287",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:303",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:311"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-        "scripts/research/proximal_distal_energy/rotating_base_two_hand.py"
-      ],
-      "competing_explanations": [
-        "finite model scope",
-        "parameter choice",
-        "numerical implementation"
-      ],
-      "negative_controls": [
-        "exact rerun",
-        "geometry control",
-        "closure and provenance validation"
-      ],
-      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13",
-      "claim_id": "PD-CLAIM-235",
-      "statement": "The rotating-base tier is a seven-coordinate, four-constraint planar mechanism with finite torso inertia, separated hand reactions, projected position/velocity closure, and a checked bilateral contact-power identity.",
-      "classification": "rotating_base_model_and_constraint_contract",
-      "published_status": "supported_at_declared_model_tier",
-      "model_domain": "Finite-inertia planar torso, two arms, separated grips, and compliant club surrogate.",
-      "uncertainty_boundary": "The coordinates are mechanism coordinates, not anatomical thorax, scapula, or shoulder observables.",
-      "falsifier": "Constraint rank, closure, action-reaction, or bilateral power identity fails."
-    },
-    {
-      "candidate_ids": [
-        "PD-CAND-91a57be070bd4382",
-        "PD-CAND-ce7dfe2f88c50b9e",
-        "PD-CAND-6a547198e8748c41",
-        "PD-CAND-37da957d8de007e5",
-        "PD-CAND-0b6cbdaa32c9dc7c",
-        "PD-CAND-4c9593273e19f5a6"
-      ],
-      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
-      "adjudication_outcome": "supported",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:322",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:332",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:336",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:348",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:357",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:362"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
-      ],
-      "competing_explanations": [
-        "finite model scope",
-        "parameter choice",
-        "numerical implementation"
-      ],
-      "negative_controls": [
-        "exact rerun",
-        "geometry control",
-        "closure and provenance validation"
-      ],
-      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13",
-      "claim_id": "PD-CLAIM-236",
-      "statement": "Thirteen of 18 rotating-base cases pass the registered load/closure envelope; torso rate correlates with delivery speed at r=0.604 and braking work at r=0.273, while the matching rule materially changes the speed/braking conclusion.",
-      "classification": "rotating_base_grid_association_and_matching_sensitivity",
-      "published_status": "supported_for_registered_deterministic_grid",
-      "model_domain": "Eighteen deterministic combinations of three initial torso rates, two matching rules, and three torso commands.",
-      "uncertainty_boundary": "Finite-grid associations are not causal effects, population estimates, or universal strategy rules.",
-      "falsifier": "Committed rows do not reproduce counts, correlations, or the stated matching-rule contrast.",
-      "numeric_evidence": [
-        {
-          "literal_id": "18#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-          "json_pointer": "/attempted_case_count",
-          "evidence_scope": "local_json_value",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.5000001,
-          "rtol": 0.0
-        },
-        {
-          "literal_id": "0.604#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
-          "json_pointer": "/claims/PD-CLAIM-236/0/value",
-          "evidence_scope": "registered_claim_value_not_independently_recomputed",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.0,
-          "rtol": 0.0
-        },
-        {
-          "literal_id": "0.273#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
-          "json_pointer": "/claims/PD-CLAIM-236/1/value",
-          "evidence_scope": "registered_claim_value_not_independently_recomputed",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.0,
-          "rtol": 0.0
-        }
-      ]
-    },
-    {
-      "candidate_ids": [
-        "PD-CAND-6f8bc79328b9bb51",
-        "PD-CAND-ee8b3d4f4aeb19b1"
-      ],
-      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
-      "adjudication_outcome": "supported",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:374",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:385"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
-      ],
-      "competing_explanations": [
-        "finite model scope",
-        "parameter choice",
-        "numerical implementation"
-      ],
-      "negative_controls": [
-        "exact rerun",
-        "geometry control",
-        "closure and provenance validation"
-      ],
-      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13",
-      "claim_id": "PD-CLAIM-237",
-      "statement": "Exact 30 ms same-state killswitches give nonmonotonic channel effects: continued torso and wrist commands add 1.223 and 1.818 m/s, whereas continued bilateral-arm commands reduce delivery speed by 1.364 m/s in the registered program.",
-      "classification": "rotating_base_same_state_command_intervention",
-      "published_status": "supported_for_one_registered_program",
-      "model_domain": "One exact same-state branch within the declared rotating-base mechanism.",
-      "uncertainty_boundary": "A channel continuation effect is conditional on state, commands, model, and endpoint; it is not an anatomical or coaching effect.",
-      "falsifier": "Pre-branch states differ or branch recomputation reverses the recorded channel differences.",
-      "numeric_evidence": [
-        {
-          "literal_id": "30#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-          "json_pointer": "/same_state_killswitch/branch_time_s",
-          "evidence_scope": "local_json_value",
-          "scale": 1000.0,
-          "offset": 0.0,
-          "atol": 0.5000001,
-          "rtol": 0.0
-        },
-        {
-          "literal_id": "1.223#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-          "json_pointer": "/same_state_killswitch/channels/torso/delivery_speed_difference_m_s",
-          "evidence_scope": "local_json_value",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.0005000000999999999,
-          "rtol": 0.0
-        },
-        {
-          "literal_id": "1.818#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-          "json_pointer": "/same_state_killswitch/channels/bilateral_wrist/delivery_speed_difference_m_s",
-          "evidence_scope": "local_json_value",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.0005000000999999999,
-          "rtol": 0.0
-        },
-        {
-          "literal_id": "1.364#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
-          "json_pointer": "/claims/PD-CLAIM-237/0/value",
-          "evidence_scope": "registered_claim_value_not_independently_recomputed",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.0,
-          "rtol": 0.0
-        }
-      ]
-    },
-    {
-      "candidate_ids": [
-        "PD-CAND-53f5d0b5a5122e3b",
-        "PD-CAND-b9f1bae7492c6c45"
-      ],
-      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
-      "adjudication_outcome": "supported",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:389",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:401"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
-      ],
-      "competing_explanations": [
-        "finite model scope",
-        "parameter choice",
-        "numerical implementation"
-      ],
-      "negative_controls": [
-        "exact rerun",
-        "geometry control",
-        "closure and provenance validation"
-      ],
-      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13",
-      "claim_id": "PD-CLAIM-238",
-      "statement": "Coincident grips remove the rotating-base force couple exactly and signed arm reversal flips +1.351 to -1.351 N m; the supported conclusion is conditional reaction-work geometry, not scapular control, safe loading, or human technique.",
-      "classification": "rotating_base_geometry_controls_and_scope",
-      "published_status": "supported_with_explicit_human_boundary",
-      "model_domain": "Algebraic geometry controls and registered planar sensitivity cases.",
-      "uncertainty_boundary": "Signed arm reversal is an algebraic control, not a feasible grip exchange; human magnitude and strategy are unmeasured.",
-      "falsifier": "Couple survives coincident grips, fails signed reversal, or the paper makes a physiological prescription.",
-      "numeric_evidence": [
-        {
-          "literal_id": "+1.351#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-          "json_pointer": "/negative_controls/baseline_separated_grip_couple_nm",
-          "evidence_scope": "local_json_value",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.0005000000999999999,
-          "rtol": 0.0
-        },
-        {
-          "literal_id": "-1.351#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
-          "json_pointer": "/negative_controls/reversed_grip_couple_nm",
-          "evidence_scope": "local_json_value",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.0005000000999999999,
-          "rtol": 0.0
-        }
-      ]
-    },
-    {
-      "candidate_ids": [
-        "PD-CAND-4908f1e4a94179d1",
-        "PD-CAND-754200ff072e2f67",
-        "PD-CAND-0e0d81483621513a",
-        "PD-CAND-78075195f3a5c55b",
-        "PD-CAND-c6851af22838909b",
-        "PD-CAND-5a5705ae572a585b",
-        "PD-CAND-4025ee9f2eefeddb",
-        "PD-CAND-1a8e629a487d47b1",
-        "PD-CAND-894295e8a2324065",
-        "PD-CAND-e2e0449dd1d086b4",
-        "PD-CAND-a345790d750e6b57",
-        "PD-CAND-64c1e1f03ff86625"
-      ],
-      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
-      "adjudication_outcome": "supported",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:5",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:17",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:24",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:37",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:47",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:55",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:57",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:65",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:78",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:89",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:98",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:105"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json"
-      ],
-      "competing_explanations": [
-        "finite model scope",
-        "parameter choice",
-        "numerical implementation"
-      ],
-      "negative_controls": [
-        "exact rerun",
-        "geometry control",
-        "closure and provenance validation"
-      ],
-      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13",
-      "claim_id": "PD-CLAIM-239",
-      "statement": "The isolated Euler-Bernoulli beam experiment recovers a declared synthetic modulus and tip mass from two synthetic modes and demonstrates mesh convergence; it is structural verification rather than equipment identification.",
-      "classification": "synthetic_beam_identification_and_convergence",
-      "published_status": "supported_for_synthetic_reference_only",
-      "model_domain": "Declared tapered axisymmetric Euler-Bernoulli beam with synthetic modal observations.",
-      "uncertainty_boundary": "No measured shaft modal data, EI profile, boundary condition, or human load enters the inference.",
-      "falsifier": "Synthetic truth or mesh convergence fails reproduction, or the result is presented as calibrated equipment evidence."
-    },
-    {
-      "candidate_ids": [
-        "PD-CAND-4908f1e4a94179d1",
-        "PD-CAND-0e0d81483621513a",
-        "PD-CAND-1a8e629a487d47b1",
-        "PD-CAND-6f754c2efe8bb75b",
-        "PD-CAND-894295e8a2324065",
-        "PD-CAND-202051f896defe8a",
-        "PD-CAND-e2e0449dd1d086b4",
-        "PD-CAND-a345790d750e6b57",
-        "PD-CAND-51dfce3188daba5e"
-      ],
-      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
-      "adjudication_outcome": "supported",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:5",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:24",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:65",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:72",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:78",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:80",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:89",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:98",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:100"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
-        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
-      ],
-      "competing_explanations": [
-        "finite model scope",
-        "parameter choice",
-        "numerical implementation"
-      ],
-      "negative_controls": [
-        "exact rerun",
-        "geometry control",
-        "closure and provenance validation"
-      ],
-      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13",
-      "claim_id": "PD-CLAIM-240",
-      "statement": "The isolated one-mode beam closely matches the six-mode slow-pulse response but its short-pulse RMS discrepancy is 0.0413 mm, about 60 times the slow-pulse discrepancy; declared work-energy residuals remain below 2.9e-7 J.",
-      "classification": "synthetic_beam_excitation_and_energy_closure",
-      "published_status": "supported_for_two_declared_load_histories",
-      "model_domain": "One- versus six-mode response under the same two synthetic force/moment histories.",
-      "uncertainty_boundary": "Peak agreement can conceal history error; two loads do not establish equipment-wide truncation validity.",
-      "falsifier": "Reproduction changes the discrepancy ratio materially or violates declared energy closure.",
-      "numeric_evidence": [
-        {
-          "literal_id": "0.0413#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
-          "json_pointer": "/comparison/high_frequency_tip_rms_discrepancy_m",
-          "evidence_scope": "local_json_value",
-          "scale": 1000.0,
-          "offset": 0.0,
-          "atol": 5.0000009999999996e-05,
-          "rtol": 0.0
-        },
-        {
-          "literal_id": "60#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
-          "json_pointer": "/claims/PD-CLAIM-240/0/value",
-          "evidence_scope": "registered_claim_value_not_independently_recomputed",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 0.0,
-          "rtol": 0.0
-        },
-        {
-          "literal_id": "2.9e-7#1",
-          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
-          "json_pointer": "/closure/maximum_reference_work_energy_residual_j",
-          "evidence_scope": "local_json_value",
-          "scale": 1.0,
-          "offset": 0.0,
-          "atol": 5.000001e-09,
-          "rtol": 0.0
-        }
-      ]
-    },
-    {
-      "candidate_ids": [
-        "PD-CAND-832e7c9916653440",
-        "PD-CAND-50a3171488967d1a",
-        "PD-CAND-367561442ab024a8",
-        "PD-CAND-3af40323c0ff313e",
-        "PD-CAND-7ff19b66654551aa",
-        "PD-CAND-788e4fc5a7ff1dc5",
-        "PD-CAND-9da5c12ad10a77c9",
-        "PD-CAND-0044f981df612835",
-        "PD-CAND-5b93ad1d66007a40"
-      ],
-      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
-      "adjudication_outcome": "supported",
-      "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:3",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:11",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:20",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:28",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:14",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:24",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:31",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:40",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:47"
-      ],
-      "evidence_artifacts": [
-        "docs/research/proximal_distal_energy_transfer/COMPANION_WORKBENCH.md",
-        "docs/research/proximal_distal_energy_transfer/release_manifest.json"
-      ],
-      "competing_explanations": [
-        "finite model scope",
-        "parameter choice",
-        "numerical implementation"
-      ],
-      "negative_controls": [
-        "exact rerun",
-        "geometry control",
-        "closure and provenance validation"
-      ],
-      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
-      "reviewer": "Codex technical audit",
-      "last_verified_on": "2026-08-13",
-      "claim_id": "PD-CLAIM-241",
-      "statement": "The companion workbench is exploratory and the open-resource bundle is provenance infrastructure: scientific authority remains the scripted, pinned, fail-closed evidence release rather than either interface or repository branding.",
-      "classification": "open_resource_and_exploratory_interface_boundary",
-      "published_status": "supported_as_release_governance",
-      "model_domain": "Provider-pinned PyQt/React exploration and hash-pinned static evidence bundle.",
-      "uncertainty_boundary": "Interface availability and checksums do not validate physical claims or substitute for governed human data.",
-      "falsifier": "Interactive output is promoted as publication authority, provider identity drifts, or bundle validation permits artifact drift."
-    },
-    {
       "claim_id": "PD-CLAIM-321",
       "candidate_ids": [
         "PD-CAND-b0db20cffe7edea1",
@@ -33147,6 +32764,616 @@
       "adjudication": "All registered same-state closure, pathway, scaling, corruption, and native-operator gates pass; interpretation remains pointwise.",
       "reviewer": "Codex technical audit",
       "last_verified_on": "2026-08-27"
+    },
+    {
+      "claim_id": "PD-CLAIM-330",
+      "candidate_ids": [
+        "PD-CAND-8e4bfff39eeef6cc",
+        "PD-CAND-3eb949059db928bd",
+        "PD-CAND-86c909985053d788"
+      ],
+      "statement": "A preregistered elastic--perfectly-plastic distributed-grip comparator retains tangential state, Coulomb radial return, slip/opening/projection dissipation, and separate passive-energy and operator-coupling ledgers across the registered matrix.",
+      "classification": "stateful_distributed_grip_design_and_execution",
+      "published_status": "executed_with_disclosed_runtime_amendment",
+      "audit_status": "stateful_distributed_grip_campaign_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:213",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:225",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_smoke/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_stateful_distributed_grip_falsification.pdf",
+        "scripts/research/proximal_distal_energy/articulated_stateful_friction.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_smoke_evaluator.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_smoke_launcher.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_summary.py",
+        "scripts/research/proximal_distal_energy/make_stateful_distributed_figure.py",
+        "tests/research/test_articulated_stateful_distributed_grip.py",
+        "tests/research/test_articulated_stateful_distributed_forward.py",
+        "tests/research/test_articulated_stateful_summary.py",
+        "tests/research/test_make_stateful_distributed_figure.py"
+      ],
+      "model_domain": "One synthetic articulated source state at 0.12 seconds, nine stateful distributed-grip variants, three time steps, a five-millisecond horizon, and two registered native engines. Twenty-seven MuJoCo cases completed; twenty-seven Pinocchio cases were typed unavailable.",
+      "uncertainty_boundary": "The comparator is not calibrated skin, finger, tendon, neural, shaft, ground, equipment, or human contact, and only one source state and a five-millisecond horizon were evaluated.",
+      "competing_explanations": [
+        "operator-split coupling error rather than physical dissipation",
+        "synthetic preload release rather than measured tissue state",
+        "five-millisecond transient rather than delivery behavior",
+        "one source state rather than a geometry or participant distribution",
+        "unmatched active constraints rather than a slack benefit"
+      ],
+      "negative_controls": [
+        "frictionless killswitch",
+        "low-friction slip probe",
+        "high-friction inactive-cap control",
+        "low and high tangential stiffness",
+        "zero preload",
+        "complete source-velocity reversal",
+        "fully open contact probe",
+        "three-resolution passive-energy and coupling-work refinement",
+        "typed native-engine unavailability retained as a failed promotion gate"
+      ],
+      "falsifier": "The plan, source state, variants, thresholds, operator split, or retained unavailable execution differs from the published contract.",
+      "adjudication": "The executed outcomes, including the two frozen refinement failures and unavailable native parity, are retained without threshold changes or human, anatomical, equipment, or coaching promotion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "claim_id": "PD-CLAIM-331",
+      "candidate_ids": [
+        "PD-CAND-cc8a3a122d4643e8",
+        "PD-CAND-45b26240d460559f",
+        "PD-CAND-86c909985053d788"
+      ],
+      "statement": "All nine completed MuJoCo variants show contracting passive-energy defect, while the frictionless preload-release and low-friction slip variants fail the frozen coupling-work refinement gate; Pinocchio parity is unavailable and promotion remains false.",
+      "classification": "stateful_distributed_grip_fail_closed_result",
+      "published_status": "promotion_withheld_for_refinement_and_native_parity",
+      "audit_status": "stateful_distributed_grip_campaign_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:238",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:257",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_smoke/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_stateful_distributed_grip_falsification.pdf",
+        "scripts/research/proximal_distal_energy/articulated_stateful_friction.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_smoke_evaluator.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_smoke_launcher.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_summary.py",
+        "scripts/research/proximal_distal_energy/make_stateful_distributed_figure.py",
+        "tests/research/test_articulated_stateful_distributed_grip.py",
+        "tests/research/test_articulated_stateful_distributed_forward.py",
+        "tests/research/test_articulated_stateful_summary.py",
+        "tests/research/test_make_stateful_distributed_figure.py"
+      ],
+      "model_domain": "One synthetic articulated source state at 0.12 seconds, nine stateful distributed-grip variants, three time steps, a five-millisecond horizon, and two registered native engines. Twenty-seven MuJoCo cases completed; twenty-seven Pinocchio cases were typed unavailable.",
+      "uncertainty_boundary": "The result is a one-state short-horizon software and model diagnostic; speed differences are not matched delivery effects or human evidence.",
+      "competing_explanations": [
+        "operator-split coupling error rather than physical dissipation",
+        "synthetic preload release rather than measured tissue state",
+        "five-millisecond transient rather than delivery behavior",
+        "one source state rather than a geometry or participant distribution",
+        "unmatched active constraints rather than a slack benefit"
+      ],
+      "negative_controls": [
+        "frictionless killswitch",
+        "low-friction slip probe",
+        "high-friction inactive-cap control",
+        "low and high tangential stiffness",
+        "zero preload",
+        "complete source-velocity reversal",
+        "fully open contact probe",
+        "three-resolution passive-energy and coupling-work refinement",
+        "typed native-engine unavailability retained as a failed promotion gate"
+      ],
+      "falsifier": "A reproduced checkpoint changes a registered status or residual, a failed ratio is suppressed or relabeled, unavailable parity is treated as agreement, or promotion becomes true without a prospective passing campaign.",
+      "adjudication": "The executed outcomes, including the two frozen refinement failures and unavailable native parity, are retained without threshold changes or human, anatomical, equipment, or coaching promotion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "claim_id": "PD-CLAIM-332",
+      "candidate_ids": [
+        "PD-CAND-8e4bfff39eeef6cc",
+        "PD-CAND-45b26240d460559f",
+        "PD-CAND-86c909985053d788"
+      ],
+      "statement": "The stateful campaign does not establish that opening, preload removal, friction, stick--slip behavior, or slack creates clubhead speed or identifies a beneficial human strategy.",
+      "classification": "stateful_distributed_grip_inference_boundary",
+      "published_status": "explicitly_bounded",
+      "audit_status": "stateful_distributed_grip_campaign_checked",
+      "adjudication_outcome": "supported",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:213",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:257",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_plan.json",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_smoke/summary.json",
+        "docs/research/proximal_distal_energy_transfer/figures/fig_stateful_distributed_grip_falsification.pdf",
+        "scripts/research/proximal_distal_energy/articulated_stateful_friction.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_distributed_grip.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_distributed_forward.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_smoke_evaluator.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_smoke_launcher.py",
+        "scripts/research/proximal_distal_energy/articulated_stateful_summary.py",
+        "scripts/research/proximal_distal_energy/make_stateful_distributed_figure.py",
+        "tests/research/test_articulated_stateful_distributed_grip.py",
+        "tests/research/test_articulated_stateful_distributed_forward.py",
+        "tests/research/test_articulated_stateful_summary.py",
+        "tests/research/test_make_stateful_distributed_figure.py"
+      ],
+      "model_domain": "One synthetic articulated source state at 0.12 seconds, nine stateful distributed-grip variants, three time steps, a five-millisecond horizon, and two registered native engines. Twenty-seven MuJoCo cases completed; twenty-seven Pinocchio cases were typed unavailable.",
+      "uncertainty_boundary": "Matched work, load, delivery, shaft and ground coupling, subject-specific tissue, governed bilateral wrench data, and participant-held-out outcomes remain open.",
+      "competing_explanations": [
+        "operator-split coupling error rather than physical dissipation",
+        "synthetic preload release rather than measured tissue state",
+        "five-millisecond transient rather than delivery behavior",
+        "one source state rather than a geometry or participant distribution",
+        "unmatched active constraints rather than a slack benefit"
+      ],
+      "negative_controls": [
+        "frictionless killswitch",
+        "low-friction slip probe",
+        "high-friction inactive-cap control",
+        "low and high tangential stiffness",
+        "zero preload",
+        "complete source-velocity reversal",
+        "fully open contact probe",
+        "three-resolution passive-energy and coupling-work refinement",
+        "typed native-engine unavailability retained as a failed promotion gate"
+      ],
+      "falsifier": "Any biological, equipment, coaching, safety, timing-economy, or slack-benefit claim is attributed to this synthetic five-millisecond campaign alone.",
+      "adjudication": "The executed outcomes, including the two frozen refinement failures and unavailable native parity, are retained without threshold changes or human, anatomical, equipment, or coaching promotion.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-28"
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-3f24b7bec1a13566",
+        "PD-CAND-3c07c3b67ea18ea3",
+        "PD-CAND-22fff2ffb5e930ab"
+      ],
+      "adjudication_outcome": "supported",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:287",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:303",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:311"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+        "scripts/research/proximal_distal_energy/rotating_base_two_hand.py"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-235",
+      "statement": "The rotating-base tier is a seven-coordinate, four-constraint planar mechanism with finite torso inertia, separated hand reactions, projected position/velocity closure, and a checked bilateral contact-power identity.",
+      "classification": "rotating_base_model_and_constraint_contract",
+      "published_status": "supported_at_declared_model_tier",
+      "model_domain": "Finite-inertia planar torso, two arms, separated grips, and compliant club surrogate.",
+      "uncertainty_boundary": "The coordinates are mechanism coordinates, not anatomical thorax, scapula, or shoulder observables.",
+      "falsifier": "Constraint rank, closure, action-reaction, or bilateral power identity fails."
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-91a57be070bd4382",
+        "PD-CAND-ce7dfe2f88c50b9e",
+        "PD-CAND-6a547198e8748c41",
+        "PD-CAND-37da957d8de007e5",
+        "PD-CAND-0b6cbdaa32c9dc7c",
+        "PD-CAND-4c9593273e19f5a6"
+      ],
+      "adjudication_outcome": "supported",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:322",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:332",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:336",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:348",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:357",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:362"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-236",
+      "statement": "Thirteen of 18 rotating-base cases pass the registered load/closure envelope; torso rate correlates with delivery speed at r=0.604 and braking work at r=0.273, while the matching rule materially changes the speed/braking conclusion.",
+      "classification": "rotating_base_grid_association_and_matching_sensitivity",
+      "published_status": "supported_for_registered_deterministic_grid",
+      "model_domain": "Eighteen deterministic combinations of three initial torso rates, two matching rules, and three torso commands.",
+      "uncertainty_boundary": "Finite-grid associations are not causal effects, population estimates, or universal strategy rules.",
+      "falsifier": "Committed rows do not reproduce counts, correlations, or the stated matching-rule contrast.",
+      "numeric_evidence": [
+        {
+          "literal_id": "18#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/attempted_case_count",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.604#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-236/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "0.273#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-236/1/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-6f8bc79328b9bb51",
+        "PD-CAND-ee8b3d4f4aeb19b1"
+      ],
+      "adjudication_outcome": "supported",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:374",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:385"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-237",
+      "statement": "Exact 30 ms same-state killswitches give nonmonotonic channel effects: continued torso and wrist commands add 1.223 and 1.818 m/s, whereas continued bilateral-arm commands reduce delivery speed by 1.364 m/s in the registered program.",
+      "classification": "rotating_base_same_state_command_intervention",
+      "published_status": "supported_for_one_registered_program",
+      "model_domain": "One exact same-state branch within the declared rotating-base mechanism.",
+      "uncertainty_boundary": "A channel continuation effect is conditional on state, commands, model, and endpoint; it is not an anatomical or coaching effect.",
+      "falsifier": "Pre-branch states differ or branch recomputation reverses the recorded channel differences.",
+      "numeric_evidence": [
+        {
+          "literal_id": "30#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/same_state_killswitch/branch_time_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 0.5000001,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.223#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/same_state_killswitch/channels/torso/delivery_speed_difference_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.818#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/same_state_killswitch/channels/bilateral_wrist/delivery_speed_difference_m_s",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "1.364#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-237/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-53f5d0b5a5122e3b",
+        "PD-CAND-b9f1bae7492c6c45"
+      ],
+      "adjudication_outcome": "supported",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:389",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch03d_shoulder_velocity_transfer.qmd:401"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-238",
+      "statement": "Coincident grips remove the rotating-base force couple exactly and signed arm reversal flips +1.351 to -1.351 N m; the supported conclusion is conditional reaction-work geometry, not scapular control, safe loading, or human technique.",
+      "classification": "rotating_base_geometry_controls_and_scope",
+      "published_status": "supported_with_explicit_human_boundary",
+      "model_domain": "Algebraic geometry controls and registered planar sensitivity cases.",
+      "uncertainty_boundary": "Signed arm reversal is an algebraic control, not a feasible grip exchange; human magnitude and strategy are unmeasured.",
+      "falsifier": "Couple survives coincident grips, fails signed reversal, or the paper makes a physiological prescription.",
+      "numeric_evidence": [
+        {
+          "literal_id": "+1.351#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/negative_controls/baseline_separated_grip_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "-1.351#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/rotating_base_torso_velocity_study.json",
+          "json_pointer": "/negative_controls/reversed_grip_couple_nm",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0005000000999999999,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-4908f1e4a94179d1",
+        "PD-CAND-754200ff072e2f67",
+        "PD-CAND-0e0d81483621513a",
+        "PD-CAND-78075195f3a5c55b",
+        "PD-CAND-c6851af22838909b",
+        "PD-CAND-5a5705ae572a585b",
+        "PD-CAND-4025ee9f2eefeddb",
+        "PD-CAND-1a8e629a487d47b1",
+        "PD-CAND-894295e8a2324065",
+        "PD-CAND-e2e0449dd1d086b4",
+        "PD-CAND-a345790d750e6b57",
+        "PD-CAND-64c1e1f03ff86625"
+      ],
+      "adjudication_outcome": "supported",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:17",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:24",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:37",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:47",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:55",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:57",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:65",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:78",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:89",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:98",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:105"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-239",
+      "statement": "The isolated Euler-Bernoulli beam experiment recovers a declared synthetic modulus and tip mass from two synthetic modes and demonstrates mesh convergence; it is structural verification rather than equipment identification.",
+      "classification": "synthetic_beam_identification_and_convergence",
+      "published_status": "supported_for_synthetic_reference_only",
+      "model_domain": "Declared tapered axisymmetric Euler-Bernoulli beam with synthetic modal observations.",
+      "uncertainty_boundary": "No measured shaft modal data, EI profile, boundary condition, or human load enters the inference.",
+      "falsifier": "Synthetic truth or mesh convergence fails reproduction, or the result is presented as calibrated equipment evidence."
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-4908f1e4a94179d1",
+        "PD-CAND-0e0d81483621513a",
+        "PD-CAND-1a8e629a487d47b1",
+        "PD-CAND-6f754c2efe8bb75b",
+        "PD-CAND-894295e8a2324065",
+        "PD-CAND-202051f896defe8a",
+        "PD-CAND-e2e0449dd1d086b4",
+        "PD-CAND-a345790d750e6b57",
+        "PD-CAND-51dfce3188daba5e"
+      ],
+      "adjudication_outcome": "supported",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:5",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:24",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:65",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:72",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:78",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:80",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:89",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:98",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06bb_shaft_beam_reference.qmd:100"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
+        "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-240",
+      "statement": "The isolated one-mode beam closely matches the six-mode slow-pulse response but its short-pulse RMS discrepancy is 0.0413 mm, about 60 times the slow-pulse discrepancy; declared work-energy residuals remain below 2.9e-7 J.",
+      "classification": "synthetic_beam_excitation_and_energy_closure",
+      "published_status": "supported_for_two_declared_load_histories",
+      "model_domain": "One- versus six-mode response under the same two synthetic force/moment histories.",
+      "uncertainty_boundary": "Peak agreement can conceal history error; two loads do not establish equipment-wide truncation validity.",
+      "falsifier": "Reproduction changes the discrepancy ratio materially or violates declared energy closure.",
+      "numeric_evidence": [
+        {
+          "literal_id": "0.0413#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
+          "json_pointer": "/comparison/high_frequency_tip_rms_discrepancy_m",
+          "evidence_scope": "local_json_value",
+          "scale": 1000.0,
+          "offset": 0.0,
+          "atol": 5.0000009999999996e-05,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "60#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json",
+          "json_pointer": "/claims/PD-CLAIM-240/0/value",
+          "evidence_scope": "registered_claim_value_not_independently_recomputed",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 0.0,
+          "rtol": 0.0
+        },
+        {
+          "literal_id": "2.9e-7#1",
+          "artifact": "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json",
+          "json_pointer": "/closure/maximum_reference_work_energy_residual_j",
+          "evidence_scope": "local_json_value",
+          "scale": 1.0,
+          "offset": 0.0,
+          "atol": 5.000001e-09,
+          "rtol": 0.0
+        }
+      ]
+    },
+    {
+      "candidate_ids": [
+        "PD-CAND-832e7c9916653440",
+        "PD-CAND-50a3171488967d1a",
+        "PD-CAND-367561442ab024a8",
+        "PD-CAND-3af40323c0ff313e",
+        "PD-CAND-7ff19b66654551aa",
+        "PD-CAND-788e4fc5a7ff1dc5",
+        "PD-CAND-9da5c12ad10a77c9",
+        "PD-CAND-0044f981df612835",
+        "PD-CAND-5b93ad1d66007a40"
+      ],
+      "adjudication_outcome": "supported",
+      "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
+      "source_locations": [
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:3",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:11",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:20",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch05a_interactive_workbench.qmd:28",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:14",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:24",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:31",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:40",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:47"
+      ],
+      "evidence_artifacts": [
+        "docs/research/proximal_distal_energy_transfer/COMPANION_WORKBENCH.md",
+        "docs/research/proximal_distal_energy_transfer/release_manifest.json"
+      ],
+      "competing_explanations": [
+        "finite model scope",
+        "parameter choice",
+        "numerical implementation"
+      ],
+      "negative_controls": [
+        "exact rerun",
+        "geometry control",
+        "closure and provenance validation"
+      ],
+      "adjudication": "Reconciled to committed machine evidence with the stated model and human boundaries retained.",
+      "reviewer": "Codex technical audit",
+      "last_verified_on": "2026-08-13",
+      "claim_id": "PD-CLAIM-241",
+      "statement": "The companion workbench is exploratory and the open-resource bundle is provenance infrastructure: scientific authority remains the scripted, pinned, fail-closed evidence release rather than either interface or repository branding.",
+      "classification": "open_resource_and_exploratory_interface_boundary",
+      "published_status": "supported_as_release_governance",
+      "model_domain": "Provider-pinned PyQt/React exploration and hash-pinned static evidence bundle.",
+      "uncertainty_boundary": "Interface availability and checksums do not validate physical claims or substitute for governed human data.",
+      "falsifier": "Interactive output is promoted as publication authority, provider identity drifts, or bundle validation permits artifact drift."
     }
   ]
 }

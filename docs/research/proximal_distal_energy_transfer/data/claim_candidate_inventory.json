@@ -1,9 +1,9 @@
 {
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper_source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-  "source_digest": "71a28cc854e86abf8d1cc72812cbd0af424807a9fe7d1f86869ec4228aaa570f",
+  "source_digest": "82f8013b8764705195e5886c418f90150023a363c07d6a09d7f497e6fcd530bd",
   "source_count": 38,
-  "candidate_count": 1180,
+  "candidate_count": 1185,
   "candidates": [
     {
       "candidate_id": "PD-CAND-54741e44f52ea561",
@@ -17970,12 +17970,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-b927f3a0c6a4132b",
+      "candidate_id": "PD-CAND-86c909985053d788",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
       "line_start": 14,
       "line_end": 20,
-      "text": "| How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. | | Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile audit rejects prescribed states that miss closure by 0.171–0.616 m; a bounded follow-up closes all 234 registered reduced-tree configurations. The articulated distributed-grip and passive-shaft tiers advance twelve selected states through 50 ms. A finite-base extension then adds translation and intrinsic free moment; all numerical gates pass, but none of 384 coupled--fixed cells meets the primary load--total-work match. | Calibrate grip, shaft, unilateral foot contact, and force-plate support; propagate initialization and parameter uncertainty; then repeat the horizon, geometry, killswitch, matched-outcome, and held-out human bilateral-wrench tests. | | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. | | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. | | Is a strategy self-correcting? | Not established. The earlier screen produced 13–20% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. | | Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic. A 216-program common-time screen yields 46 disjoint work/load-matched pairs with 20 favorable and 26 adverse higher-rate outcomes. An identical-state acceleration sweep also reverses the club-acceleration response before impact. | Full-delivery-state-matched forward rate and acceleration interventions, extended across spatial and subject-scaled models and held-out participants. | | Is slack beneficial or necessary? | Partly answered at a synthetic constitutive tier. Five declared classes have been exercised separately, but no global benefit, necessity, intentionality, or delivery advantage is supported. One scalar output nearly confounds contact disengagement with the biological-compliance surrogate. | Embed one class at a time in moving-base, two-hand, and spatial delivery models under matched state, work, and load; add stateful backlash and subject-specific tissue models; acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements. |",
-      "text_sha256": "0928ef5bdeb5f140cd8c30733f4330a8e5d2c60249db52a72d11b7168806d988",
+      "text": "| How much transfer is drift-mediated? | Conditional on the observable, coordinate and frame, event window, model, and decomposition. Signed drift shares may exceed 100% when control opposes the pathway; pointwise attribution is not forward persistence. | A common acceleration/force/impulse/power/work ledger across tiers, same-state killswitches, uncertainty propagation, and participant-held-out bilateral-wrench evaluation. | | Which geometry matters? | Relative-link and force–velocity angles create exact sine/cosine gates; bilateral couple varies with signed grip separation and transverse differential force. Existing moving-base and two-engine spatial controls reproduce coincident-grip zeros and moment-arm reversals. A six-profile audit rejects prescribed states that miss closure by 0.171–0.616 m; a bounded follow-up closes all 234 registered reduced-tree configurations. The articulated distributed-grip and passive-shaft tiers advance twelve selected states through 50 ms. A finite-base extension then adds translation and intrinsic free moment; all numerical gates pass, but none of 384 coupled--fixed cells meets the primary load--total-work match. | Calibrate grip, shaft, unilateral foot contact, and force-plate support; propagate initialization and parameter uncertainty; then repeat the horizon, geometry, killswitch, matched-outcome, and held-out human bilateral-wrench tests. | | Which timing patterns matter? | Early distal release changes the available geometry; proximal rate, acceleration, braking, and release timing interact nonmonotonically. “Casting” is not one universal event. | Factorial interventions on proximal acceleration, distal release, and braking under matched state and work, with multiple preregistered casting definitions and adverse-load tests. | | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. | | Is a strategy self-correcting? | Not established. The earlier screen produced 13–20% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. | | Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic. A 216-program common-time screen yields 46 disjoint work/load-matched pairs with 20 favorable and 26 adverse higher-rate outcomes. An identical-state acceleration sweep also reverses the club-acceleration response before impact. | Full-delivery-state-matched forward rate and acceleration interventions, extended across spatial and subject-scaled models and held-out participants. | | Is slack beneficial or necessary? | Partly answered at synthetic constitutive and short-horizon forward tiers. Five declared classes have been exercised separately. A stateful distributed-grip comparator now retains elastic tangential displacement, Coulomb slip, opening, and dissipation, but fails two registered refinement cases and lacks native cross-engine parity. No global benefit, necessity, intentionality, or delivery advantage is supported. | Extend the stateful law through matched work, load, and delivery; resolve the failed refinement and native parity gates without changing their thresholds; add subject-specific tissue and shaft/ground coupling; acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements. |",
+      "text_sha256": "bd29914c0078cff2f787d4e94463eb66b91a4abd742833690499a9cd7dda728e",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,
@@ -18307,10 +18307,90 @@
       "review_state": "unadjudicated"
     },
     {
+      "candidate_id": "PD-CAND-8e4bfff39eeef6cc",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 213,
+      "line_end": 223,
+      "text": "The next preregistered step replaces the memoryless tangential law with an elastic--perfectly-plastic engineering comparator. Each grip station retains elastic tangential displacement, applies a radial return at the Coulomb cap, accumulates plastic dissipation during slip, releases stored interface energy on opening, and carries projection loss when the local tangent plane changes. This is a stateful contact algorithm, not a finger, skin, tendon, neural, or anatomical model. The timestamp-explicit forward integrator evaluates left-node kinematics, advances the interface to the end of the increment, and then applies semi-implicit mechanics. Its energy and coupling-work defects are therefore separate numerical observables rather than terms silently absorbed into physical dissipation.",
+      "text_sha256": "38920e58abad6c1ca42909091cc1b87d08a3688b325227f409f198041be63a50",
+      "citation_keys": [],
+      "has_numeric_content": false,
+      "has_assertive_language": false,
+      "priority_score": 0,
+      "triage_flags": [],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-3eb949059db928bd",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 225,
+      "line_end": 236,
+      "text": "The prospective matrix binds one source state, nine variants, three time steps (1.0, 0.5, and 0.25 ms), and MuJoCo and Pinocchio, for 54 registered cases. The first execution produced no trajectories: all 54 cases were retained as unavailable after a Windows native-library load-order failure and an absent Pinocchio module. The disclosed runtime amendment changed only the native preload launcher. The qualified execution completed all 27 MuJoCo cases, retained all 27 Pinocchio cases as typed unavailable, and had no execution failures. The exact plan, amendment, and execution identities are recorded in [`articulated_stateful_distributed_plan.json`](../data/articulated_stateful_distributed_plan.json), and all atomic checkpoints plus the deterministic aggregate are published in [`articulated_stateful_distributed_smoke/`](../data/articulated_stateful_distributed_smoke/).",
+      "text_sha256": "48a7a77b3b7097d81bdf2394f152ef26475a6192b5672060a74540be9ed4d1fe",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-cc8a3a122d4643e8",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 238,
+      "line_end": 248,
+      "text": "All nine MuJoCo variants show decreasing passive-energy defect under time-step refinement. The frozen coupling-work refinement gate nevertheless fails for the frictionless preload-release control (ratios 1.000 and 1.000) and for the low-friction slip probe at the finest comparison (0.834 versus the registered 0.800 ceiling). The nominal ratios are 0.558 and 0.528. High friction is numerically identical to nominal because the nominal trajectory remains below the Coulomb cap; increasing an inactive cap cannot identify a friction effect. At the finest step, the nominal family contains 80 elastic-stick and 40 open station intervals, the frictionless control contains 80 slip and 40 open intervals, the low-friction probe contains 68 slip, 12 stick, and 40 open intervals, and the opening probe is open in all 120 intervals.",
+      "text_sha256": "390e56cbaf63cc03cf05612cb9f51645845cf255d1e94bc730f1cc7bc51907d2",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-e444a0c1712aa4eb",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 250,
+      "line_end": 255,
+      "text": "![Stateful Distributed-Grip Falsification. Passive-energy defects contract in all nine MuJoCo variants, but the frictionless preload-release and low-friction slip cases fail the frozen coupling-work refinement criterion. Contact-regime counts and fine-step speed differences are short-horizon engineering-model diagnostics. Pinocchio was unavailable, so promotion and cross-engine parity are withheld.](figures/fig_stateful_distributed_grip_falsification.pdf){#fig-stateful-distributed-grip-falsification width=100%}",
+      "text_sha256": "ad9d3d083e52aabad153e7ba850300d6e6bd512a126843c7c86b9bbe41486234",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": false,
+      "priority_score": 2,
+      "triage_flags": [
+        "numeric"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
+      "candidate_id": "PD-CAND-45b26240d460559f",
+      "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
+      "line_start": 257,
+      "line_end": 267,
+      "text": "The separately integrated fine-step variants differ from nominal clubhead speed by -0.02149 to +0.00834 m/s over only 5 ms. Those differences are useful software and model-sensitivity diagnostics, but they are neither a matched delivery comparison nor evidence that opening, preload removal, friction, or ``slack'' creates speed. In particular, the opening probe changes the active constraint and releases stored interface energy; its positive short-horizon difference cannot be interpreted as a beneficial strategy. The campaign is therefore a successful falsification advance precisely because it exposes where the algorithm converges, where its registered coupling ledger does not, and which engine evidence is missing. Promotion remains false until the refinement and native-parity failures are resolved prospectively.",
+      "text_sha256": "acb0a7a78a4d6931bc47bdc10e17881ba560e19a3d58d89023ec7a749ea1a658",
+      "citation_keys": [],
+      "has_numeric_content": true,
+      "has_assertive_language": true,
+      "priority_score": 4,
+      "triage_flags": [
+        "numeric",
+        "assertive_language"
+      ],
+      "review_state": "unadjudicated"
+    },
+    {
       "candidate_id": "PD-CAND-bf1c55e354cd8bd6",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 211,
-      "line_end": 221,
+      "line_start": 269,
+      "line_end": 279,
       "text": "The following articulated shaft atlas then retains the five-fiber grip and adds rigid, bending-only, torsion-only, and coupled passive-club branches. Its 384 trajectories pass the registered 0.25/0.125 ms work--energy, small-deformation, killswitch, and native-engine gates through 50 ms; 1.0 and 0.50 ms torsion probes fail closed outside the declared linear domain. Of 384 coupled--rigid cells, 126 meet the predeclared 5% peak-load and dissipated-work match. Their final-speed differences include 82 negative and 44 positive values. Passive shaft response is therefore a state-dependent pathway in this synthetic model, not a general speed advantage. Equipment calibration, higher mode adequacy under fast loading, ground work, impact, and human outcomes remain open.",
       "text_sha256": "58138498bc4f976262d33fd7eff9e80abfef11ce302ec13c40c2a6ba9e4ed443",
       "citation_keys": [],
@@ -18326,8 +18406,8 @@
     {
       "candidate_id": "PD-CAND-49c472fa030a2018",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 225,
-      "line_end": 232,
+      "line_start": 283,
+      "line_end": 290,
       "text": "These experiments are designed to make the framework easier to disprove. Synthetic studies can reject a mechanism within a declared model and can qualify software, but they cannot establish a coaching instruction or human control strategy. The participant-held-out stage remains blocked until a governed dataset contains synchronized full-body and club kinematics, force plates, bilateral six-axis grip wrenches, grip/contact state, and impact outcomes. Substituting synthetic traces would erase the question the human stage is intended to answer.",
       "text_sha256": "4ccf1e49bbec9741ca71479ff1bcd5c917d918321efc621f105c4dfaa88a832d",
       "citation_keys": [],
@@ -18343,8 +18423,8 @@
     {
       "candidate_id": "PD-CAND-cfaa95a682ee0f72",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 236,
-      "line_end": 246,
+      "line_start": 294,
+      "line_end": 304,
       "text": "The handwritten agenda contains nine testable points after its nested timing examples are separated: drift contribution; geometry; casting; early-downswing proximal acceleration; segment release; timing precision; self-correction and noise robustness; proximal-velocity maximization; and slack. The executable readiness audit preserves all nine rather than allowing a broad question to hide an unplanned subquestion. Eight presently have a model-bounded answer or a negative general-rule result. The unresolved point is the broader timing-precision claim: the registered planar comparison is adverse to a state-trigger advantage, but spatial and human timing demand remain untested. All nine have a registered model experiment and a participant-held-out human stage, but the latter remains blocked by the bilateral-wrench data boundary.",
       "text_sha256": "a1d1f38b384b153a88cc42cbdd948acb70b9e2bc763b767b0bb6831e7742b636",
       "citation_keys": [],
@@ -18359,8 +18439,8 @@
     {
       "candidate_id": "PD-CAND-1746f6ac68698fb0",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 248,
-      "line_end": 252,
+      "line_start": 306,
+      "line_end": 310,
       "text": "The machine-readable authority is [`momentum_transfer_readiness_audit.json`](../data/momentum_transfer_readiness_audit.json). It is regenerated from the question and experiment registries and validated in CI. A missing source point, missing falsifier, invalid evidence status, absent human stage, or experiment linked to the wrong question is a hard failure.",
       "text_sha256": "47282d21f66788a8eb13fde3b779c6e33d714b467a56eb7e348df34df1781855",
       "citation_keys": [],
@@ -18376,8 +18456,8 @@
     {
       "candidate_id": "PD-CAND-51f73ab4ac4d57de",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 259,
-      "line_end": 259,
+      "line_start": 317,
+      "line_end": 317,
       "text": "| Source Point | Present Scientific State | Next Decisive Model Test |",
       "text_sha256": "75e8a48a9cf1821ef7298bb2ce42a528654e8b70dda3bacdcba079514ff71ca8",
       "citation_keys": [],
@@ -18390,8 +18470,8 @@
     {
       "candidate_id": "PD-CAND-da26b9373cd3a5a5",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 261,
-      "line_end": 269,
+      "line_start": 319,
+      "line_end": 327,
       "text": "| Drift contribution | Partly answered; observable- and window-specific only | Common cross-tier estimand table with uncertainty | | Geometry dependencies | Partly answered through reduced spatial controls; the first subject-scaled audit rejects contact feasibility of the prescribed common states | Closed-contact inverse kinematics, calibrated contact, and independent forward integration | | Casting | Partly answered: no single event definition is defensible; human causal interpretation remains open | Multiple preregistered event definitions under matched controls | | Early proximal acceleration | Partly answered pointwise; nonmonotonic | Forward factorial intervention with full-state/work/load matching | | Segment release | Partly answered; objective- and constraint-dependent | Viable-region mapping across proximal and distal control families | | Timing precision | Unresolved beyond an adverse planar result; a state-trigger volume advantage is not supported in the registered planar tier | Continuous common-phase spatial and subject-scaled comparison | | Self-correction and noise robustness | Partly answered negatively at the registered planar tier; no sustained recovery in 60 cases | Continuous attraction regions with identified observers and external-contact loads | | Proximal-velocity maximization | Not supported as a general planar rule | Causal full-delivery-state-matched spatial dose response | | Slack | Partly answered at a synthetic constitutive tier; no global benefit and one-channel class identification is not established | One-class-at-a-time moving-base and spatial delivery tests with stateful backlash, subject-specific tissue, and independent measurements |",
       "text_sha256": "d72373dd5b4e4ce819a6283590691a1b4763e0fba08421ff09dcfda28444d75f",
       "citation_keys": [],
@@ -18408,8 +18488,8 @@
     {
       "candidate_id": "PD-CAND-640befe2d6c188d2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd",
-      "line_start": 271,
-      "line_end": 273,
+      "line_start": 329,
+      "line_end": 331,
       "text": ": Readiness assessment for every point transcribed from the source agenda. “Partly answered” never denotes a human or coaching conclusion. {#tbl-momentum-source-readiness tbl-colwidths=\"24,36,40\"}",
       "text_sha256": "eb7b6114050db4ccd1d425eae391cb3807022d9d29a003141d5bed0b55ab6f9b",
       "citation_keys": [],
@@ -18755,12 +18835,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-7471a3296fbe4f2f",
+      "candidate_id": "PD-CAND-b0641d03e93755f7",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 4,
       "line_end": 4,
-      "text": "The current census contains 328 material claims. The normalized outcome applies only to each claim's declared estimand, model domain, and uncertainty boundary. A `supported` model-conditional claim is not thereby independently replicated, empirically validated, or converted into a human strategy recommendation.",
-      "text_sha256": "af81507429c125c6aa91e4f3521622eec33a1c61f2a82780a3d3e2a95efecde5",
+      "text": "The current census contains 331 material claims. The normalized outcome applies only to each claim's declared estimand, model domain, and uncertainty boundary. A `supported` model-conditional claim is not thereby independently replicated, empirically validated, or converted into a human strategy recommendation.",
+      "text_sha256": "72be5633ea20732df3adaeae6b344aadee250173d913f916c8a891c35fa9c4be",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18803,12 +18883,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-05707d54a6de45ec",
+      "candidate_id": "PD-CAND-b7ea1a1164b87356",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 12,
       "line_end": 14,
-      "text": "| `inconclusive` | 5 | | `supported` | 308 | | `untested` | 15 |",
-      "text_sha256": "bb191f36950ab315a22d6620c832fc0001f15e97b535279bf29be5fc0d20ca38",
+      "text": "| `inconclusive` | 5 | | `supported` | 311 | | `untested` | 15 |",
+      "text_sha256": "572ab3639fdc7954820654751e357988acc15851e27f26b34a0b03ce2468ca8b",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18849,12 +18929,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-5c439e1412704d16",
+      "candidate_id": "PD-CAND-20af63f5d2ff25b2",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 26,
       "line_end": 33,
-      "text": "| `bibliographic_record` | 3 | | `external_empirical_human` | 34 | | `external_methods_or_measurement` | 10 | | `external_modeling_or_simulation` | 15 | | `external_review_or_synthesis` | 10 | | `project_derivation_or_document` | 113 | | `project_executable_or_generated` | 299 | | `prospective_or_unexecuted` | 15 |",
-      "text_sha256": "57997cf748318745a1142cf55cfbfe62965bde4e985bc4e2c9cffdd0e57ca122",
+      "text": "| `bibliographic_record` | 3 | | `external_empirical_human` | 34 | | `external_methods_or_measurement` | 10 | | `external_modeling_or_simulation` | 15 | | `external_review_or_synthesis` | 10 | | `project_derivation_or_document` | 116 | | `project_executable_or_generated` | 302 | | `prospective_or_unexecuted` | 15 |",
+      "text_sha256": "0a7098237f7f3e86cb637bd09fa416020ad667e53b114b6acea1fb73406951e7",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18895,12 +18975,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-bd2c606b14e67b76",
+      "candidate_id": "PD-CAND-84d3386527bcbe32",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 41,
       "line_end": 43,
-      "text": "| `multiple_independent_external_support` | 20 | | `project_only` | 274 | | `single_independent_external_support` | 34 |",
-      "text_sha256": "1dfa3aff26421a8b6d41dbf85bbbd004999f8e8f8dcc9114fb6e074a5e093a0e",
+      "text": "| `multiple_independent_external_support` | 20 | | `project_only` | 277 | | `single_independent_external_support` | 34 |",
+      "text_sha256": "080eeb097d2b5644120680858f05fd427cfb55b0469d6c4bbe29d64995ce36c7",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18939,12 +19019,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-6c60f865c75a423f",
+      "candidate_id": "PD-CAND-c59bfe4254b7d64a",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 51,
       "line_end": 60,
-      "text": "| `articulated_spatial` | 35 | | `compliant_shaft` | 66 | | `cross_tier_synthesis` | 77 | | `declared_model_tier_unclassified` | 12 | | `finite_ground_or_base` | 16 | | `human_or_external_evidence` | 46 | | `planar_reduced` | 150 | | `spatial_reduced` | 76 | | `two_hand_or_bilateral` | 94 | | `uncertainty_or_control` | 10 |",
-      "text_sha256": "2ec71741b9b5c4542f2d6f56f8d3e22ae329f2547a5c7abe67024034953994fa",
+      "text": "| `articulated_spatial` | 38 | | `compliant_shaft` | 66 | | `cross_tier_synthesis` | 80 | | `declared_model_tier_unclassified` | 12 | | `finite_ground_or_base` | 16 | | `human_or_external_evidence` | 46 | | `planar_reduced` | 150 | | `spatial_reduced` | 76 | | `two_hand_or_bilateral` | 97 | | `uncertainty_or_control` | 10 |",
+      "text_sha256": "042772890107154c40f449b418f5c3c8aefdf28a57c25c52002abb6267c786be",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -18983,12 +19063,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-2e9522c0abcc2b2e",
+      "candidate_id": "PD-CAND-1191b12cde026193",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 68,
       "line_end": 76,
-      "text": "| `external_validation_open` | 1 | | `full_text_or_original_source_open` | 5 | | `governed_human_data_unavailable` | 11 | | `independent_reimplementation_open` | 12 | | `mixed_or_insufficient_evidence` | 5 | | `none_declared` | 284 | | `prospective_experiment_open` | 15 | | `statistical_reanalysis_or_replication_open` | 9 | | `systematic_review_open` | 2 |",
-      "text_sha256": "309383dd7a88ac0b1cb6621fbde8471d3b585108ab7872dbf480783ef548136e",
+      "text": "| `external_validation_open` | 1 | | `full_text_or_original_source_open` | 5 | | `governed_human_data_unavailable` | 11 | | `independent_reimplementation_open` | 12 | | `mixed_or_insufficient_evidence` | 5 | | `none_declared` | 287 | | `prospective_experiment_open` | 15 | | `statistical_reanalysis_or_replication_open` | 9 | | `systematic_review_open` | 2 |",
+      "text_sha256": "490785754d291bf6326e6bd573c9de410c1b91f67add4cc5ecac91807aa5f25b",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": false,
@@ -19027,12 +19107,12 @@
       "review_state": "unadjudicated"
     },
     {
-      "candidate_id": "PD-CAND-123f2ade588fd4b1",
+      "candidate_id": "PD-CAND-a0f5e79432f64e0c",
       "source_path": "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd",
       "line_start": 88,
       "line_end": 119,
-      "text": "| ch01 introduction | 2 | 0 / 2 / 0 | external support concentrated | | ch02 mechanics | 33 | 5 / 17 / 11 | mixed independence | | ch03 evidence | 14 | 1 / 10 / 3 | mixed independence | | ch03 interaction forces | 10 | 8 / 1 / 1 | mixed independence | | ch03b hand path attribution | 11 | 7 / 2 / 2 | mixed independence | | ch03ba coordinate force sources | 3 | 3 / 0 / 0 | project authored only | | ch03c ground reaction drift | 8 | 4 / 2 / 2 | mixed independence | | ch03d shoulder velocity transfer | 18 | 18 / 0 / 0 | project authored only | | ch04 counterfactual ensemble | 6 | 6 / 0 / 0 | project authored only | | ch04 counterfactuals | 5 | 4 / 0 / 1 | mixed independence | | ch05 two hand wrench | 21 | 21 / 0 / 0 | project authored only | | ch05a interactive workbench | 1 | 1 / 0 / 0 | project authored only | | ch05b forward two hand | 15 | 15 / 0 / 0 | project authored only | | ch06 shaft contributions | 15 | 15 / 0 / 0 | project authored only | | ch06b coupled base flex | 14 | 14 / 0 / 0 | project authored only | | ch06bb shaft beam reference | 2 | 2 / 0 / 0 | project authored only | | ch06bbb forward modal shaft | 7 | 7 / 0 / 0 | project authored only | | ch06bc torque allocation preload | 7 | 7 / 0 / 0 | project authored only | | ch06c spatial cross formulation | 44 | 44 / 0 / 0 | project authored only | | ch06ca articulated ground | 1 | 1 / 0 / 0 | project authored only | | ch06cb spatial cross tail | 6 | 6 / 0 / 0 | project authored only | | ch06cc spatial forward contact | 8 | 8 / 0 / 0 | project authored only | | ch06cd articulated attribution | 3 | 3 / 0 / 0 | project authored only | | ch06d uncertainty control | 10 | 10 / 0 / 0 | project authored only | | ch06e experimental protocol | 1 | 1 / 0 / 0 | project authored only | | ch06f open release | 2 | 2 / 0 / 0 | project authored only | | ch07 model ladder | 32 | 32 / 0 / 0 | project authored only | | ch07 results | 7 | 7 / 0 / 0 | project authored only | | ch07b frames biology engines | 5 | 5 / 0 / 0 | project authored only | | ch07c transmission robustness | 5 | 5 / 0 / 0 | project authored only | | ch08b momentum transfer questions | 10 | 10 / 0 / 0 | project authored only | | ch09 conclusions | 2 | 2 / 0 / 0 | project authored only |",
-      "text_sha256": "ae228a1aeb062674fedf03c34c2e0d13fe22e68cb51884ae71a85e901c3be512",
+      "text": "| ch01 introduction | 2 | 0 / 2 / 0 | external support concentrated | | ch02 mechanics | 33 | 5 / 17 / 11 | mixed independence | | ch03 evidence | 14 | 1 / 10 / 3 | mixed independence | | ch03 interaction forces | 10 | 8 / 1 / 1 | mixed independence | | ch03b hand path attribution | 11 | 7 / 2 / 2 | mixed independence | | ch03ba coordinate force sources | 3 | 3 / 0 / 0 | project authored only | | ch03c ground reaction drift | 8 | 4 / 2 / 2 | mixed independence | | ch03d shoulder velocity transfer | 18 | 18 / 0 / 0 | project authored only | | ch04 counterfactual ensemble | 6 | 6 / 0 / 0 | project authored only | | ch04 counterfactuals | 5 | 4 / 0 / 1 | mixed independence | | ch05 two hand wrench | 21 | 21 / 0 / 0 | project authored only | | ch05a interactive workbench | 1 | 1 / 0 / 0 | project authored only | | ch05b forward two hand | 15 | 15 / 0 / 0 | project authored only | | ch06 shaft contributions | 15 | 15 / 0 / 0 | project authored only | | ch06b coupled base flex | 14 | 14 / 0 / 0 | project authored only | | ch06bb shaft beam reference | 2 | 2 / 0 / 0 | project authored only | | ch06bbb forward modal shaft | 7 | 7 / 0 / 0 | project authored only | | ch06bc torque allocation preload | 7 | 7 / 0 / 0 | project authored only | | ch06c spatial cross formulation | 44 | 44 / 0 / 0 | project authored only | | ch06ca articulated ground | 1 | 1 / 0 / 0 | project authored only | | ch06cb spatial cross tail | 6 | 6 / 0 / 0 | project authored only | | ch06cc spatial forward contact | 8 | 8 / 0 / 0 | project authored only | | ch06cd articulated attribution | 3 | 3 / 0 / 0 | project authored only | | ch06d uncertainty control | 10 | 10 / 0 / 0 | project authored only | | ch06e experimental protocol | 1 | 1 / 0 / 0 | project authored only | | ch06f open release | 2 | 2 / 0 / 0 | project authored only | | ch07 model ladder | 32 | 32 / 0 / 0 | project authored only | | ch07 results | 7 | 7 / 0 / 0 | project authored only | | ch07b frames biology engines | 5 | 5 / 0 / 0 | project authored only | | ch07c transmission robustness | 5 | 5 / 0 / 0 | project authored only | | ch08b momentum transfer questions | 13 | 13 / 0 / 0 | project authored only | | ch09 conclusions | 2 | 2 / 0 / 0 | project authored only |",
+      "text_sha256": "40cf99a89fb4fcab4a2ccfc961f7f95f0174c79512afae45bcea87944519ba37",
       "citation_keys": [],
       "has_numeric_content": true,
       "has_assertive_language": true,

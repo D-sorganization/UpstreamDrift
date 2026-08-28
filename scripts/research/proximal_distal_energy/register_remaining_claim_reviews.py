@@ -211,6 +211,8 @@ def _assign_candidate_claims(candidate: dict[str, object]) -> tuple[str, ...]:
     path = str(candidate["source_path"])
     text = " ".join(str(candidate["text"]).split()).lower()
     name = Path(path).name
+    if name == "_claim_adjudication_summary.qmd":
+        return ()
     for matcher in (
         _assign_intro_and_benchmarks,
         _assign_methods_and_cross,
@@ -290,6 +292,7 @@ def _build_remaining_new_claims() -> list[dict[str, Any]]:
     ]
     common = {
         "candidate_ids": [],
+        "adjudication_outcome": "supported",
         "audit_status": "independent_evidence_reconciliation_and_scope_correction_checked",
         "source_locations": [],
         "evidence_artifacts": [],

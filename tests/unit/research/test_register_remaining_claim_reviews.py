@@ -3,10 +3,23 @@ from __future__ import annotations
 import pytest
 
 from scripts.research.proximal_distal_energy.register_remaining_claim_reviews import (
+    _assign_candidate_claims,
     _reconcile_reciprocal_claim_reviews,
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_generated_claim_census_is_classified_as_editorial() -> None:
+    candidate = {
+        "source_path": (
+            "docs/research/proximal_distal_energy_transfer/chapters/"
+            "_claim_adjudication_summary.qmd"
+        ),
+        "text": "The current census contains material claims.",
+    }
+
+    assert _assign_candidate_claims(candidate) == ()
 
 
 def test_reconciliation_prunes_candidate_ids_absent_from_current_inventory() -> None:

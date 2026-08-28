@@ -384,6 +384,11 @@ python3 scripts/research/proximal_distal_energy/register_articulated_slack_claim
 python3 -m scripts.research.proximal_distal_energy.run_distributed_grip_atlas
 python3 -m scripts.research.proximal_distal_energy.make_distributed_grip_figure
 python3 scripts/research/proximal_distal_energy/register_distributed_grip_claims.py
+python3 -m scripts.research.proximal_distal_energy.articulated_stateful_summary \
+  --plan docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_plan.json \
+  --checkpoint-dir docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_smoke \
+  --output docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_smoke/summary.json
+python3 -m scripts.research.proximal_distal_energy.make_stateful_distributed_figure
 python3 -m scripts.research.proximal_distal_energy.generate_articulated_shaft_structural_basis
 python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_time_step_diagnostic
 python3 -m scripts.research.proximal_distal_energy.run_articulated_shaft_atlas

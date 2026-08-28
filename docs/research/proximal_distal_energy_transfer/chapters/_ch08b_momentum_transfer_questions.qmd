@@ -17,7 +17,7 @@ and their broader rationale is documented in the open
 | Does a drift-mediated strategy require less timing precision? | Not supported in the registered moving-base planar comparison. On a common nominal phase grid, the clock policy retained four of five robust task-viable points and 45 ms of contiguous width; the delayed/noisy state trigger retained one point and no multi-point span. This does not measure neural timing demand. | Continuous phase-volume studies with independently identified observers, spatial impact outcomes, subject scaling, and participant-held-out perturbations. |
 | Is a strategy self-correcting? | Not established. The earlier screen produced 13–20% sustained recovery, whereas the expanded phase/load screen produced none in 60 cases. No tested policy has a recovery-qualified viable region. | Continuous attraction-region studies with independently identified observers, stronger feedback families, external-contact disturbances, and human perturbations without hidden load-cost increase. |
 | Should proximal velocity be maximized? | No general rule is supported. Exact equal-energy rate sweeps are nonmonotonic. A 216-program common-time screen yields 46 disjoint work/load-matched pairs with 20 favorable and 26 adverse higher-rate outcomes. An identical-state acceleration sweep also reverses the club-acceleration response before impact. | Full-delivery-state-matched forward rate and acceleration interventions, extended across spatial and subject-scaled models and held-out participants. |
-| Is slack beneficial or necessary? | Partly answered at a synthetic constitutive tier. Five declared classes have been exercised separately, but no global benefit, necessity, intentionality, or delivery advantage is supported. One scalar output nearly confounds contact disengagement with the biological-compliance surrogate. | Embed one class at a time in moving-base, two-hand, and spatial delivery models under matched state, work, and load; add stateful backlash and subject-specific tissue models; acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements. |
+| Is slack beneficial or necessary? | Partly answered at synthetic constitutive and short-horizon forward tiers. Five declared classes have been exercised separately. A stateful distributed-grip comparator now retains elastic tangential displacement, Coulomb slip, opening, and dissipation, but fails two registered refinement cases and lacks native cross-engine parity. No global benefit, necessity, intentionality, or delivery advantage is supported. | Extend the stateful law through matched work, load, and delivery; resolve the failed refinement and native parity gates without changing their thresholds; add subject-specific tissue and shaft/ground coupling; acquire independent contact, shaft, tendon, activation, and bilateral-wrench measurements. |
 
 : Current answer and falsification map for the critical momentum-transfer
 questions. “Conditional” denotes model- and estimand-bounded evidence rather
@@ -207,6 +207,64 @@ below $9.65\times10^{-11}$ m/s with exact stored-precision engine parity. It
 does not test static-friction feasibility or subsequent stick--slip evolution.
 Attached-to-open first failure, measured contact, coupled shaft/ground work,
 matched tasks, and governed human outcomes remain necessary.
+
+### Stateful Stick--Slip Countermodel
+
+The next preregistered step replaces the memoryless tangential law with an
+elastic--perfectly-plastic engineering comparator. Each grip station retains
+elastic tangential displacement, applies a radial return at the Coulomb cap,
+accumulates plastic dissipation during slip, releases stored interface energy
+on opening, and carries projection loss when the local tangent plane changes.
+This is a stateful contact algorithm, not a finger, skin, tendon, neural, or
+anatomical model. The timestamp-explicit forward integrator evaluates
+left-node kinematics, advances the interface to the end of the increment, and
+then applies semi-implicit mechanics. Its energy and coupling-work defects are
+therefore separate numerical observables rather than terms silently absorbed
+into physical dissipation.
+
+The prospective matrix binds one source state, nine variants, three time
+steps (1.0, 0.5, and 0.25 ms), and MuJoCo and Pinocchio, for 54 registered
+cases. The first execution produced no trajectories: all 54 cases were
+retained as unavailable after a Windows native-library load-order failure and
+an absent Pinocchio module. The disclosed runtime amendment changed only the
+native preload launcher. The qualified execution completed all 27 MuJoCo
+cases, retained all 27 Pinocchio cases as typed unavailable, and had no
+execution failures. The exact plan, amendment, and execution identities are
+recorded in
+[`articulated_stateful_distributed_plan.json`](../data/articulated_stateful_distributed_plan.json),
+and all atomic checkpoints plus the deterministic aggregate are published in
+[`articulated_stateful_distributed_smoke/`](../data/articulated_stateful_distributed_smoke/).
+
+All nine MuJoCo variants show decreasing passive-energy defect under time-step
+refinement. The frozen coupling-work refinement gate nevertheless fails for
+the frictionless preload-release control (ratios 1.000 and 1.000) and for the
+low-friction slip probe at the finest comparison (0.834 versus the registered
+0.800 ceiling). The nominal ratios are 0.558 and 0.528. High friction is
+numerically identical to nominal because the nominal trajectory remains below
+the Coulomb cap; increasing an inactive cap cannot identify a friction effect.
+At the finest step, the nominal family contains 80 elastic-stick and 40 open
+station intervals, the frictionless control contains 80 slip and 40 open
+intervals, the low-friction probe contains 68 slip, 12 stick, and 40 open
+intervals, and the opening probe is open in all 120 intervals.
+
+![Stateful Distributed-Grip Falsification. Passive-energy defects contract in
+all nine MuJoCo variants, but the frictionless preload-release and low-friction
+slip cases fail the frozen coupling-work refinement criterion. Contact-regime
+counts and fine-step speed differences are short-horizon engineering-model
+diagnostics. Pinocchio was unavailable, so promotion and cross-engine parity
+are withheld.](figures/fig_stateful_distributed_grip_falsification.pdf){#fig-stateful-distributed-grip-falsification width=100%}
+
+The separately integrated fine-step variants differ from nominal clubhead
+speed by -0.02149 to +0.00834 m/s over only 5 ms. Those differences are useful
+software and model-sensitivity diagnostics, but they are neither a matched
+delivery comparison nor evidence that opening, preload removal, friction, or
+``slack'' creates speed. In particular, the opening probe changes the active
+constraint and releases stored interface energy; its positive short-horizon
+difference cannot be interpreted as a beneficial strategy. The campaign is
+therefore a successful falsification advance precisely because it exposes
+where the algorithm converges, where its registered coupling ledger does not,
+and which engine evidence is missing. Promotion remains false until the
+refinement and native-parity failures are resolved prospectively.
 
 The following articulated shaft atlas then retains the five-fiber grip and
 adds rigid, bending-only, torsion-only, and coupled passive-club branches. Its

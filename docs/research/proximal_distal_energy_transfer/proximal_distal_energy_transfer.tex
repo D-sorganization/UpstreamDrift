@@ -524,7 +524,7 @@ available with the document for independent inspection and reuse.
 
 \chapter{Introduction}\label{sec-intro}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, bottomtitle=1mm, breakable, opacityback=0, colframe=quarto-callout-note-color-frame, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, toprule=.15mm, titlerule=0mm, leftrule=.75mm, toptitle=1mm, rightrule=.15mm, left=2mm, opacitybacktitle=0.6, bottomrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, breakable, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, left=2mm, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, bottomrule=.15mm, bottomtitle=1mm, colback=white, titlerule=0mm, rightrule=.15mm, opacitybacktitle=0.6]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2829,7 +2829,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, bottomtitle=1mm, breakable, opacityback=0, colframe=quarto-callout-note-color-frame, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, arc=.35mm, toprule=.15mm, titlerule=0mm, leftrule=.75mm, toptitle=1mm, rightrule=.15mm, left=2mm, opacitybacktitle=0.6, bottomrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, breakable, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, left=2mm, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, colframe=quarto-callout-note-color-frame, opacityback=0, bottomrule=.15mm, bottomtitle=1mm, colback=white, titlerule=0mm, rightrule=.15mm, opacitybacktitle=0.6]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -12991,15 +12991,18 @@ acceleration sweep also reverses the club-acceleration response before
 impact. & Full-delivery-state-matched forward rate and acceleration
 interventions, extended across spatial and subject-scaled models and
 held-out participants. \\
-Is slack beneficial or necessary? & Partly answered at a synthetic
-constitutive tier. Five declared classes have been exercised separately,
-but no global benefit, necessity, intentionality, or delivery advantage
-is supported. One scalar output nearly confounds contact disengagement
-with the biological-compliance surrogate. & Embed one class at a time in
-moving-base, two-hand, and spatial delivery models under matched state,
-work, and load; add stateful backlash and subject-specific tissue
-models; acquire independent contact, shaft, tendon, activation, and
-bilateral-wrench measurements. \\
+Is slack beneficial or necessary? & Partly answered at synthetic
+constitutive and short-horizon forward tiers. Five declared classes have
+been exercised separately. A stateful distributed-grip comparator now
+retains elastic tangential displacement, Coulomb slip, opening, and
+dissipation, but fails two registered refinement cases and lacks native
+cross-engine parity. No global benefit, necessity, intentionality, or
+delivery advantage is supported. & Extend the stateful law through
+matched work, load, and delivery; resolve the failed refinement and
+native parity gates without changing their thresholds; add
+subject-specific tissue and shaft/ground coupling; acquire independent
+contact, shaft, tendon, activation, and bilateral-wrench
+measurements. \\
 \end{longtable}
 
 \section{Geometry Gates and Null
@@ -13264,6 +13267,80 @@ parity. It does not test static-friction feasibility or subsequent
 stick--slip evolution. Attached-to-open first failure, measured contact,
 coupled shaft/ground work, matched tasks, and governed human outcomes
 remain necessary.
+
+\subsection{Stateful Stick--Slip
+Countermodel}\label{stateful-stickslip-countermodel}
+
+The next preregistered step replaces the memoryless tangential law with
+an elastic--perfectly-plastic engineering comparator. Each grip station
+retains elastic tangential displacement, applies a radial return at the
+Coulomb cap, accumulates plastic dissipation during slip, releases
+stored interface energy on opening, and carries projection loss when the
+local tangent plane changes. This is a stateful contact algorithm, not a
+finger, skin, tendon, neural, or anatomical model. The
+timestamp-explicit forward integrator evaluates left-node kinematics,
+advances the interface to the end of the increment, and then applies
+semi-implicit mechanics. Its energy and coupling-work defects are
+therefore separate numerical observables rather than terms silently
+absorbed into physical dissipation.
+
+The prospective matrix binds one source state, nine variants, three time
+steps (1.0, 0.5, and 0.25 ms), and MuJoCo and Pinocchio, for 54
+registered cases. The first execution produced no trajectories: all 54
+cases were retained as unavailable after a Windows native-library
+load-order failure and an absent Pinocchio module. The disclosed runtime
+amendment changed only the native preload launcher. The qualified
+execution completed all 27 MuJoCo cases, retained all 27 Pinocchio cases
+as typed unavailable, and had no execution failures. The exact plan,
+amendment, and execution identities are recorded in
+\href{../data/articulated_stateful_distributed_plan.json}{\texttt{articulated\_stateful\_distributed\_plan.json}},
+and all atomic checkpoints plus the deterministic aggregate are
+published in
+\href{../data/articulated_stateful_distributed_smoke/}{\texttt{articulated\_stateful\_distributed\_smoke/}}.
+
+All nine MuJoCo variants show decreasing passive-energy defect under
+time-step refinement. The frozen coupling-work refinement gate
+nevertheless fails for the frictionless preload-release control (ratios
+1.000 and 1.000) and for the low-friction slip probe at the finest
+comparison (0.834 versus the registered 0.800 ceiling). The nominal
+ratios are 0.558 and 0.528. High friction is numerically identical to
+nominal because the nominal trajectory remains below the Coulomb cap;
+increasing an inactive cap cannot identify a friction effect. At the
+finest step, the nominal family contains 80 elastic-stick and 40 open
+station intervals, the frictionless control contains 80 slip and 40 open
+intervals, the low-friction probe contains 68 slip, 12 stick, and 40
+open intervals, and the opening probe is open in all 120 intervals.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/fig_stateful_distributed_grip_falsification.pdf}
+
+}
+
+\caption{\label{fig-stateful-distributed-grip-falsification}Stateful
+Distributed-Grip Falsification. Passive-energy defects contract in all
+nine MuJoCo variants, but the frictionless preload-release and
+low-friction slip cases fail the frozen coupling-work refinement
+criterion. Contact-regime counts and fine-step speed differences are
+short-horizon engineering-model diagnostics. Pinocchio was unavailable,
+so promotion and cross-engine parity are withheld.}
+
+\end{figure}%
+
+The separately integrated fine-step variants differ from nominal
+clubhead speed by -0.02149 to +0.00834 m/s over only 5 ms. Those
+differences are useful software and model-sensitivity diagnostics, but
+they are neither a matched delivery comparison nor evidence that
+opening, preload removal, friction, or ``slack'\,' creates speed. In
+particular, the opening probe changes the active constraint and releases
+stored interface energy; its positive short-horizon difference cannot be
+interpreted as a beneficial strategy. The campaign is therefore a
+successful falsification advance precisely because it exposes where the
+algorithm converges, where its registered coupling ledger does not, and
+which engine evidence is missing. Promotion remains false until the
+refinement and native-parity failures are resolved prospectively.
 
 The following articulated shaft atlas then retains the five-fiber grip
 and adds rigid, bending-only, torsion-only, and coupled passive-club
@@ -13630,7 +13707,7 @@ and
 \section{Normalized Claim
 Adjudication}\label{normalized-claim-adjudication}
 
-The current census contains 328 material claims. The normalized outcome
+The current census contains 331 material claims. The normalized outcome
 applies only to each claim's declared estimand, model domain, and
 uncertainty boundary. A \texttt{supported} model-conditional claim is
 not thereby independently replicated, empirically validated, or
@@ -13640,8 +13717,11 @@ The absence of a \texttt{contradicted} row does not mean that every
 mechanism survived every adverse test. Claims that accurately report
 null, mixed, or adverse model results can themselves be supported. The
 complete finding-level reasons, falsifiers, locators, and boundaries are
-available in the \href{data/claim_adjudication_summary.json}{reviewer
-JSON} and \href{data/claim_adjudication_summary.csv}{reviewer CSV}.
+available in the
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.json}{reviewer
+JSON} and
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.csv}{reviewer
+CSV}.
 
 \subsection{Outcome Counts}\label{outcome-counts}
 
@@ -13659,7 +13739,7 @@ Normalized Outcome & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{inconclusive} & 5 \\
-\texttt{supported} & 308 \\
+\texttt{supported} & 311 \\
 \texttt{untested} & 15 \\
 \end{longtable}
 
@@ -13685,8 +13765,8 @@ Evidence Tier & Claim Count \\
 \texttt{external\_methods\_or\_measurement} & 10 \\
 \texttt{external\_modeling\_or\_simulation} & 15 \\
 \texttt{external\_review\_or\_synthesis} & 10 \\
-\texttt{project\_derivation\_or\_document} & 113 \\
-\texttt{project\_executable\_or\_generated} & 299 \\
+\texttt{project\_derivation\_or\_document} & 116 \\
+\texttt{project\_executable\_or\_generated} & 302 \\
 \texttt{prospective\_or\_unexecuted} & 15 \\
 \end{longtable}
 
@@ -13707,7 +13787,7 @@ Source Independence & Claim Count \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{multiple\_independent\_external\_support} & 20 \\
-\texttt{project\_only} & 274 \\
+\texttt{project\_only} & 277 \\
 \texttt{single\_independent\_external\_support} & 34 \\
 \end{longtable}
 
@@ -13726,15 +13806,15 @@ Model Tier & Claim Count \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{articulated\_spatial} & 35 \\
+\texttt{articulated\_spatial} & 38 \\
 \texttt{compliant\_shaft} & 66 \\
-\texttt{cross\_tier\_synthesis} & 77 \\
+\texttt{cross\_tier\_synthesis} & 80 \\
 \texttt{declared\_model\_tier\_unclassified} & 12 \\
 \texttt{finite\_ground\_or\_base} & 16 \\
 \texttt{human\_or\_external\_evidence} & 46 \\
 \texttt{planar\_reduced} & 150 \\
 \texttt{spatial\_reduced} & 76 \\
-\texttt{two\_hand\_or\_bilateral} & 94 \\
+\texttt{two\_hand\_or\_bilateral} & 97 \\
 \texttt{uncertainty\_or\_control} & 10 \\
 \end{longtable}
 
@@ -13759,7 +13839,7 @@ Replication Class & Claim Count \\
 \texttt{governed\_human\_data\_unavailable} & 11 \\
 \texttt{independent\_reimplementation\_open} & 12 \\
 \texttt{mixed\_or\_insufficient\_evidence} & 5 \\
-\texttt{none\_declared} & 284 \\
+\texttt{none\_declared} & 287 \\
 \texttt{prospective\_experiment\_open} & 15 \\
 \texttt{statistical\_reanalysis\_or\_replication\_open} & 9 \\
 \texttt{systematic\_review\_open} & 2 \\
@@ -13840,7 +13920,7 @@ ch07 model ladder & 32 & 32 / 0 / 0 & project authored only \\
 ch07 results & 7 & 7 / 0 / 0 & project authored only \\
 ch07b frames biology engines & 5 & 5 / 0 / 0 & project authored only \\
 ch07c transmission robustness & 5 & 5 / 0 / 0 & project authored only \\
-ch08b momentum transfer questions & 10 & 10 / 0 / 0 & project authored
+ch08b momentum transfer questions & 13 & 13 / 0 / 0 & project authored
 only \\
 ch09 conclusions & 2 & 2 / 0 / 0 & project authored only \\
 \end{longtable}
