@@ -33,15 +33,17 @@ completion from local files or an open pull request.
 
 ## Active Integration
 
-- Worktree: `UpstreamDrift-worktrees/9128-consolidated-research`.
+- Clean protected-flow worktree: `UpstreamDrift-worktrees/9136-protected-push`.
 - Branch: `feat/9128-swing-objective-web-parity-and-research`.
 - Existing protected-flow PR: #9136. Preserve its squash auto-merge request;
   do not merge until every scientific and software gate below is satisfied.
-- Exact PR head `0e3ac2dc6` contains the integrated #9124-#9128 work, the
+- Validated research-artifact head `470370cdd` contains the integrated #9124-#9128 work, the
   protected #9123 authority, and protected-main manual authority `8ccd6df42`.
   Local research, API/provider, React, type-check, production-build, numeric-
   scaffold, architecture, title, release, and manual-governance gates pass.
-  Hosted protected delivery and post-merge verification remain pending.
+  It also repairs the Phase A-to-B-to-C topology provenance chain exposed by
+  the first hosted unit gate; nine focused tests and the 693-artifact release
+  validation pass. Hosted protected delivery and post-merge verification remain pending.
 
 ## Open Correctness Findings
 
@@ -72,7 +74,8 @@ completion from local files or an open pull request.
 
 ## Required Order
 
-1. Shepherd exact head `0e3ac2dc6` through protected CI without redundant
+1. Shepherd PR #9136 from validated artifact head `470370cdd` plus this handoff
+   commit through protected CI without redundant
    reruns, bypasses, force pushes, or loss of its squash auto-merge request.
 2. Verify the squash commit on remote `main`, then close only acceptance-complete
    issues and update epic #8557 with exact evidence and remaining boundaries.
