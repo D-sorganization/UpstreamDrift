@@ -19,6 +19,12 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     load_registered_checkpoints,
     plan_sha256,
 )
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_launcher import (
+    validate_execution_session,
+)
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit import (
+    validate_runtime_audit,
+)
 
 FloatArray = NDArray[np.float64]
 _DIRECT_OUTCOMES = (
@@ -296,14 +302,64 @@ def _checkpoint_set_sha256(checkpoints: Sequence[StructuralCheckpoint]) -> str:
     return digest.hexdigest()
 
 
+def _runtime_session_identity(
+    *,
+    plan: Mapping[str, object],
+    launch: Mapping[str, object],
+    checkpoint_dir: Path,
+    plan_path: Path | None,
+    launch_path: Path | None,
+    runtime_audit_path: Path | None,
+) -> str | None:
+    supplied = (plan_path, launch_path, runtime_audit_path)
+    if all(path is None for path in supplied):
+        return None
+    if any(path is None for path in supplied):
+        raise ValueError("runtime qualification requires plan, launch, and audit paths")
+    assert plan_path is not None
+    assert launch_path is not None
+    assert runtime_audit_path is not None
+    file_plan = _mapping(json.loads(plan_path.read_text(encoding="utf-8")), name="plan")
+    file_launch = _mapping(
+        json.loads(launch_path.read_text(encoding="utf-8")), name="launch"
+    )
+    if file_plan != plan or file_launch != launch:
+        raise ValueError("summary mappings do not match their supplied files")
+    audit = _mapping(
+        json.loads(runtime_audit_path.read_text(encoding="utf-8")),
+        name="runtime audit",
+    )
+    runtime_identity = validate_runtime_audit(plan=plan, launch=launch, audit=audit)
+    validate_execution_session(
+        plan_path=plan_path,
+        launch_path=launch_path,
+        runtime_audit_path=runtime_audit_path,
+        launch=dict(launch),
+        runtime_identity=runtime_identity,
+        checkpoint_dir=checkpoint_dir,
+    )
+    return runtime_identity
+
+
 def summarize_structural_factorial(
     *,
     plan: Mapping[str, object],
     launch: Mapping[str, object],
     checkpoint_dir: Path,
+    plan_path: Path | None = None,
+    launch_path: Path | None = None,
+    runtime_audit_path: Path | None = None,
 ) -> dict[str, object]:
     """Validate a complete run and compute preregistered factorial coefficients."""
 
+    runtime_identity = _runtime_session_identity(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=checkpoint_dir,
+        plan_path=plan_path,
+        launch_path=launch_path,
+        runtime_audit_path=runtime_audit_path,
+    )
     checkpoints = load_registered_checkpoints(
         plan=plan, launch=launch, checkpoint_dir=checkpoint_dir
     )
@@ -328,7 +384,8 @@ def summarize_structural_factorial(
     all_numerical = all(individual_pass.values())
     all_refinement = bool(refinement) and all(bool(row["passes"]) for row in refinement)
     promotion = bool(
-        counts.get("completed", 0) == len(checkpoints)
+        runtime_identity is not None
+        and counts.get("completed", 0) == len(checkpoints)
         and all_numerical
         and all_refinement
         and parity_complete
@@ -356,6 +413,7 @@ def summarize_structural_factorial(
             "plan_sha256": plan_sha256(plan),
             "execution_revision": launch["execution_revision"],
             "checkpoint_set_sha256": _checkpoint_set_sha256(checkpoints),
+            "runtime_identity_sha256": runtime_identity,
         },
         "inventory": {
             "registered_case_count": len(checkpoints),
@@ -366,6 +424,7 @@ def summarize_structural_factorial(
             "all_individual_numerical_pass": all_numerical,
             "all_refinement_groups_pass": all_refinement,
             "cross_engine_parity_complete_and_passed": parity_complete,
+            "runtime_session_qualified": runtime_identity is not None,
             "promotion_eligible": promotion,
         },
         "refinement": refinement,
@@ -387,6 +446,7 @@ def main() -> None:
     parser.add_argument("--plan", type=Path, required=True)
     parser.add_argument("--launch", type=Path, required=True)
     parser.add_argument("--checkpoint-dir", type=Path, required=True)
+    parser.add_argument("--runtime-audit", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     plan = json.loads(args.plan.read_text(encoding="utf-8"))
@@ -397,6 +457,9 @@ def main() -> None:
         plan=plan,
         launch=launch,
         checkpoint_dir=args.checkpoint_dir,
+        plan_path=args.plan if args.runtime_audit is not None else None,
+        launch_path=args.launch if args.runtime_audit is not None else None,
+        runtime_audit_path=args.runtime_audit,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     temporary = args.output.with_suffix(".tmp")

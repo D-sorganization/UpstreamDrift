@@ -101,13 +101,12 @@ are not completion evidence.
 - Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
-  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 61/2,304
-  retained (31 validated MuJoCo, 30 typed Pin absences), no orphan sidecars,
-  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 11:32 UTC.
-- Runtime audit v1.2 digest `9507556034f2009d7d7cbfbdc2d01e9613024eeb9d8b4bedaac453711801bbd7`
-  qualifies MuJoCo native 20-DOF operators and rejects wrong Pin, source drift,
-  and invalid dynamics. New launches require that audit and atomically bind the
-  checkpoint directory; Linux needs a clean new revision plus `pin`/`pin-pink`.
+  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 72/2,304
+  retained (36 validated MuJoCo, 36 typed Pin absences), no orphan sidecars,
+  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 11:46 UTC.
+- Audit v1.2 digest `9507556034f2009d7d7cbfbdc2d01e9613024eeb9d8b4bedaac453711801bbd7`
+  qualifies native operators and rejects wrong Pin/source/dynamics. New launch
+  and summary bind/revalidate it; Linux needs clean source plus `pin`/`pin-pink`.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.
@@ -128,7 +127,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current structural/container slice: 56 pass;
+Use Python 3.12 and serial pytest. Current structural/container slice: 57 pass;
 Ruff/Black and configured pre-push gates pass. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
 it does not reach project analysis. Architecture reports only pre-existing

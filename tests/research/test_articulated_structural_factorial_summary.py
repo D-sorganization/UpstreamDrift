@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -114,7 +115,9 @@ def test_summary_recovers_registered_walsh_coefficients_and_suppresses_parity(
     assert summary["gates"]["all_individual_numerical_pass"] is True
     assert summary["gates"]["all_refinement_groups_pass"] is True
     assert summary["gates"]["cross_engine_parity_complete_and_passed"] is False
+    assert summary["gates"]["runtime_session_qualified"] is False
     assert summary["gates"]["promotion_eligible"] is False
+    assert summary["identity"]["runtime_identity_sha256"] is None
     coefficients = [
         row["walsh_coefficient"]
         for row in summary["factorial_contrasts"]
@@ -135,4 +138,25 @@ def test_summary_fails_closed_when_a_registered_checkpoint_is_missing(
             plan=plan,
             launch=launch,
             checkpoint_dir=tmp_path,
+        )
+
+
+def test_summary_rejects_an_invalid_supplied_runtime_audit(tmp_path: Path) -> None:
+    plan = _fixture_plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    plan_path = tmp_path / "plan.json"
+    launch_path = tmp_path / "launch.json"
+    audit_path = tmp_path / "runtime-audit.json"
+    plan_path.write_text(json.dumps(plan), encoding="utf-8")
+    launch_path.write_text(json.dumps(launch), encoding="utf-8")
+    audit_path.write_text(json.dumps({"schema_version": "invalid"}), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="runtime audit schema"):
+        summarize_structural_factorial(
+            plan=plan,
+            launch=launch,
+            checkpoint_dir=tmp_path / "checkpoints",
+            plan_path=plan_path,
+            launch_path=launch_path,
+            runtime_audit_path=audit_path,
         )

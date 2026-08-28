@@ -21,6 +21,52 @@ def _file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _expected_execution_session(
+    *,
+    plan_path: Path,
+    launch_path: Path,
+    runtime_audit_path: Path,
+    launch: dict[str, object],
+    runtime_identity: str,
+) -> dict[str, object]:
+    return {
+        "schema_version": _SESSION_SCHEMA,
+        "execution_revision": launch.get("execution_revision"),
+        "plan_file_sha256": _file_sha256(plan_path),
+        "launch_file_sha256": _file_sha256(launch_path),
+        "runtime_audit_file_sha256": _file_sha256(runtime_audit_path),
+        "runtime_identity_sha256": runtime_identity,
+    }
+
+
+def validate_execution_session(
+    *,
+    plan_path: Path,
+    launch_path: Path,
+    runtime_audit_path: Path,
+    launch: dict[str, object],
+    runtime_identity: str,
+    checkpoint_dir: Path,
+) -> Path:
+    """Return the session path only when its complete file identity matches."""
+
+    session_path = checkpoint_dir / "execution-session.json"
+    try:
+        observed = json.loads(session_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("execution session identity is unreadable") from exc
+    expected = _expected_execution_session(
+        plan_path=plan_path,
+        launch_path=launch_path,
+        runtime_audit_path=runtime_audit_path,
+        launch=launch,
+        runtime_identity=runtime_identity,
+    )
+    if observed != expected:
+        raise ValueError("execution session identity does not match this launch")
+    return session_path
+
+
 def _bind_execution_session(
     *,
     plan_path: Path,
@@ -34,22 +80,22 @@ def _bind_execution_session(
 
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     session_path = checkpoint_dir / "execution-session.json"
-    expected: dict[str, object] = {
-        "schema_version": _SESSION_SCHEMA,
-        "execution_revision": launch.get("execution_revision"),
-        "plan_file_sha256": _file_sha256(plan_path),
-        "launch_file_sha256": _file_sha256(launch_path),
-        "runtime_audit_file_sha256": _file_sha256(runtime_audit_path),
-        "runtime_identity_sha256": runtime_identity,
-    }
+    expected = _expected_execution_session(
+        plan_path=plan_path,
+        launch_path=launch_path,
+        runtime_audit_path=runtime_audit_path,
+        launch=launch,
+        runtime_identity=runtime_identity,
+    )
     if session_path.exists():
-        try:
-            observed = json.loads(session_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            raise ValueError("execution session identity is unreadable") from exc
-        if observed != expected:
-            raise ValueError("execution session identity does not match this launch")
-        return session_path
+        return validate_execution_session(
+            plan_path=plan_path,
+            launch_path=launch_path,
+            runtime_audit_path=runtime_audit_path,
+            launch=launch,
+            runtime_identity=runtime_identity,
+            checkpoint_dir=checkpoint_dir,
+        )
     if any(checkpoint_dir.glob("case-*")):
         raise ValueError("populated checkpoint directory lacks an execution session")
     temporary = session_path.with_suffix(".tmp")
@@ -138,4 +184,4 @@ if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
 
 
-__all__ = ["launch_structural_factorial", "main"]
+__all__ = ["launch_structural_factorial", "main", "validate_execution_session"]
