@@ -25,6 +25,7 @@ class ForwardAttribution:
     contribution_names: tuple[str, ...]
     continuous_impulses: FloatArray
     generalized_work_j: FloatArray
+    kinetic_transport_work_j: float
     transport_impulse: FloatArray
     total_event_impulse: FloatArray
     total_event_work_j: float
@@ -276,6 +277,12 @@ def integrate_forward_attribution(
     generalized_work = _trapezoid(power, time, continuous)
     transport_rate = np.einsum("sij,sj->si", mass_rate, velocity)
     transport_impulse = _trapezoid(transport_rate, time, continuous)
+    kinetic_transport_power = 0.5 * np.einsum(
+        "si,sij,sj->s", velocity, mass_rate, velocity
+    )
+    kinetic_transport_work = float(
+        _trapezoid(kinetic_transport_power, time, continuous)
+    )
 
     momentum = np.einsum("sij,sj->si", mass, velocity)
     momentum_change = momentum[-1] - momentum[0]
@@ -290,7 +297,12 @@ def integrate_forward_attribution(
     kinetic_energy_change = float(kinetic_energy[-1] - kinetic_energy[0])
     total_event_work = float(np.sum(event_work))
     work_residual = float(
-        abs(kinetic_energy_change - np.sum(generalized_work) - total_event_work)
+        abs(
+            kinetic_energy_change
+            - np.sum(generalized_work)
+            - kinetic_transport_work
+            - total_event_work
+        )
     )
     impulse_components = np.concatenate(
         (continuous_impulses, transport_impulse[None, :], total_event_impulse[None, :]),
@@ -311,7 +323,12 @@ def integrate_forward_attribution(
     impulse_cancellation[impulse_adequacy] = np.sum(
         np.abs(impulse_components[:, impulse_adequacy]), axis=0
     ) / np.abs(momentum_change[impulse_adequacy])
-    work_components = np.concatenate((generalized_work, np.array([total_event_work])))
+    work_components = np.concatenate(
+        (
+            generalized_work,
+            np.array([kinetic_transport_work, total_event_work]),
+        )
+    )
     work_reference = max(
         abs(kinetic_energy_change),
         float(np.sum(np.abs(work_components))),
@@ -333,6 +350,7 @@ def integrate_forward_attribution(
         contribution_names=contribution_names,
         continuous_impulses=np.asarray(continuous_impulses, dtype=np.float64),
         generalized_work_j=np.asarray(generalized_work, dtype=np.float64),
+        kinetic_transport_work_j=kinetic_transport_work,
         transport_impulse=np.asarray(transport_impulse, dtype=np.float64),
         total_event_impulse=np.asarray(total_event_impulse, dtype=np.float64),
         total_event_work_j=total_event_work,
@@ -348,7 +366,7 @@ def integrate_forward_attribution(
         impulse_shares=impulse_shares,
         impulse_share_adequacy=impulse_adequacy,
         impulse_cancellation_indices=impulse_cancellation,
-        work_component_names=contribution_names + ("event",),
+        work_component_names=contribution_names + ("kinetic_transport", "event"),
         work_shares=work_shares,
         work_share_adequate=work_adequate,
         work_cancellation_index=work_cancellation,

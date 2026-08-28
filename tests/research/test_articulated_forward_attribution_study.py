@@ -32,13 +32,19 @@ def test_study_plan_emits_versioned_serial_manifest() -> None:
 
     manifest = plan.to_manifest()
 
-    assert manifest["schema_version"] == "1.3.0"
+    assert manifest["schema_version"] == "1.4.0"
     assert manifest["issue"] == 9153
     assert manifest["preregistration"] == {
-        "revision": 4,
-        "amendment_timing": "before_registered_outcome_generation",
+        "revision": 5,
+        "amendment_timing": ("after_initial_smoke_diagnosis_before_corrected_rerun"),
         "amendment": (
-            "freeze numeric contact, variant, model, frame, and proxy conventions"
+            "retain the omitted one-half v-transpose Mdot v kinetic transport work term"
+        ),
+        "supersedes_plan_sha256": (
+            "cdb4f61e3c6e814906f6c43b68d62ca601c044d0a35598ff9a35e86dee3331f1"
+        ),
+        "preserved_diagnostic_execution_revision": (
+            "0ba50aee3ab1fe1d445cd003e2428e048685d4f0"
         ),
     }
     assert manifest["execution"]["worker_count"] == 1
@@ -76,6 +82,8 @@ def test_study_plan_emits_versioned_serial_manifest() -> None:
     )
     assert manifest["tolerances"]["pointwise_force_closure"] == 1.0e-10
     assert manifest["tolerances"]["trajectory_energy_relative"] == 2.0e-2
+    assert "0.5*v_transpose*Mdot*v" in manifest["estimands"]["generalized_work"]
+    assert manifest["promotion"]["kinetic_transport_work_retained"] is True
     assert manifest["promotion"]["human_or_coaching_claims"] is False
     assert (
         manifest["estimands"]["same_trajectory_attribution"]

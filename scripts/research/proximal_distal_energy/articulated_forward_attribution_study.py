@@ -87,15 +87,23 @@ class ForwardAttributionStudyPlan:
         """Return the JSON-serializable preregistration contract."""
 
         return {
-            "schema_version": "1.3.0",
+            "schema_version": "1.4.0",
             "issue": 9153,
             "parent_epic": 8557,
             "preregistration": {
-                "revision": 4,
-                "amendment_timing": "before_registered_outcome_generation",
+                "revision": 5,
+                "amendment_timing": (
+                    "after_initial_smoke_diagnosis_before_corrected_rerun"
+                ),
                 "amendment": (
-                    "freeze numeric contact, variant, model, frame, and proxy "
-                    "conventions"
+                    "retain the omitted one-half v-transpose Mdot v kinetic "
+                    "transport work term"
+                ),
+                "supersedes_plan_sha256": (
+                    "cdb4f61e3c6e814906f6c43b68d62ca601c044d0a35598ff9a35e86dee3331f1"
+                ),
+                "preserved_diagnostic_execution_revision": (
+                    "0ba50aee3ab1fe1d445cd003e2428e048685d4f0"
                 ),
             },
             "identity": {
@@ -164,7 +172,10 @@ class ForwardAttributionStudyPlan:
                     "outcome difference between separately integrated matched interventions"
                 ),
                 "momentum_balance": "delta(Mv)=integral(sum(Q)+Mdot*v)dt+sum(J)",
-                "generalized_work": "integral(v_transpose*Q)dt plus event work",
+                "generalized_work": (
+                    "integral(v_transpose*Q)dt plus integral(0.5*"
+                    "v_transpose*Mdot*v)dt plus event work"
+                ),
                 "outcomes": [
                     "clubhead_speed",
                     "clubhead_direction",
@@ -197,6 +208,7 @@ class ForwardAttributionStudyPlan:
                 "all_native_operators_available": True,
                 "typed_failures_retained": True,
                 "same_trajectory_and_counterfactual_separate": True,
+                "kinetic_transport_work_retained": True,
                 "human_or_coaching_claims": False,
                 "incomplete_controltower_checkpoints_allowed": False,
             },

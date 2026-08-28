@@ -95,9 +95,9 @@ def test_mujoco_smoke_case_returns_json_safe_attribution_and_outcomes() -> None:
     assert result["engine"]["name"] == "mujoco"
     assert result["estimand"] == "same_trajectory_descriptive_attribution"
     assert result["closure"]["momentum_relative_residual"] <= 0.02
-    assert result["closure"]["work_relative_residual"] > 0.01
-    assert result["closure"]["failure_codes"] == ["work_closure"]
-    assert result["closure"]["passes_registered_tolerances"] is False
+    assert result["closure"]["work_relative_residual"] <= 0.01
+    assert result["closure"]["failure_codes"] == []
+    assert result["closure"]["passes_registered_tolerances"] is True
     assert result["outcomes"]["clubhead_speed_m_s"] > 0.0
     assert len(result["outcomes"]["clubhead_direction_world"]) == 3
     assert result["outcomes"]["face_path_proxy_definition"] == (

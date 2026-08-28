@@ -262,6 +262,7 @@ def evaluate_rigid_smoke_case(
             "names": list(attribution.contribution_names),
             "continuous_impulses": attribution.continuous_impulses.tolist(),
             "generalized_work_j": attribution.generalized_work_j.tolist(),
+            "kinetic_transport_work_j": attribution.kinetic_transport_work_j,
             "mass_transport_impulse": attribution.transport_impulse.tolist(),
             "event_impulse": attribution.total_event_impulse.tolist(),
             "event_work_j": attribution.total_event_work_j,

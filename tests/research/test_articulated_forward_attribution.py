@@ -86,6 +86,29 @@ def test_variable_mass_retains_euler_lagrange_transport_term() -> None:
     assert result.momentum_closure_residual == pytest.approx(0.0)
 
 
+def test_variable_mass_constant_velocity_requires_kinetic_transport_work() -> None:
+    time_s = np.array([0.0, 0.5, 1.0])
+    mass = (1.0 + time_s)[:, None, None]
+    velocity = np.full((3, 1), 2.0)
+
+    result = integrate_forward_attribution(
+        time_s=time_s,
+        mass_matrices=mass,
+        mass_matrix_rates=np.ones_like(mass),
+        velocities=velocity,
+        generalized_forces=np.zeros((3, 1, 1)),
+        contribution_names=("active",),
+        segment_ids=np.zeros(3, dtype=np.int64),
+        event_impulses=np.empty((0, 1)),
+        event_work_j=np.empty(0),
+    )
+
+    assert result.kinetic_transport_work_j == pytest.approx(2.0)
+    assert result.kinetic_energy_change_j == pytest.approx(2.0)
+    assert result.work_closure_residual_j == pytest.approx(0.0)
+    assert result.work_component_names == ("active", "kinetic_transport", "event")
+
+
 def test_duplicate_event_time_separates_continuous_and_impulsive_terms() -> None:
     result = integrate_forward_attribution(
         time_s=np.array([0.0, 1.0, 1.0, 2.0]),
@@ -273,7 +296,7 @@ def test_signed_shares_expose_cancellation_without_clipping() -> None:
     )
 
     np.testing.assert_allclose(result.impulse_shares[:, 0], [2.0, -1.0, 0.0, 0.0])
-    np.testing.assert_allclose(result.work_shares, [2.0, -1.0, 0.0])
+    np.testing.assert_allclose(result.work_shares, [2.0, -1.0, 0.0, 0.0])
     assert result.impulse_cancellation_indices[0] == pytest.approx(3.0)
     assert result.work_cancellation_index == pytest.approx(3.0)
     assert result.impulse_share_adequacy[0]
