@@ -112,8 +112,8 @@ are not completion evidence.
   hashes. Hosted run 33172568953 qualifies native MuJoCo 3.12.0 and Pin 4.1.0;
   identity is `468d2e829dbc52de902fd7f97e96ccfcb4196c785b829900d70a6b3d49eb09ce`.
 - Half-open registered case slices are serial, bounds-checked, session-bound,
-  and hosted; freeze a new execution revision, re-audit it, then run slices
-  sequentially. Do not combine distinct runtime/session identities.
+  and hosted. Canonical launch now freezes `2e5145fde`; re-audit it before a
+  timing slice, then run slices sequentially. Do not combine runtime identities.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.

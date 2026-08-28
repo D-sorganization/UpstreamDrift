@@ -167,5 +167,5 @@ def test_committed_launch_exactly_binds_the_immutable_runner() -> None:
 
     assert committed == build_launch_manifest(
         plan=plan,
-        execution_revision="d6bffd0c6ae6e7d90fdc18778799c0bd4b592dae",
+        execution_revision="2e5145fde2b6ec37c674e6383fcad37ba30f16fa",
     )
