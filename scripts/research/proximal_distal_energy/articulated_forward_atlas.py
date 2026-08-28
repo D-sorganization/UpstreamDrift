@@ -50,7 +50,7 @@ SOURCE_PATHS = (
 
 
 @dataclass(frozen=True, slots=True)
-class _ForwardAuthority:
+class ForwardAuthority:
     time_s: FloatArray
     profile_index: NDArray[np.int_]
     grip_span_m: FloatArray
@@ -72,9 +72,9 @@ class _AtlasBuffers:
     force_relative_error: FloatArray
 
 
-def _load_authority() -> _ForwardAuthority:
+def load_forward_authority() -> ForwardAuthority:
     with np.load(DATA_DIR / "subject_scaled_closed_contact.npz") as source:
-        authority = _ForwardAuthority(
+        authority = ForwardAuthority(
             time_s=np.asarray(source["time_s"], dtype=float),
             profile_index=np.asarray(source["case_profile_index"], dtype=int),
             grip_span_m=np.asarray(source["case_grip_span_m"], dtype=float),
@@ -108,8 +108,8 @@ def _relative_error(left: FloatArray, right: FloatArray) -> float:
     return float(np.max(np.abs(left - right)) / scale)
 
 
-def _integration_case(
-    authority: _ForwardAuthority,
+def build_forward_integration_case(
+    authority: ForwardAuthority,
     config: ArticulatedForwardContactConfig,
     variant: ForwardVariant,
     case: int,
@@ -166,7 +166,7 @@ def _record_trace(
 
 
 def _run_state(
-    authority: _ForwardAuthority,
+    authority: ForwardAuthority,
     buffers: _AtlasBuffers,
     config: ArticulatedForwardContactConfig,
     state_slot: int,
@@ -184,7 +184,7 @@ def _run_state(
         for step_slot, time_step in enumerate(config.time_steps_s):
             traces: dict[str, dict[str, FloatArray | float]] = {}
             for engine_slot, engine in enumerate(engines):
-                integration_case = _integration_case(
+                integration_case = build_forward_integration_case(
                     authority,
                     config,
                     variant,
@@ -237,7 +237,7 @@ def _gates(
 
 
 def _arrays(
-    authority: _ForwardAuthority,
+    authority: ForwardAuthority,
     buffers: _AtlasBuffers,
     states: tuple[tuple[int, int], ...],
     variants: tuple[ForwardVariant, ...],
@@ -276,7 +276,7 @@ def _sha256(path: Path) -> str:
 
 
 def _record(
-    authority: _ForwardAuthority,
+    authority: ForwardAuthority,
     buffers: _AtlasBuffers,
     states: tuple[tuple[int, int], ...],
     variants: tuple[ForwardVariant, ...],
@@ -370,7 +370,7 @@ def run_articulated_forward_contact_atlas(
         import pinocchio as pin
     except ImportError as error:  # pragma: no cover - native runtime gate
         raise RuntimeError("MuJoCo and robotics Pinocchio are required") from error
-    authority = _load_authority()
+    authority = load_forward_authority()
     states = tuple(
         (case, sample)
         for case in config.case_indices
@@ -393,4 +393,9 @@ def run_articulated_forward_contact_atlas(
     )
 
 
-__all__ = ["run_articulated_forward_contact_atlas"]
+__all__ = [
+    "ForwardAuthority",
+    "build_forward_integration_case",
+    "load_forward_authority",
+    "run_articulated_forward_contact_atlas",
+]

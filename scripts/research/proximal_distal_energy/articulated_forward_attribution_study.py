@@ -87,15 +87,15 @@ class ForwardAttributionStudyPlan:
         """Return the JSON-serializable preregistration contract."""
 
         return {
-            "schema_version": "1.2.0",
+            "schema_version": "1.3.0",
             "issue": 9153,
             "parent_epic": 8557,
             "preregistration": {
-                "revision": 3,
+                "revision": 4,
                 "amendment_timing": "before_registered_outcome_generation",
                 "amendment": (
-                    "freeze the smoke source state and declare the later "
-                    "screening population"
+                    "freeze numeric contact, variant, model, frame, and proxy "
+                    "conventions"
                 ),
             },
             "identity": {
@@ -117,6 +117,16 @@ class ForwardAttributionStudyPlan:
                 "time_steps_s": list(self.time_steps_s),
                 "engines": list(self.engines),
                 "variants": [variant.name for variant in registered_variants()],
+                "variant_parameters": [
+                    {
+                        "name": variant.name,
+                        "stiffness_factor": variant.stiffness_factor,
+                        "damping_factor": variant.damping_factor,
+                        "displacement_factor": variant.displacement_factor,
+                        "velocity_factor": variant.velocity_factor,
+                    }
+                    for variant in registered_variants()
+                ],
                 "smoke_states": [
                     {
                         "source_case_index": case_index,
@@ -128,6 +138,21 @@ class ForwardAttributionStudyPlan:
                 ],
                 "screening_case_indices": list(self.screening_case_indices),
                 "screening_sample_indices": list(self.screening_sample_indices),
+                "model_authority": {
+                    "path": (
+                        "docs/research/proximal_distal_energy_transfer/data/"
+                        "subject_scaled_closed_contact.npz"
+                    ),
+                    "state_schema": "18_cases_x_13_samples_x_20_coordinates",
+                },
+                "contact_law": {
+                    "name": "bilateral_kelvin_voigt_point_attachment_always_active",
+                    "contact_stiffness_n_m": 1800.0,
+                    "contact_damping_n_s_m": 18.0,
+                    "initial_club_displacement_m": 0.001,
+                    "initial_club_velocity_m_s": 0.05,
+                    "unilateral_contact": False,
+                },
                 "event_path_model": "linear_state_interpolant",
                 "event_kinds": ["opening", "reattachment", "stick", "slip"],
             },
@@ -151,9 +176,21 @@ class ForwardAttributionStudyPlan:
             "tolerances": {
                 "momentum_relative": self.momentum_relative_tolerance,
                 "work_relative": self.work_relative_tolerance,
+                "pointwise_force_closure": 1.0e-10,
+                "trajectory_energy_relative": 2.0e-2,
                 "refinement_ratio_limit": self.refinement_ratio_limit,
                 "event_gap_m": self.gap_tolerance_m,
                 "event_time_s": self.event_time_tolerance_s,
+            },
+            "reporting": {
+                "units": "SI",
+                "world_frame": "source_authority_world_xyz",
+                "clubhead_body": "clubhead_mass",
+                "club_face_proxy_axis": "club_local_positive_x",
+                "face_path_proxy": (
+                    "angle between club local +x axis and clubhead velocity "
+                    "in the world frame"
+                ),
             },
             "promotion": {
                 "all_retained_cases_close": True,

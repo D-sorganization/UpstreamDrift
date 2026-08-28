@@ -32,13 +32,13 @@ def test_study_plan_emits_versioned_serial_manifest() -> None:
 
     manifest = plan.to_manifest()
 
-    assert manifest["schema_version"] == "1.2.0"
+    assert manifest["schema_version"] == "1.3.0"
     assert manifest["issue"] == 9153
     assert manifest["preregistration"] == {
-        "revision": 3,
+        "revision": 4,
         "amendment_timing": "before_registered_outcome_generation",
         "amendment": (
-            "freeze the smoke source state and declare the later screening population"
+            "freeze numeric contact, variant, model, frame, and proxy conventions"
         ),
     }
     assert manifest["execution"]["worker_count"] == 1
@@ -55,6 +55,27 @@ def test_study_plan_emits_versioned_serial_manifest() -> None:
     ]
     assert manifest["design"]["screening_case_indices"] == [0, 4, 8, 9, 13, 17]
     assert manifest["design"]["screening_sample_indices"] == [0, 6, 12]
+    assert manifest["design"]["contact_law"] == {
+        "name": "bilateral_kelvin_voigt_point_attachment_always_active",
+        "contact_stiffness_n_m": 1800.0,
+        "contact_damping_n_s_m": 18.0,
+        "initial_club_displacement_m": 0.001,
+        "initial_club_velocity_m_s": 0.05,
+        "unilateral_contact": False,
+    }
+    assert manifest["design"]["variant_parameters"][5] == {
+        "name": "velocity_reversed",
+        "stiffness_factor": 1.0,
+        "damping_factor": 1.0,
+        "displacement_factor": 1.0,
+        "velocity_factor": -1.0,
+    }
+    assert manifest["reporting"]["world_frame"] == "source_authority_world_xyz"
+    assert manifest["reporting"]["face_path_proxy"] == (
+        "angle between club local +x axis and clubhead velocity in the world frame"
+    )
+    assert manifest["tolerances"]["pointwise_force_closure"] == 1.0e-10
+    assert manifest["tolerances"]["trajectory_energy_relative"] == 2.0e-2
     assert manifest["promotion"]["human_or_coaching_claims"] is False
     assert (
         manifest["estimands"]["same_trajectory_attribution"]
