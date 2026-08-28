@@ -101,12 +101,10 @@ are not completion evidence.
 - Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
-  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; its first
-  26 records include 14 validated JSON/NPZ pairs and 12 typed unavailables.
-  Active-ground timings revise runtime to 24--48 h; the process uses about one
-  CPU core and 117 MB, with atomic resume and empty stderr.
-- Windows resolves unrelated `pinocchio` distribution 0.4.3/module 0.1; current
-  robotics `pin` is unavailable. Preserve absence; parity needs bound Linux.
+  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; use the status
+  CLI for counts. Runtime is 24--48 h, one CPU/117 MB, atomic, empty stderr.
+- Windows audit rejects unrelated `pinocchio` 0.4.3/module 0.1. Heavy image and
+  workflow now require `pin`/`pin-pink` plus API gate; parity still needs Linux.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.

@@ -33,8 +33,8 @@ WORKFLOW = REPO_ROOT / ".github" / "workflows" / "heavy-tests-opt-in.yml"
 # ---------------------------------------------------------------------------
 CANONICAL_HEAVY_DEPS: frozenset[str] = frozenset(
     {
-        "pinocchio",
-        "pink",
+        "pin",
+        "pin-pink",
         "mujoco",
         "mediapipe",
         "meshcat",
@@ -47,6 +47,7 @@ CANONICAL_HEAVY_DEPS: frozenset[str] = frozenset(
         "ezdxf",
     }
 )
+FORBIDDEN_HEAVY_DISTRIBUTIONS: frozenset[str] = frozenset({"pinocchio", "pink"})
 
 
 def _extract_pip_packages(text: str) -> set[str]:
@@ -88,6 +89,7 @@ def _parse_pip_block(block_lines: list[str], packages: set[str]) -> None:
         part = re.split(r"\|\||\band\b|;", part)[0]
         tokens = part.split()
         for token in tokens:
+            token = token.strip("\"'")
             # Skip flags and shell constructs
             if token.startswith("-"):
                 continue
@@ -135,16 +137,39 @@ def main() -> int:
     # Check that each canonical dep is present in both files
     missing_from_dockerfile = CANONICAL_HEAVY_DEPS - dockerfile_pkgs
     missing_from_workflow = CANONICAL_HEAVY_DEPS - workflow_pkgs
+    forbidden_in_dockerfile = FORBIDDEN_HEAVY_DISTRIBUTIONS & dockerfile_pkgs
+    forbidden_in_workflow = FORBIDDEN_HEAVY_DISTRIBUTIONS & workflow_pkgs
 
-    if not missing_from_dockerfile and not missing_from_workflow:
+    if (
+        not missing_from_dockerfile
+        and not missing_from_workflow
+        and not forbidden_in_dockerfile
+        and not forbidden_in_workflow
+    ):
         return 0
 
+    failures = []
     if missing_from_dockerfile:
-        for _pkg in sorted(missing_from_dockerfile):
-            pass
+        failures.append(
+            "Dockerfile.heavy_test missing: "
+            + ", ".join(sorted(missing_from_dockerfile))
+        )
     if missing_from_workflow:
-        for _pkg in sorted(missing_from_workflow):
-            pass
+        failures.append(
+            "heavy-tests-opt-in.yml missing: "
+            + ", ".join(sorted(missing_from_workflow))
+        )
+    if forbidden_in_dockerfile:
+        failures.append(
+            "Dockerfile.heavy_test contains forbidden distributions: "
+            + ", ".join(sorted(forbidden_in_dockerfile))
+        )
+    if forbidden_in_workflow:
+        failures.append(
+            "heavy-tests-opt-in.yml contains forbidden distributions: "
+            + ", ".join(sorted(forbidden_in_workflow))
+        )
+    sys.stderr.write("\n".join(failures) + "\n")
     return 1
 
 

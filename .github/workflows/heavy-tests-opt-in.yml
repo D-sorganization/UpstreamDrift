@@ -135,8 +135,8 @@ jobs:
           pip install --force-reinstall "pydantic==2.12.5"
           python -m ensurepip --upgrade || true
           pip install \
-            pinocchio \
-            pink \
+            "pin>=2.6.0,<5.0.0" \
+            "pin-pink>=1.0.0,<5.0.0" \
             mujoco \
             mediapipe \
             meshcat \
@@ -154,6 +154,7 @@ jobs:
       - name: Verify heavy dependencies
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
         run: |
+          python3 scripts/ci/check_pinocchio_dynamics_api.py
           python -c "
           import sys
           deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'ezc3d', 'ezdxf']

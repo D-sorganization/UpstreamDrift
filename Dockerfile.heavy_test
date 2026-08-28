@@ -54,8 +54,8 @@ RUN pip install \
 # ── Heavy physics / robotics engines ─────────────────────────────────────────
 # pinned to last-known-good versions; update deliberately
 RUN pip install \
-    pinocchio \
-    pink \
+    "pin>=2.6.0,<5.0.0" \
+    "pin-pink>=1.0.0,<5.0.0" \
     mujoco \
     mediapipe \
     meshcat \
@@ -105,6 +105,10 @@ RUN if [ -f "pyproject.toml" ]; then \
     elif [ -f "requirements.txt" ]; then \
       pip install -r requirements.txt; \
     fi
+
+# Reject the unrelated PyPI `pinocchio` name collision before this image can
+# claim native-engine parity.
+RUN python scripts/ci/check_pinocchio_dynamics_api.py
 
 # Keep late transitive installs from restoring scanner-known vulnerable tools.
 RUN pip install --upgrade --no-cache-dir \
