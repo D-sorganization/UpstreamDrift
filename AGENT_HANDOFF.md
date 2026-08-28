@@ -56,8 +56,9 @@ are not completion evidence.
 - All 54 checkpoints and deterministic summary are published under
   `data/articulated_stateful_distributed_smoke/`; checkpoint-set SHA-256 begins
   `1e6eeeabcb2d461a`. Promotion is false.
-- The canonical QMD, governed figure, claim registry, reviewer census, and PDF
-  now integrate the result. The uncommitted candidate PDF has 255 pages,
+- Commit `572f387cdad9e23c509704652a36a2fcc098993c` integrates the canonical
+  QMD, governed figure, claim registry, reviewer census, and PDF. The PDF has
+  255 pages,
   SHA-256 `0a781df90cd7393799cbc5e94621dfddd502f0284fb09cc0e23acf251197687e`,
   196 URI links, and clean visual review on the new section/figure pages.
 - Claim governance is green at 1,185 candidates and 331 material claims:
@@ -66,14 +67,13 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Re-run final focused tests, claim/document gates, and title capitalization.
-2. Commit and push the paper/figure/claim integration; then generate the release
-   manifest against that immutable source commit in a follow-up commit.
-3. Open a protected PR only after local release validation is green. Preserve
+1. Commit the release manifest/checksums bound to immutable source commit
+   `572f387cd` and push both new commits.
+2. Open a protected PR only after local release validation is green. Preserve
    all refinement/parity failures and do not weaken thresholds.
-4. Continue #9153 with a pilot-disclosed rigid refinement extension, then
+3. Continue #9153 with a pilot-disclosed rigid refinement extension, then
    matched rigid/shaft/base branches and causal killswitch runs.
-5. Project only protected UpstreamDrift evidence into AffineDrift; continue
+4. Project only protected UpstreamDrift evidence into AffineDrift; continue
    Tools only through its provider contract and protected flow.
 
 ## Validation
