@@ -33,8 +33,8 @@ partial campaign checkpoints are not completion evidence.
   `019fe886-6614-70a2-a596-e5b0dea725d0`.
 - Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
 - Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
-  `e732757c9`. Remote recovery currently ends at `7c6fbcce7`; local committed
-  implementation continues through `cf8fcf9a8` and must be pushed normally.
+  `e732757c9`. Remote recovery currently ends at `42a375602`; local committed
+  implementation continues through `f65efb874` and must be pushed normally.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
@@ -51,14 +51,20 @@ partial campaign checkpoints are not completion evidence.
   linear state interpolant. Event-aligned replay duplicates pre/post states,
   prevents cross-event quadrature, and registers zero discrete impulse/work
   for the continuous tension law.
-- A committed serial study plan now freezes source revision `4c6b2120f`, input
+- A committed serial study plan now freezes source revision `e800788ff`, input
   SHA-256 `9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779`,
   three time steps, two native engines, seven variants, event/root tolerances,
   distinct attribution/counterfactual estimands, atomic checkpoints, and
-  fail-closed promotion. Plan SHA-256 is
-  `7f56450a1cfad36c2a408b88db9d181c6d095c7b31853aed953ed6f8855a6d82`;
+  fail-closed promotion. Pre-outcome revision 2 explicitly adds the exact
+  execution revision to resume identity. Plan SHA-256 is
+  `20c0b5b7cb09844e3d31288bd3bf0bfd98068d38025ff51eb5f73123410b7b63`;
   a freshness test requires the committed JSON to match its generator.
-- Thirty-one affected focused tests, Ruff, and format pass. Focused MyPy first
+- The serial runner expands all 42 engine/variant/step cases, writes fsync plus
+  atomic-replace JSON checkpoints, resumes only exact plan/source/data/code
+  identities, retains typed native-engine absence, and propagates unexpected
+  evaluator failures without a false completed checkpoint. It has not run the
+  registered scientific cases.
+- Thirty-six affected focused tests, Ruff, and format pass. Focused MyPy first
   exposed inherited scientific-script typing debt, then the installed MyPy
   crashed internally under `--follow-imports=skip`; do not misreport this as a
   green type gate.
@@ -72,9 +78,8 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Implement the atomic serial case runner from the frozen plan, retaining
-   typed native-runtime failures, resume identity, and three-resolution gates;
-   add the still-missing stick/slip event surfaces.
+1. Connect the atomic runner to bounded rigid/distributed native evaluators and
+   three-resolution gates; add the still-missing stick/slip event surfaces.
 2. Add matched rigid/shaft/base branches and causal forward killswitch runs kept
    separate from same-trajectory attribution, refinement/parity/adverse cases,
    and a serial smoke manifest.
@@ -116,6 +121,7 @@ portable tests. Run Python tests with `-n 0`.
 ```powershell
 python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution.py
 python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution_study.py
+python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution_runner.py
 python -m pytest -n 0 -q tests/research/test_articulated_contact_events.py tests/research/test_articulated_distributed_grip.py tests/research/test_articulated_distributed_forward.py
 python -m ruff check scripts/research/proximal_distal_energy/articulated_forward_attribution.py scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py tests/research/test_articulated_forward_attribution.py
 python -m ruff format --check scripts/research/proximal_distal_energy/articulated_forward_attribution.py scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py tests/research/test_articulated_forward_attribution.py
