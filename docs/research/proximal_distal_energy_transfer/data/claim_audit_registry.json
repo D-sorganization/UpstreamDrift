@@ -33035,8 +33035,7 @@
         "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
         "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
         "tests/research/test_articulated_drift_contact_attribution.py",
-        "tests/research/test_articulated_drift_contact_attribution_evidence.py",
-        ".github/workflows/articulated-attribution-evidence.yml"
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
       ],
       "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
       "uncertainty_boundary": "The decomposition is operational and state-specific; it does not identify anatomical force sources or a forward causal effect.",
@@ -33081,8 +33080,7 @@
         "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
         "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
         "tests/research/test_articulated_drift_contact_attribution.py",
-        "tests/research/test_articulated_drift_contact_attribution_evidence.py",
-        ".github/workflows/articulated-attribution-evidence.yml"
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
       ],
       "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
       "uncertainty_boundary": "The signs arise under an imposed synthetic perturbation and are neither forward work nor human performance evidence.",
@@ -33127,8 +33125,7 @@
         "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
         "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
         "tests/research/test_articulated_drift_contact_attribution.py",
-        "tests/research/test_articulated_drift_contact_attribution_evidence.py",
-        ".github/workflows/articulated-attribution-evidence.yml"
+        "tests/research/test_articulated_drift_contact_attribution_evidence.py"
       ],
       "model_domain": "Six synthetic profiles, three grip spans, thirteen closed states per case, twenty generalized coordinates, four contribution classes, and two native engines without a forward step.",
       "uncertainty_boundary": "Matched forward attribution through contact transitions, coupled structures, uncertainty, and adverse loading remains open.",

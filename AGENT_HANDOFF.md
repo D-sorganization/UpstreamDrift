@@ -43,12 +43,18 @@ partial campaign checkpoints are not completion evidence.
   Its downloaded JSON/NPZ reports MuJoCo 3.12.0, Pinocchio 4.1.0, 234 states,
   zero failed engine-states, and all registered gates passed. Independent NPZ
   inspection found every numeric array finite and every per-state gate true.
+- The transient path-scoped generation workflow was removed after that
+  successful run because repository policy prohibits active-workflow growth and
+  direct hosted-runner routing. The stable public runner, figure, registration,
+  README commands, committed evidence, and standard-CI evidence tests remain;
+  do not recreate a one-off workflow for the next tier.
 - The evidence, four-panel PDF/SVG figure, chapter, claims PD-CLAIM-327--329,
   data dictionary, release preset/claim, release review, and evidence/release
   tests are now integrated locally. The optimized paper has 252 pages and the
   new section/figure were visually inspected on pages 148--149 without clipping
   or an intervening float. The final 702-artifact release, checksum, and
-  2,498-reference claim-evidence manifests validate locally; computational PDF
+  2,495-reference/419-local-artifact claim-evidence manifests validate locally;
+  computational PDF
   qualification renders all 252 pages and passes, while tagged-PDF and font
   resources remain explicitly reported archival gaps.
 - Architecture remains green through a narrow #9151 exception for the

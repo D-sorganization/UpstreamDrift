@@ -23,7 +23,6 @@ ARTIFACTS = [
     "scripts/research/proximal_distal_energy/register_articulated_drift_contact_attribution_claims.py",
     "tests/research/test_articulated_drift_contact_attribution.py",
     "tests/research/test_articulated_drift_contact_attribution_evidence.py",
-    ".github/workflows/articulated-attribution-evidence.yml",
 ]
 
 

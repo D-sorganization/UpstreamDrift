@@ -2,6 +2,22 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## Articulated Same-State Drift and Contact Attribution (#9151)
+
+Issue #9151 qualifies a pointwise articulated decomposition across all 234
+registered subject-scaled closed states. Configuration-dependent bias,
+velocity-dependent bias, bilateral contact, and zero applied input close both
+generalized acceleration and generalized power. MuJoCo and robotics Pinocchio
+pass the declared native-operator parity, pathway-killswitch,
+coordinate-scaling, geometry, denominator, and corrupted-force gates. Contact
+aligns positively with total mass-metric acceleration while contributing
+negative generalized power in every registered state, demonstrating that an
+acceleration projection is not a positive-work or transfer fraction. The
+result takes no forward step and supplies no biological source, human
+performance, timing, slack, coaching, or safety inference. Its next gate is
+matched forward impulse/work attribution through contact transitions,
+shaft/base coupling, uncertainty, and adverse loads.
+
 ## Tools Green-Surface Adapter Consumption (#9143)
 
 Issue #9143 consumes the Tools `swing_sim.putting` green-surface adapter (Tools #4800 P9) via the `vendor/ud-tools` vendor boundary.
