@@ -79,17 +79,26 @@ are not completion evidence.
   6 at 0.12 s, 50 ms horizon, three resolutions, MuJoCo/Pinocchio, and seven
   variants: nominal, frictionless, high friction, zero slack, full velocity
   reversal, zero preload, and opening probe. It discloses prior pilots, has 42
-  atomic cases, is not launched, and cannot erase the rigid failure or promote
-  human/static-stick claims. Raw/canonical plan hashes are `987ab2ede44f55c1`
-  and `d2923709afcdfa78` respectively.
+  atomic cases, and cannot erase the rigid failure or promote human/static-stick
+  claims. Raw/canonical plan hashes are `987ab2ede44f55c1` and
+  `d2923709afcdfa78` respectively.
+- Execution `d2800c556153b523bee1833e66ce5d83cf8ea1ba` completed: 21
+  MuJoCo cases, 21 typed Pinocchio-unavailable cases, zero execution failures.
+  Six MuJoCo variants pass closure/refinement. The opening probe retains
+  `work_closure` and `momentum_refinement` failures. All 42 checkpoints and a
+  freshness-checked summary are published under
+  `data/articulated_forward_distributed_smoke/`; checkpoint-set SHA-256 is
+  `3372b3a8a252ea75f85fe6835153673cb0b971a9367b900afd7cb99f9829132e`.
+- Eleven checkpoints from a stopped mistyped execution identity are preserved
+  at `C:/Users/diete/Campaigns/UpstreamDrift-9153-distributed-smoke-invalid-execution-d2800c556d8`;
+  they are excluded from evidence and must not be merged with the valid run.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
 
 ## Immediate Order
 
-1. Commit the prospective distributed plan, then execute its 42 cases serially
-   through atomic checkpoints; do not amend tolerances after results.
+1. Commit and push the governed distributed evidence without amending results.
 2. Specify a pilot-disclosed rigid refinement extension without weakening or
    relabeling the original failures.
 3. Define a separate stateful tangential-compliance countermodel before any

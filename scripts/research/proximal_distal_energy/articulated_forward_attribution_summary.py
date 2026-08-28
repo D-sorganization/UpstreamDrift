@@ -167,7 +167,7 @@ def _unavailable_group(payloads: list[Mapping[str, Any]]) -> dict[str, object]:
     }
 
 
-def aggregate_rigid_smoke(
+def aggregate_registered_smoke(
     *,
     manifest: Mapping[str, object],
     execution_revision: str,
@@ -267,7 +267,22 @@ def aggregate_rigid_smoke(
     }
 
 
-def publish_rigid_smoke_evidence(
+def aggregate_rigid_smoke(
+    *,
+    manifest: Mapping[str, object],
+    execution_revision: str,
+    checkpoint_dir: Path,
+) -> dict[str, object]:
+    """Compatibility name for the original rigid registered smoke."""
+
+    return aggregate_registered_smoke(
+        manifest=manifest,
+        execution_revision=execution_revision,
+        checkpoint_dir=checkpoint_dir,
+    )
+
+
+def publish_registered_smoke_evidence(
     *,
     manifest: Mapping[str, object],
     execution_revision: str,
@@ -287,7 +302,7 @@ def publish_rigid_smoke_evidence(
         execution_revision=execution_revision,
         checkpoint_dir=checkpoint_dir,
     )
-    summary = aggregate_rigid_smoke(
+    summary = aggregate_registered_smoke(
         manifest=manifest,
         execution_revision=execution_revision,
         checkpoint_dir=checkpoint_dir,
@@ -321,4 +336,26 @@ def publish_rigid_smoke_evidence(
     return summary_path
 
 
-__all__ = ["aggregate_rigid_smoke", "publish_rigid_smoke_evidence"]
+def publish_rigid_smoke_evidence(
+    *,
+    manifest: Mapping[str, object],
+    execution_revision: str,
+    checkpoint_dir: Path,
+    output_dir: Path,
+) -> Path:
+    """Compatibility name for publishing the original rigid smoke."""
+
+    return publish_registered_smoke_evidence(
+        manifest=manifest,
+        execution_revision=execution_revision,
+        checkpoint_dir=checkpoint_dir,
+        output_dir=output_dir,
+    )
+
+
+__all__ = [
+    "aggregate_registered_smoke",
+    "aggregate_rigid_smoke",
+    "publish_registered_smoke_evidence",
+    "publish_rigid_smoke_evidence",
+]

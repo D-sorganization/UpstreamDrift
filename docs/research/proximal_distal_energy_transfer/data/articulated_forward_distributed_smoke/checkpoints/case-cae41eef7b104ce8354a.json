@@ -1,0 +1,27 @@
+{
+  "case": {
+    "engine": "pinocchio",
+    "source_case_index": 0,
+    "source_sample_index": 6,
+    "source_time_s": 0.12,
+    "time_step_s": 0.0005,
+    "variant": "nominal"
+  },
+  "checkpoint_schema_version": "1.0.0",
+  "identity": {
+    "case_key": "state=case0-sample6/pinocchio/nominal/dt=0.0005",
+    "execution_revision": "d2800c556153b523bee1833e66ce5d83cf8ea1ba",
+    "plan_sha256": "d2923709afcdfa7853c2218d550ddbb9b1ddb1c928de4dfc897e717cf5896b5b",
+    "source_data_sha256": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "source_revision": "c166a89399c0a3e4222f232e77bd4a0417b86a8f",
+    "study_schema_version": "distributed-forward-attribution/1.0.0"
+  },
+  "outcome": {
+    "failure": {
+      "code": "native_engine_unavailable",
+      "detail": "registered native module is unavailable: No module named 'pinocchio'",
+      "engine": "pinocchio"
+    },
+    "status": "unavailable"
+  }
+}

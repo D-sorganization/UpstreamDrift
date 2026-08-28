@@ -11,6 +11,9 @@ from scripts.research.proximal_distal_energy.articulated_forward_distributed_pla
 from scripts.research.proximal_distal_energy.articulated_forward_attribution_runner import (
     build_registered_cases,
 )
+from scripts.research.proximal_distal_energy.articulated_forward_attribution_summary import (
+    aggregate_registered_smoke,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 PLAN = (
@@ -21,6 +24,7 @@ PLAN = (
     / "data"
     / "articulated_forward_distributed_plan.json"
 )
+EVIDENCE = PLAN.parent / "articulated_forward_distributed_smoke"
 
 
 def test_distributed_plan_is_serial_event_explicit_and_nonhuman() -> None:
@@ -54,3 +58,22 @@ def test_committed_distributed_plan_matches_generator() -> None:
     ).to_manifest()
 
     assert committed == generated
+
+
+def test_committed_distributed_evidence_is_fresh_and_retains_adverse_failure() -> None:
+    manifest = json.loads(PLAN.read_text(encoding="utf-8"))
+    retained = json.loads((EVIDENCE / "summary.json").read_text(encoding="utf-8"))
+    regenerated = aggregate_registered_smoke(
+        manifest=manifest,
+        execution_revision=retained["identity"]["execution_revision"],
+        checkpoint_dir=EVIDENCE / "checkpoints",
+    )
+
+    assert retained == regenerated
+    opening = next(
+        group
+        for group in retained["groups"]
+        if group["engine"] == "mujoco" and group["variant"] == "opening_probe"
+    )
+    assert opening["failure_codes"] == ["work_closure", "momentum_refinement"]
+    assert retained["promotion"]["eligible"] is False

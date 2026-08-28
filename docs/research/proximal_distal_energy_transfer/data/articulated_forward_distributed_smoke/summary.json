@@ -1,0 +1,584 @@
+{
+  "checkpoint_inventory": {
+    "checkpoint_set_sha256": "3372b3a8a252ea75f85fe6835153673cb0b971a9367b900afd7cb99f9829132e",
+    "count": 42,
+    "files": [
+      {
+        "name": "case-211a86ee8c54ce2fb6f3.json",
+        "sha256": "2b986a4cf1076e83557c0bb9ea6efe206067ffc9569c4360b74db438909686d1",
+        "size_bytes": 943
+      },
+      {
+        "name": "case-33ead1e222cf8a49df56.json",
+        "sha256": "d1e806c04c395a812350d03e74bc9b6fd754694124e0ed06166ca3277acd4442",
+        "size_bytes": 19779
+      },
+      {
+        "name": "case-3ac2727d75b61a2cad45.json",
+        "sha256": "7ce9ac997db2c2c2da77f2c3b8b48293293b4c14788646e208b99ac1fdeb6db7",
+        "size_bytes": 25939
+      },
+      {
+        "name": "case-3f51687f7ac162d3abd4.json",
+        "sha256": "62be2738c73416962c9d5dcbc54957958a561d6fceac6b6ec29b29b23f682e42",
+        "size_bytes": 927
+      },
+      {
+        "name": "case-44032e512a7cc2bf7885.json",
+        "sha256": "2dcdf6001d079179a89d9838e8c18b4f60e414a8b3f9e86ab51aff9f64885f5c",
+        "size_bytes": 939
+      },
+      {
+        "name": "case-476a927f1ad15029db9a.json",
+        "sha256": "ee207b3d1b2ab5499f3bb964e3ad327b23f288b0f0bd9dba3a48598699e91888",
+        "size_bytes": 933
+      },
+      {
+        "name": "case-477dab097eb4ff69bc93.json",
+        "sha256": "91951b71b180138b6bd184e6524398877a9dd2a48cc041d9aed732d3029bfab9",
+        "size_bytes": 19927
+      },
+      {
+        "name": "case-59839c398c6ffca4f92f.json",
+        "sha256": "13df03920c87e704caa094bc47fab78ab462298c6225a88a3a53881232872950",
+        "size_bytes": 19903
+      },
+      {
+        "name": "case-5da14cf018732742de4c.json",
+        "sha256": "998ba2aeaae0add6497d8281871e60cb3e23da62d5b5984c9040db61bb02456c",
+        "size_bytes": 941
+      },
+      {
+        "name": "case-5f7fabc97d296dac703c.json",
+        "sha256": "a26907d4b6f0e34a7292e5682a49a6943a8991f344f187c76dc535635cd42847",
+        "size_bytes": 21788
+      },
+      {
+        "name": "case-61c158a64a668522bc12.json",
+        "sha256": "9d6d5c2295f38e9fb41ca057f3ff866920725eff99c8a7157b88688a2edbc005",
+        "size_bytes": 21889
+      },
+      {
+        "name": "case-6436814cd215b17d9bfd.json",
+        "sha256": "a6b3fec3b3467491e38c0c64b8afd4b9d183fa6f5f46ed7e6e4f957fe9217ed0",
+        "size_bytes": 951
+      },
+      {
+        "name": "case-664851591df825d3a223.json",
+        "sha256": "77b418a101504d0d56e68e794875982d5595734bd38a1d5548403eae47ebfc7a",
+        "size_bytes": 42574
+      },
+      {
+        "name": "case-6a475fa2bb187c2cb02b.json",
+        "sha256": "18d6bd4f61443a77113a50ce94b5bfa17beff454c050d8625235b4d16f0d43fa",
+        "size_bytes": 947
+      },
+      {
+        "name": "case-6ee489b36866ee9436c3.json",
+        "sha256": "31a5cad9512e6d27ea1513307b1d9e11d6d20e25ddaf63cf6ae8773d1aa819ee",
+        "size_bytes": 937
+      },
+      {
+        "name": "case-71041efac891b75ef6b3.json",
+        "sha256": "84193eec83b4b0eb23b24977e7bbf5d191f9507746c743d2082b5ee9bca600e8",
+        "size_bytes": 42533
+      },
+      {
+        "name": "case-7186699ba76372d9ad19.json",
+        "sha256": "5913359e42e3754a8a3bbc2ce87129cd61c7db4130494e02cdee420c9fbe7393",
+        "size_bytes": 937
+      },
+      {
+        "name": "case-7a3e8ca4bc4e5a8a63e3.json",
+        "sha256": "e579ea364abeee0b84769aa9b24a29b3731dc6fc2001912b63598cefaa11f241",
+        "size_bytes": 19904
+      },
+      {
+        "name": "case-7c4c80c51ac61923fd79.json",
+        "sha256": "8448d9e3c6b0439b8b3e800f12723774e9edbdac14b8830ca55d385e9a88b917",
+        "size_bytes": 939
+      },
+      {
+        "name": "case-824a636429b7e98d1d49.json",
+        "sha256": "6776d30236709ca9e24d0ccbf224c5556bac106bb3069ed534b7a98563f4e5be",
+        "size_bytes": 25732
+      },
+      {
+        "name": "case-89b490be7cc755f32d16.json",
+        "sha256": "45ca214749a9f27c606eaf8bfcd3c07e41dd36ac8bb96b951124c1cada8de0b8",
+        "size_bytes": 937
+      },
+      {
+        "name": "case-8c35dbdc53d46e4c0948.json",
+        "sha256": "49715f1481767106ecca5ce53a70e099367e6466c407809c555cf764d26b229c",
+        "size_bytes": 19759
+      },
+      {
+        "name": "case-8df4e24ad0072f14afcf.json",
+        "sha256": "f3c9ee2607e35b746a8087cb6707c528deab62a34c6af439a99375833426cbc1",
+        "size_bytes": 939
+      },
+      {
+        "name": "case-9039606bed02cddce88a.json",
+        "sha256": "f6f526a589a1c6e2ad8e7d1c9ad5d1169e6bc1439078ae61f4528bbf8a14931f",
+        "size_bytes": 941
+      },
+      {
+        "name": "case-9b2f113c0f6c65883dc9.json",
+        "sha256": "8eb4163b60935ee41508b19b46a516e456a241e997f81f98a9836f7a19bc826d",
+        "size_bytes": 943
+      },
+      {
+        "name": "case-a1ed07cd4b00040c3a46.json",
+        "sha256": "ee96e142a2fe33ba40ed201beec648b7279873e38b7a93bb7ad5599c067f902a",
+        "size_bytes": 941
+      },
+      {
+        "name": "case-b720cada39ce332218e9.json",
+        "sha256": "619f867b6df260d41b0574f1d968d4520a008991ec5c960b449015dd3624c015",
+        "size_bytes": 21765
+      },
+      {
+        "name": "case-b729d5f966b64a43b6ea.json",
+        "sha256": "78559010bb2f96d5df0c96da223f5f02dcba59c13c04a84ad40ca3a57ee4c799",
+        "size_bytes": 21831
+      },
+      {
+        "name": "case-b7c1682d59bdc61fca3d.json",
+        "sha256": "9ed453d40f8b78bfdd848935a99860c3f38e800e784f0fd5d2f66f6d6e2ca48e",
+        "size_bytes": 21871
+      },
+      {
+        "name": "case-b884f36f1baf2aa98c37.json",
+        "sha256": "245d4b0211272c1b5d82cff225dc6c083a5e3ce241b57c94554ab8897b31998a",
+        "size_bytes": 931
+      },
+      {
+        "name": "case-b979fcf60cd0c317ca1a.json",
+        "sha256": "6761eb869e51c0def3ead485ee23e8a9004a483fde01ffa131d8437112a8c6b4",
+        "size_bytes": 42520
+      },
+      {
+        "name": "case-bf69525b35f0fa64d204.json",
+        "sha256": "8d26e523b7ce07c9121440e740dd1a4dda6c5a150d4a0114b941d31ed2fa3b35",
+        "size_bytes": 21732
+      },
+      {
+        "name": "case-cae41eef7b104ce8354a.json",
+        "sha256": "f4332a04afc57e1e39996eec6c0ecbf595369435864d7f8ce4d5dafaccf0228c",
+        "size_bytes": 929
+      },
+      {
+        "name": "case-cb87d5726a3844141d98.json",
+        "sha256": "2792607bde367de586d4572f7184026bbbf36df4e6373f9d0b14d190c63c1fa8",
+        "size_bytes": 31501
+      },
+      {
+        "name": "case-e8f4456880f44851964c.json",
+        "sha256": "1dd651f1addad370b2267cc9801b3fa0e5bac9c1ea3284cd6d133a97d670a06e",
+        "size_bytes": 941
+      },
+      {
+        "name": "case-eb989b13e0035327e72c.json",
+        "sha256": "aee00185ec817c003ea83999e8e7f9f903b689c129d960ac589a886cdf29a326",
+        "size_bytes": 29597
+      },
+      {
+        "name": "case-ed2cef2ff27d9e2c12c3.json",
+        "sha256": "55768c8e5b18fb1e71e518a90dd7dd00751728d53a5fc48111f76a7bb70b44c8",
+        "size_bytes": 19791
+      },
+      {
+        "name": "case-f7ae09fca9b434ac25b1.json",
+        "sha256": "484b29ad371db50c66e315f3b68de27ddf54c0dd9aafab06a099bcf6beca8f08",
+        "size_bytes": 25922
+      },
+      {
+        "name": "case-f7cac2d1edca576ab4fe.json",
+        "sha256": "682307a22bd5b31717b01dd8dec956f0f22c50f43ba72a77ea3d36c8762b597e",
+        "size_bytes": 949
+      },
+      {
+        "name": "case-f96e21174f9b3026a8b7.json",
+        "sha256": "718f5c18d145b479a37e0a7c29ff742e4861fb1b05d5b8862cffa0fc62e05a4a",
+        "size_bytes": 25920
+      },
+      {
+        "name": "case-fb3364a03312b9481ace.json",
+        "sha256": "4401dcd87619ee653514338ca676afa42f6816c09e0da8039354da2bd94d8d16",
+        "size_bytes": 939
+      },
+      {
+        "name": "case-fcdf8476a94a7a2f2aa5.json",
+        "sha256": "25f8d89233fdef35a567d64484a4841da52bace39d6fae9680afac01ac03715a",
+        "size_bytes": 935
+      }
+    ]
+  },
+  "claim_boundary": {
+    "cross_engine_parity_established": false,
+    "human_or_coaching_inference": false,
+    "screening_population_evaluated": false
+  },
+  "counts": {
+    "completed": 21,
+    "failed": 0,
+    "registered": 42,
+    "unavailable": 21
+  },
+  "groups": [
+    {
+      "engine": "mujoco",
+      "failure_codes": [],
+      "momentum_refinement_ratios": [
+        0.5311575897995067,
+        0.5105113263909067
+      ],
+      "momentum_relative_residuals": [
+        0.0013949574760987978,
+        0.0007409422508774403,
+        0.000378259411274506
+      ],
+      "passes": true,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "variant": "nominal",
+      "work_refinement_ratios": [
+        0.5451110531659012,
+        0.5115799682743519
+      ],
+      "work_relative_residuals": [
+        0.000765271369981272,
+        0.00041715788244820325,
+        0.00021340961626824763
+      ]
+    },
+    {
+      "engine": "mujoco",
+      "failure_codes": [],
+      "momentum_refinement_ratios": [
+        0.4775291977206389,
+        0.4585702189314422
+      ],
+      "momentum_relative_residuals": [
+        0.0016309386131569618,
+        0.0007788208074724554,
+        0.00035714402819100644
+      ],
+      "passes": true,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "variant": "frictionless",
+      "work_refinement_ratios": [
+        0.4934196498415783,
+        0.46039225628446684
+      ],
+      "work_relative_residuals": [
+        0.001351505810715771,
+        0.0006668595238822341,
+        0.00030701696082492707
+      ]
+    },
+    {
+      "engine": "mujoco",
+      "failure_codes": [],
+      "momentum_refinement_ratios": [
+        0.5636999303987122,
+        0.46626646594564797
+      ],
+      "momentum_relative_residuals": [
+        0.0013297015826871047,
+        0.0007495526896117784,
+        0.0003494912836253391
+      ],
+      "passes": true,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "variant": "high_friction",
+      "work_refinement_ratios": [
+        0.5910101258495961,
+        0.44940762089891645
+      ],
+      "work_relative_residuals": [
+        0.0006531762240598374,
+        0.00038603376238356853,
+        0.00017348651473945715
+      ]
+    },
+    {
+      "engine": "mujoco",
+      "failure_codes": [],
+      "momentum_refinement_ratios": [
+        0.4973610583679427,
+        0.4963621254768833
+      ],
+      "momentum_relative_residuals": [
+        0.0012809821761533284,
+        0.0006371106508820898,
+        0.0003162375968357947
+      ],
+      "passes": true,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "variant": "zero_slack",
+      "work_refinement_ratios": [
+        0.48690414236041274,
+        0.4931254775196332
+      ],
+      "work_relative_residuals": [
+        0.0005523148946214868,
+        0.0002689244100785568,
+        0.00013261347813667398
+      ]
+    },
+    {
+      "engine": "mujoco",
+      "failure_codes": [],
+      "momentum_refinement_ratios": [
+        0.4853170316802883,
+        0.4786471524721123
+      ],
+      "momentum_relative_residuals": [
+        0.0025931135846782773,
+        0.0012584821877258934,
+        0.0006023689155918732
+      ],
+      "passes": true,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "variant": "velocity_reversed",
+      "work_refinement_ratios": [
+        0.5166020316708494,
+        0.5273854123674157
+      ],
+      "work_relative_residuals": [
+        0.0004809863578154726,
+        0.00024847852965343526,
+        0.00013104395182572608
+      ]
+    },
+    {
+      "engine": "mujoco",
+      "failure_codes": [],
+      "momentum_refinement_ratios": [
+        0.5329921011216108,
+        0.4678615471669297
+      ],
+      "momentum_relative_residuals": [
+        0.0018277975492146292,
+        0.000974201656180836,
+        0.0004557914941133512
+      ],
+      "passes": true,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "variant": "zero_preload",
+      "work_refinement_ratios": [
+        0.5248528792514792,
+        0.4678929084986302
+      ],
+      "work_relative_residuals": [
+        0.001352650068879725,
+        0.0007099422832712353,
+        0.0003321769597859367
+      ]
+    },
+    {
+      "engine": "mujoco",
+      "failure_codes": [
+        "work_closure",
+        "momentum_refinement"
+      ],
+      "momentum_refinement_ratios": [
+        0.4920602690839108,
+        0.8832788969845252
+      ],
+      "momentum_relative_residuals": [
+        0.002903340705419869,
+        0.0014286186087511723,
+        0.0012618686689493024
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "variant": "opening_probe",
+      "work_refinement_ratios": [
+        0.4453352983567906,
+        0.3405086734385455
+      ],
+      "work_relative_residuals": [
+        0.03246007196958077,
+        0.014455615835256147,
+        0.004922262571800303
+      ]
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "nominal"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "frictionless"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "high_friction"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "zero_slack"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "velocity_reversed"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "zero_preload"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "opening_probe"
+    }
+  ],
+  "identity": {
+    "execution_revision": "d2800c556153b523bee1833e66ce5d83cf8ea1ba",
+    "plan_sha256": "d2923709afcdfa7853c2218d550ddbb9b1ddb1c928de4dfc897e717cf5896b5b"
+  },
+  "promotion": {
+    "eligible": false,
+    "failure_codes": [
+      "native_engine_unavailable",
+      "cross_engine_parity_unavailable",
+      "case_closure_failure",
+      "refinement_failure"
+    ]
+  },
+  "schema_version": "articulated-forward-attribution-summary/v1"
+}
