@@ -78,9 +78,14 @@ class ForwardAttributionStudyPlan:
         """Return the JSON-serializable preregistration contract."""
 
         return {
-            "schema_version": "1.0.0",
+            "schema_version": "1.1.0",
             "issue": 9153,
             "parent_epic": 8557,
+            "preregistration": {
+                "revision": 2,
+                "amendment_timing": "before_registered_outcome_generation",
+                "amendment": ("add execution_revision to checkpoint resume identity"),
+            },
             "identity": {
                 "source_revision": self.source_revision,
                 "source_data_sha256": self.source_data_sha256,
@@ -90,7 +95,8 @@ class ForwardAttributionStudyPlan:
                 "worker_count": self.worker_count,
                 "case_checkpointing": "atomic_per_case",
                 "resume_identity": (
-                    "source_revision+source_data_sha256+schema_version+case_key"
+                    "source_revision+source_data_sha256+schema_version+"
+                    "execution_revision+case_key"
                 ),
                 "eligible_machine": "serial_cpu_runtime_with_qualified_native_engine",
             },

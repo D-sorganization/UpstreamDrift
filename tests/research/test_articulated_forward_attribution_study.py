@@ -32,10 +32,16 @@ def test_study_plan_emits_versioned_serial_manifest() -> None:
 
     manifest = plan.to_manifest()
 
-    assert manifest["schema_version"] == "1.0.0"
+    assert manifest["schema_version"] == "1.1.0"
     assert manifest["issue"] == 9153
+    assert manifest["preregistration"] == {
+        "revision": 2,
+        "amendment_timing": "before_registered_outcome_generation",
+        "amendment": "add execution_revision to checkpoint resume identity",
+    }
     assert manifest["execution"]["worker_count"] == 1
     assert manifest["execution"]["case_checkpointing"] == "atomic_per_case"
+    assert "execution_revision" in manifest["execution"]["resume_identity"]
     assert manifest["design"]["time_steps_s"] == [0.001, 0.0005, 0.00025]
     assert manifest["promotion"]["human_or_coaching_claims"] is False
     assert (
