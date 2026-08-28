@@ -539,9 +539,26 @@ def run_registered_rigid_smoke(
     )
 
 
+def run_registered_distributed_smoke(
+    *,
+    manifest: Mapping[str, object],
+    execution_revision: str,
+    checkpoint_dir: Path,
+) -> tuple[CaseCheckpoint, ...]:
+    """Run or resume the exact distributed serial smoke atomically."""
+
+    return run_serial_cases(
+        manifest=manifest,
+        execution_revision=execution_revision,
+        checkpoint_dir=checkpoint_dir,
+        evaluator=lambda case: evaluate_distributed_smoke_case(case, manifest),
+    )
+
+
 __all__ = [
     "evaluate_distributed_smoke_case",
     "evaluate_rigid_smoke_case",
     "require_registered_native_engine",
+    "run_registered_distributed_smoke",
     "run_registered_rigid_smoke",
 ]

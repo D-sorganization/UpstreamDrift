@@ -73,22 +73,30 @@ are not completion evidence.
   source-state time, subject-scaled model, native operator, registered variants,
   and event-aligned attribution kernel. It reports closure, contributions,
   club outcomes, complete typed event records, and explicit nonhuman/noncausal/
-  no-static-stick boundaries. Freeze its campaign manifest only after this
-  evaluator checkpoint is committed and remote.
+  no-static-stick boundaries. Evaluator variants and killswitch controls are
+  frozen at remote commit `c166a89399c0a3e4222f232e77bd4a0417b86a8f`.
+- The prospective distributed serial plan binds that evaluator, case 0/sample
+  6 at 0.12 s, 50 ms horizon, three resolutions, MuJoCo/Pinocchio, and seven
+  variants: nominal, frictionless, high friction, zero slack, full velocity
+  reversal, zero preload, and opening probe. It discloses prior pilots, has 42
+  atomic cases, is not launched, and cannot erase the rigid failure or promote
+  human/static-stick claims. Raw/canonical plan hashes are `987ab2ede44f55c1`
+  and `d2923709afcdfa78` respectively.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
 
 ## Immediate Order
 
-1. Specify a pilot-disclosed confirmatory refinement extension without
-   weakening or relabeling the original failures.
-2. Add the distributed evaluator to the registered serial runner and define a
-   separate stateful tangential-compliance countermodel before any true
-   stick/slip claim.
-3. Add matched rigid/shaft/base branches and causal killswitch runs, keeping
+1. Commit the prospective distributed plan, then execute its 42 cases serially
+   through atomic checkpoints; do not amend tolerances after results.
+2. Specify a pilot-disclosed rigid refinement extension without weakening or
+   relabeling the original failures.
+3. Define a separate stateful tangential-compliance countermodel before any
+   true stick/slip claim.
+4. Add matched rigid/shaft/base branches and causal killswitch runs, keeping
    counterfactual outcomes distinct from same-trajectory attribution.
-4. Execute refinement/parity/adverse cases serially, then generate governed
+5. Execute refinement/parity/adverse cases serially, then generate governed
    figures, paper/claim/reviewer integrations, and protected delivery.
 
 ## Scientific Boundaries

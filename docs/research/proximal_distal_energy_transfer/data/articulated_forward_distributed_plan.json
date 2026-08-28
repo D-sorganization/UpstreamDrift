@@ -1,0 +1,218 @@
+{
+  "design": {
+    "contact_law": {
+      "contact_damping_n_s_m": 18.0,
+      "contact_stiffness_n_m": 1800.0,
+      "initial_club_displacement_m": 0.001,
+      "initial_club_velocity_m_s": 0.05,
+      "name": "bilateral_kelvin_voigt_point_attachment_always_active",
+      "unilateral_contact": false
+    },
+    "distributed_contact_law": {
+      "friction_coefficient": 0.3,
+      "name": "distributed_tension_with_regularized_coulomb_limit",
+      "slack_distance_m": 0.0015,
+      "static_stick_modeled": false,
+      "station_count_per_hand": 3,
+      "station_width_m": 0.03,
+      "tangential_damping_n_s_m": 18.0
+    },
+    "duration_s": 0.05,
+    "engines": [
+      "mujoco",
+      "pinocchio"
+    ],
+    "event_kinds": [
+      "opening",
+      "reattachment",
+      "friction_limit_entry",
+      "friction_limit_exit"
+    ],
+    "event_path_model": "linear_state_interpolant",
+    "model_authority": {
+      "path": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+      "state_schema": "18_cases_x_13_samples_x_20_coordinates"
+    },
+    "screening_case_indices": [
+      0,
+      4,
+      8,
+      9,
+      13,
+      17
+    ],
+    "screening_sample_indices": [
+      0,
+      6,
+      12
+    ],
+    "smoke_states": [
+      {
+        "role": "event_bearing_runtime_and_pipeline_qualification_only",
+        "source_case_index": 0,
+        "source_sample_index": 6,
+        "source_time_s": 0.12
+      }
+    ],
+    "time_steps_s": [
+      0.001,
+      0.0005,
+      0.00025
+    ],
+    "variant_parameters": [
+      {
+        "damping_factor": 1.0,
+        "displacement_factor": 1.0,
+        "friction_coefficient_factor": 1.0,
+        "full_state_velocity_factor": 1.0,
+        "name": "nominal",
+        "slack_distance_factor": 1.0,
+        "station_width_factor": 1.0,
+        "stiffness_factor": 1.0,
+        "velocity_factor": 1.0
+      },
+      {
+        "damping_factor": 1.0,
+        "displacement_factor": 1.0,
+        "friction_coefficient_factor": 0.0,
+        "full_state_velocity_factor": 1.0,
+        "name": "frictionless",
+        "slack_distance_factor": 1.0,
+        "station_width_factor": 1.0,
+        "stiffness_factor": 1.0,
+        "velocity_factor": 1.0
+      },
+      {
+        "damping_factor": 1.0,
+        "displacement_factor": 1.0,
+        "friction_coefficient_factor": 2.0,
+        "full_state_velocity_factor": 1.0,
+        "name": "high_friction",
+        "slack_distance_factor": 1.0,
+        "station_width_factor": 1.0,
+        "stiffness_factor": 1.0,
+        "velocity_factor": 1.0
+      },
+      {
+        "damping_factor": 1.0,
+        "displacement_factor": 1.0,
+        "friction_coefficient_factor": 1.0,
+        "full_state_velocity_factor": 1.0,
+        "name": "zero_slack",
+        "slack_distance_factor": 0.0,
+        "station_width_factor": 1.0,
+        "stiffness_factor": 1.0,
+        "velocity_factor": 1.0
+      },
+      {
+        "damping_factor": 1.0,
+        "displacement_factor": 1.0,
+        "friction_coefficient_factor": 1.0,
+        "full_state_velocity_factor": -1.0,
+        "name": "velocity_reversed",
+        "slack_distance_factor": 1.0,
+        "station_width_factor": 1.0,
+        "stiffness_factor": 1.0,
+        "velocity_factor": -1.0
+      },
+      {
+        "damping_factor": 1.0,
+        "displacement_factor": 0.0,
+        "friction_coefficient_factor": 1.0,
+        "full_state_velocity_factor": 1.0,
+        "name": "zero_preload",
+        "slack_distance_factor": 1.0,
+        "station_width_factor": 1.0,
+        "stiffness_factor": 1.0,
+        "velocity_factor": 0.0
+      },
+      {
+        "damping_factor": 1.0,
+        "displacement_factor": 1.0,
+        "friction_coefficient_factor": 1.0,
+        "full_state_velocity_factor": 1.0,
+        "name": "opening_probe",
+        "slack_distance_factor": 1.0,
+        "station_width_factor": 1.0,
+        "stiffness_factor": 1.0,
+        "velocity_factor": -16.0
+      }
+    ],
+    "variants": [
+      "nominal",
+      "frictionless",
+      "high_friction",
+      "zero_slack",
+      "velocity_reversed",
+      "zero_preload",
+      "opening_probe"
+    ]
+  },
+  "estimands": {
+    "forward_counterfactual": "outcome difference between separately integrated matched interventions",
+    "generalized_work": "integral(v_transpose*Q)dt plus integral(0.5*v_transpose*Mdot*v)dt plus event work",
+    "momentum_balance": "delta(Mv)=integral(sum(Q)+Mdot*v)dt+sum(J)",
+    "outcomes": [
+      "clubhead_speed",
+      "clubhead_direction",
+      "face_path_proxy",
+      "contact_load",
+      "event_timing"
+    ],
+    "same_trajectory_attribution": "integrals evaluated on one retained realized state history"
+  },
+  "execution": {
+    "case_checkpointing": "atomic_per_case",
+    "eligible_machine": "serial_cpu_runtime_with_qualified_native_engine",
+    "estimated_registered_case_count": 42,
+    "launch_status": "not_started",
+    "resume_identity": "source_revision+source_data_sha256+schema_version+execution_revision+case_key",
+    "worker_count": 1
+  },
+  "identity": {
+    "random_seed": 9153,
+    "source_data_sha256": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "source_revision": "c166a89399c0a3e4222f232e77bd4a0417b86a8f"
+  },
+  "issue": 9153,
+  "parent_epic": 8557,
+  "preregistration": {
+    "bound_evaluator_revision": "c166a89399c0a3e4222f232e77bd4a0417b86a8f",
+    "pilot_disclosure": [
+      "rigid smoke identified nominal and high-damping coarse-grid transients",
+      "a noncampaign 50 ms distributed probe located opening, reattachment, and friction-limit-entry roots"
+    ],
+    "pilot_exclusion": "pilot outputs are not registered campaign evidence",
+    "timing": "before_registered_distributed_campaign"
+  },
+  "promotion": {
+    "all_native_operators_available": true,
+    "all_retained_cases_close": true,
+    "cross_engine_parity_required": true,
+    "event_topology_retained": true,
+    "human_or_coaching_claims": false,
+    "incomplete_controltower_checkpoints_allowed": false,
+    "kinetic_transport_work_retained": true,
+    "original_rigid_smoke_failure_erased": false,
+    "same_trajectory_and_counterfactual_separate": true,
+    "static_stick_claims": false,
+    "typed_failures_retained": true
+  },
+  "reporting": {
+    "club_face_proxy_axis": "club_local_positive_x",
+    "clubhead_body": "clubhead_mass",
+    "face_path_proxy": "angle between club local +x axis and clubhead velocity in the world frame",
+    "units": "SI",
+    "world_frame": "source_authority_world_xyz"
+  },
+  "schema_version": "distributed-forward-attribution/1.0.0",
+  "tolerances": {
+    "event_gap_m": 1e-10,
+    "event_time_s": 1e-12,
+    "momentum_relative": 0.02,
+    "pointwise_force_closure": 1e-10,
+    "refinement_ratio_limit": 0.8,
+    "trajectory_energy_relative": 0.02,
+    "work_relative": 0.01
+  }
+}
