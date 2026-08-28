@@ -102,11 +102,11 @@ are not completion evidence.
   MuJoCo 3.12.0 and Pin 4.1.0 under Linux/Python 3.11.16; runtime identity is
   `015408e1cb99f48b140206eb994451d385146fc1a58030f968a63770af55f067`.
   Artifact SHA-256 is `447683487f1ea249858caea4e15326b3b37e9de446bf4d9a15bbdb7291218b80`.
-- Timing run 33174130362 completed 0:6; cancelled run 33174462839 preserved 6:22.
-- Run 33177181557 completed all 24 cases 22:46 in 1h06m58s.
+- Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70;
+  cancelled run 33174462839 preserved 6:22. The latest took 55m13s.
 - Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero;
-  combined authority is 46/2,304. Run 33182809219 executes 46:70 with one
-  process and a 90-minute timeout.
+  authority is 70/2,304, manifest SHA-256 `617f8f6b22053f8adb2ed3ce8a148a5a79f4e0e999e471a628010c2c763e4e34`.
+  Run 33187478053 executes 70:94 with one process and a 90-minute timeout.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -116,7 +116,7 @@ are not completion evidence.
 ## Immediate Order
 
 1. Do not restart/combine the Windows diagnostic. Continue 24-case hosted
-   slices from 70 against audit 33173678044; completed JSON requires its NPZ.
+   slices from 94 against audit 33173678044; completed JSON requires its NPZ.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
