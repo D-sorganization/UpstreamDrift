@@ -101,11 +101,12 @@ are not completion evidence.
 - Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
-  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; use the status
-  CLI for counts. Runtime is 24--48 h, one CPU/117 MB, atomic, empty stderr.
-- Runtime audit v1.2 rejects wrong Pin, source drift, and invalid native dynamics.
-  Heavy image/workflow require `pin`/`pin-pink` plus API gate; parity needs a
-  clean `d6bffd0c6` Linux checkout.
+  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 61/2,304
+  retained (31 validated MuJoCo, 30 typed Pin absences), no orphan sidecars,
+  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 11:32 UTC.
+- Runtime audit v1.2 digest `9507556034f2009d7d7cbfbdc2d01e9613024eeb9d8b4bedaac453711801bbd7`
+  qualifies MuJoCo native 20-DOF operators and rejects wrong Pin, source drift,
+  and invalid dynamics. Linux parity needs clean `d6bffd0c6` plus `pin`/`pin-pink`.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.
