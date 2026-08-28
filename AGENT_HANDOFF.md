@@ -102,12 +102,15 @@ are not completion evidence.
 - Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
-  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 91/2,304
-  retained (46 validated MuJoCo, 45 typed Pin absences), no orphan sidecars,
-  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 12:09 UTC.
+  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 110/2,304
+  retained (56 validated MuJoCo, 54 typed Pin absences), no orphan sidecars,
+  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 12:23 UTC.
 - Audit v1.2 digest `9507556034f2009d7d7cbfbdc2d01e9613024eeb9d8b4bedaac453711801bbd7`
   qualifies operators; launch/summary bind it. A copied-sidecar sentinel proves
   hash rejection and summary revalidates it; Linux needs `pin`/`pin-pink`.
+- Summary v1.4 applies the unchanged 0.8 gate to every successive residual
+  ratio and retains the maximum and endpoint ratios. A stalled final step now
+  fails even when the finest-to-coarsest endpoint ratio is below 0.8.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.
@@ -128,7 +131,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current structural/container slice: 62 pass;
+Use Python 3.12 and serial pytest. Current structural/container slice: 63 pass;
 Ruff/Black and configured pre-push gates pass. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
 it does not reach project analysis. Architecture reports only pre-existing

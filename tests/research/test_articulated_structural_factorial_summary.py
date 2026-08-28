@@ -177,6 +177,46 @@ def test_summary_recovers_registered_walsh_coefficients_and_suppresses_parity(
     assert len(summary["contrast_aggregates"]) == 75
 
 
+def test_summary_rejects_a_stalled_final_refinement_step(tmp_path: Path) -> None:
+    plan = _fixture_plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+
+    def stalled_evaluation(case: StructuralCase) -> StructuralEvaluation:
+        evaluation = _evaluation(case)
+        result = dict(evaluation.result)
+        numerical = dict(result["numerical"])
+        numerical["normalized_work_energy_residual"] = {
+            0.0002: 0.04,
+            0.0001: 0.0316,
+            0.00005: 0.0316,
+        }[case.time_step_s]
+        result["numerical"] = numerical
+        return StructuralEvaluation(
+            result=result,
+            parity_arrays=evaluation.parity_arrays,
+        )
+
+    run_serial_cases(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=tmp_path,
+        evaluator=stalled_evaluation,
+    )
+
+    summary = summarize_structural_factorial(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=tmp_path,
+    )
+
+    record = summary["refinement"][0]
+    assert record["fine_to_coarse_ratio"] == pytest.approx(0.79)
+    assert record["successive_refinement_ratios"] == pytest.approx([0.79, 1.0])
+    assert record["maximum_successive_refinement_ratio"] == pytest.approx(1.0)
+    assert record["passes"] is False
+    assert summary["gates"]["all_refinement_groups_pass"] is False
+
+
 def test_summary_fails_closed_when_a_registered_checkpoint_is_missing(
     tmp_path: Path,
 ) -> None:

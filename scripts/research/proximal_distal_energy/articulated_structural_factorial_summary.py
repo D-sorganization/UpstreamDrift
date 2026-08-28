@@ -135,14 +135,19 @@ def _refinement_records(
         ordered = sorted(values, reverse=True)
         residuals = [value for _, value in ordered]
         complete = len(ordered) == 3
-        ratio = residuals[-1] / max(residuals[0], np.finfo(float).tiny)
+        successive_ratios = [
+            later / max(earlier, np.finfo(float).tiny)
+            for earlier, later in zip(residuals, residuals[1:], strict=False)
+        ]
+        maximum_successive_ratio = max(successive_ratios, default=float("inf"))
+        fine_to_coarse_ratio = residuals[-1] / max(residuals[0], np.finfo(float).tiny)
         passes = (
             complete
             and all(
                 later <= earlier + 1e-12
                 for earlier, later in zip(residuals, residuals[1:], strict=False)
             )
-            and ratio <= limit
+            and maximum_successive_ratio <= limit
         )
         if passes:
             passed.add(key)
@@ -151,7 +156,9 @@ def _refinement_records(
                 "group": list(key),
                 "time_steps_s": [step for step, _ in ordered],
                 "normalized_residuals": residuals,
-                "fine_to_coarse_ratio": ratio,
+                "successive_refinement_ratios": successive_ratios,
+                "maximum_successive_refinement_ratio": maximum_successive_ratio,
+                "fine_to_coarse_ratio": fine_to_coarse_ratio,
                 "passes": passes,
             }
         )
@@ -521,7 +528,7 @@ def summarize_structural_factorial(
     )
     aggregates = _contrast_aggregates(plan=plan, contrasts=contrasts)
     return {
-        "schema_version": "articulated-structural-factorial-summary/1.3.0",
+        "schema_version": "articulated-structural-factorial-summary/1.4.0",
         "identity": {
             "plan_sha256": plan_sha256(plan),
             "execution_revision": launch["execution_revision"],
