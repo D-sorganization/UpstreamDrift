@@ -207,6 +207,28 @@ def distributed_reference_lengths(
     return lengths
 
 
+def distributed_signed_gaps(
+    model: SpatialModel,
+    q: FloatArray,
+    *,
+    grip_span_m: float,
+    hand_contact_local_x_m: float,
+    reference_lengths_m: FloatArray,
+    config: DistributedGripConfig,
+) -> FloatArray:
+    """Return signed station distance above the declared free length."""
+
+    references = _validate_reference_lengths(reference_lengths_m, config)
+    hand, _, grip, _ = distributed_contact_kinematics(
+        model,
+        q,
+        grip_span_m=grip_span_m,
+        hand_contact_local_x_m=hand_contact_local_x_m,
+        config=config,
+    )
+    return np.linalg.norm(hand - grip, axis=2) - (references + config.slack_distance_m)
+
+
 def _validate_reference_lengths(
     value: FloatArray, config: DistributedGripConfig
 ) -> FloatArray:
@@ -377,6 +399,9 @@ def _evaluate_all_stations(
     buf: _KinematicsBuffers,
 ) -> None:
     law = config.station_law
+    buf.signed_gaps[:] = np.linalg.norm(hand - grip, axis=2) - (
+        references + config.slack_distance_m
+    )
     station_c_t = (
         config.tangential_damping_n_s_m / config.station_count_per_hand
         if config.station_count_per_hand > 0
@@ -399,9 +424,6 @@ def _evaluate_all_stations(
             buf.normal_forces[h_idx, s_idx] = f_norm
             buf.active[h_idx, s_idx] = snap.active
             buf.extensions[h_idx, s_idx] = snap.extension_m
-            buf.signed_gaps[h_idx, s_idx] = float(np.linalg.norm(disp)) - (
-                references[h_idx, s_idx] + config.slack_distance_m
-            )
             buf.storage += snap.storage_power_w
             normal_diss = snap.dissipation_power_w
             buf.normal_dissipation += normal_diss
@@ -481,6 +503,7 @@ __all__ = [
     "DistributedGripSnapshot",
     "distributed_contact_kinematics",
     "distributed_reference_lengths",
+    "distributed_signed_gaps",
     "evaluate_distributed_grip",
     "evaluate_distributed_grip_kinematics",
 ]
