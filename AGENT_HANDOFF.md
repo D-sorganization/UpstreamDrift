@@ -20,8 +20,8 @@ are not completion evidence.
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`.
   Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`; branch:
   `feat/9153-forward-impulse-work`. No PR exists yet.
-- Remote feature branch is verified through
-  `147846241aa7a17d7f2f057ca5adff27cdd879d5`.
+- Execution sources and launch are verified through
+  `5544c85590cf258dce0c9c7a5bb9e690683c7c1b`.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -102,20 +102,19 @@ are not completion evidence.
   Execution was stopped after 12 JSON-only checkpoints when audit found they
   could not support the registered full-trajectory engine-parity gate. Retain
   `Campaigns/UpstreamDrift-9153-structural-factorial-7b7862f3b` as ineligible.
-- Plan v1.2 and checkpoint v1.1 require SHA-bound compressed parity sidecars.
-  Do not restart until that amendment has a new immutable launch manifest and
-  use a new campaign directory. Estimated serial runtime remains 2.5--3.5 h.
-- The broader audit exposed an inherited provenance failure in
-  `test_articulated_ground_atlas_evidence.py`: the committed atlas records the
-  pre-stateful SHA of `articulated_distributed_grip.py`. Do not rewrite the old
-  atlas metadata. Either reproduce the old authority from its bound revision or
-  rerun a separately versioned ground authority before using it as current
-  execution evidence.
+- Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
+  `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
+- Registered execution is active under PID 31684 at
+  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; its first
+  JSON/NPZ pair passed. Estimated serial runtime is 2.5--3.5 h.
+- The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
+  its metadata; reproduce its bound revision or publish a separately versioned
+  ground authority before treating it as current execution evidence.
 
 ## Immediate Order
 
-1. Commit the v1.2 parity-sidecar amendment, bind a new immutable launch, rerun
-   one disclosed probe, and start only in a new campaign directory.
+1. Monitor PID 31684 without a second run. Verify equal JSON/NPZ counts and an
+   empty `stderr.log`; resume only with the exact v1.2 plan/launch/directory.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. Implement the registered contrast summary while execution proceeds; retain
