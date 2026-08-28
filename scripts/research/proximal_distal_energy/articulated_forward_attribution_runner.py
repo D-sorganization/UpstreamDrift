@@ -21,6 +21,9 @@ _CHECKPOINT_SCHEMA_VERSION = "1.0.0"
 class StudyCase:
     """One immutable engine, variant, and integration-step combination."""
 
+    source_case_index: int
+    source_sample_index: int
+    source_time_s: float
     engine: str
     variant: str
     time_step_s: float
@@ -80,6 +83,34 @@ def _require_steps(value: object) -> tuple[float, ...]:
     return steps
 
 
+def _require_smoke_states(value: object) -> tuple[tuple[int, int, float], ...]:
+    if not isinstance(value, list) or not value:
+        raise ValueError("design.smoke_states must be a nonempty list")
+    states: list[tuple[int, int, float]] = []
+    for slot, item in enumerate(value):
+        state = _require_mapping(item, name=f"design.smoke_states[{slot}]")
+        case_index = state.get("source_case_index")
+        sample_index = state.get("source_sample_index")
+        source_time = state.get("source_time_s")
+        if (
+            isinstance(case_index, bool)
+            or not isinstance(case_index, int)
+            or case_index < 0
+            or isinstance(sample_index, bool)
+            or not isinstance(sample_index, int)
+            or sample_index < 0
+            or isinstance(source_time, bool)
+            or not isinstance(source_time, (int, float))
+            or not math.isfinite(float(source_time))
+            or float(source_time) < 0.0
+        ):
+            raise ValueError("smoke state indices/time must be finite and nonnegative")
+        states.append((case_index, sample_index, float(source_time)))
+    if len(set(states)) != len(states):
+        raise ValueError("design.smoke_states must be unique")
+    return tuple(states)
+
+
 def build_registered_cases(manifest: Mapping[str, object]) -> tuple[StudyCase, ...]:
     """Expand the manifest design in engine, variant, then step order."""
 
@@ -92,13 +123,21 @@ def build_registered_cases(manifest: Mapping[str, object]) -> tuple[StudyCase, .
     engines = _require_strings(design.get("engines"), name="design.engines")
     variants = _require_strings(design.get("variants"), name="design.variants")
     steps = _require_steps(design.get("time_steps_s"))
+    states = _require_smoke_states(design.get("smoke_states"))
     return tuple(
         StudyCase(
+            source_case_index=case_index,
+            source_sample_index=sample_index,
+            source_time_s=source_time,
             engine=engine,
             variant=variant,
             time_step_s=step,
-            case_key=f"{engine}/{variant}/dt={step:g}",
+            case_key=(
+                f"state=case{case_index}-sample{sample_index}/"
+                f"{engine}/{variant}/dt={step:g}"
+            ),
         )
+        for case_index, sample_index, source_time in states
         for engine in engines
         for variant in variants
         for step in steps
@@ -151,6 +190,9 @@ def _checkpoint_path(checkpoint_dir: Path, case: StudyCase) -> Path:
 
 def _case_payload(case: StudyCase) -> dict[str, object]:
     return {
+        "source_case_index": case.source_case_index,
+        "source_sample_index": case.source_sample_index,
+        "source_time_s": case.source_time_s,
         "engine": case.engine,
         "variant": case.variant,
         "time_step_s": case.time_step_s,

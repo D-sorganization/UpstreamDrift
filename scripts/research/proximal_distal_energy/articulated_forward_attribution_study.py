@@ -32,6 +32,9 @@ class ForwardAttributionStudyPlan:
     refinement_ratio_limit: float = 0.8
     gap_tolerance_m: float = 1.0e-10
     event_time_tolerance_s: float = 1.0e-12
+    smoke_states: tuple[tuple[int, int, float], ...] = ((4, 6, 0.12),)
+    screening_case_indices: tuple[int, ...] = (0, 4, 8, 9, 13, 17)
+    screening_sample_indices: tuple[int, ...] = (0, 6, 12)
 
     def __post_init__(self) -> None:
         if not _SHA40.fullmatch(self.source_revision):
@@ -73,18 +76,27 @@ class ForwardAttributionStudyPlan:
                 raise ValueError(f"{name} must be finite and positive")
         if not 0.0 < self.refinement_ratio_limit < 1.0:
             raise ValueError("refinement_ratio_limit must lie in (0, 1)")
+        if self.smoke_states != ((4, 6, 0.12),):
+            raise ValueError("smoke_states must retain the preregistered source state")
+        if self.screening_case_indices != (0, 4, 8, 9, 13, 17):
+            raise ValueError("screening_case_indices must retain the prior authority")
+        if self.screening_sample_indices != (0, 6, 12):
+            raise ValueError("screening_sample_indices must retain the prior authority")
 
     def to_manifest(self) -> dict[str, Any]:
         """Return the JSON-serializable preregistration contract."""
 
         return {
-            "schema_version": "1.1.0",
+            "schema_version": "1.2.0",
             "issue": 9153,
             "parent_epic": 8557,
             "preregistration": {
-                "revision": 2,
+                "revision": 3,
                 "amendment_timing": "before_registered_outcome_generation",
-                "amendment": ("add execution_revision to checkpoint resume identity"),
+                "amendment": (
+                    "freeze the smoke source state and declare the later "
+                    "screening population"
+                ),
             },
             "identity": {
                 "source_revision": self.source_revision,
@@ -105,6 +117,17 @@ class ForwardAttributionStudyPlan:
                 "time_steps_s": list(self.time_steps_s),
                 "engines": list(self.engines),
                 "variants": [variant.name for variant in registered_variants()],
+                "smoke_states": [
+                    {
+                        "source_case_index": case_index,
+                        "source_sample_index": sample_index,
+                        "source_time_s": source_time_s,
+                        "role": "runtime_and_pipeline_qualification_only",
+                    }
+                    for case_index, sample_index, source_time_s in self.smoke_states
+                ],
+                "screening_case_indices": list(self.screening_case_indices),
+                "screening_sample_indices": list(self.screening_sample_indices),
                 "event_path_model": "linear_state_interpolant",
                 "event_kinds": ["opening", "reattachment", "stick", "slip"],
             },

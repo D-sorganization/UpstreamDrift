@@ -32,17 +32,29 @@ def test_study_plan_emits_versioned_serial_manifest() -> None:
 
     manifest = plan.to_manifest()
 
-    assert manifest["schema_version"] == "1.1.0"
+    assert manifest["schema_version"] == "1.2.0"
     assert manifest["issue"] == 9153
     assert manifest["preregistration"] == {
-        "revision": 2,
+        "revision": 3,
         "amendment_timing": "before_registered_outcome_generation",
-        "amendment": "add execution_revision to checkpoint resume identity",
+        "amendment": (
+            "freeze the smoke source state and declare the later screening population"
+        ),
     }
     assert manifest["execution"]["worker_count"] == 1
     assert manifest["execution"]["case_checkpointing"] == "atomic_per_case"
     assert "execution_revision" in manifest["execution"]["resume_identity"]
     assert manifest["design"]["time_steps_s"] == [0.001, 0.0005, 0.00025]
+    assert manifest["design"]["smoke_states"] == [
+        {
+            "source_case_index": 4,
+            "source_sample_index": 6,
+            "source_time_s": 0.12,
+            "role": "runtime_and_pipeline_qualification_only",
+        }
+    ]
+    assert manifest["design"]["screening_case_indices"] == [0, 4, 8, 9, 13, 17]
+    assert manifest["design"]["screening_sample_indices"] == [0, 6, 12]
     assert manifest["promotion"]["human_or_coaching_claims"] is False
     assert (
         manifest["estimands"]["same_trajectory_attribution"]

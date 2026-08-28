@@ -35,8 +35,12 @@ def test_registered_cases_are_complete_unique_and_stably_ordered() -> None:
 
     assert len(cases) == 42
     assert len({case.case_key for case in cases}) == 42
-    assert cases[0].case_key == "mujoco/nominal/dt=0.001"
-    assert cases[-1].case_key == "pinocchio/zero_preload/dt=0.00025"
+    assert cases[0].case_key == "state=case4-sample6/mujoco/nominal/dt=0.001"
+    assert cases[-1].case_key == (
+        "state=case4-sample6/pinocchio/zero_preload/dt=0.00025"
+    )
+    assert cases[0].source_case_index == 4
+    assert cases[0].source_sample_index == 6
 
 
 def test_serial_runner_writes_atomic_checkpoints_and_resumes(tmp_path: Path) -> None:
