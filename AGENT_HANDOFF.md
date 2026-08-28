@@ -33,8 +33,8 @@ partial campaign checkpoints are not completion evidence.
   `019fe886-6614-70a2-a596-e5b0dea725d0`.
 - Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
 - Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
-  `e732757c9`. Remote recovery currently ends at `42a375602`; local committed
-  implementation continues through `f65efb874` and must be pushed normally.
+  `e732757c9`. Remote recovery currently ends at `baf9cb2f8`; local committed
+  implementation continues through `542f5cec5` and must be pushed normally.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
@@ -51,13 +51,15 @@ partial campaign checkpoints are not completion evidence.
   linear state interpolant. Event-aligned replay duplicates pre/post states,
   prevents cross-event quadrature, and registers zero discrete impulse/work
   for the continuous tension law.
-- A committed serial study plan now freezes source revision `e800788ff`, input
+- A committed serial study plan now freezes source revision `0c05e6b99`, input
   SHA-256 `9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779`,
   three time steps, two native engines, seven variants, event/root tolerances,
   distinct attribution/counterfactual estimands, atomic checkpoints, and
-  fail-closed promotion. Pre-outcome revision 2 explicitly adds the exact
-  execution revision to resume identity. Plan SHA-256 is
-  `20c0b5b7cb09844e3d31288bd3bf0bfd98068d38025ff51eb5f73123410b7b63`;
+  fail-closed promotion. Pre-outcome revision 3 retains the exact execution
+  revision in resume identity and binds the 42-case smoke to authority case 4,
+  sample 6 (0.12 s), a runtime/pipeline qualification state only. It separately
+  declares the prior 18-state screening population. Plan SHA-256 is
+  `592892b1373f8873ffe4db221c21da3cf14b24c262b34b99437f15b48410c4f4`;
   a freshness test requires the committed JSON to match its generator.
 - The serial runner expands all 42 engine/variant/step cases, writes fsync plus
   atomic-replace JSON checkpoints, resumes only exact plan/source/data/code
