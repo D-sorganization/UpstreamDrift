@@ -31,6 +31,14 @@ class ForwardAttribution:
     kinetic_energy_change_j: float
     momentum_closure_residual: float
     work_closure_residual_j: float
+    impulse_component_names: tuple[str, ...]
+    impulse_shares: FloatArray
+    impulse_share_adequacy: NDArray[np.bool_]
+    impulse_cancellation_indices: FloatArray
+    work_component_names: tuple[str, ...]
+    work_shares: FloatArray
+    work_share_adequate: bool
+    work_cancellation_index: float
 
     @property
     def continuous_work_j(self) -> float:
@@ -151,6 +159,7 @@ def integrate_forward_attribution(
     segment_ids: IntArray,
     event_impulses: FloatArray,
     event_work_j: FloatArray,
+    share_denominator_floor: float = 1.0e-12,
 ) -> ForwardAttribution:
     """Integrate generalized impulse and work without crossing events.
 
@@ -201,6 +210,8 @@ def integrate_forward_attribution(
         raise ValueError("contribution_names must be nonempty and unique")
     if any(not name.strip() for name in contribution_names):
         raise ValueError("contribution_names must not contain blank names")
+    if not np.isfinite(share_denominator_floor) or share_denominator_floor <= 0.0:
+        raise ValueError("share_denominator_floor must be finite and positive")
 
     transitions = segments[1:] != segments[:-1]
     event_count = int(np.count_nonzero(transitions))
@@ -238,6 +249,31 @@ def integrate_forward_attribution(
     work_residual = float(
         abs(kinetic_energy_change - np.sum(generalized_work) - total_event_work)
     )
+    impulse_components = np.concatenate(
+        (continuous_impulses, transport_impulse[None, :], total_event_impulse[None, :]),
+        axis=0,
+    )
+    impulse_adequacy = np.abs(momentum_change) >= share_denominator_floor
+    impulse_shares = np.full(impulse_components.shape, np.nan)
+    impulse_cancellation = np.full(coordinate_count, np.nan)
+    impulse_shares[:, impulse_adequacy] = (
+        impulse_components[:, impulse_adequacy] / momentum_change[impulse_adequacy]
+    )
+    impulse_cancellation[impulse_adequacy] = np.sum(
+        np.abs(impulse_components[:, impulse_adequacy]), axis=0
+    ) / np.abs(momentum_change[impulse_adequacy])
+    work_components = np.concatenate((generalized_work, np.array([total_event_work])))
+    work_adequate = abs(kinetic_energy_change) >= share_denominator_floor
+    work_shares = (
+        work_components / kinetic_energy_change
+        if work_adequate
+        else np.full(work_components.shape, np.nan)
+    )
+    work_cancellation = (
+        float(np.sum(np.abs(work_components)) / abs(kinetic_energy_change))
+        if work_adequate
+        else float("nan")
+    )
     return ForwardAttribution(
         contribution_names=contribution_names,
         continuous_impulses=np.asarray(continuous_impulses, dtype=np.float64),
@@ -249,6 +285,14 @@ def integrate_forward_attribution(
         kinetic_energy_change_j=kinetic_energy_change,
         momentum_closure_residual=momentum_residual,
         work_closure_residual_j=work_residual,
+        impulse_component_names=contribution_names + ("mass_transport", "event"),
+        impulse_shares=impulse_shares,
+        impulse_share_adequacy=impulse_adequacy,
+        impulse_cancellation_indices=impulse_cancellation,
+        work_component_names=contribution_names + ("event",),
+        work_shares=work_shares,
+        work_share_adequate=work_adequate,
+        work_cancellation_index=work_cancellation,
     )
 
 
@@ -264,6 +308,7 @@ def scale_forward_attribution_inputs(
     event_impulses: FloatArray,
     event_work_j: FloatArray,
     coordinate_scale: FloatArray,
+    share_denominator_floor: float = 1.0e-12,
 ) -> dict[str, Any]:
     """Represent the same trajectory under ``q_scaled = S q``."""
 
@@ -289,6 +334,7 @@ def scale_forward_attribution_inputs(
         "segment_ids": np.asarray(segment_ids, dtype=np.int64),
         "event_impulses": np.einsum("ij,ej->ei", inverse, impulses),
         "event_work_j": np.asarray(event_work_j, dtype=np.float64),
+        "share_denominator_floor": share_denominator_floor,
     }
 
 

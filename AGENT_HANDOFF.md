@@ -37,9 +37,10 @@ partial campaign checkpoints are not completion evidence.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
-- Eight manufactured tests cover constant force/work, variable mass transport,
+- Ten manufactured tests cover constant force/work, variable mass transport,
   event separation, coordinate scaling, malformed topology, mass-rate
-  differentiation, and planted-force corruption. A ninth MuJoCo test replays a
+  differentiation, planted-force corruption, signed cancellation, and
+  denominator suppression. An eleventh MuJoCo test replays a
   five-sample rigid articulated contact trace into configuration, velocity,
   contact, and zero-active contributions with exact pointwise force closure.
 - No branch has been pushed and no PR exists yet. The current work is an
@@ -47,14 +48,12 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Add denominator adequacy and cancellation reporting without inventing an
-   invariant impulse fraction; retain coordinate-wise units/scaling.
-2. Add exact event records and active-set segmentation adapters for the
+1. Add exact event records and active-set segmentation adapters for the
    distributed-grip opening/reattachment and stick/slip authorities.
-3. Add matched rigid/shaft/base branches, causal forward killswitch runs kept
+2. Add matched rigid/shaft/base branches, causal forward killswitch runs kept
    separate from same-trajectory attribution, refinement/parity/adverse cases,
    and a serial smoke manifest.
-4. Generate JSON/NPZ evidence, figures, paper/claim/reviewer integrations, and
+3. Generate JSON/NPZ evidence, figures, paper/claim/reviewer integrations, and
    release manifests; then run full governed gates and protected delivery.
 
 ## Scientific Boundaries

@@ -233,3 +233,50 @@ def test_rigid_contact_trace_replays_registered_force_contributions() -> None:
     assert np.allclose(evidence.generalized_forces[:, 3], 0.0)
     assert np.max(np.abs(evidence.pointwise_force_closure_residual)) <= 1.0e-12
     assert np.all(np.isfinite(evidence.attribution.generalized_work_j))
+
+
+def test_signed_shares_expose_cancellation_without_clipping() -> None:
+    time_s = np.array([0.0, 0.5, 1.0])
+    velocity = time_s[:, None]
+    forces = np.repeat(np.array([[[2.0], [-1.0]]]), 3, axis=0)
+
+    result = integrate_forward_attribution(
+        time_s=time_s,
+        mass_matrices=np.ones((3, 1, 1)),
+        mass_matrix_rates=np.zeros((3, 1, 1)),
+        velocities=velocity,
+        generalized_forces=forces,
+        contribution_names=("positive", "negative"),
+        segment_ids=np.zeros(3, dtype=np.int64),
+        event_impulses=np.empty((0, 1)),
+        event_work_j=np.empty(0),
+    )
+
+    np.testing.assert_allclose(result.impulse_shares[:, 0], [2.0, -1.0, 0.0, 0.0])
+    np.testing.assert_allclose(result.work_shares, [2.0, -1.0, 0.0])
+    assert result.impulse_cancellation_indices[0] == pytest.approx(3.0)
+    assert result.work_cancellation_index == pytest.approx(3.0)
+    assert result.impulse_share_adequacy[0]
+    assert result.work_share_adequate
+
+
+def test_near_zero_share_denominators_are_suppressed() -> None:
+    result = integrate_forward_attribution(
+        time_s=np.array([0.0, 0.5, 1.0]),
+        mass_matrices=np.ones((3, 1, 1)),
+        mass_matrix_rates=np.zeros((3, 1, 1)),
+        velocities=np.zeros((3, 1)),
+        generalized_forces=np.zeros((3, 1, 1)),
+        contribution_names=("contact",),
+        segment_ids=np.zeros(3, dtype=np.int64),
+        event_impulses=np.empty((0, 1)),
+        event_work_j=np.empty(0),
+        share_denominator_floor=1.0e-10,
+    )
+
+    assert not result.impulse_share_adequacy[0]
+    assert not result.work_share_adequate
+    assert np.all(np.isnan(result.impulse_shares))
+    assert np.all(np.isnan(result.work_shares))
+    assert np.isnan(result.impulse_cancellation_indices[0])
+    assert np.isnan(result.work_cancellation_index)
