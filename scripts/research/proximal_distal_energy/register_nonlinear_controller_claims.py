@@ -125,109 +125,123 @@ def _claim(
     }
 
 
-def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]:
+def _registration_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
     boundary = candidates["boundary"]
+    return _claim(
+        claim_id="PD-CLAIM-324",
+        candidates=[candidates["registration"], boundary],
+        statement=(
+            "The prospective registration declares 9 controller families, "
+            "24 evaluation trials, 8 disjoint tuning trials, 0 controller "
+            "evaluations, and 0 ranking-eligible methods."
+        ),
+        classification="prospective_outcome_blind_controller_registration",
+        boundary=(
+            "The finite synthetic registration is not controller performance, "
+            "global optimality, human control, anatomy, fatigue, or coaching evidence."
+        ),
+        falsifier=(
+            "The deterministic report changes, tuning and evaluation overlap, "
+            "a parent digest drifts, or any method becomes ranking-eligible."
+        ),
+        controls=[
+            "three current parent digests",
+            "disjoint outcome-blind split",
+            "typed failure taxonomy",
+            "single-worker checkpoint identity",
+        ],
+        numeric_evidence=[
+            _numeric("9#1", REGISTRATION, "/controller_family_count"),
+            _numeric("24#1", REGISTRATION, "/evaluation_trial_count"),
+            _numeric("8#1", REGISTRATION, "/tuning_trial_count"),
+            _numeric("0#1", REGISTRATION, "/controller_evaluation_count"),
+            _numeric("0#2", REGISTRATION, "/ranking_eligible_method_count"),
+        ],
+    )
+
+
+def _solver_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    boundary = candidates["boundary"]
+    return _claim(
+        claim_id="PD-CLAIM-325",
+        candidates=[candidates["solver"], boundary],
+        statement=(
+            "The manufactured fixture qualifies 1 solver kernel with a "
+            "maximum directional-derivative discrepancy of "
+            "1.0477729794899915e-11, maximum bound violation 0.0, "
+            "0 double-pendulum evaluations, and 0 ranking-eligible methods."
+        ),
+        classification="manufactured_nonlinear_solver_mechanics_qualification",
+        boundary=(
+            "Manufactured solver mechanics are not golf performance, model "
+            "adequacy, human control, passive torque, or coaching evidence."
+        ),
+        falsifier=(
+            "Derivatives, bounds, accepted-cost descent, replay, cold/warm "
+            "sensitivity, typed failure, or zero-evaluation gates fail."
+        ),
+        controls=[
+            "independent directional derivative",
+            "native or in-rollout bounds",
+            "exact replay",
+            "typed nonfinite dynamics failure",
+        ],
+        numeric_evidence=[
+            _numeric("1#1", QUALIFICATION, "/qualified_solver_count"),
+            _numeric(
+                "1.0477729794899915e-11#1",
+                QUALIFICATION,
+                "/directional_derivative_max_abs_error",
+            ),
+            _numeric("0.0#1", QUALIFICATION, "/solvers/0/maximum_bound_violation"),
+            _numeric("0#1", QUALIFICATION, "/double_pendulum_evaluation_count"),
+            _numeric("0#2", QUALIFICATION, "/ranking_eligible_method_count"),
+        ],
+    )
+
+
+def _transport_claim(candidates: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    boundary = candidates["boundary"]
+    return _claim(
+        claim_id="PD-CLAIM-326",
+        candidates=[candidates["transport"], boundary],
+        statement=(
+            "The plant-transport report contains 12 parity cases across 3 "
+            "step sizes and 4 invalid-input controls, with maximum state "
+            "parity error 0.0, 0 controller evaluations, and 0 "
+            "ranking-eligible methods."
+        ),
+        classification="shared_equation_controller_plant_transport_parity",
+        boundary=(
+            "Shared-equation code-path parity is not independent physics "
+            "validation, controller performance, human evidence, or coaching authority."
+        ),
+        falsifier=(
+            "Any step differs from the canonical ODE backend beyond the gate, "
+            "replay or input immutability fails, or an invalid input emits a trajectory."
+        ),
+        controls=[
+            "0.5, 1, and 2 ms steps",
+            "four state and torque cases",
+            "deterministic replay and input immutability",
+            "wrong-size and nonfinite typed failures",
+        ],
+        numeric_evidence=[
+            _numeric("12#1", TRANSPORT, "/parity_case_count"),
+            _numeric("3#1", TRANSPORT, "/step_size_count"),
+            _numeric("4#1", TRANSPORT, "/invalid_input_case_count"),
+            _numeric("0.0#1", TRANSPORT, "/maximum_state_parity_error"),
+            _numeric("0#1", TRANSPORT, "/controller_evaluation_count"),
+            _numeric("0#2", TRANSPORT, "/ranking_eligible_method_count"),
+        ],
+    )
+
+
+def _claims(candidates: dict[str, dict[str, Any]]) -> tuple[dict[str, Any], ...]:
     return (
-        _claim(
-            claim_id="PD-CLAIM-324",
-            candidates=[candidates["registration"], boundary],
-            statement=(
-                "The prospective registration declares 9 controller families, "
-                "24 evaluation trials, 8 disjoint tuning trials, 0 controller "
-                "evaluations, and 0 ranking-eligible methods."
-            ),
-            classification="prospective_outcome_blind_controller_registration",
-            boundary=(
-                "The finite synthetic registration is not controller performance, "
-                "global optimality, human control, anatomy, fatigue, or coaching evidence."
-            ),
-            falsifier=(
-                "The deterministic report changes, tuning and evaluation overlap, "
-                "a parent digest drifts, or any method becomes ranking-eligible."
-            ),
-            controls=[
-                "three current parent digests",
-                "disjoint outcome-blind split",
-                "typed failure taxonomy",
-                "single-worker checkpoint identity",
-            ],
-            numeric_evidence=[
-                _numeric("9#1", REGISTRATION, "/controller_family_count"),
-                _numeric("24#1", REGISTRATION, "/evaluation_trial_count"),
-                _numeric("8#1", REGISTRATION, "/tuning_trial_count"),
-                _numeric("0#1", REGISTRATION, "/controller_evaluation_count"),
-                _numeric("0#2", REGISTRATION, "/ranking_eligible_method_count"),
-            ],
-        ),
-        _claim(
-            claim_id="PD-CLAIM-325",
-            candidates=[candidates["solver"], boundary],
-            statement=(
-                "The manufactured fixture qualifies 1 solver kernel with a "
-                "maximum directional-derivative discrepancy of "
-                "1.0477729794899915e-11, maximum bound violation 0.0, "
-                "0 double-pendulum evaluations, and 0 ranking-eligible methods."
-            ),
-            classification="manufactured_nonlinear_solver_mechanics_qualification",
-            boundary=(
-                "Manufactured solver mechanics are not golf performance, model "
-                "adequacy, human control, passive torque, or coaching evidence."
-            ),
-            falsifier=(
-                "Derivatives, bounds, accepted-cost descent, replay, cold/warm "
-                "sensitivity, typed failure, or zero-evaluation gates fail."
-            ),
-            controls=[
-                "independent directional derivative",
-                "native or in-rollout bounds",
-                "exact replay",
-                "typed nonfinite dynamics failure",
-            ],
-            numeric_evidence=[
-                _numeric("1#1", QUALIFICATION, "/qualified_solver_count"),
-                _numeric(
-                    "1.0477729794899915e-11#1",
-                    QUALIFICATION,
-                    "/directional_derivative_max_abs_error",
-                ),
-                _numeric("0.0#1", QUALIFICATION, "/solvers/0/maximum_bound_violation"),
-                _numeric("0#1", QUALIFICATION, "/double_pendulum_evaluation_count"),
-                _numeric("0#2", QUALIFICATION, "/ranking_eligible_method_count"),
-            ],
-        ),
-        _claim(
-            claim_id="PD-CLAIM-326",
-            candidates=[candidates["transport"], boundary],
-            statement=(
-                "The plant-transport report contains 12 parity cases across 3 "
-                "step sizes and 4 invalid-input controls, with maximum state "
-                "parity error 0.0, 0 controller evaluations, and 0 "
-                "ranking-eligible methods."
-            ),
-            classification="shared_equation_controller_plant_transport_parity",
-            boundary=(
-                "Shared-equation code-path parity is not independent physics "
-                "validation, controller performance, human evidence, or coaching authority."
-            ),
-            falsifier=(
-                "Any step differs from the canonical ODE backend beyond the gate, "
-                "replay or input immutability fails, or an invalid input emits a trajectory."
-            ),
-            controls=[
-                "0.5, 1, and 2 ms steps",
-                "four state and torque cases",
-                "deterministic replay and input immutability",
-                "wrong-size and nonfinite typed failures",
-            ],
-            numeric_evidence=[
-                _numeric("12#1", TRANSPORT, "/parity_case_count"),
-                _numeric("3#1", TRANSPORT, "/step_size_count"),
-                _numeric("4#1", TRANSPORT, "/invalid_input_case_count"),
-                _numeric("0.0#1", TRANSPORT, "/maximum_state_parity_error"),
-                _numeric("0#1", TRANSPORT, "/controller_evaluation_count"),
-                _numeric("0#2", TRANSPORT, "/ranking_eligible_method_count"),
-            ],
-        ),
+        _registration_claim(candidates),
+        _solver_claim(candidates),
+        _transport_claim(candidates),
     )
 
 

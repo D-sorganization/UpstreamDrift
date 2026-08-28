@@ -2660,8 +2660,8 @@
       "bytes": 12636
     },
     "scripts/research/proximal_distal_energy/register_nonlinear_controller_claims.py": {
-      "sha256": "72082faa691b0988949c3a0c3068e11644c679d499ebc65dc9257166e40d5c4d",
-      "bytes": 15503
+      "sha256": "2a68a420aef7768a411a7f1cf9ef49148541a8308056bcdb76bc60d63f425e02",
+      "bytes": 15554
     },
     "scripts/research/proximal_distal_energy/register_numeric_claim_evidence.py": {
       "sha256": "0009665df751d503b202495a00d501086c2f253a8e7faa9b2d66919069b57be1",
