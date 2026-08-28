@@ -621,12 +621,12 @@
       "bytes": 896184
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json": {
-      "sha256": "be7c7691f4de45537d99b58821cbb9941bea786320808c5857a8a4d5f35c20f9",
-      "bytes": 1576247
+      "sha256": "a19626e838e8916729edd9cf57f91b467982f926dcc7c76f3b5e7572a73d80a8",
+      "bytes": 1576407
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_candidate_inventory.json": {
-      "sha256": "33d36fe9285186738209a032edd58108eadc83db1696e2810aaba642dce5b0f8",
-      "bytes": 1171792
+      "sha256": "5c905a96583dc60ef3bde8ac18ccf502e64b907016475ebecc905e93c5a0e767",
+      "bytes": 1172002
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_numeric_comparison_evidence.json": {
       "sha256": "b36ac07809a5e58402b1422ee78a45756df6b604a5dccaf77f29856c7160d6ba",
@@ -2345,8 +2345,8 @@
       "bytes": 9106
     },
     "scripts/research/proximal_distal_energy/migrate_claim_adjudication_v2.py": {
-      "sha256": "87bab2f4e497d101d73d1ef28bbf34d9aee7f49ec85327a8460f34879df29287",
-      "bytes": 20722
+      "sha256": "f65d1c605e9f391193fc081ccfce499db73183dfcc54a98959f031b1eb4afaaa",
+      "bytes": 20892
     },
     "scripts/research/proximal_distal_energy/momentum_geometry_atlas.py": {
       "sha256": "ff67f0fd9ede922bb152734d5717fe6457043873a033b7ebc28a533274c85fdb",

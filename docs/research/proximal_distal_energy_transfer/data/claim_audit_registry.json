@@ -12100,7 +12100,7 @@
       "candidate_ids": [
         "PD-CAND-96f95833c562cb11"
       ],
-      "statement": "In Fradkin and colleagues' sample of 45 male golfers aged 18Ã¢â‚¬â€œ80 with handicaps 2Ã¢â‚¬â€œ27, clubhead speed was strongly associated with handicap (reported r = 0.950).",
+      "statement": "In Fradkin and colleagues' sample of 45 male golfers aged 18\u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u20ac\u015380 with handicaps 2\u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u20ac\u015327, clubhead speed was strongly associated with handicap (reported r = 0.950).",
       "classification": "external_empirical_association",
       "published_status": "supported_after_scope_narrowing",
       "audit_status": "original_abstract_checked_population_limited",
@@ -12113,7 +12113,7 @@
         "https://doi.org/10.1016/S1440-2440(04)80265-2",
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
-      "model_domain": "Cross-sectional association in 45 male golfers, handicaps 2Ã¢â‚¬â€œ27, ten recorded swings per golfer, with clubhead speed estimated from high-speed video.",
+      "model_domain": "Cross-sectional association in 45 male golfers, handicaps 2\u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u20ac\u015327, ten recorded swings per golfer, with clubhead speed estimated from high-speed video.",
       "uncertainty_boundary": "Does not establish drive distance, scoring causality, women, elite-only populations, launch conditions, or a universal performance metric.",
       "competing_explanations": [
         "Handicap-related differences in technique, strength, equipment, and practice exposure",
@@ -12284,7 +12284,7 @@
         "PD-CAND-7570c40d01e68acd",
         "PD-CAND-a16c50fe1b7a7571"
       ],
-      "statement": "In Nesbit and Serrano's four subject-specific inverse-dynamics models, the reported work partition was 68.7Ã¢â‚¬â€œ72.2% for the trunk complex, 24.3Ã¢â‚¬â€œ28% for shoulder and arm joints, and 3.3Ã¢â‚¬â€œ3.8% for modeled leg joints.",
+      "statement": "In Nesbit and Serrano's four subject-specific inverse-dynamics models, the reported work partition was 68.7\u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u20ac\u015372.2% for the trunk complex, 24.3\u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u20ac\u015328% for shoulder and arm joints, and 3.3\u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u20ac\u01533.8% for modeled leg joints.",
       "classification": "external_model_derived_quantitative_result",
       "published_status": "supported_with_model_partition_qualification",
       "audit_status": "source_values_checked_independent_recomputation_open",
