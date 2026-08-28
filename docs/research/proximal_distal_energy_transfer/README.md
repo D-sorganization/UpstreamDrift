@@ -445,6 +445,11 @@ The governed heavy-test Dockerfile and workflow install the `pin` and
 image build and runtime audit are still required before using that environment.
 The audit also requires a finite, symmetric, positive-definite native mass
 matrix and finite bias vector for the governed 20-coordinate articulated model.
+Before evaluating a case, the launcher atomically writes
+`execution-session.json` inside an empty checkpoint directory. That record binds
+the exact plan, launch, runtime-audit files, execution revision, and validated
+runtime identity. A populated unbound directory or any resume identity drift
+fails before evaluator import.
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study

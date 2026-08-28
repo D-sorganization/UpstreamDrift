@@ -5,12 +5,61 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from collections.abc import Sequence
+import hashlib
 import json
+import os
 from pathlib import Path
 
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit import (
     validate_runtime_audit,
 )
+
+_SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
+
+
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _bind_execution_session(
+    *,
+    plan_path: Path,
+    launch_path: Path,
+    runtime_audit_path: Path,
+    launch: dict[str, object],
+    runtime_identity: str,
+    checkpoint_dir: Path,
+) -> Path:
+    """Atomically bind an empty or matching directory to one execution identity."""
+
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    session_path = checkpoint_dir / "execution-session.json"
+    expected: dict[str, object] = {
+        "schema_version": _SESSION_SCHEMA,
+        "execution_revision": launch.get("execution_revision"),
+        "plan_file_sha256": _file_sha256(plan_path),
+        "launch_file_sha256": _file_sha256(launch_path),
+        "runtime_audit_file_sha256": _file_sha256(runtime_audit_path),
+        "runtime_identity_sha256": runtime_identity,
+    }
+    if session_path.exists():
+        try:
+            observed = json.loads(session_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError("execution session identity is unreadable") from exc
+        if observed != expected:
+            raise ValueError("execution session identity does not match this launch")
+        return session_path
+    if any(checkpoint_dir.glob("case-*")):
+        raise ValueError("populated checkpoint directory lacks an execution session")
+    temporary = session_path.with_suffix(".tmp")
+    with temporary.open("w", encoding="utf-8", newline="\n") as stream:
+        json.dump(expected, stream, indent=2, sort_keys=True, ensure_ascii=True)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(temporary, session_path)
+    return session_path
 
 
 def launch_structural_factorial(
@@ -34,6 +83,14 @@ def launch_structural_factorial(
     runtime_identity = validate_runtime_audit(
         plan=plan, launch=launch, audit=runtime_audit
     )
+    session_path = _bind_execution_session(
+        plan_path=plan_path,
+        launch_path=launch_path,
+        runtime_audit_path=runtime_audit_path,
+        launch=launch,
+        runtime_identity=runtime_identity,
+        checkpoint_dir=checkpoint_dir,
+    )
     from scripts.research.proximal_distal_energy.articulated_structural_factorial_evaluator import (
         evaluate_structural_case,
     )
@@ -54,6 +111,7 @@ def launch_structural_factorial(
         "status_counts": dict(sorted(counts.items())),
         "resumed_count": sum(checkpoint.resumed for checkpoint in checkpoints),
         "runtime_identity_sha256": runtime_identity,
+        "execution_session_path": str(session_path.resolve()),
     }
 
 
