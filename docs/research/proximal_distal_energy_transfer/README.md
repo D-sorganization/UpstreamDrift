@@ -432,6 +432,11 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
   --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/checkpoints \
   --output C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/summary.json
+# render one raw-unit outcome per reviewer figure after summary validation
+python3 -m scripts.research.proximal_distal_energy.make_articulated_structural_factorial_figure \
+  --summary C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/summary.json \
+  --outcome final_club_translation_speed_m_s \
+  --output docs/research/proximal_distal_energy_transfer/figures/fig_structural_factorial_club_speed
 
 The registered Windows execution treats robotics Pinocchio absence as a typed
 missing cell. The system Python resolves the unrelated `pinocchio==0.4.3`
