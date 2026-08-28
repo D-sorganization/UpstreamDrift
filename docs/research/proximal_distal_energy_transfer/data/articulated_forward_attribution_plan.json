@@ -1,14 +1,14 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "issue": 9153,
   "parent_epic": 8557,
   "preregistration": {
-    "revision": 2,
+    "revision": 3,
     "amendment_timing": "before_registered_outcome_generation",
-    "amendment": "add execution_revision to checkpoint resume identity"
+    "amendment": "freeze the smoke source state and declare the later screening population"
   },
   "identity": {
-    "source_revision": "e800788ff553938225ca64b671e636108a6fe49c",
+    "source_revision": "0c05e6b99e8936aa14fa7b68733705e3bbe950ce",
     "source_data_sha256": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "random_seed": 9153
   },
@@ -31,6 +31,16 @@
       "velocity_reversed",
       "zero_preload"
     ],
+    "smoke_states": [
+      {
+        "source_case_index": 4,
+        "source_sample_index": 6,
+        "source_time_s": 0.12,
+        "role": "runtime_and_pipeline_qualification_only"
+      }
+    ],
+    "screening_case_indices": [0, 4, 8, 9, 13, 17],
+    "screening_sample_indices": [0, 6, 12],
     "event_path_model": "linear_state_interpolant",
     "event_kinds": ["opening", "reattachment", "stick", "slip"]
   },
