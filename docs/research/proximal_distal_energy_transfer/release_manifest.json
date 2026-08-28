@@ -497,8 +497,8 @@
       "bytes": 15238
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_claim_adjudication_summary.qmd": {
-      "sha256": "8ecf8005df6da85956c1f9623946e7fc97bc5a03a15ed3bea0eb46547e48e0be",
-      "bytes": 5559
+      "sha256": "7b5eddc7940355ceba5eebf839c164aaca46bf38bcdb35ad54a333d4b78ac66a",
+      "bytes": 5769
     },
     "docs/research/proximal_distal_energy_transfer/data/advanced_biological_bridge.json": {
       "sha256": "ab074f55458dae1356f6fc3d88e291254d7498d715ea21000bc2ce055e2a0c85",
@@ -2065,8 +2065,8 @@
       "bytes": 2981
     },
     "scripts/research/proximal_distal_energy/claim_adjudication_summary.py": {
-      "sha256": "65abecc45f3b81a726c41d849ff10a59ca4d1e370f370f81f35a7339dd8150bc",
-      "bytes": 19865
+      "sha256": "b97c78a54fb00120025726dbfd8f96b065ad334ac28a1f73c621bd3e6cbcf94d",
+      "bytes": 21534
     },
     "scripts/research/proximal_distal_energy/claim_audit.py": {
       "sha256": "167a93f091a5a6ecb1f1623dced2fdf374ec3196c7d0e3ad08e4756131b0f7e6",
