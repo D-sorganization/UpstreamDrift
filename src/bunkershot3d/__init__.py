@@ -45,8 +45,14 @@ from typing import Any as _Any
 __version__ = "0.1.0"
 
 # Subpackages: the primary API surface.
+#
+# ``backends`` is deliberately excluded from this eager block (issue #9145):
+# it imports mujoco, which touches a PyOpenGL binding at *import time*. That
+# made ``import bunkershot3d`` -- and therefore every leaf import like
+# ``from bunkershot3d.solvers import EnvelopeStatus`` -- drag in mujoco and
+# OpenGL, crashing on GL-less machines. It is attached lazily below via
+# ``__getattr__`` (PEP 562) instead, alongside the driver classes it exports.
 from . import (
-    backends,
     ball,
     calibration,
     config,
@@ -79,8 +85,8 @@ from .ball import (
     to_post_impact_state,
 )
 
-# Backend drivers
-from .backends import ChronoDriver, LiggghtsDriver, MPMDriver
+# Backend drivers: see the ``backends``-import comment above -- these resolve
+# lazily through ``__getattr__`` rather than being imported here.
 
 # Calibration
 from .calibration import (
@@ -153,7 +159,8 @@ from .provenance import RunManifest, Validity, config_hash, physics_hash
 from .sand import SandState, usga_reference_sand
 
 if _TYPE_CHECKING:  # pragma: no cover - typing only
-    from . import study
+    from . import backends, study
+    from .backends import ChronoDriver, LiggghtsDriver, MPMDriver
 
 #: Subpackages attached on first access rather than at import time.
 #:
@@ -162,20 +169,32 @@ if _TYPE_CHECKING:  # pragma: no cover - typing only
 #: therefore ``bunkershot3d.postproc``, which cross-engine code imports for
 #: wrench traces -- require the optimisation extras.
 #: ``tests/bunkershot3d/test_optimizer.py`` pins that boundary.
-_LAZY_SUBMODULES = frozenset({"study"})
+#:
+#: ``backends`` imports mujoco, which touches a PyOpenGL binding at import
+#: time (issue #9145). Importing it eagerly made ``import bunkershot3d`` --
+#: and therefore any leaf import such as
+#: ``from bunkershot3d.solvers import EnvelopeStatus`` -- drag in mujoco and
+#: OpenGL, crashing with an ``AttributeError`` on GL-less machines.
+_LAZY_SUBMODULES = frozenset({"backends", "study"})
+
+#: Names re-exported from ``backends`` without importing it eagerly. Looking
+#: one of these up imports the (lazy) ``backends`` submodule and pulls the
+#: name off it, so the driver classes still resolve on first *use*.
+_LAZY_BACKEND_NAMES = frozenset({"ChronoDriver", "LiggghtsDriver", "MPMDriver"})
 
 
 def __getattr__(name: str) -> _Any:
-    """Attach a lazily-imported subpackage on first access (PEP 562).
+    """Attach a lazily-imported subpackage or backend driver (PEP 562).
 
     Args:
         name: Attribute being looked up.
 
     Returns:
-        The imported submodule.
+        The imported submodule, or a driver class re-exported from it.
 
     Raises:
-        AttributeError: ``name`` is not a lazy submodule of this package.
+        AttributeError: ``name`` is not a lazy submodule or backend name of
+            this package.
     """
     if name in _LAZY_SUBMODULES:
         import importlib
@@ -183,12 +202,17 @@ def __getattr__(name: str) -> _Any:
         module = importlib.import_module(f"{__name__}.{name}")
         globals()[name] = module
         return module
+    if name in _LAZY_BACKEND_NAMES:
+        backends_module = __getattr__("backends")
+        value = getattr(backends_module, name)
+        globals()[name] = value
+        return value
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__() -> list[str]:
     """Return the public surface, including not-yet-imported submodules."""
-    return sorted(set(globals()) | _LAZY_SUBMODULES)
+    return sorted(set(globals()) | _LAZY_SUBMODULES | _LAZY_BACKEND_NAMES)
 
 
 __all__: list[str] = [

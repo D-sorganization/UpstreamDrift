@@ -24,6 +24,8 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
         "local_linear_diagnostics",
         "constraint_internal_force_diagnostics",
         "closed_loop_singularity_margin",
+        "phase_event_stability",
+        "trajectory_control_authority",
         "double_pendulum_identifiability",
         "forward_two_hand",
         "moving_base_flexible_club",
@@ -65,6 +67,12 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["claims"]["human_experimental"] == "untested"
     assert manifest["claims"]["feasible_closed_loop_singularity_margin"] == (
         "supported_for_declared_exact_planar_kinematic_triangle"
+    )
+    assert manifest["claims"]["phase_event_finite_time_stability"] == (
+        "supported_for_declared_local_nonperiodic_analytical_trajectory"
+    )
+    assert manifest["claims"]["trajectory_varying_event_control_authority"] == (
+        "supported_for_declared_local_first_order_analytical_trajectory"
     )
     assert manifest["claims"]["double_pendulum_base_coefficient_excitation"] == (
         "full_rank_for_registered_synthetic_record"
@@ -139,6 +147,22 @@ def test_release_manifest_has_model_ladder_presets_and_neutral_boundaries() -> N
     assert manifest["presets"]["forward_modal_shaft"]["command"].endswith(
         "run_moving_base_modal_shaft_study"
     )
+    assert manifest["presets"]["phase_event_stability"] == {
+        "command": (
+            "python -m scripts.research.proximal_distal_energy."
+            "run_phase_event_stability write"
+        ),
+        "tier": ("analytical_double_pendulum_local_finite_time_event_sensitivity"),
+    }
+    assert manifest["presets"]["trajectory_control_authority"] == {
+        "command": (
+            "python -m scripts.research.proximal_distal_energy."
+            "run_trajectory_control_authority write"
+        ),
+        "tier": (
+            "analytical_double_pendulum_trajectory_varying_event_conditioned_authority"
+        ),
+    }
     allocation_command = manifest["presets"]["torque_allocation_preload"]["command"]
     assert allocation_command.endswith("run_torque_allocation_preload_study")
     assert (

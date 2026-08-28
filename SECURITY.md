@@ -198,7 +198,7 @@ vulnerabilities once a fixed package version is available.
 
 ### Archive Directory
 
-⚠️ **WARNING**: The `/engines/pendulum_models/archive/` directory contains legacy code with known vulnerabilities:
+**WARNING**: The `/engines/pendulum_models/archive/` directory contains legacy code with known vulnerabilities:
 
 - **Unsafe eval() usage**: Code injection risk
 - **No security updates**: Unmaintained code

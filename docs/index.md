@@ -6,11 +6,16 @@ below with an owner and stability tag so new documentation has a clear home.
 
 ## Canonical User Documentation
 
-The rendered documentation surface is
-[upstream-drift.readthedocs.io](https://upstream-drift.readthedocs.io), backed
-by the Sphinx project in `docs/sphinx/`. Repository Markdown remains useful for
-development notes, governance records, and source-adjacent references, but user
-navigation should start with the rendered documentation URL.
+User navigation starts at the [documentation hub](README.md) in this repository.
+It is the canonical entry point and is kept current with the source tree.
+
+A Sphinx project exists in `docs/sphinx/` and can be built locally, but it is not
+published to a hosted documentation site. Earlier revisions of this repository
+advertised `upstream-drift.readthedocs.io`; that address was never configured and
+does not resolve. Do not link to it.
+
+Repository Markdown carries development notes, governance records, and
+source-adjacent references. The catalog below records where each belongs.
 
 ## Directory Catalog
 
