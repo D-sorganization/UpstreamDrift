@@ -20,8 +20,8 @@ are not completion evidence.
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`.
   Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`; branch:
   `feat/9153-forward-impulse-work`. No PR exists yet.
-- Remote feature branch contains the prospective structural-factorial design
-  through `9ecd1688262cbd69a07c553f35ef6c9287df34dc`.
+- Remote feature branch is verified through
+  `147846241aa7a17d7f2f057ca5adff27cdd879d5`.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -87,18 +87,24 @@ are not completion evidence.
 
 ## Prospective Structural Factorial
 
-- Commit `9ecd1688262cbd69a07c553f35ef6c9287df34dc` freezes an outcome-blind
-  2^4 design over shaft bending, shaft torsion, base translation, and base free
-  moment. It retains 12 prior states, both velocity signs, three steps, two
-  engines, and four horizons: 2,304 registered engine attempts.
+- Plan v1.1 freezes the outcome-blind 2^4 shaft-bending, shaft-torsion,
+  base-translation, and free-moment matrix: 12 states, two directions, three
+  steps, two engines, four horizons, and 2,304 registered engine attempts.
 - Primary estimands are the four main effects and six two-factor interactions
   computed as exact within-state Walsh contrasts. Peak load and dissipated work
   are reported mediators, not post-hoc eligibility filters. Higher-order
   contrasts are explicitly exploratory.
-- Execution is intentionally blocked until a combined runner is implemented
-  and bound to an immutable revision. The frozen resource contract is one
-  Python process, one worker, at most two logical CPUs, and atomic per-attempt
-  checkpoints on DeskComputer; ControlTower remains excluded.
+- A disclosed first probe failed closed on a stale formatting-only shaft-source
+  hash and produced no outcome. Commit `7b7862f3b` repaired that provenance;
+  the regenerated NPZ is byte-identical. Launch manifest `147846241` binds the
+  runner to exact execution revision `7b7862f3b3a9e69c055ba920ac4c68da72177f39`.
+- The passing non-evidence probe took 4.02 s at 0.2 ms with residual 0.00291.
+  Execution was stopped after 12 JSON-only checkpoints when audit found they
+  could not support the registered full-trajectory engine-parity gate. Retain
+  `Campaigns/UpstreamDrift-9153-structural-factorial-7b7862f3b` as ineligible.
+- Plan v1.2 and checkpoint v1.1 require SHA-bound compressed parity sidecars.
+  Do not restart until that amendment has a new immutable launch manifest and
+  use a new campaign directory. Estimated serial runtime remains 2.5--3.5 h.
 - The broader audit exposed an inherited provenance failure in
   `test_articulated_ground_atlas_evidence.py`: the committed atlas records the
   pre-stateful SHA of `articulated_distributed_grip.py`. Do not rewrite the old
@@ -108,14 +114,12 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Implement a lean combined shaft--ground runner against the frozen structural
-   factorial. Add atomic checkpoints, typed engine absence, exact factorial
-   contrast evaluation, and a disclosed runtime-only probe; then bind a
-   separate immutable launch manifest before execution.
+1. Commit the v1.2 parity-sidecar amendment, bind a new immutable launch, rerun
+   one disclosed probe, and start only in a new campaign directory.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
-3. Execute the registered factorial serially, retain sign reversals and missing
-   cells, and continue causal driver/contact killswitch runs.
+3. Implement the registered contrast summary while execution proceeds; retain
+   sign reversals, numerical failures, and typed missing cells.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
 4. Project only protected UpstreamDrift evidence into AffineDrift; continue

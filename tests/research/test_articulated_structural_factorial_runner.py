@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_plan import (
@@ -13,6 +14,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_pl
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
     NativeEngineUnavailable,
     StructuralCase,
+    StructuralEvaluation,
     build_launch_manifest,
     build_registered_cases,
     load_registered_checkpoints,
@@ -86,9 +88,12 @@ def test_serial_runner_is_atomic_resumable_and_identity_bound(tmp_path: Path) ->
     launch = _launch(plan)
     calls: list[str] = []
 
-    def evaluate(case: StructuralCase) -> dict[str, object]:
+    def evaluate(case: StructuralCase) -> StructuralEvaluation:
         calls.append(case.case_key)
-        return {"horizons": [{"horizon_s": 0.05, "retained": True}]}
+        return StructuralEvaluation(
+            result={"horizons": [{"horizon_s": 0.05, "retained": True}]},
+            parity_arrays={"time_s": np.array([0.0, 0.05])},
+        )
 
     first = run_serial_cases(
         plan=plan,
@@ -111,6 +116,9 @@ def test_serial_runner_is_atomic_resumable_and_identity_bound(tmp_path: Path) ->
     payload = json.loads(first[0].path.read_text(encoding="utf-8"))
     assert payload["identity"]["execution_revision"] == EXECUTION_REVISION
     assert payload["case"]["cell_id"] == "0000"
+    sidecar = first[0].path.with_suffix(".npz")
+    assert sidecar.is_file()
+    assert payload["outcome"]["parity_sidecar"]["path"] == sidecar.name
 
 
 def test_native_absence_is_typed_and_unexpected_failure_is_not_retained(
@@ -119,7 +127,7 @@ def test_native_absence_is_typed_and_unexpected_failure_is_not_retained(
     plan = _tiny_plan()
     launch = _launch(plan)
 
-    def unavailable(case: StructuralCase) -> dict[str, object]:
+    def unavailable(case: StructuralCase) -> StructuralEvaluation:
         raise NativeEngineUnavailable(engine=case.engine, detail="not installed")
 
     checkpoints = run_serial_cases(
@@ -130,7 +138,7 @@ def test_native_absence_is_typed_and_unexpected_failure_is_not_retained(
     )
     assert all(checkpoint.status == "unavailable" for checkpoint in checkpoints)
 
-    def broken(_case: StructuralCase) -> dict[str, object]:
+    def broken(_case: StructuralCase) -> StructuralEvaluation:
         raise RuntimeError("planted integration failure")
 
     with pytest.raises(RuntimeError, match="planted integration failure"):
@@ -152,7 +160,9 @@ def test_launch_and_checkpoint_loading_fail_closed_on_identity_drift(
         plan=plan,
         launch=launch,
         checkpoint_dir=tmp_path,
-        evaluator=lambda _case: {"retained": True},
+        evaluator=lambda _case: StructuralEvaluation(
+            result={"retained": True}, parity_arrays={"x": np.array([1.0])}
+        ),
     )
 
     drifted = dict(launch)
@@ -161,6 +171,29 @@ def test_launch_and_checkpoint_loading_fail_closed_on_identity_drift(
         load_registered_checkpoints(
             plan=plan,
             launch=drifted,
+            checkpoint_dir=tmp_path,
+        )
+
+
+def test_checkpoint_loader_rejects_missing_or_corrupt_parity_sidecar(
+    tmp_path: Path,
+) -> None:
+    plan = _tiny_plan()
+    launch = _launch(plan)
+    checkpoints = run_serial_cases(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=tmp_path,
+        evaluator=lambda _case: StructuralEvaluation(
+            result={"retained": True}, parity_arrays={"x": np.array([1.0])}
+        ),
+    )
+    checkpoints[0].path.with_suffix(".npz").write_bytes(b"corrupt")
+
+    with pytest.raises(ValueError, match="sidecar is missing or corrupt"):
+        load_registered_checkpoints(
+            plan=plan,
+            launch=launch,
             checkpoint_dir=tmp_path,
         )
 

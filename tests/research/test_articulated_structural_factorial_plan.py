@@ -43,8 +43,11 @@ def _plan() -> StructuralFactorialPlan:
 def test_plan_is_a_complete_outcome_blind_binary_factorial() -> None:
     manifest = _plan().to_manifest()
 
-    assert manifest["schema_version"] == "articulated-structural-factorial-plan/1.1.0"
-    assert "no outcome was produced" in manifest["preregistration"]["amendment"]
+    assert manifest["schema_version"] == "articulated-structural-factorial-plan/1.2.0"
+    assert (
+        "neither run produced eligible evidence"
+        in manifest["preregistration"]["amendment"]
+    )
     design = manifest["design"]
     assert design["factors"] == [
         "shaft_bending",
@@ -96,6 +99,7 @@ def test_plan_is_serial_interrupt_safe_and_not_yet_executable() -> None:
     assert execution["worker_count"] == 1
     assert execution["maximum_python_process_count"] == 1
     assert execution["checkpoint_policy"] == "one_atomic_checkpoint_per_attempt"
+    assert "compressed NPZ" in execution["parity_sidecar_policy"]
     assert execution["launch_status"] == "blocked_pending_immutable_runner_revision"
     assert manifest["promotion"]["eligible"] is False
 

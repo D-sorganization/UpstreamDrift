@@ -122,7 +122,7 @@ class StructuralFactorialPlan:
             * len(_ENGINES)
         )
         return {
-            "schema_version": "articulated-structural-factorial-plan/1.1.0",
+            "schema_version": "articulated-structural-factorial-plan/1.2.0",
             "study_id": "prospective-rigid-shaft-ground-pathway-factorial",
             "identity": {
                 "design_authority_revision": self.design_authority_revision,
@@ -134,8 +134,9 @@ class StructuralFactorialPlan:
                 "status": "design_frozen_execution_not_started",
                 "amendment": (
                     "v1.1 adds the byte-identical regenerated shaft-basis NPZ and its "
-                    "updated formatting-only source provenance after the disclosed "
-                    "timing probe failed closed; no outcome was produced"
+                    "updated formatting-only source provenance after the first disclosed "
+                    "timing probe failed closed; a second pre-execution audit adds full "
+                    "parity sidecars before restart; neither run produced eligible evidence"
                 ),
                 "reason": (
                     "the shaft and ground atlases used post-registered outcome matching; "
@@ -239,6 +240,10 @@ class StructuralFactorialPlan:
                 "maximum_python_process_count": 1,
                 "maximum_logical_cpu_count": 2,
                 "checkpoint_policy": "one_atomic_checkpoint_per_attempt",
+                "parity_sidecar_policy": (
+                    "each completed JSON checkpoint binds a compressed NPZ containing "
+                    "time, state, contact force, active-set, and ground-force histories"
+                ),
                 "resume_policy": "verify_identity_and_hash_then_skip_complete_checkpoint",
                 "runtime_calibration": (
                     "run a disclosed non-evidence timing probe before launch; do not use "

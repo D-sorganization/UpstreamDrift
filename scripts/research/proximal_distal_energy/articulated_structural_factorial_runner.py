@@ -12,9 +12,12 @@ from pathlib import Path
 import re
 from typing import Any
 
+import numpy as np
+from numpy.typing import NDArray
+
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
-_CHECKPOINT_SCHEMA = "articulated-structural-factorial-checkpoint/1.0.0"
-_LAUNCH_SCHEMA = "articulated-structural-factorial-launch/1.0.0"
+_CHECKPOINT_SCHEMA = "articulated-structural-factorial-checkpoint/1.1.0"
+_LAUNCH_SCHEMA = "articulated-structural-factorial-launch/1.1.0"
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +44,14 @@ class StructuralCheckpoint:
     path: Path
     status: str
     resumed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class StructuralEvaluation:
+    """JSON summary plus compressed arrays required for engine parity."""
+
+    result: Mapping[str, object]
+    parity_arrays: Mapping[str, NDArray[Any]]
 
 
 class NativeEngineUnavailable(Exception):
@@ -214,6 +225,7 @@ def build_launch_manifest(
         "worker_count": 1,
         "maximum_python_process_count": 1,
         "checkpoint_policy": "one_atomic_checkpoint_per_attempt",
+        "parity_sidecar_policy": "one_sha256_bound_npz_per_completed_attempt",
         "status": "ready_for_disclosed_timing_probe_then_registered_execution",
     }
 
@@ -232,6 +244,8 @@ def _validate_launch(
         or launch.get("worker_count") != 1
         or launch.get("maximum_python_process_count") != 1
         or launch.get("checkpoint_policy") != "one_atomic_checkpoint_per_attempt"
+        or launch.get("parity_sidecar_policy")
+        != "one_sha256_bound_npz_per_completed_attempt"
         or launch.get("registered_case_count") != len(build_registered_cases(plan))
     ):
         raise ValueError("launch identity does not match the frozen plan")
@@ -257,6 +271,10 @@ def _path(directory: Path, case: StructuralCase) -> Path:
     return directory / f"case-{digest}.json"
 
 
+def _sidecar_path(path: Path) -> Path:
+    return path.with_suffix(".npz")
+
+
 def _write_atomic(path: Path, payload: Mapping[str, object]) -> None:
     temporary = path.with_suffix(".tmp")
     serialized = json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True) + "\n"
@@ -265,6 +283,28 @@ def _write_atomic(path: Path, payload: Mapping[str, object]) -> None:
         stream.flush()
         os.fsync(stream.fileno())
     os.replace(temporary, path)
+
+
+def _write_atomic_npz(path: Path, arrays: Mapping[str, NDArray[Any]]) -> str:
+    if not arrays:
+        raise ValueError("completed evaluation must contain parity arrays")
+    normalized: dict[str, NDArray[Any]] = {}
+    for name, value in arrays.items():
+        if not isinstance(name, str) or not name:
+            raise ValueError("parity array names must be nonempty strings")
+        array = np.asarray(value)
+        if array.dtype.hasobject or array.ndim < 1:
+            raise ValueError("parity arrays must be non-object arrays with dimensions")
+        if np.issubdtype(array.dtype, np.number) and np.any(~np.isfinite(array)):
+            raise ValueError("numeric parity arrays must be finite")
+        normalized[name] = array
+    temporary = path.with_suffix(".tmp")
+    with temporary.open("wb") as stream:
+        np.savez_compressed(stream, **normalized)
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(temporary, path)
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _load(
@@ -292,6 +332,20 @@ def _load(
     status = outcome.get("status")
     if status not in {"completed", "unavailable", "failed"}:
         raise ValueError("checkpoint outcome status is invalid")
+    sidecar = _sidecar_path(path)
+    if status == "completed":
+        metadata = _mapping(outcome.get("parity_sidecar"), name="parity_sidecar")
+        if (
+            metadata.get("path") != sidecar.name
+            or not sidecar.is_file()
+            or metadata.get("sha256")
+            != hashlib.sha256(sidecar.read_bytes()).hexdigest()
+        ):
+            raise ValueError(
+                "completed checkpoint parity sidecar is missing or corrupt"
+            )
+    elif sidecar.exists():
+        raise ValueError("non-completed checkpoint must not have a parity sidecar")
     return StructuralCheckpoint(case=case, path=path, status=str(status), resumed=True)
 
 
@@ -300,7 +354,7 @@ def run_serial_cases(
     plan: Mapping[str, object],
     launch: Mapping[str, object],
     checkpoint_dir: Path,
-    evaluator: Callable[[StructuralCase], Mapping[str, object]],
+    evaluator: Callable[[StructuralCase], StructuralEvaluation],
 ) -> tuple[StructuralCheckpoint, ...]:
     """Run or resume all cases, retaining only typed native absence."""
 
@@ -324,7 +378,7 @@ def run_serial_cases(
             )
             continue
         try:
-            result = evaluator(case)
+            evaluation = evaluator(case)
         except NativeEngineUnavailable as exc:
             if exc.engine != case.engine:
                 raise ValueError(
@@ -339,9 +393,15 @@ def run_serial_cases(
                 },
             }
         else:
-            if not isinstance(result, Mapping):
-                raise TypeError("evaluator must return a mapping")
-            outcome = {"status": "completed", "result": dict(result)}
+            if not isinstance(evaluation, StructuralEvaluation):
+                raise TypeError("evaluator must return a StructuralEvaluation")
+            sidecar = _sidecar_path(path)
+            sidecar_sha256 = _write_atomic_npz(sidecar, evaluation.parity_arrays)
+            outcome = {
+                "status": "completed",
+                "result": dict(evaluation.result),
+                "parity_sidecar": {"path": sidecar.name, "sha256": sidecar_sha256},
+            }
         _write_atomic(
             path,
             {
@@ -397,6 +457,7 @@ __all__ = [
     "NativeEngineUnavailable",
     "StructuralCase",
     "StructuralCheckpoint",
+    "StructuralEvaluation",
     "build_launch_manifest",
     "build_registered_cases",
     "load_registered_checkpoints",

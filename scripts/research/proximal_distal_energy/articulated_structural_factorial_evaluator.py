@@ -40,6 +40,7 @@ from scripts.research.proximal_distal_energy.articulated_shaft import (
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
     NativeEngineUnavailable,
     StructuralCase,
+    StructuralEvaluation,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import (
     SpatialModel,
@@ -264,7 +265,7 @@ def _horizon_rows(
 
 def evaluate_structural_case(
     case: StructuralCase, plan: Mapping[str, object]
-) -> dict[str, object]:
+) -> StructuralEvaluation:
     """Execute one registered intervention and return all nested horizons."""
 
     if not isinstance(case, StructuralCase):
@@ -318,7 +319,7 @@ def evaluate_structural_case(
     residual = np.asarray(trace["work_energy_residual_j"], dtype=float)
     energy = np.asarray(trace["total_energy_j"], dtype=float)
     normalized_residual = float(np.max(np.abs(residual)) / max(1.0, np.ptp(energy)))
-    return {
+    result = {
         "engine": engine,
         "estimand": "within_synthetic_model_structural_intervention",
         "horizons": _horizon_rows(
@@ -354,6 +355,20 @@ def evaluate_structural_case(
             "human_or_coaching_inference": False,
         },
     }
+    return StructuralEvaluation(
+        result=result,
+        parity_arrays={
+            "time_s": np.asarray(trace["time_s"]),
+            "q": np.asarray(trace["q"]),
+            "qd": np.asarray(trace["qd"]),
+            "elastic_coordinates": np.asarray(trace["elastic_coordinates"]),
+            "base_coordinates": np.asarray(trace["base_coordinates"]),
+            "net_club_force_n": contact_force,
+            "maximum_station_force_n": np.asarray(trace["maximum_station_force_n"]),
+            "active_station_count": np.asarray(trace["active_station_count"]),
+            "ground_force_n": np.asarray(trace["ground_force_n"]),
+        },
+    )
 
 
 __all__ = [
