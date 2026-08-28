@@ -20,8 +20,8 @@ are not completion evidence.
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`.
   Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`; branch:
   `feat/9153-forward-impulse-work`. No PR exists yet.
-- Remote feature branch is verified at
-  `7ef30c925f932ba545d30064e2039583ad5332ff`.
+- Remote feature branch contains the prospective structural-factorial design
+  through `9ecd1688262cbd69a07c553f35ef6c9287df34dc`.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -85,15 +85,37 @@ are not completion evidence.
   and passes the computational publication profile. Tagged-PDF and font-resource
   findings remain explicit archival gaps.
 
+## Prospective Structural Factorial
+
+- Commit `9ecd1688262cbd69a07c553f35ef6c9287df34dc` freezes an outcome-blind
+  2^4 design over shaft bending, shaft torsion, base translation, and base free
+  moment. It retains 12 prior states, both velocity signs, three steps, two
+  engines, and four horizons: 2,304 registered engine attempts.
+- Primary estimands are the four main effects and six two-factor interactions
+  computed as exact within-state Walsh contrasts. Peak load and dissipated work
+  are reported mediators, not post-hoc eligibility filters. Higher-order
+  contrasts are explicitly exploratory.
+- Execution is intentionally blocked until a combined runner is implemented
+  and bound to an immutable revision. The frozen resource contract is one
+  Python process, one worker, at most two logical CPUs, and atomic per-attempt
+  checkpoints on DeskComputer; ControlTower remains excluded.
+- The broader audit exposed an inherited provenance failure in
+  `test_articulated_ground_atlas_evidence.py`: the committed atlas records the
+  pre-stateful SHA of `articulated_distributed_grip.py`. Do not rewrite the old
+  atlas metadata. Either reproduce the old authority from its bound revision or
+  rerun a separately versioned ground authority before using it as current
+  execution evidence.
+
 ## Immediate Order
 
-1. Audit the existing articulated rigid, passive-shaft, and finite-base
-   authorities to define one prospective matched structural matrix. Freeze the
-   matching variables, tolerances, causal interventions, and resource budget
-   before running it.
+1. Implement a lean combined shaft--ground runner against the frozen structural
+   factorial. Add atomic checkpoints, typed engine absence, exact factorial
+   contrast evaluation, and a disclosed runtime-only probe; then bind a
+   separate immutable launch manifest before execution.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
-3. Continue matched rigid/shaft/base branches and causal killswitch runs.
+3. Execute the registered factorial serially, retain sign reversals and missing
+   cells, and continue causal driver/contact killswitch runs.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
 4. Project only protected UpstreamDrift evidence into AffineDrift; continue
