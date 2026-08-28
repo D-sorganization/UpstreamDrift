@@ -59,6 +59,18 @@ partial campaign checkpoints are not completion evidence.
   computational PDF
   qualification renders all 252 pages and passes, while tagged-PDF and font
   resources remain explicitly reported archival gaps.
+- Protected CI run `33142288256` found one release-governance defect after the
+  scientific jobs passed: the locked adjudication and PDF expectations still
+  described the prior 325-claim, 251-page paper. The feature branch now carries
+  an explicit 328-claim migration snapshot (308 supported, 5 inconclusive,
+  15 untested), preserves both prior source digests, regenerates the reviewer
+  JSON/CSV/chapter, and rebuilds the optimized 252-page PDF. Its current local
+  SHA-256 is `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
+  Eighty focused scientific, evidence, release, governance, claim-audit, and
+  publication-quality tests pass serially. The 702-artifact release validates,
+  and PDF pages 235--237 were visually inspected without clipping or overflow.
+  Commit, push, and the protected rerun still remain before this repair is
+  merge evidence.
 - Architecture remains green through a narrow #9151 exception for the
   hash-bound ten-parameter native control evaluator. It expires 2026-09-30 and
   must be removed when the next forward-attribution slice can regenerate native
@@ -72,9 +84,9 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Inspect exact protected checks on PR #9152's current remote head, fix only
-   actionable source failures, preserve
-   squash auto-merge, and verify the squash commit on remote main.
+1. Commit and push the validated 328-claim CI repair, then inspect exact
+   protected checks on PR #9152's new remote head. Preserve squash auto-merge
+   and verify the squash commit on remote main.
 2. Refresh AffineDrift only from that immutable qualified UpstreamDrift squash,
    then verify its protected merge and public paper links.
 
