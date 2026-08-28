@@ -1,0 +1,80 @@
+{
+  "schema_version": "upstreamdrift/design-manual-governance/1.0.0",
+  "program": {
+    "epic": 9064,
+    "current_subepic": 9066,
+    "next_subepic": 9067
+  },
+  "canonical_source": {
+    "manual_id": "upstreamdrift",
+    "format": "qmd",
+    "path": "manuals/upstreamdrift",
+    "repository_role": "scientific-computation-and-product-authority",
+    "existing_documentation_relationship": "separate-products-not-manual-authority"
+  },
+  "contracts": {
+    "owner_repository": "D-sorganization/Engineering-Design-Manuals",
+    "calculation_registry": "https://schemas.d-sorganization.org/calculation-registry/1.0.0.json",
+    "publication_projection": "https://schemas.d-sorganization.org/engineering-manuals/publication-projection/1.0.0"
+  },
+  "calculation_inventory": {
+    "path": "manuals/upstreamdrift/calculation-registry.json",
+    "owner_subepic": 9067
+  },
+  "generated_outputs": {
+    "editable": false,
+    "required_release_formats": ["html", "latex", "pdf", "docx"],
+    "current_artifact_status": "not-generated-not-approved"
+  },
+  "freshness": {
+    "enforcement": "release-blocking",
+    "current_gate": "blocked-pending-UP-D7",
+    "impacted_paths": [
+      "src",
+      "scripts",
+      "schemas",
+      "config",
+      "rust",
+      "manuals/upstreamdrift"
+    ],
+    "exemptions": "structured-owned-expiring-only"
+  },
+  "publication": {
+    "default": "deny-until-approved",
+    "public_projection_allowed": false,
+    "catalog_repository": "D-sorganization/Engineering-Design-Manuals",
+    "projection_manifest_path": "manuals/upstreamdrift/publication-projection.json",
+    "current_approval": "blocked-pending-UP-D5-D7-D8",
+    "required_evidence": [
+      "immutable_source_commit",
+      "source_tree_sha256",
+      "calculation_registry_sha256",
+      "toolchain_lock_sha256",
+      "artifact_sha256",
+      "semantic_parity",
+      "pdf_page_review",
+      "docx_page_review",
+      "human_approval"
+    ]
+  },
+  "quality": {
+    "python_version": "3.12",
+    "python_formatter": "ruff format",
+    "principles": ["TDD", "DbC", "DRY", "LoD"]
+  },
+  "git": {
+    "default_branch": "main",
+    "pull_request_target": "main",
+    "direct_push": false,
+    "auto_merge": false
+  },
+  "agent_context": {
+    "required_update_files": [
+      "scripts/config/design_manual_governance.json",
+      "manuals/upstreamdrift/calculation-registry.json",
+      "SPEC.md",
+      "AGENT_HANDOFF.md"
+    ],
+    "required_gate": "python3 -m scripts.check_design_manual_governance"
+  }
+}
