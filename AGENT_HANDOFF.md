@@ -104,8 +104,8 @@ are not completion evidence.
   Artifact SHA-256 is `447683487f1ea249858caea4e15326b3b37e9de446bf4d9a15bbdb7291218b80`.
 - Timing run 33174130362 completed 0:6. Run 33174462839 timed out at 30 min but
   uploaded 16 valid contiguous cases 6:22. Combined authority has 22/2,304.
-- Collector `ab2f908ad` records requested/observed ranges and failed conclusions;
-  it rejects drift, overlap, corruption, and gaps. Run 33177181557 executes
+- Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero.
+  Run 33177181557 executes
   22:46 with one process and a 90-minute timeout.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
