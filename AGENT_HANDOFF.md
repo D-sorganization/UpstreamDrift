@@ -33,8 +33,8 @@ partial campaign checkpoints are not completion evidence.
   `019fe886-6614-70a2-a596-e5b0dea725d0`.
 - Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`.
 - Branch: `feat/9153-forward-impulse-work`, created cleanly from protected
-  `e732757c9`. Remote recovery currently ends at `43d7955a3`; local committed
-  implementation continues through `efc55a3bc` and must be pushed normally.
+  `e732757c9`. Remote recovery currently ends at `7c6fbcce7`; local committed
+  implementation continues through `cf8fcf9a8` and must be pushed normally.
 - The pure kernel separates continuous generalized-force impulse/work,
   independently evaluated `Mdot v` momentum transport, and registered event
   impulse/work. Duplicate event times are integrated as separate segments.
@@ -51,7 +51,14 @@ partial campaign checkpoints are not completion evidence.
   linear state interpolant. Event-aligned replay duplicates pre/post states,
   prevents cross-event quadrature, and registers zero discrete impulse/work
   for the continuous tension law.
-- Twenty-six affected focused tests, Ruff, and format pass. Focused MyPy first
+- A committed serial study plan now freezes source revision `4c6b2120f`, input
+  SHA-256 `9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779`,
+  three time steps, two native engines, seven variants, event/root tolerances,
+  distinct attribution/counterfactual estimands, atomic checkpoints, and
+  fail-closed promotion. Plan SHA-256 is
+  `7f56450a1cfad36c2a408b88db9d181c6d095c7b31853aed953ed6f8855a6d82`;
+  a freshness test requires the committed JSON to match its generator.
+- Thirty-one affected focused tests, Ruff, and format pass. Focused MyPy first
   exposed inherited scientific-script typing debt, then the installed MyPy
   crashed internally under `--follow-imports=skip`; do not misreport this as a
   green type gate.
@@ -65,9 +72,10 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Add stick/slip event surfaces and build a versioned serial smoke manifest
-   with typed native-runtime failures and three-resolution promotion gates.
-2. Add matched rigid/shaft/base branches, causal forward killswitch runs kept
+1. Implement the atomic serial case runner from the frozen plan, retaining
+   typed native-runtime failures, resume identity, and three-resolution gates;
+   add the still-missing stick/slip event surfaces.
+2. Add matched rigid/shaft/base branches and causal forward killswitch runs kept
    separate from same-trajectory attribution, refinement/parity/adverse cases,
    and a serial smoke manifest.
 3. Generate JSON/NPZ evidence, figures, paper/claim/reviewer integrations, and
@@ -107,6 +115,7 @@ portable tests. Run Python tests with `-n 0`.
 
 ```powershell
 python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution.py
+python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution_study.py
 python -m pytest -n 0 -q tests/research/test_articulated_contact_events.py tests/research/test_articulated_distributed_grip.py tests/research/test_articulated_distributed_forward.py
 python -m ruff check scripts/research/proximal_distal_energy/articulated_forward_attribution.py scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py tests/research/test_articulated_forward_attribution.py
 python -m ruff format --check scripts/research/proximal_distal_energy/articulated_forward_attribution.py scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py tests/research/test_articulated_forward_attribution.py
