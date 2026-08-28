@@ -1,94 +1,56 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-27
+Updated: 2026-08-28
 
 Epic #8557 is the canonical completion authority. Issue state, local files, and
 partial campaign checkpoints are not completion evidence.
 
 ## Protected Authority
 
-- UpstreamDrift remote `main` is `10a247ba23df55537933f072d2e9adddae08b7a4`.
-- PR #9136 merged the nonlinear reaching/control and Swing Objective Lab stack
-  as `1b867e9da38dc6c3a321e0f7c199586fff5cf7be`.
-- The qualified paper has 251 pages and SHA-256
-  `92bfaca850ac459cc431e573be8c0288af51ceab4d28759d02c67c602274ee8b`.
-- Its 325 claims, 144 numeric contracts, 498/498 governed literals, and 693
-  release artifacts are computationally qualified. The PDF is still untagged
-  and retains Type 3 and two unembedded resources, so it is not archival.
-- AffineDrift PR #3991 pins the exact #9136 authority; protected squash/current
-  remote main is `17a6a65b8c95145fc56d90af8c139aa3b049c5b6`.
+- UpstreamDrift remote `main` is
+  `85cce4d3307bb7ad3953d9fc6e583e370803515c`, the protected squash of
+  #9152 for #9151.
+- The qualified paper has 252 pages and SHA-256
+  `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
+- Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
+  evidence references, and 419 local evidence artifacts are computationally
+  qualified. The PDF remains non-archival because tagged-PDF and font-resource
+  gates are still open.
+- AffineDrift PR #3993 pins the exact #9152 authority as protected squash
+  `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995
+  merged as `6cc909273d63147392b17078a35c6c4da034e1da`. All hosted checks passed.
+- Tools PR #4669 merged as `f9730033fd279ba8b4abe03bab2aadd950400b47`;
+  UpstreamDrift #8358 is closed after protected consumer integration. Tools
+  #4142 remains the broader reusable-variation completion authority.
 - Tools R14.6 registration/acceptance, calibrated renderer, and extension map
   merged through protected squashes `b2d7f721`, `d7a95e2a`, and `da0759c7`.
   The trusted rendered-evidence run remains capacity-pending; do not rerun it.
 
-## Active Scientific Slice: #9151
+## Active Publication Integrity Slice: #9142 / PR #9147
 
-- Issue: #9151, `Research: Qualify Articulated Drift and Contact Attribution`.
-- Worktree: `UpstreamDrift-worktrees/9151-articulated-drift-attribution`.
-- Branch: `feat/9151-articulated-drift-attribution` from current remote main.
-- Objective: carry the formal same-state configuration, velocity, contact, and
-  applied-input decomposition into all 234 subject-scaled articulated states.
-- Pure Python 3.12 contracts are implemented test-first and pass eight focused
-  tests. They close acceleration and power exactly, provide coordinate-invariant
-  mass-metric shares, report cancellation, and suppress inadequate ratios.
-- The native atlas binds those contracts to MuJoCo and robotics Pinocchio, zero
-  applied input, contact/velocity/gravity killswitches, coordinate scaling,
-  coincident/reversed geometry, and a corrupted-force sentinel.
-- Native Windows reproduction is not qualified: PyPI `pin` lacks a usable
-  Windows wheel in the project environment, and an isolated conda-forge attempt
-  exposed binary incompatibility. Do not commit or treat those local runtime
-  attempts as evidence.
-- PR #9152 is open with squash auto-merge enabled. Resolve its current exact
-  head from `git rev-parse origin/feat/9151-articulated-drift-attribution`
-  before acting. Ubuntu native-evidence run `33139951819`, job
-  `98748338285`, passed from exact head `cb8af2cd846da351fdfa5c4bbee15f9ee6e62ad9`.
-  Its downloaded JSON/NPZ reports MuJoCo 3.12.0, Pinocchio 4.1.0, 234 states,
-  zero failed engine-states, and all registered gates passed. Independent NPZ
-  inspection found every numeric array finite and every per-state gate true.
-- The transient path-scoped generation workflow was removed after that
-  successful run because repository policy prohibits active-workflow growth and
-  direct hosted-runner routing. The stable public runner, figure, registration,
-  README commands, committed evidence, and standard-CI evidence tests remain;
-  do not recreate a one-off workflow for the next tier.
-- The evidence, four-panel PDF/SVG figure, chapter, claims PD-CLAIM-327--329,
-  data dictionary, release preset/claim, release review, and evidence/release
-  tests are now integrated locally. The optimized paper has 252 pages and the
-  new section/figure were visually inspected on pages 148--149 without clipping
-  or an intervening float. The final 702-artifact release, checksum, and
-  2,495-reference/419-local-artifact claim-evidence manifests validate locally;
-  computational PDF
-  qualification renders all 252 pages and passes, while tagged-PDF and font
-  resources remain explicitly reported archival gaps.
-- Protected CI run `33142288256` found one release-governance defect after the
-  scientific jobs passed: the locked adjudication and PDF expectations still
-  described the prior 325-claim, 251-page paper. The feature branch now carries
-  an explicit 328-claim migration snapshot (308 supported, 5 inconclusive,
-  15 untested), preserves both prior source digests, regenerates the reviewer
-  JSON/CSV/chapter, and rebuilds the optimized 252-page PDF. Its current local
-  SHA-256 is `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
-  Eighty focused scientific, evidence, release, governance, claim-audit, and
-  publication-quality tests pass serially. The 702-artifact release validates,
-  and PDF pages 235--237 were visually inspected without clipping or overflow.
-  Commit, push, and the protected rerun still remain before this repair is
-  merge evidence.
-- Architecture remains green through a narrow #9151 exception for the
-  hash-bound ten-parameter native control evaluator. It expires 2026-09-30 and
-  must be removed when the next forward-attribution slice can regenerate native
-  evidence after introducing a cohesive evaluator context.
-- The four tests in `test_articulated_drift_contact_attribution.py` remain in
-  the suite-marker baseline because that file is hash-bound to the successful
-  native evidence. Mark them `scientific` and remove those baseline entries only
-  with the next native regeneration; do not rewrite the recorded source hash.
-- Do not close #9151 until this complete publication slice passes protected CI,
-  squash-merges, and the merge commit is verified on remote main.
+- #9142 prevents the generated claim-adjudication chapter from emitting
+  repository-relative `data/` links that break when AffineDrift republishes the
+  chapter. PR #9147 owns the implementation; do not create a duplicate PR.
+- Worktree: `UpstreamDrift-worktrees/9142-portable-links`.
+- Local branch: `fix/9142-portable-links`, tracking the PR branch through a
+  merge-only reconciliation with current `origin/main`; never force-push.
+- The source now emits portable UpstreamDrift `blob/main` links, while the
+  AffineDrift publication boundary remains responsible for immutable SHA
+  rewriting. The focused five-test generator/committed-artifact suite passes.
+- Release manifests were regenerated after reconciling #9151. Complete serial
+  validation, commit the merge, push to the existing PR branch, preserve squash
+  auto-merge, inspect actionable hosted failures, and verify its squash on
+  remote `main` before closing this slice.
 
 ## Immediate Order
 
-1. Commit and push the validated 328-claim CI repair, then inspect exact
-   protected checks on PR #9152's new remote head. Preserve squash auto-merge
-   and verify the squash commit on remote main.
-2. Refresh AffineDrift only from that immutable qualified UpstreamDrift squash,
-   then verify its protected merge and public paper links.
+1. Finish and protected-merge #9147 without changing scientific content.
+2. Register the next #8557 child for matched forward impulse/work attribution
+   through contact transitions. Its contract must freeze event surfaces,
+   contact-state matching, impulse/work estimands, shaft/base coupling,
+   uncertainty, adverse loads, killswitches, and evidence promotion rules.
+3. Implement that child from a clean leased worktree only after its issue and
+   dependency order are visible in #8557.
 
 ## Scientific Boundaries
 

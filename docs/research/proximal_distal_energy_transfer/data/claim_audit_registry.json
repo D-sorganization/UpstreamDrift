@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-audit-v2",
   "paper": {
     "source": "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd",
-    "source_digest": "c541c17cd99a7fd0638af0bb3afcdac63c0366e19d7c9dcbdf4f5d46d0c4886e",
+    "source_digest": "71a28cc854e86abf8d1cc72812cbd0af424807a9fe7d1f86869ec4228aaa570f",
     "baseline_commit": "a4b53e39b"
   },
   "audit_scope": {
@@ -12048,7 +12048,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-aa6efbe9274b5d53",
+      "candidate_id": "PD-CAND-a9f37172857a4493",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
@@ -12056,7 +12056,7 @@
       "last_verified_on": "2026-08-23"
     },
     {
-      "candidate_id": "PD-CAND-ab4689630944a0fe",
+      "candidate_id": "PD-CAND-aa6efbe9274b5d53",
       "disposition": "editorial_or_navigation",
       "claim_ids": [],
       "rationale": "Generated reviewer projection of existing claim outcomes and qualification axes; it introduces no new scientific estimand.",
