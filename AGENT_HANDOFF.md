@@ -62,6 +62,13 @@ are not completion evidence.
   identities, retains every failure, inventories exact bytes, and refuses
   promotion if parity is unavailable or not yet evaluated. A freshness test
   regenerates the committed summary from the published checkpoints.
+- Distributed friction semantics now separate tangential motion from actual
+  Coulomb-limit engagement. `slipping_station` means the cap is active;
+  per-station motion, signed force margin, and a `static_stick_modeled=false`
+  boundary are retained. Event alignment supports distinct friction-limit
+  entry/exit records in addition to opening/reattachment. A registered 50 ms,
+  three-station probe locates 4 openings, 8 reattachments, and 4 limit entries
+  while retaining zero discrete impulse/work for the continuous law.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
@@ -70,9 +77,9 @@ are not completion evidence.
 
 1. Specify a pilot-disclosed confirmatory refinement extension without
    weakening or relabeling the original failures.
-2. Add distributed stick/slip events and the distributed forward evaluator.
-   Treat the current viscous/Coulomb regularization as a model limitation: do
-   not label tangential motion as true static sticking without a stateful law.
+2. Add the distributed evaluator to the registered serial runner and define a
+   separate stateful tangential-compliance countermodel before any true
+   stick/slip claim.
 3. Add matched rigid/shaft/base branches and causal killswitch runs, keeping
    counterfactual outcomes distinct from same-trajectory attribution.
 4. Execute refinement/parity/adverse cases serially, then generate governed

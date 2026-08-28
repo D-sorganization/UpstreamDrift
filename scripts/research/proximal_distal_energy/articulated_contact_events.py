@@ -19,6 +19,13 @@ class ContactEventKind(str, Enum):
     REATTACHMENT = "reattachment"
 
 
+class FrictionEventKind(str, Enum):
+    """Transitions into or out of the regularized Coulomb force limit."""
+
+    LIMIT_ENTRY = "friction_limit_entry"
+    LIMIT_EXIT = "friction_limit_exit"
+
+
 @dataclass(frozen=True, slots=True)
 class ContactEventRecord:
     """One root located on the registered linear state interpolant."""
@@ -34,6 +41,27 @@ class ContactEventRecord:
     gap_residual_m: float
     final_bracket_width_s: float
     path_model: str = "linear_state_interpolant"
+
+
+@dataclass(frozen=True, slots=True)
+class FrictionEventRecord:
+    """One Coulomb-limit root; this is not evidence of static sticking."""
+
+    kind: FrictionEventKind
+    time_s: float
+    left_index: int
+    right_index: int
+    hand_index: int
+    station_index: int
+    position: FloatArray
+    velocity: FloatArray
+    friction_margin_residual_n: float
+    final_bracket_width_s: float
+    path_model: str = "linear_state_interpolant"
+    static_stick_modeled: bool = False
+
+
+EventRecord = ContactEventRecord | FrictionEventRecord
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,7 +96,7 @@ def _root_fraction(
     if abs(right_gap) <= gap_tolerance_m:
         return 1.0, right_gap, 0.0
     if np.signbit(left_gap) == np.signbit(right_gap):
-        raise ValueError("active-set transition does not bracket a signed-gap root")
+        raise ValueError("active-set transition does not bracket a scalar root")
     lower, upper = 0.0, 1.0
     f_lower = left_gap
     midpoint = 0.5
@@ -207,12 +235,134 @@ def locate_contact_events(
     )
 
 
+def locate_friction_limit_events(
+    *,
+    time_s: FloatArray,
+    positions: FloatArray,
+    velocities: FloatArray,
+    station_friction_margin_n: FloatArray,
+    station_active: NDArray[np.bool_],
+    station_friction_limited: NDArray[np.bool_],
+    margin_evaluator: Callable[[FloatArray, FloatArray], FloatArray],
+    force_tolerance_n: float = 1.0e-10,
+    time_tolerance_s: float = 1.0e-12,
+    max_iterations: int = 80,
+) -> tuple[FrictionEventRecord, ...]:
+    """Locate regularized Coulomb-limit transitions on a linear state path.
+
+    Only intervals active at both endpoints are eligible. Opening and
+    reattachment remain contact events. The underlying law has no tangential
+    displacement state, so limit exit must not be interpreted as static stick.
+    """
+
+    time = _finite("time_s", time_s, ndim=1)
+    q = _finite("positions", positions, ndim=2)
+    qd = _finite("velocities", velocities, ndim=2)
+    margins = _finite("station_friction_margin_n", station_friction_margin_n, ndim=3)
+    active = np.asarray(station_active, dtype=bool)
+    limited = np.asarray(station_friction_limited, dtype=bool)
+    if time.size < 2 or np.any(np.diff(time) <= 0.0):
+        raise ValueError("time_s must contain at least two strictly increasing samples")
+    if q.shape != qd.shape or q.shape[0] != time.size:
+        raise ValueError("positions and velocities must share shape")
+    if margins.shape[0] != time.size or active.shape != margins.shape:
+        raise ValueError("friction margin and active arrays must share trace shape")
+    if limited.shape != margins.shape:
+        raise ValueError("friction-limited state must share the margin shape")
+    if np.any(limited & ~active):
+        raise ValueError("an inactive station cannot be friction limited")
+    if not callable(margin_evaluator):
+        raise TypeError("margin_evaluator must be callable")
+    if not np.isfinite(force_tolerance_n) or force_tolerance_n <= 0.0:
+        raise ValueError("force_tolerance_n must be finite and positive")
+    if not np.isfinite(time_tolerance_s) or time_tolerance_s <= 0.0:
+        raise ValueError("time_tolerance_s must be finite and positive")
+
+    transitions = limited[1:] != limited[:-1]
+    transitions &= active[1:] & active[:-1]
+    records: list[FrictionEventRecord] = []
+    for left_index, hand_index, station_index in np.argwhere(transitions):
+        left_index = int(left_index)
+        right_index = left_index + 1
+        hand_index = int(hand_index)
+        station_index = int(station_index)
+        q_left, q_right = q[left_index], q[right_index]
+        qd_left, qd_right = qd[left_index], qd[right_index]
+        delta_time = float(time[right_index] - time[left_index])
+
+        def evaluate_fraction(
+            fraction: float,
+            q_start: FloatArray = q_left,
+            q_end: FloatArray = q_right,
+            qd_start: FloatArray = qd_left,
+            qd_end: FloatArray = qd_right,
+            hand: int = hand_index,
+            station: int = station_index,
+        ) -> float:
+            position = q_start + fraction * (q_end - q_start)
+            velocity = qd_start + fraction * (qd_end - qd_start)
+            evaluated = np.asarray(
+                margin_evaluator(position, velocity), dtype=np.float64
+            )
+            if evaluated.shape != margins.shape[1:] or not np.all(
+                np.isfinite(evaluated)
+            ):
+                raise ValueError("margin_evaluator returned an invalid array")
+            return float(evaluated[hand, station])
+
+        left_margin = evaluate_fraction(0.0)
+        right_margin = evaluate_fraction(1.0)
+        if not np.isclose(
+            left_margin,
+            margins[left_index, hand_index, station_index],
+            rtol=0.0,
+            atol=force_tolerance_n,
+        ) or not np.isclose(
+            right_margin,
+            margins[right_index, hand_index, station_index],
+            rtol=0.0,
+            atol=force_tolerance_n,
+        ):
+            raise ValueError("margin evaluator endpoints disagree with the trace")
+        fraction, residual, width = _root_fraction(
+            evaluate_fraction,
+            left_margin,
+            right_margin,
+            gap_tolerance_m=force_tolerance_n,
+            fraction_tolerance=time_tolerance_s / delta_time,
+            max_iterations=max_iterations,
+        )
+        records.append(
+            FrictionEventRecord(
+                kind=(
+                    FrictionEventKind.LIMIT_ENTRY
+                    if limited[right_index, hand_index, station_index]
+                    else FrictionEventKind.LIMIT_EXIT
+                ),
+                time_s=float(time[left_index] + fraction * delta_time),
+                left_index=left_index,
+                right_index=right_index,
+                hand_index=hand_index,
+                station_index=station_index,
+                position=q_left + fraction * (q_right - q_left),
+                velocity=qd_left + fraction * (qd_right - qd_left),
+                friction_margin_residual_n=residual,
+                final_bracket_width_s=width * delta_time,
+            )
+        )
+    return tuple(
+        sorted(
+            records, key=lambda item: (item.time_s, item.hand_index, item.station_index)
+        )
+    )
+
+
 def align_state_trace_to_events(
     *,
     time_s: FloatArray,
     positions: FloatArray,
     velocities: FloatArray,
-    events: tuple[ContactEventRecord, ...],
+    events: tuple[EventRecord, ...],
     equality_tolerance: float = 1.0e-12,
 ) -> EventAlignedStateTrace:
     """Insert duplicate pre/post samples so quadrature never crosses an event."""
@@ -228,8 +378,11 @@ def align_state_trace_to_events(
         )
     if not np.isfinite(equality_tolerance) or equality_tolerance <= 0.0:
         raise ValueError("equality_tolerance must be finite and positive")
-    if any(not isinstance(event, ContactEventRecord) for event in events):
-        raise TypeError("events must contain only ContactEventRecord values")
+    if any(
+        not isinstance(event, (ContactEventRecord, FrictionEventRecord))
+        for event in events
+    ):
+        raise TypeError("events must contain only registered event records")
     ordered = tuple(
         sorted(
             events,
@@ -252,7 +405,7 @@ def align_state_trace_to_events(
     segment = 0
     event_cursor = 0
     for left_index in range(time.size - 1):
-        interval_events: list[tuple[int, ContactEventRecord]] = []
+        interval_events: list[tuple[int, EventRecord]] = []
         while (
             event_cursor < len(ordered)
             and ordered[event_cursor].left_index == left_index
@@ -338,7 +491,11 @@ def align_state_trace_to_events(
 __all__ = [
     "ContactEventKind",
     "ContactEventRecord",
+    "EventRecord",
     "EventAlignedStateTrace",
     "align_state_trace_to_events",
     "locate_contact_events",
+    "FrictionEventKind",
+    "FrictionEventRecord",
+    "locate_friction_limit_events",
 ]

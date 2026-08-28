@@ -8,8 +8,10 @@ from pathlib import Path
 
 from scripts.research.proximal_distal_energy.articulated_contact_events import (
     ContactEventKind,
+    FrictionEventKind,
     align_state_trace_to_events,
     locate_contact_events,
+    locate_friction_limit_events,
 )
 from scripts.research.proximal_distal_energy.articulated_distributed_event_attribution import (
     attribute_distributed_contact_trajectory,
@@ -132,15 +134,40 @@ def test_transition_without_a_bracketed_root_fails_closed() -> None:
         )
 
 
+def test_locates_coulomb_limit_entry_without_calling_creep_static_stick() -> None:
+    time = np.array([0.0, 1.0])
+    positions = np.zeros((2, 1))
+    velocities = np.array([[0.0], [2.0]])
+    active = np.ones((2, 1, 1), dtype=bool)
+    margins = np.array([[[-1.0]], [[1.0]]])
+
+    events = locate_friction_limit_events(
+        time_s=time,
+        positions=positions,
+        velocities=velocities,
+        station_friction_margin_n=margins,
+        station_active=active,
+        station_friction_limited=np.array([[[False]], [[True]]]),
+        margin_evaluator=lambda _q, qd: np.array([[qd[0] - 1.0]]),
+    )
+
+    assert len(events) == 1
+    assert events[0].kind is FrictionEventKind.LIMIT_ENTRY
+    assert events[0].time_s == pytest.approx(0.5, abs=1.0e-10)
+    assert abs(events[0].friction_margin_residual_n) <= 1.0e-10
+    assert events[0].static_stick_modeled is False
+
+
 def test_registered_distributed_probe_locates_opening_and_reattachment() -> None:
     model, metadata = build_subject_scaled_model(default_synthetic_profiles()[0])
     with np.load(DATA / "subject_scaled_closed_contact.npz") as source:
         q = np.asarray(source["solution_q"][0, 6], dtype=float)
         grip_span_m = float(source["case_grip_span_m"][0])
     grip = DistributedGripConfig(
-        station_count_per_hand=1,
-        station_width_m=0.0,
+        station_count_per_hand=3,
+        station_width_m=0.03,
         slack_distance_m=0.0015,
+        friction_coefficient=0.3,
     )
     case = DistributedIntegrationCase(
         q=q,
@@ -164,7 +191,17 @@ def test_registered_distributed_probe_locates_opening_and_reattachment() -> None
     kinds = {event.kind for event in events}
     assert ContactEventKind.OPENING in kinds
     assert ContactEventKind.REATTACHMENT in kinds
-    assert max(abs(event.gap_residual_m) for event in events) <= 1.0e-10
+    assert FrictionEventKind.LIMIT_ENTRY in kinds
+    contact_events = [event for event in events if hasattr(event, "gap_residual_m")]
+    friction_events = [
+        event for event in events if hasattr(event, "friction_margin_residual_n")
+    ]
+    assert max(abs(event.gap_residual_m) for event in contact_events) <= 1.0e-10
+    assert (
+        max(abs(event.friction_margin_residual_n) for event in friction_events)
+        <= 1.0e-10
+    )
+    assert all(event.static_stick_modeled is False for event in friction_events)
     assert all(event.final_bracket_width_s <= 1.0e-12 for event in events)
 
     evidence = attribute_distributed_contact_trajectory(

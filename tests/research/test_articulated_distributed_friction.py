@@ -24,6 +24,7 @@ from scripts.research.proximal_distal_energy.articulated_distributed_grip import
     DistributedGripConfig,
     distributed_reference_lengths,
     evaluate_distributed_grip,
+    evaluate_distributed_grip_kinematics,
 )
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
     build_subject_scaled_model,
@@ -139,6 +140,59 @@ def test_coulomb_friction_cone_bound_is_strictly_satisfied() -> None:
                     assert f_t <= mu * f_n + 1e-12
                     if f_n <= 1e-12:
                         assert f_t == pytest.approx(0.0)
+
+
+def test_tangential_motion_is_not_mislabeled_as_coulomb_limited_sliding() -> None:
+    """Regularized tangential motion below the cone is not static-slip evidence."""
+
+    hand = np.array([[[1.0, 0.0, 0.0]], [[1.0, 0.0, 0.0]]])
+    grip = np.zeros((2, 1, 3))
+    hand_jac = np.zeros((2, 1, 3, 1))
+    hand_jac[:, :, 1, 0] = 1.0
+    grip_jac = np.zeros_like(hand_jac)
+    snapshot = evaluate_distributed_grip_kinematics(
+        hand,
+        hand_jac,
+        grip,
+        grip_jac,
+        np.array([0.01]),
+        reference_lengths_m=np.full((2, 1), 0.9),
+        config=DistributedGripConfig(
+            station_count_per_hand=1,
+            station_width_m=0.0,
+            tangential_damping_n_s_m=1.0,
+            friction_coefficient=1.0,
+        ),
+    )
+
+    assert np.all(snapshot.tangential_motion_station)
+    assert not np.any(snapshot.slipping_station)
+    assert np.all(snapshot.station_friction_margin_n < 0.0)
+    assert snapshot.static_stick_modeled is False
+
+
+def test_slipping_station_means_coulomb_limit_is_active() -> None:
+    hand = np.array([[[1.0, 0.0, 0.0]], [[1.0, 0.0, 0.0]]])
+    grip = np.zeros((2, 1, 3))
+    hand_jac = np.zeros((2, 1, 3, 1))
+    hand_jac[:, :, 1, 0] = 1.0
+    snapshot = evaluate_distributed_grip_kinematics(
+        hand,
+        hand_jac,
+        grip,
+        np.zeros_like(hand_jac),
+        np.array([10.0]),
+        reference_lengths_m=np.full((2, 1), 0.999),
+        config=DistributedGripConfig(
+            station_count_per_hand=1,
+            station_width_m=0.0,
+            tangential_damping_n_s_m=18.0,
+            friction_coefficient=0.05,
+        ),
+    )
+
+    assert np.all(snapshot.slipping_station)
+    assert np.all(snapshot.station_friction_margin_n > 0.0)
 
 
 def test_controlled_stiffness_damping_across_station_counts() -> None:

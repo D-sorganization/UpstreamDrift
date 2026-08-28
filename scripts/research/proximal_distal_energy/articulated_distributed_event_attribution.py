@@ -9,10 +9,11 @@ from typing import Any
 import numpy as np
 
 from scripts.research.proximal_distal_energy.articulated_contact_events import (
-    ContactEventRecord,
+    EventRecord,
     EventAlignedStateTrace,
     align_state_trace_to_events,
     locate_contact_events,
+    locate_friction_limit_events,
 )
 from scripts.research.proximal_distal_energy.articulated_forward_attribution import (
     ForwardAttribution,
@@ -42,7 +43,7 @@ class DistributedTrajectoryAttributionEvidence:
     """Event-aligned distributed trace and descriptive attribution."""
 
     trace: dict[str, Any]
-    events: tuple[ContactEventRecord, ...]
+    events: tuple[EventRecord, ...]
     aligned: EventAlignedStateTrace
     mass_matrices: np.ndarray
     mass_matrix_rates: np.ndarray
@@ -58,8 +59,8 @@ def locate_distributed_trace_events(
     trace: Mapping[str, Any],
     gap_tolerance_m: float = 1.0e-10,
     time_tolerance_s: float = 1.0e-12,
-) -> tuple[ContactEventRecord, ...]:
-    """Locate opening/reattachment roots on a retained distributed trace."""
+) -> tuple[EventRecord, ...]:
+    """Locate contact and Coulomb-limit roots on a retained trace."""
 
     if not isinstance(model, SpatialModel):
         raise TypeError("model must be a SpatialModel")
@@ -93,7 +94,7 @@ def locate_distributed_trace_events(
             config=case.grip,
         )
 
-    return locate_contact_events(
+    contact_events = locate_contact_events(
         time_s=np.asarray(trace["time_s"], dtype=np.float64),
         positions=np.asarray(trace["q"], dtype=np.float64),
         velocities=np.asarray(trace["qd"], dtype=np.float64),
@@ -104,6 +105,58 @@ def locate_distributed_trace_events(
         gap_evaluator=evaluate_gap,
         gap_tolerance_m=gap_tolerance_m,
         time_tolerance_s=time_tolerance_s,
+    )
+    if case.grip.friction_coefficient <= 0.0:
+        return contact_events
+    friction_required = (
+        "station_friction_margin_n",
+        "station_friction_limited",
+    )
+    missing_friction = tuple(name for name in friction_required if name not in trace)
+    if missing_friction:
+        raise ValueError(
+            "trace is missing friction-event fields: " + ", ".join(missing_friction)
+        )
+
+    def evaluate_margin(position: np.ndarray, velocity: np.ndarray) -> np.ndarray:
+        snapshot = evaluate_distributed_grip(
+            model,
+            position,
+            velocity,
+            grip_span_m=case.grip_span_m,
+            hand_contact_local_x_m=case.hand_contact_local_x_m,
+            reference_lengths_m=reference,
+            config=case.grip,
+        )
+        if snapshot.station_friction_margin_n is None:
+            raise ValueError("distributed snapshot omitted friction margins")
+        return snapshot.station_friction_margin_n
+
+    friction_events = locate_friction_limit_events(
+        time_s=np.asarray(trace["time_s"], dtype=np.float64),
+        positions=np.asarray(trace["q"], dtype=np.float64),
+        velocities=np.asarray(trace["qd"], dtype=np.float64),
+        station_friction_margin_n=np.asarray(
+            trace["station_friction_margin_n"], dtype=np.float64
+        ),
+        station_active=np.asarray(trace["station_active"], dtype=bool),
+        station_friction_limited=np.asarray(
+            trace["station_friction_limited"], dtype=bool
+        ),
+        margin_evaluator=evaluate_margin,
+        force_tolerance_n=1.0e-10,
+        time_tolerance_s=time_tolerance_s,
+    )
+    return tuple(
+        sorted(
+            (*contact_events, *friction_events),
+            key=lambda event: (
+                event.left_index,
+                event.time_s,
+                event.hand_index,
+                event.station_index,
+            ),
+        )
     )
 
 

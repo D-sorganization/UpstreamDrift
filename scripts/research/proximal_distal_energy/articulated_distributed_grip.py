@@ -126,6 +126,9 @@ class DistributedGripSnapshot:
     normal_force_on_club_n: FloatArray | None = None
     tangential_force_on_club_n: FloatArray | None = None
     slipping_station: NDArray[np.bool_] | None = None
+    tangential_motion_station: NDArray[np.bool_] | None = None
+    station_friction_margin_n: FloatArray | None = None
+    static_stick_modeled: bool = False
     station_extension_m: FloatArray | None = None
     station_signed_gap_m: FloatArray | None = None
     normal_power_w: float = 0.0
@@ -282,12 +285,14 @@ def _compute_station_friction(
     active: bool,
     config: DistributedGripConfig,
     station_c_t: float,
-) -> tuple[FloatArray, float, float, float, bool]:
+) -> tuple[FloatArray, float, float, float, bool, bool, float]:
     f_tan = np.zeros(3)
     f_norm_mag = float(np.linalg.norm(f_norm))
     v_tan_mag = 0.0
     utilization = 0.0
     is_slipping = False
+    has_tangential_motion = False
+    friction_margin_n = 0.0
     tan_diss = 0.0
 
     if active and f_norm_mag > 0.0:
@@ -296,24 +301,33 @@ def _compute_station_friction(
         v_n_scalar = float(normal_dir @ rel_velocity)
         v_tan = rel_velocity - v_n_scalar * normal_dir
         v_tan_mag = float(np.linalg.norm(v_tan))
+        has_tangential_motion = v_tan_mag > config.slip_velocity_tolerance_m_s
 
-        if config.friction_coefficient > 0.0 and v_tan_mag > 0.0:
-            t_dir = v_tan / v_tan_mag
+        if config.friction_coefficient > 0.0:
             f_tan_trial = station_c_t * v_tan_mag
             f_tan_cone = config.friction_coefficient * f_norm_mag
+            friction_margin_n = f_tan_trial - f_tan_cone
             if f_tan_cone > 0.0:
                 utilization = min(1.0, f_tan_trial / f_tan_cone)
-            if f_tan_trial >= f_tan_cone:
-                f_tan_mag = f_tan_cone
-                is_slipping = True
-            else:
-                f_tan_mag = f_tan_trial
-                if v_tan_mag > config.slip_velocity_tolerance_m_s:
+            if v_tan_mag > 0.0:
+                t_dir = v_tan / v_tan_mag
+                if f_tan_trial >= f_tan_cone:
+                    f_tan_mag = f_tan_cone
                     is_slipping = True
-            f_tan = f_tan_mag * t_dir
-            tan_diss = -float(f_tan @ v_tan)
+                else:
+                    f_tan_mag = f_tan_trial
+                f_tan = f_tan_mag * t_dir
+                tan_diss = -float(f_tan @ v_tan)
 
-    return f_tan, v_tan_mag, utilization, tan_diss, is_slipping
+    return (
+        f_tan,
+        v_tan_mag,
+        utilization,
+        tan_diss,
+        is_slipping,
+        has_tangential_motion,
+        friction_margin_n,
+    )
 
 
 @dataclass(slots=True)
@@ -323,11 +337,13 @@ class _KinematicsBuffers:
     tangential_forces: FloatArray
     active: NDArray[np.bool_]
     slipping: NDArray[np.bool_]
+    tangential_motion: NDArray[np.bool_]
     extensions: FloatArray
     signed_gaps: FloatArray
     tangential_norms: FloatArray
     sliding_speeds: FloatArray
     coulomb_utilization: FloatArray
+    friction_margin: FloatArray
     generalized: FloatArray
     physical_power: float = 0.0
     storage: float = 0.0
@@ -376,6 +392,9 @@ def _build_distributed_snapshot(
         normal_force_on_club_n=buf.normal_forces,
         tangential_force_on_club_n=buf.tangential_forces,
         slipping_station=buf.slipping,
+        tangential_motion_station=buf.tangential_motion,
+        station_friction_margin_n=buf.friction_margin,
+        static_stick_modeled=False,
         station_extension_m=buf.extensions,
         station_signed_gap_m=buf.signed_gaps,
         normal_power_w=float(buf.normal_power),
@@ -430,12 +449,22 @@ def _evaluate_all_stations(
             buf.normal_power += float(snap.interface_power_w)
             buf.strain += snap.strain_energy_j
 
-            f_tan, v_tan_mag, util, tan_diss, is_slip = _compute_station_friction(
+            (
+                f_tan,
+                v_tan_mag,
+                util,
+                tan_diss,
+                is_slip,
+                has_tangential_motion,
+                friction_margin_n,
+            ) = _compute_station_friction(
                 disp, v_rel, f_norm, snap.active, config, station_c_t
             )
             buf.sliding_speeds[h_idx, s_idx] = v_tan_mag
             buf.coulomb_utilization[h_idx, s_idx] = util
             buf.slipping[h_idx, s_idx] = is_slip
+            buf.tangential_motion[h_idx, s_idx] = has_tangential_motion
+            buf.friction_margin[h_idx, s_idx] = friction_margin_n
             buf.tangential_dissipation += tan_diss
             buf.tangential_power += tan_diss
             buf.tangential_forces[h_idx, s_idx] = f_tan
@@ -483,11 +512,13 @@ def evaluate_distributed_grip_kinematics(
         tangential_forces=np.zeros_like(hand),
         active=np.zeros(references.shape, dtype=bool),
         slipping=np.zeros(references.shape, dtype=bool),
+        tangential_motion=np.zeros(references.shape, dtype=bool),
         extensions=np.zeros(references.shape),
         signed_gaps=np.zeros(references.shape),
         tangential_norms=np.zeros(references.shape),
         sliding_speeds=np.zeros(references.shape),
         coulomb_utilization=np.zeros(references.shape),
+        friction_margin=np.zeros(references.shape),
         generalized=np.zeros(velocity.size),
     )
 

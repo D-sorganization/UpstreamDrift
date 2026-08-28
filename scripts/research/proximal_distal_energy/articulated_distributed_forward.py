@@ -106,6 +106,9 @@ class _Buffers:
     sliding_speed: FloatArray
     station_active: NDArray[np.bool_]
     station_signed_gap: FloatArray
+    station_friction_limited: NDArray[np.bool_]
+    station_tangential_motion: NDArray[np.bool_]
+    station_friction_margin: FloatArray
 
 
 def _validate_case(
@@ -166,6 +169,13 @@ def _buffers(sample_count: int, nq: int, station_count_per_hand: int) -> _Buffer
         sliding_speed=np.empty(sample_count),
         station_active=np.empty((sample_count, 2, station_count_per_hand), dtype=bool),
         station_signed_gap=np.empty((sample_count, 2, station_count_per_hand)),
+        station_friction_limited=np.empty(
+            (sample_count, 2, station_count_per_hand), dtype=bool
+        ),
+        station_tangential_motion=np.empty(
+            (sample_count, 2, station_count_per_hand), dtype=bool
+        ),
+        station_friction_margin=np.empty((sample_count, 2, station_count_per_hand)),
     )
 
 
@@ -207,9 +217,17 @@ def _record(
     buffers.coulomb_utilization[index] = snapshot.coulomb_limit_utilization
     buffers.sliding_speed[index] = snapshot.maximum_sliding_speed_m_s
     buffers.station_active[index] = snapshot.active_station
-    if snapshot.station_signed_gap_m is None:
-        raise ValueError("distributed snapshot must retain signed station gaps")
+    if (
+        snapshot.station_signed_gap_m is None
+        or snapshot.slipping_station is None
+        or snapshot.tangential_motion_station is None
+        or snapshot.station_friction_margin_n is None
+    ):
+        raise ValueError("distributed snapshot must retain station regime fields")
     buffers.station_signed_gap[index] = snapshot.station_signed_gap_m
+    buffers.station_friction_limited[index] = snapshot.slipping_station
+    buffers.station_tangential_motion[index] = snapshot.tangential_motion_station
+    buffers.station_friction_margin[index] = snapshot.station_friction_margin_n
 
 
 def _result(
@@ -278,6 +296,10 @@ def _result(
         "active_set_transition": transitions,
         "station_active": buffers.station_active,
         "station_signed_gap_m": buffers.station_signed_gap,
+        "station_friction_limited": buffers.station_friction_limited,
+        "station_tangential_motion": buffers.station_tangential_motion,
+        "station_friction_margin_n": buffers.station_friction_margin,
+        "static_stick_modeled": False,
         "station_transitions": station_transitions,
         "total_transition_count": total_transitions_count,
         "opening_transition_count": opening_count,

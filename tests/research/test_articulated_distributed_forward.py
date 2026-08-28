@@ -131,3 +131,7 @@ def test_five_fiber_trace_is_finite_passive_and_power_closed() -> None:
     assert np.all(trace["station_load_concentration"] <= 1.0)
     assert trace["station_signed_gap_m"].shape == trace["station_active"].shape
     assert np.array_equal(trace["station_signed_gap_m"] > 0.0, trace["station_active"])
+    assert trace["station_friction_limited"].shape == trace["station_active"].shape
+    assert trace["station_tangential_motion"].shape == trace["station_active"].shape
+    assert trace["station_friction_margin_n"].shape == trace["station_active"].shape
+    assert trace["static_stick_modeled"] is False
