@@ -121,6 +121,47 @@ def test_serial_runner_is_atomic_resumable_and_identity_bound(tmp_path: Path) ->
     assert payload["outcome"]["parity_sidecar"]["path"] == sidecar.name
 
 
+def test_serial_runner_executes_only_a_registered_half_open_slice(
+    tmp_path: Path,
+) -> None:
+    plan = _tiny_plan()
+    launch = _launch(plan)
+    observed: list[str] = []
+
+    checkpoints = run_serial_cases(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=tmp_path,
+        evaluator=lambda case: (
+            observed.append(case.case_key)
+            or StructuralEvaluation(
+                result={"retained": True},
+                parity_arrays={"x": np.array([1.0])},
+            )
+        ),
+        case_start=1,
+        case_stop=3,
+    )
+
+    registered = build_registered_cases(plan)
+    assert observed == [registered[1].case_key, registered[2].case_key]
+    assert [checkpoint.case.case_key for checkpoint in checkpoints] == observed
+    assert len(tuple(tmp_path.glob("case-*.json"))) == 2
+
+    for start, stop in ((-1, 1), (0, 0), (3, 2), (0, 5)):
+        with pytest.raises(ValueError, match="case slice"):
+            run_serial_cases(
+                plan=plan,
+                launch=launch,
+                checkpoint_dir=tmp_path / f"invalid-{start}-{stop}",
+                evaluator=lambda _case: StructuralEvaluation(
+                    result={}, parity_arrays={"x": np.array([1.0])}
+                ),
+                case_start=start,
+                case_stop=stop,
+            )
+
+
 def test_native_absence_is_typed_and_unexpected_failure_is_not_retained(
     tmp_path: Path,
 ) -> None:

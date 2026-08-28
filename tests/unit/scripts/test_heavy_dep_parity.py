@@ -44,6 +44,12 @@ def test_structural_runtime_audit_is_hosted_exact_revision_and_artifact_bound() 
     assert "inputs.structural_runtime_audit != true" in workflow
     assert "submodule update --init --depth 1 vendor/ud-tools" in workflow
     assert "python -m pip install -e ./execution-source" in workflow
+    assert "structural_campaign_slice:" in workflow
+    assert "--case-start ${{ inputs.structural_case_start }}" in workflow
+    assert "--case-stop ${{ inputs.structural_case_stop }}" in workflow
+    assert "run-id: ${{ inputs.structural_runtime_audit_run_id }}" in workflow
+    assert "structural-checkpoints-${{ github.run_id }}" in workflow
+    assert "exactly one structural mode must be selected" in workflow
 
 
 def test_parser_handles_quoted_constraints_and_exposes_wrong_distributions() -> None:

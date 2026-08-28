@@ -363,17 +363,31 @@ def run_serial_cases(
     launch: Mapping[str, object],
     checkpoint_dir: Path,
     evaluator: Callable[[StructuralCase], StructuralEvaluation],
+    case_start: int = 0,
+    case_stop: int | None = None,
 ) -> tuple[StructuralCheckpoint, ...]:
-    """Run or resume all cases, retaining only typed native absence."""
+    """Run or resume one registered half-open slice, retaining typed absence."""
 
     if not isinstance(checkpoint_dir, Path):
         raise TypeError("checkpoint_dir must be a pathlib.Path")
     if not callable(evaluator):
         raise TypeError("evaluator must be callable")
     plan_hash, execution_revision = _validate_launch(plan=plan, launch=launch)
+    registered_cases = build_registered_cases(plan)
+    resolved_stop = len(registered_cases) if case_stop is None else case_stop
+    if (
+        isinstance(case_start, bool)
+        or not isinstance(case_start, int)
+        or isinstance(resolved_stop, bool)
+        or not isinstance(resolved_stop, int)
+        or case_start < 0
+        or resolved_stop <= case_start
+        or resolved_stop > len(registered_cases)
+    ):
+        raise ValueError("case slice must satisfy 0 <= start < stop <= case count")
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     checkpoints: list[StructuralCheckpoint] = []
-    for case in build_registered_cases(plan):
+    for case in registered_cases[case_start:resolved_stop]:
         path = _path(checkpoint_dir, case)
         if path.exists():
             checkpoints.append(

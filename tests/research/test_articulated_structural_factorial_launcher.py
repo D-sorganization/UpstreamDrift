@@ -38,28 +38,33 @@ def test_launcher_reports_statuses_without_owning_execution_logic(
     import scripts.research.proximal_distal_energy.articulated_structural_factorial_evaluator as evaluator
     import scripts.research.proximal_distal_energy.articulated_structural_factorial_runner as runner
 
+    received: dict[str, object] = {}
+
+    def run_slice(**kwargs: object) -> tuple[Checkpoint, ...]:
+        received.update(kwargs)
+        return (Checkpoint("completed", False), Checkpoint("unavailable", True))
+
     monkeypatch.setattr(evaluator, "evaluate_structural_case", lambda *_args: {})
     monkeypatch.setattr(launcher, "validate_runtime_audit", lambda **_kwargs: "a" * 64)
-    monkeypatch.setattr(
-        runner,
-        "run_serial_cases",
-        lambda **_kwargs: (
-            Checkpoint("completed", False),
-            Checkpoint("unavailable", True),
-        ),
-    )
+    monkeypatch.setattr(runner, "run_serial_cases", run_slice)
 
     result = launcher.launch_structural_factorial(
         plan_path=plan_path,
         launch_path=launch_path,
         runtime_audit_path=audit_path,
         checkpoint_dir=tmp_path / "checkpoints",
+        case_start=8,
+        case_stop=16,
     )
 
     assert result["case_count"] == 2
     assert result["status_counts"] == {"completed": 1, "unavailable": 1}
     assert result["resumed_count"] == 1
     assert result["runtime_identity_sha256"] == "a" * 64
+    assert result["case_start"] == 8
+    assert result["case_stop"] == 16
+    assert received["case_start"] == 8
+    assert received["case_stop"] == 16
     session_path = tmp_path / "checkpoints" / "execution-session.json"
     assert result["execution_session_path"] == str(session_path.resolve())
     session = json.loads(session_path.read_text(encoding="utf-8"))

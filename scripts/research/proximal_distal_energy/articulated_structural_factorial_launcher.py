@@ -114,6 +114,8 @@ def launch_structural_factorial(
     launch_path: Path,
     runtime_audit_path: Path,
     checkpoint_dir: Path,
+    case_start: int = 0,
+    case_stop: int | None = None,
 ) -> dict[str, object]:
     """Run only after an immutable launch-specific runtime audit passes."""
 
@@ -149,11 +151,15 @@ def launch_structural_factorial(
         launch=launch,
         checkpoint_dir=checkpoint_dir,
         evaluator=lambda case: evaluate_structural_case(case, plan),
+        case_start=case_start,
+        case_stop=case_stop,
     )
     counts = Counter(checkpoint.status for checkpoint in checkpoints)
     return {
         "checkpoint_dir": str(checkpoint_dir.resolve()),
         "case_count": len(checkpoints),
+        "case_start": case_start,
+        "case_stop": case_stop,
         "status_counts": dict(sorted(counts.items())),
         "resumed_count": sum(checkpoint.resumed for checkpoint in checkpoints),
         "runtime_identity_sha256": runtime_identity,
@@ -169,12 +175,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--launch", type=Path, required=True)
     parser.add_argument("--runtime-audit", type=Path, required=True)
     parser.add_argument("--checkpoint-dir", type=Path, required=True)
+    parser.add_argument("--case-start", type=int, default=0)
+    parser.add_argument("--case-stop", type=int)
     args = parser.parse_args(argv)
     result = launch_structural_factorial(
         plan_path=args.plan,
         launch_path=args.launch,
         runtime_audit_path=args.runtime_audit,
         checkpoint_dir=args.checkpoint_dir,
+        case_start=args.case_start,
+        case_stop=args.case_stop,
     )
     print(json.dumps(result, sort_keys=True))
     return 0

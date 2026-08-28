@@ -102,22 +102,18 @@ are not completion evidence.
 - Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
-  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 121/2,304
-  retained (61 validated MuJoCo, 60 typed Pin absences), no orphan sidecars,
-  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 12:36 UTC.
+  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 128/2,304
+  retained (65 validated MuJoCo, 63 typed Pin absences), no orphan sidecars,
+  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 12:46 UTC.
 - It began from launch commit `5544c8559` before the runtime-audit/session gates
   were added. Preserve it as diagnostic checkpoint evidence, not promotion
   authority; do not combine it with a separately qualified runtime.
-- The retrospective v1.2 audit did not prove that imported operator modules
-  came from its declared source root and is not promotion authority. Audit v1.3
-  binds clean audit-tool and execution checkouts plus executed-module hashes.
-- The opt-in hosted-Ubuntu audit lane checks out launch revision `d6bffd0c6`
-  separately, installs `pin`/MuJoCo, and uploads the exact audit without using
-  this workstation or a fleet runner. It must pass before a Linux campaign.
-- Hosted run 33172008965 reached the exact source but failed before audit on a
-  missing core `defusedxml`. Run 33172324660 then reached the package build and
-  failed on its absent pinned Tools gitlink; the lane now initializes that exact
-  submodule before installing the frozen source package.
+- Audit v1.3 binds clean audit-tool/execution checkouts and executed-module
+  hashes. Hosted run 33172568953 qualifies native MuJoCo 3.12.0 and Pin 4.1.0;
+  identity is `468d2e829dbc52de902fd7f97e96ccfcb4196c785b829900d70a6b3d49eb09ce`.
+- Half-open registered case slices are serial, bounds-checked, session-bound,
+  and hosted; freeze a new execution revision, re-audit it, then run slices
+  sequentially. Do not combine distinct runtime/session identities.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -127,9 +123,9 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Monitor PID 31684 with `articulated_structural_factorial_status`; do not
-   start a second run. Keep `stderr.log` empty and resume only with the exact
-   v1.2 plan/launch/directory. Completed JSON requires NPZ; unavailable does not.
+1. Monitor diagnostic PID 31684; do not mutate/restart/combine it. Freeze and
+   qualify the hosted execution before preserving and stopping this diagnostic;
+   never run both campaigns concurrently. Completed JSON requires its NPZ.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
@@ -141,7 +137,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current structural/container slice: 63 pass;
+Use Python 3.12 and serial pytest. Current structural/container slice: 64 pass;
 Ruff/Black and configured pre-push gates pass. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
 it does not reach project analysis. Architecture reports only pre-existing
