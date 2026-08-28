@@ -11,11 +11,18 @@ import pytest
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_plan import (
     StructuralFactorialPlan,
 )
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_launcher import (
+    bind_execution_session,
+)
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
     StructuralCase,
     StructuralEvaluation,
     build_launch_manifest,
     run_serial_cases,
+)
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit import (
+    audit_structural_runtime,
+    validate_runtime_audit,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_summary import (
     summarize_structural_factorial,
@@ -160,3 +167,60 @@ def test_summary_rejects_an_invalid_supplied_runtime_audit(tmp_path: Path) -> No
             launch_path=launch_path,
             runtime_audit_path=audit_path,
         )
+
+
+def test_summary_accepts_a_qualified_bound_runtime_but_retains_other_gates(
+    tmp_path: Path,
+) -> None:
+    plan = _fixture_plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    plan_path = tmp_path / "plan.json"
+    launch_path = tmp_path / "launch.json"
+    audit_path = tmp_path / "runtime-audit.json"
+    checkpoint_dir = tmp_path / "checkpoints"
+    plan_path.write_text(json.dumps(plan), encoding="utf-8")
+    launch_path.write_text(json.dumps(launch), encoding="utf-8")
+
+    def probe(name: str) -> dict[str, str]:
+        return {"name": name, "version": "3.3.4", "operator": "native"}
+
+    audit = audit_structural_runtime(
+        plan=plan,
+        launch=launch,
+        source_checkout={
+            "revision": "b" * 40,
+            "tree_sha": "c" * 40,
+            "tracked_clean": True,
+        },
+        engine_probe=probe,
+        operator_probe=lambda _name: {"passes": True},
+    )
+    audit_path.write_text(json.dumps(audit), encoding="utf-8")
+    runtime_identity = validate_runtime_audit(plan=plan, launch=launch, audit=audit)
+    bind_execution_session(
+        plan_path=plan_path,
+        launch_path=launch_path,
+        runtime_audit_path=audit_path,
+        launch=launch,
+        runtime_identity=runtime_identity,
+        checkpoint_dir=checkpoint_dir,
+    )
+    run_serial_cases(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=checkpoint_dir,
+        evaluator=_evaluation,
+    )
+
+    summary = summarize_structural_factorial(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=checkpoint_dir,
+        plan_path=plan_path,
+        launch_path=launch_path,
+        runtime_audit_path=audit_path,
+    )
+
+    assert summary["gates"]["runtime_session_qualified"] is True
+    assert summary["identity"]["runtime_identity_sha256"] == runtime_identity
+    assert summary["gates"]["promotion_eligible"] is False

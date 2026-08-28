@@ -127,7 +127,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current structural/container slice: 57 pass;
+Use Python 3.12 and serial pytest. Current structural/container slice: 58 pass;
 Ruff/Black and configured pre-push gates pass. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
 it does not reach project analysis. Architecture reports only pre-existing

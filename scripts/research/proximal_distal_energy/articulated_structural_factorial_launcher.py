@@ -67,7 +67,7 @@ def validate_execution_session(
     return session_path
 
 
-def _bind_execution_session(
+def bind_execution_session(
     *,
     plan_path: Path,
     launch_path: Path,
@@ -129,7 +129,7 @@ def launch_structural_factorial(
     runtime_identity = validate_runtime_audit(
         plan=plan, launch=launch, audit=runtime_audit
     )
-    session_path = _bind_execution_session(
+    session_path = bind_execution_session(
         plan_path=plan_path,
         launch_path=launch_path,
         runtime_audit_path=runtime_audit_path,
@@ -184,4 +184,9 @@ if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
 
 
-__all__ = ["launch_structural_factorial", "main", "validate_execution_session"]
+__all__ = [
+    "bind_execution_session",
+    "launch_structural_factorial",
+    "main",
+    "validate_execution_session",
+]
