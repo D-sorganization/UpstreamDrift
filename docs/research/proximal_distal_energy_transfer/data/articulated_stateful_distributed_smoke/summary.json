@@ -1,0 +1,1013 @@
+{
+  "checkpoint_inventory": {
+    "checkpoint_set_sha256": "1e6eeeabcb2d461ab5a42131d9c411409c8571ff78c7b2f46076935caad7a62c",
+    "count": 54,
+    "files": [
+      {
+        "name": "case-211a86ee8c54ce2fb6f3.json",
+        "sha256": "24c5a01b6703a11130150ac9306db065ca129ff105d4c4a92fb9dea7f882bbba",
+        "size_bytes": 940
+      },
+      {
+        "name": "case-270bb67f25a311038eed.json",
+        "sha256": "aeeadd8b615989556711de684cc10f06f0653a6598144dc2868d21b7bcdcdd09",
+        "size_bytes": 154345
+      },
+      {
+        "name": "case-2e799381e44f019bd5df.json",
+        "sha256": "001de283efd1333a768ce8817dbb05b5a885eb31389ee5a32918a4942e0a2c58",
+        "size_bytes": 958
+      },
+      {
+        "name": "case-2ed0669ad77d10f43846.json",
+        "sha256": "3dd8f67f7535d1f538c53fa4f4abfa159579b4705769ded3b4a0388a65649e0c",
+        "size_bytes": 165794
+      },
+      {
+        "name": "case-350481cc9a856a477ed2.json",
+        "sha256": "0b41a2380a2b57ec1b9462fa397845c0c107f52b804b4f1da4998b2fd4eab854",
+        "size_bytes": 962
+      },
+      {
+        "name": "case-3f51687f7ac162d3abd4.json",
+        "sha256": "84d146dd9d788ea2f96c7ef58153d8b938973a456e74d9c7d94fe8a5ba138482",
+        "size_bytes": 924
+      },
+      {
+        "name": "case-44032e512a7cc2bf7885.json",
+        "sha256": "0f72bafc219df94e7f19c8aceab865bd61c51fe23be40fd52b039a66867e15b4",
+        "size_bytes": 936
+      },
+      {
+        "name": "case-45317ad1f673d71755ca.json",
+        "sha256": "ca16edf000ce3e1e30d6f4577dddd5083fb2bbb06a835a1cd51933c305d316f4",
+        "size_bytes": 80601
+      },
+      {
+        "name": "case-477dab097eb4ff69bc93.json",
+        "sha256": "4ba12aa48fb7747618be41b4752d913dbb5118335b05af19d86cffeb061ae64a",
+        "size_bytes": 165578
+      },
+      {
+        "name": "case-4859e5d189d9e865cca6.json",
+        "sha256": "d39e4588894a02fae1cfd3e5222df75c6cb7ece7d563641efcc613db160f96fa",
+        "size_bytes": 86324
+      },
+      {
+        "name": "case-4864d0ab07720db8d4c4.json",
+        "sha256": "5d2be1180e952f658f7656f634c16b920785db34d2648968433774848a373657",
+        "size_bytes": 956
+      },
+      {
+        "name": "case-59717b1d94d6cb9768e0.json",
+        "sha256": "01bb966234f56dc7f7c14f0d0e7ca4b2d4bd67fede1f77c2f77efc1279ca5975",
+        "size_bytes": 956
+      },
+      {
+        "name": "case-59839c398c6ffca4f92f.json",
+        "sha256": "9602edfdf5e5421a2ac3bdec46960ec158d7c7f72a9aaeaf27c1b6f2cf4640ec",
+        "size_bytes": 46444
+      },
+      {
+        "name": "case-5d7be4ed3f27ea5bc304.json",
+        "sha256": "2ef9bb80db4800a929ab51b993971daa00113993eb34dfbefb96017855a38bfe",
+        "size_bytes": 88301
+      },
+      {
+        "name": "case-5da14cf018732742de4c.json",
+        "sha256": "fa31b44175aedfb9744af6b796628ea1ae04b8d107c6811c34ee3123681d75e1",
+        "size_bytes": 938
+      },
+      {
+        "name": "case-5dfca530ac9418184826.json",
+        "sha256": "d859c0d1d5b178a97ecb7d284dde51557db66e5fe1593e30d4d7d3f8765ab69b",
+        "size_bytes": 46488
+      },
+      {
+        "name": "case-5f7fabc97d296dac703c.json",
+        "sha256": "f15c008ffc88e6ef6da6ebab0fb133a2add33d2dfc4302a157a9bbcd784eefbc",
+        "size_bytes": 165921
+      },
+      {
+        "name": "case-61c158a64a668522bc12.json",
+        "sha256": "1c3fe8e514c7e15dfa094ed6f9ef67ea02c735a6e1ed9423d469e7ac72ebce27",
+        "size_bytes": 86228
+      },
+      {
+        "name": "case-6436814cd215b17d9bfd.json",
+        "sha256": "54f8e6a758042fc23a91ea5b3765b232c6705e34a7055742b8e5fcb007d8a392",
+        "size_bytes": 948
+      },
+      {
+        "name": "case-664851591df825d3a223.json",
+        "sha256": "ea4ff5f267ab7eff33af57b9e6472c502d71628d1ca5f6d28c6d97bf778d54ff",
+        "size_bytes": 70729
+      },
+      {
+        "name": "case-6a475fa2bb187c2cb02b.json",
+        "sha256": "f02b7acf2ced44fc6f374c3cad6a4b4ec7699337233c22419fb215460e4fd817",
+        "size_bytes": 944
+      },
+      {
+        "name": "case-71041efac891b75ef6b3.json",
+        "sha256": "84b3b191a316dfdcab00d8b1a61779bfad439cfeabfe402acaf9697563365a23",
+        "size_bytes": 134921
+      },
+      {
+        "name": "case-7186699ba76372d9ad19.json",
+        "sha256": "078ee78f2eaac01cf58fdd754894a9a1f2849e1839554d92e3b4b8ed34baa647",
+        "size_bytes": 934
+      },
+      {
+        "name": "case-7a3e8ca4bc4e5a8a63e3.json",
+        "sha256": "45502857e89e849849b520a289be08311b3bdd157ebf2ccab91da13a1122170b",
+        "size_bytes": 86146
+      },
+      {
+        "name": "case-824a636429b7e98d1d49.json",
+        "sha256": "5e7cc02b460eca7ac24a51aa036bc49dd0950744b3f775fe7a50cedfc043fd74",
+        "size_bytes": 165794
+      },
+      {
+        "name": "case-8b6f4819c127eb4012b6.json",
+        "sha256": "adb0ae6d4beb767717d175983179227d0f544304c86f15e450ced97fee40ece4",
+        "size_bytes": 960
+      },
+      {
+        "name": "case-8df4e24ad0072f14afcf.json",
+        "sha256": "4e6766aaf16434808287f97d7ff6c3adcf1bc140ff62254e66d2591abb8fa3d2",
+        "size_bytes": 936
+      },
+      {
+        "name": "case-9039606bed02cddce88a.json",
+        "sha256": "4fc4732d2ffc90101447a7b9279c9b4e8bf7442e6e9bffc0dbeb80120869fe92",
+        "size_bytes": 938
+      },
+      {
+        "name": "case-9b2f113c0f6c65883dc9.json",
+        "sha256": "ce91aa0fd956957f308c70528cfff4b313384a7300b808bf7d60d4fe70e5a5db",
+        "size_bytes": 940
+      },
+      {
+        "name": "case-a1ed07cd4b00040c3a46.json",
+        "sha256": "7cb4f002e5f4b0424dde952de1382fd34d1d82cec76406300d9fc1a4a8bbe77d",
+        "size_bytes": 938
+      },
+      {
+        "name": "case-a53795c4c776be90667b.json",
+        "sha256": "0b8a440567f530e923479850e42438337523b773e419e6e9745ef2799af4041a",
+        "size_bytes": 962
+      },
+      {
+        "name": "case-b13385c382aa0ca937c0.json",
+        "sha256": "d79f104ff58b855c5bf73bc8394b4d11c6bad872f52759c62e545cd405032fb5",
+        "size_bytes": 960
+      },
+      {
+        "name": "case-b720cada39ce332218e9.json",
+        "sha256": "f763ed0e8fc7e8094a947e14437af93145bbadc94d7a5666c40a634a4a5ceff4",
+        "size_bytes": 86296
+      },
+      {
+        "name": "case-b729d5f966b64a43b6ea.json",
+        "sha256": "758a402fb34f76a856d8416a0791bc13bbbf998fbc6046606825a7e7760ef462",
+        "size_bytes": 46486
+      },
+      {
+        "name": "case-b7c1682d59bdc61fca3d.json",
+        "sha256": "c6f885f8845acb99a82f290b3ef9821fbbe8d3f0c0f511fcb22e3ddf8a84b381",
+        "size_bytes": 165739
+      },
+      {
+        "name": "case-b884f36f1baf2aa98c37.json",
+        "sha256": "bb1a431759cd25927579a3d05c023f75a01cf5218fab3281e40b1892380949d9",
+        "size_bytes": 928
+      },
+      {
+        "name": "case-b979fcf60cd0c317ca1a.json",
+        "sha256": "3bda623ab267bd78fe740a7ddb0f5ecab1df8d5963d9b0b9a85545b51418f860",
+        "size_bytes": 38685
+      },
+      {
+        "name": "case-bf69525b35f0fa64d204.json",
+        "sha256": "8bece91be2afdc9f0490705fa873f4af6721c41baf0700d67bc401726977d826",
+        "size_bytes": 46478
+      },
+      {
+        "name": "case-c0af3afb980a6b11f906.json",
+        "sha256": "e343d054a082c6574bacd0df9777d09c6be815c1e29e6297458e2609fa90f7f7",
+        "size_bytes": 86254
+      },
+      {
+        "name": "case-c9c3bac9a8727f826c5f.json",
+        "sha256": "ba4e796e105a28da1637722a856658e6c09b794eac1d8c50de2a6e9da68692ee",
+        "size_bytes": 960
+      },
+      {
+        "name": "case-cae41eef7b104ce8354a.json",
+        "sha256": "858cf58f514074a85a4626fdac54bcc692e152c66a75ce81077e013fe6e03e3b",
+        "size_bytes": 926
+      },
+      {
+        "name": "case-caf9a6abb259c3a59aaf.json",
+        "sha256": "6a14d677cc23b7191faf40a4aac24d269602e6a1ac39ec4b29d95758ebaae0cf",
+        "size_bytes": 958
+      },
+      {
+        "name": "case-cb87d5726a3844141d98.json",
+        "sha256": "be88d3257aa71ce9e9fe6783bf13a8d05cba08237fc1dfcb09a7188730c06598",
+        "size_bytes": 46490
+      },
+      {
+        "name": "case-d0c1856ad83f11d5c449.json",
+        "sha256": "f936b8d9174f9f3fa89512ba0df2b0713172d6b6fad50d3a78172c292bbf48ca",
+        "size_bytes": 165923
+      },
+      {
+        "name": "case-d7621006be011851a4cc.json",
+        "sha256": "43e6fbbeecae78ba1c5545f0eaa8513ea0a310b85736041425f1b733698f3f3e",
+        "size_bytes": 47534
+      },
+      {
+        "name": "case-e0a800bbe9bf949f8f87.json",
+        "sha256": "91ee53d7c5e616c95521067322b5a2563b705fd824c4f0e283cb6b01e466e89c",
+        "size_bytes": 960
+      },
+      {
+        "name": "case-e5a34792532f398992d6.json",
+        "sha256": "082ef3c725061541d0550785611b14078a6820ea5cd820769dc9ce59de23451a",
+        "size_bytes": 46574
+      },
+      {
+        "name": "case-eb989b13e0035327e72c.json",
+        "sha256": "fc9038f4655de6e07ee39742bd9fd8e4b980a17f7459f5b9f2a796bf5449a812",
+        "size_bytes": 86251
+      },
+      {
+        "name": "case-ec45f808b08627406879.json",
+        "sha256": "561e776f95ce6aa7ce941e22c9a92354da11f36b7ddf2a703d93627f49cf9881",
+        "size_bytes": 169728
+      },
+      {
+        "name": "case-f7cac2d1edca576ab4fe.json",
+        "sha256": "811ba274b7d7efdea71a8698a8cd658341e988ccf4dd377e8e3238f84260c7cf",
+        "size_bytes": 946
+      },
+      {
+        "name": "case-fb3364a03312b9481ace.json",
+        "sha256": "445ff02d8d9863f72deb92eb45ec669e6c57a04215f08edac8770c029bca85de",
+        "size_bytes": 936
+      },
+      {
+        "name": "case-fe21603dc7f6e0e02312.json",
+        "sha256": "d1d582d785a97faa5b29ce3e4a96f7ddc67dfe469a37b687b4131f437153c26c",
+        "size_bytes": 964
+      },
+      {
+        "name": "case-fe91da86b9aeb172d691.json",
+        "sha256": "d362b3cfa04b085053db8e7958efcd492b6729c99540dd81bb35478a44a0c0cf",
+        "size_bytes": 43739
+      },
+      {
+        "name": "case-fff6f1e55f7bbf182d36.json",
+        "sha256": "f4e6fb657d7df449c5310d59247e2e35ad0274dfe3c75b0a36acec1845fbf21d",
+        "size_bytes": 958
+      }
+    ]
+  },
+  "claim_boundary": {
+    "cross_engine_parity_established": false,
+    "human_or_anatomical_inference": false,
+    "human_or_coaching_inference": false,
+    "screening_population_evaluated": false
+  },
+  "counterfactuals": [
+    {
+      "clubhead_speed_difference_m_s": 0.00039501809114628195,
+      "engine": "mujoco",
+      "estimand": "matched_separately_integrated_counterfactual",
+      "reference_variant": "nominal",
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "variant": "frictionless_killswitch"
+    },
+    {
+      "clubhead_speed_difference_m_s": 0.00026956395531341215,
+      "engine": "mujoco",
+      "estimand": "matched_separately_integrated_counterfactual",
+      "reference_variant": "nominal",
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "variant": "low_friction_slip_probe"
+    },
+    {
+      "clubhead_speed_difference_m_s": 0.0,
+      "engine": "mujoco",
+      "estimand": "matched_separately_integrated_counterfactual",
+      "reference_variant": "nominal",
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "variant": "high_friction"
+    },
+    {
+      "clubhead_speed_difference_m_s": 0.00018402238725001574,
+      "engine": "mujoco",
+      "estimand": "matched_separately_integrated_counterfactual",
+      "reference_variant": "nominal",
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "variant": "low_tangential_stiffness"
+    },
+    {
+      "clubhead_speed_difference_m_s": -0.0002907755465721973,
+      "engine": "mujoco",
+      "estimand": "matched_separately_integrated_counterfactual",
+      "reference_variant": "nominal",
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "variant": "high_tangential_stiffness"
+    },
+    {
+      "clubhead_speed_difference_m_s": 0.0008166881371909351,
+      "engine": "mujoco",
+      "estimand": "matched_separately_integrated_counterfactual",
+      "reference_variant": "nominal",
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "variant": "zero_preload"
+    },
+    {
+      "clubhead_speed_difference_m_s": -0.021490672744151285,
+      "engine": "mujoco",
+      "estimand": "matched_separately_integrated_counterfactual",
+      "reference_variant": "nominal",
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "variant": "velocity_reversed"
+    },
+    {
+      "clubhead_speed_difference_m_s": 0.008336716352022933,
+      "engine": "mujoco",
+      "estimand": "matched_separately_integrated_counterfactual",
+      "reference_variant": "nominal",
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "variant": "opening_probe"
+    }
+  ],
+  "counts": {
+    "completed": 27,
+    "failed": 0,
+    "registered": 54,
+    "unavailable": 27
+  },
+  "groups": [
+    {
+      "coupling_work_refinement_ratios": [
+        0.5582357798885821,
+        0.5277791641489941
+      ],
+      "coupling_work_relative_residuals": [
+        6.207342645045868e-06,
+        3.4651607624928343e-06,
+        1.8288396508703592e-06
+      ],
+      "engine": "mujoco",
+      "failure_codes": [],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.7355842040542587,
+          0.1016585012101247,
+          0.6697622174156838
+        ],
+        "clubhead_direction_world": [
+          -0.6378420023661142,
+          0.6807365871662207,
+          -0.3602156005934123
+        ],
+        "clubhead_speed_m_s": 1.4401589405545963,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 129.8845425534184,
+        "maximum_contact_load_n": 0.9142717992652609,
+        "total_frictional_dissipation_j": 0.0,
+        "total_release_dissipation_j": 6.05309190075756e-06
+      },
+      "fine_step_regime_counts": {
+        "elastic_stick": 80,
+        "open": 40
+      },
+      "passes": true,
+      "passive_energy_refinement_ratios": [
+        0.5009355237101195,
+        0.5004747828372428
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.001488751318841442,
+        0.0007457684215779689,
+        0.00037323828883610734
+      ],
+      "variant": "nominal"
+    },
+    {
+      "coupling_work_refinement_ratios": [
+        1.0,
+        1.0
+      ],
+      "coupling_work_relative_residuals": [
+        1.1950183892356684e-05,
+        1.1950183892356684e-05,
+        1.1950183892356684e-05
+      ],
+      "engine": "mujoco",
+      "failure_codes": [
+        "coupling_work_refinement"
+      ],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.7355669955650198,
+          0.10173719447301494,
+          0.6697691679199707
+        ],
+        "clubhead_direction_world": [
+          -0.6372499927980336,
+          0.6813083648892864,
+          -0.36018239630886095
+        ],
+        "clubhead_speed_m_s": 1.4405539586457425,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 129.8414042355323,
+        "maximum_contact_load_n": 0.9123588378142506,
+        "total_frictional_dissipation_j": 0.0,
+        "total_release_dissipation_j": 6.049816107643317e-06
+      },
+      "fine_step_regime_counts": {
+        "coulomb_slip": 80,
+        "open": 40
+      },
+      "passes": false,
+      "passive_energy_refinement_ratios": [
+        0.5047091778491115,
+        0.5082752229407419
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.0014941369604658506,
+        0.0007541046369106899,
+        0.0003832927024464281
+      ],
+      "variant": "frictionless_killswitch"
+    },
+    {
+      "coupling_work_refinement_ratios": [
+        0.7708322924488722,
+        0.833991057921557
+      ],
+      "coupling_work_relative_residuals": [
+        3.97377446543405e-06,
+        3.0631136808653204e-06,
+        2.5546094192388633e-06
+      ],
+      "engine": "mujoco",
+      "failure_codes": [
+        "coupling_work_refinement"
+      ],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.735575117521805,
+          0.1017019693775306,
+          0.6697655977336509
+        ],
+        "clubhead_direction_world": [
+          -0.6375275615467315,
+          0.6810611536270736,
+          -0.36015873346128674
+        ],
+        "clubhead_speed_m_s": 1.4404285045099097,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 129.8594168156734,
+        "maximum_contact_load_n": 0.9130884331630046,
+        "total_frictional_dissipation_j": 1.7092633779649907e-05,
+        "total_release_dissipation_j": 6.050751357229726e-06
+      },
+      "fine_step_regime_counts": {
+        "coulomb_slip": 68,
+        "elastic_stick": 12,
+        "open": 40
+      },
+      "passes": false,
+      "passive_energy_refinement_ratios": [
+        0.5014194072167607,
+        0.5017179435594685
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.0014866602240057266,
+        0.0007454402882536881,
+        0.0003740007684690178
+      ],
+      "variant": "low_friction_slip_probe"
+    },
+    {
+      "coupling_work_refinement_ratios": [
+        0.5582357798885821,
+        0.5277791641489941
+      ],
+      "coupling_work_relative_residuals": [
+        6.207342645045868e-06,
+        3.4651607624928343e-06,
+        1.8288396508703592e-06
+      ],
+      "engine": "mujoco",
+      "failure_codes": [],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.7355842040542587,
+          0.1016585012101247,
+          0.6697622174156838
+        ],
+        "clubhead_direction_world": [
+          -0.6378420023661142,
+          0.6807365871662207,
+          -0.3602156005934123
+        ],
+        "clubhead_speed_m_s": 1.4401589405545963,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 129.8845425534184,
+        "maximum_contact_load_n": 0.9142717992652609,
+        "total_frictional_dissipation_j": 0.0,
+        "total_release_dissipation_j": 6.05309190075756e-06
+      },
+      "fine_step_regime_counts": {
+        "elastic_stick": 80,
+        "open": 40
+      },
+      "passes": true,
+      "passive_energy_refinement_ratios": [
+        0.5009355237101195,
+        0.5004747828372428
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.001488751318841442,
+        0.0007457684215779689,
+        0.00037323828883610734
+      ],
+      "variant": "high_friction"
+    },
+    {
+      "coupling_work_refinement_ratios": [
+        0.5605538900388437,
+        0.528690518332455
+      ],
+      "coupling_work_relative_residuals": [
+        3.0850779349799736e-06,
+        1.7293524375260272e-06,
+        9.142922365751297e-07
+      ],
+      "engine": "mujoco",
+      "failure_codes": [],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.7355757237960233,
+          0.10169732035803523,
+          0.6697656378121765
+        ],
+        "clubhead_direction_world": [
+          -0.637550485067216,
+          0.6810138873638858,
+          -0.3602075293606261
+        ],
+        "clubhead_speed_m_s": 1.4403429629418463,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 129.86373999271018,
+        "maximum_contact_load_n": 0.912837454006058,
+        "total_frictional_dissipation_j": 0.0,
+        "total_release_dissipation_j": 3.0268570009887696e-06
+      },
+      "fine_step_regime_counts": {
+        "elastic_stick": 80,
+        "open": 40
+      },
+      "passes": true,
+      "passive_energy_refinement_ratios": [
+        0.5008279419725712,
+        0.5004177844346034
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.0014857933882603646,
+        0.0007441268448388919,
+        0.0003723743070325902
+      ],
+      "variant": "low_tangential_stiffness"
+    },
+    {
+      "coupling_work_refinement_ratios": [
+        0.5539239592617552,
+        0.5261052066890707
+      ],
+      "coupling_work_relative_residuals": [
+        1.2824436425195497e-05,
+        7.10376259994496e-06,
+        3.7373264909141336e-06
+      ],
+      "engine": "mujoco",
+      "failure_codes": [],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.735600413285646,
+          0.10158413398551312,
+          0.6697556985173029
+        ],
+        "clubhead_direction_world": [
+          -0.6383993507882364,
+          0.6802315245627795,
+          -0.3601823731169464
+        ],
+        "clubhead_speed_m_s": 1.439868165008024,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 129.92171149677088,
+        "maximum_contact_load_n": 0.9199868177934072,
+        "total_frictional_dissipation_j": 0.0,
+        "total_release_dissipation_j": 1.2104618898995754e-05
+      },
+      "fine_step_regime_counts": {
+        "elastic_stick": 80,
+        "open": 40
+      },
+      "passes": true,
+      "passive_energy_refinement_ratios": [
+        0.501151309441294,
+        0.5005890646184936
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.0014933600496516413,
+        0.000748399344350236,
+        0.0003746405277493785
+      ],
+      "variant": "high_tangential_stiffness"
+    },
+    {
+      "coupling_work_refinement_ratios": [
+        0.557254555781702,
+        0.5273785925734498
+      ],
+      "coupling_work_relative_residuals": [
+        5.898726177798346e-06,
+        3.2870920358869145e-06,
+        1.7335419715454366e-06
+      ],
+      "engine": "mujoco",
+      "failure_codes": [],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.7355811354208706,
+          0.10166829219697512,
+          0.6697641014377326
+        ],
+        "clubhead_direction_world": [
+          -0.6376965244588871,
+          0.6811027923133238,
+          -0.3597806679020558
+        ],
+        "clubhead_speed_m_s": 1.4409756286917872,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 129.85143606109028,
+        "maximum_contact_load_n": 0.912361386250942,
+        "total_frictional_dissipation_j": 0.0,
+        "total_release_dissipation_j": 5.186560327411321e-09
+      },
+      "fine_step_regime_counts": {
+        "elastic_stick": 80,
+        "open": 40
+      },
+      "passes": true,
+      "passive_energy_refinement_ratios": [
+        0.5009001196379814,
+        0.5004576385196593
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.0014877319936435535,
+        0.0007452051336053085,
+        0.0003729436013768399
+      ],
+      "variant": "zero_preload"
+    },
+    {
+      "coupling_work_refinement_ratios": [
+        0.5513191610462903,
+        0.5233484875894243
+      ],
+      "coupling_work_relative_residuals": [
+        6.1750945420007414e-06,
+        3.4044479422773754e-06,
+        1.7817126816677923e-06
+      ],
+      "engine": "mujoco",
+      "failure_codes": [],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.7290134661817429,
+          0.0961606969909238,
+          0.677711211711818
+        ],
+        "clubhead_direction_world": [
+          0.6350974125149975,
+          -0.6985005231647176,
+          0.3297700649776613
+        ],
+        "clubhead_speed_m_s": 1.418668267810445,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 51.733860457243416,
+        "maximum_contact_load_n": 0.6029975779127656,
+        "total_frictional_dissipation_j": 0.0,
+        "total_release_dissipation_j": 6.05773690452433e-06
+      },
+      "fine_step_regime_counts": {
+        "elastic_stick": 80,
+        "open": 40
+      },
+      "passes": true,
+      "passive_energy_refinement_ratios": [
+        0.5004919470687735,
+        0.5002466869105826
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.001458988599467327,
+        0.0007302120448985454,
+        0.0003652861562026989
+      ],
+      "variant": "velocity_reversed"
+    },
+    {
+      "coupling_work_refinement_ratios": [
+        0.0,
+        0.0
+      ],
+      "coupling_work_relative_residuals": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "engine": "mujoco",
+      "failure_codes": [],
+      "fine_step_outcomes": {
+        "club_face_proxy_axis_world": [
+          0.7357717442058502,
+          0.10144113401979517,
+          0.6695891551967212
+        ],
+        "clubhead_direction_world": [
+          -0.6295057483129908,
+          0.6805401098082718,
+          -0.3749502257407596
+        ],
+        "clubhead_speed_m_s": 1.4484956569066192,
+        "face_path_proxy_definition": "angle between club local +x axis and clubhead velocity in the world frame",
+        "face_path_proxy_deg": 130.1807014477559,
+        "maximum_contact_load_n": 0.0,
+        "total_frictional_dissipation_j": 0.0,
+        "total_release_dissipation_j": 1.8e-05
+      },
+      "fine_step_regime_counts": {
+        "open": 120
+      },
+      "passes": true,
+      "passive_energy_refinement_ratios": [
+        0.5000252654465597,
+        0.5000125515536942
+      ],
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "completed",
+      "time_steps_s": [
+        0.001,
+        0.0005,
+        0.00025
+      ],
+      "trajectory_energy_relative_residuals": [
+        0.0014371188711493523,
+        0.0007185957450247151,
+        0.00035930689200543565
+      ],
+      "variant": "opening_probe"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "nominal"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "frictionless_killswitch"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "low_friction_slip_probe"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "high_friction"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "low_tangential_stiffness"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "high_tangential_stiffness"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "zero_preload"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "velocity_reversed"
+    },
+    {
+      "engine": "pinocchio",
+      "failure_codes": [
+        "native_engine_unavailable"
+      ],
+      "failure_details": [
+        "registered native module is unavailable: No module named 'pinocchio'"
+      ],
+      "passes": false,
+      "source_case_index": 0,
+      "source_sample_index": 6,
+      "source_time_s": 0.12,
+      "status": "unavailable",
+      "variant": "opening_probe"
+    }
+  ],
+  "identity": {
+    "execution_revision": "715a4f3852276ff0e17b823f73e44e9561249814",
+    "plan_sha256": "ae01fa154c7b38a47f02fbe44b8456bbef48b6b3f22a3ecc451dd7fc329fc68d"
+  },
+  "promotion": {
+    "eligible": false,
+    "failure_codes": [
+      "native_engine_unavailable",
+      "cross_engine_parity_unavailable",
+      "refinement_failure"
+    ]
+  },
+  "schema_version": "stateful-distributed-forward-summary/v1"
+}

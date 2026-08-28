@@ -106,7 +106,9 @@ are not completion evidence.
   typed Pinocchio absences. Energy defects contract in all variants; coupling
   refinement fails frictionless preload release (ratios 1/1) and the low-mu
   slip probe (fine ratio 0.834 > 0.8). No execution failures occurred;
-  checkpoint-set SHA-256 is `1e6eeeabcb2d461a`; promotion is false.
+  checkpoint-set SHA-256 is `1e6eeeabcb2d461a`; promotion is false. All exact
+  checkpoints and a freshness-checked summary are published under
+  `data/articulated_stateful_distributed_smoke/`.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.

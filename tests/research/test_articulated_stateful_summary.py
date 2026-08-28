@@ -21,6 +21,11 @@ PLAN = (
     "articulated_stateful_distributed_plan.json"
 )
 EXECUTION = "d" * 40
+PUBLISHED_EXECUTION = "715a4f3852276ff0e17b823f73e44e9561249814"
+PUBLISHED = (
+    ROOT / "docs/research/proximal_distal_energy_transfer/data/"
+    "articulated_stateful_distributed_smoke"
+)
 
 
 def _manifest() -> dict[str, object]:
@@ -139,3 +144,16 @@ def test_publish_copies_exact_checkpoint_set_and_is_deterministic(
     assert len(tuple((output_dir / "checkpoints").glob("case-*.json"))) == 54
     summary = json.loads(first)
     assert summary["checkpoint_inventory"]["count"] == 54
+
+
+def test_committed_stateful_summary_is_fresh(tmp_path: Path) -> None:
+    manifest = _manifest()
+    regenerated = publish_stateful_smoke_evidence(
+        manifest=manifest,
+        execution_revision=PUBLISHED_EXECUTION,
+        checkpoint_dir=PUBLISHED / "checkpoints",
+        output_dir=tmp_path / "regenerated",
+    )
+
+    assert regenerated.read_bytes() == (PUBLISHED / "summary.json").read_bytes()
+    assert len(tuple((PUBLISHED / "checkpoints").glob("case-*.json"))) == 54
