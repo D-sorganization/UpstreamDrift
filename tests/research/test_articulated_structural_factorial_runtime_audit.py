@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
@@ -9,6 +11,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     plan_sha256,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit import (
+    _execution_module_provenance,
     audit_structural_runtime,
     validate_runtime_audit,
 )
@@ -28,6 +31,19 @@ def _source(*, revision: str = "a" * 40, clean: bool = True) -> dict[str, object
     return {"revision": revision, "tree_sha": "b" * 40, "tracked_clean": clean}
 
 
+def _audit_source() -> dict[str, object]:
+    return {"revision": "c" * 40, "tree_sha": "d" * 40, "tracked_clean": True}
+
+
+def _execution_modules() -> dict[str, object]:
+    return {
+        "native_dynamics_operator": {
+            "path": "scripts/research/operator.py",
+            "sha256": "e" * 64,
+        }
+    }
+
+
 def _smoke(_name: str) -> dict[str, object]:
     return {"model_nq": 4, "passes": True}
 
@@ -42,6 +58,8 @@ def test_runtime_audit_qualifies_every_registered_native_engine() -> None:
         plan=plan,
         launch=_launch(plan),
         source_checkout=_source(),
+        audit_source_checkout=_audit_source(),
+        execution_modules=_execution_modules(),
         engine_probe=probe,
         operator_probe=_smoke,
     )
@@ -92,6 +110,8 @@ def test_runtime_audit_retains_typed_unavailability_without_qualification() -> N
         plan=plan,
         launch=_launch(plan),
         source_checkout=_source(),
+        audit_source_checkout=_audit_source(),
+        execution_modules=_execution_modules(),
         engine_probe=probe,
         operator_probe=_smoke,
     )
@@ -117,6 +137,8 @@ def test_runtime_audit_rejects_launch_identity_drift() -> None:
             plan=plan,
             launch=launch,
             source_checkout=_source(),
+            audit_source_checkout=_audit_source(),
+            execution_modules=_execution_modules(),
             operator_probe=_smoke,
         )
 
@@ -140,6 +162,8 @@ def test_runtime_audit_rejects_source_checkout_drift(
         plan=plan,
         launch=_launch(plan),
         source_checkout=source,
+        audit_source_checkout=_audit_source(),
+        execution_modules=_execution_modules(),
         engine_probe=probe,
         operator_probe=_smoke,
     )
@@ -162,6 +186,8 @@ def test_runtime_audit_rejects_native_operator_smoke_failure() -> None:
         plan=plan,
         launch=_launch(plan),
         source_checkout=_source(),
+        audit_source_checkout=_audit_source(),
+        execution_modules=_execution_modules(),
         engine_probe=probe,
         operator_probe=smoke,
     )
@@ -186,6 +212,8 @@ def test_runtime_audit_validator_accepts_only_intact_qualified_identity() -> Non
         plan=plan,
         launch=launch,
         source_checkout=_source(),
+        audit_source_checkout=_audit_source(),
+        execution_modules=_execution_modules(),
         engine_probe=probe,
         operator_probe=_smoke,
     )
@@ -217,6 +245,8 @@ def test_runtime_audit_validator_fails_closed_on_tampering(
         plan=plan,
         launch=launch,
         source_checkout=_source(),
+        audit_source_checkout=_audit_source(),
+        execution_modules=_execution_modules(),
         engine_probe=probe,
         operator_probe=_smoke,
     )
@@ -224,3 +254,16 @@ def test_runtime_audit_validator_fails_closed_on_tampering(
 
     with pytest.raises(ValueError, match=message):
         validate_runtime_audit(plan=plan, launch=launch, audit=audit)
+
+
+def test_execution_module_provenance_rejects_a_different_source_root(
+    tmp_path: Path,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    provenance = _execution_module_provenance(repo_root)
+
+    assert "native_dynamics_operator" in provenance
+    assert all(len(str(row["sha256"])) == 64 for row in provenance.values())
+    with pytest.raises(ValueError, match="outside the declared execution source"):
+        _execution_module_provenance(tmp_path)

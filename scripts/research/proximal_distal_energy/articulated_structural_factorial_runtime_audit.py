@@ -6,6 +6,7 @@ import argparse
 from collections.abc import Callable, Mapping, Sequence
 import hashlib
 from importlib import metadata
+import inspect
 import json
 import os
 from pathlib import Path
@@ -31,9 +32,11 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
     default_synthetic_profiles,
 )
 
-_SCHEMA = "articulated-structural-factorial-runtime-audit/1.2.0"
+_SCHEMA = "articulated-structural-factorial-runtime-audit/1.3.0"
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _DISTRIBUTIONS = ("numpy", "scipy", "mujoco", "pin", "pinocchio")
+ROOT = Path(__file__).resolve().parents[3]
 EngineProbe = Callable[[str], Mapping[str, str]]
 OperatorProbe = Callable[[str], Mapping[str, object]]
 
@@ -83,8 +86,59 @@ def _audit_digest_payload(audit: Mapping[str, object]) -> dict[str, object]:
             "distributions",
             "engines",
             "source_checkout",
+            "audit_source_checkout",
+            "execution_modules",
         )
     }
+
+
+def _execution_module_provenance(source_root: Path) -> dict[str, object]:
+    """Hash executed operator modules and require them to live under source_root."""
+
+    root = source_root.resolve()
+    functions = {
+        "native_dynamics_operator": native_dynamics_operator,
+        "require_native_engine": require_native_engine,
+        "build_subject_scaled_model": build_subject_scaled_model,
+        "default_synthetic_profiles": default_synthetic_profiles,
+    }
+    provenance: dict[str, object] = {}
+    for name, function in functions.items():
+        raw_path = inspect.getsourcefile(function)
+        if raw_path is None:
+            raise ValueError(f"cannot resolve executed source for {name}")
+        path = Path(raw_path).resolve()
+        try:
+            relative = path.relative_to(root)
+        except ValueError as exc:
+            raise ValueError(
+                f"executed module {name} is outside the declared execution source"
+            ) from exc
+        provenance[name] = {
+            "path": relative.as_posix(),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }
+    return provenance
+
+
+def _validate_provenance_mapping(value: Mapping[str, object], *, name: str) -> None:
+    if not value:
+        raise ValueError(f"{name} must retain at least one executed module")
+    for module_name, raw in value.items():
+        row = _mapping(raw, name=f"{name}.{module_name}")
+        path = row.get("path")
+        digest = row.get("sha256")
+        if (
+            not isinstance(module_name, str)
+            or not module_name
+            or not isinstance(path, str)
+            or not path
+            or Path(path).is_absolute()
+            or ".." in Path(path).parts
+            or not isinstance(digest, str)
+            or _SHA256.fullmatch(digest) is None
+        ):
+            raise ValueError(f"{name} contains invalid module provenance")
 
 
 def validate_runtime_audit(
@@ -112,6 +166,21 @@ def validate_runtime_audit(
         or source.get("matches_launch_revision") is not True
     ):
         raise ValueError("runtime audit source checkout is not launch-qualified")
+    audit_source = _mapping(
+        audit.get("audit_source_checkout"), name="audit_source_checkout"
+    )
+    if (
+        not isinstance(audit_source.get("revision"), str)
+        or _SHA40.fullmatch(str(audit_source.get("revision"))) is None
+        or not isinstance(audit_source.get("tree_sha"), str)
+        or _SHA40.fullmatch(str(audit_source.get("tree_sha"))) is None
+        or audit_source.get("tracked_clean") is not True
+    ):
+        raise ValueError("runtime audit tool source is not clean and revision-bound")
+    execution_modules = _mapping(
+        audit.get("execution_modules"), name="execution_modules"
+    )
+    _validate_provenance_mapping(execution_modules, name="execution_modules")
     engines = _mapping(audit.get("engines"), name="engines")
     registered = _registered_engines(plan)
     if set(engines) != set(registered) or any(
@@ -164,6 +233,8 @@ def audit_structural_runtime(
     plan: Mapping[str, object],
     launch: Mapping[str, object],
     source_checkout: Mapping[str, object],
+    audit_source_checkout: Mapping[str, object],
+    execution_modules: Mapping[str, object],
     engine_probe: EngineProbe | None = None,
     operator_probe: OperatorProbe | None = None,
 ) -> dict[str, object]:
@@ -189,6 +260,18 @@ def audit_structural_runtime(
             "source checkout must declare revision, tree SHA, and clean state"
         )
     source_matches = observed_revision == revision and tracked_clean
+    audit_revision = audit_source_checkout.get("revision")
+    audit_tree = audit_source_checkout.get("tree_sha")
+    audit_clean = audit_source_checkout.get("tracked_clean")
+    if (
+        not isinstance(audit_revision, str)
+        or _SHA40.fullmatch(audit_revision) is None
+        or not isinstance(audit_tree, str)
+        or _SHA40.fullmatch(audit_tree) is None
+        or audit_clean is not True
+    ):
+        raise ValueError("audit source checkout must be clean and revision-bound")
+    _validate_provenance_mapping(execution_modules, name="execution_modules")
     probe = engine_probe or require_native_engine
     smoke_probe = operator_probe or _native_operator_smoke
     engines: dict[str, dict[str, object]] = {}
@@ -269,6 +352,8 @@ def audit_structural_runtime(
         "distributions": distributions,
         "engines": engines,
         "source_checkout": source_record,
+        "audit_source_checkout": dict(audit_source_checkout),
+        "execution_modules": dict(execution_modules),
     }
     return {
         "schema_version": _SCHEMA,
@@ -278,6 +363,8 @@ def audit_structural_runtime(
         "distributions": distributions,
         "engines": engines,
         "source_checkout": source_record,
+        "audit_source_checkout": dict(audit_source_checkout),
+        "execution_modules": dict(execution_modules),
         "runtime_identity_sha256": _canonical_sha256(digest_payload),
         "qualified_for_registered_engines": qualified,
         "qualified_for_execution": qualified and source_matches,
@@ -320,15 +407,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--launch", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--source-root", type=Path, default=Path.cwd())
+    parser.add_argument("--audit-source-root", type=Path, default=ROOT)
     args = parser.parse_args(argv)
     plan = _mapping(json.loads(args.plan.read_text(encoding="utf-8")), name="plan")
     launch = _mapping(
         json.loads(args.launch.read_text(encoding="utf-8")), name="launch"
     )
+    source_root = args.source_root.resolve()
     result = audit_structural_runtime(
         plan=plan,
         launch=launch,
-        source_checkout=_source_checkout(args.source_root.resolve()),
+        source_checkout=_source_checkout(source_root),
+        audit_source_checkout=_source_checkout(args.audit_source_root.resolve()),
+        execution_modules=_execution_module_provenance(source_root),
     )
     _write_atomic(args.output, result)
     return 0 if result["qualified_for_execution"] else 2

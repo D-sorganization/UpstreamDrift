@@ -102,12 +102,18 @@ are not completion evidence.
 - Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
   `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
 - Registered execution is active under PID 31684 at
-  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 110/2,304
-  retained (56 validated MuJoCo, 54 typed Pin absences), no orphan sidecars,
-  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 12:23 UTC.
-- Audit v1.2 digest `9507556034f2009d7d7cbfbdc2d01e9613024eeb9d8b4bedaac453711801bbd7`
-  qualifies operators; launch/summary bind it. A copied-sidecar sentinel proves
-  hash rejection and summary revalidates it; Linux needs `pin`/`pin-pink`.
+  `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`: 121/2,304
+  retained (61 validated MuJoCo, 60 typed Pin absences), no orphan sidecars,
+  one CPU/117 MB, atomic, and empty stderr as of 2026-08-28 12:36 UTC.
+- It began from launch commit `5544c8559` before the runtime-audit/session gates
+  were added. Preserve it as diagnostic checkpoint evidence, not promotion
+  authority; do not combine it with a separately qualified runtime.
+- The retrospective v1.2 audit did not prove that imported operator modules
+  came from its declared source root and is not promotion authority. Audit v1.3
+  binds clean audit-tool and execution checkouts plus executed-module hashes.
+- The opt-in hosted-Ubuntu audit lane checks out launch revision `d6bffd0c6`
+  separately, installs `pin`/MuJoCo, and uploads the exact audit without using
+  this workstation or a fleet runner. It must pass before a Linux campaign.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.

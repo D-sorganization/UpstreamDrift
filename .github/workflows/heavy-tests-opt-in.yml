@@ -24,6 +24,11 @@ on:
         default: "3.11"
         type: choice
         options: ["3.10", "3.11", "3.12"]
+      structural_runtime_audit:
+        description: "Run only the exact-revision structural runtime audit"
+        required: false
+        default: false
+        type: boolean
   schedule:
     - cron: "0 2 * * 0" # Weekly Sunday 02:00 UTC
 
@@ -34,6 +39,7 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.structural_runtime_audit != true }}
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
@@ -51,8 +57,84 @@ jobs:
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+  structural-runtime-audit:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.structural_runtime_audit == true }}
+    name: Structural Runtime Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Audit Authority
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: audit-tools
+
+      - name: Resolve Frozen Execution Revision
+        id: execution
+        shell: bash
+        run: |
+          execution_revision=$(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          launch = json.loads(
+              Path(
+                  "audit-tools/docs/research/proximal_distal_energy_transfer/"
+                  "data/articulated_structural_factorial_launch.json"
+              ).read_text(encoding="utf-8")
+          )
+          revision = launch["execution_revision"]
+          if not isinstance(revision, str) or len(revision) != 40:
+              raise SystemExit("execution revision is not a full SHA-1")
+          int(revision, 16)
+          print(revision)
+          PY
+          )
+          echo "revision=$execution_revision" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout Frozen Execution Source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ steps.execution.outputs.revision }}
+          path: execution-source
+
+      - name: Set Up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+
+      - name: Install Native Operator Dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy mujoco "pin>=2.6.0,<5.0.0"
+          python audit-tools/scripts/ci/check_pinocchio_dynamics_api.py
+
+      - name: Generate Exact-Revision Runtime Audit
+        working-directory: execution-source
+        env:
+          PYTHONPATH: ${{ github.workspace }}/execution-source
+        shell: bash
+        run: |
+          python ../audit-tools/scripts/research/proximal_distal_energy/articulated_structural_factorial_runtime_audit.py \
+            --plan ../audit-tools/docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+            --launch ../audit-tools/docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+            --source-root . \
+            --audit-source-root ../audit-tools \
+            --output ../structural-runtime-audit.json
+
+      - name: Upload Structural Runtime Audit
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: structural-runtime-audit-${{ github.run_id }}
+          path: structural-runtime-audit.json
+          if-no-files-found: error
+          retention-days: 30
+
   run-heavy-tests:
     needs: pick-runner
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.structural_runtime_audit != true }}
     name: Heavy Integration Tests (${{ matrix.engine }})
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 90

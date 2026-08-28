@@ -31,6 +31,19 @@ def test_heavy_runtime_uses_robotics_pin_and_rejects_name_collisions() -> None:
     assert main() == 0
 
 
+def test_structural_runtime_audit_is_hosted_exact_revision_and_artifact_bound() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "structural_runtime_audit:" in workflow
+    assert "structural-runtime-audit:" in workflow
+    assert "runs-on: ubuntu-latest" in workflow
+    assert "articulated_structural_factorial_launch.json" in workflow
+    assert "ref: ${{ steps.execution.outputs.revision }}" in workflow
+    assert "articulated_structural_factorial_runtime_audit" in workflow
+    assert "structural-runtime-audit-${{ github.run_id }}" in workflow
+    assert "inputs.structural_runtime_audit != true" in workflow
+
+
 def test_parser_handles_quoted_constraints_and_exposes_wrong_distributions() -> None:
     packages = _extract_pip_packages(
         'RUN pip install "pin>=2.6,<5" "pin-pink>=1,<5" pinocchio pink'

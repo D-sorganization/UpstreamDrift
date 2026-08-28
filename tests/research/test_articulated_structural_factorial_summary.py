@@ -275,6 +275,17 @@ def test_summary_accepts_a_qualified_bound_runtime_but_retains_other_gates(
             "tree_sha": "c" * 40,
             "tracked_clean": True,
         },
+        audit_source_checkout={
+            "revision": "d" * 40,
+            "tree_sha": "e" * 40,
+            "tracked_clean": True,
+        },
+        execution_modules={
+            "native_dynamics_operator": {
+                "path": "scripts/research/operator.py",
+                "sha256": "f" * 64,
+            }
+        },
         engine_probe=probe,
         operator_probe=lambda _name: {"passes": True},
     )
