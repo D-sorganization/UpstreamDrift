@@ -103,8 +103,9 @@ are not completion evidence.
 - Registered execution is active under PID 31684 at
   `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`; use the status
   CLI for counts. Runtime is 24--48 h, one CPU/117 MB, atomic, empty stderr.
-- Windows audit rejects unrelated `pinocchio` 0.4.3/module 0.1. Heavy image and
-  workflow now require `pin`/`pin-pink` plus API gate; parity still needs Linux.
+- Runtime audit v1.1 rejects wrong Pin and dirty/nonlaunch source checkouts.
+  Heavy image/workflow require `pin`/`pin-pink` plus API gate; parity needs a
+  clean `d6bffd0c6` Linux checkout.
 - The old ground atlas retains a pre-stateful distributed-grip SHA. Preserve
   its metadata; reproduce its bound revision or publish a separately versioned
   ground authority before treating it as current execution evidence.

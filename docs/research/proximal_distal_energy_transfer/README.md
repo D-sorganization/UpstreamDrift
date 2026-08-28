@@ -419,6 +419,7 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit \
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
   --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+  --source-root /path/to/clean/execution-revision-checkout \
   --output C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/runtime-audit.json
 # inspect a partial run without promoting it or starting another worker
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_status \

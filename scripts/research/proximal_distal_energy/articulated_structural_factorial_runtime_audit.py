@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import subprocess
 from typing import Any
 
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_evaluator import (
@@ -21,7 +22,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     plan_sha256,
 )
 
-_SCHEMA = "articulated-structural-factorial-runtime-audit/1.0.0"
+_SCHEMA = "articulated-structural-factorial-runtime-audit/1.1.0"
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _DISTRIBUTIONS = ("numpy", "scipy", "mujoco", "pin", "pinocchio")
 EngineProbe = Callable[[str], Mapping[str, str]]
@@ -67,6 +68,7 @@ def audit_structural_runtime(
     *,
     plan: Mapping[str, object],
     launch: Mapping[str, object],
+    source_checkout: Mapping[str, object],
     engine_probe: EngineProbe | None = None,
 ) -> dict[str, object]:
     """Return an identity-bound runtime audit without evaluating outcomes."""
@@ -77,6 +79,20 @@ def audit_structural_runtime(
     revision = launch.get("execution_revision")
     if not isinstance(revision, str) or _SHA40.fullmatch(revision) is None:
         raise ValueError("launch execution_revision must be a lowercase SHA-1")
+    observed_revision = source_checkout.get("revision")
+    tree_sha = source_checkout.get("tree_sha")
+    tracked_clean = source_checkout.get("tracked_clean")
+    if (
+        not isinstance(observed_revision, str)
+        or _SHA40.fullmatch(observed_revision) is None
+        or not isinstance(tree_sha, str)
+        or _SHA40.fullmatch(tree_sha) is None
+        or not isinstance(tracked_clean, bool)
+    ):
+        raise ValueError(
+            "source checkout must declare revision, tree SHA, and clean state"
+        )
+    source_matches = observed_revision == revision and tracked_clean
     probe = engine_probe or require_native_engine
     engines: dict[str, dict[str, object]] = {}
     for name in _registered_engines(plan):
@@ -114,11 +130,18 @@ def audit_structural_runtime(
         "execution_revision": revision,
     }
     qualified = all(row["status"] == "qualified" for row in engines.values())
+    source_record: dict[str, object] = {
+        "revision": observed_revision,
+        "tree_sha": tree_sha,
+        "tracked_clean": tracked_clean,
+        "matches_launch_revision": source_matches,
+    }
     digest_payload: dict[str, object] = {
         "identity": identity_record,
         "platform": platform_record,
         "distributions": distributions,
         "engines": engines,
+        "source_checkout": source_record,
     }
     return {
         "schema_version": _SCHEMA,
@@ -127,8 +150,27 @@ def audit_structural_runtime(
         "platform": platform_record,
         "distributions": distributions,
         "engines": engines,
+        "source_checkout": source_record,
         "runtime_identity_sha256": _canonical_sha256(digest_payload),
         "qualified_for_registered_engines": qualified,
+        "qualified_for_execution": qualified and source_matches,
+    }
+
+
+def _source_checkout(root: Path) -> dict[str, object]:
+    def git(*args: str) -> str:
+        completed = subprocess.run(
+            ["git", "-C", str(root), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return completed.stdout.strip()
+
+    return {
+        "revision": git("rev-parse", "HEAD"),
+        "tree_sha": git("rev-parse", "HEAD^{tree}"),
+        "tracked_clean": not bool(git("status", "--porcelain", "--untracked-files=no")),
     }
 
 
@@ -150,14 +192,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--plan", type=Path, required=True)
     parser.add_argument("--launch", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--source-root", type=Path, default=Path.cwd())
     args = parser.parse_args(argv)
     plan = _mapping(json.loads(args.plan.read_text(encoding="utf-8")), name="plan")
     launch = _mapping(
         json.loads(args.launch.read_text(encoding="utf-8")), name="launch"
     )
-    result = audit_structural_runtime(plan=plan, launch=launch)
+    result = audit_structural_runtime(
+        plan=plan,
+        launch=launch,
+        source_checkout=_source_checkout(args.source_root.resolve()),
+    )
     _write_atomic(args.output, result)
-    return 0 if result["qualified_for_registered_engines"] else 2
+    return 0 if result["qualified_for_execution"] else 2
 
 
 if __name__ == "__main__":  # pragma: no cover
