@@ -20,8 +20,8 @@ are not completion evidence.
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`.
   Worktree: `UpstreamDrift-worktrees/9153-forward-impulse-work`; branch:
   `feat/9153-forward-impulse-work`. No PR exists yet.
-- Remote/local branch head is `97b6395ca6805fd5f92764a2913ded498f792dd7`.
-  The tree is clean and the remote branch was verified at that exact head.
+- Remote feature-branch authority before this slice is
+  `9d4817912755ce75e189f9baf13e388b494b7bf9`.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -78,13 +78,17 @@ are not completion evidence.
 - All individual closure tolerances pass. Thirty-three of 36 MuJoCo groups
   pass refinement; nominal case 4/sample 0 and case 13/samples 0 and 12 fail
   the unchanged 0.8 work-refinement gate. Promotion remains false.
-- Published checkpoint evidence, a four-panel governed figure, a paper section,
-  and claims PD-CLAIM-333--335 are implemented locally but not yet committed.
+- Source commit `623e8cea1303ee2a7ee8c4ff47871ef1d192ea6e` publishes the
+  checkpoints, four-panel figure, paper section, and claims PD-CLAIM-333--335.
+  The rebuilt paper is 256 pages, SHA-256
+  `af1157d0a5558b11979c9ad567d08a6bacfc2ab96ab12f8cbc899a8a8fec2253`,
+  and passes the computational publication profile. Tagged-PDF and font-resource
+  findings remain explicit archival gaps.
 
 ## Immediate Order
 
-1. Finish claim-evidence regeneration, rebuild and inspect the paper, qualify
-   the release, then commit and push the completed refinement evidence slice.
+1. Commit the release manifest/checksums bound to source commit `623e8cea1`,
+   push both new commits, and verify the remote feature head exactly.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. Continue matched rigid/shaft/base branches and causal killswitch runs.
