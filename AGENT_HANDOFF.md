@@ -90,9 +90,12 @@ are not completion evidence.
   they are excluded from evidence and must not be merged with the valid run.
 - A new stateful elastic--perfectly-plastic tangential countermodel uses a
   Coulomb radial return, retained elastic displacement, plastic-slip
-  dissipation, and explicit stored-energy release on opening. Its pure kernel
-  passes stick, slip, opening, rotation-equivariance, and fail-closed tests. It
-  is an engineering comparator, not anatomy; forward integration remains next.
+  dissipation, and explicit stored-energy release on opening. The distributed
+  adapter projects state into the changing tangent plane, retains projection
+  release, combines native generalized loads, and closes every station ledger.
+  Kernel/adapter tests cover stick, slip, opening, rotation equivariance, and
+  fail-closed inputs. This is an engineering comparator, not anatomy; a frozen
+  time-integration contract remains next.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
