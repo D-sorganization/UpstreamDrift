@@ -37,16 +37,11 @@ completion from local files or an open pull request.
 - Branch: `feat/9128-swing-objective-web-parity-and-research`.
 - Existing protected-flow PR: #9136. Preserve its squash auto-merge request;
   do not merge until every scientific and software gate below is satisfied.
-- Remote PR head `7da562063` contains the complete #9125 slice. Hosted checks
-  were newly queued/in progress after that push; no actionable failure was
-  observed and no redundant rerun was requested.
-- PR #9136 is being reconciled with protected #9123. Protected #9123
-  trajectory-authority sources and tests take precedence over its earlier,
-  incorrect fixed-horizon implementation.
-- A clean prior #9124 worktree at
-  `UpstreamDrift-worktrees/9124-bounded-event-reachability` contains the more
-  complete event-replay and multiple-shooting implementation. Reuse only the
-  #9124-owned files, then rebind them to protected #9123 source identities.
+- Exact PR head `0e3ac2dc6` contains the integrated #9124-#9128 work, the
+  protected #9123 authority, and protected-main manual authority `8ccd6df42`.
+  Local research, API/provider, React, type-check, production-build, numeric-
+  scaffold, architecture, title, release, and manual-governance gates pass.
+  Hosted protected delivery and post-merge verification remain pending.
 
 ## Open Correctness Findings
 
@@ -69,29 +64,24 @@ completion from local files or an open pull request.
   on PR #9136 rather than inferring delivery from this checkout.
 - #9128 now uses the mounted `/api/tools/...` frontend contract, generated
   OpenAPI types, and the current `WorkspaceShell` interface. The vendored Tools
-  pin is advanced to protected provider `3dfbd32cc`; focused API and React
-  parity tests pass, but full web/build and provider-consumer gates remain.
-- The current consolidated branch has complete local paper/release integration
-  through #9126, but #9126 still needs final gates, commit, push, and protected
-  delivery. The handoff, issue closures, and `parity` status must not overstate
-  implementation, protected delivery, or validation.
+  pin is advanced to protected provider `3dfbd32cc`; 24 API/provider tests,
+  four React tests, TypeScript type-check, and the production build pass.
+- The consolidated branch has complete local integration through #9128.
+  Protected merge and post-merge evidence remain; issue closures and `parity`
+  status must not overstate protected delivery or scientific validation.
 
 ## Required Order
 
-1. Finish the merge from protected `main`, retaining protected #9123 sources.
-2. Preserve #9124's governed multiple-shooting evidence and verified release;
-   do not infer optimality or ranking from its local feasibility result.
-3. Correct and qualify #9125 event-topology robustness, including delays,
-   channel coverage, common-random-number perturbations, and typed failures.
-4. Finish #9126 final gates and protected delivery while keeping human limits,
-   controller outcomes, collocation NMPC, and rankings explicitly unavailable.
-5. Correct #9128 API routing/types/shell contracts and test desktop/web parity
-   without moving research authority into the UI.
-6. Regenerate claims, numeric contracts, release artifacts, TeX, PDF, and
-   reviewer figures only after the source results are final. Visually inspect
-   affected pages and re-run the computational publication profile.
-7. Shepherd #9136 through protected CI, verify its squash on remote `main`,
-   close only actually completed issues, and update epic #8557.
+1. Shepherd exact head `0e3ac2dc6` through protected CI without redundant
+   reruns, bypasses, force pushes, or loss of its squash auto-merge request.
+2. Verify the squash commit on remote `main`, then close only acceptance-complete
+   issues and update epic #8557 with exact evidence and remaining boundaries.
+3. Regenerate the AffineDrift projection only from the immutable protected
+   UpstreamDrift squash; keep Tools as provider authority and the UI as consumer.
+4. Preserve #9124's failed optimality gate, #9125's synthetic topology scope,
+   and #9126's zero-evaluation/zero-ranking boundary in every publication.
+5. Resume #8800 only after explicit storage-recovery approval and identity
+   revalidation; never substitute partial checkpoints for release evidence.
 
 ## Scientific Boundaries
 
