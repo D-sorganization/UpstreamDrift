@@ -36,6 +36,17 @@ class ContactEventRecord:
     path_model: str = "linear_state_interpolant"
 
 
+@dataclass(frozen=True, slots=True)
+class EventAlignedStateTrace:
+    """State samples with one duplicate-time boundary per event group."""
+
+    time_s: FloatArray
+    positions: FloatArray
+    velocities: FloatArray
+    segment_ids: NDArray[np.int64]
+    event_record_offsets: NDArray[np.int64]
+
+
 def _finite(name: str, value: object, *, ndim: int) -> FloatArray:
     array = np.asarray(value, dtype=np.float64)
     if array.ndim != ndim or not np.all(np.isfinite(array)):
@@ -196,4 +207,138 @@ def locate_contact_events(
     )
 
 
-__all__ = ["ContactEventKind", "ContactEventRecord", "locate_contact_events"]
+def align_state_trace_to_events(
+    *,
+    time_s: FloatArray,
+    positions: FloatArray,
+    velocities: FloatArray,
+    events: tuple[ContactEventRecord, ...],
+    equality_tolerance: float = 1.0e-12,
+) -> EventAlignedStateTrace:
+    """Insert duplicate pre/post samples so quadrature never crosses an event."""
+
+    time = _finite("time_s", time_s, ndim=1)
+    q = _finite("positions", positions, ndim=2)
+    qd = _finite("velocities", velocities, ndim=2)
+    if time.size < 2 or np.any(np.diff(time) <= 0.0):
+        raise ValueError("time_s must contain at least two strictly increasing samples")
+    if q.shape != qd.shape or q.shape[0] != time.size:
+        raise ValueError(
+            "positions and velocities must share shape (samples, coordinates)"
+        )
+    if not np.isfinite(equality_tolerance) or equality_tolerance <= 0.0:
+        raise ValueError("equality_tolerance must be finite and positive")
+    if any(not isinstance(event, ContactEventRecord) for event in events):
+        raise TypeError("events must contain only ContactEventRecord values")
+    ordered = tuple(
+        sorted(
+            events,
+            key=lambda event: (
+                event.left_index,
+                event.time_s,
+                event.hand_index,
+                event.station_index,
+            ),
+        )
+    )
+    if ordered != events:
+        raise ValueError("events must be sorted in path order")
+
+    output_time: list[float] = [float(time[0])]
+    output_q: list[FloatArray] = [q[0].copy()]
+    output_qd: list[FloatArray] = [qd[0].copy()]
+    output_segments: list[int] = [0]
+    event_offsets: list[int] = []
+    segment = 0
+    event_cursor = 0
+    for left_index in range(time.size - 1):
+        interval_events: list[tuple[int, ContactEventRecord]] = []
+        while (
+            event_cursor < len(ordered)
+            and ordered[event_cursor].left_index == left_index
+        ):
+            event = ordered[event_cursor]
+            if event.right_index != left_index + 1:
+                raise ValueError("event indices must name adjacent trace samples")
+            if not time[left_index] <= event.time_s <= time[left_index + 1]:
+                raise ValueError("event time lies outside its retained bracket")
+            interval_events.append((event_cursor, event))
+            event_cursor += 1
+
+        group_index = 0
+        while group_index < len(interval_events):
+            offset, first = interval_events[group_index]
+            group = [first]
+            group_index += 1
+            while group_index < len(interval_events) and np.isclose(
+                interval_events[group_index][1].time_s,
+                first.time_s,
+                rtol=0.0,
+                atol=equality_tolerance,
+            ):
+                group.append(interval_events[group_index][1])
+                group_index += 1
+            if any(
+                not np.allclose(
+                    member.position,
+                    first.position,
+                    rtol=0.0,
+                    atol=equality_tolerance,
+                )
+                or not np.allclose(
+                    member.velocity,
+                    first.velocity,
+                    rtol=0.0,
+                    atol=equality_tolerance,
+                )
+                for member in group[1:]
+            ):
+                raise ValueError("simultaneous event records disagree on state")
+            if not np.isclose(
+                output_time[-1], first.time_s, rtol=0.0, atol=equality_tolerance
+            ):
+                output_time.append(first.time_s)
+                output_q.append(first.position.copy())
+                output_qd.append(first.velocity.copy())
+                output_segments.append(segment)
+            elif not np.allclose(
+                output_q[-1], first.position, rtol=0.0, atol=equality_tolerance
+            ):
+                raise ValueError("event state disagrees with coincident trace sample")
+            segment += 1
+            output_time.append(first.time_s)
+            output_q.append(first.position.copy())
+            output_qd.append(first.velocity.copy())
+            output_segments.append(segment)
+            event_offsets.append(offset)
+
+        if not (
+            np.isclose(
+                output_time[-1], time[left_index + 1], rtol=0.0, atol=equality_tolerance
+            )
+            and np.allclose(
+                output_q[-1], q[left_index + 1], rtol=0.0, atol=equality_tolerance
+            )
+        ):
+            output_time.append(float(time[left_index + 1]))
+            output_q.append(q[left_index + 1].copy())
+            output_qd.append(qd[left_index + 1].copy())
+            output_segments.append(segment)
+    if event_cursor != len(ordered):
+        raise ValueError("an event does not belong to a retained trace interval")
+    return EventAlignedStateTrace(
+        time_s=np.asarray(output_time, dtype=np.float64),
+        positions=np.asarray(output_q, dtype=np.float64),
+        velocities=np.asarray(output_qd, dtype=np.float64),
+        segment_ids=np.asarray(output_segments, dtype=np.int64),
+        event_record_offsets=np.asarray(event_offsets, dtype=np.int64),
+    )
+
+
+__all__ = [
+    "ContactEventKind",
+    "ContactEventRecord",
+    "EventAlignedStateTrace",
+    "align_state_trace_to_events",
+    "locate_contact_events",
+]
