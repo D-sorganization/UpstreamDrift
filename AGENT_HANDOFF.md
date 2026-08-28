@@ -18,7 +18,6 @@ are not completion evidence.
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`; worktree
   `UpstreamDrift-worktrees/9153-forward-impulse-work`, branch
   `feat/9153-forward-impulse-work`. No PR exists.
-- Execution sources and launch are verified through `5544c8559`.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -103,10 +102,11 @@ are not completion evidence.
   MuJoCo 3.12.0 and Pin 4.1.0 under Linux/Python 3.11.16; runtime identity is
   `015408e1cb99f48b140206eb994451d385146fc1a58030f968a63770af55f067`.
   Artifact SHA-256 is `447683487f1ea249858caea4e15326b3b37e9de446bf4d9a15bbdb7291218b80`.
-- Timing run 33174130362 completed cases 0:6 in 90 s (15 s/case), with both
-  engines at three resolutions. Production run 33174462839 is executing 6:78.
-  Collector `3c947a5dc` atomically rejects session drift, overlap, corrupt
-  sidecars, and unexpected files; never combine execution identities.
+- Timing run 33174130362 completed 0:6. Run 33174462839 timed out at 30 min but
+  uploaded 16 valid contiguous cases 6:22. Combined authority has 22/2,304.
+- Collector `ab2f908ad` records requested/observed ranges and failed conclusions;
+  it rejects drift, overlap, corruption, and gaps. Run 33177181557 executes
+  22:46 with one process and a 90-minute timeout.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -115,8 +115,8 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Do not restart/combine the Windows diagnostic. Complete non-overlapping
-   hosted slices against audit 33173678044; completed JSON requires its NPZ.
+1. Do not restart/combine the Windows diagnostic. Continue 24-case hosted
+   slices from 46 against audit 33173678044; completed JSON requires its NPZ.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
@@ -128,7 +128,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current structural/container slice: 68 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 49 pass;
 Ruff/Black and configured pre-push gates pass. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
 it does not reach project analysis. Architecture reports only pre-existing
