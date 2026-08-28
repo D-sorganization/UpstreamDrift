@@ -104,14 +104,19 @@ are not completion evidence.
   passive energy, coupling work, virtual power, and exact constitutive closure;
   step-boundary events explicitly make no substep-time or impulse claim. No
   stateful campaign or result interpretation exists yet.
+- The prospective 54-case stateful plan binds evaluator commit `6124cf402`,
+  one source state, nine adverse/killswitch variants, three decreasing steps,
+  and both native engines under atomic one-worker execution. Raw/canonical plan
+  SHA-256 values are `38778f598c373478` and `2f07ff3621e82e3b`; launch is still
+  `not_started`, so there is no registered stateful evidence yet.
 - Focused aggregation/runner tests, Ruff, format, and file-size gates pass.
   Existing focused MyPy behavior is not green: inherited scientific-script
   errors and an installed-MyPy internal crash were previously observed.
 
 ## Immediate Order
 
-1. Commit the stateful evaluator, then bind its exact SHA in a prospective plan
-   with adverse opening/slip/preload cases before any execution.
+1. Commit the prospective stateful plan, use that exact commit as execution
+   identity, then launch/resume its 54 cases serially through atomic checkpoints.
 2. Specify a pilot-disclosed rigid refinement extension without weakening or
    relabeling the original failures.
 3. Add matched rigid/shaft/base branches and causal killswitch runs, keeping

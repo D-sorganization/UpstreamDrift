@@ -104,6 +104,12 @@ def _stateful_case(
     )
     if not np.all(np.isfinite(factors)) or np.any(factors[:4] < 0.0):
         raise ValueError("stateful variant factors must be finite and nonnegative")
+    slack_override = variant_row.get("slack_distance_override_m")
+    slack_distance = (
+        _number(variant_row, "slack_distance_override_m", positive=False)
+        if slack_override is not None
+        else _number(law, "slack_distance_m", positive=False) * slack_factor
+    )
     count = int(law.get("station_count_per_hand", 0))
     mu = _number(law, "friction_coefficient", positive=False) * friction_factor
     grip = DistributedGripConfig(
@@ -112,9 +118,7 @@ def _stateful_case(
         total_stiffness_n_m=rigid_case.contact_stiffness,
         total_damping_n_s_m=rigid_case.contact_damping,
         friction_coefficient=mu,
-        slack_distance_m=(
-            _number(law, "slack_distance_m", positive=False) * slack_factor
-        ),
+        slack_distance_m=slack_distance,
     )
     preload = _vector3(law, "initial_preload_vector_m") * preload_factor
     initial_state = np.broadcast_to(preload, (2, count, 3)).copy()
