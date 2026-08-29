@@ -504,7 +504,12 @@ class MohrCoulombEnvelope:
 
     Attributes:
         friction_angle_deg: ``asin(slope)``.
-        cohesion_pa: ``intercept / cos(phi)``.
+        cohesion_pa: ``intercept / cos(phi)``. Reported, never fitted --
+            no target in this package constrains it. On the damp firm
+            preset it comes out at 1.67 kPa against the moisture model's
+            declared 1.80 kPa, an 8% gap that is the two-dimensional
+            cone's apparent cohesion differing from the Mohr-Coulomb one,
+            not an error in either.
         slope: Fitted ``dq/dp``.
         intercept_pa: Fitted ``q`` at ``p = 0``.
         n_points: Number of cells in the fit.
