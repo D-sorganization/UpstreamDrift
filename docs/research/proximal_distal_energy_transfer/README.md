@@ -324,7 +324,7 @@ the finding-by-finding record in
 
 ## Reproducing Everything
 
-```bash
+````bash
 # primary analyses (E1 sweep, E2 counterfactuals, E4 interface powers)
 python3 -m scripts.research.proximal_distal_energy.run_experiments
 # registered source extraction and exact interaction-force study
@@ -455,6 +455,25 @@ recoverable operational diagnostics, but the governed summary now rejects them
 rather than implying that its minimal parity sidecars support the required
 reviewer figures or complete #9153 evidence package.
 
+After replaying the frozen legacy prefix under the enriched revision, require
+an exact noninterpretive reproduction audit before continuing beyond that
+prefix:
+
+```bash
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_enrichment_audit \
+  --legacy-plan /path/to/legacy-plan.json \
+  --legacy-launch /path/to/legacy-launch.json \
+  --legacy-checkpoint-dir /path/to/legacy-prefix \
+  --enriched-plan /path/to/enriched-plan.json \
+  --enriched-launch /path/to/enriched-launch.json \
+  --enriched-checkpoint-dir /path/to/enriched-prefix \
+  --output /path/to/enrichment-audit.json
+````
+
+The audit requires identical case ordering, statuses, JSON results, and every
+overlapping legacy NPZ array while independently validating the enriched
+sidecars. It does not compare or interpret scientific outcome magnitudes.
+
 The registered Windows execution treats robotics Pinocchio absence as a typed
 missing cell. The system Python resolves the unrelated `pinocchio==0.4.3`
 distribution, whose module advertises version 0.1, while the qualified robotics
@@ -482,7 +501,9 @@ python3 -m scripts.research.proximal_distal_energy.run_typed_slack_dynamic_study
 python3 -m scripts.research.proximal_distal_energy.run_experimental_protocol_dry_run
 python3 -m scripts.research.proximal_distal_energy.measured_trajectory_source_registry validate
 python3 -m scripts.research.proximal_distal_energy.measured_trajectory_metric_registration validate
+
 # governed measured-trajectory ingestion contracts (no human dataset is currently admitted)
+
 python3 -m pytest tests/research/test_measured_trajectory_ingestion.py -q
 python3 -m scripts.research.proximal_distal_energy.run_advanced_biological_bridge
 python3 -m scripts.research.proximal_distal_energy.claim_audit inventory
@@ -496,12 +517,16 @@ python3 -m scripts.research.proximal_distal_energy.claim_evidence_integrity vali
 python3 -m scripts.research.proximal_distal_energy.external_source_review validate
 python3 -m scripts.research.proximal_distal_energy.momentum_question_readiness validate
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate
+
 # robustness analyses
+
 python3 -m scripts.research.proximal_distal_energy.e1b_bounded_torque
 python3 -m scripts.research.proximal_distal_energy.e1c_impact_sensitivity
 python3 -m scripts.research.proximal_distal_energy.e1d_parameter_sensitivity
 python3 -m scripts.research.proximal_distal_energy.e1e_smooth_command_sensitivity
+
 # figures
+
 python3 -m scripts.research.proximal_distal_energy.make_figures
 python3 -m scripts.research.proximal_distal_energy.make_interaction_force_figures
 python3 -m scripts.research.proximal_distal_energy.make_counterfactual_figures
@@ -522,15 +547,18 @@ python3 -m scripts.research.proximal_distal_energy.make_uncertainty_control_figu
 python3 -m scripts.research.proximal_distal_energy.run_constraint_internal_force_diagnostics validate
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_identifiability_study
 python3 -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification
+
 # document
+
 python3 -m pip install -e '.[publication]'
 cd docs/research/proximal_distal_energy_transfer
 quarto render proximal_distal_energy_transfer.qmd --to pdf
 cd ../../..
 python3 -m scripts.research.proximal_distal_energy.optimize_article_pdf
 python3 -m scripts.research.proximal_distal_energy.qualify_open_release validate \
-  --source-revision "$(git rev-parse HEAD)" \
-  --publication-profile computational
+--source-revision "$(git rev-parse HEAD)" \
+--publication-profile computational
+
 ```
 
 Requires Quarto + a LaTeX distribution (TeX Live with `lmodern`), and
@@ -621,3 +649,4 @@ model and ABA APIs.
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 
 Edit the `.qmd`/chapter files, never the generated `.tex`.
+```

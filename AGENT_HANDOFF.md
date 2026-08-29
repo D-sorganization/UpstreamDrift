@@ -127,7 +127,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 53 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 55 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
