@@ -6,10 +6,13 @@ are not completion evidence.
 
 ## Protected Authority
 
-- UpstreamDrift protected `main` was `e732757c90538acae7d7c4531dc1a05dc321b94f`
-  when #9153 began and contains the #9152/#9151 authority.
+- UpstreamDrift protected `main` is `63fa73282845436f432bb831e95d680c4bcc06cf`.
+  #9153 began at ancestor `e732757c90538acae7d7c4531dc1a05dc321b94f`,
+  which contains the #9152/#9151 authority.
 - AffineDrift protected `main` is `b28fd8227d5003c752a16426ed508e13ff2e137a`;
-  Tools handoff PR #4869 is protected as `cefcc1878de11804c44cd7d1d19c0ffcf58fa89e`.
+  Tools protected `main` is `b9becbff76633fb0703ed7d3c2f0a89a6c84e708`
+  and contains handoff PR #4869 commit
+  `cefcc1878de11804c44cd7d1d19c0ffcf58fa89e` as an ancestor.
   Tools #4669 is protected and #4142 remains the reusable-variation authority.
 - Last protected paper: 252 pages, SHA-256 `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`;
   tagged-PDF and font-resource gates remain open.
@@ -17,8 +20,9 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  branch `feat/9153-forward-impulse-work` must remain clean and remote-equal;
-  resolve its exact head with `git rev-parse HEAD`. No PR exists.
+  branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
+  Scientific/collector content head is `acc3d81ba0216d8c8faf9c036b11fa835966a2a8`;
+  resolve the handoff-only successor with `git rev-parse HEAD`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 
@@ -52,7 +56,9 @@ are not completion evidence.
 - Replay 33277732709 passed [0,20): archive `142556c34373`, receipt `f3bd190abc2d`,
   source-derived sentinel `f8b7c4e836ab`, and exact audit `7b00bb69fbbe` over
   20 statuses/JSON results and 180 arrays. No outcomes were summarized.
-- Replay 33279075050 executes [20,40) at exact `e86dff3ba`; do not duplicate it.
+- Replay 33279075050 executes [20,40) at exact `e86dff3ba`.
+- At 2026-08-29T22:38:13Z, job 99171004536 is in the registered campaign-slice
+  step. Do not cancel, rerun, or duplicate it.
 - Collection schema 1.1 requires each source's retained receipt, accepts the
   governed 1.1/1.2 receipts, verifies exact identity/count/file digests, and
   records the receipt schema/SHA. A real 1.1 intake retained 20/20 at
@@ -63,16 +69,35 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Let replay 33279075050 terminate; retain exact metadata without outcomes.
-2. Receipt/audit/collect [20,40), then compare legacy/enriched [0,40).
-3. Preserve all three refinement failures, typed Pinocchio absence, original
+1. Let replay 33279075050 terminate; poll it once after GitHub App setup and
+   retain exact metadata without inspecting outcomes.
+2. Intake [20,40) into the required-absent directory
+   `Campaigns/UpstreamDrift-9153-enriched-slice-0020-0040-run-33279075050`.
+   Require the API/archive SHA-256 match, exactly 20 JSON plus 20 NPZ files and
+   one session file, then create receipt 1.2 and a source-derived corruption
+   sentinel from clean committed source.
+3. Build cumulative receipt-bound collection
+   `Campaigns/UpstreamDrift-9153-enriched-collected-prefix-0040-v1`, legacy view
+   `Campaigns/UpstreamDrift-9153-legacy-prefix-view-0040-v1`, and exact audit
+   `Campaigns/UpstreamDrift-9153-enrichment-audit-prefix-0040-v1`.
+   Stop and preserve evidence on any mismatch.
+4. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
-4. The contrast summary is implemented locally; after completion, validate the
+5. The contrast summary is implemented locally; after completion, validate the
    checkpoint set and retain sign reversals, failures, and typed missing cells.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
-5. Project only protected UpstreamDrift evidence into AffineDrift; continue
+6. Project only protected UpstreamDrift evidence into AffineDrift; continue
    Tools only through its provider contract and protected flow.
+
+## Cross-Repository Turnover
+
+- This file is the campaign handoff. AffineDrift and Tools root handoffs govern
+  their own concurrent programs and are not #9153 execution authority.
+- Do not edit AffineDrift until #9153 is protected in UpstreamDrift. Then use an
+  immutable source pin and ordinary protected publication flow.
+- Do not modify the occupied primary Tools branch for this campaign. No Tools
+  provider delta is presently required; use its protected contract only.
 
 ## Validation
 
