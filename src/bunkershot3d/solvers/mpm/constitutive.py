@@ -248,6 +248,33 @@ def yield_function(
     )
 
 
+def _validate_yield_projection_inputs(
+    hencky_strain: NDArray[np.float64],
+    *,
+    cap_volumetric_strain: float,
+) -> None:
+    """Reject strain arrays and caps the return map cannot act on.
+
+    Args:
+        hencky_strain: Trial principal logarithmic strains.
+        cap_volumetric_strain: Most compressive elastic ``tr(eps)``.
+
+    Raises:
+        CalibrationError: If the strain array is not ``(n, d)`` with
+            ``d >= 1``, or if the cap is not compressive.
+    """
+    if hencky_strain.ndim != 2 or hencky_strain.shape[1] < 1:
+        raise CalibrationError(
+            "hencky_strain must have shape (n, d) with d >= 1, got "
+            f"{hencky_strain.shape!r}"
+        )
+    if not math.isfinite(cap_volumetric_strain) or cap_volumetric_strain >= 0.0:
+        raise CalibrationError(
+            "cap_volumetric_strain must be negative -- the cap is a limit on "
+            f"compaction, not on extension -- got {cap_volumetric_strain!r}"
+        )
+
+
 def project_to_yield_surface(
     hencky_strain: NDArray[np.float64],
     *,
@@ -302,16 +329,9 @@ def project_to_yield_surface(
         CalibrationError: If the strain array is not ``(n, d)`` with
             ``d >= 1``, or if the cap is not compressive.
     """
-    if hencky_strain.ndim != 2 or hencky_strain.shape[1] < 1:
-        raise CalibrationError(
-            "hencky_strain must have shape (n, d) with d >= 1, got "
-            f"{hencky_strain.shape!r}"
-        )
-    if not math.isfinite(cap_volumetric_strain) or cap_volumetric_strain >= 0.0:
-        raise CalibrationError(
-            "cap_volumetric_strain must be negative -- the cap is a limit on "
-            f"compaction, not on extension -- got {cap_volumetric_strain!r}"
-        )
+    _validate_yield_projection_inputs(
+        hencky_strain, cap_volumetric_strain=cap_volumetric_strain
+    )
     dimension = hencky_strain.shape[1]
     strain = np.array(hencky_strain, dtype=np.float64, copy=True)
 
@@ -546,13 +566,7 @@ class SandContinuum:
             MoistureRegimeError: If the bed is saturated and no dilation
                 suction was supplied.
         """
-        if not isinstance(sand, SandState):
-            raise CalibrationError(f"expected a SandState, got {type(sand).__name__}")
-        if not math.isfinite(poisson_ratio) or not -1.0 < poisson_ratio < 0.5:
-            raise CalibrationError(
-                "poisson_ratio must lie strictly inside (-1, 0.5), got "
-                f"{poisson_ratio!r}"
-            )
+        _validate_continuum_inputs(sand, poisson_ratio=poisson_ratio)
         depth_m = sand.bed.depth_m if reference_depth_m is None else reference_depth_m
         modulus_pa = (
             _hardin_richart_shear_modulus_pa(
@@ -573,15 +587,7 @@ class SandContinuum:
         bulk_term = 2.0 * modulus_pa + PLANE_STRAIN_DIMENSION * lame_lambda
         tip = PLANE_STRAIN_DIMENSION * tensile_pa / bulk_term
 
-        packing = sand.packing
-        cap = math.log(packing.solid_fraction / packing.solid_fraction_max)
-        if cap >= 0.0:
-            raise CalibrationError(
-                f"sand '{sand.name}' is already at or past its densest packing "
-                f"(phi = {packing.solid_fraction:.4f}, phi_max = "
-                f"{packing.solid_fraction_max:.4f}), so there is no compressive "
-                "cap to place; the packing state is not physical"
-            )
+        cap = _cap_volumetric_strain(sand)
         return cls(
             density_kg_m3=sand.bulk_density_kg_m3,
             shear_modulus_pa=modulus_pa,
@@ -594,6 +600,51 @@ class SandContinuum:
             cohesion_pa=cohesion_pa,
             provenance=_continuum_provenance(sand, derived=shear_modulus_pa is None),
         )
+
+
+def _validate_continuum_inputs(sand: SandState, *, poisson_ratio: float) -> None:
+    """Reject sand states and Poisson ratios the continuum cannot use.
+
+    Args:
+        sand: The bed being struck.
+        poisson_ratio: Drained Poisson's ratio.
+
+    Raises:
+        CalibrationError: If the sand state is not a
+            :class:`~bunkershot3d.sand.state.SandState`, or if the
+            Poisson ratio is outside ``(-1, 0.5)``.
+    """
+    if not isinstance(sand, SandState):
+        raise CalibrationError(f"expected a SandState, got {type(sand).__name__}")
+    if not math.isfinite(poisson_ratio) or not -1.0 < poisson_ratio < 0.5:
+        raise CalibrationError(
+            f"poisson_ratio must lie strictly inside (-1, 0.5), got {poisson_ratio!r}"
+        )
+
+
+def _cap_volumetric_strain(sand: SandState) -> float:
+    """Return the most compressive elastic ``tr(eps)`` the packing carries.
+
+    Args:
+        sand: The bed being struck.
+
+    Returns:
+        The compressive volumetric-strain cap, strictly negative.
+
+    Raises:
+        CalibrationError: If the packing is already at or past its
+            densest state, leaving no compressive cap to place.
+    """
+    packing = sand.packing
+    cap = math.log(packing.solid_fraction / packing.solid_fraction_max)
+    if cap >= 0.0:
+        raise CalibrationError(
+            f"sand '{sand.name}' is already at or past its densest packing "
+            f"(phi = {packing.solid_fraction:.4f}, phi_max = "
+            f"{packing.solid_fraction_max:.4f}), so there is no compressive "
+            "cap to place; the packing state is not physical"
+        )
+    return cap
 
 
 def _hardin_richart_shear_modulus_pa(
