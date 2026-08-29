@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import argparse
 from collections.abc import Mapping, Sequence
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import uuid
 
 import numpy as np
 
@@ -357,4 +360,74 @@ def build_structural_artifact_receipt(
     return receipt
 
 
-__all__ = ["build_structural_artifact_receipt"]
+def _write_required_absent_json(path: Path, payload: Mapping[str, object]) -> None:
+    if path.exists():
+        raise FileExistsError("output receipt must not already exist")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f"{path.name}.tmp-{uuid.uuid4().hex}")
+    try:
+        with temporary.open("x", encoding="utf-8", newline="\n") as stream:
+            json.dump(payload, stream, indent=2, sort_keys=True, ensure_ascii=True)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        if path.exists():
+            raise FileExistsError("output receipt must not already exist")
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Build one receipt from exact retained GitHub API responses."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--run-json", type=Path, required=True)
+    parser.add_argument("--jobs-json", type=Path, required=True)
+    parser.add_argument("--artifacts-json", type=Path, required=True)
+    parser.add_argument("--archive", type=Path, required=True)
+    parser.add_argument("--extracted-dir", type=Path, required=True)
+    parser.add_argument("--expected-run-id", type=int, required=True)
+    parser.add_argument("--expected-dispatch-head", required=True)
+    parser.add_argument("--expected-execution-revision", required=True)
+    parser.add_argument("--expected-session-sha256", required=True)
+    parser.add_argument("--case-start", type=int, required=True)
+    parser.add_argument("--case-stop", type=int, required=True)
+    parser.add_argument(
+        "--required-evidence-schema",
+        choices=[EVIDENCE_SIDECAR_SCHEMA],
+    )
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args(argv)
+
+    artifact_response = _read_json_mapping(
+        args.artifacts_json, name="artifacts response"
+    )
+    artifact = _exact_named_record(
+        artifact_response.get("artifacts"),
+        expected_name=f"structural-checkpoints-{args.expected_run_id}",
+        collection_name="artifacts",
+    )
+    receipt = build_structural_artifact_receipt(
+        run=_read_json_mapping(args.run_json, name="run response"),
+        jobs=_read_json_mapping(args.jobs_json, name="jobs response"),
+        artifact=artifact,
+        archive_path=args.archive,
+        extracted_dir=args.extracted_dir,
+        expected_run_id=args.expected_run_id,
+        expected_dispatch_head=args.expected_dispatch_head,
+        expected_execution_revision=args.expected_execution_revision,
+        expected_session_sha256=args.expected_session_sha256,
+        requested_case_start=args.case_start,
+        requested_case_stop=args.case_stop,
+        required_evidence_schema=args.required_evidence_schema,
+    )
+    _write_required_absent_json(args.output, receipt)
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
+
+
+__all__ = ["build_structural_artifact_receipt", "main"]

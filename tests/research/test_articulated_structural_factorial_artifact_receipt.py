@@ -11,6 +11,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_artifact_receipt import (
     build_structural_artifact_receipt,
+    main,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_evidence import (
     EVIDENCE_SIDECAR_SCHEMA,
@@ -165,6 +166,89 @@ def test_receipt_binds_terminal_run_job_artifact_and_exact_slice(
     assert len(receipt["artifact_archive_sha256"]) == 64
     assert receipt["checkpoint_pair_count"] == 2
     assert len(receipt["files"]) == 5
+
+
+def test_receipt_cli_consumes_retained_github_responses_atomically(
+    tmp_path: Path,
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path, enriched=True)
+    run_path = tmp_path / "github-run.json"
+    jobs_path = tmp_path / "github-jobs.json"
+    artifacts_path = tmp_path / "github-artifacts.json"
+    output_path = tmp_path / "artifact-receipt.json"
+    run_path.write_text(json.dumps(_run()), encoding="utf-8")
+    jobs_path.write_text(json.dumps(_jobs()), encoding="utf-8")
+    artifacts_path.write_text(
+        json.dumps({"total_count": 1, "artifacts": [_artifact()]}),
+        encoding="utf-8",
+    )
+
+    exit_code = main(
+        [
+            "--run-json",
+            str(run_path),
+            "--jobs-json",
+            str(jobs_path),
+            "--artifacts-json",
+            str(artifacts_path),
+            "--archive",
+            str(archive),
+            "--extracted-dir",
+            str(extracted),
+            "--expected-run-id",
+            str(RUN_ID),
+            "--expected-dispatch-head",
+            HEAD_SHA,
+            "--expected-execution-revision",
+            EXECUTION_REVISION,
+            "--expected-session-sha256",
+            session_digest,
+            "--case-start",
+            "694",
+            "--case-stop",
+            "696",
+            "--required-evidence-schema",
+            EVIDENCE_SIDECAR_SCHEMA,
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    assert exit_code == 0
+    receipt = json.loads(output_path.read_text(encoding="utf-8"))
+    assert receipt["artifact"]["id"] == _artifact()["id"]
+    assert receipt["evidence_sidecars_validated"] == 2
+    assert not tuple(tmp_path.glob("artifact-receipt.json.tmp-*"))
+
+    with pytest.raises(FileExistsError, match="output receipt"):
+        main(
+            [
+                "--run-json",
+                str(run_path),
+                "--jobs-json",
+                str(jobs_path),
+                "--artifacts-json",
+                str(artifacts_path),
+                "--archive",
+                str(archive),
+                "--extracted-dir",
+                str(extracted),
+                "--expected-run-id",
+                str(RUN_ID),
+                "--expected-dispatch-head",
+                HEAD_SHA,
+                "--expected-execution-revision",
+                EXECUTION_REVISION,
+                "--expected-session-sha256",
+                session_digest,
+                "--case-start",
+                "694",
+                "--case-stop",
+                "696",
+                "--output",
+                str(output_path),
+            ]
+        )
 
 
 def test_enriched_receipt_validates_every_registered_evidence_history(
