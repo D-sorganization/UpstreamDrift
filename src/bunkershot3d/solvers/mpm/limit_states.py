@@ -46,8 +46,8 @@ from ..exceptions import SolverInputError
 from ..protocol import IntrusionState
 from .constitutive import PLANE_STRAIN_DIMENSION, SandContinuum
 from .grid import PlaneStrainGrid
-from .solver import PlaneStrainMPMSolver
-from .state import DomainWalls, WallCondition, settled_bed
+from .solver import MPMRun, PlaneStrainMPMSolver
+from .state import DomainWalls, ParticleState, WallCondition, settled_bed
 
 if TYPE_CHECKING:  # pragma: no cover - only a checker needs the section type
     from .body import RigidSection
@@ -260,6 +260,40 @@ def rankine_limits(material: SandContinuum) -> RankineLimits:
 class PassiveWallLimit:
     """One measured passive thrust against its closed-form limit load.
 
+    The closed form and what it assumes
+    -----------------------------------
+
+    ``P_p = K_p rho g H^2 / 2 + (s T / (1 - s)) H`` per unit width is
+    exact for this constitutive model under five conditions, each
+    arranged by :func:`passive_earth_pressure_limit` and reported here
+    rather than assumed:
+
+    1. **Smooth wall.**  ``contact_friction = 0``, so the wall carries no
+       shear and the principal directions stay axis-aligned.
+    2. **Frictionless base.**  ``sigma_xz = 0`` everywhere makes
+       horizontal equilibrium ``d sigma_xx / dx = 0``, so the Rankine
+       field is statically admissible over the *whole* layer and the
+       answer does not depend on where the failure surface goes.  This is
+       also why the bed length barely matters: measured 1.0615 at 5H
+       against 1.0573 at 8H, a 0.4% difference.
+    3. **Quasi-static.**  ``v_wall / c = 1.6e-4`` at the defaults, and
+       halving the wall speed moved the plateau by 0.25%.
+    4. **Fully mobilised.**  Reported as :attr:`yielded_fraction`; a load
+       read off a bed that is still elastic is a stiffness, not a limit.
+    5. **No escape route.**  The plate runs past the toe and past the
+       free surface.
+
+    Passive rather than active, and why
+    -----------------------------------
+
+    The active limit needs the sand to *follow* a retreating wall, so
+    what is measured is the wedge's ability to fall rather than its
+    strength.  Measured: the active plateau reached 0.78 of the closed
+    form on a frictionless base and 0.32 on a sticky one, while the
+    passive case on the same grid and material reached 1.06.  The active
+    number is available from
+    :meth:`RankineLimits.active_thrust_n_per_m` but is not a verified one.
+
     Attributes:
         cell_size_m: Grid ``dx``.
         height_m: Retained height ``H``.
@@ -360,6 +394,153 @@ def _rankine_wall_section(
     return solver.section_from_state(state)
 
 
+def _push_the_wall(
+    material: SandContinuum,
+    *,
+    cell_size_m: float,
+    height_m: float,
+    length_m: float,
+    wall_speed_m_s: float,
+    travel_m: float,
+    gravity_m_s2: float,
+) -> tuple[ParticleState, MPMRun]:
+    """Build the layer and the wall, and march the wall into it.
+
+    The grid is padded on the left so the wall has somewhere to start,
+    and its lower and right wall bands land on the layer's own floor and
+    far edge.  That is the same trap the consolidation column records: a
+    generously padded grid puts the "fixed base" two cells below the sand
+    and the run then looks entirely plausible while reporting zero.
+
+    Args:
+        material: The continuum.
+        cell_size_m: Grid ``dx``.
+        height_m: Retained height ``H``.
+        length_m: Layer length.
+        wall_speed_m_s: Wall speed.
+        travel_m: How far the wall travels.
+        gravity_m_s2: Gravitational acceleration.
+
+    Returns:
+        ``(particles, run)`` at the end of the push.
+    """
+    solver = PlaneStrainMPMSolver(
+        material=material,
+        cell_size_m=cell_size_m,
+        effective_width_m=1.0,
+        bed_depth_m=height_m,
+        gravity_m_s2=gravity_m_s2,
+        contact_friction=0.0,
+        walls=_SLIP_LAYER_DOMAIN,
+        refusal_policy=RefusalPolicy.REPORT,
+        max_steps=_PASSIVE_STEP_CAP,
+    )
+    particles = settled_bed(
+        material,
+        x_bounds_m=(0.0, length_m),
+        free_surface_height_m=0.0,
+        depth_m=height_m,
+        cell_size_m=cell_size_m,
+        particles_per_cell_axis=2,
+        gravity_m_s2=gravity_m_s2,
+        geostatic=True,
+    )
+    pad = _PASSIVE_PAD_CELLS
+    grid = PlaneStrainGrid(
+        (-(pad + 1) * cell_size_m, -height_m - cell_size_m),
+        cell_size_m,
+        (
+            int(round(length_m / cell_size_m)) + pad + 3,
+            int(round(height_m / cell_size_m)) + 4,
+        ),
+    )
+    section = _rankine_wall_section(
+        solver,
+        height_m=height_m,
+        cell_size_m=cell_size_m,
+        speed_m_s=wall_speed_m_s,
+    )
+    step_s = 0.4 * cell_size_m / material.elastic_wave_speed_m_s
+    n_steps = max(int(math.ceil(travel_m / (wall_speed_m_s * step_s))), 2)
+    run = solver.march(
+        particles,
+        section,
+        grid,
+        n_steps=n_steps,
+        time_step_s=step_s,
+        free_surface_height_m=0.0,
+        bed_x_bounds_m=(0.0, length_m),
+    )
+    return particles, run
+
+
+def _require_static_limit_conditions(
+    limits: RankineLimits,
+    *,
+    quasi_static_ratio: float,
+    length_ratio: float,
+    plateau_fraction: float,
+) -> None:
+    """Refuse a configuration whose answer would not be a static limit load.
+
+    Args:
+        limits: The closed-form limits, for the wedge extent in the
+            message.
+        quasi_static_ratio: ``v_wall / c``.
+        length_ratio: Layer length in wall heights.
+        plateau_fraction: Trailing share of the march to average.
+
+    Raises:
+        SolverInputError: If the wall is not quasi-static, if the layer
+            is too short to hold the passive wedge, or if the plateau
+            window is not a usable fraction. Each of those turns a limit
+            load into something else while still returning a number.
+    """
+    if not 0.0 < plateau_fraction <= 1.0:
+        raise SolverInputError(
+            f"plateau_fraction must lie in (0, 1], got {plateau_fraction!r}"
+        )
+    if not math.isfinite(quasi_static_ratio) or (
+        quasi_static_ratio > _MAX_QUASI_STATIC_RATIO
+    ):
+        raise SolverInputError(
+            f"the wall runs at v/c = {quasi_static_ratio:.3g}, over the "
+            f"{_MAX_QUASI_STATIC_RATIO:g} this case treats as quasi-static. "
+            "Rankine is a *static* limit; at a finite fraction of the wave "
+            "speed the measured thrust carries an inertial term the closed "
+            "form does not have, and the comparison would be against the "
+            "wrong problem"
+        )
+    if length_ratio < _MIN_PASSIVE_LENGTH_RATIO:
+        wedge = math.tan(math.radians(45.0 + limits.phi_star_deg / 2.0))
+        raise SolverInputError(
+            f"a bed {length_ratio!r} wall-heights long cannot hold the passive "
+            f"wedge, which reaches H tan(45 + phi*/2) = {wedge:.3g} H; use at "
+            f"least {_MIN_PASSIVE_LENGTH_RATIO:g}"
+        )
+
+
+def _plateau_thrust_n_per_m(run: MPMRun, *, fraction: float) -> tuple[float, float]:
+    """Mean and relative spread of the wall reaction over the plateau.
+
+    The plateau is a plastic flow rather than a settled static answer, so
+    it fluctuates.  Reporting the fluctuation beside the mean keeps a
+    single averaged number from reading as a converged one.
+
+    Args:
+        run: The march.
+        fraction: Trailing share of the march to average over.
+
+    Returns:
+        ``(mean, standard deviation / mean)`` in N/m and as a fraction.
+    """
+    reaction = np.abs(np.array([step.contact_force_n_per_m[0] for step in run.steps]))
+    window = max(int(round(fraction * reaction.size)), 1)
+    plateau = reaction[-window:]
+    mean = float(plateau.mean())
+    return mean, float(plateau.std()) / max(mean, _TINY)
+
+
 def passive_earth_pressure_limit(
     material: SandContinuum,
     *,
@@ -373,70 +554,35 @@ def passive_earth_pressure_limit(
 ) -> PassiveWallLimit:
     """Push a smooth rigid wall into a layer and read its limit load.
 
-    The plastic-limit case issue #8733 section 4 asks for.  Everything
-    else in this module is elastic, kinematic, or a restatement of the
-    yield function's own identity; this one drives the whole layer to the
-    Drucker-Prager limit and compares the wall reaction **the solver
-    computes for itself** -- ``StepDiagnostics.contact_force_n_per_m``,
-    the same traction integration a club head is loaded through --
-    against a closed form.
-
-    The closed form and what it assumes
-    -----------------------------------
-
-    ``P_p = K_p rho g H^2 / 2 + (s T / (1 - s)) H`` per unit width, with
-    ``K_p`` and the intercept from :func:`rankine_limits`.  It is exact
-    for this constitutive model under five conditions, each of which is
-    arranged here and reported rather than assumed:
-
-    1. **Smooth wall.**  ``contact_friction = 0``, so the wall carries no
-       shear and the principal directions stay axis-aligned.
-    2. **Frictionless base.**  ``sigma_xz = 0`` everywhere makes
-       horizontal equilibrium ``d sigma_xx / dx = 0``, so the Rankine
-       field is statically admissible over the *whole* layer and the
-       answer does not depend on where the failure surface goes.  This is
-       also why the bed length barely matters: measured 1.0615 at 5H
-       against 1.0573 at 8H, a 0.4% difference.
-    3. **Quasi-static.**  ``v_wall / c = 1.6e-4`` at the defaults, and
-       halving the wall speed moved the plateau by 0.25%.
-    4. **Fully mobilised.**  Reported as ``yielded_fraction``; a load
-       read off a bed that is still elastic is a stiffness, not a limit.
-    5. **No escape route.**  The plate runs past the toe and past the
-       free surface.
-
-    Passive rather than active, and why
-    -----------------------------------
-
-    The active limit needs the sand to *follow* a retreating wall, so
-    what is measured is the wedge's ability to fall rather than its
-    strength.  Measured here: the active plateau reached 0.78 of the
-    closed form on a frictionless base and 0.32 on a sticky one, while
-    the passive case on the same grid reached 1.06.  The active number is
-    reported by :meth:`RankineLimits.active_thrust_n_per_m` but is not
-    the verification case.
+    The plastic-limit case issue #8733 section 4 asks for.  It drives the
+    whole layer to the Drucker-Prager limit and compares the wall
+    reaction **the solver computes for itself** --
+    ``StepDiagnostics.contact_force_n_per_m``, the same traction
+    integration a club head is loaded through -- against
+    ``P_p = K_p rho g H^2 / 2 + (s T / (1 - s)) H`` per unit width, whose
+    coefficient and intercept come from :func:`rankine_limits`.
+    :class:`PassiveWallLimit` states the five conditions that make that
+    exact here, and why the case is passive rather than active.
 
     Args:
         material: The continuum. A cohesionless one puts all of the load
-            on the friction cone; ``cohesive_share`` says how much of it
-            the cone tip carried.
+            on the friction cone; ``cohesive_share`` reports the split.
         cell_size_m: Grid ``dx``.
         height_m: Retained height ``H``.
         length_ratio: Bed length in multiples of ``H``.
         wall_speed_m_s: Wall speed.
         travel_ratio: Wall travel in multiples of ``H``.
-        plateau_fraction: Trailing share of the march the plateau is
-            averaged over.
+        plateau_fraction: Trailing share of the march to average.
         gravity_m_s2: Gravitational acceleration.
 
     Returns:
         The measured limit load beside its closed form.
 
     Raises:
-        SolverInputError: If the wall is not quasi-static, if the bed is
-            too short to hold a passive wedge, if the plateau window is
-            not a usable fraction, or if the bed never reached its limit
-            -- each of which would turn a limit load into something else
-            while still returning a number.
+        SolverInputError: If the configuration cannot produce a static
+            limit load (see :func:`_require_static_limit_conditions`), or
+            if the bed never reached its limit -- either of which would
+            return a number that is not one.
     """
     limits = rankine_limits(material)
     size = float(cell_size_m)
@@ -444,73 +590,25 @@ def passive_earth_pressure_limit(
     length = float(length_ratio) * height
     speed = float(wall_speed_m_s)
     ratio = speed / material.elastic_wave_speed_m_s
-    if not 0.0 < float(plateau_fraction) <= 1.0:
-        raise SolverInputError(
-            f"plateau_fraction must lie in (0, 1], got {plateau_fraction!r}"
-        )
-    if not math.isfinite(ratio) or ratio > _MAX_QUASI_STATIC_RATIO:
-        raise SolverInputError(
-            f"the wall runs at v/c = {ratio:.3g}, over the "
-            f"{_MAX_QUASI_STATIC_RATIO:g} this case treats as quasi-static. "
-            "Rankine is a *static* limit; at a finite fraction of the wave "
-            "speed the measured thrust carries an inertial term the closed "
-            "form does not have, and the comparison would be against the "
-            "wrong problem"
-        )
-    if float(length_ratio) < _MIN_PASSIVE_LENGTH_RATIO:
-        raise SolverInputError(
-            f"a bed {length_ratio!r} wall-heights long cannot hold the passive "
-            f"wedge, which reaches H tan(45 + phi*/2) = "
-            f"{math.tan(math.radians(45.0 + limits.phi_star_deg / 2.0)):.3g} H; "
-            f"use at least {_MIN_PASSIVE_LENGTH_RATIO:g}"
-        )
+    _require_static_limit_conditions(
+        limits,
+        quasi_static_ratio=ratio,
+        length_ratio=float(length_ratio),
+        plateau_fraction=float(plateau_fraction),
+    )
 
-    solver = PlaneStrainMPMSolver(
-        material=material,
-        cell_size_m=size,
-        effective_width_m=1.0,
-        bed_depth_m=height,
-        gravity_m_s2=gravity_m_s2,
-        contact_friction=0.0,
-        walls=_SLIP_LAYER_DOMAIN,
-        refusal_policy=RefusalPolicy.REPORT,
-        max_steps=_PASSIVE_STEP_CAP,
-    )
-    particles = settled_bed(
-        material,
-        x_bounds_m=(0.0, length),
-        free_surface_height_m=0.0,
-        depth_m=height,
-        cell_size_m=size,
-        particles_per_cell_axis=2,
-        gravity_m_s2=gravity_m_s2,
-        geostatic=True,
-    )
-    pad = _PASSIVE_PAD_CELLS
-    grid = PlaneStrainGrid(
-        (-(pad + 1) * size, -height - size),
-        size,
-        (int(round(length / size)) + pad + 3, int(round(height / size)) + 4),
-    )
-    section = _rankine_wall_section(
-        solver, height_m=height, cell_size_m=size, speed_m_s=speed
-    )
-    step_s = 0.4 * size / material.elastic_wave_speed_m_s
     travel = float(travel_ratio) * height
-    n_steps = max(int(math.ceil(travel / (speed * step_s))), 2)
-    run = solver.march(
-        particles,
-        section,
-        grid,
-        n_steps=n_steps,
-        time_step_s=step_s,
-        free_surface_height_m=0.0,
-        bed_x_bounds_m=(0.0, length),
+    particles, run = _push_the_wall(
+        material,
+        cell_size_m=size,
+        height_m=height,
+        length_m=length,
+        wall_speed_m_s=speed,
+        travel_m=travel,
+        gravity_m_s2=gravity_m_s2,
     )
 
-    reaction = np.abs(np.array([step.contact_force_n_per_m[0] for step in run.steps]))
-    window = max(int(round(float(plateau_fraction) * reaction.size)), 1)
-    plateau = float(reaction[-window:].mean())
+    thrust, spread = _plateau_thrust_n_per_m(run, fraction=float(plateau_fraction))
     unit_weight = material.density_kg_m3 * gravity_m_s2
     analytic = limits.passive_thrust_n_per_m(
         height_m=height, unit_weight_n_m3=unit_weight
@@ -528,8 +626,8 @@ def passive_earth_pressure_limit(
         length_m=length,
         wall_speed_m_s=speed,
         travel_m=travel,
-        thrust_n_per_m=plateau,
-        plateau_spread=float(reaction[-window:].std()) / max(plateau, _TINY),
+        thrust_n_per_m=thrust,
+        plateau_spread=spread,
         analytic_thrust_n_per_m=analytic,
         passive_coefficient=limits.passive_coefficient,
         cohesive_share=(

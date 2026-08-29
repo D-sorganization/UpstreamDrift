@@ -111,6 +111,9 @@ study below is taken at the *initial* lattice and in a single step, so it
 measures the operator rather than the drift, and the honest reading of a
 result near 2 is "the operator is second order", not "the solver is"."""
 
+_LATTICE_TOLERANCE = 1e-9
+"""How far a cell count may sit from a whole number and still divide."""
+
 _PATCH_MARGIN_CELLS = 3
 """Cells of material a particle needs on every side for full support.
 
@@ -498,6 +501,80 @@ def _interior(
     )
 
 
+def _uniform_patch_step(
+    material: SandContinuum,
+    *,
+    strains: tuple[float, float],
+    cell_size_m: float,
+    size_m: float,
+    gravity_m_s2: float,
+) -> tuple[ParticleState, NDArray[np.float64]]:
+    """Seed a uniformly strained block, take one step, return ``a - g``.
+
+    Args:
+        material: The continuum.
+        strains: ``(a, b)``, the two uniform principal logarithmic strains.
+        cell_size_m: Grid ``dx``.
+        size_m: Side of the block.
+        gravity_m_s2: Gravitational acceleration.
+
+    Returns:
+        ``(particles, acceleration)`` with gravity already subtracted, so
+        an exact scheme returns identically zero.
+
+    Raises:
+        SolverInputError: If the uniform state is outside the cone, or if
+            the return map moved anything.
+    """
+    first, second = strains
+    particles = settled_bed(
+        material,
+        x_bounds_m=(0.0, size_m),
+        free_surface_height_m=size_m,
+        depth_m=size_m,
+        cell_size_m=cell_size_m,
+        particles_per_cell_axis=2,
+        geostatic=False,
+    )
+    count = particles.n_particles
+    worst = float(material.yield_value(np.tile([first, second], (count, 1))).max())
+    if worst >= 0.0:
+        raise SolverInputError(
+            f"the uniform patch state has a yield value of {worst:.4g} Pa, so it "
+            "is outside the cone and the return map would move it"
+        )
+    gradient = np.zeros((count, PLANE_STRAIN_DIMENSION, PLANE_STRAIN_DIMENSION))
+    gradient[:, 0, 0] = math.exp(first)
+    gradient[:, 1, 1] = math.exp(second)
+    particles.deformation_gradient = gradient
+    grid = PlaneStrainGrid.covering(
+        (0.0, 0.0), (size_m, size_m), cell_size_m, pad_cells=4
+    )
+    solver = _free_solver(
+        material,
+        cell_size_m,
+        walls=_OPEN_DOMAIN,
+        gravity_m_s2=gravity_m_s2,
+        max_steps=1,
+    )
+    step_s = 0.4 * cell_size_m / material.elastic_wave_speed_m_s
+    run = solver.march(
+        particles,
+        None,
+        grid,
+        n_steps=1,
+        time_step_s=step_s,
+        free_surface_height_m=size_m,
+        bed_x_bounds_m=(0.0, size_m),
+    )
+    yielded = run.steps[-1].n_yielded
+    if yielded:
+        raise SolverInputError(f"{yielded} particle(s) yielded on the patch step")
+    acceleration = particles.velocity_m_s / step_s
+    acceleration[:, 1] += float(gravity_m_s2)
+    return particles, acceleration
+
+
 def uniform_stress_patch_residual(
     material: SandContinuum,
     *,
@@ -543,63 +620,16 @@ def uniform_stress_patch_residual(
     """
     first = 0.5 * float(volumetric_strain) + float(deviatoric_strain)
     second = 0.5 * float(volumetric_strain) - float(deviatoric_strain)
-    field = ManufacturedField(
-        size_m=size_m,
-        amplitude_x=abs(first) if first else _TINY,
-        amplitude_z=abs(second) if second else _TINY,
-        mean_compression=0.0,
-    )
-    particles = settled_bed(
+    size = float(cell_size_m)
+    particles, acceleration = _uniform_patch_step(
         material,
-        x_bounds_m=(0.0, field.size_m),
-        free_surface_height_m=field.size_m,
-        depth_m=field.size_m,
-        cell_size_m=cell_size_m,
-        particles_per_cell_axis=2,
-        geostatic=False,
-    )
-    count = particles.n_particles
-    strain = np.tile([first, second], (count, 1))
-    worst = float(material.yield_value(strain).max())
-    if worst >= 0.0:
-        raise SolverInputError(
-            f"the uniform patch state has a yield value of {worst:.4g} Pa, so it "
-            "is outside the cone and the return map would move it"
-        )
-    gradient = np.zeros((count, PLANE_STRAIN_DIMENSION, PLANE_STRAIN_DIMENSION))
-    gradient[:, 0, 0] = math.exp(first)
-    gradient[:, 1, 1] = math.exp(second)
-    particles.deformation_gradient = gradient
-    grid = PlaneStrainGrid.covering(
-        (0.0, 0.0), (field.size_m, field.size_m), cell_size_m, pad_cells=4
-    )
-    solver = _free_solver(
-        material,
-        cell_size_m,
-        walls=_OPEN_DOMAIN,
+        strains=(first, second),
+        cell_size_m=size,
+        size_m=float(size_m),
         gravity_m_s2=gravity_m_s2,
-        max_steps=1,
     )
-    step_s = 0.4 * cell_size_m / material.elastic_wave_speed_m_s
-    run = solver.march(
-        particles,
-        None,
-        grid,
-        n_steps=1,
-        time_step_s=step_s,
-        free_surface_height_m=field.size_m,
-        bed_x_bounds_m=(0.0, field.size_m),
-    )
-    if run.steps[-1].n_yielded:
-        raise SolverInputError(
-            f"{run.steps[-1].n_yielded} particle(s) yielded on the patch step"
-        )
-    acceleration = particles.velocity_m_s / step_s
-    acceleration[:, 1] += float(gravity_m_s2)
     inside = _interior(
-        particles,
-        size_m=field.size_m,
-        margin_m=_PATCH_MARGIN_CELLS * float(cell_size_m),
+        particles, size_m=float(size_m), margin_m=_PATCH_MARGIN_CELLS * size
     )
     if not bool(inside.any()):
         raise SolverInputError(
@@ -618,7 +648,62 @@ def uniform_stress_patch_residual(
         name="F1 patch test: net force of a uniform stress field",
         conservation_class=ConservationClass.ROUND_OFF,
         residual=float(np.abs(acceleration[inside]).max()),
-        scale=abs(kirchhoff) / (material.density_kg_m3 * float(cell_size_m)),
+        scale=abs(kirchhoff) / (material.density_kg_m3 * size),
+    )
+
+
+def _manufactured_level(
+    material: SandContinuum,
+    field: ManufacturedField,
+    *,
+    cell_size_m: float,
+    margin_m: float,
+    gravity_m_s2: float,
+) -> ManufacturedLevel:
+    """Solve one grid of the manufactured study and score its interior.
+
+    Raises:
+        SolverInputError: If the grid does not divide the block a whole
+            number of times -- the particle lattice would then change by
+            a rounding rather than by the discretisation, and the
+            observed order would be measuring the ``round`` call -- or if
+            the interior margin leaves no particle behind.
+    """
+    cells = field.size_m / cell_size_m
+    if abs(cells - round(cells)) > _LATTICE_TOLERANCE:
+        raise SolverInputError(
+            f"dx = {cell_size_m!r} m does not divide the {field.size_m!r} m block "
+            "a whole number of times, so the particle lattice would change by a "
+            "rounding rather than by the discretisation and the observed order "
+            "would be measuring the round() call"
+        )
+    particles, run, discrete = _manufactured_block(
+        material, field, cell_size_m=cell_size_m, gravity_m_s2=gravity_m_s2
+    )
+    horizontal = particles.position_m[:, 0]
+    vertical = particles.position_m[:, 1]
+    exact = field.exact_acceleration_m_s2(
+        horizontal, vertical, material=material, gravity_m_s2=gravity_m_s2
+    )
+    inside = _interior(particles, size_m=field.size_m, margin_m=margin_m)
+    if not bool(inside.any()):
+        raise SolverInputError(
+            f"no particle survives a {margin_m:.4g} m interior margin at "
+            f"dx = {cell_size_m!r}; widen the block or coarsen the study"
+        )
+    difference = discrete[inside] - exact[inside]
+    count = int(inside.sum())
+    first, second = field.hencky_strains(horizontal, vertical)
+    return ManufacturedLevel(
+        cell_size_m=cell_size_m,
+        error_rms_m_s2=math.sqrt(float((difference**2).sum()) / count),
+        exact_rms_m_s2=math.sqrt(float((exact[inside] ** 2).sum()) / count),
+        n_particles=particles.n_particles,
+        n_interior=count,
+        worst_yield_pa=float(
+            material.yield_value(np.stack([first, second], axis=1)).max()
+        ),
+        n_yielded=run.steps[-1].n_yielded,
     )
 
 
@@ -686,49 +771,16 @@ def manufactured_solution_convergence(
             f"an order-of-accuracy study needs at least three grids, got {len(sizes)}"
         )
     margin = _PATCH_MARGIN_CELLS * max(sizes)
-    levels: list[ManufacturedLevel] = []
-    for size in sizes:
-        cells = field.size_m / size
-        if abs(cells - round(cells)) > 1e-9:
-            raise SolverInputError(
-                f"dx = {size!r} m does not divide the {field.size_m!r} m block a "
-                "whole number of times, so the particle lattice would change by "
-                "a rounding rather than by the discretisation and the observed "
-                "order would be measuring the round() call"
-            )
-        particles, run, discrete = _manufactured_block(
-            material, field, cell_size_m=size, gravity_m_s2=gravity_m_s2
-        )
-        horizontal = particles.position_m[:, 0]
-        vertical = particles.position_m[:, 1]
-        exact = field.exact_acceleration_m_s2(
-            horizontal,
-            vertical,
-            material=material,
+    levels = [
+        _manufactured_level(
+            material,
+            field,
+            cell_size_m=size,
+            margin_m=margin,
             gravity_m_s2=gravity_m_s2,
         )
-        inside = _interior(particles, size_m=field.size_m, margin_m=margin)
-        if not bool(inside.any()):
-            raise SolverInputError(
-                f"no particle survives a {margin:.4g} m interior margin at "
-                f"dx = {size!r}; widen the block or coarsen the study"
-            )
-        difference = discrete[inside] - exact[inside]
-        count = int(inside.sum())
-        first, second = field.hencky_strains(horizontal, vertical)
-        levels.append(
-            ManufacturedLevel(
-                cell_size_m=size,
-                error_rms_m_s2=math.sqrt(float((difference**2).sum()) / count),
-                exact_rms_m_s2=math.sqrt(float((exact[inside] ** 2).sum()) / count),
-                n_particles=particles.n_particles,
-                n_interior=count,
-                worst_yield_pa=float(
-                    material.yield_value(np.stack([first, second], axis=1)).max()
-                ),
-                n_yielded=run.steps[-1].n_yielded,
-            )
-        )
+        for size in sizes
+    ]
     return ManufacturedSolutionStudy(
         levels=tuple(levels),
         observed_order=observed_order_from_errors(
@@ -778,6 +830,22 @@ class TemporalStudy:
     can take to convergence -- so its GCI is a *space-time* band and not a
     spatial one.  This study holds ``dx`` fixed and refines only the step,
     which is what isolates the integrator.
+
+    **The damping has to be off.**  ``damping_per_step`` is applied once
+    per step, so halving the step doubles the number of times it acts and
+    a damped study measures the damping schedule rather than the
+    integrator.  Measured with ``damping_per_step = 0.01``: the passive
+    limit load moved from 1.06 to 2.67 times its closed form, and
+    refining ``dx`` then made it monotonically *worse*.
+
+    **The window has to be short.**  Over a fixed window the particle-grid
+    round trip is taken ``T/dt`` times and what it costs does not shrink
+    with the step, so its accumulated effect grows as the step is refined.
+    Inside about one elastic transit the integrator's own ``O(dt)`` error
+    still dominates and the series converges; past that it does not.
+    ``transits=1`` gives a monotonic triplet; ``transits=4`` gives
+    ``MONOTONIC_DIVERGENCE``, and :attr:`converging` is then ``False``
+    rather than the study quietly extrapolating anyway.
 
     Attributes:
         cell_size_m: The grid every level was solved on.
@@ -832,6 +900,68 @@ class TemporalStudy:
         )
 
 
+def _temporal_level(
+    material: SandContinuum,
+    *,
+    courant_number: float,
+    duration_s: float,
+    cell_size_m: float,
+    width_m: float,
+    height_m: float,
+    gravity_m_s2: float,
+) -> TemporalLevel:
+    """Relax the column for a fixed window at one step, on the fixed grid.
+
+    Raises:
+        SolverInputError: If any particle yields, which would make the
+            difference between levels plastic dissipation rather than the
+            temporal truncation error the study fits.
+    """
+    particles = _particles(
+        material, cell_size_m=cell_size_m, width_m=width_m, height_m=height_m
+    )
+    grid = PlaneStrainGrid(
+        (-cell_size_m, -cell_size_m),
+        cell_size_m,
+        (
+            int(math.ceil(width_m / cell_size_m)) + 3,
+            int(math.ceil(height_m / cell_size_m)) + 4,
+        ),
+    )
+    step_s = courant_number * cell_size_m / material.elastic_wave_speed_m_s
+    n_steps = max(int(round(duration_s / step_s)), 2)
+    solver = _free_solver(
+        material,
+        cell_size_m,
+        walls=_COLUMN_DOMAIN,
+        gravity_m_s2=gravity_m_s2,
+        max_steps=n_steps,
+    )
+    run = solver.march(
+        particles,
+        None,
+        grid,
+        n_steps=n_steps,
+        time_step_s=step_s,
+        free_surface_height_m=height_m,
+        bed_x_bounds_m=(0.0, width_m),
+    )
+    yielded = run.steps[-1].n_yielded
+    if yielded:
+        raise SolverInputError(
+            f"{yielded} particle(s) yielded at C={courant_number:g}, so the "
+            "difference between levels would be plastic dissipation rather "
+            "than the temporal truncation error the study fits"
+        )
+    return TemporalLevel(
+        time_step_s=step_s,
+        courant_number=courant_number,
+        n_steps=n_steps,
+        value=mean_vertical_stress_pa(material, particles),
+        n_yielded=yielded,
+    )
+
+
 def column_temporal_convergence(
     material: SandContinuum,
     *,
@@ -844,28 +974,12 @@ def column_temporal_convergence(
 ) -> TemporalStudy:
     """Refine the step on a fixed grid and report the order and the GCI.
 
-    The case is the elastic column of :func:`elastic_column_equilibrium`
-    with the damping removed and the window cut short: an unstressed
-    column released under gravity, marched for a fixed physical time, and
-    read for its volume-weighted ``<sigma_zz>``.  The damping has to go,
-    because ``damping_per_step`` is applied **once per step** -- halving
-    the step doubles the number of times it acts, so a damped study
-    measures the damping schedule and not the integrator.  Measured on
-    this solver with ``damping_per_step = 0.01``: the passive limit load
-    moved from 1.06 to 2.67 times its closed form, and refining ``dx``
-    made it monotonically worse.
-
-    Why the window is short
-    -----------------------
-
-    Over a *fixed* window the particle-grid round trip is taken ``T/dt``
-    times, and what it costs does not shrink with the step, so its
-    accumulated effect grows as the step is refined.  Inside about one
-    elastic transit the integrator's own ``O(dt)`` error still dominates
-    and the series converges; past that it does not.  Both are reported:
-    ``transits=1`` gives a monotonic triplet, ``transits=4`` gives
-    ``MONOTONIC_DIVERGENCE`` and :attr:`TemporalStudy.converging` is
-    ``False`` rather than the study quietly extrapolating anyway.
+    The case is the elastic column of
+    :func:`~bunkershot3d.solvers.mpm.verification.elastic_column_equilibrium`
+    with the damping removed and the window cut short.  See
+    :class:`TemporalStudy` for why the damping has to go and why the
+    window has to be about one elastic transit; both are properties of
+    the scheme rather than tuning, and both were measured.
 
     Args:
         material: The continuum.
@@ -895,52 +1009,18 @@ def column_temporal_convergence(
         raise SolverInputError(f"transits must be positive, got {transits!r}")
     size = float(cell_size_m)
     duration_s = float(transits) * height_m / material.elastic_wave_speed_m_s
-    grid_shape = (
-        int(math.ceil(width_m / size)) + 3,
-        int(math.ceil(height_m / size)) + 4,
-    )
-    levels: list[TemporalLevel] = []
-    for number in numbers:
-        particles = _particles(
+    levels = [
+        _temporal_level(
             material,
+            courant_number=number,
+            duration_s=duration_s,
             cell_size_m=size,
             width_m=width_m,
             height_m=height_m,
-        )
-        grid = PlaneStrainGrid((-size, -size), size, grid_shape)
-        step_s = number * size / material.elastic_wave_speed_m_s
-        n_steps = max(int(round(duration_s / step_s)), 2)
-        solver = _free_solver(
-            material,
-            size,
-            walls=_COLUMN_DOMAIN,
             gravity_m_s2=gravity_m_s2,
-            max_steps=n_steps,
         )
-        run = solver.march(
-            particles,
-            None,
-            grid,
-            n_steps=n_steps,
-            time_step_s=step_s,
-            free_surface_height_m=height_m,
-            bed_x_bounds_m=(0.0, width_m),
-        )
-        if run.steps[-1].n_yielded:
-            raise SolverInputError(
-                f"{run.steps[-1].n_yielded} particle(s) yielded at C={number:g}, "
-                "so the difference between levels would be plastic dissipation "
-                "rather than the temporal truncation error the study fits"
-            )
-        levels.append(
-            TemporalLevel(
-                time_step_s=step_s,
-                courant_number=number,
-                n_steps=n_steps,
-                value=mean_vertical_stress_pa(material, particles),
-                n_yielded=run.steps[-1].n_yielded,
-            )
-        )
+        for number in numbers
+    ]
     ordered = sorted(levels, key=lambda level: level.time_step_s, reverse=True)
     differences = [
         abs(ordered[index + 1].value - ordered[index].value)

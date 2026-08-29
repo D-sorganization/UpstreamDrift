@@ -340,6 +340,77 @@ def free_fall_residuals(
 # ------------------------------------------------------------------ energy
 
 
+def _free_fall_energy_residual(
+    material: SandContinuum,
+    *,
+    courant_number: float,
+    cell_size_m: float,
+    width_m: float,
+    height_m: float,
+    duration_s: float,
+    gravity_m_s2: float,
+) -> ConservationResidual:
+    """One free-fall energy residual, at one Courant number.
+
+    Raises:
+        SolverInputError: If any particle yields. A uniformly falling
+            block cannot deform, so a yield means the transfer is not
+            reproducing a uniform velocity field and the residual is no
+            longer truncation error.
+    """
+    particles = _particles(
+        material, cell_size_m=cell_size_m, width_m=width_m, height_m=height_m
+    )
+    grid = _open_grid(cell_size_m=cell_size_m, width_m=width_m, height_m=height_m)
+    step_s = courant_number * cell_size_m / material.elastic_wave_speed_m_s
+    n_steps = max(int(round(duration_s / step_s)), 2)
+    solver = _free_solver(
+        material,
+        cell_size_m,
+        walls=_OPEN_DOMAIN,
+        gravity_m_s2=gravity_m_s2,
+        max_steps=n_steps,
+    )
+    run = _march_open_domain(
+        solver,
+        particles,
+        grid,
+        n_steps=n_steps,
+        time_step_s=step_s,
+        width_m=width_m,
+        height_m=height_m,
+    )
+    yielded = sum(step.n_yielded for step in run.steps)
+    if yielded:
+        raise SolverInputError(
+            f"{yielded} particle(s) yielded during the free-fall energy case. A "
+            "uniformly falling block cannot deform, so this means the transfer "
+            "is not reproducing a uniform velocity field and the residual would "
+            "no longer be truncation error"
+        )
+    total = _total_energy_history(run)
+    scale = float(np.abs(total).max())
+    return ConservationResidual(
+        name=f"F1 free fall: total energy at C={courant_number:g}",
+        conservation_class=ConservationClass.TRUNCATION,
+        residual=float(np.abs(total - total[0]).max()),
+        scale=scale if scale > 0.0 else 1.0,
+        step_size_s=step_s,
+    )
+
+
+def _total_energy_history(run: MPMRun) -> NDArray[np.float64]:
+    """``(n_steps,)`` kinetic plus elastic plus gravitational energy."""
+    return np.array(
+        [
+            step.kinetic_energy_j_per_m
+            + step.elastic_energy_j_per_m
+            + step.gravitational_energy_j_per_m
+            for step in run.steps
+        ]
+    )
+
+
 def energy_residuals(
     material: SandContinuum,
     *,
@@ -394,60 +465,18 @@ def energy_residuals(
         SolverInputError: If any particle yields, which would make the
             residual physical dissipation rather than truncation error.
     """
-    residuals: list[ConservationResidual] = []
-    for number in courant_numbers:
-        particles = _particles(
+    return tuple(
+        _free_fall_energy_residual(
             material,
+            courant_number=float(number),
             cell_size_m=cell_size_m,
             width_m=width_m,
             height_m=height_m,
-        )
-        grid = _open_grid(cell_size_m=cell_size_m, width_m=width_m, height_m=height_m)
-        step_s = float(number) * cell_size_m / material.elastic_wave_speed_m_s
-        n_steps = max(int(round(duration_s / step_s)), 2)
-        solver = _free_solver(
-            material,
-            cell_size_m,
-            walls=_OPEN_DOMAIN,
+            duration_s=duration_s,
             gravity_m_s2=gravity_m_s2,
-            max_steps=n_steps,
         )
-        run = _march_open_domain(
-            solver,
-            particles,
-            grid,
-            n_steps=n_steps,
-            time_step_s=step_s,
-            width_m=width_m,
-            height_m=height_m,
-        )
-        yielded = sum(step.n_yielded for step in run.steps)
-        if yielded:
-            raise SolverInputError(
-                f"{yielded} particle(s) yielded during the free-fall energy "
-                "case. A uniformly falling block cannot deform, so this means "
-                "the transfer is not reproducing a uniform velocity field and "
-                "the residual would no longer be truncation error"
-            )
-        total = np.array(
-            [
-                step.kinetic_energy_j_per_m
-                + step.elastic_energy_j_per_m
-                + step.gravitational_energy_j_per_m
-                for step in run.steps
-            ]
-        )
-        scale = float(np.abs(total).max())
-        residuals.append(
-            ConservationResidual(
-                name=f"F1 free fall: total energy at C={number:g}",
-                conservation_class=ConservationClass.TRUNCATION,
-                residual=float(np.abs(total - total[0]).max()),
-                scale=scale if scale > 0.0 else 1.0,
-                step_size_s=step_s,
-            )
-        )
-    return tuple(residuals)
+        for number in courant_numbers
+    )
 
 
 # ---------------------------------------------------------- elastic column
@@ -949,6 +978,76 @@ def cohesive_elastic_strain_limit(material: SandContinuum) -> float:
     )
 
 
+def _cohesive_oscillation_residual(
+    material: SandContinuum,
+    *,
+    courant_number: float,
+    amplitude: float,
+    duration_s: float,
+    cell_size_m: float,
+    width_m: float,
+    height_m: float,
+) -> ConservationResidual:
+    """One oscillation energy residual, at one Courant number.
+
+    Raises:
+        SolverInputError: If any particle yields, which would mean the
+            cohesive tip did not in fact keep the rebound inside the cone
+            and the residual is plastic dissipation.
+    """
+    particles = _particles(
+        material, cell_size_m=cell_size_m, width_m=width_m, height_m=height_m
+    )
+    gradient = np.tile(np.eye(PLANE_STRAIN_DIMENSION), (particles.n_particles, 1, 1))
+    gradient[:, 1, 1] = math.exp(-amplitude)
+    particles.deformation_gradient = gradient
+    grid = PlaneStrainGrid(
+        (-cell_size_m, -cell_size_m),
+        cell_size_m,
+        (
+            int(math.ceil(width_m / cell_size_m)) + 3,
+            int(math.ceil(height_m / cell_size_m)) + 4,
+        ),
+    )
+    step_s = courant_number * cell_size_m / material.elastic_wave_speed_m_s
+    n_steps = max(int(round(duration_s / step_s)), 2)
+    solver = _free_solver(
+        material,
+        cell_size_m,
+        walls=_COLUMN_DOMAIN,
+        gravity_m_s2=_NEGLIGIBLE_GRAVITY_M_S2,
+        max_steps=n_steps,
+    )
+    run = solver.march(
+        particles,
+        None,
+        grid,
+        n_steps=n_steps,
+        time_step_s=step_s,
+        free_surface_height_m=height_m,
+        bed_x_bounds_m=(0.0, width_m),
+    )
+    yielded = sum(step.n_yielded for step in run.steps)
+    if yielded:
+        raise SolverInputError(
+            f"{yielded} particle(s) yielded at C={courant_number:g}, so the "
+            "cohesive tip did not in fact keep the rebound inside the cone and "
+            "the residual is plastic dissipation. Lower initial_compression"
+        )
+    total = _total_energy_history(run)
+    # The block's own energy, exactly as energy_residuals scales the free-fall
+    # case, so the two numbers are comparable. Scaling by the drift's own span
+    # would make every level read as 100%.
+    scale = float(np.abs(total).max())
+    return ConservationResidual(
+        name=(f"F1 cohesive elastic oscillation: total energy at C={courant_number:g}"),
+        conservation_class=ConservationClass.TRUNCATION,
+        residual=float(np.abs(total - total[0]).max()),
+        scale=scale if scale > 0.0 else 1.0,
+        step_size_s=step_s,
+    )
+
+
 def cohesive_oscillation_residuals(
     material: SandContinuum,
     *,
@@ -1036,67 +1135,16 @@ def cohesive_oscillation_residuals(
             "larger amplitude rebounds past the tip and the residual becomes "
             "plastic dissipation rather than anything about the integrator"
         )
-    size = float(cell_size_m)
     duration_s = float(transits) * height_m / material.elastic_wave_speed_m_s
-    grid_shape = (
-        int(math.ceil(width_m / size)) + 3,
-        int(math.ceil(height_m / size)) + 4,
-    )
-    residuals: list[ConservationResidual] = []
-    for number in courant_numbers:
-        particles = _particles(
-            material, cell_size_m=size, width_m=width_m, height_m=height_m
-        )
-        gradient = np.tile(
-            np.eye(PLANE_STRAIN_DIMENSION), (particles.n_particles, 1, 1)
-        )
-        gradient[:, 1, 1] = math.exp(-amplitude)
-        particles.deformation_gradient = gradient
-        grid = PlaneStrainGrid((-size, -size), size, grid_shape)
-        step_s = float(number) * size / material.elastic_wave_speed_m_s
-        n_steps = max(int(round(duration_s / step_s)), 2)
-        solver = _free_solver(
+    return tuple(
+        _cohesive_oscillation_residual(
             material,
-            size,
-            walls=_COLUMN_DOMAIN,
-            gravity_m_s2=_NEGLIGIBLE_GRAVITY_M_S2,
-            max_steps=n_steps,
+            courant_number=float(number),
+            amplitude=amplitude,
+            duration_s=duration_s,
+            cell_size_m=float(cell_size_m),
+            width_m=width_m,
+            height_m=height_m,
         )
-        run = solver.march(
-            particles,
-            None,
-            grid,
-            n_steps=n_steps,
-            time_step_s=step_s,
-            free_surface_height_m=height_m,
-            bed_x_bounds_m=(0.0, width_m),
-        )
-        yielded = sum(step.n_yielded for step in run.steps)
-        if yielded:
-            raise SolverInputError(
-                f"{yielded} particle(s) yielded at C={number:g}, so the cohesive "
-                "tip did not in fact keep the rebound inside the cone and the "
-                "residual is plastic dissipation. Lower initial_compression"
-            )
-        total = np.array(
-            [
-                step.kinetic_energy_j_per_m
-                + step.elastic_energy_j_per_m
-                + step.gravitational_energy_j_per_m
-                for step in run.steps
-            ]
-        )
-        # The block's own energy, exactly as energy_residuals scales the
-        # free-fall case, so the two numbers are comparable. Scaling by the
-        # drift's own span would make every level read as 100%.
-        scale = float(np.abs(total).max())
-        residuals.append(
-            ConservationResidual(
-                name=f"F1 cohesive elastic oscillation: total energy at C={number:g}",
-                conservation_class=ConservationClass.TRUNCATION,
-                residual=float(np.abs(total - total[0]).max()),
-                scale=scale if scale > 0.0 else 1.0,
-                step_size_s=step_s,
-            )
-        )
-    return tuple(residuals)
+        for number in courant_numbers
+    )
