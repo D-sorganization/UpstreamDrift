@@ -455,6 +455,12 @@ class SandDelivery:
             caller has a point estimate and nothing else. Carried rather than
             recomputed so a launch can report how wide the mass it divided by
             actually was.
+        displaced_mass_reason: What may and may not be said about that mass,
+            travelling onto the launch verdict. Supplied by whoever produced
+            the mass rather than written here, because this module does not
+            know how the number was arrived at and must not invent a
+            provenance for it; the workbench passes
+            :data:`bunkershot3d.metrics.divot.ACCELERATED_MASS_CONSISTENCY_REASON`.
         contact_duration_s: Time the sole spent engaged with the bed [s].
         entry_speed_m_s: Head speed at the first sample [m/s].
         exit_speed_m_s: Head speed at the last sample [m/s].
@@ -476,6 +482,7 @@ class SandDelivery:
     bed_relative_density: float
     verdict: ValidityVerdict
     displaced_mass_bounds_kg: tuple[float, float] | None = None
+    displaced_mass_reason: str | None = None
 
     def __post_init__(self) -> None:
         """Refuse a strike that was not measured, or that cannot have happened.
@@ -782,10 +789,13 @@ def _launch_reasons(delivery: SandDelivery) -> tuple[str, ...]:
         delivery: The measured strike.
 
     Returns:
-        The uncalibrated-transfer statements, plus the interval-floor
-        diagnostic when the mass band's lower edge is inadmissible.
+        The uncalibrated-transfer statements, whatever the supplier of the
+        mass said about it, and the interval-floor diagnostic when the mass
+        band's lower edge is inadmissible.
     """
     reasons = [BALL_LAUNCH_UNCALIBRATED_REASON, BED_PACKING_DEPENDENCE_REASON]
+    if delivery.displaced_mass_reason:
+        reasons.append(delivery.displaced_mass_reason)
     bounds = delivery.displaced_mass_bounds_kg
     floor = delivery.admissible_mass_floor_kg
     if bounds is not None and floor > 0.0 and float(bounds[0]) < floor:

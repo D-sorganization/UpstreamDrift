@@ -59,6 +59,7 @@ from bunkershot3d.geometry import (
     deliver_wedge,
 )
 from bunkershot3d.metrics import (
+    ACCELERATED_MASS_CONSISTENCY_REASON,
     DigSkidResult,
     DivotMetrics,
     HeadLoadMetrics,
@@ -205,6 +206,7 @@ def _sand_delivery(
         impulse_n_s=float(np.linalg.norm(result.impulse_n_s)),
         displaced_mass_kg=accelerated.central_kg,
         displaced_mass_bounds_kg=accelerated.bounds_kg,
+        displaced_mass_reason=ACCELERATED_MASS_CONSISTENCY_REASON,
         contact_duration_s=result.contact_duration_s,
         entry_speed_m_s=result.entry_speed_m_s,
         exit_speed_m_s=result.exit_speed_m_s,

@@ -249,7 +249,7 @@ F1_ENTRAINMENT_FACTOR_BOUNDS: tuple[float, float] = (2.84, 3.90)
 
 Read off the **F1 plane-strain MPM tier**, not off a bunker. Ten whole-shot F1
 marches (:func:`bunkershot3d.solvers.mpm.wholeshot.simulate_f1_shot`,
-``dx = 4 mm``, 12 ms, firm bed 80 mm deep) were run at the workbench's own
+``dx = 4 mm``, 12 ms, 80 mm bed) were run at the workbench's own
 designs and deliveries -- attack -4/-8/-12 deg, marketed bounce 8/20 deg, sole
 16/20/24 mm, firm/fluffy/plugged beds, 20 and 25 m/s -- and each march was
 reduced **twice from its own record**:
