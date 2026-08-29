@@ -67,6 +67,33 @@ and spends momentum rearranging grains, dense sand carries it out through force
 chains -- and the **magnitude is assumed, not measured**. See
 :data:`BED_PACKING_TRANSFER_SENSITIVITY`.
 
+The mass in that partition was the wrong one (issue #8659)
+-----------------------------------------------------------
+
+``m_divot`` above was the **prismatic** divot mass, and making it a
+denominator immediately produced a physical impossibility: at the workbench's
+nominal greenside shot the solver's 2.917 N.s over the prism's 63.7 g is sand
+leaving at 45.8 m/s, out of a head arriving at 25.0 m/s. The prism counts only
+what the sole passed over; a splash also throws the bow wave, the heave and
+the divot's own walls. So this module now takes
+:attr:`bunkershot3d.metrics.divot.AcceleratedSandMass.central_kg`, and
+:meth:`SandDelivery._require_admissible_ejecta` **refuses** any pair that
+implies ejecta faster than the head. A refusal, not a clamp: capping the speed
+would restore exactly the impulse-blindness #8657 removed.
+
+**The consequence lands on ``eta``, and is not absorbed here.** The corrected
+mass is 4.4x the prism at the nominal shot, and because the added-mass term
+``m_b / (m_int + m_b)`` falls with it, nominal carry moves from 11.81 m to
+1.59 m (interval 0.76-3.17 m) and the workbench's playability window goes
+empty against its 12.0 m target. That is not a new defect. It is the old one
+becoming visible: the model produced a plausible 12 m only while it was
+dividing by a mass three to four times too small, and the free parameter that
+would have to absorb the difference is
+:data:`BALL_MOMENTUM_TRANSFER_EFFICIENCY`, which is a stated placeholder with
+no measurement behind it. Re-tuning it to recover the old carry would be
+fitting an uncalibrated constant to a number nobody has measured, so it is
+left alone and reported instead.
+
 What is still not grounded
 --------------------------
 
@@ -793,6 +820,16 @@ def launch_verdict(delivery: SandDelivery) -> ValidityVerdict:
     solver = delivery.verdict
     details = dict(solver.details)
     details["mean_ejecta_speed_m_s"] = delivery.mean_ejecta_speed_m_s
+    details["accelerated_mass_kg"] = delivery.displaced_mass_kg
+    details["admissible_mass_floor_kg"] = delivery.admissible_mass_floor_kg
+    if delivery.displaced_mass_bounds_kg is not None:
+        # The width of the denominator travels with the launch. A carry read
+        # off a mass that is only known to a factor of two is a carry known to
+        # no better, and a manifest that shows one without the other invites
+        # the point estimate to be quoted alone (issue #8659).
+        lower, upper = delivery.displaced_mass_bounds_kg
+        details["accelerated_mass_lower_kg"] = float(lower)
+        details["accelerated_mass_upper_kg"] = float(upper)
     # The launch verdict is listed first so that it wins a tie in ``worst_of``
     # -- both are normally BEYOND_VALIDATION -- and its merged details, which
     # already include the solver's, survive onto the combined verdict.

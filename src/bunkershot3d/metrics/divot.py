@@ -785,8 +785,7 @@ def divot_metrics(
         )
     if not np.isfinite(friction_angle_deg) or not 0.0 < friction_angle_deg < 90.0:
         raise ValueError(
-            "friction_angle_deg must lie in (0, 90) degrees, got "
-            f"{friction_angle_deg}"
+            f"friction_angle_deg must lie in (0, 90) degrees, got {friction_angle_deg}"
         )
     profile = sole_depth_profile(trace, head, scene)
     interval = _interval_from_profile(profile, trace, scene)

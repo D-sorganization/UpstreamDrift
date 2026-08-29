@@ -63,6 +63,7 @@ _SOLE_WIDTH_M = 0.020
 
 #: Measured bulk density of Covia Signature 500 bunker sand (research addendum).
 _BULK_DENSITY_KG_M3 = 1550.0
+_FRICTION_ANGLE_DEG = 34.0
 
 #: Ball 30 mm ahead of where the sole enters, inside the 25-150 mm band Wivou
 #: et al. (2016) report for entry distance behind the ball.
@@ -167,6 +168,7 @@ class TestDivotMetricsFromARawShot:
             scene,
             width_m=_SOLE_WIDTH_M,
             bulk_density_kg_m3=_BULK_DENSITY_KG_M3,
+            friction_angle_deg=_FRICTION_ANGLE_DEG,
         )
         assert 0.002 < divot.max_depth_m < 0.060
         assert divot.length_m > 0.0
@@ -185,6 +187,7 @@ class TestDivotMetricsFromARawShot:
             scene,
             width_m=_SOLE_WIDTH_M,
             bulk_density_kg_m3=_BULK_DENSITY_KG_M3,
+            friction_angle_deg=_FRICTION_ANGLE_DEG,
         )
         assert 0.025 <= divot.entry_distance_behind_ball_m <= 0.150
         assert divot.exit_distance_past_ball_m > -_BALL_AHEAD_M
