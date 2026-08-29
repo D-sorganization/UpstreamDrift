@@ -52,7 +52,8 @@ are not completion evidence.
   legacy killswitch, and session SHA `1bcc7ced5178`.
 - Receipt 1.2 at `bbded2f5c` binds terminal metadata, exact session/pairs, all
   histories, and API/archive digest. Receipt 1.3 additionally cross-binds
-  run, structural job, and artifact workflow-run IDs and dispatch heads.
+  run, structural job, and artifact workflow-run IDs and dispatch heads, and
+  requires GitHub's recorded archive size and digest to match retained bytes.
   `323a55db9` derives corruption revision from clean committed source. Prefix
   views never mutate the 714-case source.
 - Replay 33277732709 passed [0,20): archive `142556c34373`, receipt `f3bd190abc2d`,
@@ -106,7 +107,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 89 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 90 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;

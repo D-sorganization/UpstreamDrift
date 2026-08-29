@@ -22,7 +22,8 @@ pytestmark = pytest.mark.scientific
 RUN_ID = 33273691711
 HEAD_SHA = "a" * 40
 EXECUTION_REVISION = "b" * 40
-ARCHIVE_SHA256 = hashlib.sha256(b"synthetic archive bytes").hexdigest()
+ARCHIVE_BYTES = b"synthetic archive bytes"
+ARCHIVE_SHA256 = hashlib.sha256(ARCHIVE_BYTES).hexdigest()
 
 
 def _run(
@@ -80,7 +81,7 @@ def _artifact() -> dict[str, object]:
     return {
         "id": 987654321,
         "name": f"structural-checkpoints-{RUN_ID}",
-        "size_in_bytes": 12345,
+        "size_in_bytes": len(ARCHIVE_BYTES),
         "expired": False,
         "created_at": "2026-08-29T21:11:55Z",
         "updated_at": "2026-08-29T21:11:55Z",
@@ -144,7 +145,7 @@ def _artifact_tree(
         )
         np.savez_compressed(extracted / f"{stem}.npz", **arrays)
     archive = tmp_path / "artifact.zip"
-    archive.write_bytes(b"synthetic archive bytes")
+    archive.write_bytes(ARCHIVE_BYTES)
     return extracted, archive, hashlib.sha256(session).hexdigest()
 
 
@@ -323,6 +324,29 @@ def test_receipt_rejects_an_archive_that_disagrees_with_the_api_digest(
     artifact["digest"] = "sha256:" + "0" * 64
 
     with pytest.raises(ValueError, match="GitHub artifact digest"):
+        build_structural_artifact_receipt(
+            run=_run(),
+            jobs=_jobs(),
+            artifact=artifact,
+            archive_path=archive,
+            extracted_dir=extracted,
+            expected_run_id=RUN_ID,
+            expected_dispatch_head=HEAD_SHA,
+            expected_execution_revision=EXECUTION_REVISION,
+            expected_session_sha256=session_digest,
+            requested_case_start=694,
+            requested_case_stop=696,
+        )
+
+
+def test_receipt_rejects_an_archive_size_that_disagrees_with_the_api(
+    tmp_path: Path,
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path)
+    artifact = _artifact()
+    artifact["size_in_bytes"] = len(ARCHIVE_BYTES) + 1
+
+    with pytest.raises(ValueError, match="size"):
         build_structural_artifact_receipt(
             run=_run(),
             jobs=_jobs(),

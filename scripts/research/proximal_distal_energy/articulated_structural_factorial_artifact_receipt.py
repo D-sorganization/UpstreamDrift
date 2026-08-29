@@ -275,9 +275,15 @@ def build_structural_artifact_receipt(
     expected_artifact_name = f"structural-checkpoints-{expected_run_id}"
     if artifact_record.get("name") != expected_artifact_name:
         raise ValueError("artifact name does not match the expected run")
-    _positive_integer(
+    api_archive_size = _positive_integer(
         artifact_record.get("size_in_bytes"), name="artifact.size_in_bytes"
     )
+    try:
+        retained_archive_size = archive_path.stat().st_size
+    except OSError as exc:
+        raise ValueError("cannot read the retained artifact archive size") from exc
+    if api_archive_size != retained_archive_size:
+        raise ValueError("GitHub artifact size does not match the retained archive")
     if artifact_record.get("expired") is not False:
         raise ValueError("artifact must be retained and unexpired")
     api_digest = artifact_record.get("digest")
