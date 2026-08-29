@@ -339,7 +339,13 @@ def project_to_yield_surface(
     if bool(at_tip.any()):
         projected[at_tip] = tip_volumetric_strain / dimension
     if bool(on_cone.any()):
-        scale = np.where(deviator_norm > 0.0, delta_gamma / deviator_norm, 0.0)
+        # ``np.where`` would evaluate the quotient for every particle,
+        # including the hydrostatic ones the mask is there to discard, so
+        # a freshly seeded bed emits a divide-by-zero warning per call.
+        # Dividing only where the norm is positive leaves those entries at
+        # the zero they already hold.
+        scale = np.zeros_like(deviator_norm)
+        np.divide(delta_gamma, deviator_norm, out=scale, where=deviator_norm > 0.0)
         projected = np.where(
             on_cone[:, None], strain - scale[:, None] * deviator, projected
         )
