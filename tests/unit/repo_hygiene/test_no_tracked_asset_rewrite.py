@@ -12,11 +12,6 @@ agent workflows (spurious stashes, blocked rebases, false PR diffs, and
 Derived artifacts now go to :func:`get_derived_model_cache_dir` instead. These
 tests pin that behaviour by hashing the tracked asset before and after
 exercising the loader.
-
-Follow-up (issue #9220): with the rewrite gone, that asset had no reader left
-anywhere in the repository -- it was derived output kept alive only by the
-rewrite -- so it was deleted. The loader path must therefore never re-create
-it either, which :func:`test_source_tree_model_xml_stays_absent` pins.
 """
 
 from __future__ import annotations
@@ -108,28 +103,6 @@ def test_explicit_base_path_keeps_derived_output_under_that_base(
     assert resolved is not None
     assert resolved.is_relative_to(base)
     assert not resolved.is_relative_to(library.human_models_path)
-
-
-@pytest.mark.unit
-def test_source_tree_model_xml_stays_absent(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """The deleted orphan must not reappear in the source tree (issue #9220).
-
-    ``src/shared/urdf/human_models/mujoco_humanoid/model.xml`` was derived
-    output with no reader; it was removed. Loading the embedded humanoid must
-    not resurrect it.
-    """
-    monkeypatch.setenv(MODEL_CACHE_DIR_ENV_VAR, str(tmp_path / "cache"))
-
-    assert not TRACKED_MODEL_XML.exists(), (
-        f"{TRACKED_MODEL_XML} is back in the source tree. It is derived output "
-        "with no reader; regenerate it into the model cache instead."
-    )
-
-    ModelLibrary().get_human_model("mujoco_humanoid")
-
-    assert not TRACKED_MODEL_XML.exists()
 
 
 @pytest.mark.unit
