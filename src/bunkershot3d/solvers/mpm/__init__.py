@@ -23,6 +23,11 @@ What this package is
 * :mod:`.ball` -- the ball as a second such section, an **infinite
   cylinder rather than a sphere**, whose below-equator / face-side
   split is reported qualitatively and whose launch stays refused.
+* :mod:`.contact` -- the sand against **several** bodies in one step, and
+  the stated projection order that makes a shared node's answer
+  independent of the caller's argument list.
+* :mod:`.step` -- the scheme itself, one step at a time, so a whole-shot
+  march can drive it without reaching into the solver.
 * :mod:`.solver` -- :class:`~bunkershot3d.solvers.mpm.solver.PlaneStrainMPMSolver`,
   which implements the :class:`~bunkershot3d.solvers.protocol.GranularSolver`
   protocol so F1 is swappable with F0.
@@ -70,6 +75,12 @@ from .ball import (
     n_facets_for_cell_size,
 )
 from .body import ContactImpulse, RigidSection, convex_hull_2d, plane_torque_about_y
+from .contact import (
+    BodyContact,
+    apply_body_contacts,
+    contact_order,
+    push_out_bodies,
+)
 from .constitutive import (
     HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA,
     HARDIN_RICHART_ROUND_COEFFICIENT_KPA,
@@ -116,6 +127,7 @@ from .state import (
     surface_depression,
     surface_profile_m,
 )
+from .step import StepContext, advance_step
 from .verification import (
     ColumnEquilibrium,
     F0CrossCheck,
@@ -131,6 +143,7 @@ __all__ = [
     "BALL_RADIUS_M",
     "BallContactSplit",
     "BallSection",
+    "BodyContact",
     "ColumnEquilibrium",
     "ContactImpulse",
     "DEFAULT_BALL_FACETS",
@@ -157,13 +170,17 @@ __all__ = [
     "SAND_POISSON_RATIO",
     "STENCIL_WIDTH",
     "SandContinuum",
+    "StepContext",
     "StepDiagnostics",
     "SurfaceDepression",
     "WallCondition",
+    "advance_step",
     "apic_angular_momentum",
+    "apply_body_contacts",
     "cfl_time_step_s",
     "circular_section",
     "column_grid_convergence",
+    "contact_order",
     "convex_hull_2d",
     "cross_2d",
     "cross_check_against_f0",
@@ -177,6 +194,7 @@ __all__ = [
     "plane_torque_about_y",
     "principal_stretches",
     "project_to_yield_surface",
+    "push_out_bodies",
     "reconstruct",
     "require_quotable",
     "settled_bed",
