@@ -36,3 +36,30 @@ python -m bunkershot3d.calibration.calibrate_all --backends mujoco
 properties. `restitution_coefficient` is copied from `canonical.yaml` and
 reported under `provenance.not_calibrated`: no experiment in this package
 measures it.
+
+## The F1 Constitutive Calibration Record
+
+`f1_continuum.yaml` is not checked in, for the same reason the three `sand_*.yaml` files above were
+deleted: a calibration file sitting in the tree gets cited. Produce it when you
+need it:
+
+```bash
+python -m bunkershot3d.calibration.f1_continuum
+python -m bunkershot3d.calibration.f1_continuum --no-search   # closed form only
+```
+
+It records the friction angle fitted to the declared drained-shear-cell targets
+through F1's own Drucker-Prager return map (issue #8733 section 6), **beside**
+the Quikrete-analogue value it replaces, with the residual split into the part
+the fit removed and the part no parameter value can remove.
+
+The targets are declared numbers, not measurements of golf bunker sand. The
+record says so in `provenance.honesty`, carries
+`provenance.measured_on_bunker_sand: false`, and pins
+`nasa_std_7009b_validation_levels_met: 0` of 4. Fitting F1 to a stated target
+makes it self-consistent with that target; it does not validate it.
+
+Only `friction_angle_deg` is calibrated. `provenance.not_calibrated` lists what
+is not, and why — most importantly the elastic shear modulus, which cancels
+exactly out of the drained limit ratio and keeps its Hardin & Richart (1963)
+`ESTIMATED` label.
