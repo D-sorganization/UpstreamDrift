@@ -903,6 +903,9 @@ jobs:
       - name: VERSION / pyproject / SPEC.md Consistency Check
         run: python3 scripts/ci/check_version_consistency.py
 
+      - name: SPEC.md Changelog Duplicate Version Check
+        run: python3 scripts/ci/check_spec_changelog_duplicates.py
+
       - name: Python Version Coherence Check
         run: python3 scripts/ci/check_python_version_coherence.py
 
