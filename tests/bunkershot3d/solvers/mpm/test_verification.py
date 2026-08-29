@@ -16,6 +16,8 @@ claiming a validation that neither tier has.
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -28,18 +30,26 @@ from bunkershot3d.solvers import (
     RefusalPolicy,
     SurfaceElements,
 )
-from bunkershot3d.solvers.mpm.constitutive import SandContinuum
+from bunkershot3d.solvers.exceptions import SolverInputError
+from bunkershot3d.solvers.mpm.constitutive import SAND_POISSON_RATIO, SandContinuum
 from bunkershot3d.solvers.mpm.solver import PlaneStrainMPMSolver
 from bunkershot3d.solvers.mpm.verification import (
+    ManufacturedField,
     column_grid_convergence,
+    column_temporal_convergence,
     cross_check_against_f0,
     elastic_column_equilibrium,
     energy_residuals,
     free_fall_residuals,
+    manufactured_solution_convergence,
+    passive_earth_pressure_limit,
+    rankine_limits,
+    uniform_stress_patch_residual,
 )
 from bunkershot3d.vandv.conservation import ConservationClass
 from bunkershot3d.vandv.convergence import observed_order_from_residuals
 from bunkershot3d.vandv.exceptions import ConservationClassError
+from bunkershot3d.vandv.gci import ConvergenceType
 
 pytestmark = pytest.mark.unit
 
@@ -47,6 +57,20 @@ pytestmark = pytest.mark.unit
 @pytest.fixture(scope="module")
 def material() -> SandContinuum:
     return SandContinuum.from_sand_state(playing_condition(PlayingCondition.FIRM))
+
+
+@pytest.fixture(scope="module")
+def cohesionless() -> SandContinuum:
+    """A sand whose cone tip sits at the origin.
+
+    The Rankine limits and the manufactured solution both want the
+    friction cone tested on its own, and the ``FLUFFY`` preset is
+    genuinely cohesionless -- its water content puts the moisture model
+    at zero apparent cohesion, so ``tip_volumetric_strain`` is exactly
+    zero rather than merely small.  Nothing is stripped or overridden to
+    get that.
+    """
+    return SandContinuum.from_sand_state(playing_condition(PlayingCondition.FLUFFY))
 
 
 def wedge_state(speed_m_s: float = 12.0, attack_deg: float = 20.0) -> IntrusionState:
@@ -270,3 +294,217 @@ class TestF0CrossCheck:
         """No magnitude may be reproduced without its assumption."""
         assert "width=" in comparison.summary()
         assert comparison.effective_width_m == pytest.approx(0.030)
+
+
+class TestRankineLimits:
+    """The closed form is the *model's own* plane-strain Coulomb limit.
+
+    The F1 cone is written on the two in-plane principal Kirchhoff
+    stresses, so the plane-strain limit stress ratio it enforces is
+    ``(1 - sqrt(2) alpha)/(1 + sqrt(2) alpha)`` -- a Rankine coefficient
+    at an equivalent friction angle ``phi* = asin(sqrt(2) alpha)``, which
+    is **not** the friction angle handed to
+    :func:`~bunkershot3d.solvers.mpm.constitutive.drucker_prager_alpha`.
+    Verifying against ``(1 - sin phi)/(1 + sin phi)`` at the *input*
+    angle would be verifying the wrong number.
+    """
+
+    @pytest.fixture(scope="class")
+    def limits(self, cohesionless: SandContinuum):
+        return rankine_limits(cohesionless)
+
+    def test_the_equivalent_angle_is_the_cone_slope_not_the_input(
+        self, limits, cohesionless: SandContinuum
+    ) -> None:
+        assert limits.sin_phi_star == pytest.approx(np.sqrt(2.0) * cohesionless.alpha)
+        assert limits.phi_star_deg < cohesionless.friction_angle_deg
+        assert limits.phi_star_deg > 0.5 * cohesionless.friction_angle_deg
+
+    def test_the_two_coefficients_are_reciprocal(self, limits) -> None:
+        """``K_a K_p = 1`` is an identity of the Rankine pair."""
+        assert limits.active_coefficient * limits.passive_coefficient == pytest.approx(
+            1.0
+        )
+
+    def test_the_at_rest_state_lies_between_them(self, limits) -> None:
+        """Otherwise the geostatic seed would already be at yield."""
+        at_rest = SAND_POISSON_RATIO / (1.0 - SAND_POISSON_RATIO)
+        assert limits.active_coefficient < at_rest < limits.passive_coefficient
+
+    def test_a_cohesionless_sand_has_no_intercept(self, limits) -> None:
+        assert limits.cone_tip_stress_pa == 0.0
+        assert limits.passive_cohesive_intercept_pa == 0.0
+        assert limits.active_cohesive_intercept_pa == 0.0
+
+    def test_a_cohesive_sand_does(self, material: SandContinuum) -> None:
+        cohesive = rankine_limits(material)
+        assert cohesive.cone_tip_stress_pa > 0.0
+        assert cohesive.passive_cohesive_intercept_pa > 0.0
+
+    def test_a_cone_too_steep_for_a_rankine_state_is_refused(
+        self, cohesionless: SandContinuum
+    ) -> None:
+        """``sqrt(2) alpha >= 1`` has no plane-strain Coulomb equivalent."""
+        steep = replace(cohesionless, alpha=1.0)
+        with pytest.raises(SolverInputError, match="no plane-strain"):
+            rankine_limits(steep)
+
+
+class TestPassiveEarthPressureLimit:
+    """The plastic-limit case: a closed-form limit *load*, not an identity.
+
+    Everything else in this module is elastic, kinematic, or a
+    restatement of the yield function. This one drives the whole bed to
+    the Drucker-Prager limit and compares the wall reaction the solver
+    computes for itself against ``P_p = K_p rho g H^2 / 2``.
+    """
+
+    @pytest.fixture(scope="class")
+    def limit(self, cohesionless: SandContinuum):
+        return passive_earth_pressure_limit(cohesionless, cell_size_m=0.003)
+
+    def test_the_bed_actually_reached_its_limit(self, limit) -> None:
+        """A load read off an unmobilised bed is an elastic answer."""
+        assert limit.yielded_fraction > 0.8, limit.summary()
+
+    def test_the_push_was_quasi_static(self, limit) -> None:
+        """Rankine is a static limit; an inertial answer is a different one."""
+        assert limit.quasi_static_ratio < 1e-3, limit.summary()
+
+    def test_it_finds_the_closed_form_limit_load(self, limit) -> None:
+        assert limit.relative_error < 0.12, limit.summary()
+
+    def test_the_thrust_is_far_above_the_at_rest_value(self, limit) -> None:
+        """The failure mode this case has: reporting ``K_0`` as ``K_p``."""
+        at_rest = SAND_POISSON_RATIO / (1.0 - SAND_POISSON_RATIO)
+        at_rest_thrust = (
+            at_rest * limit.analytic_thrust_n_per_m / limit.passive_coefficient
+        )
+        assert limit.thrust_n_per_m > 3.0 * at_rest_thrust, limit.summary()
+
+    def test_none_of_the_load_is_cohesive_here(self, limit) -> None:
+        """So the number is a test of the friction cone, not of the tip."""
+        assert limit.cohesive_share == 0.0, limit.summary()
+
+    def test_the_error_falls_when_the_grid_is_refined(
+        self, cohesionless: SandContinuum, limit
+    ) -> None:
+        coarse = passive_earth_pressure_limit(cohesionless, cell_size_m=0.004)
+        assert coarse.relative_error > limit.relative_error, (
+            f"{coarse.summary()} / {limit.summary()}"
+        )
+
+    def test_a_wall_that_is_not_quasi_static_is_refused(
+        self, cohesionless: SandContinuum
+    ) -> None:
+        with pytest.raises(SolverInputError, match="quasi-static"):
+            passive_earth_pressure_limit(
+                cohesionless, cell_size_m=0.004, wall_speed_m_s=20.0
+            )
+
+
+class TestManufacturedSolution:
+    """MMS on the stress divergence and the transfer, taken together."""
+
+    @pytest.fixture(scope="class")
+    def patch(self, cohesionless: SandContinuum):
+        return uniform_stress_patch_residual(cohesionless, cell_size_m=0.004)
+
+    @pytest.fixture(scope="class")
+    def study(self, cohesionless: SandContinuum):
+        return manufactured_solution_convergence(cohesionless)
+
+    def test_a_uniform_stress_field_produces_no_net_force(self, patch) -> None:
+        """The patch test: an identity of the scheme, so round-off class."""
+        assert patch.conservation_class is ConservationClass.ROUND_OFF
+        assert patch.within_round_off, patch.summary()
+
+    def test_the_patch_residual_refuses_an_order_test(self, patch) -> None:
+        with pytest.raises(ConservationClassError):
+            observed_order_from_residuals([patch, patch])
+
+    def test_the_manufactured_error_is_not_round_off(self, study) -> None:
+        """So a fixed tolerance would be the wrong test for it."""
+        assert study.levels[0].relative_error > 1e-3, study.summary()
+
+    def test_the_solution_stays_on_the_elastic_branch(self, study) -> None:
+        """Otherwise the residual would be plastic dissipation."""
+        for level in study.levels:
+            assert level.n_yielded == 0, level.summary()
+            assert level.worst_yield_pa < 0.0, level.summary()
+
+    def test_the_observed_order_matches_the_design_order(self, study) -> None:
+        assert study.design_order == 2.0
+        assert 1.7 < study.observed_order.order < 2.2, study.summary()
+
+    def test_the_error_falls_monotonically(self, study) -> None:
+        assert study.observed_order.monotone, study.summary()
+        assert study.observed_order.spread < 0.3, study.summary()
+
+    def test_the_study_names_what_it_does_not_cover(self, study) -> None:
+        """An honest partial: the plastic branch is not in this one."""
+        assert "elastic" in study.summary()
+
+    def test_a_field_that_yields_is_refused(self, cohesionless: SandContinuum) -> None:
+        """A manufactured field outside the cone measures the return map."""
+        tensile = ManufacturedField(
+            size_m=0.048, amplitude_x=1.0e-4, amplitude_z=0.7e-4, mean_compression=0.0
+        )
+        with pytest.raises(SolverInputError, match="yield"):
+            manufactured_solution_convergence(
+                cohesionless, cell_sizes_m=(0.004, 0.003, 0.002), field=tensile
+            )
+
+
+class TestTemporalConvergence:
+    """The step is refined on a *fixed* grid, through the same Celik code."""
+
+    @pytest.fixture(scope="class")
+    def study(self, material: SandContinuum):
+        return column_temporal_convergence(material, transits=1.0)
+
+    def test_three_steps_were_solved_at_one_cell_size(self, study) -> None:
+        assert len(study.levels) == 3
+        assert len({level.time_step_s for level in study.levels}) == 3
+        assert len({level.n_steps for level in study.levels}) == 3
+
+    def test_the_refinement_is_temporal_only(self, study) -> None:
+        """A study that refined dx too would not isolate the step."""
+        assert study.cell_size_m > 0.0
+        assert "dt" in study.summary()
+
+    def test_the_convergence_is_monotonic(self, study) -> None:
+        assert study.converging, study.summary()
+        assert not study.gci.is_oscillatory, study.summary()
+
+    def test_an_order_of_at_least_one_is_observed(self, study) -> None:
+        """The scheme is formally first order in the step."""
+        assert 0.8 < study.apparent_order < 2.2, study.summary()
+        assert 0.8 < study.difference_order.order < 2.2, study.summary()
+
+    def test_the_temporal_gci_is_reported_and_small(self, study) -> None:
+        assert np.isfinite(study.gci.gci_fine)
+        assert study.gci.gci_fine < 0.02, study.summary()
+        assert study.gci.n_grids == 3
+
+    def test_the_band_is_declared_temporal_only(self, study) -> None:
+        """It is not the total numerical uncertainty and must not read as one."""
+        assert "temporal" in study.gci.quantity
+
+    def test_the_relaxation_stays_elastic(self, study) -> None:
+        for level in study.levels:
+            assert level.n_yielded == 0, study.summary()
+
+    def test_a_long_window_stops_converging_and_says_so(
+        self, material: SandContinuum
+    ) -> None:
+        """The finding, not a failure: the transfer's cost is per step.
+
+        The particle-grid round trip loses a fixed amount each step, so
+        over a *fixed* physical window its total grows as the step is
+        refined. Past about one elastic transit it overtakes the
+        integrator's own ``O(dt)`` error and the series diverges.
+        """
+        long_window = column_temporal_convergence(material, transits=4.0)
+        assert not long_window.converging, long_window.summary()
+        assert long_window.gci.convergence is ConvergenceType.MONOTONIC_DIVERGENCE
