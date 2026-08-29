@@ -27,6 +27,11 @@ What this package is
   quantities ADR-0033 refuses outright.
 * :mod:`.verification` -- conservation residuals, the analytic case, the
   grid-convergence study and the F0 cross-check.
+* :mod:`.limit_states` -- closed-form Rankine earth-pressure limits, the
+  plastic-collapse case the return map is checked against.
+* :mod:`.order_of_accuracy` -- manufactured-solution and temporal
+  refinement studies, which measure the observed order rather than
+  asserting the design order.
 
 Verified is not validated
 -------------------------
@@ -85,6 +90,24 @@ from .grid import (
     apic_angular_momentum,
     cross_2d,
 )
+from .limit_states import (
+    PassiveWallLimit,
+    RankineLimits,
+    passive_earth_pressure_limit,
+    rankine_limits,
+)
+from .order_of_accuracy import (
+    DEFAULT_MANUFACTURED_FIELD,
+    DESIGN_ORDER_SPATIAL,
+    ManufacturedField,
+    ManufacturedLevel,
+    ManufacturedSolutionStudy,
+    TemporalLevel,
+    TemporalStudy,
+    column_temporal_convergence,
+    manufactured_solution_convergence,
+    uniform_stress_patch_residual,
+)
 from .solver import (
     DEFAULT_CFL_NUMBER,
     MPMRun,
@@ -103,17 +126,24 @@ from .state import (
     surface_profile_m,
 )
 from .verification import (
+    COHESIVE_OSCILLATION_COMPRESSION,
     ColumnEquilibrium,
     F0CrossCheck,
+    cohesive_elastic_strain_limit,
+    cohesive_oscillation_residuals,
     column_grid_convergence,
     cross_check_against_f0,
     elastic_column_equilibrium,
     energy_residuals,
     free_fall_residuals,
+    mean_vertical_stress_pa,
 )
 
 __all__ = [
+    "COHESIVE_OSCILLATION_COMPRESSION",
     "DEFAULT_CFL_NUMBER",
+    "DEFAULT_MANUFACTURED_FIELD",
+    "DESIGN_ORDER_SPATIAL",
     "F1_STANDING_CAVEATS",
     "HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA",
     "HARDIN_RICHART_ROUND_COEFFICIENT_KPA",
@@ -130,18 +160,28 @@ __all__ = [
     "GridInterpolation",
     "MPMRun",
     "MPMSetup",
+    "ManufacturedField",
+    "ManufacturedLevel",
+    "ManufacturedSolutionStudy",
     "ParticleState",
+    "PassiveWallLimit",
     "PlaneStrainGrid",
     "PlaneStrainMPMSolver",
+    "RankineLimits",
     "RefusedQuantity",
     "RigidSection",
     "SandContinuum",
     "StepDiagnostics",
     "SurfaceDepression",
+    "TemporalLevel",
+    "TemporalStudy",
     "WallCondition",
     "apic_angular_momentum",
     "cfl_time_step_s",
+    "cohesive_elastic_strain_limit",
+    "cohesive_oscillation_residuals",
     "column_grid_convergence",
+    "column_temporal_convergence",
     "convex_hull_2d",
     "cross_2d",
     "cross_check_against_f0",
@@ -151,13 +191,18 @@ __all__ = [
     "evaluate_f1_envelope",
     "free_fall_residuals",
     "hencky_kirchhoff_principal",
+    "manufactured_solution_convergence",
+    "mean_vertical_stress_pa",
+    "passive_earth_pressure_limit",
     "plane_torque_about_y",
     "principal_stretches",
     "project_to_yield_surface",
+    "rankine_limits",
     "reconstruct",
     "require_quotable",
     "settled_bed",
     "surface_depression",
     "surface_profile_m",
+    "uniform_stress_patch_residual",
     "yield_function",
 ]
