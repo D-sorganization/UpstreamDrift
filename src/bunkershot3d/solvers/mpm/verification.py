@@ -229,6 +229,69 @@ def _march_open_domain(
     )
 
 
+def _march_column(
+    material: SandContinuum,
+    particles: ParticleState,
+    *,
+    cell_size_m: float,
+    courant_number: float,
+    duration_s: float,
+    width_m: float,
+    height_m: float,
+    gravity_m_s2: float,
+) -> tuple[MPMRun, float, int]:
+    """March a laterally confined column for a fixed *physical* window.
+
+    The temporal refinement in
+    :mod:`~bunkershot3d.solvers.mpm.order_of_accuracy` and the cohesive
+    oscillation below both hold the window fixed while the step varies,
+    which is the whole point of either, so the step count is derived from
+    the duration in *one* place: a second copy that rounded differently
+    would make the two studies disagree about how long "one elastic
+    transit" is.  The grid is the snug one :func:`_column_grid` explains.
+
+    Args:
+        material: The continuum.
+        particles: The column, advanced in place.
+        cell_size_m: Grid ``dx``.
+        courant_number: Courant number setting the step.
+        duration_s: Physical window to cover.
+        width_m: Column width.
+        height_m: Column height.
+        gravity_m_s2: Gravitational acceleration.
+
+    Returns:
+        ``(run, time_step_s, n_steps)``.
+    """
+    grid = PlaneStrainGrid(
+        (-cell_size_m, -cell_size_m),
+        cell_size_m,
+        (
+            int(math.ceil(width_m / cell_size_m)) + 3,
+            int(math.ceil(height_m / cell_size_m)) + 4,
+        ),
+    )
+    step_s = courant_number * cell_size_m / material.elastic_wave_speed_m_s
+    n_steps = max(int(round(duration_s / step_s)), 2)
+    solver = _free_solver(
+        material,
+        cell_size_m,
+        walls=_COLUMN_DOMAIN,
+        gravity_m_s2=gravity_m_s2,
+        max_steps=n_steps,
+    )
+    run = solver.march(
+        particles,
+        None,
+        grid,
+        n_steps=n_steps,
+        time_step_s=step_s,
+        free_surface_height_m=height_m,
+        bed_x_bounds_m=(0.0, width_m),
+    )
+    return run, step_s, n_steps
+
+
 def _column_grid(
     *, cell_size_m: float, width_m: float, height_m: float
 ) -> PlaneStrainGrid:
@@ -1001,31 +1064,15 @@ def _cohesive_oscillation_residual(
     gradient = np.tile(np.eye(PLANE_STRAIN_DIMENSION), (particles.n_particles, 1, 1))
     gradient[:, 1, 1] = math.exp(-amplitude)
     particles.deformation_gradient = gradient
-    grid = PlaneStrainGrid(
-        (-cell_size_m, -cell_size_m),
-        cell_size_m,
-        (
-            int(math.ceil(width_m / cell_size_m)) + 3,
-            int(math.ceil(height_m / cell_size_m)) + 4,
-        ),
-    )
-    step_s = courant_number * cell_size_m / material.elastic_wave_speed_m_s
-    n_steps = max(int(round(duration_s / step_s)), 2)
-    solver = _free_solver(
+    run, step_s, _ = _march_column(
         material,
-        cell_size_m,
-        walls=_COLUMN_DOMAIN,
-        gravity_m_s2=_NEGLIGIBLE_GRAVITY_M_S2,
-        max_steps=n_steps,
-    )
-    run = solver.march(
         particles,
-        None,
-        grid,
-        n_steps=n_steps,
-        time_step_s=step_s,
-        free_surface_height_m=height_m,
-        bed_x_bounds_m=(0.0, width_m),
+        cell_size_m=cell_size_m,
+        courant_number=courant_number,
+        duration_s=duration_s,
+        width_m=width_m,
+        height_m=height_m,
+        gravity_m_s2=_NEGLIGIBLE_GRAVITY_M_S2,
     )
     yielded = sum(step.n_yielded for step in run.steps)
     if yielded:

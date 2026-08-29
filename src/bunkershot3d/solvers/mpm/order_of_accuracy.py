@@ -72,8 +72,8 @@ from .state import ParticleState, settled_bed
 # The dependency runs one way only: verification.py does not import this
 # module.
 from .verification import (
-    _COLUMN_DOMAIN,
     _free_solver,
+    _march_column,
     _OPEN_DOMAIN,
     _particles,
     mean_vertical_stress_pa,
@@ -920,31 +920,15 @@ def _temporal_level(
     particles = _particles(
         material, cell_size_m=cell_size_m, width_m=width_m, height_m=height_m
     )
-    grid = PlaneStrainGrid(
-        (-cell_size_m, -cell_size_m),
-        cell_size_m,
-        (
-            int(math.ceil(width_m / cell_size_m)) + 3,
-            int(math.ceil(height_m / cell_size_m)) + 4,
-        ),
-    )
-    step_s = courant_number * cell_size_m / material.elastic_wave_speed_m_s
-    n_steps = max(int(round(duration_s / step_s)), 2)
-    solver = _free_solver(
+    run, step_s, n_steps = _march_column(
         material,
-        cell_size_m,
-        walls=_COLUMN_DOMAIN,
-        gravity_m_s2=gravity_m_s2,
-        max_steps=n_steps,
-    )
-    run = solver.march(
         particles,
-        None,
-        grid,
-        n_steps=n_steps,
-        time_step_s=step_s,
-        free_surface_height_m=height_m,
-        bed_x_bounds_m=(0.0, width_m),
+        cell_size_m=cell_size_m,
+        courant_number=courant_number,
+        duration_s=duration_s,
+        width_m=width_m,
+        height_m=height_m,
+        gravity_m_s2=gravity_m_s2,
     )
     yielded = run.steps[-1].n_yielded
     if yielded:
