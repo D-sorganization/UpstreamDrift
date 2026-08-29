@@ -12,6 +12,10 @@ import pytest
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_artifact_receipt import (
     build_structural_artifact_receipt,
 )
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_evidence import (
+    EVIDENCE_SIDECAR_SCHEMA,
+    REQUIRED_EVIDENCE_ARRAYS,
+)
 
 pytestmark = pytest.mark.scientific
 RUN_ID = 33273691711
@@ -80,7 +84,21 @@ def _artifact() -> dict[str, object]:
     }
 
 
-def _artifact_tree(tmp_path: Path, *, count: int = 2) -> tuple[Path, Path, str]:
+def _complete_evidence_arrays() -> dict[str, np.ndarray]:
+    arrays = {name: np.zeros(2) for name in REQUIRED_EVIDENCE_ARRAYS}
+    arrays["time_s"] = np.array([0.0, 0.1])
+    arrays["station_force_on_club_n"] = np.zeros((2, 2, 2, 3))
+    arrays["active_station"] = np.zeros((2, 2, 2), dtype=bool)
+    arrays["active_set_transition"] = np.zeros(2, dtype=bool)
+    arrays["net_club_force_n"] = np.zeros((2, 3))
+    arrays["cumulative_contact_impulse_n_s"] = np.zeros((2, 3))
+    arrays["active_station_count"] = np.zeros(2, dtype=int)
+    return arrays
+
+
+def _artifact_tree(
+    tmp_path: Path, *, count: int = 2, enriched: bool = False
+) -> tuple[Path, Path, str]:
     extracted = tmp_path / "extracted"
     extracted.mkdir()
     session = (
@@ -97,16 +115,22 @@ def _artifact_tree(tmp_path: Path, *, count: int = 2) -> tuple[Path, Path, str]:
     (extracted / "execution-session.json").write_bytes(session)
     for index in range(count):
         stem = f"case-{index:02d}"
+        checkpoint: dict[str, object] = {
+            "identity": {"execution_revision": EXECUTION_REVISION},
+            "case": {"case_key": stem},
+        }
+        if enriched:
+            checkpoint["outcome"] = {
+                "result": {"evidence_sidecar_schema": EVIDENCE_SIDECAR_SCHEMA}
+            }
         (extracted / f"{stem}.json").write_text(
-            json.dumps(
-                {
-                    "identity": {"execution_revision": EXECUTION_REVISION},
-                    "case": {"case_key": stem},
-                }
-            ),
+            json.dumps(checkpoint),
             encoding="utf-8",
         )
-        np.savez_compressed(extracted / f"{stem}.npz", time_s=np.array([0.0]))
+        arrays = (
+            _complete_evidence_arrays() if enriched else {"time_s": np.array([0.0])}
+        )
+        np.savez_compressed(extracted / f"{stem}.npz", **arrays)
     archive = tmp_path / "artifact.zip"
     archive.write_bytes(b"synthetic archive bytes")
     return extracted, archive, hashlib.sha256(session).hexdigest()
@@ -141,6 +165,54 @@ def test_receipt_binds_terminal_run_job_artifact_and_exact_slice(
     assert len(receipt["artifact_archive_sha256"]) == 64
     assert receipt["checkpoint_pair_count"] == 2
     assert len(receipt["files"]) == 5
+
+
+def test_enriched_receipt_validates_every_registered_evidence_history(
+    tmp_path: Path,
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path, enriched=True)
+
+    receipt = build_structural_artifact_receipt(
+        run=_run(),
+        jobs=_jobs(),
+        artifact=_artifact(),
+        archive_path=archive,
+        extracted_dir=extracted,
+        expected_run_id=RUN_ID,
+        expected_dispatch_head=HEAD_SHA,
+        expected_execution_revision=EXECUTION_REVISION,
+        expected_session_sha256=session_digest,
+        requested_case_start=694,
+        requested_case_stop=696,
+        required_evidence_schema=EVIDENCE_SIDECAR_SCHEMA,
+    )
+
+    assert receipt["schema_version"] == (
+        "articulated-structural-factorial-artifact-receipt/1.1.0"
+    )
+    assert receipt["evidence_sidecar_schema"] == EVIDENCE_SIDECAR_SCHEMA
+    assert receipt["required_evidence_array_count"] == 37
+    assert receipt["evidence_sidecars_validated"] == 2
+
+
+def test_enriched_receipt_rejects_a_readable_legacy_sidecar(tmp_path: Path) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path)
+
+    with pytest.raises(ValueError, match="evidence sidecar schema"):
+        build_structural_artifact_receipt(
+            run=_run(),
+            jobs=_jobs(),
+            artifact=_artifact(),
+            archive_path=archive,
+            extracted_dir=extracted,
+            expected_run_id=RUN_ID,
+            expected_dispatch_head=HEAD_SHA,
+            expected_execution_revision=EXECUTION_REVISION,
+            expected_session_sha256=session_digest,
+            requested_case_start=694,
+            requested_case_stop=696,
+            required_evidence_schema=EVIDENCE_SIDECAR_SCHEMA,
+        )
 
 
 @pytest.mark.parametrize("defect", ["missing_sidecar", "unexpected", "session_drift"])

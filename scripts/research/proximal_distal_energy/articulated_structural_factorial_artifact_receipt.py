@@ -10,7 +10,14 @@ import re
 
 import numpy as np
 
-_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.0.0"
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_evidence import (
+    EVIDENCE_SIDECAR_SCHEMA,
+    REQUIRED_EVIDENCE_ARRAYS,
+    validate_structural_evidence_arrays,
+)
+
+_BASE_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.0.0"
+_ENRICHED_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.1.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _JOB_NAME = "Structural Runtime Audit or Campaign Slice"
 _CAMPAIGN_STEP = "Run Registered Structural Campaign Slice"
@@ -105,7 +112,8 @@ def _validate_artifact_tree(
     extracted_dir: Path,
     expected_execution_revision: str,
     expected_session_sha256: str,
-) -> tuple[list[dict[str, str]], int]:
+    required_evidence_schema: str | None,
+) -> tuple[list[dict[str, str]], int, int]:
     if not extracted_dir.is_dir():
         raise ValueError("extracted artifact directory does not exist")
     entries = tuple(extracted_dir.iterdir())
@@ -137,6 +145,7 @@ def _validate_artifact_tree(
     npz_paths = {path.stem: path for path in extracted_dir.glob("case-*.npz")}
     if json_paths.keys() != npz_paths.keys():
         raise ValueError("checkpoint JSON and NPZ sidecars must be exactly paired")
+    evidence_sidecars_validated = 0
     for stem in sorted(json_paths):
         checkpoint = _read_json_mapping(json_paths[stem], name=f"checkpoint {stem}")
         identity = _mapping(
@@ -144,18 +153,34 @@ def _validate_artifact_tree(
         )
         if identity.get("execution_revision") != expected_execution_revision:
             raise ValueError("checkpoint execution revision does not match the session")
+        if required_evidence_schema is not None:
+            outcome = checkpoint.get("outcome")
+            result = outcome.get("result") if isinstance(outcome, Mapping) else None
+            if (
+                not isinstance(result, Mapping)
+                or result.get("evidence_sidecar_schema") != required_evidence_schema
+            ):
+                raise ValueError(
+                    "checkpoint does not declare the required evidence sidecar schema"
+                )
         try:
             with np.load(npz_paths[stem], allow_pickle=False) as archive:
                 if not archive.files:
                     raise ValueError("checkpoint NPZ sidecar contains no named arrays")
+                if required_evidence_schema is not None:
+                    arrays = {name: np.asarray(archive[name]) for name in archive.files}
+                    validate_structural_evidence_arrays(arrays)
+                    evidence_sidecars_validated += 1
         except (OSError, ValueError) as exc:
+            if required_evidence_schema is not None:
+                raise ValueError("checkpoint evidence sidecar is invalid") from exc
             raise ValueError("checkpoint NPZ sidecar is unreadable") from exc
 
     files = [
         {"name": path.name, "sha256": _sha256(path)}
         for path in sorted(entries, key=lambda item: item.name)
     ]
-    return files, len(json_paths)
+    return files, len(json_paths), evidence_sidecars_validated
 
 
 def build_structural_artifact_receipt(
@@ -171,6 +196,7 @@ def build_structural_artifact_receipt(
     expected_session_sha256: str,
     requested_case_start: int,
     requested_case_stop: int,
+    required_evidence_schema: str | None = None,
 ) -> dict[str, object]:
     """Return an outcome-blind receipt for one terminal hosted slice artifact."""
 
@@ -183,6 +209,8 @@ def build_structural_artifact_receipt(
         )
     if _SHA256.fullmatch(expected_session_sha256) is None:
         raise ValueError("expected_session_sha256 must be a lowercase SHA-256")
+    if required_evidence_schema not in {None, EVIDENCE_SIDECAR_SCHEMA}:
+        raise ValueError("required_evidence_schema is not a registered schema")
     if (
         isinstance(requested_case_start, bool)
         or not isinstance(requested_case_start, int)
@@ -237,10 +265,11 @@ def build_structural_artifact_receipt(
     if artifact_record.get("expired") is not False:
         raise ValueError("artifact must be retained and unexpired")
 
-    files, checkpoint_pair_count = _validate_artifact_tree(
+    files, checkpoint_pair_count, evidence_sidecars_validated = _validate_artifact_tree(
         extracted_dir=extracted_dir,
         expected_execution_revision=expected_execution_revision,
         expected_session_sha256=expected_session_sha256,
+        required_evidence_schema=required_evidence_schema,
     )
     requested_count = requested_case_stop - requested_case_start
     if run_conclusion == "success" and checkpoint_pair_count != requested_count:
@@ -256,8 +285,10 @@ def build_structural_artifact_receipt(
         "started_at",
         "completed_at",
     )
-    return {
-        "schema_version": _SCHEMA,
+    receipt: dict[str, object] = {
+        "schema_version": (
+            _ENRICHED_SCHEMA if required_evidence_schema is not None else _BASE_SCHEMA
+        ),
         "classification": "workflow_artifact_provenance_not_scientific_summary",
         "requested_case_range": [requested_case_start, requested_case_stop],
         "execution_revision": expected_execution_revision,
@@ -315,6 +346,15 @@ def build_structural_artifact_receipt(
         "checkpoint_pair_count": checkpoint_pair_count,
         "files": files,
     }
+    if required_evidence_schema is not None:
+        receipt.update(
+            {
+                "evidence_sidecar_schema": required_evidence_schema,
+                "required_evidence_array_count": len(REQUIRED_EVIDENCE_ARRAYS),
+                "evidence_sidecars_validated": evidence_sidecars_validated,
+            }
+        )
+    return receipt
 
 
 __all__ = ["build_structural_artifact_receipt"]
