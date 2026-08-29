@@ -19,8 +19,13 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     plan_sha256,
 )
 
-_SCHEMA = "articulated-structural-factorial-collection/1.0.0"
+_SCHEMA = "articulated-structural-factorial-collection/1.1.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
+_RECEIPT_SCHEMAS = {
+    "articulated-structural-factorial-artifact-receipt/1.1.0",
+    "articulated-structural-factorial-artifact-receipt/1.2.0",
+}
+_RECEIPT_CLASSIFICATION = "workflow_artifact_provenance_not_scientific_summary"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 
 
@@ -34,6 +39,7 @@ class StructuralSliceSource:
     requested_case_start: int
     requested_case_stop: int
     directory: Path
+    receipt_path: Path
 
     def __post_init__(self) -> None:
         if isinstance(self.run_id, bool) or not isinstance(self.run_id, int):
@@ -57,6 +63,8 @@ class StructuralSliceSource:
             raise ValueError("requested case range must satisfy 0 <= start < stop")
         if not isinstance(self.directory, Path):
             raise TypeError("directory must be a pathlib.Path")
+        if not isinstance(self.receipt_path, Path):
+            raise TypeError("receipt_path must be a pathlib.Path")
 
 
 def _sha256(path: Path) -> str:
@@ -101,6 +109,90 @@ def _allowed_names(source: StructuralSliceSource) -> set[str]:
     }
 
 
+def _receipt_mapping(value: object, *, name: str) -> Mapping[str, object]:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{name} must be a mapping")
+    return value
+
+
+def _receipt_files(value: object) -> dict[str, str]:
+    if not isinstance(value, list):
+        raise ValueError("receipt files must be a list")
+    files: dict[str, str] = {}
+    for item in value:
+        record = _receipt_mapping(item, name="receipt file")
+        name = record.get("name")
+        digest = record.get("sha256")
+        if (
+            not isinstance(name, str)
+            or not name
+            or not isinstance(digest, str)
+            or _SHA256.fullmatch(digest) is None
+            or name in files
+        ):
+            raise ValueError("receipt files contain an invalid or duplicate record")
+        files[name] = digest
+    return files
+
+
+def _validate_receipt(
+    *,
+    source: StructuralSliceSource,
+    launch: Mapping[str, object],
+    session: bytes,
+) -> tuple[Mapping[str, object], str]:
+    try:
+        receipt_bytes = source.receipt_path.read_bytes()
+        receipt = json.loads(receipt_bytes)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("artifact receipt is unreadable") from exc
+    record = _receipt_mapping(receipt, name="artifact receipt")
+    schema = record.get("schema_version")
+    if schema not in _RECEIPT_SCHEMAS:
+        raise ValueError("artifact receipt schema is unsupported")
+    if record.get("classification") != _RECEIPT_CLASSIFICATION:
+        raise ValueError("artifact receipt classification is invalid")
+    if record.get("execution_revision") != launch.get("execution_revision"):
+        raise ValueError("receipt execution revision does not match the launch")
+    if record.get("execution_session_sha256") != hashlib.sha256(session).hexdigest():
+        raise ValueError("receipt execution session does not match the slice")
+    if record.get("requested_case_range") != [
+        source.requested_case_start,
+        source.requested_case_stop,
+    ]:
+        raise ValueError("receipt requested case range does not match the source")
+
+    run = _receipt_mapping(record.get("run"), name="receipt run")
+    if run.get("id") != source.run_id:
+        raise ValueError("receipt run ID does not match the source")
+    if (
+        run.get("status") != "completed"
+        or run.get("conclusion") != source.run_conclusion
+    ):
+        raise ValueError("receipt run conclusion does not match the source")
+    artifact = _receipt_mapping(record.get("artifact"), name="receipt artifact")
+    if artifact.get("name") != source.artifact_name:
+        raise ValueError("receipt artifact name does not match the source")
+
+    archive_sha256 = record.get("artifact_archive_sha256")
+    if not isinstance(archive_sha256, str) or _SHA256.fullmatch(archive_sha256) is None:
+        raise ValueError("receipt artifact archive digest is invalid")
+    if (
+        schema.endswith("/1.2.0")
+        and artifact.get("digest") != f"sha256:{archive_sha256}"
+    ):
+        raise ValueError("receipt API and archive digests do not match")
+
+    actual_files = {
+        path.name: _sha256(path)
+        for path in source.directory.iterdir()
+        if path.is_file()
+    }
+    if _receipt_files(record.get("files")) != actual_files:
+        raise ValueError("receipt files do not match the slice bytes")
+    return record, hashlib.sha256(receipt_bytes).hexdigest()
+
+
 def collect_structural_slices(
     *,
     plan: Mapping[str, object],
@@ -137,6 +229,9 @@ def collect_structural_slices(
         unexpected = visible - _allowed_names(source)
         if unexpected:
             raise ValueError("slice contains unexpected files")
+        receipt, receipt_sha256 = _validate_receipt(
+            source=source, launch=launch, session=session
+        )
         checkpoints = load_available_checkpoints(
             plan=plan, launch=launch, checkpoint_dir=source.directory
         )
@@ -157,6 +252,8 @@ def collect_structural_slices(
             and len(indices) != source.requested_case_stop - source.requested_case_start
         ):
             raise ValueError("successful slice is incomplete")
+        if receipt.get("checkpoint_pair_count") != len(checkpoints):
+            raise ValueError("receipt checkpoint count does not match the slice")
         combined_indices.extend(indices)
         files: list[dict[str, str]] = []
         for checkpoint in checkpoints:
@@ -181,6 +278,8 @@ def collect_structural_slices(
                 ],
                 "observed_case_range": [indices[0], indices[-1] + 1],
                 "checkpoint_count": len(checkpoints),
+                "artifact_receipt_schema": receipt.get("schema_version"),
+                "artifact_receipt_sha256": receipt_sha256,
                 "files": sorted(files, key=lambda item: item["name"]),
             }
         )
@@ -237,7 +336,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--source",
         action="append",
-        nargs=6,
+        nargs=7,
         required=True,
         metavar=(
             "RUN_ID",
@@ -246,6 +345,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "CASE_START",
             "CASE_STOP",
             "DIRECTORY",
+            "RECEIPT",
         ),
     )
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -258,8 +358,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             int(case_start),
             int(case_stop),
             Path(directory),
+            Path(receipt),
         )
-        for run_id, artifact_name, conclusion, case_start, case_stop, directory in args.source
+        for (
+            run_id,
+            artifact_name,
+            conclusion,
+            case_start,
+            case_stop,
+            directory,
+            receipt,
+        ) in args.source
     )
     manifest = collect_structural_slices(
         plan=_read_mapping(args.plan, name="plan"),

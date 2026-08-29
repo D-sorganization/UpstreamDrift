@@ -97,6 +97,116 @@ def _digest_tree(root: Path) -> dict[str, str]:
     }
 
 
+def _write_receipt(
+    path: Path,
+    *,
+    source: Path,
+    launch: dict[str, object],
+    run_id: int,
+    artifact_name: str,
+    conclusion: str,
+    start: int,
+    stop: int,
+    schema_version: str = ("articulated-structural-factorial-artifact-receipt/1.2.0"),
+) -> Path:
+    files = [
+        {"name": name, "sha256": digest}
+        for name, digest in sorted(_digest_tree(source).items())
+    ]
+    payload = {
+        "schema_version": schema_version,
+        "classification": "workflow_artifact_provenance_not_scientific_summary",
+        "requested_case_range": [start, stop],
+        "execution_revision": launch["execution_revision"],
+        "execution_session_sha256": hashlib.sha256(
+            (source / "execution-session.json").read_bytes()
+        ).hexdigest(),
+        "run": {"id": run_id, "status": "completed", "conclusion": conclusion},
+        "artifact": {"name": artifact_name, "digest": f"sha256:{'d' * 64}"},
+        "artifact_archive_sha256": "d" * 64,
+        "checkpoint_pair_count": len(tuple(source.glob("case-*.json"))),
+        "files": files,
+    }
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
+def _source_record(
+    *,
+    launch: dict[str, object],
+    run_id: int,
+    artifact_name: str,
+    conclusion: str,
+    start: int,
+    stop: int,
+    directory: Path,
+    schema_version: str = ("articulated-structural-factorial-artifact-receipt/1.2.0"),
+) -> StructuralSliceSource:
+    receipt = _write_receipt(
+        directory.parent / f"{directory.name}-{run_id}-receipt.json",
+        source=directory,
+        launch=launch,
+        run_id=run_id,
+        artifact_name=artifact_name,
+        conclusion=conclusion,
+        start=start,
+        stop=stop,
+        schema_version=schema_version,
+    )
+    return StructuralSliceSource(
+        run_id,
+        artifact_name,
+        conclusion,
+        start,
+        stop,
+        directory,
+        receipt,
+    )
+
+
+def test_collection_rejects_source_metadata_or_bytes_not_bound_by_receipt(
+    tmp_path: Path,
+) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    source = _slice(tmp_path / "source", plan=plan, launch=launch, start=0, stop=2)
+    receipt = _write_receipt(
+        tmp_path / "receipt.json",
+        source=source,
+        launch=launch,
+        run_id=101,
+        artifact_name="artifact",
+        conclusion="success",
+        start=0,
+        stop=2,
+    )
+
+    with pytest.raises(ValueError, match="receipt run ID"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=(
+                StructuralSliceSource(
+                    202, "artifact", "success", 0, 2, source, receipt
+                ),
+            ),
+            output_dir=tmp_path / "metadata-mismatch",
+        )
+
+    next(source.glob("case-*.json")).write_text("{}", encoding="utf-8")
+    with pytest.raises(ValueError, match="receipt files"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=(
+                StructuralSliceSource(
+                    101, "artifact", "success", 0, 2, source, receipt
+                ),
+            ),
+            output_dir=tmp_path / "byte-mismatch",
+        )
+
+
 def test_collection_is_deterministic_complete_and_source_preserving(
     tmp_path: Path,
 ) -> None:
@@ -111,11 +221,26 @@ def test_collection_is_deterministic_complete_and_source_preserving(
         plan=plan,
         launch=launch,
         sources=(
-            StructuralSliceSource(
-                202, "structural-checkpoints-202", "success", 2, 4, second
+            _source_record(
+                launch=launch,
+                run_id=202,
+                artifact_name="structural-checkpoints-202",
+                conclusion="success",
+                start=2,
+                stop=4,
+                directory=second,
             ),
-            StructuralSliceSource(
-                101, "structural-checkpoints-101", "success", 0, 2, first
+            _source_record(
+                launch=launch,
+                run_id=101,
+                artifact_name="structural-checkpoints-101",
+                conclusion="success",
+                start=0,
+                stop=2,
+                directory=first,
+                schema_version=(
+                    "articulated-structural-factorial-artifact-receipt/1.1.0"
+                ),
             ),
         ),
         output_dir=output,
@@ -125,6 +250,10 @@ def test_collection_is_deterministic_complete_and_source_preserving(
     assert manifest["combined_checkpoint_count"] == 4
     assert manifest["next_missing_case_index"] == 4
     assert [source["run_id"] for source in manifest["sources"]] == [101, 202]
+    assert [source["artifact_receipt_schema"] for source in manifest["sources"]] == [
+        "articulated-structural-factorial-artifact-receipt/1.1.0",
+        "articulated-structural-factorial-artifact-receipt/1.2.0",
+    ]
     assert manifest["sources"][0]["observed_case_range"] == [0, 2]
     assert json.loads((output / "collection-manifest.json").read_text()) == manifest
     assert (
@@ -155,11 +284,23 @@ def test_collection_rejects_session_drift_and_overlap(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     sources = (
-        StructuralSliceSource(
-            101, "structural-checkpoints-101", "success", 0, 2, first
+        _source_record(
+            launch=launch,
+            run_id=101,
+            artifact_name="structural-checkpoints-101",
+            conclusion="success",
+            start=0,
+            stop=2,
+            directory=first,
         ),
-        StructuralSliceSource(
-            202, "structural-checkpoints-202", "success", 2, 4, drifted
+        _source_record(
+            launch=launch,
+            run_id=202,
+            artifact_name="structural-checkpoints-202",
+            conclusion="success",
+            start=2,
+            stop=4,
+            directory=drifted,
         ),
     )
     with pytest.raises(ValueError, match="execution-session bytes"):
@@ -172,11 +313,23 @@ def test_collection_rejects_session_drift_and_overlap(tmp_path: Path) -> None:
 
     overlap = _slice(tmp_path / "overlap", plan=plan, launch=launch, start=1, stop=3)
     sources = (
-        StructuralSliceSource(
-            101, "structural-checkpoints-101", "success", 0, 2, first
+        _source_record(
+            launch=launch,
+            run_id=101,
+            artifact_name="structural-checkpoints-101",
+            conclusion="success",
+            start=0,
+            stop=2,
+            directory=first,
         ),
-        StructuralSliceSource(
-            303, "structural-checkpoints-303", "success", 1, 3, overlap
+        _source_record(
+            launch=launch,
+            run_id=303,
+            artifact_name="structural-checkpoints-303",
+            conclusion="success",
+            start=1,
+            stop=3,
+            directory=overlap,
         ),
     )
     with pytest.raises(ValueError, match="overlapping checkpoint"):
@@ -198,7 +351,17 @@ def test_collection_rejects_corrupt_or_unexpected_slice_files(tmp_path: Path) ->
         collect_structural_slices(
             plan=plan,
             launch=launch,
-            sources=(StructuralSliceSource(101, "artifact", "success", 0, 2, source),),
+            sources=(
+                _source_record(
+                    launch=launch,
+                    run_id=101,
+                    artifact_name="artifact",
+                    conclusion="success",
+                    start=0,
+                    stop=2,
+                    directory=source,
+                ),
+            ),
             output_dir=tmp_path / "corrupt-output",
         )
 
@@ -208,7 +371,17 @@ def test_collection_rejects_corrupt_or_unexpected_slice_files(tmp_path: Path) ->
         collect_structural_slices(
             plan=plan,
             launch=launch,
-            sources=(StructuralSliceSource(202, "artifact", "success", 2, 4, source),),
+            sources=(
+                _source_record(
+                    launch=launch,
+                    run_id=202,
+                    artifact_name="artifact",
+                    conclusion="success",
+                    start=2,
+                    stop=4,
+                    directory=source,
+                ),
+            ),
             output_dir=tmp_path / "unexpected-output",
         )
 
@@ -224,6 +397,16 @@ def test_collection_cli_retains_explicit_workflow_provenance(
     plan_path.write_text(json.dumps(plan), encoding="utf-8")
     launch_path.write_text(json.dumps(launch), encoding="utf-8")
     output = tmp_path / "combined"
+    receipt = _write_receipt(
+        tmp_path / "receipt.json",
+        source=source,
+        launch=launch,
+        run_id=33174130362,
+        artifact_name="structural-checkpoints-33174130362",
+        conclusion="success",
+        start=0,
+        stop=2,
+    )
 
     result = main(
         (
@@ -238,6 +421,7 @@ def test_collection_cli_retains_explicit_workflow_provenance(
             "0",
             "2",
             str(source),
+            str(receipt),
             "--output-dir",
             str(output),
         )
@@ -259,8 +443,24 @@ def test_collection_accepts_only_a_contiguous_cancelled_prefix(tmp_path: Path) -
         plan=plan,
         launch=launch,
         sources=(
-            StructuralSliceSource(101, "initial", "success", 0, 1, initial),
-            StructuralSliceSource(404, "partial", "cancelled", 1, 4, prefix),
+            _source_record(
+                launch=launch,
+                run_id=101,
+                artifact_name="initial",
+                conclusion="success",
+                start=0,
+                stop=1,
+                directory=initial,
+            ),
+            _source_record(
+                launch=launch,
+                run_id=404,
+                artifact_name="partial",
+                conclusion="cancelled",
+                start=1,
+                stop=4,
+                directory=prefix,
+            ),
         ),
         output_dir=tmp_path / "accepted-prefix",
     )
@@ -275,9 +475,23 @@ def test_collection_accepts_only_a_contiguous_cancelled_prefix(tmp_path: Path) -
             plan=plan,
             launch=launch,
             sources=(
-                StructuralSliceSource(101, "initial", "success", 0, 1, initial),
-                StructuralSliceSource(
-                    505, "incomplete", "success", 1, 4, incomplete_success
+                _source_record(
+                    launch=launch,
+                    run_id=101,
+                    artifact_name="initial",
+                    conclusion="success",
+                    start=0,
+                    stop=1,
+                    directory=initial,
+                ),
+                _source_record(
+                    launch=launch,
+                    run_id=505,
+                    artifact_name="incomplete",
+                    conclusion="success",
+                    start=1,
+                    stop=4,
+                    directory=incomplete_success,
                 ),
             ),
             output_dir=tmp_path / "rejected-success",
@@ -297,8 +511,24 @@ def test_collection_requires_one_gap_free_prefix_from_case_zero(tmp_path: Path) 
             plan=plan,
             launch=launch,
             sources=(
-                StructuralSliceSource(101, "first", "success", 0, 2, first),
-                StructuralSliceSource(202, "after-gap", "success", 3, 4, after_gap),
+                _source_record(
+                    launch=launch,
+                    run_id=101,
+                    artifact_name="first",
+                    conclusion="success",
+                    start=0,
+                    stop=2,
+                    directory=first,
+                ),
+                _source_record(
+                    launch=launch,
+                    run_id=202,
+                    artifact_name="after-gap",
+                    conclusion="success",
+                    start=3,
+                    stop=4,
+                    directory=after_gap,
+                ),
             ),
             output_dir=tmp_path / "gapped-output",
         )

@@ -481,7 +481,7 @@ prefix:
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_collection \
   --plan /path/to/enriched-plan.json \
   --launch /path/to/enriched-launch.json \
-  --source RUN_ID ARTIFACT_NAME CONCLUSION CASE_START CASE_STOP /path/to/extracted-slice \
+  --source RUN_ID ARTIFACT_NAME CONCLUSION CASE_START CASE_STOP /path/to/extracted-slice /path/to/artifact-receipt.json \
   --output-dir /path/to/required-absent-enriched-prefix
 # expose the matching immutable legacy prefix without altering its source
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_prefix_view \
@@ -505,6 +505,11 @@ overlapping legacy NPZ array while independently validating the enriched
 sidecars. It does not compare or interpret scientific outcome magnitudes.
 Artifact receipt 1.2 also requires GitHub's recorded SHA-256 digest to equal
 the retained ZIP exactly; a readable but different archive fails intake.
+Collection accepts the retained 1.1 receipt and current 1.2 receipt only after
+matching the run, artifact, conclusion, requested range, execution identity,
+checkpoint count, and every extracted file digest. The collection manifest
+retains each receipt's schema and SHA-256 so manually repeated command-line
+metadata cannot silently substitute for the governed intake record.
 
 Only after the legacy workflow is terminal and its gap-free prefix manifest is
 validated, write the retention-only plan amendment. The command requires an

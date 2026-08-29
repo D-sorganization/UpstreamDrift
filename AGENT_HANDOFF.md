@@ -53,9 +53,11 @@ are not completion evidence.
   source-derived sentinel `f8b7c4e836ab`, and exact audit `7b00bb69fbbe` over
   20 statuses/JSON results and 180 arrays. No outcomes were summarized.
 - Replay 33279075050 executes [20,40) at exact `e86dff3ba`; do not duplicate it.
-- The collector still trusts caller-supplied run/range metadata. Before the
-  cumulative [0,40) collection, add a focused TDD receipt-binding gate that
-  accepts retained receipt schemas 1.1/1.2 and rejects source/receipt mismatch.
+- Collection schema 1.1 requires each source's retained receipt, accepts the
+  governed 1.1/1.2 receipts, verifies exact identity/count/file digests, and
+  records the receipt schema/SHA. A real 1.1 intake retained 20/20 at
+  `Campaigns/UpstreamDrift-9153-receipt-bind-validation-prefix-0020-v1`,
+  manifest SHA `55412e9342d1`.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
@@ -74,7 +76,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 77 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 80 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
