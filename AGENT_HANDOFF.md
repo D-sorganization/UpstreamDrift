@@ -16,10 +16,9 @@ are not completion evidence.
 
 ## Active Slice: UpstreamDrift #9153
 
-- Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`, expires
-  `2026-08-30T04:32:38Z`; implementation head `0315a23fd` plus this
-  handoff-only successor;
-  worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`. No PR exists.
+- The `codex` lease expired `2026-08-30T04:32:38Z`; recheck/reacquire #9153.
+  Worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`; implementation
+  head `3d947cade` plus this handoff successor. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 - Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
@@ -89,11 +88,16 @@ are not completion evidence.
   `015408e1cb99f48b140206eb994451d385146fc1a58030f968a63770af55f067`.
   Artifact SHA-256 is `447683487f1ea249858caea4e15326b3b37e9de446bf4d9a15bbdb7291218b80`.
 - Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70; cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 694, including run 33271631525 for 674:694 (issue comment 5464722724).
-- Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero;
-  authority is 694/2,304 at `Campaigns/UpstreamDrift-9153-linux-collected-prefix-0694-v1`; manifest SHA-256 `cf706961fdb8638006e055a44553a0c2ef66614df5b977a1210fbccf11dba272`.
-- Run 33273691711 executes 694:714 from head `4aacb75aea60` with one process
-  and a 90-minute timeout. It remained `in_progress` at the 2026-08-29 turnover
-  poll; do not cancel, restart, duplicate, or dispatch beyond 714.
+- Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero.
+  Run 33273691711 completed successfully at head `4aacb75aea60`; its 20 JSON/NPZ
+  pairs and session are retained at
+  `Campaigns/UpstreamDrift-9153-linux-slice-0694-0714-run-33273691711`.
+- Commit `3d947cade` adds the outcome-blind receipt: terminal run/job/upload
+  metadata, exact pairing/session identity, every file digest, and archive
+  SHA-256 `9ac59c76f5fc5e2d68a2d249e4f20c6aa746bd10b2fb51583a8cc7a827a43086`.
+- Gap-free authority is 714/2,304 at `Campaigns/UpstreamDrift-9153-linux-collected-prefix-0714-v1`;
+  manifest SHA-256 `501d9e557036377fc25e6490da21746445b4026aeb28d1f6f569d440973334d4`.
+  Do not dispatch or resume this legacy revision.
 - Its legacy minimal sidecars fail the new complete-history retention contract; preserve the prefix as diagnostic evidence, not a promotable release.
 - Commits `19f74b6d3`/`87b06433f` add the 37-history evidence contract and
   exact legacy-to-enriched replay audit. Commit `2aa0b79cb` adds runtime-audit
@@ -109,13 +113,9 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Let run 33273691711 terminate, then download and validate its 20 JSON, 20
-   NPZ, and session records without inspecting outcomes. Collect through 714,
-   freeze the legacy prefix as incomplete diagnostic evidence, and never resume
-   the legacy revision.
-2. Transparently amend the preregistration, qualify a clean immutable
-   execution/runtime pair under runtime-audit 1.4, replay the full legacy
-   prefix, and require the exact enrichment audit before continuing.
+1. Freeze the 714-case diagnostic prefix/receipt; never resume its legacy revision.
+2. Instantiate the outcome-blind v1.3 amendment; qualify a clean immutable
+   runtime-audit 1.4 pair, replay the legacy prefix, and require enrichment audit.
 3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 4. The contrast summary is implemented locally; after completion, validate the
@@ -127,7 +127,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 62 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 68 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
