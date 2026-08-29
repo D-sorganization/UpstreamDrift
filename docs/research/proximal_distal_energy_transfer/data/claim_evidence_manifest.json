@@ -4662,7 +4662,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/bounded_event_reachability.json": {
-      "sha256": "c63b15db3c814ed5cb48df332a6a34558aa15e194c40f68b838be3b53271a33b",
+      "sha256": "73b275f33e8aa7e0329d9c68c2c3d679d0fc36a02b695b62055e6cd7e995794a",
       "bytes": 49625,
       "referenced_by": [
         "PD-CLAIM-319",
@@ -4947,7 +4947,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json": {
-      "sha256": "c51a7eb2b4e12ad8ebf899491eb1ea2d3224569311c0632be5b770166ccf46cb",
+      "sha256": "35a2e9e209d2044e03422e7a431786016f3674fd451274d36e5684de3686c6c8",
       "bytes": 108676,
       "referenced_by": [
         "PD-CLAIM-321",
@@ -4965,7 +4965,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json": {
-      "sha256": "bdba13a7c3c102d66174f3144b94972a4a92862d14a1bf84366186b379ab9328",
+      "sha256": "4de5ced3274fa35af77b2fc3e9141ee7c09a4e88464c1fc33b457b8bba6b881e",
       "bytes": 19716,
       "referenced_by": [
         "PD-CLAIM-321",
@@ -4983,7 +4983,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json": {
-      "sha256": "503eb7e3fd73d23e76602c799b3c92420a3b5f145b77520b51321f2cc05da4d7",
+      "sha256": "4d382e9851740f3ff97b793f77fd60682911dab3a51ed7a2dfb08308ae821f8f",
       "bytes": 26320,
       "referenced_by": [
         "PD-CLAIM-321",
@@ -5338,7 +5338,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json": {
-      "sha256": "88625e180dff5cfcf14a1bf7d8ebf3a47bae6473f1c59420a4ea7d814d73659f",
+      "sha256": "bfc6c776f1ed193198f7f78d8f481fa5860abe119fa6163c09e621f291c7f35a",
       "bytes": 15632,
       "referenced_by": [
         "PD-CLAIM-324",
@@ -5356,7 +5356,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json": {
-      "sha256": "f3da4e8bf7e6847383c832833b55eb2d0799d04ed8f9870859b3220da26c250c",
+      "sha256": "9dc1b5c8eba3148abcde6d231aed56581418a6beb445d8b78418c0ea1e956799",
       "bytes": 3344,
       "referenced_by": [
         "PD-CLAIM-324",
@@ -6307,7 +6307,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "27a5cf174e5452ac2124faa2799563b7cb86eda86146abdc807f0fe78dba334a",
+      "sha256": "159a302366c9d784edaa87fed7132e5169a6c0bfa3d1bc40241c15d3f8861e3e",
       "bytes": 160489,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -6598,8 +6598,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/bounded_event_multiple_shooting.py": {
-      "sha256": "a77efae0b1898ce6faddf3ad1a91cc84274f9fd451cafcb8947050c313243041",
-      "bytes": 19159,
+      "sha256": "9d4c418d7b755d04cd1223a49b747e5ace20bbd75b31579ff4eeb6c90ce869c5",
+      "bytes": 22857,
       "referenced_by": [
         "PD-CLAIM-319",
         "PD-CLAIM-320"
@@ -8362,8 +8362,8 @@
       ]
     },
     "tests/research/test_bounded_event_multiple_shooting.py": {
-      "sha256": "086c7a59e844df084e95a5714d3f4a0fffe07bcca124af898cc63cb33d3d0ffb",
-      "bytes": 8537,
+      "sha256": "8b5cea75316ef09155772b5fe0b054ad9ba76748e91e9669c504a62ffb138816",
+      "bytes": 11943,
       "referenced_by": [
         "PD-CLAIM-319",
         "PD-CLAIM-320"
