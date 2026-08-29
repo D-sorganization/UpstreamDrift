@@ -18,7 +18,12 @@ Exit point                   The first upward crossing ``depth = 0`` after entry
 Divot length                 ``s_exit - s_entry`` [m].
 Divot section area           ``integral of depth ds`` between entry and exit [m^2].
 Divot volume                 ``section area * width`` [m^3] -- a prismatic model.
-Divot mass                   ``volume * sand bulk density`` [kg].
+Divot mass                   ``volume * sand bulk density`` [kg]. The sand under
+                             the sole path, and **not** the sand the strike
+                             accelerated -- see the section below.
+Accelerated sand mass        The mass that shared the delivered momentum [kg],
+                             reported as an interval by
+                             :class:`AcceleratedSandMass`.
 Entry descent speed          ``-v_z`` of the sole at the first submerged sample;
                              positive downward [m/s].
 Exit climb speed             ``+v_z`` of the sole at the last submerged sample;
@@ -113,8 +118,39 @@ head's vertical momentum change must equal the sum of the sand impulse, the
 gravity impulse and whatever the shaft and hands supply. All four are reported,
 so the residual is visible rather than absorbed -- and they are reported over
 the same sampled window the two speeds are read from, so the restitution and
-the balance describe one strike. The prismatic divot model and the flat-surface
-scene are the two approximations here, and both are stated.
+the balance describe one strike. The flat-surface scene is the remaining
+approximation here, and it is stated.
+
+**Two masses, and why (issue #8659)**
+--------------------------------------
+
+The prismatic divot mass was an honest approximation for as long as it was a
+*reported metric*. Issue #8657 made it a **denominator** -- ball launch became
+the delivered impulse divided by it -- and the arithmetic immediately produced
+something impossible. At the workbench's nominal greenside shot the F0 solver
+integrates 2.917 N.s out of a head arriving at 25.0 m/s, and the prism says
+63.7 g of sand carried it: a mean ejecta speed of **45.8 m/s**. Sand cannot
+leave faster than the thing that threw it.
+
+The impulse is an integral of a force computed element by element. The prism
+is a constant-width channel under the sole path, and a real splash throws
+material the sole never passed over -- the bow wave ahead of the leading edge,
+the heave above the original surface, and the divot's own sloping walls. So
+the mass was the wrong quantity, and this module now reports both:
+
+* :attr:`DivotMetrics.mass_kg` is the prism, unchanged, with the same
+  provenance and the same warning it always carried; and
+* :attr:`DivotMetrics.accelerated_mass` is the mass that shared the delivered
+  momentum, as an **interval** -- because the in-plane part of the correction
+  was measured against the F1 MPM tier and the out-of-plane part cannot be,
+  plane strain having no out-of-plane extent.
+
+Nothing here is a clamp. The ejecta speed is not capped; the mass is bigger
+because a different, better-founded mass is being reported. And nothing here
+is a validation: two uncalibrated tiers agreeing is two uncalibrated tiers
+agreeing, and :data:`ACCELERATED_MASS_CONSISTENCY_REASON` says so in the words
+a verdict carries. What the comparison did do is falsify -- the prism was
+inadmissible against the head's own entry speed, and the interval is not.
 """
 
 from __future__ import annotations
@@ -130,14 +166,18 @@ from .enums import DigSkidVerdict
 from .trace import STANDARD_GRAVITY_MPS2, HeadModel, StrikeScene, StrikeTrace
 
 __all__ = [
+    "ACCELERATED_MASS_CONSISTENCY_REASON",
+    "ACCELERATED_MASS_LATERAL_REASON",
     "DEFAULT_DIG_DESCENT_RETURN",
     "DEFAULT_SKID_DESCENT_RETURN",
     "DIG_SKID_BOUNCE_ORDERING_REASON",
     "DIG_SKID_COARSE_WINDOW_REASON",
     "DIG_SKID_UNCALIBRATED_REASON",
+    "F1_ENTRAINMENT_FACTOR_BOUNDS",
     "MIN_RESOLVED_SUBMERGED_SAMPLES",
     "MIN_SUBMERGED_SAMPLES",
     "STANDARD_GRAVITY_MPS2",
+    "AcceleratedSandMass",
     "DigSkidCalibration",
     "DigSkidResult",
     "DivotMetrics",
@@ -203,6 +243,78 @@ DIG_SKID_COARSE_WINDOW_REASON = (
     "resolved, so the ratio carries the sample spacing as well as the strike"
 )
 """Template for the diagnostic that fires on a barely-resolved divot."""
+
+F1_ENTRAINMENT_FACTOR_BOUNDS: tuple[float, float] = (2.84, 3.90)
+"""How much more sand is moving than the swept prism accounts for, in plane.
+
+Read off the **F1 plane-strain MPM tier**, not off a bunker. Ten whole-shot F1
+marches (:func:`bunkershot3d.solvers.mpm.wholeshot.simulate_f1_shot`,
+``dx = 4 mm``, 12 ms, firm bed 80 mm deep) were run at the workbench's own
+designs and deliveries -- attack -4/-8/-12 deg, marketed bounce 8/20 deg, sole
+16/20/24 mm, firm/fluffy/plugged beds, 20 and 25 m/s -- and each march was
+reduced **twice from its own record**:
+
+* by the prismatic rule :func:`divot_metrics` applies -- the same
+  ``integral of depth ds`` along its own sole path, at the same declared width
+  and bulk density; and
+* by asking the particles what mass was actually in motion.
+
+The second reading is momentum-and-energy consistent and threshold-free: a bed
+carrying momentum ``P`` and kinetic energy ``T`` has exactly one mass
+``P^2 / (2 T)`` that would carry both while moving as a single lump, and by
+Cauchy-Schwarz that mass is a **lower bound** on the mass with any motion at
+all. Counting particles above a speed threshold instead gives 8-12x the prism
+rather than 3x, so this choice is the conservative one by a wide margin.
+
+Both readings come from one march, so the constitutive difference between the
+tiers divides out and what is left is what the prism misses: the bow wave
+ahead of the leading edge and the heave above the original surface.
+
+**Where the ratio is evaluated matters, and it is stated rather than chosen
+quietly.** F1's prism keeps growing along the sole path while the moving mass
+saturates, so the ratio *falls* through a march -- above 10 early, near 2 at
+the end of a truncated 12 ms window. Each ratio above is therefore taken at
+**matched prism**: the instant F1's own accumulated prism equals the prism F0
+reported for the same design, so both tiers are asked about the same amount of
+swept sand. Over the nine designs whose marches reached that point the ratio
+runs 2.845 (plugged bed) to 3.898 (16 mm sole), geometric mean 3.30 -- and the
+bounds above are that min and max. The one design that did not reach matched
+prism in 12 ms (-4 deg of attack, whose divot is 308 mm long) is excluded
+rather than extrapolated.
+
+The spread is real and it is mostly one effect: the designs with the smallest
+prisms sit higher on the declining ratio curve. Holding that aside, the sand
+condition moves it (firm 3.54, fluffy 2.92, plugged 2.85) and the delivery
+speed barely does at all (3.54 at 25 m/s against 3.51 at 20 m/s).
+
+Plane strain has no out-of-plane extent, so this factor is **blind** to the
+divot's sloping walls; :class:`AcceleratedSandMass` carries those separately,
+and that blindness is why the correction is an interval."""
+
+ACCELERATED_MASS_CONSISTENCY_REASON = (
+    "the accelerated sand mass is a **consistency** correction between two "
+    "uncalibrated models and not a measurement. Its in-plane factor of "
+    f"{F1_ENTRAINMENT_FACTOR_BOUNDS[0]:.3g}-"
+    f"{F1_ENTRAINMENT_FACTOR_BOUNDS[1]:.3g} was read off the "
+    "F1 MPM tier, which is BEYOND_VALIDATION, whose published-speed ceiling is "
+    "1.44 m/s against a 25 m/s greenside delivery and whose NASA-STD-7009B "
+    "validation is 0 of 4; no ejecta mass has ever been measured on a real "
+    "bunker shot (issue #8616). Two uncalibrated tiers agreeing is two "
+    "uncalibrated tiers agreeing. What the comparison can do is falsify, and "
+    "it did: the prismatic mass was inadmissible against the head's own entry "
+    "speed and the corrected interval is not (issue #8659)"
+)
+"""Why an accelerated mass is never quotable as a measured ejecta mass."""
+
+ACCELERATED_MASS_LATERAL_REASON = (
+    "the upper edge of the accelerated mass widens the divot's walls to the "
+    "bed's own friction angle, on the argument that a trench cut in a "
+    "cohesionless sand cannot stand steeper than the material it is cut in. "
+    "The angle is the bed's, so nothing new is fitted, but the shape is a "
+    "model: F1 is plane strain and cannot see out of the plane, so no tier in "
+    "this package has measured what the walls actually do (issue #8659)"
+)
+"""Why the out-of-plane half of the interval is modelled rather than measured."""
 
 
 @dataclass(frozen=True)
@@ -399,6 +511,172 @@ def _interval_from_profile(
     )
 
 
+@dataclass(frozen=True, slots=True)
+class AcceleratedSandMass:
+    """The sand one strike set in motion, as an **interval** and not a point.
+
+    Why an interval. The swept prism is not the mass that shared the delivered
+    momentum, and issue #8659 is the arithmetic that proves it: at the nominal
+    greenside shot the solver's 2.917 N.s over the prism's 63.7 g implies sand
+    leaving at 45.8 m/s from a 25.0 m/s head. Something has to be bigger, and
+    it is the mass.
+
+    Two separate things are missing from the prism and only one of them has
+    been looked at by a solver. **In plane**, the head throws a bow wave ahead
+    of its leading edge and heaves material above the original surface, and
+    the F1 MPM tier resolves that -- see
+    :data:`F1_ENTRAINMENT_FACTOR_BOUNDS` for what it measured and under what
+    licence. **Out of plane**, the divot's walls slope away from the sole and
+    a plane-strain tier cannot see them at all, so that half is a stated model
+    on the bed's own friction angle rather than a measurement.
+
+    The interval is built so that each edge says which of those it rests on:
+
+    * :attr:`lower_kg` is the prism scaled by the *smallest* in-plane factor
+      the F1 sweep produced and no lateral spread whatsoever -- the
+      plane-strain reading, taken literally.
+    * :attr:`upper_kg` is the prism scaled by the largest in-plane factor and
+      by the lateral widening a wall at the bed's friction angle implies.
+    * :attr:`central_kg` is their geometric mean, because the two edges are
+      multiplicative factors rather than additive offsets. A convention, and
+      the only number here that is neither measured nor derived.
+
+    None of this is calibrated against a bunker; nothing in this package is.
+    :data:`ACCELERATED_MASS_CONSISTENCY_REASON` says so in the words a
+    verdict carries.
+
+    Attributes:
+        prismatic_kg: The swept-prism mass this was formed from [kg], which
+            is :attr:`DivotMetrics.mass_kg` unchanged.
+        entrainment_lower: Smallest in-plane factor of the F1 sweep.
+        entrainment_upper: Largest in-plane factor of the F1 sweep.
+        lateral_factor: Out-of-plane widening, ``>= 1``, from the wall model.
+        wall_angle_deg: The friction angle the walls were laid back at.
+    """
+
+    prismatic_kg: float
+    entrainment_lower: float
+    entrainment_upper: float
+    lateral_factor: float
+    wall_angle_deg: float
+
+    def __post_init__(self) -> None:
+        """Refuse an interval that is not one.
+
+        Raises:
+            ValueError: If the prism is not positive, if either factor is not
+                at least one, if the factors are out of order, or if the
+                lateral widening is below one. A plain ``raise`` and not a
+                contract: ball launch divides by the number this object
+                produces, and ``python -O`` strips assertions.
+        """
+        if not np.isfinite(self.prismatic_kg) or self.prismatic_kg <= 0.0:
+            raise ValueError(
+                "the prismatic divot mass must be positive and finite, got "
+                f"{self.prismatic_kg!r}"
+            )
+        for name in ("entrainment_lower", "entrainment_upper", "lateral_factor"):
+            value = float(getattr(self, name))
+            if not np.isfinite(value) or value < 1.0:
+                raise ValueError(
+                    f"{name} must be a finite factor of at least 1 -- the sand "
+                    "outside the swept prism can only add mass, never remove "
+                    f"it -- got {value!r}"
+                )
+        if self.entrainment_upper < self.entrainment_lower:
+            raise ValueError(
+                "the entrainment bounds are out of order: "
+                f"{self.entrainment_lower!r} above {self.entrainment_upper!r}"
+            )
+        if not np.isfinite(self.wall_angle_deg) or not 0.0 < self.wall_angle_deg < 90.0:
+            raise ValueError(
+                "the wall angle must lie in (0, 90) degrees, got "
+                f"{self.wall_angle_deg!r}"
+            )
+
+    @property
+    def lower_kg(self) -> float:
+        """Smallest admissible accelerated mass [kg]: F1 in plane, no walls."""
+        return self.prismatic_kg * self.entrainment_lower
+
+    @property
+    def upper_kg(self) -> float:
+        """Largest [kg]: the F1 sweep's widest factor, walls laid back."""
+        return self.prismatic_kg * self.entrainment_upper * self.lateral_factor
+
+    @property
+    def central_kg(self) -> float:
+        """Geometric mean of the two edges [kg]. A convention, not a value."""
+        return float(np.sqrt(self.lower_kg * self.upper_kg))
+
+    @property
+    def bounds_kg(self) -> tuple[float, float]:
+        """The interval, ``(lower, upper)`` [kg]."""
+        return (self.lower_kg, self.upper_kg)
+
+    def summary(self) -> str:
+        """A line fit for a report, carrying the interval and not the point."""
+        return (
+            f"{self.central_kg * 1e3:.4g} g "
+            f"[{self.lower_kg * 1e3:.4g}-{self.upper_kg * 1e3:.4g} g], "
+            f"{self.central_kg / self.prismatic_kg:.3g}x the swept prism "
+            f"({self.prismatic_kg * 1e3:.4g} g)"
+        )
+
+
+def lateral_spread_factor(
+    section_area_m2: float,
+    depth_squared_integral_m3: float,
+    *,
+    width_m: float,
+    wall_angle_deg: float,
+) -> float:
+    """How much the divot's sloping walls widen the swept prism.
+
+    A trench of bottom width ``w`` and depth ``d(s)`` whose walls lie back at
+    the bed's friction angle ``phi`` measured from the horizontal has section
+    ``w d + d^2 cot(phi)``, so the whole volume is
+    ``w * integral d ds + cot(phi) * integral d^2 ds`` and the widening is the
+    ratio of that to the prism. The argument for the angle is that a trench
+    cut in a cohesionless sand cannot stand steeper than the material it is
+    cut in; the argument for the *shape* is only that it is the simplest one
+    that has the right limits, and :data:`ACCELERATED_MASS_LATERAL_REASON`
+    says so.
+
+    Args:
+        section_area_m2: ``integral of depth ds`` over the divot [m^2].
+        depth_squared_integral_m3: ``integral of depth^2 ds`` over the same
+            window [m^3].
+        width_m: Sole width in contact [m].
+        wall_angle_deg: Friction angle of the bed [deg], from the sand state.
+
+    Returns:
+        The widening factor, at least 1.
+
+    Raises:
+        ValueError: If any argument is out of range. A ``raise`` for the same
+            reason :class:`AcceleratedSandMass` uses one.
+    """
+    if not np.isfinite(width_m) or width_m <= 0.0:
+        raise ValueError(f"width_m must be positive and finite, got {width_m}")
+    if not np.isfinite(wall_angle_deg) or not 0.0 < wall_angle_deg < 90.0:
+        raise ValueError(
+            f"wall_angle_deg must lie in (0, 90) degrees, got {wall_angle_deg}"
+        )
+    for name, value in (
+        ("section_area_m2", section_area_m2),
+        ("depth_squared_integral_m3", depth_squared_integral_m3),
+    ):
+        if not np.isfinite(value) or value < 0.0:
+            raise ValueError(f"{name} must be finite and non-negative, got {value}")
+    if section_area_m2 <= 0.0:
+        return 1.0
+    cotangent = 1.0 / np.tan(np.radians(float(wall_angle_deg)))
+    return 1.0 + float(cotangent) * float(depth_squared_integral_m3) / (
+        float(width_m) * float(section_area_m2)
+    )
+
+
 @dataclass(frozen=True)
 class DivotMetrics:
     """Divot geometry, measured from the sole path.
@@ -415,9 +693,18 @@ class DivotMetrics:
         exit_distance_past_ball_m: Positive when the sole exits past the ball.
         length_m: Along-track distance from entry to exit.
         section_area_m2: ``integral of depth ds`` over the divot.
+        depth_squared_integral_m3: ``integral of depth^2 ds`` over the same
+            window. Carried because the divot's *walls* scale with it, not
+            with the section: see :func:`lateral_spread_factor`.
         width_m: Effective cutting width used for the prismatic volume.
         volume_m3: ``section_area_m2 * width_m``.
-        mass_kg: ``volume_m3 * bulk_density_kg_m3``.
+        mass_kg: ``volume_m3 * bulk_density_kg_m3`` -- the **swept prism**,
+            unchanged and still the sand directly under the sole path. It is
+            reported for what it is and is no longer what ball launch divides
+            by; :attr:`accelerated_mass` is (issue #8659).
+        accelerated_mass: The mass that shared the delivered momentum, as an
+            interval. ``None`` only when the caller declined to state a bed
+            friction angle, which no shipped path does.
         bulk_density_kg_m3: Sand bulk density used for the mass.
         submerged_duration_s: Time between the entry and exit crossings.
     """
@@ -431,11 +718,13 @@ class DivotMetrics:
     exit_distance_past_ball_m: float
     length_m: float
     section_area_m2: float
+    depth_squared_integral_m3: float
     width_m: float
     volume_m3: float
     mass_kg: float
     bulk_density_kg_m3: float
     submerged_duration_s: float
+    accelerated_mass: AcceleratedSandMass
 
 
 def divot_metrics(
@@ -445,13 +734,24 @@ def divot_metrics(
     *,
     width_m: float,
     bulk_density_kg_m3: float,
+    friction_angle_deg: float,
 ) -> DivotMetrics:
-    """Measure the divot the strike cuts.
+    """Measure the divot the strike cuts, and the mass the strike accelerated.
 
-    The volume model is prismatic: a constant-width channel whose depth follows
-    the sole. It is an approximation -- a real divot has sloped walls and the
-    ejected sand does not all come from below the sole path -- and it is stated
-    here rather than buried, because divot mass feeds the momentum budget.
+    Two masses come back and they are different quantities. The **prismatic**
+    one, :attr:`DivotMetrics.mass_kg`, is unchanged: a constant-width channel
+    whose depth follows the sole, counting only the sand directly beneath the
+    sole path. That was always an approximation and was always stated as one.
+
+    It stopped being an adequate approximation when it became a *denominator*.
+    Issue #8657 made ball launch divide the delivered impulse by it, and issue
+    #8659 is the contradiction that produced: 2.917 N.s over 63.7 g is sand
+    leaving at 45.8 m/s from a head that arrived at 25.0 m/s. The prism does
+    not count the bow wave, the heave, or the divot's sloping walls, so
+    :attr:`DivotMetrics.accelerated_mass` is what ball launch divides by now,
+    and it is an interval rather than a point. See
+    :class:`AcceleratedSandMass` for how the interval is built and
+    :data:`ACCELERATED_MASS_CONSISTENCY_REASON` for what may be said about it.
 
     Args:
         trace: Strike trace.
@@ -461,21 +761,32 @@ def divot_metrics(
             contact. Must be positive.
         bulk_density_kg_m3: Sand bulk density [kg/m^3]. The measured Covia
             Signature 500 bunker sand is 1550 kg/m^3 (research addendum).
+        friction_angle_deg: Internal friction angle of the bed [deg], from
+            :attr:`bunkershot3d.sand.SandState.friction_angle_deg`. Required
+            rather than defaulted: it is the angle the divot's walls are laid
+            back at, so a default would be an invented divot shape, and the
+            bed already knows the number.
 
     Returns:
         The divot metrics.
 
     Raises:
-        ValueError: If ``width_m`` or ``bulk_density_kg_m3`` is not positive, if
-            the sole never enters or never leaves the sand, or if the head does
-            not travel forward monotonically through the strike (the section
-            integral would double back on itself).
+        ValueError: If ``width_m``, ``bulk_density_kg_m3`` or
+            ``friction_angle_deg`` is out of range, if the sole never enters or
+            never leaves the sand, or if the head does not travel forward
+            monotonically through the strike (the section integral would double
+            back on itself).
     """
     if not np.isfinite(width_m) or width_m <= 0.0:
         raise ValueError(f"width_m must be positive and finite, got {width_m}")
     if not np.isfinite(bulk_density_kg_m3) or bulk_density_kg_m3 <= 0.0:
         raise ValueError(
             f"bulk_density_kg_m3 must be positive and finite, got {bulk_density_kg_m3}"
+        )
+    if not np.isfinite(friction_angle_deg) or not 0.0 < friction_angle_deg < 90.0:
+        raise ValueError(
+            "friction_angle_deg must lie in (0, 90) degrees, got "
+            f"{friction_angle_deg}"
         )
     profile = sole_depth_profile(trace, head, scene)
     interval = _interval_from_profile(profile, trace, scene)
@@ -498,8 +809,22 @@ def divot_metrics(
         "divot section area must be non-negative -- depth is positive downward",
         value=section_area_m2,
     )
+    depth_squared_integral_m3 = float(np.trapezoid(np.square(depth), travel))
     peak = int(np.argmax(profile.depth_m[window])) + interval.entry_index
     volume_m3 = section_area_m2 * width_m
+    lower, upper = F1_ENTRAINMENT_FACTOR_BOUNDS
+    accelerated = AcceleratedSandMass(
+        prismatic_kg=volume_m3 * float(bulk_density_kg_m3),
+        entrainment_lower=lower,
+        entrainment_upper=upper,
+        lateral_factor=lateral_spread_factor(
+            section_area_m2,
+            depth_squared_integral_m3,
+            width_m=float(width_m),
+            wall_angle_deg=float(friction_angle_deg),
+        ),
+        wall_angle_deg=float(friction_angle_deg),
+    )
     return DivotMetrics(
         entry_point_m=interval.entry_point_m,
         entry_distance_behind_ball_m=-interval.entry_travel_m,
@@ -510,11 +835,13 @@ def divot_metrics(
         exit_distance_past_ball_m=interval.exit_travel_m,
         length_m=interval.exit_travel_m - interval.entry_travel_m,
         section_area_m2=section_area_m2,
+        depth_squared_integral_m3=depth_squared_integral_m3,
         width_m=float(width_m),
         volume_m3=volume_m3,
         mass_kg=volume_m3 * float(bulk_density_kg_m3),
         bulk_density_kg_m3=float(bulk_density_kg_m3),
         submerged_duration_s=interval.duration_s,
+        accelerated_mass=accelerated,
     )
 
 

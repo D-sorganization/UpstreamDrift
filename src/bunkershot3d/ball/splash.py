@@ -101,9 +101,10 @@ __all__ = [
     "BED_PACKING_DEPENDENCE_REASON",
     "BED_PACKING_TRANSFER_SENSITIVITY",
     "DEFAULT_MOMENTUM_TRANSFER",
+    "INADMISSIBLE_EJECTA_REFUSAL",
+    "MASS_INTERVAL_FLOOR_REASON",
     "SAND_BALL_FRICTION",
     "SPIN_LEVER_ARM_FRACTION",
-    "SUPERSONIC_EJECTA_REASON",
     "BallLaunchResult",
     "ContactType",
     "MomentumTransfer",
@@ -186,19 +187,34 @@ BALL_LAUNCH_UNCALIBRATED_REASON = (
 )
 """Why a carry number is beyond validation however good the shot behind it was."""
 
-SUPERSONIC_EJECTA_REASON = (
-    "the derived mean ejecta speed of {ejecta:.3g} m/s exceeds the head's "
-    "entry speed of {entry:.3g} m/s, which sand thrown by that head cannot "
-    "do. The prismatic divot model counts only the sand under the sole path "
-    "and a real divot has sloped walls, so the mass that shared the delivered "
-    "momentum is under-counted here and ball speed is over-predicted. The "
-    "direction of the bias is known; its size is not."
+INADMISSIBLE_EJECTA_REFUSAL = (
+    "the sand this strike moved would have to leave at {ejecta:.4g} m/s to "
+    "carry the {impulse:.4g} N.s the solver delivered, from a head that "
+    "arrived at {entry:.4g} m/s. Sand cannot leave faster than the thing that "
+    "threw it, so this pair of numbers does not describe a strike and no ball "
+    "launch is derivable from it. The mass is the suspect quantity: see "
+    "bunkershot3d.metrics.divot.AcceleratedSandMass, which is what a shipped "
+    "caller passes here (issue #8659)"
 )
-"""Template for the diagnostic that fires when the divot mass under-counts.
+"""Message of the refusal that replaces #8657's supersonic-ejecta diagnostic.
 
-Not a clamp. Capping the ejecta speed would make ball speed stop responding to
-the delivered impulse in exactly the regime issue #8657 exists to fix, so the
-inconsistency is reported instead of hidden."""
+A refusal and **not** a clamp. Capping the ejecta speed would make ball speed
+stop responding to the delivered impulse in exactly the regime issue #8657
+exists to fix; refusing says the inputs are inconsistent without inventing a
+consistent pair, which is the one thing a caller can act on."""
+
+MASS_INTERVAL_FLOOR_REASON = (
+    "the momentum budget excludes the lower part of the accelerated-mass "
+    "interval on its own: the delivered {impulse:.4g} N.s over the interval's "
+    "lower edge of {lower:.4g} kg needs {implied:.4g} m/s of ejecta against a "
+    "{entry:.4g} m/s head, so the mass is at least {floor:.4g} kg however the "
+    "interval was formed. The number reported here is not clamped to that "
+    "floor -- it is the interval's own central value, and the floor is quoted "
+    "so the asymmetry of the remaining uncertainty is visible (issue #8659)"
+)
+"""Template for the diagnostic that fires when only the band's lower edge is
+inadmissible. This is information about the *width* of the interval, not a
+statement that the reported mass is wrong, so it is reported and not raised."""
 
 
 class ContactType(enum.Enum):
@@ -400,7 +416,18 @@ class SandDelivery:
         impulse_n_s: Magnitude of the sand impulse exchanged with the head
             [N.s]. By Newton's third law this is also the momentum the head
             delivered to the bed.
-        displaced_mass_kg: Divot mass [kg] -- the sand actually moved.
+        displaced_mass_kg: The mass of sand the strike **accelerated** [kg],
+            which is not the swept divot prism. Since issue #8659 a shipped
+            caller passes
+            :attr:`bunkershot3d.metrics.divot.AcceleratedSandMass.central_kg`;
+            the prism counted only the sand under the sole path and dividing
+            the delivered impulse by it implied ejecta leaving faster than the
+            head that threw it.
+        displaced_mass_bounds_kg: ``(lower, upper)`` of the interval
+            ``displaced_mass_kg`` was drawn from [kg], or ``None`` when the
+            caller has a point estimate and nothing else. Carried rather than
+            recomputed so a launch can report how wide the mass it divided by
+            actually was.
         contact_duration_s: Time the sole spent engaged with the bed [s].
         entry_speed_m_s: Head speed at the first sample [m/s].
         exit_speed_m_s: Head speed at the last sample [m/s].
@@ -421,14 +448,18 @@ class SandDelivery:
     exit_speed_m_s: float
     bed_relative_density: float
     verdict: ValidityVerdict
+    displaced_mass_bounds_kg: tuple[float, float] | None = None
 
     def __post_init__(self) -> None:
-        """Refuse a strike that was not measured.
+        """Refuse a strike that was not measured, or that cannot have happened.
 
         Raises:
-            ValueError: If any measurement is unusable, or the verdict is
-                missing. A launch computed from a defaulted impulse would be
-                exactly the invented number this rewrite removed.
+            ValueError: If any measurement is unusable, if the verdict is
+                missing, or if the impulse and the mass together imply sand
+                leaving faster than the head arrived. A launch computed from a
+                defaulted impulse would be exactly the invented number this
+                rewrite removed; a launch computed from an inadmissible pair
+                would be the contradiction of issue #8659, shipped again.
         """
         if not isinstance(self.verdict, ValidityVerdict):
             raise ValueError(
@@ -458,11 +489,90 @@ class SandDelivery:
                 "a finite fraction in [0, 1] -- the lie sets how much of the "
                 "delivered momentum reaches the ball (issue #8704)",
             )
+        self._require_bounds()
+        self._require_admissible_ejecta()
+
+    def _require_bounds(self) -> None:
+        """Refuse an interval that does not bracket the value drawn from it.
+
+        Raises:
+            ValueError: If the bounds are not an ordered, finite, positive
+                pair containing :attr:`displaced_mass_kg`.
+        """
+        if self.displaced_mass_bounds_kg is None:
+            return
+        try:
+            lower, upper = (float(value) for value in self.displaced_mass_bounds_kg)
+        except (TypeError, ValueError) as error:
+            raise ValueError(
+                "displaced_mass_bounds_kg must be a (lower, upper) pair, got "
+                f"{self.displaced_mass_bounds_kg!r}"
+            ) from error
+        if not math.isfinite(lower) or not math.isfinite(upper) or lower <= 0.0:
+            _refuse(
+                "displaced_mass_bounds_kg",
+                self.displaced_mass_bounds_kg,
+                "a finite pair of positive masses",
+            )
+        if not lower <= self.displaced_mass_kg <= upper:
+            raise ValueError(
+                f"the reported mass {self.displaced_mass_kg:.6g} kg lies outside "
+                f"the interval [{lower:.6g}, {upper:.6g}] kg it is said to have "
+                "come from; a point estimate outside its own band is not a "
+                "narrower claim, it is a different one"
+            )
+
+    def _require_admissible_ejecta(self) -> None:
+        """Refuse an impulse and a mass that cannot both describe one strike.
+
+        The one relation in this model that is not a convention: momentum is
+        carried by mass moving, the sand was set moving by the head, and
+        nothing the head threw can outrun it. Both quantities meet here for
+        the first time -- the impulse from the solver, the mass from the
+        metrics layer -- so this is the only place the pair can be checked
+        before something divides one by the other.
+
+        A plain ``raise`` and never an ``assert``: ``python -O`` strips
+        assertions and ``DBC_LEVEL=off`` disables contracts, and a physical
+        impossibility that evaporates under an optimisation flag is worse than
+        no check at all. Not a clamp either -- see
+        :data:`INADMISSIBLE_EJECTA_REFUSAL`.
+
+        Raises:
+            ValueError: If the implied mean ejecta speed exceeds the head's
+                entry speed.
+        """
+        entry = float(self.entry_speed_m_s)
+        if entry <= 0.0 or self.impulse_n_s <= 0.0:
+            return
+        ejecta = self.mean_ejecta_speed_m_s
+        if ejecta > entry:
+            raise ValueError(
+                INADMISSIBLE_EJECTA_REFUSAL.format(
+                    ejecta=ejecta, impulse=self.impulse_n_s, entry=entry
+                )
+            )
 
     @property
     def mean_ejecta_speed_m_s(self) -> float:
-        """``J / m_divot``: the mean speed of the sand that was moved [m/s]."""
+        """``J / m``: the mean speed of the sand that was accelerated [m/s].
+
+        Never above :attr:`entry_speed_m_s` for a delivery that could be
+        built: :meth:`_require_admissible_ejecta` refuses the pair otherwise.
+        """
         return self.impulse_n_s / self.displaced_mass_kg
+
+    @property
+    def admissible_mass_floor_kg(self) -> float:
+        """Smallest mass the delivered impulse can be carried by [kg].
+
+        ``J / v_entry``. Zero when there is no entry speed to divide by, which
+        is the same condition :meth:`_require_admissible_ejecta` declines to
+        judge.
+        """
+        if self.entry_speed_m_s <= 0.0:
+            return 0.0
+        return self.impulse_n_s / float(self.entry_speed_m_s)
 
 
 @dataclass(frozen=True, slots=True)
@@ -632,22 +742,35 @@ def compute_splash_impulse(
 def _launch_reasons(delivery: SandDelivery) -> tuple[str, ...]:
     """Return the findings the launch model raises about one strike.
 
+    The supersonic-ejecta diagnostic issue #8657 added is gone from here,
+    because the condition it reported is now refused outright in
+    :meth:`SandDelivery._require_admissible_ejecta` rather than carried on a
+    result. What is left is the *interval* diagnostic: a delivery whose mass
+    band reaches below the momentum floor is still admissible at the value it
+    reports, but half its band is not, and that asymmetry is worth saying.
+
     Args:
         delivery: The measured strike.
 
     Returns:
-        The uncalibrated-transfer statement, plus the under-counted-divot
-        diagnostic when the two measured quantities disagree with each other.
+        The uncalibrated-transfer statements, plus the interval-floor
+        diagnostic when the mass band's lower edge is inadmissible.
     """
-    ejecta = delivery.mean_ejecta_speed_m_s
-    entry = delivery.entry_speed_m_s
-    if entry > 0.0 and ejecta > entry:
-        return (
-            BALL_LAUNCH_UNCALIBRATED_REASON,
-            BED_PACKING_DEPENDENCE_REASON,
-            SUPERSONIC_EJECTA_REASON.format(ejecta=ejecta, entry=entry),
+    reasons = [BALL_LAUNCH_UNCALIBRATED_REASON, BED_PACKING_DEPENDENCE_REASON]
+    bounds = delivery.displaced_mass_bounds_kg
+    floor = delivery.admissible_mass_floor_kg
+    if bounds is not None and floor > 0.0 and float(bounds[0]) < floor:
+        lower = float(bounds[0])
+        reasons.append(
+            MASS_INTERVAL_FLOOR_REASON.format(
+                impulse=delivery.impulse_n_s,
+                lower=lower,
+                implied=delivery.impulse_n_s / lower,
+                entry=delivery.entry_speed_m_s,
+                floor=floor,
+            )
         )
-    return (BALL_LAUNCH_UNCALIBRATED_REASON, BED_PACKING_DEPENDENCE_REASON)
+    return tuple(reasons)
 
 
 def launch_verdict(delivery: SandDelivery) -> ValidityVerdict:

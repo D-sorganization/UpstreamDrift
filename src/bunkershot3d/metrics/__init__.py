@@ -17,6 +17,7 @@ Entry point / distance behind ball    m                     :mod:`.divot`
 Maximum divot depth                   m                     :mod:`.divot`
 Exit point, divot length              m                     :mod:`.divot`
 Divot section area / volume / mass    m^2 / m^3 / kg        :mod:`.divot`
+Accelerated sand mass interval        kg                    :mod:`.divot`
 Dig-vs-skid descent return, verdict   dimensionless         :mod:`.divot`
 Vertical impulse balance              N.s                   :mod:`.divot`
 Club KE loss, work on sand, ball      J, and fractions      :mod:`.energy`
@@ -53,13 +54,17 @@ from .bounce_map import (
     bounce_utilisation,
 )
 from .divot import (
+    ACCELERATED_MASS_CONSISTENCY_REASON,
+    ACCELERATED_MASS_LATERAL_REASON,
     DEFAULT_DIG_DESCENT_RETURN,
     DEFAULT_SKID_DESCENT_RETURN,
     DIG_SKID_BOUNCE_ORDERING_REASON,
     DIG_SKID_COARSE_WINDOW_REASON,
     DIG_SKID_UNCALIBRATED_REASON,
+    F1_ENTRAINMENT_FACTOR_BOUNDS,
     MIN_RESOLVED_SUBMERGED_SAMPLES,
     MIN_SUBMERGED_SAMPLES,
+    AcceleratedSandMass,
     DigSkidCalibration,
     DigSkidResult,
     DivotMetrics,
@@ -67,6 +72,7 @@ from .divot import (
     StrikeInterval,
     dig_vs_skid,
     divot_metrics,
+    lateral_spread_factor,
     sole_depth_profile,
     submerged_interval,
 )
@@ -114,7 +120,10 @@ __all__ = [
     "DEFAULT_SKID_DESCENT_RETURN",
     "DIG_SKID_BOUNCE_ORDERING_REASON",
     "DIG_SKID_COARSE_WINDOW_REASON",
+    "ACCELERATED_MASS_CONSISTENCY_REASON",
+    "ACCELERATED_MASS_LATERAL_REASON",
     "DIG_SKID_UNCALIBRATED_REASON",
+    "F1_ENTRAINMENT_FACTOR_BOUNDS",
     "MIN_RESOLVED_SUBMERGED_SAMPLES",
     "MIN_SUBMERGED_SAMPLES",
     "STANDARD_GRAVITY_MPS2",
@@ -126,6 +135,7 @@ __all__ = [
     "DigSkidCalibration",
     "DigSkidResult",
     "DigSkidVerdict",
+    "AcceleratedSandMass",
     "DivotMetrics",
     "EnergyPartition",
     "FactorSensitivity",
@@ -148,6 +158,7 @@ __all__ = [
     "centre_of_mass_moment_Nm",
     "dig_vs_skid",
     "divot_metrics",
+    "lateral_spread_factor",
     "energy_partition",
     "forgiveness_report",
     "forgiveness_sensitivity",

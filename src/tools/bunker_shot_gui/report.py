@@ -201,7 +201,8 @@ def _divot_lines(outcome: ShotOutcome) -> tuple[str, ...]:
         ),
         _line("Maximum depth", f"{divot.max_depth_m * 1e3:.4g} mm"),
         _line("Length", f"{divot.length_m * 1e3:.4g} mm"),
-        _line("Sand moved", f"{divot.mass_kg:.4g} kg"),
+        _line("Sand under the sole", f"{divot.mass_kg:.4g} kg"),
+        _line("Sand accelerated", divot.accelerated_mass.summary()),
         "",
     )
 
