@@ -33,6 +33,31 @@ def _is_tracked_at_head(root: Path, rel_path: str) -> bool:
         return False
 
 
+def _differs_from_head(root: Path, rel_path: str) -> bool:
+    """Return True if the working-tree file does not match its HEAD blob.
+
+    Existence alone is not proof of a usable build context: a shared or
+    partially-restored workspace can leave a tracked Dockerfile present but
+    truncated or stale, which Buildx would then consume silently.  ``git diff``
+    is used rather than a raw byte comparison so that git's own filters and
+    end-of-line normalisation are applied, avoiding false mismatches on
+    Windows checkouts.  A git failure is reported as a difference so the
+    caller fails closed and restores.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--quiet", "HEAD", "--", rel_path],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except subprocess.SubprocessError as exc:
+        logger.warning("Could not compare %s against HEAD: %s", rel_path, exc)
+        return True
+    return result.returncode != 0
+
+
 def _checkout_from_head(root: Path, rel_path: str) -> bool:
     """Restore a tracked file from git HEAD."""
     try:
@@ -68,24 +93,40 @@ def rehydrate_tracked_files(
             continue
 
         file_path = root / rel_str
-        if not file_path.is_file():
+        missing = not file_path.is_file()
+        stale = not missing and _differs_from_head(root, rel_str)
+
+        if missing or stale:
             if check_only:
-                failures.append(f"Tracked file '{rel_str}' is missing on disk")
+                reason = "is missing on disk" if missing else "differs from HEAD"
+                failures.append(f"Tracked file '{rel_str}' {reason}")
                 continue
 
-            logger.info("Rehydrating missing tracked file from HEAD: %s", rel_str)
+            logger.info(
+                "Rehydrating %s tracked file from HEAD: %s",
+                "missing" if missing else "stale",
+                rel_str,
+            )
             restored = _checkout_from_head(root, rel_str)
             if not restored or not file_path.is_file():
                 failures.append(f"Failed to restore tracked file '{rel_str}' from HEAD")
                 continue
+            if _differs_from_head(root, rel_str):
+                failures.append(
+                    f"Tracked file '{rel_str}' still differs from HEAD after restore"
+                )
+                continue
 
-        # Verify file is readable and non-empty if tracked blob is non-empty
+        # Verify the restored file is readable.  Content now provably matches the
+        # HEAD blob, so a 0-byte file means the tracked blob is itself empty --
+        # worth reporting for a build context, not merely logging.
         try:
             size = file_path.stat().st_size
-            if size == 0:
-                logger.warning("Rehydrated file '%s' is 0 bytes", rel_str)
         except OSError as exc:
             failures.append(f"Could not access rehydrated file '{rel_str}': {exc}")
+            continue
+        if size == 0:
+            failures.append(f"Tracked file '{rel_str}' is 0 bytes at HEAD")
 
     return failures
 
