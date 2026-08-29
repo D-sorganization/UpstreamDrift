@@ -10,6 +10,7 @@ a tolerance chosen to make it pass.
 from __future__ import annotations
 
 import math
+import warnings
 
 import numpy as np
 import pytest
@@ -345,3 +346,47 @@ class TestSandContinuum:
         )
         cauchy = material.cauchy_from_hencky(strain)
         np.testing.assert_allclose(cauchy * math.exp(-0.015), kirchhoff, rtol=1e-13)
+
+
+class TestAHydrostaticParticleIsSilent:
+    """A state on the hydrostatic axis must not emit numpy warnings.
+
+    ``deviator_norm`` is exactly zero there, which is the commonest state
+    in a freshly seeded bed. The projection masks those particles out, so
+    the answer was always right -- but computing the quotient before
+    masking made every F1 run emit divide-by-zero noise, which trains a
+    reader to ignore warnings that might one day be real.
+    """
+
+    def test_a_purely_hydrostatic_state_emits_no_warning(self) -> None:
+        # Both components equal, so the deviator -- and its norm -- vanish.
+        hydrostatic = np.array([[-1.0e-3, -1.0e-3]])
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)
+            projected, yielded, _ = _project(hydrostatic)
+        assert np.isfinite(projected).all()
+        assert not bool(yielded[0])
+
+    def test_a_bed_of_mixed_states_emits_no_warning(self) -> None:
+        # Hydrostatic particles beside sheared ones: the sheared ones make
+        # the ``on_cone`` branch run, which is where the division lives.
+        strain = np.array(
+            [
+                [-1.0e-3, -1.0e-3],
+                [-2.0e-3, -2.0e-3],
+                [-3.0e-3, 1.0e-3],
+                [2.0e-3, -4.0e-3],
+            ]
+        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)
+            projected, _, _ = _project(strain)
+        assert np.isfinite(projected).all()
+
+    def test_the_hydrostatic_rows_are_returned_unchanged(self) -> None:
+        # Silencing the warning must not change the answer: a hydrostatic
+        # state below the tip is admissible and is passed straight through.
+        strain = np.array([[-1.0e-3, -1.0e-3], [-3.0e-3, 1.0e-3]])
+        projected, yielded, _ = _project(strain)
+        np.testing.assert_array_equal(projected[0], strain[0])
+        assert not bool(yielded[0])
