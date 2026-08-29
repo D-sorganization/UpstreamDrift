@@ -205,6 +205,8 @@ def test_shot_tracer_main(mock_exit, mock_window, mock_app) -> None:
     from src.launchers.shot_tracer import main
 
     mock_app_instance = MagicMock()
+    # No pre-existing Qt application: the fresh-construction path must run.
+    mock_app.instance.return_value = None
     mock_app.return_value = mock_app_instance
     mock_window_instance = MagicMock()
     mock_window.return_value = mock_window_instance
@@ -214,6 +216,26 @@ def test_shot_tracer_main(mock_exit, mock_window, mock_app) -> None:
     mock_app_instance.setStyle.assert_called_with("Fusion")
     mock_window_instance.show.assert_called_once()
     mock_app_instance.exec.assert_called_once()
+    mock_exit.assert_called_once()
+
+
+@patch("src.launchers.shot_tracer.QApplication")
+@patch("src.launchers.shot_tracer.MultiModelShotTracerWindow")
+@patch("src.launchers.shot_tracer.sys.exit")
+def test_shot_tracer_main_reuses_existing_qapplication(
+    mock_exit, mock_window, mock_app
+) -> None:
+    """An existing QApplication must be reused, never re-instantiated (#9099)."""
+    from src.launchers.shot_tracer import main
+
+    existing_app = MagicMock()
+    mock_app.instance.return_value = existing_app
+
+    main()
+
+    mock_app.assert_not_called()
+    existing_app.setStyle.assert_not_called()
+    existing_app.exec.assert_called_once()
     mock_exit.assert_called_once()
 
 
