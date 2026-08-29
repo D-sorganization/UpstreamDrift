@@ -1,0 +1,6 @@
+{
+  "$schema": "https://upstreamdrift.dev/schemas/upstreamdrift-companion-v1.schema.json",
+  "schema_version": "1.0.0",
+  "manifest_id": "upstreamdrift-companion",
+  "undeclared": true
+}
