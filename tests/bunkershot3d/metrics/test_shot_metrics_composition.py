@@ -212,6 +212,21 @@ class TestDigSkidFromARawShot:
         )
         assert result.verdict is not None
 
+    def test_the_descent_return_ratio_comes_off_the_same_two_crossings(
+        self, shot: ShotResult, head: HeadModel, scene: StrikeScene
+    ) -> None:
+        """The discriminant needs both speeds, so it needs both crossings.
+
+        A shot truncated before the sole came back out would have no exit
+        climb to divide by the entry descent, which is why issue #8702 had to
+        land before #8703 could be answered on a real record.
+        """
+        result = dig_vs_skid(StrikeTrace.from_shot(shot), head, scene)
+        assert result.entry_descent_speed_mps > 0.0
+        assert result.descent_return_ratio == pytest.approx(
+            result.exit_climb_speed_mps / result.entry_descent_speed_mps, rel=1e-12
+        )
+
     def test_head_loads_come_off_the_same_trace(
         self, shot: ShotResult, head: HeadModel
     ) -> None:
