@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  implementation head `6c1f56c16` plus this handoff successor. No PR exists.
+  implementation head `c54b8b367` plus this handoff successor. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 - Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
@@ -106,7 +106,8 @@ are not completion evidence.
   prefix identity, all enriched schemas, and the legacy-revision killswitch.
 - Audit 33277601263 qualified both engines/seven modules; runtime identity is
   `5ceeb5af7815aece95ed859e749b72e8696e0ab8d6f183d4193700b525d16bb4`.
-- Replay run 33277732709 executes [0,20) at `6c1f56c16`; do not duplicate it.
+- `c54b8b367` requires all 37 enriched histories at artifact intake.
+  Replay run 33277732709 executes [0,20) at `6c1f56c16`; do not duplicate it.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -128,7 +129,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 68 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 70 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
