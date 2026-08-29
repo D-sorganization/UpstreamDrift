@@ -427,6 +427,22 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
   --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
   --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/checkpoints
+# retain a terminal hosted slice only after saving the exact GitHub API responses,
+# original artifact ZIP, and required-absent extraction directory
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_artifact_receipt \
+  --run-json /path/to/github-run.json \
+  --jobs-json /path/to/github-jobs.json \
+  --artifacts-json /path/to/github-artifacts.json \
+  --archive /path/to/original-artifact.zip \
+  --extracted-dir /path/to/required-absent-extraction \
+  --expected-run-id RUN_ID \
+  --expected-dispatch-head DISPATCH_COMMIT_SHA \
+  --expected-execution-revision EXECUTION_COMMIT_SHA \
+  --expected-session-sha256 SESSION_SHA256 \
+  --case-start CASE_START \
+  --case-stop CASE_STOP \
+  --required-evidence-schema articulated-structural-factorial-evidence/1.0.0 \
+  --output /path/to/required-absent-artifact-receipt.json
 # corrupt only a copied completed sidecar and retain the fail-closed audit
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_corruption_audit \
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
@@ -461,6 +477,19 @@ an exact noninterpretive reproduction audit before continuing beyond that
 prefix:
 
 ```bash
+# collect only explicit, nonoverlapping hosted sources into a gap-free prefix
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_collection \
+  --plan /path/to/enriched-plan.json \
+  --launch /path/to/enriched-launch.json \
+  --source RUN_ID ARTIFACT_NAME CONCLUSION CASE_START CASE_STOP /path/to/extracted-slice \
+  --output-dir /path/to/required-absent-enriched-prefix
+# expose the matching immutable legacy prefix without altering its source
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_prefix_view \
+  --plan /path/to/legacy-plan.json \
+  --launch /path/to/legacy-launch.json \
+  --source-dir /path/to/immutable-legacy-prefix \
+  --prefix-stop-exclusive PREFIX_STOP \
+  --output-dir /path/to/required-absent-legacy-view
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_enrichment_audit \
   --legacy-plan /path/to/legacy-plan.json \
   --legacy-launch /path/to/legacy-launch.json \
@@ -474,6 +503,8 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
 The audit requires identical case ordering, statuses, JSON results, and every
 overlapping legacy NPZ array while independently validating the enriched
 sidecars. It does not compare or interpret scientific outcome magnitudes.
+Artifact receipt 1.2 also requires GitHub's recorded SHA-256 digest to equal
+the retained ZIP exactly; a readable but different archive fails intake.
 
 Only after the legacy workflow is terminal and its gap-free prefix manifest is
 validated, write the retention-only plan amendment. The command requires an
