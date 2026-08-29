@@ -18,11 +18,85 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.shared.python.launcher_embed import (
+    EMBEDDABLE_TOOL_REGISTRY,
     EmbedCapabilities,
     EmbeddableTool,
     get_embeddable_tool,
 )
 from src.tools.sidekick._embed_adapter import _SidekickEmbedAdapter
+
+_SIDEKICK_PACKAGE = "src.tools.sidekick"
+
+# ---------------------------------------------------------------------------
+# Registry isolation (issue #9168)
+# ---------------------------------------------------------------------------
+
+
+def _sidekick_module_names() -> list[str]:
+    """Return every currently-imported ``src.tools.sidekick*`` module name."""
+    prefix = f"{_SIDEKICK_PACKAGE}."
+    return [
+        name
+        for name in list(sys.modules)
+        if name == _SIDEKICK_PACKAGE or name.startswith(prefix)
+    ]
+
+
+@pytest.fixture(autouse=True)
+def _isolate_sidekick_registration():
+    """Snapshot and restore the registry *and* the sidekick module cache.
+
+    ``src.tools.sidekick`` registers its adapter as an *import* side
+    effect, so the registration runs at most once per process. Two of the
+    tests below want opposite preconditions — "registers on import" needs
+    the entry absent, "idempotent" needs it already present — and before
+    #9168 each simply inherited whatever ambient state the session had
+    produced. Under ``pytest-xdist`` that state depends on whether some
+    other test in the same worker imported the package first, which is
+    pure scheduling luck, so the pair failed as mirror images:
+    ``assert None is not None`` and ``assert <adapter object> is None``.
+
+    Both halves of the state have to be restored. Putting the registry
+    back is not enough on its own: if the package stays cached in
+    ``sys.modules`` the import side effect never re-runs, so a later test
+    still sees an empty registry. Copying the mapping and the module
+    entries — rather than rebinding names — keeps each test's mutations
+    from escaping into the rest of the worker's session.
+    """
+    registry_snapshot = dict(EMBEDDABLE_TOOL_REGISTRY)
+    module_snapshot = {name: sys.modules[name] for name in _sidekick_module_names()}
+    try:
+        yield
+    finally:
+        EMBEDDABLE_TOOL_REGISTRY.clear()
+        EMBEDDABLE_TOOL_REGISTRY.update(registry_snapshot)
+        for name in _sidekick_module_names():
+            del sys.modules[name]
+        sys.modules.update(module_snapshot)
+
+
+def _fresh_import_sidekick():
+    """Drop the sidekick package from ``sys.modules`` and import it again.
+
+    Forces the module-level registration side effect to actually execute
+    instead of being short-circuited by an ambient cached import. Returns
+    the freshly imported package.
+    """
+    for name in _sidekick_module_names():
+        del sys.modules[name]
+    return importlib.import_module(_SIDEKICK_PACKAGE)
+
+
+def _fresh_adapter_class() -> type:
+    """Return the ``_SidekickEmbedAdapter`` class from the live module.
+
+    A fresh import rebinds the class object, so identity checks must use
+    the class the *current* module cache holds, not the one this test
+    module imported at collection time.
+    """
+    module = importlib.import_module(f"{_SIDEKICK_PACKAGE}._embed_adapter")
+    return module._SidekickEmbedAdapter
+
 
 # ---------------------------------------------------------------------------
 # embed_capabilities
@@ -169,13 +243,20 @@ def test_cleanup_skips_non_callable_delete_later() -> None:
 
 @pytest.mark.unit
 def test_cleanup_swallows_exceptions_and_logs() -> None:
-    adapter = _SidekickEmbedAdapter()
+    # Resolve class and patch target from the *same* live module object.
+    # A dotted-string patch target would re-resolve through ``sys.modules``,
+    # which another suite may have swapped for a freshly imported module
+    # (``tests/unit/launcher_embed/test_sidekick_contract.py`` evicts the
+    # sidekick modules). Patching the module the class actually belongs to
+    # makes this independent of import order. See issue #9168.
+    module = importlib.import_module(f"{_SIDEKICK_PACKAGE}._embed_adapter")
+    adapter = module._SidekickEmbedAdapter()
     bad = MagicMock()
     bad.deleteLater.side_effect = RuntimeError("boom")
     good = MagicMock()
     adapter._widgets = [bad, good]
 
-    with patch("src.tools.sidekick._embed_adapter.logger") as mock_logger:
+    with patch.object(module, "logger") as mock_logger:
         adapter.cleanup()  # must not raise
 
     mock_logger.exception.assert_called_once()
@@ -207,23 +288,35 @@ def test_is_dirty_always_false() -> None:
 
 @pytest.mark.unit
 def test_package_registers_adapter_on_import() -> None:
-    # Importing the package elsewhere in the test session should have
-    # already registered the adapter. Re-import to be defensive.
-    import src.tools.sidekick  # noqa: F401
+    """Importing the package registers the adapter.
+
+    Both preconditions are established explicitly rather than inherited
+    from whatever import order the session produced: the registry entry
+    is dropped, and the package is evicted from ``sys.modules`` so the
+    import genuinely re-executes the registration.
+    """
+    EMBEDDABLE_TOOL_REGISTRY.pop("sidekick", None)
+    assert get_embeddable_tool("sidekick") is None
+
+    _fresh_import_sidekick()
 
     registered = get_embeddable_tool("sidekick")
     assert registered is not None
     assert registered.tool_id == "sidekick"
-    assert isinstance(registered, _SidekickEmbedAdapter)
+    assert isinstance(registered, _fresh_adapter_class())
 
 
 @pytest.mark.unit
 def test_package_registration_is_idempotent() -> None:
-    """Reloading the package must not raise or replace the adapter."""
-    import src.tools.sidekick as pkg
-
+    """Re-importing the package must not raise or replace the adapter."""
+    # Explicitly establish the "already registered" precondition instead
+    # of assuming an earlier test in this worker supplied it.
+    EMBEDDABLE_TOOL_REGISTRY.pop("sidekick", None)
+    _fresh_import_sidekick()
     first = get_embeddable_tool("sidekick")
-    importlib.reload(pkg)
+    assert first is not None
+
+    _fresh_import_sidekick()
     second = get_embeddable_tool("sidekick")
 
     # ``get_embeddable_tool`` returns the originally registered instance
@@ -232,7 +325,25 @@ def test_package_registration_is_idempotent() -> None:
 
 
 @pytest.mark.unit
+def test_package_registration_recovers_from_cleared_registry() -> None:
+    """A cleared registry must be repopulated by re-importing the package.
+
+    Regression guard for #9168: the adapter is registered by an import
+    side effect, so once another suite clears the registry the entry only
+    returns if the package body runs again. Asserting that recovery path
+    directly is what makes this file independent of import order.
+    """
+    _fresh_import_sidekick()
+    EMBEDDABLE_TOOL_REGISTRY.clear()
+    assert get_embeddable_tool("sidekick") is None
+
+    _fresh_import_sidekick()
+
+    assert isinstance(get_embeddable_tool("sidekick"), _fresh_adapter_class())
+
+
+@pytest.mark.unit
 def test_package_all_is_empty() -> None:
-    import src.tools.sidekick as pkg
+    pkg = _fresh_import_sidekick()
 
     assert pkg.__all__ == []
