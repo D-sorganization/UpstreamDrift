@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`, expires
-  `2026-08-30T04:32:38Z`; implementation head `ffb8fd2d892e` plus this
+  `2026-08-30T04:32:38Z`; implementation head `2aa0b79cb` plus this
   handoff-only successor;
   worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
@@ -95,10 +95,10 @@ are not completion evidence.
   and a 90-minute timeout. It remained `in_progress` at the 2026-08-29 turnover
   poll; do not cancel, restart, duplicate, or dispatch beyond 714.
 - Its legacy minimal sidecars fail the new complete-history retention contract; preserve the prefix as diagnostic evidence, not a promotable release.
-- Commit `19f74b6d3` adds evidence schema
-  `articulated-structural-factorial-evidence/1.0.0` and validates 37 complete
-  histories. Commit `87b06433f` adds exact legacy-to-enriched replay audit
-  `articulated-structural-factorial-enrichment-audit/1.0.0`.
+- Commits `19f74b6d3`/`87b06433f` add the 37-history evidence contract and
+  exact legacy-to-enriched replay audit. Commit `2aa0b79cb` adds runtime-audit
+  schema 1.4, which requires seven exact evaluator, runner, validator, native,
+  and geometry-provider identities even if its digest is recomputed.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -111,11 +111,9 @@ are not completion evidence.
    NPZ, and session records without inspecting outcomes. Collect through 714,
    freeze the legacy prefix as incomplete diagnostic evidence, and never resume
    the legacy revision.
-2. Before a new dispatch, make runtime-audit provenance explicitly require the
-   evaluator, serial runner, and evidence validator; test missing/mutated module
-   identities fail closed. Then amend the preregistration transparently,
-   qualify a clean immutable execution/runtime pair, replay the full legacy
-   prefix, and require the exact enrichment audit.
+2. Transparently amend the preregistration, qualify a clean immutable
+   execution/runtime pair under runtime-audit 1.4, replay the full legacy
+   prefix, and require the exact enrichment audit before continuing.
 3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 4. The contrast summary is implemented locally; after completion, validate the
@@ -127,7 +125,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 55 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 56 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
