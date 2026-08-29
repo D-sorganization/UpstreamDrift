@@ -20,6 +20,11 @@ from matplotlib.figure import Figure
 
 from src.shared.python.plotting.base import RecorderInterface
 from src.shared.python.plotting.config import PlotConfig, resolve_figure
+from src.shared.python.plotting.identity import (
+    PlotIdentity,
+    apply_identity_footer,
+    resolve_and_apply_identity_footer,
+)
 
 if TYPE_CHECKING:
     pass
@@ -31,6 +36,7 @@ def plot_joint_positions(
     joint_indices: list[int] | None = None,
     joint_names: list[str] | None = None,
     config: PlotConfig | None = None,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot joint positions over time.
 
@@ -40,6 +46,8 @@ def plot_joint_positions(
         joint_indices: Indices of joints to plot (None = all)
         joint_names: Names for legend (uses "Joint N" if None)
         config: Plot configuration
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
@@ -47,6 +55,7 @@ def plot_joint_positions(
     if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
+    resolve_and_apply_identity_footer(fig, recorder, identity)
 
     times, positions = recorder.get_time_series("joint_positions")
 
@@ -82,6 +91,7 @@ def plot_joint_velocities(
     joint_indices: list[int] | None = None,
     joint_names: list[str] | None = None,
     config: PlotConfig | None = None,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot joint velocities over time.
 
@@ -91,6 +101,8 @@ def plot_joint_velocities(
         joint_indices: Indices of joints to plot (None = all)
         joint_names: Names for legend (uses "Joint N" if None)
         config: Plot configuration
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
@@ -98,6 +110,7 @@ def plot_joint_velocities(
     if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
+    resolve_and_apply_identity_footer(fig, recorder, identity)
 
     times, velocities = recorder.get_time_series("joint_velocities")
 
@@ -133,6 +146,7 @@ def plot_joint_accelerations(
     joint_indices: list[int] | None = None,
     joint_names: list[str] | None = None,
     config: PlotConfig | None = None,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot joint accelerations over time.
 
@@ -144,6 +158,8 @@ def plot_joint_accelerations(
         joint_indices: Indices of joints to plot (None = all)
         joint_names: Names for legend (uses "Joint N" if None)
         config: Plot configuration
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
@@ -151,6 +167,7 @@ def plot_joint_accelerations(
     if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
+    resolve_and_apply_identity_footer(fig, recorder, identity)
 
     # Try to get accelerations directly, compute from velocities if not available
     try:
@@ -197,6 +214,7 @@ def plot_club_head_speed(
     ax: Axes | None = None,
     config: PlotConfig | None = None,
     show_peak: bool = True,
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot club head speed over time.
 
@@ -205,6 +223,8 @@ def plot_club_head_speed(
         ax: Optional axes to plot on
         config: Plot configuration
         show_peak: Whether to annotate peak speed
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
@@ -212,6 +232,7 @@ def plot_club_head_speed(
     if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
+    resolve_and_apply_identity_footer(fig, recorder, identity)
 
     times, speeds = recorder.get_time_series("club_head_speed")
 
@@ -258,6 +279,7 @@ def plot_com_trajectory(
     ax: Axes | None = None,
     config: PlotConfig | None = None,
     dimensions: str = "xy",
+    identity: PlotIdentity | None = None,
 ) -> tuple[Figure, Axes]:
     """Plot center of mass trajectory.
 
@@ -266,6 +288,8 @@ def plot_com_trajectory(
         ax: Optional axes to plot on
         config: Plot configuration
         dimensions: Which dimensions to plot ("xy", "xz", "yz", or "3d")
+        identity: Optional engine/model/run identity rendered as a figure
+            footer. Derived from ``recorder.engine`` when not provided.
 
     Returns:
         Tuple of (figure, axes)
@@ -273,6 +297,9 @@ def plot_com_trajectory(
     if recorder is None:
         raise ValueError("recorder must be provided")
     config = config or PlotConfig()
+    resolved_identity = (
+        identity if identity is not None else PlotIdentity.from_recorder(recorder)
+    )
 
     times, positions = recorder.get_time_series("com_position")
 
@@ -281,6 +308,7 @@ def plot_com_trajectory(
             fig, ax = config.create_figure()
         else:
             fig = ax.figure  # type: ignore[assignment]
+        apply_identity_footer(fig, resolved_identity)
         ax.text(0.5, 0.5, "No data available", ha="center", va="center")
         return fig, ax
 
@@ -336,6 +364,7 @@ def plot_com_trajectory(
         ax.set_xlabel(f"{d1.upper()} [m]")
         ax.set_ylabel(f"{d2.upper()} [m]")
 
+    apply_identity_footer(fig, resolved_identity)
     ax.set_title("Center of Mass Trajectory")
     ax.set_aspect("equal", adjustable="box")
 
