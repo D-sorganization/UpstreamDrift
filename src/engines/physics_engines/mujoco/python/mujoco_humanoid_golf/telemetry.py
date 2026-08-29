@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -235,7 +236,9 @@ class TelemetryRecorder:
         reshaped = data.cfrc_ext.reshape(-1, 6)
         for idx, name in enumerate(self._body_names):
             force_vector = reshaped[idx]
-            if np.linalg.norm(force_vector) > 0.0:
+            if (
+                np.vdot(force_vector, force_vector) > 0.0
+            ):  # ⚡ Bolt: skip sqrt completely for > 0.0 check
                 forces[name] = force_vector.copy()
         return forces
 
@@ -258,7 +261,9 @@ class TelemetryRecorder:
         peaks: dict[str, float] = {}
         for entry in series:
             for key, value in entry.items():
-                force_norm = float(np.linalg.norm(value))
+                force_norm = float(
+                    math.sqrt(np.vdot(value, value))
+                )  # ⚡ Bolt: math.sqrt(np.vdot) avoids np.linalg.norm overhead for small arrays
                 current_peak = peaks.get(key, 0.0)
                 peaks[key] = max(current_peak, force_norm)
         return peaks
