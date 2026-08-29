@@ -2,6 +2,26 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## Qt `sys.modules` Pollution Guard (#9188)
+
+Issue #9188 removes the order-dependence that made `unit-test-gate` a lottery. The session-scoped autouse fixture in
+`tests/unit/plotting/conftest.py` replaced `PyQt6`, `PyQt6.QtCore`, `PyQt6.QtGui`, `PyQt6.QtWidgets` and the
+`src.shared.python.ui` shim with `MagicMock(spec=ModuleType)` stubs. A `scope="session"` fixture declared in a _directory_
+`conftest.py` is created lazily at the first test in that directory but only finalized at the end of the whole session, so
+the stubs stayed installed for every test collected after `tests/unit/plotting`. Because a spec'd mock raises
+`AttributeError` for names a real module supplies, each later `from PyQt6.QtCore import Qt` (or `QApplication`, `QDialog`)
+failed with `cannot import name 'Qt' from '<unknown module name>' (unknown location)`, and which tests were hit depended
+only on collection order. The fixture is now function-scoped and installs its stubs through `monkeypatch.setitem`, whose
+teardown is automatic and exception-safe.
+
+A durable guard in `tests/conftest.py` prevents recurrence. A `trylast` `pytest_runtest_teardown` hook — running after every
+fixture finalizer that is due, and therefore immune to autouse ordering — compares the `sys.modules` entries for `PyQt6`,
+`PyQt5`, `PySide2`, `PySide6`, `qtpy` and the `shared.python.ui` shim against a baseline snapshot taken at
+`pytest_collection_finish`. It records the first test at which they diverge and reports at the test-file boundary, so a
+properly scoped stub that is undone in time is never flagged while one that outlives its file fails the run and names its
+author. Newly imported real modules are permitted; stub insertions, replacements and removals are not. After reporting, the
+guard restores the baseline so a single leak yields one attributable failure instead of a cascade of innocent victims.
+
 ## Performance Enhancements (#9161)
 
 - Replaced instances of `np.linalg.norm` with faster mathematical equivalents (`math.hypot`, `np.vdot`, and `np.einsum`) for small vectors and multidimensional arrays in telemetry logging, screw kinematics, and bunker shot traces.
