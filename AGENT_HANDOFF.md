@@ -103,10 +103,10 @@ are not completion evidence.
   `015408e1cb99f48b140206eb994451d385146fc1a58030f968a63770af55f067`.
   Artifact SHA-256 is `447683487f1ea249858caea4e15326b3b37e9de446bf4d9a15bbdb7291218b80`.
 - Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70.
-  Cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 374.
+  Cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 394.
 - Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero;
-  authority is 374/2,304, manifest SHA-256 `d7014e5ff328d8883b53affa563d5e7e1bcda9acc273341b7606e35e8a023384`.
-  Run 33236856896 executes 374:394 with one process and a 90-minute timeout.
+  authority is 394/2,304, manifest SHA-256 `c4f9fbe91a6c4f101f7afecc2cee8c7a21b8ab1b958e77cb180b9c7709d76bf9`.
+  Run 33238148325 executes 394:414 with one process and a 90-minute timeout.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -116,7 +116,7 @@ are not completion evidence.
 ## Immediate Order
 
 1. Do not restart/combine the Windows diagnostic. Continue 20-case hosted
-   slices from 394 against audit 33173678044; completed JSON requires its NPZ.
+   slices from 414 against audit 33173678044; completed JSON requires its NPZ.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
