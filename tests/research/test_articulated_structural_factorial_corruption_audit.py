@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
+import subprocess
 
 import numpy as np
 import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_corruption_audit import (
     audit_checkpoint_corruption,
+    main,
     validate_corruption_audit,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_plan import (
@@ -129,4 +132,92 @@ def test_corruption_audit_requires_a_completed_checkpoint(tmp_path: Path) -> Non
             launch=launch,
             checkpoint_dir=tmp_path,
             audit_revision="c" * 40,
+        )
+
+
+def test_corruption_audit_cli_derives_a_clean_committed_source_revision(
+    tmp_path: Path,
+) -> None:
+    plan = _single_case_plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    checkpoint_dir = tmp_path / "checkpoints"
+    run_serial_cases(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=checkpoint_dir,
+        evaluator=lambda _case: StructuralEvaluation(
+            result={"retained": True},
+            parity_arrays={"time_s": np.asarray([0.0, 0.001])},
+        ),
+    )
+    plan_path = tmp_path / "plan.json"
+    launch_path = tmp_path / "launch.json"
+    plan_path.write_text(json.dumps(plan), encoding="utf-8")
+    launch_path.write_text(json.dumps(launch), encoding="utf-8")
+
+    source_root = tmp_path / "source"
+    module = source_root / (
+        "scripts/research/proximal_distal_energy/"
+        "articulated_structural_factorial_corruption_audit.py"
+    )
+    module.parent.mkdir(parents=True)
+    module.write_text("# committed audit source\n", encoding="utf-8")
+    subprocess.run(["git", "init", "-q", source_root], check=True)
+    subprocess.run(
+        ["git", "-C", source_root, "config", "user.email", "test@example.invalid"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", source_root, "config", "user.name", "Test"], check=True
+    )
+    subprocess.run(["git", "-C", source_root, "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", source_root, "commit", "-q", "-m", "audit source"],
+        check=True,
+    )
+    revision = subprocess.run(
+        ["git", "-C", source_root, "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    output = tmp_path / "corruption-audit.json"
+
+    assert (
+        main(
+            [
+                "--plan",
+                str(plan_path),
+                "--launch",
+                str(launch_path),
+                "--checkpoint-dir",
+                str(checkpoint_dir),
+                "--audit-source-root",
+                str(source_root),
+                "--output",
+                str(output),
+            ]
+        )
+        == 0
+    )
+    assert (
+        json.loads(output.read_text(encoding="utf-8"))["identity"]["audit_revision"]
+        == revision
+    )
+
+    module.write_text("# dirty audit source\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="committed audit module"):
+        main(
+            [
+                "--plan",
+                str(plan_path),
+                "--launch",
+                str(launch_path),
+                "--checkpoint-dir",
+                str(checkpoint_dir),
+                "--audit-source-root",
+                str(source_root),
+                "--output",
+                str(tmp_path / "dirty-audit.json"),
+            ]
         )

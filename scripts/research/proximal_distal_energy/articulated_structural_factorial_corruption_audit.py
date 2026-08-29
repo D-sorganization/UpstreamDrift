@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import subprocess
 import tempfile
 from typing import Any
 
@@ -21,6 +22,10 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
 SCHEMA = "articulated-structural-factorial-corruption-audit/1.0.0"
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _EXPECTED_REJECTION = "completed checkpoint parity sidecar is missing or corrupt"
+_AUDIT_MODULE = Path(
+    "scripts/research/proximal_distal_energy/"
+    "articulated_structural_factorial_corruption_audit.py"
+)
 
 
 def _mapping(value: object, *, name: str) -> Mapping[str, Any]:
@@ -38,6 +43,42 @@ def _canonical_sha256(value: Mapping[str, object]) -> str:
         value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def _git_output(source_root: Path, *arguments: str) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(source_root), *arguments],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValueError("audit source root is not a readable Git checkout") from exc
+    return completed.stdout.strip()
+
+
+def _verified_audit_revision(source_root: Path) -> str:
+    if not isinstance(source_root, Path) or not source_root.is_dir():
+        raise ValueError("audit_source_root must be an existing pathlib.Path directory")
+    revision = _git_output(source_root, "rev-parse", "HEAD")
+    if _SHA40.fullmatch(revision) is None:
+        raise ValueError("audit source revision is not a lowercase 40-character SHA")
+    module_path = source_root / _AUDIT_MODULE
+    if not module_path.is_file():
+        raise ValueError("audit source root does not contain the audit module")
+    relative = _AUDIT_MODULE.as_posix()
+    committed_blob = _git_output(source_root, "rev-parse", f"HEAD:{relative}")
+    working_blob = _git_output(
+        source_root,
+        "hash-object",
+        "--path",
+        relative,
+        str(module_path),
+    )
+    if committed_blob != working_blob:
+        raise ValueError("committed audit module does not match the working source")
+    return revision
 
 
 def validate_corruption_audit(
@@ -195,7 +236,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--plan", type=Path, required=True)
     parser.add_argument("--launch", type=Path, required=True)
     parser.add_argument("--checkpoint-dir", type=Path, required=True)
-    parser.add_argument("--audit-revision", required=True)
+    parser.add_argument("--audit-source-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     plan = _mapping(json.loads(args.plan.read_text(encoding="utf-8")), name="plan")
@@ -206,7 +247,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         plan=plan,
         launch=launch,
         checkpoint_dir=args.checkpoint_dir,
-        audit_revision=args.audit_revision,
+        audit_revision=_verified_audit_revision(args.audit_source_root),
     )
     _write_atomic(args.output, result)
     return 0

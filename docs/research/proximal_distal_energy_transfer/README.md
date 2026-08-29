@@ -432,7 +432,7 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
   --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
   --checkpoint-dir C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/checkpoints \
-  --audit-revision AUDIT_IMPLEMENTATION_COMMIT_SHA \
+  --audit-source-root . \
   --output C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/corruption-audit.json
 python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_summary \
   --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
