@@ -159,23 +159,7 @@ jobs:
           pip install -e ".[jaxsim]" || echo "::warning::jaxsim install failed"
           python -m ensurepip --upgrade || true
           pip install "opensim>=4.4.0" || echo "::warning::opensim install failed"
-          python -m ensurepip --upgrade || true
-          python - <<'PY'
-          import pathlib
-          import shutil
-          import site
-
-          for root in site.getsitepackages():
-              for pattern in ("scipy", "scipy.libs", "scipy-*.dist-info", "~cipy*"):
-                  for path in pathlib.Path(root).glob(pattern):
-                      if path.is_dir():
-                          shutil.rmtree(path, ignore_errors=True)
-                      else:
-                          path.unlink(missing_ok=True)
-          PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1" --default-timeout=100
-          python -m ensurepip --upgrade || true
-          pip install --force-reinstall "pydantic==2.12.5"
+          python3 scripts/ci/bootstrap_conformance_deps.py
 
       - name: Guard JaxSim version pin (issue #6660)
         # Fail the build if the jaxsim pin drifts from the gated ==0.9.0,
@@ -294,23 +278,7 @@ jobs:
           python -m pip install --ignore-installed --no-deps pip
           python -m pip install --ignore-installed pathspec hatchling editables
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
-          python -m ensurepip --upgrade || true
-          python - <<'PY'
-          import pathlib
-          import shutil
-          import site
-
-          for root in site.getsitepackages():
-              for pattern in ("scipy", "scipy.libs", "scipy-*.dist-info", "~cipy*"):
-                  for path in pathlib.Path(root).glob(pattern):
-                      if path.is_dir():
-                          shutil.rmtree(path, ignore_errors=True)
-                      else:
-                          path.unlink(missing_ok=True)
-          PY
-          pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.14.1" --default-timeout=100
-          python -m ensurepip --upgrade || true
-          pip install --force-reinstall "pydantic==2.12.5"
+          python3 scripts/ci/bootstrap_conformance_deps.py
           pip uninstall -y pytest-vcr pytest-recording || true
 
       - name: Run canonical conformance gate
