@@ -21,7 +21,7 @@ are not completion evidence.
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
-  Scientific/collector content head is `acc3d81ba0216d8c8faf9c036b11fa835966a2a8`;
+  Scientific/collector content head is `f0b6f6fe1aff60f772db262474becf084ba49529`;
   resolve the handoff-only successor with `git rev-parse HEAD`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
@@ -58,42 +58,40 @@ are not completion evidence.
 - Replay 33277732709 passed [0,20): archive `142556c34373`, receipt `f3bd190abc2d`,
   source-derived sentinel `f8b7c4e836ab`, and exact audit `7b00bb69fbbe` over
   20 statuses/JSON results and 180 arrays. No outcomes were summarized.
-- Replay 33279075050 executes [20,40) at exact `e86dff3ba`.
-- At 2026-08-29T22:38:13Z, job 99171004536 is in the registered campaign-slice
-  step. Do not cancel, rerun, or duplicate it.
+- Replay 33279075050 passed [20,40) at exact `e86dff3ba`: archive
+  `4061ad24ff11`, receipt `2e765f0aed41`, and source-derived sentinel
+  `640e60ae0ad4`. Do not rerun or duplicate it.
 - Collection schema 1.1 requires each source's retained receipt, accepts the
-  governed 1.1/1.2 receipts, verifies exact identity/count/file digests, and
-  records the receipt schema/SHA. A real 1.1 intake retained 20/20 at
+  governed 1.1/1.2/1.3 receipts, verifies exact identity/count/file digests,
+  and records the receipt schema/SHA. A real 1.1 intake retained 20/20 at
   `Campaigns/UpstreamDrift-9153-receipt-bind-validation-prefix-0020-v1`,
   manifest SHA `55412e9342d1`.
 - Real receipt-1.3 validation against governed run 33277732709 retained 20/20
   cross-bound pairs and evidence sidecars at
   `Campaigns/UpstreamDrift-9153-receipt-v1.3-validation-run-33277732709`;
   receipt SHA is `d4f041d9bfa7`.
+- Cumulative [0,40) collection manifest is `151e60ade22a`; immutable legacy
+  view is `e9e7e9853848`; exact audit `d8fcb768d68d` passes 40 statuses/JSON
+  results, 360 legacy arrays, and every enriched sidecar without outcome
+  inspection or promotion.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. Let replay 33279075050 terminate; poll it once after GitHub App setup and
-   retain exact metadata without inspecting outcomes.
-2. Intake [20,40) into the required-absent directory
-   `Campaigns/UpstreamDrift-9153-enriched-slice-0020-0040-run-33279075050`.
-   Require the API/archive SHA-256 match, exactly 20 JSON plus 20 NPZ files and
-   one session file, then create receipt 1.3 and a source-derived corruption
-   sentinel from clean committed source.
-3. Build cumulative receipt-bound collection
-   `Campaigns/UpstreamDrift-9153-enriched-collected-prefix-0040-v1`, legacy view
-   `Campaigns/UpstreamDrift-9153-legacy-prefix-view-0040-v1`, and exact audit
-   `Campaigns/UpstreamDrift-9153-enrichment-audit-prefix-0040-v1`.
+1. After this boundary is committed, pushed, and remote-equal, dispatch exactly
+   one [40,60) slice using audit 33277601263. Record its exact run/head here;
+   never run a second structural process concurrently.
+2. On terminal status, apply the same receipt-1.3, corruption, cumulative
+   collection, immutable legacy view, and exact audit gates through case 60.
    Stop and preserve evidence on any mismatch.
-4. Preserve all three refinement failures, typed Pinocchio absence, original
+3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
-5. The contrast summary is implemented locally; after completion, validate the
+4. The contrast summary is implemented locally; after completion, validate the
    checkpoint set and retain sign reversals, failures, and typed missing cells.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
-6. Project only protected UpstreamDrift evidence into AffineDrift; continue
+5. Project only protected UpstreamDrift evidence into AffineDrift; continue
    Tools only through its provider contract and protected flow.
 
 ## Cross-Repository Turnover
