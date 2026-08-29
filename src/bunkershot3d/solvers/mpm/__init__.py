@@ -79,7 +79,13 @@ from .ball import (
     circular_section,
     n_facets_for_cell_size,
 )
-from .body import ContactImpulse, RigidSection, convex_hull_2d, plane_torque_about_y
+from .body import (
+    ContactImpulse,
+    RigidSection,
+    convex_hull_2d,
+    coulomb_cone_projection,
+    plane_torque_about_y,
+)
 from .contact import (
     BodyContact,
     apply_body_contacts,
@@ -198,6 +204,7 @@ __all__ = [
     "column_grid_convergence",
     "contact_order",
     "convex_hull_2d",
+    "coulomb_cone_projection",
     "cross_2d",
     "cross_check_against_f0",
     "drucker_prager_alpha",

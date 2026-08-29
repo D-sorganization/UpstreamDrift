@@ -17,6 +17,7 @@ from bunkershot3d.solvers.exceptions import SolverInputError
 from bunkershot3d.solvers.mpm.body import (
     RigidSection,
     convex_hull_2d,
+    coulomb_cone_projection,
     plane_torque_about_y,
 )
 
@@ -315,3 +316,56 @@ class TestPushOut:
         assert count == 0
         assert moved is positions
         assert updated is velocity
+
+
+class TestCoulombCone:
+    """The friction projection, on its own rather than through a step.
+
+    Extracted from ``project_grid_velocity`` so it can be exercised
+    directly: the sliding branch subtracts the friction bound from the
+    tangential speed rather than replacing it, and getting that backwards
+    would brake a frictionless club without failing any test that only
+    looked at the sticking case.
+    """
+
+    NORMAL = np.array([[1.0, 0.0]])
+
+    def test_a_separating_node_is_left_alone(self) -> None:
+        relative = np.array([[2.0, 3.0]])
+        projected = coulomb_cone_projection(relative, self.NORMAL, friction=0.4)
+        assert projected == pytest.approx(relative)
+
+    def test_an_approaching_node_loses_its_normal_component(self) -> None:
+        relative = np.array([[-2.0, 0.0]])
+        projected = coulomb_cone_projection(relative, self.NORMAL, friction=0.0)
+        assert projected[0, 0] == pytest.approx(0.0)
+
+    def test_a_frictionless_body_leaves_the_tangent_untouched(self) -> None:
+        relative = np.array([[-2.0, 5.0]])
+        projected = coulomb_cone_projection(relative, self.NORMAL, friction=0.0)
+        assert projected[0] == pytest.approx([0.0, 5.0])
+
+    def test_inside_the_cone_the_node_sticks(self) -> None:
+        relative = np.array([[-2.0, 0.5]])
+        projected = coulomb_cone_projection(relative, self.NORMAL, friction=1.0)
+        assert projected[0] == pytest.approx([0.0, 0.0])
+
+    def test_outside_the_cone_the_tangent_is_reduced_not_replaced(self) -> None:
+        # |v_t| = 5, |v_n| = 2, mu = 0.5 -> the bound is 1, so the surviving
+        # tangential speed is 4 and not 1.
+        relative = np.array([[-2.0, 5.0]])
+        projected = coulomb_cone_projection(relative, self.NORMAL, friction=0.5)
+        assert projected[0] == pytest.approx([0.0, 4.0])
+
+    def test_a_zero_tangent_does_not_divide_by_zero(self) -> None:
+        relative = np.array([[-2.0, 0.0]])
+        projected = coulomb_cone_projection(relative, self.NORMAL, friction=0.5)
+        assert np.all(np.isfinite(projected))
+
+    def test_it_handles_a_mixed_batch(self) -> None:
+        relative = np.array([[-2.0, 5.0], [2.0, 5.0], [-2.0, 0.5]])
+        normals = np.tile([1.0, 0.0], (3, 1))
+        projected = coulomb_cone_projection(relative, normals, friction=0.5)
+        assert projected[0] == pytest.approx([0.0, 4.0])
+        assert projected[1] == pytest.approx([2.0, 5.0])
+        assert projected[2] == pytest.approx([0.0, 0.0])
