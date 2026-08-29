@@ -78,14 +78,14 @@ These workflows support repository operations. They can affect labels,
 publishing, or release artifacts, but they are not the first quality signal for
 ordinary PR review.
 
-| Workflow file                    | Purpose                                                          |
-| -------------------------------- | ---------------------------------------------------------------- |
-| `auto-update-prs.yml`            | Rebase/update open PRs after `main` changes.                     |
-| `pr-auto-labeler.yml`            | Applies scope and size labels to PRs.                            |
-| `PR-Comment-Responder.yml`       | Collects PR comments for downstream processing.                  |
-| `Comment-to-Issue-Converter.yml` | Converts actionable review comments into issues.                 |
-| `release.yml`                    | Tag-driven release, PyPI, Docker, and GitHub Release publishing. |
-| `tauri-build.yml`                | Desktop application build and release validation.                |
+| Workflow file                    | Purpose                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| `auto-update-prs.yml`            | Rebase/update open PRs after `main` changes.                                                |
+| `pr-auto-labeler.yml`            | Applies scope and size labels to PRs.                                                       |
+| `PR-Comment-Responder.yml`       | Collects PR comments for downstream processing.                                             |
+| `Comment-to-Issue-Converter.yml` | Converts actionable review comments into issues.                                            |
+| `release.yml`                    | Exact-main companion artifacts plus draft-first, attested tag releases and PyPI publishing. |
+| `tauri-build.yml`                | Desktop application build and release validation.                                           |
 
 ## Agent And Remediation Workflows
 

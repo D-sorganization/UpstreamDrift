@@ -1,14 +1,14 @@
-name: Release
+name: Release and Companion Publication
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*.*.*"
 
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -35,7 +35,74 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
+  companion-protected-main:
+    name: Publish exact-commit companion artifact
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 20
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Install companion publication dependencies
+        run: python3 -m pip install jsonschema pyyaml
+      - name: Build companion publication bundle
+        run: >-
+          python3 -m scripts.companion_publication build
+          --authority protected-main --output-dir dist/companion
+      - name: Verify companion publication bundle
+        run: >-
+          python3 -m scripts.companion_publication verify-bundle
+          --bundle-dir dist/companion
+      - name: Attest companion publication payloads
+        id: companion-attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: "dist/companion/*"
+      - name: Upload exact-commit companion artifact
+        id: companion-upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: upstreamdrift-companion-${{ github.sha }}
+          path: dist/companion/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Record ephemeral Actions acquisition
+        run: >-
+          python3 -m scripts.companion_publication record-actions
+          --bundle-dir dist/companion
+          --artifact-name upstreamdrift-companion-${{ github.sha }}
+          --artifact-id ${{ steps.companion-upload.outputs.artifact-id }}
+          --artifact-url '${{ steps.companion-upload.outputs.artifact-url }}'
+          --artifact-digest '${{ steps.companion-upload.outputs.artifact-digest }}'
+          --retention-days 30
+          --attestation-id '${{ steps.companion-attestation.outputs.attestation-id }}'
+          --attestation-url '${{ steps.companion-attestation.outputs.attestation-url }}'
+          --output dist/companion-evidence/upstreamdrift-companion-acquisition.v1.json
+      - name: Attest Actions acquisition evidence
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: "dist/companion-evidence/*"
+      - name: Upload Actions acquisition evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: upstreamdrift-companion-evidence-${{ github.sha }}
+          path: dist/companion-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
   build:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     timeout-minutes: 30
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -45,6 +112,8 @@ jobs:
       attestations: write
     outputs:
       wheel_filename: ${{ steps.build-wheel.outputs.wheel_filename }}
+      companion_attestation_id: ${{ steps.companion-attestation.outputs.attestation-id }}
+      companion_attestation_url: ${{ steps.companion-attestation.outputs.attestation-url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -84,7 +153,7 @@ jobs:
       - name: Install build tools
         run: |
           python -m ensurepip --upgrade || true
-          python3 -m pip install build twine pip-audit
+          python3 -m pip install build twine pip-audit jsonschema pyyaml
       - name: Build package
         id: build-wheel
         shell: bash
@@ -110,10 +179,26 @@ jobs:
           cd dist
           sha256sum * > SHA256SUMS.txt
           cat SHA256SUMS.txt
+      - name: Build companion publication bundle
+        run: >-
+          python3 -m scripts.companion_publication build
+          --authority tag --output-dir dist/companion
+      - name: Verify companion publication bundle
+        run: >-
+          python3 -m scripts.companion_publication verify-bundle
+          --bundle-dir dist/companion
       - name: Attest release artifacts
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
-          subject-path: "dist/*"
+          subject-path: |
+            dist/*.whl
+            dist/*.json
+            dist/SHA256SUMS.txt
+      - name: Attest companion publication payloads
+        id: companion-attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: "dist/companion/*"
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -194,6 +279,9 @@ jobs:
     timeout-minutes: 30
     needs: [pick-runner, build, smoke-python-wheel]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    outputs:
+      release_id: ${{ steps.github-release.outputs.id }}
+      release_url: ${{ steps.github-release.outputs.url }}
     permissions:
       contents: write
     steps:
@@ -205,8 +293,83 @@ jobs:
           path: dist/
 
       - name: Create GitHub Release
+        id: github-release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
         with:
+          draft: true
           generate_release_notes: true
+          overwrite_files: false
+          fail_on_unmatched_files: true
           files: |
-            dist/*
+            dist/*.whl
+            dist/*.json
+            dist/SHA256SUMS.txt
+            dist/companion/*
+
+  record-companion-release:
+    name: Verify and publish immutable release acquisition
+    needs: [pick-runner, build, create-release]
+    timeout-minutes: 20
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Install companion publication dependencies
+        run: python3 -m pip install jsonschema pyyaml
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: dist
+          path: dist/
+      - name: Read exact draft release metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ needs.create-release.outputs.release_id }}
+        run: >-
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}"
+          > "${RUNNER_TEMP}/companion-release.json"
+      - name: Record immutable release acquisition
+        run: >-
+          python3 -m scripts.companion_publication record-release
+          --bundle-dir dist/companion
+          --release-metadata "${RUNNER_TEMP}/companion-release.json"
+          --attestation-id '${{ needs.build.outputs.companion_attestation_id }}'
+          --attestation-url '${{ needs.build.outputs.companion_attestation_url }}'
+          --output dist/companion-release/upstreamdrift-companion-acquisition.v1.json
+      - name: Acquire and verify numeric release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 -m scripts.companion_publication verify-release-download
+          --acquisition dist/companion-release/upstreamdrift-companion-acquisition.v1.json
+          --output-dir "${RUNNER_TEMP}/companion-release-download"
+      - name: Attest release acquisition record
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: "dist/companion-release/*"
+      - name: Upload release acquisition record
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
+        with:
+          draft: true
+          overwrite_files: false
+          fail_on_unmatched_files: true
+          files: |
+            dist/companion-release/upstreamdrift-companion-acquisition.v1.json
+            dist/companion-release/upstreamdrift-companion-acquisition.v1.json.sha256
+      - name: Publish verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ needs.create-release.outputs.release_id }}
+        run: >-
+          gh api --method PATCH
+          "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}"
+          -F draft=false

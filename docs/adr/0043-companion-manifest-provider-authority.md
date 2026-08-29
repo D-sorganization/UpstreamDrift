@@ -3,7 +3,8 @@
 - Status: Accepted
 - Date: 2026-08-28
 - Decision Makers: UpstreamDrift maintainers and AffineDrift companion owners
-- Related Issues/PRs: UpstreamDrift #9174, #9064, #9070; AffineDrift #4010
+- Related Issues/PRs: UpstreamDrift #9174, #9192, #9064, #9070;
+  AffineDrift #4010, #4030
 
 ## Context
 
@@ -164,6 +165,36 @@ by four linked children:
 The local ignored files produced by #9180 validate deterministic generation;
 they have no durable release acquisition URL and must not be represented as a
 released provider artifact. No ad hoc tag or release is part of this slice.
+
+### Protected Publication and Acquisition
+
+Issue #9192 adds a delivery layer without adding another catalog generator.
+`scripts/companion_publication.py` invokes the canonical exporter, validates
+the manifest against the tracked schema, validates the compatibility policy,
+and packages eight exact payloads: manifest, manifest schema, acquisition
+schema, compatibility policy, and one detached SHA-256 file for each. Both the
+protected-main and release-tag paths invoke this same public command. Authority
+is fail-closed: only an official `push` in `D-sorganization/UpstreamDrift`, with
+`GITHUB_SHA == HEAD` and either `refs/heads/main` or an exact `vX.Y.Z` tag, can
+publish.
+
+The existing release workflow owns both delivery channels so workflow count and
+generator logic do not grow independently. Every protected-main commit produces
+one 30-day Actions artifact plus a separate acquisition-evidence artifact. The
+record calls that channel `ephemeral`, pins the workflow run and artifact ID,
+and explicitly states that no durable release URL exists. A release tag builds
+the same bytes, attests them, uploads them to a draft release with overwrite
+disabled, records numeric release/asset API identities, and publishes the draft
+only after the acquisition record is attested and uploaded. Release browser
+URLs are display links; numeric GitHub API asset URLs are the authority.
+
+Schema `1.0.0` remains the only real schema version and therefore the current
+version. The compatibility policy deliberately declares
+`previous_supported: []`; it does not fabricate a predecessor. Its tests require
+a committed validating fixture for every version as soon as a second supported
+version is declared, and require future/incompatible fixtures to remain
+rejected. Rollback retains the previous immutable release and consumer pin
+until a replacement is reviewed and promoted atomically.
 
 ## Migration and Acceptance Gates
 

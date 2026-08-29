@@ -4,6 +4,8 @@ from pathlib import Path
 
 from scripts.check_workflow_inventory import audit_repository
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def _write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -167,4 +169,7 @@ def test_audit_repository_accepts_mutating_agent_workflows_with_budget_contract(
 
 def test_checked_in_repository_inventory_is_current() -> None:
     """The default guard must pass on the checked-in repository state."""
-    assert audit_repository(Path(".")) == []
+    # The repository-wide autouse fixture intentionally changes CWD to a
+    # temporary directory. Inventory authority is the checked-in repository,
+    # never whichever directory a prior fixture selected.
+    assert audit_repository(REPO_ROOT) == []
