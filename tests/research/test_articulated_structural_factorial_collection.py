@@ -131,6 +131,7 @@ def _write_receipt(
         "job": {"run_id": run_id, "head_sha": head_sha},
         "artifact": {
             "name": artifact_name,
+            "size_in_bytes": 12345,
             "digest": f"sha256:{'d' * 64}",
             "workflow_run": {"id": run_id, "head_sha": head_sha},
         },
@@ -258,6 +259,9 @@ def test_collection_is_deterministic_complete_and_source_preserving(
     )
 
     assert manifest["complete"] is True
+    assert manifest["schema_version"] == (
+        "articulated-structural-factorial-collection/1.2.0"
+    )
     assert manifest["combined_checkpoint_count"] == 4
     assert manifest["next_missing_case_index"] == 4
     assert [source["run_id"] for source in manifest["sources"]] == [101, 202]
@@ -266,6 +270,8 @@ def test_collection_is_deterministic_complete_and_source_preserving(
         "articulated-structural-factorial-artifact-receipt/1.3.0",
     ]
     assert manifest["sources"][0]["observed_case_range"] == [0, 2]
+    assert manifest["sources"][0]["artifact_archive_size_in_bytes"] == 12345
+    assert manifest["sources"][0]["artifact_archive_sha256"] == "d" * 64
     assert json.loads((output / "collection-manifest.json").read_text()) == manifest
     assert (
         len(
@@ -417,6 +423,35 @@ def test_collection_rejects_cross_run_receipt_identity(
             launch=launch,
             sources=(source_record,),
             output_dir=tmp_path / "cross-run-output",
+        )
+
+
+@pytest.mark.parametrize("invalid_size", [None, 0, -1, True, "12345"])
+def test_collection_rejects_invalid_archive_size_metadata(
+    tmp_path: Path, invalid_size: object
+) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    source = _slice(tmp_path / "source", plan=plan, launch=launch, start=0, stop=2)
+    source_record = _source_record(
+        launch=launch,
+        run_id=101,
+        artifact_name="structural-checkpoints-101",
+        conclusion="success",
+        start=0,
+        stop=2,
+        directory=source,
+    )
+    receipt = json.loads(source_record.receipt_path.read_text(encoding="utf-8"))
+    receipt["artifact"]["size_in_bytes"] = invalid_size
+    source_record.receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="archive size"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=(source_record,),
+            output_dir=tmp_path / "invalid-size-output",
         )
 
 

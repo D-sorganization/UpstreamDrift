@@ -19,7 +19,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     plan_sha256,
 )
 
-_SCHEMA = "articulated-structural-factorial-collection/1.1.0"
+_SCHEMA = "articulated-structural-factorial-collection/1.2.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _RECEIPT_SCHEMAS = {
     "articulated-structural-factorial-artifact-receipt/1.1.0",
@@ -174,6 +174,13 @@ def _validate_receipt(
     artifact = _receipt_mapping(record.get("artifact"), name="receipt artifact")
     if artifact.get("name") != source.artifact_name:
         raise ValueError("receipt artifact name does not match the source")
+    archive_size = artifact.get("size_in_bytes")
+    if (
+        isinstance(archive_size, bool)
+        or not isinstance(archive_size, int)
+        or archive_size <= 0
+    ):
+        raise ValueError("receipt artifact archive size is invalid")
     if schema.endswith("/1.3.0"):
         run_head = run.get("head_sha")
         if (
@@ -251,6 +258,9 @@ def collect_structural_slices(
         receipt, receipt_sha256 = _validate_receipt(
             source=source, launch=launch, session=session
         )
+        receipt_artifact = _receipt_mapping(
+            receipt.get("artifact"), name="receipt artifact"
+        )
         checkpoints = load_available_checkpoints(
             plan=plan, launch=launch, checkpoint_dir=source.directory
         )
@@ -299,6 +309,8 @@ def collect_structural_slices(
                 "checkpoint_count": len(checkpoints),
                 "artifact_receipt_schema": receipt.get("schema_version"),
                 "artifact_receipt_sha256": receipt_sha256,
+                "artifact_archive_size_in_bytes": receipt_artifact.get("size_in_bytes"),
+                "artifact_archive_sha256": receipt.get("artifact_archive_sha256"),
                 "files": sorted(files, key=lambda item: item["name"]),
             }
         )

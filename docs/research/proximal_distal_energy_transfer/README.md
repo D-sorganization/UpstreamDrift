@@ -512,6 +512,9 @@ retained 1.1 and 1.2 receipts and applies the stronger cross-binding checks to
 checkpoint count, and every extracted file digest. The collection manifest
 retains each receipt's schema and SHA-256 so manually repeated command-line
 metadata cannot silently substitute for the governed intake record.
+Collection schema 1.2 also projects each source archive's recorded byte size
+and SHA-256 into the cumulative manifest, so reviewers can audit raw-artifact
+identity without reopening or interpreting checkpoint content.
 
 Only after the legacy workflow is terminal and its gap-free prefix manifest is
 validated, write the retention-only plan amendment. The command requires an
