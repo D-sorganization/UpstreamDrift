@@ -102,10 +102,10 @@ are not completion evidence.
   MuJoCo 3.12.0 and Pin 4.1.0 under Linux/Python 3.11.16; runtime identity is
   `015408e1cb99f48b140206eb994451d385146fc1a58030f968a63770af55f067`.
   Artifact SHA-256 is `447683487f1ea249858caea4e15326b3b37e9de446bf4d9a15bbdb7291218b80`.
-- Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70; cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 554, including run 33254179022 for 534:554.
+- Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70; cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 574, including run 33256749019 for 554:574.
 - Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero;
-  authority is 554/2,304, manifest SHA-256 `ff6e0191f4d940070310fead438762b9679a47f8fe4d8fce1630c5a236ee45dc`.
-- Run 33256749019 executes 554:574 from head `a442cf9218cd` with one process and a 90-minute timeout; the next unassigned case is 574.
+  authority is 574/2,304, manifest SHA-256 `854e643a1ea50e7756284a07af616fb35633450ff37cbd1f78e9c770dae938f8`.
+- Run 33260170654 executes 574:594 from head `676f3111de2` with one process and a 90-minute timeout; the next unassigned case is 594.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -114,7 +114,7 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Do not restart/combine the Windows diagnostic. Validate run 33256749019, then continue 20-case hosted slices from 574 against audit 33173678044; completed JSON requires its NPZ.
+1. Do not restart/combine the Windows diagnostic. Validate run 33260170654, then continue 20-case hosted slices from 594 against audit 33173678044; completed JSON requires its NPZ.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
