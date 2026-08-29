@@ -105,7 +105,8 @@ are not completion evidence.
 - Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70; cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 694, including run 33271631525 for 674:694 (issue comment 5464722724).
 - Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero;
   authority is 694/2,304 at `Campaigns/UpstreamDrift-9153-linux-collected-prefix-0694-v1`; manifest SHA-256 `cf706961fdb8638006e055a44553a0c2ef66614df5b977a1210fbccf11dba272`.
-- Run 33273691711 executes 694:714 from head `4aacb75aea60` with one process and a 90-minute timeout; the next unassigned case is 714.
+- Run 33273691711 executes 694:714 from head `4aacb75aea60` with one process and a 90-minute timeout; do not dispatch beyond 714.
+- Its legacy minimal sidecars fail the new complete-history retention contract; preserve the prefix as diagnostic evidence, not a promotable release.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -114,7 +115,7 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Do not restart/combine the Windows diagnostic. Validate run 33273691711, then continue 20-case hosted slices from 714 against audit 33173678044; completed JSON requires its NPZ.
+1. Validate run 33273691711 without restarting it. Then freeze the legacy prefix and qualify a new immutable execution revision with evidence sidecars before any further campaign dispatch.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
@@ -126,8 +127,9 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 49 pass;
-Ruff/Black and configured pre-push gates pass. Direct MyPy under local 3.13
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 53 pass;
+Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
+the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
 it does not reach project analysis. Architecture reports only pre-existing
 #9153 over-budget functions in earlier event/attribution scripts; new files add

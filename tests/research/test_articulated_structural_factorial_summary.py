@@ -31,6 +31,9 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_summary import (
     summarize_structural_factorial,
 )
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_evidence import (
+    EVIDENCE_SIDECAR_SCHEMA,
+)
 
 pytestmark = pytest.mark.scientific
 HASHES = {
@@ -66,6 +69,7 @@ def _evaluation(case: StructuralCase) -> StructuralEvaluation:
     residual = 10.0 * case.time_step_s
     return StructuralEvaluation(
         result={
+            "evidence_sidecar_schema": EVIDENCE_SIDECAR_SCHEMA,
             "horizons": [
                 {
                     "horizon_s": 0.05,
@@ -95,11 +99,39 @@ def _evaluation(case: StructuralCase) -> StructuralEvaluation:
             "q": np.zeros((2, 20)),
             "qd": np.zeros((2, 20)),
             "elastic_coordinates": np.zeros((2, 0)),
+            "elastic_velocities": np.zeros((2, 0)),
             "base_coordinates": np.zeros((2, 0)),
+            "base_velocities": np.zeros((2, 0)),
+            "station_force_on_club_n": np.zeros((2, 2, 1, 3)),
+            "active_station": np.zeros((2, 2, 1), dtype=bool),
+            "active_set_transition": np.zeros(2, dtype=bool),
             "net_club_force_n": np.zeros((2, 3)),
+            "contact_power_w": np.zeros(2),
+            "cumulative_contact_impulse_n_s": np.zeros((2, 3)),
+            "cumulative_contact_work_j": np.zeros(2),
             "maximum_station_force_n": np.zeros(2),
             "active_station_count": np.zeros(2, dtype=int),
+            "force_couple_vector_nm": np.zeros((2, 3)),
+            "grip_strain_energy_j": np.zeros(2),
+            "grip_dissipation_power_w": np.zeros(2),
+            "virtual_power_residual_w": np.zeros(2),
+            "shaft_strain_energy_j": np.zeros(2),
+            "shaft_damping_power_w": np.zeros(2),
+            "shaft_power_residual_w": np.zeros(2),
             "ground_force_n": np.zeros((2, 3)),
+            "ground_intrinsic_free_moment_nm": np.zeros(2),
+            "ground_transported_moment_nm": np.zeros(2),
+            "ground_strain_energy_j": np.zeros(2),
+            "ground_damping_power_w": np.zeros(2),
+            "ground_power_residual_w": np.zeros(2),
+            "total_mechanical_energy_j": np.zeros(2),
+            "total_energy_j": np.zeros(2),
+            "cumulative_dissipation_j": np.zeros(2),
+            "work_energy_residual_j": np.zeros(2),
+            "tip_bending_m": np.zeros((2, 2)),
+            "twist_angle_rad": np.zeros(2),
+            "base_translation_m": np.zeros((2, 2)),
+            "base_pitch_rad": np.zeros(2),
         },
     )
 
@@ -224,6 +256,34 @@ def test_summary_fails_closed_when_a_registered_checkpoint_is_missing(
     launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
 
     with pytest.raises(FileNotFoundError, match="registered checkpoint is missing"):
+        summarize_structural_factorial(
+            plan=plan,
+            launch=launch,
+            checkpoint_dir=tmp_path,
+        )
+
+
+def test_summary_rejects_legacy_minimal_sidecar_contract(tmp_path: Path) -> None:
+    plan = _fixture_plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+
+    def legacy_evaluation(case: StructuralCase) -> StructuralEvaluation:
+        evaluation = _evaluation(case)
+        result = dict(evaluation.result)
+        result.pop("evidence_sidecar_schema")
+        return StructuralEvaluation(
+            result=result,
+            parity_arrays=evaluation.parity_arrays,
+        )
+
+    run_serial_cases(
+        plan=plan,
+        launch=launch,
+        checkpoint_dir=tmp_path,
+        evaluator=legacy_evaluation,
+    )
+
+    with pytest.raises(ValueError, match="evidence sidecar schema"):
         summarize_structural_factorial(
             plan=plan,
             launch=launch,

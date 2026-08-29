@@ -42,6 +42,12 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     StructuralCase,
     StructuralEvaluation,
 )
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_evidence import (
+    EVIDENCE_SIDECAR_SCHEMA,
+    REQUIRED_EVIDENCE_ARRAYS,
+    cumulative_trapezoid,
+    validate_structural_evidence_arrays,
+)
 from scripts.research.proximal_distal_energy.spatial_full_body import (
     SpatialModel,
     forward_kinematics,
@@ -154,7 +160,7 @@ def _contact_histories(
     model: SpatialModel,
     trace: Mapping[str, NDArray[Any]],
     case: GroundIntegrationCase,
-) -> tuple[FloatArray, FloatArray]:
+) -> dict[str, NDArray[Any]]:
     shaft = build_articulated_shaft(model, case.shaft)
     ground = build_articulated_ground(case.ground)
     reference = distributed_reference_lengths(
@@ -171,6 +177,10 @@ def _contact_histories(
     base_velocity = np.asarray(trace["base_velocities"], dtype=float)
     net_force = np.empty((q.shape[0], 3))
     power = np.empty(q.shape[0])
+    station_force = np.empty((q.shape[0], 2, case.grip.station_count_per_hand, 3))
+    active_station = np.empty(
+        (q.shape[0], 2, case.grip.station_count_per_hand), dtype=bool
+    )
     for index in range(q.shape[0]):
         contact = evaluate_ground_coupled_grip(
             model,
@@ -195,7 +205,47 @@ def _contact_histories(
             club_power += float(generalized[elastic_slice] @ eta_dot[index])
         net_force[index] = contact.net_club_force_n
         power[index] = club_power
-    return net_force, power
+        station_force[index] = contact.force_on_club_n
+        active_station[index] = contact.active_station
+    return {
+        "net_club_force_n": net_force,
+        "contact_power_w": power,
+        "station_force_on_club_n": station_force,
+        "active_station": active_station,
+    }
+
+
+def _evidence_arrays(
+    *,
+    trace: Mapping[str, NDArray[Any]],
+    contact: Mapping[str, NDArray[Any]],
+) -> dict[str, NDArray[Any]]:
+    """Build the complete reviewer and falsification sidecar for one case."""
+
+    time_s = np.asarray(trace["time_s"], dtype=float)
+    active_station = np.asarray(contact["active_station"], dtype=bool)
+    transitions = np.zeros(time_s.size, dtype=bool)
+    transitions[1:] = np.any(active_station[1:] != active_station[:-1], axis=(1, 2))
+    net_force = np.asarray(contact["net_club_force_n"], dtype=float)
+    contact_power = np.asarray(contact["contact_power_w"], dtype=float)
+    evidence: dict[str, NDArray[Any]] = {
+        name: np.asarray(trace[name])
+        for name in REQUIRED_EVIDENCE_ARRAYS
+        if name in trace
+    }
+    evidence.update(
+        {
+            "station_force_on_club_n": np.asarray(contact["station_force_on_club_n"]),
+            "active_station": active_station,
+            "active_set_transition": transitions,
+            "net_club_force_n": net_force,
+            "contact_power_w": contact_power,
+            "cumulative_contact_impulse_n_s": cumulative_trapezoid(net_force, time_s),
+            "cumulative_contact_work_j": cumulative_trapezoid(contact_power, time_s),
+        }
+    )
+    validate_structural_evidence_arrays(evidence)
+    return evidence
 
 
 def _horizon_rows(
@@ -313,15 +363,16 @@ def evaluate_structural_case(
     )
     forward = GroundForwardConfig(duration_s=0.05, time_steps_s=steps)
     trace = integrate_articulated_ground(model, integration_case, forward)
-    contact_force, contact_power = _contact_histories(
-        model=model, trace=trace, case=integration_case
-    )
+    contact = _contact_histories(model=model, trace=trace, case=integration_case)
+    contact_force = np.asarray(contact["net_club_force_n"], dtype=float)
+    contact_power = np.asarray(contact["contact_power_w"], dtype=float)
     residual = np.asarray(trace["work_energy_residual_j"], dtype=float)
     energy = np.asarray(trace["total_energy_j"], dtype=float)
     normalized_residual = float(np.max(np.abs(residual)) / max(1.0, np.ptp(energy)))
     result = {
         "engine": engine,
         "estimand": "within_synthetic_model_structural_intervention",
+        "evidence_sidecar_schema": EVIDENCE_SIDECAR_SCHEMA,
         "horizons": _horizon_rows(
             model=model,
             trace=trace,
@@ -357,17 +408,7 @@ def evaluate_structural_case(
     }
     return StructuralEvaluation(
         result=result,
-        parity_arrays={
-            "time_s": np.asarray(trace["time_s"]),
-            "q": np.asarray(trace["q"]),
-            "qd": np.asarray(trace["qd"]),
-            "elastic_coordinates": np.asarray(trace["elastic_coordinates"]),
-            "base_coordinates": np.asarray(trace["base_coordinates"]),
-            "net_club_force_n": contact_force,
-            "maximum_station_force_n": np.asarray(trace["maximum_station_force_n"]),
-            "active_station_count": np.asarray(trace["active_station_count"]),
-            "ground_force_n": np.asarray(trace["ground_force_n"]),
-        },
+        parity_arrays=_evidence_arrays(trace=trace, contact=contact),
     )
 
 

@@ -445,6 +445,16 @@ python3 -m scripts.research.proximal_distal_energy.make_articulated_structural_f
   --outcome final_club_translation_speed_m_s \
   --output docs/research/proximal_distal_energy_transfer/figures/fig_structural_factorial_club_speed
 
+Every completed checkpoint used for promotion must declare and pass
+`articulated-structural-factorial-evidence/1.0.0`. The validator requires the
+complete position/velocity, station-force and active-set, net-force and power,
+cumulative impulse/work, structural/ground, energy/dissipation, and closure
+histories and recomputes their integral identities. Execution revision
+`2e5145f...` predates this retention contract: its gap-free checkpoints remain
+recoverable operational diagnostics, but the governed summary now rejects them
+rather than implying that its minimal parity sidecars support the required
+reviewer figures or complete #9153 evidence package.
+
 The registered Windows execution treats robotics Pinocchio absence as a typed
 missing cell. The system Python resolves the unrelated `pinocchio==0.4.3`
 distribution, whose module advertises version 0.1, while the qualified robotics

@@ -28,6 +28,10 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_la
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit import (
     validate_runtime_audit,
 )
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_evidence import (
+    EVIDENCE_SIDECAR_SCHEMA,
+    validate_structural_evidence_arrays,
+)
 
 FloatArray = NDArray[np.float64]
 _DIRECT_OUTCOMES = (
@@ -72,8 +76,15 @@ def _result(checkpoint: StructuralCheckpoint) -> Mapping[str, Any]:
 
 
 def _sidecar(checkpoint: StructuralCheckpoint) -> dict[str, NDArray[Any]]:
+    result = _result(checkpoint)
+    if result.get("evidence_sidecar_schema") != EVIDENCE_SIDECAR_SCHEMA:
+        raise ValueError(
+            "completed checkpoint lacks the registered evidence sidecar schema"
+        )
     with np.load(checkpoint.path.with_suffix(".npz"), allow_pickle=False) as source:
-        return {name: np.asarray(source[name]) for name in source.files}
+        arrays = {name: np.asarray(source[name]) for name in source.files}
+    validate_structural_evidence_arrays(arrays)
+    return arrays
 
 
 def _horizon_rows(result: Mapping[str, Any]) -> tuple[Mapping[str, Any], ...]:
@@ -497,6 +508,9 @@ def summarize_structural_factorial(
     checkpoints = load_registered_checkpoints(
         plan=plan, launch=launch, checkpoint_dir=checkpoint_dir
     )
+    for checkpoint in checkpoints:
+        if checkpoint.status == "completed":
+            _sidecar(checkpoint)
     gates = _mapping(plan.get("gates"), name="gates")
     counts = Counter(checkpoint.status for checkpoint in checkpoints)
     individual_pass = {
