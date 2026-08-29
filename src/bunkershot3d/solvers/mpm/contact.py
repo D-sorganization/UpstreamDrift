@@ -111,6 +111,14 @@ class BodyContact:
         n_contacts: Grid nodes this body projected.
         n_swept: Of those, nodes reached only by the swept test.
         n_pushed_out: Particles this body's backstop had to reposition.
+        nodes: The node-resolved ledger the summary above was reduced
+            from -- the same :class:`~.body.ContactImpulse` the projection
+            returned, kept rather than discarded. A summed impulse cannot
+            say *where on the body* the sand arrived, and that is exactly
+            what #8712 asks of the ball, so the resolution is retained on
+            the ledger rather than recomputed later from a pose that has
+            since moved. It costs the projected nodes of one step, which
+            is tens of rows.
     """
 
     force_n_per_m: NDArray[np.float64]
@@ -120,6 +128,7 @@ class BodyContact:
     n_contacts: int
     n_swept: int
     n_pushed_out: int
+    nodes: ContactImpulse = NO_CONTACT
 
 
 def contact_order(bodies: Sequence[RigidSection]) -> tuple[int, ...]:
@@ -274,6 +283,7 @@ def ledger_from_impulses(
             n_contacts=impulse.n_contacts,
             n_swept=impulse.n_swept,
             n_pushed_out=int(count),
+            nodes=impulse,
         )
         for body, impulse, count in zip(bodies, impulses, pushed, strict=True)
     )
