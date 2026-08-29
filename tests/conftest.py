@@ -21,6 +21,19 @@ os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 os.environ.setdefault("MPLBACKEND", "Agg")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 # ---------------------------------------------------------------------------
+# Issue #9220: generated run output must never land inside the checkout.
+# ``OutputManager``'s default base path is the documented interactive/CLI
+# location ``<repo>/output``; the *tests* redirect it instead of the default
+# being made test-shaped. Set at import time -- before any test module is
+# collected -- so it cannot be defeated by autouse-fixture ordering.
+# ---------------------------------------------------------------------------
+import tempfile as _tempfile
+
+os.environ.setdefault(
+    "UPSTREAM_DRIFT_OUTPUT_DIR",
+    _tempfile.mkdtemp(prefix="upstream_drift_test_output_"),
+)
+# ---------------------------------------------------------------------------
 # Patch broken transitive imports before any test module is collected.
 # Other agents are refactoring src.shared.python.data_io and
 # src.shared.python.config, which temporarily removes symbols that

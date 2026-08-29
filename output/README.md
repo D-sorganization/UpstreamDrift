@@ -13,6 +13,21 @@ data (and analysis results, if requested) is saved as JSON under
 caller in `SimulationResponse.export_paths`. A failed run persists nothing,
 so `export_paths` is empty in that case — it is never fabricated.
 
+## Choosing the Output Location (Issue #9220)
+
+`OutputManager` resolves its base directory in this order:
+
+1. an explicit `base_path` argument;
+2. the `UPSTREAM_DRIFT_OUTPUT_DIR` environment variable;
+3. this directory — `<repository root>/output`.
+
+The test suite sets `UPSTREAM_DRIFT_OUTPUT_DIR` to a temporary directory in
+`tests/conftest.py`, so a test run never writes generated files into the
+checkout. Previously the root-detection heuristic stopped at `src/` (because
+`src/engines` exists) and dropped untracked
+`src/output/simulations/<engine>/simulation_*.json` files into the source
+tree on every run.
+
 ## Directory Structure
 
 ```

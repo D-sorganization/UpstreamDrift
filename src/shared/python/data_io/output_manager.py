@@ -44,6 +44,9 @@ from ._async_io import (
 # Submodule imports — re-exported for backward compatibility
 from ._format_handlers import OutputFormat, dispatch_load, dispatch_save
 from ._path_utils import (
+    OUTPUT_DIR_ENV_VAR as OUTPUT_DIR_ENV_VAR,  # re-exported (issue #9220)
+)
+from ._path_utils import (
     create_output_structure,
     fast_dir_scan,
     resolve_base_path,

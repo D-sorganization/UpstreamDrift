@@ -18,6 +18,40 @@ from .common_utils import get_logger
 
 logger = get_logger(__name__)
 
+#: Environment variable overriding the default output base directory.
+OUTPUT_DIR_ENV_VAR = "UPSTREAM_DRIFT_OUTPUT_DIR"
+
+
+def find_project_root(start: Path | None = None) -> Path | None:
+    """Return the repository root above ``start``, or ``None`` when not found.
+
+    The previous heuristic accepted any ancestor containing a directory named
+    ``engines``, which matches ``src/`` (``src/engines`` exists), so the default
+    output directory resolved to ``src/output`` and dropped generated run
+    artifacts into the source tree (issue #9220).
+
+    ``pyproject.toml`` alone is not a unique marker either -- several packages
+    nested under ``src/`` ship one. So the checkout's ``.git`` entry is tried
+    first (a file in a worktree, a directory in a normal clone), falling back
+    to the *outermost* ancestor carrying a ``pyproject.toml`` for installs that
+    are not a git checkout.
+
+    Args:
+        start: Path to search upwards from. Defaults to this module.
+
+    Returns:
+        The detected project root, or ``None`` when no marker is found.
+    """
+    origin = (start or Path(__file__)).resolve()
+    candidates = (origin, *origin.parents)
+
+    git_root = next((p for p in candidates if (p / ".git").exists()), None)
+    if git_root is not None:
+        return git_root
+
+    pyproject_roots = [p for p in candidates if (p / "pyproject.toml").is_file()]
+    return pyproject_roots[-1] if pyproject_roots else None
+
 
 def sanitize_filename(filename: str, format_type: OutputFormat) -> str:
     """
@@ -115,27 +149,29 @@ def resolve_base_path(base_path: Any) -> Path:
     """
     Resolve the base output path, auto-detecting the project root when None.
 
+    Resolution order when ``base_path`` is ``None`` (issue #9220):
+
+    1. ``UPSTREAM_DRIFT_OUTPUT_DIR`` when set -- the override the test suite
+       uses so that no run writes generated output into the checkout.
+    2. ``<project root>/output`` -- the documented interactive/CLI location
+       described by ``output/README.md``.
+    3. ``<cwd>/output`` when no project root can be located.
+
     Args:
         base_path: Explicit path, or None to auto-detect.
 
     Returns:
         Resolved and created base Path.
     """
-    if base_path is None:
-        current_path = Path(__file__).resolve()
-        project_root = current_path
-
-        while project_root.parent != project_root:
-            if (project_root / ".git").exists() or (project_root / "engines").exists():
-                break
-            project_root = project_root.parent
-
-        if (project_root / "engines").exists():
-            resolved = project_root / "output"
-        else:
-            resolved = Path.cwd() / "output"
-    else:
+    if base_path is not None:
         resolved = Path(base_path)
+    else:
+        override = os.environ.get(OUTPUT_DIR_ENV_VAR)
+        if override:
+            resolved = Path(override).expanduser()
+        else:
+            project_root = find_project_root()
+            resolved = (project_root or Path.cwd()) / "output"
 
     resolved.mkdir(parents=True, exist_ok=True)
     return resolved
