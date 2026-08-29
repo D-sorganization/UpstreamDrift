@@ -551,6 +551,23 @@ class FieldProvenance:
         object.__setattr__(self, "settings", MappingProxyType(dict(self.settings)))
         object.__setattr__(self, "seeds", tuple(self.seeds))
 
+    def setting(self, name: str, default: float | int | str = 0.0) -> float | int | str:
+        """Return one recorded solver setting, or ``default`` if absent.
+
+        Callers want a single stated assumption -- an effective width, a
+        timestep -- not the whole mapping, and reaching through
+        ``provenance.settings`` to ask makes every one of them depend on
+        the settings being a mapping at all.
+
+        Args:
+            name: The setting's key.
+            default: Returned when the run recorded no such setting.
+
+        Returns:
+            The recorded value, or ``default``.
+        """
+        return self.settings.get(name, default)
+
     @property
     def speed_ratio(self) -> float:
         """Peak speed as a multiple of :data:`MAX_VALIDATED_SPEED_M_S`.

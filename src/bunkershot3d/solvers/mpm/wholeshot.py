@@ -72,6 +72,7 @@ import math
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -92,6 +93,7 @@ __all__ = [
     "DEFAULT_TRAVEL_SPANS",
     "F1ShotResult",
     "F1ShotSettings",
+    "ShotFieldRecorder",
     "simulate_f1_shot",
 ]
 
@@ -237,6 +239,59 @@ class F1ShotResult:
         )
 
 
+class ShotFieldRecorder(Protocol):
+    """Something that wants to look at the bed as the shot marches past.
+
+    The march advances one particle bed in place, so the only moment the
+    sand field of a *whole shot* exists is during the loop. Anything that
+    wants it -- issue #8729's volumetric view, most immediately -- has to
+    be handed it there rather than reconstructing it afterwards from the
+    final bed, which is one instant and not a record.
+
+    Deliberately a structural protocol over solver types this module
+    already imports, so :mod:`bunkershot3d.fields` can implement it
+    without this module importing :mod:`bunkershot3d.fields` back.
+
+    A recorder must not mutate what it is handed. The arrays it sees are
+    the live solve; copying is the recorder's job, and
+    :func:`~bunkershot3d.fields.shotcapture.capture_f1_shot_field` does
+    it by sampling onto the grid rather than by holding a reference.
+    """
+
+    def begin(
+        self,
+        grid: PlaneStrainGrid,
+        *,
+        time_step_s: float,
+        n_steps: int,
+    ) -> None:
+        """Told the march's shape before the first step.
+
+        Args:
+            grid: The lattice the whole march runs on; it does not move.
+            time_step_s: The CFL step [s].
+            n_steps: The step budget, so a recorder can pick a stride.
+        """
+
+    def sample(
+        self,
+        time_s: float,
+        particles: ParticleState,
+        section: RigidSection,
+    ) -> None:
+        """Offered one instant of the march.
+
+        Called before the first step and after every step, so a recorder
+        that keeps everything sees the undisturbed bed first. Whether to
+        keep any given instant is the recorder's own decision.
+
+        Args:
+            time_s: Elapsed time at this instant [s].
+            particles: The live particle bed. Not to be retained.
+            section: The head's pose at this instant.
+        """
+
+
 @dataclass(slots=True)
 class _Columns:
     """Per-step columns of the shot, accumulated as lists.
@@ -280,6 +335,7 @@ def simulate_f1_shot(
     *,
     settings: F1ShotSettings,
     extra_bodies: Sequence[RigidSection] = (),
+    recorder: ShotFieldRecorder | None = None,
 ) -> F1ShotResult:
     """March the head's real trajectory once and read the wrench off it.
 
@@ -295,6 +351,12 @@ def simulate_f1_shot(
         extra_bodies: Further bodies marched alongside the head -- the
             ball of :mod:`.ball`, for instance. They are rigid and
             prescribed; only the head is integrated.
+        recorder: Offered every instant of the march as it happens
+            (issue #8729). The bed is advanced in place, so a whole
+            shot's sand *field* only exists during the loop; a caller
+            that wants it has to be handed it here. Recording changes
+            nothing about the trajectory -- the recorder is only shown
+            the state, never asked about it.
 
     Returns:
         The shot, its trace and the solve behind it.
@@ -317,8 +379,14 @@ def simulate_f1_shot(
     verdict.require_usable(solver.refusal_policy)
 
     plan = _plan(solver, state, settings, tuple(extra_bodies))
+    if recorder is not None:
+        recorder.begin(
+            plan.context.grid,
+            time_step_s=plan.context.time_step_s,
+            n_steps=plan.n_steps,
+        )
     started = time.perf_counter()
-    columns, head, extra, exited, truncated = _march(plan)
+    columns, head, extra, exited, truncated = _march(plan, recorder)
     contacted = any(step.n_contacts > 0 for step in columns.steps)
     run = MPMRun(
         steps=tuple(columns.steps),
@@ -470,6 +538,7 @@ def _build_bed(
 
 def _march(
     plan: _Plan,
+    recorder: ShotFieldRecorder | None = None,
 ) -> tuple[_Columns, RigidSection, tuple[RigidSection, ...], bool, bool]:
     """Integrate the head until it comes out, stops, or the budget ends.
 
@@ -499,6 +568,12 @@ def _march(
     extra = plan.extra
     entered = False
     elapsed = 0.0
+    # The undisturbed bed, before anything has touched it. It is the
+    # reference every later frame is read against: without it an animation
+    # opens on sand that is already moving and gives no sense of what the
+    # club changed.
+    if recorder is not None:
+        recorder.sample(0.0, plan.particles, head)
 
     for _ in range(plan.n_steps):
         elapsed += step_s
@@ -507,6 +582,8 @@ def _march(
         )
         sole_depth = settings.free_surface_height_m - float(head.bounds_m()[0][1])
         _record(columns, plan, head, diagnostic, sole_depth, elapsed - step_s)
+        if recorder is not None:
+            recorder.sample(elapsed, plan.particles, head)
 
         if entered and sole_depth <= 0.0:
             return columns, head, extra, True, False

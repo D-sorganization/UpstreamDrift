@@ -76,6 +76,8 @@ from .crosstier import CrossTierComparison
 from .render import RENDERER as MATPLOTLIB_RENDERER
 from .render import ViewportFallback
 from .render3d import SceneScale, ShotSceneArtists, scene_scale
+from .render3d_sand import SandVolumeArtists
+from .sandvolume import SandVolumeScale
 from .render3d_vtk import VtkSceneArtists
 from .render_crosstier import CrossTierArtists
 from .render_slice import SliceArtists
@@ -158,6 +160,7 @@ class ShotViewportWidget(QWidget):
         self._vtk_artists: VtkSceneArtists | None = None
         self._vtk_image: AxesImage | None = None
         self._scale: SceneScale | None = None
+        self._sand_scale: SandVolumeScale | None = None
         self._band: ValidityBand | None = None
         self._frame = 0
         self._fallback: ViewportFallback = _MATPLOTLIB_FALLBACK
@@ -222,6 +225,22 @@ class ShotViewportWidget(QWidget):
         return self._scale
 
     @property
+    def sand(self) -> SandVolumeArtists | None:
+        """The solved sand field's artists, when this tier resolved one.
+
+        ``None`` at F0, which moves no sand at all, and ``None`` on the
+        VTK path, whose sand lives inside the plotter rather than in a
+        matplotlib artist. Either way it answers the question a caller is
+        actually asking: is there solved sand on screen.
+        """
+        return None if self._artists is None else self._artists.sand
+
+    @property
+    def sand_scale(self) -> SandVolumeScale | None:
+        """The fixed sand colour ramp in force, or ``None`` when empty."""
+        return self._sand_scale
+
+    @property
     def renderer_note(self) -> str:
         """What actually drew the current frame -- never mere availability."""
         return self._describe_fallback()
@@ -235,6 +254,7 @@ class ShotViewportWidget(QWidget):
         scale: SceneScale | None = None,
         band: ValidityBand | None = None,
         build: HeadBuild | None = None,
+        sand_scale: SandVolumeScale | None = None,
     ) -> None:
         """Load one scene and open on its deepest moment.
 
@@ -250,12 +270,20 @@ class ShotViewportWidget(QWidget):
                 :mod:`~.render3d_vtk` instead of :mod:`~.render3d`: without
                 it there is no mesh to pose, so the view stays on the
                 matplotlib path even when a VTK provider is installed.
+            sand_scale: The fixed colour ramp for the solved sand field,
+                shared with any other design this one is compared against
+                (issue #8729). Defaults to this field's own coverage,
+                which is right alone and wrong in a comparison -- two
+                designs each normalised to their own fastest sand look
+                equally fast, which is issue #8728's defect in the
+                volume.
 
         Raises:
             ValueError: If the band does not describe the same shot.
         """
         self._scene = scene
         self._scale = scene_scale((scene,)) if scale is None else scale
+        self._sand_scale = sand_scale
         self._band = band
         self._frame = int(scene.sole_depth_m.argmax())
         self._close_vtk()
@@ -269,7 +297,12 @@ class ShotViewportWidget(QWidget):
         else:
             self._fallback = _MATPLOTLIB_FALLBACK
             self._artists = ShotSceneArtists(
-                self._canvas.fig, scene, self._scale, camera=self.camera, band=band
+                self._canvas.fig,
+                scene,
+                self._scale,
+                camera=self.camera,
+                band=band,
+                sand_scale=sand_scale,
             )
             self._redraw()
         self._refresh_renderer_note()
@@ -280,6 +313,7 @@ class ShotViewportWidget(QWidget):
         self._artists = None
         self._close_vtk()
         self._scale = None
+        self._sand_scale = None
         self._band = None
         self._frame = 0
         self._fallback = _MATPLOTLIB_FALLBACK
@@ -315,7 +349,12 @@ class ShotViewportWidget(QWidget):
             return None
         try:
             artists = VtkSceneArtists(
-                scene, build, scale, camera=self.camera, band=band
+                scene,
+                build,
+                scale,
+                camera=self.camera,
+                band=band,
+                sand_scale=self._sand_scale,
             )
             artists.update(self._frame)
             image = artists.image_array()

@@ -174,6 +174,7 @@ from .wholeshot import (
     DEFAULT_TRAVEL_SPANS,
     F1ShotResult,
     F1ShotSettings,
+    ShotFieldRecorder,
     simulate_f1_shot,
 )
 
@@ -248,6 +249,7 @@ __all__ = [
     "RigidSection",
     "SandContinuum",
     "SandVersusClub",
+    "ShotFieldRecorder",
     "StepContext",
     "StepDiagnostics",
     "SurfaceDepression",

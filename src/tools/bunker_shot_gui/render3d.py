@@ -81,13 +81,18 @@ from numpy.typing import NDArray
 
 from src.shared.python.visualization.viewport import ViewportOverlayPayload
 
+from bunkershot3d.fields.schema import FieldQuantity
+
 from .render import (
     ViewportFallback,
     stamp_axes,
     validity_stamp,
     viewport_fallback,
 )
+from .render3d_sand import SandVolumeArtists
+from .sandvolume import SandVolumeScale, sand_volume_scale
 from .shot3d import CameraPreset, ShotScene, viewport_payload
+from .slices import CursorMap
 from .traces import ValidityBand
 
 __all__ = [
@@ -167,6 +172,25 @@ white border but the caption's own reserved band -- see
 
 _NOTE_WIDTH_FRACTION = 0.97
 """Fraction of the axes width the wrapped footer caption may use."""
+
+_NOTE_LINE_SPACING = 1.35
+"""Baseline-to-baseline spacing as a multiple of the font size."""
+
+_LABEL_BAND_FRACTION = 0.14
+"""Figure fraction reserved above the caption for the x-axis furniture.
+
+``mplot3d`` hangs the x label and its ticks below the panel it squared to
+the frame's width, so this is the room they need over and above the
+caption's own height."""
+
+_MIN_BOTTOM_MARGIN = 0.21
+_MAX_BOTTOM_MARGIN = 0.34
+"""Bounds on the caption band, as a figure fraction.
+
+The floor is what issue #8706 reserved for a three-line caption. The
+ceiling stops a pathological wrap from squeezing the scene out of its own
+frame -- better a caption that runs slightly long than a picture with
+nowhere to be."""
 
 _NOTE_TOP_MARGIN_FIG_FRACTION = 0.02
 """How far the caption's *last* line sits above the physical bottom of the
@@ -269,20 +293,42 @@ def _scale_for(scene: ShotScene) -> SceneScale:
     surface = scene.surface
     along = surface.along_extent_m
     across = surface.across_extent_m
+    sand_x, sand_y, sand_z = _sand_bounds(scene)
     return SceneScale(
         x_m=_padded(
-            min(along[0], float(corners[:, 0].min())),
-            max(along[1], float(corners[:, 0].max())),
+            min(along[0], float(corners[:, 0].min()), sand_x[0]),
+            max(along[1], float(corners[:, 0].max()), sand_x[1]),
         ),
         y_m=_padded(
-            min(across[0], float(corners[:, 1].min())),
-            max(across[1], float(corners[:, 1].max())),
+            min(across[0], float(corners[:, 1].min()), sand_y[0]),
+            max(across[1], float(corners[:, 1].max()), sand_y[1]),
         ),
         z_m=_padded(
-            float(corners[:, 2].min()),
-            max(float(corners[:, 2].max()), surface.height_m),
+            min(float(corners[:, 2].min()), sand_z[0]),
+            max(float(corners[:, 2].max()), surface.height_m, sand_z[1]),
         ),
         depth_m=(0.0, max(scene.divot.max_depth_m, 1e-4)),
+    )
+
+
+def _sand_bounds(
+    scene: ShotScene,
+) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float]]:
+    """The world span the sand volume occupies, or a span that changes nothing.
+
+    A box framed on the head alone crops the sand thrown past it, and
+    material drawn outside the axes is simply drawn wrong -- the first
+    real render of a captured field put half the plume beyond the
+    right-hand wall. Infinities are the identity here: at F0 there is no
+    sand, and this must widen nothing.
+    """
+    sand = scene.sand
+    if sand is None:
+        return ((np.inf, -np.inf), (np.inf, -np.inf), (np.inf, -np.inf))
+    return (
+        (float(sand.along_m.min()), float(sand.along_m.max())),
+        (float(sand.across_m.min()), float(sand.across_m.max())),
+        (float(sand.up_m.min()), float(sand.up_m.max())),
     )
 
 
@@ -414,6 +460,7 @@ class ShotSceneArtists:
         *,
         camera: CameraPreset = CameraPreset.DOWN_THE_LINE,
         band: ValidityBand | None = None,
+        sand_scale: SandVolumeScale | None = None,
     ) -> None:
         """Build the axes for one scene.
 
@@ -422,6 +469,11 @@ class ShotSceneArtists:
             scene: The scene to draw.
             scale: The fixed world box and depth ramp.
             camera: Which named view to open on.
+            sand_scale: The fixed colour ramp for the sand field, when the
+                scene carries one. Defaults to this field's own coverage,
+                which is right for a single design and **wrong** for a
+                comparison -- pass a merged ramp there, the same way
+                ``scale`` is merged (issue #8728).
             band: The per-sample validity band, when there is one. With it
                 the stamp shows the verdict *at the drawn moment*; without
                 it, the one verdict the whole scene carries.
@@ -450,6 +502,7 @@ class ShotSceneArtists:
         axes = figure.add_subplot(111, projection="3d")
         self._axes: Axes3D = axes
         self._build_surface()
+        self._sand = self._build_sand(sand_scale)
         self._floor = self._build_floor()
         self._trail = self._new_line(_PATH_COLOUR, 1.2, "sole reference path")
         self._head_mesh = self._build_head_mesh()
@@ -497,6 +550,38 @@ class ShotSceneArtists:
     def scale(self) -> SceneScale:
         """The fixed world box in force."""
         return self._scale
+
+    @property
+    def sand(self) -> SandVolumeArtists | None:
+        """The sand field's artists, or ``None`` when the tier solved none.
+
+        ``None`` is the honest answer at F0, which moves no sand at all:
+        its flat plane is a boundary condition and the caption says so.
+        """
+        return self._sand
+
+    def _build_sand(self, scale: SandVolumeScale | None) -> SandVolumeArtists | None:
+        """Add the sand volume's artists, when this scene carries one.
+
+        The cursor map is built here rather than passed in because the two
+        clocks are a property of this pairing: the shot is sampled every
+        CFL step and the field every stride block, so the sand has far
+        fewer frames than the pose does and one has to be mapped onto the
+        other. :class:`~.slices.CursorMap` is the same mapping the 2-D
+        slice view already uses, so both views land on the same moment.
+        """
+        volume = self._scene.sand
+        if volume is None:
+            return None
+        self._cursor = CursorMap(
+            n_transport=self._scene.n_frames, n_field=volume.n_frames
+        )
+        return SandVolumeArtists(
+            self._axes,
+            volume,
+            sand_volume_scale((volume,)) if scale is None else scale,
+            quantity=FieldQuantity.VELOCITY,
+        )
 
     # ------------------------------------------------------------- building
 
@@ -672,6 +757,12 @@ class ShotSceneArtists:
         chosen = CameraPreset(camera)
         self._camera = chosen
         self._axes.view_init(elev=chosen.elevation_deg, azim=chosen.azimuth_deg)
+        if self._sand is not None:
+            # The flow arrows ride one sheet of the extrusion; which one has
+            # to follow the eye, or the sheets in front hide them. The
+            # preset already states a backend-neutral eye direction, so
+            # this needs no matplotlib-specific camera maths.
+            self._sand.set_eye_direction(chosen.eye_direction)
         self._set_y_label()
         self._recompute_note()
         self._refresh_note()
@@ -693,8 +784,12 @@ class ShotSceneArtists:
         scene = self._scene
         lines = (
             f"{self._camera.label} - {self._camera.description}",
-            scene.surface.describe(),
-            scene.divot.describe(),
+            *scene.sand_note(),
+            *(
+                (self._sand.viewing_note(), self._sand.legend_label())
+                if self._sand is not None
+                else ()
+            ),
         )
         axes = self._axes
         figure = axes.figure
@@ -721,9 +816,47 @@ class ShotSceneArtists:
         # rectangle subplots_adjust was given, an axes-fraction anchor
         # would put the caption back under the tick labels the reserved
         # bottom margin exists to clear.
+        # Reserve the band from the caption's own height rather than from a
+        # constant. Issue #8729 added three lines to it -- the extrusion
+        # sentence, how the camera is cutting it, and the ramp's fixed
+        # range -- and a band sized for the old three-line caption put the
+        # first of them straight through the x-axis label.
+        self._reserve_caption_band(len(wrapped))
+        axes.apply_aspect()
+        axes_bbox = axes.get_window_extent(renderer=renderer)
         target_px = _NOTE_TOP_MARGIN_FIG_FRACTION * figure.bbox.height
         anchor_y = (target_px - axes_bbox.y0) / axes_bbox.height
         self._note_position = (0.02, anchor_y)
+
+    def _reserve_caption_band(self, n_lines: int) -> None:
+        """Give the caption band the height this caption actually needs.
+
+        Issue #8729 took the caption from three lines to eight -- the
+        extrusion sentence, how the camera is cutting it, and the ramp's
+        fixed range -- and the band #8706 sized for three put the first of
+        them straight through the x-axis label.
+
+        Computed rather than measured. ``mplot3d`` positions its axis
+        labels during a draw, so asking one where it is beforehand
+        answers for wherever it was last, and a corrective loop fed by
+        that measurement drives the panel to its stop on the first pass.
+        The line count is known here and the pad above the caption is the
+        one free parameter, so the arithmetic is the honest way round.
+
+        The floor is #8706's own band, so a short caption -- an F0 shot's
+        three lines -- lays out exactly as it did before.
+
+        Args:
+            n_lines: Wrapped lines the caption will draw.
+        """
+        figure = self._axes.figure
+        line_px = _NOTE_FONTSIZE * _NOTE_LINE_SPACING * figure.dpi / 72.0
+        caption = (n_lines * line_px) / max(float(figure.bbox.height), 1.0)
+        bottom = min(
+            max(caption + _LABEL_BAND_FRACTION, _MIN_BOTTOM_MARGIN),
+            _MAX_BOTTOM_MARGIN,
+        )
+        figure.subplots_adjust(**{**_FIGURE_MARGINS, "bottom": bottom})
 
     def _refresh_note(self) -> None:
         """Re-apply the caption :meth:`_recompute_note` last wrapped."""
@@ -778,6 +911,10 @@ class ShotSceneArtists:
         trail = scene.sole_reference_world_m[: index + 1] * _MM_PER_M
         self._trail.set_data_3d(trail[:, 0], trail[:, 1], trail[:, 2])
         self._floor.set_data_3d(*self._floor_track(index))
+        if self._sand is not None:
+            # Mapped, not used directly: the sand's clock is the capture's
+            # stride and the pose's is the CFL step.
+            self._sand.update(self._cursor.field_frame(index))
 
         moment_ms = float(scene.time_s[index]) * 1e3
         depth_mm = float(scene.sole_depth_m[index]) * 1e3
@@ -806,6 +943,7 @@ def draw_scene_frame(
     scale: SceneScale | None = None,
     camera: CameraPreset = CameraPreset.DOWN_THE_LINE,
     band: ValidityBand | None = None,
+    sand_scale: SandVolumeScale | None = None,
 ) -> ShotSceneArtists:
     """Draw one sample of one scene into an existing figure.
 
@@ -823,6 +961,8 @@ def draw_scene_frame(
             **wrong** for a comparison -- pass the merged scale there.
         camera: Which named view to open on.
         band: The per-sample validity band, when there is one.
+        sand_scale: The fixed sand colour ramp; see
+            :class:`ShotSceneArtists`.
 
     Returns:
         The built artists, ready to be updated to another frame.
@@ -832,7 +972,9 @@ def draw_scene_frame(
             describe the same shot as the scene.
     """
     limits = scene_scale((scene,)) if scale is None else scale
-    artists = ShotSceneArtists(figure, scene, limits, camera=camera, band=band)
+    artists = ShotSceneArtists(
+        figure, scene, limits, camera=camera, band=band, sand_scale=sand_scale
+    )
     artists.update(frame)
     return artists
 
@@ -844,6 +986,7 @@ def shot_scene_still(
     scale: SceneScale | None = None,
     camera: CameraPreset = CameraPreset.DOWN_THE_LINE,
     band: ValidityBand | None = None,
+    sand_scale: SandVolumeScale | None = None,
     figsize: tuple[float, float] = (8.0, 6.0),
 ) -> Figure:
     """Render one frame as a standalone figure -- the ADR-0027 fallback.
@@ -855,6 +998,8 @@ def shot_scene_still(
         scale: The fixed world box; see :func:`draw_scene_frame`.
         camera: Which named view.
         band: The per-sample validity band, when there is one.
+        sand_scale: The fixed sand colour ramp; see
+            :class:`ShotSceneArtists`.
         figsize: Figure size in inches.
 
     Returns:
@@ -865,5 +1010,13 @@ def shot_scene_still(
     """
     chosen = int(np.argmax(scene.sole_depth_m)) if frame is None else frame
     figure = Figure(figsize=figsize)
-    draw_scene_frame(figure, scene, frame=chosen, scale=scale, camera=camera, band=band)
+    draw_scene_frame(
+        figure,
+        scene,
+        frame=chosen,
+        scale=scale,
+        camera=camera,
+        band=band,
+        sand_scale=sand_scale,
+    )
     return figure
