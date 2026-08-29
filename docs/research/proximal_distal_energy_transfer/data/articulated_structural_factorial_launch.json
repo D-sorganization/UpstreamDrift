@@ -1,11 +1,17 @@
 {
-  "schema_version": "articulated-structural-factorial-launch/1.1.0",
-  "plan_sha256": "2f0f5acb705eb4470181d6293d4a5855ce015edcd56e7f52ea52cdae749c1915",
-  "execution_revision": "2e5145fdefdd837bdf7401f7f1d5dfdda1cebf4f",
+  "schema_version": "articulated-structural-factorial-launch/1.2.0",
+  "plan_sha256": "1575b1cb0ee7c5d8b42848a8c427a2379b22a156e239b01f399dc1fa2c878a87",
+  "execution_revision": "ccb171ed3185164e21c635e36de53d6a3cca3ed5",
   "registered_case_count": 2304,
   "worker_count": 1,
   "maximum_python_process_count": 1,
   "checkpoint_policy": "one_atomic_checkpoint_per_attempt",
   "parity_sidecar_policy": "one_sha256_bound_npz_per_completed_attempt",
-  "status": "ready_for_disclosed_timing_probe_then_registered_execution"
+  "status": "ready_for_disclosed_timing_probe_then_registered_execution",
+  "evidence_sidecar_schema": "articulated-structural-factorial-evidence/1.0.0",
+  "runtime_audit_schema": "articulated-structural-factorial-runtime-audit/1.4.0",
+  "enrichment_audit_schema": "articulated-structural-factorial-enrichment-audit/1.0.0",
+  "supersedes_legacy_execution_revision": "2e5145fdefdd837bdf7401f7f1d5dfdda1cebf4f",
+  "legacy_prefix_case_stop_exclusive": 714,
+  "legacy_prefix_manifest_sha256": "501d9e557036377fc25e6490da21746445b4026aeb28d1f6f569d440973334d4"
 }
