@@ -369,8 +369,10 @@ def run_launcher(launcher_class: type[BaseLauncher], **kwargs: Any) -> int:
     Returns:
         Exit code from QApplication
     """
-    app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+        app.setStyle("Fusion")
 
     window = launcher_class(**kwargs)
     window.init_ui()

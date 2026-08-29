@@ -114,8 +114,10 @@ def _build_app() -> QApplication:
     _install_exception_hook()
     _set_windows_app_user_model_id()
 
-    app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+        app.setStyle("Fusion")
     _install_global_ui_zoom(app)
     _apply_app_icon(app)
     _apply_stylesheet(app)
