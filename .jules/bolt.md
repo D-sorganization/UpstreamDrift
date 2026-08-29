@@ -8,3 +8,6 @@
 ## 2024-05-19 - Fast Multidimensional Array Magnitude
 **Learning:** `np.linalg.norm(..., axis=1)` is known to be relatively slow due to internal overhead and intermediate array allocations. Replacing it with `np.sqrt(np.einsum('ij,ij->i', ...))` is a highly effective optimization that provides a significant speedup (often 2x-4x faster for small-to-medium arrays) while keeping the code readable.
 **Action:** When computing vector norms along an axis (other than small 2D vectors where `np.hypot` is best), use `np.sqrt(np.einsum)` instead of `np.linalg.norm` to avoid intermediate allocations and speed up the computation.
+## 2024-05-19 - Fast Small Array Magnitude
+**Learning:** `np.linalg.norm()` is known to be relatively slow for small arrays (1D arrays with 2 to 6 elements) due to internal overhead and instance checks. Built-in `math.hypot()` is much faster, providing a ~2x to ~5x speedup. For arrays larger than that, `math.sqrt(np.vdot(arr, arr))` provides a ~2x speedup by bypassing `np.linalg.norm` overhead while leveraging the fast C-level `np.vdot`.
+**Action:** When computing vector norms for small 1D arrays, replace `np.linalg.norm(v)` with `math.hypot(*v)` for small arrays (length <= 6) or `math.sqrt(np.vdot(v, v))` for other 1D cases. For simple checks like `np.linalg.norm(v) > 0.0`, `np.vdot(v, v) > 0.0` completely skips the square root.

@@ -2,6 +2,9 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## Performance Enhancements (#9161)
+- Replaced instances of `np.linalg.norm` with faster mathematical equivalents (`math.hypot`, `np.vdot`, and `np.einsum`) for small vectors and multidimensional arrays in telemetry logging, screw kinematics, and bunker shot traces.
+
 ## Articulated Same-State Drift and Contact Attribution (#9151)
 
 Issue #9151 qualifies a pointwise articulated decomposition across all 234
