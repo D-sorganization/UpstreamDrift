@@ -497,6 +497,8 @@ def test_upstream_drift_launcher_main(
     mock_worker,
     mock_app,
 ) -> None:
+    # No pre-existing Qt application: the fresh-construction path must run.
+    mock_app.instance.return_value = None
     mock_app.return_value.exec.return_value = 0
     mock_splash = mock_splash_cls.return_value
     mock_worker_instance = mock_worker.return_value

@@ -489,8 +489,10 @@ def main() -> None:
     _sync_public_overrides()
     configure_gui_logging()
 
-    app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+        app.setStyle("Fusion")
 
     # Apply dark theme
     app.setStyleSheet("""

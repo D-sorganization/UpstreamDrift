@@ -166,7 +166,9 @@ def main() -> None:
 
     exercise = args.exercise or os.environ.get("BIOMECH_EXERCISE", "gait")
 
-    app = QApplication(sys.argv)
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
     window = ExerciseDashboard(
         exercise,
         preferred_engine=os.environ.get("BIOMECH_ENGINE"),
