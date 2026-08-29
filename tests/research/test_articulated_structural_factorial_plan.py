@@ -56,6 +56,20 @@ def _amendment() -> StructuralFactorialPlanAmendment:
     )
 
 
+def _committed_amendment() -> StructuralFactorialPlanAmendment:
+    return StructuralFactorialPlanAmendment(
+        legacy_execution_revision="2e5145fdefdd837bdf7401f7f1d5dfdda1cebf4f",
+        legacy_runtime_audit_run_id=33173678044,
+        terminal_workflow_run_id=33273691711,
+        terminal_conclusion="success",
+        legacy_prefix_case_stop_exclusive=714,
+        legacy_prefix_manifest_sha256=(
+            "501d9e557036377fc25e6490da21746445b4026aeb28d1f6f569d440973334d4"
+        ),
+        detected_before_scientific_outcome_inspection=True,
+    )
+
+
 def test_plan_is_a_complete_outcome_blind_binary_factorial() -> None:
     manifest = _plan().to_manifest()
 
@@ -231,9 +245,10 @@ def test_amendment_generator_requires_explicit_outcome_blind_confirmation(
 
 def test_committed_plan_matches_generator() -> None:
     committed = json.loads(PLAN_PATH.read_text(encoding="utf-8"))
-    generated = StructuralFactorialPlan(
+    plan = StructuralFactorialPlan(
         design_authority_revision=committed["identity"]["design_authority_revision"],
         authority_sha256=committed["identity"]["authority_sha256"],
-    ).to_manifest()
+    )
+    generated = plan.to_amended_manifest(_committed_amendment())
 
     assert committed == generated

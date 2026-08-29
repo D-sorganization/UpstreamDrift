@@ -1,5 +1,5 @@
 {
-  "schema_version": "articulated-structural-factorial-plan/1.2.0",
+  "schema_version": "articulated-structural-factorial-plan/1.3.0",
   "study_id": "prospective-rigid-shaft-ground-pathway-factorial",
   "identity": {
     "design_authority_revision": "01b82082d9e5fcad88293fbeb56994de0c77a8be",
@@ -16,7 +16,7 @@
   },
   "preregistration": {
     "timing": "before_combined_runner_implementation_or_execution",
-    "status": "design_frozen_execution_not_started",
+    "status": "operational_retention_amended_before_outcome_inspection",
     "amendment": "v1.1 adds the byte-identical regenerated shaft-basis NPZ and its updated formatting-only source provenance after the first disclosed timing probe failed closed; a second pre-execution audit adds full parity sidecars before restart; neither run produced eligible evidence",
     "reason": "the shaft and ground atlases used post-registered outcome matching; this design instead identifies pathway contrasts by exact within-state intervention",
     "prior_results_retained": {
@@ -26,6 +26,24 @@
       "ground_total_cells": 384,
       "rigid_refinement_failed_groups": 3,
       "pinocchio_current_status": "typed_unavailable"
+    },
+    "operational_amendment": {
+      "amendment_id": "post-operational-retention-closure-v1",
+      "timing": "after_legacy_execution_before_scientific_outcome_inspection",
+      "reason": "legacy parity sidecars retained insufficient reviewer-facing time histories; correct retention and provenance without changing the registered design, estimands, numerical gates, or interpretations",
+      "legacy_execution_revision": "2e5145fdefdd837bdf7401f7f1d5dfdda1cebf4f",
+      "legacy_runtime_audit_run_id": 33173678044,
+      "terminal_workflow_run_id": 33273691711,
+      "terminal_conclusion": "success",
+      "legacy_prefix_case_stop_exclusive": 714,
+      "legacy_prefix_manifest_sha256": "501d9e557036377fc25e6490da21746445b4026aeb28d1f6f569d440973334d4",
+      "detected_before_scientific_outcome_inspection": true,
+      "registered_design_or_gate_change": false,
+      "legacy_prefix_promotable": false,
+      "legacy_revision_resume_permitted": false,
+      "requires_full_legacy_prefix_replay": true,
+      "requires_exact_enrichment_audit": true,
+      "base_plan_sha256": "2f0f5acb705eb4470181d6293d4a5855ce015edcd56e7f52ea52cdae749c1915"
     }
   },
   "design": {
@@ -352,15 +370,20 @@
     "maximum_python_process_count": 1,
     "maximum_logical_cpu_count": 2,
     "checkpoint_policy": "one_atomic_checkpoint_per_attempt",
-    "parity_sidecar_policy": "each completed JSON checkpoint binds a compressed NPZ containing time, state, contact force, active-set, and ground-force histories",
-    "resume_policy": "verify_identity_and_hash_then_skip_complete_checkpoint",
+    "parity_sidecar_policy": "every completed checkpoint binds all 37 required time histories under the exact evidence-sidecar schema",
+    "resume_policy": "replay the full legacy prefix under one new immutable revision; require the exact enrichment audit before continuing beyond that prefix",
     "runtime_calibration": "run a disclosed non-evidence timing probe before launch; do not use its outcomes to alter factors, states, estimands, or gates",
     "resource_contract": "DeskComputer serial CPU only; no ControlTower, WSL, or VHDX access",
-    "launch_status": "blocked_pending_immutable_runner_revision"
+    "launch_status": "blocked_pending_enriched_immutable_runner_revision",
+    "evidence_sidecar_schema": "articulated-structural-factorial-evidence/1.0.0",
+    "runtime_audit_schema": "articulated-structural-factorial-runtime-audit/1.4.0",
+    "enrichment_audit_schema": "articulated-structural-factorial-enrichment-audit/1.0.0"
   },
   "promotion": {
     "eligible": false,
     "requirements": [
+      "complete evidence sidecars validate for every completed checkpoint",
+      "legacy-prefix replay passes the exact enrichment audit",
       "immutable combined-runner revision and launch manifest",
       "all registered checkpoints accounted for",
       "all numerical gates pass for every promoted contrast",
