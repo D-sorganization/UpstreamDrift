@@ -7,6 +7,7 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
+from scripts.research.proximal_distal_energy import bounded_event_multiple_shooting
 from scripts.research.proximal_distal_energy.bounded_event_multiple_shooting import (
     MultipleShootingConfig,
     MultipleShootingStatus,
@@ -72,6 +73,94 @@ def nominal_problem() -> BoundedEventReachabilityProblem:
         target_event_state=tuple(replay.state),
         tangent_tolerance=2e-7,
     )
+
+
+def test_solve_builds_exactly_one_backend_and_reuses_it(
+    nominal_problem: BoundedEventReachabilityProblem,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression guard for #9198: no backend construction in the SLSQP loop.
+
+    ``_integrate_segment`` used to call ``make_backend`` itself, so a fresh
+    ``ODEBackend`` and ``DoublePendulum`` were built once per shooting residual
+    -- and SciPy evaluates that residual once per finite-difference column per
+    SLSQP iteration. ``registered_step`` resets the backend before every step,
+    so one backend per solve is numerically identical and orders of magnitude
+    cheaper under ``coverage``, whose collector lock is taken on every
+    construction.
+    """
+
+    constructed: list[str] = []
+    real_make_backend = bounded_event_multiple_shooting.make_backend
+
+    def counting_make_backend(name: str, params: object, **kwargs: object) -> object:
+        constructed.append(name)
+        return real_make_backend(name, params, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(
+        bounded_event_multiple_shooting, "make_backend", counting_make_backend
+    )
+    config = MultipleShootingConfig(segment_count=3, max_iterations=20, seed=23)
+
+    result = solve_bounded_event_multiple_shooting(nominal_problem, config)
+
+    assert constructed == ["ode"]
+    assert result.iterations > 0
+
+
+def test_segment_memo_returns_bit_identical_states(
+    nominal_problem: BoundedEventReachabilityProblem,
+) -> None:
+    """The #9198 memo must be exact, not approximate.
+
+    A cache hit has to return the same float64 bit pattern the RK4 loop would
+    have produced, or the registered evidence would silently drift.
+    """
+
+    layout = bounded_event_multiple_shooting._crossing_layout(nominal_problem, 4)
+    durations = bounded_event_multiple_shooting._step_durations(
+        layout,
+        dt_s=nominal_problem.dt_s,
+        partial_dt_s=layout.nominal_partial_dt_s,
+    )
+    backend = bounded_event_multiple_shooting._solve_backend(nominal_problem)
+    start = np.asarray(nominal_problem.initial_state, dtype=float)
+    perturbation = np.array([0.75, -0.25])
+    memo: dict[object, object] = {}
+
+    for indices in layout.segment_indices:
+        uncached = bounded_event_multiple_shooting._integrate_segment(
+            nominal_problem,
+            backend=backend,
+            start_state=start,
+            perturbation=perturbation,
+            indices=indices,
+            durations=durations,
+        )
+        first = bounded_event_multiple_shooting._integrate_segment(
+            nominal_problem,
+            backend=backend,
+            start_state=start,
+            perturbation=perturbation,
+            indices=indices,
+            durations=durations,
+            memo=memo,  # type: ignore[arg-type]
+        )
+        hit = bounded_event_multiple_shooting._integrate_segment(
+            nominal_problem,
+            backend=backend,
+            start_state=start,
+            perturbation=perturbation,
+            indices=indices,
+            durations=durations,
+            memo=memo,  # type: ignore[arg-type]
+        )
+
+        assert uncached.tobytes() == first.tobytes()
+        assert uncached.tobytes() == hit.tobytes()
+        assert not hit.flags.writeable
+
+    assert len(memo) == len(layout.segment_indices)
 
 
 def test_multiple_shooting_config_fails_closed() -> None:

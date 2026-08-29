@@ -33,9 +33,18 @@ from scripts.research.proximal_distal_energy.bounded_event_reachability import (
 from scripts.research.proximal_distal_energy.phase_event_stability import (
     registered_step,
 )
-from src.shared.python.simulation_backends import make_backend
+from src.shared.python.simulation_backends import SimulationBackend, make_backend
 
 FloatArray: TypeAlias = npt.NDArray[np.float64]
+
+#: Identity of one segment integration: (first index, last index, final step
+#: duration, segment start time, start state bytes, perturbation bytes).
+_SegmentKey: TypeAlias = tuple[int, int, float, float, bytes, bytes]
+
+#: Bound on the per-solve segment memo. One residual evaluation stores at most
+#: ``segment_count`` entries, so this holds many SLSQP iterations of working set
+#: while keeping the cache far below a megabyte.
+_SEGMENT_MEMO_LIMIT = 8192
 
 
 def _readonly(value: npt.ArrayLike) -> FloatArray:
@@ -196,17 +205,72 @@ def _step_durations(
     return durations
 
 
+def _solve_backend(
+    problem: BoundedEventReachabilityProblem,
+) -> SimulationBackend:
+    """Build the one reusable registered RK4 backend for a whole solve.
+
+    Precondition:
+        ``problem.params`` and ``problem.dt_s`` are fixed for the solve.
+
+    Postcondition:
+        The returned backend is safe to reuse across every
+        :func:`_integrate_segment` call of that solve.  :func:`registered_step`
+        drives it exclusively through ``reset`` / ``set_control`` / ``step``,
+        and ``reset`` overwrites the backend's complete mutable state
+        (positions, velocities, clock, and the control vector) before every
+        step, so no state carries between integrations.  This mirrors the
+        single-backend reuse already used by
+        :func:`~scripts.research.proximal_distal_energy.phase_event_stability.propagate_state_transition`.
+    """
+
+    return make_backend("ode", problem.params, dt=problem.dt_s)
+
+
 def _integrate_segment(
     problem: BoundedEventReachabilityProblem,
     *,
+    backend: SimulationBackend,
     start_state: FloatArray,
     perturbation: FloatArray,
     indices: FloatArray,
     durations: FloatArray,
+    memo: dict[_SegmentKey, FloatArray] | None = None,
 ) -> FloatArray:
-    backend = make_backend("ode", problem.params, dt=problem.dt_s)
-    state = start_state.copy()
+    """Integrate one shooting segment, optionally through an exact memo.
+
+    ``memo`` is an exactness-preserving cache, not an approximation: the
+    integration is a deterministic pure function of the arguments below, so a
+    hit returns the identical float64 bit pattern the loop would have produced.
+    It matters because SciPy's ``approx_derivative`` perturbs one decision
+    variable at a time, and a perturbation confined to one segment leaves every
+    other segment's integration bit-for-bit unchanged -- without the memo those
+    are re-integrated once per finite-difference column (issue #9198).
+
+    Precondition:
+        ``indices`` is nonempty and ordered, and every duration outside the
+        final global step equals ``problem.dt_s`` (established by
+        :func:`_step_durations`), so the key below identifies the slice.
+
+    Postcondition:
+        The returned array is read-only when it came from or entered the memo,
+        so a caller cannot corrupt a shared entry.
+    """
+
     time_s = float(np.sum(durations[: int(indices[0])]))
+    key: _SegmentKey = (
+        int(indices[0]),
+        int(indices[-1]),
+        float(durations[int(indices[-1])]),
+        time_s,
+        start_state.tobytes(),
+        perturbation.tobytes(),
+    )
+    if memo is not None:
+        cached = memo.get(key)
+        if cached is not None:
+            return cached
+    state = start_state.copy()
     for index_value in indices:
         index = int(index_value)
         duration = float(durations[index])
@@ -218,6 +282,11 @@ def _integrate_segment(
             dt_s=duration,
         )
         time_s += duration
+    if memo is not None:
+        if len(memo) >= _SEGMENT_MEMO_LIMIT:
+            memo.clear()
+        state.setflags(write=False)
+        memo[key] = state
     return state
 
 
@@ -226,6 +295,8 @@ def _shooting_residual(
     *,
     problem: BoundedEventReachabilityProblem,
     layout: _ShootingLayout,
+    backend: SimulationBackend,
+    memo: dict[_SegmentKey, FloatArray] | None = None,
 ) -> FloatArray:
     segment_controls, state_nodes, partial_dt_s = _unpack(
         decision, segment_count=len(layout.segment_indices)
@@ -246,10 +317,12 @@ def _shooting_residual(
     ):
         predicted = _integrate_segment(
             problem,
+            backend=backend,
             start_state=start,
             perturbation=perturbation,
             indices=indices,
             durations=durations,
+            memo=memo,
         )
         residuals.append((predicted - node) / state_scale)
         start = node
@@ -303,6 +376,7 @@ def _initial_decision(
     problem: BoundedEventReachabilityProblem,
     layout: _ShootingLayout,
     config: MultipleShootingConfig,
+    backend: SimulationBackend,
 ) -> FloatArray:
     segment_count = len(layout.segment_indices)
     if segment_count != config.segment_count:
@@ -318,6 +392,7 @@ def _initial_decision(
     for segment, indices in enumerate(layout.segment_indices):
         state = _integrate_segment(
             problem,
+            backend=backend,
             start_state=state,
             perturbation=controls[segment],
             indices=indices,
@@ -389,6 +464,7 @@ def _qualified_result(
     problem: BoundedEventReachabilityProblem,
     config: MultipleShootingConfig,
     layout: _ShootingLayout,
+    backend: SimulationBackend,
     decision: FloatArray,
     solver_success: bool,
     message: str,
@@ -397,7 +473,9 @@ def _qualified_result(
     segment_controls, state_nodes, partial_dt_s = _unpack(
         decision, segment_count=config.segment_count
     )
-    residual = _shooting_residual(decision, problem=problem, layout=layout)
+    residual = _shooting_residual(
+        decision, problem=problem, layout=layout, backend=backend
+    )
     continuity = residual[: 4 * config.segment_count]
     target = residual[4 * config.segment_count :]
     maximum_continuity = float(np.max(np.abs(continuity)))
@@ -442,6 +520,72 @@ def _qualified_result(
     )
 
 
+def _zero_authority_result(
+    *,
+    problem: BoundedEventReachabilityProblem,
+    config: MultipleShootingConfig,
+    layout: _ShootingLayout,
+    backend: SimulationBackend,
+    initial: FloatArray,
+) -> MultipleShootingResult:
+    """Type the direct-replay outcome when no incremental authority exists."""
+
+    result = _qualified_result(
+        problem=problem,
+        config=config,
+        layout=layout,
+        backend=backend,
+        decision=initial,
+        solver_success=False,
+        message="zero incremental authority; direct replay only",
+        iterations=0,
+    )
+    if result.replay is not None and (
+        result.replay.feasibility_status is FeasibilityStatus.FEASIBLE
+    ):
+        return replace(
+            result,
+            status=MultipleShootingStatus.CONVERGED,
+            solver_success=True,
+        )
+    return replace(result, status=MultipleShootingStatus.INFEASIBLE)
+
+
+def _numerical_failure_result(
+    *,
+    problem: BoundedEventReachabilityProblem,
+    config: MultipleShootingConfig,
+    layout: _ShootingLayout,
+    backend: SimulationBackend,
+    initial: FloatArray,
+    message: str,
+) -> MultipleShootingResult:
+    """Report the initialization residuals when SLSQP itself raised."""
+
+    segment_controls, state_nodes, _ = _unpack(
+        initial, segment_count=config.segment_count
+    )
+    residual = _shooting_residual(
+        initial, problem=problem, layout=layout, backend=backend
+    )
+    continuity = residual[: 4 * config.segment_count]
+    target = residual[4 * config.segment_count :]
+    return MultipleShootingResult(
+        status=MultipleShootingStatus.NUMERICAL_FAILURE,
+        solver_success=False,
+        message=message,
+        iterations=0,
+        objective=_objective(initial, problem=problem, layout=layout),
+        event_time_s=None,
+        maximum_continuity_residual=float(np.max(np.abs(continuity))),
+        maximum_target_residual=float(np.max(np.abs(target))),
+        segment_perturbations=segment_controls,
+        state_nodes=state_nodes,
+        perturbations=_expand_perturbations(segment_controls, layout),
+        replay=None,
+    )
+
+
 def solve_bounded_event_multiple_shooting(
     problem: BoundedEventReachabilityProblem,
     config: MultipleShootingConfig,
@@ -449,26 +593,21 @@ def solve_bounded_event_multiple_shooting(
     """Solve one local event target and require independent exact replay."""
 
     layout = _crossing_layout(problem, config.segment_count)
-    initial = _initial_decision(problem, layout, config)
+    # One backend for the whole solve: constructing it per segment integration
+    # placed a fresh ODEBackend + DoublePendulum inside the SLSQP finite
+    # difference loop (issue #9198).  registered_step resets the backend before
+    # every step, so reuse is numerically identical.
+    backend = _solve_backend(problem)
+    memo: dict[_SegmentKey, FloatArray] = {}
+    initial = _initial_decision(problem, layout, config, backend)
     if problem.bounds.is_zero_authority:
-        result = _qualified_result(
+        return _zero_authority_result(
             problem=problem,
             config=config,
             layout=layout,
-            decision=initial,
-            solver_success=False,
-            message="zero incremental authority; direct replay only",
-            iterations=0,
+            backend=backend,
+            initial=initial,
         )
-        if result.replay is not None and (
-            result.replay.feasibility_status is FeasibilityStatus.FEASIBLE
-        ):
-            return replace(
-                result,
-                status=MultipleShootingStatus.CONVERGED,
-                solver_success=True,
-            )
-        return replace(result, status=MultipleShootingStatus.INFEASIBLE)
 
     equality = {
         "type": "eq",
@@ -476,6 +615,8 @@ def solve_bounded_event_multiple_shooting(
             np.asarray(decision, dtype=float),
             problem=problem,
             layout=layout,
+            backend=backend,
+            memo=memo,
         ),
     }
     rate = {
@@ -504,31 +645,20 @@ def solve_bounded_event_multiple_shooting(
             },
         )
     except (ArithmeticError, RuntimeError, ValueError) as exc:
-        segment_controls, state_nodes, _ = _unpack(
-            initial, segment_count=config.segment_count
-        )
-        residual = _shooting_residual(initial, problem=problem, layout=layout)
-        continuity = residual[: 4 * config.segment_count]
-        target = residual[4 * config.segment_count :]
-        return MultipleShootingResult(
-            status=MultipleShootingStatus.NUMERICAL_FAILURE,
-            solver_success=False,
+        return _numerical_failure_result(
+            problem=problem,
+            config=config,
+            layout=layout,
+            backend=backend,
+            initial=initial,
             message=str(exc),
-            iterations=0,
-            objective=_objective(initial, problem=problem, layout=layout),
-            event_time_s=None,
-            maximum_continuity_residual=float(np.max(np.abs(continuity))),
-            maximum_target_residual=float(np.max(np.abs(target))),
-            segment_perturbations=segment_controls,
-            state_nodes=state_nodes,
-            perturbations=_expand_perturbations(segment_controls, layout),
-            replay=None,
         )
     decision = np.asarray(solved.x, dtype=float)
     return _qualified_result(
         problem=problem,
         config=config,
         layout=layout,
+        backend=backend,
         decision=decision,
         solver_success=bool(solved.success),
         message=str(solved.message),

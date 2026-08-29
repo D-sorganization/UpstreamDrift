@@ -973,7 +973,7 @@
   "source_identity": {
     "preregistration_comment": "https://github.com/D-sorganization/UpstreamDrift/issues/9125#issuecomment-5431171920",
     "required_phase_a_array_sha256": "7e0cc0241d2ac1f3be2b2dab038b0e1437db8c54a23f0ca1292f6fa9a6316ed0",
-    "required_phase_a_report_sha256": "bdba13a7c3c102d66174f3144b94972a4a92862d14a1bf84366186b379ab9328",
+    "required_phase_a_report_sha256": "04cd3282114950cb5aa5ee408cab681fa99c53c3a931d04b137a4f57a478fe32",
     "required_phase_a_schema": "proximal-distal-event-topology-robustness/v1",
     "source_sha256": {
       "scripts/research/proximal_distal_energy/run_event_topology_robustness.py": "c573224fb1a2ce84d661382a484288d905a762b8c39502c9c448216deb3eb961",
