@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  implementation head `e86dff3ba` plus this handoff successor. No PR exists.
+  implementation head `323a55db9` plus this handoff successor. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 - Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
@@ -116,8 +116,9 @@ are not completion evidence.
   and receipt 1.1 SHA-256 is `f3bd190abc2d`. All 20 sidecars pass 37 histories.
 - Exact legacy/enriched audit SHA-256 `7b00bb69fbbe` passes 20 statuses/JSON
   results, 180 legacy arrays, and enriched evidence. No outcomes were summarized.
-- Authoritative corruption sentinel at exact `b560c784e` passes; the retained
-  mistyped-revision sentinel is explicitly rejected and excluded downstream.
+- `323a55db9` derives corruption-audit revision from clean committed source;
+  source-derived sentinel SHA-256 `f8b7c4e836ab` passes. Earlier manually
+  supplied-revision sentinels remain retained but are excluded downstream.
 - Replay 33279075050 executes [20,40) at exact `e86dff3ba`; do not duplicate it.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
@@ -140,7 +141,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 75 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 76 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
