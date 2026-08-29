@@ -504,11 +504,7 @@ def build_actions_acquisition(
     bundle_dir: Path,
     *,
     env: Mapping[str, str],
-    artifact_name: str,
-    artifact_id: int,
-    artifact_url: str,
-    artifact_digest: str,
-    retention_days: int,
+    artifact_metadata: Mapping[str, Any],
     attestation_id: str,
     attestation_url: str,
 ) -> dict[str, Any]:
@@ -516,6 +512,17 @@ def build_actions_acquisition(
     payloads, manifest = _payload_inventory(bundle_dir)
     commit = manifest["source"]["commit"]
     context = validate_ci_authority("protected-main", env=env, head_commit=commit)
+    artifact_name = artifact_metadata.get("name")
+    artifact_id = artifact_metadata.get("id")
+    artifact_url = artifact_metadata.get("url")
+    artifact_digest = artifact_metadata.get("digest")
+    retention_days = artifact_metadata.get("retention_days")
+    if not isinstance(artifact_name, str) or not isinstance(artifact_url, str):
+        raise PublicationContractError("artifact name and URL must be strings")
+    if not isinstance(artifact_digest, str):
+        raise PublicationContractError("artifact digest must be a string")
+    if not isinstance(artifact_id, int) or not isinstance(retention_days, int):
+        raise PublicationContractError("artifact ID and retention must be integers")
     if artifact_id < 1 or not 1 <= retention_days <= 90:
         raise PublicationContractError("artifact ID and retention must be positive")
     expected_name = f"upstreamdrift-companion-{commit}"
@@ -798,11 +805,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             record = build_actions_acquisition(
                 args.bundle_dir,
                 env=os.environ,
-                artifact_name=args.artifact_name,
-                artifact_id=args.artifact_id,
-                artifact_url=args.artifact_url,
-                artifact_digest=args.artifact_digest,
-                retention_days=args.retention_days,
+                artifact_metadata={
+                    "name": args.artifact_name,
+                    "id": args.artifact_id,
+                    "url": args.artifact_url,
+                    "digest": args.artifact_digest,
+                    "retention_days": args.retention_days,
+                },
                 attestation_id=args.attestation_id,
                 attestation_url=args.attestation_url,
             )
