@@ -16,6 +16,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _CHECKPOINT_SCHEMA = "articulated-structural-factorial-checkpoint/1.1.0"
 _LEGACY_LAUNCH_SCHEMA = "articulated-structural-factorial-launch/1.1.0"
 _ENRICHED_LAUNCH_SCHEMA = "articulated-structural-factorial-launch/1.2.0"
@@ -211,7 +212,7 @@ def build_registered_cases(plan: Mapping[str, object]) -> tuple[StructuralCase, 
 
 def _launch_contract(
     plan: Mapping[str, object], execution: Mapping[str, object]
-) -> tuple[str, dict[str, str]]:
+) -> tuple[str, dict[str, object]]:
     plan_schema = plan.get("schema_version")
     if plan_schema == "articulated-structural-factorial-plan/1.2.0":
         return _LEGACY_LAUNCH_SCHEMA, {}
@@ -236,7 +237,25 @@ def _launch_contract(
         or amendment.get("requires_exact_enrichment_audit") is not True
     ):
         raise ValueError("enriched retention amendment is not fail-closed")
-    return _ENRICHED_LAUNCH_SCHEMA, dict(_ENRICHED_EXECUTION_SCHEMAS)
+    legacy_revision = amendment.get("legacy_execution_revision")
+    prefix_stop = amendment.get("legacy_prefix_case_stop_exclusive")
+    prefix_digest = amendment.get("legacy_prefix_manifest_sha256")
+    if (
+        not isinstance(legacy_revision, str)
+        or _SHA40.fullmatch(legacy_revision) is None
+        or isinstance(prefix_stop, bool)
+        or not isinstance(prefix_stop, int)
+        or not 0 < prefix_stop <= 2304
+        or not isinstance(prefix_digest, str)
+        or _SHA256.fullmatch(prefix_digest) is None
+    ):
+        raise ValueError("enriched legacy-prefix identity is invalid")
+    return _ENRICHED_LAUNCH_SCHEMA, {
+        **_ENRICHED_EXECUTION_SCHEMAS,
+        "supersedes_legacy_execution_revision": legacy_revision,
+        "legacy_prefix_case_stop_exclusive": prefix_stop,
+        "legacy_prefix_manifest_sha256": prefix_digest,
+    }
 
 
 def build_launch_manifest(
@@ -256,6 +275,10 @@ def build_launch_manifest(
         raise ValueError("outcome matching must remain prohibited")
     cases = build_registered_cases(plan)
     launch_schema, enriched_identity = _launch_contract(plan, execution)
+    if execution_revision == enriched_identity.get(
+        "supersedes_legacy_execution_revision"
+    ):
+        raise ValueError("enriched launch cannot reuse the legacy execution revision")
     return {
         "schema_version": launch_schema,
         "plan_sha256": plan_sha256(plan),
@@ -292,6 +315,8 @@ def _validate_launch(
         or any(
             launch.get(name) != expected for name, expected in enriched_identity.items()
         )
+        or execution_revision
+        == enriched_identity.get("supersedes_legacy_execution_revision")
     ):
         raise ValueError("launch identity does not match the frozen plan")
     return expected_plan, execution_revision

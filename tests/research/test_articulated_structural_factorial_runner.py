@@ -286,6 +286,12 @@ def test_enriched_launch_binds_amended_retention_and_audit_schemas(
     assert launch["enrichment_audit_schema"] == (
         "articulated-structural-factorial-enrichment-audit/1.0.0"
     )
+    assert launch["supersedes_legacy_execution_revision"] == "c" * 40
+    assert launch["legacy_prefix_case_stop_exclusive"] == 714
+    assert launch["legacy_prefix_manifest_sha256"] == "d" * 64
+
+    with pytest.raises(ValueError, match="legacy execution revision"):
+        build_launch_manifest(plan=plan, execution_revision="c" * 40)
 
     tampered = dict(plan)
     execution = dict(tampered["execution"])
