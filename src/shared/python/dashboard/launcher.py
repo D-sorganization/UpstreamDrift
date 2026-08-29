@@ -1,5 +1,6 @@
 """Common launcher utilities for the unified dashboard."""
 
+import os
 import sys
 from collections.abc import Callable
 from typing import Any
@@ -13,6 +14,38 @@ from src.shared.python.logging_pkg.logging_config import (
 from src.shared.python.ui.qt.utils import get_qapp
 
 logger = get_logger(__name__)
+
+
+def _default_event_loop_runner(qt_app: Any) -> int:
+    """Run the Qt event loop, refusing to block inside a pytest session.
+
+    A headless test must never enter a real Qt event loop: nothing will ever
+    post the quit event, so the worker blocks until the suite-level timeout
+    kills it and the whole job fails minutes later with a stack that points at
+    Qt rather than at the mistake (issue #9183).
+
+    There is no legitimate reason for a test to reach this function. A test
+    that exercises :func:`launch_dashboard` must either patch it out or inject
+    ``event_loop_runner``. Raising here converts a class of multi-minute CI
+    hangs into an immediate, self-describing failure.
+
+    Args:
+        qt_app: The ``QApplication`` whose event loop should be run.
+
+    Returns:
+        The event loop's exit code.
+
+    Raises:
+        RuntimeError: If called while pytest is running a test.
+    """
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        raise RuntimeError(
+            "launch_dashboard() reached the blocking Qt event loop during a "
+            "pytest run. A headless test must never enter a real Qt event "
+            "loop. Inject event_loop_runner=... or patch launch_dashboard on "
+            "the module under test. See issue #9183."
+        )
+    return int(qt_app.exec())
 
 
 def launch_dashboard(
@@ -76,5 +109,5 @@ def launch_dashboard(
 
     window.show()
 
-    runner = event_loop_runner or (lambda qt_app: int(qt_app.exec()))
+    runner = event_loop_runner or _default_event_loop_runner
     sys.exit(runner(app))
