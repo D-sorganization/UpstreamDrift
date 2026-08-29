@@ -8,27 +8,23 @@ are not completion evidence.
 
 - UpstreamDrift protected `main` was `e732757c90538acae7d7c4531dc1a05dc321b94f`
   when #9153 began and contains the #9152/#9151 authority.
-- AffineDrift #3993/#3995 and Tools #4669 are protected; Tools #4142 remains
-  the reusable-variation authority.
+- AffineDrift protected `main` is `b28fd8227d5003c752a16426ed508e13ff2e137a`;
+  Tools handoff PR #4869 is protected as `cefcc1878de11804c44cd7d1d19c0ffcf58fa89e`.
+  Tools #4669 is protected and #4142 remains the reusable-variation authority.
 - Last protected paper: 252 pages, SHA-256 `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`;
   tagged-PDF and font-resource gates remain open.
 
 ## Active Slice: UpstreamDrift #9153
 
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`, expires
-  `2026-08-30T04:32:38Z`; recovery-audit head `87b06433f`; worktree
-  `UpstreamDrift-worktrees/9153-forward-impulse-work`. No PR exists.
-- The event-aligned kernel separates continuous impulse/work, independently
-  evaluated `Mdot v` transport, kinetic geometry work, and registered event
-  impulse/work. Signed shares retain cancellation and denominator suppression.
-- Corrected rigid execution `659394211` published 42 checkpoints: 21 MuJoCo,
-  21 typed Pinocchio unavailable, zero failures. Individual closure passes;
-  nominal/high-damping work refinement fail 0.8. A disclosed pilot suggests a
-  coarse-grid transient but does not erase failures.
-- Distributed execution `d2800c556` published 42 checkpoints: 21 MuJoCo,
-  21 typed Pinocchio unavailable, zero failures. Six variants pass; the opening
-  probe retains work-closure and momentum-refinement failures. Eleven invalid-identity checkpoints remain isolated at
-  `C:/Users/diete/Campaigns/UpstreamDrift-9153-distributed-smoke-invalid-execution-d2800c556d8`.
+  `2026-08-30T04:32:38Z`; implementation head `ffb8fd2d892e` plus this
+  handoff-only successor;
+  worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`. No PR exists.
+- The event-aligned kernel separates continuous/event impulse and work,
+  independently evaluated `Mdot v` transport, and kinetic geometry work.
+- Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
+  nominal/high-damping work refinement fails 0.8. Distributed `d2800c556` has
+  the same engine counts; six variants pass, while the opening probe fails.
 
 ## Stateful Distributed-Grip Gate
 
@@ -38,21 +34,11 @@ are not completion evidence.
   mechanics, separate histories, and numerical coupling work.
 - The 54-case plan binds evaluator `6124cf402`, launcher `92c68aa91`, and
   raw/canonical hashes `8106a78c425119f1`/`ae01fa154c7b38a4`.
-- Initial execution `b2ab7ed66` retained 54 unavailable checkpoints after DLL
-  error 1114/absent Pinocchio; no trajectories, separate from evidence.
-- Qualified `715a4f385`: 27 MuJoCo, 27 typed Pinocchio absences, zero failures.
-  Passive-energy defects contract; coupling refinement fails the frictionless
-  control (1/1) and low-friction probe (0.834 > 0.8).
-- All 54 checkpoints and deterministic summary are published under
-  `data/articulated_stateful_distributed_smoke/`; checkpoint-set SHA-256 begins
-  `1e6eeeabcb2d461a`. Promotion is false.
-- Commit `572f387cdad9e23c509704652a36a2fcc098993c` integrates the canonical
-  QMD, governed figure, claim registry, reviewer census, and PDF. The PDF has
-  255 pages,
-  SHA-256 `0a781df90cd7393799cbc5e94621dfddd502f0284fb09cc0e23acf251197687e`,
-  196 URI links, and clean visual review on the new section/figure pages.
-- Claim governance: 1,189 candidates/334 material; 314 supported at scope,
-  five inconclusive, 15 untested; promotion/human boundaries explicit.
+- Qualified `715a4f385`: 27 MuJoCo complete, 27 typed Pinocchio absences;
+  coupling refinement fails the frictionless control and low-friction probe.
+- Commit `572f387cdad9e23c509704652a36a2fcc098993c` publishes the 54-checkpoint
+  evidence, claims, figure, and reviewed 255-page PDF. Promotion remains false;
+  five material claims are inconclusive and 15 untested.
 
 ## Rigid Refinement Extension
 
@@ -105,8 +91,14 @@ are not completion evidence.
 - Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70; cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 694, including run 33271631525 for 674:694 (issue comment 5464722724).
 - Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero;
   authority is 694/2,304 at `Campaigns/UpstreamDrift-9153-linux-collected-prefix-0694-v1`; manifest SHA-256 `cf706961fdb8638006e055a44553a0c2ef66614df5b977a1210fbccf11dba272`.
-- Run 33273691711 executes 694:714 from head `4aacb75aea60` with one process and a 90-minute timeout; do not dispatch beyond 714.
+- Run 33273691711 executes 694:714 from head `4aacb75aea60` with one process
+  and a 90-minute timeout. It remained `in_progress` at the 2026-08-29 turnover
+  poll; do not cancel, restart, duplicate, or dispatch beyond 714.
 - Its legacy minimal sidecars fail the new complete-history retention contract; preserve the prefix as diagnostic evidence, not a promotable release.
+- Commit `19f74b6d3` adds evidence schema
+  `articulated-structural-factorial-evidence/1.0.0` and validates 37 complete
+  histories. Commit `87b06433f` adds exact legacy-to-enriched replay audit
+  `articulated-structural-factorial-enrichment-audit/1.0.0`.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -115,14 +107,22 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Validate run 33273691711 without restarting it. Then freeze the legacy prefix and qualify a new immutable execution revision with evidence sidecars before any further campaign dispatch.
-2. Preserve all three refinement failures, typed Pinocchio absence, original
+1. Let run 33273691711 terminate, then download and validate its 20 JSON, 20
+   NPZ, and session records without inspecting outcomes. Collect through 714,
+   freeze the legacy prefix as incomplete diagnostic evidence, and never resume
+   the legacy revision.
+2. Before a new dispatch, make runtime-audit provenance explicitly require the
+   evaluator, serial runner, and evidence validator; test missing/mutated module
+   identities fail closed. Then amend the preregistration transparently,
+   qualify a clean immutable execution/runtime pair, replay the full legacy
+   prefix, and require the exact enrichment audit.
+3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
-3. The contrast summary is implemented locally; after completion, validate the
+4. The contrast summary is implemented locally; after completion, validate the
    checkpoint set and retain sign reversals, failures, and typed missing cells.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
-4. Project only protected UpstreamDrift evidence into AffineDrift; continue
+5. Project only protected UpstreamDrift evidence into AffineDrift; continue
    Tools only through its provider contract and protected flow.
 
 ## Validation
