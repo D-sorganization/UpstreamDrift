@@ -118,3 +118,23 @@ def test_repeated_loads_do_not_churn_the_cache_file(tmp_path: Path) -> None:
 
     assert second == first
     assert second.stat().st_mtime_ns == first_mtime
+
+
+@pytest.mark.unit
+def test_derived_humanoid_mjcf_is_not_committed_to_the_source_tree() -> None:
+    """The generated MJCF must not be re-committed as a tracked asset (#9220).
+
+    The canonical humanoid MJCF is the string embedded in
+    ``get_embedded_mujoco_models()``. A committed copy under
+    ``human_models/`` is derived output that nothing reads: since #9219 the
+    loader resolves ``mujoco_humanoid`` straight to the derived cache, and no
+    other code path opens this file. The committed copy had already drifted
+    from its generator (render-side blocks only), which is exactly the trap
+    this guard exists to prevent.
+    """
+    assert not TRACKED_MODEL_XML.exists(), (
+        f"{TRACKED_MODEL_XML} is derived output committed as a tracked asset. "
+        "Nothing reads it and it silently drifts from the embedded MJCF that "
+        "generates it. Delete it, or give it an explicit regeneration target "
+        "and a freshness check."
+    )
