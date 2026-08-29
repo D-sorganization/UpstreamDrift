@@ -793,7 +793,8 @@ class TemporalStudy:
     @property
     def converging(self) -> bool:
         """Whether the triplet supports a Richardson estimate at all."""
-        return self.gci.convergence.supports_richardson
+        convergence = self.gci.convergence
+        return convergence.supports_richardson
 
     @property
     def apparent_order(self) -> float:
