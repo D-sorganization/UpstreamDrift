@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`, expires
-  `2026-08-30T04:32:38Z`; implementation head `265c6067c` plus this
+  `2026-08-30T04:32:38Z`; implementation head `0315a23fd` plus this
   handoff-only successor;
   worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
@@ -99,8 +99,8 @@ are not completion evidence.
   exact legacy-to-enriched replay audit. Commit `2aa0b79cb` adds runtime-audit
   schema 1.4, which requires seven exact evaluator, runner, validator, native,
   and geometry-provider identities even if its digest is recomputed.
-- `44f642eb5` prepares the outcome-blind v1.3 amendment; `265c6067c` binds its
-  launch schema. The canonical plan remains v1.2 until the run is terminal.
+- `44f642eb5` prepares the v1.3 amendment; `0315a23fd` binds its launch, legacy
+  prefix, and non-reusable revision. The plan remains v1.2 until terminal.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
