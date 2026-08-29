@@ -33,18 +33,22 @@ from bunkershot3d.solvers import (
 from bunkershot3d.solvers.exceptions import SolverInputError
 from bunkershot3d.solvers.mpm.constitutive import SAND_POISSON_RATIO, SandContinuum
 from bunkershot3d.solvers.mpm.solver import PlaneStrainMPMSolver
-from bunkershot3d.solvers.mpm.verification import (
+from bunkershot3d.solvers.mpm.limit_states import (
+    passive_earth_pressure_limit,
+    rankine_limits,
+)
+from bunkershot3d.solvers.mpm.order_of_accuracy import (
     ManufacturedField,
-    column_grid_convergence,
     column_temporal_convergence,
+    manufactured_solution_convergence,
+    uniform_stress_patch_residual,
+)
+from bunkershot3d.solvers.mpm.verification import (
+    column_grid_convergence,
     cross_check_against_f0,
     elastic_column_equilibrium,
     energy_residuals,
     free_fall_residuals,
-    manufactured_solution_convergence,
-    passive_earth_pressure_limit,
-    rankine_limits,
-    uniform_stress_patch_residual,
 )
 from bunkershot3d.vandv.conservation import ConservationClass
 from bunkershot3d.vandv.convergence import observed_order_from_residuals
