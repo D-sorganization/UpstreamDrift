@@ -17,114 +17,43 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  implementation head `afd136817` plus this handoff successor. No PR exists.
+  implementation head `4c5819a2a` plus this handoff successor. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
-- Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
-  nominal/high-damping work refinement fails 0.8. Distributed `d2800c556` has
-  the same engine counts; six variants pass, while the opening probe fails.
 
-## Stateful Distributed-Grip Gate
+## Retained Failure Boundaries
 
-- The elastic--perfectly-plastic tangential comparator retains state, Coulomb
-  return, dissipation, and station ledgers; it is not anatomy.
-- The integrator uses left-node kinematics, end-increment force, semi-implicit
-  mechanics, separate histories, and numerical coupling work.
-- The 54-case plan binds evaluator `6124cf402`, launcher `92c68aa91`, and
-  raw/canonical hashes `8106a78c425119f1`/`ae01fa154c7b38a4`.
-- Qualified `715a4f385`: 27 MuJoCo complete, 27 typed Pinocchio absences;
-  coupling refinement fails the frictionless control and low-friction probe.
-- Commit `572f387cdad9e23c509704652a36a2fcc098993c` publishes the 54-checkpoint
-  evidence, claims, figure, and reviewed 255-page PDF. Promotion remains false;
-  five material claims are inconclusive and 15 untested.
-
-## Rigid Refinement Extension
-
-- Prospective plan commit `9d4817912755ce75e189f9baf13e388b494b7bf9` is
-  verified on the remote feature branch. It retains the original failures and
-  excludes the disclosed pilot steps.
-- The serial campaign completed 216/216 atomic checkpoints: 108 MuJoCo
-  complete, 108 Pinocchio typed unavailable, and zero execution failures.
-  Checkpoint-set SHA-256 is
-  `743999ac8afd516b2cea4e8f7ac43e56f87f66d9cdba1a2b5bad95081421e7c7`;
-  repository formatting excludes this byte-for-byte execution evidence.
-- All individual closure tolerances pass. Thirty-three of 36 MuJoCo groups
-  pass refinement; nominal case 4/sample 0 and case 13/samples 0 and 12 fail
-  the unchanged 0.8 work-refinement gate. Promotion remains false.
-- Source commit `623e8cea1303ee2a7ee8c4ff47871ef1d192ea6e` publishes the
-  checkpoints, four-panel figure, paper section, and claims PD-CLAIM-333--335.
-  The rebuilt paper is 256 pages, SHA-256
-  `af1157d0a5558b11979c9ad567d08a6bacfc2ab96ab12f8cbc899a8a8fec2253`,
-  and passes the computational publication profile. Tagged-PDF and font-resource
-  findings remain explicit archival gaps.
+- Original rigid/distributed executions retain typed Pinocchio absence, the
+  opening smoke failure, and unchanged 0.8 work-refinement failures.
+- Stateful distributed-grip evidence at `572f387c` is a mechanical comparator,
+  not anatomy: 27 MuJoCo complete, 27 typed absences, frictionless and
+  low-friction refinement failures, five inconclusive claims, and 15 untested.
+- Rigid refinement `623e8cea` completed 216/216; 33/36 MuJoCo groups pass.
+  Nominal case 4/sample 0 and case 13/samples 0 and 12 fail 0.8. The 256-page
+  paper SHA is `af1157d0a555`; tagged-PDF/font gaps remain open.
+- The old ground atlas has a pre-stateful SHA; reproduce its revision or
+  publish versioned authority before use.
 
 ## Prospective Structural Factorial
 
-- Plan v1.1 freezes the outcome-blind 2^4 shaft-bending, shaft-torsion,
-  base-translation, and free-moment matrix: 12 states, two directions, three
-  steps, two engines, four horizons, and 2,304 registered engine attempts.
-- Primary estimands are four main and six two-factor Walsh coefficients; the
-  summary separately labels the high-minus-low effect as twice the coefficient.
-  Peak load/dissipated work are mediators, not filters; higher orders are
-  exploratory.
-  Aggregates retain exact signs/zeros, median/range, and expected/missing support.
-- First probe failed closed on a stale formatting-only shaft-source hash.
-  `7b7862f3b` repaired provenance; the regenerated NPZ is byte-identical.
-- The passing non-evidence probe took 4.02 s at 0.2 ms with residual 0.00291.
-  It stopped after 12 JSON-only checkpoints failed the trajectory-parity need.
-  Retain `Campaigns/UpstreamDrift-9153-structural-factorial-7b7862f3b` as ineligible.
-- Plan/checkpoint v1.2/v1.1 require SHA-bound parity sidecars. Launch
-  `5544c8559` binds `d6bffd0c6`; its probe took 4.57 s and retained nine arrays.
-- The Windows diagnostic stopped cleanly after 145/2,304 attempts: 73 native
-  results with NPZ sidecars and 72 typed absences, zero temporary files, empty
-  stderr. Preserve `Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6`.
-- It began from launch commit `5544c8559` before the runtime-audit/session gates
-  were added. Preserve it as diagnostic checkpoint evidence, not promotion
-  authority; do not combine it with a separately qualified runtime.
-- Audit v1.3 binds clean audit-tool/execution checkouts and executed-module
-  hashes. Hosted run 33173678044 qualifies frozen `2e5145fdefdd`, native
-  MuJoCo 3.12.0 and Pin 4.1.0 under Linux/Python 3.11.16; runtime identity is
-  `015408e1cb99f48b140206eb994451d385146fc1a58030f968a63770af55f067`.
-  Artifact SHA-256 is `447683487f1ea249858caea4e15326b3b37e9de446bf4d9a15bbdb7291218b80`.
-- Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70; cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 694, including run 33271631525 for 674:694 (issue comment 5464722724).
-- Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero.
-  Run 33273691711 completed successfully at head `4aacb75aea60`; its 20 JSON/NPZ
-  pairs and session are retained at
-  `Campaigns/UpstreamDrift-9153-linux-slice-0694-0714-run-33273691711`.
-- Commit `3d947cade` adds the outcome-blind receipt: terminal run/job/upload
-  metadata, exact pairing/session identity, every file digest, and archive
-  SHA-256 `9ac59c76f5fc5e2d68a2d249e4f20c6aa746bd10b2fb51583a8cc7a827a43086`.
-- Gap-free authority is 714/2,304 at `Campaigns/UpstreamDrift-9153-linux-collected-prefix-0714-v1`;
-  manifest SHA-256 `501d9e557036377fc25e6490da21746445b4026aeb28d1f6f569d440973334d4`.
-  Do not dispatch or resume this legacy revision.
-- Its legacy minimal sidecars fail the new complete-history retention contract; preserve the prefix as diagnostic evidence, not a promotable release.
-- Commits `19f74b6d3`/`87b06433f` add the 37-history evidence contract and
-  exact legacy-to-enriched replay audit. Commit `2aa0b79cb` adds runtime-audit
-  schema 1.4, which requires seven exact evaluator, runner, validator, native,
-  and geometry-provider identities even if its digest is recomputed.
-- `ccb171ed3` instantiates plan v1.3; `6c1f56c16` binds launch v1.2 to it,
-  prefix identity, all enriched schemas, and the legacy-revision killswitch.
-- Audit 33277601263 qualified both engines/seven modules; runtime identity is
-  `5ceeb5af7815aece95ed859e749b72e8696e0ab8d6f183d4193700b525d16bb4`.
-- `c54b8b367` requires all 37 histories; `c0b4b4c90` adds required-absent CLI.
-  `bbded2f5c` upgrades intake to receipt 1.2 and binds the API/archive digest.
-  Expected enriched session SHA-256 is
-  `1bcc7ced5178dbf45613e362f9d03bcaf1043782fb5afccbeeeec372a5e532c6`.
-  `76fe32b1f` creates atomic, byte-exact, source-preserving legacy prefix views
-  for interim replay audits; final audit must still use all 714 legacy cases.
-- Replay 33277732709 succeeded for [0,20); archive SHA-256 is `142556c34373`
-  and receipt 1.1 SHA-256 is `f3bd190abc2d`. All 20 sidecars pass 37 histories.
-- Exact legacy/enriched audit SHA-256 `7b00bb69fbbe` passes 20 statuses/JSON
-  results, 180 legacy arrays, and enriched evidence. No outcomes were summarized.
-- `323a55db9` derives corruption-audit revision from clean committed source;
-  source-derived sentinel SHA-256 `f8b7c4e836ab` passes. Earlier manually
-  supplied-revision sentinels remain retained but are excluded downstream.
+- The outcome-blind 2^4 design registers 2,304 engine attempts and four main
+  plus six two-factor Walsh coefficients. Effects retain signs, zeros,
+  median/range, and support; mediators never filter cells.
+- Immutable legacy prefix is 714/2,304 at
+  `Campaigns/UpstreamDrift-9153-linux-collected-prefix-0714-v1`, manifest SHA
+  `501d9e557036`. It is diagnostic only, has minimal sidecars, and must not run.
+- Enriched plan `ccb171ed3`, launch `6c1f56c16`, and audit 33277601263 bind
+  seven modules, both engines, runtime identity `5ceeb5af7815`, all 37 histories,
+  legacy killswitch, and session SHA `1bcc7ced5178`.
+- Receipt 1.2 at `bbded2f5c` binds terminal metadata, exact session/pairs, all
+  histories, and API/archive digest. `323a55db9` derives corruption revision
+  from clean committed source. Prefix views never mutate the 714-case source.
+- Replay 33277732709 passed [0,20): archive `142556c34373`, receipt `f3bd190abc2d`,
+  source-derived sentinel `f8b7c4e836ab`, and exact audit `7b00bb69fbbe` over
+  20 statuses/JSON results and 180 arrays. No outcomes were summarized.
 - Replay 33279075050 executes [20,40) at exact `e86dff3ba`; do not duplicate it.
-- Summary v1.4 applies the unchanged 0.8 gate to every successive residual
-  ratio and retains the maximum and endpoint ratios. A stalled final step now
-  fails even when the finest-to-coarsest endpoint ratio is below 0.8.
-- The old ground atlas retains a pre-stateful distributed-grip SHA; reproduce
-  its revision or publish versioned ground authority before using it.
+- Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
+  step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
