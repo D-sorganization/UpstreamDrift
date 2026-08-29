@@ -318,8 +318,10 @@ DEFAULT_MANUFACTURED_FIELD = ManufacturedField(
 """The field the study runs on.
 
 ``mean_compression`` is five times ``A + B``, which puts the whole field
-about 26 kPa inside the cone for every sand preset in this package -- a
-margin the study checks rather than assumes.  The amplitudes are small
+at least 15 kPa inside the cone for every sand preset this package can
+build -- 28.5 kPa for ``FIRM``, 19.5 kPa for ``FLUFFY``, 15.8 kPa for
+``PLUGGED`` -- a margin the study checks rather than assumes.  The
+amplitudes are small
 enough that ``J`` stays within 0.2% of one, so the manufactured state is
 a perturbation of a uniformly compressed block rather than a large
 deformation the Hencky model would have to be argued for."""
