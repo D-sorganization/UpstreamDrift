@@ -1665,7 +1665,7 @@
       "infeasible": 6
     },
     "source_schema": "proximal-distal-bounded-event-reachability/v1",
-    "source_sha256": "73b275f33e8aa7e0329d9c68c2c3d679d0fc36a02b695b62055e6cd7e995794a",
+    "source_sha256": "0045df6ae32fd4555de12892a43e0333f56525f2b19c3039f859fb8732e9ffa1",
     "trial_count": 28
   },
   "qualification": {
@@ -1713,7 +1713,7 @@
   "schema_version": "proximal-distal-event-topology-channel-matrix/v1",
   "source_identity": {
     "required_parent_array_sha256": "b79683e34956ddd179ff012844715ef8f42e1e331fbe5fd71d2bfa40dfa9157c",
-    "required_parent_report_sha256": "4d382e9851740f3ff97b793f77fd60682911dab3a51ed7a2dfb08308ae821f8f",
+    "required_parent_report_sha256": "e3a3e961030b615f88d8076a8af3e2bc1b66525b5c08161016dc2d86bffd48ee",
     "required_parent_schema": "proximal-distal-event-topology-stress-extension/v1",
     "source_sha256": {
       "scripts/research/proximal_distal_energy/event_topology_channel_controls.py": "5f22488241ebee492538a71d7cd0e88e90fd11447a7a6df6cd7245727e4aeae7",

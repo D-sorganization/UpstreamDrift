@@ -520,6 +520,72 @@ def _qualified_result(
     )
 
 
+def _zero_authority_result(
+    *,
+    problem: BoundedEventReachabilityProblem,
+    config: MultipleShootingConfig,
+    layout: _ShootingLayout,
+    backend: SimulationBackend,
+    initial: FloatArray,
+) -> MultipleShootingResult:
+    """Type the direct-replay outcome when no incremental authority exists."""
+
+    result = _qualified_result(
+        problem=problem,
+        config=config,
+        layout=layout,
+        backend=backend,
+        decision=initial,
+        solver_success=False,
+        message="zero incremental authority; direct replay only",
+        iterations=0,
+    )
+    if result.replay is not None and (
+        result.replay.feasibility_status is FeasibilityStatus.FEASIBLE
+    ):
+        return replace(
+            result,
+            status=MultipleShootingStatus.CONVERGED,
+            solver_success=True,
+        )
+    return replace(result, status=MultipleShootingStatus.INFEASIBLE)
+
+
+def _numerical_failure_result(
+    *,
+    problem: BoundedEventReachabilityProblem,
+    config: MultipleShootingConfig,
+    layout: _ShootingLayout,
+    backend: SimulationBackend,
+    initial: FloatArray,
+    message: str,
+) -> MultipleShootingResult:
+    """Report the initialization residuals when SLSQP itself raised."""
+
+    segment_controls, state_nodes, _ = _unpack(
+        initial, segment_count=config.segment_count
+    )
+    residual = _shooting_residual(
+        initial, problem=problem, layout=layout, backend=backend
+    )
+    continuity = residual[: 4 * config.segment_count]
+    target = residual[4 * config.segment_count :]
+    return MultipleShootingResult(
+        status=MultipleShootingStatus.NUMERICAL_FAILURE,
+        solver_success=False,
+        message=message,
+        iterations=0,
+        objective=_objective(initial, problem=problem, layout=layout),
+        event_time_s=None,
+        maximum_continuity_residual=float(np.max(np.abs(continuity))),
+        maximum_target_residual=float(np.max(np.abs(target))),
+        segment_perturbations=segment_controls,
+        state_nodes=state_nodes,
+        perturbations=_expand_perturbations(segment_controls, layout),
+        replay=None,
+    )
+
+
 def solve_bounded_event_multiple_shooting(
     problem: BoundedEventReachabilityProblem,
     config: MultipleShootingConfig,
@@ -535,25 +601,13 @@ def solve_bounded_event_multiple_shooting(
     memo: dict[_SegmentKey, FloatArray] = {}
     initial = _initial_decision(problem, layout, config, backend)
     if problem.bounds.is_zero_authority:
-        result = _qualified_result(
+        return _zero_authority_result(
             problem=problem,
             config=config,
             layout=layout,
             backend=backend,
-            decision=initial,
-            solver_success=False,
-            message="zero incremental authority; direct replay only",
-            iterations=0,
+            initial=initial,
         )
-        if result.replay is not None and (
-            result.replay.feasibility_status is FeasibilityStatus.FEASIBLE
-        ):
-            return replace(
-                result,
-                status=MultipleShootingStatus.CONVERGED,
-                solver_success=True,
-            )
-        return replace(result, status=MultipleShootingStatus.INFEASIBLE)
 
     equality = {
         "type": "eq",
@@ -591,27 +645,13 @@ def solve_bounded_event_multiple_shooting(
             },
         )
     except (ArithmeticError, RuntimeError, ValueError) as exc:
-        segment_controls, state_nodes, _ = _unpack(
-            initial, segment_count=config.segment_count
-        )
-        residual = _shooting_residual(
-            initial, problem=problem, layout=layout, backend=backend
-        )
-        continuity = residual[: 4 * config.segment_count]
-        target = residual[4 * config.segment_count :]
-        return MultipleShootingResult(
-            status=MultipleShootingStatus.NUMERICAL_FAILURE,
-            solver_success=False,
+        return _numerical_failure_result(
+            problem=problem,
+            config=config,
+            layout=layout,
+            backend=backend,
+            initial=initial,
             message=str(exc),
-            iterations=0,
-            objective=_objective(initial, problem=problem, layout=layout),
-            event_time_s=None,
-            maximum_continuity_residual=float(np.max(np.abs(continuity))),
-            maximum_target_residual=float(np.max(np.abs(target))),
-            segment_perturbations=segment_controls,
-            state_nodes=state_nodes,
-            perturbations=_expand_perturbations(segment_controls, layout),
-            replay=None,
         )
     decision = np.asarray(solved.x, dtype=float)
     return _qualified_result(

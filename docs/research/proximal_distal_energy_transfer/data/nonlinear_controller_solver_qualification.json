@@ -4,12 +4,12 @@
   "evidence_status": "solver_mechanics_only_no_golf_evaluation",
   "registration_authority": {
     "path": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
-    "sha256": "bfc6c776f1ed193198f7f78d8f481fa5860abe119fa6163c09e621f291c7f35a"
+    "sha256": "4856de8cabd4a820c22c2bb3e25f9f97852c22bbb7f08d405702f9b10d64d7bf"
   },
   "source_authorities": [
     {
       "path": "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json",
-      "sha256": "bfc6c776f1ed193198f7f78d8f481fa5860abe119fa6163c09e621f291c7f35a"
+      "sha256": "4856de8cabd4a820c22c2bb3e25f9f97852c22bbb7f08d405702f9b10d64d7bf"
     },
     {
       "path": "scripts/research/proximal_distal_energy/nonlinear_controller_numerics.py",

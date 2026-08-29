@@ -9,11 +9,11 @@
     },
     {
       "path": "docs/research/proximal_distal_energy_transfer/data/bounded_event_reachability.json",
-      "sha256": "73b275f33e8aa7e0329d9c68c2c3d679d0fc36a02b695b62055e6cd7e995794a"
+      "sha256": "0045df6ae32fd4555de12892a43e0333f56525f2b19c3039f859fb8732e9ffa1"
     },
     {
       "path": "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json",
-      "sha256": "35a2e9e209d2044e03422e7a431786016f3674fd451274d36e5684de3686c6c8"
+      "sha256": "813e1d8c9bdf38b5aa8e0e690400ab80e0cb1c075a575d7ad108c26f185bad34"
     }
   ],
   "plant_and_solver_source_authorities": [

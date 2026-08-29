@@ -681,7 +681,7 @@
       "bytes": 3647
     },
     "docs/research/proximal_distal_energy_transfer/data/bounded_event_reachability.json": {
-      "sha256": "73b275f33e8aa7e0329d9c68c2c3d679d0fc36a02b695b62055e6cd7e995794a",
+      "sha256": "0045df6ae32fd4555de12892a43e0333f56525f2b19c3039f859fb8732e9ffa1",
       "bytes": 49625
     },
     "docs/research/proximal_distal_energy_transfer/data/bounded_event_reachability.npz": {
@@ -765,7 +765,7 @@
       "bytes": 169094
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.json": {
-      "sha256": "35a2e9e209d2044e03422e7a431786016f3674fd451274d36e5684de3686c6c8",
+      "sha256": "813e1d8c9bdf38b5aa8e0e690400ab80e0cb1c075a575d7ad108c26f185bad34",
       "bytes": 108676
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_channel_matrix.npz": {
@@ -773,7 +773,7 @@
       "bytes": 2153339
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.json": {
-      "sha256": "4de5ced3274fa35af77b2fc3e9141ee7c09a4e88464c1fc33b457b8bba6b881e",
+      "sha256": "04cd3282114950cb5aa5ee408cab681fa99c53c3a931d04b137a4f57a478fe32",
       "bytes": 19716
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_robustness.npz": {
@@ -781,7 +781,7 @@
       "bytes": 2755759
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.json": {
-      "sha256": "4d382e9851740f3ff97b793f77fd60682911dab3a51ed7a2dfb08308ae821f8f",
+      "sha256": "e3a3e961030b615f88d8076a8af3e2bc1b66525b5c08161016dc2d86bffd48ee",
       "bytes": 26320
     },
     "docs/research/proximal_distal_energy_transfer/data/event_topology_stress_extension.npz": {
@@ -965,7 +965,7 @@
       "bytes": 234376
     },
     "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_comparison_registration.json": {
-      "sha256": "bfc6c776f1ed193198f7f78d8f481fa5860abe119fa6163c09e621f291c7f35a",
+      "sha256": "4856de8cabd4a820c22c2bb3e25f9f97852c22bbb7f08d405702f9b10d64d7bf",
       "bytes": 15632
     },
     "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_plant_transport.json": {
@@ -973,7 +973,7 @@
       "bytes": 6337
     },
     "docs/research/proximal_distal_energy_transfer/data/nonlinear_controller_solver_qualification.json": {
-      "sha256": "9dc1b5c8eba3148abcde6d231aed56581418a6beb445d8b78418c0ea1e956799",
+      "sha256": "abb8870ba97a2d490ced50eed39495c8f8327bd612681dd01ae21546ef03e977",
       "bytes": 3344
     },
     "docs/research/proximal_distal_energy_transfer/data/observer_recovery_study.json": {
@@ -2201,8 +2201,8 @@
       "bytes": 8858
     },
     "scripts/research/proximal_distal_energy/bounded_event_multiple_shooting.py": {
-      "sha256": "9d4c418d7b755d04cd1223a49b747e5ace20bbd75b31579ff4eeb6c90ce869c5",
-      "bytes": 22857
+      "sha256": "a495e460df344260fe9ca32b904620279bb589c00af8fbc0e4d8bc3d906be2e3",
+      "bytes": 23747
     },
     "scripts/research/proximal_distal_energy/bounded_event_reachability.py": {
       "sha256": "b90c7294d3383c922e72f404137e6438f4a44fe996672eb0ba59c075410c7e8d",
