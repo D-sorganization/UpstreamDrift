@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/upstreamdrift-companion-acquisition-v1.schema.json",
+  "title": "UpstreamDrift Companion Acquisition Record v1",
+  "description": "Strict evidence record for ephemeral Actions artifacts or immutable GitHub release assets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract_version",
+    "repository",
+    "source_commit",
+    "schema_version",
+    "generator_version",
+    "channel",
+    "workflow",
+    "delivery",
+    "attestation",
+    "payloads",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://upstreamdrift.dev/schemas/upstreamdrift-companion-acquisition-v1.schema.json"
+    },
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "repository": {
+      "const": "D-sorganization/UpstreamDrift"
+    },
+    "source_commit": {
+      "$ref": "#/$defs/commit"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "generator_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "channel": {
+      "enum": ["actions", "release"]
+    },
+    "workflow": {
+      "$ref": "#/$defs/workflow"
+    },
+    "delivery": {
+      "$ref": "#/$defs/delivery"
+    },
+    "attestation": {
+      "$ref": "#/$defs/attestation"
+    },
+    "payloads": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/payload"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "actions"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "delivery": {
+            "properties": {
+              "durability": {
+                "const": "ephemeral"
+              },
+              "actions_artifact": {
+                "$ref": "#/$defs/actionsArtifact"
+              },
+              "release": {
+                "type": "null"
+              }
+            }
+          },
+          "limitations": {
+            "minItems": 1
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "delivery": {
+            "properties": {
+              "durability": {
+                "const": "immutable-release"
+              },
+              "actions_artifact": {
+                "type": "null"
+              },
+              "release": {
+                "$ref": "#/$defs/release"
+              }
+            }
+          },
+          "limitations": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "httpsUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "run_attempt", "run_url", "event_name", "ref"],
+      "properties": {
+        "run_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "run_attempt": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "run_url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "event_name": {
+          "const": "push"
+        },
+        "ref": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["durability", "actions_artifact", "release"],
+      "properties": {
+        "durability": {
+          "enum": ["ephemeral", "immutable-release"]
+        },
+        "actions_artifact": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/actionsArtifact"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "release": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/release"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "actionsArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "artifact_id",
+        "url",
+        "archive_sha256",
+        "retention_days"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "artifact_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "archive_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "retention_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 90
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_id", "tag", "api_url", "html_url", "assets"],
+      "properties": {
+        "release_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tag": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+        },
+        "api_url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "html_url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "assets": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/releaseAsset"
+          }
+        }
+      }
+    },
+    "releaseAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "asset_id",
+        "api_url",
+        "display_url",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "asset_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "api_url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "display_url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "url", "verification_command"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "verification_command": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "size", "sha256", "embedded_commit"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "embedded_commit": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/commit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
