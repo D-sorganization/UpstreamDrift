@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from src.shared.python import SUITE_ROOT
 from src.shared.python.security.subprocess_utils import (
     CommandRunner,
     ProcessManager,
+    _default_suite_root,
     run_command,
 )
 
@@ -180,3 +183,107 @@ class TestCommandRunner:
     def test_cwd_set_on_runner(self) -> None:
         runner = CommandRunner(cwd="/tmp")
         assert str(runner.cwd) == "/tmp"
+
+
+# ---------------------------------------------------------------------------
+# suite_root plumbing (issue #9221)
+#
+# PR #9216 enforced the executable-name allowlist on the two secure_popen call
+# sites in this module, but neither passed ``suite_root`` -- and
+# ``secure_popen`` skips script-path and cwd validation entirely when it is
+# falsy. Directory-traversal protection was therefore inert on the background
+# launch paths. These tests pin that it now engages, and that a rejection
+# stays inside the existing "log and return falsy" contract rather than
+# escaping as an exception.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestSuiteRootIsPlumbedThrough:
+    #: A real in-suite script under an ALLOWED_SCRIPT_DIRECTORIES entry.
+    _IN_SUITE_SCRIPT = SUITE_ROOT / "src" / "shared" / "python" / "version_info.py"
+
+    def test_default_suite_root_is_the_checkout_root(self) -> None:
+        assert _default_suite_root() == SUITE_ROOT
+        assert (SUITE_ROOT / "src" / "shared" / "python").is_dir()
+
+    def test_default_suite_root_matches_project_root_detection(self) -> None:
+        """Stay consistent with the .git-based root rule from #9224."""
+        from src.shared.python.data_io._path_utils import find_project_root
+
+        assert find_project_root() == _default_suite_root()
+
+    def test_process_manager_rejects_out_of_tree_script(self, tmp_path) -> None:
+        payload = tmp_path / "payload.py"
+        payload.write_text("print('pwned')\n", encoding="utf-8")
+
+        pm = ProcessManager()
+        try:
+            assert pm.start("evil", [sys.executable, str(payload)]) is False
+            assert "evil" not in pm.processes
+        finally:
+            pm.stop_all()
+
+    def test_process_manager_rejects_out_of_tree_cwd(self, tmp_path) -> None:
+        pm = ProcessManager()
+        try:
+            started = pm.start(
+                "evil-cwd",
+                [sys.executable, "-c", "import time; time.sleep(60)"],
+                cwd=tmp_path,
+            )
+            assert started is False
+            assert "evil-cwd" not in pm.processes
+        finally:
+            pm.stop_all()
+
+    def test_process_manager_allows_in_suite_script(self) -> None:
+        pm = ProcessManager()
+        try:
+            assert pm.start("ok", [sys.executable, str(self._IN_SUITE_SCRIPT)]) is True
+        finally:
+            pm.stop_all()
+
+    def test_process_manager_honours_explicit_suite_root(self, tmp_path) -> None:
+        """An explicit root re-permits a launch the default root rejects."""
+        (tmp_path / "src").mkdir()
+        payload = tmp_path / "src" / "payload.py"
+        payload.write_text("pass\n", encoding="utf-8")
+
+        pm = ProcessManager()
+        try:
+            assert pm.start("scoped", [sys.executable, str(payload)]) is False
+            assert (
+                pm.start(
+                    "scoped",
+                    [sys.executable, str(payload)],
+                    suite_root=tmp_path,
+                )
+                is True
+            )
+        finally:
+            pm.stop_all()
+
+    def test_command_runner_rejects_out_of_tree_script(self, tmp_path) -> None:
+        payload = tmp_path / "payload.py"
+        payload.write_text("print('pwned')\n", encoding="utf-8")
+
+        runner = CommandRunner()
+        assert runner.run_async([sys.executable, str(payload)]) is None
+
+    def test_command_runner_rejects_out_of_tree_cwd(self, tmp_path) -> None:
+        runner = CommandRunner(cwd=tmp_path)
+        assert runner.run_async([sys.executable, "--version"]) is None
+
+    def test_command_runner_allows_in_suite_script(self) -> None:
+        runner = CommandRunner()
+        proc = runner.run_async([sys.executable, str(self._IN_SUITE_SCRIPT)])
+        assert proc is not None
+        try:
+            proc.wait(timeout=60)
+        finally:
+            proc.terminate()
+
+    def test_command_runner_defaults_suite_root(self) -> None:
+        assert CommandRunner().suite_root == _default_suite_root()
+        assert CommandRunner(suite_root="/somewhere").suite_root == Path("/somewhere")

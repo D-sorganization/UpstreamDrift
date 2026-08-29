@@ -29,6 +29,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from src.shared.python import SUITE_ROOT
 from src.shared.python.core.error_decorators import log_errors
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import (
@@ -43,6 +44,22 @@ logger = get_logger(__name__)
 # This ensures long-running processes don't hang indefinitely while allowing
 # reasonable time for complex operations like model loading or simulation runs.
 DEFAULT_SUBPROCESS_TIMEOUT: float = 300.0
+
+
+def _default_suite_root() -> Path:
+    """Return the suite root used to validate background launches.
+
+    ``secure_popen``/``secure_run`` skip script-path *and* working-directory
+    validation entirely when ``suite_root`` is falsy -- the allowlist on the
+    executable name still applies, but directory-traversal protection is inert
+    (issue #9221; PR #9216 landed the executable allowlist only). Both
+    ``secure_popen`` call sites in this module therefore supply a root.
+
+    ``SUITE_ROOT`` (``src/shared/python/__init__.py``) is the repository's
+    existing canonical constant for this and resolves to the checkout root,
+    matching the ``.git``-based project-root rule established by #9224.
+    """
+    return SUITE_ROOT
 
 
 def _hidden_window_kwargs() -> dict[str, Any]:
@@ -125,6 +142,7 @@ class ProcessManager:
         cmd: list[str],
         cwd: str | Path | None = None,
         env: dict[str, str] | None = None,
+        suite_root: str | Path | None = None,
     ) -> bool:
         """Start a background process.
 
@@ -133,6 +151,11 @@ class ProcessManager:
             cmd: Command and arguments
             cwd: Working directory
             env: Environment variables
+            suite_root: Root the script path and working directory must live
+                under (or under a trusted sibling provider checkout).
+                Defaults to :func:`_default_suite_root`. A launch rejected by
+                that validation is logged and returns ``False`` -- the same
+                contract as any other launch failure.
 
         Returns:
             True if started successfully, False otherwise
@@ -152,6 +175,9 @@ class ProcessManager:
                 process = secure_popen(
                     cmd,
                     cwd=str(cwd) if cwd else None,
+                    suite_root=(
+                        Path(suite_root) if suite_root else _default_suite_root()
+                    ),
                     env=env,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -299,16 +325,23 @@ class CommandRunner:
     """
 
     def __init__(
-        self, cwd: str | Path | None = None, env: dict[str, str] | None = None
+        self,
+        cwd: str | Path | None = None,
+        env: dict[str, str] | None = None,
+        suite_root: str | Path | None = None,
     ) -> None:
         """Initialize command runner.
 
         Args:
             cwd: Default working directory
             env: Default environment variables
+            suite_root: Root that :meth:`run_async` launches must stay within
+                (or within a trusted sibling provider checkout). Defaults to
+                :func:`_default_suite_root`.
         """
         self.cwd = cwd
         self.env = env
+        self.suite_root = Path(suite_root) if suite_root else _default_suite_root()
 
     def run(
         self,
@@ -342,7 +375,8 @@ class CommandRunner:
             cmd: Command and arguments
 
         Returns:
-            Popen object or None if failed
+            Popen object or None if failed, including when the script path or
+            working directory is rejected as outside ``self.suite_root``.
         """
         try:
             logger.debug(f"Running async command: {' '.join(cmd)}")
@@ -350,6 +384,7 @@ class CommandRunner:
             process = secure_popen(
                 cmd,
                 cwd=str(self.cwd) if self.cwd else None,
+                suite_root=self.suite_root,
                 env=self.env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
