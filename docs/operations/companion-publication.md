@@ -9,8 +9,8 @@ workflow, screenshot, calculation, or engineering conclusion.
 Both channels call the same public builder and verifier:
 
 ```text
-python3 scripts/companion_publication.py build --authority <protected-main|tag> --output-dir dist/companion
-python3 scripts/companion_publication.py verify-bundle --bundle-dir dist/companion
+python3 -m scripts.companion_publication build --authority <protected-main|tag> --output-dir dist/companion
+python3 -m scripts.companion_publication verify-bundle --bundle-dir dist/companion
 ```
 
 The builder delegates software-fact generation to

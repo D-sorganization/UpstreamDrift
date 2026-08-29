@@ -58,11 +58,11 @@ jobs:
         run: python3 -m pip install jsonschema pyyaml
       - name: Build companion publication bundle
         run: >-
-          python3 scripts/companion_publication.py build
+          python3 -m scripts.companion_publication build
           --authority protected-main --output-dir dist/companion
       - name: Verify companion publication bundle
         run: >-
-          python3 scripts/companion_publication.py verify-bundle
+          python3 -m scripts.companion_publication verify-bundle
           --bundle-dir dist/companion
       - name: Attest companion publication payloads
         id: companion-attestation
@@ -79,7 +79,7 @@ jobs:
           retention-days: 30
       - name: Record ephemeral Actions acquisition
         run: >-
-          python3 scripts/companion_publication.py record-actions
+          python3 -m scripts.companion_publication record-actions
           --bundle-dir dist/companion
           --artifact-name upstreamdrift-companion-${{ github.sha }}
           --artifact-id ${{ steps.companion-upload.outputs.artifact-id }}
@@ -181,11 +181,11 @@ jobs:
           cat SHA256SUMS.txt
       - name: Build companion publication bundle
         run: >-
-          python3 scripts/companion_publication.py build
+          python3 -m scripts.companion_publication build
           --authority tag --output-dir dist/companion
       - name: Verify companion publication bundle
         run: >-
-          python3 scripts/companion_publication.py verify-bundle
+          python3 -m scripts.companion_publication verify-bundle
           --bundle-dir dist/companion
       - name: Attest release artifacts
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
@@ -339,7 +339,7 @@ jobs:
           > "${RUNNER_TEMP}/companion-release.json"
       - name: Record immutable release acquisition
         run: >-
-          python3 scripts/companion_publication.py record-release
+          python3 -m scripts.companion_publication record-release
           --bundle-dir dist/companion
           --release-metadata "${RUNNER_TEMP}/companion-release.json"
           --attestation-id '${{ needs.build.outputs.companion_attestation_id }}'
@@ -349,7 +349,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: >-
-          python3 scripts/companion_publication.py verify-release-download
+          python3 -m scripts.companion_publication verify-release-download
           --acquisition dist/companion-release/upstreamdrift-companion-acquisition.v1.json
           --output-dir "${RUNNER_TEMP}/companion-release-download"
       - name: Attest release acquisition record
