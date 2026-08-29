@@ -11,7 +11,10 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     plan_sha256,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit import (
+    _audit_digest_payload,
+    _canonical_sha256,
     _execution_module_provenance,
+    _REQUIRED_EXECUTION_MODULE_NAMES,
     audit_structural_runtime,
     validate_runtime_audit,
 )
@@ -37,10 +40,11 @@ def _audit_source() -> dict[str, object]:
 
 def _execution_modules() -> dict[str, object]:
     return {
-        "native_dynamics_operator": {
+        name: {
             "path": "scripts/research/operator.py",
             "sha256": "e" * 64,
         }
+        for name in _REQUIRED_EXECUTION_MODULE_NAMES
     }
 
 
@@ -256,6 +260,39 @@ def test_runtime_audit_validator_fails_closed_on_tampering(
         validate_runtime_audit(plan=plan, launch=launch, audit=audit)
 
 
+@pytest.mark.parametrize(
+    "replacement_name",
+    [None, "unregistered_campaign_evaluator"],
+)
+def test_runtime_audit_rejects_incomplete_execution_module_identity_even_with_valid_digest(
+    replacement_name: str | None,
+) -> None:
+    plan = _plan()
+    launch = _launch(plan)
+
+    def probe(name: str) -> dict[str, str]:
+        return {"name": name, "version": "3.0.0", "operator": "native"}
+
+    audit = audit_structural_runtime(
+        plan=plan,
+        launch=launch,
+        source_checkout=_source(),
+        audit_source_checkout=_audit_source(),
+        execution_modules=_execution_modules(),
+        engine_probe=probe,
+        operator_probe=_smoke,
+    )
+    modules = dict(audit["execution_modules"])
+    removed = modules.pop("evaluate_structural_case")
+    if replacement_name is not None:
+        modules[replacement_name] = removed
+    audit["execution_modules"] = modules
+    audit["runtime_identity_sha256"] = _canonical_sha256(_audit_digest_payload(audit))
+
+    with pytest.raises(ValueError, match="required executed modules"):
+        validate_runtime_audit(plan=plan, launch=launch, audit=audit)
+
+
 def test_execution_module_provenance_rejects_a_different_source_root(
     tmp_path: Path,
 ) -> None:
@@ -263,7 +300,7 @@ def test_execution_module_provenance_rejects_a_different_source_root(
 
     provenance = _execution_module_provenance(repo_root)
 
-    assert "native_dynamics_operator" in provenance
+    assert set(provenance) == set(_REQUIRED_EXECUTION_MODULE_NAMES)
     assert all(len(str(row["sha256"])) == 64 for row in provenance.values())
     with pytest.raises(ValueError, match="outside the declared execution source"):
         _execution_module_provenance(tmp_path)

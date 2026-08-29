@@ -21,24 +21,38 @@ from scripts.research.proximal_distal_energy.articulated_forward_integration imp
     native_dynamics_operator,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_evaluator import (
+    evaluate_structural_case,
     require_native_engine,
+)
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_evidence import (
+    validate_structural_evidence_arrays,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
     NativeEngineUnavailable,
     plan_sha256,
+    run_serial_cases,
 )
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
     build_subject_scaled_model,
     default_synthetic_profiles,
 )
 
-_SCHEMA = "articulated-structural-factorial-runtime-audit/1.3.0"
+_SCHEMA = "articulated-structural-factorial-runtime-audit/1.4.0"
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _DISTRIBUTIONS = ("numpy", "scipy", "mujoco", "pin", "pinocchio")
 ROOT = Path(__file__).resolve().parents[3]
 EngineProbe = Callable[[str], Mapping[str, str]]
 OperatorProbe = Callable[[str], Mapping[str, object]]
+_REQUIRED_EXECUTION_MODULE_NAMES = (
+    "native_dynamics_operator",
+    "require_native_engine",
+    "evaluate_structural_case",
+    "run_serial_cases",
+    "validate_structural_evidence_arrays",
+    "build_subject_scaled_model",
+    "default_synthetic_profiles",
+)
 
 
 def _mapping(value: object, *, name: str) -> Mapping[str, Any]:
@@ -99,6 +113,9 @@ def _execution_module_provenance(source_root: Path) -> dict[str, object]:
     functions = {
         "native_dynamics_operator": native_dynamics_operator,
         "require_native_engine": require_native_engine,
+        "evaluate_structural_case": evaluate_structural_case,
+        "run_serial_cases": run_serial_cases,
+        "validate_structural_evidence_arrays": validate_structural_evidence_arrays,
         "build_subject_scaled_model": build_subject_scaled_model,
         "default_synthetic_profiles": default_synthetic_profiles,
     }
@@ -141,6 +158,14 @@ def _validate_provenance_mapping(value: Mapping[str, object], *, name: str) -> N
             raise ValueError(f"{name} contains invalid module provenance")
 
 
+def _validate_execution_module_provenance(value: Mapping[str, object]) -> None:
+    _validate_provenance_mapping(value, name="execution_modules")
+    if set(value) != set(_REQUIRED_EXECUTION_MODULE_NAMES):
+        raise ValueError(
+            "execution_modules must retain exactly the required executed modules"
+        )
+
+
 def validate_runtime_audit(
     *,
     plan: Mapping[str, object],
@@ -180,7 +205,7 @@ def validate_runtime_audit(
     execution_modules = _mapping(
         audit.get("execution_modules"), name="execution_modules"
     )
-    _validate_provenance_mapping(execution_modules, name="execution_modules")
+    _validate_execution_module_provenance(execution_modules)
     engines = _mapping(audit.get("engines"), name="engines")
     registered = _registered_engines(plan)
     if set(engines) != set(registered) or any(
@@ -271,7 +296,7 @@ def audit_structural_runtime(
         or audit_clean is not True
     ):
         raise ValueError("audit source checkout must be clean and revision-bound")
-    _validate_provenance_mapping(execution_modules, name="execution_modules")
+    _validate_execution_module_provenance(execution_modules)
     probe = engine_probe or require_native_engine
     smoke_probe = operator_probe or _native_operator_smoke
     engines: dict[str, dict[str, object]] = {}

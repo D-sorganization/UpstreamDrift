@@ -25,6 +25,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     run_serial_cases,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runtime_audit import (
+    _REQUIRED_EXECUTION_MODULE_NAMES,
     audit_structural_runtime,
     validate_runtime_audit,
 )
@@ -341,10 +342,11 @@ def test_summary_accepts_a_qualified_bound_runtime_but_retains_other_gates(
             "tracked_clean": True,
         },
         execution_modules={
-            "native_dynamics_operator": {
+            name: {
                 "path": "scripts/research/operator.py",
                 "sha256": "f" * 64,
             }
+            for name in _REQUIRED_EXECUTION_MODULE_NAMES
         },
         engine_probe=probe,
         operator_probe=lambda _name: {"passes": True},

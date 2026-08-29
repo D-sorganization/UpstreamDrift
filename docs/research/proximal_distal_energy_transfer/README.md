@@ -324,7 +324,7 @@ the finding-by-finding record in
 
 ## Reproducing Everything
 
-````bash
+```bash
 # primary analyses (E1 sweep, E2 counterfactuals, E4 interface powers)
 python3 -m scripts.research.proximal_distal_energy.run_experiments
 # registered source extraction and exact interaction-force study
@@ -444,6 +444,7 @@ python3 -m scripts.research.proximal_distal_energy.make_articulated_structural_f
   --summary C:/Users/diete/Campaigns/UpstreamDrift-9153-structural-factorial-d6bffd0c6/summary.json \
   --outcome final_club_translation_speed_m_s \
   --output docs/research/proximal_distal_energy_transfer/figures/fig_structural_factorial_club_speed
+```
 
 Every completed checkpoint used for promotion must declare and pass
 `articulated-structural-factorial-evidence/1.0.0`. The validator requires the
@@ -468,7 +469,7 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --enriched-launch /path/to/enriched-launch.json \
   --enriched-checkpoint-dir /path/to/enriched-prefix \
   --output /path/to/enrichment-audit.json
-````
+```
 
 The audit requires identical case ordering, statuses, JSON results, and every
 overlapping legacy NPZ array while independently validating the enriched
@@ -486,6 +487,10 @@ The governed heavy-test Dockerfile and workflow install the `pin` and
 image build and runtime audit are still required before using that environment.
 The audit also requires a finite, symmetric, positive-definite native mass
 matrix and finite bias vector for the governed 20-coordinate articulated model.
+Runtime-audit schema 1.4 additionally binds the native operator, engine gate,
+case evaluator, serial checkpoint runner, complete-history validator, and both
+subject-scaled geometry providers. Missing, substituted, or extra executed
+module identities fail closed even if an audit digest is recomputed.
 Before evaluating a case, the launcher atomically writes
 `execution-session.json` inside an empty checkpoint directory. That record binds
 the exact plan, launch, runtime-audit files, execution revision, and validated
@@ -494,6 +499,8 @@ fails before evaluator import. For promotion, the summary revalidates the same
 files/session through `--runtime-audit` and the copied-sidecar sentinel through
 `--corruption-audit`; either missing gate leaves promotion false even when the
 numerical gates pass.
+
+```bash
 python3 -m scripts.research.proximal_distal_energy.run_spatial_forward_contact_study
 python3 -m scripts.research.proximal_distal_energy.run_uncertainty_control_study
 python3 -m scripts.research.proximal_distal_energy.run_timing_viability_study
@@ -649,4 +656,3 @@ model and ABA APIs.
   [#8426](https://github.com/D-sorganization/UpstreamDrift/issues/8426).
 
 Edit the `.qmd`/chapter files, never the generated `.tex`.
-```
