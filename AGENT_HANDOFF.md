@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  implementation head `bbded2f5c` plus this handoff successor. No PR exists.
+  implementation head `afd136817` plus this handoff successor. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 - Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
