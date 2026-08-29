@@ -52,6 +52,26 @@ class TestMassMatrix:
         M = mass_matrix(0.1, -0.2, _P)
         np.testing.assert_allclose(M, M.T, atol=1e-10)
 
+    @pytest.mark.unit
+    def test_physics_triple_is_exactly_symmetric(self) -> None:
+        """Mirrored entries are bit-identical, not merely close (issue #9204).
+
+        ``mass_matrix`` assembles the array from a symmetric literal, so each
+        off-diagonal pair holds the same float64 bit pattern. The runtime
+        postcondition asserts exact equality rather than ``np.isclose``; this
+        test pins that stronger contract across a spread of configurations so a
+        future rewrite cannot silently weaken it back to a tolerance.
+        """
+        for phi1, phi2 in (
+            (0.0, 0.0),
+            (0.1, -0.2),
+            (1.3, 2.7),
+            (-2.9, 0.45),
+            (np.pi, -np.pi / 3.0),
+        ):
+            M = mass_matrix(phi1, phi2, _P)
+            assert np.array_equal(M, M.T), f"not exactly symmetric at {phi1},{phi2}"
+
     def test_is_positive_definite(self) -> None:
         M = mass_matrix(0.0, 0.0, _P)
         eigenvalues = np.linalg.eigvalsh(M)

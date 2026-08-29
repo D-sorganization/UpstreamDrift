@@ -160,12 +160,23 @@ def mass_matrix(phi1: float, phi2: float, params: TriplePendulumParams) -> np.nd
         ]
     )
 
-    # Postcondition: symmetry
-    for i in range(3):
-        for j in range(3):
-            assert np.isclose(M[i, j], M[j, i]), (
-                f"Mass matrix not symmetric at [{i},{j}]"
-            )
+    # Postcondition: symmetry.
+    #
+    # ``M`` is assembled from a symmetric literal -- ``M[0,1]`` and ``M[1,0]``
+    # are both the scalar ``M12``, and likewise for the other two off-diagonal
+    # pairs -- so the mirrored entries hold the *same* float64 bit pattern.
+    # Asserting exact equality is therefore strictly stronger than the
+    # tolerance-based ``np.isclose`` check it replaces, and it never accepts a
+    # matrix the old form would have rejected.
+    #
+    # This is a hot path, not a cosmetic change: ``mass_matrix`` runs once per
+    # RK4 stage, and the nine ``np.isclose`` calls the loop used to make cost
+    # ~119 us against ~0.45 us for the three scalar comparisons below. In the
+    # shaft-contribution study those nine calls were 8.7 M invocations and 53%
+    # of total runtime (issue #9204).
+    assert M[0, 1] == M[1, 0], "Mass matrix not symmetric at [0,1]"
+    assert M[0, 2] == M[2, 0], "Mass matrix not symmetric at [0,2]"
+    assert M[1, 2] == M[2, 1], "Mass matrix not symmetric at [1,2]"
 
     return M
 
