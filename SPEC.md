@@ -2,6 +2,40 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## F1 MPM Plastic-Limit, Manufactured-Solution and Temporal Verification (#8733 §4)
+
+Three code-verification cases the shipped F1 suite did not reach, all routed
+through the existing `vandv/` conservation, convergence and Celik GCI
+implementations rather than a second Richardson extrapolation.
+
+**Plastic limit.** The 2-D Drucker-Prager surface is written on the two
+in-plane principal Kirchhoff stresses, so the plane-strain Coulomb limit it
+enforces is `K = (1 ∓ √2·α)/(1 ± √2·α)` at an equivalent friction angle
+`φ* = asin(√2·α) = 31.944°` — not the 34° handed to `drucker_prager_alpha`,
+which fits the inner cone in three dimensions. A smooth rigid wall pushed at
+`v/c = 1.58e-4` into a frictionless-based cohesionless layer reaches
+`P_p = 22.744 N/m` against the closed form `K_p·ρgH²/2 = 21.287 N/m` at
+`dx = 3 mm`, `H = 30 mm`, with 98.9% of the bed at yield — **6.845%**, falling
+to **2.966%** at `dx = 2 mm` and rising to 10.182% at `dx = 4 mm`.
+
+**MMS.** A manufactured diagonal deformation-gradient field with a closed-form
+`div σ` is compared against one step from rest, which makes the particle
+velocity exactly `dt` times the discrete P2G–solve–G2P operator. Observed order
+**1.880** over four grids (pairwise 1.866, 1.892, 1.870; spread 0.026) against
+a design order of 2. It covers the stress divergence and the transfer together
+on the **elastic** branch and covers neither the return map nor the time
+integration; the accompanying uniform-stress patch test is a round-off-class
+identity at **1.76e-15** relative and refuses an order test.
+
+**Temporal.** Step refinement at fixed `dx` over one elastic transit is
+monotonic with Celik apparent order **1.214** and `GCI_fine = 0.473%`, declared
+a temporal band only. Over two transits and beyond the same triplet is
+`MONOTONIC_DIVERGENCE`: the particle-grid round trip costs a fixed amount per
+step, so over a fixed physical window its total grows as `1/dt` and overtakes
+the integrator's own `O(dt)` error. The tier's convergent refinement direction
+is therefore space-time at fixed Courant number, which is what the shipped
+grid study already takes.
+
 ## Performance Enhancements (#9161)
 
 - Replaced instances of `np.linalg.norm` with faster mathematical equivalents (`math.hypot`, `np.vdot`, and `np.einsum`) for small vectors and multidimensional arrays in telemetry logging, screw kinematics, and bunker shot traces.
@@ -742,8 +776,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.623                                            |
-| **Last Spec Update**    | 2026-08-27                                         |
+| **Spec Version**        | 1.0.626                                            |
+| **Last Spec Update**    | 2026-08-28                                         |
 
 ## 2. Purpose & Mission
 
@@ -3431,6 +3465,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-28 | 1.0.626 | Closed issue #8733 section 4, the F1 MPM code verification the shipped suite did not reach. Added a plastic-limit case (`rankine_limits`, `passive_earth_pressure_limit`): the 2-D Drucker-Prager surface enforces a plane-strain Coulomb limit at `phi* = asin(sqrt(2) alpha) = 31.944 deg`, not the 34 deg input angle, and a smooth rigid wall pushed into a frictionless-based cohesionless layer at `v/c = 1.58e-4` reaches 22.744 N/m against the closed-form 21.287 N/m at `dx = 3 mm` (6.845%, falling to 2.966% at `dx = 2 mm`) with 98.9% of the bed at yield. Added a manufactured-solution study (`manufactured_solution_convergence`) whose observed order is 1.880 over four grids against a design order of 2, covering the stress divergence and the particle-grid transfer together on the elastic branch only, with a round-off-class uniform-stress patch test at 1.76e-15 relative underneath it. Added temporal refinement at fixed `dx` (`column_temporal_convergence`): monotonic over one elastic transit with Celik apparent order 1.214 and `GCI_fine = 0.473%` declared a temporal band only, and `MONOTONIC_DIVERGENCE` beyond that because the particle-grid round trip costs a fixed amount per step so its total over a fixed window grows as `1/dt`. Everything reuses the existing `vandv/` conservation, convergence and Celik implementations. |
 | 2026-08-28 | 1.0.625 | Fixed #9168: `tests/tools/sidekick_tool/test_embed_adapter.py` was order-dependent in two ways and failed intermittently on unrelated PRs (#9095, #9148, #9150, #9160). (1) `src/tools/sidekick/__init__.py` registers `_SidekickEmbedAdapter` as a module-level import side effect that runs at most once per process, while `test_package_registers_adapter_on_import` needed an empty registry and `test_package_registration_is_idempotent` needed a populated one; three autouse conftest fixtures (`tests/ui/launcher_embed`, `tests/launchers/launcher_embed`, `tests/ui/tools/simulation_backends`) cleared the process-wide registry without restoring it, so when one landed in the same pytest-xdist worker first the cached `sys.modules` entry stopped the side effect re-running and the pair failed as mirror images (`assert None is not None` / `assert <adapter> is None`). (2) `tests/unit/launcher_embed/test_sidekick_contract.py` evicts the sidekick modules and never restores them, leaving a different `_embed_adapter` module cached, so `test_cleanup_swallows_exceptions_and_logs` patched a module its collection-time class no longer belonged to. Fix is test-side only, leaving production registration semantics unchanged: an autouse fixture now snapshots and restores both the registry mapping and the `src.tools.sidekick*` `sys.modules` entries; a `_fresh_import_sidekick` helper evicts the package and its submodules before re-importing so each test establishes its own precondition explicitly; identity checks resolve the adapter class from the live module; the logger patch uses `patch.object` on that same module object; the contract test's `_registry_snapshot` now restores the sidekick `sys.modules` entries it evicts. Added `test_package_registration_recovers_from_cleared_registry` as a regression guard (all 17 tests marked `@pytest.mark.unit`). Verified against `origin/main` as a control across eight scenarios: the four co-scheduled orderings failed 5/5, 3/5, 5/5 and 5/5 before the fix and pass 10/10 each after, with the file alone and the broad `tests/tools` tree clean in both. No retry marker and no xfail. |
 | 2026-08-28 | 1.0.624 | Replaced the saturated `dig_vs_skid` discriminant with the descent-return ratio (#8703). The verdict was built on the entry slope ratio -- the penetration slope over the first 10 mm of travel divided by the delivered path slope -- which spanned only 0.9987-1.0000 over the demo's whole 77-point design space and returned `MARGINAL` at every point, because 10 mm is 0.4 ms at greenside speed and a 0.3 kg head under an order-5 N.s impulse cannot bend measurably in that time; resizing the window was measured and refuted, since normalising by the delivered slope divides out the attack angle and inverts the ordering against sole depth. `bunkershot3d.metrics.divot` now measures the **vertical restitution of the strike** -- the sole's climb speed at the last submerged sample over its descent speed at the first -- which is the direct expression of the physical claim (a digging head gives its descent to the sand and crawls out; a skidding head bottoms out and is thrown back) and has no window parameter to place. Over the shipped `WorkbenchModel` swept at 384 points (marketed bounce 8-26 deg x sole 16-24 mm x attack -2 to -14 deg x four sand conditions x 20 and 25 m/s) the new ratio spans 0.338-0.954 against 0.00124 for the quantity it replaced, and correlates with maximum sole depth at -0.97 with the correct sign where the old ratio managed -0.64 with the wrong one. `DigSkidResult` now carries `entry_descent_speed_mps`, `exit_climb_speed_mps` and `descent_return_ratio` in place of the slope fields; `DigSkidCalibration` still reports `calibrated=False` and now also carries `DIG_SKID_BOUNCE_ORDERING_REASON`, which records that the F0 solver reads more marketed bounce as more dig in the shallow, non-burying regime -- a model behaviour the saturated metric could not have exposed -- so the verdict is never a bounce recommendation. |
 | 2026-08-28 | 1.0.623 | Fixed CI offline determinism, Docker buildx rehydration, and dependency lock provenance (#9120, #9121, #9122). Added `bootstrap_conformance_deps.py` for deterministic offline install of pinned conformance dependencies across cross-engine workflows; added `rehydrate_docker_context.py` to ensure Dockerfile is rehydrated before Buildx smoke gates; and made dependency lock provenance invariant to offline environments with canonical compilation headers. |
