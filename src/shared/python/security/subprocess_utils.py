@@ -47,13 +47,14 @@ DEFAULT_SUBPROCESS_TIMEOUT: float = 300.0
 
 
 def _default_suite_root() -> Path:
-    """Return the suite root used to validate background launches.
+    """Return the suite root used to validate subprocess launches.
 
     ``secure_popen``/``secure_run`` skip script-path *and* working-directory
     validation entirely when ``suite_root`` is falsy -- the allowlist on the
     executable name still applies, but directory-traversal protection is inert
     (issue #9221; PR #9216 landed the executable allowlist only). Both
-    ``secure_popen`` call sites in this module therefore supply a root.
+    ``secure_popen`` call sites in this module therefore supply a root, and so
+    does the synchronous :func:`run_command` path (issue #9228).
 
     ``SUITE_ROOT`` (``src/shared/python/__init__.py``) is the repository's
     existing canonical constant for this and resolves to the checkout root,
@@ -75,6 +76,7 @@ def run_command(
     cwd: str | Path | None = None,
     timeout: float | None = None,
     capture_output: bool = True,
+    suite_root: str | Path | None = None,
 ) -> subprocess.CompletedProcess | None:
     """Run command synchronously with error handling.
 
@@ -85,9 +87,20 @@ def run_command(
             Pass a specific value to override, or use a very large value for
             effectively unlimited execution time.
         capture_output: Whether to capture stdout/stderr
+        suite_root: Root the script path and working directory must live under
+            (or under a trusted sibling provider checkout). Defaults to
+            :func:`_default_suite_root`.
 
     Returns:
         CompletedProcess object or None if failed
+
+    Raises:
+        SecureSubprocessError: If the command, its script path or its working
+            directory is rejected. This propagates rather than becoming
+            ``None``: the ``@log_errors`` decorator on this function catches
+            only ``(RuntimeError, TypeError, ValueError)``, so the existing
+            executable-allowlist rejection already raises, and the ``suite_root``
+            rejections deliberately behave identically.
 
     Example:
         result = run_command(["python", "--version"])
@@ -102,6 +115,7 @@ def run_command(
     result = secure_run(
         cmd,
         cwd=str(cwd) if cwd else None,
+        suite_root=Path(suite_root) if suite_root else _default_suite_root(),
         timeout=effective_timeout,
         capture_output=capture_output,
     )
@@ -335,9 +349,9 @@ class CommandRunner:
         Args:
             cwd: Default working directory
             env: Default environment variables
-            suite_root: Root that :meth:`run_async` launches must stay within
-                (or within a trusted sibling provider checkout). Defaults to
-                :func:`_default_suite_root`.
+            suite_root: Root that :meth:`run` and :meth:`run_async` launches
+                must stay within (or within a trusted sibling provider
+                checkout). Defaults to :func:`_default_suite_root`.
         """
         self.cwd = cwd
         self.env = env
@@ -357,9 +371,13 @@ class CommandRunner:
             check: Raise exception on non-zero exit code
 
         Returns:
-            CompletedProcess object or None if failed
+            CompletedProcess object or None if failed, including when the
+            script path or working directory is rejected as outside
+            ``self.suite_root``
         """
-        result = run_command(cmd, cwd=self.cwd, timeout=timeout)
+        result = run_command(
+            cmd, cwd=self.cwd, timeout=timeout, suite_root=self.suite_root
+        )
 
         if check and result and result.returncode != 0:
             raise subprocess.CalledProcessError(
