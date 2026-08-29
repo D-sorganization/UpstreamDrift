@@ -66,6 +66,10 @@ are not completion evidence.
   records the receipt schema/SHA. A real 1.1 intake retained 20/20 at
   `Campaigns/UpstreamDrift-9153-receipt-bind-validation-prefix-0020-v1`,
   manifest SHA `55412e9342d1`.
+- Real receipt-1.3 validation against governed run 33277732709 retained 20/20
+  cross-bound pairs and evidence sidecars at
+  `Campaigns/UpstreamDrift-9153-receipt-v1.3-validation-run-33277732709`;
+  receipt SHA is `d4f041d9bfa7`.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
