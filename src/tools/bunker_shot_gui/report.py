@@ -207,10 +207,12 @@ def _divot_lines(outcome: ShotOutcome) -> tuple[str, ...]:
 
 
 DIG_SKID_CAVEAT = (
-    "the dig-versus-skid verdict is UNCALIBRATED and is not a finding: at the "
-    "shipped entry window the slope ratio spans 0.9987-1.0000 over the whole "
-    "design space, and widening the window orders the designs opposite to sole "
-    "depth (#8703)"
+    "the dig-versus-skid verdict is UNCALIBRATED and is not a finding: the "
+    "descent-return ratio separates the design space, but no vertical "
+    "restitution has been published for a wedge sole leaving bunker sand, so "
+    "its DIG and SKID thresholds are conventions; and the F0 model reads more "
+    "marketed bounce as more dig in the shallow regime, so this is never a "
+    "bounce recommendation (#8703)"
 )
 """The sentence a dig-versus-skid verdict is never shown without (#8703)."""
 
@@ -232,8 +234,12 @@ def _dig_skid_lines(outcome: ShotOutcome) -> tuple[str, ...]:
         "Dig versus skid",
         _THIN,
         _line("Verdict", f"{dig_skid_verdict.value.upper()} ({state})"),
-        _line("Slope ratio", f"{skid.slope_ratio:.3f}"),
-        _line("Entry window", f"{skid.calibration.entry_window_samples:.2f} samples"),
+        _line("Descent returned", f"{skid.descent_return_ratio:.3f}"),
+        _line(
+            "Entry descent / exit climb",
+            f"{skid.entry_descent_speed_mps:.3g} / {skid.exit_climb_speed_mps:.3g} m/s",
+        ),
+        _line("Submerged samples", f"{skid.calibration.submerged_samples}"),
         _line("Vertical sand impulse", f"{skid.vertical_sand_impulse_Ns:.4g} N.s"),
         f"  {DIG_SKID_CAVEAT}",
         "",

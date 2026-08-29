@@ -12,6 +12,7 @@ from src.shared.python.plotting.export import (
     export_figure,
     export_plot_data,
 )
+from src.shared.python.plotting.identity import PlotIdentity
 
 
 class TestExportConfig:
@@ -145,3 +146,136 @@ class TestExportPlotData:
         config = ExportConfig(output_dir=str(tmp_path))
         with pytest.raises(ValueError):
             export_plot_data({}, "test", config=config, fmt="xml")
+
+    @pytest.mark.unit
+    def test_json_metadata_includes_identity_fields(self, tmp_path: Path) -> None:
+        """(c) JSON export carries identity fields, not just a static string."""
+        config = ExportConfig(output_dir=str(tmp_path), include_metadata=True)
+        identity = PlotIdentity(engine="mujoco", model="golfer_v3", run_id="run-9")
+        data = {"x": [1.0]}
+        path = export_plot_data(
+            data, "test", config=config, fmt="json", identity=identity
+        )
+        with open(path) as f:
+            loaded = json.load(f)
+        meta = loaded["_meta"]
+        assert meta["engine"] == "mujoco"
+        assert meta["model"] == "golfer_v3"
+        assert meta["run_id"] == "run-9"
+        assert "exported_at" in meta
+        assert meta["source"] == "UpstreamDrift"
+
+    @pytest.mark.unit
+    def test_json_metadata_omits_unknown_identity_fields(self, tmp_path: Path) -> None:
+        config = ExportConfig(output_dir=str(tmp_path), include_metadata=True)
+        identity = PlotIdentity(engine="drake")
+        data = {"x": [1.0]}
+        path = export_plot_data(
+            data, "test", config=config, fmt="json", identity=identity
+        )
+        with open(path) as f:
+            loaded = json.load(f)
+        meta = loaded["_meta"]
+        assert meta["engine"] == "drake"
+        assert "model" not in meta
+        assert "run_id" not in meta
+
+    @pytest.mark.unit
+    def test_json_metadata_without_identity_keeps_static_source(
+        self, tmp_path: Path
+    ) -> None:
+        config = ExportConfig(output_dir=str(tmp_path), include_metadata=True)
+        path = export_plot_data({"x": [1.0]}, "test", config=config, fmt="json")
+        with open(path) as f:
+            loaded = json.load(f)
+        assert loaded["_meta"]["source"] == "UpstreamDrift"
+        assert "engine" not in loaded["_meta"]
+
+
+class TestExportFigureMetadata:
+    """(b) export_figure(include_metadata=True) embeds identity in PNG metadata."""
+
+    @pytest.mark.unit
+    def test_png_metadata_contains_identity_fields(self, tmp_path: Path) -> None:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from PIL import Image
+
+        fig, ax = plt.subplots()
+        ax.plot([1, 2, 3])
+        config = ExportConfig(output_dir=str(tmp_path), dpi=72, include_metadata=True)
+        identity = PlotIdentity(engine="mujoco", model="golfer_v3", run_id="run-9")
+        paths = export_figure(
+            fig, "meta_test", config=config, formats=["png"], identity=identity
+        )
+        plt.close("all")
+
+        img = Image.open(paths[0])
+        info = img.info
+        assert info.get("engine") == "mujoco"
+        assert info.get("model") == "golfer_v3"
+        assert info.get("run_id") == "run-9"
+        assert "Creation Time" in info
+        assert info.get("Software") == "UpstreamDrift"
+
+    @pytest.mark.unit
+    def test_png_metadata_absent_when_include_metadata_false(
+        self, tmp_path: Path
+    ) -> None:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from PIL import Image
+
+        fig, ax = plt.subplots()
+        ax.plot([1, 2, 3])
+        config = ExportConfig(output_dir=str(tmp_path), dpi=72, include_metadata=False)
+        identity = PlotIdentity(engine="mujoco")
+        paths = export_figure(
+            fig, "no_meta_test", config=config, formats=["png"], identity=identity
+        )
+        plt.close("all")
+
+        img = Image.open(paths[0])
+        assert "engine" not in img.info
+
+    @pytest.mark.unit
+    def test_png_metadata_without_identity_still_has_timestamp(
+        self, tmp_path: Path
+    ) -> None:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from PIL import Image
+
+        fig, ax = plt.subplots()
+        ax.plot([1, 2, 3])
+        config = ExportConfig(output_dir=str(tmp_path), dpi=72, include_metadata=True)
+        paths = export_figure(fig, "identityless", config=config, formats=["png"])
+        plt.close("all")
+
+        img = Image.open(paths[0])
+        assert "Creation Time" in img.info
+        assert "engine" not in img.info
+
+    @pytest.mark.unit
+    def test_pdf_export_with_identity_does_not_raise(self, tmp_path: Path) -> None:
+        """PDF's stricter metadata key vocabulary must not break exports."""
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots()
+        ax.plot([1, 2, 3])
+        config = ExportConfig(output_dir=str(tmp_path), dpi=72, include_metadata=True)
+        identity = PlotIdentity(engine="mujoco", model="golfer_v3")
+        paths = export_figure(
+            fig, "pdf_meta_test", config=config, formats=["pdf"], identity=identity
+        )
+        plt.close("all")
+        assert paths[0].exists()

@@ -130,86 +130,131 @@ class TestDepthProfile:
 
 
 class TestDigVersusSkid:
-    """The discriminator, and the vertical impulse balance beside it."""
+    """The discriminator, and the vertical impulse balance beside it.
 
-    def test_a_sole_that_steepens_after_entry_is_a_dig(self, head, scene) -> None:
-        """Delivered at 0.20, penetrating at 0.30: ratio 1.5, comfortably a dig.
+    Every trace below shares one ascending limb of slope 0.20 at 20 m/s, so the
+    sole leaves the sand climbing at exactly 4 m/s and only the descent it
+    arrived with changes. The descent-return ratio is then a ratio of two
+    exactly known speeds.
+    """
 
-        The delivered slope is the chord across the two samples before entry,
-        both on the 0.20 limb; the entry slope is 0.30 * 0.010 m / 0.010 m over
-        the window. arctan(0.20) = 11.3099 deg, reported negative for a
-        descending blow.
+    def test_a_sole_that_arrives_steep_and_leaves_slowly_is_a_dig(
+        self, head, scene
+    ) -> None:
+        """Down at 0.50, out at 0.20: 4 / 10 = 0.40, below the 0.50 threshold.
+
+        The sole enters at 120 mm behind the ball descending on a 0.50 slope, so
+        at 20 m/s its downward speed is 10 m/s; it bottoms 20 mm deep 40 mm
+        later and climbs out on the 0.20 limb at 4 m/s. The sand kept 60 % of
+        the descent it was handed. arctan(0.50) = 26.5651 deg, reported negative
+        for a descending blow.
         """
         trace = build_piecewise_trace(
             [
-                (-0.200, -0.016),
+                (-0.200, -0.040),
                 (-0.120, 0.000),
-                (-0.060, 0.018),
-                (0.030, 0.000),
-                (0.100, -0.014),
+                (-0.080, 0.020),
+                (0.020, 0.000),
+                (0.100, -0.016),
             ]
         )
 
         result = dig_vs_skid(trace, head, scene)
 
-        assert result.incoming_path_slope == pytest.approx(0.20, rel=1e-9)
-        assert result.entry_penetration_slope == pytest.approx(0.30, rel=1e-9)
-        assert result.slope_ratio == pytest.approx(1.5, rel=1e-9)
+        assert result.entry_descent_speed_mps == pytest.approx(10.0, rel=1e-9)
+        assert result.exit_climb_speed_mps == pytest.approx(4.0, rel=1e-9)
+        assert result.descent_return_ratio == pytest.approx(0.40, rel=1e-9)
         assert result.verdict is DigSkidVerdict.DIG
         assert np.degrees(result.entry_attack_angle_rad) == pytest.approx(
-            -11.3099324740, rel=1e-9
+            -26.5650511771, rel=1e-9
         )
 
-    def test_the_vee_trace_holds_exactly_its_delivered_slope(
+    def test_the_vee_trace_sits_on_the_skid_threshold(
         self, vee_trace, head, scene
     ) -> None:
-        """Entry slope 0.25 over the 10 mm window against a delivered 0.25."""
+        """Down at 0.25 (5 m/s), out at 0.20 (4 m/s): exactly 0.80.
+
+        The threshold is inclusive, so the boundary case is a skid rather than
+        marginal, and that is pinned here rather than left to a comparison.
+        """
         result = dig_vs_skid(vee_trace, head, scene)
 
-        assert result.entry_penetration_slope == pytest.approx(0.25, rel=1e-9)
-        assert result.incoming_path_slope == pytest.approx(0.25, rel=1e-9)
-        assert result.slope_ratio == pytest.approx(1.0, rel=1e-9)
+        assert result.entry_descent_speed_mps == pytest.approx(5.0, rel=1e-9)
+        assert result.exit_climb_speed_mps == pytest.approx(4.0, rel=1e-9)
+        assert result.descent_return_ratio == pytest.approx(0.80, rel=1e-9)
+        assert result.verdict is DigSkidVerdict.SKID
 
-    def test_a_sole_that_flattens_immediately_is_a_skid(self, head, scene) -> None:
-        """Depth 0.001 m at the apex, then rising at 0.05.
-
-        At the 10 mm window the depth is 0.001 - 0.05 * 0.006 = 7.0e-4 m, so the
-        entry slope is 7.0e-4 / 0.010 = 0.07 against a delivered 0.25: a ratio of
-        0.28, comfortably below the 0.5 skid threshold.
-        """
+    def test_a_sole_handed_all_its_descent_back_is_a_skid(self, head, scene) -> None:
+        """Down at 0.25 (5 m/s), out at 0.25 (5 m/s): the sand returned it all."""
         trace = build_piecewise_trace(
             [
                 (-0.200, -0.020),
                 (-0.120, 0.000),
-                (-0.116, 0.001),
-                (-0.096, 0.000),
-                (0.100, -0.0098),
+                (-0.040, 0.020),
+                (0.040, 0.000),
+                (0.100, -0.015),
             ]
         )
 
         result = dig_vs_skid(trace, head, scene)
 
-        assert result.entry_penetration_slope == pytest.approx(0.07, rel=1e-9)
-        assert result.slope_ratio == pytest.approx(0.28, rel=1e-9)
+        assert result.descent_return_ratio == pytest.approx(1.0, rel=1e-9)
         assert result.verdict is DigSkidVerdict.SKID
 
     def test_the_marginal_band_is_reported_rather_than_forced(
         self, head, scene
     ) -> None:
-        """A ratio between the thresholds is MARGINAL, not rounded to a side."""
-        trace = build_vee_trace()
+        """Down at 0.3125 (6.25 m/s), out at 4 m/s: 0.64, between the bands."""
+        trace = build_piecewise_trace(
+            [
+                (-0.200, -0.025),
+                (-0.120, 0.000),
+                (-0.056, 0.020),
+                (0.044, 0.000),
+                (0.100, -0.0112),
+            ]
+        )
 
-        result = dig_vs_skid(trace, head, scene, dig_slope_ratio=1.5)
+        result = dig_vs_skid(trace, head, scene)
 
-        assert result.slope_ratio == pytest.approx(1.0, rel=1e-9)
+        assert result.descent_return_ratio == pytest.approx(0.64, rel=1e-9)
         assert result.verdict is DigSkidVerdict.MARGINAL
 
     def test_thresholds_must_leave_a_band(self, vee_trace, head, scene) -> None:
         """An inverted pair of thresholds would make the verdict meaningless."""
         with pytest.raises(ValueError):
             dig_vs_skid(
-                vee_trace, head, scene, dig_slope_ratio=0.4, skid_slope_ratio=0.9
+                vee_trace,
+                head,
+                scene,
+                dig_descent_return=0.9,
+                skid_descent_return=0.4,
             )
+
+    def test_a_sole_that_is_not_descending_at_entry_is_refused(
+        self, head, scene
+    ) -> None:
+        """Without a descent to return, the ratio has no denominator.
+
+        A 0.1 mm scuff one sample wide, 78 mm before the real entry, is the
+        first sample the interval finder calls submerged. The centred velocity
+        there straddles two samples at the same height, so the measured descent
+        is exactly zero and the ratio would be a division by nothing.
+        """
+        trace = build_piecewise_trace(
+            [
+                (-0.200, -0.020),
+                (-0.122, -0.001),
+                (-0.120, 0.0001),
+                (-0.118, -0.001),
+                (-0.040, 0.020),
+                (0.060, 0.000),
+                (0.100, -0.008),
+            ],
+        )
+
+        with pytest.raises(ValueError, match="descending"):
+            dig_vs_skid(trace, head, scene)
 
     def test_vertical_impulse_balance_closes_on_the_reported_terms(
         self, head, scene

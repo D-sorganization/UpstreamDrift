@@ -14,8 +14,17 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from src.shared.python.plotting.identity import PlotIdentity
+
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
+
+# Matplotlib backends validate metadata keys per format and warn (but do not
+# raise) on unrecognized ones. Map our generic timestamp/identity fields onto
+# each format's accepted vocabulary so exports stay warning-free.
+# PNG (via Pillow) accepts arbitrary keys, so identity fields are embedded
+# directly there for straightforward readback (e.g. via PIL.Image.open().info).
+_SOFTWARE_NAME = "UpstreamDrift"
 
 
 # ---------------------------------------------------------------------------
@@ -49,11 +58,51 @@ class ExportConfig:
 # ---------------------------------------------------------------------------
 
 
+def _build_savefig_metadata(
+    fmt: str, identity: PlotIdentity | None, timestamp: datetime
+) -> dict[str, Any]:
+    """Build a ``fig.savefig(metadata=...)`` dict appropriate for *fmt*.
+
+    Each matplotlib backend recognizes a different metadata key vocabulary
+    (see the matplotlib docs for ``print_png``/``print_pdf``/``print_svg``).
+    Standard keys (timestamp, software) are always populated; identity
+    fields (engine/model/run) are included only when genuinely known.
+    """
+    fmt = fmt.lower()
+    identity = identity or PlotIdentity()
+    title = identity.label()
+
+    if fmt == "pdf":
+        # The PDF backend requires an actual datetime.datetime for
+        # CreationDate, not a string (unlike PNG/SVG).
+        meta: dict[str, Any] = {"Creator": _SOFTWARE_NAME, "CreationDate": timestamp}
+        if title:
+            meta["Title"] = title
+            meta["Subject"] = title
+        return meta
+
+    if fmt == "svg":
+        meta = {"Creator": _SOFTWARE_NAME, "Date": timestamp.isoformat()}
+        if title:
+            meta["Title"] = title
+        return meta
+
+    # PNG (and anything else routed through Pillow) accepts arbitrary text
+    # chunks, so identity fields can be embedded directly for readback via
+    # PIL.Image.open(path).info.
+    meta = {"Software": _SOFTWARE_NAME, "Creation Time": timestamp.isoformat()}
+    if title:
+        meta["Title"] = title
+    meta.update(identity.as_metadata_dict())
+    return meta
+
+
 def export_figure(
     fig: Figure,
     name: str,
     config: ExportConfig | None = None,
     formats: list[str] | None = None,
+    identity: PlotIdentity | None = None,
 ) -> list[Path]:
     """Save a matplotlib ``Figure`` to one or more formats.
 
@@ -63,6 +112,10 @@ def export_figure(
         config: Export configuration (uses defaults if ``None``).
         formats: List of formats to export.  Defaults to the image and
             vector formats specified in *config*.
+        identity: Optional engine/model/run identity. When
+            ``config.include_metadata`` is True, this (plus a UTC
+            timestamp and the UpstreamDrift software name) is embedded in
+            each saved file's format-appropriate metadata.
 
     Returns:
         List of paths to the saved files.
@@ -76,16 +129,22 @@ def export_figure(
     if formats is None:
         formats = [config.image_format, config.vector_format]
 
+    timestamp = datetime.now(tz=timezone.utc)
+
     saved: list[Path] = []
     for fmt in formats:
         path = out_dir / f"{name}.{fmt}"
-        fig.savefig(
-            str(path),
-            format=fmt,
-            dpi=config.dpi,
-            transparent=config.transparent,
-            bbox_inches=config.bbox_inches,
-        )
+        savefig_kwargs: dict[str, Any] = {
+            "format": fmt,
+            "dpi": config.dpi,
+            "transparent": config.transparent,
+            "bbox_inches": config.bbox_inches,
+        }
+        if config.include_metadata:
+            savefig_kwargs["metadata"] = _build_savefig_metadata(
+                fmt, identity, timestamp
+            )
+        fig.savefig(str(path), **savefig_kwargs)
         saved.append(path)
 
     return saved
@@ -101,6 +160,7 @@ def export_plot_data(  # noqa: C901
     name: str,
     config: ExportConfig | None = None,
     fmt: str = "json",
+    identity: PlotIdentity | None = None,
 ) -> Path:
     """Export the raw data behind a plot to CSV or JSON.
 
@@ -109,6 +169,10 @@ def export_plot_data(  # noqa: C901
         name: Base filename (without extension).
         config: Export configuration.
         fmt: ``"json"`` or ``"csv"``.
+        identity: Optional engine/model/run identity. When
+            ``config.include_metadata`` is True and ``fmt == "json"``, its
+            populated fields are merged into the ``_meta`` block alongside
+            the export timestamp and source name.
 
     Returns:
         Path to the exported file.
@@ -124,10 +188,13 @@ def export_plot_data(  # noqa: C901
     if fmt == "json":
         payload: dict[str, Any] = {}
         if config.include_metadata:
-            payload["_meta"] = {
+            meta: dict[str, str] = {
                 "exported_at": datetime.now(tz=timezone.utc).isoformat(),
-                "source": "UpstreamDrift",
+                "source": _SOFTWARE_NAME,
             }
+            if identity is not None:
+                meta.update(identity.as_metadata_dict())
+            payload["_meta"] = meta
         for key, val in data.items():
             if isinstance(val, np.ndarray):
                 payload[key] = val.tolist()
@@ -172,6 +239,7 @@ def export_all_figures(
     figures: dict[str, Figure],
     config: ExportConfig | None = None,
     formats: list[str] | None = None,
+    identity: PlotIdentity | None = None,
 ) -> dict[str, list[Path]]:
     """Export multiple named figures at once.
 
@@ -179,6 +247,8 @@ def export_all_figures(
         figures: ``{name: Figure}`` mapping.
         config: Shared export configuration.
         formats: Formats for each figure.
+        identity: Optional engine/model/run identity applied to every
+            figure's export metadata (see ``export_figure``).
 
     Returns:
         ``{name: [paths]}`` mapping.
@@ -187,5 +257,7 @@ def export_all_figures(
         raise ValueError("figures must be provided")
     results: dict[str, list[Path]] = {}
     for name, fig in figures.items():
-        results[name] = export_figure(fig, name, config=config, formats=formats)
+        results[name] = export_figure(
+            fig, name, config=config, formats=formats, identity=identity
+        )
     return results

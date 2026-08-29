@@ -17,7 +17,7 @@ Entry point / distance behind ball    m                     :mod:`.divot`
 Maximum divot depth                   m                     :mod:`.divot`
 Exit point, divot length              m                     :mod:`.divot`
 Divot section area / volume / mass    m^2 / m^3 / kg        :mod:`.divot`
-Dig-vs-skid slope ratio and verdict   dimensionless         :mod:`.divot`
+Dig-vs-skid descent return, verdict   dimensionless         :mod:`.divot`
 Vertical impulse balance              N.s                   :mod:`.divot`
 Club KE loss, work on sand, ball      J, and fractions      :mod:`.energy`
 Peak / mean head deceleration         m/s^2 (also g)        :mod:`.loads`
@@ -53,14 +53,13 @@ from .bounce_map import (
     bounce_utilisation,
 )
 from .divot import (
-    DEFAULT_DIG_SLOPE_RATIO,
-    DEFAULT_ENTRY_WINDOW_M,
-    DEFAULT_SKID_SLOPE_RATIO,
-    DIG_SKID_INVERTED_SPREAD_REASON,
-    DIG_SKID_THIN_WINDOW_REASON,
+    DEFAULT_DIG_DESCENT_RETURN,
+    DEFAULT_SKID_DESCENT_RETURN,
+    DIG_SKID_BOUNCE_ORDERING_REASON,
+    DIG_SKID_COARSE_WINDOW_REASON,
     DIG_SKID_UNCALIBRATED_REASON,
-    DIG_SKID_UNDEFLECTED_ENTRY_REASON,
-    MIN_INFORMATIVE_ENTRY_WINDOW_SAMPLES,
+    MIN_RESOLVED_SUBMERGED_SAMPLES,
+    MIN_SUBMERGED_SAMPLES,
     DigSkidCalibration,
     DigSkidResult,
     DivotMetrics,
@@ -110,15 +109,14 @@ from .trace import (
 
 __all__ = [
     "DEFAULT_CARRY_TOLERANCE_FRACTION",
-    "DEFAULT_DIG_SLOPE_RATIO",
-    "DEFAULT_ENTRY_WINDOW_M",
+    "DEFAULT_DIG_DESCENT_RETURN",
     "DEFAULT_LOAD_THRESHOLD_FRACTION",
-    "DEFAULT_SKID_SLOPE_RATIO",
-    "DIG_SKID_INVERTED_SPREAD_REASON",
-    "DIG_SKID_THIN_WINDOW_REASON",
+    "DEFAULT_SKID_DESCENT_RETURN",
+    "DIG_SKID_BOUNCE_ORDERING_REASON",
+    "DIG_SKID_COARSE_WINDOW_REASON",
     "DIG_SKID_UNCALIBRATED_REASON",
-    "DIG_SKID_UNDEFLECTED_ENTRY_REASON",
-    "MIN_INFORMATIVE_ENTRY_WINDOW_SAMPLES",
+    "MIN_RESOLVED_SUBMERGED_SAMPLES",
+    "MIN_SUBMERGED_SAMPLES",
     "STANDARD_GRAVITY_MPS2",
     "SWEEP_RANGES",
     "WIVOU_2016_CARRY_CORRELATION",
