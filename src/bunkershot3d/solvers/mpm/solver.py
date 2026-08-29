@@ -3,16 +3,20 @@
 One step, in the order it happens
 ---------------------------------
 
-1. **P2G.**  Mass and APIC momentum onto the grid.
-2. **Stress.**  Cauchy stress from each particle's elastic deformation
-   gradient through the Hencky law, scattered as an internal force.
-3. **Grid update.**  Symplectic Euler: ``v* = v + dt (f/m + g)``.
-4. **Boundaries.**  Domain walls, then the club's collision projection,
-   which returns the exact momentum ledger that becomes the wrench.
-5. **G2P.**  Velocity, the APIC affine matrix, and the velocity gradient.
-6. **Plasticity.**  ``F <- (I + dt grad v) F``, then the capped
-   Drucker-Prager return map.
-7. **Advection**, then the particle-level pushout backstop.
+The scheme itself lives in :mod:`.step`, so that a march driven one step
+at a time -- which is what a whole-shot march has to be, since the head's
+next pose depends on the wrench this step produced -- is a caller of the
+solver rather than a friend of it.
+
+Bodies, plural
+--------------
+
+:meth:`PlaneStrainMPMSolver.march` still takes one section, or none, and
+is what the verification suite calls.  :meth:`~PlaneStrainMPMSolver.march_bodies`
+takes a sequence, and every body in it is projected within the same step
+in :func:`~.contact.contact_order` -- slowest first, fastest last -- with
+one exact momentum ledger each.  The first body is the primary one, whose
+load the scalar diagnostics and the reported wrench describe.
 
 Why ``solve`` marches instead of evaluating
 -------------------------------------------
@@ -48,7 +52,7 @@ verdict.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -61,32 +65,19 @@ from ..elements import SurfaceElements
 from ..envelope import GRAVITY_M_S2, RefusalPolicy, ValidityVerdict
 from ..exceptions import SolverInputError
 from ..protocol import FidelityTier, IntrusionState, SolverResult, Wrench
-from .body import ContactImpulse, RigidSection
-from .constitutive import (
-    SandContinuum,
-    hencky_kirchhoff_principal,
-    principal_stretches,
-    reconstruct,
-)
+from .body import RigidSection
+from .constitutive import SandContinuum
 from .envelope import evaluate_f1_envelope
-from .grid import (
-    PlaneStrainGrid,
-    affine_from_grid_velocity,
-    gather_velocity,
-    scatter_mass,
-    scatter_momentum,
-    scatter_stress_force,
-    velocity_gradient,
-)
+from .grid import PlaneStrainGrid
 from .state import (
     DomainWalls,
     ParticleState,
     SurfaceDepression,
-    apply_wall_conditions,
     settled_bed,
     surface_depression,
     surface_profile_m,
 )
+from .step import StepContext, StepDiagnostics, advance_step
 
 __all__ = [
     "DEFAULT_CFL_NUMBER",
@@ -105,26 +96,12 @@ the elastic wave alone; 0.4 leaves margin for the plastic correction and
 for the club's own motion, which enters the same condition."""
 
 _DIMENSION = 2
-_MASS_FLOOR_KG = 1e-15
 _MIN_APPROACH_CLEARANCE_CELLS = 2.0
 _MIN_DIRECTION = 1e-9
 """Floor on a direction cosine before it becomes a divisor."""
 _EJECTA_HEADROOM_CELLS = 6.0
 """Cells of empty grid above the free surface, for sand thrown up."""
 _SURFACE_BINS = 64
-
-_NO_CONTACT = ContactImpulse(
-    node_index=np.zeros(0, dtype=np.int64),
-    impulse_n_s=np.zeros((0, _DIMENSION)),
-    position_m=np.zeros((0, _DIMENSION)),
-    stress_force_n=np.zeros(_DIMENSION),
-    n_swept=0,
-)
-"""The ledger of a step with no intruder at all.
-
-A bed marched without a club is a *closed* system, which is the only
-configuration whose momentum budget is an identity rather than a balance
-against a boundary -- so it is what the conservation cases run on."""
 
 
 def cfl_time_step_s(
@@ -184,46 +161,6 @@ def cfl_time_step_s(
     return step
 
 
-@dataclass(frozen=True, slots=True)
-class StepDiagnostics:
-    """What one step did, kept so the run is inspectable rather than opaque.
-
-    Attributes:
-        time_s: Simulation time at the end of the step.
-        contact_force_n_per_m: ``(2,)`` total in-plane force on the body,
-            per unit out-of-plane width.
-        stress_force_n_per_m: ``(2,)`` the stress-and-weight part of that
-            force. See :meth:`MPMRun.force_split` for what the split
-            means and, just as importantly, what it does not.
-        contact_torque_n: Torque on the body about ``+y``, per unit width.
-        n_contacts: Grid nodes the club projected.
-        n_swept: Of those, nodes reached only by the swept test.
-        n_pushed_out: Particles the backstop had to reposition.
-        n_yielded: Particles the return map moved.
-        n_capped: Particles that hit the compressive cap.
-        kinetic_energy_j_per_m: Translational kinetic energy.
-        elastic_energy_j_per_m: Stored Hencky strain energy.
-        gravitational_energy_j_per_m: Potential energy above the floor.
-        linear_momentum_kg_m_s: ``(2,)`` total particle momentum.
-        total_mass_kg_per_m: Total particle mass. Invariant.
-    """
-
-    time_s: float
-    contact_force_n_per_m: NDArray[np.float64]
-    stress_force_n_per_m: NDArray[np.float64]
-    contact_torque_n: float
-    n_contacts: int
-    n_swept: int
-    n_pushed_out: int
-    n_yielded: int
-    n_capped: int
-    kinetic_energy_j_per_m: float
-    elastic_energy_j_per_m: float
-    gravitational_energy_j_per_m: float
-    linear_momentum_kg_m_s: NDArray[np.float64]
-    total_mass_kg_per_m: float
-
-
 @dataclass(frozen=True)
 class MPMSetup:
     """A march that has been built but not yet taken.
@@ -281,6 +218,9 @@ class MPMRun:
         free_surface_height_m: The undisturbed surface the run started
             from.
         bed_x_bounds_m: Horizontal extent of the bed.
+        extra_sections: Final poses of every body after the primary one,
+            in the order they were supplied. Empty for the single-body
+            march.
     """
 
     steps: tuple[StepDiagnostics, ...]
@@ -290,6 +230,7 @@ class MPMRun:
     section: RigidSection | None
     free_surface_height_m: float
     bed_x_bounds_m: tuple[float, float]
+    extra_sections: tuple[RigidSection, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.steps:
@@ -599,7 +540,9 @@ class PlaneStrainMPMSolver:
             approach_distance_m=float(approach_distance_m),
         )
 
-    def run(self, state: IntrusionState) -> MPMRun:
+    def run(
+        self, state: IntrusionState, *, extra_bodies: Sequence[RigidSection] = ()
+    ) -> MPMRun:
         """Build the bed and the approach, then march to the queried pose.
 
         Exposed separately from :meth:`solve` because the verification
@@ -608,14 +551,19 @@ class PlaneStrainMPMSolver:
 
         Args:
             state: The intrusion query.
+            extra_bodies: Further bodies to march alongside the club --
+                the ball of :mod:`.ball`, for instance. They are *not*
+                allowed for in the bed sizing, which is built from the
+                club's declared approach, so a body outside that bed
+                sweeps empty grid; place them inside it deliberately.
 
         Returns:
             The run.
         """
         setup = self.prepare(state)
-        return self.march(
+        return self.march_bodies(
             setup.particles,
-            setup.section,
+            (setup.section, *extra_bodies),
             setup.grid,
             n_steps=setup.n_steps,
             time_step_s=setup.time_step_s,
@@ -646,11 +594,15 @@ class PlaneStrainMPMSolver:
         bed_x_bounds_m: tuple[float, float],
         damping_per_step: float = 0.0,
     ) -> MPMRun:
-        """Integrate ``n_steps`` of the scheme and return the trace.
+        """Integrate ``n_steps`` of the scheme against one body, or none.
+
+        The single-body entry point, unchanged since the solver core
+        landed. :meth:`march_bodies` is the same march against a sequence.
 
         Args:
             particles: The bed, advanced in place.
-            section: The club at its starting pose.
+            section: The club at its starting pose, or ``None`` for a
+                closed system with no intruder at all.
             grid: The background grid.
             n_steps: How many steps to take.
             time_step_s: The step, normally from :meth:`time_step_s`.
@@ -663,10 +615,61 @@ class PlaneStrainMPMSolver:
 
         Returns:
             The run.
+        """
+        return self.march_bodies(
+            particles,
+            () if section is None else (section,),
+            grid,
+            n_steps=n_steps,
+            time_step_s=time_step_s,
+            free_surface_height_m=free_surface_height_m,
+            bed_x_bounds_m=bed_x_bounds_m,
+            damping_per_step=damping_per_step,
+        )
+
+    def march_bodies(
+        self,
+        particles: ParticleState,
+        bodies: Sequence[RigidSection],
+        grid: PlaneStrainGrid,
+        *,
+        n_steps: int,
+        time_step_s: float,
+        free_surface_height_m: float,
+        bed_x_bounds_m: tuple[float, float],
+        damping_per_step: float = 0.0,
+    ) -> MPMRun:
+        """Integrate ``n_steps`` of the scheme against a sequence of bodies.
+
+        Every body is projected onto the grid within the same step, in
+        :func:`~.contact.contact_order` -- slowest first, fastest last, so
+        the fastest body's non-penetration is the constraint that holds
+        exactly at a node two bodies share -- and each keeps its own exact
+        momentum ledger on
+        :attr:`~.step.StepDiagnostics.body_contacts`. The first body is
+        the **primary** one, whose load the scalar diagnostics and the
+        reported wrench describe.
+
+        Args:
+            particles: The bed, advanced in place.
+            bodies: The bodies at their starting poses, primary first.
+                Empty marches a closed system.
+            grid: The background grid.
+            n_steps: How many steps to take.
+            time_step_s: The step, normally from :meth:`time_step_s`.
+            free_surface_height_m: The undisturbed surface, for the divot.
+            bed_x_bounds_m: Horizontal extent of the bed.
+            damping_per_step: Fraction of the nodal velocity removed each
+                step.
+
+        Returns:
+            The run, carrying the primary body's final pose on
+            :attr:`MPMRun.section` and the rest on
+            :attr:`MPMRun.extra_sections`.
 
         Raises:
             SolverInputError: If the step count exceeds ``max_steps``, or
-                if the body would cross more than one cell in a step --
+                if any body would cross more than one cell in a step --
                 the runtime assertion of the CFL condition, which is a
                 ``raise`` so that ``python -O`` cannot remove it.
         """
@@ -679,170 +682,40 @@ class PlaneStrainMPMSolver:
                 "cap; raise max_steps deliberately rather than letting a run grow "
                 "without bound"
             )
-        if not math.isfinite(damping_per_step) or not 0.0 <= damping_per_step < 1.0:
-            raise SolverInputError(
-                f"damping_per_step must lie in [0, 1), got {damping_per_step!r}"
-            )
-        self._require_courant(section, time_step_s)
+        moving = tuple(bodies)
+        self._require_courant(moving, time_step_s)
 
-        datum_m = float(free_surface_height_m) - self.bed_depth_m
-        node_positions = grid.node_positions_m()
+        context = StepContext(
+            grid=grid,
+            material=self.material,
+            node_positions_m=grid.node_positions_m(),
+            time_step_s=float(time_step_s),
+            datum_m=float(free_surface_height_m) - self.bed_depth_m,
+            walls=self.walls,
+            gravity_m_s2=self.gravity_m_s2,
+            damping_per_step=float(damping_per_step),
+        )
         diagnostics: list[StepDiagnostics] = []
-        moving = section
         elapsed = 0.0
         for _ in range(steps):
             elapsed += time_step_s
-            report = self._advance(
-                particles,
-                moving,
-                grid,
-                node_positions,
-                time_step_s=time_step_s,
-                elapsed_s=elapsed,
-                datum_m=datum_m,
-                damping_per_step=damping_per_step,
+            diagnostics.append(
+                advance_step(particles, moving, context, elapsed_s=elapsed)
             )
-            diagnostics.append(report)
-            if moving is not None:
-                moving = moving.advanced(time_step_s)
+            moving = tuple(body.advanced(time_step_s) for body in moving)
 
         return MPMRun(
             steps=tuple(diagnostics),
             time_step_s=float(time_step_s),
             particles=particles,
             grid=grid,
-            section=moving,
+            section=moving[0] if moving else None,
             free_surface_height_m=float(free_surface_height_m),
             bed_x_bounds_m=bed_x_bounds_m,
+            extra_sections=moving[1:],
         )
 
     # ------------------------------------------------------------ one step
-
-    def _advance(
-        self,
-        particles: ParticleState,
-        section: RigidSection | None,
-        grid: PlaneStrainGrid,
-        node_positions: NDArray[np.float64],
-        *,
-        time_step_s: float,
-        elapsed_s: float,
-        datum_m: float,
-        damping_per_step: float,
-    ) -> StepDiagnostics:
-        """One full MPM step, mutating ``particles`` in place."""
-        stencil = grid.interpolate(particles.position_m)
-        nodal_mass = scatter_mass(grid, stencil, particles.mass_kg)
-        nodal_momentum = scatter_momentum(
-            grid,
-            stencil,
-            particles.mass_kg,
-            particles.velocity_m_s,
-            particles.affine,
-        )
-        live = nodal_mass > _MASS_FLOOR_KG
-        node_velocity = np.zeros_like(nodal_momentum)
-        node_velocity[live] = nodal_momentum[live] / nodal_mass[live, None]
-
-        stress, elastic_energy = self._cauchy_stress(particles)
-        internal_force = scatter_stress_force(
-            grid, stencil, self._current_volume(particles), stress
-        )
-        weight = np.zeros_like(internal_force)
-        weight[:, 1] = -nodal_mass * self.gravity_m_s2
-        applied_force = internal_force + weight
-
-        updated = node_velocity.copy()
-        updated[live] += time_step_s * applied_force[live] / nodal_mass[live, None]
-        if damping_per_step > 0.0:
-            updated *= 1.0 - damping_per_step
-        apply_wall_conditions(grid, updated, self.walls)
-        impulse = _NO_CONTACT
-        if section is not None:
-            updated, impulse = section.project_grid_velocity(
-                node_positions,
-                updated,
-                nodal_mass,
-                time_step_s=time_step_s,
-                stress_force_n=applied_force,
-            )
-
-        particles.velocity_m_s = gather_velocity(stencil, updated)
-        particles.affine = affine_from_grid_velocity(grid, stencil, updated)
-        gradient = velocity_gradient(stencil, updated)
-        identity = np.eye(_DIMENSION)
-        trial = (identity + time_step_s * gradient) @ particles.deformation_gradient
-
-        left, stretches, right = principal_stretches(trial)
-        projected, yielded, capped = self.material.project(np.log(stretches))
-        particles.deformation_gradient = reconstruct(left, projected, right)
-
-        particles.position_m = (
-            particles.position_m + time_step_s * particles.velocity_m_s
-        )
-        pushed = 0
-        if section is not None:
-            particles.position_m, particles.velocity_m_s, pushed = section.push_out(
-                particles.position_m, particles.velocity_m_s
-            )
-
-        reference = (
-            np.zeros(_DIMENSION) if section is None else section.reference_point_m
-        )
-        return StepDiagnostics(
-            time_s=float(elapsed_s),
-            contact_force_n_per_m=impulse.force_on_body_n(time_step_s),
-            stress_force_n_per_m=-impulse.stress_force_n,
-            contact_torque_n=impulse.torque_on_body_n_m(time_step_s, reference),
-            n_contacts=impulse.n_contacts,
-            n_swept=impulse.n_swept,
-            n_pushed_out=int(pushed),
-            n_yielded=int(yielded.sum()),
-            n_capped=int(capped.sum()),
-            kinetic_energy_j_per_m=particles.kinetic_energy_j(),
-            elastic_energy_j_per_m=float(elastic_energy),
-            gravitational_energy_j_per_m=particles.gravitational_energy_j(
-                self.gravity_m_s2, datum_m
-            ),
-            linear_momentum_kg_m_s=particles.linear_momentum_kg_m_s(),
-            total_mass_kg_per_m=particles.total_mass_kg,
-        )
-
-    def _cauchy_stress(
-        self, particles: ParticleState
-    ) -> tuple[NDArray[np.float64], float]:
-        """Cauchy stress and stored energy from the elastic deformation.
-
-        For an isotropic model the Kirchhoff stress is coaxial with the
-        *left* stretch, so ``tau = U diag(tau_i) U^T`` and
-        ``sigma = tau / J``.  The stored energy is the Hencky strain
-        energy ``mu ||eps||^2 + (lambda / 2) tr(eps)^2``, which the
-        conservation suite needs to close the energy budget.
-        """
-        left, stretches, _ = principal_stretches(particles.deformation_gradient)
-        strain = np.log(stretches)
-        kirchhoff = hencky_kirchhoff_principal(
-            strain,
-            shear_modulus_pa=self.material.shear_modulus_pa,
-            lame_lambda_pa=self.material.lame_lambda_pa,
-        )
-        jacobian = stretches.prod(axis=1)
-        principal = kirchhoff / jacobian[:, None]
-        stress = np.einsum("nik,nk,njk->nij", left, principal, left)
-
-        trace = strain.sum(axis=1)
-        density = (
-            self.material.shear_modulus_pa * np.einsum("ij,ij->i", strain, strain)
-            + 0.5 * self.material.lame_lambda_pa * trace**2
-        )
-        energy = float((particles.initial_volume_m2 * density).sum())
-        return stress, energy
-
-    @staticmethod
-    def _current_volume(particles: ParticleState) -> NDArray[np.float64]:
-        """``V = J V_0``, the deformed particle area."""
-        jacobian = np.linalg.det(particles.deformation_gradient)
-        return particles.initial_volume_m2 * jacobian
 
     # ------------------------------------------------------------- set-up
 
@@ -860,19 +733,25 @@ class PlaneStrainMPMSolver:
             raise SolverInputError("the intruder has no surface elements")
 
     def _require_courant(
-        self, section: RigidSection | None, time_step_s: float
+        self, bodies: Sequence[RigidSection], time_step_s: float
     ) -> None:
-        """Runtime assertion of the CFL condition, as a ``raise``."""
-        if section is None:
-            return
-        travel = section.max_speed_m_s * float(time_step_s)
-        if travel > self.cell_size_m:
-            raise SolverInputError(
-                f"the club would cross {travel * 1e3:.4g} mm in one step on a "
-                f"{self.cell_size_m * 1e3:.4g} mm grid, so sand could pass through "
-                "it. Lower cfl_number or refine the grid; this is checked with a "
-                "raise rather than an assert because python -O strips assertions."
-            )
+        """Runtime assertion of the CFL condition, as a ``raise``.
+
+        Checked on **every** body, not only the primary one: the ball is
+        slow at the start of a shot and fast once the club has reached it,
+        and a condition that only ever looked at the club would go quiet
+        exactly when it started to matter.
+        """
+        for index, body in enumerate(bodies):
+            travel = body.max_speed_m_s * float(time_step_s)
+            if travel > self.cell_size_m:
+                raise SolverInputError(
+                    f"body {index} would cross {travel * 1e3:.4g} mm in one step "
+                    f"on a {self.cell_size_m * 1e3:.4g} mm grid, so sand could pass "
+                    "through it. Lower cfl_number or refine the grid; this is "
+                    "checked with a raise rather than an assert because python -O "
+                    "strips assertions."
+                )
 
     def section_from_state(self, state: IntrusionState) -> RigidSection:
         """Project the 3-D body onto the swing plane as a convex section.

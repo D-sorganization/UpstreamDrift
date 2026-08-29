@@ -20,18 +20,26 @@ What this package is
 * :mod:`.state` -- particles, bed initialisation and the domain walls.
 * :mod:`.body` -- the clubhead as a rigid moving plane-strain section,
   with the contact treatment that stops material tunnelling through it.
+* :mod:`.ball` -- the ball as a second such section, an **infinite
+  cylinder rather than a sphere**, whose below-equator / face-side
+  split is reported qualitatively and whose launch stays refused.
+* :mod:`.contact` -- the sand against **several** bodies in one step, and
+  the stated projection order that makes a shared node's answer
+  independent of the caller's argument list.
+* :mod:`.step` -- the scheme itself, one step at a time, so a whole-shot
+  march can drive it without reaching into the solver.
 * :mod:`.solver` -- :class:`~bunkershot3d.solvers.mpm.solver.PlaneStrainMPMSolver`,
   which implements the :class:`~bunkershot3d.solvers.protocol.GranularSolver`
   protocol so F1 is swappable with F0.
 * :mod:`.envelope` -- the F1 validity verdict, its caveats, and the
   quantities ADR-0033 refuses outright.
+* :mod:`.wholeshot` -- the head's **real trajectory**, marched once, with
+  the wrench history read off a single continuous solve. Additional to
+  the declared straight-line approach ``solve()`` builds, not a
+  replacement for it: the two answer different questions and only the
+  second is comparable to F0's memoryless answer.
 * :mod:`.verification` -- conservation residuals, the analytic case, the
   grid-convergence study and the F0 cross-check.
-* :mod:`.limit_states` -- closed-form Rankine earth-pressure limits, the
-  plastic-collapse case the return map is checked against.
-* :mod:`.order_of_accuracy` -- manufactured-solution and temporal
-  refinement studies, which measure the observed order rather than
-  asserting the design order.
 
 Verified is not validated
 -------------------------
@@ -60,7 +68,30 @@ than leaving that to documentation.
 
 from __future__ import annotations
 
-from .body import ContactImpulse, RigidSection, convex_hull_2d, plane_torque_about_y
+from .ball import (
+    BALL_DIAMETER_M,
+    BALL_RADIUS_M,
+    DEFAULT_BALL_FACETS,
+    MIN_BALL_FACETS,
+    PLANE_STRAIN_BALL_NOTE,
+    BallContactSplit,
+    BallSection,
+    circular_section,
+    n_facets_for_cell_size,
+)
+from .body import (
+    ContactImpulse,
+    RigidSection,
+    convex_hull_2d,
+    coulomb_cone_projection,
+    plane_torque_about_y,
+)
+from .contact import (
+    BodyContact,
+    apply_body_contacts,
+    contact_order,
+    push_out_bodies,
+)
 from .constitutive import (
     HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA,
     HARDIN_RICHART_ROUND_COEFFICIENT_KPA,
@@ -90,24 +121,6 @@ from .grid import (
     apic_angular_momentum,
     cross_2d,
 )
-from .limit_states import (
-    PassiveWallLimit,
-    RankineLimits,
-    passive_earth_pressure_limit,
-    rankine_limits,
-)
-from .order_of_accuracy import (
-    DEFAULT_MANUFACTURED_FIELD,
-    DESIGN_ORDER_SPATIAL,
-    ManufacturedField,
-    ManufacturedLevel,
-    ManufacturedSolutionStudy,
-    TemporalLevel,
-    TemporalStudy,
-    column_temporal_convergence,
-    manufactured_solution_convergence,
-    uniform_stress_patch_residual,
-)
 from .solver import (
     DEFAULT_CFL_NUMBER,
     MPMRun,
@@ -125,6 +138,7 @@ from .state import (
     surface_depression,
     surface_profile_m,
 )
+from .step import StepContext, advance_step
 from .verification import (
     COHESIVE_OSCILLATION_COMPRESSION,
     ColumnEquilibrium,
@@ -138,25 +152,64 @@ from .verification import (
     free_fall_residuals,
     mean_vertical_stress_pa,
 )
+from .wholeshot import (
+    DEFAULT_EJECTA_HEADROOM_CELLS,
+    DEFAULT_TRAVEL_SPANS,
+    F1ShotResult,
+    F1ShotSettings,
+    simulate_f1_shot,
+)
+
+from .limit_states import (
+    PassiveWallLimit,
+    RankineLimits,
+    passive_earth_pressure_limit,
+    rankine_limits,
+)
+
+from .order_of_accuracy import (
+    DEFAULT_MANUFACTURED_FIELD,
+    DESIGN_ORDER_SPATIAL,
+    ManufacturedField,
+    ManufacturedLevel,
+    ManufacturedSolutionStudy,
+    TemporalLevel,
+    TemporalStudy,
+    column_temporal_convergence,
+    manufactured_solution_convergence,
+    uniform_stress_patch_residual,
+)
 
 __all__ = [
+    "BALL_DIAMETER_M",
+    "BALL_RADIUS_M",
     "COHESIVE_OSCILLATION_COMPRESSION",
+    "DEFAULT_BALL_FACETS",
     "DEFAULT_CFL_NUMBER",
+    "DEFAULT_EJECTA_HEADROOM_CELLS",
     "DEFAULT_MANUFACTURED_FIELD",
+    "DEFAULT_TRAVEL_SPANS",
     "DESIGN_ORDER_SPATIAL",
     "F1_STANDING_CAVEATS",
     "HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA",
     "HARDIN_RICHART_ROUND_COEFFICIENT_KPA",
+    "MIN_BALL_FACETS",
     "MIN_CELLS_PER_GRAIN",
     "MIN_CELLS_PER_RESOLVED_FEATURE",
     "NODES_PER_PARTICLE",
+    "PLANE_STRAIN_BALL_NOTE",
     "PLANE_STRAIN_DIMENSION",
     "SAND_POISSON_RATIO",
     "STENCIL_WIDTH",
+    "BallContactSplit",
+    "BallSection",
+    "BodyContact",
     "ColumnEquilibrium",
     "ContactImpulse",
     "DomainWalls",
     "F0CrossCheck",
+    "F1ShotResult",
+    "F1ShotSettings",
     "GridInterpolation",
     "MPMRun",
     "MPMSetup",
@@ -171,18 +224,24 @@ __all__ = [
     "RefusedQuantity",
     "RigidSection",
     "SandContinuum",
+    "StepContext",
     "StepDiagnostics",
     "SurfaceDepression",
     "TemporalLevel",
     "TemporalStudy",
     "WallCondition",
+    "advance_step",
     "apic_angular_momentum",
+    "apply_body_contacts",
     "cfl_time_step_s",
+    "circular_section",
     "cohesive_elastic_strain_limit",
     "cohesive_oscillation_residuals",
     "column_grid_convergence",
     "column_temporal_convergence",
+    "contact_order",
     "convex_hull_2d",
+    "coulomb_cone_projection",
     "cross_2d",
     "cross_check_against_f0",
     "drucker_prager_alpha",
@@ -193,14 +252,17 @@ __all__ = [
     "hencky_kirchhoff_principal",
     "manufactured_solution_convergence",
     "mean_vertical_stress_pa",
+    "n_facets_for_cell_size",
     "passive_earth_pressure_limit",
     "plane_torque_about_y",
     "principal_stretches",
     "project_to_yield_surface",
+    "push_out_bodies",
     "rankine_limits",
     "reconstruct",
     "require_quotable",
     "settled_bed",
+    "simulate_f1_shot",
     "surface_depression",
     "surface_profile_m",
     "uniform_stress_patch_residual",

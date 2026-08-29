@@ -57,7 +57,7 @@ travels with every frame.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 from numpy.typing import NDArray
@@ -437,22 +437,11 @@ def _shifted(diagnostic: StepDiagnostics, offset_s: float) -> StepDiagnostics:
     """
     if offset_s == 0.0:
         return diagnostic
-    return StepDiagnostics(
-        time_s=diagnostic.time_s + offset_s,
-        contact_force_n_per_m=diagnostic.contact_force_n_per_m,
-        stress_force_n_per_m=diagnostic.stress_force_n_per_m,
-        contact_torque_n=diagnostic.contact_torque_n,
-        n_contacts=diagnostic.n_contacts,
-        n_swept=diagnostic.n_swept,
-        n_pushed_out=diagnostic.n_pushed_out,
-        n_yielded=diagnostic.n_yielded,
-        n_capped=diagnostic.n_capped,
-        kinetic_energy_j_per_m=diagnostic.kinetic_energy_j_per_m,
-        elastic_energy_j_per_m=diagnostic.elastic_energy_j_per_m,
-        gravitational_energy_j_per_m=diagnostic.gravitational_energy_j_per_m,
-        linear_momentum_kg_m_s=diagnostic.linear_momentum_kg_m_s,
-        total_mass_kg_per_m=diagnostic.total_mass_kg_per_m,
-    )
+    # ``replace`` rather than a field-by-field rebuild: the field list grew
+    # a per-body contact ledger when the ball became a body (#8733), and a
+    # hand-written rebuild drops silently whatever it has not been taught
+    # about, which is the worst failure mode a re-timing helper can have.
+    return replace(diagnostic, time_s=diagnostic.time_s + offset_s)
 
 
 def _take(
