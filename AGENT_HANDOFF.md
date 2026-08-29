@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-28
+Updated: 2026-08-29
 
 Epic #8557 is the canonical completion authority. Issue state, local files, and
 partial campaign checkpoints are not completion evidence.
@@ -8,8 +8,8 @@ partial campaign checkpoints are not completion evidence.
 ## Protected Authority
 
 - UpstreamDrift remote `main` is
-  `85cce4d3307bb7ad3953d9fc6e583e370803515c`, the protected squash of
-  #9152 for #9151.
+  `0205591cad6edab869fc8fbfb20f386a1eb2a056`. The #9174 companion slice
+  branches from this exact protected authority.
 - The qualified paper has 252 pages and SHA-256
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
 - Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
@@ -78,6 +78,44 @@ partial campaign checkpoints are not completion evidence.
   and a recoverability plan.
 - DeskComputer remains runner-drained. Keep local tests serial and web tests at
   no more than two workers.
+
+## Active AffineDrift Companion Provider Slice: #9174
+
+- Non-draft PR #9180 owns this slice; do not open a competing PR or merge it
+  outside protected review/checks.
+- Lease/worktree: `worktrees/UpstreamDrift-9174-b1`; branch
+  `feat/9174-companion-manifest`. Do not use the dirty primary checkout.
+- ADR-0043 and the strict companion v1 schema define one-way UpstreamDrift
+  software-fact authority for AffineDrift #4010. They do not duplicate #9064's
+  design-manual authority or #9070's typed calculation manifest.
+- `scripts/companion_catalog.py` uses explicit local-only discovery and exact
+  committed inputs/provider pins. Its CLI must refuse dirty/non-authoritative
+  state. `dist/companion` JSON/SHA outputs are ignored local build artifacts,
+  not released authority and not a durable acquisition URL.
+- PR #9180 is the foundation only and must not close #9174. Keep #9174 open
+  behind #9190 (ten workflows/four failure fixtures/provider CI), #9191 (full
+  screenshot/capture authority), #9192 (protected artifacts, attestation,
+  compatibility fixtures, rollback-safe release acquisition), and #9193
+  (documentation freshness plus engine capability evidence/promotion).
+- The foundation remains draft/blocked. Empty documentation/workflow/screenshot
+  arrays are negative evidence, not completion; do not invent a tag or release
+  in this slice.
+- The reconciled exact-head unit gate exposed a plotting-subtree fixture that
+  kept PyQt/UI mocks for an entire xdist worker session. Its scope is now per
+  test; preserve the plotting-then-GUI/UI order regression gate and do not add
+  a quarantine entry or retry in place of module-state isolation.
+- The next exact-head unit gate exposed the same lifetime defect in the
+  embeddable-tool registry: launcher/UI subtree fixtures cleared cached
+  canonical-core registrations after their tests. They now snapshot and
+  restore incoming registry state, and the canonical-core regression forces a
+  cached-module/cleared-registry reload. Preserve that deterministic ordering
+  gate; do not replace it with a retry or quarantine entry.
+- A subsequent exact-head run exposed three tests that assumed their owned
+  registry key was globally absent and one model-explorer test that left a Qt
+  render timer alive. Those tests now snapshot/remove/restore only their exact
+  key, and the URDF failure test stops timers and disposes the widget before
+  fixture teardown. Preserve the contaminated-worker ordering and Qt teardown
+  regressions; do not globally clear the registry or add quarantine entries.
 
 ## Validation
 

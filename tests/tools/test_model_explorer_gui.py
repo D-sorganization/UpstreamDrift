@@ -178,23 +178,37 @@ def test_open_urdf_updates_status_bar_on_success(valid_urdf_file: Path) -> None:
 
 
 def test_open_urdf_does_not_overwrite_status_bar_on_failure(tmp_path: Path) -> None:
-    _ensure_qapp()
+    app = _ensure_qapp()
     widget = MainWidget()
-    widget.status_bar.showMessage("Initial Status")
-    missing_file = tmp_path / "nonexistent.urdf"
+    try:
+        widget.status_bar.showMessage("Initial Status")
+        missing_file = tmp_path / "nonexistent.urdf"
 
-    with (
-        patch(
-            "PyQt6.QtWidgets.QFileDialog.getOpenFileName",
-            return_value=(str(missing_file), "URDF Files (*.urdf)"),
-        ),
-        patch.object(QMessageBox, "warning"),
-    ):
-        widget.open_urdf()
+        with (
+            patch(
+                "PyQt6.QtWidgets.QFileDialog.getOpenFileName",
+                return_value=(str(missing_file), "URDF Files (*.urdf)"),
+            ),
+            patch.object(QMessageBox, "warning"),
+        ):
+            widget.open_urdf()
 
-    # Status bar should retain previous message and not show "Opened: ..."
-    assert widget.status_bar.currentMessage() == "Initial Status"
-    assert widget.current_file_path is None
+        # Status bar should retain previous message and not show "Opened: ..."
+        assert widget.status_bar.currentMessage() == "Initial Status"
+        assert widget.current_file_path is None
+    finally:
+        visualization = widget.visualization_widget
+        mujoco_widget = getattr(visualization, "mujoco_widget", None)
+        render_timer = getattr(mujoco_widget, "_render_timer", None)
+        if render_timer is not None:
+            render_timer.stop()
+        gl_widget = getattr(visualization, "gl_widget", None)
+        animation_timer = getattr(gl_widget, "timer", None)
+        if animation_timer is not None:
+            animation_timer.stop()
+        widget.close()
+        widget.deleteLater()
+        app.processEvents()
 
 
 def test_load_from_library_does_not_overwrite_status_bar_on_load_failure() -> None:

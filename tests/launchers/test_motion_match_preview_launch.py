@@ -46,10 +46,21 @@ def test_motion_match_preview_never_executes_package_main_in_launcher(
         encoding="utf-8",
     )
 
-    widget = SpecialAppHandler().get_dockable_ui(_MotionMatchPreviewModel(), tmp_path)
+    from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
 
-    assert widget is None
-    assert not sentinel.exists()
+    missing = object()
+    previous = EMBEDDABLE_TOOL_REGISTRY.pop("motion_target_preview", missing)
+    try:
+        widget = SpecialAppHandler().get_dockable_ui(
+            _MotionMatchPreviewModel(), tmp_path
+        )
+
+        assert widget is None
+        assert not sentinel.exists()
+    finally:
+        EMBEDDABLE_TOOL_REGISTRY.pop("motion_target_preview", None)
+        if previous is not missing:
+            EMBEDDABLE_TOOL_REGISTRY["motion_target_preview"] = previous
 
 
 @pytest.mark.unit

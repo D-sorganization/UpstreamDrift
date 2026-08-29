@@ -166,12 +166,16 @@ class ModelRegistry(ContractChecker):
         config_path: str | Path | None = None,
         strict: bool | None = None,
         required_model_ids: Iterable[str] = (),
+        discovery_mode: str | None = None,
     ) -> None:
         """Initialize registry.
 
         Args:
             config_path: Path to the YAML configuration file. Defaults to
                 src/config/models.yaml (absolute, resolved from this file).
+            discovery_mode: Explicit source-discovery policy. When omitted,
+                the legacy environment-controlled policy remains in effect.
+                Authoritative exporters must pass ``"local-only"``.
         """
         if config_path is None:
             config_path = self._DEFAULT_CONFIG_PATH
@@ -188,9 +192,12 @@ class ModelRegistry(ContractChecker):
             else strict
         )
         self.required_model_ids = _normalize_required_model_ids(required_model_ids)
-        self.discovery_mode = _normalize_discovery_mode(
+        configured_discovery_mode = (
             os.environ.get("UPSTREAM_DRIFT_DISCOVERY_MODE")
+            if discovery_mode is None
+            else discovery_mode
         )
+        self.discovery_mode = _normalize_discovery_mode(configured_discovery_mode)
         self._load_registry()
 
     def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:

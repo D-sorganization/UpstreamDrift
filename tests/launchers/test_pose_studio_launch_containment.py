@@ -44,7 +44,16 @@ def test_pose_studio_missing_marker_dependency_cannot_terminate_launcher(
         encoding="utf-8",
     )
 
-    assert SpecialAppHandler().get_dockable_ui(_PoseStudioModel(), tmp_path) is None
+    from src.shared.python.launcher_embed import EMBEDDABLE_TOOL_REGISTRY
+
+    missing = object()
+    previous = EMBEDDABLE_TOOL_REGISTRY.pop("pose_studio", missing)
+    try:
+        assert SpecialAppHandler().get_dockable_ui(_PoseStudioModel(), tmp_path) is None
+    finally:
+        EMBEDDABLE_TOOL_REGISTRY.pop("pose_studio", None)
+        if previous is not missing:
+            EMBEDDABLE_TOOL_REGISTRY["pose_studio"] = previous
 
 
 def test_pose_studio_uses_a_child_package_module(

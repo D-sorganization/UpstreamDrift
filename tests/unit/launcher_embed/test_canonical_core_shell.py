@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import importlib
+
 import pytest
 
 from src.shared.python.launcher_embed import EmbeddableTool
@@ -43,8 +45,22 @@ def test_canonical_core_adapters_implement_embed_contract() -> None:
 
 
 def test_canonical_core_adapters_self_register() -> None:
-    from src.shared.python.launcher_embed import get_embeddable_tool
-    from src.tools.canonical_core import _embed_adapter  # noqa: F401
+    from src.shared.python.launcher_embed import (
+        EMBEDDABLE_TOOL_REGISTRY,
+        get_embeddable_tool,
+    )
+    from src.tools.canonical_core import _embed_adapter
 
-    assert get_embeddable_tool("canonical_core_estimation") is not None
-    assert get_embeddable_tool("canonical_core_comparison") is not None
+    # A cached adapter module plus a test that clears the process registry was
+    # the hosted xdist failure mode.  Establish the empty precondition, reload
+    # the module to exercise its registration side effect, and restore the
+    # process state so this regression is order-independent in both directions.
+    snapshot = dict(EMBEDDABLE_TOOL_REGISTRY)
+    EMBEDDABLE_TOOL_REGISTRY.clear()
+    try:
+        importlib.reload(_embed_adapter)
+        assert get_embeddable_tool("canonical_core_estimation") is not None
+        assert get_embeddable_tool("canonical_core_comparison") is not None
+    finally:
+        EMBEDDABLE_TOOL_REGISTRY.clear()
+        EMBEDDABLE_TOOL_REGISTRY.update(snapshot)

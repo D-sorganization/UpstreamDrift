@@ -224,6 +224,8 @@ dev = [
     "pytest-anyio>=0.0.0",
     # Required for config tests
     "PyYAML>=6.0.3",
+    # Required for strict companion/model-pack contract validation
+    "jsonschema>=4.23.0",
     # NOTE: slowapi and python-multipart moved to core [project] dependencies
     # (#6612) — they are runtime imports of the API server, not test-only.
     # Required for async streaming tests

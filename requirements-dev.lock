@@ -19,6 +19,10 @@ anyio==4.12.1
     #   starlette
     #   upstream-drift (pyproject.toml)
     #   watchfiles
+attrs==26.1.0
+    # via
+    #   jsonschema
+    #   referencing
 bcrypt==5.0.0
     # via upstream-drift (pyproject.toml)
 blinker==1.9.0
@@ -109,6 +113,10 @@ jinja2==3.1.6
     #   bokeh
     #   flask
     #   upstream-drift (pyproject.toml)
+jsonschema==4.26.0
+    # via upstream-drift (pyproject.toml)
+jsonschema-specifications==2025.9.1
+    # via jsonschema
 kiwisolver==1.5.0
     # via matplotlib
 librt==0.9.0
@@ -260,8 +268,16 @@ pyyaml==6.0.3
     #   bokeh
     #   upstream-drift (pyproject.toml)
     #   uvicorn
+referencing==0.37.0
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
 requests==2.33.0
     # via upstream-drift (pyproject.toml)
+rpds-py==2026.6.3
+    # via
+    #   jsonschema
+    #   referencing
 ruff==0.15.12
     # via upstream-drift (pyproject.toml)
 scipy==1.15.3
@@ -307,6 +323,7 @@ typing-extensions==4.15.0
     #   pydantic-core
     #   pytest-asyncio
     #   pytest-qt
+    #   referencing
     #   sqlalchemy
     #   starlette
     #   typing-inspection

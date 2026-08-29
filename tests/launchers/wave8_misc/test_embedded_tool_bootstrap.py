@@ -275,12 +275,16 @@ def test_bootstrap_records_successfully_imported_tools() -> None:
             return object()
         raise ImportError(f"forced for {name}")
 
+    missing = object()
+    previous = EMBEDDABLE_TOOL_REGISTRY.pop("model_explorer", missing)
     try:
         with patch.object(_builtins, "__import__", _make_filtered_import(_selective)):
             result = bootstrap.bootstrap_embeddable_tools()
         assert "model_explorer" in result
     finally:
         EMBEDDABLE_TOOL_REGISTRY.pop("model_explorer", None)
+        if previous is not missing:
+            EMBEDDABLE_TOOL_REGISTRY["model_explorer"] = previous
 
 
 def test_bootstrap_imports_entry_point_adapters(monkeypatch) -> None:
