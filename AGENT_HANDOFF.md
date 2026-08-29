@@ -84,74 +84,33 @@ partial campaign checkpoints are not completion evidence.
 
 - Foundation PR #9180 protected-merged as
   `1af18489e8755933a0d189aa8edafe787fa94d0f`; issue #9174 was reopened and
-  remains the completion authority.
+  remains the completion authority. PR #9214 / issue #9192 is the active child.
 - Lease/worktree: `worktrees/UpstreamDrift-9174-b1`; branch
   `feat/9192-companion-release`. Do not use the dirty primary checkout.
-- ADR-0043 and the strict companion v1 schema define one-way UpstreamDrift
-  software-fact authority for AffineDrift #4010. They do not duplicate #9064's
-  design-manual authority or #9070's typed calculation manifest.
-- `scripts/companion_catalog.py` uses explicit local-only discovery and exact
-  committed inputs/provider pins. `scripts/companion_publication.py` is the
-  sole delivery wrapper for protected-main and tag bundles; both must refuse
-  dirty/non-authoritative state and validate the same canonical bytes.
-- Issue #9192 is the active child. It packages the manifest, manifest schema,
-  acquisition schema, compatibility policy, and detached hashes as one
-  exact-commit Actions artifact. A separate evidence artifact records its
-  30-day/ephemeral run and artifact identities and explicitly provides no
-  durable release URL.
-- The tag path is implemented but no tag or release is authorized here. On a
-  human-authorized tag it creates a draft with overwrites disabled, records
-  numeric release/asset API identities and attestation, then publishes only
-  after the acquisition record is uploaded. Schema 1.0.0 is current,
-  `previous_supported` is empty because no predecessor exists, and tests make
-  previous fixtures mandatory once a second version is declared.
-- PR #9180 is the foundation only and does not close #9174. Keep #9174 open
-  behind #9190 (ten workflows/four failure fixtures/provider CI), #9191 (full
-  screenshot/capture authority), #9192 (protected artifacts, attestation,
-  compatibility fixtures, rollback-safe release acquisition), and #9193
-  (documentation freshness plus engine capability evidence/promotion).
-- The foundation remains draft/blocked. Empty documentation/workflow/screenshot
-  arrays are negative evidence, not completion; do not invent a tag or release
-  in this slice.
-- The reconciled exact-head unit gate exposed a plotting-subtree fixture that
-  kept PyQt/UI mocks for an entire xdist worker session. Its scope is now per
-  test; preserve the plotting-then-GUI/UI order regression gate and do not add
-  a quarantine entry or retry in place of module-state isolation.
-- The next exact-head unit gate exposed the same lifetime defect in the
-  embeddable-tool registry: launcher/UI subtree fixtures cleared cached
-  canonical-core registrations after their tests. They now snapshot and
-  restore incoming registry state, and the canonical-core regression forces a
-  cached-module/cleared-registry reload. Preserve that deterministic ordering
-  gate; do not replace it with a retry or quarantine entry.
-- A subsequent exact-head run exposed three tests that assumed their owned
-  registry key was globally absent and one model-explorer test that left a Qt
-  render timer alive. Those tests now snapshot/remove/restore only their exact
-  key, and the URDF failure test stops timers and disposes the widget before
-  fixture teardown. Preserve the contaminated-worker ordering and Qt teardown
-  regressions; do not globally clear the registry or add quarantine entries.
-- #9192 post-reconciliation validation is green for all companion contract
-  tests, the CI-infrastructure/workflow-inventory subset, ruff format/lint,
-  focused mypy, action pinning, local-only routing, docs governance, ADR
-  numbering, spec paths, and the declared 974-test pre-push unit lane (with its
-  governed vendor/Windows skips). The unscoped repository-wide pytest command
-  remains unable to collect because the pre-existing colocated Sidekick
-  conftest imports a missing top-level `utils` module; do not misreport that as
-  #9192 test execution or waive the hosted Linux matrix.
-- #9192's first hosted head exposed two governance failures. Its feature-style
-  PR title overstated a delivery implementation owned by `scripts/` and the
-  protected release workflow, so PR #9214 is honestly titled
-  `chore(companion): publish exact-commit artifacts`. Replaying the old
-  pull-request run cannot observe that edit because its event payload is
-  immutable; use the legitimate follow-up synchronize event. The architecture
-  gate also found nine scalar parameters on `build_actions_acquisition`; the
-  builder now accepts and validates one cohesive artifact-metadata mapping and
-  passes the <=8-parameter budget without an exception. Do not add a dummy
-  `src/` file, bypass either gate, or replay a stale event as merge evidence.
-- The next exact-head repository gate correctly rejected the new publication
-  contract tests as unmarked. The module now declares `pytest.mark.unit`, so
-  all 24 cases, including parametrized cases, remain in the ordinary unit lane.
-  Preserve that classification; do not update the ratchet baseline or waive
-  the failure.
+- ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
+  authority for AffineDrift #4010; #9064 remains design-manual authority and
+  #9070 remains typed calculation-manifest authority.
+- `scripts/companion_catalog.py` owns local-only discovery and exact source
+  provenance. `scripts/companion_publication.py` is the sole protected-main/tag
+  delivery wrapper and must refuse dirty or non-authoritative state.
+- #9192 packages the manifest, both schemas, compatibility policy, and detached
+  hashes as one commit-named 30-day Actions artifact; separate attested evidence
+  records exact run/artifact identity and explicitly says no durable URL exists.
+- Schema 1.0.0 is current and `previous_supported` is empty; declare a prior
+  version only with a validating fixture. The tag path is implemented, but no
+  tag or release is authorized in this slice.
+- Exact-head gates must include the 24 `pytest.mark.unit` publication cases,
+  architecture/suite-marker ratchets, workflow inventory/routing/action pins,
+  docs/spec/ADR checks, ruff, mypy, Bandit, and the protected hosted matrix.
+  `build_actions_acquisition` takes one validated metadata mapping; do not add
+  an architecture exception, rewrite the marker baseline, retry a real failure,
+  add dummy `src/` code, force-push, or bypass protection.
+- The unscoped full pytest command has a pre-existing Sidekick `utils` collection
+  failure. Do not treat that as #9192 evidence or waive the hosted Linux matrix.
+- Merge only when exact head/base/current protected main match and every required
+  check is green. Then verify the protected-main payload/evidence artifacts,
+  attestation, acquisition identity, embedded commit, and exact bytes before
+  closing #9192. Keep #9174 open for #9190, #9191, and #9193.
 
 ## Validation
 
