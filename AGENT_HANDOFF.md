@@ -8,9 +8,8 @@ partial campaign checkpoints are not completion evidence.
 ## Protected Authority
 
 - UpstreamDrift protected `main` was
-  `4775edb23f1438b8851d2c9d450691ac1adb15e6` at the latest #9192
-  reconciliation. Branch `feat/9192-companion-release` includes it through
-  this ordinary merge; re-check remote authority before push or merge.
+  `20f1907c79f9fd2714c4db43981da4ee3d397616` when #9236 branched. Re-check
+  remote authority before every push or merge.
 - The qualified paper has 252 pages and SHA-256
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
 - Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
@@ -84,9 +83,11 @@ partial campaign checkpoints are not completion evidence.
 
 - Foundation PR #9180 protected-merged as
   `1af18489e8755933a0d189aa8edafe787fa94d0f`; issue #9174 was reopened and
-  remains the completion authority. PR #9214 / issue #9192 is the active child.
-- Lease/worktree: `worktrees/UpstreamDrift-9174-b1`; branch
-  `feat/9192-companion-release`. Do not use the dirty primary checkout.
+  remains the completion authority. Issue #9192 remains the release child.
+- PR #9222 is held unchanged at its four-file workflow fix because protected
+  base #9231 left the articulated manufactured-solution source digest stale.
+  Repair #9236 first from `worktrees/UpstreamDrift-9236-b1`, branch
+  `fix/9236-articulated-provenance`; do not use the dirty primary checkout.
 - ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
   authority for AffineDrift #4010; #9064 remains design-manual authority and
   #9070 remains typed calculation-manifest authority.
@@ -99,7 +100,12 @@ partial campaign checkpoints are not completion evidence.
 - Schema 1.0.0 is current and `previous_supported` is empty; declare a prior
   version only with a validating fixture. The tag path is implemented, but no
   tag or release is authorized in this slice.
-- Exact-head gates must include the 24 `pytest.mark.unit` publication cases,
+- The exact failure is optional-stack run 33271527700 / job 99150747357:
+  recorded `spatial_full_body.py` SHA-256 `bb195bf...` versus tracked
+  `b386ec...`. #9236 updates provenance and its checksum/manifest cascade only,
+  and adds same-environment two-build byte equality against the committed
+  record. Numeric results, tolerances, claims, and qualification are unchanged.
+- Exact-head gates for #9222 must include the 24 `pytest.mark.unit` cases,
   architecture/suite-marker ratchets, workflow inventory/routing/action pins,
   docs/spec/ADR checks, ruff, mypy, Bandit, and the protected hosted matrix.
   `build_actions_acquisition` takes one validated metadata mapping; do not add
@@ -110,7 +116,8 @@ partial campaign checkpoints are not completion evidence.
 - Merge only when exact head/base/current protected main match and every required
   check is green. Then verify the protected-main payload/evidence artifacts,
   attestation, acquisition identity, embedded commit, and exact bytes before
-  closing #9192. Keep #9174 open for #9190, #9191, and #9193.
+  closing #9192. After #9236 protected-merges, reconcile #9222 normally and
+  require its fresh complete matrix. Keep #9174 open for #9190, #9191, and #9193.
 
 ## Validation
 
