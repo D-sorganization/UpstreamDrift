@@ -28,6 +28,21 @@ ignored local artifacts are negative evidence, not completion or publication.
 This catalog does not copy or supersede #9064's design-manual authority or
 #9070's typed calculation-manifest authority.
 
+Issue #9192 adds the publication boundary without changing that scientific or
+content status. The existing release workflow now runs the same fail-closed
+`scripts/companion_publication.py build` command for protected `main` and exact
+`vX.Y.Z` tags. It packages the manifest, manifest schema, acquisition schema,
+compatibility policy, and detached SHA-256 files; attests the exact payloads;
+and records repository, source commit, workflow run, schema/generator versions,
+sizes, hashes, and artifact identities. Protected-main Actions artifacts are
+explicitly 30-day/ephemeral and have no durable release URL. Tag releases are
+draft-first, refuse overwrites, use numeric GitHub API asset identities, and
+become public only after the acquisition record is generated and attested.
+Schema 1.0.0 remains current with no fabricated predecessor; compatibility
+tests require a previous fixture as soon as a real second supported version is
+declared and reject future/incompatible fixtures now. No tag or release is
+created by implementing #9192.
+
 ## Ball-Sand Interaction: What Reaches the Ball (#8712)
 
 Issue #8712 resolves the sand arriving at the ball inside the F1 plane-strain
@@ -923,7 +938,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.637                                            |
+| **Spec Version**        | 1.0.638                                            |
 | **Last Spec Update**    | 2026-08-29                                         |
 
 ## 2. Purpose & Mission

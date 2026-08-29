@@ -77,10 +77,10 @@ Triggers abbreviations: `PR` = `pull_request`, `P` = `push`,
 
 ### Group: Release / Build (kebab-case)
 
-| File              | `name:` field | Triggers     | Purpose                         |
-| ----------------- | ------------- | ------------ | ------------------------------- |
-| `release.yml`     | Release       | P            | Tag-driven release pipeline.    |
-| `tauri-build.yml` | Tauri Build   | P, PR, R, WD | Tauri desktop app build matrix. |
+| File              | `name:` field                     | Triggers     | Purpose                                                      |
+| ----------------- | --------------------------------- | ------------ | ------------------------------------------------------------ |
+| `release.yml`     | Release and Companion Publication | P            | Exact-main companion artifacts and draft-first tag releases. |
+| `tauri-build.yml` | Tauri Build                       | P, PR, R, WD | Tauri desktop app build matrix.                              |
 
 ### Group: Ops / Misc (kebab-case)
 

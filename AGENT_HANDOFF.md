@@ -81,18 +81,30 @@ partial campaign checkpoints are not completion evidence.
 
 ## Active AffineDrift Companion Provider Slice: #9174
 
-- Non-draft PR #9180 owns this slice; do not open a competing PR or merge it
-  outside protected review/checks.
+- Foundation PR #9180 protected-merged as
+  `1af18489e8755933a0d189aa8edafe787fa94d0f`; issue #9174 was reopened and
+  remains the completion authority.
 - Lease/worktree: `worktrees/UpstreamDrift-9174-b1`; branch
-  `feat/9174-companion-manifest`. Do not use the dirty primary checkout.
+  `feat/9192-companion-release`. Do not use the dirty primary checkout.
 - ADR-0043 and the strict companion v1 schema define one-way UpstreamDrift
   software-fact authority for AffineDrift #4010. They do not duplicate #9064's
   design-manual authority or #9070's typed calculation manifest.
 - `scripts/companion_catalog.py` uses explicit local-only discovery and exact
-  committed inputs/provider pins. Its CLI must refuse dirty/non-authoritative
-  state. `dist/companion` JSON/SHA outputs are ignored local build artifacts,
-  not released authority and not a durable acquisition URL.
-- PR #9180 is the foundation only and must not close #9174. Keep #9174 open
+  committed inputs/provider pins. `scripts/companion_publication.py` is the
+  sole delivery wrapper for protected-main and tag bundles; both must refuse
+  dirty/non-authoritative state and validate the same canonical bytes.
+- Issue #9192 is the active child. It packages the manifest, manifest schema,
+  acquisition schema, compatibility policy, and detached hashes as one
+  exact-commit Actions artifact. A separate evidence artifact records its
+  30-day/ephemeral run and artifact identities and explicitly provides no
+  durable release URL.
+- The tag path is implemented but no tag or release is authorized here. On a
+  human-authorized tag it creates a draft with overwrites disabled, records
+  numeric release/asset API identities and attestation, then publishes only
+  after the acquisition record is uploaded. Schema 1.0.0 is current,
+  `previous_supported` is empty because no predecessor exists, and tests make
+  previous fixtures mandatory once a second version is declared.
+- PR #9180 is the foundation only and does not close #9174. Keep #9174 open
   behind #9190 (ten workflows/four failure fixtures/provider CI), #9191 (full
   screenshot/capture authority), #9192 (protected artifacts, attestation,
   compatibility fixtures, rollback-safe release acquisition), and #9193
