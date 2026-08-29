@@ -19,84 +19,102 @@ Divot length                 ``s_exit - s_entry`` [m].
 Divot section area           ``integral of depth ds`` between entry and exit [m^2].
 Divot volume                 ``section area * width`` [m^3] -- a prismatic model.
 Divot mass                   ``volume * sand bulk density`` [kg].
-Entry penetration slope      ``d(depth)/ds`` evaluated over the first ``entry_window_m``
-                             of travel after entry; dimensionless.
+Entry descent speed          ``-v_z`` of the sole at the first submerged sample;
+                             positive downward [m/s].
+Exit climb speed             ``+v_z`` of the sole at the last submerged sample;
+                             positive upward [m/s].
+Descent-return ratio         exit climb speed / entry descent speed.
 Incoming path slope          Chord slope ``-dz/d(travel)`` across the last free-flight
-                             step; equals ``tan|attack angle|`` at delivery.
-Slope ratio                  entry penetration slope / incoming path slope.
+                             step; equals ``tan|attack angle|`` at delivery. Reported
+                             as context; **nothing is divided by it**.
 ============================ ============================================================
 
-**The discriminator.** A sole that keeps descending as steeply as it was
-delivered is digging -- the bounce is not deflecting it. A sole that flattens is
-skidding, i.e. planing on the sand. The reported quantity is the dimensionless
-*ratio*, referenced to the delivered attack angle rather than to an absolute
-angle, because the same geometry digs at -12 deg and skids at -2 deg. The
-DIG/SKID/MARGINAL thresholds on that ratio are conventions and are arguments.
+**The discriminator, and the observable that expresses it.** Dig and skid are
+claims about what the sand does with the head's descent. A digging head hands
+its descent to the sand and stays down: it is still being carried deeper when
+the sand finally lets go, and it crawls out. A skidding head bottoms out early
+and is handed its descent back: the sole planes, and the sand throws it out
+about as fast as it came down. The observable is therefore the **vertical
+restitution of the strike** -- the sole's upward speed as it leaves the sand
+over its downward speed as it entered, both read off the same sole reference
+point the divot is measured on, at the two ``depth = 0`` crossings that bound
+the divot. Near 0 the sand kept the descent (DIG); near 1 it returned it
+(SKID).
 
-**The verdict is not calibrated, and at the shipped window it saturates**
-------------------------------------------------------------------------
+Two structural properties follow, and both are what the metric this replaced
+lacked. The ratio has **no window parameter** -- its window is the divot, which
+the trace defines -- so no threshold on it is a statement about where a window
+was placed. And its scale is **absolute**: 0 and 1 mean something before any
+calibration, where a slope ratio's numbers meant nothing without one.
 
-Issue #8703. Across the demo's full 77-point sweep -- geometric bounce
-14-26 deg, sole width 16-24 mm, attack -2 to -14 deg, four sand conditions --
-``dig_vs_skid`` returned ``MARGINAL`` at every point, with slope ratios
-spanning only 0.9987 to 1.0000. The head really can deflect: ``simulate_shot``
-integrates translation under the sand wrench and prescribes only the rotation.
-The problem is *scale*. At a 25 m/s delivery, the 10 mm ``entry_window_m``
-below is about **0.4 ms** of travel, and a 0.3 kg head under an order-5 N.s
-total impulse cannot bend measurably in 0.4 ms. The signal is 0.13 % wide and
-design-independent, so no threshold on it separates anything.
+**What this replaced, and why (issue #8703)**
+---------------------------------------------
 
-**Resizing the window does not rescue it, and was measured rather than
-assumed.** Sweeping 48 design points (bounce 14/20/26 deg x sole 16/24 mm x
-attack -2/-6/-10/-14 deg x firm/fluffy) over windows from 10 mm to the whole
-divot gives:
+The previous discriminator was the *entry slope ratio*: the penetration slope
+over the first 10 mm of travel after entry, divided by the delivered path
+slope. Across the demo's 77-point sweep it returned ``MARGINAL`` at every
+point, with ratios spanning only 0.9987 to 1.0000. The head really can deflect
+-- ``simulate_shot`` integrates translation under the sand wrench and
+prescribes only the rotation -- but at a 25 m/s delivery 10 mm of travel is
+about **0.4 ms**, and a 0.3 kg head under an order-5 N.s total impulse cannot
+bend measurably in 0.4 ms.
 
-===================  ==========  ==================================
-entry window         ratio span  correlation with max sole depth
-===================  ==========  ==================================
-10 mm (shipped)      0.0015      -0.57
-40 mm                0.0175      -0.54
-80 mm                0.1602      -0.50
-0.25 x divot length  0.0446      -0.68
-0.50 x divot length  0.2800      -0.60
-1.00 x divot length  0.0000      n/a
-===================  ==========  ==================================
+Resizing that window was measured rather than argued, over 48 design points and
+six window sizes, and **refuted**: the spread opens (0.0015 at 10 mm to 0.28 at
+half the divot) but the correlation with maximum sole depth is negative at
+every informative window (-0.50 to -0.68), so the deepest-cutting designs came
+out nearest the *skid* threshold. Normalising by the delivered slope divides
+out the attack angle, which is the variable that decides the outcome, and a
+resized window would have shipped a confidently **inverted** verdict. The
+quantity was also pinned at 1 as the window vanished and at 0 at the exit
+crossing, for every design.
 
-Widening the window does open the spread -- and opens it **the wrong way
-round**. The correlation with sole depth is negative at every informative
-window, so the designs that cut deepest (28-30 mm at 26 deg bounce, 24 mm sole,
--14 deg attack) come out *nearest the skid threshold*, while the shallowest
-(9 mm, at -2 deg attack) sit nearest ``DIG``. Normalising by the delivered
-slope divides out the attack angle, which is the variable that decides the
-outcome. A resized window would therefore ship a **confidently inverted**
-verdict, which is worse than a saturated one.
+**What the replacement measures, over the same design space**
+-------------------------------------------------------------
 
-The last row is the reason no window is a free parameter: the entry chord
-starts at the entry crossing and the depth returns to zero at the exit
-crossing, so the ratio is pinned at 1 as the window shrinks and at 0 when it
-reaches the whole divot, **for every design**. Any threshold on it is a
-statement about where on that fixed arc the window was placed.
+Swept through the shipped ``WorkbenchModel`` at its default settings over 384
+points -- marketed bounce 8/14/20/26 deg x sole width 16/20/24 mm x attack
+-2/-6/-10/-14 deg x firm/fluffy/wet/plugged x 20 and 25 m/s:
 
-So the verdict is left as it is and marked, rather than retuned. Three things
-are enforced here rather than described:
+=================================  ====================  =====================
+quantity                           span over the sweep   r with max sole depth
+=================================  ====================  =====================
+entry slope ratio (removed)        0.0012                -0.64  (inverted)
+descent-return ratio               0.6162                -0.97
+=================================  ====================  =====================
 
-* a window shorter than one sample of travel is **refused**: the entry chord is
-  then interpolated inside the single still-straight step the delivered chord
-  was measured across, and the answer is the input divided by itself;
-* a window that reaches the whole divot is **refused**, because the chord
-  through the exit crossing is identically zero whatever the design did; and
-* every :class:`DigSkidResult` carries a :class:`DigSkidCalibration` declaring
-  the verdict uncalibrated, in the same shape the solver's ``ValidityVerdict``
-  and the ball model's provenance record use, so a caller cannot read
-  ``MARGINAL`` as a finding. A verdict that separates needs a quantity that
-  varies with the design -- sole depth already does, cleanly -- and an absolute
-  threshold on it that nobody has published yet.
+The sign is the point: deeper is more dig. Holding the delivery fixed, the
+design axes alone still move the ratio by 0.11 (at -2 deg of attack) to 0.18
+(at -14 deg), against 0.0012 for the whole of the old signal.
+
+**One caveat the verdict carries rather than hides.** Over that same workbench
+sweep the ratio falls from 0.424 to 0.339 as marketed bounce rises from 8 to
+26 deg at -14 deg of attack and a 24 mm sole -- more bounce reading as *more*
+dig, which is the opposite of fitting practice. That is the model, not the
+metric: maximum sole depth over the same span rises from 18.0 to 21.5 mm, so
+the F0 solver itself puts the higher-bounce sole deeper in this shallow,
+non-burying regime. Where the head does bury -- three shipped presets at
+5.0/8.0/14.42 deg of marketed bounce, run through ``simulate_shot`` directly --
+the ordering is the expected one: at -10 deg of attack the 5 deg sole buries
+75 mm and returns 0.35 of its descent while the 14.42 deg sole buries 13 mm and
+returns 0.51. Both measurements are reported;
+:data:`DIG_SKID_BOUNCE_ORDERING_REASON` travels with every verdict so that
+nobody reads one as a bounce recommendation.
+
+**Still uncalibrated.** Separating is not the same as being measured. Nobody
+has published a vertical restitution for a wedge sole leaving bunker sand, so
+the DIG and SKID thresholds remain conventions, every
+:class:`DigSkidResult` carries a :class:`DigSkidCalibration` saying so in the
+same shape the solver's ``ValidityVerdict`` and the ball model's provenance
+record use, and :meth:`DigSkidCalibration.require_calibrated` refuses.
 
 **The force side of the same question.** Through the submerged window the
 head's vertical momentum change must equal the sum of the sand impulse, the
 gravity impulse and whatever the shaft and hands supply. All four are reported,
-so the residual is visible rather than absorbed. The prismatic divot model and
-the flat-surface scene are the two approximations here, and both are stated.
+so the residual is visible rather than absorbed -- and they are reported over
+the same sampled window the two speeds are read from, so the restitution and
+the balance describe one strike. The prismatic divot model and the flat-surface
+scene are the two approximations here, and both are stated.
 """
 
 from __future__ import annotations
@@ -112,14 +130,13 @@ from .enums import DigSkidVerdict
 from .trace import STANDARD_GRAVITY_MPS2, HeadModel, StrikeScene, StrikeTrace
 
 __all__ = [
-    "DEFAULT_DIG_SLOPE_RATIO",
-    "DEFAULT_ENTRY_WINDOW_M",
-    "DEFAULT_SKID_SLOPE_RATIO",
-    "DIG_SKID_INVERTED_SPREAD_REASON",
-    "DIG_SKID_THIN_WINDOW_REASON",
+    "DEFAULT_DIG_DESCENT_RETURN",
+    "DEFAULT_SKID_DESCENT_RETURN",
+    "DIG_SKID_BOUNCE_ORDERING_REASON",
+    "DIG_SKID_COARSE_WINDOW_REASON",
     "DIG_SKID_UNCALIBRATED_REASON",
-    "DIG_SKID_UNDEFLECTED_ENTRY_REASON",
-    "MIN_INFORMATIVE_ENTRY_WINDOW_SAMPLES",
+    "MIN_RESOLVED_SUBMERGED_SAMPLES",
+    "MIN_SUBMERGED_SAMPLES",
     "STANDARD_GRAVITY_MPS2",
     "DigSkidCalibration",
     "DigSkidResult",
@@ -132,67 +149,60 @@ __all__ = [
     "submerged_interval",
 ]
 
-#: Travel window after entry over which the penetration slope is evaluated [m].
-#: 10 mm is short compared with a 25-150 mm entry distance, so it measures the
-#: entry rather than the whole strike.
-DEFAULT_ENTRY_WINDOW_M = 0.010
+#: Descent-return ratio at or below which the strike is called a dig: the sand
+#: kept at least half of the descent the sole arrived with, so the head is left
+#: lower than it was handed back. Half is a round number, not a measurement.
+DEFAULT_DIG_DESCENT_RETURN = 0.50
 
-#: Slope ratio at or above which the strike is called a dig: the sole is still
-#: descending at least as steeply as it was delivered.
-DEFAULT_DIG_SLOPE_RATIO = 1.0
+#: Descent-return ratio at or above which the strike is called a skid: the sand
+#: returned at least four fifths of the descent, so the sole planed and was
+#: thrown out about as fast as it came down. A convention, not a measurement.
+DEFAULT_SKID_DESCENT_RETURN = 0.80
 
-#: Slope ratio at or below which the strike is called a skid: the sole has lost
-#: at least half of its delivered descent rate within the entry window.
-DEFAULT_SKID_SLOPE_RATIO = 0.5
+#: Submerged samples below which the entry and exit speeds are not two separate
+#: measurements at all: both are centred differences, so with fewer than three
+#: samples they overlap and the ratio is an arithmetic identity. Refused.
+MIN_SUBMERGED_SAMPLES = 3
 
-#: Entry-window length, in samples of along-track travel, below which the ratio
-#: is dominated by the still-straight entry rather than by the design. Two
-#: samples is the smallest window that contains a change of slope at all.
-MIN_INFORMATIVE_ENTRY_WINDOW_SAMPLES = 2.0
+#: Submerged samples below which the two speeds are answerable but resolution
+#: limited -- each is a centred difference over a window this short. Reported,
+#: not refused.
+MIN_RESOLVED_SUBMERGED_SAMPLES = 8
 
-#: Departure from 1.0 below which the entry chord is the delivered chord to
-#: within floating point, so nothing about the design entered the ratio.
-_UNDEFLECTED_RATIO_ATOL = 1e-9
+#: Share of the sole's speed below which a measured descent is differencing
+#: noise rather than a delivered blow. A numerical floor, not a physical
+#: threshold: at 25 m/s it is 25 micrometres per second.
+_MIN_ENTRY_DESCENT_SPEED_FRACTION = 1e-6
 
 DIG_SKID_UNCALIBRATED_REASON = (
     "the dig-versus-skid verdict is a convention on an uncalibrated ratio and "
-    "must not be quoted as a finding. At the shipped 10 mm entry window the "
-    "ratio spanned 0.9987-1.0000 over the whole 77-point demo design space and "
-    "every point returned MARGINAL: 10 mm is 0.4 ms at greenside speed, and a "
-    "0.3 kg head cannot deflect measurably in 0.4 ms. Widening the window does "
-    "spread the ratio but correlates it negatively with sole depth, so a "
-    "resized window would invert the verdict rather than calibrate it. A "
-    "separating verdict needs a quantity that varies with the design and an "
-    "absolute threshold nobody has published (issue #8703)."
+    "must not be quoted as a finding. The descent-return ratio separates the "
+    "design space -- it spans 0.34-0.95 over the workbench's 384-point sweep "
+    "and ranks against maximum sole depth at -0.97 -- but no vertical "
+    "restitution has been published for a wedge sole leaving bunker sand, so "
+    "the DIG and SKID thresholds it is compared against are round numbers "
+    "rather than measurements (issue #8703)."
 )
 """Why a dig-versus-skid verdict is never a finding, however clean the trace."""
 
-DIG_SKID_UNDEFLECTED_ENTRY_REASON = (
-    "the entry chord equals the delivered chord to within floating point, so "
-    "the ratio is 1 by arithmetic rather than by physics: over this window the "
-    "sole is still travelling on the straight line it was delivered on"
+DIG_SKID_BOUNCE_ORDERING_REASON = (
+    "the F0 model's response to marketed bounce disagrees with fitting "
+    "practice in the shallow, non-burying regime: over the workbench sweep the "
+    "ratio falls from 0.424 to 0.339 as marketed bounce rises from 8 to 26 deg "
+    "at -14 deg of attack, and maximum sole depth rises from 18.0 to 21.5 mm "
+    "over the same span, so the solver -- not this metric -- puts more bounce "
+    "deeper there. Where the head buries the ordering is the expected one. "
+    "Read the verdict as what the model did, never as a bounce recommendation "
+    "(issue #8703)."
 )
-"""Fires when the sand has not bent the path at all inside the entry window."""
+"""The one ordering a designer must not take at face value from this verdict."""
 
-DIG_SKID_THIN_WINDOW_REASON = (
-    "the entry window spans only {samples:.2f} samples of along-track travel, "
-    "below the {minimum:.0f} samples needed to contain a change of slope, so "
-    "the ratio is bounded near 1 by the sampling as well as by the physics"
+DIG_SKID_COARSE_WINDOW_REASON = (
+    "the entry and exit speeds are centred differences over a submerged window "
+    "of only {samples} samples, below the {minimum} this metric treats as "
+    "resolved, so the ratio carries the sample spacing as well as the strike"
 )
-"""Template for the diagnostic that fires on a window of one or two samples."""
-
-DIG_SKID_INVERTED_SPREAD_REASON = (
-    "the entry window spans {fraction:.0%} of the divot; the ratio is pinned "
-    "at 1 for a vanishing window and at 0 at the exit crossing, so a wide "
-    "window reports where on that fixed arc it was placed rather than what the "
-    "sole did, and it orders the designs opposite to sole depth (issue #8703)"
-)
-"""Template for the diagnostic that fires once the window is a wide chord."""
-
-#: Fraction of the divot beyond which the entry chord is mostly the pinned
-#: arc rather than the entry. Reported, not refused: only the full divot, where
-#: the chord is identically zero, is refused.
-_WIDE_CHORD_DIVOT_FRACTION = 0.25
+"""Template for the diagnostic that fires on a barely-resolved divot."""
 
 
 @dataclass(frozen=True)
@@ -518,29 +528,23 @@ class DigSkidCalibration:
     :class:`bunkershot3d.sand.provenance.SandProvenance`.
 
     Attributes:
-        calibrated: ``False``, unconditionally, until the verdict rests on a
-            quantity that varies with the design and on an absolute threshold
-            somebody has published (issue #8703).
-        undeflected_entry: The entry chord equalled the delivered chord to
-            within floating point, so the ratio is 1 by arithmetic.
-        dig_slope_ratio: The DIG threshold the verdict was formed against.
-        skid_slope_ratio: The SKID threshold the verdict was formed against.
-        entry_window_samples: Entry window in samples of along-track travel.
-            Below :data:`MIN_INFORMATIVE_ENTRY_WINDOW_SAMPLES` the window
-            cannot contain a change of slope.
-        entry_window_divot_fraction: Entry window as a share of divot length.
-            The ratio is pinned at 1 as this goes to 0 and at 0 as it goes to
-            1, for every design, so it says where on that arc the answer sits.
+        calibrated: ``False``, unconditionally, until somebody publishes a
+            vertical restitution for a wedge sole leaving bunker sand for the
+            thresholds to be measured against (issue #8703).
+        dig_descent_return: The DIG threshold the verdict was formed against.
+        skid_descent_return: The SKID threshold the verdict was formed against.
+        submerged_samples: Samples the sole spent below the surface, which is
+            the resolution both speeds were differenced at. Below
+            :data:`MIN_RESOLVED_SUBMERGED_SAMPLES` the ratio carries the
+            sample spacing as well as the strike.
         reasons: Everything wrong with quoting this verdict, most general
             first.
     """
 
     calibrated: bool
-    undeflected_entry: bool
-    dig_slope_ratio: float
-    skid_slope_ratio: float
-    entry_window_samples: float
-    entry_window_divot_fraction: float
+    dig_descent_return: float
+    skid_descent_return: float
+    submerged_samples: int
     reasons: tuple[str, ...]
 
     def measured_constants(self) -> tuple[str, ...]:
@@ -580,8 +584,9 @@ class DigSkidCalibration:
         state = "calibrated" if self.calibrated else "UNCALIBRATED"
         head = (
             f"dig-versus-skid: {state} "
-            f"(window {self.entry_window_samples:.2f} samples, "
-            f"{self.entry_window_divot_fraction:.1%} of the divot)"
+            f"(dig at or below {self.dig_descent_return:.2f}, skid at or above "
+            f"{self.skid_descent_return:.2f}, measured over "
+            f"{self.submerged_samples} submerged samples)"
         )
         return "\n".join([head, *(f"  - {reason}" for reason in self.reasons)])
 
@@ -594,14 +599,21 @@ class DigSkidResult:
         verdict: DIG, SKID or MARGINAL. **Uncalibrated**: read
             :attr:`calibration` before quoting it (issue #8703).
         calibration: Whether the verdict may be quoted, and why not.
-        entry_penetration_slope: ``d(depth)/d(travel)`` over the entry window;
-            dimensionless, positive when still descending.
+        entry_descent_speed_mps: How fast the sole was going *down* at the
+            first submerged sample; positive downward.
+        exit_climb_speed_mps: How fast it is going *up* at the last submerged
+            sample; positive upward, and negative if it is still descending
+            there.
+        descent_return_ratio: ``exit_climb_speed_mps /
+            entry_descent_speed_mps`` -- the share of its descent the sand
+            handed back. Near 0 the sand kept it (dig); near 1 it returned it
+            (skid).
         incoming_path_slope: ``tan|attack angle|`` from the chord across the
-            last free-flight step; dimensionless.
-        slope_ratio: ``entry_penetration_slope / incoming_path_slope``.
+            last free-flight step; dimensionless. Context only: the ratio is
+            **not** referenced to it, because normalising by the delivered
+            slope is what made the metric this replaced saturate.
         entry_attack_angle_rad: ``-arctan(incoming_path_slope)``; negative for a
             descending blow, matching the -2 to -12 deg delivery convention.
-        entry_window_m: Travel window the entry slope was evaluated over.
         vertical_sand_impulse_Ns: ``integral of F_z dt`` over the submerged
             window; positive is upward, i.e. the sand holding the sole up.
         gravity_impulse_Ns: ``-m g * submerged duration``; always negative.
@@ -609,15 +621,18 @@ class DigSkidResult:
             the head centre of mass.
         constraint_vertical_impulse_Ns: The residual -- what the shaft, hands
             and any unmodelled contact supplied. Reported rather than absorbed.
+            It, and the gravity term, are the two things besides the sand that
+            moved the head between the two speeds the ratio is built from, so
+            they are reported beside it rather than corrected out of it.
     """
 
     verdict: DigSkidVerdict
     calibration: DigSkidCalibration
-    entry_penetration_slope: float
+    entry_descent_speed_mps: float
+    exit_climb_speed_mps: float
+    descent_return_ratio: float
     incoming_path_slope: float
-    slope_ratio: float
     entry_attack_angle_rad: float
-    entry_window_m: float
     vertical_sand_impulse_Ns: float
     gravity_impulse_Ns: float
     measured_vertical_momentum_change_Ns: float
@@ -629,10 +644,15 @@ def _incoming_path_slope(
 ) -> float:
     """Return the chord slope of the last free-flight step before entry.
 
+    Reported as context beside the verdict -- it is the delivered attack angle
+    the shot was set up with -- and **nothing is divided by it**. Normalising
+    the discriminant by this slope is what made the metric of issue #8703
+    saturate, so it is kept as a reading rather than as a denominator.
+
     A **backward** difference across the two samples preceding entry, not a
     centred one at the last free-flight sample: a centred difference there
     straddles the entry and would average the delivered slope with the first
-    submerged one, hiding exactly the change the discriminator is looking for.
+    submerged one, so it would report the strike rather than the delivery.
 
     Args:
         profile: Sole depth profile.
@@ -661,82 +681,75 @@ def _incoming_path_slope(
     return -float(step[2]) / along
 
 
-def _entry_sample_travel_m(
+def _descent_and_climb(
     profile: SoleDepthProfile, interval: StrikeInterval
-) -> float:
-    """Return the along-track sample spacing the entry window is resolved at.
+) -> tuple[float, float]:
+    """Return the sole's descent speed at entry and climb speed at exit.
 
-    The median forward step over the submerged window and the two samples
-    before it -- the stretch the discriminator actually reads. A median rather
-    than the single step across the crossing, so one irregular sample cannot
-    decide whether the trace is refused.
+    Both are read at the bounding **samples** of the submerged window, the same
+    two the impulse balance integrates between, so the restitution and the
+    balance describe one window rather than two.
 
     Args:
         profile: Sole depth profile.
         interval: Submerged window.
 
     Returns:
-        Sample spacing along travel [m].
+        ``(entry descent speed, exit climb speed)`` [m/s], the first positive
+        downward and the second positive upward.
 
     Raises:
-        BunkerShot3DValueError: If the sole never advances over that stretch,
-            so no spacing exists to judge the window against.
+        BunkerShot3DValueError: If the sole is not measurably descending at the
+            first submerged sample. Without a descent there is nothing for the
+            sand to return, and the ratio would have no denominator.
     """
-    start = max(interval.entry_index - 2, 0)
-    stop = min(interval.exit_index + 2, profile.travel_m.size)
-    steps = np.diff(profile.travel_m[start:stop])
-    forward = steps[steps > 0.0]
-    if forward.size == 0:
+    entry_index = interval.entry_index
+    vertical = profile.velocity_mps[:, 2]
+    entry_descent = -float(vertical[entry_index])
+    exit_climb = float(vertical[interval.exit_index])
+    speed = float(np.linalg.norm(profile.velocity_mps[entry_index]))
+    floor = _MIN_ENTRY_DESCENT_SPEED_FRACTION * speed
+    if entry_descent <= floor:
         raise BunkerShot3DValueError(
-            "the sole does not advance across the submerged window, so the "
-            "entry window cannot be expressed in samples of travel"
+            "the sole is not descending at the first submerged sample "
+            f"({entry_descent:+.6g} m/s downward against a {speed:.4g} m/s "
+            "sole speed), so there is no delivered descent for the sand to "
+            "return and the descent-return ratio has no denominator. This is "
+            "a trace whose entry crossing is a sampling artefact -- a scuff, "
+            "or a dip resolved by one sample -- rather than a strike "
+            "(issue #8703)"
         )
-    return float(np.median(forward))
+    return entry_descent, exit_climb
 
 
 def _dig_skid_calibration(
     *,
-    ratio: float,
-    window_m: float,
-    sample_travel_m: float,
-    divot_length_m: float,
-    dig_slope_ratio: float,
-    skid_slope_ratio: float,
+    submerged_samples: int,
+    dig_descent_return: float,
+    skid_descent_return: float,
 ) -> DigSkidCalibration:
     """Build the calibration record that travels with a verdict.
 
     Args:
-        ratio: The slope ratio the verdict was formed on.
-        window_m: Entry window actually used, after clipping.
-        sample_travel_m: Along-track sample spacing.
-        divot_length_m: Length of the divot the window is a chord of.
-        dig_slope_ratio: The DIG threshold used.
-        skid_slope_ratio: The SKID threshold used.
+        submerged_samples: Samples the sole spent below the surface.
+        dig_descent_return: The DIG threshold used.
+        skid_descent_return: The SKID threshold used.
 
     Returns:
         The record, never reporting itself calibrated.
     """
-    samples = window_m / sample_travel_m
-    fraction = window_m / divot_length_m
-    undeflected = abs(ratio - 1.0) <= _UNDEFLECTED_RATIO_ATOL
-    reasons = [DIG_SKID_UNCALIBRATED_REASON]
-    if undeflected:
-        reasons.append(DIG_SKID_UNDEFLECTED_ENTRY_REASON)
-    if samples < MIN_INFORMATIVE_ENTRY_WINDOW_SAMPLES:
+    reasons = [DIG_SKID_UNCALIBRATED_REASON, DIG_SKID_BOUNCE_ORDERING_REASON]
+    if submerged_samples < MIN_RESOLVED_SUBMERGED_SAMPLES:
         reasons.append(
-            DIG_SKID_THIN_WINDOW_REASON.format(
-                samples=samples, minimum=MIN_INFORMATIVE_ENTRY_WINDOW_SAMPLES
+            DIG_SKID_COARSE_WINDOW_REASON.format(
+                samples=submerged_samples, minimum=MIN_RESOLVED_SUBMERGED_SAMPLES
             )
         )
-    if fraction > _WIDE_CHORD_DIVOT_FRACTION:
-        reasons.append(DIG_SKID_INVERTED_SPREAD_REASON.format(fraction=fraction))
     return DigSkidCalibration(
         calibrated=False,
-        undeflected_entry=undeflected,
-        dig_slope_ratio=float(dig_slope_ratio),
-        skid_slope_ratio=float(skid_slope_ratio),
-        entry_window_samples=samples,
-        entry_window_divot_fraction=fraction,
+        dig_descent_return=float(dig_descent_return),
+        skid_descent_return=float(skid_descent_return),
+        submerged_samples=submerged_samples,
         reasons=tuple(reasons),
     )
 
@@ -746,24 +759,25 @@ def dig_vs_skid(
     head: HeadModel,
     scene: StrikeScene,
     *,
-    entry_window_m: float = DEFAULT_ENTRY_WINDOW_M,
-    dig_slope_ratio: float = DEFAULT_DIG_SLOPE_RATIO,
-    skid_slope_ratio: float = DEFAULT_SKID_SLOPE_RATIO,
+    dig_descent_return: float = DEFAULT_DIG_DESCENT_RETURN,
+    skid_descent_return: float = DEFAULT_SKID_DESCENT_RETURN,
     gravity_mps2: float = STANDARD_GRAVITY_MPS2,
 ) -> DigSkidResult:
     """Classify the strike as digging or skidding, and balance vertical impulse.
+
+    The discriminant is the **descent-return ratio**: how much of the descent
+    the sole arrived with the sand hands back by the time it leaves. A digging
+    head gives its descent away and crawls out; a skidding head bottoms out and
+    is thrown out about as fast as it came down. See the module docstring for
+    what this replaced, and for the sweep that showed it separates.
 
     Args:
         trace: Strike trace.
         head: Head the trace was recorded for.
         scene: Sand surface, ball and travel axis.
-        entry_window_m: Travel window after entry over which the penetration
-            slope is evaluated. Must be longer than one sample of along-track
-            travel and shorter than the divot: outside that band the ratio is
-            1 or 0 by construction rather than by physics (issue #8703).
-        dig_slope_ratio: Slope ratio at or above which the verdict is DIG.
+        dig_descent_return: Ratio at or **below** which the verdict is DIG.
             A convention, not a calibration; carried on the result.
-        skid_slope_ratio: Slope ratio at or below which the verdict is SKID.
+        skid_descent_return: Ratio at or **above** which the verdict is SKID.
             A convention, not a calibration; carried on the result.
         gravity_mps2: Gravitational acceleration used for the impulse balance.
 
@@ -773,67 +787,50 @@ def dig_vs_skid(
         why, and :meth:`DigSkidCalibration.require_calibrated` refuses.
 
     Raises:
-        ValueError: If the thresholds are not ordered, the window is not
-            positive, the window is degenerate at either end (shorter than one
-            sample of travel, or as long as the divot), or the sole path does
-            not support a slope measurement.
+        ValueError: If the thresholds are not ordered, if the sole is submerged
+            for fewer than :data:`MIN_SUBMERGED_SAMPLES` samples so the two
+            centred differences overlap, if the sole is not descending at the
+            first submerged sample, or if the sole path does not support the
+            delivered-slope measurement reported beside the ratio.
     """
     require(
-        entry_window_m > 0.0, "entry_window_m must be positive", value=entry_window_m
-    )
-    require(
-        skid_slope_ratio < dig_slope_ratio,
-        "skid_slope_ratio must be below dig_slope_ratio, leaving a marginal band",
-        value=(skid_slope_ratio, dig_slope_ratio),
+        dig_descent_return < skid_descent_return,
+        "dig_descent_return must be below skid_descent_return, leaving a marginal band",
+        value=(dig_descent_return, skid_descent_return),
     )
     profile = sole_depth_profile(trace, head, scene)
     interval = _interval_from_profile(profile, trace, scene)
-    divot_length_m = interval.exit_travel_m - interval.entry_travel_m
-    if float(entry_window_m) >= divot_length_m:
+    submerged_samples = interval.exit_index - interval.entry_index + 1
+    if submerged_samples < MIN_SUBMERGED_SAMPLES:
         raise BunkerShot3DValueError(
-            f"the entry window of {entry_window_m * 1e3:.4g} mm reaches the "
-            f"whole {divot_length_m * 1e3:.4g} mm divot. The entry chord is "
-            "taken from the entry crossing, and the depth returns to zero at "
-            "the exit crossing, so a chord that spans the divot is identically "
-            "zero for every design and the verdict would be SKID whatever the "
-            "sole did (issue #8703)"
+            f"the sole is below the surface for only {submerged_samples} "
+            f"submerged samples, below the {MIN_SUBMERGED_SAMPLES} this metric "
+            "needs. Both speeds are centred differences, so at this spacing "
+            "they are the same measurement and the ratio would be an "
+            "arithmetic identity rather than a strike. Record the strike more "
+            "finely (issue #8703)"
         )
-    window_m = float(entry_window_m)
-    sample_travel_m = _entry_sample_travel_m(profile, interval)
-    if window_m <= sample_travel_m:
-        raise BunkerShot3DValueError(
-            f"the entry window of {window_m * 1e3:.4g} mm is shorter than one "
-            f"sample of travel ({sample_travel_m * 1e3:.4g} mm), so the entry "
-            "penetration slope is interpolated inside the single step the "
-            "incoming path slope was measured across and the ratio is 1 by "
-            "construction rather than by physics. Record the strike more "
-            "finely, or widen the window (issue #8703)"
-        )
-    depth_at_window = profile.depth_at_travel_m(interval.entry_travel_m + window_m)
-    entry_slope = depth_at_window / window_m
-    incoming_slope = _incoming_path_slope(profile, scene, interval.entry_index)
-    ratio = entry_slope / incoming_slope
-    if ratio >= dig_slope_ratio:
+    entry_descent, exit_climb = _descent_and_climb(profile, interval)
+    ratio = exit_climb / entry_descent
+    if ratio <= dig_descent_return:
         verdict = DigSkidVerdict.DIG
-    elif ratio <= skid_slope_ratio:
+    elif ratio >= skid_descent_return:
         verdict = DigSkidVerdict.SKID
     else:
         verdict = DigSkidVerdict.MARGINAL
+    incoming_slope = _incoming_path_slope(profile, scene, interval.entry_index)
     return DigSkidResult(
         verdict=verdict,
         calibration=_dig_skid_calibration(
-            ratio=ratio,
-            window_m=window_m,
-            sample_travel_m=sample_travel_m,
-            divot_length_m=divot_length_m,
-            dig_slope_ratio=dig_slope_ratio,
-            skid_slope_ratio=skid_slope_ratio,
+            submerged_samples=submerged_samples,
+            dig_descent_return=dig_descent_return,
+            skid_descent_return=skid_descent_return,
         ),
-        entry_penetration_slope=entry_slope,
+        entry_descent_speed_mps=entry_descent,
+        exit_climb_speed_mps=exit_climb,
+        descent_return_ratio=ratio,
         incoming_path_slope=incoming_slope,
-        slope_ratio=ratio,
         entry_attack_angle_rad=-float(np.arctan(incoming_slope)),
-        entry_window_m=window_m,
         **_vertical_balance(trace, head, interval, gravity_mps2),
     )
 
