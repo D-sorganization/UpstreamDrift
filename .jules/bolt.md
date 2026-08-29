@@ -14,3 +14,7 @@
 ## 2024-05-19 - Limit Micro-Optimizations for .sum()
 **Learning:** While replacing `np.sum(array)` with `array.sum()` does avoid NumPy's internal function dispatch overhead (~1 microsecond), it is an extreme micro-optimization. In heavy computational contexts (such as Principal Component Analysis involving SVD), this change has absolutely no measurable impact on overall application performance and is not worth the noise of inline comments or PR churn.
 **Action:** Do not perform this `.sum()` replacement in standard calculations unless it is inside a provably hot loop where the microsecond overhead is a true bottleneck.
+
+## 2026-08-29 - [Optimize Square Array Summation]
+**Learning:** Computing the sum of squares of an array (e.g., `np.square(arr).sum()` or `np.sum(arr**2)`) incurs unnecessary overhead due to the intermediate array created by `np.square()` or `**2`. By using `np.vdot(arr, arr)`, we skip this temporary array allocation and speed up the computation directly at the C-level (often ~2x faster).
+**Action:** When computing the sum of squared elements for real arrays, replace `np.square(arr).sum()` or `np.sum(arr**2)` with `np.vdot(arr, arr)`.
