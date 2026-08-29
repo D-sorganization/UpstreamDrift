@@ -726,6 +726,243 @@ def _protect_engine_modules() -> Generator[None, None, None]:
             sys.modules[k] = v
 
 
+# ---------------------------------------------------------------------------
+# Qt ``sys.modules`` pollution guard (issue #9188)
+#
+# A test that drops a stub into ``sys.modules`` for a Qt module and never puts
+# the real one back turns the suite into a lottery: the *next* test to do
+# ``from PyQt6.QtCore import Qt`` fails with
+#
+#     ImportError: cannot import name 'Qt' from '<unknown module name>'
+#                  (unknown location)
+#
+# ...and which test that is depends only on collection order.  ``<unknown
+# module name> (unknown location)`` is the fingerprint of a non-module object
+# sitting in ``sys.modules``.
+#
+# ``pytest_runtest_teardown`` below runs ``trylast``, i.e. after pytest's own
+# teardown hook has finalized every fixture that is due — so it is immune to
+# fixture ordering, unlike a guard written as an autouse fixture.  It does two
+# things:
+#
+#   * After every test, it compares the watched ``sys.modules`` entries against
+#     the baseline taken once collection finished, and remembers the *first*
+#     test at which they started deviating.  Returning to baseline clears that.
+#   * At each test-*file* boundary it reports a deviation that is still in
+#     place, naming the remembered first offender.
+#
+# Deferring the report to the file boundary is what keeps the guard free of
+# false positives: a deliberate, properly-scoped stub (say a module-scoped
+# ``patch.dict(sys.modules, ...)``) is undone before the boundary is reached
+# and is never reported, while a stub that outlives the file that installed it
+# has escaped every legitimate scope.  That is exactly the #9188 shape — a
+# ``scope="session"`` autouse fixture declared in a *directory* conftest.py is
+# created lazily at the first test in that directory but only finalized at the
+# end of the whole session.
+#
+# The check repairs ``sys.modules`` after reporting, so one bad test produces
+# one attributable failure rather than a cascade of innocent victims.
+# ---------------------------------------------------------------------------
+_QT_MODULE_PREFIXES = (
+    "PyQt6",
+    "PyQt5",
+    "PySide2",
+    "PySide6",
+    "qtpy",
+    # The repo's own Qt shim layer, stubbed by the same conftests that stub
+    # PyQt6 and therefore subject to the identical leak.
+    "src.shared.python.ui",
+    "shared.python.ui",
+)
+
+# ``str.startswith`` accepts a tuple and runs in C, which keeps the per-test
+# scan of ``sys.modules`` (a few thousand keys) cheap.
+_QT_PREFIX_MATCH = tuple(_QT_MODULE_PREFIXES) + tuple(
+    prefix + "." for prefix in _QT_MODULE_PREFIXES
+)
+
+_qt_baseline: dict[str, Any] = {}
+# Node id of the first test after which the watched entries stopped matching
+# the baseline; used to attribute a leak to its author, not to whoever is
+# unlucky enough to run next.
+_qt_dirty_since: list[str] = []
+# Single-element flag set once the baseline has been taken.  An *empty*
+# baseline is legitimate — no Qt binding imported yet — and must still police
+# stub *additions*, so armed-ness cannot be inferred from the baseline being
+# non-empty.
+_qt_guard_armed: list[bool] = []
+
+
+def _is_qt_module_name(name: str) -> bool:
+    """Return True if *name* is a Qt binding module we police."""
+    if not name.startswith(_QT_PREFIX_MATCH):
+        return False
+    return any(
+        name == prefix or name.startswith(prefix + ".")
+        for prefix in _QT_MODULE_PREFIXES
+    )
+
+
+def _qt_module_snapshot() -> dict[str, Any]:
+    """Map every watched Qt module name to the object currently registered."""
+    # list() needed: the lazy alias meta-path finder can insert into
+    # sys.modules while we walk it (see _protect_engine_modules).
+    modules = sys.modules
+    return {
+        name: modules[name]
+        for name in list(modules)
+        if _is_qt_module_name(name) and name in modules
+    }
+
+
+def _is_module_stub(obj: object) -> bool:
+    """Return True if *obj* is a stand-in rather than a genuine module.
+
+    A ``MagicMock`` — even ``MagicMock(spec=ModuleType)`` — is a stub: it has
+    no ``__name__``/``__file__``, which is precisely why the resulting
+    ``ImportError`` says ``<unknown module name> (unknown location)``.
+    """
+    from unittest.mock import NonCallableMock
+
+    if isinstance(obj, NonCallableMock):
+        return True
+    return not isinstance(obj, _types.ModuleType)
+
+
+def _describe_module_object(obj: object) -> str:
+    """Render *obj* for a guard failure message."""
+    if _is_module_stub(obj):
+        return f"stub {type(obj).__name__}"
+    location = getattr(obj, "__file__", None)
+    return f"module {getattr(obj, '__name__', '?')} ({location or 'namespace'})"
+
+
+def _diff_qt_modules(
+    before: dict[str, Any], after: dict[str, Any]
+) -> tuple[list[str], list[str]]:
+    """Compare two snapshots.
+
+    Returns ``(problems, repairable_additions)``.  Newly imported *real*
+    modules are legitimate lazy imports and are not reported; only stubs,
+    replacements and removals are.
+    """
+    problems: list[str] = []
+    added_stubs: list[str] = []
+    for name, original in before.items():
+        if name not in after:
+            problems.append(
+                f"  {name}: removed from sys.modules "
+                f"(was {_describe_module_object(original)})"
+            )
+        elif after[name] is not original:
+            problems.append(
+                f"  {name}: {_describe_module_object(original)} "
+                f"-> {_describe_module_object(after[name])}"
+            )
+    for name, current in after.items():
+        if name in before:
+            continue
+        if _is_module_stub(current):
+            added_stubs.append(name)
+            problems.append(
+                f"  {name}: stub added to sys.modules "
+                f"({_describe_module_object(current)})"
+            )
+    return problems, added_stubs
+
+
+def _repair_qt_modules(before: dict[str, Any], added_stubs: list[str]) -> None:
+    """Put the watched Qt entries back the way the snapshot found them."""
+    for name in added_stubs:
+        sys.modules.pop(name, None)
+    for name, original in before.items():
+        sys.modules[name] = original
+
+
+_QT_GUARD_REMEDY = (
+    "Stub Qt modules with `monkeypatch.setitem(sys.modules, ...)` or "
+    "`unittest.mock.patch.dict(sys.modules, ...)` so teardown is automatic, "
+    "and never from a fixture scoped wider than the tests that need it "
+    "(a scope='session' autouse fixture in a directory conftest.py is only "
+    "finalized at the END of the session). A leaked stub makes every later "
+    "`from PyQt6.QtCore import Qt` fail with \"cannot import name 'Qt' from "
+    "'<unknown module name>' (unknown location)\", blaming an innocent test. "
+    "See issue #9188."
+)
+
+
+def _arm_qt_guard() -> None:
+    """Snapshot the clean Qt ``sys.modules`` state, once."""
+    if _qt_guard_armed:
+        return
+    _qt_guard_armed.append(True)
+    _qt_baseline.clear()
+    _qt_baseline.update(_qt_module_snapshot())
+    _qt_dirty_since.clear()
+
+
+def pytest_collection_finish(session: pytest.Session) -> None:
+    """Arm the guard once collection is done and before the run loop starts."""
+    _arm_qt_guard()
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_setup(item: pytest.Item) -> None:
+    """Arm the guard on the first test, if collection did not already.
+
+    ``tryfirst`` puts this ahead of pytest's own setup hook, so the snapshot is
+    still taken before the first test's fixtures run.  This is a fallback for
+    runners that reach the run loop without ``pytest_collection_finish``.
+    """
+    _arm_qt_guard()
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_runtest_teardown(item: pytest.Item, nextitem: pytest.Item | None) -> None:
+    """Name the test that leaked a Qt stub, rather than its next-door neighbour.
+
+    Runs ``trylast`` so it executes after pytest's own teardown hook, i.e.
+    after every fixture finalizer that is due at this point — including the
+    module-, class-, package- and session-scoped ones.  That makes the check
+    independent of autouse fixture ordering.
+    """
+    if not _qt_guard_armed:
+        return
+
+    after = _qt_module_snapshot()
+    deviates = after != _qt_baseline
+    if deviates and not _qt_dirty_since:
+        # First test at which the watched entries stopped matching the
+        # baseline: the prime suspect, recorded even though a wider scope may
+        # still legitimately restore them before the file ends.
+        _qt_dirty_since.append(item.nodeid)
+    elif not deviates:
+        _qt_dirty_since.clear()
+        return
+
+    current_file = item.nodeid.partition("::")[0]
+    if nextitem is not None and nextitem.nodeid.partition("::")[0] == current_file:
+        return  # still inside the same file; wider scopes may legitimately hold
+
+    problems, added_stubs = _diff_qt_modules(_qt_baseline, after)
+    if not problems:
+        _qt_dirty_since.clear()
+        return
+
+    culprit = _qt_dirty_since[0] if _qt_dirty_since else item.nodeid
+    _repair_qt_modules(_qt_baseline, added_stubs)
+    _qt_dirty_since.clear()
+    pytest.fail(
+        f"Qt modules are still altered in sys.modules at the end of "
+        f"{current_file}.\nFirst test at which they diverged: {culprit}\n"
+        + "\n".join(problems)
+        + "\n\nThe stub outlived the file that installed it, so every test "
+        "collected after this one would import Qt names from the stub.\n"
+        + _QT_GUARD_REMEDY,
+        pytrace=False,
+    )
+
+
 @pytest.fixture
 def pendulum_urdf(tmp_path: Path) -> str:
     """Create a standardized simple pendulum URDF for testing."""

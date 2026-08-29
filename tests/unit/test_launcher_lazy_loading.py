@@ -6,11 +6,44 @@ does NOT trigger its heavy physics engine import at module level.
 """
 
 import sys
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Pre-import dashboard launcher to populate sys.modules with heavy dependencies (scipy, numpy, pyqt)
 # so that patch.dict("sys.modules") doesn't remove them and trigger C-extension reload errors.
 import src.shared.python.dashboard.launcher  # noqa: F401
+
+# Dashboard launcher modules these tests evict from ``sys.modules`` in order to
+# force a fresh import.
+_DASHBOARD_MODULES = (
+    "src.launchers.mujoco_dashboard",
+    "src.launchers.pinocchio_dashboard",
+    "src.launchers.drake_dashboard",
+)
+
+
+@pytest.fixture(autouse=True)
+def _restore_dashboard_modules() -> Generator[None, None, None]:
+    """Put the original dashboard modules back after each test.
+
+    These tests deliberately evict launcher modules from ``sys.modules`` so the
+    next import runs fresh. Leaving the hole behind is what made issue #9183
+    intermittent: a later test that had already bound ``main`` at import time
+    kept a reference into the *old* module dict, while ``mock.patch`` re-imported
+    the module and patched the *new* one. The patch silently missed, the real
+    ``launch_dashboard`` ran, and CI hung in a Qt event loop until it timed out.
+
+    Restoring the original module objects keeps every previously-bound
+    reference and its module dict in agreement.
+    """
+    saved = {
+        name: sys.modules[name] for name in _DASHBOARD_MODULES if name in sys.modules
+    }
+    yield
+    for name, module in saved.items():
+        sys.modules[name] = module
 
 
 class TestMuJoCoDashboardLazyLoading:
