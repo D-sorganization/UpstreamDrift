@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`, expires
-  `2026-08-30T04:32:38Z`; implementation head `44f642eb5` plus this
+  `2026-08-30T04:32:38Z`; implementation head `265c6067c` plus this
   handoff-only successor;
   worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
@@ -99,8 +99,8 @@ are not completion evidence.
   exact legacy-to-enriched replay audit. Commit `2aa0b79cb` adds runtime-audit
   schema 1.4, which requires seven exact evaluator, runner, validator, native,
   and geometry-provider identities even if its digest is recomputed.
-- Commit `44f642eb5` prepares an outcome-blind v1.3 retention amendment; the
-  committed plan remains unchanged at v1.2 until the live run is terminal.
+- `44f642eb5` prepares the outcome-blind v1.3 amendment; `265c6067c` binds its
+  launch schema. The canonical plan remains v1.2 until the run is terminal.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -127,7 +127,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 61 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 62 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
