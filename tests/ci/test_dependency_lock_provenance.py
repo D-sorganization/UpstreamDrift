@@ -44,14 +44,20 @@ def test_requirements_dev_lock_provenance_header_is_canonical() -> None:
 
 
 def test_makefile_sync_deps_uses_custom_compile_command() -> None:
-    """Makefile sync-deps target must pass --custom-compile-command for both lockfiles."""
+    """Makefile sync-deps must pin CUSTOM_COMPILE_COMMAND for both lockfiles.
+
+    pip-tools has no ``--custom-compile-command`` CLI flag; the header override is
+    supplied through the ``CUSTOM_COMPILE_COMMAND`` environment variable. Pinning it
+    is what keeps the generated header free of environment-derived flags such as
+    ``--no-index``, so ``make sync-deps`` is reproducible offline.
+    """
     makefile_path = ROOT / "Makefile"
     content = makefile_path.read_text(encoding="utf-8")
     assert (
-        '--custom-compile-command="pip-compile --output-file=requirements.lock pyproject.toml"'
+        'CUSTOM_COMPILE_COMMAND="pip-compile --output-file=requirements.lock pyproject.toml"'
         in content
     )
     assert (
-        '--custom-compile-command="pip-compile --extra=dev --extra=gui-test --output-file=requirements-dev.lock pyproject.toml"'
+        'CUSTOM_COMPILE_COMMAND="pip-compile --extra=dev --extra=gui-test --output-file=requirements-dev.lock pyproject.toml"'
         in content
     )
