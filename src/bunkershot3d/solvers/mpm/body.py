@@ -59,6 +59,7 @@ __all__ = [
     "ContactImpulse",
     "RigidSection",
     "convex_hull_2d",
+    "coulomb_cone_projection",
     "plane_torque_about_y",
 ]
 
@@ -86,6 +87,46 @@ def plane_torque_about_y(
         The summed torque about ``+y`` in N m (per unit width).
     """
     return float((lever_m[:, 1] * force_n[:, 0] - lever_m[:, 0] * force_n[:, 1]).sum())
+
+
+def coulomb_cone_projection(
+    relative_m_s: NDArray[np.float64],
+    normal: NDArray[np.float64],
+    *,
+    friction: float,
+) -> NDArray[np.float64]:
+    """Project relative velocities onto the Coulomb friction cone.
+
+    A **separating** node is returned untouched -- sand may leave the club
+    freely, which is what makes a divot open behind the sole instead of
+    the club dragging a vacuum. An **approaching** node has its normal
+    component removed and its tangential component reduced inside the
+    cone, sticking when the cone closes.
+
+    The tangential update is ``v_t' = v_t + mu v_n v_t / |v_t|`` with
+    ``v_n < 0``: the tangential speed is *reduced* by the friction bound
+    rather than replaced by it, so a frictionless club leaves the
+    tangential velocity entirely alone. That is the case this scaling has
+    to get right, and it is why the bound appears as a subtraction.
+
+    Args:
+        relative_m_s: ``(k, 2)`` nodal velocity relative to the body.
+        normal: ``(k, 2)`` outward unit contact normals.
+        friction: Coulomb friction coefficient.
+
+    Returns:
+        ``(k, 2)`` projected relative velocities.
+    """
+    normal_speed = np.einsum("ij,ij->i", relative_m_s, normal)
+    approaching = normal_speed < 0.0
+    tangential = relative_m_s - normal_speed[:, None] * normal
+    tangential_speed = np.sqrt(np.einsum("ij,ij->i", tangential, tangential))
+    cone_limit = -float(friction) * normal_speed
+    sticking = tangential_speed <= cone_limit
+    safe_speed = np.where(tangential_speed > 0.0, tangential_speed, 1.0)
+    sliding_scale = np.where(sticking, 0.0, 1.0 - cone_limit / safe_speed)
+    projected = np.where(sticking[:, None], 0.0, sliding_scale[:, None] * tangential)
+    return np.where(approaching[:, None], projected, relative_m_s)
 
 
 def convex_hull_2d(points_m: NDArray[np.float64]) -> NDArray[np.float64]:
@@ -333,6 +374,40 @@ class RigidSection:
             friction=self.friction,
         )
 
+    def with_velocity(
+        self,
+        velocity_m_s: ArrayLike,
+        *,
+        angular_velocity_rad_s: float | None = None,
+    ) -> RigidSection:
+        """Return the same section, in the same pose, moving differently.
+
+        What a *marched* body needs and a prescribed one does not: the
+        head's velocity is an unknown of the shot, so a step ends by
+        rebuilding the section around a new one rather than by mutating
+        a frozen value.
+
+        Args:
+            velocity_m_s: ``(2,)`` new linear velocity of the reference
+                point.
+            angular_velocity_rad_s: New rotation rate about ``+y``, or
+                ``None`` to keep the current one.
+
+        Returns:
+            The section.
+        """
+        return RigidSection(
+            self.vertices_m,
+            velocity_m_s=velocity_m_s,
+            angular_velocity_rad_s=(
+                self.angular_velocity_rad_s
+                if angular_velocity_rad_s is None
+                else angular_velocity_rad_s
+            ),
+            reference_point_m=self.reference_point_m,
+            friction=self.friction,
+        )
+
     def advanced(self, time_step_s: float) -> RigidSection:
         """Return the section after ``time_step_s`` of its own motion.
 
@@ -500,17 +575,11 @@ class RigidSection:
         if not math.isfinite(step) or step <= 0.0:
             raise SolverInputError(f"time_step_s must be positive, got {step!r}")
 
-        distance, normal = self.signed_distance(node_position_m)
-        occupied = distance < 0.0
-        # Swept test: where will the body be at the end of the step?
-        swept_section = self.advanced(step)
-        swept_distance, swept_normal = swept_section.signed_distance(node_position_m)
-        swept_only = (~occupied) & (swept_distance < 0.0)
-        active = occupied | swept_only
-        live = active & (node_mass_kg > 0.0)
-        index = np.flatnonzero(live)
+        index, contact_normal, n_swept = self._active_nodes(
+            node_position_m, node_mass_kg, step
+        )
         if index.size == 0:
-            empty = np.zeros((0, _DIMENSION), dtype=np.float64)
+            empty: NDArray[np.float64] = np.zeros((0, _DIMENSION), dtype=np.float64)
             return node_velocity_m_s, ContactImpulse(
                 node_index=np.zeros(0, dtype=np.int64),
                 impulse_n_s=empty,
@@ -519,33 +588,12 @@ class RigidSection:
                 n_swept=0,
             )
 
-        # A node the body has not reached yet is projected on the normal it
-        # will be hit with, not the one it happens to sit near now.
-        contact_normal = np.where(
-            occupied[index, None], normal[index], swept_normal[index]
-        )
         positions = node_position_m[index]
         body_velocity = self.velocity_at(positions)
         relative = node_velocity_m_s[index] - body_velocity
-        normal_speed = np.einsum("ij,ij->i", relative, contact_normal)
-        approaching = normal_speed < 0.0
-
-        tangential = relative - normal_speed[:, None] * contact_normal
-        tangential_speed = np.sqrt(np.einsum("ij,ij->i", tangential, tangential))
-        cone_limit = -self.friction * normal_speed
-        sticking = tangential_speed <= cone_limit
-        safe_speed = np.where(tangential_speed > 0.0, tangential_speed, 1.0)
-        # v_t' = v_t + mu v_n v_t / |v_t| with v_n < 0, i.e. the tangential
-        # speed is *reduced* by the friction bound rather than replaced by
-        # it.  A frictionless club must leave the tangential velocity
-        # untouched, which is the case this scale has to get right.
-        sliding_scale = np.where(sticking, 0.0, 1.0 - cone_limit / safe_speed)
-        projected_relative = np.where(
-            sticking[:, None],
-            0.0,
-            sliding_scale[:, None] * tangential,
+        new_relative = coulomb_cone_projection(
+            relative, contact_normal, friction=self.friction
         )
-        new_relative = np.where(approaching[:, None], projected_relative, relative)
 
         updated = node_velocity_m_s.copy()
         updated[index] = new_relative + body_velocity
@@ -563,8 +611,47 @@ class RigidSection:
             impulse_n_s=impulse,
             position_m=positions,
             stress_force_n=stress_total,
-            n_swept=int(swept_only[index].sum()),
+            n_swept=n_swept,
         )
+
+    def _active_nodes(
+        self,
+        node_position_m: NDArray[np.float64],
+        node_mass_kg: NDArray[np.float64],
+        time_step_s: float,
+    ) -> tuple[NDArray[np.int64], NDArray[np.float64], int]:
+        """Which nodes this body collides, and on which normal.
+
+        A node is collided if the body is inside it *now* or will be after
+        this step's motion -- the second of the three anti-tunnelling
+        mechanisms. A node the body has not reached yet is projected on
+        the normal it will be hit with, not the one it happens to sit near
+        now, which is the difference between stopping sand in front of the
+        sole and stopping it beside the sole.
+
+        Args:
+            node_position_m: ``(n_nodes, 2)`` node positions.
+            node_mass_kg: ``(n_nodes,)`` nodal masses; an empty node has
+                no momentum to exchange and is skipped.
+            time_step_s: The step, for the swept test.
+
+        Returns:
+            ``(index, contact_normal, n_swept)``.
+        """
+        distance, normal = self.signed_distance(node_position_m)
+        occupied = distance < 0.0
+        swept_distance, swept_normal = self.advanced(time_step_s).signed_distance(
+            node_position_m
+        )
+        swept_only = (~occupied) & (swept_distance < 0.0)
+        live = (occupied | swept_only) & (node_mass_kg > 0.0)
+        index = np.flatnonzero(live)
+        if index.size == 0:
+            return index, np.zeros((0, _DIMENSION), dtype=np.float64), 0
+        contact_normal = np.where(
+            occupied[index, None], normal[index], swept_normal[index]
+        )
+        return index, contact_normal, int(swept_only[index].sum())
 
     def push_out(
         self,

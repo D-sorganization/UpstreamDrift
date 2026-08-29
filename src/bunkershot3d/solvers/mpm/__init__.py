@@ -20,11 +20,24 @@ What this package is
 * :mod:`.state` -- particles, bed initialisation and the domain walls.
 * :mod:`.body` -- the clubhead as a rigid moving plane-strain section,
   with the contact treatment that stops material tunnelling through it.
+* :mod:`.ball` -- the ball as a second such section, an **infinite
+  cylinder rather than a sphere**, whose below-equator / face-side
+  split is reported qualitatively and whose launch stays refused.
+* :mod:`.contact` -- the sand against **several** bodies in one step, and
+  the stated projection order that makes a shared node's answer
+  independent of the caller's argument list.
+* :mod:`.step` -- the scheme itself, one step at a time, so a whole-shot
+  march can drive it without reaching into the solver.
 * :mod:`.solver` -- :class:`~bunkershot3d.solvers.mpm.solver.PlaneStrainMPMSolver`,
   which implements the :class:`~bunkershot3d.solvers.protocol.GranularSolver`
   protocol so F1 is swappable with F0.
 * :mod:`.envelope` -- the F1 validity verdict, its caveats, and the
   quantities ADR-0033 refuses outright.
+* :mod:`.wholeshot` -- the head's **real trajectory**, marched once, with
+  the wrench history read off a single continuous solve. Additional to
+  the declared straight-line approach ``solve()`` builds, not a
+  replacement for it: the two answer different questions and only the
+  second is comparable to F0's memoryless answer.
 * :mod:`.verification` -- conservation residuals, the analytic case, the
   grid-convergence study and the F0 cross-check.
 
@@ -55,7 +68,30 @@ than leaving that to documentation.
 
 from __future__ import annotations
 
-from .body import ContactImpulse, RigidSection, convex_hull_2d, plane_torque_about_y
+from .ball import (
+    BALL_DIAMETER_M,
+    BALL_RADIUS_M,
+    DEFAULT_BALL_FACETS,
+    MIN_BALL_FACETS,
+    PLANE_STRAIN_BALL_NOTE,
+    BallContactSplit,
+    BallSection,
+    circular_section,
+    n_facets_for_cell_size,
+)
+from .body import (
+    ContactImpulse,
+    RigidSection,
+    convex_hull_2d,
+    coulomb_cone_projection,
+    plane_torque_about_y,
+)
+from .contact import (
+    BodyContact,
+    apply_body_contacts,
+    contact_order,
+    push_out_bodies,
+)
 from .constitutive import (
     HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA,
     HARDIN_RICHART_ROUND_COEFFICIENT_KPA,
@@ -102,6 +138,7 @@ from .state import (
     surface_depression,
     surface_profile_m,
 )
+from .step import StepContext, advance_step
 from .verification import (
     ColumnEquilibrium,
     F0CrossCheck,
@@ -111,38 +148,63 @@ from .verification import (
     energy_residuals,
     free_fall_residuals,
 )
+from .wholeshot import (
+    DEFAULT_EJECTA_HEADROOM_CELLS,
+    DEFAULT_TRAVEL_SPANS,
+    F1ShotResult,
+    F1ShotSettings,
+    simulate_f1_shot,
+)
 
 __all__ = [
-    "DEFAULT_CFL_NUMBER",
-    "F1_STANDING_CAVEATS",
-    "HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA",
-    "HARDIN_RICHART_ROUND_COEFFICIENT_KPA",
-    "MIN_CELLS_PER_GRAIN",
-    "MIN_CELLS_PER_RESOLVED_FEATURE",
-    "NODES_PER_PARTICLE",
-    "PLANE_STRAIN_DIMENSION",
-    "SAND_POISSON_RATIO",
-    "STENCIL_WIDTH",
+    "BALL_DIAMETER_M",
+    "BALL_RADIUS_M",
+    "BallContactSplit",
+    "BallSection",
+    "BodyContact",
     "ColumnEquilibrium",
     "ContactImpulse",
+    "DEFAULT_BALL_FACETS",
+    "DEFAULT_CFL_NUMBER",
+    "DEFAULT_EJECTA_HEADROOM_CELLS",
+    "DEFAULT_TRAVEL_SPANS",
     "DomainWalls",
     "F0CrossCheck",
+    "F1ShotResult",
+    "F1ShotSettings",
+    "F1_STANDING_CAVEATS",
     "GridInterpolation",
+    "HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA",
+    "HARDIN_RICHART_ROUND_COEFFICIENT_KPA",
+    "MIN_BALL_FACETS",
+    "MIN_CELLS_PER_GRAIN",
+    "MIN_CELLS_PER_RESOLVED_FEATURE",
     "MPMRun",
     "MPMSetup",
+    "NODES_PER_PARTICLE",
+    "PLANE_STRAIN_BALL_NOTE",
+    "PLANE_STRAIN_DIMENSION",
     "ParticleState",
     "PlaneStrainGrid",
     "PlaneStrainMPMSolver",
     "RefusedQuantity",
     "RigidSection",
+    "SAND_POISSON_RATIO",
+    "STENCIL_WIDTH",
     "SandContinuum",
+    "StepContext",
     "StepDiagnostics",
     "SurfaceDepression",
     "WallCondition",
+    "advance_step",
     "apic_angular_momentum",
+    "apply_body_contacts",
     "cfl_time_step_s",
+    "circular_section",
     "column_grid_convergence",
+    "contact_order",
     "convex_hull_2d",
+    "coulomb_cone_projection",
     "cross_2d",
     "cross_check_against_f0",
     "drucker_prager_alpha",
@@ -151,12 +213,15 @@ __all__ = [
     "evaluate_f1_envelope",
     "free_fall_residuals",
     "hencky_kirchhoff_principal",
+    "n_facets_for_cell_size",
     "plane_torque_about_y",
     "principal_stretches",
     "project_to_yield_surface",
+    "push_out_bodies",
     "reconstruct",
     "require_quotable",
     "settled_bed",
+    "simulate_f1_shot",
     "surface_depression",
     "surface_profile_m",
     "yield_function",

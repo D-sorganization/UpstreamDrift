@@ -250,7 +250,7 @@ class TestTimeStep:
             velocity_m_s=(25.0, 0.0),
         )
         with pytest.raises(SolverInputError, match="in one step"):
-            solver._require_courant(section, 1.0e-3)
+            solver._require_courant((section,), 1.0e-3)
 
 
 class TestApproachHistory:
