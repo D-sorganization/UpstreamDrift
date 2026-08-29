@@ -536,10 +536,12 @@ class SandDelivery:
                 f"{self.displaced_mass_bounds_kg!r}"
             ) from error
         if not math.isfinite(lower) or not math.isfinite(upper) or lower <= 0.0:
-            _refuse(
-                "displaced_mass_bounds_kg",
-                self.displaced_mass_bounds_kg,
-                "a finite pair of positive masses",
+            # Not routed through ``_refuse``: that helper reports one offending
+            # scalar, and widening it to take a pair would blur the message it
+            # produces for every other field.
+            raise ValueError(
+                "displaced_mass_bounds_kg must be a finite pair of positive "
+                f"masses, got {self.displaced_mass_bounds_kg!r}"
             )
         if not lower <= self.displaced_mass_kg <= upper:
             raise ValueError(
