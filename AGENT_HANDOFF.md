@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  implementation head `b560c784e` plus this handoff successor. No PR exists.
+  implementation head `e86dff3ba` plus this handoff successor. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 - Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
@@ -118,6 +118,7 @@ are not completion evidence.
   results, 180 legacy arrays, and enriched evidence. No outcomes were summarized.
 - Authoritative corruption sentinel at exact `b560c784e` passes; the retained
   mistyped-revision sentinel is explicitly rejected and excluded downstream.
+- Replay 33279075050 executes [20,40) at exact `e86dff3ba`; do not duplicate it.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -126,8 +127,8 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Dispatch only enriched [20,40) from the current head using audit 33277601263.
-2. Receipt/audit/collect it, then compare exact legacy/enriched [0,40).
+1. Let replay 33279075050 terminate; retain exact metadata without outcomes.
+2. Receipt/audit/collect [20,40), then compare legacy/enriched [0,40).
 3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 4. The contrast summary is implemented locally; after completion, validate the
