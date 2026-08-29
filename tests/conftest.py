@@ -786,6 +786,11 @@ _qt_baseline: dict[str, Any] = {}
 # the baseline; used to attribute a leak to its author, not to whoever is
 # unlucky enough to run next.
 _qt_dirty_since: list[str] = []
+# Single-element flag set once the baseline has been taken.  An *empty*
+# baseline is legitimate — no Qt binding imported yet — and must still police
+# stub *additions*, so armed-ness cannot be inferred from the baseline being
+# non-empty.
+_qt_guard_armed: list[bool] = []
 
 
 def _is_qt_module_name(name: str) -> bool:
@@ -886,11 +891,30 @@ _QT_GUARD_REMEDY = (
 )
 
 
-def pytest_collection_finish(session: pytest.Session) -> None:
-    """Record the clean Qt ``sys.modules`` state before the run loop starts."""
+def _arm_qt_guard() -> None:
+    """Snapshot the clean Qt ``sys.modules`` state, once."""
+    if _qt_guard_armed:
+        return
+    _qt_guard_armed.append(True)
     _qt_baseline.clear()
     _qt_baseline.update(_qt_module_snapshot())
     _qt_dirty_since.clear()
+
+
+def pytest_collection_finish(session: pytest.Session) -> None:
+    """Arm the guard once collection is done and before the run loop starts."""
+    _arm_qt_guard()
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_setup(item: pytest.Item) -> None:
+    """Arm the guard on the first test, if collection did not already.
+
+    ``tryfirst`` puts this ahead of pytest's own setup hook, so the snapshot is
+    still taken before the first test's fixtures run.  This is a fallback for
+    runners that reach the run loop without ``pytest_collection_finish``.
+    """
+    _arm_qt_guard()
 
 
 @pytest.hookimpl(trylast=True)
@@ -902,7 +926,7 @@ def pytest_runtest_teardown(item: pytest.Item, nextitem: pytest.Item | None) -> 
     module-, class-, package- and session-scoped ones.  That makes the check
     independent of autouse fixture ordering.
     """
-    if not _qt_baseline:
+    if not _qt_guard_armed:
         return
 
     after = _qt_module_snapshot()
