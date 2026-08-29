@@ -23,6 +23,10 @@ What this package is
 * :mod:`.ball` -- the ball as a second such section, an **infinite
   cylinder rather than a sphere**, whose below-equator / face-side
   split is reported qualitatively and whose launch stays refused.
+* :mod:`.ballreach` -- **what actually reaches the ball** (#8712): the
+  sand's traction read off that ball's own momentum ledger, resolved
+  around its in-plane surface and through the march, and compared
+  against what the club delivers as a share rather than as a force.
 * :mod:`.contact` -- the sand against **several** bodies in one step, and
   the stated projection order that makes a shared node's answer
   independent of the caller's argument list.
@@ -78,6 +82,19 @@ from .ball import (
     BallSection,
     circular_section,
     n_facets_for_cell_size,
+)
+from .ballreach import (
+    BALL_REACH_TIER_NOTE,
+    DEFAULT_BALL_SECTORS,
+    MIN_BALL_SECTORS,
+    BallReachHistory,
+    BallSurfaceSectors,
+    BallTractionSample,
+    SandVersusClub,
+    ball_reach_history,
+    compare_sand_and_club,
+    resolve_ball_traction,
+    resolve_sectors,
 )
 from .body import (
     ContactImpulse,
@@ -183,8 +200,10 @@ from .order_of_accuracy import (
 __all__ = [
     "BALL_DIAMETER_M",
     "BALL_RADIUS_M",
+    "BALL_REACH_TIER_NOTE",
     "COHESIVE_OSCILLATION_COMPRESSION",
     "DEFAULT_BALL_FACETS",
+    "DEFAULT_BALL_SECTORS",
     "DEFAULT_CFL_NUMBER",
     "DEFAULT_EJECTA_HEADROOM_CELLS",
     "DEFAULT_MANUFACTURED_FIELD",
@@ -194,6 +213,7 @@ __all__ = [
     "HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA",
     "HARDIN_RICHART_ROUND_COEFFICIENT_KPA",
     "MIN_BALL_FACETS",
+    "MIN_BALL_SECTORS",
     "MIN_CELLS_PER_GRAIN",
     "MIN_CELLS_PER_RESOLVED_FEATURE",
     "NODES_PER_PARTICLE",
@@ -202,7 +222,10 @@ __all__ = [
     "SAND_POISSON_RATIO",
     "STENCIL_WIDTH",
     "BallContactSplit",
+    "BallReachHistory",
     "BallSection",
+    "BallSurfaceSectors",
+    "BallTractionSample",
     "BodyContact",
     "ColumnEquilibrium",
     "ContactImpulse",
@@ -224,6 +247,7 @@ __all__ = [
     "RefusedQuantity",
     "RigidSection",
     "SandContinuum",
+    "SandVersusClub",
     "StepContext",
     "StepDiagnostics",
     "SurfaceDepression",
@@ -233,12 +257,14 @@ __all__ = [
     "advance_step",
     "apic_angular_momentum",
     "apply_body_contacts",
+    "ball_reach_history",
     "cfl_time_step_s",
     "circular_section",
     "cohesive_elastic_strain_limit",
     "cohesive_oscillation_residuals",
     "column_grid_convergence",
     "column_temporal_convergence",
+    "compare_sand_and_club",
     "contact_order",
     "convex_hull_2d",
     "coulomb_cone_projection",
@@ -261,6 +287,8 @@ __all__ = [
     "rankine_limits",
     "reconstruct",
     "require_quotable",
+    "resolve_ball_traction",
+    "resolve_sectors",
     "settled_bed",
     "simulate_f1_shot",
     "surface_depression",
