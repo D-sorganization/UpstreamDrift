@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+import hashlib
 from itertools import combinations, product
+import json
 import re
 from typing import Any
 
@@ -32,6 +34,27 @@ _VELOCITY_FACTORS = (1.0, -1.0)
 _TIME_STEPS_S = (0.0002, 0.0001, 0.00005)
 _HORIZONS_S = (0.004, 0.01, 0.025, 0.05)
 _ENGINES = ("mujoco", "pinocchio")
+_TERMINAL_CONCLUSIONS = (
+    "success",
+    "failure",
+    "neutral",
+    "cancelled",
+    "skipped",
+    "timed_out",
+    "action_required",
+    "startup_failure",
+    "stale",
+)
+_EVIDENCE_SCHEMA = "articulated-structural-factorial-evidence/1.0.0"
+_RUNTIME_AUDIT_SCHEMA = "articulated-structural-factorial-runtime-audit/1.4.0"
+_ENRICHMENT_AUDIT_SCHEMA = "articulated-structural-factorial-enrichment-audit/1.0.0"
+
+
+def _canonical_sha256(value: Mapping[str, Any]) -> str:
+    payload = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _activation_name(first: int, second: int, *, domain: str) -> str:
@@ -74,6 +97,64 @@ def _contrast(factors: tuple[str, ...]) -> dict[str, Any]:
             "over all sixteen pathway cells"
         ),
     }
+
+
+@dataclass(frozen=True, slots=True)
+class StructuralFactorialPlanAmendment:
+    """Record an outcome-blind operational retention correction."""
+
+    legacy_execution_revision: str
+    legacy_runtime_audit_run_id: int
+    terminal_workflow_run_id: int
+    terminal_conclusion: str
+    legacy_prefix_case_stop_exclusive: int
+    legacy_prefix_manifest_sha256: str
+    detected_before_scientific_outcome_inspection: bool
+
+    def __post_init__(self) -> None:
+        if not _SHA40.fullmatch(self.legacy_execution_revision):
+            raise ValueError("legacy_execution_revision must be a full SHA-1")
+        if self.legacy_runtime_audit_run_id <= 0:
+            raise ValueError("legacy_runtime_audit_run_id must be positive")
+        if self.terminal_workflow_run_id <= 0:
+            raise ValueError("terminal_workflow_run_id must be positive")
+        if self.terminal_conclusion not in _TERMINAL_CONCLUSIONS:
+            raise ValueError("terminal_conclusion must be a terminal GitHub conclusion")
+        if not 0 < self.legacy_prefix_case_stop_exclusive <= 2304:
+            raise ValueError("legacy prefix must be within the registered case range")
+        if not _SHA256.fullmatch(self.legacy_prefix_manifest_sha256):
+            raise ValueError("legacy_prefix_manifest_sha256 must be a SHA-256")
+        if self.detected_before_scientific_outcome_inspection is not True:
+            raise ValueError(
+                "retention amendment is valid only before scientific outcome inspection"
+            )
+
+    def to_record(self) -> dict[str, Any]:
+        """Return metadata that cannot carry scientific outcome values."""
+
+        return {
+            "amendment_id": "post-operational-retention-closure-v1",
+            "timing": "after_legacy_execution_before_scientific_outcome_inspection",
+            "reason": (
+                "legacy parity sidecars retained insufficient reviewer-facing time "
+                "histories; correct retention and provenance without changing the "
+                "registered design, estimands, numerical gates, or interpretations"
+            ),
+            "legacy_execution_revision": self.legacy_execution_revision,
+            "legacy_runtime_audit_run_id": self.legacy_runtime_audit_run_id,
+            "terminal_workflow_run_id": self.terminal_workflow_run_id,
+            "terminal_conclusion": self.terminal_conclusion,
+            "legacy_prefix_case_stop_exclusive": (
+                self.legacy_prefix_case_stop_exclusive
+            ),
+            "legacy_prefix_manifest_sha256": self.legacy_prefix_manifest_sha256,
+            "detected_before_scientific_outcome_inspection": True,
+            "registered_design_or_gate_change": False,
+            "legacy_prefix_promotable": False,
+            "legacy_revision_resume_permitted": False,
+            "requires_full_legacy_prefix_replay": True,
+            "requires_exact_enrichment_audit": True,
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -269,5 +350,43 @@ class StructuralFactorialPlan:
             },
         }
 
+    def to_amended_manifest(
+        self, amendment: StructuralFactorialPlanAmendment
+    ) -> dict[str, Any]:
+        """Apply a retention-only amendment without changing registered science."""
 
-__all__ = ["StructuralFactorialPlan"]
+        manifest = self.to_manifest()
+        base_plan_sha256 = _canonical_sha256(manifest)
+        manifest["schema_version"] = "articulated-structural-factorial-plan/1.3.0"
+        preregistration = manifest["preregistration"]
+        preregistration["status"] = (
+            "operational_retention_amended_before_outcome_inspection"
+        )
+        amendment_record = amendment.to_record()
+        amendment_record["base_plan_sha256"] = base_plan_sha256
+        preregistration["operational_amendment"] = amendment_record
+        execution = manifest["execution"]
+        execution["parity_sidecar_policy"] = (
+            "every completed checkpoint binds all 37 required time histories under "
+            "the exact evidence-sidecar schema"
+        )
+        execution["evidence_sidecar_schema"] = _EVIDENCE_SCHEMA
+        execution["runtime_audit_schema"] = _RUNTIME_AUDIT_SCHEMA
+        execution["enrichment_audit_schema"] = _ENRICHMENT_AUDIT_SCHEMA
+        execution["resume_policy"] = (
+            "replay the full legacy prefix under one new immutable revision; require "
+            "the exact enrichment audit before continuing beyond that prefix"
+        )
+        execution["launch_status"] = (
+            "blocked_pending_enriched_immutable_runner_revision"
+        )
+        promotion = manifest["promotion"]
+        promotion["requirements"] = [
+            "complete evidence sidecars validate for every completed checkpoint",
+            "legacy-prefix replay passes the exact enrichment audit",
+            *promotion["requirements"],
+        ]
+        return manifest
+
+
+__all__ = ["StructuralFactorialPlan", "StructuralFactorialPlanAmendment"]

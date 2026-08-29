@@ -475,6 +475,27 @@ The audit requires identical case ordering, statuses, JSON results, and every
 overlapping legacy NPZ array while independently validating the enriched
 sidecars. It does not compare or interpret scientific outcome magnitudes.
 
+Only after the legacy workflow is terminal and its gap-free prefix manifest is
+validated, write the retention-only plan amendment. The command requires an
+explicit confirmation that no scientific outcome inspection has occurred:
+
+```bash
+python3 -m scripts.research.proximal_distal_energy.generate_articulated_structural_factorial_amendment \
+  --base-plan /path/to/legacy-plan-v1.2.json \
+  --legacy-execution-revision LEGACY_EXECUTION_SHA \
+  --legacy-runtime-audit-run-id LEGACY_AUDIT_RUN_ID \
+  --terminal-workflow-run-id TERMINAL_SLICE_RUN_ID \
+  --terminal-conclusion TERMINAL_CONCLUSION \
+  --legacy-prefix-case-stop-exclusive PREFIX_STOP \
+  --legacy-prefix-manifest-sha256 PREFIX_MANIFEST_SHA256 \
+  --confirm-no-scientific-outcome-inspection \
+  --output /path/to/amended-plan-v1.3.json
+```
+
+The amendment binds the canonical v1.2 plan and operational records, changes
+only retention/provenance execution requirements, and preserves the registered
+factorial design, estimands, numerical gates, and falsification rules exactly.
+
 The registered Windows execution treats robotics Pinocchio absence as a typed
 missing cell. The system Python resolves the unrelated `pinocchio==0.4.3`
 distribution, whose module advertises version 0.1, while the qualified robotics
