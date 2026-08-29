@@ -31,7 +31,11 @@ from typing import Any
 
 from src.shared.python.core.error_decorators import log_errors
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.security.secure_subprocess import secure_run
+from src.shared.python.security.secure_subprocess import (
+    secure_run,
+    secure_popen,
+    SecureSubprocessError,
+)
 
 logger = get_logger(__name__)
 
@@ -145,7 +149,7 @@ class ProcessManager:
             try:
                 logger.info(f"Starting process '{name}': {' '.join(cmd)}")
 
-                process = subprocess.Popen(
+                process = secure_popen(
                     cmd,
                     cwd=str(cwd) if cwd else None,
                     env=env,
@@ -157,7 +161,12 @@ class ProcessManager:
                 self.processes[name] = process
                 return True
 
-            except (FileNotFoundError, PermissionError, OSError) as e:
+            except (
+                FileNotFoundError,
+                PermissionError,
+                OSError,
+                SecureSubprocessError,
+            ) as e:
                 logger.error(f"Failed to start process '{name}': {e}")
                 return False
 
@@ -338,7 +347,7 @@ class CommandRunner:
         try:
             logger.debug(f"Running async command: {' '.join(cmd)}")
 
-            process = subprocess.Popen(
+            process = secure_popen(
                 cmd,
                 cwd=str(self.cwd) if self.cwd else None,
                 env=self.env,
@@ -349,7 +358,12 @@ class CommandRunner:
 
             return process
 
-        except (FileNotFoundError, PermissionError, OSError) as e:
+        except (
+            FileNotFoundError,
+            PermissionError,
+            OSError,
+            SecureSubprocessError,
+        ) as e:
             logger.error(f"Failed to run async command: {e}")
             return None
 
