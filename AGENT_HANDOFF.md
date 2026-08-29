@@ -15,9 +15,9 @@ are not completion evidence.
 
 ## Active Slice: UpstreamDrift #9153
 
-- Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`; worktree
-  `UpstreamDrift-worktrees/9153-forward-impulse-work`, branch
-  `feat/9153-forward-impulse-work`. No PR exists.
+- Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`, expires
+  `2026-08-30T04:32:38Z`; clean synchronized head `71404f658710`; worktree
+  `UpstreamDrift-worktrees/9153-forward-impulse-work`. No PR exists.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
   impulse/work. Signed shares retain cancellation and denominator suppression.
@@ -102,9 +102,9 @@ are not completion evidence.
   MuJoCo 3.12.0 and Pin 4.1.0 under Linux/Python 3.11.16; runtime identity is
   `015408e1cb99f48b140206eb994451d385146fc1a58030f968a63770af55f067`.
   Artifact SHA-256 is `447683487f1ea249858caea4e15326b3b37e9de446bf4d9a15bbdb7291218b80`.
-- Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70; cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 694, including run 33271631525 for 674:694.
+- Runs 33174130362/33177181557/33182809219 completed 0:6/22:46/46:70; cancelled 33174462839/33187478053 retained 6:22/70:94; later success runs completed through 694, including run 33271631525 for 674:694 (issue comment 5464722724).
 - Collector `30e38344f` rejects drift, overlap, corruption, or a gap from zero;
-  authority is 694/2,304, manifest SHA-256 `cf706961fdb8638006e055a44553a0c2ef66614df5b977a1210fbccf11dba272`.
+  authority is 694/2,304 at `Campaigns/UpstreamDrift-9153-linux-collected-prefix-0694-v1`; manifest SHA-256 `cf706961fdb8638006e055a44553a0c2ef66614df5b977a1210fbccf11dba272`.
 - Run 33273691711 executes 694:714 from head `4aacb75aea60` with one process and a 90-minute timeout; the next unassigned case is 714.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
