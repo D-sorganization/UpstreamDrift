@@ -57,6 +57,7 @@ follow-up" (`#6805`).
 
 from __future__ import annotations
 
+import textwrap
 from importlib import import_module
 from importlib.util import find_spec
 from pathlib import Path
@@ -75,6 +76,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from .bridge import HeadBuild
     from .render import ViewportFallback
     from .render3d import SceneScale
+    from .sandvolume import SandVolumeScale
     from .shot3d import CameraPreset, ShotScene
     from .traces import ValidityBand
 
@@ -116,8 +118,47 @@ named views clear the scene without the caller re-tuning per shot."""
 _MIN_CAMERA_RADIUS_MM = 50.0
 
 _TRAIL_NAME = "trail"
+_SAND_NAME = "sand"
+_SAND_ARROW_NAME = "sand_arrows"
+_SAND_ARROW_COLOUR = "#101010"
+_SAND_ARROW_WIDTH = 2.4
+_BAR_X = 0.90
+_BAR_WIDTH = 0.04
+_BAR_HEIGHT = 0.34
+_BAR_UPPER_Y = 0.60
+_BAR_LOWER_Y = 0.18
+_BAR_TITLE_PT = 11
+_BAR_LABEL_PT = 9
+"""Where the two colour ramps sit.
+
+Stacked vertically down the right edge. PyVista lays horizontal bars
+along the bottom, which is where the caption is, and the first frame of a
+captured field drew the divot ramp straight through the sentence saying
+the volume is an extrusion."""
+
+_NOTE_WRAP_CHARS = 132
+"""Where the caption is folded.
+
+PyVista draws text unwrapped, so a line longer than the render target
+runs off the right edge and is simply lost -- which happened to the half
+of the extrusion sentence saying the stripes are not across-width
+structure. matplotlib's side measures its own font; there is no
+equivalent here, so this is a character count against the shipped
+window."""
+
+_SAND_NAN_OPACITY = 0.0
+"""Opacity of a lattice cell holding no sand.
+
+Invisible, not faint. ``nan`` is air, and air painted at the ramp's floor
+is a claim that there is still sand there."""
 _STAMP_FONT_PT = 9
-_NOTE_FONT_PT = 7
+_NOTE_FONT_PT = 10
+"""Caption size.
+
+Raised from 7 for issue #8729: the caption now carries the sentence
+saying the volume is an *extrusion* of a plane-strain solve, and a
+qualifier nobody can read is not a qualifier. Measured on the shipped
+960x720 target."""
 
 
 class PyVistaNotAvailableError(RuntimeError):
@@ -180,6 +221,18 @@ def _coerce_camera(camera: CameraPreset | str | None) -> CameraPreset:
     from .shot3d import CameraPreset
 
     return CameraPreset.DOWN_THE_LINE if camera is None else CameraPreset(camera)
+
+
+def _wrapped(line: str) -> list[str]:
+    """Fold one caption line to the render target's width.
+
+    Args:
+        line: The sentence.
+
+    Returns:
+        One or more lines, none longer than :data:`_NOTE_WRAP_CHARS`.
+    """
+    return textwrap.wrap(line, _NOTE_WRAP_CHARS) or [""]
 
 
 def _hex_to_rgb01(colour: str) -> tuple[float, float, float]:
@@ -301,6 +354,7 @@ class VtkSceneArtists:
         *,
         camera: CameraPreset | str | None = None,
         band: ValidityBand | None = None,
+        sand_scale: SandVolumeScale | None = None,
         off_screen: bool = True,
         window_size: tuple[int, int] = _DEFAULT_WINDOW_SIZE,
     ) -> None:
@@ -314,6 +368,9 @@ class VtkSceneArtists:
             camera: Which named view to open on; ``None`` (the default)
                 opens the down-the-line view.
             band: The per-sample validity band, when there is one.
+            sand_scale: The fixed colour ramp for the sand field, when the
+                scene carries one. Injected and merged across designs for
+                the same reason ``scale`` is (issue #8728).
             off_screen: Whether the underlying ``Plotter`` renders headless.
                 ``False`` is for interactive debugging only; every shipped
                 caller leaves this at its default.
@@ -382,6 +439,7 @@ class VtkSceneArtists:
         )
 
         self._build_surface()
+        self._sand_mesh = self._build_sand(sand_scale)
         self._floor_line = self._build_floor()
 
         self.set_camera(self._camera)
@@ -469,6 +527,148 @@ class VtkSceneArtists:
             plane, color=_SURFACE_COLOUR, opacity=_SURFACE_ALPHA, name="surface"
         )
 
+    def _build_sand(self, scale: SandVolumeScale | None) -> pv.PolyData | None:
+        """Draw the extruded sand field, once, as discrete sheets.
+
+        The same quads :mod:`.render3d_sand` hands matplotlib, at the same
+        coordinates, so the upgrade cannot quietly show a different volume
+        from the fallback.
+
+        Discrete sheets rather than a ``StructuredGrid`` volume, which is
+        what PyVista would otherwise be for: a smooth volume interpolated
+        *between* the sheets would draw across-width structure the
+        plane-strain solve does not have, and would look exactly like a
+        solved volume. The sheets are the honest picture, and every one of
+        them is the same section.
+
+        Args:
+            scale: The injected colour ramp, or ``None`` to cover this
+                field alone.
+
+        Returns:
+            The sheet mesh, or ``None`` when the tier solved no sand.
+        """
+        from bunkershot3d.fields.schema import FieldQuantity
+
+        from .render3d_sand import sheet_quads_mm
+        from .sandvolume import sand_volume_scale
+        from .slices import CursorMap
+
+        volume = self._scene.sand
+        if volume is None:
+            return None
+        self._sand_scale = sand_volume_scale((volume,)) if scale is None else scale
+        self._sand_cursor = CursorMap(
+            n_transport=self._scene.n_frames, n_field=volume.n_frames
+        )
+        quads, _ = sheet_quads_mm(volume)
+        n_quads = quads.shape[0]
+        mesh = self._pv.PolyData(
+            quads.reshape(-1, 3),
+            faces=np.hstack(
+                [
+                    np.full((n_quads, 1), 4, dtype=np.int64),
+                    np.arange(n_quads * 4, dtype=np.int64).reshape(n_quads, 4),
+                ]
+            ).ravel(),
+        )
+        mesh.cell_data[_SAND_NAME] = np.full(n_quads, np.nan, dtype=np.float64)
+        quantity = FieldQuantity.VELOCITY
+        low, high = self._sand_scale.limits(quantity)
+        self._plotter.add_mesh(
+            mesh,
+            scalars=_SAND_NAME,
+            cmap=self._sand_scale.colormap_name(quantity),
+            # Fixed from the injected ramp and never touched by update():
+            # a per-frame clim is #8728's defect in a third dimension.
+            clim=(low, high),
+            opacity="linear",
+            nan_opacity=_SAND_NAN_OPACITY,
+            show_scalar_bar=True,
+            # Vertical and on the right. PyVista stacks horizontal bars
+            # along the bottom, and the divot ramp is already there: the
+            # first VTK frame of a captured field gave a third of its
+            # height to two stacked bars and the caption under them.
+            scalar_bar_args={
+                "title": quantity.label,
+                "fmt": "%.1f",
+                "vertical": True,
+                "position_x": _BAR_X,
+                "position_y": _BAR_UPPER_Y,
+                "width": _BAR_WIDTH,
+                "height": _BAR_HEIGHT,
+                "title_font_size": _BAR_TITLE_PT,
+                "label_font_size": _BAR_LABEL_PT,
+            },
+            name=_SAND_NAME,
+        )
+        return mesh
+
+    def _update_sand(self, frame: int) -> None:
+        """Repaint the sand at the field frame this pose maps onto.
+
+        Mapped rather than used directly: the pose is recorded every CFL
+        step and the field every stride block, so the two clocks differ.
+        :class:`~.slices.CursorMap` is the same mapping the 2-D slice view
+        and the matplotlib scene use, so all three land on one moment.
+        """
+        from bunkershot3d.fields.schema import FieldQuantity
+
+        from .render3d_sand import PAINT_FLOOR, arrow_segments_mm
+
+        mesh = self._sand_mesh
+        volume = self._scene.sand
+        if mesh is None or volume is None:
+            return
+        index = self._sand_cursor.field_frame(frame)
+        quantity = FieldQuantity.VELOCITY
+        values = volume.channel(quantity, index)
+        normalised = self._sand_scale.normalise(quantity, values)
+        low, high = self._sand_scale.limits(quantity)
+        # Below the floor becomes nan, which nan_opacity draws as nothing:
+        # a bed painted everywhere hides the motion the view exists for.
+        painted = np.where(normalised >= PAINT_FLOOR, values, np.nan)
+        mesh.cell_data[_SAND_NAME] = np.tile(painted.ravel(), volume.n_sheets)
+
+        lattice = volume.arrows(index)
+        across = volume.across_m * _MM_PER_M
+        eye_y = float(np.asarray(self._camera.eye_direction)[1])
+        nearest = float(across.max()) if eye_y >= 0.0 else float(across.min())
+        segments = arrow_segments_mm(
+            lattice,
+            across_mm=nearest,
+            span_mm=float(np.ptp(volume.along_m)) * _MM_PER_M * 0.055,
+            peak_m_s=high if high > low else 1.0,
+        )
+        self._draw_sand_arrows(segments)
+
+    def _draw_sand_arrows(self, segments: NDArray[np.float64]) -> None:
+        """Replace the flow arrows with this frame's.
+
+        Replaced by name rather than mutated: the segment count changes
+        with how much sand is moving, and a mesh whose topology changes is
+        not a mesh that can be updated in place. The stamp and the note
+        are already redrawn this way every frame.
+        """
+        if segments.size == 0:
+            self._plotter.remove_actor(_SAND_ARROW_NAME, render=False)
+            return
+        n_lines = segments.shape[0]
+        lines = np.hstack(
+            [
+                np.full((n_lines, 1), 2, dtype=np.int64),
+                np.arange(n_lines * 2, dtype=np.int64).reshape(n_lines, 2),
+            ]
+        ).ravel()
+        arrows = self._pv.PolyData(segments.reshape(-1, 3), lines=lines)
+        self._plotter.add_mesh(
+            arrows,
+            color=_SAND_ARROW_COLOUR,
+            line_width=_SAND_ARROW_WIDTH,
+            render_lines_as_tubes=True,
+            name=_SAND_ARROW_NAME,
+        )
+
     def _build_floor(self) -> pv.PolyData:
         """Add the divot profile: a tube coloured by depth on a fixed ramp.
 
@@ -503,7 +703,21 @@ class VtkSceneArtists:
             line_width=6.0,
             name="floor",
             show_scalar_bar=True,
-            scalar_bar_args={"title": "divot depth [mm]", "fmt": "%.1f"},
+            # Vertical, under the sand ramp. PyVista lays horizontal bars
+            # along the bottom, which is where the caption now is: the
+            # first captured-field frame drew the two straight through
+            # each other.
+            scalar_bar_args={
+                "title": "divot depth [mm]",
+                "fmt": "%.1f",
+                "vertical": True,
+                "position_x": _BAR_X,
+                "position_y": _BAR_LOWER_Y,
+                "width": _BAR_WIDTH,
+                "height": _BAR_HEIGHT,
+                "title_font_size": _BAR_TITLE_PT,
+                "label_font_size": _BAR_LABEL_PT,
+            },
         )
         return floor
 
@@ -562,17 +776,19 @@ class VtkSceneArtists:
     def _refresh_note(self, *, title: str = "") -> None:
         """Rewrite the qualifier text: the camera, the surface, the divot."""
         scene = self._scene
-        surface = scene.surface
-        divot = scene.divot
         camera = self._camera
         lines = [
             f"{camera.label} - {camera.description}",
-            surface.describe(),
-            divot.describe(),
+            # One source for both backends: a fallback and an upgrade that
+            # qualified the same picture differently would be worse than
+            # either qualifying it alone.
+            *scene.sand_note(),
         ]
+        if scene.sand is not None:
+            lines.append(scene.sand.viewing_note(camera.eye_direction))
         if title:
             lines.insert(0, title)
-        full = "\n".join(lines)
+        full = "\n".join(folded for line in lines for folded in _wrapped(line))
         self._plotter.add_text(
             full,
             position="lower_left",
@@ -640,6 +856,7 @@ class VtkSceneArtists:
 
         trail_mm = scene.sole_reference_world_m[: index + 1] * _MM_PER_M
         self._update_trail(trail_mm)
+        self._update_sand(index)
 
         divot = scene.divot
         points = np.asarray(self._floor_line.points, dtype=np.float64)
@@ -691,7 +908,7 @@ def draw_scene_frame_vtk(
     scale: SceneScale | None = None,
     camera: CameraPreset | str | None = None,
     band: ValidityBand | None = None,
-    off_screen: bool = True,
+    sand_scale: SandVolumeScale | None = None,
     window_size: tuple[int, int] = _DEFAULT_WINDOW_SIZE,
 ) -> VtkSceneArtists:
     """Draw one sample of one scene through PyVista.
@@ -711,8 +928,16 @@ def draw_scene_frame_vtk(
         camera: Which named view to open on; ``None`` (the default) opens
             the down-the-line view.
         band: The per-sample validity band, when there is one.
-        off_screen: Whether the plotter renders headless.
+        sand_scale: The fixed sand colour ramp, from
+            :func:`~.sandvolume.sand_volume_scale`; see
+            :class:`VtkSceneArtists`.
         window_size: Pixel size of the render target.
+
+    Note:
+        Rendering is always headless here. A caller that genuinely wants
+        an on-screen plotter -- interactive debugging, and nothing that
+        ships -- builds a :class:`VtkSceneArtists` directly, which still
+        takes ``off_screen``.
 
     Returns:
         The built artists, ready to be updated to another frame or rendered.
@@ -737,7 +962,7 @@ def draw_scene_frame_vtk(
         limits,
         camera=camera,
         band=band,
-        off_screen=off_screen,
+        sand_scale=sand_scale,
         window_size=window_size,
     )
     artists.update(frame)
@@ -752,6 +977,7 @@ def shot_scene_still_vtk(
     scale: SceneScale | None = None,
     camera: CameraPreset | str | None = None,
     band: ValidityBand | None = None,
+    sand_scale: SandVolumeScale | None = None,
     window_size: tuple[int, int] = _DEFAULT_WINDOW_SIZE,
 ) -> VtkSceneArtists:
     """Render one frame headless -- the ADR-0027 VTK/PyVista adapter.
@@ -766,6 +992,8 @@ def shot_scene_still_vtk(
         camera: Which named view; ``None`` (the default) opens the
             down-the-line view.
         band: The per-sample validity band, when there is one.
+        sand_scale: The fixed sand colour ramp; see
+            :class:`VtkSceneArtists`.
         window_size: Pixel size of the render target.
 
     Returns:
@@ -785,6 +1013,6 @@ def shot_scene_still_vtk(
         scale=scale,
         camera=camera,
         band=band,
-        off_screen=True,
+        sand_scale=sand_scale,
         window_size=window_size,
     )

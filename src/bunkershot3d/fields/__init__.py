@@ -31,6 +31,11 @@ from .capture import (
     capture_f1_field,
     sample_grid_field,
 )
+from .shotcapture import (
+    WHOLE_SHOT_KINEMATICS_NOTE,
+    WholeShotRecorder,
+    capture_f1_shot_field,
+)
 from .schema import (
     FieldLayout,
     FieldQuantity,
@@ -77,7 +82,10 @@ __all__ = [
     "RetentionRecord",
     "SandFieldFrame",
     "SandFieldSeries",
+    "WHOLE_SHOT_KINEMATICS_NOTE",
+    "WholeShotRecorder",
     "capture_f1_field",
+    "capture_f1_shot_field",
     "deterministic_seed_record",
     "field_manifest",
     "load_field",

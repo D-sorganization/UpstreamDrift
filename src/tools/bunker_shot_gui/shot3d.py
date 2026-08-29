@@ -20,8 +20,17 @@ objects rather than left to whatever draws them.
 number -- the world ``z`` of the undisturbed free surface, the same
 ``free_surface_height_m`` the solver judged every element depth against.
 There are no grains at F0, so :attr:`SandSurface.resolves_grains` is
-``False`` and stays ``False``; a renderer that stippled a grain bed would be
-inventing a field the model has none of.
+``False``; a renderer that stippled a grain bed would be inventing a field
+the model has none of.
+
+A grain-resolving tier is different, and issue #8729 made room for it
+without loosening any of the above. :attr:`ShotScene.sand` carries a
+solved field when there is one, and the scene refuses a field whose tier
+disagrees with its own: an F1 grain bed animated over an F0 trajectory
+looks exactly like an F1 shot and is a claim neither run made. The flags
+that decide every caption -- ``resolves_grains`` on both the surface and
+the divot -- are stored as data and validated against the field's
+presence, so a scene cannot draw moving sand under a sentence denying it.
 
 **The divot is the head's swept envelope, not transported sand.** F0 never
 moves a grain, so the only honest divot at this tier is a statement about
@@ -68,6 +77,7 @@ from bunkershot3d.solvers import (
 from src.shared.python.visualization.viewport import ViewportOverlayPayload
 
 from .bridge import HeadBuild, free_surface_height_m
+from .sandvolume import SandVolume
 
 __all__ = [
     "DIVOT_STATIONS",
@@ -243,11 +253,21 @@ class SandSurface:
             over [m].
         across_extent_m: ``(low, high)`` world ``y`` the surface is drawn
             over [m].
+        resolves_grains: Whether the tier behind this surface solves a
+            grain bed under it. Stored as data rather than decided by a
+            constant, the same way :mod:`bunkershot3d.fields` stores tier
+            and validity: a renderer that consults it gets the answer for
+            *this* shot rather than for whichever tier was current when
+            the property was written.
+        tier: Which rung of the ADR-0032 ladder the surface came from,
+            so the caption can name it rather than hard-coding one.
     """
 
     height_m: float
     along_extent_m: tuple[float, float]
     across_extent_m: tuple[float, float]
+    resolves_grains: bool = False
+    tier: FidelityTier = FidelityTier.F0
 
     def __post_init__(self) -> None:
         """Validate the surface.
@@ -269,26 +289,26 @@ class SandSurface:
             _check_extent("across_extent_m", self.across_extent_m),
         )
 
-    @property
-    def resolves_grains(self) -> bool:
-        """Whether the surface is a resolved grain bed. Never, at F0.
-
-        A property rather than a constant so a future sand-solving tier can
-        return ``True`` from its own surface type and every renderer that
-        already consults this will follow without being edited.
-        """
-        return False
-
     def describe(self) -> str:
         """One line stating what the drawn surface is, and is not.
+
+        The plane is an *input* at every tier: the solver is set up with an
+        undisturbed free-surface height and judges depths against it. What
+        changes with the tier is whether anything is solved beneath it, so
+        that is the half of the sentence this branches on.
 
         Returns:
             The sentence drawn beside, or inside, any 3-D frame.
         """
+        height = f"sand: model free-surface height at z = {self.height_m * 1e3:.1f} mm"
+        if not self.resolves_grains:
+            return (
+                f"{height}; {self.tier.value} resolves no grains, so this plane "
+                "is a boundary condition, not a grain bed"
+            )
         return (
-            f"sand: model free-surface height at z = {self.height_m * 1e3:.1f} mm; "
-            "F0 resolves no grains, so this plane is a boundary condition, "
-            "not a grain bed"
+            f"{height}; the undisturbed level {self.tier.value} was set up with, "
+            "not a result -- the solved grains are the field drawn under it"
         )
 
 
@@ -308,11 +328,20 @@ class DivotSection:
         floor_m: ``(T, S)`` world ``z`` of the swept envelope [m]. Equal to
             the free surface where the head has not been.
         surface_height_m: The free surface the envelope is clipped at [m].
+        resolves_grains: Whether the tier behind it solved a grain bed.
+            The envelope is the head's own geometry at every tier, but
+            what it may be *contrasted with* changes: at F0 there is no
+            transported sand to distinguish it from, and at a
+            grain-resolving tier there is.
+        tier: Which rung of the ADR-0032 ladder produced it, so the
+            sentence names the tier it came from rather than a fixed one.
     """
 
     station_m: NDArray[np.float64]
     floor_m: NDArray[np.float64]
     surface_height_m: float
+    resolves_grains: bool = False
+    tier: FidelityTier = FidelityTier.F0
 
     def __post_init__(self) -> None:
         """Validate the section.
@@ -403,10 +432,19 @@ class DivotSection:
         Returns:
             The sentence drawn inside any frame showing the divot.
         """
+        envelope = (
+            "divot: the swept lower envelope of the head below the free "
+            f"surface ({self.max_depth_m * 1e3:.1f} mm deepest)"
+        )
+        if not self.resolves_grains:
+            return (
+                f"{envelope}. {self.tier.value} moves no sand, so this is "
+                "where the head has been, not where sand has gone"
+            )
         return (
-            "divot: the swept lower envelope of the head below the free surface "
-            f"({self.max_depth_m * 1e3:.1f} mm deepest). F0 moves no sand, so "
-            "this is where the head has been, not where sand has gone"
+            f"{envelope}. Still the head's own envelope, not a sand surface: "
+            f"{self.tier.value} does solve the bed, and where the sand went "
+            "is the field, not this line"
         )
 
 
@@ -442,6 +480,12 @@ class ShotScene:
         divot: The swept section.
         verdict: The validity statement the whole scene must be read under.
         fidelity_tier: Which rung of the ADR-0032 ladder produced it.
+        sand: The solved sand field, when the tier resolved one (issue
+            #8729). ``None`` at F0, which moves no sand at all. It carries
+            its own tier, and :meth:`__post_init__` refuses one that
+            disagrees with this scene's: an F1 field animated over an F0
+            shot is entirely plausible to look at and is a claim neither
+            run made.
     """
 
     time_s: NDArray[np.float64]
@@ -456,6 +500,7 @@ class ShotScene:
     divot: DivotSection
     verdict: ValidityVerdict
     fidelity_tier: FidelityTier
+    sand: SandVolume | None = None
 
     def __post_init__(self) -> None:
         """Validate the scene.
@@ -539,6 +584,7 @@ class ShotScene:
                 "the divot section and the pose must come from one shot; got "
                 f"{self.divot.n_frames} envelope samples against {times.size} poses"
             )
+        self._check_sand()
         object.__setattr__(self, "time_s", times)
         object.__setattr__(self, "position_m", positions)
         object.__setattr__(self, "orientation", rotations)
@@ -547,7 +593,70 @@ class ShotScene:
         object.__setattr__(self, "sole_reference_body_m", reference)
         object.__setattr__(self, "sole_depth_m", depths)
 
+    def _check_sand(self) -> None:
+        """Refuse a sand field that did not come from this shot's tier.
+
+        The substitution this catches is the most persuasive unlabelled
+        picture the workbench can produce: an F1 grain field animated over
+        an F0 trajectory looks exactly like an F1 shot and is a claim
+        neither run made. The surface's own ``resolves_grains`` has to
+        agree too, because that flag is what every caption and every
+        renderer branches on -- a scene whose caption said "resolves no
+        grains" over a box of moving sand would be worse than either half
+        alone.
+
+        Raises:
+            ValueError: If the tiers disagree, or the surface and the
+                field disagree about whether grains were resolved.
+        """
+        sand = self.sand
+        if sand is not None and sand.fidelity_tier is not self.fidelity_tier:
+            raise ValueError(
+                f"this scene was solved at {self.fidelity_tier.value} and the "
+                f"sand field at {sand.fidelity_tier.value}; drawing one tier's "
+                "grains over another tier's trajectory is entirely plausible "
+                "to look at and is a claim neither run made"
+            )
+        if self.divot.resolves_grains != (sand is not None):
+            raise ValueError(
+                "the divot's resolves_grains and the presence of a sand field "
+                f"must agree; got resolves_grains={self.divot.resolves_grains} "
+                f"with {'a' if sand is not None else 'no'} field"
+            )
+        if self.surface.resolves_grains != (sand is not None):
+            raise ValueError(
+                "the surface's resolves_grains and the presence of a sand "
+                f"field must agree; got resolves_grains="
+                f"{self.surface.resolves_grains} with "
+                f"{'a' if sand is not None else 'no'} field. Every caption in "
+                "the 3-D view branches on that flag, so a scene that disagrees "
+                "with itself draws a denial over solved sand, or promises "
+                "grains it has none of"
+            )
+
     # ---------------------------------------------------------------- extent
+
+    @property
+    def resolves_grains(self) -> bool:
+        """Whether this scene carries a solved grain bed."""
+        return self.sand is not None
+
+    def sand_note(self) -> tuple[str, ...]:
+        """The sentences a frame must draw about what its sand is.
+
+        One place, so the matplotlib fallback and the VTK backend cannot
+        drift into qualifying the same picture differently.
+
+        Returns:
+            The free-surface line, the extrusion line when there is a
+            solved field, and the divot line -- in the order they are
+            drawn.
+        """
+        lines = [self.surface.describe()]
+        if self.sand is not None:
+            lines.append(self.sand.describe())
+        lines.append(self.divot.describe())
+        return tuple(lines)
 
     @property
     def n_frames(self) -> int:
@@ -746,6 +855,7 @@ def shot_scene(
     result: ShotResult,
     *,
     n_stations: int = DIVOT_STATIONS,
+    sand: SandVolume | None = None,
 ) -> ShotScene | None:
     """Build the 3-D scene of one recorded shot.
 
@@ -761,6 +871,10 @@ def shot_scene(
         build: The lofted head.
         result: The shot trace.
         n_stations: Along-track stations to resolve the divot on.
+        sand: The solved sand field for this shot, when the tier resolved
+            one (issue #8729). It must have come from the same tier as
+            ``result``; :class:`ShotScene` refuses the mismatch rather
+            than drawing one tier's grains over another's trajectory.
 
     Returns:
         The scene, or ``None`` when the trace is too short to animate.
@@ -812,16 +926,41 @@ def shot_scene(
                 float(stations[0]) - margin,
                 float(stations[-1]) + margin,
             ),
-            across_extent_m=(
-                float(across.min()) - across_margin,
-                float(across.max()) + across_margin,
-            ),
+            across_extent_m=_across_extent(across, across_margin, sand),
+            # Not a judgement about the tier in the abstract: this shot
+            # either came with a solved field or it did not.
+            resolves_grains=sand is not None,
+            tier=result.fidelity_tier,
         ),
         divot=DivotSection(
-            station_m=stations, floor_m=floor, surface_height_m=surface_height
+            station_m=stations,
+            floor_m=floor,
+            surface_height_m=surface_height,
+            resolves_grains=sand is not None,
+            tier=result.fidelity_tier,
         ),
         verdict=result.verdict,
         fidelity_tier=result.fidelity_tier,
+        sand=sand,
+    )
+
+
+def _across_extent(
+    across: NDArray[np.float64], margin: float, sand: SandVolume | None
+) -> tuple[float, float]:
+    """The world ``y`` span the surface is drawn over.
+
+    Widened to hold the extruded sheets when there are any: a surface
+    plane narrower than the sand under it would crop the volume at its
+    own edge and make the extrusion look like a solved, bounded slab.
+    """
+    low = float(across.min()) - margin
+    high = float(across.max()) + margin
+    if sand is None:
+        return (low, high)
+    return (
+        min(low, float(sand.across_m.min())),
+        max(high, float(sand.across_m.max())),
     )
 
 
@@ -868,7 +1007,28 @@ def viewport_payload(
             "fidelity_tier": scene.fidelity_tier.value,
             "resolves_grains": scene.surface.resolves_grains,
             "free_surface_height_m": scene.surface.height_m,
-            "sand_note": scene.surface.describe(),
+            "sand_note": "\n".join(scene.sand_note()),
             "divot_note": scene.divot.describe(),
+            **_sand_meta(scene),
         },
     )
+
+
+def _sand_meta(scene: ShotScene) -> dict[str, str]:
+    """What a backend needs to stamp a solved sand field, or nothing.
+
+    Kept out of the payload literal so the F0 case adds no empty keys a
+    provider would have to interpret: a missing ``sand_fidelity`` means
+    there is no sand, which is the same thing ``resolves_grains`` already
+    says, rather than a sand field of unknown standing.
+    """
+    sand = scene.sand
+    if sand is None:
+        return {}
+    return {
+        "sand_fidelity": sand.fidelity.value,
+        "sand_tier": sand.fidelity_tier.value,
+        "sand_digest": sand.source_digest,
+        "sand_kinematics": sand.kinematics,
+        "sand_extrusion_note": sand.describe(),
+    }
