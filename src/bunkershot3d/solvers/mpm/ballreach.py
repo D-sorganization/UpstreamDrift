@@ -82,7 +82,7 @@ from typing import NoReturn
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from ..envelope import MAX_VALIDATED_SPEED_M_S, ValidityVerdict
+from ..envelope import MAX_VALIDATED_SPEED_M_S, EnvelopeStatus, ValidityVerdict
 from ..exceptions import SolverInputError
 from ..protocol import FidelityTier
 from .ball import PLANE_STRAIN_BALL_NOTE, BallContactSplit, BallSection
@@ -484,6 +484,11 @@ class BallReachHistory:
         return True
 
     @property
+    def status(self) -> EnvelopeStatus:
+        """The verdict's status, which can be no better than BEYOND_VALIDATION."""
+        return self.verdict.status
+
+    @property
     def first_arrival_s(self) -> float | None:
         """When sand first reached the ball, or ``None`` if it never did."""
         for sample in self.samples:
@@ -528,7 +533,15 @@ class BallReachHistory:
 
     @property
     def peak_traction_n_per_m(self) -> float:
-        """Largest traction magnitude over the run, per metre of width."""
+        """Largest traction magnitude over the run, per metre of width.
+
+        Read as a **spike**, not as a load. Explicit MPM contact is
+        step-noisy -- a node enters or leaves the projected set discretely
+        -- so the single largest step is the noisiest number this history
+        holds. :attr:`total_impulse_n_s_per_m` integrates that noise away
+        and :attr:`peak_traction_time_s` is what ADR-0033 marks quotable
+        with tier; both are steadier readings of the same ledger.
+        """
         return float(max(sample.traction_magnitude_n_per_m for sample in self.samples))
 
     @property
@@ -620,7 +633,7 @@ class BallReachHistory:
         arrived = "never" if arrival is None else f"{arrival * 1e3:.4g} ms"
         return (
             f"sand reaching the ball ({self.fidelity_tier.value}, "
-            f"{self.verdict.status.value}): first arrival {arrived}, peak "
+            f"{self.status.value}): first arrival {arrived}, peak "
             f"{self.peak_traction_n_per_m:.4g} N per metre of width at "
             f"{self.peak_traction_time_s * 1e3:.4g} ms, total "
             f"{self.total_impulse_magnitude_n_s_per_m:.4g} N.s per metre of "
@@ -748,6 +761,11 @@ class SandVersusClub:
     verdict: ValidityVerdict
 
     @property
+    def status(self) -> EnvelopeStatus:
+        """The verdict's status, which can be no better than BEYOND_VALIDATION."""
+        return self.verdict.status
+
+    @property
     def transmitted_fraction(self) -> float:
         """Share of the club's impulse magnitude that arrives at the ball.
 
@@ -764,7 +782,17 @@ class SandVersusClub:
 
     @property
     def arrival_lag_s(self) -> float | None:
-        """How long after the club entered the sand the ball first felt it."""
+        """How long after the club's first contact the ball's first contact came.
+
+        Usually zero, and that is the correct answer rather than a
+        degenerate one: a ball lying in a bunker is *resting on sand*, so
+        it is in contact from the first step, and so is a club whose
+        swept-node test fires while it is still a step above the surface.
+        The lag that carries information is
+        :attr:`peak_lag_s`, or the gap between two
+        :meth:`BallReachHistory.loading_onset_s` readings at a stated
+        threshold.
+        """
         if self.club_first_contact_s is None or self.ball_first_arrival_s is None:
             return None
         return self.ball_first_arrival_s - self.club_first_contact_s
@@ -798,7 +826,7 @@ class SandVersusClub:
         lag_text = "no arrival" if lag is None else f"{lag * 1e3:.4g} ms after entry"
         return (
             f"sand to the ball against club to the sand "
-            f"({self.verdict.status.value}): the ball receives "
+            f"({self.status.value}): the ball receives "
             f"{self.transmitted_fraction * 100:.2f}% of the club's delivered "
             f"impulse magnitude, "
             f"{float(np.hypot(*self.sand_impulse_on_ball_n_s_per_m)):.4g} against "

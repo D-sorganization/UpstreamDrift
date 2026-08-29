@@ -2,6 +2,32 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## Ball-Sand Interaction: What Reaches the Ball (#8712)
+
+Issue #8712 resolves the sand arriving at the ball inside the F1 plane-strain
+MPM tier. `solvers/mpm/ballreach.py` reads the ball's own exact momentum ledger
+as traction on the ball, resolved around its in-plane surface: a below-equator /
+face-side split, an even-sector resolution whose bin edges always place the
+equator on a boundary, and a per-node radial (compressive) and tangential (shear)
+decomposition. The time history reports first contact, a caller-thresholded
+loading onset, the peak and its timing, and the total impulse. Nothing here
+computes a force: `BodyContact` now retains the node-resolved `ContactImpulse`
+it was reduced from, so every number is the existing ledger regrouped and the
+two-body momentum budget still closes to round-off with the ball's term in it.
+
+Every quantity is named for what it is: per unit out-of-plane width, on an
+infinite cylinder rather than a sphere. The absolute force on the ball raises
+`RefusedQuantity.OUT_OF_PLANE` because, unlike the club, there is no effective
+width to declare; heel-toe and lateral distributions raise for the same reason;
+ball launch stays on F0's #8657 momentum-transfer path and
+`RefusedQuantity.BALL_LAUNCH` still raises. `SandVersusClub` compares what the
+sand delivers to the ball against what the club delivers to the sand as a
+dimensionless share of one solve's ledger plus a pair of timings, never as two
+forces, since absolute club force is refused at this tier and an absolute ball
+force does not exist in plane strain. Every result carries its
+`ValidityVerdict`: F1, BEYOND_VALIDATION and no better, published-speed ceiling
+1.44 m/s, NASA-STD-7009B validation 0 of 4.
+
 ## Performance Enhancements (#9161)
 
 - Replaced instances of `np.linalg.norm` with faster mathematical equivalents (`math.hypot`, `np.vdot`, and `np.einsum`) for small vectors and multidimensional arrays in telemetry logging, screw kinematics, and bunker shot traces.
@@ -802,7 +828,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.624                                            |
+| **Spec Version**        | 1.0.625                                            |
 | **Last Spec Update**    | 2026-08-28                                         |
 
 ## 2. Purpose & Mission
