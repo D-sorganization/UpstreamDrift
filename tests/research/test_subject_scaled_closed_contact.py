@@ -90,10 +90,35 @@ def test_small_closed_contact_atlas_reports_every_feasibility_gate() -> None:
         SyntheticSubjectProfile("female-short", 1.55, 24.0 * 1.55**2, "F"),
         SyntheticSubjectProfile("male-tall", 1.95, 24.0 * 1.95**2, "M"),
     )
+    # This test only checks array shapes/metadata (below), not solver
+    # convergence or feasibility outcomes -- see #9204 (the `scientific`
+    # marker tier is not deselected from the default lane, so slow
+    # research solves compete with unit tests for a bounded CI budget).
+    # The default ClosedContactConfig chases ftol=xtol=gtol=1e-11, a relative
+    # tolerance about 7 orders of magnitude tighter than the 5e-4 m
+    # closure_tolerance_m gate that actually determines feasibility.
+    # Finite-difference verification confirms the analytic jacobian is
+    # correct (relative error ~2e-10), and hand-to-grip closure is
+    # already within the gate by iteration ~10-20; the extra iterations
+    # (up to the default max_nfev=1000, empirically ~200-500 per solve)
+    # are scipy's trust-region optimizer chasing near-flat regularization
+    # (least-norm tie-breaking among the redundant reduced-tree DOF) long
+    # past the point of any engineering-relevant improvement. Across this
+    # test's 12 solves that inflated wall time enough to trip CI's
+    # per-test watchdog on a contended runner (main's `tests (3.12)`
+    # job hung inside this exact call stack). A tightly bounded,
+    # loosened-tolerance config keeps this shape/metadata check fast and
+    # deterministic without touching the module's published default
+    # (which the committed evidence bundle and the single-solve
+    # convergence tests below intentionally keep at full precision).
+    fast_config = ClosedContactConfig(
+        solver_tolerance=1.0e-6, maximum_function_evaluations=60
+    )
     record, arrays = run_closed_contact_feasibility_atlas(
         profiles=profiles,
         grip_spans_m=np.array([0.12, 0.24]),
         time_s=np.array([0.00, 0.12, 0.24]),
+        config=fast_config,
     )
 
     assert record["schema_version"] == "subject-scaled-closed-contact/v1"
