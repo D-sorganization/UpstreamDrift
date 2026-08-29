@@ -147,6 +147,11 @@ partial campaign checkpoints are not completion evidence.
   builder now accepts and validates one cohesive artifact-metadata mapping and
   passes the <=8-parameter budget without an exception. Do not add a dummy
   `src/` file, bypass either gate, or replay a stale event as merge evidence.
+- The next exact-head repository gate correctly rejected the new publication
+  contract tests as unmarked. The module now declares `pytest.mark.unit`, so
+  all 24 cases, including parametrized cases, remain in the ordinary unit lane.
+  Preserve that classification; do not update the ratchet baseline or waive
+  the failure.
 
 ## Validation
 

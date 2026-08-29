@@ -13,6 +13,8 @@ from pathlib import Path
 import jsonschema
 import pytest
 
+pytestmark = pytest.mark.unit
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_ROOT = REPO_ROOT / "tests/fixtures/companion"
 MANIFEST_SCHEMA = (
