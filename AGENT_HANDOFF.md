@@ -16,7 +16,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - Lease: `codex`, session `019fe886-6614-70a2-a596-e5b0dea725d0`, expires
-  `2026-08-30T04:32:38Z`; evidence-contract head `19f74b6d3`; worktree
+  `2026-08-30T04:32:38Z`; recovery-audit head `87b06433f`; worktree
   `UpstreamDrift-worktrees/9153-forward-impulse-work`. No PR exists.
 - The event-aligned kernel separates continuous impulse/work, independently
   evaluated `Mdot v` transport, kinetic geometry work, and registered event
