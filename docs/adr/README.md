@@ -54,6 +54,10 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 
 ## Recent Amendments
 
+- **2026-08-29:** ADR-0043 adds the #9192 exact-commit publication boundary:
+  one shared bundle command, ephemeral protected-main evidence, draft-first
+  immutable release acquisition, attestation, and non-fabricated schema
+  compatibility history.
 - **2026-08-16:** ADR-0033 amends ADR-0032's fidelity-tier table: F1 is
   narrowed from "reduced-order / 2-D plane-strain continuum" to a 2-D
   plane-strain **MPM** solver and becomes the sand-field visualization tier,
