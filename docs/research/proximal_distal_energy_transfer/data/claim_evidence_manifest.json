@@ -6307,7 +6307,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "a2812ca83092d9b3ea2bb247178432da3fe34a71440e01372aa322ac71e11664",
+      "sha256": "d3e18c765479c447be982721195685b7c975ee85e5af09818cde1c16181178e1",
       "bytes": 160489,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -7855,8 +7855,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/spatial_full_body.py": {
-      "sha256": "bb195bf720542f870eaaa514e1ae8b2a4e81ac89d6d89447fa9be4e43aa94743",
-      "bytes": 33064,
+      "sha256": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
+      "bytes": 33838,
       "referenced_by": [
         "PD-CLAIM-004",
         "PD-CLAIM-175",

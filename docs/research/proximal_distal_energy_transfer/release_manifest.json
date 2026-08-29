@@ -3029,8 +3029,8 @@
       "bytes": 17127
     },
     "scripts/research/proximal_distal_energy/spatial_full_body.py": {
-      "sha256": "bb195bf720542f870eaaa514e1ae8b2a4e81ac89d6d89447fa9be4e43aa94743",
-      "bytes": 33064
+      "sha256": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
+      "bytes": 33838
     },
     "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py": {
       "sha256": "b62fd2d7b90bb0593d660c362ebfc266cb905f0d808593b2c978a515275a3d0a",
