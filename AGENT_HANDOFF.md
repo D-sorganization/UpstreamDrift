@@ -17,7 +17,8 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  implementation head `4c5819a2a` plus this handoff successor. No PR exists.
+  branch `feat/9153-forward-impulse-work` must remain clean and remote-equal;
+  resolve its exact head with `git rev-parse HEAD`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 
@@ -52,6 +53,9 @@ are not completion evidence.
   source-derived sentinel `f8b7c4e836ab`, and exact audit `7b00bb69fbbe` over
   20 statuses/JSON results and 180 arrays. No outcomes were summarized.
 - Replay 33279075050 executes [20,40) at exact `e86dff3ba`; do not duplicate it.
+- The collector still trusts caller-supplied run/range metadata. Before the
+  cumulative [0,40) collection, add a focused TDD receipt-binding gate that
+  accepts retained receipt schemas 1.1/1.2 and rejects source/receipt mismatch.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
