@@ -139,11 +139,13 @@
 **Prevention:** Always validate constructed query expressions passed to `pd.DataFrame.query()` using an AST-based validator to ensure they only contain safe operations.
 
 ## 2024-05-18 - [Fix user enumeration via timing attack in login endpoint]
+
 **Vulnerability:** The `/login` endpoint returned 401 immediately if the user email was not found, but took hundreds of milliseconds to compute bcrypt hashes if the user was found (even if the password was wrong). This allowed an attacker to enumerate registered emails via timing analysis.
 **Learning:** Bcrypt's intentional slowness is a security feature to slow down brute force attacks, but it introduces a side-channel timing leak if it's only executed for valid users. This is a common pattern in authentication endpoints.
 **Prevention:** Always perform a dummy password verification using a valid bcrypt hash with the same work factor (e.g. 12) if the user is not found, to ensure the authentication endpoint takes roughly the same time regardless of whether the user exists.
 
 ## 2026-08-29 - [Subprocess Security Enhancement]
+
 **Vulnerability:** Found uses of raw `subprocess.Popen` in `ProcessManager.start` and `CommandRunner.run_async` within `src/shared/python/security/subprocess_utils.py` that bypassed the security validation checks implemented by `secure_popen` (such as executable allowlisting and directory validation).
 **Learning:** Even within utility classes housed in the `security` namespace, raw OS-level subprocess calls were used, showing that wrapping functions (like `secure_run`) were adopted but not all variants (`Popen`) were consistently migrated to the secure alternatives.
 **Prevention:** Ensure all `subprocess.Popen` calls are replaced with `secure_popen` and related errors (`SecureSubprocessError`) are correctly handled to maintain defense-in-depth across the entire process execution lifecycle.
