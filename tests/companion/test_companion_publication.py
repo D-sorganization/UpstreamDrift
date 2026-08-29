@@ -6,6 +6,8 @@ import copy
 import hashlib
 import json
 import os
+import subprocess
+import sys
 from pathlib import Path
 
 import jsonschema
@@ -369,8 +371,8 @@ def test_existing_workflows_share_publication_command_and_publish_atomically() -
         for step in release_build["steps"]
         if step.get("name") == "Build companion publication bundle"
     )
-    assert "scripts/companion_publication.py build" in main_command
-    assert "scripts/companion_publication.py build" in tag_command
+    assert "-m scripts.companion_publication build" in main_command
+    assert "-m scripts.companion_publication build" in tag_command
     assert "--authority protected-main" in main_command
     assert "--authority tag" in tag_command
 
@@ -388,6 +390,22 @@ def test_existing_workflows_share_publication_command_and_publish_atomically() -
     )
     assert any(
         step.get("name") == "Publish verified release" for step in finalize["steps"]
+    )
+
+
+def test_public_module_cli_is_importable_from_repository_root() -> None:
+    completed = subprocess.run(
+        [sys.executable, "-m", "scripts.companion_publication", "--help"],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        encoding="utf-8",
+        shell=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert "Build and verify exact-revision companion publication bundles" in (
+        completed.stdout
     )
 
 
