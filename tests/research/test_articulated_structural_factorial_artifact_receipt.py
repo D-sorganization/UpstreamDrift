@@ -45,6 +45,8 @@ def _jobs() -> dict[str, object]:
         "jobs": [
             {
                 "id": 99156607309,
+                "run_id": RUN_ID,
+                "head_sha": HEAD_SHA,
                 "name": "Structural Runtime Audit or Campaign Slice",
                 "status": "completed",
                 "conclusion": "success",
@@ -84,6 +86,13 @@ def _artifact() -> dict[str, object]:
         "updated_at": "2026-08-29T21:11:55Z",
         "archive_download_url": "https://api.github.example/artifacts/987654321/zip",
         "digest": f"sha256:{ARCHIVE_SHA256}",
+        "workflow_run": {
+            "id": RUN_ID,
+            "head_sha": HEAD_SHA,
+            "head_branch": "feat/9153-forward-impulse-work",
+            "repository_id": 1117929611,
+            "head_repository_id": 1117929611,
+        },
     }
 
 
@@ -163,9 +172,13 @@ def test_receipt_binds_terminal_run_job_artifact_and_exact_slice(
     )
     assert receipt["run"]["id"] == RUN_ID
     assert receipt["job"]["id"] == 99156607309
+    assert receipt["job"]["run_id"] == RUN_ID
+    assert receipt["job"]["head_sha"] == HEAD_SHA
     assert [step["number"] for step in receipt["job"]["steps"]] == [11, 12]
     assert receipt["artifact"]["id"] == 987654321
     assert receipt["artifact"]["digest"] == f"sha256:{ARCHIVE_SHA256}"
+    assert receipt["artifact"]["workflow_run"]["id"] == RUN_ID
+    assert receipt["artifact"]["workflow_run"]["head_sha"] == HEAD_SHA
     assert len(receipt["artifact_archive_sha256"]) == 64
     assert receipt["checkpoint_pair_count"] == 2
     assert len(receipt["files"]) == 5
@@ -275,7 +288,7 @@ def test_enriched_receipt_validates_every_registered_evidence_history(
     )
 
     assert receipt["schema_version"] == (
-        "articulated-structural-factorial-artifact-receipt/1.2.0"
+        "articulated-structural-factorial-artifact-receipt/1.3.0"
     )
     assert receipt["evidence_sidecar_schema"] == EVIDENCE_SIDECAR_SCHEMA
     assert receipt["required_evidence_array_count"] == 37
@@ -313,6 +326,41 @@ def test_receipt_rejects_an_archive_that_disagrees_with_the_api_digest(
         build_structural_artifact_receipt(
             run=_run(),
             jobs=_jobs(),
+            artifact=artifact,
+            archive_path=archive,
+            extracted_dir=extracted,
+            expected_run_id=RUN_ID,
+            expected_dispatch_head=HEAD_SHA,
+            expected_execution_revision=EXECUTION_REVISION,
+            expected_session_sha256=session_digest,
+            requested_case_start=694,
+            requested_case_stop=696,
+        )
+
+
+@pytest.mark.parametrize(
+    "defect",
+    ["job_run", "job_head", "artifact_run", "artifact_head"],
+)
+def test_receipt_rejects_cross_run_job_or_artifact_identity(
+    tmp_path: Path, defect: str
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path)
+    jobs = _jobs()
+    artifact = _artifact()
+    if defect == "job_run":
+        jobs["jobs"][0]["run_id"] = RUN_ID + 1
+    elif defect == "job_head":
+        jobs["jobs"][0]["head_sha"] = "0" * 40
+    elif defect == "artifact_run":
+        artifact["workflow_run"]["id"] = RUN_ID + 1
+    else:
+        artifact["workflow_run"]["head_sha"] = "0" * 40
+
+    with pytest.raises(ValueError, match="does not match the expected run"):
+        build_structural_artifact_receipt(
+            run=_run(),
+            jobs=jobs,
             artifact=artifact,
             archive_path=archive,
             extracted_dir=extracted,

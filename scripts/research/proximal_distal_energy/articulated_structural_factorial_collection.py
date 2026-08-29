@@ -24,6 +24,7 @@ _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _RECEIPT_SCHEMAS = {
     "articulated-structural-factorial-artifact-receipt/1.1.0",
     "articulated-structural-factorial-artifact-receipt/1.2.0",
+    "articulated-structural-factorial-artifact-receipt/1.3.0",
 }
 _RECEIPT_CLASSIFICATION = "workflow_artifact_provenance_not_scientific_summary"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -173,6 +174,24 @@ def _validate_receipt(
     artifact = _receipt_mapping(record.get("artifact"), name="receipt artifact")
     if artifact.get("name") != source.artifact_name:
         raise ValueError("receipt artifact name does not match the source")
+    if schema.endswith("/1.3.0"):
+        run_head = run.get("head_sha")
+        if (
+            not isinstance(run_head, str)
+            or re.fullmatch(r"[0-9a-f]{40}", run_head) is None
+        ):
+            raise ValueError("receipt run head is invalid")
+        job = _receipt_mapping(record.get("job"), name="receipt job")
+        workflow_run = _receipt_mapping(
+            artifact.get("workflow_run"), name="receipt artifact workflow run"
+        )
+        if job.get("run_id") != source.run_id or job.get("head_sha") != run_head:
+            raise ValueError("receipt job is not bound to the retained run")
+        if (
+            workflow_run.get("id") != source.run_id
+            or workflow_run.get("head_sha") != run_head
+        ):
+            raise ValueError("receipt artifact is not bound to the retained run")
 
     archive_sha256 = record.get("artifact_archive_sha256")
     if not isinstance(archive_sha256, str) or _SHA256.fullmatch(archive_sha256) is None:

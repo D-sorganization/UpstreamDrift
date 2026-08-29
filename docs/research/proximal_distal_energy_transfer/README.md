@@ -503,10 +503,12 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
 The audit requires identical case ordering, statuses, JSON results, and every
 overlapping legacy NPZ array while independently validating the enriched
 sidecars. It does not compare or interpret scientific outcome magnitudes.
-Artifact receipt 1.2 also requires GitHub's recorded SHA-256 digest to equal
-the retained ZIP exactly; a readable but different archive fails intake.
-Collection accepts the retained 1.1 receipt and current 1.2 receipt only after
-matching the run, artifact, conclusion, requested range, execution identity,
+Artifact receipt 1.3 requires GitHub's recorded SHA-256 digest to equal the
+retained ZIP exactly and cross-binds the run, structural job, and artifact
+workflow-run IDs and dispatch heads. A readable archive or API record from a
+different execution fails intake. Collection preserves compatibility with the
+retained 1.1 and 1.2 receipts and applies the stronger cross-binding checks to
+1.3 before matching conclusion, requested range, execution identity,
 checkpoint count, and every extracted file digest. The collection manifest
 retains each receipt's schema and SHA-256 so manually repeated command-line
 metadata cannot silently substitute for the governed intake record.

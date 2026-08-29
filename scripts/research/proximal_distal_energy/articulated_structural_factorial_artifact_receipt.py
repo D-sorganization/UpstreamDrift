@@ -19,8 +19,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ev
     validate_structural_evidence_arrays,
 )
 
-_BASE_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.1.0"
-_ENRICHED_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.2.0"
+_CROSS_BOUND_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.3.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _JOB_NAME = "Structural Runtime Audit or Campaign Slice"
 _CAMPAIGN_STEP = "Run Registered Structural Campaign Slice"
@@ -240,6 +239,11 @@ def build_structural_artifact_receipt(
     job = _exact_named_record(
         jobs_record.get("jobs"), expected_name=_JOB_NAME, collection_name="jobs"
     )
+    if (
+        job.get("run_id") != expected_run_id
+        or job.get("head_sha") != expected_dispatch_head
+    ):
+        raise ValueError("structural job does not match the expected run")
     job_conclusion = _terminal_record(job, name="structural job")
     campaign_step = _exact_named_record(
         job.get("steps"), expected_name=_CAMPAIGN_STEP, collection_name="job steps"
@@ -260,6 +264,14 @@ def build_structural_artifact_receipt(
 
     artifact_record = _mapping(artifact, name="artifact")
     artifact_id = _positive_integer(artifact_record.get("id"), name="artifact.id")
+    artifact_workflow_run = _mapping(
+        artifact_record.get("workflow_run"), name="artifact.workflow_run"
+    )
+    if (
+        artifact_workflow_run.get("id") != expected_run_id
+        or artifact_workflow_run.get("head_sha") != expected_dispatch_head
+    ):
+        raise ValueError("artifact workflow run does not match the expected run")
     expected_artifact_name = f"structural-checkpoints-{expected_run_id}"
     if artifact_record.get("name") != expected_artifact_name:
         raise ValueError("artifact name does not match the expected run")
@@ -299,9 +311,7 @@ def build_structural_artifact_receipt(
         "completed_at",
     )
     receipt: dict[str, object] = {
-        "schema_version": (
-            _ENRICHED_SCHEMA if required_evidence_schema is not None else _BASE_SCHEMA
-        ),
+        "schema_version": _CROSS_BOUND_SCHEMA,
         "classification": "workflow_artifact_provenance_not_scientific_summary",
         "requested_case_range": [requested_case_start, requested_case_stop],
         "execution_revision": expected_execution_revision,
@@ -325,6 +335,8 @@ def build_structural_artifact_receipt(
                 job,
                 (
                     "id",
+                    "run_id",
+                    "head_sha",
                     "name",
                     "status",
                     "conclusion",
@@ -355,6 +367,17 @@ def build_structural_artifact_receipt(
                 prefix="artifact",
             ),
             "id": artifact_id,
+            "workflow_run": _selected_fields(
+                artifact_workflow_run,
+                (
+                    "id",
+                    "head_sha",
+                    "head_branch",
+                    "repository_id",
+                    "head_repository_id",
+                ),
+                prefix="artifact.workflow_run",
+            ),
         },
         "artifact_archive_sha256": archive_sha256,
         "checkpoint_pair_count": checkpoint_pair_count,

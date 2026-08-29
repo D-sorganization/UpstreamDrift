@@ -51,8 +51,10 @@ are not completion evidence.
   seven modules, both engines, runtime identity `5ceeb5af7815`, all 37 histories,
   legacy killswitch, and session SHA `1bcc7ced5178`.
 - Receipt 1.2 at `bbded2f5c` binds terminal metadata, exact session/pairs, all
-  histories, and API/archive digest. `323a55db9` derives corruption revision
-  from clean committed source. Prefix views never mutate the 714-case source.
+  histories, and API/archive digest. Receipt 1.3 additionally cross-binds
+  run, structural job, and artifact workflow-run IDs and dispatch heads.
+  `323a55db9` derives corruption revision from clean committed source. Prefix
+  views never mutate the 714-case source.
 - Replay 33277732709 passed [0,20): archive `142556c34373`, receipt `f3bd190abc2d`,
   source-derived sentinel `f8b7c4e836ab`, and exact audit `7b00bb69fbbe` over
   20 statuses/JSON results and 180 arrays. No outcomes were summarized.
@@ -74,7 +76,7 @@ are not completion evidence.
 2. Intake [20,40) into the required-absent directory
    `Campaigns/UpstreamDrift-9153-enriched-slice-0020-0040-run-33279075050`.
    Require the API/archive SHA-256 match, exactly 20 JSON plus 20 NPZ files and
-   one session file, then create receipt 1.2 and a source-derived corruption
+   one session file, then create receipt 1.3 and a source-derived corruption
    sentinel from clean committed source.
 3. Build cumulative receipt-bound collection
    `Campaigns/UpstreamDrift-9153-enriched-collected-prefix-0040-v1`, legacy view
@@ -101,7 +103,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 80 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 89 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;

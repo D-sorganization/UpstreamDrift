@@ -107,8 +107,9 @@ def _write_receipt(
     conclusion: str,
     start: int,
     stop: int,
-    schema_version: str = ("articulated-structural-factorial-artifact-receipt/1.2.0"),
+    schema_version: str = ("articulated-structural-factorial-artifact-receipt/1.3.0"),
 ) -> Path:
+    head_sha = "e" * 40
     files = [
         {"name": name, "sha256": digest}
         for name, digest in sorted(_digest_tree(source).items())
@@ -121,8 +122,18 @@ def _write_receipt(
         "execution_session_sha256": hashlib.sha256(
             (source / "execution-session.json").read_bytes()
         ).hexdigest(),
-        "run": {"id": run_id, "status": "completed", "conclusion": conclusion},
-        "artifact": {"name": artifact_name, "digest": f"sha256:{'d' * 64}"},
+        "run": {
+            "id": run_id,
+            "status": "completed",
+            "conclusion": conclusion,
+            "head_sha": head_sha,
+        },
+        "job": {"run_id": run_id, "head_sha": head_sha},
+        "artifact": {
+            "name": artifact_name,
+            "digest": f"sha256:{'d' * 64}",
+            "workflow_run": {"id": run_id, "head_sha": head_sha},
+        },
         "artifact_archive_sha256": "d" * 64,
         "checkpoint_pair_count": len(tuple(source.glob("case-*.json"))),
         "files": files,
@@ -140,7 +151,7 @@ def _source_record(
     start: int,
     stop: int,
     directory: Path,
-    schema_version: str = ("articulated-structural-factorial-artifact-receipt/1.2.0"),
+    schema_version: str = ("articulated-structural-factorial-artifact-receipt/1.3.0"),
 ) -> StructuralSliceSource:
     receipt = _write_receipt(
         directory.parent / f"{directory.name}-{run_id}-receipt.json",
@@ -252,7 +263,7 @@ def test_collection_is_deterministic_complete_and_source_preserving(
     assert [source["run_id"] for source in manifest["sources"]] == [101, 202]
     assert [source["artifact_receipt_schema"] for source in manifest["sources"]] == [
         "articulated-structural-factorial-artifact-receipt/1.1.0",
-        "articulated-structural-factorial-artifact-receipt/1.2.0",
+        "articulated-structural-factorial-artifact-receipt/1.3.0",
     ]
     assert manifest["sources"][0]["observed_case_range"] == [0, 2]
     assert json.loads((output / "collection-manifest.json").read_text()) == manifest
@@ -264,6 +275,42 @@ def test_collection_is_deterministic_complete_and_source_preserving(
     )
     assert {first: _digest_tree(first), second: _digest_tree(second)} == before
     assert not tuple(tmp_path.glob("combined.tmp-*"))
+
+
+@pytest.mark.parametrize(
+    "schema_version",
+    [
+        "articulated-structural-factorial-artifact-receipt/1.1.0",
+        "articulated-structural-factorial-artifact-receipt/1.2.0",
+        "articulated-structural-factorial-artifact-receipt/1.3.0",
+    ],
+)
+def test_collection_accepts_each_governed_receipt_schema(
+    tmp_path: Path, schema_version: str
+) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    source = _slice(tmp_path / "source", plan=plan, launch=launch, start=0, stop=2)
+
+    manifest = collect_structural_slices(
+        plan=plan,
+        launch=launch,
+        sources=(
+            _source_record(
+                launch=launch,
+                run_id=101,
+                artifact_name="structural-checkpoints-101",
+                conclusion="success",
+                start=0,
+                stop=2,
+                directory=source,
+                schema_version=schema_version,
+            ),
+        ),
+        output_dir=tmp_path / "combined",
+    )
+
+    assert manifest["sources"][0]["artifact_receipt_schema"] == schema_version
 
 
 def test_collection_rejects_session_drift_and_overlap(tmp_path: Path) -> None:
@@ -338,6 +385,38 @@ def test_collection_rejects_session_drift_and_overlap(tmp_path: Path) -> None:
             launch=launch,
             sources=sources,
             output_dir=tmp_path / "overlap-output",
+        )
+
+
+@pytest.mark.parametrize("defect", ["job", "artifact"])
+def test_collection_rejects_cross_run_receipt_identity(
+    tmp_path: Path, defect: str
+) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    source = _slice(tmp_path / "source", plan=plan, launch=launch, start=0, stop=2)
+    source_record = _source_record(
+        launch=launch,
+        run_id=101,
+        artifact_name="structural-checkpoints-101",
+        conclusion="success",
+        start=0,
+        stop=2,
+        directory=source,
+    )
+    receipt = json.loads(source_record.receipt_path.read_text(encoding="utf-8"))
+    if defect == "job":
+        receipt["job"]["run_id"] = 202
+    else:
+        receipt["artifact"]["workflow_run"]["head_sha"] = "0" * 40
+    source_record.receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="not bound to the retained run"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=(source_record,),
+            output_dir=tmp_path / "cross-run-output",
         )
 
 
