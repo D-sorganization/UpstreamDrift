@@ -196,7 +196,7 @@
   "source_sha256": {
     "scripts/research/proximal_distal_energy/make_subject_scaled_spatial_geometry_figures.py": "7524993f5cbd6450f53922bf23d00ff49109674eca8be0f846a925b399e619ae",
     "scripts/research/proximal_distal_energy/run_subject_scaled_spatial_geometry.py": "58ecd15ded5ae930623924f870da3fb9a85bc6cc85a6ecd4a5d4c03c3b5cb24c",
-    "scripts/research/proximal_distal_energy/spatial_full_body.py": "8e0c3efb06747742cca30f6bc1b9e18a28779a1c187e4b98ba6cde5293d96cfc",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8"
   },
   "study_id": "subject-scaled-spatial-contact-geometry-atlas"

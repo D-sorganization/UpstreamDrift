@@ -320,6 +320,25 @@ def _rotation(axis: Array, angle: float) -> Array:
     return np.eye(3) + math.sin(angle) * skew + (1.0 - math.cos(angle)) * (skew @ skew)
 
 
+def _cross3(first: Array, second: Array) -> Array:
+    """Return the cross product of two 3-vectors without generic dispatch.
+
+    ``numpy.cross`` spends the overwhelming majority of its runtime in generic
+    axis normalisation and ``moveaxis`` bookkeeping that is irrelevant for the
+    fixed ``(3,)`` inputs used throughout this module.  The three expressions
+    below are exactly the products and differences ``numpy.cross`` evaluates
+    for that case, in the same order, so the result is bit-identical while
+    costing roughly one tenth as much.
+    """
+
+    a0, a1, a2 = first[0], first[1], first[2]
+    b0, b1, b2 = second[0], second[1], second[2]
+    return np.array(
+        [a1 * b2 - a2 * b1, a2 * b0 - a0 * b2, a0 * b1 - a1 * b0],
+        dtype=np.float64,
+    )
+
+
 def _ancestors(model: SpatialModel, joint_index: int) -> list[int]:
     result: list[int] = []
     cursor = joint_index
@@ -369,7 +388,7 @@ def forward_kinematics(model: SpatialModel, q: Array) -> Kinematics:
             else:
                 axis = axes_world[joint_index]
                 jw[body_index, :, joint_index] = axis
-                jv[body_index, :, joint_index] = np.cross(
+                jv[body_index, :, joint_index] = _cross3(
                     axis, com - positions[joint_index]
                 )
     return Kinematics(
@@ -460,7 +479,7 @@ def _point_jacobians(
         else:
             axis = kin.joint_axis_world[ancestor]
             jw[:, ancestor] = axis
-            jv[:, ancestor] = np.cross(axis, point - kin.joint_position_m[ancestor])
+            jv[:, ancestor] = _cross3(axis, point - kin.joint_position_m[ancestor])
     return point, jv, jw
 
 
@@ -520,7 +539,7 @@ def evaluate_hand_wrenches(
     differential_local = _vec(24.0, 1.8, 3.5) * envelope
     lead_force = club_rotation @ (common_local + differential_local)
     trail_force = club_rotation @ (common_local - differential_local)
-    moment = np.cross(lead_position - reference, lead_force) + np.cross(
+    moment = _cross3(lead_position - reference, lead_force) + _cross3(
         trail_position - reference, trail_force
     )
     total_force = lead_force + trail_force
@@ -606,8 +625,8 @@ def wrench_reference_power_residual(model: SpatialModel, time_s: float) -> float
     angular_velocity = sample.compatible_twist[3:]
     displacement_op = _vec(0.07, -0.04, 0.03)
     # r_P = r_O + displacement_op.  Transport both wrench and twist to P.
-    moment_p = moment_o - np.cross(displacement_op, force)
-    velocity_p = velocity_o + np.cross(angular_velocity, displacement_op)
+    moment_p = moment_o - _cross3(displacement_op, force)
+    velocity_p = velocity_o + _cross3(angular_velocity, displacement_op)
     power_o = float(force @ velocity_o + moment_o @ angular_velocity)
     power_p = float(force @ velocity_p + moment_p @ angular_velocity)
     return power_p - power_o

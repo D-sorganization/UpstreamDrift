@@ -152,7 +152,7 @@
     "scripts/research/proximal_distal_energy/register_articulated_forward_contact_claims.py": "3da0ad192f042fcebc16b631ba28163322a2455f7b5839975de2c91fd78f0950",
     "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "a5914695739fd3f2137c3be0905f707b8de11f4dea3edc1d0c04897853149fd3",
     "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py": "a6b1d49b35f7fdae6df887112d51b03cfae0b845365caa031e8477cf95b08b76",
-    "scripts/research/proximal_distal_energy/spatial_full_body.py": "8e0c3efb06747742cca30f6bc1b9e18a28779a1c187e4b98ba6cde5293d96cfc",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
     "tests/research/test_articulated_forward_contact.py": "2f5ab64e653cf71940231aaf0ef6f5d102f4251afdb7ed83dbf2ca1983d6ce54"
   }
