@@ -1,0 +1,199 @@
+"""Hosted structural artifacts are retained with exact operational provenance."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_artifact_receipt import (
+    build_structural_artifact_receipt,
+)
+
+pytestmark = pytest.mark.scientific
+RUN_ID = 33273691711
+HEAD_SHA = "a" * 40
+EXECUTION_REVISION = "b" * 40
+
+
+def _run(
+    *, status: str = "completed", conclusion: str = "success"
+) -> dict[str, object]:
+    return {
+        "id": RUN_ID,
+        "status": status,
+        "conclusion": conclusion,
+        "head_sha": HEAD_SHA,
+        "created_at": "2026-08-29T20:31:06Z",
+        "run_started_at": "2026-08-29T20:31:06Z",
+        "updated_at": "2026-08-29T21:12:00Z",
+        "html_url": f"https://github.example/actions/runs/{RUN_ID}",
+    }
+
+
+def _jobs() -> dict[str, object]:
+    return {
+        "jobs": [
+            {
+                "id": 99156607309,
+                "name": "Structural Runtime Audit or Campaign Slice",
+                "status": "completed",
+                "conclusion": "success",
+                "started_at": "2026-08-29T20:31:11Z",
+                "completed_at": "2026-08-29T21:11:58Z",
+                "runner_name": "GitHub Actions 1000410531",
+                "steps": [
+                    {
+                        "number": 11,
+                        "name": "Run Registered Structural Campaign Slice",
+                        "status": "completed",
+                        "conclusion": "success",
+                        "started_at": "2026-08-29T20:32:25Z",
+                        "completed_at": "2026-08-29T21:11:40Z",
+                    },
+                    {
+                        "number": 12,
+                        "name": "Upload Structural Campaign Checkpoints",
+                        "status": "completed",
+                        "conclusion": "success",
+                        "started_at": "2026-08-29T21:11:40Z",
+                        "completed_at": "2026-08-29T21:11:55Z",
+                    },
+                ],
+            }
+        ]
+    }
+
+
+def _artifact() -> dict[str, object]:
+    return {
+        "id": 987654321,
+        "name": f"structural-checkpoints-{RUN_ID}",
+        "size_in_bytes": 12345,
+        "expired": False,
+        "created_at": "2026-08-29T21:11:55Z",
+        "updated_at": "2026-08-29T21:11:55Z",
+        "archive_download_url": "https://api.github.example/artifacts/987654321/zip",
+    }
+
+
+def _artifact_tree(tmp_path: Path, *, count: int = 2) -> tuple[Path, Path, str]:
+    extracted = tmp_path / "extracted"
+    extracted.mkdir()
+    session = (
+        json.dumps(
+            {
+                "schema_version": "articulated-structural-factorial-session/1.0.0",
+                "execution_revision": EXECUTION_REVISION,
+                "runtime_identity_sha256": "c" * 64,
+            },
+            sort_keys=True,
+        )
+        + "\n"
+    ).encode()
+    (extracted / "execution-session.json").write_bytes(session)
+    for index in range(count):
+        stem = f"case-{index:02d}"
+        (extracted / f"{stem}.json").write_text(
+            json.dumps(
+                {
+                    "identity": {"execution_revision": EXECUTION_REVISION},
+                    "case": {"case_key": stem},
+                }
+            ),
+            encoding="utf-8",
+        )
+        np.savez_compressed(extracted / f"{stem}.npz", time_s=np.array([0.0]))
+    archive = tmp_path / "artifact.zip"
+    archive.write_bytes(b"synthetic archive bytes")
+    return extracted, archive, hashlib.sha256(session).hexdigest()
+
+
+def test_receipt_binds_terminal_run_job_artifact_and_exact_slice(
+    tmp_path: Path,
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path)
+
+    receipt = build_structural_artifact_receipt(
+        run=_run(),
+        jobs=_jobs(),
+        artifact=_artifact(),
+        archive_path=archive,
+        extracted_dir=extracted,
+        expected_run_id=RUN_ID,
+        expected_dispatch_head=HEAD_SHA,
+        expected_execution_revision=EXECUTION_REVISION,
+        expected_session_sha256=session_digest,
+        requested_case_start=694,
+        requested_case_stop=696,
+    )
+
+    assert receipt["classification"] == (
+        "workflow_artifact_provenance_not_scientific_summary"
+    )
+    assert receipt["run"]["id"] == RUN_ID
+    assert receipt["job"]["id"] == 99156607309
+    assert [step["number"] for step in receipt["job"]["steps"]] == [11, 12]
+    assert receipt["artifact"]["id"] == 987654321
+    assert len(receipt["artifact_archive_sha256"]) == 64
+    assert receipt["checkpoint_pair_count"] == 2
+    assert len(receipt["files"]) == 5
+
+
+@pytest.mark.parametrize("defect", ["missing_sidecar", "unexpected", "session_drift"])
+def test_receipt_rejects_incomplete_or_contaminated_artifact(
+    tmp_path: Path, defect: str
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path)
+    if defect == "missing_sidecar":
+        next(extracted.glob("case-*.npz")).unlink()
+    elif defect == "unexpected":
+        (extracted / "partial.tmp").write_text("inflight", encoding="utf-8")
+    else:
+        session_digest = "0" * 64
+
+    with pytest.raises(ValueError):
+        build_structural_artifact_receipt(
+            run=_run(),
+            jobs=_jobs(),
+            artifact=_artifact(),
+            archive_path=archive,
+            extracted_dir=extracted,
+            expected_run_id=RUN_ID,
+            expected_dispatch_head=HEAD_SHA,
+            expected_execution_revision=EXECUTION_REVISION,
+            expected_session_sha256=session_digest,
+            requested_case_start=694,
+            requested_case_stop=696,
+        )
+
+
+@pytest.mark.parametrize(
+    ("run", "message"),
+    [
+        (_run(status="in_progress", conclusion="success"), "terminal"),
+        (_run(status="completed", conclusion="failure"), "successful slice"),
+    ],
+)
+def test_receipt_rejects_nonterminal_or_inconsistent_success(
+    tmp_path: Path, run: dict[str, object], message: str
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path)
+
+    with pytest.raises(ValueError, match=message):
+        build_structural_artifact_receipt(
+            run=run,
+            jobs=_jobs(),
+            artifact=_artifact(),
+            archive_path=archive,
+            extracted_dir=extracted,
+            expected_run_id=RUN_ID,
+            expected_dispatch_head=HEAD_SHA,
+            expected_execution_revision=EXECUTION_REVISION,
+            expected_session_sha256=session_digest,
+            requested_case_start=694,
+            requested_case_stop=696,
+        )
