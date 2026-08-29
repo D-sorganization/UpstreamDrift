@@ -33,6 +33,11 @@ What this package is
   protocol so F1 is swappable with F0.
 * :mod:`.envelope` -- the F1 validity verdict, its caveats, and the
   quantities ADR-0033 refuses outright.
+* :mod:`.wholeshot` -- the head's **real trajectory**, marched once, with
+  the wrench history read off a single continuous solve. Additional to
+  the declared straight-line approach ``solve()`` builds, not a
+  replacement for it: the two answer different questions and only the
+  second is comparable to F0's memoryless answer.
 * :mod:`.verification` -- conservation residuals, the analytic case, the
   grid-convergence study and the F0 cross-check.
 
@@ -137,6 +142,13 @@ from .verification import (
     energy_residuals,
     free_fall_residuals,
 )
+from .wholeshot import (
+    DEFAULT_EJECTA_HEADROOM_CELLS,
+    DEFAULT_TRAVEL_SPANS,
+    F1ShotResult,
+    F1ShotSettings,
+    simulate_f1_shot,
+)
 
 __all__ = [
     "BALL_DIAMETER_M",
@@ -148,8 +160,12 @@ __all__ = [
     "ContactImpulse",
     "DEFAULT_BALL_FACETS",
     "DEFAULT_CFL_NUMBER",
+    "DEFAULT_EJECTA_HEADROOM_CELLS",
+    "DEFAULT_TRAVEL_SPANS",
     "DomainWalls",
     "F0CrossCheck",
+    "F1ShotResult",
+    "F1ShotSettings",
     "F1_STANDING_CAVEATS",
     "GridInterpolation",
     "HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA",
@@ -198,6 +214,7 @@ __all__ = [
     "reconstruct",
     "require_quotable",
     "settled_bed",
+    "simulate_f1_shot",
     "surface_depression",
     "surface_profile_m",
     "yield_function",

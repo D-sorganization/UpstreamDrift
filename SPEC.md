@@ -3,6 +3,7 @@
 ## Current Scientific Audit State (2026-08-27)
 
 ## Performance Enhancements (#9161)
+
 - Replaced instances of `np.linalg.norm` with faster mathematical equivalents (`math.hypot`, `np.vdot`, and `np.einsum`) for small vectors and multidimensional arrays in telemetry logging, screw kinematics, and bunker shot traces.
 
 ## Articulated Same-State Drift and Contact Attribution (#9151)
@@ -470,9 +471,69 @@ evidence at all that those equations describe golf bunker sand. Validation stays
 at NASA-STD-7009B level 0 of 4 and the F1 envelope enforces a
 `BEYOND_VALIDATION` floor that no query can beat, since `EXTRAPOLATED` would
 require a published validation set that issue #8616 established does not exist.
-Field extraction and schema (#8710), the visual layers (#8711-#8713), the ball
-as a plane-strain body, and F1's own `simulate_shot` integration are
-deliberately out of this change.
+Field extraction and schema (#8710) and the visual layers (#8711-#8713) are
+deliberately out of that change.
+
+Issue #8733 sections 1-3 close the rest of the tier's mechanics: the ball as a
+plane-strain body, contact against several bodies within one step, and a
+whole-shot march. The ball is a rigid circular section built as an **equal-area**
+regular polygon rather than an inscribed or circumscribed one, because either of
+those biases the displaced area systematically and the bias survives grid
+refinement, so it would read as a quiet offset in the flux onto the ball rather
+than as noise; `n_facets_for_cell_size` then picks a facet count whose chord fits
+inside one cell, the only scale at which the sand can see the flat spots. Both
+facts ADR-0033 requires travel in the API rather than in a comment: the body is
+an **infinite cylinder, not a sphere**, so `line_mass_kg_per_m` is named for the
+per-unit-width quantity it is and `sphere_mass_kg` raises rather than returning a
+number that would be quoted; and the below-equator / face-side split #8712 asks
+for is in-plane and **qualitative**, reported as fractions on a value that flags
+itself `is_qualitative` and carries the cylinder note into its own summary, while
+`heel_toe_split`, `lateral_distribution` and `BallContactSplit.heel_toe_fraction`
+all raise `RefusedQuantity.OUT_OF_PLANE` and `launch_velocity_m_s` raises
+`RefusedQuantity.BALL_LAUNCH`, ball launch staying on F0's #8657
+momentum-transfer path. Multi-body contact is order-dependent by construction --
+the grid projection writes a velocity-level constraint straight onto the node, so
+at a shared node the last projection wins and the earlier body's non-penetration
+may be left violated -- and the order is therefore chosen and stated rather than
+inherited from a loop: **slowest first, fastest last, ties in the caller's
+order**. The fastest body is the one that can tunnel, since the CFL travel bound,
+the swept-node test and the pushout backstop all scale with body speed, so it is
+the body whose constraint is worth making exact; deriving the order from the
+bodies rather than from the argument list is what makes two callers who pass the
+same bodies in different sequences get the same answer. What the choice costs is
+the slow body under-collecting, never sand passing through the fast one, and both
+halves are pinned by test. The momentum ledger is unaffected by the order: each
+body records `m_i (v_i^after - v_i^before)` at its own stage, so the stages
+telescope, and a two-body march of a 600-particle bed with every wall FREE --
+gravity and the bodies being the only momentum sources -- closes
+`delta p = sum_b J_b + M g dt n` to a residual of 1.95e-16 kg m/s against a
+2.6e-2 change, 4.3e-15 relative, with the club delivering (2.631e-2, -3.249e-2)
+and the ball (-9.25e-7, -3.760e-3) N s per metre of width. The whole-shot march
+(`simulate_f1_shot`) is **additional to** the declared straight-line approach,
+not a replacement: `solve()` still reverses the body and drives it back to the
+queried pose at constant velocity, which is the assumption that makes an F1
+answer comparable to F0's memoryless one, while the new path places the head just
+above the sand and integrates it, so nothing prescribes where it goes and the
+sand it meets is sand it has already disturbed. On one 40 x 16 mm sole at 12 m/s
+and 20 deg attack, 4 mm grid, 30 mm declared width, the two paths differ in the
+way the difference in question predicts: the declared approach runs 365 steps
+over 3.90 ms, peaks at 1.06 kN 1.04 ms after first contact and reports 42.5 N
+windowed at the queried pose with a 9.08 mm divot; the marched shot runs 1123
+steps over 12.0 ms without exiting, peaks at 534 N 0.13 ms after first contact,
+slows the 300 g head from 12 to 9.40 m/s for a 0.984 N s impulse, reaches 25.6 mm
+of sole depth over 122 mm of travel with a 26 mm divot, and reports 17.3 N at the
+_same_ 8 mm sole depth the declared path was queried at -- a factor of 2.5 lower,
+because the marched head has slowed and is ploughing through its own divot rather
+than being driven at delivery speed into an undisturbed bed. Cost is as ADR-0033
+estimated: 23.75 ms per step at 2,600 particles on the primary development
+machine, so a whole shot is tens of seconds and the tier remains a study tier and
+not a drop-in for the design sweep. Both the travel allowance and the ejecta
+headroom are **declared** rather than predicted, since how far a head travels
+while submerged is one of the things the march is run to find out; a head that
+reaches the end of the bed raises and names the setting rather than sweeping
+empty grid and reporting the resulting zero as a result. Sections 4 and 6 of
+#8733 -- a plastic-limit analytic verification case, MMS, temporal grid
+convergence, and calibration toward F2 -- remain open.
 
 Issues #8706 and #8708 (epic #8699) add the two views that put the sole-load
 field in context: the shot in three dimensions, and the scalar traces beside
@@ -741,8 +802,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.623                                            |
-| **Last Spec Update**    | 2026-08-27                                         |
+| **Spec Version**        | 1.0.624                                            |
+| **Last Spec Update**    | 2026-08-28                                         |
 
 ## 2. Purpose & Mission
 
@@ -3430,6 +3491,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-28 | 1.0.624 | Closed sections 1-3 of #8733 (epic #8699): the F1 ball as a plane-strain body, multi-body contact within one step, and a whole-shot march. The ball is an equal-area polygonal circle (`ball.py`) whose two ADR-0033 facts are enforced by the API rather than documented -- it is an infinite cylinder rather than a sphere, so `sphere_mass_kg` raises and only `line_mass_kg_per_m` is available, and the below-equator / face-side split #8712 wants is qualitative and in-plane, with every heel-toe or lateral question raising `RefusedQuantity.OUT_OF_PLANE` and ball launch still raising `RefusedQuantity.BALL_LAUNCH`. Multi-body contact (`contact.py`) fixes the projection order from the bodies themselves -- slowest first, fastest last, ties in the caller's order -- because the grid projection is a velocity-level constraint and at a shared node the last one applied is the one that holds exactly; the fastest body is the one that can tunnel, and deriving the order from state rather than from the argument list makes the answer independent of how the caller assembled the sequence. The momentum ledger stays exact regardless: a two-body march of a 600-particle bed with every wall FREE closes to a 1.95e-16 kg m/s residual, 4.3e-15 relative. The whole-shot march (`wholeshot.py::simulate_f1_shot`) integrates the head instead of prescribing it and returns a `ShotResult`, so an F1 shot enters `bunkershot3d.metrics` through the same door an F0 shot does; `solve()`/`_approach` is untouched and still the comparable-to-F0 path. On one 12 m/s, 20 deg delivery the declared approach peaks at 1.06 kN and reports 42.5 N at the queried pose, while the marched shot peaks at 534 N, slows the head 12 -> 9.40 m/s and reports 17.3 N at that same 8 mm sole depth. Structurally, `solver.py` was 1077 of a 1200-line budget, so the scheme moved to `step.py` (`StepContext`/`advance_step`) where a step-by-step caller can drive it; `march()`'s signature is unchanged and `march_bodies()` is the sequence form. 110 new tests; 404 pass across `tests/bunkershot3d/solvers/mpm/` and `tests/bunkershot3d/fields/`. Sections 4 and 6 of #8733 remain open. |
 | 2026-08-28 | 1.0.623 | Fixed CI offline determinism, Docker buildx rehydration, and dependency lock provenance (#9120, #9121, #9122). Added `bootstrap_conformance_deps.py` for deterministic offline install of pinned conformance dependencies across cross-engine workflows; added `rehydrate_docker_context.py` to ensure Dockerfile is rehydrated before Buildx smoke gates; and made dependency lock provenance invariant to offline environments with canonical compilation headers. |
 | 2026-08-27 | 1.0.622 | Emit portable source links for claim-adjudication data (#9142). `claim_adjudication_summary.py` now builds absolute `blob/main` links for `claim_adjudication_summary.json` and `claim_adjudication_summary.csv`; AffineDrift rewrites that declared form to the protected source SHA. The explicit editorial-only claim-census migration verifies that the candidate count remains 1,180 and replaces only the generated reviewer candidate whose URL text changed. |
 | 2026-08-27 | 1.0.621 | Consumed the Tools green-surface adapter across the vendor boundary (issue #9143, Tools #4800 P9). Bumped the `vendor/ud-tools` submodule to the latest Tools main squash (`b46f58df52df86b6c5a3db44460b26ac8919da70`), pulling in `shared.python.swing_sim.putting.ud_adapter`, `UdGreenTopography`, `green_surface_from_ud_json`, and `green_surface_to_ud_json` alongside recent variation fixes (#4692/#4693/#4694/#4697). Added consumer integration tests in `tests/unit/putting/test_putting_green_consumer.py` covering vendor boundary import resolution, bi-directional topography JSON serialization/deserialization between Tools heightfields and UpstreamDrift `GreenSurface`, fail-closed rejection of scattered contours/slopes/unknown fields, and roll physics consistency on imported flat and sloped green surfaces. |

@@ -315,7 +315,7 @@ class TestMultiBodyMarch:
         solver = self._open_solver(material)
         grid, particles, bounds = self._bed(solver)
         club = RigidSection(
-            [[-0.05, 0.004], [-0.03, 0.004], [-0.03, 0.02], [-0.05, 0.02]],
+            [[-0.05, 0.0], [-0.03, 0.0], [-0.03, 0.016], [-0.05, 0.016]],
             velocity_m_s=(2.0, -1.0),
             friction=0.3,
         )
@@ -341,6 +341,13 @@ class TestMultiBodyMarch:
         # A step whose pushout fired has moved particles geometrically, and
         # a geometric repair is outside the momentum budget by construction.
         assert run.max_pushed_out() == 0
+        # Both bodies must actually have delivered something, or the
+        # identity below would close for the trivial reason.
+        for index in (0, 1):
+            delivered = sum(
+                step.body_contacts[index].impulse_on_sand_n_s for step in run.steps
+            )
+            assert float(np.hypot(delivered[0], delivered[1])) > 0.0
         contact = sum(step.total_impulse_on_sand_n_s() for step in run.steps)
         gravity = np.array(
             [0.0, -total_mass * solver.gravity_m_s2 * step_s * run.n_steps]
@@ -352,7 +359,7 @@ class TestMultiBodyMarch:
         solver = self._open_solver(material)
         grid, particles, bounds = self._bed(solver)
         club = RigidSection(
-            [[-0.05, 0.004], [-0.03, 0.004], [-0.03, 0.02], [-0.05, 0.02]],
+            [[-0.05, 0.0], [-0.03, 0.0], [-0.03, 0.016], [-0.05, 0.016]],
             velocity_m_s=(2.0, -1.0),
         )
         ball = RigidSection(
@@ -378,7 +385,7 @@ class TestMultiBodyMarch:
         solver = self._open_solver(material)
         grid, particles, bounds = self._bed(solver)
         club = RigidSection(
-            [[-0.05, 0.004], [-0.03, 0.004], [-0.03, 0.02], [-0.05, 0.02]],
+            [[-0.05, 0.0], [-0.03, 0.0], [-0.03, 0.016], [-0.05, 0.016]],
             velocity_m_s=(2.0, -1.0),
         )
         ball = RigidSection(
@@ -404,7 +411,7 @@ class TestMultiBodyMarch:
         solver = self._open_solver(material)
         grid, particles, bounds = self._bed(solver)
         club = RigidSection(
-            [[-0.05, 0.004], [-0.03, 0.004], [-0.03, 0.02], [-0.05, 0.02]],
+            [[-0.05, 0.0], [-0.03, 0.0], [-0.03, 0.016], [-0.05, 0.016]],
             velocity_m_s=(2.0, -1.0),
         )
         run = solver.march(
@@ -447,7 +454,7 @@ class TestMultiBodyMarch:
         solver = self._open_solver(material)
         grid, particles, bounds = self._bed(solver)
         slow = RigidSection(
-            [[-0.05, 0.004], [-0.03, 0.004], [-0.03, 0.02], [-0.05, 0.02]],
+            [[-0.05, 0.0], [-0.03, 0.0], [-0.03, 0.016], [-0.05, 0.016]],
             velocity_m_s=(1.0, 0.0),
         )
         rocket = RigidSection(

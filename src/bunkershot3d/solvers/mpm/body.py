@@ -333,6 +333,40 @@ class RigidSection:
             friction=self.friction,
         )
 
+    def with_velocity(
+        self,
+        velocity_m_s: ArrayLike,
+        *,
+        angular_velocity_rad_s: float | None = None,
+    ) -> RigidSection:
+        """Return the same section, in the same pose, moving differently.
+
+        What a *marched* body needs and a prescribed one does not: the
+        head's velocity is an unknown of the shot, so a step ends by
+        rebuilding the section around a new one rather than by mutating
+        a frozen value.
+
+        Args:
+            velocity_m_s: ``(2,)`` new linear velocity of the reference
+                point.
+            angular_velocity_rad_s: New rotation rate about ``+y``, or
+                ``None`` to keep the current one.
+
+        Returns:
+            The section.
+        """
+        return RigidSection(
+            self.vertices_m,
+            velocity_m_s=velocity_m_s,
+            angular_velocity_rad_s=(
+                self.angular_velocity_rad_s
+                if angular_velocity_rad_s is None
+                else angular_velocity_rad_s
+            ),
+            reference_point_m=self.reference_point_m,
+            friction=self.friction,
+        )
+
     def advanced(self, time_step_s: float) -> RigidSection:
         """Return the section after ``time_step_s`` of its own motion.
 
@@ -510,7 +544,7 @@ class RigidSection:
         live = active & (node_mass_kg > 0.0)
         index = np.flatnonzero(live)
         if index.size == 0:
-            empty = np.zeros((0, _DIMENSION), dtype=np.float64)
+            empty: NDArray[np.float64] = np.zeros((0, _DIMENSION), dtype=np.float64)
             return node_velocity_m_s, ContactImpulse(
                 node_index=np.zeros(0, dtype=np.int64),
                 impulse_n_s=empty,
