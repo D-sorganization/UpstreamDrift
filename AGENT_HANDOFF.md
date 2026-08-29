@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  implementation head `c0b4b4c90` plus this handoff successor. No PR exists.
+  implementation head `b560c784e` plus this handoff successor. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 - Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
@@ -112,8 +112,12 @@ are not completion evidence.
   `1bcc7ced5178dbf45613e362f9d03bcaf1043782fb5afccbeeeec372a5e532c6`.
   `76fe32b1f` creates atomic, byte-exact, source-preserving legacy prefix views
   for interim replay audits; final audit must still use all 714 legacy cases.
-- Replay run 33277732709 remains in progress for [0,20) at `6c1f56c16`;
-  attempt 1 was last checked 2026-08-29. Do not duplicate or restart it.
+- Replay 33277732709 succeeded for [0,20); archive SHA-256 is `142556c34373`
+  and receipt 1.1 SHA-256 is `f3bd190abc2d`. All 20 sidecars pass 37 histories.
+- Exact legacy/enriched audit SHA-256 `7b00bb69fbbe` passes 20 statuses/JSON
+  results, 180 legacy arrays, and enriched evidence. No outcomes were summarized.
+- Authoritative corruption sentinel at exact `b560c784e` passes; the retained
+  mistyped-revision sentinel is explicitly rejected and excluded downstream.
 - Summary v1.4 applies the unchanged 0.8 gate to every successive residual
   ratio and retains the maximum and endpoint ratios. A stalled final step now
   fails even when the finest-to-coarsest endpoint ratio is below 0.8.
@@ -122,8 +126,8 @@ are not completion evidence.
 
 ## Immediate Order
 
-1. Let run 33277732709 terminate; retain exact metadata without outcomes.
-2. Audit/collect enriched [0,20), then compare exactly to legacy [0,20).
+1. Dispatch only enriched [20,40) from the current head using audit 33277601263.
+2. Receipt/audit/collect it, then compare exact legacy/enriched [0,40).
 3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 4. The contrast summary is implemented locally; after completion, validate the
