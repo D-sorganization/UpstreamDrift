@@ -74,24 +74,25 @@ are not completion evidence.
   view is `e9e7e9853848`; exact audit `d8fcb768d68d` passes 40 statuses/JSON
   results, 360 legacy arrays, and every enriched sidecar without outcome
   inspection or promotion.
+- Replay 33281576272 executes [40,60) at exact dispatch head `a6d4d9b55` using
+  qualified audit 33277601263. It is the only authorized structural process;
+  do not cancel, rerun, or duplicate it.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. After this boundary is committed, pushed, and remote-equal, dispatch exactly
-   one [40,60) slice using audit 33277601263. Record its exact run/head here;
-   never run a second structural process concurrently.
-2. On terminal status, apply the same receipt-1.3, corruption, cumulative
+1. Poll only replay 33281576272 after GitHub App setup. On terminal status,
+   apply the same receipt-1.3, corruption, cumulative
    collection, immutable legacy view, and exact audit gates through case 60.
    Stop and preserve evidence on any mismatch.
-3. Preserve all three refinement failures, typed Pinocchio absence, original
+2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
-4. The contrast summary is implemented locally; after completion, validate the
+3. The contrast summary is implemented locally; after completion, validate the
    checkpoint set and retain sign reversals, failures, and typed missing cells.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
-5. Project only protected UpstreamDrift evidence into AffineDrift; continue
+4. Project only protected UpstreamDrift evidence into AffineDrift; continue
    Tools only through its provider contract and protected flow.
 
 ## Cross-Repository Turnover
