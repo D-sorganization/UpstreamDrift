@@ -41,6 +41,9 @@ jobs:
     timeout-minutes: 20
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
     permissions:
       contents: read
       id-token: write
@@ -106,6 +109,9 @@ jobs:
     timeout-minutes: 30
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
     permissions:
       contents: read
       id-token: write
@@ -311,6 +317,9 @@ jobs:
     needs: [pick-runner, build, create-release]
     timeout-minutes: 20
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
     permissions:
       contents: write
       id-token: write

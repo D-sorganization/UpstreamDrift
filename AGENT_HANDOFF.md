@@ -8,8 +8,9 @@ partial campaign checkpoints are not completion evidence.
 ## Protected Authority
 
 - UpstreamDrift protected `main` was
-  `5c6256c6ef52e442d21826f55920b05115d81ec9` at #9236's ordinary #9238
-  reconciliation. Re-check remote authority before every push or merge.
+  `e9c0f9349b96ffc11ca2d410ab5d711af0f51d42` after #9222 merged, superseding
+  both the #9238 (`5c6256c6`) and #9192 (`20f1907c`) reconciliation points.
+  Re-check remote authority before every push or merge.
 - The qualified paper has 252 pages and SHA-256
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
 - Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
@@ -83,11 +84,15 @@ partial campaign checkpoints are not completion evidence.
 
 - Foundation PR #9180 protected-merged as
   `1af18489e8755933a0d189aa8edafe787fa94d0f`; issue #9174 was reopened and
-  remains the completion authority. Issue #9192 remains the release child.
-- PR #9222 is held unchanged at its four-file workflow fix because protected
-  base #9231 left the articulated manufactured-solution source digest stale.
-  Repair #9236 first from `worktrees/UpstreamDrift-9236-b1`, branch
-  `fix/9236-articulated-provenance`; do not use the dirty primary checkout.
+  remains the completion authority. Publication PR #9214 protected-merged as
+  `a8073c42edc811522c5d5709744f55c5cbd0fa8e`; issue #9192 remains the release
+  child and remains active.
+- PR #9222 is no longer held: it merged on 2026-08-29 once #9236 was under
+  repair, so the earlier "held at its four-file workflow fix" note is retired.
+- Lease/worktree: `worktrees/UpstreamDrift-9236-b1`, branch
+  `fix/9236-articulated-provenance`, repairing the stale articulated
+  manufactured-solution source digest left by protected base #9231.
+  Do not use the dirty primary checkout.
 - ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
   authority for AffineDrift #4010; #9064 remains design-manual authority and
   #9070 remains typed calculation-manifest authority.
@@ -113,6 +118,10 @@ partial campaign checkpoints are not completion evidence.
   add dummy `src/` code, force-push, or bypass protection.
 - The unscoped full pytest command has a pre-existing Sidekick `utils` collection
   failure. Do not treat that as #9192 evidence or waive the hosted Linux matrix.
+- Protected-main run 33260000606 checked out exact `a8073c42` and submodules,
+  then job 99120201094 failed before creating artifacts because the runner shell
+  could not import `scripts.companion_publication`. Every companion CLI job must
+  explicitly run from `${{ github.workspace }}`; the focused contract is GREEN.
 - Merge only when exact head/base/current protected main match and every required
   check is green. Then verify the protected-main payload/evidence artifacts,
   attestation, acquisition identity, embedded commit, and exact bytes before
