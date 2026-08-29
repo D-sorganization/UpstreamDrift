@@ -53,6 +53,31 @@ except ImportError:
 
 logger = get_logger(__name__)
 
+#: Environment variable overriding where derived (generated) model files are cached.
+MODEL_CACHE_DIR_ENV_VAR = "UPSTREAM_DRIFT_MODEL_CACHE_DIR"
+
+
+def get_derived_model_cache_dir() -> Path:
+    """Return the directory used for *derived* model artifacts.
+
+    Derived artifacts are materialisations of models that live in Python source
+    (for example the embedded MuJoCo humanoid MJCF string). They are generated
+    output, not source assets, so they must never be written into the repository
+    working tree -- doing so leaves ``git status`` dirty after a plain test run
+    (issue #9182).
+
+    Returns:
+        A user-level cache directory. Honours ``UPSTREAM_DRIFT_MODEL_CACHE_DIR``
+        when set, otherwise ``~/.upstream_drift/model_cache``.
+
+    Postconditions:
+        The returned path is absolute. It is not guaranteed to exist yet.
+    """
+    override = os.environ.get(MODEL_CACHE_DIR_ENV_VAR)
+    if override:
+        return Path(override).expanduser().resolve()
+    return (Path.home() / ".upstream_drift" / "model_cache").resolve()
+
 
 def _with_attachment_manifest(model_info: dict[str, Any]) -> dict[str, Any]:
     """Return model info enriched with declared attachment points when present."""
@@ -225,18 +250,34 @@ class ModelLibrary:
         },
     }
 
-    def __init__(self, base_path: Path | None = None) -> None:
+    def __init__(
+        self, base_path: Path | None = None, cache_path: Path | None = None
+    ) -> None:
         """Initialize model library.
 
         Args:
             base_path: Base path for storing downloaded models.
                       Defaults to shared/urdf in the project root.
+            cache_path: Directory for *derived* model artifacts generated at
+                      runtime (e.g. the embedded MuJoCo humanoid). Defaults to a
+                      user-level cache directory so that generated files never
+                      land in the repository working tree (issue #9182). When
+                      ``base_path`` is supplied but ``cache_path`` is not (the
+                      usual pattern in tests), the cache lives under
+                      ``base_path`` so everything stays inside ``tmp_path``.
         """
+        default_base = base_path is None
         if base_path is None:
             # Default to project's shared/urdf directory
             base_path = Path(__file__).parent.parent.parent / "shared" / "urdf"
 
         self.base_path = Path(base_path)
+        if cache_path is not None:
+            self.cache_path = Path(cache_path)
+        elif default_base:
+            self.cache_path = get_derived_model_cache_dir()
+        else:
+            self.cache_path = self.base_path / "_derived"
         self.human_models_path = self.base_path / "human_models"
         self.golf_clubs_path = self.base_path / "golf_clubs"
         self.meshes_path = self.base_path.parent / "meshes"
@@ -316,6 +357,10 @@ class ModelLibrary:
     def _get_cached_embedded_model(self, embedded_key: str) -> Path | None:
         """Extract an embedded model and cache it to a file.
 
+        The embedded MJCF lives in Python source, so the file written here is
+        *derived* output. It is written under :attr:`cache_path` -- never under
+        :attr:`human_models_path`, which is tracked source (issue #9182).
+
         Args:
             embedded_key: Key in get_embedded_mujoco_models()
 
@@ -331,17 +376,17 @@ class ModelLibrary:
 
         content = embedded[embedded_key]["content"]
 
-        # Determine cache path
-        # Use a stable directory for this model
-        cache_dir = self.human_models_path / "mujoco_humanoid"
-        cache_dir.mkdir(parents=True, exist_ok=True)
-
-        # Save as XML
+        # Derived artifacts go to the cache directory, never to the tracked
+        # source tree under human_models_path.
+        cache_dir = self.cache_path / "human_models" / "mujoco_humanoid"
         file_path = cache_dir / "model.xml"
 
-        # Write content if it changed or doesn't exist
-        # For simplicity, always write (it's fast)
         try:
+            # Only rewrite when the content actually changed, so repeated calls
+            # do not churn mtimes for downstream watchers.
+            if file_path.exists() and file_path.read_text(encoding="utf-8") == content:
+                return file_path
+            cache_dir.mkdir(parents=True, exist_ok=True)
             file_path.write_text(content, encoding="utf-8")
             logger.info(f"Cached embedded model to: {file_path}")
             return file_path
