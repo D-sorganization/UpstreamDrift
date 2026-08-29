@@ -51,7 +51,11 @@ What travels with every number here
   raises :attr:`~.envelope.RefusedQuantity.BALL_LAUNCH`.  This module
   answers what reaches the ball; it does not answer where the ball goes,
   and the boundary between those two is what keeps the first answer
-  honest.
+  honest.  There is a mechanical reason as well as a policy one: bodies
+  after the primary one in a march are **prescribed**, so the ball is
+  held rather than integrated, and what the sand delivers to a body that
+  does not give way is an upper bound on what it would deliver to one
+  that does.
 * **The tier, on every result.**  A number about the ball is not more
   trustworthy than the tier that produced it, so
   :class:`BallReachHistory` and :class:`SandVersusClub` carry the
@@ -552,7 +556,18 @@ class BallReachHistory:
 
     @property
     def total_impulse_n_s_per_m(self) -> NDArray[np.float64]:
-        """``(2,)`` impulse the sand delivered in total, per metre of width."""
+        """``(2,)`` impulse the sand delivered in total, per metre of width.
+
+        **To a ball that does not give way.** Bodies after the primary
+        one in an F1 march are *prescribed* -- advanced along their own
+        velocity, never accelerated by the sand -- so this is the impulse
+        the sand delivers to a held cylinder, and it is an **upper
+        bound**: a ball free to move would recede from the load and take
+        less. That is a third reason, independent of the plane-strain
+        geometry and of the tier, why
+        :meth:`launch_velocity_m_s` refuses; ``J / m`` off this number is
+        not a ball speed.
+        """
         return np.sum([sample.impulse_n_s_per_m for sample in self.samples], axis=0)
 
     @property
@@ -678,7 +693,10 @@ def ball_reach_history(
     Args:
         run: The march, from :meth:`~.solver.PlaneStrainMPMSolver.march_bodies`
             or off :attr:`~.wholeshot.F1ShotResult.run`.
-        ball: The ball at its **starting** pose.
+        ball: The ball at its **starting** pose. Held rather than
+            integrated: a march advances its extra bodies without
+            accelerating them, so the traction read off it is what the
+            sand delivers to a ball that does not give way.
         verdict: The F1 verdict the run was produced under, carried onto
             the history.
         body_index: Which body of the step the ball was. One by
