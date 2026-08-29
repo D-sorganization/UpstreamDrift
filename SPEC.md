@@ -938,7 +938,7 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.651                                            |
+| **Spec Version**        | 1.0.652                                            |
 | **Last Spec Update**    | 2026-08-29                                         |
 
 ## 2. Purpose & Mission
@@ -4900,3 +4900,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Performance: Optimized 2D vector norm calculation in `drift_control_transfer.py` using `np.hypot` to avoid intermediate array allocations and improve speed. (spec-exempt: micro-optimization)
 - Replaced `np.mean(..., axis=1)` with `np.einsum` in the Sobol first-order and total-order index calculations in `src/bunkershot3d/study/sensitivity.py` to avoid temporary array allocation and speed up computation. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm` with `math.hypot` for contact force slices in humanoid_golf visualization. (spec-exempt: micro-optimization)
+- Replaced `numpy.cross` with a bit-identical fixed-size `_cross3` helper on the `spatial_full_body` forward-kinematics and point-Jacobian hot paths, removing the generic axis-normalisation and `moveaxis` dispatch that dominated `test_subject_scaled_closed_contact` (#9231). Outputs verified bit-identical via `np.array_equal` across the full committed closed-contact atlas. (spec-exempt: micro-optimization)
