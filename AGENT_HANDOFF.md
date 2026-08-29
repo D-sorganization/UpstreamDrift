@@ -129,6 +129,14 @@ partial campaign checkpoints are not completion evidence.
   key, and the URDF failure test stops timers and disposes the widget before
   fixture teardown. Preserve the contaminated-worker ordering and Qt teardown
   regressions; do not globally clear the registry or add quarantine entries.
+- #9192 post-reconciliation validation is green for all companion contract
+  tests, the CI-infrastructure/workflow-inventory subset, ruff format/lint,
+  focused mypy, action pinning, local-only routing, docs governance, ADR
+  numbering, spec paths, and the declared 974-test pre-push unit lane (with its
+  governed vendor/Windows skips). The unscoped repository-wide pytest command
+  remains unable to collect because the pre-existing colocated Sidekick
+  conftest imports a missing top-level `utils` module; do not misreport that as
+  #9192 test execution or waive the hosted Linux matrix.
 
 ## Validation
 
