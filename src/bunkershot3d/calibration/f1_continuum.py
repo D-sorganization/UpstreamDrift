@@ -109,7 +109,6 @@ F1_UNCALIBRATED_PROPERTIES: tuple[str, ...] = (
 """Everything F1 still carries that this calibration did not touch."""
 
 _PROVENANCE_KEY = "friction_angle_deg"
-_MODULUS_KEY = "elastic_shear_modulus_pa"
 _CALIBRATION_KEY = "f1_constitutive_calibration"
 
 #: How far the stochastic search may sit from the closed-form optimum before
