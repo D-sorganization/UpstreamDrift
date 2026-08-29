@@ -23,6 +23,9 @@ from scripts.research.proximal_distal_energy.articulated_manufactured_solution i
 from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
     require_robotics_pinocchio,
 )
+from scripts.research.proximal_distal_energy.run_articulated_manufactured_solution import (
+    write_record,
+)
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
     build_subject_scaled_model,
     default_synthetic_profiles,
@@ -176,3 +179,17 @@ def test_committed_manufactured_solution_evidence_is_current_and_nontrivial() ->
     for relative_path, expected in record["source_sha256"].items():
         actual = hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest()
         assert actual == expected
+
+
+@pytest.mark.requires_pinocchio
+@requires_native_pinocchio
+def test_manufactured_solution_record_is_byte_deterministic(
+    tmp_path: Path,
+) -> None:
+    """Two native builds must reproduce the exact committed evidence bytes."""
+
+    first = write_record(tmp_path / "first.json").read_bytes()
+    second = write_record(tmp_path / "second.json").read_bytes()
+    committed = (DATA / "articulated_manufactured_solution.json").read_bytes()
+    assert first == second
+    assert first == committed
