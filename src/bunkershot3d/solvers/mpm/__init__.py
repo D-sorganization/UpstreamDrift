@@ -20,6 +20,9 @@ What this package is
 * :mod:`.state` -- particles, bed initialisation and the domain walls.
 * :mod:`.body` -- the clubhead as a rigid moving plane-strain section,
   with the contact treatment that stops material tunnelling through it.
+* :mod:`.ball` -- the ball as a second such section, an **infinite
+  cylinder rather than a sphere**, whose below-equator / face-side
+  split is reported qualitatively and whose launch stays refused.
 * :mod:`.solver` -- :class:`~bunkershot3d.solvers.mpm.solver.PlaneStrainMPMSolver`,
   which implements the :class:`~bunkershot3d.solvers.protocol.GranularSolver`
   protocol so F1 is swappable with F0.
@@ -55,6 +58,17 @@ than leaving that to documentation.
 
 from __future__ import annotations
 
+from .ball import (
+    BALL_DIAMETER_M,
+    BALL_RADIUS_M,
+    DEFAULT_BALL_FACETS,
+    MIN_BALL_FACETS,
+    PLANE_STRAIN_BALL_NOTE,
+    BallContactSplit,
+    BallSection,
+    circular_section,
+    n_facets_for_cell_size,
+)
 from .body import ContactImpulse, RigidSection, convex_hull_2d, plane_torque_about_y
 from .constitutive import (
     HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA,
@@ -113,34 +127,42 @@ from .verification import (
 )
 
 __all__ = [
-    "DEFAULT_CFL_NUMBER",
-    "F1_STANDING_CAVEATS",
-    "HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA",
-    "HARDIN_RICHART_ROUND_COEFFICIENT_KPA",
-    "MIN_CELLS_PER_GRAIN",
-    "MIN_CELLS_PER_RESOLVED_FEATURE",
-    "NODES_PER_PARTICLE",
-    "PLANE_STRAIN_DIMENSION",
-    "SAND_POISSON_RATIO",
-    "STENCIL_WIDTH",
+    "BALL_DIAMETER_M",
+    "BALL_RADIUS_M",
+    "BallContactSplit",
+    "BallSection",
     "ColumnEquilibrium",
     "ContactImpulse",
+    "DEFAULT_BALL_FACETS",
+    "DEFAULT_CFL_NUMBER",
     "DomainWalls",
     "F0CrossCheck",
+    "F1_STANDING_CAVEATS",
     "GridInterpolation",
+    "HARDIN_RICHART_ANGULAR_COEFFICIENT_KPA",
+    "HARDIN_RICHART_ROUND_COEFFICIENT_KPA",
+    "MIN_BALL_FACETS",
+    "MIN_CELLS_PER_GRAIN",
+    "MIN_CELLS_PER_RESOLVED_FEATURE",
     "MPMRun",
     "MPMSetup",
+    "NODES_PER_PARTICLE",
+    "PLANE_STRAIN_BALL_NOTE",
+    "PLANE_STRAIN_DIMENSION",
     "ParticleState",
     "PlaneStrainGrid",
     "PlaneStrainMPMSolver",
     "RefusedQuantity",
     "RigidSection",
+    "SAND_POISSON_RATIO",
+    "STENCIL_WIDTH",
     "SandContinuum",
     "StepDiagnostics",
     "SurfaceDepression",
     "WallCondition",
     "apic_angular_momentum",
     "cfl_time_step_s",
+    "circular_section",
     "column_grid_convergence",
     "convex_hull_2d",
     "cross_2d",
@@ -151,6 +173,7 @@ __all__ = [
     "evaluate_f1_envelope",
     "free_fall_residuals",
     "hencky_kirchhoff_principal",
+    "n_facets_for_cell_size",
     "plane_torque_about_y",
     "principal_stretches",
     "project_to_yield_surface",
