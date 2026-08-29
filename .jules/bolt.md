@@ -11,3 +11,6 @@
 ## 2024-05-19 - Fast Small Array Magnitude
 **Learning:** `np.linalg.norm()` is known to be relatively slow for small arrays (1D arrays with 2 to 6 elements) due to internal overhead and instance checks. Built-in `math.hypot()` is much faster, providing a ~2x to ~5x speedup. For arrays larger than that, `math.sqrt(np.vdot(arr, arr))` provides a ~2x speedup by bypassing `np.linalg.norm` overhead while leveraging the fast C-level `np.vdot`.
 **Action:** When computing vector norms for small 1D arrays, replace `np.linalg.norm(v)` with `math.hypot(*v)` for small arrays (length <= 6) or `math.sqrt(np.vdot(v, v))` for other 1D cases. For simple checks like `np.linalg.norm(v) > 0.0`, `np.vdot(v, v) > 0.0` completely skips the square root.
+## 2024-05-19 - Limit Micro-Optimizations for .sum()
+**Learning:** While replacing `np.sum(array)` with `array.sum()` does avoid NumPy's internal function dispatch overhead (~1 microsecond), it is an extreme micro-optimization. In heavy computational contexts (such as Principal Component Analysis involving SVD), this change has absolutely no measurable impact on overall application performance and is not worth the noise of inline comments or PR churn.
+**Action:** Do not perform this `.sum()` replacement in standard calculations unless it is inside a provably hot loop where the microsecond overhead is a true bottleneck.
