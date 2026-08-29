@@ -22,6 +22,7 @@ pytestmark = pytest.mark.scientific
 RUN_ID = 33273691711
 HEAD_SHA = "a" * 40
 EXECUTION_REVISION = "b" * 40
+ARCHIVE_SHA256 = hashlib.sha256(b"synthetic archive bytes").hexdigest()
 
 
 def _run(
@@ -82,6 +83,7 @@ def _artifact() -> dict[str, object]:
         "created_at": "2026-08-29T21:11:55Z",
         "updated_at": "2026-08-29T21:11:55Z",
         "archive_download_url": "https://api.github.example/artifacts/987654321/zip",
+        "digest": f"sha256:{ARCHIVE_SHA256}",
     }
 
 
@@ -163,6 +165,7 @@ def test_receipt_binds_terminal_run_job_artifact_and_exact_slice(
     assert receipt["job"]["id"] == 99156607309
     assert [step["number"] for step in receipt["job"]["steps"]] == [11, 12]
     assert receipt["artifact"]["id"] == 987654321
+    assert receipt["artifact"]["digest"] == f"sha256:{ARCHIVE_SHA256}"
     assert len(receipt["artifact_archive_sha256"]) == 64
     assert receipt["checkpoint_pair_count"] == 2
     assert len(receipt["files"]) == 5
@@ -272,7 +275,7 @@ def test_enriched_receipt_validates_every_registered_evidence_history(
     )
 
     assert receipt["schema_version"] == (
-        "articulated-structural-factorial-artifact-receipt/1.1.0"
+        "articulated-structural-factorial-artifact-receipt/1.2.0"
     )
     assert receipt["evidence_sidecar_schema"] == EVIDENCE_SIDECAR_SCHEMA
     assert receipt["required_evidence_array_count"] == 37
@@ -296,6 +299,29 @@ def test_enriched_receipt_rejects_a_readable_legacy_sidecar(tmp_path: Path) -> N
             requested_case_start=694,
             requested_case_stop=696,
             required_evidence_schema=EVIDENCE_SIDECAR_SCHEMA,
+        )
+
+
+def test_receipt_rejects_an_archive_that_disagrees_with_the_api_digest(
+    tmp_path: Path,
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path)
+    artifact = _artifact()
+    artifact["digest"] = "sha256:" + "0" * 64
+
+    with pytest.raises(ValueError, match="GitHub artifact digest"):
+        build_structural_artifact_receipt(
+            run=_run(),
+            jobs=_jobs(),
+            artifact=artifact,
+            archive_path=archive,
+            extracted_dir=extracted,
+            expected_run_id=RUN_ID,
+            expected_dispatch_head=HEAD_SHA,
+            expected_execution_revision=EXECUTION_REVISION,
+            expected_session_sha256=session_digest,
+            requested_case_start=694,
+            requested_case_stop=696,
         )
 
 

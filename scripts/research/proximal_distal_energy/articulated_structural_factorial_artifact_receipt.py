@@ -19,14 +19,15 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ev
     validate_structural_evidence_arrays,
 )
 
-_BASE_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.0.0"
-_ENRICHED_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.1.0"
+_BASE_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.1.0"
+_ENRICHED_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.2.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _JOB_NAME = "Structural Runtime Audit or Campaign Slice"
 _CAMPAIGN_STEP = "Run Registered Structural Campaign Slice"
 _UPLOAD_STEP = "Upload Structural Campaign Checkpoints"
 _SHA40 = re.compile(r"[0-9a-f]{40}")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+_ARTIFACT_DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 _TERMINAL_CONCLUSIONS = {
     "action_required",
     "cancelled",
@@ -267,6 +268,15 @@ def build_structural_artifact_receipt(
     )
     if artifact_record.get("expired") is not False:
         raise ValueError("artifact must be retained and unexpired")
+    api_digest = artifact_record.get("digest")
+    if (
+        not isinstance(api_digest, str)
+        or _ARTIFACT_DIGEST.fullmatch(api_digest) is None
+    ):
+        raise ValueError("GitHub artifact digest must be a lowercase SHA-256")
+    archive_sha256 = _sha256(archive_path)
+    if api_digest != f"sha256:{archive_sha256}":
+        raise ValueError("GitHub artifact digest does not match the retained archive")
 
     files, checkpoint_pair_count, evidence_sidecars_validated = _validate_artifact_tree(
         extracted_dir=extracted_dir,
@@ -340,12 +350,13 @@ def build_structural_artifact_receipt(
                     "created_at",
                     "updated_at",
                     "archive_download_url",
+                    "digest",
                 ),
                 prefix="artifact",
             ),
             "id": artifact_id,
         },
-        "artifact_archive_sha256": _sha256(archive_path),
+        "artifact_archive_sha256": archive_sha256,
         "checkpoint_pair_count": checkpoint_pair_count,
         "files": files,
     }
