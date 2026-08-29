@@ -60,7 +60,7 @@
     "Agreement verifies the declared model and operators, not anatomy or coaching strategy."
   ],
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "0d9f4d7d9e479b5c611294662d73d92c11f197bd85e91ee1af7c98c7785d5df2",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py": "bbe4de3fa99d66c9f694d2aa1a85decb8dedf269d59c82e64bf2c617c1daac07",
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py": "1df4b9c5b0c9550aa051f1b7d28b6b54702f56398d87bc07904ed93a03997119",

@@ -223,7 +223,7 @@
   "source_sha256": {
     "scripts/research/proximal_distal_energy/make_subject_scaled_closed_contact_figures.py": "511ceb7b9e70b8c8e81d26fa32ec58d76d791cfb69f8f1c4c46c39e0c7e3be83",
     "scripts/research/proximal_distal_energy/run_subject_scaled_closed_contact.py": "5a56b538f8a9ccbc53cd3b23e70e873d48faf2c6d3eb6926f77c7f5d78b32a1a",
-    "scripts/research/proximal_distal_energy/spatial_full_body.py": "8e0c3efb06747742cca30f6bc1b9e18a28779a1c187e4b98ba6cde5293d96cfc",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
     "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py": "b62fd2d7b90bb0593d660c362ebfc266cb905f0d808593b2c978a515275a3d0a",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8"
   },

@@ -8,8 +8,8 @@ partial campaign checkpoints are not completion evidence.
 ## Protected Authority
 
 - UpstreamDrift protected `main` was
-  `20f1907c79f9fd2714c4db43981da4ee3d397616` when #9236 branched. Re-check
-  remote authority before every push or merge.
+  `5b5eca5cd5d8a37cdd97719e4f03c91824374d93` at #9236's ordinary #9235
+  reconciliation. Re-check remote authority before every push or merge.
 - The qualified paper has 252 pages and SHA-256
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
 - Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
@@ -102,9 +102,9 @@ partial campaign checkpoints are not completion evidence.
   tag or release is authorized in this slice.
 - The exact failure is optional-stack run 33271527700 / job 99150747357:
   recorded `spatial_full_body.py` SHA-256 `bb195bf...` versus tracked
-  `b386ec...`. #9236 updates provenance and its checksum/manifest cascade only,
-  and adds same-environment two-build byte equality against the committed
-  record. Numeric results, tolerances, claims, and qualification are unchanged.
+  `b386ec...`. #9236 and its #9235 reconciliation update this and the nested
+  closed-contact provenance edge plus the checksum/manifest cascade only, and add same-environment two-build byte equality against the committed record.
+  Numeric results, tolerances, claims, and qualification are unchanged.
 - Exact-head gates for #9222 must include the 24 `pytest.mark.unit` cases,
   architecture/suite-marker ratchets, workflow inventory/routing/action pins,
   docs/spec/ADR checks, ruff, mypy, Bandit, and the protected hosted matrix.
