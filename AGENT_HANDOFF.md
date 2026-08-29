@@ -8,9 +8,9 @@ partial campaign checkpoints are not completion evidence.
 ## Protected Authority
 
 - UpstreamDrift protected `main` was
-  `e97b68f2fe2dcc97763e849b7d4259d3ebf29bed` at the #9192 reconciliation.
+  `c03649898402b9272ebf7eace1582fe8dcb9ae24` at the #9192 reconciliation.
   Branch `feat/9192-companion-release` includes it through ordinary merge
-  `06f738efb`; re-check remote authority before push or merge.
+  `dd53a1b0a`; re-check remote authority before push or merge.
 - The qualified paper has 252 pages and SHA-256
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
 - Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
