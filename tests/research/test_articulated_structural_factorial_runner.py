@@ -10,6 +10,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_plan import (
     StructuralFactorialPlan,
+    StructuralFactorialPlanAmendment,
 )
 from scripts.research.proximal_distal_energy.articulated_structural_factorial_runner import (
     NativeEngineUnavailable,
@@ -44,6 +45,23 @@ def _plan() -> dict[str, object]:
 
 def _launch(plan: dict[str, object]) -> dict[str, object]:
     return build_launch_manifest(plan=plan, execution_revision=EXECUTION_REVISION)
+
+
+def _amended_plan() -> dict[str, object]:
+    plan = StructuralFactorialPlan(
+        design_authority_revision=PLAN_REVISION,
+        authority_sha256=HASHES,
+    )
+    amendment = StructuralFactorialPlanAmendment(
+        legacy_execution_revision="c" * 40,
+        legacy_runtime_audit_run_id=33173678044,
+        terminal_workflow_run_id=33273691711,
+        terminal_conclusion="success",
+        legacy_prefix_case_stop_exclusive=714,
+        legacy_prefix_manifest_sha256="d" * 64,
+        detected_before_scientific_outcome_inspection=True,
+    )
+    return plan.to_amended_manifest(amendment)
 
 
 def _tiny_plan() -> dict[str, object]:
@@ -249,3 +267,38 @@ def test_launch_refuses_parallel_or_outcome_matched_design() -> None:
     plan["analysis"] = {**plan["analysis"], "outcome_matching": "allowed"}  # type: ignore[index]
     with pytest.raises(ValueError, match="outcome matching"):
         build_launch_manifest(plan=plan, execution_revision=EXECUTION_REVISION)
+
+
+def test_enriched_launch_binds_amended_retention_and_audit_schemas(
+    tmp_path: Path,
+) -> None:
+    plan = _amended_plan()
+
+    launch = build_launch_manifest(plan=plan, execution_revision=EXECUTION_REVISION)
+
+    assert launch["schema_version"] == ("articulated-structural-factorial-launch/1.2.0")
+    assert launch["evidence_sidecar_schema"] == (
+        "articulated-structural-factorial-evidence/1.0.0"
+    )
+    assert launch["runtime_audit_schema"] == (
+        "articulated-structural-factorial-runtime-audit/1.4.0"
+    )
+    assert launch["enrichment_audit_schema"] == (
+        "articulated-structural-factorial-enrichment-audit/1.0.0"
+    )
+
+    tampered = dict(plan)
+    execution = dict(tampered["execution"])
+    execution["evidence_sidecar_schema"] = "legacy-minimal"
+    tampered["execution"] = execution
+    with pytest.raises(ValueError, match="enriched execution schema"):
+        build_launch_manifest(plan=tampered, execution_revision=EXECUTION_REVISION)
+
+    drifted_launch = dict(launch)
+    drifted_launch["runtime_audit_schema"] = "legacy-runtime-audit"
+    with pytest.raises(ValueError, match="launch identity"):
+        load_registered_checkpoints(
+            plan=plan,
+            launch=drifted_launch,
+            checkpoint_dir=tmp_path,
+        )

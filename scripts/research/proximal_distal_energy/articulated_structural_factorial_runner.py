@@ -17,7 +17,15 @@ from numpy.typing import NDArray
 
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _CHECKPOINT_SCHEMA = "articulated-structural-factorial-checkpoint/1.1.0"
-_LAUNCH_SCHEMA = "articulated-structural-factorial-launch/1.1.0"
+_LEGACY_LAUNCH_SCHEMA = "articulated-structural-factorial-launch/1.1.0"
+_ENRICHED_LAUNCH_SCHEMA = "articulated-structural-factorial-launch/1.2.0"
+_ENRICHED_EXECUTION_SCHEMAS = {
+    "evidence_sidecar_schema": ("articulated-structural-factorial-evidence/1.0.0"),
+    "runtime_audit_schema": ("articulated-structural-factorial-runtime-audit/1.4.0"),
+    "enrichment_audit_schema": (
+        "articulated-structural-factorial-enrichment-audit/1.0.0"
+    ),
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -201,6 +209,36 @@ def build_registered_cases(plan: Mapping[str, object]) -> tuple[StructuralCase, 
     )
 
 
+def _launch_contract(
+    plan: Mapping[str, object], execution: Mapping[str, object]
+) -> tuple[str, dict[str, str]]:
+    plan_schema = plan.get("schema_version")
+    if plan_schema == "articulated-structural-factorial-plan/1.2.0":
+        return _LEGACY_LAUNCH_SCHEMA, {}
+    if plan_schema != "articulated-structural-factorial-plan/1.3.0":
+        raise ValueError("structural plan schema is not launchable")
+    if any(
+        execution.get(name) != expected
+        for name, expected in _ENRICHED_EXECUTION_SCHEMAS.items()
+    ):
+        raise ValueError("enriched execution schema identity is invalid")
+    preregistration = _mapping(plan.get("preregistration"), name="preregistration")
+    amendment = _mapping(
+        preregistration.get("operational_amendment"),
+        name="preregistration.operational_amendment",
+    )
+    if (
+        amendment.get("detected_before_scientific_outcome_inspection") is not True
+        or amendment.get("registered_design_or_gate_change") is not False
+        or amendment.get("legacy_prefix_promotable") is not False
+        or amendment.get("legacy_revision_resume_permitted") is not False
+        or amendment.get("requires_full_legacy_prefix_replay") is not True
+        or amendment.get("requires_exact_enrichment_audit") is not True
+    ):
+        raise ValueError("enriched retention amendment is not fail-closed")
+    return _ENRICHED_LAUNCH_SCHEMA, dict(_ENRICHED_EXECUTION_SCHEMAS)
+
+
 def build_launch_manifest(
     *, plan: Mapping[str, object], execution_revision: str
 ) -> dict[str, object]:
@@ -217,8 +255,9 @@ def build_launch_manifest(
     if analysis.get("outcome_matching") != "prohibited":
         raise ValueError("outcome matching must remain prohibited")
     cases = build_registered_cases(plan)
+    launch_schema, enriched_identity = _launch_contract(plan, execution)
     return {
-        "schema_version": _LAUNCH_SCHEMA,
+        "schema_version": launch_schema,
         "plan_sha256": plan_sha256(plan),
         "execution_revision": execution_revision,
         "registered_case_count": len(cases),
@@ -227,13 +266,16 @@ def build_launch_manifest(
         "checkpoint_policy": "one_atomic_checkpoint_per_attempt",
         "parity_sidecar_policy": "one_sha256_bound_npz_per_completed_attempt",
         "status": "ready_for_disclosed_timing_probe_then_registered_execution",
+        **enriched_identity,
     }
 
 
 def _validate_launch(
     *, plan: Mapping[str, object], launch: Mapping[str, object]
 ) -> tuple[str, str]:
-    if launch.get("schema_version") != _LAUNCH_SCHEMA:
+    execution = _mapping(plan.get("execution"), name="execution")
+    expected_schema, enriched_identity = _launch_contract(plan, execution)
+    if launch.get("schema_version") != expected_schema:
         raise ValueError("launch identity schema is invalid")
     expected_plan = plan_sha256(plan)
     execution_revision = launch.get("execution_revision")
@@ -247,6 +289,9 @@ def _validate_launch(
         or launch.get("parity_sidecar_policy")
         != "one_sha256_bound_npz_per_completed_attempt"
         or launch.get("registered_case_count") != len(build_registered_cases(plan))
+        or any(
+            launch.get(name) != expected for name, expected in enriched_identity.items()
+        )
     ):
         raise ValueError("launch identity does not match the frozen plan")
     return expected_plan, execution_revision
