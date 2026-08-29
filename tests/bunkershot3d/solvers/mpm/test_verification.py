@@ -39,6 +39,8 @@ from bunkershot3d.solvers.mpm.limit_states import (
 )
 from bunkershot3d.solvers.mpm.order_of_accuracy import (
     ManufacturedField,
+    cohesive_elastic_strain_limit,
+    cohesive_oscillation_residuals,
     column_temporal_convergence,
     manufactured_solution_convergence,
     uniform_stress_patch_residual,
@@ -512,3 +514,65 @@ class TestTemporalConvergence:
         long_window = column_temporal_convergence(material, transits=4.0)
         assert not long_window.converging, long_window.summary()
         assert long_window.gci.convergence is ConvergenceType.MONOTONIC_DIVERGENCE
+
+
+class TestCohesiveElasticOscillation:
+    """The conservative elastic case #8733 says "was not attempted".
+
+    It is attempted here and it does not work, for a *different* reason
+    than the cohesionless case does. The plasticity is genuinely gone --
+    zero particles yield, and the function refuses to return if one
+    does -- and the energy still drifts by about a tenth of the block's
+    total without decaying with the step. What that identifies is the
+    particle-grid transfer rather than the integrator, which is the same
+    mechanism ``column_temporal_convergence`` finds over a long window.
+
+    These tests pin the negative. If the order ever climbs to one, the
+    transfer has changed and the tier's energy story wants rewriting
+    rather than re-running.
+    """
+
+    @pytest.fixture(scope="class")
+    def residuals(self, material: SandContinuum):
+        return cohesive_oscillation_residuals(material)
+
+    def test_a_cohesive_tip_buys_a_real_strain_budget(
+        self, material: SandContinuum, cohesionless: SandContinuum
+    ) -> None:
+        budget = cohesive_elastic_strain_limit(material)
+        assert budget > 0.0
+        assert budget > 2.0 * 2.0e-5, budget
+        assert cohesive_elastic_strain_limit(cohesionless) == 0.0
+
+    def test_a_cohesionless_sand_is_refused_outright(
+        self, cohesionless: SandContinuum
+    ) -> None:
+        """Running it there would report the plastic obstacle, not this one."""
+        with pytest.raises(SolverInputError, match="no cohesive cone tip"):
+            cohesive_oscillation_residuals(cohesionless)
+
+    def test_an_amplitude_past_the_tip_is_refused(
+        self, material: SandContinuum
+    ) -> None:
+        budget = cohesive_elastic_strain_limit(material)
+        with pytest.raises(SolverInputError, match="initial_compression"):
+            cohesive_oscillation_residuals(material, initial_compression=2.0 * budget)
+
+    def test_every_residual_is_truncation_class(self, residuals) -> None:
+        for residual in residuals:
+            assert residual.conservation_class is ConservationClass.TRUNCATION
+            assert residual.step_size_s is not None
+
+    def test_the_oscillation_is_genuinely_elastic(self, residuals) -> None:
+        """Zero yields is enforced by a raise, so reaching here is the check."""
+        assert len(residuals) == 3
+
+    def test_the_drift_does_not_decay_with_the_step(self, residuals) -> None:
+        """The finding. Compare with 1.00 for the transfer-exact free fall."""
+        order = observed_order_from_residuals(list(residuals))
+        assert order.order < 0.5, order.summary()
+
+    def test_the_drift_is_a_large_fraction_of_the_energy(self, residuals) -> None:
+        """Not a small residual that merely fails to shrink."""
+        for residual in residuals:
+            assert residual.relative > 0.01, residual.summary()

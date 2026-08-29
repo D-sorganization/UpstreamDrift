@@ -72,6 +72,7 @@ from .verification import (
 )
 
 __all__ = [
+    "COHESIVE_OSCILLATION_COMPRESSION",
     "DEFAULT_MANUFACTURED_FIELD",
     "DESIGN_ORDER_SPATIAL",
     "ManufacturedField",
@@ -79,6 +80,8 @@ __all__ = [
     "ManufacturedSolutionStudy",
     "TemporalLevel",
     "TemporalStudy",
+    "cohesive_elastic_strain_limit",
+    "cohesive_oscillation_residuals",
     "column_temporal_convergence",
     "manufactured_solution_convergence",
     "uniform_stress_patch_residual",
@@ -958,3 +961,208 @@ def column_temporal_convergence(
             ),
         ),
     )
+
+
+# ----------------------------------------- the conservative elastic case, tried
+
+
+_NEGLIGIBLE_GRAVITY_M_S2 = 1.0e-9
+"""Gravity for the oscillation case: positive, because the solver requires it.
+
+Small enough that the gravitational term is 0.02% of the block's energy,
+so what is being measured is the elastic exchange and not a falling block.
+"""
+
+COHESIVE_OSCILLATION_COMPRESSION = 2.0e-5
+"""Initial uniaxial compression of the oscillation case.
+
+Below :func:`cohesive_elastic_strain_limit` for every sand preset in this
+package, so the whole oscillation -- compression *and* rebound -- stays
+inside the cone and the return map never fires."""
+
+
+def cohesive_elastic_strain_limit(material: SandContinuum) -> float:
+    """Largest 1-D extension a cohesive cone tip can carry elastically.
+
+    For a laterally confined column the strain is ``eps = (0, e)``, so
+    ``||dev(eps)|| = |e| / sqrt(2)`` and the yield function is
+    ``2 mu |e| / sqrt(2) + alpha (2 mu + d lambda) (e - eps_tip)``.  In
+    compression that is negative for every ``e``; in extension it changes
+    sign at
+
+    ``e = alpha B eps_tip / (sqrt(2) mu + alpha B)``,  ``B = 2 mu + d lambda``
+
+    which is zero for a cohesionless sand and 6.566e-5 for the ``FIRM``
+    preset.  That number is the whole question behind issue #8733's
+    second bullet: it is the amplitude budget a conservative elastic
+    oscillation would have to live inside.
+
+    Args:
+        material: The continuum.
+
+    Returns:
+        The limiting extensional strain, zero for a cohesionless sand.
+    """
+    bulk = (
+        2.0 * material.shear_modulus_pa
+        + PLANE_STRAIN_DIMENSION * material.lame_lambda_pa
+    )
+    cone = material.alpha * bulk
+    return (
+        cone
+        * material.tip_volumetric_strain
+        / (math.sqrt(2.0) * material.shear_modulus_pa + cone)
+    )
+
+
+def cohesive_oscillation_residuals(
+    material: SandContinuum,
+    *,
+    initial_compression: float = COHESIVE_OSCILLATION_COMPRESSION,
+    courant_numbers: Sequence[float] = (0.4, 0.2, 0.1),
+    transits: float = 2.0,
+    cell_size_m: float = 0.003,
+    width_m: float = 0.024,
+    height_m: float = 0.048,
+) -> tuple[ConservationResidual, ...]:
+    """Try the conservative elastic case a cohesive cone tip is supposed to allow.
+
+    Issue #8733's second bullet says a conservative elastic-energy case
+    does not exist for cohesionless sand -- a pre-compressed block rebounds
+    into tension, the return map annihilates the deviatoric strain at the
+    cone tip, and the loss is physical dissipation rather than truncation
+    error -- and adds that "a damp sand with a cohesive cone tip might
+    admit a genuinely conservative small-amplitude case; it was not
+    attempted".
+
+    It was attempted here.  **It does not work, and it fails for a
+    different reason than the cohesionless case does.**
+
+    A laterally confined ``FIRM`` column is pre-compressed uniformly by
+    ``2.0e-5``, comfortably inside the ``6.566e-5``
+    :func:`cohesive_elastic_strain_limit` allows, and released with
+    gravity made negligible.  The plasticity is genuinely gone: **zero**
+    particles yield at any step, at any of the three timesteps, and the
+    function refuses to return at all if one does.  The energy still
+    drifts, by 9.5% to 11.4% of the block's total, and the drift **does
+    not decay with the step**: measured orders -0.036 and -0.212 across a
+    four-fold refinement, against the 1.00 the same measurement gives for
+    the transfer-exact free-fall case in
+    :func:`~bunkershot3d.solvers.mpm.verification.energy_residuals`.
+
+    What that identifies is the particle-grid round trip, not the
+    integrator, and it is the same mechanism
+    :func:`column_temporal_convergence` finds: the transfer costs a fixed
+    amount per step, so over a fixed physical window the total grows as
+    the step shrinks.  A cohesive tip removes the plastic obstacle and
+    leaves the numerical one, so the residuals are returned as
+    truncation-class values with their step sizes -- the machinery will
+    let an order be fitted to them -- and the honest reading of that
+    order is that **F1 has no conservative elastic-energy case**, for
+    cohesive sand either.
+
+    If this ever starts fitting an order near one, the transfer has
+    changed and the tier's energy story needs rewriting rather than
+    re-running.
+
+    Args:
+        material: The continuum. Must carry a cohesive cone tip; a
+            cohesionless one is refused, because for that material the
+            case is already known to be unavailable and running it would
+            report the plastic obstacle as though it were this one.
+        initial_compression: Uniform ``-eps_zz`` at release.
+        courant_numbers: Courant numbers to run.
+        transits: Window length in elastic transits of the column.
+        cell_size_m: Grid ``dx``.
+        width_m: Column width.
+        height_m: Column height.
+
+    Returns:
+        One truncation-class residual per Courant number.
+
+    Raises:
+        SolverInputError: If the sand is cohesionless, if the amplitude
+            is outside what the cone tip can carry, or if any particle
+            yields -- which would make the residual plastic dissipation
+            and put the case back in the cohesionless situation.
+    """
+    budget = cohesive_elastic_strain_limit(material)
+    if budget <= 0.0:
+        raise SolverInputError(
+            "this sand has no cohesive cone tip, so its elastic strain budget in "
+            "extension is exactly zero and any rebound yields. That is the case "
+            "issue #8733 already records as unavailable; this function exists to "
+            "test the *cohesive* variant and refuses to be pointed at the other one"
+        )
+    amplitude = float(initial_compression)
+    if not math.isfinite(amplitude) or not 0.0 < amplitude < budget:
+        raise SolverInputError(
+            f"initial_compression must lie in (0, {budget:.4e}), the extensional "
+            f"strain this cone tip can carry, got {initial_compression!r}. A "
+            "larger amplitude rebounds past the tip and the residual becomes "
+            "plastic dissipation rather than anything about the integrator"
+        )
+    size = float(cell_size_m)
+    duration_s = float(transits) * height_m / material.elastic_wave_speed_m_s
+    grid_shape = (
+        int(math.ceil(width_m / size)) + 3,
+        int(math.ceil(height_m / size)) + 4,
+    )
+    residuals: list[ConservationResidual] = []
+    for number in courant_numbers:
+        particles = _particles(
+            material, cell_size_m=size, width_m=width_m, height_m=height_m
+        )
+        gradient = np.tile(
+            np.eye(PLANE_STRAIN_DIMENSION), (particles.n_particles, 1, 1)
+        )
+        gradient[:, 1, 1] = math.exp(-amplitude)
+        particles.deformation_gradient = gradient
+        grid = PlaneStrainGrid((-size, -size), size, grid_shape)
+        step_s = float(number) * size / material.elastic_wave_speed_m_s
+        n_steps = max(int(round(duration_s / step_s)), 2)
+        solver = _free_solver(
+            material,
+            size,
+            walls=_COLUMN_DOMAIN,
+            gravity_m_s2=_NEGLIGIBLE_GRAVITY_M_S2,
+            max_steps=n_steps,
+        )
+        run = solver.march(
+            particles,
+            None,
+            grid,
+            n_steps=n_steps,
+            time_step_s=step_s,
+            free_surface_height_m=height_m,
+            bed_x_bounds_m=(0.0, width_m),
+        )
+        yielded = sum(step.n_yielded for step in run.steps)
+        if yielded:
+            raise SolverInputError(
+                f"{yielded} particle(s) yielded at C={number:g}, so the cohesive "
+                "tip did not in fact keep the rebound inside the cone and the "
+                "residual is plastic dissipation. Lower initial_compression"
+            )
+        total = np.array(
+            [
+                step.kinetic_energy_j_per_m
+                + step.elastic_energy_j_per_m
+                + step.gravitational_energy_j_per_m
+                for step in run.steps
+            ]
+        )
+        # The block's own energy, exactly as energy_residuals scales the
+        # free-fall case, so the two numbers are comparable. Scaling by the
+        # drift's own span would make every level read as 100%.
+        scale = float(np.abs(total).max())
+        residuals.append(
+            ConservationResidual(
+                name=f"F1 cohesive elastic oscillation: total energy at C={number:g}",
+                conservation_class=ConservationClass.TRUNCATION,
+                residual=float(np.abs(total - total[0]).max()),
+                scale=scale if scale > 0.0 else 1.0,
+                step_size_s=step_s,
+            )
+        )
+    return tuple(residuals)
