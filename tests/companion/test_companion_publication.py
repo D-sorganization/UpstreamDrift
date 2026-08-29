@@ -187,14 +187,16 @@ def test_actions_record_is_explicitly_ephemeral_and_exact(tmp_path: Path) -> Non
     record = publication.build_actions_acquisition(
         bundle,
         env=env,
-        artifact_name=f"upstreamdrift-companion-{COMMIT}",
-        artifact_id=987,
-        artifact_url=(
-            "https://github.com/D-sorganization/UpstreamDrift/"
-            "actions/runs/123456/artifacts/987"
-        ),
-        artifact_digest="sha256:" + "b" * 64,
-        retention_days=30,
+        artifact_metadata={
+            "name": f"upstreamdrift-companion-{COMMIT}",
+            "id": 987,
+            "url": (
+                "https://github.com/D-sorganization/UpstreamDrift/"
+                "actions/runs/123456/artifacts/987"
+            ),
+            "digest": "sha256:" + "b" * 64,
+            "retention_days": 30,
+        },
         attestation_id="456",
         attestation_url=(
             "https://github.com/D-sorganization/UpstreamDrift/attestations/456"
@@ -218,11 +220,13 @@ def test_actions_record_rejects_mutable_or_cross_run_url(tmp_path: Path) -> None
         publication.build_actions_acquisition(
             bundle,
             env=_ci_env(authority="protected-main"),
-            artifact_name=f"upstreamdrift-companion-{COMMIT}",
-            artifact_id=987,
-            artifact_url="https://github.com/D-sorganization/UpstreamDrift/actions/runs/999/artifacts/987",
-            artifact_digest="sha256:" + "b" * 64,
-            retention_days=30,
+            artifact_metadata={
+                "name": f"upstreamdrift-companion-{COMMIT}",
+                "id": 987,
+                "url": "https://github.com/D-sorganization/UpstreamDrift/actions/runs/999/artifacts/987",
+                "digest": "sha256:" + "b" * 64,
+                "retention_days": 30,
+            },
             attestation_id="456",
             attestation_url="https://github.com/D-sorganization/UpstreamDrift/attestations/456",
         )

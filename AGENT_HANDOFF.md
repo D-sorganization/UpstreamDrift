@@ -137,6 +137,16 @@ partial campaign checkpoints are not completion evidence.
   remains unable to collect because the pre-existing colocated Sidekick
   conftest imports a missing top-level `utils` module; do not misreport that as
   #9192 test execution or waive the hosted Linux matrix.
+- #9192's first hosted head exposed two governance failures. Its feature-style
+  PR title overstated a delivery implementation owned by `scripts/` and the
+  protected release workflow, so PR #9214 is honestly titled
+  `chore(companion): publish exact-commit artifacts`. Replaying the old
+  pull-request run cannot observe that edit because its event payload is
+  immutable; use the legitimate follow-up synchronize event. The architecture
+  gate also found nine scalar parameters on `build_actions_acquisition`; the
+  builder now accepts and validates one cohesive artifact-metadata mapping and
+  passes the <=8-parameter budget without an exception. Do not add a dummy
+  `src/` file, bypass either gate, or replay a stale event as merge evidence.
 
 ## Validation
 
