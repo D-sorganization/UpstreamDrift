@@ -21,7 +21,7 @@ are not completion evidence.
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
-  Scientific/collector content head is `f0b6f6fe1aff60f772db262474becf084ba49529`;
+  Scientific/collector content head is `55b6315cf89db0ad61deee8c95913cc7439ee171`;
   resolve the handoff-only successor with `git rev-parse HEAD`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
@@ -71,6 +71,9 @@ are not completion evidence.
   cross-bound pairs and evidence sidecars at
   `Campaigns/UpstreamDrift-9153-receipt-v1.3-validation-run-33277732709`;
   receipt SHA is `d4f041d9bfa7`.
+- Real size-binding validation against run 33279075050 matches 8,143,272 API
+  and retained bytes at `Campaigns/UpstreamDrift-9153-receipt-v1.3-size-
+validation-run-33279075050`; deterministic receipt SHA is `2e765f0aed41`.
 - Cumulative [0,40) collection manifest is `151e60ade22a`; immutable legacy
   view is `e9e7e9853848`; exact audit `d8fcb768d68d` passes 40 statuses/JSON
   results, 360 legacy arrays, and every enriched sidecar without outcome
