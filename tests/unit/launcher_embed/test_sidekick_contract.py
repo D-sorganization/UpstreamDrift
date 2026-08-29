@@ -43,15 +43,35 @@ def _drop_sidekick_from_modules() -> None:
         sys.modules.pop(name, None)
 
 
+_SIDEKICK_MODULES = (
+    "src.tools.sidekick",
+    "src.tools.sidekick._embed_adapter",
+)
+
+
 @pytest.fixture
 def _registry_snapshot() -> Iterator[None]:
-    """Snapshot the registry around tests that mutate it via bootstrap."""
+    """Snapshot the registry and module cache around bootstrap mutations.
+
+    Restoring ``sys.modules`` matters as much as restoring the registry:
+    :func:`_drop_sidekick_from_modules` leaves a *different*
+    ``_embed_adapter`` module object cached, so any later test that binds
+    the adapter class at collection time and then patches
+    ``src.tools.sidekick._embed_adapter.<attr>`` would patch a module the
+    class no longer belongs to. See issue #9168.
+    """
     snapshot = dict(EMBEDDABLE_TOOL_REGISTRY)
+    module_snapshot = {
+        name: sys.modules[name] for name in _SIDEKICK_MODULES if name in sys.modules
+    }
     try:
         yield
     finally:
         EMBEDDABLE_TOOL_REGISTRY.clear()
         EMBEDDABLE_TOOL_REGISTRY.update(snapshot)
+        for name in _SIDEKICK_MODULES:
+            sys.modules.pop(name, None)
+        sys.modules.update(module_snapshot)
 
 
 # --- Protocol conformance -----------------------------------------------
