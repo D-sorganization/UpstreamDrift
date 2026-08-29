@@ -29,6 +29,20 @@ _DEFAULT_PARAMETERS: tuple[str, ...] = ("friction_coefficient",)
 #: Objective change below this counts as "the parameter has no effect".
 _SENSITIVITY_TOLERANCE = 1e-12
 
+#: ...and so does a change this small *relative to the objective itself*.
+#:
+#: The absolute floor above is only meaningful for an objective of order
+#: one. The F1 shear cell of issue #8733 has an objective of order 10 deg^2
+#: in which the shear modulus cancels exactly, yet the two evaluations
+#: differ by ~1e-11 because the strain path they take differs by three
+#: decades in magnitude and the least-squares fit rounds differently. That
+#: is round-off, not identification, and an absolute 1e-12 floor calls it a
+#: sensitivity -- which is exactly the #7999 failure mode wearing a
+#: different hat. Double precision carries ~1e-16 relative, so 1e-9 is
+#: seven decades of headroom above the noise and nine below any effect a
+#: calibration could act on.
+_SENSITIVITY_RELATIVE_TOLERANCE = 1e-9
+
 
 class InertParameterError(BunkerShot3DValueError):
     """Raised when a declared parameter does not affect the objective.
@@ -110,6 +124,12 @@ class CalibrationOptimizer:
     def check_sensitivity(self) -> dict[str, float]:
         """Measure how much each declared parameter moves the objective.
 
+        A parameter counts as inert when the change it produces is below
+        :data:`_SENSITIVITY_TOLERANCE` *or* below
+        :data:`_SENSITIVITY_RELATIVE_TOLERANCE` times the objective's own
+        magnitude. The relative arm is what catches a parameter that
+        cancels analytically but leaves floating-point residue behind.
+
         Returns:
             Mapping of parameter name to the absolute objective change observed
             when the parameter is swept across its bounds with the others held
@@ -125,9 +145,15 @@ class CalibrationOptimizer:
             low = midpoint.copy()
             high = midpoint.copy()
             low[i], high[i] = self.bounds[i]
-            delta = abs(self._objective(high) - self._objective(low))
+            low_value = self._objective(low)
+            high_value = self._objective(high)
+            delta = abs(high_value - low_value)
             sensitivities[name] = delta
-            if delta <= _SENSITIVITY_TOLERANCE:
+            scale = max(abs(low_value), abs(high_value))
+            tolerance = max(
+                _SENSITIVITY_TOLERANCE, _SENSITIVITY_RELATIVE_TOLERANCE * scale
+            )
+            if delta <= tolerance:
                 inert.append(name)
 
         if inert:
