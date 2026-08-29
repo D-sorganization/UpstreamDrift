@@ -17,7 +17,7 @@ are not completion evidence.
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  implementation head `323a55db9` plus this handoff successor. No PR exists.
+  implementation head `bbded2f5c` plus this handoff successor. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 - Rigid execution `659394211`: 21 MuJoCo complete, 21 Pinocchio unavailable;
@@ -106,8 +106,8 @@ are not completion evidence.
   prefix identity, all enriched schemas, and the legacy-revision killswitch.
 - Audit 33277601263 qualified both engines/seven modules; runtime identity is
   `5ceeb5af7815aece95ed859e749b72e8696e0ab8d6f183d4193700b525d16bb4`.
-- `c54b8b367` requires all 37 enriched histories at artifact intake.
-  `c0b4b4c90` adds the required-absent CLI over retained GitHub responses.
+- `c54b8b367` requires all 37 histories; `c0b4b4c90` adds required-absent CLI.
+  `bbded2f5c` upgrades intake to receipt 1.2 and binds the API/archive digest.
   Expected enriched session SHA-256 is
   `1bcc7ced5178dbf45613e362f9d03bcaf1043782fb5afccbeeeec372a5e532c6`.
   `76fe32b1f` creates atomic, byte-exact, source-preserving legacy prefix views
@@ -141,7 +141,7 @@ are not completion evidence.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 76 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 77 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
