@@ -21,7 +21,7 @@ are not completion evidence.
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
-  Scientific/collector content head is `55b6315cf89db0ad61deee8c95913cc7439ee171`;
+  Scientific/collector content head is `aefc7e530bdba0debb65124729f702d6226fa252`;
   resolve the handoff-only successor with `git rev-parse HEAD`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
@@ -62,11 +62,15 @@ are not completion evidence.
 - Replay 33279075050 passed [20,40) at exact `e86dff3ba`: archive
   `4061ad24ff11`, receipt `2e765f0aed41`, and source-derived sentinel
   `640e60ae0ad4`. Do not rerun or duplicate it.
-- Collection schema 1.1 requires each source's retained receipt, accepts the
+- Collection schema 1.2 requires each source's retained receipt, accepts the
   governed 1.1/1.2/1.3 receipts, verifies exact identity/count/file digests,
-  and records the receipt schema/SHA. A real 1.1 intake retained 20/20 at
+  and records receipt plus archive size/SHA. A real 1.1 intake retained 20/20 at
   `Campaigns/UpstreamDrift-9153-receipt-bind-validation-prefix-0020-v1`,
   manifest SHA `55412e9342d1`.
+- Real schema-1.2 collection validation retained the exact [0,40) prefix at
+  `Campaigns/UpstreamDrift-9153-enriched-collected-prefix-0040-schema-1.2-
+validation-v1`; manifest SHA is `7ff363120b4c`, with archive sizes 7,098,230
+  and 8,143,272 bytes and the governed archive digests. No outcomes were read.
 - Real receipt-1.3 validation against governed run 33277732709 retained 20/20
   cross-bound pairs and evidence sidecars at
   `Campaigns/UpstreamDrift-9153-receipt-v1.3-validation-run-33277732709`;
@@ -110,7 +114,7 @@ validation-run-33279075050`; deterministic receipt SHA is `2e765f0aed41`.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 90 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 95 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
