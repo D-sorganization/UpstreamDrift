@@ -43,6 +43,14 @@ tests require a previous fixture as soon as a real second supported version is
 declared and reject future/incompatible fixtures now. No tag or release is
 created by implementing #9192.
 
+Protected publication commands have an explicit repository-root precondition:
+every workflow job that invokes `scripts.companion_publication` runs from
+`${{ github.workspace }}`. This is enforced by a workflow-structure contract so
+self-hosted runner defaults cannot make a successful checkout non-importable.
+Failure to establish that working directory is negative publication evidence:
+no artifact or attestation may be accepted, and #9192 remains open until a new
+protected-main run publishes and verifies the exact protected commit bytes.
+
 ## Ball-Sand Interaction: What Reaches the Ball (#8712)
 
 Issue #8712 resolves the sand arriving at the ball inside the F1 plane-strain

@@ -399,6 +399,27 @@ def test_existing_workflows_share_publication_command_and_publish_atomically() -
     )
 
 
+def test_every_companion_cli_job_runs_from_explicit_github_workspace() -> None:
+    yaml = pytest.importorskip("yaml")
+    workflow_path = REPO_ROOT / ".github/workflows/release.yml"
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+
+    companion_jobs = {
+        job_id: job
+        for job_id, job in workflow["jobs"].items()
+        if any(
+            "scripts.companion_publication" in step.get("run", "")
+            for step in job.get("steps", [])
+        )
+    }
+
+    assert companion_jobs
+    for job_id, job in companion_jobs.items():
+        assert job.get("defaults", {}).get("run", {}).get("working-directory") == (
+            "${{ github.workspace }}"
+        ), f"{job_id} can run outside the checked-out repository"
+
+
 def test_public_module_cli_is_importable_from_repository_root() -> None:
     completed = subprocess.run(
         [sys.executable, "-m", "scripts.companion_publication", "--help"],
