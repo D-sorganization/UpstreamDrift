@@ -184,6 +184,13 @@ _SURFACE_FIT_LOWER_FRACTION = 0.15
 _SURFACE_FIT_UPPER_FRACTION = 0.90
 """Bins above this fraction are the plateau, not slope."""
 
+_MAX_RELAXATION_STEPS = 2_000_000
+"""Step cap for a relaxation march.
+
+Deliberately far above anything this module asks for: the solver's own
+20,000-step default is a shot-length cap, and a relaxation watched for a
+second of simulated time is 80,000 steps at the CFL step."""
+
 
 @dataclass(frozen=True, slots=True)
 class SlopeRelaxationSettings:
@@ -485,6 +492,58 @@ def _fit_slope_deg(
     return math.degrees(math.atan(-float(gradient))), used
 
 
+def _open_bed_solver(
+    material: SandContinuum, settings: SlopeRelaxationSettings
+) -> tuple[PlaneStrainMPMSolver, PlaneStrainGrid, float]:
+    """Build the solver, grid and timestep the relaxation marches on.
+
+    The walls are the point of this helper: ``SLIP`` on the crest side is
+    a symmetry plane, ``SEPARATE`` on the toe side lets sand leave but not
+    return, and ``STICKY`` on the base is what gives the wedge something
+    to stand on -- a frictionless base has no repose angle at all.  The
+    grid is built explicitly rather than through
+    :meth:`~bunkershot3d.solvers.mpm.grid.PlaneStrainGrid.covering` so
+    that the base wall band lands on the bed floor instead of a padded
+    cell or two below it, where material settles under the surface the
+    slope is being measured against.
+
+    Args:
+        material: The continuum under test.
+        settings: Geometry and resolution.
+
+    Returns:
+        ``(solver, grid, time_step_s)``.
+    """
+    cell = settings.cell_size_m
+    solver = PlaneStrainMPMSolver(
+        material=material,
+        cell_size_m=cell,
+        effective_width_m=settings.effective_width_m,
+        bed_depth_m=settings.height_m,
+        walls=DomainWalls(
+            lower_x=WallCondition.SLIP,
+            upper_x=WallCondition.SEPARATE,
+            lower_z=WallCondition.STICKY,
+            upper_z=WallCondition.FREE,
+        ),
+        max_steps=_MAX_RELAXATION_STEPS,
+    )
+    grid = PlaneStrainGrid(
+        (-cell, -cell),
+        cell,
+        (
+            int(round((settings.bed_length_m + 2.0 * cell) / cell)) + 4,
+            int(round(settings.height_m / cell)) + 10,
+        ),
+    )
+    time_step = cfl_time_step_s(
+        cell_size_m=cell,
+        elastic_wave_speed_m_s=material.elastic_wave_speed_m_s,
+        max_material_speed_m_s=math.sqrt(2.0 * GRAVITY_M_S2 * settings.height_m),
+    )
+    return solver, grid, time_step
+
+
 def relax_slope(
     material: SandContinuum,
     settings: SlopeRelaxationSettings | None = None,
@@ -515,35 +574,7 @@ def relax_slope(
         )
     config = SlopeRelaxationSettings() if settings is None else settings
     particles = wedge_bed(material, config)
-
-    walls = DomainWalls(
-        lower_x=WallCondition.SLIP,
-        upper_x=WallCondition.SEPARATE,
-        lower_z=WallCondition.STICKY,
-        upper_z=WallCondition.FREE,
-    )
-    solver = PlaneStrainMPMSolver(
-        material=material,
-        cell_size_m=config.cell_size_m,
-        effective_width_m=config.effective_width_m,
-        bed_depth_m=config.height_m,
-        walls=walls,
-        max_steps=2_000_000,
-    )
-    cell = config.cell_size_m
-    grid = PlaneStrainGrid(
-        (-cell, -cell),
-        cell,
-        (
-            int(round((config.bed_length_m + 2.0 * cell) / cell)) + 4,
-            int(round(config.height_m / cell)) + 10,
-        ),
-    )
-    time_step = cfl_time_step_s(
-        cell_size_m=cell,
-        elastic_wave_speed_m_s=material.elastic_wave_speed_m_s,
-        max_material_speed_m_s=math.sqrt(2.0 * GRAVITY_M_S2 * config.height_m),
-    )
+    solver, grid, time_step = _open_bed_solver(material, config)
     stride = max(int(config.settle_time_s / (time_step * config.n_strides)), 1)
 
     samples: list[SlopeSample] = []
