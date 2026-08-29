@@ -30,8 +30,8 @@ This catalog does not copy or supersede #9064's design-manual authority or
 
 Issue #9192 adds the publication boundary without changing that scientific or
 content status. The existing release workflow now runs the same fail-closed
-`python3 -m scripts.companion_publication build` command for protected `main` and exact
-`vX.Y.Z` tags. It packages the manifest, manifest schema, acquisition schema,
+`python3 -m scripts.companion_publication build` command for protected `main`
+and exact `vX.Y.Z` tags. It packages the manifest, manifest schema, acquisition schema,
 compatibility policy, and detached SHA-256 files; attests the exact payloads;
 and records repository, source commit, workflow run, schema/generator versions,
 sizes, hashes, and artifact identities. Protected-main Actions artifacts are
