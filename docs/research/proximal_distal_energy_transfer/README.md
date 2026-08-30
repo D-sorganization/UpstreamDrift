@@ -498,11 +498,31 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --enriched-launch /path/to/enriched-launch.json \
   --enriched-checkpoint-dir /path/to/enriched-prefix \
   --output /path/to/enrichment-audit.json
+# if exact enrichment fails, classify a preregistered one-case repeat without
+# numerical tolerances or scientific outcome inspection
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_repeatability_audit \
+  --legacy-plan /path/to/legacy-plan.json \
+  --legacy-launch /path/to/legacy-launch.json \
+  --legacy-checkpoint-dir /path/to/legacy-prefix \
+  --enriched-plan /path/to/enriched-plan.json \
+  --enriched-launch /path/to/enriched-launch.json \
+  --enriched-checkpoint-dir /path/to/enriched-prefix \
+  --repeat-plan /path/to/enriched-plan.json \
+  --repeat-launch /path/to/enriched-launch.json \
+  --repeat-checkpoint-dir /path/to/single-case-repeat \
+  --case-index REGISTERED_CASE_INDEX \
+  --output /path/to/repeatability-audit.json
 ```
 
 The audit requires identical case ordering, statuses, JSON results, and every
 overlapping legacy NPZ array while independently validating the enriched
 sidecars. It does not compare or interpret scientific outcome magnitudes.
+The repeatability audit is diagnostic only. It compares the JSON result after
+removing only the evidence-schema marker and requires element-exact equality
+for every legacy array. It binds all three checkpoint pairs by SHA-256 and
+classifies enriched-only, legacy-only, neither, or nondiscriminating matches;
+none of those branches authorizes campaign promotion, effect interpretation,
+or human or coaching inference.
 Artifact receipt 1.3 requires GitHub's recorded byte size and SHA-256 digest to
 equal the retained ZIP exactly and cross-binds the run, structural job, and artifact
 workflow-run IDs and dispatch heads. A readable archive or API record from a
