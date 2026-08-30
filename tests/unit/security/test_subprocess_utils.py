@@ -317,9 +317,15 @@ class TestRunCommandSuiteRoot:
     _IN_SUITE_SCRIPT = SUITE_ROOT / "src" / "shared" / "python" / "version_info.py"
 
     def test_executable_rejection_already_raises(self) -> None:
-        """The contract the new rejections match: raise, do not return None."""
+        """The contract the new rejections match: raise, do not return None.
+
+        This used ``git`` as its example of a rejected executable; ``git`` is
+        now allowlisted (issue #9230), so the example moved to ``rm``. The
+        contract under test is unchanged -- the choice of executable was
+        incidental, not an assertion that ``git`` in particular is unsafe.
+        """
         with pytest.raises(SecureSubprocessError):
-            run_command(["git", "--version"])
+            run_command(["rm", "--version"])
 
     def test_rejects_out_of_tree_script(self, tmp_path) -> None:
         payload = tmp_path / "payload.py"

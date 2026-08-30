@@ -33,6 +33,22 @@ ALLOWED_SCRIPT_DIRECTORIES = [
 # Windows hosts where Docker Desktop is not installed but Docker is reachable
 # inside WSL. Blocking `wsl` caused the launcher's Docker probe to silently
 # report "unavailable" on every WSL-only Windows dev box.
+#
+# `git`/`git.exe` are allowed because `git_sync_repository()` in
+# `src/shared/python/gui_pkg/launcher_utils.py` runs `git fetch --all` and
+# `git pull` (used by `installer/legacy_setup.py`). Without the entry every
+# call raised `SecureSubprocessError` out of `run_command()` -- neither
+# `@log_errors(...(RuntimeError, TypeError, ValueError))` nor the caller's
+# `except (RuntimeError, ValueError, OSError)` catches it -- so repository
+# sync crashed the installer instead of logging a warning and returning False
+# (issue #9230).
+#
+# This does not meaningfully widen the threat model. The allowlist constrains
+# *which tools* this codebase may invoke; it is not a sandbox. `python`,
+# `python3`, `docker` and `wsl` are already listed and each trivially executes
+# arbitrary code (`python -c ...`, `docker run ...`, `wsl <anything>`), so the
+# arbitrary-execution paths `git` offers (aliases, hooks, `-c core.pager=...`)
+# are strictly less capable than entries already present.
 ALLOWED_EXECUTABLES = [
     "python",
     "python3",
@@ -44,6 +60,8 @@ ALLOWED_EXECUTABLES = [
     "docker.exe",
     "wsl",
     "wsl.exe",
+    "git",
+    "git.exe",
     "echo",
 ]
 
