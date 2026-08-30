@@ -1,10 +1,14 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 09:18 PDT
+Updated: 2026-08-30 09:39 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
 design-manual program.
+
+Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
+contract, recovery constraints, and next commands are in
+`docs/development/proximal_distal_program_turnover.md`.
 
 ## Protected Authority
 
@@ -31,11 +35,16 @@ design-manual program.
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
 
-## Active Prospective Smoke Registration: #9153
+## Gated Prospective Smoke Registration: #9153
 
 - Worktree: `UpstreamDrift-worktrees/9153-current-main-smoke-prereg`.
 - Branch: `feat/9153-current-main-smoke-prereg`, based exactly on protected
   #9306 squash `f98bf7b382083322c609bfd7d680e4e82d71aed8`.
+- PR #9308 is the only active completion PR for this slice. Its reviewed head
+  is `142662fb3de86fbb8086b83772df09425897f9c2`; CI Standard run
+  `33322181043` is green, including the 9m54s unit aggregate. Squash auto-merge
+  is preserved while Bot CI Trigger run `33322180972` waits for the
+  `d-sorg-fleet-docker` runner. Do not rerun it for capacity alone.
 - New registration source:
   `scripts/research/proximal_distal_energy/articulated_distributed_smoke_registration.py`.
 - New frozen protocol:
@@ -56,17 +65,14 @@ design-manual program.
 
 ## Immediate Order
 
-1. Run focused event, registration, specification, architecture, title, and
-   release-governance gates on this clean current-main branch.
-2. Commit the prospective registration slice and update deterministic release
-   manifests/checksums if the release qualifier requires them.
-3. Run the GitHub App setup immediately before every GitHub operation, verify
-   the #9153 lease, open a full protected PR, preserve squash auto-merge, and
-   fix only exact-head actionable failures.
-4. Verify the squash commit/tree on remote `main` and record exact evidence on
-   #9153.
-5. Only after the registration merges, implement the current-main single-worker
-   atomic smoke runner. Never import or relabel legacy checkpoints as outcomes.
+1. Wait for exact Bot CI Trigger run `33322180972`; do not create a redundant
+   capacity-only rerun.
+2. Verify #9308's squash commit/tree on remote `main` and record exact evidence
+   on #9153.
+3. Merge the turnover update from `docs/9153-turnover` so the protected handoff
+   states the final #9308 authority.
+4. Only then implement the current-main single-worker atomic smoke runner.
+   Never import or relabel legacy checkpoints as outcomes.
 
 ## Scientific Boundaries
 
