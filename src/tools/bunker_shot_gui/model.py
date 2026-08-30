@@ -1014,16 +1014,12 @@ class WorkbenchModel:
             reasons: Accumulator for why a point could not be answered.
 
         Returns:
-            The carry and its verdict, or ``None``; and whether the
-            **envelope refused** the query.
-
-            The two ways a point yields no carry are different claims and
-            the caller must not collapse them (issue #9247). The envelope
-            declining is ADR-0032 refusal: the solver would not answer. A
-            head that buries *did* answer -- it ploughed, reversed inside
-            its own crater, and so has no prismatic divot for the launch
-            to divide by. Reporting the second as the first tells a
-            designer the tool refused a delivery it actually simulated.
+            The carry and its verdict, or ``None``, and whether the
+            **envelope refused**. The two ways a point yields no carry
+            must not be collapsed (issue #9247): the envelope declining
+            is ADR-0032 refusal, while a head that buries *did* answer
+            and has no prismatic divot to divide by -- reporting the
+            second as the first says the tool refused a real delivery.
         """
         build = self.head_build(geometry)
         solver = self.solver(sand, swing)
@@ -1052,14 +1048,10 @@ class WorkbenchModel:
                 geometry,
                 sand,
             )
-            return (
-                self.carry_estimate(
-                    geometry,
-                    swing,
-                    _sand_delivery(result, _measured_divot(divot), sand),
-                ),
-                False,
+            estimate = self.carry_estimate(
+                geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
             )
+            return estimate, False
         except (RuntimeError, ImportError, ValueError) as error:
             reasons.append(f"carry is unavailable: {error}")
             return None, False
