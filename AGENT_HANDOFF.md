@@ -110,6 +110,8 @@ contract, recovery constraints, and next commands are in
 
 - Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`;
   publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
+- Governed companion workflows (#9190) define the 15-record registry, public
+  executor, and CI execution evidence across 10 success and 4 failure fixtures.
 - #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with
   no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes,
   acquisition identity, and attestations; #9174 remains open.
