@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 02:23 PDT (2026-08-30 09:23 UTC)
+Updated: 2026-08-30 02:40 PDT (2026-08-30 09:40 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -20,7 +20,7 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
 
 - #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must be clean and remote-equal after
-  this handoff commit; active #9285 dispatch head is `6f157c9269be99fddc3b741c2ccb17896a6eb2c8`; no PR.
+  this handoff commit; completed #9285 dispatch head is `6f157c9269be99fddc3b741c2ccb17896a6eb2c8`; no PR.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
@@ -100,9 +100,9 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    #9283 corrected run 33299342024 passed [0,20), boundary `7b5b4db054b1`.
    #9284 run 33300572602 passed [20,40); ZIP SHAs are `646760f77ee4`/
    `d5a45955d0c3`; collection/boundary SHAs are `a7a4d1203152`/`ecb18f483fbf`;
-   40 cases/360 arrays pass exactly. #9285 run 33302869012/job 99234117531
-   is sole live [40,60); registration/runtime gates pass and cases execute.
-   Do not cancel, duplicate, inspect outcomes, or dispatch [60,80).
+   40 cases/360 arrays pass exactly. #9285 run 33302869012 passed [40,60);
+   ZIP/receipt/corruption SHAs are `455ae2400f11`/`cb8be588c5d2`/`6db837906327`/`e362e20e81eb`.
+   Collection/legacy/enrichment/boundary SHAs end `046d28ce`/`fd18ba7e`/`52404c77`/`47753027`; 60 cases/540 arrays pass, outcomes unopened, [60,80) unauthorized.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
