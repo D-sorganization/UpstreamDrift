@@ -25,6 +25,7 @@ _RECEIPT_SCHEMAS = {
     "articulated-structural-factorial-artifact-receipt/1.1.0",
     "articulated-structural-factorial-artifact-receipt/1.2.0",
     "articulated-structural-factorial-artifact-receipt/1.3.0",
+    "articulated-structural-factorial-artifact-receipt/1.4.0",
 }
 _RECEIPT_CLASSIFICATION = "workflow_artifact_provenance_not_scientific_summary"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -181,7 +182,7 @@ def _validate_receipt(
         or archive_size <= 0
     ):
         raise ValueError("receipt artifact archive size is invalid")
-    if schema.endswith("/1.3.0"):
+    if schema.endswith(("/1.3.0", "/1.4.0")):
         run_head = run.get("head_sha")
         if (
             not isinstance(run_head, str)
@@ -199,6 +200,17 @@ def _validate_receipt(
             or workflow_run.get("head_sha") != run_head
         ):
             raise ValueError("receipt artifact is not bound to the retained run")
+    if schema.endswith("/1.4.0"):
+        response_digests = record.get("github_api_response_sha256")
+        if (
+            not isinstance(response_digests, Mapping)
+            or set(response_digests) != {"run", "jobs", "artifacts"}
+            or any(
+                not isinstance(digest, str) or _SHA256.fullmatch(digest) is None
+                for digest in response_digests.values()
+            )
+        ):
+            raise ValueError("receipt GitHub API response digests are invalid")
 
     archive_sha256 = record.get("artifact_archive_sha256")
     if not isinstance(archive_sha256, str) or _SHA256.fullmatch(archive_sha256) is None:
@@ -311,6 +323,7 @@ def collect_structural_slices(
                 "artifact_receipt_sha256": receipt_sha256,
                 "artifact_archive_size_in_bytes": receipt_artifact.get("size_in_bytes"),
                 "artifact_archive_sha256": receipt.get("artifact_archive_sha256"),
+                "github_api_response_sha256": receipt.get("github_api_response_sha256"),
                 "files": sorted(files, key=lambda item: item["name"]),
             }
         )

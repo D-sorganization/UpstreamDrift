@@ -233,6 +233,14 @@ def test_receipt_cli_consumes_retained_github_responses_atomically(
 
     assert exit_code == 0
     receipt = json.loads(output_path.read_text(encoding="utf-8"))
+    assert receipt["schema_version"] == (
+        "articulated-structural-factorial-artifact-receipt/1.4.0"
+    )
+    assert receipt["github_api_response_sha256"] == {
+        "artifacts": hashlib.sha256(artifacts_path.read_bytes()).hexdigest(),
+        "jobs": hashlib.sha256(jobs_path.read_bytes()).hexdigest(),
+        "run": hashlib.sha256(run_path.read_bytes()).hexdigest(),
+    }
     assert receipt["artifact"]["id"] == _artifact()["id"]
     assert receipt["evidence_sidecars_validated"] == 2
     assert not tuple(tmp_path.glob("artifact-receipt.json.tmp-*"))

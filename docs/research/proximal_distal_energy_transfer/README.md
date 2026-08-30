@@ -507,8 +507,10 @@ Artifact receipt 1.3 requires GitHub's recorded byte size and SHA-256 digest to
 equal the retained ZIP exactly and cross-binds the run, structural job, and artifact
 workflow-run IDs and dispatch heads. A readable archive or API record from a
 different execution fails intake. Collection preserves compatibility with the
-retained 1.1 and 1.2 receipts and applies the stronger cross-binding checks to
-1.3 before matching conclusion, requested range, execution identity,
+retained 1.1--1.3 receipts. Receipt 1.4 additionally binds the exact retained
+run, jobs, and artifacts API-response bytes by SHA-256. Collection applies the
+stronger cross-binding checks to 1.3 and 1.4 before matching conclusion,
+requested range, execution identity,
 checkpoint count, and every extracted file digest. The collection manifest
 retains each receipt's schema and SHA-256 so manually repeated command-line
 metadata cannot silently substitute for the governed intake record.

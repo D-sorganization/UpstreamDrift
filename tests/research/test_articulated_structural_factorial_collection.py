@@ -139,6 +139,12 @@ def _write_receipt(
         "checkpoint_pair_count": len(tuple(source.glob("case-*.json"))),
         "files": files,
     }
+    if schema_version.endswith("/1.4.0"):
+        payload["github_api_response_sha256"] = {
+            "run": "a" * 64,
+            "jobs": "b" * 64,
+            "artifacts": "c" * 64,
+        }
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
 
@@ -317,6 +323,41 @@ def test_collection_accepts_each_governed_receipt_schema(
     )
 
     assert manifest["sources"][0]["artifact_receipt_schema"] == schema_version
+    if schema_version.endswith("/1.4.0"):
+        assert manifest["sources"][0]["github_api_response_sha256"] == {
+            "run": "a" * 64,
+            "jobs": "b" * 64,
+            "artifacts": "c" * 64,
+        }
+
+
+def test_collection_rejects_a_v14_receipt_without_raw_api_response_digests(
+    tmp_path: Path,
+) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    source = _slice(tmp_path / "source", plan=plan, launch=launch, start=0, stop=2)
+    record = _source_record(
+        launch=launch,
+        run_id=101,
+        artifact_name="structural-checkpoints-101",
+        conclusion="success",
+        start=0,
+        stop=2,
+        directory=source,
+        schema_version=("articulated-structural-factorial-artifact-receipt/1.4.0"),
+    )
+    receipt = json.loads(record.receipt_path.read_text(encoding="utf-8"))
+    del receipt["github_api_response_sha256"]
+    record.receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="API response digests"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=(record,),
+            output_dir=tmp_path / "combined",
+        )
 
 
 def test_collection_rejects_session_drift_and_overlap(tmp_path: Path) -> None:

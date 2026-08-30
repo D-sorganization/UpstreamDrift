@@ -20,6 +20,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ev
 )
 
 _CROSS_BOUND_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.3.0"
+_RAW_RESPONSE_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.4.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _JOB_NAME = "Structural Runtime Audit or Campaign Slice"
 _CAMPAIGN_STEP = "Run Registered Structural Campaign Slice"
@@ -200,6 +201,7 @@ def build_structural_artifact_receipt(
     requested_case_start: int,
     requested_case_stop: int,
     required_evidence_schema: str | None = None,
+    github_api_response_sha256: Mapping[str, str] | None = None,
 ) -> dict[str, object]:
     """Return an outcome-blind receipt for one terminal hosted slice artifact."""
 
@@ -214,6 +216,12 @@ def build_structural_artifact_receipt(
         raise ValueError("expected_session_sha256 must be a lowercase SHA-256")
     if required_evidence_schema not in {None, EVIDENCE_SIDECAR_SCHEMA}:
         raise ValueError("required_evidence_schema is not a registered schema")
+    if github_api_response_sha256 is not None:
+        if set(github_api_response_sha256) != {"run", "jobs", "artifacts"} or any(
+            not isinstance(digest, str) or _SHA256.fullmatch(digest) is None
+            for digest in github_api_response_sha256.values()
+        ):
+            raise ValueError("GitHub API response digests are invalid")
     if (
         isinstance(requested_case_start, bool)
         or not isinstance(requested_case_start, int)
@@ -317,7 +325,11 @@ def build_structural_artifact_receipt(
         "completed_at",
     )
     receipt: dict[str, object] = {
-        "schema_version": _CROSS_BOUND_SCHEMA,
+        "schema_version": (
+            _RAW_RESPONSE_SCHEMA
+            if github_api_response_sha256 is not None
+            else _CROSS_BOUND_SCHEMA
+        ),
         "classification": "workflow_artifact_provenance_not_scientific_summary",
         "requested_case_range": [requested_case_start, requested_case_stop],
         "execution_revision": expected_execution_revision,
@@ -397,6 +409,8 @@ def build_structural_artifact_receipt(
                 "evidence_sidecars_validated": evidence_sidecars_validated,
             }
         )
+    if github_api_response_sha256 is not None:
+        receipt["github_api_response_sha256"] = dict(github_api_response_sha256)
     return receipt
 
 
@@ -461,6 +475,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         requested_case_start=args.case_start,
         requested_case_stop=args.case_stop,
         required_evidence_schema=args.required_evidence_schema,
+        github_api_response_sha256={
+            "run": _sha256(args.run_json),
+            "jobs": _sha256(args.jobs_json),
+            "artifacts": _sha256(args.artifacts_json),
+        },
     )
     _write_required_absent_json(args.output, receipt)
     return 0
