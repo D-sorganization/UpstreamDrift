@@ -2,6 +2,35 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## Hybrid Manufactured-Solution Authority Repair (#9236)
+
+The protected articulated manufactured-solution record is not presently
+reproducible authority. Optional-stack run `33278810705`, job `99170340423`,
+used MuJoCo 3.12.0 and Pinocchio 4.1.0 while the record declared 3.8.0 for both,
+and the current generator did not reproduce the committed JSON bytes. This is
+negative authority evidence even though 12 of 13 native checks passed.
+
+The #9236 candidate defines a study-scoped, hash-locked CPython 3.11.15
+manylinux environment and an isolated native workflow. Its canonical writer
+rejects NaN and performs atomic replacement. Semantic comparison fails closed
+unless both authority and rolling records declare the complete six-gate
+tolerance set, the exact 18-field compatibility policy, every governed result
+path, finite numeric leaves, monotone convergence, and an internally consistent
+component maximum. Runtime profile, dependency, command, lock/input digest,
+source, and output identities are explicit.
+
+This implementation does not modify the scientific record or its checksum,
+release manifest, or claim-evidence manifest. Independent implementation review
+is GO at `0f2f4aed2d1aa2c231c241aabe464249f1586b0f`; 83 cumulative corrective
+tests pass. The exact original authority suite remains deliberately partitioned
+as 33 passed, 6 native-stack skips on Windows, and 3 RED tests that reserve
+publication until exact Linux CPython 3.11.15 regeneration. A regenerated
+record may be accepted only after two same-environment native builds are
+byte-identical, their execution identity matches the declared profile, numeric
+evidence satisfies the governed comparison, and the canonical checksum and
+manifest cascade is regenerated. #9192, #9174, and AffineDrift #4022 remain
+open until that protected evidence exists.
+
 ## Deterministic AffineDrift Companion Authority (#9174)
 
 ADR-0043 establishes UpstreamDrift as the one-way provider of the strict v1
@@ -3359,6 +3388,7 @@ overlapping fixture names in nested conftests.
 
 | Tool       | Version | Purpose                                                                            | Blocking? |
 | ---------- | ------- | ---------------------------------------------------------------------------------- | --------- |
+| 2026-08-29 | 1.0.657 | Hardened the #9236 articulated manufactured-solution authority boundary without changing scientific evidence. Added a study-scoped, hash-locked CPython 3.11.15 manylinux environment; isolated native workflow execution; canonical atomic JSON serialization; explicit execution-profile provenance; and declared-tolerance semantic comparison. The comparator now rejects incomplete or unknown tolerance policy, missing governed result paths in either record, non-finite or non-positive policy values, inconsistent per-record maxima, negative residuals, non-monotone convergence, and stale profiles. Independent review is GO for the implementation at `0f2f4aed2`; the scientific record and checksum/release/claim manifests remain byte-identical to protected main. Exactly three authority tests remain RED until two exact-environment Linux native builds reproduce byte-identical governed evidence, so #9192, #9174, and AffineDrift #4022 remain open. |
 | 2026-08-29 | 1.0.656 | Repaired the articulated manufactured-solution provenance contract after #9231's bit-identical `_cross3` optimization changed the tracked bytes of `spatial_full_body.py` without changing the recorded computation (issue #9236). The exact protected-base optional-stack failure, run 33271527700 / job 99150747357, proved the committed record still named source SHA-256 `bb195bf720542f870eaaa514e1ae8b2a4e81ac89d6d89447fa9be4e43aa94743` while the authoritative file was `b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2`. The record now pins that exact source plus the changed test source. Ordinary reconciliation with #9235 also advanced the nested `subject_scaled_closed_contact.json` provenance bytes, so that input pin and the governed checksum, release manifest, and claim-evidence manifest were regenerated together from the combined protected state. A native-Pinocchio regression generates the record twice in one pinned environment, requires byte equality between both builds and the committed artifact, and therefore fails closed on nondeterminism as well as stale bytes. Numeric arrays, tolerances, scientific claims, qualification state, and authority boundaries are unchanged. |
 | 2026-08-29 | 1.0.652 | Fixed the `tests (3.12)` per-test timeout on `tests/research/test_subject_scaled_closed_contact.py` (issue #9231; distinct from the 35-minute suite-budget exhaustion tracked by #9204). `cProfile` on the closed-contact atlas attributed 37.5 s of 45.7 s -- 82% -- to `numpy.cross` across 1,164,975 calls, essentially all of it generic dispatch: `normalize_axis_tuple` (6.99 M calls) and `moveaxis` (3.49 M calls) normalising axes for inputs that are always `(3,)`. The faulthandler frame named `_point_jacobians`, but the call volume comes from the body-Jacobian loop in `forward_kinematics`. `scripts/research/proximal_distal_energy/spatial_full_body.py` now uses a module-private `_cross3` evaluating the same three products and differences in the same order on the same float64 values. Equivalence was verified, not assumed: `np.array_equal` holds over 200,000 random pairs at 1e-8/1e0/1e6 magnitudes plus zero, parallel, inf, NaN and overflow-to-inf cases, and across 82 recorded outputs (34,612 float elements) spanning the module's whole public surface and every array of the complete committed 18x13 closed-contact atlas -- all bit-identical. The atlas test drops 20.89 s to 5.23 s plain and 30.03 s to 6.74 s under `--cov=src`, the CI condition, against a 60 s per-test timeout. No iteration count, solver tolerance, problem size, marker or lane changed, and no registered evidence hash was regenerated. Recorded separately for follow-up: the registered `source_sha256` values across the `proximal_distal_energy` evidence bundle are already stale on `main` (11 records, `spatial_full_body.py` among them, drifted by the pure refactors in #9055 and #8962), which is why `test_spatial_full_body_evidence.py` and three sibling evidence tests fail before this change as well as after it. |
 | 2026-08-27 | 1.0.608 | Optimized `max_linear_speed` array operations in `trajectory.py` using `np.einsum` to avoid intermediate array allocations and square root calculations. |
