@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 09:50 PDT
+Updated: 2026-08-30 10:02 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -13,9 +13,9 @@ contract, recovery constraints, and next commands are in
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
-  `651de90a4cf8e1195ec7f3ab3ae16883ec8f6172`, the verified squash merge of PR
-  #9308. Its reviewed head and squash merge share exact tree
-  `a0dd17ed057c0aea45f112172d406ace971610df`.
+  `3503674a90e3ca6d75e81f084f011299f5e95794`, the verified squash merge of
+  turnover PR #9309. Its reviewed head and squash merge share exact tree
+  `827608120154ecdfb6dc8b9f0c53b988a0454343`.
 - #9306 adds signed-gap retention, bracketed opening/reattachment location on a
   declared linear state interpolant, duplicate-time event alignment, and the
   distributed replay adapter into the protected attribution kernel.
@@ -42,9 +42,11 @@ contract, recovery constraints, and next commands are in
   `651de90a4cf8e1195ec7f3ab3ae16883ec8f6172`. Reviewed head
   `142662fb3de86fbb8086b83772df09425897f9c2` and merge share tree
   `a0dd17ed057c0aea45f112172d406ace971610df`; remote `main` equals the squash.
-- Active turnover worktree: `UpstreamDrift-worktrees/9153-turnover`, branch
-  `docs/9153-turnover`. It contains handoff documentation only relative to the
-  protected #9308 tree.
+- PR #9309 changed only this root handoff and the detailed turnover document;
+  it introduced no runtime, smoke outcome, scientific promotion, human
+  validation, or coaching authority. Any post-merge turnover correction PR is
+  recorded in the latest #9153 comment rather than self-referentially embedded
+  here; verify it is protected before implementation resumes.
 - New registration source:
   `scripts/research/proximal_distal_energy/articulated_distributed_smoke_registration.py`.
 - New frozen protocol:
@@ -65,8 +67,8 @@ contract, recovery constraints, and next commands are in
 
 ## Immediate Order
 
-1. Open and protected-squash-merge the turnover-only update from
-   `docs/9153-turnover`.
+1. Verify the latest turnover-correction PR recorded on #9153 is protected on
+   remote `main`; preserve its existing runs and auto-merge.
 2. From that exact protected base, implement the current-main single-worker
    atomic smoke runner with RED contracts for registration identity, complete
    case enumeration, atomic resume, typed failures, and no outcome promotion.
