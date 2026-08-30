@@ -14,6 +14,7 @@ from scripts.research.proximal_distal_energy.articulated_contact_projection impo
 )
 from scripts.research.proximal_distal_energy.articulated_forward_attribution import (
     ForwardAttribution,
+    ForwardAttributionInputs,
     differentiate_mass_along_velocity,
     integrate_forward_attribution,
 )
@@ -137,15 +138,17 @@ def attribute_rigid_contact_trajectory(
         mass_evaluator=evaluate_mass,
     )
     attribution = integrate_forward_attribution(
-        time_s=time,
-        mass_matrices=masses,
-        mass_matrix_rates=mass_rates,
-        velocities=velocities,
-        generalized_forces=forces,
-        contribution_names=CONTRIBUTION_NAMES,
-        segment_ids=segments,
-        event_impulses=np.empty((0, model.nq)),
-        event_work_j=np.empty(0),
+        ForwardAttributionInputs(
+            time_s=time,
+            mass_matrices=masses,
+            mass_matrix_rates=mass_rates,
+            velocities=velocities,
+            generalized_forces=forces,
+            contribution_names=CONTRIBUTION_NAMES,
+            segment_ids=segments,
+            event_impulses=np.empty((0, model.nq)),
+            event_work_j=np.empty(0),
+        )
     )
     return RigidTrajectoryAttributionEvidence(
         trace=dict(trace),

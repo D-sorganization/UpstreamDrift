@@ -53,6 +53,71 @@ class ForwardAttribution:
         return float(np.sum(self.generalized_work_j))
 
 
+@dataclass(frozen=True, slots=True)
+class ForwardAttributionInputs:
+    """Complete typed input contract for one event-aligned attribution."""
+
+    time_s: FloatArray
+    mass_matrices: FloatArray
+    mass_matrix_rates: FloatArray
+    velocities: FloatArray
+    generalized_forces: FloatArray
+    contribution_names: tuple[str, ...]
+    segment_ids: IntArray
+    event_impulses: FloatArray
+    event_work_j: FloatArray
+    share_denominator_floor: float = 1.0e-12
+
+
+@dataclass(frozen=True, slots=True)
+class _ValidatedInputs:
+    time: FloatArray
+    mass: FloatArray
+    mass_rate: FloatArray
+    velocity: FloatArray
+    forces: FloatArray
+    contribution_names: tuple[str, ...]
+    segments: IntArray
+    impulses: FloatArray
+    event_work: FloatArray
+    continuous: NDArray[np.bool_]
+    denominator_floor: float
+
+
+@dataclass(frozen=True, slots=True)
+class _IntegratedComponents:
+    continuous_impulses: FloatArray
+    generalized_work: FloatArray
+    kinetic_transport_work: float
+    transport_impulse: FloatArray
+    total_event_impulse: FloatArray
+    total_event_work: float
+    momentum_change: FloatArray
+    kinetic_energy_change: float
+    momentum_residual: float
+    work_residual: float
+
+
+@dataclass(frozen=True, slots=True)
+class _ImpulseSummary:
+    reference: float
+    relative_residual: float
+    component_names: tuple[str, ...]
+    shares: FloatArray
+    adequacy: NDArray[np.bool_]
+    cancellation: FloatArray
+
+
+@dataclass(frozen=True, slots=True)
+class _WorkSummary:
+    reference: float
+    relative_residual: float
+    component_names: tuple[str, ...]
+    shares: FloatArray
+    adequate: bool
+    cancellation: float
+
+
 def _finite_array(name: str, value: Any, shape: tuple[int, ...]) -> FloatArray:
     array = np.asarray(value, dtype=np.float64)
     if array.shape != shape:
@@ -193,18 +258,200 @@ def require_forward_attribution_closure(
         )
 
 
+def _validate_forward_inputs(inputs: ForwardAttributionInputs) -> _ValidatedInputs:
+    if not isinstance(inputs, ForwardAttributionInputs):
+        raise TypeError("inputs must be a ForwardAttributionInputs")
+    time, segments = _validate_time_and_segments(inputs.time_s, inputs.segment_ids)
+    sample_count = time.size
+    velocity = np.asarray(inputs.velocities, dtype=np.float64)
+    if velocity.ndim != 2 or velocity.shape[0] != sample_count:
+        raise ValueError("velocities must have shape (samples, coordinates)")
+    coordinate_count = velocity.shape[1]
+    velocity = _finite_array("velocities", velocity, velocity.shape)
+    mass = _finite_array(
+        "mass_matrices",
+        inputs.mass_matrices,
+        (sample_count, coordinate_count, coordinate_count),
+    )
+    mass_rate = _finite_array(
+        "mass_matrix_rates",
+        inputs.mass_matrix_rates,
+        (sample_count, coordinate_count, coordinate_count),
+    )
+    if not np.allclose(mass, np.swapaxes(mass, 1, 2), rtol=1.0e-10, atol=1.0e-12):
+        raise ValueError("mass_matrices must be symmetric")
+    if any(np.linalg.eigvalsh(matrix)[0] <= 0.0 for matrix in mass):
+        raise ValueError("mass_matrices must be positive definite")
+    if not np.allclose(
+        mass_rate, np.swapaxes(mass_rate, 1, 2), rtol=1.0e-10, atol=1.0e-12
+    ):
+        raise ValueError("mass_matrix_rates must be symmetric")
+    expected_force_shape = (
+        sample_count,
+        len(inputs.contribution_names),
+        coordinate_count,
+    )
+    forces = _finite_array(
+        "generalized_forces", inputs.generalized_forces, expected_force_shape
+    )
+    if not inputs.contribution_names or len(set(inputs.contribution_names)) != len(
+        inputs.contribution_names
+    ):
+        raise ValueError("contribution_names must be nonempty and unique")
+    if any(not name.strip() for name in inputs.contribution_names):
+        raise ValueError("contribution_names must not contain blank names")
+    floor = inputs.share_denominator_floor
+    if not np.isfinite(floor) or floor <= 0.0:
+        raise ValueError("share_denominator_floor must be finite and positive")
+    transitions = segments[1:] != segments[:-1]
+    event_count = int(np.count_nonzero(transitions))
+    raw_impulses = np.asarray(inputs.event_impulses, dtype=np.float64)
+    raw_event_work = np.asarray(inputs.event_work_j, dtype=np.float64)
+    if raw_impulses.shape != (event_count, coordinate_count):
+        raise ValueError("event_impulses must contain one row per segment transition")
+    if raw_event_work.shape != (event_count,):
+        raise ValueError("event_work_j must contain one value per segment transition")
+    impulses = _finite_array(
+        "event_impulses", raw_impulses, (event_count, coordinate_count)
+    )
+    event_work = _finite_array("event_work_j", raw_event_work, (event_count,))
+    return _ValidatedInputs(
+        time=time,
+        mass=mass,
+        mass_rate=mass_rate,
+        velocity=velocity,
+        forces=forces,
+        contribution_names=inputs.contribution_names,
+        segments=segments,
+        impulses=impulses,
+        event_work=event_work,
+        continuous=~transitions,
+        denominator_floor=floor,
+    )
+
+
+def _integrate_components(inputs: _ValidatedInputs) -> _IntegratedComponents:
+    continuous_impulses = np.moveaxis(
+        _trapezoid(inputs.forces, inputs.time, inputs.continuous), 0, 0
+    )
+    power = np.einsum("skd,sd->sk", inputs.forces, inputs.velocity)
+    generalized_work = _trapezoid(power, inputs.time, inputs.continuous)
+    transport_rate = np.einsum("sij,sj->si", inputs.mass_rate, inputs.velocity)
+    transport_impulse = _trapezoid(transport_rate, inputs.time, inputs.continuous)
+    kinetic_transport_power = 0.5 * np.einsum(
+        "si,sij,sj->s", inputs.velocity, inputs.mass_rate, inputs.velocity
+    )
+    kinetic_transport_work = float(
+        _trapezoid(kinetic_transport_power, inputs.time, inputs.continuous)
+    )
+    momentum = np.einsum("sij,sj->si", inputs.mass, inputs.velocity)
+    momentum_change = momentum[-1] - momentum[0]
+    total_event_impulse = np.sum(inputs.impulses, axis=0)
+    reconstructed_momentum_change = (
+        np.sum(continuous_impulses, axis=0) + transport_impulse + total_event_impulse
+    )
+    momentum_residual = float(
+        np.linalg.norm(momentum_change - reconstructed_momentum_change)
+    )
+    kinetic_energy = 0.5 * np.einsum(
+        "si,sij,sj->s", inputs.velocity, inputs.mass, inputs.velocity
+    )
+    kinetic_energy_change = float(kinetic_energy[-1] - kinetic_energy[0])
+    total_event_work = float(np.sum(inputs.event_work))
+    work_residual = float(
+        abs(
+            kinetic_energy_change
+            - np.sum(generalized_work)
+            - kinetic_transport_work
+            - total_event_work
+        )
+    )
+    return _IntegratedComponents(
+        continuous_impulses=np.asarray(continuous_impulses, dtype=np.float64),
+        generalized_work=np.asarray(generalized_work, dtype=np.float64),
+        kinetic_transport_work=kinetic_transport_work,
+        transport_impulse=np.asarray(transport_impulse, dtype=np.float64),
+        total_event_impulse=np.asarray(total_event_impulse, dtype=np.float64),
+        total_event_work=total_event_work,
+        momentum_change=np.asarray(momentum_change, dtype=np.float64),
+        kinetic_energy_change=kinetic_energy_change,
+        momentum_residual=momentum_residual,
+        work_residual=work_residual,
+    )
+
+
+def _summarize_impulse(
+    inputs: _ValidatedInputs, components: _IntegratedComponents
+) -> _ImpulseSummary:
+    impulse_components = np.concatenate(
+        (
+            components.continuous_impulses,
+            components.transport_impulse[None, :],
+            components.total_event_impulse[None, :],
+        ),
+        axis=0,
+    )
+    reference = max(
+        float(np.linalg.norm(components.momentum_change)),
+        float(np.sum(np.linalg.norm(impulse_components, axis=1))),
+        inputs.denominator_floor,
+    )
+    adequacy = np.abs(components.momentum_change) >= inputs.denominator_floor
+    shares = np.full(impulse_components.shape, np.nan)
+    cancellation = np.full(components.momentum_change.shape, np.nan)
+    shares[:, adequacy] = (
+        impulse_components[:, adequacy] / components.momentum_change[adequacy]
+    )
+    cancellation[adequacy] = np.sum(
+        np.abs(impulse_components[:, adequacy]), axis=0
+    ) / np.abs(components.momentum_change[adequacy])
+    return _ImpulseSummary(
+        reference=reference,
+        relative_residual=components.momentum_residual / reference,
+        component_names=inputs.contribution_names + ("mass_transport", "event"),
+        shares=shares,
+        adequacy=adequacy,
+        cancellation=cancellation,
+    )
+
+
+def _summarize_work(
+    inputs: _ValidatedInputs, components: _IntegratedComponents
+) -> _WorkSummary:
+    work_components = np.concatenate(
+        (
+            components.generalized_work,
+            np.array([components.kinetic_transport_work, components.total_event_work]),
+        )
+    )
+    reference = max(
+        abs(components.kinetic_energy_change),
+        float(np.sum(np.abs(work_components))),
+        inputs.denominator_floor,
+    )
+    adequate = abs(components.kinetic_energy_change) >= inputs.denominator_floor
+    shares = (
+        work_components / components.kinetic_energy_change
+        if adequate
+        else np.full(work_components.shape, np.nan)
+    )
+    cancellation = (
+        float(np.sum(np.abs(work_components)) / abs(components.kinetic_energy_change))
+        if adequate
+        else float("nan")
+    )
+    return _WorkSummary(
+        reference=reference,
+        relative_residual=components.work_residual / reference,
+        component_names=inputs.contribution_names + ("kinetic_transport", "event"),
+        shares=shares,
+        adequate=adequate,
+        cancellation=cancellation,
+    )
+
+
 def integrate_forward_attribution(
-    *,
-    time_s: FloatArray,
-    mass_matrices: FloatArray,
-    mass_matrix_rates: FloatArray,
-    velocities: FloatArray,
-    generalized_forces: FloatArray,
-    contribution_names: tuple[str, ...],
-    segment_ids: IntArray,
-    event_impulses: FloatArray,
-    event_work_j: FloatArray,
-    share_denominator_floor: float = 1.0e-12,
+    inputs: ForwardAttributionInputs,
 ) -> ForwardAttribution:
     """Integrate generalized impulse and work without crossing events.
 
@@ -220,203 +467,68 @@ def integrate_forward_attribution(
     a non-closing trace.
     """
 
-    time, segments = _validate_time_and_segments(time_s, segment_ids)
-    sample_count = time.size
-    velocity = np.asarray(velocities, dtype=np.float64)
-    if velocity.ndim != 2 or velocity.shape[0] != sample_count:
-        raise ValueError("velocities must have shape (samples, coordinates)")
-    coordinate_count = velocity.shape[1]
-    velocity = _finite_array("velocities", velocity, (sample_count, coordinate_count))
-    mass = _finite_array(
-        "mass_matrices",
-        mass_matrices,
-        (sample_count, coordinate_count, coordinate_count),
-    )
-    mass_rate = _finite_array(
-        "mass_matrix_rates",
-        mass_matrix_rates,
-        (sample_count, coordinate_count, coordinate_count),
-    )
-    if not np.allclose(mass, np.swapaxes(mass, 1, 2), rtol=1.0e-10, atol=1.0e-12):
-        raise ValueError("mass_matrices must be symmetric")
-    if any(np.linalg.eigvalsh(matrix)[0] <= 0.0 for matrix in mass):
-        raise ValueError("mass_matrices must be positive definite")
-    if not np.allclose(
-        mass_rate, np.swapaxes(mass_rate, 1, 2), rtol=1.0e-10, atol=1.0e-12
-    ):
-        raise ValueError("mass_matrix_rates must be symmetric")
-
-    forces = np.asarray(generalized_forces, dtype=np.float64)
-    expected_force_shape = (sample_count, len(contribution_names), coordinate_count)
-    forces = _finite_array("generalized_forces", forces, expected_force_shape)
-    if not contribution_names or len(set(contribution_names)) != len(
-        contribution_names
-    ):
-        raise ValueError("contribution_names must be nonempty and unique")
-    if any(not name.strip() for name in contribution_names):
-        raise ValueError("contribution_names must not contain blank names")
-    if not np.isfinite(share_denominator_floor) or share_denominator_floor <= 0.0:
-        raise ValueError("share_denominator_floor must be finite and positive")
-
-    transitions = segments[1:] != segments[:-1]
-    event_count = int(np.count_nonzero(transitions))
-    raw_impulses = np.asarray(event_impulses, dtype=np.float64)
-    raw_event_work = np.asarray(event_work_j, dtype=np.float64)
-    if raw_impulses.shape != (event_count, coordinate_count):
-        raise ValueError("event_impulses must contain one row per segment transition")
-    if raw_event_work.shape != (event_count,):
-        raise ValueError("event_work_j must contain one value per segment transition")
-    impulses = _finite_array(
-        "event_impulses", raw_impulses, (event_count, coordinate_count)
-    )
-    event_work = _finite_array("event_work_j", raw_event_work, (event_count,))
-    continuous = ~transitions
-
-    continuous_impulses = np.moveaxis(_trapezoid(forces, time, continuous), 0, 0)
-    power = np.einsum("skd,sd->sk", forces, velocity)
-    generalized_work = _trapezoid(power, time, continuous)
-    transport_rate = np.einsum("sij,sj->si", mass_rate, velocity)
-    transport_impulse = _trapezoid(transport_rate, time, continuous)
-    kinetic_transport_power = 0.5 * np.einsum(
-        "si,sij,sj->s", velocity, mass_rate, velocity
-    )
-    kinetic_transport_work = float(
-        _trapezoid(kinetic_transport_power, time, continuous)
-    )
-
-    momentum = np.einsum("sij,sj->si", mass, velocity)
-    momentum_change = momentum[-1] - momentum[0]
-    total_event_impulse = np.sum(impulses, axis=0)
-    reconstructed_momentum_change = (
-        np.sum(continuous_impulses, axis=0) + transport_impulse + total_event_impulse
-    )
-    momentum_residual = float(
-        np.linalg.norm(momentum_change - reconstructed_momentum_change)
-    )
-    kinetic_energy = 0.5 * np.einsum("si,sij,sj->s", velocity, mass, velocity)
-    kinetic_energy_change = float(kinetic_energy[-1] - kinetic_energy[0])
-    total_event_work = float(np.sum(event_work))
-    work_residual = float(
-        abs(
-            kinetic_energy_change
-            - np.sum(generalized_work)
-            - kinetic_transport_work
-            - total_event_work
-        )
-    )
-    impulse_components = np.concatenate(
-        (continuous_impulses, transport_impulse[None, :], total_event_impulse[None, :]),
-        axis=0,
-    )
-    momentum_reference = max(
-        float(np.linalg.norm(momentum_change)),
-        float(np.sum(np.linalg.norm(impulse_components, axis=1))),
-        share_denominator_floor,
-    )
-    momentum_relative_residual = momentum_residual / momentum_reference
-    impulse_adequacy = np.abs(momentum_change) >= share_denominator_floor
-    impulse_shares = np.full(impulse_components.shape, np.nan)
-    impulse_cancellation = np.full(coordinate_count, np.nan)
-    impulse_shares[:, impulse_adequacy] = (
-        impulse_components[:, impulse_adequacy] / momentum_change[impulse_adequacy]
-    )
-    impulse_cancellation[impulse_adequacy] = np.sum(
-        np.abs(impulse_components[:, impulse_adequacy]), axis=0
-    ) / np.abs(momentum_change[impulse_adequacy])
-    work_components = np.concatenate(
-        (
-            generalized_work,
-            np.array([kinetic_transport_work, total_event_work]),
-        )
-    )
-    work_reference = max(
-        abs(kinetic_energy_change),
-        float(np.sum(np.abs(work_components))),
-        share_denominator_floor,
-    )
-    work_relative_residual = work_residual / work_reference
-    work_adequate = abs(kinetic_energy_change) >= share_denominator_floor
-    work_shares = (
-        work_components / kinetic_energy_change
-        if work_adequate
-        else np.full(work_components.shape, np.nan)
-    )
-    work_cancellation = (
-        float(np.sum(np.abs(work_components)) / abs(kinetic_energy_change))
-        if work_adequate
-        else float("nan")
-    )
+    validated = _validate_forward_inputs(inputs)
+    components = _integrate_components(validated)
+    impulse = _summarize_impulse(validated, components)
+    work = _summarize_work(validated, components)
     return ForwardAttribution(
-        contribution_names=contribution_names,
-        continuous_impulses=np.asarray(continuous_impulses, dtype=np.float64),
-        generalized_work_j=np.asarray(generalized_work, dtype=np.float64),
-        kinetic_transport_work_j=kinetic_transport_work,
-        transport_impulse=np.asarray(transport_impulse, dtype=np.float64),
-        total_event_impulse=np.asarray(total_event_impulse, dtype=np.float64),
-        total_event_work_j=total_event_work,
-        momentum_change=np.asarray(momentum_change, dtype=np.float64),
-        kinetic_energy_change_j=kinetic_energy_change,
-        momentum_closure_residual=momentum_residual,
-        momentum_reference_norm=momentum_reference,
-        momentum_closure_relative_residual=momentum_relative_residual,
-        work_closure_residual_j=work_residual,
-        work_reference_j=work_reference,
-        work_closure_relative_residual=work_relative_residual,
-        impulse_component_names=contribution_names + ("mass_transport", "event"),
-        impulse_shares=impulse_shares,
-        impulse_share_adequacy=impulse_adequacy,
-        impulse_cancellation_indices=impulse_cancellation,
-        work_component_names=contribution_names + ("kinetic_transport", "event"),
-        work_shares=work_shares,
-        work_share_adequate=work_adequate,
-        work_cancellation_index=work_cancellation,
+        contribution_names=validated.contribution_names,
+        continuous_impulses=components.continuous_impulses,
+        generalized_work_j=components.generalized_work,
+        kinetic_transport_work_j=components.kinetic_transport_work,
+        transport_impulse=components.transport_impulse,
+        total_event_impulse=components.total_event_impulse,
+        total_event_work_j=components.total_event_work,
+        momentum_change=components.momentum_change,
+        kinetic_energy_change_j=components.kinetic_energy_change,
+        momentum_closure_residual=components.momentum_residual,
+        momentum_reference_norm=impulse.reference,
+        momentum_closure_relative_residual=impulse.relative_residual,
+        work_closure_residual_j=components.work_residual,
+        work_reference_j=work.reference,
+        work_closure_relative_residual=work.relative_residual,
+        impulse_component_names=impulse.component_names,
+        impulse_shares=impulse.shares,
+        impulse_share_adequacy=impulse.adequacy,
+        impulse_cancellation_indices=impulse.cancellation,
+        work_component_names=work.component_names,
+        work_shares=work.shares,
+        work_share_adequate=work.adequate,
+        work_cancellation_index=work.cancellation,
     )
 
 
 def scale_forward_attribution_inputs(
-    *,
-    time_s: FloatArray,
-    mass_matrices: FloatArray,
-    mass_matrix_rates: FloatArray,
-    velocities: FloatArray,
-    generalized_forces: FloatArray,
-    contribution_names: tuple[str, ...],
-    segment_ids: IntArray,
-    event_impulses: FloatArray,
-    event_work_j: FloatArray,
+    inputs: ForwardAttributionInputs,
     coordinate_scale: FloatArray,
-    share_denominator_floor: float = 1.0e-12,
-) -> dict[str, Any]:
+) -> ForwardAttributionInputs:
     """Represent the same trajectory under ``q_scaled = S q``."""
 
-    velocity = np.asarray(velocities, dtype=np.float64)
-    if velocity.ndim != 2:
-        raise ValueError("velocities must have shape (samples, coordinates)")
-    coordinate_count = velocity.shape[1]
+    validated = _validate_forward_inputs(inputs)
+    coordinate_count = validated.velocity.shape[1]
     scale = _finite_array("coordinate_scale", coordinate_scale, (coordinate_count,))
     if np.any(scale <= 0.0):
         raise ValueError("coordinate_scale must be positive")
     inverse = np.diag(1.0 / scale)
-    mass = np.asarray(mass_matrices, dtype=np.float64)
-    mass_rate = np.asarray(mass_matrix_rates, dtype=np.float64)
-    forces = np.asarray(generalized_forces, dtype=np.float64)
-    impulses = np.asarray(event_impulses, dtype=np.float64)
-    return {
-        "time_s": np.asarray(time_s, dtype=np.float64),
-        "mass_matrices": np.einsum("ij,sjk,kl->sil", inverse, mass, inverse),
-        "mass_matrix_rates": np.einsum("ij,sjk,kl->sil", inverse, mass_rate, inverse),
-        "velocities": velocity * scale,
-        "generalized_forces": np.einsum("ij,skj->ski", inverse, forces),
-        "contribution_names": contribution_names,
-        "segment_ids": np.asarray(segment_ids, dtype=np.int64),
-        "event_impulses": np.einsum("ij,ej->ei", inverse, impulses),
-        "event_work_j": np.asarray(event_work_j, dtype=np.float64),
-        "share_denominator_floor": share_denominator_floor,
-    }
+    return ForwardAttributionInputs(
+        time_s=validated.time,
+        mass_matrices=np.einsum("ij,sjk,kl->sil", inverse, validated.mass, inverse),
+        mass_matrix_rates=np.einsum(
+            "ij,sjk,kl->sil", inverse, validated.mass_rate, inverse
+        ),
+        velocities=validated.velocity * scale,
+        generalized_forces=np.einsum("ij,skj->ski", inverse, validated.forces),
+        contribution_names=validated.contribution_names,
+        segment_ids=validated.segments,
+        event_impulses=np.einsum("ij,ej->ei", inverse, validated.impulses),
+        event_work_j=validated.event_work,
+        share_denominator_floor=validated.denominator_floor,
+    )
 
 
 __all__ = [
     "ForwardAttribution",
+    "ForwardAttributionInputs",
     "differentiate_mass_along_velocity",
     "differentiate_mass_matrices",
     "integrate_forward_attribution",

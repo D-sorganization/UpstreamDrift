@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -9,9 +11,11 @@ from scripts.research.proximal_distal_energy.articulated_contact_projection impo
     ArticulatedContactProjectionConfig,
 )
 from scripts.research.proximal_distal_energy.articulated_forward_attribution import (
+    ForwardAttribution,
+    ForwardAttributionInputs,
     differentiate_mass_along_velocity,
     differentiate_mass_matrices,
-    integrate_forward_attribution,
+    integrate_forward_attribution as _integrate_forward_attribution,
     require_forward_attribution_closure,
     scale_forward_attribution_inputs,
 )
@@ -30,6 +34,12 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 )
 
 pytestmark = pytest.mark.scientific
+
+
+def integrate_forward_attribution(**kwargs: Any) -> ForwardAttribution:
+    """Construct the typed public input contract for concise manufactured tests."""
+
+    return _integrate_forward_attribution(ForwardAttributionInputs(**kwargs))
 
 
 def test_constant_force_closes_impulse_and_work() -> None:
@@ -146,11 +156,11 @@ def test_coordinate_scaling_preserves_work_and_transforms_impulse() -> None:
         "event_work_j": np.empty(0),
     }
     reference = integrate_forward_attribution(**arguments)
-    scaled_arguments = scale_forward_attribution_inputs(
-        **arguments,
+    scaled_inputs = scale_forward_attribution_inputs(
+        ForwardAttributionInputs(**arguments),
         coordinate_scale=np.array([2.0, 0.5]),
     )
-    scaled = integrate_forward_attribution(**scaled_arguments)
+    scaled = _integrate_forward_attribution(scaled_inputs)
 
     np.testing.assert_allclose(scaled.generalized_work_j, reference.generalized_work_j)
     np.testing.assert_allclose(scaled.continuous_work_j, reference.continuous_work_j)
