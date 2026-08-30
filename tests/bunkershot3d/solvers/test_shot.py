@@ -531,21 +531,131 @@ class TestFreeFlightLeadIn:
 
 
 class TestPerformanceBudget:
-    """A full shot has to fit in 50 ms so a 1000-point DOE is minutes."""
+    """A full shot must stay cheap enough for F0 to be the *fast* tier.
+
+    The budget used to be justified as "so a 1000-point DOE is minutes".
+    That justification does not survive inspection and has been dropped:
+
+    * The number is wrong by an order of magnitude. ``WedgeDesign`` has
+      seven sweepable parameters, and Sobol' costs ``N(D + 2)`` model
+      evaluations, so even a modest ``N = 1024`` is **9,216** shots, not
+      1,000.
+    * Nothing runs it. :mod:`bunkershot3d.study` -- ``DesignSpace``,
+      ``MorrisDesign``, ``SaltelliDesign``, ``SobolIndices`` -- never calls
+      :func:`~bunkershot3d.solvers.shot.simulate_shot`. It samples and
+      analyses; it is not wired to the solver.
+    * A sweep would not answer anything yet. Model-form uncertainty from
+      the accelerated sand mass is 81-86% of the reported band, and no two
+      shipped designs currently separate, so a thousand points would return
+      a thousand indistinguishable answers. What blocks design-of-
+      experiments today is uncertainty, not milliseconds.
+
+    The two reasons that *are* true today, and that this class defends:
+
+    1. **Tier identity.** ADR-0032 makes F0 the default precisely because
+       it is fast, against F1's seconds-to-minutes. If F0 drifts to
+       seconds the multi-fidelity architecture collapses and there is no
+       fast tier left.
+    2. **Interactive use.** One workbench evaluation runs the shot plus a
+       5x5 playability grid -- of order 25-50 shots. At tens of
+       milliseconds that is about a second; at half a second each it is
+       unusable.
+
+    That constraint is real, but **wall-clock time is not a property of the
+    code**, and asserting it directly made this class intermittently red.
+    Measured on one developer machine, the same unchanged shot took 45.4,
+    58.6 and 123.2 ms on three separate invocations -- a 2.7x spread from
+    machine state alone -- against a 50 ms budget.
+
+    The budget was not merely noisy, it was *foreign*.  Checking out the
+    commit that introduced it (``337991108``) and running it on the same box
+    gives **93.7 ms** for the original code, against 45-59 ms for the code
+    today: the shot has become roughly 2.5x faster per step since the budget
+    was written, and the 50 ms figure simply encodes hardware several times
+    quicker than the machine now running it.  An absolute threshold
+    calibrated elsewhere fails honest code on slower hardware and waves a
+    genuine regression through on faster hardware.
+
+    So the budget is asserted two ways, neither an absolute clock:
+
+    * :meth:`test_the_shot_does_not_do_more_work_than_budgeted` counts the
+      **work** -- integration steps times surface elements -- which is
+      perfectly deterministic and identical on every machine.  It catches the
+      order-of-magnitude case the budget exists for: an accidental quadratic,
+      a lost early exit, a mesh silently refined.
+    * :meth:`test_a_full_wedge_shot_fits_the_budget` measures the shot
+      **against a reference workload timed in the same process**, so a slower
+      or busier box moves both and the ratio holds.
+
+    Neither is marked out of the default lane.  Excluding it would have been
+    the easy fix and the wrong one: the DOE budget is a real product
+    constraint, and a test nobody runs cannot defend it.
+    """
+
+    #: Integration steps for the reference wedge shot.  Deterministic --
+    #: measured identical across repeated runs -- so this is an equality-like
+    #: bound rather than a timing tolerance.  Raise it only with a stated
+    #: reason: more steps is more DOE time on every machine at once.
+    _MAX_STEPS = 96
+
+    #: Element-force evaluations, ``steps * elements``.  This is what the DOE
+    #: budget is really about, and what an algorithmic regression moves.
+    _MAX_ELEMENT_STEPS = 96 * 800
+
+    #: ``shot / reference`` ceiling.  Measured at ~7.3 across five trials on a
+    #: loaded developer machine (spread 1.29x); 20.0 leaves room for an
+    #: unlucky box while still failing a 3x slowdown outright.
+    _MAX_COST_RATIO = 20.0
+
+    def _reference_s(self, n_elements: int, repeats: int = 200) -> float:
+        """Time a fixed workload shaped like the solver's inner loop.
+
+        This is the yardstick the shot is measured against.  It does the same
+        *kind* of work -- per-element vector arithmetic over an ``(n, 3)``
+        array -- so a machine that is slow, throttled or busy slows both it
+        and the shot together, leaving their ratio a property of the code.
+
+        Best-of, like the shot itself, because noise only ever adds time.
+
+        Args:
+            n_elements: Element count to size the workload to.
+            repeats: Inner iterations per timing sample.
+
+        Returns:
+            The fastest observed duration, in seconds.
+        """
+        left = np.linspace(0.1, 1.0, n_elements * 3).reshape(n_elements, 3)
+        right = np.linspace(0.2, 1.1, n_elements * 3).reshape(n_elements, 3)
+        best = math.inf
+        for _ in range(5):
+            started = time.perf_counter()
+            for _ in range(repeats):
+                dot = np.einsum("ij,ij->i", left, right)
+                np.sqrt(np.maximum(dot, 0.0))
+                (left * right[:, :1]).sum(axis=0)
+            best = min(best, time.perf_counter() - started)
+        return best
 
     def _fastest_shot_s(
         self, solver: DRFTSolver, body: SurfaceElements, repeats: int = 9
     ) -> float:
         """Best of ``repeats`` wall-clock timings, after a warm-up.
 
-        The *minimum*, not the mean or the median, on purpose.  Noise on
-        a shared machine only ever adds time, so the best sample is the
-        least biased estimate of what the code costs; a mean or median
-        measures the load on the box instead.  That is not academic
-        here: the same shot measured 15 ms on a quiet interpreter and a
-        30 ms median with a large heap resident, while its minimum stayed
-        at 17 ms.  Asserting on the median would make this test a
-        thermometer.
+        The *minimum*, not the mean or the median, on purpose.  Noise on a
+        shared machine only ever adds time, so the best sample is the least
+        biased estimate of what the code costs; a mean or median measures the
+        load on the box instead.
+
+        The minimum is still not machine-independent -- see the class
+        docstring -- which is why no test asserts it against a fixed number.
+
+        Args:
+            solver: The granular solver under test.
+            body: The surface elements to march.
+            repeats: Timing samples to take.
+
+        Returns:
+            The fastest observed shot duration, in seconds.
         """
         kinematics = HeadKinematics(velocity_m_s=_entry_velocity())
         for _ in range(3):
@@ -561,24 +671,57 @@ class TestPerformanceBudget:
             best = min(best, time.perf_counter() - started)
         return best
 
-    @pytest.mark.timeout(120)
+    def test_the_shot_does_not_do_more_work_than_budgeted(
+        self, solver: DRFTSolver, wedge_elements: SurfaceElements
+    ) -> None:
+        """The load-invariant half of the budget: count work, not seconds."""
+        assert len(wedge_elements) > 400, "the budget must be measured on a real mesh"
+        shot = simulate_shot(
+            solver,
+            wedge_elements,
+            head_mass_kg=_HEAD_MASS_KG,
+            kinematics=HeadKinematics(velocity_m_s=_entry_velocity()),
+        )
+        element_steps = shot.n_steps * len(wedge_elements)
+        assert shot.n_steps <= self._MAX_STEPS, (
+            f"the shot took {shot.n_steps} integration steps against a budget of "
+            f"{self._MAX_STEPS}; every extra step costs DOE time on every machine"
+        )
+        assert element_steps <= self._MAX_ELEMENT_STEPS, (
+            f"the shot evaluated {element_steps} element-steps against a budget of "
+            f"{self._MAX_ELEMENT_STEPS}; a 1000-point DOE scales directly with this"
+        )
+
+    @pytest.mark.timeout(180)
     def test_a_full_wedge_shot_fits_the_budget(
         self, solver: DRFTSolver, wedge_elements: SurfaceElements
     ) -> None:
+        """The timed half, expressed relative to this machine, not to a clock."""
         assert len(wedge_elements) > 400, "the budget must be measured on a real mesh"
         fastest_s = self._fastest_shot_s(solver, wedge_elements)
-        assert fastest_s < _SHOT_BUDGET_S, (
-            f"a full shot took {fastest_s * 1e3:.1f} ms against a "
-            f"{_SHOT_BUDGET_S * 1e3:.0f} ms budget; a 1000-point DOE would take "
-            f"{fastest_s * 1000 / 60:.1f} minutes"
+        reference_s = self._reference_s(len(wedge_elements))
+        assert reference_s > 0.0, "the reference workload must take measurable time"
+        ratio = fastest_s / reference_s
+        assert ratio < self._MAX_COST_RATIO, (
+            f"a full shot cost {ratio:.1f}x the reference workload against a ceiling "
+            f"of {self._MAX_COST_RATIO:.0f}x (shot {fastest_s * 1e3:.1f} ms, reference "
+            f"{reference_s * 1e3:.1f} ms on this machine); the ratio is asserted "
+            "rather than raw milliseconds because a busy or slower box moves both"
         )
 
-    @pytest.mark.timeout(120)
-    def test_a_thousand_point_design_of_experiments_is_minutes(
+    @pytest.mark.timeout(180)
+    def test_a_workbench_interaction_stays_responsive(
         self, solver: DRFTSolver, wedge_elements: SurfaceElements
     ) -> None:
+        """One interaction is the shot plus a 5x5 grid: about 26 shots."""
         fastest_s = self._fastest_shot_s(solver, wedge_elements)
-        assert fastest_s * 1000 < 300.0
+        reference_s = self._reference_s(len(wedge_elements))
+        ratio = fastest_s / reference_s
+        assert ratio < self._MAX_COST_RATIO, (
+            f"a workbench interaction would cost {fastest_s * 26:.1f} s on this "
+            f"machine ({ratio:.1f}x the reference workload); the seconds figure is "
+            "machine-specific, so the ratio is what is asserted"
+        )
 
     def test_the_shot_reports_its_own_runtime(
         self, solver: DRFTSolver, sole_body: SurfaceElements
