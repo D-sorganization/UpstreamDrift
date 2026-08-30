@@ -1,20 +1,16 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 07:05 PDT
-
-Epic #8557 is the canonical completion authority. Issue state, local files, and
-partial campaign checkpoints are not completion evidence.
+Updated: 2026-08-30 06:44 PDT
+Epic #8557 is canonical; issue state, local files, and checkpoints are not completion evidence.
 
 ## Protected Authority
 
-- UpstreamDrift protected `main` is `727bda2de2d4656e8d9a3abbbc3a72b30fa06ebb`;
-  re-check remote authority before every push or merge.
-- The qualified paper has 252 pages and SHA-256
-  `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
-- Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
-  evidence references, and 419 local evidence artifacts are computationally
-  qualified. The PDF remains non-archival because tagged-PDF and font-resource
-  gates are still open.
+- Protected `main` was `727bda2de2d4656e8d9a3abbbc3a72b30fa06ebb`; re-check before push/merge.
+- The requalified paper has 253 pages, 2,011,818 bytes, and SHA-256
+  `554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36`.
+- Its 328 claims, 1,181 candidates, 498/498 literals, 707 release artifacts,
+  2,501 evidence references, and 421 local artifacts qualify computationally;
+  tagged-PDF and font-resource gates remain open.
 - AffineDrift PR #3993 pins the exact #9152 authority as protected squash
   `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995
   merged as `6cc909273d63147392b17078a35c6c4da034e1da`. All hosted checks passed.
@@ -28,9 +24,9 @@ partial campaign checkpoints are not completion evidence.
 
 ## Active Reproducibility Fix: #9153
 
-- Clean worktree: `UpstreamDrift-worktrees/9153-crba-symmetry`; branch
-  `fix/9153-pinocchio-crba-symmetry` from current protected `main`; ready PR
-  #9299 is open at exact pushed head `a1ac7093aa97252987cda5a3bb1bc26bc8ebf2f5`.
+- Worktree `UpstreamDrift-worktrees/9153-crba-symmetry`, branch
+  `fix/9153-pinocchio-crba-symmetry`, backs open PR #9299. Latest pushed head is
+  `d1e8db1a76e95fd3ee76dc5e714523c17a890603`; closure below is uncommitted.
 - Source audit of the quarantined structural replay found that robotics
   Pinocchio CRBA only guarantees its upper triangle, while four research paths
   consumed the reusable native matrix without completing the lower triangle.
@@ -38,11 +34,17 @@ partial campaign checkpoints are not completion evidence.
   research consumers through it, and has a poisoned-lower-triangle regression
   test. The protected publication gate correctly fails because pre-fix source
   hashes remain in the release authority; do not patch hashes alone.
-- Requalification v1 reproduced all six JSON/NPZ families and the claim registry
-  exactly twice, but correctly stopped on timestamp/random-ID figure drift.
-  Schema v2 now also hash-binds the deterministic vector writer and six figure
-  generators, exact cmeel compatibility pins, one worker, and two clean replays;
-  it still has no promotion authority.
+- Requalification v1 stopped on timestamp/random-ID figure drift. V2 then ran
+  twice from clean snapshots under Linux/Python 3.11, MuJoCo/robotics Pinocchio
+  3.8.0, exact cmeel pins, one worker, and one numerical thread per library.
+  Six JSON/NPZ families and eleven vector figures reproduce exactly. The
+  hash-frozen 102-line figure writer exception expires 2026-09-15; do not
+  refactor it before this evidence merges.
+- The copied exact registry exposed one stale reciprocal link under focused
+  testing. Canonical reconciliation changed two review links and no material
+  claim field; the v2 replay report now rejects nonreciprocal registries.
+- All 47 native/focused and 50 claim/release/PDF tests, claim audit, release
+  qualification, and all-page inspection pass; final pages 141--142 were viewed.
 - The large campaign worktree remains
   `UpstreamDrift-worktrees/9153-forward-impulse-work`, remote-equal at
   `1e5e823ca2fa9391134e8a0ccf140a36036a88a7` before this isolated fix. Its
@@ -50,12 +52,12 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Commit/push requalification v2 before its execution; keep PR #9299
-   fail-closed meanwhile.
-2. Execute two clean serial v2 replays of all six registered artifact pipelines
-   in the qualified Linux Pinocchio/MuJoCo 3.8.0 environment.
-3. Regenerate dependent claim, figure, PDF, checksum, and release authorities;
-   merge #9299 only after exact-head protected gates prove the final tree.
+1. Commit the reviewed requalified evidence, paper, authorities, tests, SPEC,
+   and this handoff; all registered local gates are green.
+2. Run the GitHub App setup immediately before pushing to PR #9299, then inspect
+   the exact protected-check state without redundant reruns.
+3. Merge #9299 only after exact-head protected gates prove the final tree and
+   verify the squash commit is an ancestor of remote `main`.
 4. Reconcile the 233-commit #9153 campaign branch with protected `main` as
    reviewable dependency slices; never open the entire accumulated branch as a
    single PR and never dispatch `[100,120)` from the pre-fix authority.
@@ -143,8 +145,3 @@ and affected full gates after publication artifacts are added. Run the GitHub
 App setup script immediately before every GitHub operation. Never force-push,
 bypass protection/review, relax scientific tolerances after inspecting results,
 or create redundant CI reruns.
-
-## Other Repository Programs
-
-- UP-D0/#9066 and UP-D1/#9067 govern the separate design-manual inventory;
-  markerless mocap remains Tools provider -> Upstream -> Affine projection.

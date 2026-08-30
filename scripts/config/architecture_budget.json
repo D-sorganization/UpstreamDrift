@@ -3,6 +3,15 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+      "symbol": "make_figure",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9153,
+      "reason": "Issue #9153: the 102-line deterministic figure writer is hash-frozen in the completed two-replay CRBA requalification. Splitting two lines after observing the replay would invalidate the prospective figure-source authority and require two new native executions; defer the behavior-preserving helper extraction until the protected evidence lands.",
+      "expires_on": "2026-09-15"
+    },
+    {
       "path": "src/shared/python/optimization/batch_swing_optimizer.py",
       "symbol": "BatchSwingOptimizer.__init__",
       "rule": "parameters",

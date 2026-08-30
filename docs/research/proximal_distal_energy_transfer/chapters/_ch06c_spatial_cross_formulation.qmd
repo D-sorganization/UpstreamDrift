@@ -436,6 +436,22 @@ is $1.79\times10^{-12}$. The largest symmetry residual is zero at stored
 precision, and the smallest native mass-matrix eigenvalue is
 $1.386\times10^{-4}$.
 
+An independent release requalification audited the storage contract behind
+these results. Pinocchio's CRBA operator guarantees the upper triangle of the
+returned mass matrix, so the project adapter now copies that triangle into
+independent storage and mirrors it explicitly before any solve or comparison.
+The six directly affected evidence families were then regenerated twice from
+clean snapshots in a single-worker Linux environment with MuJoCo 3.8.0 and
+robotics Pinocchio 3.8.0. All JSON records, every typed NPZ member, all eleven
+vector figures, and the reconciled claim registry reproduced exactly. A new
+semantic gate also detected and repaired two stale reciprocal review links;
+the reconciliation changed no claim statement, classification, or adjudication
+outcome. The machine-readable
+[requalification report](data/articulated_crba_requalification_report.json)
+records the execution identity, distribution hashes, thread limits, artifact
+hashes, array schemas, and inference boundary. This is reproducibility and
+internal-consistency evidence, not human or anatomical validation.
+
 This closes an engine-transport question, not the articulated-contact question.
 The common-state comparison applies no bilateral contact, advances no forward
 trajectory, and adds no scapulothoracic glide, forearm pronation--supination,

@@ -1668,12 +1668,12 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:76",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:263",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:289",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:592",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:608",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:13",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:494",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:509",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:519",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:601",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:510",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:535",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:9",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:24",
@@ -1688,7 +1688,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:688",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636"
       ],
       "negative_controls": [
         "bilateral distance-to-contact closure",
@@ -1750,12 +1750,12 @@
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:592",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:608",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:13",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:494",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:509",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:519",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:601",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:510",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:535",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:9",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:24",
@@ -1770,7 +1770,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:688",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:76",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:299",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:55",
@@ -1838,12 +1838,12 @@
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:592",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:608",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:13",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:494",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:509",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:519",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:601",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:510",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:535",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:617",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:9",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cc_spatial_forward_contact.qmd:24",
@@ -1858,7 +1858,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:688",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08_discussion.qmd:67",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:100",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:3",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:23",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch09_conclusions.qmd:91",
@@ -1931,7 +1931,7 @@
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:340",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:348",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:358",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636"
       ],
       "negative_controls": [
         "bilateral distance-to-contact closure",
@@ -2011,19 +2011,22 @@
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
         "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+        "docs/research/proximal_distal_energy_transfer/data/articulated_crba_requalification_report.json",
         "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
         "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
         "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
         "tests/research/test_articulated_inertia_cross_engine.py",
+        "tests/research/test_articulated_crba_replay_report.py",
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:410",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:420",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:431",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:439"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:439",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:455"
       ],
       "negative_controls": [
         "independent engine model assembly",
@@ -2066,11 +2069,11 @@
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:533",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:540",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:547",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:557",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:564"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:549",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:556",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:563",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:573",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:580"
       ],
       "negative_controls": [
         "zero-preload closed-state control",
@@ -2112,10 +2115,10 @@
         "tests/research/test_articulated_forward_contact.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:574",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:583",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:611",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:590",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:599",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:627",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636"
       ],
       "negative_controls": [
         "zero-preload branch",
@@ -2160,17 +2163,17 @@
         "tests/research/test_articulated_slack_forward.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:631",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:653",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:646",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:667",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:675",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:647",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:669",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:662",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:683",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:691",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:604",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:610",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:683",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:699",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:587",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:620",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:636",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:182"
       ],
       "negative_controls": [
@@ -2219,18 +2222,18 @@
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:693",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:742",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:704",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:713",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:717",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:709",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:758",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:720",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:729",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:751",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:733",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:745",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:767",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:195",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:766",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:778",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:789",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:798",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:782",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:794",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:805",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:814",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48"
       ],
@@ -2288,19 +2291,19 @@
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:807",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:821",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:834",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:842",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:823",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:837",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:850",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:858",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:211",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:48",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:54",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:856",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:871",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:895",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:872",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:887",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:911",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:780",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:761",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:882",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:898",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch08b_momentum_transfer_questions.qmd:14"
       ],
       "negative_controls": [
@@ -2362,7 +2365,7 @@
         "docs/research/proximal_distal_energy_transfer/data/claim_numeric_reported_values.json"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:895",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:911",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06f_open_release.qmd:5",
         "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd:14",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:634",
@@ -2434,11 +2437,11 @@
         "tests/research/test_articulated_manufactured_solution.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:450",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:459",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:467",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:466",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:475",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:486"
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:483",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:491",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:502"
       ],
       "negative_controls": [
         "10 N m MuJoCo corruption killswitch",
@@ -2487,9 +2490,9 @@
         "tests/research/test_spatial_full_body_cross_formulation.py"
       ],
       "source_locations": [
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:494",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:509",
-        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:519",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:510",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:525",
+        "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:535",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06cb_spatial_cross_tail.qmd:86",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:573",
         "docs/research/proximal_distal_energy_transfer/chapters/_ch07_model_ladder.qmd:587",

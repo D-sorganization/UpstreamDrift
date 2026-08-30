@@ -524,7 +524,7 @@ available with the document for independent inspection and reuse.
 
 \chapter{Introduction}\label{sec-intro}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, bottomtitle=1mm, breakable, opacityback=0, colframe=quarto-callout-note-color-frame, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, toprule=.15mm, titlerule=0mm, leftrule=.75mm, toptitle=1mm, rightrule=.15mm, left=2mm, opacitybacktitle=0.6, bottomrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, breakable, opacitybacktitle=0.6, bottomtitle=1mm, bottomrule=.15mm, toptitle=1mm, titlerule=0mm, coltitle=black, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, arc=.35mm, opacityback=0, rightrule=.15mm, colback=white, colframe=quarto-callout-note-color-frame, left=2mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2829,7 +2829,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, bottomtitle=1mm, breakable, opacityback=0, colframe=quarto-callout-note-color-frame, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, arc=.35mm, toprule=.15mm, titlerule=0mm, leftrule=.75mm, toptitle=1mm, rightrule=.15mm, left=2mm, opacitybacktitle=0.6, bottomrule=.15mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, breakable, opacitybacktitle=0.6, bottomtitle=1mm, bottomrule=.15mm, toptitle=1mm, titlerule=0mm, coltitle=black, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, arc=.35mm, opacityback=0, rightrule=.15mm, colback=white, colframe=quarto-callout-note-color-frame, left=2mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -7919,6 +7919,24 @@ relative bias error is \(1.41\times10^{-12}\), and the largest relative
 inverse-dynamics error is \(1.79\times10^{-12}\). The largest symmetry
 residual is zero at stored precision, and the smallest native
 mass-matrix eigenvalue is \(1.386\times10^{-4}\).
+
+An independent release requalification audited the storage contract
+behind these results. Pinocchio's CRBA operator guarantees the upper
+triangle of the returned mass matrix, so the project adapter now copies
+that triangle into independent storage and mirrors it explicitly before
+any solve or comparison. The six directly affected evidence families
+were then regenerated twice from clean snapshots in a single-worker
+Linux environment with MuJoCo 3.8.0 and robotics Pinocchio 3.8.0. All
+JSON records, every typed NPZ member, all eleven vector figures, and the
+reconciled claim registry reproduced exactly. A new semantic gate also
+detected and repaired two stale reciprocal review links; the
+reconciliation changed no claim statement, classification, or
+adjudication outcome. The machine-readable
+\href{data/articulated_crba_requalification_report.json}{requalification
+report} records the execution identity, distribution hashes, thread
+limits, artifact hashes, array schemas, and inference boundary. This is
+reproducibility and internal-consistency evidence, not human or
+anatomical validation.
 
 This closes an engine-transport question, not the articulated-contact
 question. The common-state comparison applies no bilateral contact,
@@ -13640,8 +13658,11 @@ The absence of a \texttt{contradicted} row does not mean that every
 mechanism survived every adverse test. Claims that accurately report
 null, mixed, or adverse model results can themselves be supported. The
 complete finding-level reasons, falsifiers, locators, and boundaries are
-available in the \href{data/claim_adjudication_summary.json}{reviewer
-JSON} and \href{data/claim_adjudication_summary.csv}{reviewer CSV}.
+available in the
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.json}{reviewer
+JSON} and
+\href{https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/research/proximal_distal_energy_transfer/data/claim_adjudication_summary.csv}{reviewer
+CSV}.
 
 \subsection{Outcome Counts}\label{outcome-counts}
 
