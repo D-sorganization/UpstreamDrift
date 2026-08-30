@@ -11,9 +11,12 @@ import numpy as np
 import pytest
 
 from bunkershot3d.metrics import (
+    F1_ENTRAINMENT_FACTOR_BOUNDS,
+    AcceleratedSandMass,
     DigSkidVerdict,
     dig_vs_skid,
     divot_metrics,
+    lateral_spread_factor,
     sole_depth_profile,
     submerged_interval,
 )
@@ -21,6 +24,7 @@ from bunkershot3d.metrics import (
 from .conftest import (
     DIVOT_WIDTH_M,
     SAND_BULK_DENSITY_KG_M3,
+    SAND_FRICTION_ANGLE_DEG,
     VEE_SPEED_MPS,
     build_piecewise_trace,
     build_vee_trace,
@@ -74,6 +78,7 @@ class TestDivotMetrics:
             scene,
             width_m=DIVOT_WIDTH_M,
             bulk_density_kg_m3=SAND_BULK_DENSITY_KG_M3,
+            friction_angle_deg=SAND_FRICTION_ANGLE_DEG,
         )
 
     def test_entry_distance_behind_the_ball(self, metrics) -> None:
@@ -109,10 +114,198 @@ class TestDivotMetrics:
         """A zero width would silently report a zero-mass divot."""
         with pytest.raises(ValueError, match="width_m must be positive"):
             divot_metrics(
-                vee_trace, head, scene, width_m=0.0, bulk_density_kg_m3=1550.0
+                vee_trace,
+                head,
+                scene,
+                width_m=0.0,
+                bulk_density_kg_m3=1550.0,
+                friction_angle_deg=SAND_FRICTION_ANGLE_DEG,
             )
         with pytest.raises(ValueError, match="bulk_density_kg_m3 must be positive"):
-            divot_metrics(vee_trace, head, scene, width_m=0.02, bulk_density_kg_m3=-1.0)
+            divot_metrics(
+                vee_trace,
+                head,
+                scene,
+                width_m=0.02,
+                bulk_density_kg_m3=-1.0,
+                friction_angle_deg=SAND_FRICTION_ANGLE_DEG,
+            )
+
+    def test_the_bed_friction_angle_has_no_default(
+        self, vee_trace, head, scene
+    ) -> None:
+        """The angle the divot walls lie back at is the bed's, not this module's.
+
+        Defaulting it would be an invented divot shape, and the sand state
+        already carries the number (issue #8659).
+        """
+        with pytest.raises(TypeError, match="friction_angle_deg"):
+            divot_metrics(
+                vee_trace,
+                head,
+                scene,
+                width_m=0.02,
+                bulk_density_kg_m3=1550.0,
+            )
+        with pytest.raises(ValueError, match="friction_angle_deg must lie"):
+            divot_metrics(
+                vee_trace,
+                head,
+                scene,
+                width_m=0.02,
+                bulk_density_kg_m3=1550.0,
+                friction_angle_deg=0.0,
+            )
+
+    def test_the_depth_squared_integral_is_the_triangle_second_moment(
+        self, metrics
+    ) -> None:
+        """Two straight limbs, so ``integral d^2 ds`` is exact by hand.
+
+        Descending limb: depth rises 0 -> 0.020 m over 0.080 m of travel, so
+        ``integral d^2 ds = 0.080 * 0.020^2 / 3``. Ascending limb: 0.020 -> 0
+        over 0.100 m, so ``0.100 * 0.020^2 / 3``. Together
+        ``0.180 * 4e-4 / 3 = 2.4e-5 m^3``.
+
+        The tolerance is quadrature, not slop. The trapezoid rule is exact for
+        the vee's *linear* depth -- which is why the section area is checked at
+        1e-9 -- but not for its square, so this integral carries an
+        ``O(dx^2)`` error at the trace's 2 mm sampling. It comes out
+        2.4006e-5, 0.025 % high, and a tighter bound would only be pinning the
+        sample spacing.
+        """
+        assert metrics.depth_squared_integral_m3 == pytest.approx(2.4e-5, rel=1e-3)
+
+
+class TestAcceleratedSandMass:
+    """The mass the strike moved, which is not the mass under the sole.
+
+    Issue #8659: dividing the delivered impulse by the swept prism implied
+    sand leaving faster than the head that threw it, so the prism is no longer
+    the denominator. Every expected value below is worked out from the vee
+    trace's own definition and the two stated factors.
+    """
+
+    @pytest.fixture
+    def metrics(self, vee_trace, head, scene):
+        """Divot metrics for the vee trace, in a 34 deg bed at 20 mm."""
+        return divot_metrics(
+            vee_trace,
+            head,
+            scene,
+            width_m=DIVOT_WIDTH_M,
+            bulk_density_kg_m3=SAND_BULK_DENSITY_KG_M3,
+            friction_angle_deg=SAND_FRICTION_ANGLE_DEG,
+        )
+
+    def test_the_prism_is_carried_through_unchanged(self, metrics) -> None:
+        """The reported divot mass is still the prism, with its provenance."""
+        assert metrics.accelerated_mass.prismatic_kg == pytest.approx(
+            metrics.mass_kg, rel=1e-12
+        )
+
+    def test_the_lateral_factor_is_the_hand_computed_trapezoid(self, metrics) -> None:
+        """``1 + cot(34 deg) * (integral d^2 ds) / (w * integral d ds)``.
+
+        cot(34 deg) = 1.482561 and the vee's two integrals are 2.4e-5 m^3 over
+        1.8e-3 m^2, so a 20 mm sole is widened by 1 + 1.482561 * 0.666667 =
+        1.98837. The realised value is 1.98862, 0.013 % high, because the
+        trapezoid rule is exact for the vee's linear depth but not for its
+        square -- the same ``O(dx^2)`` quadrature error the second-moment test
+        above records. Both the hand value and the exact composition of the
+        two integrals are checked, so neither a wrong formula nor a wrong
+        integral could pass.
+        """
+        assert metrics.accelerated_mass.lateral_factor == pytest.approx(
+            1.0
+            + (1.0 / np.tan(np.radians(SAND_FRICTION_ANGLE_DEG)))
+            * (2.4e-5 / (DIVOT_WIDTH_M * 1.8e-3)),
+            rel=1e-3,
+        )
+        assert metrics.accelerated_mass.lateral_factor == pytest.approx(
+            lateral_spread_factor(
+                metrics.section_area_m2,
+                metrics.depth_squared_integral_m3,
+                width_m=DIVOT_WIDTH_M,
+                wall_angle_deg=SAND_FRICTION_ANGLE_DEG,
+            ),
+            rel=1e-12,
+        )
+        assert metrics.accelerated_mass.lateral_factor > 1.0
+
+    def test_the_interval_edges_are_the_two_stated_models(self, metrics) -> None:
+        """Lower is F1 alone; upper is F1's widest reading times the walls."""
+        accelerated = metrics.accelerated_mass
+        lower_factor, upper_factor = F1_ENTRAINMENT_FACTOR_BOUNDS
+
+        assert accelerated.lower_kg == pytest.approx(
+            metrics.mass_kg * lower_factor, rel=1e-12
+        )
+        assert accelerated.upper_kg == pytest.approx(
+            metrics.mass_kg * upper_factor * accelerated.lateral_factor, rel=1e-12
+        )
+        assert accelerated.bounds_kg == (accelerated.lower_kg, accelerated.upper_kg)
+
+    def test_the_central_value_is_the_geometric_mean_of_the_edges(
+        self, metrics
+    ) -> None:
+        accelerated = metrics.accelerated_mass
+        assert accelerated.central_kg == pytest.approx(
+            np.sqrt(accelerated.lower_kg * accelerated.upper_kg), rel=1e-12
+        )
+        assert accelerated.lower_kg < accelerated.central_kg < accelerated.upper_kg
+
+    def test_the_accelerated_mass_never_falls_below_the_prism(self, metrics) -> None:
+        """Sand outside the swept prism can only add mass, never remove it."""
+        assert metrics.accelerated_mass.lower_kg > metrics.mass_kg
+
+    @pytest.mark.parametrize(
+        ("field", "value"),
+        [
+            ("prismatic_kg", 0.0),
+            ("prismatic_kg", -1.0),
+            ("entrainment_lower", 0.5),
+            ("entrainment_upper", float("nan")),
+            ("lateral_factor", 0.9),
+            ("wall_angle_deg", 0.0),
+            ("wall_angle_deg", 90.0),
+        ],
+    )
+    def test_an_impossible_interval_is_refused(self, field: str, value: float) -> None:
+        """A ``raise`` and not a contract: ball launch divides by this."""
+        fields = {
+            "prismatic_kg": 0.05,
+            "entrainment_lower": 2.0,
+            "entrainment_upper": 3.0,
+            "lateral_factor": 1.5,
+            "wall_angle_deg": 34.0,
+        }
+        fields[field] = value
+
+        with pytest.raises(ValueError):
+            AcceleratedSandMass(**fields)
+
+    def test_bounds_out_of_order_are_refused(self) -> None:
+        with pytest.raises(ValueError, match="out of order"):
+            AcceleratedSandMass(
+                prismatic_kg=0.05,
+                entrainment_lower=3.0,
+                entrainment_upper=2.0,
+                lateral_factor=1.5,
+                wall_angle_deg=34.0,
+            )
+
+    def test_a_flat_divot_has_no_walls_to_widen(self) -> None:
+        """A zero section is not widened; it is returned as it is."""
+        assert lateral_spread_factor(0.0, 0.0, width_m=0.02, wall_angle_deg=34.0) == 1.0
+
+    def test_the_widening_grows_with_the_wall_lying_flatter(self) -> None:
+        """A looser bed lays its walls back further and moves more sand."""
+        steep = lateral_spread_factor(1.8e-3, 2.4e-5, width_m=0.02, wall_angle_deg=45.0)
+        shallow = lateral_spread_factor(
+            1.8e-3, 2.4e-5, width_m=0.02, wall_angle_deg=25.0
+        )
+        assert shallow > steep > 1.0
 
 
 class TestDepthProfile:
