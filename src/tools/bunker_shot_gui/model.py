@@ -59,6 +59,7 @@ from bunkershot3d.geometry import (
     deliver_wedge,
 )
 from bunkershot3d.metrics import (
+    ACCELERATED_MASS_CONSISTENCY_REASON,
     DigSkidResult,
     DivotMetrics,
     HeadLoadMetrics,
@@ -186,6 +187,11 @@ def _sand_delivery(
 ) -> SandDelivery:
     """Bundle what the solver and the metrics layer measured about one strike.
 
+    The mass handed over is the **accelerated** mass, not the swept prism:
+    dividing the delivered impulse by the prism implied sand leaving faster
+    than the head that threw it (issue #8659). The interval it was drawn from
+    travels with it, so the launch can report how wide the denominator was.
+
     Args:
         result: The F0 shot.
         divot: The divot the same shot cut.
@@ -195,9 +201,12 @@ def _sand_delivery(
     Returns:
         The delivery the ball model derives launch from.
     """
+    accelerated = divot.accelerated_mass
     return SandDelivery(
         impulse_n_s=float(np.linalg.norm(result.impulse_n_s)),
-        displaced_mass_kg=divot.mass_kg,
+        displaced_mass_kg=accelerated.central_kg,
+        displaced_mass_bounds_kg=accelerated.bounds_kg,
+        displaced_mass_reason=ACCELERATED_MASS_CONSISTENCY_REASON,
         contact_duration_s=result.contact_duration_s,
         entry_speed_m_s=result.entry_speed_m_s,
         exit_speed_m_s=result.exit_speed_m_s,
@@ -845,6 +854,7 @@ class WorkbenchModel:
             scene,
             width_m=geometry.sole_width_m,
             bulk_density_kg_m3=sand.bulk_density_kg_m3,
+            friction_angle_deg=sand.friction_angle_deg,
         )
 
     def _sole_map(self, field: SoleLoadField | None) -> SoleLoadMap | None:

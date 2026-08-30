@@ -7,6 +7,12 @@
       "owner": "@dieterolson @D-sorganization/security-reviewers",
       "reason": "Issue #5922 temporary exception while the URDF campaign script is split by workflow domain.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/bunkershot3d/metrics/divot.py",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #9250 temporary exception: #9237 (issue #8659) took this file to 1201 lines. The accelerated-sand-mass concern splits out to src/bunkershot3d/metrics/accelerated_mass.py, which needs a matching Sphinx cross-reference pass and so is tracked separately.",
+      "expires_on": "2026-11-30"
     }
   ]
 }

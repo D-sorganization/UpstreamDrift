@@ -34,6 +34,7 @@ from bunkershot3d.ball.lie import BallLie, BallProperties
 from bunkershot3d.ball.splash import (
     BALL_LAUNCH_MEASUREMENT_GAP,
     MomentumTransfer,
+    SandDelivery,
     compute_ball_launch_from_splash,
 )
 from bunkershot3d.sand import ProvenanceBasis
@@ -112,7 +113,9 @@ class TestTheVerdictTravelsWithTheCarry:
         result = compute_ball_launch_from_splash(
             lie=BallLie(depth_m=0.005),
             ball=BallProperties(),
-            delivery=delivery(speed_m_s=0.1, verdict=within),
+            # 0.02 N.s over 0.25 kg is 0.08 m/s of ejecta, admissible for a
+            # 0.1 m/s head. The default 4 N.s would not be (issue #8659).
+            delivery=delivery(speed_m_s=0.1, impulse_n_s=0.02, verdict=within),
             club_loft_rad=GREENSIDE_LOFT_RAD,
         )
         assert result.verdict.status is EnvelopeStatus.BEYOND_VALIDATION
@@ -132,25 +135,76 @@ class TestTheVerdictTravelsWithTheCarry:
         result = launch(delivery(impulse_n_s=4.0, displaced_mass_kg=0.25))
         assert result.verdict.details["mean_ejecta_speed_m_s"] == pytest.approx(16.0)
 
-    def test_an_under_counted_divot_is_reported_not_clamped(self) -> None:
-        """Sand cannot leave faster than the head that threw it.
+    def test_an_inadmissible_strike_is_refused_before_it_becomes_a_launch(
+        self,
+    ) -> None:
+        """Sand cannot leave faster than the head that threw it (issue #8659).
 
-        When the prismatic divot mass is small enough that ``J / m`` exceeds
-        the head's entry speed, the two measured quantities disagree. The
-        model says so rather than capping the ejecta speed, which would make
-        ball speed stop responding to impulse -- the defect #8657 removed.
+        #8657 reported this pair on the verdict and carried on. It is now
+        refused where the two quantities first meet, because a delivery whose
+        impulse and mass imply 80 m/s of ejecta out of a 25 m/s head is not a
+        strike that happened and no launch is derivable from it.
         """
-        result = launch(delivery(impulse_n_s=4.0, displaced_mass_kg=0.05))
-        assert any("exceeds the head" in reason for reason in result.verdict.reasons)
-        assert any("under-counted" in reason for reason in result.verdict.reasons)
+        with pytest.raises(ValueError, match="cannot leave faster"):
+            delivery(impulse_n_s=4.0, displaced_mass_kg=0.05)
 
-    def test_a_consistent_strike_raises_no_such_diagnostic(self) -> None:
+    def test_the_refusal_is_a_raise_and_not_an_assertion(self) -> None:
+        """``python -O`` strips assertions; a momentum budget must survive it.
+
+        Read off the module text rather than through ``inspect.getsource``,
+        which is the pattern the source scans at the top of this file already
+        use: the check has to survive an optimisation flag, so it is made
+        against the shipped bytes.
+        """
+        source = Path(splash_module.__file__).read_text(encoding="utf-8")
+        start = source.index("    def _require_admissible_ejecta")
+        body = source[start : source.index("\n    @property", start)]
+
+        assert "raise ValueError(" in body
+        assert "assert " not in body
+        assert SandDelivery._require_admissible_ejecta is not None
+
+    def test_a_consistent_strike_is_built_and_carries_no_such_diagnostic(
+        self,
+    ) -> None:
         result = launch(delivery(impulse_n_s=4.0, displaced_mass_kg=0.50))
-        assert not any("exceeds the head" in r for r in result.verdict.reasons)
+        assert not any("cannot leave faster" in r for r in result.verdict.reasons)
+        assert result.ball_speed_m_s > 0.0
 
-    def test_the_diagnostic_does_not_stop_carry_responding_to_impulse(self) -> None:
-        soft = launch(delivery(impulse_n_s=3.0, displaced_mass_kg=0.05))
-        hard = launch(delivery(impulse_n_s=6.0, displaced_mass_kg=0.05))
+    def test_an_interval_reaching_below_the_momentum_floor_is_reported(self) -> None:
+        """Half a band being excluded is information, not an error.
+
+        The reported mass is admissible; its lower edge is not. That is a
+        statement about the width of the interval and is reported rather than
+        raised or clamped.
+        """
+        result = launch(
+            delivery(
+                impulse_n_s=4.0,
+                displaced_mass_kg=0.50,
+                displaced_mass_bounds_kg=(0.10, 1.00),
+            )
+        )
+        assert any("momentum budget excludes" in r for r in result.verdict.reasons)
+
+    def test_an_interval_clear_of_the_floor_raises_no_diagnostic(self) -> None:
+        result = launch(
+            delivery(
+                impulse_n_s=4.0,
+                displaced_mass_kg=0.50,
+                displaced_mass_bounds_kg=(0.30, 1.00),
+            )
+        )
+        assert not any("momentum budget excludes" in r for r in result.verdict.reasons)
+
+    def test_the_refusal_does_not_stop_carry_responding_to_impulse(self) -> None:
+        """The refusal is not the clamp #8657 rejected: nothing is capped.
+
+        Both strikes below are admissible, and ball speed still tracks the
+        delivered impulse exactly.
+        """
+        soft = launch(delivery(impulse_n_s=3.0, displaced_mass_kg=0.50))
+        hard = launch(delivery(impulse_n_s=6.0, displaced_mass_kg=0.50))
         assert hard.ball_speed_m_s == pytest.approx(2.0 * soft.ball_speed_m_s)
 
     def test_a_worse_solver_verdict_wins(self) -> None:
