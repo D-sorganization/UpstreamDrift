@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 23:30 PDT (2026-08-30 06:30 UTC)
+Updated: 2026-08-29 23:39 PDT (2026-08-30 06:39 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -100,9 +100,9 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    gate passes and the next missing index is 40. #9273 is closed. #9281 run
    33296773419 failed before case execution at exact head `85f529533b5199efcfd63d3892a31ec930e88b1e`:
    environment matched, but native-smoke eigenvalue low bits drifted. Raw APIs
-   and runtime ZIP SHA `40e7a1d33d99` are retained under its named failure
-   directory. Do not rerun, relax equality, or dispatch [60,80); prospectively
-   remediate runtime determinism first and preserve this adverse evidence.
+   and runtime ZIP SHA `40e7a1d33d99` are retained. `240633a90` pins Haswell
+   without tolerance relaxation; 133 tests pass. Next preregister qualification
+   plus independent replay; if exact restart [0,20). Never mix runtime identities.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
