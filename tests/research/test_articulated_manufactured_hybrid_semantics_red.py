@@ -93,6 +93,13 @@ def _install_compatibility_tolerance(
     rolling_policy[dotted_path] = tolerance
 
 
+def _refresh_inverse_maximum(record: dict[str, Any]) -> None:
+    inverse = record["free_body"]["inverse_dynamics_relative_error"]
+    inverse["maximum"] = max(
+        value for name, value in inverse.items() if name != "maximum"
+    )
+
+
 def test_rolling_comparison_accepts_difference_inside_declared_tolerance() -> None:
     """The drift test has a legitimate within-tolerance control."""
 
@@ -104,6 +111,7 @@ def test_rolling_comparison_accepts_difference_inside_declared_tolerance() -> No
         "lagrange_mujoco"
     ]
     _set_nested(rolling, field, baseline + tolerance / 2.0)
+    _refresh_inverse_maximum(rolling)
 
     assert runner.compare_semantic_evidence(authority, rolling)[
         "all_registered_gates_pass"
@@ -150,6 +158,21 @@ def test_rolling_comparison_rejects_inconsistent_maximum() -> None:
 
     authority, rolling = _profiled_records()
     rolling["free_body"]["inverse_dynamics_relative_error"]["maximum"] = 0.0
+
+    with pytest.raises(ValueError, match="maximum|semantic|gate"):
+        runner.compare_semantic_evidence(authority, rolling)
+
+
+@pytest.mark.parametrize("target_name", ("authority", "rolling"))
+def test_each_record_rejects_maximum_inconsistent_with_own_components(
+    target_name: str,
+) -> None:
+    """Authority cannot excuse a rolling record's inconsistent derived maximum."""
+
+    authority, rolling = _profiled_records()
+    target = authority if target_name == "authority" else rolling
+    inverse = target["free_body"]["inverse_dynamics_relative_error"]
+    inverse["lagrange_mujoco"] = inverse["maximum"] + 5.0e-9
 
     with pytest.raises(ValueError, match="maximum|semantic|gate"):
         runner.compare_semantic_evidence(authority, rolling)
