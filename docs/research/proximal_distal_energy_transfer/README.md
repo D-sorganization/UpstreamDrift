@@ -554,6 +554,28 @@ run is terminal, retained under receipt 1.4, accumulated into a gap-free
 attested prefix, and exact against the legacy projection. Registration and
 runtime qualification do not make a scientific result promotable.
 
+After retaining those artifacts, create one outcome-blind boundary audit that
+cross-binds the run-local runtime replay, receipt 1.4, corruption sentinel,
+collection 1.3 manifest, immutable legacy projection, and exact enrichment
+audit. The output deliberately leaves the next slice unauthorized; a separate
+issue preregistration is still required.
+
+```bash
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_recovery_boundary \
+  --plan /path/to/enriched-plan.json \
+  --launch /path/to/enriched-launch.json \
+  --registration /path/to/recovery-registration.json \
+  --runtime-replay-audit /path/to/runtime-replay-audit.json \
+  --artifact-receipt /path/to/artifact-receipt-1.4.json \
+  --corruption-audit /path/to/corruption-audit.json \
+  --collection-manifest /path/to/collection-manifest-1.3.json \
+  --legacy-prefix-manifest /path/to/prefix-view-manifest.json \
+  --enrichment-audit /path/to/enrichment-audit.json \
+  --case-start CASE_START \
+  --case-stop CASE_STOP \
+  --output /path/to/recovery-boundary.json
+```
+
 Artifact receipt 1.3 requires GitHub's recorded byte size and SHA-256 digest to
 equal the retained ZIP exactly and cross-binds the run, structural job, and artifact
 workflow-run IDs and dispatch heads. A readable archive or API record from a

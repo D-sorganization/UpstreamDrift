@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 21:10 PDT (2026-08-30 04:10 UTC)
+Updated: 2026-08-29 21:18 PDT (2026-08-30 04:18 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -97,7 +97,8 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    `124ac709ea90` and the hosted registration gate passed before runtime replay.
    Do not cancel, duplicate, or dispatch [20,40). On terminal success retain
    raw APIs, both ZIPs, receipt 1.4, corruption audit, gap-free attested prefix,
-   legacy projection, and exact enrichment audit; any failure blocks progress.
+   legacy projection, exact enrichment, and the recovery-boundary audit; any
+   failure blocks progress.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
@@ -121,7 +122,7 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 111 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 116 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; direct MyPy reaches the pre-existing NumPy-stub
 error at `articulated_structural_factorial_runner.py:381`.
