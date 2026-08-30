@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 20:27 PDT (2026-08-30 03:27 UTC)
+Updated: 2026-08-29 20:29 PDT (2026-08-30 03:29 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -98,10 +98,11 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    retained evidence, or dispatch [100,120). Preserve the legacy-only probe
    classification and the adverse first enriched replay. Runtime replay gate
    `a76a1e360` binds the actual package/platform/operator contract and fixed
-   single-thread environment. The next preregistered action is only [80,81) at
-   frozen execution `ccb171ed3` and audit 33277601263: runtime drift stops before
-   execution; exact runtime permits one checkpoint for the same four-branch
-   comparison. Retain either artifact; no tolerance or promotion is permitted.
+   single-thread environment. Preregistered [80,81) run 33290346007, job
+   99200773332, is active at exact head `29bab3429968`, frozen execution
+   `ccb171ed3`, and audit 33277601263. Runtime drift stops before execution;
+   exact runtime permits one checkpoint for the same four-branch comparison.
+   Do not cancel, duplicate, add tolerance, or promote either artifact.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
