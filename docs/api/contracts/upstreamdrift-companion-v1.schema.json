@@ -646,10 +646,156 @@
         }
       }
     },
+    "workflowEnvironment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inherit", "fixed", "python_paths"],
+      "properties": {
+        "inherit": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "uniqueItems": true
+        },
+        "fixed": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "MPLBACKEND": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "PYTHONHASHSEED": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "PYTHONPATH": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "PYTHONDONTWRITEBYTECODE": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "PYTHONUTF8": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        },
+        "python_paths": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "const": "."
+              },
+              {
+                "$ref": "#/$defs/repoPath"
+              }
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "workflowArtifactVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "minimum_bytes"],
+      "properties": {
+        "method": {
+          "enum": [
+            "csv-header",
+            "json-object",
+            "non-empty",
+            "png-signature",
+            "sha256-sidecar"
+          ]
+        },
+        "minimum_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "required_columns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "workflowArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "type", "required", "verification"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "type": {
+          "enum": ["csv", "json", "markdown", "png", "sha256"]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "verification": {
+          "$ref": "#/$defs/workflowArtifactVerification"
+        }
+      }
+    },
+    "workflowDeterminism": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixture_kind",
+        "fixture_paths",
+        "absolute_tolerance",
+        "relative_tolerance"
+      ],
+      "properties": {
+        "fixture_kind": {
+          "enum": ["inline", "repository"]
+        },
+        "fixture_paths": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repoPath"
+          },
+          "uniqueItems": true
+        },
+        "absolute_tolerance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "relative_tolerance": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
     "workflow": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title", "command", "documentation_ids"],
+      "required": [
+        "id",
+        "title",
+        "kind",
+        "executor",
+        "argv",
+        "cwd",
+        "environment",
+        "expected_exit_code",
+        "expected_artifacts",
+        "documentation_paths",
+        "program_ids",
+        "prerequisites",
+        "support_tier",
+        "availability",
+        "determinism",
+        "verification_method",
+        "scientific_limitations",
+        "source_commit"
+      ],
       "properties": {
         "id": {
           "$ref": "#/$defs/identifier"
@@ -657,17 +803,147 @@
         "title": {
           "$ref": "#/$defs/nonEmptyString"
         },
-        "command": {
-          "$ref": "#/$defs/command"
+        "kind": {
+          "enum": ["workflow", "failure-fixture"]
         },
-        "documentation_ids": {
+        "failure_class": {
+          "enum": [
+            "bad-input",
+            "stale-version",
+            "unavailable-engine",
+            "unsupported-dependency"
+          ]
+        },
+        "executor": {
+          "enum": ["python-module", null]
+        },
+        "argv": {
           "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "cwd": {
+          "anyOf": [
+            {
+              "const": "."
+            },
+            {
+              "$ref": "#/$defs/repoPath"
+            }
+          ]
+        },
+        "environment": {
+          "$ref": "#/$defs/workflowEnvironment"
+        },
+        "expected_exit_code": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 255
+        },
+        "expected_artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/workflowArtifact"
+          }
+        },
+        "documentation_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/repoPath"
+          },
+          "uniqueItems": true
+        },
+        "program_ids": {
+          "type": "array",
+          "minItems": 1,
           "items": {
             "$ref": "#/$defs/identifier"
           },
           "uniqueItems": true
+        },
+        "prerequisites": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "uniqueItems": true
+        },
+        "support_tier": {
+          "enum": ["supported", "extended", "experimental", "not_applicable"]
+        },
+        "availability": {
+          "$ref": "#/$defs/availability"
+        },
+        "determinism": {
+          "$ref": "#/$defs/workflowDeterminism"
+        },
+        "verification_method": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "scientific_limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "uniqueItems": true
+        },
+        "source_commit": {
+          "$ref": "#/$defs/commit"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "failure-fixture"
+              }
+            }
+          },
+          "then": {
+            "required": ["failure_class"],
+            "properties": {
+              "expected_exit_code": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "availability": {
+                "properties": {
+                  "state": {
+                    "const": "unavailable"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executor": {
+                "const": null
+              },
+              "argv": {
+                "maxItems": 0
+              },
+              "expected_exit_code": {
+                "const": null
+              },
+              "expected_artifacts": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
     },
     "screenshot": {
       "type": "object",
@@ -699,7 +975,9 @@
         "local_model_records",
         "program_records",
         "feature_records",
-        "feature_surface_paths"
+        "feature_surface_paths",
+        "workflow_records",
+        "executable_workflow_records"
       ],
       "properties": {
         "raw_launcher_records": {
@@ -719,6 +997,14 @@
           "minimum": 0
         },
         "feature_surface_paths": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "workflow_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "executable_workflow_records": {
           "type": "integer",
           "minimum": 0
         }

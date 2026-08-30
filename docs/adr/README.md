@@ -65,6 +65,10 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
   one shared bundle command, ephemeral protected-main evidence, draft-first
   immutable release acquisition, attestation, and non-fabricated schema
   compatibility history.
+- **2026-08-30:** ADR-0043 adds the #9190 structured-workflow authority:
+  a hashed repository registry, one fail-closed public executor, exact-commit
+  CI evidence, and an explicit boundary against scientific or native-engine
+  qualification.
 - **2026-08-16:** ADR-0033 amends ADR-0032's fidelity-tier table: F1 is
   narrowed from "reduced-order / 2-D plane-strain continuum" to a 2-D
   plane-strain **MPM** solver and becomes the sand-field visualization tier,
