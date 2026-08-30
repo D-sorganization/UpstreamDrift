@@ -106,11 +106,12 @@ design-manual program.
 - #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with
   no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes,
   acquisition identity, and attestations; #9174 remains open.
-- #9190 worktree: `worktrees/UpstreamDrift-9190-workflows`; branch
-  `feat/9190-governed-workflows`, implementation checkpoint
-  `e8ca04e989cab2e951d24fc60e636e16ce89b5a7`, based on exact `origin/main`
-  `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`. Protected PR #9303 is open;
-  this branch is not protected authority until reviewed and merged.
+- #9190 worktree: `worktrees/UpstreamDrift-9190-workflows`; replacement branch
+  `feat/9190-governed-workflows-v2`, implementation checkpoint
+  `e8ca04e989cab2e951d24fc60e636e16ce89b5a7`, reconciled onto protected
+  `origin/main` `7dc5f86af68907f19bc953c509d96d05f505cdab`. Protected PR #9304 supersedes
+  conflicting PR #9303 without force-pushing; it is not protected authority
+  until reviewed and merged.
 - ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
   authority for AffineDrift #4010; #9064 remains design-manual authority and
   #9070 remains typed calculation-manifest authority.
