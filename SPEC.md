@@ -4935,6 +4935,10 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Exact registry bytes shall not be sufficient evidence: every claim-to-review
   and review-to-claim edge shall also be unique, resolvable, and reciprocal
   after the canonical adjudication and numeric-evidence reconciliation passes.
+- Byte determinism shall compare two builds from the same declared engine
+  environment. A lane using different engine versions shall verify immutable
+  model, design, source, and gate contracts but shall not compare its bytes or
+  numerical payload to a frozen engine-qualified evidence record.
 - Pre-correction outputs shall remain retained as stale/adverse provenance.
   Requalification may establish internal numerical reproducibility only; it
   shall not establish human intent, anatomy, population effects, injury risk,

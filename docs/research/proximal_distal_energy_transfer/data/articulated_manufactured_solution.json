@@ -6,7 +6,10 @@
     "canonical_sha256": "672f983841884df9d41c0eb814a1fda4da65bb960029620169c84b00dffca1d9",
     "coordinate_count": 20,
     "profile": "f-1.55",
-    "closed_state_index": [0, 6]
+    "closed_state_index": [
+      0,
+      6
+    ]
   },
   "engines": {
     "analytical": "lagrange_christoffel_finite_difference_mass_gradient",
@@ -15,8 +18,15 @@
   },
   "design": {
     "duration_s": 0.01,
-    "time_steps_s": [0.002, 0.001, 0.0005],
-    "registered_richardson_order_interval": [0.9, 1.1],
+    "time_steps_s": [
+      0.002,
+      0.001,
+      0.0005
+    ],
+    "registered_richardson_order_interval": [
+      0.9,
+      1.1
+    ],
     "inverse_dynamics_relative_tolerance": 0.05,
     "conservation_relative_tolerance": 0.02,
     "conservation_scope": "gravity_free_zero_torque_free_floating_club_subtree",
@@ -32,15 +42,18 @@
       "maximum": 3.085729133305138e-11
     },
     "integration_step_error_rad": {
-      "0.0005": 1.5338080207677462e-5,
-      "0.001": 3.0691137526489554e-5,
-      "0.002": 6.142840443981723e-5
+      "0.0005": 1.5338080207677462e-05,
+      "0.001": 3.0691137526489554e-05,
+      "0.002": 6.142840443981723e-05
     },
-    "richardson_orders": [1.0010837924036449, 1.0007041993085717],
+    "richardson_orders": [
+      1.0010837924036449,
+      1.0007041993085717
+    ],
     "gravity_free_zero_torque_relative_drift": {
-      "linear_momentum": 1.0080231065762152e-6,
-      "angular_momentum": 1.5118397415440685e-6,
-      "kinetic_energy": 8.665719958278473e-7
+      "linear_momentum": 1.0080231065762152e-06,
+      "angular_momentum": 1.5118397415440685e-06,
+      "kinetic_energy": 8.665719958278473e-07
     }
   },
   "constrained_motion": {
@@ -66,6 +79,6 @@
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py": "1df4b9c5b0c9550aa051f1b7d28b6b54702f56398d87bc07904ed93a03997119",
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": "26e8f8237a008eac7286236c9eb765e7694c81d10bc0852c23d937ee7ae90973",
     "scripts/research/proximal_distal_energy/spatial_full_body.py": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
-    "tests/research/test_articulated_manufactured_solution.py": "0bac91ea7537b751032a58e74d112b97375587e1ef3fb15d32ce393624dc2e81"
+    "tests/research/test_articulated_manufactured_solution.py": "8abfd51c53ca5da0928ec43a3e53ef50a73992b0e78fee8cff8ef69efe0c82c2"
   }
 }
