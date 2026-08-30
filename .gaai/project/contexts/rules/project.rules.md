@@ -2,8 +2,8 @@
 
 ## Safety
 
-1. All AI work on `main` branch. Never commit directly to `main`.
-2. PRs target `main`. No auto-merge. Human approval required.
+1. All AI work uses a focused topic branch or isolated worktree. Never commit directly to `main`.
+2. PRs target `main`. After required checks and repository protections pass, automated merge may be enabled. A separate human approval is needed only when an active GitHub protection rule requires one.
 3. No destructive git history operations.
 4. No secret commits (.env, API keys, credentials).
 
