@@ -35,6 +35,7 @@ from bunkershot3d.metrics import (
 from .conftest import (
     DIVOT_WIDTH_M,
     SAND_BULK_DENSITY_KG_M3,
+    SAND_FRICTION_ANGLE_DEG,
     build_decelerating_trace,
     build_sole_load_trace,
     build_vee_trace,
@@ -95,6 +96,7 @@ def _divot_scalars(trace: StrikeTrace, head, scene: StrikeScene) -> dict[str, fl
         scene,
         width_m=DIVOT_WIDTH_M,
         bulk_density_kg_m3=SAND_BULK_DENSITY_KG_M3,
+        friction_angle_deg=SAND_FRICTION_ANGLE_DEG,
     )
     dig = dig_vs_skid(trace, head, scene)
     return {

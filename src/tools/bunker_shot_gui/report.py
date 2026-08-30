@@ -25,6 +25,7 @@ from .model import (
 )
 
 __all__ = [
+    "ACCELERATED_MASS_CAVEAT",
     "CARRY_CAVEAT",
     "MAX_REPORTED_REASONS",
     "PATCH_CONFOUND_CAVEAT",
@@ -201,10 +202,22 @@ def _divot_lines(outcome: ShotOutcome) -> tuple[str, ...]:
         ),
         _line("Maximum depth", f"{divot.max_depth_m * 1e3:.4g} mm"),
         _line("Length", f"{divot.length_m * 1e3:.4g} mm"),
-        _line("Sand moved", f"{divot.mass_kg:.4g} kg"),
+        _line("Sand under the sole", f"{divot.mass_kg:.4g} kg"),
+        _line("Sand accelerated", divot.accelerated_mass.summary()),
+        f"  {ACCELERATED_MASS_CAVEAT}",
         "",
     )
 
+
+ACCELERATED_MASS_CAVEAT = (
+    "the accelerated sand mass is an INTERVAL and a consistency correction "
+    "between two uncalibrated models, not a measurement: its in-plane factor "
+    "was read off the F1 MPM tier, which is BEYOND_VALIDATION at a 1.44 m/s "
+    "ceiling and 0 of 4 on NASA-STD-7009B, and its out-of-plane half is a "
+    "wall model no tier here can see. Never quote the central value alone "
+    "(#8659)"
+)
+"""The sentence the accelerated mass is never shown without (issue #8659)."""
 
 DIG_SKID_CAVEAT = (
     "the dig-versus-skid verdict is UNCALIBRATED and is not a finding: the "
@@ -247,9 +260,10 @@ def _dig_skid_lines(outcome: ShotOutcome) -> tuple[str, ...]:
 
 
 CARRY_CAVEAT = (
-    "carry is derived from the delivered sand impulse and the measured divot "
-    "mass through an uncalibrated transfer efficiency; no published "
-    "measurement of ball speed or launch angle out of sand exists (#8616)"
+    "carry is derived from the delivered sand impulse and the accelerated "
+    "sand mass through an uncalibrated transfer efficiency, and it inherits "
+    "the whole width of that mass interval (#8659); no published measurement "
+    "of ball speed or launch angle out of sand exists (#8616)"
 )
 """The sentence a carry number is never shown without (issue #8657)."""
 

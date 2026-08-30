@@ -317,13 +317,15 @@ def _ball_speed_in(condition: PlayingCondition, elements: SurfaceElements) -> fl
         scene,
         width_m=geometry.sole_width_m,
         bulk_density_kg_m3=sand.bulk_density_kg_m3,
+        friction_angle_deg=sand.friction_angle_deg,
     )
     launch = compute_ball_launch_from_splash(
         lie=NOMINAL_LIE,
         ball=BALL,
         delivery=SandDelivery(
             impulse_n_s=float(np.linalg.norm(shot.impulse_n_s)),
-            displaced_mass_kg=divot.mass_kg,
+            displaced_mass_kg=divot.accelerated_mass.central_kg,
+            displaced_mass_bounds_kg=divot.accelerated_mass.bounds_kg,
             contact_duration_s=shot.contact_duration_s,
             entry_speed_m_s=shot.entry_speed_m_s,
             exit_speed_m_s=shot.exit_speed_m_s,
