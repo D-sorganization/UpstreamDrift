@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 08:26 PDT
+Updated: 2026-08-30 08:44 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -35,7 +35,11 @@ design-manual program.
 
 - Worktree: `UpstreamDrift-worktrees/9153-crba-symmetry`.
 - Branch: `feat/9153-distributed-event-boundaries`, based exactly on protected
-  #9305 squash `ebc372aed21937d345854aeedab0385373969dd6`; no PR exists yet.
+  #9305 squash `ebc372aed21937d345854aeedab0385373969dd6`.
+- PR #9306 is open with squash auto-merge preserved. Its prior exact head was
+  `2683764952be298b1bfbd373f41f901e22fdce13`; CI Standard run `33320260016`
+  passed both Python lanes and the scientific gates but found one actionable
+  suite-marker ratchet failure in the new event test file.
 - This slice may port only distributed tension-contact event-surface retention,
   bracketed root location on the declared linear state interpolant, duplicate-
   time pre/post alignment, and the adapter into the protected attribution
@@ -47,24 +51,24 @@ design-manual program.
 - Event locations qualify the retained discrete trajectory only; they are not
   claimed as the continuous integrator's exact event solution or causal
   counterfactual evidence.
-- Current commits are `30fd30ad8` (source/tests/SPEC) and `fee08a65c`
-  (deterministic release records). Thirty-three focused tests pass; architecture,
-  Ruff, format, title, file-size, design-manual, claim/evidence, PDF, and 711-
-  artifact release qualification gates pass locally. No PR exists yet.
+- Current commits through `268376495` include source/tests/SPEC, deterministic
+  release records, and this handoff. The missing `scientific` suite marker is
+  fixed locally; the exact ratchet, eight event tests, and five release-bundle
+  tests pass. Thirty-three focused tests, architecture, Ruff, format, title,
+  file-size, design-manual, claim/evidence, PDF, and 711-artifact release
+  qualification gates passed before the protected run.
 - PR #9305 passed every required protected gate, including the 8m53s full unit
   suite, and its release bundle validates 709 artifacts. The non-required
   optional-stack job remained queued after merge and was not redundantly rerun.
 
 ## Immediate Order
 
-1. Rebuild the distributed event-surface/root-location adapter from the mature
-   quarantined logic, refactoring it to current architecture and typed contracts.
-2. Complete focused validation, document the exact diff, and commit this clean
-   source/test/SPEC/handoff slice without importing generated campaign evidence.
-3. Push and open one protected PR linked to #9153. Run the GitHub App setup
-   immediately before every GitHub operation.
-4. Fix actionable exact-head failures only, preserve squash auto-merge, and
+1. Commit and push the narrow suite-marker fix; run the GitHub App setup
+   immediately before the GitHub push.
+2. Inspect PR #9306's new exact-head protected checks without redundant reruns.
+3. Fix actionable exact-head failures only, preserve squash auto-merge, and
    verify the squash commit/tree on remote `main`.
+4. Record protected evidence on #9153 and refresh this handoff from remote main.
 5. Only after source/adapters merge, preregister fresh current-main smoke
    execution. Never dispatch `[100,120)` from pre-fix authority.
 
