@@ -4713,7 +4713,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json": {
-      "sha256": "a30956a1e274a6b00eb6739290cc21c3cee18646eb1baebe9422d5a68a3f9476",
+      "sha256": "5cd74490235b01d59d9303b77d5d625aff53ed50847bef43651526c1834ae14e",
       "bytes": 984,
       "referenced_by": [
         "PD-CLAIM-289",
@@ -6460,8 +6460,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "d24191d423aeebe4d690292048f41fd44d2eb824e0d6b2436835fafa78716f73",
-      "bytes": 254816,
+      "sha256": "51c4c80c04b190e788a04f4c2b9622a0a1c609c784e03c38619c9e8c9eb48171",
+      "bytes": 260101,
       "referenced_by": [
         "PD-CLAIM-241"
       ]

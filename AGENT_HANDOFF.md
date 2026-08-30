@@ -126,11 +126,11 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Validation
 
-Use serial pytest. All 132 structural-factorial/workflow tests pass; Python 3.11
-MyPy, repository Ruff, and changed-file Black pass. Full local collection stops
-on 44 environment/baseline errors (missing pyproj/pytest plugins, vendor paths),
-and full Black reports 668 pre-existing files. Native replay requires hosted
-qualified runtime; do not call the whole repository green from this checkout.
+Use serial pytest. All 134 structural-factorial/workflow tests pass; Python 3.11
+MyPy, repository Ruff, and changed-file Black pass. The 256-page PDF candidate
+`2e294d8b7541` passes the 1,115-artifact computational release gate and visual
+QA. Full collection retains 44 environment/baseline errors; native replay needs
+the hosted qualified runtime, so do not call the whole repository green here.
 
 Invoke receipt/corruption/collection/enrichment entry points from the root with
 `python -m scripts.research.proximal_distal_energy.<module>`.

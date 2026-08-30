@@ -524,7 +524,7 @@ available with the document for independent inspection and reuse.
 
 \chapter{Introduction}\label{sec-intro}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, rightrule=.15mm, toprule=.15mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, leftrule=.75mm, coltitle=black, opacitybacktitle=0.6, titlerule=0mm, colframe=quarto-callout-note-color-frame, arc=.35mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, opacityback=0, left=2mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6, toptitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toprule=.15mm, arc=.35mm, opacityback=0, rightrule=.15mm, colback=white, colbacktitle=quarto-callout-note-color!10!white]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2829,7 +2829,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, rightrule=.15mm, toprule=.15mm, bottomrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, leftrule=.75mm, coltitle=black, opacitybacktitle=0.6, titlerule=0mm, colframe=quarto-callout-note-color-frame, arc=.35mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, opacityback=0, left=2mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6, toptitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toprule=.15mm, arc=.35mm, opacityback=0, rightrule=.15mm, colback=white, colbacktitle=quarto-callout-note-color!10!white]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -14103,10 +14103,21 @@ parameter provenance) and \texttt{figures/} (PDF and SVG). The
 open-chain analyses use fixed-step RK4; the forward constrained two-hand
 analysis uses velocity Verlet with mass-metric projection. The analyses
 contain no stochastic elements. Re-runs should reproduce the recorded
-values up to floating-point environment differences. The final optimizer
-requires PyMuPDF, performs lossless object/stream compaction, and
-refuses an artifact that changes the page count, URI-link count, or
-outline-entry count.
+values up to floating-point environment differences. The prospective
+native-engine structural factorial uses a stricter contract: the frozen
+source and execution-module digests, package and engine versions, thread
+settings, and numerical-kernel dispatch are qualified before execution.
+The actual campaign runner must reproduce that audit exactly before any
+case is evaluated. The OpenBLAS kernel path is pinned with
+\href{https://github.com/OpenMathLib/OpenBLAS/wiki/Faq/0ed685dd80eab9b96751a75b2713049891bd4f16}{\texttt{OPENBLAS\_CORETYPE=Haswell}},
+and a replay-only run independently tests the qualification without
+invoking the campaign. Runtime drift is retained as adverse
+computational evidence and stops the slice; it is not repaired by
+rounding results or relaxing a numerical tolerance. Evidence from
+different runtime identities is not pooled. The final optimizer requires
+PyMuPDF, performs lossless object/stream compaction, and refuses an
+artifact that changes the page count, URI-link count, or outline-entry
+count.
 
 \chapter{Validation Evidence}\label{sec-appendix-validation}
 

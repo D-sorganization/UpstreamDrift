@@ -325,8 +325,8 @@
       "bytes": 2789
     },
     "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md": {
-      "sha256": "b5b29296de2e591eda6c5e4275e42ebfa6dd69a281c1c8d3cb881202824f5073",
-      "bytes": 48631
+      "sha256": "dd4a2e4288099df3366e9a608cb8e9d2e7116b7f7ebadca88a77c7a056988399",
+      "bytes": 59423
     },
     "docs/research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md": {
       "sha256": "f243857fe5fbab125fac69907995d0e454552c3f7952d8c1e047353cfbc6a567",
@@ -393,8 +393,8 @@
       "bytes": 9004
     },
     "docs/research/proximal_distal_energy_transfer/README.md": {
-      "sha256": "a2cedeaab3b3c541c6a71fac156c0ccb282a2e619d9abf0c64f2efe62136ecae",
-      "bytes": 47447
+      "sha256": "a0bd2b340c286ac6a834915d43743a6ef8f44aa2b96053872d9053ea4cecd232",
+      "bytes": 64583
     },
     "docs/research/proximal_distal_energy_transfer/REVIEWER_WORKBENCH.md": {
       "sha256": "c0ec13a6072b09edb6147a9a7a636c56ebb62650d4a0946525a32f07ee5751da",
@@ -413,8 +413,8 @@
       "bytes": 15020
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd": {
-      "sha256": "26c1cbacaeae03f1285c1deb13953116dde95f0574fceb2e3a260446f99cf51a",
-      "bytes": 16042
+      "sha256": "74d6c6bb2fca683435ad78eb66bf61f0b9e7e8d2b1afbf39569285935de1e52f",
+      "bytes": 16832
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd": {
       "sha256": "5a92dfd140bd7d22389912d5d5b732b1fabc63d862883707cce73446cd416387",
@@ -1869,7 +1869,7 @@
       "bytes": 253240
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json": {
-      "sha256": "a30956a1e274a6b00eb6739290cc21c3cee18646eb1baebe9422d5a68a3f9476",
+      "sha256": "5cd74490235b01d59d9303b77d5d625aff53ed50847bef43651526c1834ae14e",
       "bytes": 984
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.npz": {
@@ -2111,6 +2111,18 @@
     "docs/research/proximal_distal_energy_transfer/data/articulated_stateful_distributed_smoke/summary.json": {
       "sha256": "be42ac778e46e6b40ec32ba95bec68bf39e8c43fe7b29e0b01432a0e0a92a293",
       "bytes": 31356
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json": {
+      "sha256": "668148756bd03f663521f9a9c2fe77eb9b5a20f3ee8aca64d9a86b9390315705",
+      "bytes": 1006
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json": {
+      "sha256": "0d9e65247351d5e3d3fef9278c2142303df1141fe7f681d973ac4369f98a5152",
+      "bytes": 15513
+    },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_recovery_registration.json": {
+      "sha256": "124ac709ea9045fbf33b72b1929fccba509c15721474873c12841f978ec7453b",
+      "bytes": 3412
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json": {
       "sha256": "8230941e0aa51ba4c389b58161a18e172ce781805b00161b72e48300c2211fc2",
@@ -3517,8 +3529,8 @@
       "bytes": 69285
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf": {
-      "sha256": "af1157d0a5558b11979c9ad567d08a6bacfc2ab96ab12f8cbc899a8a8fec2253",
-      "bytes": 2011956
+      "sha256": "2e294d8b7541ac9c22f53c1dedaa01d9cb5c37d1690d4dc269f2eaf2429a0330",
+      "bytes": 2012267
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd": {
       "sha256": "0f963245c75dad095f50e64772ff4b68c8b97a877adbac57d6991ba60197733b",
@@ -3708,6 +3720,78 @@
       "sha256": "79f316c02625d480f4b0d03651bf118ed564b239b3cde49ee5eaa4a0dbeebe9f",
       "bytes": 10987
     },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_artifact_receipt.py": {
+      "sha256": "71a7f0f605f69961ebdbfd74583cac408aef3304e947201d1d582bfd2e933205",
+      "bytes": 19655
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_collection.py": {
+      "sha256": "7284f079bda0a7413d7cddbe5faf22e244e98387816837720a5d7799f087bdc3",
+      "bytes": 19603
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_corruption_audit.py": {
+      "sha256": "7f41d5f17393b8b68184bf8336e24d45475cbccbd482a194891685e59031dc3c",
+      "bytes": 9928
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_enrichment_audit.py": {
+      "sha256": "e1d8a8721a8d11c56b9ac957b57315d308f27cac5dcef99a34239772ad2be580",
+      "bytes": 8626
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_evaluator.py": {
+      "sha256": "f9a46da367102f44223086b6886e724b8becfc13d420faafdc853ee83fdfbf16",
+      "bytes": 16714
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_evidence.py": {
+      "sha256": "94dc40f6be505d99521c7afc8a3c3eade4be749892ed6186f50b20fbcc3d0e14",
+      "bytes": 5999
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_github_artifact.py": {
+      "sha256": "eeac7ae27bfe0ceb7edced37000fff40413ff98aebca167008f29d7b8a46f502",
+      "bytes": 3608
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_launcher.py": {
+      "sha256": "a4e0ffea28b0cb02fd2fb83b717e11295465ee419ba92aa1465e7bcd158ad7d4",
+      "bytes": 6716
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_plan.py": {
+      "sha256": "6d2296433aa173fa4db737a274618e14fabd670cb9b7ecf3218a03d951249e56",
+      "bytes": 16927
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_prefix_view.py": {
+      "sha256": "e37298470dbb94fc6edb68b1870683641cadd4c11755492ae96f5669083a51f5",
+      "bytes": 6413
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_recovery_boundary.py": {
+      "sha256": "f9b6761d4864c17a31d61a1650df5068a089cb43a6234552fd3b1904d4404438",
+      "bytes": 16645
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_recovery_registration.py": {
+      "sha256": "559633ba4262c859544b7303a855b75ec66f0dd5379c412dda3e9b90445e4a78",
+      "bytes": 15963
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_repeatability_audit.py": {
+      "sha256": "a8d1a05f30b3d668439abe2f7fd375c03ff56f1bb6ad2899b15d35cde84e0960",
+      "bytes": 10108
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_runner.py": {
+      "sha256": "bc78072c2f977e6fda46d4ab11c744b9522a0f1ae2e73b35a0db13ff1acd79e3",
+      "bytes": 22577
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_runtime_audit.py": {
+      "sha256": "272546eec378d998d8c74253991ecd9600199c3978ac64a5bdcce40e4923840f",
+      "bytes": 17753
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_runtime_replay_audit.py": {
+      "sha256": "71c53572032f043334cf9c53d2148c91f07fde142169dc8dd1e4ef985abd5ac3",
+      "bytes": 6468
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_status.py": {
+      "sha256": "c245741cf9f3a95dac1bfa254178b864b18794726e31d5c0dcbc8a8c19593ec8",
+      "bytes": 4762
+    },
+    "scripts/research/proximal_distal_energy/articulated_structural_factorial_summary.py": {
+      "sha256": "4ca020d88556c6bb82d5e4342e4ddf3abcdc8662646b0ae0aa6bd53cf98471f8",
+      "bytes": 23760
+    },
     "scripts/research/proximal_distal_energy/articulated_uncertainty_study.py": {
       "sha256": "f786eb0000095a81f702de75e4e569754e03dee2a366bab1207ce45894f209c5",
       "bytes": 12993
@@ -3872,6 +3956,18 @@
       "sha256": "0ccf6f8f02fde877a9a4330cdd034afc1518c39f9c5d55a2b70fccd9c7858d2e",
       "bytes": 2635
     },
+    "scripts/research/proximal_distal_energy/generate_articulated_structural_factorial_amendment.py": {
+      "sha256": "c15c5e8376ad6453e058f389eb5af63348bd974cca77a67b0b298fde1e9531ba",
+      "bytes": 3489
+    },
+    "scripts/research/proximal_distal_energy/generate_articulated_structural_factorial_launch.py": {
+      "sha256": "55338c4e943bff5cbf0de57b5400469f27ba800698b814094888223284a41f57",
+      "bytes": 1482
+    },
+    "scripts/research/proximal_distal_energy/generate_articulated_structural_factorial_plan.py": {
+      "sha256": "4900eb40cae46df2f91d7e93d77b395ebe26001d6d477746e3fc098ccf01602e",
+      "bytes": 2219
+    },
     "scripts/research/proximal_distal_energy/hybrid_system_contract.py": {
       "sha256": "d05dd2db201320f59f1227177d7c73946504e57aa71f2c9508cab15de9ce633d",
       "bytes": 13725
@@ -3919,6 +4015,10 @@
     "scripts/research/proximal_distal_energy/make_articulated_slack_figure.py": {
       "sha256": "f101a0cf43d54dd4de24c79ba5c088be2e18702d4431c9a226780436bd93cc71",
       "bytes": 5128
+    },
+    "scripts/research/proximal_distal_energy/make_articulated_structural_factorial_figure.py": {
+      "sha256": "972015db9475aec4985435d34ea67bbf297939a78a4ddf9e73185572aa6b3377",
+      "bytes": 8648
     },
     "scripts/research/proximal_distal_energy/make_bounded_event_reachability_figure.py": {
       "sha256": "8a995833fea925238f0cba1f84a35931e349f73b838dd1d697560655593df3ee",
