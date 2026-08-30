@@ -246,8 +246,25 @@ class TestDrawingIsRepeatableAndBounded:
     def test_every_frame_of_the_shot_can_be_drawn(
         self, field: SoleLoadField, patch: ContactPatch
     ) -> None:
+        """Build the axes once and update them, as an animation must.
+
+        This used to call :func:`draw_shot_frame` once per frame, which
+        clears the figure and rebuilds every axes and colour bar each
+        time -- the call its own docstring names as "the wrong one for an
+        animation". The cost is ~340 ms per frame and linear in the
+        length of the trace, so the test was one buried shot away from
+        being unrunnable, and issue #9247 delivered one: correcting the
+        delivery frame took the nominal shot from 69 samples to 457,
+        turning a 29 s test into a 155 s one and killing the xdist worker
+        that was running it. Per-frame cost was unchanged, so nothing
+        leaked -- the trace simply got 6.6x longer.
+
+        Updating in place is also the path the workbench view actually
+        uses, so this now covers the code that ships.
+        """
         figure = Figure(figsize=(8.0, 6.0))
         scales = field_scales((field,))
+        artists = draw_shot_frame(figure, field, patch, frame=0, scales=scales)
         for frame in range(field.n_frames):
-            draw_shot_frame(figure, field, patch, frame=frame, scales=scales)
+            artists.update(frame)
         assert np.isfinite(patch.area_m2).all()
