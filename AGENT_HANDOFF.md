@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29
+Updated: 2026-08-29 17:31 PDT (2026-08-30 00:31 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -23,6 +23,9 @@ are not completion evidence.
   branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
   Scientific/collector content head is `442c6d70a626df56e73cdccfe47682a5b1a0678a`;
   resolve the handoff-only successor with `git rev-parse HEAD`. No PR exists.
+- Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
+  leased worktree above, verify `git status --short --branch`, and fetch before
+  comparing its branch with the remote.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
 
@@ -70,16 +73,20 @@ collected-prefix-0060-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   `52404c77b8a6` passes 60 statuses/results, 540 arrays, and every enriched
   sidecar without outcome inspection, human/coaching inference, or promotion.
 - Replay 33283267821 executes [60,80) at dispatch head `42f1acda4` using
-  qualified audit 33277601263. It is the sole authorized structural process;
-  do not cancel, rerun, duplicate, or dispatch another while it is live.
+  qualified audit 33277601263. At 2026-08-30 00:31 UTC, job 99181938431 was
+  still running registered-campaign step 11; upload step 12 was pending and no
+  artifact existed. It is the sole authorized structural process; do not
+  cancel, rerun, duplicate, or dispatch another while it is live.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. Poll only replay 33283267821 after GitHub App setup. On terminal status,
-   apply receipt-1.4, corruption, cumulative collection, immutable legacy view,
-   and exact audit gates through case 80; stop and preserve any mismatch.
+1. Poll only replay 33283267821 after GitHub App setup. On terminal success,
+   retain the exact run/jobs/artifacts API-response bytes and original ZIP;
+   verify the API/archive identity before extraction. Then apply receipt-1.4,
+   source-derived corruption, cumulative collection, immutable legacy view,
+   and exact audit gates through case 80. Stop and preserve any mismatch.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
