@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 09:50 PDT
+Updated: 2026-08-30 09:57 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -42,9 +42,14 @@ contract, recovery constraints, and next commands are in
   `651de90a4cf8e1195ec7f3ab3ae16883ec8f6172`. Reviewed head
   `142662fb3de86fbb8086b83772df09425897f9c2` and merge share tree
   `a0dd17ed057c0aea45f112172d406ace971610df`; remote `main` equals the squash.
-- Active turnover worktree: `UpstreamDrift-worktrees/9153-turnover`, branch
-  `docs/9153-turnover`. It contains handoff documentation only relative to the
-  protected #9308 tree.
+- Active turnover worktree: `UpstreamDrift-worktrees/9153-turnover-main`, branch
+  `docs/9153-turnover-main`. PR #9309 is a full, turnover-only PR at reviewed
+  head `3c99bfaef8c8d333adaa7c7604d26546a085e806` with two changed files,
+  +223/-22, and squash auto-merge enabled. CI Standard run `33323662717`,
+  docs-quality run `33323662727`, doc-governance run `33323662712`, SPEC run
+  `33323662716`, LoD run `33323662707`, and guards are green. Bot CI Trigger
+  run `33323662694`, job `99289907941`, is queued for
+  `d-sorg-fleet-docker` with no runner assigned. Do not rerun it for capacity.
 - New registration source:
   `scripts/research/proximal_distal_energy/articulated_distributed_smoke_registration.py`.
 - New frozen protocol:
@@ -65,12 +70,14 @@ contract, recovery constraints, and next commands are in
 
 ## Immediate Order
 
-1. Open and protected-squash-merge the turnover-only update from
-   `docs/9153-turnover`.
-2. From that exact protected base, implement the current-main single-worker
+1. Resume the existing #9309 Bot CI Trigger handle; preserve auto-merge and do
+   not create a redundant capacity-only run.
+2. Verify #9309's squash and reviewed tree on remote `main`, then update #9153
+   with exact evidence.
+3. From that exact protected base, implement the current-main single-worker
    atomic smoke runner with RED contracts for registration identity, complete
    case enumeration, atomic resume, typed failures, and no outcome promotion.
-3. Execute the six registered cases only after runner code and tests merge.
+4. Execute the six registered cases only after runner code and tests merge.
    Never import or relabel legacy checkpoints as outcomes.
 
 ## Scientific Boundaries
