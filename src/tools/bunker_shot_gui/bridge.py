@@ -31,21 +31,22 @@ No Qt, no arithmetic that is not either the solver's or the metric's.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from functools import lru_cache
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.spatial.transform import Rotation
 
 from bunkershot3d.geometry import (
+    TRAVEL_AXIS_BODY,
     CamberFit,
     LoftedWedge,
     MassProperties,
     StationCamber,
     WedgeGeometry,
     compute_mass_properties,
+    delivered_rotation,
+    entry_velocity_m_s,
     loft_wedge,
     shaft_axis,
 )
@@ -241,11 +242,13 @@ def delivery_rotation(
 ) -> NDArray[np.float64]:
     """Return the body-to-world rotation for a delivered head.
 
-    Opening the face is a rotation about the shaft axis; shaft lean is a pure
-    pitch applied after it. This is the same composition
-    :mod:`bunkershot3d.geometry.delivery` uses for its closed-form angles,
-    built here on the public shaft axis so the mesh and those angles cannot
-    disagree.
+    Delegates to :func:`~bunkershot3d.geometry.delivery.delivered_rotation`,
+    which is the library's one definition of a delivered pose. This function
+    used to rebuild that composition here from the delivery module's
+    docstring, and inherited its mirrored frame: opening the face and leaning
+    the shaft both came out backwards on a real mesh, which is half of issue
+    #9247. A second copy of a frame convention is a second chance to get it
+    wrong, so there is now only one.
 
     Args:
         geometry: The design vector, supplying the lie angle.
@@ -254,10 +257,11 @@ def delivery_rotation(
     Returns:
         A ``(3, 3)`` rotation matrix.
     """
-    _, axis = shaft_axis(geometry)
-    opening = Rotation.from_rotvec(np.asarray(axis) * math.radians(swing.face_open_deg))
-    lean = Rotation.from_euler("y", math.radians(swing.shaft_lean_deg))
-    return np.asarray((lean * opening).as_matrix(), dtype=np.float64)
+    return delivered_rotation(
+        lie_deg=geometry.lie_deg,
+        face_open_deg=swing.face_open_deg,
+        shaft_lean_deg=swing.shaft_lean_deg,
+    )
 
 
 def entry_kinematics(build: HeadBuild, swing: SwingSetup) -> HeadKinematics:
@@ -271,6 +275,15 @@ def entry_kinematics(build: HeadBuild, swing: SwingSetup) -> HeadKinematics:
     itself; doing it once, in the solver, is what makes the workbench's trace
     the same trace any other caller gets.
 
+    The head travels along :data:`~bunkershot3d.geometry.TRAVEL_AXIS_BODY`,
+    which is ``-x``: the mesh puts the leading edge at the origin with ``+x``
+    rearward, so a wedge striking leading edge first moves toward ``-x``. This
+    function used to build ``+x cos(attack)`` instead, driving the head
+    backwards through its own sole -- a ramp descending into the bed, on which
+    more bounce is a steeper ramp. That was the other half of issue #9247, and
+    it is why entry is now placed with one library call rather than a local
+    trigonometric expression.
+
     Args:
         build: The lofted head.
         swing: The delivery.
@@ -279,10 +292,9 @@ def entry_kinematics(build: HeadBuild, swing: SwingSetup) -> HeadKinematics:
         The entry pose and velocity.
     """
     orientation = delivery_rotation(build.geometry, swing)
-    speed = float(swing.clubhead_speed_mps)
-    attack_rad = math.radians(swing.attack_angle_deg)
-    velocity = speed * np.array(
-        [math.cos(attack_rad), 0.0, math.sin(attack_rad)], dtype=np.float64
+    velocity = entry_velocity_m_s(
+        speed_m_s=swing.clubhead_speed_mps,
+        attack_angle_deg=swing.attack_angle_deg,
     )
     require(
         -float(velocity[2]) > 0.0,
@@ -290,12 +302,12 @@ def entry_kinematics(build: HeadBuild, swing: SwingSetup) -> HeadKinematics:
         value=-float(velocity[2]),
     )
     reference_world = orientation @ build.sole_reference_body_m
+    # The sole crosses the surface this far *behind* the ball, and behind is
+    # upstream along the travel axis: the ball sits at the origin, so the head
+    # enters at ``-travel_axis * entry_distance``.
+    entry_station_m = -TRAVEL_AXIS_BODY[0] * swing.entry_distance_behind_ball_m
     position = np.array(
-        [
-            -swing.entry_distance_behind_ball_m - float(reference_world[0]),
-            0.0,
-            0.0,
-        ],
+        [entry_station_m - float(reference_world[0]), 0.0, 0.0],
         dtype=np.float64,
     )
     return HeadKinematics(

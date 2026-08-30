@@ -129,7 +129,12 @@ class TestPlayabilityWindow:
     def test_a_refused_solve_is_outside_the_window_and_counted(
         self, axis_a, axis_b
     ) -> None:
-        """NaN carry means the solver refused; it never counts as playable."""
+        """NaN carry never counts as playable.
+
+        With no ``refused`` grid supplied every NaN is attributed to
+        refusal, which is what this function meant when refusal was the
+        only way to produce one.
+        """
         carry = np.full((5, 3), GOOD_CARRY_M)
         carry[0, 0] = np.nan
 
@@ -140,6 +145,59 @@ class TestPlayabilityWindow:
         assert not window.in_window[0, 0]
         assert window.area == pytest.approx(4.0 - 0.125, rel=1e-12)
         assert window.refused_fraction == pytest.approx(0.125 / 4.0, rel=1e-12)
+        assert window.unmeasured_fraction == 0.0
+
+    def test_a_buried_solve_is_counted_apart_from_a_refused_one(
+        self, axis_a, axis_b
+    ) -> None:
+        """Two NaNs, two causes, two numbers (issue #9247).
+
+        The solver declining is ADR-0032 refusal. A head that buries
+        answered the query and simply has no divot to derive a carry
+        from. Both are outside the window, and reporting the second as
+        the first tells a designer the tool refused a delivery it
+        actually simulated.
+        """
+        carry = np.full((5, 3), GOOD_CARRY_M)
+        carry[0, 0] = np.nan
+        carry[4, 2] = np.nan
+        refused = np.zeros((5, 3), dtype=bool)
+        refused[0, 0] = True
+
+        window = playability_window(
+            axis_a, axis_b, carry, target_carry_m=TARGET_CARRY_M, refused=refused
+        )
+
+        assert not window.in_window[0, 0]
+        assert not window.in_window[4, 2]
+        assert window.area == pytest.approx(4.0 - 0.25, rel=1e-12)
+        assert window.refused_fraction == pytest.approx(0.125 / 4.0, rel=1e-12)
+        assert window.unmeasured_fraction == pytest.approx(0.125 / 4.0, rel=1e-12)
+
+    def test_a_refused_point_that_reports_a_carry_is_refused(
+        self, axis_a, axis_b
+    ) -> None:
+        """The two grids must agree, or one of them is describing a lie."""
+        carry = np.full((5, 3), GOOD_CARRY_M)
+        refused = np.zeros((5, 3), dtype=bool)
+        refused[0, 0] = True
+
+        with pytest.raises(ValueError, match="cannot also report a carry"):
+            playability_window(
+                axis_a, axis_b, carry, target_carry_m=TARGET_CARRY_M, refused=refused
+            )
+
+    def test_a_refusal_grid_of_the_wrong_shape_is_refused(self, axis_a, axis_b) -> None:
+        carry = np.full((5, 3), GOOD_CARRY_M)
+
+        with pytest.raises(ValueError, match="refused must have shape"):
+            playability_window(
+                axis_a,
+                axis_b,
+                carry,
+                target_carry_m=TARGET_CARRY_M,
+                refused=np.zeros((3, 5), dtype=bool),
+            )
 
     def test_scattered_islands_are_separated_from_the_total(
         self, axis_a, axis_b

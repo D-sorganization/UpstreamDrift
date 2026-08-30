@@ -39,8 +39,14 @@ from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 
+from .delivery import TRAVEL_AXIS_BODY
 from .mass_properties import MassProperties, compute_mass_properties
-from .mesh import TriangleMesh, require_watertight, signed_volume_m3
+from .mesh import (
+    MeshValidationError,
+    TriangleMesh,
+    require_watertight,
+    signed_volume_m3,
+)
 from .profile import (
     InconstructibleCamberError,
     build_section_polygon,
@@ -55,6 +61,7 @@ __all__ = [
     "StationCamber",
     "build_wedge_mesh",
     "loft_wedge",
+    "require_travel_frame",
     "rocker_offsets_m",
     "shaft_axis",
     "wedge_mass_properties",
@@ -63,6 +70,8 @@ __all__ = [
 _MIN_STATIONS = 5
 _RELIEF_EXPONENT = 3.0
 _MIN_TRAILING_RELIEF = 1e-6
+_SOLE_SPAN_SLACK = 0.05
+"""Slack on the sole span, for the rocker lift and the trailing chamfer."""
 
 
 class CamberFit(Enum):
@@ -527,6 +536,7 @@ def loft_wedge(
         sections.append(_apply_rocker(polygon, float(lift), top_z_m))
 
     mesh = _stitch_sections(geometry, span, sections)
+    require_travel_frame(mesh, geometry)
     return LoftedWedge(
         mesh=mesh,
         geometry=geometry,
@@ -535,6 +545,58 @@ def loft_wedge(
         effective_camber_area_m2=effective_m2,
         stations=tuple(fits),
     )
+
+
+def require_travel_frame(mesh: TriangleMesh, geometry: WedgeGeometry) -> None:
+    """Refuse a mesh that is mirrored against the travel axis.
+
+    The head frame and :data:`~.delivery.TRAVEL_AXIS_BODY` are two halves of
+    one convention, and until issue #9247 nothing held them together.  The
+    sections are built with the leading-edge point at ``x =
+    face_progression_m`` and the sole descending rearward from it to the
+    trailing contact, which is precisely what makes ``-x`` the direction a
+    wedge travels.  Reverse the sections and that constant is silently wrong:
+    the head is then driven trailing edge first down a sole descending into
+    the bed, on which more bounce is a steeper ramp and digs *deeper*.  That
+    inverted the tool's primary design variable, and it survived a suite of
+    2,000 tests because the two conventions were stated only in prose, in two
+    docstrings, that disagreed.
+
+    So the contract is checked on the artefact: the lowest point of a lofted
+    head lies on the sole, rearward of the leading edge and no further back
+    than the sole is wide.  Note that comparing the mesh's own extremes would
+    not do -- an ``x`` mirror maps extremes to extremes, and a check on those
+    passes either way round.  It is the leading edge's *forward-referenced*
+    station that breaks the symmetry.
+
+    Checked rather than asserted: ``python -O`` strips assertions, and every
+    delivered pose and entry velocity in the package is expressed against
+    this frame.
+
+    Args:
+        mesh: The lofted head.
+        geometry: The design vector it was lofted from, supplying the leading
+            edge's station and the sole width.
+
+    Raises:
+        MeshValidationError: If the sole's lowest point is not rearward of the
+            leading edge and within the sole width of it.
+    """
+    vertices = np.asarray(mesh.vertices, dtype=np.float64)
+    lowest_x = float(vertices[int(np.argmin(vertices[:, 2])), 0])
+    rearward = -float(TRAVEL_AXIS_BODY[0])
+    along_m = (lowest_x - geometry.face_progression_m) * rearward
+    if not 0.0 <= along_m <= geometry.sole_width_m * (1.0 + _SOLE_SPAN_SLACK):
+        raise MeshValidationError(
+            "the lofted sole must descend rearward from the leading edge: the "
+            f"leading edge is at x = {geometry.face_progression_m * 1e3:.4g} mm "
+            f"and the lowest point at x = {lowest_x * 1e3:.4g} mm, which is "
+            f"{along_m * 1e3:.4g} mm rearward against a {geometry.sole_width_m * 1e3:.4g} "
+            f"mm sole. With a travel axis of {TRAVEL_AXIS_BODY} the head would "
+            "be driven trailing edge first down a sole descending into the "
+            "bed. Either the sections are mirrored or TRAVEL_AXIS_BODY is "
+            "(issue #9247)."
+        )
 
 
 def build_wedge_mesh(

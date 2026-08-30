@@ -143,9 +143,17 @@ class TestSwingSetup:
         assert delivery.shaft_lean_deg == pytest.approx(5.0)
 
     def test_with_attack_angle_is_non_mutating(self) -> None:
+        """The subject is non-mutation, so read the default, do not pin it.
+
+        This used to assert the default was ``-8.0``, which coupled a
+        non-mutation test to the shipped delivery and made it fail when
+        issue #9247 corrected that delivery. What it means to check is
+        that the original is unchanged, whatever it started as.
+        """
         original = SwingSetup()
+        before = original.attack_angle_deg
         swept = original.with_attack_angle(-11.0)
-        assert original.attack_angle_deg == pytest.approx(-8.0)
+        assert original.attack_angle_deg == pytest.approx(before)
         assert swept.attack_angle_deg == pytest.approx(-11.0)
 
 
