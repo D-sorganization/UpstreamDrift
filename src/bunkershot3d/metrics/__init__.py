@@ -26,6 +26,7 @@ Peak resultant force and moment       N, N.m                :mod:`.loads`
 Head twist about the shaft axis       N.m, N.s.m, rad       :mod:`.loads`
 Playability window area               axis unit product     :mod:`.playability`
 Bounce utilisation of the sole        m^2 and fraction      :mod:`.bounce_map`
+Spanwise heel-to-toe sole load        N.s, m, fraction      :mod:`.spanwise`
 Forgiveness sensitivities             r, m/unit, fraction   :mod:`.forgiveness`
 ===================================== ===================== ==============================
 
@@ -42,6 +43,14 @@ And one is new work rather than a reproduction:
 :func:`~bunkershot3d.metrics.loads.head_twist_metrics` quantifies head rotation
 under sand load -- the moment about the shaft axis and about the CG. The
 literature search for this epic found it published nowhere.
+
+:func:`~bunkershot3d.metrics.spanwise.spanwise_load` is the third of the
+prescriptive ones and answers the question the tool was built for: how a grind
+shares one strike **heel to toe**, so two soles that differ only in relief stop
+reading as the same shot. F0 already integrates a per-element response across
+the whole blade -- ADR-0044 records that it is reporting-blind, not
+geometrically blind -- and this is the report. F1 is refused there, because a
+plane-strain tier has no span to distribute across.
 """
 
 from __future__ import annotations
@@ -101,6 +110,22 @@ from .playability import (
     playability_objective,
     playability_window,
 )
+from .spanwise import (
+    MIN_ELEMENTS_PER_SPANWISE_BIN,
+    MIN_LOADED_SAMPLES_FOR_MIGRATION,
+    MIN_SPANWISE_BINS,
+    MIN_SPANWISE_STATIONS,
+    SPANWISE_AXIS_INDEX,
+    SPANWISE_F0_ANALYTIC_REASON,
+    SPANWISE_PLANE_STRAIN_REASON,
+    SPANWISE_SOLE_NOT_SAND_REASON,
+    SPANWISE_UNMEASURED_REASON,
+    SpanwiseCredibility,
+    SpanwiseDistribution,
+    SpanwiseLoad,
+    SpanwiseMigration,
+    spanwise_load,
+)
 from .trace import (
     STANDARD_GRAVITY_MPS2,
     WORLD_UP,
@@ -114,62 +139,76 @@ from .trace import (
 )
 
 __all__ = [
+    "ACCELERATED_MASS_CONSISTENCY_REASON",
+    "ACCELERATED_MASS_LATERAL_REASON",
+    "AcceleratedSandMass",
+    "BallLaunch",
+    "BounceUtilisation",
     "DEFAULT_CARRY_TOLERANCE_FRACTION",
     "DEFAULT_DIG_DESCENT_RETURN",
     "DEFAULT_LOAD_THRESHOLD_FRACTION",
     "DEFAULT_SKID_DESCENT_RETURN",
     "DIG_SKID_BOUNCE_ORDERING_REASON",
     "DIG_SKID_COARSE_WINDOW_REASON",
-    "ACCELERATED_MASS_CONSISTENCY_REASON",
-    "ACCELERATED_MASS_LATERAL_REASON",
     "DIG_SKID_UNCALIBRATED_REASON",
-    "F1_ENTRAINMENT_FACTOR_BOUNDS",
-    "MIN_RESOLVED_SUBMERGED_SAMPLES",
-    "MIN_SUBMERGED_SAMPLES",
-    "STANDARD_GRAVITY_MPS2",
-    "SWEEP_RANGES",
-    "WIVOU_2016_CARRY_CORRELATION",
-    "WORLD_UP",
-    "BallLaunch",
-    "BounceUtilisation",
     "DigSkidCalibration",
     "DigSkidResult",
     "DigSkidVerdict",
-    "AcceleratedSandMass",
     "DivotMetrics",
     "EnergyPartition",
+    "F1_ENTRAINMENT_FACTOR_BOUNDS",
     "FactorSensitivity",
     "ForgivenessReport",
     "HeadLoadMetrics",
     "HeadModel",
     "HeadTwistMetrics",
     "LoadProfile",
+    "MIN_ELEMENTS_PER_SPANWISE_BIN",
+    "MIN_LOADED_SAMPLES_FOR_MIGRATION",
+    "MIN_RESOLVED_SUBMERGED_SAMPLES",
+    "MIN_SPANWISE_BINS",
+    "MIN_SPANWISE_STATIONS",
+    "MIN_SUBMERGED_SAMPLES",
     "PlayabilityAxis",
     "PlayabilityWindow",
+    "SPANWISE_AXIS_INDEX",
+    "SPANWISE_F0_ANALYTIC_REASON",
+    "SPANWISE_PLANE_STRAIN_REASON",
+    "SPANWISE_SOLE_NOT_SAND_REASON",
+    "SPANWISE_UNMEASURED_REASON",
+    "STANDARD_GRAVITY_MPS2",
+    "SWEEP_RANGES",
     "SoleDepthProfile",
     "SoleLoadTrace",
+    "SpanwiseCredibility",
+    "SpanwiseDistribution",
+    "SpanwiseLoad",
+    "SpanwiseMigration",
     "StrikeInterval",
     "StrikeScene",
     "StrikeTrace",
     "SweepRange",
+    "WIVOU_2016_CARRY_CORRELATION",
+    "WORLD_UP",
     "WrenchReference",
     "angular_velocity_world_radps",
     "bounce_utilisation",
     "centre_of_mass_moment_Nm",
     "dig_vs_skid",
     "divot_metrics",
-    "lateral_spread_factor",
     "energy_partition",
     "forgiveness_report",
     "forgiveness_sensitivity",
     "head_kinetic_energy_J",
     "head_load_metrics",
     "head_twist_metrics",
+    "lateral_spread_factor",
     "playability_objective",
     "playability_window",
     "rotate_body_to_world",
     "rotate_world_to_body",
     "shaft_travel_loft_axes",
     "sole_depth_profile",
+    "spanwise_load",
     "submerged_interval",
 ]
