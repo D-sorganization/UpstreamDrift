@@ -1,8 +1,7 @@
-# Agent Handoff: Proximal--Distal Research Program
+# Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 20:41 PDT (2026-08-30 03:41 UTC)
-Epic #8557 is the completion authority. Local artifacts and partial campaigns
-are not completion evidence.
+Updated: 2026-08-29 20:45 PDT (2026-08-30 03:45 UTC)
+Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
 
@@ -19,12 +18,11 @@ are not completion evidence.
 
 ## Active Slice: UpstreamDrift #9153
 
-- #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
-  branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
-  Scientific/collector content head is `442c6d70a626df56e73cdccfe47682a5b1a0678a`;
-  exact preregistration/dispatch head is
-  `0aa431ca4e23cb4ab3c2cc87ff9af97824990cfb`; resolve the turnover-only
-  successor with `git rev-parse HEAD`. No PR exists.
+- #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
+  branch `feat/9153-forward-impulse-work` is clean
+  and remote-equal at turnover head `1b374f328`. Runtime attestation landed at
+  `a76a1e360`; the active repeat was preregistered/dispatched from
+  `e3b8b8dea978ae36ea650c9610ddc68acd73aa6a`. No PR exists.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
@@ -94,22 +92,24 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Immediate Order
 
-1. Preserve the exact case-100 mismatch and do not weaken equality, overwrite
-   retained evidence, or dispatch [100,120). Preserve the legacy-only probe
-   classification and the adverse first enriched replay. Runtime replay gate
-   `a76a1e360` binds the actual package/platform/operator contract and fixed
-   single-thread environment. Run 33290346007/job 99200773332 passed the exact
-   runtime gate and produced the same legacy-only JSON/NPZ bytes as prior run 33289155154. Runtime artifact SHA is `5b3c1c4d4006`; checkpoint SHA is
-   `3cd55ac66825`. Second attested [80,81) run 33290812945/job 99202003097 is
-   active at `e3b8b8dea978`; do not cancel, duplicate, dispatch [100,120), add
-   tolerance, or promote evidence.
-2. Preserve all three refinement failures, typed Pinocchio absence, original
+1. Run 33290812945/job 99202003097 is the only live structural process. It is
+   an exact second attested [80,81) repeat at `e3b8b8dea978`; do not cancel or
+   duplicate it. Query once after GitHub App setup. On success, first retain the
+   raw run/jobs/artifacts API bodies under `C:\Users\diete\Campaigns\UpstreamDrift-9153-runtime-attested-repeat-2-case-0080-run-33290812945`, then
+   retain and digest both runtime-replay and checkpoint ZIPs, build receipt 1.4
+   plus corruption/repeatability audits, and compare JSON/NPZ digests with run 33290346007. On failure, retain APIs/artifacts/logs and do not auto-rerun.
+2. Preserve the case-100 mismatch, legacy-only repeat classification, and
+   adverse first enriched replay. Do not weaken exact equality, add tolerance,
+   overwrite evidence, read effects, promote results, or dispatch [100,120).
+   If the live repeat is exact, preregister a fresh attested [0,100) replay in
+   20-case slices before any dispatch; do not mix old unbound evidence silently.
+3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
-3. The contrast summary is implemented locally; after completion, validate the
+4. The contrast summary is implemented locally; after completion, validate the
    checkpoint set and retain sign reversals, failures, and typed missing cells.
    Open a protected PR only after the full #9153 acceptance set is locally
    green.
-4. Project only protected UpstreamDrift evidence into AffineDrift; continue
+5. Project only protected UpstreamDrift evidence into AffineDrift; continue
    Tools only through its provider contract and protected flow.
 
 ## Cross-Repository Turnover
