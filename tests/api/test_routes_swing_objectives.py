@@ -43,11 +43,12 @@ def test_compare_swing_objectives_default(client: TestClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["schema_version"] == COMPARISON_SCHEMA_VERSION
-    assert len(data["objective_keys"]) == 5
+    assert len(data["objective_keys"]) == 6
     assert "clubhead_speed" in data["objective_keys"]
+    assert "hand_path_impulse" in data["objective_keys"]
     assert "matrix" in data
-    assert len(data["matrix"]) == 5
-    assert len(data["matrix"][0]) == 5
+    assert len(data["matrix"]) == 6
+    assert len(data["matrix"][0]) == 6
     assert "raw_values" in data
     assert "torque_saturation" in data
     assert "is_degenerate" in data
