@@ -350,6 +350,7 @@ def test_provider_ci_executes_and_aggregates_governed_workflows() -> None:
     )
 
     assert "companion-workflows:" in workflow
+    assert "pydantic==2.12.5" in workflow
     assert "python3 -m scripts.companion_workflows" in workflow
     assert "--report dist/companion-workflows/execution-report.v1.json" in workflow
     assert "upstreamdrift-companion-workflows-${{ github.sha }}" in workflow
