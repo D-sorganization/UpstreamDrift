@@ -50,7 +50,6 @@ def test_get_bootstrapped_tools_returns_copy() -> None:
 
 import builtins as _builtins  # noqa: E402
 
-_ADAPTER_TOKEN = "_embed_adapter"
 _REAL_IMPORT = _builtins.__import__
 
 
@@ -59,13 +58,34 @@ class _FakeEntryPoint:
         self.value = value
 
 
+def _adapter_module_names() -> frozenset[str]:
+    """Exactly the module names ``bootstrap`` will try to import.
+
+    This used to be a substring test for ``_embed_adapter`` plus a special
+    case for ``pose_studio.gui``.  That drifted: ``FALLBACK_ADAPTER_MODULES``
+    also holds ``src.launchers.adapters.simscape_embed`` and
+    ``src.launchers.adapters.swing_objective_lab_embed``, neither of which
+    contains the token.  They were therefore imported for real inside tests
+    that patch every adapter import to fail, so the Swing Objective Lab
+    adapter registered itself and ``test_bootstrap_handles_import_errors``
+    saw ``['swing_objective_lab']`` where it expected ``[]`` -- but only on a
+    host where that adapter's dependencies resolve, which is why it went
+    unnoticed until it started failing every pull request in CI.
+
+    Deriving the set from the module under test means a new adapter can never
+    reintroduce the drift.
+    """
+    return frozenset(bootstrap._adapter_modules_for_bootstrap())
+
+
 def _make_filtered_import(decide):
     """Build an __import__ replacement that delegates to the real one
     for everything except adapter module names, which go through *decide*.
     """
+    adapter_modules = _adapter_module_names()
 
     def _filtered(name, globals=None, locals=None, fromlist=(), level=0):
-        if _ADAPTER_TOKEN in name or "pose_studio.gui" in name:
+        if name in adapter_modules:
             return decide(name)
         return _REAL_IMPORT(name, globals, locals, fromlist, level)
 
@@ -174,6 +194,34 @@ def test_bootstrap_respects_explicit_tools_env_over_stale_paths(
         )
     finally:
         sys.path[:] = original_path
+
+
+def test_every_adapter_module_is_intercepted_by_the_harness() -> None:
+    """Guard the harness the failure tests depend on.
+
+    ``test_bootstrap_handles_import_errors`` and
+    ``test_bootstrap_handles_generic_errors`` are only meaningful if *every*
+    adapter import is routed through their ``decide`` callback.  Any adapter
+    that slips past ``_make_filtered_import`` is imported for real, registers
+    itself, and quietly turns those assertions into a lie.
+    """
+    modules = bootstrap._adapter_modules_for_bootstrap()
+    assert modules, "adapter list is empty -- this test would pass vacuously"
+
+    seen: list[str] = []
+
+    def _record(name):
+        seen.append(name)
+        return object()
+
+    filtered = _make_filtered_import(_record)
+    for name in modules:
+        filtered(name)
+
+    assert seen == list(modules), (
+        "these adapter modules were not intercepted and would be imported for "
+        f"real: {sorted(set(modules) - set(seen))}"
+    )
 
 
 def test_bootstrap_handles_import_errors() -> None:
