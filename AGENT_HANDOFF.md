@@ -1,15 +1,15 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30
+Updated: 2026-08-30 06:20 PDT
 
 Epic #8557 is the canonical completion authority. Issue state, local files, and
 partial campaign checkpoints are not completion evidence.
 
 ## Protected Authority
 
-- UpstreamDrift protected `main` was
-  `4cf39347be49adb0e700edebb05390717c5ce2ec` when the Tools pin branch started;
-  re-check remote authority before every push or merge.
+- UpstreamDrift protected `main` is
+  `727bda2de2d4656e8d9a3abbbc3a72b30fa06ebb`; re-check remote authority before
+  every push or merge.
 - The qualified paper has 252 pages and SHA-256
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
 - Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
@@ -27,31 +27,29 @@ partial campaign checkpoints are not completion evidence.
   merged through protected squashes `b2d7f721`, `d7a95e2a`, and `da0759c7`.
   The trusted rendered-evidence run remains capacity-pending; do not rerun it.
 
-## Active Publication Integrity Slice: #9142 / PR #9147
+## Active Reproducibility Fix: #9153
 
-- #9142 prevents the generated claim-adjudication chapter from emitting
-  repository-relative `data/` links that break when AffineDrift republishes the
-  chapter. PR #9147 owns the implementation; do not create a duplicate PR.
-- Worktree: `UpstreamDrift-worktrees/9142-portable-links`.
-- Local branch: `fix/9142-portable-links`, tracking the PR branch through a
-  merge-only reconciliation with current `origin/main`; never force-push.
-- The source now emits portable UpstreamDrift `blob/main` links, while the
-  AffineDrift publication boundary remains responsible for immutable SHA
-  rewriting. The focused five-test generator/committed-artifact suite passes.
-- Release manifests were regenerated after reconciling #9151. Complete serial
-  validation, commit the merge, push to the existing PR branch, preserve squash
-  auto-merge, inspect actionable hosted failures, and verify its squash on
-  remote `main` before closing this slice.
+- Clean worktree: `UpstreamDrift-worktrees/9153-crba-symmetry`; branch
+  `fix/9153-pinocchio-crba-symmetry` from current protected `main`.
+- Source audit of the quarantined structural replay found that robotics
+  Pinocchio CRBA only guarantees its upper triangle, while four research paths
+  consumed the reusable native matrix without completing the lower triangle.
+- The fix adds one shared finite/square/symmetry adapter, routes all four
+  research consumers through it, and has a poisoned-lower-triangle regression
+  test. Do not regenerate scientific artifacts in this PR.
+- The large campaign worktree remains
+  `UpstreamDrift-worktrees/9153-forward-impulse-work`, remote-equal at
+  `1e5e823ca2fa9391134e8a0ccf140a36036a88a7` before this isolated fix. Its
+  exact replay failure, legacy evidence, and `[100,120)` prohibition remain.
 
 ## Immediate Order
 
-1. Finish and protected-merge #9147 without changing scientific content.
-2. Register the next #8557 child for matched forward impulse/work attribution
-   through contact transitions. Its contract must freeze event surfaces,
-   contact-state matching, impulse/work estimands, shaft/base coupling,
-   uncertainty, adverse loads, killswitches, and evidence promotion rules.
-3. Implement that child from a clean leased worktree only after its issue and
-   dependency order are visible in #8557.
+1. Validate, commit, and protected-merge the isolated #9153 CRBA correction.
+2. Preserve all pre-fix artifacts as adverse/stale evidence; preregister a new
+   post-fix runtime and numerical-equivalence qualification before execution.
+3. Reconcile the 233-commit #9153 campaign branch with protected `main` as
+   reviewable dependency slices; never open the entire accumulated branch as a
+   single PR and never dispatch `[100,120)` from the pre-fix authority.
 
 ## Scientific Boundaries
 

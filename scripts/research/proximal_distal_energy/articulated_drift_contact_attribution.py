@@ -23,6 +23,7 @@ from scripts.research.proximal_distal_energy.articulated_contact_projection impo
 from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
     build_pinocchio_articulated_model,
     finite_difference_kinematics,
+    pinocchio_crba_mass_matrix,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import (
     mujoco_mass_matrix_and_bias,
@@ -519,7 +520,7 @@ def _evaluate_case(
         qd_eval[14] += config.contact.club_velocity_perturbation_m_s
         matrix_m, bias_m = mujoco_mass_matrix_and_bias(model, q_eval, qd_eval)
         _, static_m = mujoco_mass_matrix_and_bias(model, q_eval, np.zeros_like(qd_eval))
-        matrix_p = np.asarray(pin.crba(native, native_data, q_eval), dtype=np.float64)
+        matrix_p = pinocchio_crba_mass_matrix(pin, native, native_data, q_eval)
         bias_p = np.asarray(
             pin.nonLinearEffects(native, native_data, q_eval, qd_eval), dtype=np.float64
         )

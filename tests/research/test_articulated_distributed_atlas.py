@@ -17,6 +17,7 @@ from scripts.research.proximal_distal_energy.articulated_distributed_atlas impor
 from scripts.research.proximal_distal_energy.articulated_distributed_forward import (
     DistributedForwardConfig,
 )
+from scripts.research.proximal_distal_energy import articulated_forward_integration
 from scripts.research.proximal_distal_energy.articulated_forward_integration import (
     native_dynamics_operator,
 )
@@ -113,6 +114,67 @@ def test_pinocchio_operator_rejects_an_impostor_without_mujoco_fallback(
 
     with pytest.raises(RuntimeError, match="unrelated PyPI 'pinocchio'"):
         native_dynamics_operator("pinocchio", cast(SpatialModel, cast(Any, object())))
+
+
+def test_pinocchio_operator_symmetrizes_crba_upper_triangle(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Pinocchio leaves the CRBA lower triangle unspecified between calls."""
+
+    class NativeModel:
+        def createData(self) -> object:
+            return object()
+
+    class PinocchioModule:
+        __version__ = "3.8.0"
+
+        @staticmethod
+        def crba(_model: object, _data: object, _q: np.ndarray) -> np.ndarray:
+            return np.array(
+                [
+                    [4.0, 1.5, -0.25],
+                    [987.0, 3.0, 0.75],
+                    [-654.0, 321.0, 2.0],
+                ]
+            )
+
+        @staticmethod
+        def nonLinearEffects(
+            _model: object,
+            _data: object,
+            _q: np.ndarray,
+            _qd: np.ndarray,
+        ) -> np.ndarray:
+            return np.zeros(3)
+
+    monkeypatch.setitem(sys.modules, "pinocchio", PinocchioModule())
+    monkeypatch.setattr(
+        articulated_forward_integration,
+        "require_robotics_pinocchio",
+        lambda _module: "3.8.0",
+    )
+    monkeypatch.setattr(
+        articulated_forward_integration,
+        "build_pinocchio_articulated_model",
+        lambda _module, _model: NativeModel(),
+    )
+
+    operator = native_dynamics_operator(
+        "pinocchio", cast(SpatialModel, cast(Any, object()))
+    )
+    mass, bias = operator(np.zeros(3), np.zeros(3))
+
+    np.testing.assert_array_equal(
+        mass,
+        np.array(
+            [
+                [4.0, 1.5, -0.25],
+                [1.5, 3.0, 0.75],
+                [-0.25, 0.75, 2.0],
+            ]
+        ),
+    )
+    np.testing.assert_array_equal(bias, np.zeros(3))
 
 
 def test_committed_distributed_atlas_is_complete_finite_and_qualified() -> None:
