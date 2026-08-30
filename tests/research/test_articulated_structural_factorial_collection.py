@@ -266,7 +266,7 @@ def test_collection_is_deterministic_complete_and_source_preserving(
 
     assert manifest["complete"] is True
     assert manifest["schema_version"] == (
-        "articulated-structural-factorial-collection/1.2.0"
+        "articulated-structural-factorial-collection/1.3.0"
     )
     assert manifest["combined_checkpoint_count"] == 4
     assert manifest["next_missing_case_index"] == 4

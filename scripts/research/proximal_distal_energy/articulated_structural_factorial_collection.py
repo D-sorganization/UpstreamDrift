@@ -19,7 +19,7 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
     plan_sha256,
 )
 
-_SCHEMA = "articulated-structural-factorial-collection/1.2.0"
+_SCHEMA = "articulated-structural-factorial-collection/1.3.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _RECEIPT_SCHEMAS = {
     "articulated-structural-factorial-artifact-receipt/1.1.0",
