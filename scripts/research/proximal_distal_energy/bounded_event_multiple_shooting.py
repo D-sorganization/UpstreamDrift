@@ -36,6 +36,7 @@ from scripts.research.proximal_distal_energy.phase_event_stability import (
 from src.shared.python.simulation_backends import make_backend
 
 FloatArray: TypeAlias = npt.NDArray[np.float64]
+IntArray: TypeAlias = npt.NDArray[np.int64]
 
 
 def _readonly(value: npt.ArrayLike) -> FloatArray:
@@ -135,7 +136,7 @@ class MultipleShootingResult:
 
 @dataclass(frozen=True, slots=True)
 class _ShootingLayout:
-    segment_indices: tuple[FloatArray, ...]
+    segment_indices: tuple[IntArray, ...]
     prefix_step_count: int
     nominal_partial_dt_s: float
 
@@ -201,7 +202,7 @@ def _integrate_segment(
     *,
     start_state: FloatArray,
     perturbation: FloatArray,
-    indices: FloatArray,
+    indices: IntArray,
     durations: FloatArray,
 ) -> FloatArray:
     backend = make_backend("ode", problem.params, dt=problem.dt_s)

@@ -204,7 +204,7 @@ def _result(
     buffers: _Buffers,
     case: ShaftIntegrationCase,
     properties: ArticulatedShaftProperties,
-) -> dict[str, NDArray[Any]]:
+) -> dict[str, NDArray[Any] | str | int | float]:
     dissipation = buffers.grip_dissipation + buffers.shaft_damping
     cumulative = np.zeros(dissipation.size)
     cumulative[1:] = np.cumsum(
@@ -244,7 +244,7 @@ def _result(
 
 def _rigid_trace(
     model: SpatialModel, case: ShaftIntegrationCase, config: ShaftForwardConfig
-) -> dict[str, NDArray[Any]]:
+) -> dict[str, NDArray[Any] | str | int | float]:
     distributed = DistributedIntegrationCase(
         q=case.q,
         qd=case.qd,
@@ -284,7 +284,7 @@ def integrate_articulated_shaft(
     model: SpatialModel,
     case: ShaftIntegrationCase,
     config: ShaftForwardConfig = ShaftForwardConfig(),
-) -> dict[str, NDArray[Any]]:
+) -> dict[str, NDArray[Any] | str | int | float]:
     """Advance one native rigid operator plus shared passive elastic states."""
 
     step_count = _validate(model, case, config)

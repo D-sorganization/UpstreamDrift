@@ -1,11 +1,11 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 02:00 PDT (2026-08-30 09:00 UTC)
+Updated: 2026-08-30 10:15 PDT (2026-08-30 17:15 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
 
-- UpstreamDrift protected `main` is `58413d2c24e5a9cfae32ebfa10caf9e0bc58d27c`.
+- UpstreamDrift protected `main` is `4cf39347be49adb0e700edebb05390717c5ce2ec`.
   #9153 began at ancestor `e732757c90538acae7d7c4531dc1a05dc321b94f`,
   which contains the #9152/#9151 authority.
 - AffineDrift protected `main` is `b28fd8227d5003c752a16426ed508e13ff2e137a`;
@@ -126,11 +126,11 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Validation
 
-Use serial pytest. All 138 structural-factorial/workflow tests pass; Python 3.11
-MyPy, repository Ruff, and changed-file Black pass. The 256-page PDF candidate
-`72334a25bffb` passes the 1,115-artifact computational release gate and visual
-QA. Full collection retains 44 environment/baseline errors; native replay needs
-the hosted qualified runtime, so do not call the whole repository green here.
+Use serial pytest. Python 3.11 MyPy passes all 53 changed research modules;
+Ruff and Black pass the 12-file typing slice, with no placeholders. The broad
+affected suite passes 273/275; two currentness tests reject intentionally stale
+ground atlas/diagnostic source hashes pending integrated evidence regeneration.
+The hosted qualified runtime remains required; do not call the repository green.
 
 Invoke receipt/corruption/collection/enrichment entry points from the root with
 `python -m scripts.research.proximal_distal_energy.<module>`.

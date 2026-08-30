@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -119,7 +119,7 @@ def differentiate_mass_matrices(
         segment_time = time[indices]
         if np.any(np.diff(segment_time) <= 0.0):
             raise ValueError("time must increase strictly within each segment")
-        edge_order = 2 if indices.size >= 3 else 1
+        edge_order: Literal[1, 2] = 2 if indices.size >= 3 else 1
         rates[indices] = np.gradient(
             mass[indices], segment_time, axis=0, edge_order=edge_order
         )

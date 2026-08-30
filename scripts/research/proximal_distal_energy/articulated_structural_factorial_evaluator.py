@@ -58,6 +58,7 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 )
 
 FloatArray = NDArray[np.float64]
+TraceValue = NDArray[Any] | str | int | float
 ROOT = Path(__file__).resolve().parents[3]
 AUTHORITY_PATHS = {
     "closed_state_npz": ROOT
@@ -152,13 +153,14 @@ def _club_momentum_and_head_velocity(
 
 
 def _trapz(values: FloatArray, time_s: FloatArray, end: int) -> FloatArray:
-    return np.asarray(np.trapezoid(values[: end + 1], time_s[: end + 1], axis=0))
+    trapezoid = np.trapezoid  # type: ignore[attr-defined]  # NumPy 2.x runtime API.
+    return np.asarray(trapezoid(values[: end + 1], time_s[: end + 1], axis=0))
 
 
 def _contact_histories(
     *,
     model: SpatialModel,
-    trace: Mapping[str, NDArray[Any]],
+    trace: Mapping[str, TraceValue],
     case: GroundIntegrationCase,
 ) -> dict[str, NDArray[Any]]:
     shaft = build_articulated_shaft(model, case.shaft)
@@ -217,7 +219,7 @@ def _contact_histories(
 
 def _evidence_arrays(
     *,
-    trace: Mapping[str, NDArray[Any]],
+    trace: Mapping[str, TraceValue],
     contact: Mapping[str, NDArray[Any]],
 ) -> dict[str, NDArray[Any]]:
     """Build the complete reviewer and falsification sidecar for one case."""
@@ -251,7 +253,7 @@ def _evidence_arrays(
 def _horizon_rows(
     *,
     model: SpatialModel,
-    trace: Mapping[str, NDArray[Any]],
+    trace: Mapping[str, TraceValue],
     contact_force: FloatArray,
     contact_power: FloatArray,
     horizons_s: tuple[float, ...],

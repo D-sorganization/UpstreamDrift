@@ -8,12 +8,13 @@ calibrated production shaft.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cache
 import hashlib
 import json
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -115,6 +116,16 @@ def _active_indices(activation: ShaftActivation) -> tuple[int, ...]:
     }[activation]
 
 
+def _beam_number(beam: Mapping[str, object], key: str) -> float:
+    value = beam[key]
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise RuntimeError(f"articulated shaft beam field {key} must be numeric")
+    result = float(value)
+    if not np.isfinite(result):
+        raise RuntimeError(f"articulated shaft beam field {key} must be finite")
+    return result
+
+
 @cache
 def _structural_basis() -> tuple[dict[str, object], dict[str, FloatArray]]:
     json_path = DATA_DIR / "articulated_shaft_structural_basis.json"
@@ -142,16 +153,18 @@ def _structural_basis() -> tuple[dict[str, object], dict[str, FloatArray]]:
 
 def _torsion_stiffness(config: ArticulatedShaftConfig) -> float:
     record, _ = _structural_basis()
-    beam = record["beam_configuration"]
+    beam = cast(Mapping[str, object], record["beam_configuration"])
     nodes, weights = np.polynomial.legendre.leggauss(64)
     locations = 0.5 * config.shaft_length_m * (nodes + 1.0)
     fraction = locations / config.shaft_length_m
-    outer = float(beam["butt_diameter_m"]) + fraction * (
-        float(beam["tip_diameter_m"]) - float(beam["butt_diameter_m"])
+    outer = _beam_number(beam, "butt_diameter_m") + fraction * (
+        _beam_number(beam, "tip_diameter_m") - _beam_number(beam, "butt_diameter_m")
     )
-    inner = outer - 2.0 * float(beam["wall_thickness_m"])
+    inner = outer - 2.0 * _beam_number(beam, "wall_thickness_m")
     polar = np.pi * (outer**4 - inner**4) / 32.0
-    shear = float(beam["youngs_modulus_pa"]) / (2.0 * (1.0 + config.poisson_ratio))
+    shear = _beam_number(beam, "youngs_modulus_pa") / (
+        2.0 * (1.0 + config.poisson_ratio)
+    )
     compliance = 0.5 * config.shaft_length_m * float(np.sum(weights / (shear * polar)))
     return 1.0 / compliance
 
@@ -160,7 +173,8 @@ def _body_modes(
     model: SpatialModel, config: ArticulatedShaftConfig
 ) -> tuple[tuple[_BodyMode, ...], float]:
     record, basis = _structural_basis()
-    beam_length = float(record["beam_configuration"]["length_m"])
+    beam = cast(Mapping[str, object], record["beam_configuration"])
+    beam_length = _beam_number(beam, "length_m")
     locations = basis["locations_m"]
     shapes = basis["tip_normalized_shape"]
     slopes = basis["tip_normalized_slope_per_m"]

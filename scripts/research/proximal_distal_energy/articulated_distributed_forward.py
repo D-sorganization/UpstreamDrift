@@ -334,7 +334,7 @@ def integrate_distributed_grip(
     model: SpatialModel,
     case: DistributedIntegrationCase,
     config: DistributedForwardConfig = DistributedForwardConfig(),
-) -> dict[str, NDArray[Any]]:
+) -> dict[str, NDArray[Any] | str | int | float]:
     """Advance one state-registered passive distributed grip."""
 
     step_count = _validate_case(model, case, config)

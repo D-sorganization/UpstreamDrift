@@ -156,7 +156,8 @@ def _block_heatmap(
             contrast_index[str(row["contrast_id"])], block_index[tuple(row["block"])]
         ] = float(row["high_minus_low_effect"])
     finite = np.abs(matrix[np.isfinite(matrix)])
-    limit = max(float(np.max(finite)) if finite.size else 0.0, np.finfo(float).eps)
+    finite_max = float(np.max(finite)) if finite.size else 0.0
+    limit = max(finite_max, float(np.finfo(float).eps))
     color_map = plt.get_cmap("coolwarm").copy()
     color_map.set_bad("#e6e6e6")
     image = axis.imshow(matrix, aspect="auto", cmap=color_map, vmin=-limit, vmax=limit)

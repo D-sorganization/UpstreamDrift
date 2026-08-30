@@ -13,7 +13,7 @@ from pathlib import Path
 import platform
 import re
 import subprocess
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -121,7 +121,7 @@ def _execution_module_provenance(source_root: Path) -> dict[str, object]:
     }
     provenance: dict[str, object] = {}
     for name, function in functions.items():
-        raw_path = inspect.getsourcefile(function)
+        raw_path = inspect.getsourcefile(cast(Any, function))
         if raw_path is None:
             raise ValueError(f"cannot resolve executed source for {name}")
         path = Path(raw_path).resolve()
@@ -359,7 +359,7 @@ def audit_structural_runtime(
         "release": platform.release(),
         "machine": platform.machine(),
     }
-    distributions: dict[str, object] = _distribution_versions()
+    distributions: dict[str, str | None] = _distribution_versions()
     identity_record: dict[str, object] = {
         "plan_sha256": expected_plan_hash,
         "execution_revision": revision,

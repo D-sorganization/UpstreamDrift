@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from typing import cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -235,8 +236,10 @@ def evaluate_stateful_distributed_grip(
     )
     buf = _buffers(model, inputs.grip_config)
     _advance_stations(velocity, previous, kinematics, normal, inputs, buf)
+    normal_force = cast(FloatArray, normal.normal_force_on_club_n)
+    station_gap = cast(FloatArray, normal.station_signed_gap_m)
     generalized = normal.generalized_contact_force + buf.tangent_generalized
-    total_force = normal.normal_force_on_club_n + buf.tangential_force
+    total_force = normal_force + buf.tangential_force
     virtual_residual = (
         abs(float(buf.tangent_generalized @ velocity) - buf.physical_power)
         + normal.virtual_power_residual_w
@@ -246,10 +249,10 @@ def evaluate_stateful_distributed_grip(
         normal_generalized_contact_force=normal.generalized_contact_force,
         tangential_generalized_contact_force=buf.tangent_generalized,
         force_on_club_n=total_force,
-        normal_force_on_club_n=normal.normal_force_on_club_n,
+        normal_force_on_club_n=normal_force,
         tangential_force_on_club_n=buf.tangential_force,
         active_station=normal.active_station,
-        station_signed_gap_m=normal.station_signed_gap_m,
+        station_signed_gap_m=station_gap,
         elastic_displacement_m=buf.next_state,
         regimes=buf.regimes,
         friction_limit_n=buf.friction_limit,

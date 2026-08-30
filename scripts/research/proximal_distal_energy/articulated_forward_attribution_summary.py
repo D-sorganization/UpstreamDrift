@@ -9,7 +9,7 @@ import json
 import math
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from scripts.research.proximal_distal_energy.articulated_forward_attribution_runner import (
     CaseCheckpoint,
@@ -232,13 +232,15 @@ def aggregate_registered_smoke(
     if counts["failed"]:
         promotion_failures.append("failed_case")
     if any(
-        "closure" in code for group in groups for code in group.get("failure_codes", [])
+        "closure" in code
+        for group in groups
+        for code in cast(list[str], group.get("failure_codes", []))
     ):
         promotion_failures.append("case_closure_failure")
     if any(
         "refinement" in code
         for group in groups
-        for code in group.get("failure_codes", [])
+        for code in cast(list[str], group.get("failure_codes", []))
     ):
         promotion_failures.append("refinement_failure")
     return {

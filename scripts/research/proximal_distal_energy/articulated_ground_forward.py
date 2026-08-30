@@ -266,7 +266,7 @@ def solve_conditional_base_equilibrium(
 
 def _fixed_trace(
     model: SpatialModel, case: GroundIntegrationCase, config: GroundForwardConfig
-) -> dict[str, NDArray[Any]]:
+) -> dict[str, NDArray[Any] | str | int | float]:
     if any(case.initial_base_displacement) or any(case.initial_base_velocity):
         raise ValueError("fixed base requires zero initial base state")
     shaft_case = ShaftIntegrationCase(
@@ -315,7 +315,7 @@ def integrate_articulated_ground(
     model: SpatialModel,
     case: GroundIntegrationCase,
     config: GroundForwardConfig = GroundForwardConfig(),
-) -> dict[str, NDArray[Any]]:
+) -> dict[str, NDArray[Any] | str | int | float]:
     """Advance one common rigid/shaft/base trajectory with full ledgers."""
 
     step_count = _validate(model, case, config)
@@ -369,6 +369,7 @@ def integrate_articulated_ground(
         "base_translation_m": np.empty((samples, 2)),
         "base_pitch_rad": np.empty(samples),
     }
+    ground_intrinsic_free_moment = arrays["ground_intrinsic_free_moment_nm"]
     operator = native_dynamics_operator(case.engine, model)
     for index in range(samples):
         contact = evaluate_ground_coupled_grip(
@@ -412,9 +413,7 @@ def integrate_articulated_ground(
             float(elastic_force @ eta_dot) + shaft_storage_power - shaft_damping_power
         )
         arrays["ground_force_n"][index] = wrench.force_n
-        arrays["ground_intrinsic_free_moment_nm"][index] = (
-            wrench.intrinsic_free_moment_nm
-        )
+        ground_intrinsic_free_moment[index] = wrench.intrinsic_free_moment_nm
         arrays["ground_transported_moment_nm"][index] = wrench.transported_moment_nm
         arrays["ground_strain_energy_j"][index] = wrench.strain_energy_j
         arrays["ground_damping_power_w"][index] = wrench.damping_power_w
@@ -484,7 +483,7 @@ def integrate_articulated_ground(
     active = arrays["active_station_count"] > 0
     transitions = np.zeros(samples, dtype=bool)
     transitions[1:] = active[1:] != active[:-1]
-    return {
+    result: dict[str, NDArray[Any] | str | int | float] = {
         "time_s": np.arange(samples) * case.time_step_s,
         **arrays,
         "active_labels": np.asarray(shaft.active_labels),
@@ -496,6 +495,7 @@ def integrate_articulated_ground(
         "cumulative_dissipation_j": cumulative,
         "work_energy_residual_j": total - total[0] - cumulative,
     }
+    return result
 
 
 __all__ = [

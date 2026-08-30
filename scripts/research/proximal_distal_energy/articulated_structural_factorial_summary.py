@@ -34,6 +34,8 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ev
 )
 
 FloatArray = NDArray[np.float64]
+RefinementKey = tuple[int, int, str, float, str]
+ParityKey = tuple[int, int, str, float, float]
 _DIRECT_OUTCOMES = (
     "final_club_translation_speed_m_s",
     "club_linear_momentum_change_kg_m_s",
@@ -51,6 +53,15 @@ def _mapping(value: object, *, name: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise ValueError(f"{name} must be a mapping")
     return value
+
+
+def _finite_float(value: object, *, name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{name} must be numeric")
+    result = float(value)
+    if not np.isfinite(result):
+        raise ValueError(f"{name} must be finite")
+    return result
 
 
 def _relative_error(left: FloatArray, right: FloatArray) -> float:
@@ -122,8 +133,8 @@ def _individual_numerical_pass(
 
 def _refinement_records(
     checkpoints: Sequence[StructuralCheckpoint], gates: Mapping[str, Any]
-) -> tuple[list[dict[str, object]], set[tuple[object, ...]]]:
-    grouped: dict[tuple[object, ...], list[tuple[float, float]]] = defaultdict(list)
+) -> tuple[list[dict[str, object]], set[RefinementKey]]:
+    grouped: dict[RefinementKey, list[tuple[float, float]]] = defaultdict(list)
     for checkpoint in checkpoints:
         if checkpoint.status != "completed":
             continue
@@ -140,18 +151,19 @@ def _refinement_records(
             (case.time_step_s, float(numerical["normalized_work_energy_residual"]))
         )
     records: list[dict[str, object]] = []
-    passed: set[tuple[object, ...]] = set()
+    passed: set[RefinementKey] = set()
     limit = float(gates["three_step_refinement_ratio_max"])
+    tiny = float(np.finfo(np.float64).tiny)
     for key, values in sorted(grouped.items(), key=lambda item: str(item[0])):
         ordered = sorted(values, reverse=True)
         residuals = [value for _, value in ordered]
         complete = len(ordered) == 3
         successive_ratios = [
-            later / max(earlier, np.finfo(float).tiny)
+            later / max(earlier, tiny)
             for earlier, later in zip(residuals, residuals[1:], strict=False)
         ]
         maximum_successive_ratio = max(successive_ratios, default=float("inf"))
-        fine_to_coarse_ratio = residuals[-1] / max(residuals[0], np.finfo(float).tiny)
+        fine_to_coarse_ratio = residuals[-1] / max(residuals[0], tiny)
         passes = (
             complete
             and all(
@@ -179,9 +191,7 @@ def _refinement_records(
 def _parity_records(
     checkpoints: Sequence[StructuralCheckpoint], gates: Mapping[str, Any]
 ) -> list[dict[str, object]]:
-    grouped: dict[tuple[object, ...], dict[str, StructuralCheckpoint]] = defaultdict(
-        dict
-    )
+    grouped: dict[ParityKey, dict[str, StructuralCheckpoint]] = defaultdict(dict)
     for checkpoint in checkpoints:
         case = checkpoint.case
         key = (
@@ -249,7 +259,7 @@ def _contrast_records(
     plan: Mapping[str, object],
     checkpoints: Sequence[StructuralCheckpoint],
     individual_pass: Mapping[str, bool],
-    refinement_pass: set[tuple[object, ...]],
+    refinement_pass: set[RefinementKey],
 ) -> list[dict[str, object]]:
     design = _mapping(plan.get("design"), name="design")
     analysis = _mapping(plan.get("analysis"), name="analysis")
@@ -429,7 +439,7 @@ def _contrast_aggregates(
     grouped: dict[tuple[str, str], list[float]] = defaultdict(list)
     for row in contrasts:
         grouped[(str(row["contrast_id"]), str(row["outcome"]))].append(
-            float(row["walsh_coefficient"])
+            _finite_float(row["walsh_coefficient"], name="walsh coefficient")
         )
     aggregates: list[dict[str, object]] = []
     for estimand_class, definition in definitions:

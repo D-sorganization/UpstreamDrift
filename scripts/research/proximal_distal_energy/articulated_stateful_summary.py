@@ -6,7 +6,7 @@ from collections import Counter
 from collections.abc import Mapping
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from scripts.research.proximal_distal_energy.articulated_forward_attribution_runner import (
     CaseCheckpoint,
@@ -213,7 +213,11 @@ def aggregate_stateful_smoke(
             }
         )
     counts = Counter(checkpoint.status for checkpoint in checkpoints)
-    codes = [code for group in groups for code in group.get("failure_codes", [])]
+    codes = [
+        code
+        for group in groups
+        for code in cast(list[str], group.get("failure_codes", []))
+    ]
     promotion_failures: list[str] = []
     if counts["unavailable"]:
         promotion_failures.extend(
