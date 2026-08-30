@@ -21,7 +21,7 @@ are not completion evidence.
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
-  Scientific/collector content head is `aefc7e530bdba0debb65124729f702d6226fa252`;
+  Scientific/collector content head is `0195b4676fbae88c2594d8995b6c1cf3ed7a21b5`;
   resolve the handoff-only successor with `git rev-parse HEAD`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
@@ -54,6 +54,8 @@ are not completion evidence.
   histories, and API/archive digest. Receipt 1.3 additionally cross-binds
   run, structural job, and artifact workflow-run IDs and dispatch heads, and
   requires GitHub's recorded archive size and digest to match retained bytes.
+  Receipt 1.4 also binds the exact retained run/jobs/artifacts API-response
+  bytes; collection projects those three SHA-256 digests into its manifest.
   `323a55db9` derives corruption revision from clean committed source. Prefix
   views never mutate the 714-case source.
 - Replay 33277732709 passed [0,20): archive `142556c34373`, receipt `f3bd190abc2d`,
@@ -114,7 +116,7 @@ validation-run-33279075050`; deterministic receipt SHA is `2e765f0aed41`.
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 95 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 97 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
