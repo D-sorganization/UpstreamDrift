@@ -46,6 +46,7 @@ from .lofting import (
     StationCamber,
     build_wedge_mesh,
     loft_wedge,
+    require_travel_frame,
     shaft_axis,
     wedge_mass_properties,
 )
@@ -114,6 +115,7 @@ __all__: list[str] = [
     "loft_wedge",
     "marketed_from_geometric",
     "preset_names",
+    "require_travel_frame",
     "require_watertight",
     "shaft_axis",
     "wedge_mass_properties",
