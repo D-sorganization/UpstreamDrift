@@ -43,13 +43,11 @@ contract, recovery constraints, and next commands are in
   `142662fb3de86fbb8086b83772df09425897f9c2` and merge share tree
   `a0dd17ed057c0aea45f112172d406ace971610df`; remote `main` equals the squash.
 - Active turnover worktree: `UpstreamDrift-worktrees/9153-turnover-main`, branch
-  `docs/9153-turnover-main`. PR #9309 is a full, turnover-only PR at reviewed
-  head `3c99bfaef8c8d333adaa7c7604d26546a085e806` with two changed files,
-  +223/-22, and squash auto-merge enabled. CI Standard run `33323662717`,
-  docs-quality run `33323662727`, doc-governance run `33323662712`, SPEC run
-  `33323662716`, LoD run `33323662707`, and guards are green. Bot CI Trigger
-  run `33323662694`, job `99289907941`, is queued for
-  `d-sorg-fleet-docker` with no runner assigned. Do not rerun it for capacity.
+  `docs/9153-turnover-main`. PR #9309 is a full, turnover-only PR with two
+  changed documentation files and squash auto-merge enabled. The final handoff
+  checkpoint changed the PR head; query #9309 and require every exact-head
+  protected check before merge. Current handles are recorded in the latest
+  #9153 turnover comment, not self-referentially embedded here.
 - New registration source:
   `scripts/research/proximal_distal_energy/articulated_distributed_smoke_registration.py`.
 - New frozen protocol:
@@ -70,8 +68,8 @@ contract, recovery constraints, and next commands are in
 
 ## Immediate Order
 
-1. Resume the existing #9309 Bot CI Trigger handle; preserve auto-merge and do
-   not create a redundant capacity-only run.
+1. Inspect #9309's exact current head and protected checks; preserve auto-merge
+   and do not create a redundant capacity-only run.
 2. Verify #9309's squash and reviewed tree on remote `main`, then update #9153
    with exact evidence.
 3. From that exact protected base, implement the current-main single-worker
