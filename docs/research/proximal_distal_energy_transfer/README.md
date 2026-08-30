@@ -576,6 +576,14 @@ Runtime-audit schema 1.4 additionally binds the native operator, engine gate,
 case evaluator, serial checkpoint runner, complete-history validator, and both
 subject-scaled geometry providers. Missing, substituted, or extra executed
 module identities fail closed even if an audit digest is recomputed.
+Every hosted slice now regenerates that audit on the actual assigned runner
+before case execution. The run-local replay gate requires exact identity,
+platform, distribution, engine/smoke, execution-module, and source-checkout
+records plus an explicit single-thread BLAS/OpenMP and fixed-hash environment.
+It preserves only mismatched section names, not scientific outcome values, and
+uploads the observed and comparison audits even when the gate stops execution.
+Audit-tool revision drift is retained separately and is not confused with
+frozen execution-source drift.
 Before evaluating a case, the launcher atomically writes
 `execution-session.json` inside an empty checkpoint directory. That record binds
 the exact plan, launch, runtime-audit files, execution revision, and validated

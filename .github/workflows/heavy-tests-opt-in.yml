@@ -84,6 +84,16 @@ jobs:
     timeout-minutes: 90
     permissions:
       contents: read
+    env:
+      BLIS_NUM_THREADS: "1"
+      MKL_DYNAMIC: "FALSE"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      OMP_DYNAMIC: "FALSE"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      PYTHONHASHSEED: "0"
+      VECLIB_MAXIMUM_THREADS: "1"
     steps:
       - name: Validate Structural Mode
         shell: bash
@@ -177,6 +187,45 @@ jobs:
           path: runtime-audit
           github-token: ${{ github.token }}
           run-id: ${{ inputs.structural_runtime_audit_run_id }}
+
+      - name: Generate Current-Run Runtime Audit
+        if: ${{ inputs.structural_campaign_slice == true }}
+        working-directory: execution-source
+        env:
+          PYTHONPATH: ${{ github.workspace }}/execution-source
+        shell: bash
+        run: |
+          python ../audit-tools/scripts/research/proximal_distal_energy/articulated_structural_factorial_runtime_audit.py \
+            --plan ../audit-tools/docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+            --launch ../audit-tools/docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+            --source-root . \
+            --audit-source-root ../audit-tools \
+            --output ../structural-runtime-observed.json
+
+      - name: Compare Qualified and Current Runtime
+        if: ${{ inputs.structural_campaign_slice == true }}
+        working-directory: execution-source
+        env:
+          PYTHONPATH: ${{ github.workspace }}/execution-source
+        shell: bash
+        run: |
+          python ../audit-tools/scripts/research/proximal_distal_energy/articulated_structural_factorial_runtime_replay_audit.py \
+            --plan ../audit-tools/docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+            --launch ../audit-tools/docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+            --qualified-audit ../runtime-audit/structural-runtime-audit.json \
+            --observed-audit ../structural-runtime-observed.json \
+            --output ../structural-runtime-replay-audit.json
+
+      - name: Upload Structural Runtime Replay Evidence
+        if: ${{ inputs.structural_campaign_slice == true && always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: structural-runtime-replay-${{ github.run_id }}
+          path: |
+            structural-runtime-observed.json
+            structural-runtime-replay-audit.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Run Registered Structural Campaign Slice
         if: ${{ inputs.structural_campaign_slice == true }}
