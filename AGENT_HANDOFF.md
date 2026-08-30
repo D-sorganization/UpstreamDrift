@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 21:04 PDT (2026-08-30 04:04 UTC)
+Updated: 2026-08-29 21:10 PDT (2026-08-30 04:10 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -82,26 +82,22 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   but all 14 completed new cases change `horizons`, `numerical`, and seven
   legacy arrays. Six non-completed cases retain status. No audit artifact was
   written, no outcomes were interpreted, and [100,120) must not be dispatched.
-- Exact [80,81) probe 33289155154/job 99197600514 passed at `0aa431ca4e23`.
-  Artifact 9725478419 is 713,240 bytes, archive SHA `99f1c3ad7602`; receipt
-  SHA is `68fdf686aa21` and corruption-audit SHA is `a375a94f6661`. Exact audit
-  SHA `3021c3fc5d9d` matches legacy only, supporting a first-enriched-replay
-  anomaly. It authorizes no promotion, effect reading, or human inference.
-- Runtime-attested probes 33290346007 and 33290812945 both passed their exact
-  runtime gates and produced byte-identical JSON/NPZ/session evidence matching
-  legacy only. Second runtime/checkpoint ZIP SHAs are `479c06bd0245` and
-  `5f3575d37eec`; receipt SHA is `53c086cfab84`; corruption audit SHA is
-  `bc543900ff93`; repeatability audit SHA
-  remains `3021c3fc5d9d`. Retained at `C:\Users\diete\Campaigns\UpstreamDrift-9153-runtime-attested-repeat-2-case-0080-run-33290812945`; trace is issue comment 5466564997.
+- Exact probe 33289155154 and runtime-attested probes 33290346007/33290812945
+  produced byte-identical JSON/NPZ/session evidence matching legacy only.
+  Repeatability audit SHA `3021c3fc5d9d` supports a first-enriched-replay
+  anomaly but no promotion/effect/human inference. The second attested evidence
+  is retained at `C:\Users\diete\Campaigns\UpstreamDrift-9153-runtime-attested-repeat-2-case-0080-run-33290812945`; trace is issue comment 5466564997.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. No structural process is live. Recovery registration SHA `124ac709ea90`
-   binds fresh attested [0,100) slices, serial dependencies, stop conditions,
-   and no checkpoint reuse. Commit/push it, bind the exact head on #9153, then
-   dispatch only [0,20) against qualified runtime-audit run 33277601263.
+1. Run 33291836517/job 99204705076 is the sole live structural process: exact
+   [0,20) at `9ec22b4a14d0` against runtime audit 33277601263. Registration SHA
+   `124ac709ea90` and the hosted registration gate passed before runtime replay.
+   Do not cancel, duplicate, or dispatch [20,40). On terminal success retain
+   raw APIs, both ZIPs, receipt 1.4, corruption audit, gap-free attested prefix,
+   legacy projection, and exact enrichment audit; any failure blocks progress.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
