@@ -154,6 +154,23 @@ tests and current registrations.
   participant dataset with synchronized bilateral six-axis grip wrenches is
   available.
 
+## Local Checkout Safety
+
+Observed at the turnover cut; recheck before acting:
+
+- `C:\Users\diete\Repositories\UpstreamDrift` is occupied on
+  `fix/9120-ci-conformance-docker-provenance`, with modified model submodules
+  and an untracked `book/` tree. Do not clean, switch, or reuse it.
+- `C:\Users\diete\Repositories\Tools` is occupied on
+  `feat/4740-plot-export-metadata-and-inventory`, seven commits ahead and 35
+  behind its local `origin/main` observation. Do not rebase, reset, or reuse it.
+- `C:\Users\diete\Repositories\AffineDrift` was clean on `main` but one commit
+  behind its local `origin/main` observation. Fetch through the GitHub App
+  setup and use an isolated worktree for any new AffineDrift slice.
+- Safe UpstreamDrift turnover checkpoint:
+  `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-turnover` on
+  `docs/9153-turnover`.
+
 ## Scientific Interpretation Guardrails
 
 - Keep energy transfer, momentum redistribution, joint work, constraint-force
