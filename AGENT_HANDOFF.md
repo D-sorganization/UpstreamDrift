@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 07:47 PDT
+Updated: 2026-08-30 08:26 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -9,14 +9,19 @@ design-manual program.
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
-  `7dc5f86af68907f19bc953c509d96d05f505cdab`, the squash merge of PR #9302.
+  `ebc372aed21937d345854aeedab0385373969dd6`, the squash merge of PR #9305.
+- PR #9305 added the typed event-aligned forward impulse/work kernel and bounded
+  rigid-contact same-trajectory attribution adapter. Its reviewed head and
+  squash tree are exactly `709aef6cb91c2a3a7e8ae7a952018d25a8639f8d`.
+- PR #9302 remains the cross-version manufactured-evidence qualification parent
+  at `7dc5f86af68907f19bc953c509d96d05f505cdab`.
 - PR #9299 remains its direct CRBA requalification parent at
   `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
 - PR #9299 requalified the CRBA-dependent publication after routing four native
   Pinocchio consumers through one finite, square, symmetric-matrix adapter.
 - The requalified paper has 253 pages, 2,011,818 bytes, and SHA-256
   `554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36`.
-- Its 328 claims, 1,181 candidates, 498/498 literals, 707 release artifacts,
+- Its 328 claims, 1,181 candidates, 498/498 literals, 709 release artifacts,
   2,501 evidence references, and 421 local artifacts qualify computationally.
   Tagged-PDF and embedded-font gates remain open archival limitations.
 - AffineDrift #3993 pins the exact #9152 authority as protected squash
@@ -26,39 +31,36 @@ design-manual program.
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
 
-## Active Forward-Attribution Kernel Slice: #9153
+## Active Distributed Event-Boundary Slice: #9153
 
 - Worktree: `UpstreamDrift-worktrees/9153-crba-symmetry`.
-- Branch: `feat/9153-forward-attribution-kernel`, based exactly on protected
-  `main`; no PR exists yet.
-- This slice ports only the mature event-aligned generalized impulse/work
-  kernel, the bounded rigid-contact replay adapter, and manufactured scientific
-  tests from the quarantined branch. It excludes all campaign outputs,
-  preregistrations, launch workflows, summaries, figures, and stale handoffs.
-- The kernel splits quadrature at duplicate-time segment transitions, retains
-  continuous generalized impulse/work, `Mdot v` momentum transport,
-  `0.5 v^T Mdot v` kinetic-geometry work, and declared event impulse/work.
-- Signed cancellation remains visible; ratios below the declared denominator
-  floor are undefined rather than zero. Coordinate-scaling and corruption
-  controls fail closed.
-- The rigid replay is descriptive same-trajectory attribution, not a divergent
-  causal ablation and not evidence of anatomy, biological passivity, or a human
-  strategy.
-- Current focused state: 13 scientific tests pass; focused MyPy, Ruff, format,
-  file-size, and architecture checks pass. F-8557.32 records the contract.
-- #9302 passed every protected gate, including the 9m43s unit suite and 7m26s
-  latest-dependency optional stack. Its remote tree was verified exactly.
+- Branch: `feat/9153-distributed-event-boundaries`, based exactly on protected
+  #9305 squash `ebc372aed21937d345854aeedab0385373969dd6`; no PR exists yet.
+- This slice may port only distributed tension-contact event-surface retention,
+  bracketed root location on the declared linear state interpolant, duplicate-
+  time pre/post alignment, and the adapter into the protected attribution
+  kernel. It excludes stateful friction, campaign outputs, preregistrations,
+  launch workflows, summaries, figures, and stale handoffs.
+- The adapter must use the protected `ForwardAttributionInputs` contract rather
+  than the quarantined positional API. It must preserve zero compliant-event
+  impulse/work as an explicit model statement, not infer physical impact.
+- Event locations qualify the retained discrete trajectory only; they are not
+  claimed as the continuous integrator's exact event solution or causal
+  counterfactual evidence.
+- PR #9305 passed every required protected gate, including the 8m53s full unit
+  suite, and its release bundle validates 709 artifacts. The non-required
+  optional-stack job remained queued after merge and was not redundantly rerun.
 
 ## Immediate Order
 
-1. Complete focused validation, document the exact diff, and commit this clean
-   source/test/SPEC/handoff slice without importing generated evidence.
-2. Push and open one protected PR linked to #9153. Run the GitHub App setup
+1. Rebuild the distributed event-surface/root-location adapter from the mature
+   quarantined logic, refactoring it to current architecture and typed contracts.
+2. Complete focused validation, document the exact diff, and commit this clean
+   source/test/SPEC/handoff slice without importing generated campaign evidence.
+3. Push and open one protected PR linked to #9153. Run the GitHub App setup
    immediately before every GitHub operation.
-3. Fix actionable exact-head failures only, preserve squash auto-merge, and
+4. Fix actionable exact-head failures only, preserve squash auto-merge, and
    verify the squash commit/tree on remote `main`.
-4. Next port the distributed event-surface/root-location adapter as a separate
-   dependency slice. Do not combine it with stateful friction or campaigns.
 5. Only after source/adapters merge, preregister fresh current-main smoke
    execution. Never dispatch `[100,120)` from pre-fix authority.
 
@@ -90,7 +92,7 @@ design-manual program.
   more than two workers.
 - The accumulated campaign worktree is
   `UpstreamDrift-worktrees/9153-forward-impulse-work`, last remote-equal at
-  `1e5e823ca2fa9391134e8a0ccf140a36036a88a7`, with 233 commits ahead and 46
+  `1e5e823ca2fa9391134e8a0ccf140a36036a88a7`, with 233 commits ahead and 48
   behind at the last audit. Preserve its legacy evidence and quarantine.
 
 ## Active AffineDrift Companion Boundary
