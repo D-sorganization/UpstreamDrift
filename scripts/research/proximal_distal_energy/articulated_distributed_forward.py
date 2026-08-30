@@ -105,6 +105,7 @@ class _Buffers:
     coulomb_utilization: FloatArray
     sliding_speed: FloatArray
     station_active: NDArray[np.bool_]
+    station_signed_gap: FloatArray
 
 
 def _validate_case(
@@ -164,6 +165,7 @@ def _buffers(sample_count: int, nq: int, station_count_per_hand: int) -> _Buffer
         coulomb_utilization=np.empty(sample_count),
         sliding_speed=np.empty(sample_count),
         station_active=np.empty((sample_count, 2, station_count_per_hand), dtype=bool),
+        station_signed_gap=np.empty((sample_count, 2, station_count_per_hand)),
     )
 
 
@@ -205,6 +207,9 @@ def _record(
     buffers.coulomb_utilization[index] = snapshot.coulomb_limit_utilization
     buffers.sliding_speed[index] = snapshot.maximum_sliding_speed_m_s
     buffers.station_active[index] = snapshot.active_station
+    if snapshot.station_signed_gap_m is None:
+        raise ValueError("distributed snapshot must retain signed station gaps")
+    buffers.station_signed_gap[index] = snapshot.station_signed_gap_m
 
 
 def _result(
@@ -272,6 +277,7 @@ def _result(
         "slipping_station_count": buffers.slipping_count,
         "active_set_transition": transitions,
         "station_active": buffers.station_active,
+        "station_signed_gap_m": buffers.station_signed_gap,
         "station_transitions": station_transitions,
         "total_transition_count": total_transitions_count,
         "opening_transition_count": opening_count,
