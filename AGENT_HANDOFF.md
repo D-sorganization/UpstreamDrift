@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 18:43 PDT (2026-08-30 01:43 UTC)
+Updated: 2026-08-29 18:45 PDT (2026-08-30 01:45 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -73,16 +73,19 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   `f26ccf158ec0` passes 80 statuses/results, 720 arrays, and every enriched
   sidecar without outcome inspection, human/coaching inference, or promotion.
   The separately preserved `REJECTED-mixed-receipts-v1` collection is not
-  authority. No structural workflow was active at this snapshot.
+  authority.
+- Replay 33286379004 executes [80,100) at exact dispatch head `0824aa693` using
+  qualified audit 33277601263. It is the sole authorized structural process;
+  do not cancel, rerun, duplicate, or dispatch another while it is live.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. After GitHub App setup, verify no structural workflow is active or queued;
-   then dispatch only [80,100) from the current remote branch using qualified
-   audit 33277601263. Record its exact dispatch head and treat it as the sole
-   authorized structural process. Stop and preserve any mismatch.
+1. Poll only replay 33286379004 after GitHub App setup. On terminal success,
+   retain exact API-response bytes and the original ZIP; apply receipt-1.4,
+   corruption, cumulative collection, immutable legacy view, and exact audit
+   gates through case 100. Stop and preserve any mismatch.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
