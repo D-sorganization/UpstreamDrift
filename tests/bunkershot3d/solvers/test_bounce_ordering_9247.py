@@ -62,6 +62,7 @@ from bunkershot3d.metrics import HeadModel, StrikeScene, StrikeTrace, divot_metr
 from bunkershot3d.sand import PlayingCondition, SandState, playing_condition
 from bunkershot3d.solvers import (
     HeadKinematics,
+    ShotResult,
     ShotSettings,
     SurfaceElements,
     simulate_shot,
@@ -154,6 +155,56 @@ def heads() -> dict[float, _Head]:
     return {bounce: _Head(_design(bounce)) for bounce in BOUNCES_DEG}
 
 
+def _peak_resolution_m(result: ShotResult) -> float:
+    """How far this march's true peak depth may lie above its reported max.
+
+    ``max_sole_depth_m`` is the largest *sample*: :func:`divot_metrics`
+    states depth is "resolved to the sample spacing; no sub-sample peak fit
+    is applied".  The naive floor -- vertical speed times the step, 0.65 mm
+    at -6 deg -- is badly wrong, because near a smooth peak the derivative
+    vanishes and the error is second order in the step, not first.
+
+    Two different things can limit the reading, and which one dominates
+    depends on the shape of the peak, so the larger is taken:
+
+    * the **gap to the neighbouring sample**, which bounds the reading when
+      the peak is sharp; and
+    * the **sub-sample parabolic deficit** -- the height a parabola through
+      the peak and its two neighbours reaches above the sampled max -- which
+      bounds it when the peak is *flat*, exactly where the gap collapses
+      towards zero and would understate the uncertainty.
+
+    A concrete case forced this: at -6 deg with 20 and 23 deg of bounce the
+    gaps are 0.0002 and 0.0005 mm while the parabolic deficits are 0.0054
+    and 0.0050 mm.  Their sum, 0.0104 mm, is what covers the 0.0100 mm
+    apparent inversion between that pair -- and comparing two measurements
+    accumulates both, since either reported max may sit below its own true
+    peak.
+
+    Args:
+        result: The completed march.
+
+    Returns:
+        The resolution floor in metres, or ``0.0`` when the trace is too
+        short to have neighbours on both sides of its peak.
+    """
+    depths = np.asarray(result.sole_depths_m, dtype=np.float64)
+    if depths.size < 3:
+        return 0.0
+    peak = int(np.argmax(depths))
+    if peak == 0 or peak + 1 >= depths.size:
+        return 0.0
+    before, at, after = depths[peak - 1], depths[peak], depths[peak + 1]
+    gap = float(at - max(before, after))
+    curvature = before - 2.0 * at + after
+    if curvature >= 0.0:
+        # Not concave at the sample: no parabolic peak to recover.
+        return gap
+    offset = 0.5 * (before - after) / curvature
+    deficit = float(-0.25 * (before - after) * offset)
+    return max(gap, deficit)
+
+
 def _shoot(
     solver: DRFTSolver,
     sand: SandState,
@@ -162,14 +213,30 @@ def _shoot(
     *,
     face_open_deg: float = 0.0,
     shaft_lean_deg: float = 0.0,
-) -> tuple[float, float | None]:
-    """March one head and return ``(max sole depth, displaced mass)``.
+) -> tuple[float, float | None, float, float]:
+    """March one head and measure it, with the floors the reading carries.
+
+    Returns ``(max sole depth, displaced mass, depth floor, mass floor)``.
 
     The mass is ``None`` when the strike has no measurable divot, which is
     what a buried head produces: it stops, or reverses out of its own
     crater, and a prismatic divot is then undefined.  Depth is always
     available, which is why the ordering is asserted on it in both
     regimes and on mass only where a divot exists.
+
+    The two floors are what the ordering assertions compare against, and
+    they are **computed per march rather than fixed**, because a constant
+    would be a bound chosen to fit the results this file happens to
+    produce.  ``depth floor`` is :func:`_peak_resolution_m`.  ``mass
+    floor`` is one submerged sample's worth of the prism, ``mass /
+    count(sole_depths_m > 0)`` -- around 0.66 g here -- because the
+    section integral is a sum over samples and a design cannot be said to
+    have moved more sand than another by less than the quantum it is
+    accumulated in.  Both are zero when there is nothing to measure.
+
+    A comparison between two designs **adds** their floors: either
+    reported figure may sit below its own true value, so the uncertainty
+    accumulates rather than being shared.
 
     ``sand`` is the same bed the solver was built from, and it is passed
     rather than defaulted because the divot's wall angle is the bed's
@@ -197,8 +264,9 @@ def _shoot(
         sole_reference_body_m=head.sole_reference_m,
     )
     depth_m = result.max_sole_depth_m
+    depth_floor_m = _peak_resolution_m(result)
     if result.n_steps < 3:
-        return depth_m, None
+        return depth_m, None, depth_floor_m, 0.0
     scene = StrikeScene(
         sand_surface_height_m=0.0,
         ball_position_m=np.zeros(3, dtype=np.float64),
@@ -214,8 +282,10 @@ def _shoot(
             friction_angle_deg=sand.friction_angle_deg,
         )
     except ValueError:
-        return depth_m, None
-    return depth_m, divot.mass_kg
+        return depth_m, None, depth_floor_m, 0.0
+    submerged = int(np.count_nonzero(np.asarray(result.sole_depths_m) > 0.0))
+    mass_floor_kg = divot.mass_kg / submerged if submerged else divot.mass_kg
+    return depth_m, divot.mass_kg, depth_floor_m, mass_floor_kg
 
 
 def _head_model(head: _Head) -> HeadModel:
@@ -397,18 +467,33 @@ class TestNonBuryingRegime:
         heads: dict[float, _Head],
         attack_deg: float,
     ) -> None:
-        depths = [_shoot(solver, sand, heads[b], attack_deg)[0] for b in BOUNCES_DEG]
-        for low, high, shallow, deep in zip(
-            BOUNCES_DEG, BOUNCES_DEG[1:], depths, depths[1:], strict=False
+        shots = [_shoot(solver, sand, heads[b], attack_deg) for b in BOUNCES_DEG]
+        depths = [shot[0] for shot in shots]
+        floors = [shot[2] for shot in shots]
+        for low, high, shallow, deep, floor_a, floor_b in zip(
+            BOUNCES_DEG,
+            BOUNCES_DEG[1:],
+            depths,
+            depths[1:],
+            floors,
+            floors[1:],
+            strict=False,
         ):
-            assert deep <= shallow + 1e-6, (
+            floor = floor_a + floor_b
+            assert deep <= shallow + floor, (
                 f"at {attack_deg} deg of attack, {high} deg of bounce reached "
-                f"{deep * 1e3:.3f} mm against {shallow * 1e3:.3f} mm at {low} "
-                "deg: more bounce dug deeper"
+                f"{deep * 1e3:.4f} mm against {shallow * 1e3:.4f} mm at {low} "
+                f"deg: more bounce dug deeper by more than the {floor * 1e3:.4f} mm "
+                "these marches could resolve"
             )
-        assert depths[-1] < depths[0], (
-            "bounce must actually buy something: the sweep is flat, from "
-            f"{depths[0] * 1e3:.3f} mm to {depths[-1] * 1e3:.3f} mm"
+        span = depths[0] - depths[-1]
+        resolvable = 2.0 * max(floors)
+        assert span > resolvable, (
+            "bounce must buy something the model can actually see: the sweep "
+            f"moved {span * 1e3:.4f} mm from {depths[0] * 1e3:.4f} to "
+            f"{depths[-1] * 1e3:.4f} mm, against a {resolvable * 1e3:.4f} mm "
+            "resolution floor -- an ordering asserted below the floor would be "
+            "asserting quantisation noise"
         )
 
     @pytest.mark.parametrize("attack_deg", SHALLOW_ATTACKS_DEG)
@@ -419,19 +504,29 @@ class TestNonBuryingRegime:
         heads: dict[float, _Head],
         attack_deg: float,
     ) -> None:
-        masses = [_shoot(solver, sand, heads[b], attack_deg)[1] for b in BOUNCES_DEG]
+        shots = [_shoot(solver, sand, heads[b], attack_deg) for b in BOUNCES_DEG]
+        masses = [shot[1] for shot in shots]
+        floors = [shot[3] for shot in shots]
         assert all(mass is not None for mass in masses), (
             "every design in the non-burying regime must cut a measurable "
             f"divot; got {masses}"
         )
-        for low, high, light, heavy in zip(
-            BOUNCES_DEG, BOUNCES_DEG[1:], masses, masses[1:], strict=False
+        for low, high, light, heavy, floor_a, floor_b in zip(
+            BOUNCES_DEG,
+            BOUNCES_DEG[1:],
+            masses,
+            masses[1:],
+            floors,
+            floors[1:],
+            strict=False,
         ):
             assert heavy is not None and light is not None
-            assert heavy <= light + 1e-9, (
+            floor = floor_a + floor_b
+            assert heavy <= light + floor, (
                 f"at {attack_deg} deg of attack, {high} deg of bounce moved "
-                f"{heavy * 1e3:.2f} g against {light * 1e3:.2f} g at {low} deg: "
-                "more bounce moved more sand"
+                f"{heavy * 1e3:.3f} g against {light * 1e3:.3f} g at {low} deg: "
+                f"more bounce moved more sand by more than the {floor * 1e3:.3f} g "
+                "one submerged sample is worth"
             )
 
     def test_the_ordering_survives_an_open_leaning_delivery(
@@ -485,16 +580,24 @@ class TestBuryingRegime:
         that were backwards.  With the frame un-mirrored the sign is the
         same on both sides of the boundary.
         """
-        depths = [
-            _shoot(solver, sand, heads[b], STEEP_ATTACK_DEG)[0] for b in BOUNCES_DEG
-        ]
-        for low, high, shallow, deep in zip(
-            BOUNCES_DEG, BOUNCES_DEG[1:], depths, depths[1:], strict=False
+        shots = [_shoot(solver, sand, heads[b], STEEP_ATTACK_DEG) for b in BOUNCES_DEG]
+        depths = [shot[0] for shot in shots]
+        floors = [shot[2] for shot in shots]
+        for low, high, shallow, deep, floor_a, floor_b in zip(
+            BOUNCES_DEG,
+            BOUNCES_DEG[1:],
+            depths,
+            depths[1:],
+            floors,
+            floors[1:],
+            strict=False,
         ):
-            assert deep <= shallow + 1e-6, (
+            floor = floor_a + floor_b
+            assert deep <= shallow + floor, (
                 f"in the burying regime {high} deg of bounce reached "
-                f"{deep * 1e3:.3f} mm against {shallow * 1e3:.3f} mm at {low} "
-                "deg: more bounce dug deeper"
+                f"{deep * 1e3:.4f} mm against {shallow * 1e3:.4f} mm at {low} "
+                f"deg: more bounce dug deeper by more than the {floor * 1e3:.4f} mm "
+                "these marches could resolve"
             )
 
     def test_a_steeper_attack_never_makes_a_design_shallower(
