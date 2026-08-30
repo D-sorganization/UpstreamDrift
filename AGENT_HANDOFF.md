@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 18:49 PDT (2026-08-30 01:49 UTC)
+Updated: 2026-08-29 19:38 PDT (2026-08-30 02:38 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -74,20 +74,23 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   sidecar without outcome inspection, human/coaching inference, or promotion.
   The separately preserved `REJECTED-mixed-receipts-v1` collection is not
   authority.
-- Replay 33286379004 executes [80,100) at exact dispatch head `0824aa693` using
-  qualified audit 33277601263. Job 99190171132 was last verified in progress
-  at step 11 (`Run Registered Structural Campaign Slice`) at 01:49 UTC. It is
-  the sole authorized structural process; do not cancel, rerun, duplicate, or
-  dispatch another while it is live.
+- Replay 33286379004 completed [80,100) at exact dispatch head `0824aa693`.
+  Artifact 9725109521 is 8,643,595 bytes, archive SHA `cbe13a163eeb`; receipt
+  1.4 SHA is `554d6a1797ce` and corruption-audit SHA is `4c5a5fceb71e`.
+  Cumulative [0,100) manifest SHA is `e295d8a3d5fb`; legacy-view SHA is
+  `092b0d29010a`. The enrichment gate failed closed: zero status mismatches,
+  but all 14 completed new cases change `horizons`, `numerical`, and seven
+  legacy arrays. Six non-completed cases retain status. No audit artifact was
+  written, no outcomes were interpreted, and [100,120) must not be dispatched.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. Poll only replay 33286379004 after GitHub App setup. On terminal success,
-   retain exact API-response bytes and the original ZIP; apply receipt-1.4,
-   corruption, cumulative collection, immutable legacy view, and exact audit
-   gates through case 100. Stop and preserve any mismatch.
+1. Preserve the exact case-100 mismatch and do not weaken equality, overwrite
+   retained evidence, or dispatch [100,120). Diagnose why the qualified
+   enriched execution changes every completed legacy result in [80,100), then
+   choose a preregistered recovery that preserves the adverse comparison.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
