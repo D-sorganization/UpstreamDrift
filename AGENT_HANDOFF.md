@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 00:56 PDT (2026-08-30 07:56 UTC)
+Updated: 2026-08-30 01:54 PDT (2026-08-30 08:54 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -19,8 +19,8 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
-  branch `feat/9153-forward-impulse-work` is clean and remote-equal at
-  `ff823beac015a2d5161b9756c76cfc0c73e9833d`; run 33299342024 is pinned to `7c4cd1dc6`; no PR.
+  branch `feat/9153-forward-impulse-work` must be clean and remote-equal after
+  this handoff commit; source audit revision is `041827d9fe03768590bfcd072d8bcf88747779d2`; no PR.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
@@ -97,12 +97,12 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    33297583257 and independent replay 33297683794 pass exact at `63f02a265`;
    runtime identity is `58b7cc58cffc`; audit/replay ZIP/JSON SHAs are
    `c27495a5aaf4`, `a3c655b658c4`, and `7ea57a01ce0f`; no case/checkpoint ran.
-   #9283 run 33297882357 is non-promotable due to its placement/audit conflict;
-   corrected run 33299342024 passed; ZIP SHAs are `2d37d758b3ce` / `ed27776934ab`.
+   #9283's corrected run 33299342024 passed [0,20); boundary SHA is
+   `7b5b4db054b1`. #9284 run 33300572602/job 99227819941 passed [20,40) at
+   `0825cf6f7`; checkpoint/runtime ZIP SHAs are `646760f77ee4`/`d5a45955d0c3`.
    Receipt/corruption/collection/legacy/enrichment/boundary SHAs are
-   `24d5ef943b75`, `449b65b3b5bd`, `b6784792e585`, `0eaa55ccb355`,
-   `7b00bb69fbbe`, and `7b5b4db054b1`; the 20-case/180-array gate passes exactly.
-   #9284 run 33300572602/job 99227819941 is sole live [20,40) at `0825cf6f7`; both gates passed. Do not inspect, cancel, duplicate, or advance.
+   `74793ca0a8eb`, `f3306ae509f1`, `a7a4d1203152`, `e9e7e9853848`,
+   `d8fcb768d68d`, and `ecb18f483fbf`; 40 cases/360 arrays pass exactly; [40,60) remains unauthorized pending a separate issue preregistration.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
