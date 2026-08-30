@@ -15,10 +15,10 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_re
     validate_registered_slice,
 )
 
-BOUNDARY_SCHEMA = "articulated-structural-factorial-recovery-boundary/1.0.0"
+BOUNDARY_SCHEMA = "articulated-structural-factorial-recovery-boundary/1.1.0"
 _HEX_64 = re.compile(r"[0-9a-f]{64}")
-_RECEIPT_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.4.0"
-_COLLECTION_SCHEMA = "articulated-structural-factorial-collection/1.3.0"
+_RECEIPT_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.5.0"
+_COLLECTION_SCHEMA = "articulated-structural-factorial-collection/1.4.0"
 _RUNTIME_SCHEMA = "articulated-structural-factorial-runtime-replay-audit/1.0.0"
 _CORRUPTION_SCHEMA = "articulated-structural-factorial-corruption-audit/1.0.0"
 _PREFIX_SCHEMA = "articulated-structural-factorial-prefix-view/1.0.0"
@@ -72,6 +72,8 @@ def _validate_collection_sources(
     case_stop: int,
     current_run_id: int,
     artifact_receipt_sha256: str,
+    current_runtime_artifact: Mapping[str, object],
+    current_runtime_archive_sha256: str,
 ) -> None:
     expected_start = 0
     last: Mapping[str, object] | None = None
@@ -97,7 +99,27 @@ def _validate_collection_sources(
         _require(source.get("run_conclusion") == "success", "source run failed")
         _require(
             source.get("artifact_receipt_schema") == _RECEIPT_SCHEMA,
-            "collection source does not bind receipt 1.4",
+            "collection source does not bind receipt 1.5",
+        )
+        runtime = _mapping(
+            source.get("runtime_replay_artifact"),
+            name="collection runtime replay artifact",
+        )
+        workflow = _mapping(
+            runtime.get("workflow_run"), name="collection runtime workflow run"
+        )
+        runtime_sha = _sha(
+            source.get("runtime_replay_archive_sha256"),
+            name="collection runtime replay archive SHA",
+        )
+        source_run_id = source.get("run_id")
+        _require(
+            isinstance(source_run_id, int)
+            and not isinstance(source_run_id, bool)
+            and runtime.get("name") == f"structural-runtime-replay-{source_run_id}"
+            and workflow.get("id") == source_run_id
+            and runtime.get("digest") == f"sha256:{runtime_sha}",
+            "collection runtime replay binding is invalid",
         )
         expected_start = requested_stop
         last = source
@@ -108,6 +130,11 @@ def _validate_collection_sources(
     _require(
         last.get("artifact_receipt_sha256") == artifact_receipt_sha256,
         "collection does not bind the exact current receipt",
+    )
+    _require(
+        last.get("runtime_replay_artifact") == current_runtime_artifact
+        and last.get("runtime_replay_archive_sha256") == current_runtime_archive_sha256,
+        "collection does not bind the exact current runtime replay artifact",
     )
 
 
@@ -157,7 +184,7 @@ def audit_recovery_boundary(
         "runtime evidence is not outcome-blind",
     )
 
-    _exact_schema(artifact_receipt, _RECEIPT_SCHEMA, name="receipt 1.4")
+    _exact_schema(artifact_receipt, _RECEIPT_SCHEMA, name="receipt 1.5")
     _require(
         artifact_receipt.get("execution_revision") == execution_revision,
         "receipt execution identity drifted",
@@ -173,6 +200,30 @@ def audit_recovery_boundary(
     run_id = run.get("id")
     if not isinstance(run_id, int) or isinstance(run_id, bool) or run_id <= 0:
         raise ValueError("receipt run id is invalid")
+    run_head = run.get("head_sha")
+    _require(
+        isinstance(run_head, str)
+        and re.fullmatch(r"[0-9a-f]{40}", run_head) is not None,
+        "receipt run head is invalid",
+    )
+    runtime_artifact = _mapping(
+        artifact_receipt.get("runtime_replay_artifact"),
+        name="receipt runtime replay artifact",
+    )
+    runtime_workflow = _mapping(
+        runtime_artifact.get("workflow_run"), name="receipt runtime workflow run"
+    )
+    runtime_archive_sha256 = _sha(
+        artifact_receipt.get("runtime_replay_archive_sha256"),
+        name="receipt runtime replay archive SHA",
+    )
+    _require(
+        runtime_artifact.get("name") == f"structural-runtime-replay-{run_id}"
+        and runtime_artifact.get("digest") == f"sha256:{runtime_archive_sha256}"
+        and runtime_workflow.get("id") == run_id
+        and runtime_workflow.get("head_sha") == run_head,
+        "receipt runtime replay artifact binding is invalid",
+    )
 
     _exact_schema(corruption_audit, _CORRUPTION_SCHEMA, name="corruption audit")
     corruption_identity = _mapping(
@@ -209,6 +260,8 @@ def audit_recovery_boundary(
         case_stop=case_stop,
         current_run_id=run_id,
         artifact_receipt_sha256=artifact_receipt_sha256,
+        current_runtime_artifact=runtime_artifact,
+        current_runtime_archive_sha256=runtime_archive_sha256,
     )
 
     _exact_schema(legacy_prefix_manifest, _PREFIX_SCHEMA, name="legacy prefix")
@@ -269,7 +322,8 @@ def audit_recovery_boundary(
         "gates": {
             "registration_exact": True,
             "runtime_replay_exact": True,
-            "receipt_1_4_exact": True,
+            "receipt_1_5_exact": True,
+            "runtime_replay_archive_bound": True,
             "corruption_killswitch_passes": True,
             "collection_gap_free": True,
             "legacy_projection_exact_boundary": True,

@@ -24,6 +24,8 @@ HEAD_SHA = "a" * 40
 EXECUTION_REVISION = "b" * 40
 ARCHIVE_BYTES = b"synthetic archive bytes"
 ARCHIVE_SHA256 = hashlib.sha256(ARCHIVE_BYTES).hexdigest()
+RUNTIME_ARCHIVE_BYTES = b"runtime replay evidence"
+RUNTIME_ARCHIVE_SHA256 = hashlib.sha256(RUNTIME_ARCHIVE_BYTES).hexdigest()
 
 
 def _run(
@@ -95,6 +97,20 @@ def _artifact() -> dict[str, object]:
             "head_repository_id": 1117929611,
         },
     }
+
+
+def _runtime_artifact() -> dict[str, object]:
+    artifact = _artifact()
+    artifact.update(
+        {
+            "id": 987654322,
+            "name": f"structural-runtime-replay-{RUN_ID}",
+            "size_in_bytes": len(RUNTIME_ARCHIVE_BYTES),
+            "archive_download_url": "https://api.github.example/artifacts/987654322/zip",
+            "digest": f"sha256:{RUNTIME_ARCHIVE_SHA256}",
+        }
+    )
+    return artifact
 
 
 def _complete_evidence_arrays() -> dict[str, np.ndarray]:
@@ -273,6 +289,193 @@ def test_receipt_cli_consumes_retained_github_responses_atomically(
                 "--output",
                 str(output_path),
             ]
+        )
+
+
+def test_attested_receipt_binds_same_run_runtime_replay_archive(
+    tmp_path: Path,
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path, enriched=True)
+    runtime_archive = tmp_path / "runtime-replay.zip"
+    runtime_archive.write_bytes(RUNTIME_ARCHIVE_BYTES)
+
+    receipt = build_structural_artifact_receipt(
+        run=_run(),
+        jobs=_jobs(),
+        artifact=_artifact(),
+        archive_path=archive,
+        extracted_dir=extracted,
+        expected_run_id=RUN_ID,
+        expected_dispatch_head=HEAD_SHA,
+        expected_execution_revision=EXECUTION_REVISION,
+        expected_session_sha256=session_digest,
+        requested_case_start=694,
+        requested_case_stop=696,
+        required_evidence_schema=EVIDENCE_SIDECAR_SCHEMA,
+        github_api_response_sha256={
+            "run": "a" * 64,
+            "jobs": "b" * 64,
+            "artifacts": "c" * 64,
+        },
+        runtime_replay_artifact=_runtime_artifact(),
+        runtime_replay_archive_path=runtime_archive,
+    )
+
+    assert receipt["schema_version"] == (
+        "articulated-structural-factorial-artifact-receipt/1.5.0"
+    )
+    assert receipt["runtime_replay_artifact"]["id"] == 987654322
+    assert receipt["runtime_replay_artifact"]["workflow_run"] == {
+        "head_branch": "feat/9153-forward-impulse-work",
+        "head_repository_id": 1117929611,
+        "head_sha": HEAD_SHA,
+        "id": RUN_ID,
+        "repository_id": 1117929611,
+    }
+    assert receipt["runtime_replay_archive_sha256"] == RUNTIME_ARCHIVE_SHA256
+
+
+def test_attested_receipt_cli_selects_both_exact_artifacts(tmp_path: Path) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path, enriched=True)
+    runtime_archive = tmp_path / "runtime-replay.zip"
+    runtime_archive.write_bytes(RUNTIME_ARCHIVE_BYTES)
+    run_path = tmp_path / "github-run.json"
+    jobs_path = tmp_path / "github-jobs.json"
+    artifacts_path = tmp_path / "github-artifacts.json"
+    output_path = tmp_path / "artifact-receipt.json"
+    run_path.write_text(json.dumps(_run()), encoding="utf-8")
+    jobs_path.write_text(json.dumps(_jobs()), encoding="utf-8")
+    artifacts_path.write_text(
+        json.dumps(
+            {
+                "total_count": 2,
+                "artifacts": [_artifact(), _runtime_artifact()],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert (
+        main(
+            [
+                "--run-json",
+                str(run_path),
+                "--jobs-json",
+                str(jobs_path),
+                "--artifacts-json",
+                str(artifacts_path),
+                "--archive",
+                str(archive),
+                "--runtime-replay-archive",
+                str(runtime_archive),
+                "--extracted-dir",
+                str(extracted),
+                "--expected-run-id",
+                str(RUN_ID),
+                "--expected-dispatch-head",
+                HEAD_SHA,
+                "--expected-execution-revision",
+                EXECUTION_REVISION,
+                "--expected-session-sha256",
+                session_digest,
+                "--case-start",
+                "694",
+                "--case-stop",
+                "696",
+                "--required-evidence-schema",
+                EVIDENCE_SIDECAR_SCHEMA,
+                "--output",
+                str(output_path),
+            ]
+        )
+        == 0
+    )
+    receipt = json.loads(output_path.read_text(encoding="utf-8"))
+    assert receipt["schema_version"].endswith("/1.5.0")
+    assert receipt["runtime_replay_artifact"]["id"] == 987654322
+
+
+@pytest.mark.parametrize("missing", ["artifact", "archive", "raw_api"])
+def test_attested_receipt_rejects_incomplete_runtime_binding(
+    tmp_path: Path, missing: str
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path, enriched=True)
+    runtime_archive = tmp_path / "runtime-replay.zip"
+    runtime_archive.write_bytes(RUNTIME_ARCHIVE_BYTES)
+    kwargs: dict[str, object] = {
+        "runtime_replay_artifact": _runtime_artifact(),
+        "runtime_replay_archive_path": runtime_archive,
+        "github_api_response_sha256": {
+            "run": "a" * 64,
+            "jobs": "b" * 64,
+            "artifacts": "c" * 64,
+        },
+    }
+    if missing == "artifact":
+        kwargs["runtime_replay_artifact"] = None
+    elif missing == "archive":
+        kwargs["runtime_replay_archive_path"] = None
+    else:
+        kwargs["github_api_response_sha256"] = None
+
+    with pytest.raises(ValueError, match="runtime replay"):
+        build_structural_artifact_receipt(
+            run=_run(),
+            jobs=_jobs(),
+            artifact=_artifact(),
+            archive_path=archive,
+            extracted_dir=extracted,
+            expected_run_id=RUN_ID,
+            expected_dispatch_head=HEAD_SHA,
+            expected_execution_revision=EXECUTION_REVISION,
+            expected_session_sha256=session_digest,
+            requested_case_start=694,
+            requested_case_stop=696,
+            required_evidence_schema=EVIDENCE_SIDECAR_SCHEMA,
+            **kwargs,
+        )
+
+
+@pytest.mark.parametrize("defect", ["run", "head", "digest", "size", "id"])
+def test_attested_receipt_rejects_mismatched_runtime_artifact(
+    tmp_path: Path, defect: str
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path, enriched=True)
+    runtime_archive = tmp_path / "runtime-replay.zip"
+    runtime_archive.write_bytes(RUNTIME_ARCHIVE_BYTES)
+    runtime = _runtime_artifact()
+    if defect == "run":
+        runtime["workflow_run"]["id"] = RUN_ID + 1
+    elif defect == "head":
+        runtime["workflow_run"]["head_sha"] = "0" * 40
+    elif defect == "digest":
+        runtime["digest"] = "sha256:" + "0" * 64
+    elif defect == "size":
+        runtime["size_in_bytes"] = len(RUNTIME_ARCHIVE_BYTES) + 1
+    else:
+        runtime["id"] = _artifact()["id"]
+
+    with pytest.raises(ValueError, match="runtime replay"):
+        build_structural_artifact_receipt(
+            run=_run(),
+            jobs=_jobs(),
+            artifact=_artifact(),
+            archive_path=archive,
+            extracted_dir=extracted,
+            expected_run_id=RUN_ID,
+            expected_dispatch_head=HEAD_SHA,
+            expected_execution_revision=EXECUTION_REVISION,
+            expected_session_sha256=session_digest,
+            requested_case_start=694,
+            requested_case_stop=696,
+            required_evidence_schema=EVIDENCE_SIDECAR_SCHEMA,
+            github_api_response_sha256={
+                "run": "a" * 64,
+                "jobs": "b" * 64,
+                "artifacts": "c" * 64,
+            },
+            runtime_replay_artifact=runtime,
+            runtime_replay_archive_path=runtime_archive,
         )
 
 

@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 22:25 PDT (2026-08-30 05:25 UTC)
+Updated: 2026-08-29 21:59 PDT (2026-08-30 04:59 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -58,11 +58,11 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
   run, structural job, and artifact workflow-run IDs and dispatch heads, and
   requires GitHub's recorded archive size and digest to match retained bytes.
   Receipt 1.4 also binds the exact retained run/jobs/artifacts API-response
-  bytes; collection projects those three SHA-256 digests into its manifest.
+  bytes. Receipt 1.5 binds the same-run runtime-replay artifact and ZIP too.
   `323a55db9` derives corruption revision from clean committed source. Prefix
   views never mutate the 714-case source.
-- Collection schema 1.3 requires each source's retained receipt, accepts the
-  governed 1.1--1.4 receipts, and records receipt, archive, and raw API digests.
+- Collection 1.4 requires every source to use receipt 1.5 and rejects mixed
+  attested/unattested sources; older 1.1--1.4 collections remain readable.
 - Replays 33277732709, 33279075050, 33281576272, and 33283267821 passed exact
   [0,80). Their all-v1.4 receipt SHAs end `1fd79829`, `a276c3bb`, `1a160ded`,
   and `d0940331`. Run 33283267821 artifact 9724470237 is 8,009,522 bytes,
@@ -92,17 +92,16 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Immediate Order
 
-1. Run 33291836517/job 99204705076 is the sole live structural process: exact
-   [0,20) at `9ec22b4a14d0` against runtime audit 33277601263. Registration SHA
-   `124ac709ea90` and the hosted registration gate passed before runtime replay.
-   At 2026-08-29 22:25 PDT the campaign step remained `in_progress`; every
-   registration/runtime gate before it had passed.
-   Do not cancel, duplicate, or dispatch [20,40). On terminal success retain
-   raw APIs and both ZIPs. Before collection, finish the planned attested
-   receipt/collection upgrade so each source cryptographically binds its
-   run-local runtime-replay artifact; then run corruption, gap-free collection,
-   legacy projection, exact enrichment, and recovery-boundary gates. Any failure
-   blocks progress.
+1. Recovery run 33291836517/job 99204705076 completed [0,20) successfully at
+   `9ec22b4a14d0`; it is #9153 anomaly recovery, not ControlTower/#8800 recovery.
+   Exact retained evidence directory is
+   `Campaigns/UpstreamDrift-9153-attested-recovery-slice-0000-0020-run-33291836517`.
+   Receipt 1.5 SHA `86ed1ae321d7`,
+   collection 1.4 SHA `103265593955`, legacy view SHA `0eaa55ccb355`, exact
+   enrichment SHA `7b00bb69fbbe`, and boundary 1.1 SHA `0863b7c95345` pass
+   outcome-blind. The boundary records [20,40) but leaves it unauthorized.
+   Commit/publish these controls and separately preregister [20,40) before any
+   dispatch; then retain the next run under the same exact sequence.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
@@ -126,11 +125,11 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 116 pass;
-Ruff/Black and configured push gates pass. The older branch base still fails
-`test_markerless_mocap_authority.py` because its SPEC lacks the later #9063
-heading. Native replay requires hosted runtime; direct MyPy reaches the existing
-NumPy-stub error at `articulated_structural_factorial_runner.py:381`.
+Use serial pytest. All 132 structural-factorial/workflow tests pass; Python 3.11
+MyPy, repository Ruff, and changed-file Black pass. Full local collection stops
+on 44 environment/baseline errors (missing pyproj/pytest plugins, vendor paths),
+and full Black reports 668 pre-existing files. Native replay requires hosted
+qualified runtime; do not call the whole repository green from this checkout.
 
 Invoke receipt/corruption/collection/enrichment entry points from the root with
 `python -m scripts.research.proximal_distal_energy.<module>`.

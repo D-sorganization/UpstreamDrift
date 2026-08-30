@@ -20,12 +20,14 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ru
 )
 
 _SCHEMA = "articulated-structural-factorial-collection/1.3.0"
+_ATTESTED_SCHEMA = "articulated-structural-factorial-collection/1.4.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _RECEIPT_SCHEMAS = {
     "articulated-structural-factorial-artifact-receipt/1.1.0",
     "articulated-structural-factorial-artifact-receipt/1.2.0",
     "articulated-structural-factorial-artifact-receipt/1.3.0",
     "articulated-structural-factorial-artifact-receipt/1.4.0",
+    "articulated-structural-factorial-artifact-receipt/1.5.0",
 }
 _RECEIPT_CLASSIFICATION = "workflow_artifact_provenance_not_scientific_summary"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -182,7 +184,7 @@ def _validate_receipt(
         or archive_size <= 0
     ):
         raise ValueError("receipt artifact archive size is invalid")
-    if schema.endswith(("/1.3.0", "/1.4.0")):
+    if schema.endswith(("/1.3.0", "/1.4.0", "/1.5.0")):
         run_head = run.get("head_sha")
         if (
             not isinstance(run_head, str)
@@ -200,7 +202,7 @@ def _validate_receipt(
             or workflow_run.get("head_sha") != run_head
         ):
             raise ValueError("receipt artifact is not bound to the retained run")
-    if schema.endswith("/1.4.0"):
+    if schema.endswith(("/1.4.0", "/1.5.0")):
         response_digests = record.get("github_api_response_sha256")
         if (
             not isinstance(response_digests, Mapping)
@@ -211,6 +213,34 @@ def _validate_receipt(
             )
         ):
             raise ValueError("receipt GitHub API response digests are invalid")
+    if schema.endswith("/1.5.0"):
+        runtime = _receipt_mapping(
+            record.get("runtime_replay_artifact"),
+            name="receipt runtime replay artifact",
+        )
+        runtime_workflow = _receipt_mapping(
+            runtime.get("workflow_run"),
+            name="receipt runtime replay artifact workflow run",
+        )
+        runtime_id = runtime.get("id")
+        runtime_size = runtime.get("size_in_bytes")
+        runtime_digest = runtime.get("digest")
+        runtime_archive_sha256 = record.get("runtime_replay_archive_sha256")
+        if (
+            runtime.get("name") != f"structural-runtime-replay-{source.run_id}"
+            or isinstance(runtime_id, bool)
+            or not isinstance(runtime_id, int)
+            or runtime_id <= 0
+            or isinstance(runtime_size, bool)
+            or not isinstance(runtime_size, int)
+            or runtime_size <= 0
+            or runtime_workflow.get("id") != source.run_id
+            or runtime_workflow.get("head_sha") != run.get("head_sha")
+            or not isinstance(runtime_archive_sha256, str)
+            or _SHA256.fullmatch(runtime_archive_sha256) is None
+            or runtime_digest != f"sha256:{runtime_archive_sha256}"
+        ):
+            raise ValueError("receipt runtime replay artifact binding is invalid")
 
     archive_sha256 = record.get("artifact_archive_sha256")
     if not isinstance(archive_sha256, str) or _SHA256.fullmatch(archive_sha256) is None:
@@ -308,31 +338,48 @@ def collect_structural_slices(
             checkpoint_sources[name] = source
             checkpoint_files[name] = tuple(paths)
             files.extend({"name": path.name, "sha256": _sha256(path)} for path in paths)
-        source_records.append(
-            {
-                "run_id": source.run_id,
-                "artifact_name": source.artifact_name,
-                "run_conclusion": source.run_conclusion,
-                "requested_case_range": [
-                    source.requested_case_start,
-                    source.requested_case_stop,
-                ],
-                "observed_case_range": [indices[0], indices[-1] + 1],
-                "checkpoint_count": len(checkpoints),
-                "artifact_receipt_schema": receipt.get("schema_version"),
-                "artifact_receipt_sha256": receipt_sha256,
-                "artifact_archive_size_in_bytes": receipt_artifact.get("size_in_bytes"),
-                "artifact_archive_sha256": receipt.get("artifact_archive_sha256"),
-                "github_api_response_sha256": receipt.get("github_api_response_sha256"),
-                "files": sorted(files, key=lambda item: item["name"]),
-            }
-        )
+        source_record: dict[str, object] = {
+            "run_id": source.run_id,
+            "artifact_name": source.artifact_name,
+            "run_conclusion": source.run_conclusion,
+            "requested_case_range": [
+                source.requested_case_start,
+                source.requested_case_stop,
+            ],
+            "observed_case_range": [indices[0], indices[-1] + 1],
+            "checkpoint_count": len(checkpoints),
+            "artifact_receipt_schema": receipt.get("schema_version"),
+            "artifact_receipt_sha256": receipt_sha256,
+            "artifact_archive_size_in_bytes": receipt_artifact.get("size_in_bytes"),
+            "artifact_archive_sha256": receipt.get("artifact_archive_sha256"),
+            "github_api_response_sha256": receipt.get("github_api_response_sha256"),
+            "files": sorted(files, key=lambda item: item["name"]),
+        }
+        if receipt.get("schema_version") == (
+            "articulated-structural-factorial-artifact-receipt/1.5.0"
+        ):
+            source_record.update(
+                {
+                    "runtime_replay_artifact": receipt.get("runtime_replay_artifact"),
+                    "runtime_replay_archive_sha256": receipt.get(
+                        "runtime_replay_archive_sha256"
+                    ),
+                }
+            )
+        source_records.append(source_record)
 
     if sorted(combined_indices) != list(range(len(combined_indices))):
         raise ValueError("combined slices must form a gap-free prefix from case zero")
+    attested = [
+        source["artifact_receipt_schema"]
+        == "articulated-structural-factorial-artifact-receipt/1.5.0"
+        for source in source_records
+    ]
+    if any(attested) and not all(attested):
+        raise ValueError("collection cannot mix attested and unattested sources")
     next_missing_case_index = len(combined_indices)
     manifest: dict[str, object] = {
-        "schema_version": _SCHEMA,
+        "schema_version": _ATTESTED_SCHEMA if all(attested) else _SCHEMA,
         "classification": "execution_collection_not_scientific_summary",
         "plan_sha256": plan_sha256(plan),
         "execution_revision": launch.get("execution_revision"),

@@ -139,12 +139,21 @@ def _write_receipt(
         "checkpoint_pair_count": len(tuple(source.glob("case-*.json"))),
         "files": files,
     }
-    if schema_version.endswith("/1.4.0"):
+    if schema_version.endswith(("/1.4.0", "/1.5.0")):
         payload["github_api_response_sha256"] = {
             "run": "a" * 64,
             "jobs": "b" * 64,
             "artifacts": "c" * 64,
         }
+    if schema_version.endswith("/1.5.0"):
+        payload["runtime_replay_artifact"] = {
+            "id": run_id + 10_000,
+            "name": f"structural-runtime-replay-{run_id}",
+            "size_in_bytes": 2345,
+            "digest": f"sha256:{'f' * 64}",
+            "workflow_run": {"id": run_id, "head_sha": head_sha},
+        }
+        payload["runtime_replay_archive_sha256"] = "f" * 64
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
 
@@ -329,6 +338,124 @@ def test_collection_accepts_each_governed_receipt_schema(
             "jobs": "b" * 64,
             "artifacts": "c" * 64,
         }
+
+
+def test_collection_projects_only_uniformly_attested_sources(tmp_path: Path) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    first = _slice(tmp_path / "first", plan=plan, launch=launch, start=0, stop=1)
+    second = _slice(tmp_path / "second", plan=plan, launch=launch, start=1, stop=2)
+    schema = "articulated-structural-factorial-artifact-receipt/1.5.0"
+
+    manifest = collect_structural_slices(
+        plan=plan,
+        launch=launch,
+        sources=[
+            _source_record(
+                launch=launch,
+                run_id=101,
+                artifact_name="structural-checkpoints-101",
+                conclusion="success",
+                start=0,
+                stop=1,
+                directory=first,
+                schema_version=schema,
+            ),
+            _source_record(
+                launch=launch,
+                run_id=202,
+                artifact_name="structural-checkpoints-202",
+                conclusion="success",
+                start=1,
+                stop=2,
+                directory=second,
+                schema_version=schema,
+            ),
+        ],
+        output_dir=tmp_path / "attested",
+    )
+
+    assert manifest["schema_version"] == (
+        "articulated-structural-factorial-collection/1.4.0"
+    )
+    assert [
+        source["runtime_replay_artifact"]["name"] for source in manifest["sources"]
+    ] == ["structural-runtime-replay-101", "structural-runtime-replay-202"]
+    assert all(
+        source["runtime_replay_archive_sha256"] == "f" * 64
+        for source in manifest["sources"]
+    )
+
+
+def test_collection_rejects_mixed_attested_and_unattested_sources(
+    tmp_path: Path,
+) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    first = _slice(tmp_path / "first", plan=plan, launch=launch, start=0, stop=1)
+    second = _slice(tmp_path / "second", plan=plan, launch=launch, start=1, stop=2)
+
+    with pytest.raises(ValueError, match="mix attested and unattested"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=[
+                _source_record(
+                    launch=launch,
+                    run_id=101,
+                    artifact_name="structural-checkpoints-101",
+                    conclusion="success",
+                    start=0,
+                    stop=1,
+                    directory=first,
+                    schema_version=(
+                        "articulated-structural-factorial-artifact-receipt/1.5.0"
+                    ),
+                ),
+                _source_record(
+                    launch=launch,
+                    run_id=202,
+                    artifact_name="structural-checkpoints-202",
+                    conclusion="success",
+                    start=1,
+                    stop=2,
+                    directory=second,
+                    schema_version=(
+                        "articulated-structural-factorial-artifact-receipt/1.4.0"
+                    ),
+                ),
+            ],
+            output_dir=tmp_path / "mixed",
+        )
+
+
+def test_collection_rejects_attested_receipt_without_runtime_binding(
+    tmp_path: Path,
+) -> None:
+    plan = _plan()
+    launch = build_launch_manifest(plan=plan, execution_revision="b" * 40)
+    source = _slice(tmp_path / "source", plan=plan, launch=launch, start=0, stop=1)
+    record = _source_record(
+        launch=launch,
+        run_id=101,
+        artifact_name="structural-checkpoints-101",
+        conclusion="success",
+        start=0,
+        stop=1,
+        directory=source,
+        schema_version="articulated-structural-factorial-artifact-receipt/1.5.0",
+    )
+    receipt = json.loads(record.receipt_path.read_text(encoding="utf-8"))
+    del receipt["runtime_replay_artifact"]
+    record.receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="runtime replay"):
+        collect_structural_slices(
+            plan=plan,
+            launch=launch,
+            sources=[record],
+            output_dir=tmp_path / "invalid",
+        )
 
 
 def test_collection_rejects_a_v14_receipt_without_raw_api_response_digests(

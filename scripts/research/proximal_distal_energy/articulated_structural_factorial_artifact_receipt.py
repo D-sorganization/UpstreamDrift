@@ -18,16 +18,19 @@ from scripts.research.proximal_distal_energy.articulated_structural_factorial_ev
     REQUIRED_EVIDENCE_ARRAYS,
     validate_structural_evidence_arrays,
 )
+from scripts.research.proximal_distal_energy.articulated_structural_factorial_github_artifact import (
+    bind_retained_github_artifact,
+)
 
 _CROSS_BOUND_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.3.0"
 _RAW_RESPONSE_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.4.0"
+_ATTESTED_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.5.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
 _JOB_NAME = "Structural Runtime Audit or Campaign Slice"
 _CAMPAIGN_STEP = "Run Registered Structural Campaign Slice"
 _UPLOAD_STEP = "Upload Structural Campaign Checkpoints"
 _SHA40 = re.compile(r"[0-9a-f]{40}")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-_ARTIFACT_DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 _TERMINAL_CONCLUSIONS = {
     "action_required",
     "cancelled",
@@ -49,12 +52,6 @@ def _mapping(value: object, *, name: str) -> Mapping[str, object]:
 def _positive_integer(value: object, *, name: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
         raise ValueError(f"{name} must be a positive integer")
-    return value
-
-
-def _nonempty_string(value: object, *, name: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{name} must be a nonempty string")
     return value
 
 
@@ -202,6 +199,8 @@ def build_structural_artifact_receipt(
     requested_case_stop: int,
     required_evidence_schema: str | None = None,
     github_api_response_sha256: Mapping[str, str] | None = None,
+    runtime_replay_artifact: Mapping[str, object] | None = None,
+    runtime_replay_archive_path: Path | None = None,
 ) -> dict[str, object]:
     """Return an outcome-blind receipt for one terminal hosted slice artifact."""
 
@@ -222,6 +221,17 @@ def build_structural_artifact_receipt(
             for digest in github_api_response_sha256.values()
         ):
             raise ValueError("GitHub API response digests are invalid")
+    has_runtime_binding = (
+        runtime_replay_artifact is not None or runtime_replay_archive_path is not None
+    )
+    if has_runtime_binding and (
+        runtime_replay_artifact is None
+        or runtime_replay_archive_path is None
+        or github_api_response_sha256 is None
+    ):
+        raise ValueError(
+            "runtime replay attestation requires artifact, archive, and raw API digests"
+        )
     if (
         isinstance(requested_case_start, bool)
         or not isinstance(requested_case_start, int)
@@ -270,39 +280,28 @@ def build_structural_artifact_receipt(
     ):
         raise ValueError("successful slice run requires successful job and steps")
 
-    artifact_record = _mapping(artifact, name="artifact")
-    artifact_id = _positive_integer(artifact_record.get("id"), name="artifact.id")
-    artifact_workflow_run = _mapping(
-        artifact_record.get("workflow_run"), name="artifact.workflow_run"
+    checkpoint_binding = bind_retained_github_artifact(
+        artifact=artifact,
+        archive_path=archive_path,
+        expected_name=f"structural-checkpoints-{expected_run_id}",
+        expected_run_id=expected_run_id,
+        expected_dispatch_head=expected_dispatch_head,
+        label="artifact",
     )
-    if (
-        artifact_workflow_run.get("id") != expected_run_id
-        or artifact_workflow_run.get("head_sha") != expected_dispatch_head
-    ):
-        raise ValueError("artifact workflow run does not match the expected run")
-    expected_artifact_name = f"structural-checkpoints-{expected_run_id}"
-    if artifact_record.get("name") != expected_artifact_name:
-        raise ValueError("artifact name does not match the expected run")
-    api_archive_size = _positive_integer(
-        artifact_record.get("size_in_bytes"), name="artifact.size_in_bytes"
-    )
-    try:
-        retained_archive_size = archive_path.stat().st_size
-    except OSError as exc:
-        raise ValueError("cannot read the retained artifact archive size") from exc
-    if api_archive_size != retained_archive_size:
-        raise ValueError("GitHub artifact size does not match the retained archive")
-    if artifact_record.get("expired") is not False:
-        raise ValueError("artifact must be retained and unexpired")
-    api_digest = artifact_record.get("digest")
-    if (
-        not isinstance(api_digest, str)
-        or _ARTIFACT_DIGEST.fullmatch(api_digest) is None
-    ):
-        raise ValueError("GitHub artifact digest must be a lowercase SHA-256")
-    archive_sha256 = _sha256(archive_path)
-    if api_digest != f"sha256:{archive_sha256}":
-        raise ValueError("GitHub artifact digest does not match the retained archive")
+    runtime_binding = None
+    if has_runtime_binding:
+        if runtime_replay_artifact is None or runtime_replay_archive_path is None:
+            raise ValueError("runtime replay attestation inputs are incomplete")
+        runtime_binding = bind_retained_github_artifact(
+            artifact=runtime_replay_artifact,
+            archive_path=runtime_replay_archive_path,
+            expected_name=f"structural-runtime-replay-{expected_run_id}",
+            expected_run_id=expected_run_id,
+            expected_dispatch_head=expected_dispatch_head,
+            label="runtime replay artifact",
+        )
+        if runtime_binding.record["id"] == checkpoint_binding.record["id"]:
+            raise ValueError("runtime replay and checkpoint artifact IDs must differ")
 
     files, checkpoint_pair_count, evidence_sidecars_validated = _validate_artifact_tree(
         extracted_dir=extracted_dir,
@@ -326,9 +325,13 @@ def build_structural_artifact_receipt(
     )
     receipt: dict[str, object] = {
         "schema_version": (
-            _RAW_RESPONSE_SCHEMA
-            if github_api_response_sha256 is not None
-            else _CROSS_BOUND_SCHEMA
+            _ATTESTED_SCHEMA
+            if runtime_binding is not None
+            else (
+                _RAW_RESPONSE_SCHEMA
+                if github_api_response_sha256 is not None
+                else _CROSS_BOUND_SCHEMA
+            )
         ),
         "classification": "workflow_artifact_provenance_not_scientific_summary",
         "requested_case_range": [requested_case_start, requested_case_stop],
@@ -369,35 +372,8 @@ def build_structural_artifact_receipt(
                 _selected_fields(upload_step, step_fields, prefix="upload step"),
             ],
         },
-        "artifact": {
-            **_selected_fields(
-                artifact_record,
-                (
-                    "id",
-                    "name",
-                    "size_in_bytes",
-                    "expired",
-                    "created_at",
-                    "updated_at",
-                    "archive_download_url",
-                    "digest",
-                ),
-                prefix="artifact",
-            ),
-            "id": artifact_id,
-            "workflow_run": _selected_fields(
-                artifact_workflow_run,
-                (
-                    "id",
-                    "head_sha",
-                    "head_branch",
-                    "repository_id",
-                    "head_repository_id",
-                ),
-                prefix="artifact.workflow_run",
-            ),
-        },
-        "artifact_archive_sha256": archive_sha256,
+        "artifact": checkpoint_binding.record,
+        "artifact_archive_sha256": checkpoint_binding.archive_sha256,
         "checkpoint_pair_count": checkpoint_pair_count,
         "files": files,
     }
@@ -411,6 +387,9 @@ def build_structural_artifact_receipt(
         )
     if github_api_response_sha256 is not None:
         receipt["github_api_response_sha256"] = dict(github_api_response_sha256)
+    if runtime_binding is not None:
+        receipt["runtime_replay_artifact"] = runtime_binding.record
+        receipt["runtime_replay_archive_sha256"] = runtime_binding.archive_sha256
     return receipt
 
 
@@ -440,6 +419,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--jobs-json", type=Path, required=True)
     parser.add_argument("--artifacts-json", type=Path, required=True)
     parser.add_argument("--archive", type=Path, required=True)
+    parser.add_argument("--runtime-replay-archive", type=Path)
     parser.add_argument("--extracted-dir", type=Path, required=True)
     parser.add_argument("--expected-run-id", type=int, required=True)
     parser.add_argument("--expected-dispatch-head", required=True)
@@ -462,6 +442,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         expected_name=f"structural-checkpoints-{args.expected_run_id}",
         collection_name="artifacts",
     )
+    runtime_artifact = (
+        _exact_named_record(
+            artifact_response.get("artifacts"),
+            expected_name=f"structural-runtime-replay-{args.expected_run_id}",
+            collection_name="artifacts",
+        )
+        if args.runtime_replay_archive is not None
+        else None
+    )
     receipt = build_structural_artifact_receipt(
         run=_read_json_mapping(args.run_json, name="run response"),
         jobs=_read_json_mapping(args.jobs_json, name="jobs response"),
@@ -480,6 +469,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "jobs": _sha256(args.jobs_json),
             "artifacts": _sha256(args.artifacts_json),
         },
+        runtime_replay_artifact=runtime_artifact,
+        runtime_replay_archive_path=args.runtime_replay_archive,
     )
     _write_required_absent_json(args.output, receipt)
     return 0

@@ -48,12 +48,25 @@ def _evidence() -> dict[str, dict[str, object]]:
         },
         "receipt": {
             "schema_version": (
-                "articulated-structural-factorial-artifact-receipt/1.4.0"
+                "articulated-structural-factorial-artifact-receipt/1.5.0"
             ),
             "execution_revision": execution,
             "requested_case_range": [0, 20],
-            "run": {"id": 123, "status": "completed", "conclusion": "success"},
+            "run": {
+                "id": 123,
+                "status": "completed",
+                "conclusion": "success",
+                "head_sha": "d" * 40,
+            },
             "job": {"status": "completed", "conclusion": "success"},
+            "runtime_replay_artifact": {
+                "id": 201,
+                "name": "structural-runtime-replay-123",
+                "size_in_bytes": 200,
+                "digest": f"sha256:{'f' * 64}",
+                "workflow_run": {"id": 123, "head_sha": "d" * 40},
+            },
+            "runtime_replay_archive_sha256": "f" * 64,
         },
         "corruption": {
             "schema_version": (
@@ -66,7 +79,7 @@ def _evidence() -> dict[str, dict[str, object]]:
             "sentinel": {"passes": True, "source_checkpoint_unchanged": True},
         },
         "collection": {
-            "schema_version": "articulated-structural-factorial-collection/1.3.0",
+            "schema_version": "articulated-structural-factorial-collection/1.4.0",
             "classification": "execution_collection_not_scientific_summary",
             "plan_sha256": plan_sha,
             "execution_revision": execution,
@@ -79,9 +92,17 @@ def _evidence() -> dict[str, dict[str, object]]:
                     "observed_case_range": [0, 20],
                     "run_conclusion": "success",
                     "artifact_receipt_schema": (
-                        "articulated-structural-factorial-artifact-receipt/1.4.0"
+                        "articulated-structural-factorial-artifact-receipt/1.5.0"
                     ),
                     "artifact_receipt_sha256": receipt_sha,
+                    "runtime_replay_artifact": {
+                        "id": 201,
+                        "name": "structural-runtime-replay-123",
+                        "size_in_bytes": 200,
+                        "digest": f"sha256:{'f' * 64}",
+                        "workflow_run": {"id": 123, "head_sha": "d" * 40},
+                    },
+                    "runtime_replay_archive_sha256": "f" * 64,
                 }
             ],
         },
@@ -159,12 +180,19 @@ def test_recovery_boundary_cross_binds_all_exact_gates() -> None:
                     "articulated-structural-factorial-artifact-receipt/1.3.0"
                 )
             ),
-            "receipt 1.4",
+            "receipt 1.5",
         ),
         (
             "collection",
             lambda value: value["sources"][0].update(requested_case_range=[1, 20]),
             "gap-free",
+        ),
+        (
+            "collection",
+            lambda value: value["sources"][0].update(
+                runtime_replay_archive_sha256="e" * 64
+            ),
+            "runtime replay",
         ),
         (
             "enrichment",

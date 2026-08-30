@@ -550,13 +550,13 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
 
 Passing `validate-slice` proves only that the requested range is an exact
 registered slice. Every slice after `[0,20)` remains blocked until the prior
-run is terminal, retained under receipt 1.4, accumulated into a gap-free
+run is terminal, retained under receipt 1.5, accumulated into a gap-free
 attested prefix, and exact against the legacy projection. Registration and
 runtime qualification do not make a scientific result promotable.
 
 After retaining those artifacts, create one outcome-blind boundary audit that
-cross-binds the run-local runtime replay, receipt 1.4, corruption sentinel,
-collection 1.3 manifest, immutable legacy projection, and exact enrichment
+cross-binds the run-local runtime replay, receipt 1.5, corruption sentinel,
+collection 1.4 manifest, immutable legacy projection, and exact enrichment
 audit. The output deliberately leaves the next slice unauthorized; a separate
 issue preregistration is still required.
 
@@ -566,9 +566,9 @@ python3 -m scripts.research.proximal_distal_energy.articulated_structural_factor
   --launch /path/to/enriched-launch.json \
   --registration /path/to/recovery-registration.json \
   --runtime-replay-audit /path/to/runtime-replay-audit.json \
-  --artifact-receipt /path/to/artifact-receipt-1.4.json \
+  --artifact-receipt /path/to/artifact-receipt-1.5.json \
   --corruption-audit /path/to/corruption-audit.json \
-  --collection-manifest /path/to/collection-manifest-1.3.json \
+  --collection-manifest /path/to/collection-manifest-1.4.json \
   --legacy-prefix-manifest /path/to/prefix-view-manifest.json \
   --enrichment-audit /path/to/enrichment-audit.json \
   --case-start CASE_START \
@@ -591,6 +591,13 @@ Collection schema 1.3 projects each source archive's recorded byte size and
 SHA-256 plus receipt-1.4 raw API-response digests into the cumulative manifest,
 so reviewers can audit operational provenance without reopening or interpreting
 checkpoint content.
+Receipt 1.5 additionally binds the retained runtime-replay ZIP to the exact
+same workflow run and dispatch head as the checkpoint artifact. Collection
+schema 1.4 is emitted only when every source uses receipt 1.5; it rejects mixed
+attested and unattested sources and projects each runtime artifact and archive
+digest into the cumulative manifest. Recovery boundary 1.1 requires those
+stronger schemas. Existing preregistration remains immutable at its earlier
+minimum; applying stricter follow-on evidence does not rewrite that record.
 
 Only after the legacy workflow is terminal and its gap-free prefix manifest is
 validated, write the retention-only plan amendment. The command requires an
