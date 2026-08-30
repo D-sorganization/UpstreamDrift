@@ -2120,6 +2120,10 @@
       "sha256": "7a5cf9167dfb17ddf66a7d034b55dd4ac0a333fc99d08a47dcfd869e1d4fd4c2",
       "bytes": 17103
     },
+    "scripts/research/proximal_distal_energy/articulated_forward_attribution.py": {
+      "sha256": "70a8a252839fab352f2237b4f363a8e9bf5e5769a6b203df03c1d1bb0b49ae6c",
+      "bytes": 20725
+    },
     "scripts/research/proximal_distal_energy/articulated_forward_contact.py": {
       "sha256": "0a208418991bb272bd6ce72ba56161c227367ab1efe8d8e46fcabb61f7066605",
       "bytes": 993
@@ -2163,6 +2167,10 @@
     "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py": {
       "sha256": "e1c6f0f066e4ad3f157557d003e4e12ae83842cc275ccc0965f263e1fc21220a",
       "bytes": 22185
+    },
+    "scripts/research/proximal_distal_energy/articulated_rigid_forward_attribution.py": {
+      "sha256": "25746b3dd16e12cfd7b331afa3142a79710aac147a896a7dd854ae82a163318b",
+      "bytes": 6452
     },
     "scripts/research/proximal_distal_energy/articulated_shaft.py": {
       "sha256": "314371699ad92854817fb0f79bc60cd9e7febd827d2c5c9ad0a8a3a632a5ece1",
