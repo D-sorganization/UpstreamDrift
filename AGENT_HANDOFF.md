@@ -58,50 +58,26 @@ are not completion evidence.
   bytes; collection projects those three SHA-256 digests into its manifest.
   `323a55db9` derives corruption revision from clean committed source. Prefix
   views never mutate the 714-case source.
-- Replay 33277732709 passed [0,20): archive `142556c34373`, receipt `f3bd190abc2d`,
-  source-derived sentinel `f8b7c4e836ab`, and exact audit `7b00bb69fbbe` over
-  20 statuses/JSON results and 180 arrays. No outcomes were summarized.
-- Replay 33279075050 passed [20,40) at exact `e86dff3ba`: archive
-  `4061ad24ff11`, receipt `2e765f0aed41`, and source-derived sentinel
-  `640e60ae0ad4`. Do not rerun or duplicate it.
 - Collection schema 1.3 requires each source's retained receipt, accepts the
-  governed 1.1/1.2/1.3 receipts, verifies exact identity/count/file digests,
-  and records receipt plus archive size/SHA. A real 1.1 intake retained 20/20 at
-  `Campaigns/UpstreamDrift-9153-receipt-bind-validation-prefix-0020-v1`,
-  manifest SHA `55412e9342d1`.
-- Real schema-1.2 collection validation retained the exact [0,40) prefix at
-  `Campaigns/UpstreamDrift-9153-enriched-collected-prefix-0040-schema-1.2-
-validation-v1`; manifest SHA is `7ff363120b4c`, with archive sizes 7,098,230
-  and 8,143,272 bytes and the governed archive digests. No outcomes were read.
-- Real receipt-1.3 validation against governed run 33277732709 retained 20/20
-  cross-bound pairs and evidence sidecars at
-  `Campaigns/UpstreamDrift-9153-receipt-v1.3-validation-run-33277732709`;
-  receipt SHA is `d4f041d9bfa7`.
-- Real size-binding validation against run 33279075050 matches 8,143,272 API
-  and retained bytes at `Campaigns/UpstreamDrift-9153-receipt-v1.3-size-
-validation-run-33279075050`; deterministic receipt SHA is `2e765f0aed41`.
-- Real receipt-1.4 validations for governed runs 33277732709 and 33279075050
-  retain 20/20 sidecars and all raw API digests at matching `Campaigns/
-UpstreamDrift-9153-receipt-v1.4-validation-run-*` paths; receipt SHAs are
-  `1fd798290ad3` and `a276c3bb2d52`. The all-v1.4 [0,40) collection is at
-  `Campaigns/UpstreamDrift-9153-enriched-collected-prefix-0040-all-receipt-
-v1.4-collection-v1.3-v1`; manifest SHA is `4e866fa61965`.
-- Cumulative [0,40) collection manifest is `151e60ade22a`; immutable legacy
-  view is `e9e7e9853848`; exact audit `d8fcb768d68d` passes 40 statuses/JSON
-  results, 360 legacy arrays, and every enriched sidecar without outcome
-  inspection or promotion.
-- Replay 33281576272 executes [40,60) at exact dispatch head `a6d4d9b55` using
-  qualified audit 33277601263. It is the only authorized structural process;
-  do not cancel, rerun, or duplicate it.
+  governed 1.1--1.4 receipts, and records receipt, archive, and raw API digests.
+- Replays 33277732709, 33279075050, and 33281576272 passed exact [0,60).
+  Their all-v1.4 receipt SHAs are `1fd798290ad3`, `a276c3bb2d52`, and
+  `1a160dede50d`; run 33281576272 archive is 8,129,764 bytes, SHA `666df3baf7e1`,
+  and its source-derived corruption audit SHA is `d1065a479207`.
+- Cumulative all-v1.4 [0,60) is `Campaigns/UpstreamDrift-9153-enriched-
+collected-prefix-0060-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
+  `febaa52266f0`. Immutable legacy view SHA is `fd18ba7ef4c8`; exact audit
+  `52404c77b8a6` passes 60 statuses/results, 540 arrays, and every enriched
+  sidecar without outcome inspection, human/coaching inference, or promotion.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. Poll only replay 33281576272 after GitHub App setup. On terminal status,
-   apply the same receipt-1.3, corruption, cumulative
-   collection, immutable legacy view, and exact audit gates through case 60.
-   Stop and preserve evidence on any mismatch.
+1. After GitHub App setup, confirm no structural process is active, then dispatch
+   exactly [60,80) with the frozen plan/launch/audit. Poll only that run; on
+   terminal status apply receipt-1.4, corruption, cumulative collection,
+   immutable legacy view, and exact audit gates through case 80.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
