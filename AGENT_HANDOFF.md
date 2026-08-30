@@ -38,10 +38,11 @@ partial campaign checkpoints are not completion evidence.
   research consumers through it, and has a poisoned-lower-triangle regression
   test. The protected publication gate correctly fails because pre-fix source
   hashes remain in the release authority; do not patch hashes alone.
-- `data/articulated_crba_requalification.json` is the prospective, outcome-blind
-  registration. It freezes four corrected source hashes, six directly affected
-  artifact families, Linux Pinocchio/MuJoCo 3.8.0 identity, one worker, two
-  clean replays, dependency order, stop conditions, and no promotion authority.
+- Requalification v1 reproduced all six JSON/NPZ families and the claim registry
+  exactly twice, but correctly stopped on timestamp/random-ID figure drift.
+  Schema v2 now also hash-binds the deterministic vector writer and six figure
+  generators, exact cmeel compatibility pins, one worker, and two clean replays;
+  it still has no promotion authority.
 - The large campaign worktree remains
   `UpstreamDrift-worktrees/9153-forward-impulse-work`, remote-equal at
   `1e5e823ca2fa9391134e8a0ccf140a36036a88a7` before this isolated fix. Its
@@ -49,11 +50,10 @@ partial campaign checkpoints are not completion evidence.
 
 ## Immediate Order
 
-1. Commit and push the prospective requalification registration before any
-   corrected native outcome is inspected; keep PR #9299 fail-closed meanwhile.
-2. In isolated Linux Python 3.11/3.12, qualify `pin==3.8.0` and
-   `mujoco==3.8.0`, then execute two clean serial replays of the six registered
-   artifact pipelines. Retain every declared case and typed failure.
+1. Commit/push requalification v2 before its execution; keep PR #9299
+   fail-closed meanwhile.
+2. Execute two clean serial v2 replays of all six registered artifact pipelines
+   in the qualified Linux Pinocchio/MuJoCo 3.8.0 environment.
 3. Regenerate dependent claim, figure, PDF, checksum, and release authorities;
    merge #9299 only after exact-head protected gates prove the final tree.
 4. Reconcile the 233-commit #9153 campaign branch with protected `main` as

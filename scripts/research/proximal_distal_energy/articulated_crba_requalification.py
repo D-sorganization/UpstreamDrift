@@ -16,7 +16,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRATION_PATH = ARTICLE / "data/articulated_crba_requalification.json"
-SCHEMA_VERSION = "proximal-distal-articulated-crba-requalification/v1"
+SCHEMA_VERSION = "proximal-distal-articulated-crba-requalification/v2"
 
 CORRECTED_SOURCE_PATHS = (
     Path("scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py"),
@@ -26,6 +26,31 @@ CORRECTED_SOURCE_PATHS = (
         "scripts/research/proximal_distal_energy/"
         "articulated_drift_contact_attribution.py"
     ),
+)
+
+FIGURE_SOURCE_PATHS = (
+    Path("scripts/research/proximal_distal_energy/deterministic_vector_figure.py"),
+    Path(
+        "scripts/research/proximal_distal_energy/"
+        "make_articulated_inertia_cross_engine_figure.py"
+    ),
+    Path(
+        "scripts/research/proximal_distal_energy/"
+        "make_articulated_native_constraint_discrepancy_figure.py"
+    ),
+    Path(
+        "scripts/research/proximal_distal_energy/"
+        "make_articulated_contact_projection_figure.py"
+    ),
+    Path(
+        "scripts/research/proximal_distal_energy/"
+        "make_articulated_drift_contact_attribution_figure.py"
+    ),
+    Path(
+        "scripts/research/proximal_distal_energy/"
+        "make_articulated_forward_contact_figure.py"
+    ),
+    Path("scripts/research/proximal_distal_energy/make_distributed_grip_figure.py"),
 )
 
 PRIMARY_ARTIFACTS = (
@@ -195,9 +220,17 @@ def build_registration(root: Path = ROOT) -> dict[str, object]:
             ),
             "scientific_effect_status": "unknown_until_requalified",
             "pre_correction_artifact_status": "retained_but_stale_not_promotable",
+            "v1_replay_observation": (
+                "six JSON records, every NPZ member, and the claim registry "
+                "replayed exactly; all eleven figure files differed because "
+                "Matplotlib emitted clock metadata and randomized SVG IDs"
+            ),
         },
         "corrected_source_authorities": [
             _authority(root, path) for path in CORRECTED_SOURCE_PATHS
+        ],
+        "figure_source_authorities": [
+            _authority(root, path) for path in FIGURE_SOURCE_PATHS
         ],
         "primary_artifacts": list(PRIMARY_ARTIFACTS),
         "qualified_environment": {
@@ -207,6 +240,10 @@ def build_registration(root: Path = ROOT) -> dict[str, object]:
             "pinocchio_version": "3.8.0",
             "mujoco_distribution": "mujoco",
             "mujoco_version": "3.8.0",
+            "native_binary_compatibility_pins": {
+                "cmeel-urdfdom": "4.0.1",
+                "cmeel-tinyxml2": "10.0.0",
+            },
             "pinocchio_operator_probe": ["Model", "crba", "rnea"],
             "maximum_workers": 1,
             "thread_limits": {
@@ -274,11 +311,16 @@ def validate_registration(
         raise ValueError("registration differs from deterministic authority")
     sources = report.get("corrected_source_authorities")
     artifacts = report.get("primary_artifacts")
+    figure_sources = report.get("figure_source_authorities")
     phases = report.get("execution_phases")
     if not isinstance(sources, list) or len(sources) != len(CORRECTED_SOURCE_PATHS):
         raise ValueError("all corrected source authorities are required")
     if not isinstance(artifacts, list) or artifacts != list(PRIMARY_ARTIFACTS):
         raise ValueError("complete primary artifact closure is required")
+    if not isinstance(figure_sources, list) or len(figure_sources) != len(
+        FIGURE_SOURCE_PATHS
+    ):
+        raise ValueError("all deterministic figure authorities are required")
     if not isinstance(phases, list) or len(phases) != 8:
         raise ValueError("the eight dependency-ordered phases are required")
     if report.get("promotion_eligible") is not False:
@@ -286,6 +328,7 @@ def validate_registration(
     return {
         "corrected_source_count": len(sources),
         "primary_artifact_count": len(artifacts),
+        "figure_source_count": len(figure_sources),
         "execution_phase_count": len(phases),
         "promotion_eligible": False,
     }

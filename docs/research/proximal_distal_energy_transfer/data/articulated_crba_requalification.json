@@ -1,11 +1,12 @@
 {
-  "schema_version": "proximal-distal-articulated-crba-requalification/v1",
+  "schema_version": "proximal-distal-articulated-crba-requalification/v2",
   "classification": "prospective_native_evidence_requalification",
   "evidence_status": "prospective_no_requalified_outcome",
   "trigger": {
     "defect": "Pinocchio CRBA populates the upper triangle; four research paths previously passed the returned storage without explicit mirroring",
     "scientific_effect_status": "unknown_until_requalified",
-    "pre_correction_artifact_status": "retained_but_stale_not_promotable"
+    "pre_correction_artifact_status": "retained_but_stale_not_promotable",
+    "v1_replay_observation": "six JSON records, every NPZ member, and the claim registry replayed exactly; all eleven figure files differed because Matplotlib emitted clock metadata and randomized SVG IDs"
   },
   "corrected_source_authorities": [
     {
@@ -29,6 +30,43 @@
       "bytes": 31581
     }
   ],
+  "figure_source_authorities": [
+    {
+      "path": "scripts/research/proximal_distal_energy/deterministic_vector_figure.py",
+      "sha256": "26a98e0a51837a25130dba915dc2155d9a0c90d33dbe46e9f0ca1e73fe0ffacb",
+      "bytes": 2543
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
+      "sha256": "22923cc967a2a47fd2ca14267694d757b2f991a4a5c39d096723397afd69d2f3",
+      "bytes": 2879
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
+      "sha256": "854b4432e9fbee7def1848229fd779d2877b7f0b5c85677e02081b7d80f3ceb5",
+      "bytes": 4205
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_articulated_contact_projection_figure.py",
+      "sha256": "fcb82ce67f8b2f28be5513588659ad8d5e39a47d0b1a38b1cdb58842e2fe8c71",
+      "bytes": 2413
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_articulated_drift_contact_attribution_figure.py",
+      "sha256": "66b661f5c69c3a5f212c94193a28e688fa9e7aa6e7103756368079abdc0e3902",
+      "bytes": 4376
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_articulated_forward_contact_figure.py",
+      "sha256": "9d6d031727068cf1dbddb2e93b646c04ea4252afc1e929030defe911c5f374aa",
+      "bytes": 3431
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/make_distributed_grip_figure.py",
+      "sha256": "0579c78ac3939a0c24a46cd014189b0689e62063d0661fe2d6678b3ad22c9e9b",
+      "bytes": 6552
+    }
+  ],
   "primary_artifacts": [
     "articulated_inertia_cross_engine",
     "articulated_native_constraint_discrepancy",
@@ -44,6 +82,10 @@
     "pinocchio_version": "3.8.0",
     "mujoco_distribution": "mujoco",
     "mujoco_version": "3.8.0",
+    "native_binary_compatibility_pins": {
+      "cmeel-urdfdom": "4.0.1",
+      "cmeel-tinyxml2": "10.0.0"
+    },
     "pinocchio_operator_probe": ["Model", "crba", "rnea"],
     "maximum_workers": 1,
     "thread_limits": {

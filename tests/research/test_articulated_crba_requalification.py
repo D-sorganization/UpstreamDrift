@@ -25,6 +25,7 @@ def test_checked_in_registration_freezes_complete_requalification_closure() -> N
     assert summary == {
         "corrected_source_count": 4,
         "primary_artifact_count": 6,
+        "figure_source_count": 7,
         "execution_phase_count": 8,
         "promotion_eligible": False,
     }
@@ -62,6 +63,10 @@ def test_registration_requires_native_operator_identity_and_two_clean_replays() 
     assert environment["pinocchio_distribution"] == "pin"
     assert environment["pinocchio_version"] == "3.8.0"
     assert environment["mujoco_version"] == "3.8.0"
+    assert environment["native_binary_compatibility_pins"] == {
+        "cmeel-urdfdom": "4.0.1",
+        "cmeel-tinyxml2": "10.0.0",
+    }
     assert environment["pinocchio_operator_probe"] == ["Model", "crba", "rnea"]
     assert environment["maximum_workers"] == 1
     assert replay["clean_execution_count"] == 2

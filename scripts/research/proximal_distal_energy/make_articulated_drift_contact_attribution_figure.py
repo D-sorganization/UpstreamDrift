@@ -7,6 +7,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scripts.research.proximal_distal_energy.deterministic_vector_figure import (
+    save_vector_figure,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 DATA = ARTICLE / "data/articulated_drift_contact_attribution.npz"
@@ -103,18 +107,12 @@ def main() -> int:
     axes[1, 1].set_ylabel("Cancellation Index (1 = No Cancellation)")
     axes[1, 1].legend(frameon=False)
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(OUTPUT.with_suffix(".pdf"), bbox_inches="tight")
-    figure.savefig(OUTPUT.with_suffix(".svg"), bbox_inches="tight")
-    plt.close(figure)
-    svg = OUTPUT.with_suffix(".svg")
-    svg.write_text(
-        "\n".join(
-            line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()
-        )
-        + "\n",
-        encoding="utf-8",
+    save_vector_figure(
+        figure,
+        OUTPUT,
+        salt="articulated-drift-contact-attribution-v1",
     )
+    plt.close(figure)
     return 0
 
 
