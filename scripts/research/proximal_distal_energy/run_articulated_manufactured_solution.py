@@ -454,6 +454,58 @@ def _require_profile(record: dict[str, Any], profile_id: str, authority: str) ->
         raise ValueError("execution profile has invalid publication eligibility")
 
 
+def validate_generated_record(
+    record: dict[str, Any], *, profile: RecordProfile
+) -> None:
+    """Validate a generated record before exposing it for independent review."""
+
+    if profile == "authority":
+        _require_profile(record, AUTHORITY_PROFILE, "authoritative")
+        execution_profile = _mapping(record, "execution_profile")
+        if execution_profile.get("python_minor") != "3.11":
+            raise ValueError("authority identity has an invalid Python minor")
+        if execution_profile.get("platform") != "linux-x86_64":
+            raise ValueError("authority identity has an invalid platform")
+        lock = _mapping(execution_profile, "dependency_lock")
+        expected_lock = {
+            "path": AUTHORITY_LOCK.relative_to(ROOT).as_posix(),
+            "sha256": _sha256(AUTHORITY_LOCK),
+        }
+        if lock != expected_lock:
+            raise ValueError("authority identity has a stale dependency lock")
+    elif profile == "rolling":
+        _require_profile(
+            record,
+            ROLLING_PROFILE,
+            "non_authoritative_compatibility_only",
+        )
+    else:
+        raise ValueError(f"unsupported execution profile: {profile!r}")
+
+    if record.get("schema_version") != "1.1.0":
+        raise ValueError("generated identity has an invalid schema version")
+    if record.get("study_id") != "articulated-manufactured-solution-independent-v1":
+        raise ValueError("generated identity has an invalid study id")
+    if (
+        record.get("classification")
+        != "synthetic_numerical_verification_not_human_evidence"
+    ):
+        raise ValueError("generated identity has an invalid classification")
+    _mapping(record, "model")
+    limitations = record.get("limitations")
+    if not isinstance(limitations, list) or not limitations:
+        raise ValueError("generated identity has no limitations")
+    expected_sources = {path: _sha256(ROOT / path) for path in SOURCE_PATHS}
+    if record.get("source_sha256") != expected_sources:
+        raise ValueError("generated identity has stale governed source hashes")
+    if not all(_registered_gates(record)):
+        raise ValueError("generated record has a failed registered gate")
+    tolerances = _compatibility_tolerances(record)
+    for path in tolerances:
+        _resolve_compatibility_path(record, path, profile)
+    _validate_numeric_gates(record)
+
+
 def _compatibility_tolerances(record: dict[str, Any]) -> dict[str, float]:
     design = _mapping(record, "design")
     field = "rolling_compatibility_absolute_tolerance_by_field"
@@ -667,12 +719,15 @@ def main() -> None:
         "--profile", choices=("authority", "rolling"), default="authority"
     )
     parser.add_argument("--compare-committed", action="store_true")
+    parser.add_argument("--validate-generated", action="store_true")
     arguments = parser.parse_args()
     if arguments.compare_committed and arguments.output.resolve() == OUTPUT.resolve():
         parser.error("--compare-committed requires a temporary --output path")
     output = write_record(arguments.output, profile=arguments.profile)
+    generated = json.loads(output.read_text(encoding="utf-8"))
+    if arguments.validate_generated:
+        validate_generated_record(generated, profile=arguments.profile)
     if arguments.compare_committed:
-        generated = json.loads(output.read_text(encoding="utf-8"))
         committed = json.loads(OUTPUT.read_text(encoding="utf-8"))
         if (
             arguments.profile == "authority"

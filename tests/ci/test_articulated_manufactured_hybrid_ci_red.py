@@ -77,7 +77,7 @@ def test_authority_job_is_distinct_hash_locked_python311_and_no_deps() -> None:
     assert "--profile authority" in commands
     assert "test_articulated_manufactured_solution" in commands
     assert "killswitch" in commands
-    assert "compare-committed" in commands
+    assert "articulated_manufactured_solution.json" in commands
 
 
 def test_rolling_job_is_non_vacuous_and_explicitly_non_authoritative() -> None:

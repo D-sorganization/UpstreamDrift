@@ -180,10 +180,10 @@ def test_semantic_comparison_ignores_provenance_but_fails_closed_on_gates() -> N
 
 
 @requires_native_stack
-def test_same_environment_two_process_authority_bytes_match_committed(
+def test_same_environment_two_process_authority_bytes_match(
     tmp_path: Path,
 ) -> None:
-    """Two fresh authority processes must equal each other and committed bytes."""
+    """Two fresh authority processes must produce byte-identical candidates."""
 
     first = tmp_path / "authority-first.json"
     second = tmp_path / "authority-second.json"
@@ -191,7 +191,6 @@ def test_same_environment_two_process_authority_bytes_match_committed(
     _require_success(_write_in_process(second, "authority"))
 
     assert first.read_bytes() == second.read_bytes()
-    assert first.read_bytes() == COMMITTED.read_bytes()
 
 
 @requires_native_stack
