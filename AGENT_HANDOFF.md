@@ -127,13 +127,13 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 ## Validation
 
 Use Python 3.12 and serial pytest. Current focused structural/workflow: 116 pass;
-Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
-the qualified hosted runtime; direct MyPy reaches the pre-existing NumPy-stub
-error at `articulated_structural_factorial_runner.py:381`.
+Ruff/Black and configured push gates pass. The older branch base still fails
+`test_markerless_mocap_authority.py` because its SPEC lacks the later #9063
+heading. Native replay requires hosted runtime; direct MyPy reaches the existing
+NumPy-stub error at `articulated_structural_factorial_runner.py:381`.
 
-Invoke the receipt, corruption, collection, and enrichment-audit entry points
-with `python -m scripts.research.proximal_distal_energy.<module>` from the repo
-root.
+Invoke receipt/corruption/collection/enrichment entry points from the root with
+`python -m scripts.research.proximal_distal_energy.<module>`.
 
 Never force-push, bypass checks/review, relax a tolerance after seeing results,
 or create redundant CI reruns. Run the GitHub App setup script immediately
