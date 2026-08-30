@@ -282,13 +282,65 @@ class TestPlayabilityWindow:
             playability.firmness_kg_per_cm2.size,
         )
 
-    def test_a_steeper_blow_digs_deeper_and_carries_further(
-        self, nominal_evaluation
+    def test_a_steeper_blow_digs_deeper(self, model, nominal_design, firm_sand) -> None:
+        """Depth is monotone in attack angle; carry is **not** (issue #9247).
+
+        This test used to read ``carry[0, 0] > carry[-1, 0]`` over the
+        registered sweep and was documented as "carry tracks divot depth,
+        which tracks attack angle". Only the first half of that survives
+        the un-mirrored frame. Depth is monotone across the whole sweep,
+        but carry turns over: measured on this design in firm sand it
+        climbs 0.117 -> 0.696 m from -2 to -6 deg, falls to 0.624 m by
+        -7 deg, and past -8 deg the head buries and there is no carry to
+        compare at all -- which is why the old assertion now reads a NaN
+        at its steep end.
+
+        That turnover is the physics the tool exists to show: a steeper
+        blow moves more sand, and past the point where the sole stops
+        planing it spends the extra on burying the head instead of on the
+        ball. Asserting the old monotone claim across the whole sweep
+        would re-assert an ordering that only held because every delivery
+        planed under the mirror.
+        """
+        geometry = nominal_design.geometry()
+        sand = firm_sand.sand_state()
+        depths = [
+            model.run_shot(
+                geometry, sand, SwingSetup(attack_angle_deg=angle)
+            ).max_depth_m
+            for angle in (-2.0, -4.0, -6.0, -8.0)
+        ]
+        assert depths == sorted(depths), (
+            f"a steeper blow must dig deeper: {[round(d * 1e3, 2) for d in depths]} mm"
+        )
+
+    def test_carry_peaks_inside_the_sweep_rather_than_at_its_steep_end(
+        self, model, nominal_design, firm_sand
     ) -> None:
-        """Carry tracks divot depth, which tracks attack angle. Rows run
-        from the steepest angle to the shallowest, so carry must fall."""
-        carry = nominal_evaluation.playability.carry_m
-        assert float(carry[0, 0]) > float(carry[-1, 0])
+        """The other half of the old claim, stated as what it really is.
+
+        Carry is single-peaked in attack angle, so the steepest delivery
+        in the registered sweep is not the longest. Pinned because the
+        mirrored frame made carry look monotone, and a tool that ranks
+        deliveries by carry would have recommended the steepest one.
+        """
+        geometry = nominal_design.geometry()
+        sand = firm_sand.sand_state()
+        carries = {
+            angle: model.run_shot(
+                geometry, sand, SwingSetup(attack_angle_deg=angle)
+            ).carry_m
+            for angle in (-2.0, -4.0, -6.0, -8.0)
+        }
+        assert carries[-8.0] is None, (
+            "the steep end of the sweep must bury this design and report no "
+            f"carry; got {carries[-8.0]}"
+        )
+        planing = {a: c for a, c in carries.items() if c is not None}
+        assert set(planing) == {-2.0, -4.0, -6.0}, planing
+        assert planing[-6.0] > planing[-4.0] > planing[-2.0], (
+            f"carry must still rise with a steeper blow while the sole planes: {planing}"
+        )
 
     def test_the_window_is_a_fraction_of_the_swept_domain(
         self, nominal_evaluation
@@ -298,7 +350,35 @@ class TestPlayabilityWindow:
         assert window.area <= window.domain_area
 
     def test_nothing_was_refused_in_the_dynamic_sweep(self, nominal_evaluation) -> None:
-        assert nominal_evaluation.playability.window.refused_fraction == 0.0
+        """Refusal is the envelope declining, and it declines nothing here.
+
+        With the inertial term on, the F0 envelope answers every point in
+        the sweep. It used to be possible to satisfy this by accident,
+        because ``refused_fraction`` counted *any* NaN carry and the only
+        way to get one was a refusal. Issue #9247 gave NaN a second cause
+        -- a buried head with no divot to derive a carry from -- and this
+        assertion is only about the first.
+        """
+        window = nominal_evaluation.playability.window
+        assert window.refused_fraction == 0.0
+
+    def test_a_buried_point_is_reported_apart_from_a_refused_one(
+        self, nominal_evaluation
+    ) -> None:
+        """The steep end of the sweep buries; that is not a refusal.
+
+        Before issue #9247 these were one number, and the corrected model
+        made it read "the solver refused half this domain" about a solver
+        that refused nothing. Both still count against the window.
+        """
+        window = nominal_evaluation.playability.window
+        assert window.unmeasured_fraction > 0.0, (
+            "the registered attack sweep reaches -12 deg, which buries this "
+            "design; the burial must be recorded"
+        )
+        assert window.refused_fraction == 0.0
+        missing = np.isnan(window.carry_m)
+        assert missing.any() and not missing.all()
 
     def test_skipping_the_sweep_says_so_rather_than_reporting_an_empty_window(
         self, model, nominal_design, firm_sand, tour_swing

@@ -34,7 +34,7 @@ import dataclasses
 import numpy as np
 import pytest
 
-from bunkershot3d.geometry import TriangleMesh
+from bunkershot3d.geometry import TRAVEL_AXIS_BODY, TriangleMesh
 from bunkershot3d.solvers import EnvelopeStatus, FidelityTier
 from src.shared.python.visualization.viewport import ViewportOverlayPayload
 from src.tools.bunker_shot_gui.shot3d import (
@@ -79,8 +79,30 @@ class TestThePoseComesFromTheRecordedShot:
             assert np.isclose(float(np.linalg.det(rotation)), 1.0, atol=1e-9)
 
     def test_the_head_travels_toward_the_target(self, nominal_scene: ShotScene) -> None:
+        """Travel is along ``TRAVEL_AXIS_BODY``, which is ``-x``, not ``+x``.
+
+        The scene's world frame is axis-aligned with the head frame, and
+        the mesh puts the leading edge at the origin with ``+x``
+        **rearward** (:mod:`bunkershot3d.geometry.profile`). A wedge
+        strikes leading edge first, so it travels toward ``-x``.
+
+        This assertion used to read ``path[-1, 0] > path[0, 0]``: it took
+        ``+x`` for the direction of travel, which is the mirrored
+        convention issue #9247 removed. It passed only because the
+        workbench was driving the head backwards, so the test and the
+        defect agreed with each other. Projecting onto the published
+        axis rather than hard-coding a sign is what stops that from
+        recurring -- a re-mirror now moves the axis and the assertion
+        together instead of leaving this one silently satisfied.
+        """
         path = nominal_scene.path_world_m
-        assert path[-1, 0] > path[0, 0]
+        travel = np.asarray(TRAVEL_AXIS_BODY, dtype=np.float64)
+        advance = float((path[-1] - path[0]) @ travel)
+        assert advance > 0.0, (
+            f"the head must advance along the travel axis {tuple(travel)}; "
+            f"it moved {advance * 1e3:.2f} mm along it, from {path[0]} to "
+            f"{path[-1]}"
+        )
 
     def test_the_head_points_are_placed_by_the_pose(
         self, nominal_scene: ShotScene
