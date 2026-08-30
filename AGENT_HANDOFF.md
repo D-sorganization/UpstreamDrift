@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 10:15 PDT (2026-08-30 17:15 UTC)
+Updated: 2026-08-30 02:23 PDT (2026-08-30 09:23 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -127,10 +127,10 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 ## Validation
 
 Use serial pytest. Python 3.11 MyPy passes all 53 changed research modules;
-Ruff and Black pass the 12-file typing slice, with no placeholders. The broad
+Ruff and Black pass the 13-file typing slice, with no placeholders. The broad
 affected suite passes 273/275; two currentness tests reject intentionally stale
-ground atlas/diagnostic source hashes pending integrated evidence regeneration.
-The hosted qualified runtime remains required; do not call the repository green.
+ground atlas/diagnostic hashes pending qualified native regeneration. The local
+default Python lacks Pinocchio; do not call the repository green or substitute it.
 
 Invoke receipt/corruption/collection/enrichment entry points from the root with
 `python -m scripts.research.proximal_distal_energy.<module>`.
