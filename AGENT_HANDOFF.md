@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 23:34 PDT (2026-08-30 06:34 UTC)
+Updated: 2026-08-29 23:25 PDT (2026-08-30 06:25 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -94,14 +94,15 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 1. Recovery runs 33291836517 and 33294119255 completed exact [0,20) and
    [20,40) slices at dispatch heads `9ec22b4a14d0` and `429ef9d97c`.
-   The second evidence directory ends `recovery-slice-0020-0040-run-33294119255`.
-   Its receipt 1.5 SHA is
-   `aa18d78d45dc`, corruption SHA `3189b4a4f2e7`, cumulative collection 1.4
+   Second receipt 1.5 SHA is `aa18d78d45dc`, corruption SHA `3189b4a4f2e7`,
+   cumulative collection 1.4
    SHA `c4099337544b`, legacy-view SHA `e9e7e9853848`, exact enrichment SHA
    `d8fcb768d68d`, and boundary 1.1 SHA `48e022a7fc02`; every outcome-blind
-   gate passes and the next missing index is 40. Close #9273 with this evidence,
-   then preregister only [40,60) before one new dispatch. Do not dispatch
-   [60,80) until that slice is terminal, retained, and boundary-qualified.
+   gate passes and the next missing index is 40. #9273 is closed. #9281
+   preregisters only [40,60); run 33296773419/job 99217697086 is the sole live
+   structural process at exact dispatch head `85f529533b5199efcfd63d3892a31ec930e88b1e`.
+   Do not cancel, duplicate, inspect outcomes, or dispatch [60,80). On success,
+   retain raw APIs/ZIPs, then build the cumulative [0,60) gate set.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
