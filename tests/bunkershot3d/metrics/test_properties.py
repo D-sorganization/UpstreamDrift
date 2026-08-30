@@ -33,6 +33,7 @@ from bunkershot3d.metrics import (
 
 from .conftest import (
     DT_S,
+    SAND_FRICTION_ANGLE_DEG,
     VEE_DX_M,
     build_decelerating_trace,
     build_trace,
@@ -154,7 +155,12 @@ class TestDivotProperties:
         )
 
         metrics = divot_metrics(
-            trace, head, scene, width_m=width_m, bulk_density_kg_m3=density_kg_m3
+            trace,
+            head,
+            scene,
+            width_m=width_m,
+            bulk_density_kg_m3=density_kg_m3,
+            friction_angle_deg=SAND_FRICTION_ANGLE_DEG,
         )
 
         expected_length_m = (n_descend + n_ascend) * VEE_DX_M

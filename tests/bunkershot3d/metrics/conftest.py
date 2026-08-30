@@ -56,6 +56,10 @@ SAND_BULK_DENSITY_KG_M3 = 1550.0
 #: Effective cutting width used by the divot tests [m].
 DIVOT_WIDTH_M = 0.020
 
+#: Internal friction angle the divot tests lay the divot walls back at [deg].
+#: Every shipped USGA bunker sand carries 34.0 (issue #8659).
+SAND_FRICTION_ANGLE_DEG = 34.0
+
 
 def reference_head() -> HeadModel:
     """Return the head every builder here is expressed for.

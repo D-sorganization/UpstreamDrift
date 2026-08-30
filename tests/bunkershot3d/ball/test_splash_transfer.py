@@ -80,6 +80,7 @@ def delivery(
     *,
     impulse_n_s: float = 4.0,
     displaced_mass_kg: float = 0.25,
+    displaced_mass_bounds_kg: tuple[float, float] | None = None,
     contact_duration_s: float = 0.005,
     speed_m_s: float = 25.0,
     bed_relative_density: float = 0.5,
@@ -87,9 +88,14 @@ def delivery(
 ) -> SandDelivery:
     """Return a measured strike, as the solver and metrics layer report one.
 
+    The default 4.0 N.s over 0.25 kg is 16 m/s of ejecta out of a 25 m/s head,
+    which is admissible: since issue #8659 a pair that is not cannot be built
+    at all, so every default here has to stay on the right side of that.
+
     Args:
         impulse_n_s: Magnitude of the sand impulse the solver integrated.
-        displaced_mass_kg: Divot mass the metrics layer measured.
+        displaced_mass_kg: Accelerated sand mass the metrics layer reported.
+        displaced_mass_bounds_kg: The interval it was drawn from, or ``None``.
         contact_duration_s: Time the sole spent engaged.
         speed_m_s: Head speed at entry; the exit is 60% of it.
         bed_relative_density: Packing state of the bed, which sets the share of
@@ -105,6 +111,7 @@ def delivery(
     return SandDelivery(
         impulse_n_s=impulse_n_s,
         displaced_mass_kg=displaced_mass_kg,
+        displaced_mass_bounds_kg=displaced_mass_bounds_kg,
         contact_duration_s=contact_duration_s,
         entry_speed_m_s=speed_m_s,
         exit_speed_m_s=0.6 * speed_m_s,
@@ -148,8 +155,9 @@ class TestCarryFollowsTheDeliveredImpulse:
         assert hard.ball_speed_m_s == pytest.approx(2.0 * soft.ball_speed_m_s)
 
     def test_ball_speed_is_proportional_to_the_delivered_impulse(self) -> None:
+        """At 0.50 kg the whole ladder stays admissible: 8 N.s is 16 m/s."""
         speeds = [
-            launch(delivery(impulse_n_s=impulse)).ball_speed_m_s
+            launch(delivery(impulse_n_s=impulse, displaced_mass_kg=0.50)).ball_speed_m_s
             for impulse in (1.0, 2.0, 4.0, 8.0)
         ]
         ratios = [b / a for a, b in zip(speeds, speeds[1:], strict=False)]
@@ -189,13 +197,19 @@ class TestMovingMoreSandDoesNotHelp:
         assert heavy.ball_speed_m_s <= light.ball_speed_m_s
 
     @given(
-        st.floats(min_value=0.01, max_value=2.0, allow_nan=False),
+        st.floats(min_value=0.20, max_value=2.0, allow_nan=False),
         st.floats(min_value=1.0, max_value=4.0, allow_nan=False),
     )
     @settings(deadline=None, max_examples=40)
     def test_ball_speed_is_monotonically_decreasing_in_sand_mass(
         self, mass_kg: float, factor: float
     ) -> None:
+        """0.20 kg is the floor: 4 N.s over it is 20 m/s from a 25 m/s head.
+
+        Below that the pair is inadmissible and cannot be built at all
+        (issue #8659), so the lower bound is a physical one rather than an
+        arbitrary shrink of the search space.
+        """
         light = launch(delivery(impulse_n_s=4.0, displaced_mass_kg=mass_kg))
         heavy = launch(delivery(impulse_n_s=4.0, displaced_mass_kg=mass_kg * factor))
         assert heavy.ball_speed_m_s <= light.ball_speed_m_s
@@ -228,10 +242,23 @@ class TestMomentumBookkeeping:
     def test_the_partition_conserves_momentum_for_any_strike(
         self, impulse_n_s: float, mass_kg: float, depth_m: float
     ) -> None:
+        """The head speed is drawn from the pair, not fixed at 25 m/s.
+
+        Since issue #8659 an impulse and a mass that imply ejecta faster than
+        the head cannot be built at all, so a fixed entry speed would have made
+        most of this search space unconstructible rather than unconserved. The
+        delivery is therefore given a head fast enough to have thrown what it
+        threw, which leaves the momentum bound the only thing under test.
+        """
+        speed_m_s = max(impulse_n_s / mass_kg, 1e-6)
         splash = compute_splash_impulse(
             lie=BallLie(depth_m=depth_m),
             ball=BallProperties(),
-            delivery=delivery(impulse_n_s=impulse_n_s, displaced_mass_kg=mass_kg),
+            delivery=delivery(
+                impulse_n_s=impulse_n_s,
+                displaced_mass_kg=mass_kg,
+                speed_m_s=speed_m_s,
+            ),
             club_loft_rad=GREENSIDE_LOFT_RAD,
         )
         assert splash.ball_impulse_n_s <= splash.delivered_impulse_n_s
