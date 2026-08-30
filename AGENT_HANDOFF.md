@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 22:11 PDT (2026-08-30 05:11 UTC)
+Updated: 2026-08-29 23:34 PDT (2026-08-30 06:34 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -92,18 +92,16 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Immediate Order
 
-1. Recovery run 33291836517/job 99204705076 completed [0,20) successfully at
-   `9ec22b4a14d0`; it is #9153 anomaly recovery, not ControlTower/#8800 recovery.
-   Exact retained evidence directory is
-   `Campaigns/UpstreamDrift-9153-attested-recovery-slice-0000-0020-run-33291836517`.
-   Receipt 1.5 SHA `86ed1ae321d7`,
-   collection 1.4 SHA `103265593955`, legacy view SHA `0eaa55ccb355`, exact
-   enrichment SHA `7b00bb69fbbe`, and boundary 1.1 SHA `0863b7c95345` pass
-   outcome-blind. Issue #9273 separately preregisters only [20,40). Run
-   33294119255 is the sole live structural process at exact dispatch head
-   `429ef9d97c108eb88cfd3f36b05b806050f2e918`. Do not cancel, duplicate, or
-   dispatch [40,60). On terminal success retain raw APIs and both ZIPs before
-   receipt 1.5, cumulative collection 1.4, legacy, enrichment, and boundary 1.1.
+1. Recovery runs 33291836517 and 33294119255 completed exact [0,20) and
+   [20,40) slices at dispatch heads `9ec22b4a14d0` and `429ef9d97c`.
+   The second evidence directory ends `recovery-slice-0020-0040-run-33294119255`.
+   Its receipt 1.5 SHA is
+   `aa18d78d45dc`, corruption SHA `3189b4a4f2e7`, cumulative collection 1.4
+   SHA `c4099337544b`, legacy-view SHA `e9e7e9853848`, exact enrichment SHA
+   `d8fcb768d68d`, and boundary 1.1 SHA `48e022a7fc02`; every outcome-blind
+   gate passes and the next missing index is 40. Close #9273 with this evidence,
+   then preregister only [40,60) before one new dispatch. Do not dispatch
+   [60,80) until that slice is terminal, retained, and boundary-qualified.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
