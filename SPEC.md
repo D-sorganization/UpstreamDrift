@@ -4980,6 +4980,36 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   or coaching recommendation; divergent forward counterfactuals require a
   separately registered design.
 
+### F-8557.33: Distributed Contact Event-Boundary Qualification
+
+- Distributed tension-contact traces shall retain the signed distance of every
+  hand/station pair above its declared free length. The retained active state
+  shall equal the strictly positive signed-gap state; disagreement shall fail
+  closed before event location.
+- Every sampled opening or reattachment shall bracket a signed-gap root. Root
+  location shall use a declared linear generalized-state interpolant, retain
+  event kind, hand/station identity, source indices, interpolated state,
+  residual, and final bracket width, and reject evaluator endpoint or shape
+  disagreement. This is a qualification of the retained discrete path, not the
+  continuous integrator's exact event solution.
+- Simultaneous station transitions shall share one duplicate-time pre/post
+  state and one segment boundary. Event alignment shall reject unsorted,
+  nonadjacent, out-of-bracket, or state-inconsistent event records so numerical
+  quadrature never crosses an active-set transition.
+- The distributed replay adapter shall use the protected typed forward-
+  attribution input contract. Configuration, velocity, contact, active-input,
+  mass-transport, and event terms shall remain separately observable. Opening
+  and reattachment under the continuous compliant tension law shall retain zero
+  discrete event impulse and work rather than infer an impact.
+- Manufactured and registered gates shall cover opening, reattachment, no-
+  transition, duplicate pre/post alignment, active-gap inconsistency, missing
+  bracketing, corrupt evaluator shape, retained signed-gap/active-state parity,
+  and pointwise generalized-force closure on the subject-scaled distributed
+  probe.
+- This slice does not add stateful friction, equipment calibration, generated
+  campaign evidence, human validation, biological passivity, causal strategy
+  attribution, or coaching guidance.
+
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
