@@ -1,16 +1,16 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 19:55 PDT (2026-08-30 02:55 UTC)
+Updated: 2026-08-29 20:04 PDT (2026-08-30 03:04 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
 ## Protected Authority
 
-- UpstreamDrift protected `main` is `63fa73282845436f432bb831e95d680c4bcc06cf`.
+- UpstreamDrift protected `main` is `58413d2c24e5a9cfae32ebfa10caf9e0bc58d27c`.
   #9153 began at ancestor `e732757c90538acae7d7c4531dc1a05dc321b94f`,
   which contains the #9152/#9151 authority.
 - AffineDrift protected `main` is `b28fd8227d5003c752a16426ed508e13ff2e137a`;
-  Tools protected `main` is `b9becbff76633fb0703ed7d3c2f0a89a6c84e708`
+  Tools protected `main` is `eb2b67436483fc33821790f8aa08d61dac079e39`
   and contains handoff PR #4869 commit
   `cefcc1878de11804c44cd7d1d19c0ffcf58fa89e` as an ancestor.
   Tools #4669 is protected and #4142 remains the reusable-variation authority.
@@ -22,7 +22,8 @@ are not completion evidence.
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
   Scientific/collector content head is `442c6d70a626df56e73cdccfe47682a5b1a0678a`;
-  resolve the handoff-only successor with `git rev-parse HEAD`. No PR exists.
+  exact handoff/preregistration head is
+  `0aa431ca4e23cb4ab3c2cc87ff9af97824990cfb`. No PR exists.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
@@ -89,8 +90,10 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 1. Preserve the exact case-100 mismatch and do not weaken equality, overwrite
    retained evidence, or dispatch [100,120). The preregistered diagnostic is
-   an exact [80,81) repeat at frozen execution `ccb171ed3` and audit run 33277601263. Exact match to enriched-only supports a source delta; match to
-   legacy-only supports a first-replay anomaly; match to neither demonstrates
+   an exact [80,81) repeat at frozen execution `ccb171ed3` and audit run 33277601263. Hosted run 33289155154, job 99197600514, is in progress at
+   exact head `0aa431ca4e23`; do not cancel, restart, or duplicate it. Exact match
+   to enriched-only supports a source delta; match to legacy-only supports a
+   first-replay anomaly; match to neither demonstrates
    cross-run non-repeatability. No tolerance, promotion, or outcome reading is
    permitted; preserve the adverse comparison under every branch.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
