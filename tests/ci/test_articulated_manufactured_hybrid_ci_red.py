@@ -7,6 +7,10 @@ from typing import Any
 
 import pytest
 
+from scripts.research.proximal_distal_energy import (
+    run_articulated_manufactured_solution as runner,
+)
+
 yaml = pytest.importorskip("yaml")
 pytestmark = [pytest.mark.unit]
 
@@ -14,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_PATH = ROOT / ".github/workflows/ci-optional-stack.yml"
 AUTHORITY_JOB = "articulated-manufactured-authority"
 ROLLING_JOB = "articulated-manufactured-rolling"
-AUTHORITY_LOCK = "requirements-articulated-authority-py311.lock"
+AUTHORITY_LOCK = runner.AUTHORITY_LOCK.relative_to(ROOT).as_posix()
 
 
 def _workflow() -> dict[str, Any]:
@@ -55,7 +59,7 @@ def test_authority_job_is_distinct_hash_locked_python311_and_no_deps() -> None:
     commands = _run_text(job)
 
     _assert_fail_closed(job)
-    assert _setup_python_version(job) == "3.11"
+    assert _setup_python_version(job) == runner.AUTHORITY_PYTHON_VERSION
     assert AUTHORITY_LOCK in commands
     assert "--require-hashes" in commands
     assert "--no-deps" in commands

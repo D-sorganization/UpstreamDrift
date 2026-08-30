@@ -6,19 +6,34 @@ import json
 from pathlib import Path
 from typing import Any
 
+from scripts.research.proximal_distal_energy.run_articulated_manufactured_solution import (
+    AUTHORITY_LOCK,
+    SOURCE_PATHS,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
 DATE = "2026-08-21"
 CLAIM_IDS = {f"PD-CLAIM-{number}" for number in range(297, 302)}
-ARTIFACTS = [
-    "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
-    "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
-    "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
-    "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-    "tests/research/test_articulated_manufactured_solution.py",
-]
+_AUTHORITY_CONTRACT_ARTIFACTS = (
+    AUTHORITY_LOCK.relative_to(ROOT).as_posix(),
+    AUTHORITY_LOCK.with_suffix(".in").relative_to(ROOT).as_posix(),
+    ".github/workflows/ci-optional-stack.yml",
+    "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+    "tests/ci/test_articulated_manufactured_hybrid_ci_red.py",
+)
+ARTIFACTS = list(
+    dict.fromkeys(
+        (
+            "docs/research/proximal_distal_energy_transfer/data/"
+            "articulated_manufactured_solution.json",
+            *SOURCE_PATHS,
+            *_AUTHORITY_CONTRACT_ARTIFACTS,
+        )
+    )
+)
 
 
 def _find(candidates: list[dict[str, Any]], prefix: str) -> dict[str, Any]:

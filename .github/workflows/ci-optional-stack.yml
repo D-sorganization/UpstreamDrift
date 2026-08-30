@@ -457,20 +457,25 @@ jobs:
     env:
       PYTHONPATH: .:src
       MUJOCO_GL: egl
+      PYTHONNOUSERSITE: "1"
+      PIP_CONFIG_FILE: /dev/null
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
-          python-version: "3.11"
+          python-version: "3.11.15"
+      - name: Create Isolated Authority Runtime
+        run: python -m venv "$RUNNER_TEMP/articulated-manufactured-authority-venv"
       - name: Install Hash-Locked Authority Runtime
         run: |
-          python -m pip install --require-hashes --no-deps \
-            -r requirements-articulated-authority-py311.lock
-          python -m pip check
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" \
+            -m pip install --require-hashes --no-deps \
+            -r scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" -m pip check
       - name: Run Non-Vacuous Authority and Killswitch Contracts
         run: |
           set -o pipefail
-          python -m pytest \
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" -m pytest \
             tests/research/test_articulated_manufactured_solution.py \
             tests/research/test_articulated_manufactured_hybrid_authority_red.py \
             -v --tb=short \
@@ -483,7 +488,8 @@ jobs:
           fi
       - name: Compare Temporary Authority Bytes With Committed Evidence
         run: |
-          python -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" \
+            -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
             --profile authority \
             --output "$RUNNER_TEMP/articulated-authority.json" \
             --compare-committed

@@ -116,7 +116,9 @@ def test_authority_runtime_accepts_exact_declared_python_patch(
 ) -> None:
     """The exact-patch rejection test has a legitimate positive control."""
 
-    expected = tuple(int(part) for part in _lock_compile_python().split("."))
+    parts = tuple(int(part) for part in _lock_compile_python().split("."))
+    assert len(parts) == 3
+    expected = (parts[0], parts[1], parts[2])
     _set_authority_platform(monkeypatch, expected)
 
     runner.validate_authority_environment()

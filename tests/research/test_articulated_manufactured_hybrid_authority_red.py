@@ -26,7 +26,7 @@ pytestmark = [pytest.mark.scientific]
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
 COMMITTED = DATA / "articulated_manufactured_solution.json"
-AUTHORITY_LOCK = ROOT / "requirements-articulated-authority-py311.lock"
+AUTHORITY_LOCK = runner.AUTHORITY_LOCK
 AUTHORITY_PROFILE = "articulated-manufactured-authority-py311-v1"
 ROLLING_PROFILE = "articulated-manufactured-rolling-native-v1"
 

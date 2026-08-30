@@ -7,9 +7,11 @@ import hashlib
 import importlib.metadata
 import json
 import math
+import os
 import platform
 from pathlib import Path
 import sys
+import tempfile
 from typing import Any, Literal
 
 import numpy as np
@@ -30,7 +32,12 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 DATA = ARTICLE / "data"
 OUTPUT = DATA / "articulated_manufactured_solution.json"
-AUTHORITY_LOCK = ROOT / "requirements-articulated-authority-py311.lock"
+AUTHORITY_LOCK = (
+    Path(__file__).resolve().parent
+    / "requirements"
+    / "articulated-authority-py311.lock"
+)
+AUTHORITY_PYTHON_VERSION = "3.11.15"
 AUTHORITY_PROFILE = "articulated-manufactured-authority-py311-v1"
 ROLLING_PROFILE = "articulated-manufactured-rolling-native-v1"
 RecordProfile = Literal["authority", "rolling"]
@@ -44,16 +51,39 @@ _CROSS_ENGINE_TOLERANCE = 1.0e-8
 _POSITION_TOLERANCE_M = 1.0e-10
 _VELOCITY_TOLERANCE_M_S = 1.0e-10
 _VIRTUAL_POWER_TOLERANCE_W = 1.0e-9
+_ROLLING_COMPATIBILITY_ABSOLUTE_TOLERANCE_BY_FIELD = {
+    "free_body.inverse_dynamics_relative_error.lagrange_mujoco": 1.0e-8,
+    "free_body.inverse_dynamics_relative_error.lagrange_pinocchio": 1.0e-8,
+    "free_body.inverse_dynamics_relative_error.mujoco_pinocchio": 1.0e-8,
+    "free_body.inverse_dynamics_relative_error.maximum": 1.0e-8,
+    "free_body.integration_step_error_rad.0.0005": 1.0e-8,
+    "free_body.integration_step_error_rad.0.001": 1.0e-8,
+    "free_body.integration_step_error_rad.0.002": 1.0e-8,
+    "free_body.richardson_orders.0": 1.0e-3,
+    "free_body.richardson_orders.1": 1.0e-3,
+    "free_body.gravity_free_zero_torque_relative_drift.linear_momentum": 1.0e-8,
+    "free_body.gravity_free_zero_torque_relative_drift.angular_momentum": 1.0e-8,
+    "free_body.gravity_free_zero_torque_relative_drift.kinetic_energy": 1.0e-8,
+    "constrained_motion.position_residual_m": _POSITION_TOLERANCE_M,
+    "constrained_motion.velocity_residual_m_s": _VELOCITY_TOLERANCE_M_S,
+    "constrained_motion.virtual_power_residual_w": _VIRTUAL_POWER_TOLERANCE_W,
+    "constrained_motion.multiplier_relative_residual": 1.0e-8,
+    "constrained_motion.cross_engine_multiplier_relative_residual": 1.0e-8,
+    "constrained_motion.equilibrium_relative_residual": 1.0e-8,
+}
 SOURCE_PATHS = (
-    "requirements-articulated-authority-py311.in",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+    "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
     "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+    "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
     "scripts/research/proximal_distal_energy/spatial_full_body.py",
+    "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
     "tests/research/test_articulated_manufactured_solution.py",
     "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+    "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
 )
 
 
@@ -92,8 +122,11 @@ def validate_authority_environment() -> None:
         raise RuntimeError("authority requires Linux x86_64")
     if platform.python_implementation() != "CPython":
         raise RuntimeError("authority requires CPython")
-    if sys.version_info[:2] != (3, 11):
-        raise RuntimeError("authority requires Python 3.11")
+    expected_python = tuple(int(part) for part in AUTHORITY_PYTHON_VERSION.split("."))
+    if sys.version_info[:3] != expected_python:
+        raise RuntimeError(
+            f"authority requires exact Python patch {AUTHORITY_PYTHON_VERSION}"
+        )
     mismatches: dict[str, tuple[str, str]] = {}
     for name, expected in _AUTHORITY_DISTRIBUTIONS.items():
         actual = _distribution_version(name)
@@ -125,17 +158,19 @@ def _execution_profile(profile: RecordProfile) -> dict[str, Any]:
                 "pinocchio": _distribution_version("pin"),
             },
         }
-    return {
-        "id": ROLLING_PROFILE,
-        "publication_authority": "non_authoritative_compatibility_only",
-        "publication_eligible": False,
-        "runtime_versions": {
-            "python": sys.version.split()[0],
-            "numpy": _distribution_version("numpy"),
-            "mujoco": _distribution_version("mujoco"),
-            "pin": _distribution_version("pin"),
-        },
-    }
+    if profile == "rolling":
+        return {
+            "id": ROLLING_PROFILE,
+            "publication_authority": "non_authoritative_compatibility_only",
+            "publication_eligible": False,
+            "runtime_versions": {
+                "python": sys.version.split()[0],
+                "numpy": _distribution_version("numpy"),
+                "mujoco": _distribution_version("mujoco"),
+                "pin": _distribution_version("pin"),
+            },
+        }
+    raise ValueError(f"unsupported execution profile: {profile!r}")
 
 
 def _free_record(result: Any) -> dict[str, Any]:
@@ -228,6 +263,9 @@ def build_record(profile: RecordProfile = "authority") -> dict[str, Any]:
             "constraint_position_tolerance_m": _POSITION_TOLERANCE_M,
             "constraint_velocity_tolerance_m_s": _VELOCITY_TOLERANCE_M_S,
             "constraint_virtual_power_tolerance_w": _VIRTUAL_POWER_TOLERANCE_W,
+            "rolling_compatibility_absolute_tolerance_by_field": (
+                _ROLLING_COMPATIBILITY_ABSOLUTE_TOLERANCE_BY_FIELD
+            ),
             "conservation_scope": "gravity_free_zero_torque_free_floating_club_subtree",
             "killswitch": "add_10_nm_to_mujoco_inverse_and_require_gate_failure",
         },
@@ -274,23 +312,118 @@ def _finite(mapping: dict[str, Any], field: str) -> float:
     return numeric
 
 
+def _finite_value(value: object, field: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"semantic field is not numeric: {field}")
+    numeric = float(value)
+    if not math.isfinite(numeric):
+        raise ValueError(f"semantic field is not finite: {field}")
+    return numeric
+
+
+def _positive_limit(design: dict[str, Any], field: str, fallback: float) -> float:
+    if field not in design:
+        return fallback
+    value = _finite(design, field)
+    if value <= 0.0:
+        raise ValueError(f"semantic tolerance must be positive: {field}")
+    return value
+
+
+def _nonnegative_values(mapping: dict[str, Any], prefix: str) -> None:
+    for field, value in mapping.items():
+        if _finite_value(value, f"{prefix}.{field}") < 0.0:
+            raise ValueError(f"semantic field must be nonnegative: {prefix}.{field}")
+
+
+def _integration_errors(free: dict[str, Any]) -> tuple[tuple[float, float], ...]:
+    raw = _mapping(free, "integration_step_error_rad")
+    pairs: list[tuple[float, float]] = []
+    for step, error in raw.items():
+        try:
+            numeric_step = float(step)
+        except (TypeError, ValueError) as exception:
+            raise ValueError("semantic integration step is not numeric") from exception
+        numeric_error = _finite_value(error, f"integration_step_error_rad.{step}")
+        if numeric_step <= 0.0 or numeric_error < 0.0:
+            raise ValueError("semantic integration evidence must be nonnegative")
+        pairs.append((numeric_step, numeric_error))
+    if not pairs:
+        raise ValueError("semantic record has no integration evidence")
+    ordered = tuple(sorted(pairs))
+    if any(
+        finer_error > coarser_error
+        for (_, finer_error), (_, coarser_error) in zip(
+            ordered, ordered[1:], strict=False
+        )
+    ):
+        raise ValueError("semantic integration errors are not monotonic")
+    return ordered
+
+
 def _validate_numeric_gates(record: dict[str, Any]) -> None:
     design = _mapping(record, "design")
     free = _mapping(record, "free_body")
     inverse = _mapping(free, "inverse_dynamics_relative_error")
     drift = _mapping(free, "gravity_free_zero_torque_relative_drift")
     constrained = _mapping(record, "constrained_motion")
-    inverse_limit = _finite(design, "inverse_dynamics_relative_tolerance")
-    conservation_limit = _finite(design, "conservation_relative_tolerance")
+    inverse_limit = _positive_limit(design, "inverse_dynamics_relative_tolerance", 0.05)
+    conservation_limit = _positive_limit(
+        design, "conservation_relative_tolerance", 0.02
+    )
+    cross_engine_limit = _positive_limit(
+        design, "cross_engine_relative_tolerance", _CROSS_ENGINE_TOLERANCE
+    )
+    position_limit = _positive_limit(
+        design, "constraint_position_tolerance_m", _POSITION_TOLERANCE_M
+    )
+    velocity_limit = _positive_limit(
+        design, "constraint_velocity_tolerance_m_s", _VELOCITY_TOLERANCE_M_S
+    )
+    virtual_power_limit = _positive_limit(
+        design, "constraint_virtual_power_tolerance_w", _VIRTUAL_POWER_TOLERANCE_W
+    )
     order_bounds = design.get("registered_richardson_order_interval")
     orders = free.get("richardson_orders")
     if not isinstance(order_bounds, list) or len(order_bounds) != 2:
         raise ValueError("semantic record has invalid Richardson bounds")
     if not isinstance(orders, list) or not orders:
         raise ValueError("semantic record has no Richardson evidence")
-    inverse_values = tuple(_finite(inverse, name) for name in inverse)
+    inverse_components = {
+        name: _finite(inverse, name) for name in inverse if name != "maximum"
+    }
+    if not inverse_components or "maximum" not in inverse:
+        raise ValueError("semantic inverse-dynamics maximum is missing")
+    _nonnegative_values(inverse, "inverse_dynamics_relative_error")
+    maximum = _finite(inverse, "maximum")
+    compatibility = _compatibility_tolerances(record)
+    maximum_paths = (
+        "free_body.inverse_dynamics_relative_error.maximum",
+        *(
+            f"free_body.inverse_dynamics_relative_error.{name}"
+            for name in inverse_components
+        ),
+    )
+    maximum_tolerance = max(
+        (compatibility.get(path, 0.0) for path in maximum_paths), default=0.0
+    )
+    if abs(maximum - max(inverse_components.values())) > maximum_tolerance:
+        raise ValueError("semantic inverse-dynamics maximum is inconsistent")
+    _nonnegative_values(drift, "gravity_free_zero_torque_relative_drift")
     drift_values = tuple(_finite(drift, name) for name in drift)
-    order_values = tuple(float(value) for value in orders)
+    order_values = tuple(
+        _finite_value(value, f"richardson_orders.{index}")
+        for index, value in enumerate(orders)
+    )
+    if any(value < 0.0 for value in order_values):
+        raise ValueError("semantic Richardson order must be nonnegative")
+    _integration_errors(free)
+    constrained_numeric = {
+        name: value
+        for name, value in constrained.items()
+        if name not in {"all_gates_pass", "independent_engine_difference_detected"}
+    }
+    _nonnegative_values(constrained_numeric, "constrained_motion")
     constrained_values = (
         _finite(constrained, "multiplier_relative_residual"),
         _finite(constrained, "equilibrium_relative_residual"),
@@ -298,7 +431,7 @@ def _validate_numeric_gates(record: dict[str, Any]) -> None:
     passed = (
         free.get("independent_engine_difference_detected") is True
         and constrained.get("independent_engine_difference_detected") is True
-        and max(inverse_values) < inverse_limit
+        and maximum < inverse_limit
         and max(drift_values) < conservation_limit
         and all(
             float(order_bounds[0]) <= value <= float(order_bounds[1])
@@ -306,11 +439,10 @@ def _validate_numeric_gates(record: dict[str, Any]) -> None:
         )
         and max(constrained_values) < inverse_limit
         and _finite(constrained, "cross_engine_multiplier_relative_residual")
-        < _CROSS_ENGINE_TOLERANCE
-        and _finite(constrained, "position_residual_m") < _POSITION_TOLERANCE_M
-        and _finite(constrained, "velocity_residual_m_s") < _VELOCITY_TOLERANCE_M_S
-        and _finite(constrained, "virtual_power_residual_w")
-        < _VIRTUAL_POWER_TOLERANCE_W
+        < cross_engine_limit
+        and _finite(constrained, "position_residual_m") < position_limit
+        and _finite(constrained, "velocity_residual_m_s") < velocity_limit
+        and _finite(constrained, "virtual_power_residual_w") < virtual_power_limit
     )
     if not passed:
         raise ValueError("semantic numeric gate comparison failed")
@@ -327,6 +459,64 @@ def _require_profile(record: dict[str, Any], profile_id: str, authority: str) ->
     expected_eligibility = authority == "authoritative"
     if profile.get("publication_eligible") is not expected_eligibility:
         raise ValueError("execution profile has invalid publication eligibility")
+
+
+def _compatibility_tolerances(record: dict[str, Any]) -> dict[str, float]:
+    design = _mapping(record, "design")
+    raw = design.get("rolling_compatibility_absolute_tolerance_by_field", {})
+    if not isinstance(raw, dict):
+        raise ValueError("semantic compatibility tolerance policy is malformed")
+    tolerances: dict[str, float] = {}
+    for field, value in raw.items():
+        if not isinstance(field, str) or not field:
+            raise ValueError("semantic compatibility tolerance path is malformed")
+        numeric = _finite_value(value, f"compatibility tolerance {field}")
+        if numeric < 0.0:
+            raise ValueError("semantic compatibility tolerance must be nonnegative")
+        tolerances[field] = numeric
+    return tolerances
+
+
+def _compare_values(
+    authority: object,
+    rolling: object,
+    path: str,
+    tolerances: dict[str, float],
+) -> None:
+    if isinstance(authority, dict) and isinstance(rolling, dict):
+        if authority.keys() != rolling.keys():
+            raise ValueError(f"semantic compatibility fields differ: {path}")
+        for field in authority:
+            child = f"{path}.{field}" if path else str(field)
+            _compare_values(authority[field], rolling[field], child, tolerances)
+        return
+    if isinstance(authority, list) and isinstance(rolling, list):
+        if len(authority) != len(rolling):
+            raise ValueError(f"semantic compatibility sequence differs: {path}")
+        for index, authority_value in enumerate(authority):
+            child = f"{path}.{index}"
+            _compare_values(authority_value, rolling[index], child, tolerances)
+        return
+    numeric_types = (int, float)
+    authority_is_numeric = isinstance(authority, numeric_types) and not isinstance(
+        authority, bool
+    )
+    rolling_is_numeric = isinstance(rolling, numeric_types) and not isinstance(
+        rolling, bool
+    )
+    if authority_is_numeric or rolling_is_numeric:
+        authority_value = _finite_value(authority, path)
+        rolling_value = _finite_value(rolling, path)
+        tolerance = tolerances.get(path, 0.0)
+        if abs(rolling_value - authority_value) > tolerance:
+            raise ValueError(
+                f"semantic compatibility tolerance exceeded at {path}: "
+                f"authority={authority_value}, rolling={rolling_value}, "
+                f"tolerance={tolerance}"
+            )
+        return
+    if authority != rolling:
+        raise ValueError(f"semantic compatibility value differs: {path}")
 
 
 def compare_semantic_evidence(
@@ -360,6 +550,9 @@ def compare_semantic_evidence(
         raise ValueError("semantic gate comparison failed")
     _validate_numeric_gates(authority)
     _validate_numeric_gates(rolling)
+    tolerances = _compatibility_tolerances(authority)
+    if tolerances != _compatibility_tolerances(rolling):
+        raise ValueError("semantic compatibility tolerance policies differ")
     for field in ("free_body", "constrained_motion"):
         authority_section = authority[field]
         rolling_section = rolling[field]
@@ -367,9 +560,7 @@ def compare_semantic_evidence(
             rolling_section, dict
         ):
             raise ValueError(f"semantic section is malformed: {field}")
-        if authority_section.keys() != rolling_section.keys():
-            raise ValueError(f"semantic section fields differ: {field}")
-        canonical_record_bytes({field: rolling_section})
+        _compare_values(authority_section, rolling_section, field, tolerances)
     return {
         "all_registered_gates_pass": True,
         "scientific_identity_matches": True,
@@ -381,11 +572,27 @@ def compare_semantic_evidence(
 def write_record(path: Path = OUTPUT, *, profile: RecordProfile = "authority") -> Path:
     """Write the deterministic evidence record."""
 
+    if profile not in ("authority", "rolling"):
+        raise ValueError(f"unsupported execution profile: {profile!r}")
     if profile == "rolling" and path.resolve() == OUTPUT.resolve():
         raise ValueError("rolling evidence cannot replace the authoritative record")
     record = build_record(profile)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(canonical_record_bytes(record))
+    payload = canonical_record_bytes(record)
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
     return path
 
 
