@@ -56,6 +56,43 @@ def _set_design_value(
     rolling["design"][field] = value
 
 
+def _delete_governed_path(record: dict[str, Any], dotted_path: str) -> None:
+    parts = dotted_path.split(".")
+    current: object = record
+    steps: list[tuple[dict[str, Any] | list[Any], str | int]] = []
+    offset = 0
+    while offset < len(parts):
+        if isinstance(current, dict):
+            match = next(
+                (
+                    (end, ".".join(parts[offset:end]))
+                    for end in range(len(parts), offset, -1)
+                    if ".".join(parts[offset:end]) in current
+                ),
+                None,
+            )
+            if match is None:
+                raise AssertionError(f"test path is not traversable: {dotted_path}")
+            end, key = match
+            steps.append((current, key))
+            current = current[key]
+            offset = end
+        elif isinstance(current, list):
+            index = int(parts[offset])
+            steps.append((current, index))
+            current = current[index]
+            offset += 1
+        else:
+            raise AssertionError(f"test path is not traversable: {dotted_path}")
+    parent, final_key = steps[-1]
+    if isinstance(parent, dict):
+        assert isinstance(final_key, str)
+        del parent[final_key]
+    else:
+        assert isinstance(final_key, int)
+        del parent[final_key]
+
+
 @pytest.mark.parametrize("field", REQUIRED_GATE_FIELDS)
 def test_missing_governed_gate_tolerance_is_rejected(field: str) -> None:
     """Every gate tolerance is required even when both records omit it."""
@@ -124,6 +161,18 @@ def test_missing_rolling_compatibility_field_is_rejected(field: str) -> None:
     del rolling["design"][POLICY_FIELD][field]
 
     with pytest.raises(ValueError, match="complete|required|compatib|policy|field"):
+        runner.compare_semantic_evidence(authority, rolling)
+
+
+@pytest.mark.parametrize("field", REQUIRED_COMPATIBILITY_FIELDS)
+def test_governed_result_path_must_exist_in_both_records(field: str) -> None:
+    """A declared tolerance cannot govern a result that both records omit."""
+
+    authority, rolling = _profiled_records()
+    _delete_governed_path(authority, field)
+    _delete_governed_path(rolling, field)
+
+    with pytest.raises(ValueError, match="required|missing|compatib|policy|path"):
         runner.compare_semantic_evidence(authority, rolling)
 
 
