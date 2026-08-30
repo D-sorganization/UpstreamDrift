@@ -1,23 +1,28 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 09:18 PDT
+Updated: 2026-08-30 09:50 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
 design-manual program.
 
+Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
+contract, recovery constraints, and next commands are in
+`docs/development/proximal_distal_program_turnover.md`.
+
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
-  `f98bf7b382083322c609bfd7d680e4e82d71aed8`, the verified squash merge of PR
-  #9306. Its reviewed head and squash merge share exact tree
-  `e04e7357bdb32a2e966549bd61535c38c3874504`.
+  `651de90a4cf8e1195ec7f3ab3ae16883ec8f6172`, the verified squash merge of PR
+  #9308. Its reviewed head and squash merge share exact tree
+  `a0dd17ed057c0aea45f112172d406ace971610df`.
 - #9306 adds signed-gap retention, bracketed opening/reattachment location on a
   declared linear state interpolant, duplicate-time event alignment, and the
   distributed replay adapter into the protected attribution kernel.
-- CI Standard run `33320578643`, Optional Stack run `33320578618`, and Bot CI
-  Trigger run `33320578587` passed on the final reviewed head. Protected merge
-  evidence is recorded on #9153 in comment `issuecomment-5469769326`.
+- #9308 adds the prospective six-case current-main smoke registration without
+  executing or promoting an outcome. CI Standard run `33322181043`, Optional
+  Stack run `33322180991`, and Bot CI Trigger run `33322180972` passed. Exact
+  turnover evidence is recorded on #9153 in comment `issuecomment-5469958455`.
 - PR #9302 remains the manufactured-evidence qualification parent at
   `7dc5f86af68907f19bc953c509d96d05f505cdab`; PR #9299 remains its CRBA
   requalification parent at `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
@@ -31,11 +36,15 @@ design-manual program.
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
 
-## Active Prospective Smoke Registration: #9153
+## Protected Prospective Smoke Registration: #9153
 
-- Worktree: `UpstreamDrift-worktrees/9153-current-main-smoke-prereg`.
-- Branch: `feat/9153-current-main-smoke-prereg`, based exactly on protected
-  #9306 squash `f98bf7b382083322c609bfd7d680e4e82d71aed8`.
+- PR #9308 protected-squash-merged as
+  `651de90a4cf8e1195ec7f3ab3ae16883ec8f6172`. Reviewed head
+  `142662fb3de86fbb8086b83772df09425897f9c2` and merge share tree
+  `a0dd17ed057c0aea45f112172d406ace971610df`; remote `main` equals the squash.
+- Active turnover worktree: `UpstreamDrift-worktrees/9153-turnover`, branch
+  `docs/9153-turnover`. It contains handoff documentation only relative to the
+  protected #9308 tree.
 - New registration source:
   `scripts/research/proximal_distal_energy/articulated_distributed_smoke_registration.py`.
 - New frozen protocol:
@@ -56,17 +65,13 @@ design-manual program.
 
 ## Immediate Order
 
-1. Run focused event, registration, specification, architecture, title, and
-   release-governance gates on this clean current-main branch.
-2. Commit the prospective registration slice and update deterministic release
-   manifests/checksums if the release qualifier requires them.
-3. Run the GitHub App setup immediately before every GitHub operation, verify
-   the #9153 lease, open a full protected PR, preserve squash auto-merge, and
-   fix only exact-head actionable failures.
-4. Verify the squash commit/tree on remote `main` and record exact evidence on
-   #9153.
-5. Only after the registration merges, implement the current-main single-worker
-   atomic smoke runner. Never import or relabel legacy checkpoints as outcomes.
+1. Open and protected-squash-merge the turnover-only update from
+   `docs/9153-turnover`.
+2. From that exact protected base, implement the current-main single-worker
+   atomic smoke runner with RED contracts for registration identity, complete
+   case enumeration, atomic resume, typed failures, and no outcome promotion.
+3. Execute the six registered cases only after runner code and tests merge.
+   Never import or relabel legacy checkpoints as outcomes.
 
 ## Scientific Boundaries
 
