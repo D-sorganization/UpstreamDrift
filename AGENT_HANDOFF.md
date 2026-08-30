@@ -69,15 +69,17 @@ collected-prefix-0060-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   `febaa52266f0`. Immutable legacy view SHA is `fd18ba7ef4c8`; exact audit
   `52404c77b8a6` passes 60 statuses/results, 540 arrays, and every enriched
   sidecar without outcome inspection, human/coaching inference, or promotion.
+- Replay 33283267821 executes [60,80) at dispatch head `42f1acda4` using
+  qualified audit 33277601263. It is the sole authorized structural process;
+  do not cancel, rerun, duplicate, or dispatch another while it is live.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. After GitHub App setup, confirm no structural process is active, then dispatch
-   exactly [60,80) with the frozen plan/launch/audit. Poll only that run; on
-   terminal status apply receipt-1.4, corruption, cumulative collection,
-   immutable legacy view, and exact audit gates through case 80.
+1. Poll only replay 33283267821 after GitHub App setup. On terminal status,
+   apply receipt-1.4, corruption, cumulative collection, immutable legacy view,
+   and exact audit gates through case 80; stop and preserve any mismatch.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
