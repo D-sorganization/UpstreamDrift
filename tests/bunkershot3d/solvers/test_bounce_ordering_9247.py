@@ -156,6 +156,7 @@ def heads() -> dict[float, _Head]:
 
 def _shoot(
     solver: DRFTSolver,
+    sand: SandState,
     head: _Head,
     attack_deg: float,
     *,
@@ -169,6 +170,12 @@ def _shoot(
     crater, and a prismatic divot is then undefined.  Depth is always
     available, which is why the ordering is asserted on it in both
     regimes and on mass only where a divot exists.
+
+    ``sand`` is the same bed the solver was built from, and it is passed
+    rather than defaulted because the divot's wall angle is the bed's
+    internal friction angle (issue #8659): a default here would invent a
+    divot shape, and every design in a sweep must be measured against the
+    same one for the ordering between them to mean anything.
     """
     rotation = delivered_rotation(
         lie_deg=head.geometry.lie_deg,
@@ -204,6 +211,7 @@ def _shoot(
             scene,
             width_m=head.geometry.sole_width_m,
             bulk_density_kg_m3=1600.0,
+            friction_angle_deg=sand.friction_angle_deg,
         )
     except ValueError:
         return depth_m, None
@@ -383,9 +391,13 @@ class TestNonBuryingRegime:
 
     @pytest.mark.parametrize("attack_deg", SHALLOW_ATTACKS_DEG)
     def test_more_bounce_never_digs_deeper(
-        self, solver: DRFTSolver, heads: dict[float, _Head], attack_deg: float
+        self,
+        solver: DRFTSolver,
+        sand: SandState,
+        heads: dict[float, _Head],
+        attack_deg: float,
     ) -> None:
-        depths = [_shoot(solver, heads[b], attack_deg)[0] for b in BOUNCES_DEG]
+        depths = [_shoot(solver, sand, heads[b], attack_deg)[0] for b in BOUNCES_DEG]
         for low, high, shallow, deep in zip(
             BOUNCES_DEG, BOUNCES_DEG[1:], depths, depths[1:], strict=False
         ):
@@ -401,9 +413,13 @@ class TestNonBuryingRegime:
 
     @pytest.mark.parametrize("attack_deg", SHALLOW_ATTACKS_DEG)
     def test_more_bounce_never_moves_more_sand(
-        self, solver: DRFTSolver, heads: dict[float, _Head], attack_deg: float
+        self,
+        solver: DRFTSolver,
+        sand: SandState,
+        heads: dict[float, _Head],
+        attack_deg: float,
     ) -> None:
-        masses = [_shoot(solver, heads[b], attack_deg)[1] for b in BOUNCES_DEG]
+        masses = [_shoot(solver, sand, heads[b], attack_deg)[1] for b in BOUNCES_DEG]
         assert all(mass is not None for mass in masses), (
             "every design in the non-burying regime must cut a measurable "
             f"divot; got {masses}"
@@ -419,7 +435,7 @@ class TestNonBuryingRegime:
             )
 
     def test_the_ordering_survives_an_open_leaning_delivery(
-        self, solver: DRFTSolver, heads: dict[float, _Head]
+        self, solver: DRFTSolver, sand: SandState, heads: dict[float, _Head]
     ) -> None:
         """A square delivery leaves the rotation at identity.
 
@@ -429,7 +445,9 @@ class TestNonBuryingRegime:
         carried the mirror.
         """
         depths = [
-            _shoot(solver, heads[b], -4.0, face_open_deg=10.0, shaft_lean_deg=6.0)[0]
+            _shoot(
+                solver, sand, heads[b], -4.0, face_open_deg=10.0, shaft_lean_deg=6.0
+            )[0]
             for b in BOUNCES_DEG
         ]
         assert depths == sorted(depths, reverse=True), (
@@ -441,7 +459,7 @@ class TestBuryingRegime:
     """Where the head buries, the sign is the same -- only the size differs."""
 
     def test_the_sweep_spans_both_regimes(
-        self, solver: DRFTSolver, heads: dict[float, _Head]
+        self, solver: DRFTSolver, sand: SandState, heads: dict[float, _Head]
     ) -> None:
         """A steep attack must bury the low-bounce end and not the high.
 
@@ -449,14 +467,16 @@ class TestBuryingRegime:
         vacuous, and it brackets the boundary: it lies strictly inside
         the swept range at this attack angle.
         """
-        depths = [_shoot(solver, heads[b], STEEP_ATTACK_DEG)[0] for b in BOUNCES_DEG]
+        depths = [
+            _shoot(solver, sand, heads[b], STEEP_ATTACK_DEG)[0] for b in BOUNCES_DEG
+        ]
         assert depths[0] > _BURYING_DEPTH_RATIO * depths[-1], (
             f"at {STEEP_ATTACK_DEG} deg of attack the sweep does not reach the "
             f"burying regime: {[round(d * 1e3, 2) for d in depths]} mm"
         )
 
     def test_more_bounce_never_digs_deeper_where_the_head_buries(
-        self, solver: DRFTSolver, heads: dict[float, _Head]
+        self, solver: DRFTSolver, sand: SandState, heads: dict[float, _Head]
     ) -> None:
         """The ordering does not reverse across the boundary.
 
@@ -465,7 +485,9 @@ class TestBuryingRegime:
         that were backwards.  With the frame un-mirrored the sign is the
         same on both sides of the boundary.
         """
-        depths = [_shoot(solver, heads[b], STEEP_ATTACK_DEG)[0] for b in BOUNCES_DEG]
+        depths = [
+            _shoot(solver, sand, heads[b], STEEP_ATTACK_DEG)[0] for b in BOUNCES_DEG
+        ]
         for low, high, shallow, deep in zip(
             BOUNCES_DEG, BOUNCES_DEG[1:], depths, depths[1:], strict=False
         ):
@@ -476,7 +498,7 @@ class TestBuryingRegime:
             )
 
     def test_a_steeper_attack_never_makes_a_design_shallower(
-        self, solver: DRFTSolver, heads: dict[float, _Head]
+        self, solver: DRFTSolver, sand: SandState, heads: dict[float, _Head]
     ) -> None:
         """The other lever, checked for the same class of sign error.
 
@@ -487,7 +509,7 @@ class TestBuryingRegime:
         """
         for bounce in BOUNCES_DEG:
             depths = [
-                _shoot(solver, heads[bounce], attack)[0]
+                _shoot(solver, sand, heads[bounce], attack)[0]
                 for attack in (-2.0, -4.0, -6.0)
             ]
             assert depths == sorted(depths), (
