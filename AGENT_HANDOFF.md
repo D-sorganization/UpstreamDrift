@@ -19,10 +19,10 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
-  branch `feat/9153-forward-impulse-work` is clean and remote-equal at turnover
-  head `5cb9695452a13260dbc1f54da8de456481af686a`. The registered recovery
-  run remains pinned to dispatch head `9ec22b4a14d0208acfac722e8760beae2bfeb97e`.
-  No PR exists.
+  branch `feat/9153-forward-impulse-work` must be clean and remote-equal before work. Scientific/post-run tooling is preserved through `5cb9695452a1`; the
+  turnover refresh `b508a89bd` changes documentation only. Verify the moving
+  branch head directly. The registered recovery remains pinned to dispatch
+  head `9ec22b4a14d0208acfac722e8760beae2bfeb97e`; no PR exists.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
