@@ -854,6 +854,7 @@ class TestCIEnvironmentCompatibility:
             "pick-runner",
             "changed-paths",
             "code-quality",
+            "companion-workflows",
             "security-scans",
             "repo-structure-gates",
             "tests",
