@@ -472,6 +472,17 @@ recoverable operational diagnostics, but the governed summary now rejects them
 rather than implying that its minimal parity sidecars support the required
 reviewer figures or complete #9153 evidence package.
 
+Runtime qualification and every hosted slice also pin
+`OPENBLAS_CORETYPE=Haswell` before importing NumPy or either native engine.
+[OpenBLAS documents `OPENBLAS_CORETYPE`](https://github.com/OpenMathLib/OpenBLAS/wiki/Faq/0ed685dd80eab9b96751a75b2713049891bd4f16)
+as the runtime kernel-selection control for a dynamic-architecture build. This
+is a prospective execution-determinism constraint, not a scientific result or
+a tolerance relaxation. A runtime replay must still reproduce the registered
+operator-smoke values exactly; any drift stops the slice before case execution.
+Evidence produced before this control remains retained as diagnostic/adverse
+evidence and must not be mixed into a collection qualified under the pinned
+kernel contract.
+
 After replaying the frozen legacy prefix under the enriched revision, require
 an exact noninterpretive reproduction audit before continuing beyond that
 prefix:

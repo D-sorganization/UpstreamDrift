@@ -38,6 +38,7 @@ def test_structural_campaign_replays_runtime_contract_before_execution() -> None
         "NUMEXPR_NUM_THREADS": "1",
         "OMP_DYNAMIC": "FALSE",
         "OMP_NUM_THREADS": "1",
+        "OPENBLAS_CORETYPE": "Haswell",
         "OPENBLAS_NUM_THREADS": "1",
         "PYTHONHASHSEED": "0",
         "VECLIB_MAXIMUM_THREADS": "1",

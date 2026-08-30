@@ -165,6 +165,27 @@ def test_runtime_replay_rejects_unspecified_thread_environment() -> None:
     assert result["mismatched_environment_names"] == ["OPENBLAS_NUM_THREADS"]
 
 
+def test_runtime_replay_rejects_unpinned_openblas_core_type() -> None:
+    plan = _plan()
+    audit = _runtime_audit(plan)
+    environment = _environment()
+    environment["OPENBLAS_CORETYPE"] = "Zen"
+
+    result = audit_runtime_replay(
+        plan=plan,
+        launch=_launch(plan),
+        qualified_audit=audit,
+        observed_audit=dict(audit),
+        environment=environment,
+        host={},
+    )
+
+    assert result["classification"] == "runtime_replay_contract_drift"
+    assert result["gates"]["passes"] is False
+    assert result["gates"]["deterministic_environment_exact"] is False
+    assert result["mismatched_environment_names"] == ["OPENBLAS_CORETYPE"]
+
+
 def test_runtime_replay_does_not_require_audit_tool_revision_equality() -> None:
     plan = _plan()
     qualified = _runtime_audit(plan)
