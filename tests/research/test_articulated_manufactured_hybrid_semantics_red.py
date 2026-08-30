@@ -20,6 +20,32 @@ COMMITTED = (
     ROOT / "docs/research/proximal_distal_energy_transfer/data/"
     "articulated_manufactured_solution.json"
 )
+_REQUIRED_GATE_TOLERANCES = {
+    "cross_engine_relative_tolerance": 1.0e-8,
+    "constraint_position_tolerance_m": 1.0e-10,
+    "constraint_velocity_tolerance_m_s": 1.0e-10,
+    "constraint_virtual_power_tolerance_w": 1.0e-9,
+}
+_REQUIRED_COMPATIBILITY_TOLERANCES = {
+    "free_body.inverse_dynamics_relative_error.lagrange_mujoco": 1.0e-8,
+    "free_body.inverse_dynamics_relative_error.lagrange_pinocchio": 1.0e-8,
+    "free_body.inverse_dynamics_relative_error.mujoco_pinocchio": 1.0e-8,
+    "free_body.inverse_dynamics_relative_error.maximum": 1.0e-8,
+    "free_body.integration_step_error_rad.0.0005": 1.0e-8,
+    "free_body.integration_step_error_rad.0.001": 1.0e-8,
+    "free_body.integration_step_error_rad.0.002": 1.0e-8,
+    "free_body.richardson_orders.0": 1.0e-3,
+    "free_body.richardson_orders.1": 1.0e-3,
+    "free_body.gravity_free_zero_torque_relative_drift.linear_momentum": 1.0e-8,
+    "free_body.gravity_free_zero_torque_relative_drift.angular_momentum": 1.0e-8,
+    "free_body.gravity_free_zero_torque_relative_drift.kinetic_energy": 1.0e-8,
+    "constrained_motion.position_residual_m": 1.0e-10,
+    "constrained_motion.velocity_residual_m_s": 1.0e-10,
+    "constrained_motion.virtual_power_residual_w": 1.0e-9,
+    "constrained_motion.multiplier_relative_residual": 1.0e-8,
+    "constrained_motion.cross_engine_multiplier_relative_residual": 1.0e-8,
+    "constrained_motion.equilibrium_relative_residual": 1.0e-8,
+}
 
 
 def _profiled_records() -> tuple[dict[str, Any], dict[str, Any]]:
@@ -29,6 +55,10 @@ def _profiled_records() -> tuple[dict[str, Any], dict[str, Any]]:
         "publication_authority": "authoritative",
         "publication_eligible": True,
     }
+    authority["design"].update(_REQUIRED_GATE_TOLERANCES)
+    authority["design"]["rolling_compatibility_absolute_tolerance_by_field"] = dict(
+        _REQUIRED_COMPATIBILITY_TOLERANCES
+    )
     rolling = copy.deepcopy(authority)
     rolling["execution_profile"] = {
         "id": runner.ROLLING_PROFILE,
@@ -55,8 +85,12 @@ def _install_compatibility_tolerance(
     tolerance: float,
 ) -> None:
     field = "rolling_compatibility_absolute_tolerance_by_field"
-    authority["design"][field] = {dotted_path: tolerance}
-    rolling["design"][field] = {dotted_path: tolerance}
+    authority_policy = authority["design"][field]
+    rolling_policy = rolling["design"][field]
+    assert isinstance(authority_policy, dict)
+    assert isinstance(rolling_policy, dict)
+    authority_policy[dotted_path] = tolerance
+    rolling_policy[dotted_path] = tolerance
 
 
 def test_rolling_comparison_accepts_difference_inside_declared_tolerance() -> None:
