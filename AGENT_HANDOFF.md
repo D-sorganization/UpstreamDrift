@@ -1,7 +1,7 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-08-30 06:44 PDT
-Epic #8557 is canonical; issue state, local files, and checkpoints are not completion evidence.
+Epic #8557 is canonical; issue state, local files, and checkpoints are not completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
 
 ## Protected Authority
 
