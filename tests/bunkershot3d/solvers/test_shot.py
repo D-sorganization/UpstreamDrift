@@ -531,7 +531,35 @@ class TestFreeFlightLeadIn:
 
 
 class TestPerformanceBudget:
-    """A full shot must stay cheap enough that a 1000-point DOE is minutes.
+    """A full shot must stay cheap enough for F0 to be the *fast* tier.
+
+    The budget used to be justified as "so a 1000-point DOE is minutes".
+    That justification does not survive inspection and has been dropped:
+
+    * The number is wrong by an order of magnitude. ``WedgeDesign`` has
+      seven sweepable parameters, and Sobol' costs ``N(D + 2)`` model
+      evaluations, so even a modest ``N = 1024`` is **9,216** shots, not
+      1,000.
+    * Nothing runs it. :mod:`bunkershot3d.study` -- ``DesignSpace``,
+      ``MorrisDesign``, ``SaltelliDesign``, ``SobolIndices`` -- never calls
+      :func:`~bunkershot3d.solvers.shot.simulate_shot`. It samples and
+      analyses; it is not wired to the solver.
+    * A sweep would not answer anything yet. Model-form uncertainty from
+      the accelerated sand mass is 81-86% of the reported band, and no two
+      shipped designs currently separate, so a thousand points would return
+      a thousand indistinguishable answers. What blocks design-of-
+      experiments today is uncertainty, not milliseconds.
+
+    The two reasons that *are* true today, and that this class defends:
+
+    1. **Tier identity.** ADR-0032 makes F0 the default precisely because
+       it is fast, against F1's seconds-to-minutes. If F0 drifts to
+       seconds the multi-fidelity architecture collapses and there is no
+       fast tier left.
+    2. **Interactive use.** One workbench evaluation runs the shot plus a
+       5x5 playability grid -- of order 25-50 shots. At tens of
+       milliseconds that is about a second; at half a second each it is
+       unusable.
 
     That constraint is real, but **wall-clock time is not a property of the
     code**, and asserting it directly made this class intermittently red.
@@ -682,16 +710,16 @@ class TestPerformanceBudget:
         )
 
     @pytest.mark.timeout(180)
-    def test_a_thousand_point_design_of_experiments_is_minutes(
+    def test_a_workbench_interaction_stays_responsive(
         self, solver: DRFTSolver, wedge_elements: SurfaceElements
     ) -> None:
-        """The DOE claim, on the same relative footing as the budget above."""
+        """One interaction is the shot plus a 5x5 grid: about 26 shots."""
         fastest_s = self._fastest_shot_s(solver, wedge_elements)
         reference_s = self._reference_s(len(wedge_elements))
         ratio = fastest_s / reference_s
         assert ratio < self._MAX_COST_RATIO, (
-            f"a 1000-point DOE would cost {fastest_s * 1000 / 60:.1f} minutes on this "
-            f"machine ({ratio:.1f}x the reference workload); that minute figure is "
+            f"a workbench interaction would cost {fastest_s * 26:.1f} s on this "
+            f"machine ({ratio:.1f}x the reference workload); the seconds figure is "
             "machine-specific, so the ratio is what is asserted"
         )
 
