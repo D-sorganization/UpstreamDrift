@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 21:59 PDT (2026-08-30 04:59 UTC)
+Updated: 2026-08-29 22:11 PDT (2026-08-30 05:11 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -99,9 +99,11 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    Receipt 1.5 SHA `86ed1ae321d7`,
    collection 1.4 SHA `103265593955`, legacy view SHA `0eaa55ccb355`, exact
    enrichment SHA `7b00bb69fbbe`, and boundary 1.1 SHA `0863b7c95345` pass
-   outcome-blind. The boundary records [20,40) but leaves it unauthorized.
-   Commit/publish these controls and separately preregister [20,40) before any
-   dispatch; then retain the next run under the same exact sequence.
+   outcome-blind. Issue #9273 separately preregisters only [20,40). Run
+   33294119255 is the sole live structural process at exact dispatch head
+   `429ef9d97c108eb88cfd3f36b05b806050f2e918`. Do not cancel, duplicate, or
+   dispatch [40,60). On terminal success retain raw APIs and both ZIPs before
+   receipt 1.5, cumulative collection 1.4, legacy, enrichment, and boundary 1.1.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
