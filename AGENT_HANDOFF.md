@@ -21,7 +21,7 @@ are not completion evidence.
 
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
-  Scientific/collector content head is `0195b4676fbae88c2594d8995b6c1cf3ed7a21b5`;
+  Scientific/collector content head is `442c6d70a626df56e73cdccfe47682a5b1a0678a`;
   resolve the handoff-only successor with `git rev-parse HEAD`. No PR exists.
 - The event-aligned kernel separates continuous/event impulse and work,
   independently evaluated `Mdot v` transport, and kinetic geometry work.
@@ -64,7 +64,7 @@ are not completion evidence.
 - Replay 33279075050 passed [20,40) at exact `e86dff3ba`: archive
   `4061ad24ff11`, receipt `2e765f0aed41`, and source-derived sentinel
   `640e60ae0ad4`. Do not rerun or duplicate it.
-- Collection schema 1.2 requires each source's retained receipt, accepts the
+- Collection schema 1.3 requires each source's retained receipt, accepts the
   governed 1.1/1.2/1.3 receipts, verifies exact identity/count/file digests,
   and records receipt plus archive size/SHA. A real 1.1 intake retained 20/20 at
   `Campaigns/UpstreamDrift-9153-receipt-bind-validation-prefix-0020-v1`,
@@ -83,9 +83,9 @@ validation-run-33279075050`; deterministic receipt SHA is `2e765f0aed41`.
 - Real receipt-1.4 validation against the same governed slice retains 20/20
   sidecars and all three raw API-response digests at `Campaigns/UpstreamDrift-
 9153-receipt-v1.4-validation-run-33279075050`; receipt SHA is `a276c3bb2d52`.
-  A fresh [0,40) collection using it is at `Campaigns/UpstreamDrift-9153-
-enriched-collected-prefix-0040-receipt-v1.4-validation-v1`; manifest SHA
-  `314e5ae3ccda` exposes the exact receipt, archive, and API-response digests.
+  A fresh collection-1.3 [0,40) proof is at `Campaigns/UpstreamDrift-9153-
+enriched-collected-prefix-0040-receipt-v1.4-collection-v1.3-validation-v1`;
+  manifest SHA `fd7492310c65` exposes receipt, archive, and API-response digests.
 - Cumulative [0,40) collection manifest is `151e60ade22a`; immutable legacy
   view is `e9e7e9853848`; exact audit `d8fcb768d68d` passes 40 statuses/JSON
   results, 360 legacy arrays, and every enriched sidecar without outcome
