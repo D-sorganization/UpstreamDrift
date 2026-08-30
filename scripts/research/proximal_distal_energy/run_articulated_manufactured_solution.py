@@ -71,6 +71,14 @@ _ROLLING_COMPATIBILITY_ABSOLUTE_TOLERANCE_BY_FIELD = {
     "constrained_motion.cross_engine_multiplier_relative_residual": 1.0e-8,
     "constrained_motion.equilibrium_relative_residual": 1.0e-8,
 }
+_REQUIRED_GATE_TOLERANCE_FIELDS = (
+    "inverse_dynamics_relative_tolerance",
+    "conservation_relative_tolerance",
+    "cross_engine_relative_tolerance",
+    "constraint_position_tolerance_m",
+    "constraint_velocity_tolerance_m_s",
+    "constraint_virtual_power_tolerance_w",
+)
 SOURCE_PATHS = (
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
@@ -83,6 +91,7 @@ SOURCE_PATHS = (
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
     "tests/research/test_articulated_manufactured_solution.py",
     "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+    "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
     "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
 )
 
@@ -264,7 +273,7 @@ def build_record(profile: RecordProfile = "authority") -> dict[str, Any]:
             "constraint_velocity_tolerance_m_s": _VELOCITY_TOLERANCE_M_S,
             "constraint_virtual_power_tolerance_w": _VIRTUAL_POWER_TOLERANCE_W,
             "rolling_compatibility_absolute_tolerance_by_field": (
-                _ROLLING_COMPATIBILITY_ABSOLUTE_TOLERANCE_BY_FIELD
+                dict(_ROLLING_COMPATIBILITY_ABSOLUTE_TOLERANCE_BY_FIELD)
             ),
             "conservation_scope": "gravity_free_zero_torque_free_floating_club_subtree",
             "killswitch": "add_10_nm_to_mujoco_inverse_and_require_gate_failure",
@@ -321,9 +330,9 @@ def _finite_value(value: object, field: str) -> float:
     return numeric
 
 
-def _positive_limit(design: dict[str, Any], field: str, fallback: float) -> float:
+def _positive_limit(design: dict[str, Any], field: str) -> float:
     if field not in design:
-        return fallback
+        raise ValueError(f"required semantic tolerance is missing: {field}")
     value = _finite(design, field)
     if value <= 0.0:
         raise ValueError(f"semantic tolerance must be positive: {field}")
@@ -361,28 +370,24 @@ def _integration_errors(free: dict[str, Any]) -> tuple[tuple[float, float], ...]
     return ordered
 
 
-def _validate_numeric_gates(record: dict[str, Any]) -> None:
+def _validate_numeric_gates(
+    record: dict[str, Any], *, authority_maximum: float | None = None
+) -> float:
     design = _mapping(record, "design")
     free = _mapping(record, "free_body")
     inverse = _mapping(free, "inverse_dynamics_relative_error")
     drift = _mapping(free, "gravity_free_zero_torque_relative_drift")
     constrained = _mapping(record, "constrained_motion")
-    inverse_limit = _positive_limit(design, "inverse_dynamics_relative_tolerance", 0.05)
-    conservation_limit = _positive_limit(
-        design, "conservation_relative_tolerance", 0.02
-    )
-    cross_engine_limit = _positive_limit(
-        design, "cross_engine_relative_tolerance", _CROSS_ENGINE_TOLERANCE
-    )
-    position_limit = _positive_limit(
-        design, "constraint_position_tolerance_m", _POSITION_TOLERANCE_M
-    )
-    velocity_limit = _positive_limit(
-        design, "constraint_velocity_tolerance_m_s", _VELOCITY_TOLERANCE_M_S
-    )
-    virtual_power_limit = _positive_limit(
-        design, "constraint_virtual_power_tolerance_w", _VIRTUAL_POWER_TOLERANCE_W
-    )
+    limits = {
+        field: _positive_limit(design, field)
+        for field in _REQUIRED_GATE_TOLERANCE_FIELDS
+    }
+    inverse_limit = limits["inverse_dynamics_relative_tolerance"]
+    conservation_limit = limits["conservation_relative_tolerance"]
+    cross_engine_limit = limits["cross_engine_relative_tolerance"]
+    position_limit = limits["constraint_position_tolerance_m"]
+    velocity_limit = limits["constraint_velocity_tolerance_m_s"]
+    virtual_power_limit = limits["constraint_virtual_power_tolerance_w"]
     order_bounds = design.get("registered_richardson_order_interval")
     orders = free.get("richardson_orders")
     if not isinstance(order_bounds, list) or len(order_bounds) != 2:
@@ -396,18 +401,8 @@ def _validate_numeric_gates(record: dict[str, Any]) -> None:
         raise ValueError("semantic inverse-dynamics maximum is missing")
     _nonnegative_values(inverse, "inverse_dynamics_relative_error")
     maximum = _finite(inverse, "maximum")
-    compatibility = _compatibility_tolerances(record)
-    maximum_paths = (
-        "free_body.inverse_dynamics_relative_error.maximum",
-        *(
-            f"free_body.inverse_dynamics_relative_error.{name}"
-            for name in inverse_components
-        ),
-    )
-    maximum_tolerance = max(
-        (compatibility.get(path, 0.0) for path in maximum_paths), default=0.0
-    )
-    if abs(maximum - max(inverse_components.values())) > maximum_tolerance:
+    computed_maximum = max(inverse_components.values())
+    if maximum != computed_maximum and maximum != authority_maximum:
         raise ValueError("semantic inverse-dynamics maximum is inconsistent")
     _nonnegative_values(drift, "gravity_free_zero_torque_relative_drift")
     drift_values = tuple(_finite(drift, name) for name in drift)
@@ -446,6 +441,7 @@ def _validate_numeric_gates(record: dict[str, Any]) -> None:
     )
     if not passed:
         raise ValueError("semantic numeric gate comparison failed")
+    return maximum
 
 
 def _require_profile(record: dict[str, Any], profile_id: str, authority: str) -> None:
@@ -463,16 +459,28 @@ def _require_profile(record: dict[str, Any], profile_id: str, authority: str) ->
 
 def _compatibility_tolerances(record: dict[str, Any]) -> dict[str, float]:
     design = _mapping(record, "design")
-    raw = design.get("rolling_compatibility_absolute_tolerance_by_field", {})
+    field = "rolling_compatibility_absolute_tolerance_by_field"
+    if field not in design:
+        raise ValueError("required semantic compatibility policy is missing")
+    raw = design[field]
     if not isinstance(raw, dict):
         raise ValueError("semantic compatibility tolerance policy is malformed")
+    required = set(_ROLLING_COMPATIBILITY_ABSOLUTE_TOLERANCE_BY_FIELD)
+    actual = set(raw)
+    if actual != required:
+        missing = sorted(required - actual)
+        unknown = sorted(str(item) for item in actual - required)
+        raise ValueError(
+            "semantic compatibility policy is incomplete: "
+            f"missing={missing}, unknown={unknown}"
+        )
     tolerances: dict[str, float] = {}
     for field, value in raw.items():
         if not isinstance(field, str) or not field:
             raise ValueError("semantic compatibility tolerance path is malformed")
         numeric = _finite_value(value, f"compatibility tolerance {field}")
-        if numeric < 0.0:
-            raise ValueError("semantic compatibility tolerance must be nonnegative")
+        if numeric <= 0.0:
+            raise ValueError("semantic compatibility tolerance must be positive")
         tolerances[field] = numeric
     return tolerances
 
@@ -548,11 +556,11 @@ def compare_semantic_evidence(
     rolling_gates = _registered_gates(rolling)
     if not all(authority_gates) or not all(rolling_gates):
         raise ValueError("semantic gate comparison failed")
-    _validate_numeric_gates(authority)
-    _validate_numeric_gates(rolling)
     tolerances = _compatibility_tolerances(authority)
     if tolerances != _compatibility_tolerances(rolling):
         raise ValueError("semantic compatibility tolerance policies differ")
+    authority_maximum = _validate_numeric_gates(authority)
+    _validate_numeric_gates(rolling, authority_maximum=authority_maximum)
     for field in ("free_body", "constrained_motion"):
         authority_section = authority[field]
         rolling_section = rolling[field]
