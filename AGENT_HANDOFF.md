@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 23:53 PDT (2026-08-30 06:53 UTC)
+Updated: 2026-08-30 00:34 PDT (2026-08-30 07:34 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -19,10 +19,8 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
-  branch `feat/9153-forward-impulse-work` must be clean and remote-equal before work. Scientific/post-run tooling is preserved through `5cb9695452a1`; the
-  turnover refresh `b508a89bd` changes documentation only. Verify the moving
-  branch head directly. The registered recovery remains pinned to dispatch
-  head `9ec22b4a14d0208acfac722e8760beae2bfeb97e`; no PR exists.
+  branch `feat/9153-forward-impulse-work` is clean and remote-equal at
+  `7c4cd1dc6e8c9205166120208db62c836fc1e7a5`; recovery is pinned here; no PR.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
@@ -102,7 +100,9 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    #9283 run 33297882357 is terminal but non-promotable: its plan says
    DeskComputer and old registration names audit 33277601263, while hosted run
    used 33297583257. Retained checkpoint/runtime ZIP SHAs are `fd751968e8f8` /
-   `58041bf22374`; v1.1 binds hosted placement/audit, then replace [0,20) only.
+   `58041bf22374`. Run 33299342024/job 99224393310 is the sole live [0,20)
+   replacement at `7c4cd1dc6`; v1.1 placement and runtime replay gates passed.
+   It is executing; do not inspect outcomes, cancel, duplicate, or advance.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
