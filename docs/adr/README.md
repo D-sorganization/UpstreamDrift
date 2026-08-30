@@ -48,12 +48,19 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0041](0041-markerless-mocap-consumer-authority.md)           | Markerless Mocap Consumer Authority                                               | Accepted | 2026-08-25 |
 | [0042](0042-engineering-design-manual-authority.md)           | Engineering Design Manual Authority and Release Boundary                          | Accepted | 2026-08-25 |
 | [0043](0043-companion-manifest-provider-authority.md)         | Companion Manifest Provider Authority                                             | Accepted | 2026-08-28 |
+| [0044](0044-out-of-plane-fidelity-for-bunkershot3d.md)        | Out-of-Plane Fidelity for BunkerShot3D                                            | Proposed | 2026-08-29 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.
 
 ## Recent Amendments
 
+- **2026-08-29:** ADR-0044 keeps BunkerShot3D in-plane: F1's
+  `RefusedQuantity.OUT_OF_PLANE`, the `EXTRUDED` slice labelling, and the
+  ball-as-cylinder caveat are recorded as the tool's durable position rather
+  than a stopgap, with a concrete, cheap reopening trigger (fix #9247, then
+  run the existing Sobol'/Morris study over `WedgeGeometry`'s heel/toe and
+  rocker parameters) instead of a permanent close.
 - **2026-08-29:** ADR-0043 adds the #9192 exact-commit publication boundary:
   one shared bundle command, ephemeral protected-main evidence, draft-first
   immutable release acquisition, attestation, and non-fabricated schema
