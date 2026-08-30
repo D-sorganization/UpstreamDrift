@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 20:39 PDT (2026-08-30 03:39 UTC)
+Updated: 2026-08-29 20:41 PDT (2026-08-30 03:41 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -100,8 +100,9 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    `a76a1e360` binds the actual package/platform/operator contract and fixed
    single-thread environment. Run 33290346007/job 99200773332 passed the exact
    runtime gate and produced the same legacy-only JSON/NPZ bytes as prior run 33289155154. Runtime artifact SHA is `5b3c1c4d4006`; checkpoint SHA is
-   `3cd55ac66825`. Preregister one second attested [80,81) repeat before any
-   larger replay; do not dispatch [100,120), add tolerance, or promote evidence.
+   `3cd55ac66825`. Second attested [80,81) run 33290812945/job 99202003097 is
+   active at `e3b8b8dea978`; do not cancel, duplicate, dispatch [100,120), add
+   tolerance, or promote evidence.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
