@@ -1137,6 +1137,40 @@ jobs:
             --source-revision "$(git rev-parse HEAD)" \
             --publication-profile computational
 
+  # Governed companion workflows execute on every code PR and protected-main
+  # push. The job emits exact-commit evidence but does not publish or qualify it.
+  companion-workflows:
+    name: companion-workflows
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Install governed companion workflow dependencies
+        run: >-
+          python3 -m pip install
+          jsonschema==4.26.0 pyyaml==6.0.3 numpy==2.2.6 scipy==1.15.3
+          pandas==3.0.2 matplotlib==3.10.9 simpleeval==1.0.7
+      - name: Execute governed companion workflow authority
+        run: >-
+          python3 -m scripts.companion_workflows
+          --repo-root . execute-all
+          --report dist/companion-workflows/execution-report.v1.json
+      - name: Upload exact-revision companion workflow evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: upstreamdrift-companion-workflows-${{ github.sha }}
+          path: dist/companion-workflows/
+          if-no-files-found: error
+          retention-days: 30
+
   # Required branch-protection check (issue #7064). The name `quality-gate` is
   # preserved exactly so the org ruleset `Repository_Protections` and the bot
   # workflows (Jules-Auto-Repair, Jules-PR-AutoFix, Bot-CI-Trigger) keep
@@ -1156,6 +1190,7 @@ jobs:
         pick-runner,
         changed-paths,
         code-quality,
+        companion-workflows,
         security-scans,
         repo-structure-gates,
         tests,
@@ -1187,6 +1222,7 @@ jobs:
           CODE_CHANGED: ${{ needs.changed-paths.outputs.code }}
           PUBLICATION_CHANGED: ${{ needs.changed-paths.outputs.publication }}
           CODE_QUALITY: ${{ needs.code-quality.result }}
+          COMPANION_WORKFLOWS: ${{ needs.companion-workflows.result }}
           SECURITY_SCANS: ${{ needs.security-scans.result }}
           REPO_STRUCTURE_GATES: ${{ needs.repo-structure-gates.result }}
           TESTS: ${{ needs.tests.result }}
@@ -1198,6 +1234,7 @@ jobs:
           failed=0
 
           gates="code-quality:$CODE_QUALITY"
+          gates="$gates companion-workflows:$COMPANION_WORKFLOWS"
           gates="$gates security-scans:$SECURITY_SCANS"
           gates="$gates repo-structure-gates:$REPO_STRUCTURE_GATES"
           gates="$gates tests:$TESTS"
