@@ -26,6 +26,11 @@ WORKFLOW_PATH = ROOT / ".github/workflows/ci-optional-stack.yml"
 AUTHORITY_JOB = "articulated-manufactured-authority"
 STUDY_SCRIPT_ROOT = ROOT / "scripts/research/proximal_distal_energy"
 HYBRID_CONTRACT = "tests/research/test_articulated_manufactured_hybrid_authority_red.py"
+AUTHORITY_IMPORT_REQUIREMENTS = {
+    "defusedxml": "0.7.1",
+    "pydantic": "2.12.5",
+    "pyyaml": "6.0.3",
+}
 
 
 def _workflow() -> dict[str, Any]:
@@ -145,6 +150,14 @@ def test_authority_dependency_files_are_scoped_to_the_study() -> None:
     assert runner.AUTHORITY_LOCK.parent != ROOT
     assert runner.AUTHORITY_LOCK.is_relative_to(STUDY_SCRIPT_ROOT)
     assert authority_input.parent == runner.AUTHORITY_LOCK.parent
+
+
+def test_authority_input_closes_governed_test_import_dependencies() -> None:
+    """The isolated no-deps lane must pin every observed import dependency."""
+
+    direct = _requirement_versions(_authority_input())
+
+    assert AUTHORITY_IMPORT_REQUIREMENTS.items() <= direct.items()
 
 
 def test_repository_root_clutter_gate_accepts_authority_layout() -> None:

@@ -100,6 +100,48 @@ def _refresh_inverse_maximum(record: dict[str, Any]) -> None:
     )
 
 
+def _generated_authority_candidate() -> dict[str, Any]:
+    authority, _ = _profiled_records()
+    authority["schema_version"] = "1.1.0"
+    authority["source_sha256"] = {
+        path: runner._sha256(ROOT / path) for path in runner.SOURCE_PATHS
+    }
+    authority["execution_profile"].update(
+        {
+            "python_minor": "3.11",
+            "platform": "linux-x86_64",
+            "dependency_lock": {
+                "path": runner.AUTHORITY_LOCK.relative_to(ROOT).as_posix(),
+                "sha256": runner._sha256(runner.AUTHORITY_LOCK),
+            },
+        }
+    )
+    return authority
+
+
+def test_generated_authority_candidate_requires_identity_and_passing_gates() -> None:
+    """Review artifacts must validate before committed-byte comparison."""
+
+    authority = _generated_authority_candidate()
+
+    runner.validate_generated_record(authority, profile="authority")
+
+    authority["all_gates_pass"] = False
+    with pytest.raises(ValueError, match="gate"):
+        runner.validate_generated_record(authority, profile="authority")
+
+
+def test_generated_authority_candidate_rejects_stale_source_identity() -> None:
+    """A candidate cannot be uploaded with stale governed source hashes."""
+
+    authority = _generated_authority_candidate()
+    first_source = next(iter(authority["source_sha256"]))
+    authority["source_sha256"][first_source] = "0" * 64
+
+    with pytest.raises(ValueError, match="source|identity"):
+        runner.validate_generated_record(authority, profile="authority")
+
+
 def test_rolling_comparison_accepts_difference_inside_declared_tolerance() -> None:
     """The drift test has a legitimate within-tolerance control."""
 
