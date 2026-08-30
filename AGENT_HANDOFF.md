@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 18:10 PDT (2026-08-30 01:10 UTC)
+Updated: 2026-08-29 18:43 PDT (2026-08-30 01:43 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -63,30 +63,26 @@ are not completion evidence.
   views never mutate the 714-case source.
 - Collection schema 1.3 requires each source's retained receipt, accepts the
   governed 1.1--1.4 receipts, and records receipt, archive, and raw API digests.
-- Replays 33277732709, 33279075050, and 33281576272 passed exact [0,60).
-  Their all-v1.4 receipt SHAs are `1fd798290ad3`, `a276c3bb2d52`, and
-  `1a160dede50d`; run 33281576272 archive is 8,129,764 bytes, SHA `666df3baf7e1`,
-  and its source-derived corruption audit SHA is `d1065a479207`.
-- Cumulative all-v1.4 [0,60) is `Campaigns/UpstreamDrift-9153-enriched-
-collected-prefix-0060-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
-  `febaa52266f0`. Immutable legacy view SHA is `fd18ba7ef4c8`; exact audit
-  `52404c77b8a6` passes 60 statuses/results, 540 arrays, and every enriched
+- Replays 33277732709, 33279075050, 33281576272, and 33283267821 passed exact
+  [0,80). Their all-v1.4 receipt SHAs end `1fd79829`, `a276c3bb`, `1a160ded`,
+  and `d0940331`. Run 33283267821 artifact 9724470237 is 8,009,522 bytes,
+  archive SHA `46c7b28f66db`; its corruption audit SHA is `1f8f9e92e3e8`.
+- Cumulative all-v1.4 [0,80) is `Campaigns/UpstreamDrift-9153-enriched-
+collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
+  `cd1071cabca9`. Legacy view SHA is `7e18fe9c1ac0`; exact audit
+  `f26ccf158ec0` passes 80 statuses/results, 720 arrays, and every enriched
   sidecar without outcome inspection, human/coaching inference, or promotion.
-- Replay 33283267821 executes [60,80) at dispatch head `42f1acda4` using
-  qualified audit 33277601263. At 2026-08-30 01:09 UTC, job 99181938431 was
-  still running registered-campaign step 11; upload step 12 was pending and no
-  artifact existed. It is the sole authorized structural process; do not
-  cancel, rerun, duplicate, or dispatch another while it is live.
+  The separately preserved `REJECTED-mixed-receipts-v1` collection is not
+  authority. No structural workflow was active at this snapshot.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. Poll only replay 33283267821 after GitHub App setup. On terminal success,
-   retain the exact run/jobs/artifacts API-response bytes and original ZIP;
-   verify the API/archive identity before extraction. Then apply receipt-1.4,
-   source-derived corruption, cumulative collection, immutable legacy view,
-   and exact audit gates through case 80. Stop and preserve any mismatch.
+1. After GitHub App setup, verify no structural workflow is active or queued;
+   then dispatch only [80,100) from the current remote branch using qualified
+   audit 33277601263. Record its exact dispatch head and treat it as the sole
+   authorized structural process. Stop and preserve any mismatch.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
