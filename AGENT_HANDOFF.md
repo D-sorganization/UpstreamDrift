@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29
+Updated: 2026-08-30
 
 Epic #8557 is the canonical completion authority. Issue state, local files, and
 partial campaign checkpoints are not completion evidence.
@@ -8,8 +8,8 @@ partial campaign checkpoints are not completion evidence.
 ## Protected Authority
 
 - UpstreamDrift protected `main` was
-  `0c064b53316eca16caafcb447c4fd2d157029368` at #9236's ordinary
-  reconciliation. Re-check remote authority before every push or merge.
+  `4cf39347be49adb0e700edebb05390717c5ce2ec` when the Tools pin branch started;
+  re-check remote authority before every push or merge.
 - The qualified paper has 252 pages and SHA-256
   `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
 - Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
@@ -19,9 +19,10 @@ partial campaign checkpoints are not completion evidence.
 - AffineDrift PR #3993 pins the exact #9152 authority as protected squash
   `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995
   merged as `6cc909273d63147392b17078a35c6c4da034e1da`. All hosted checks passed.
-- Tools PR #4669 merged as `f9730033fd279ba8b4abe03bab2aadd950400b47`;
-  UpstreamDrift #8358 is closed after protected consumer integration. Tools
-  #4142 remains the broader reusable-variation completion authority.
+- Tools force-source frame PR #4873 merged as
+  `cc883cbaf63157b58c71cba385a683df2762b0cb`; the current pin branch advances
+  `vendor/ud-tools` to that exact authority. Tools #4142 remains the broader
+  reusable-variation completion authority.
 - Tools R14.6 registration/acceptance, calibrated renderer, and extension map
   merged through protected squashes `b2d7f721`, `d7a95e2a`, and `da0759c7`.
   The trusted rendered-evidence run remains capacity-pending; do not rerun it.
