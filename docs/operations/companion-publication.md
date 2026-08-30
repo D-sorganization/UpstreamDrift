@@ -4,6 +4,30 @@ UpstreamDrift is the provider authority for the AffineDrift companion catalog.
 This runbook covers delivery evidence only; it does not qualify a program,
 workflow, screenshot, calculation, or engineering conclusion.
 
+## Governed Workflow Evidence
+
+From a clean exact-commit checkout, execute the provider-owned workflow
+registry with:
+
+```text
+python3 -m scripts.companion_workflows --repo-root . execute-all --report dist/companion-workflows/execution-report.v1.json
+```
+
+The strict registry is `scripts/config/companion_workflows.v1.json`; it and all
+referenced fixtures are hashed catalog inputs. Ten successful workflows cover
+installation, launch resolution, simulation/analysis, import/export, program
+export, counterfactual, report, and plot evidence. Four deterministic failure
+fixtures must return their declared non-zero exits. The native OpenSim GUI
+record is explicitly unavailable and cannot be executed.
+
+The executor passes no shell string, rejects undeclared environment and
+outputs, restricts paths to the repository, verifies artifact types and
+digests, and refuses a stale source commit. CI runs every available record on
+code pull requests and protected `main`, then uploads a commit-named 30-day
+artifact. This is test evidence only. It is not a durable acquisition channel,
+does not demonstrate native GUI interaction, and grants no scientific,
+operational, engine, participant, or coaching qualification.
+
 ## One Generator, Two Delivery Channels
 
 Both channels call the same public builder and verifier:
