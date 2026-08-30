@@ -99,10 +99,10 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    33297583257 and independent replay 33297683794 pass exact at `63f02a265`;
    runtime identity is `58b7cc58cffc`, audit ZIP SHA `c27495a5aaf4`, replay ZIP
    SHA `a3c655b658c4`, replay JSON SHA `7ea57a01ce0f`, and no case/checkpoint ran.
-   #9283 run 33297882357/job 99220559724 is sole-live but non-promotable: its
-   plan says DeskComputer and old registration names audit 33277601263, while
-   hosted execution uses 33297583257. Retain it; v1.1 prospectively binds hosted
-   placement/audit 33297583257, then replace [0,20). Never dispatch [20,40).
+   #9283 run 33297882357 is terminal but non-promotable: its plan says
+   DeskComputer and old registration names audit 33277601263, while hosted run
+   used 33297583257. Retained checkpoint/runtime ZIP SHAs are `fd751968e8f8` /
+   `58041bf22374`; v1.1 binds hosted placement/audit, then replace [0,20) only.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
@@ -126,7 +126,7 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Validation
 
-Use serial pytest. All 137 structural-factorial/workflow tests pass; Python 3.11
+Use serial pytest. All 138 structural-factorial/workflow tests pass; Python 3.11
 MyPy, repository Ruff, and changed-file Black pass. The 256-page PDF candidate
 `72334a25bffb` passes the 1,115-artifact computational release gate and visual
 QA. Full collection retains 44 environment/baseline errors; native replay needs

@@ -43,14 +43,16 @@ def _run(
     }
 
 
-def _jobs() -> dict[str, object]:
+def _jobs(
+    job_name: str = "Structural Runtime Audit or Campaign Slice",
+) -> dict[str, object]:
     return {
         "jobs": [
             {
                 "id": 99156607309,
                 "run_id": RUN_ID,
                 "head_sha": HEAD_SHA,
-                "name": "Structural Runtime Audit or Campaign Slice",
+                "name": job_name,
                 "status": "completed",
                 "conclusion": "success",
                 "started_at": "2026-08-29T20:31:11Z",
@@ -199,6 +201,30 @@ def test_receipt_binds_terminal_run_job_artifact_and_exact_slice(
     assert len(receipt["artifact_archive_sha256"]) == 64
     assert receipt["checkpoint_pair_count"] == 2
     assert len(receipt["files"]) == 5
+
+
+def test_receipt_accepts_the_replay_inclusive_structural_job_name(
+    tmp_path: Path,
+) -> None:
+    extracted, archive, session_digest = _artifact_tree(tmp_path)
+
+    receipt = build_structural_artifact_receipt(
+        run=_run(),
+        jobs=_jobs("Structural Runtime Audit, Replay, or Campaign Slice"),
+        artifact=_artifact(),
+        archive_path=archive,
+        extracted_dir=extracted,
+        expected_run_id=RUN_ID,
+        expected_dispatch_head=HEAD_SHA,
+        expected_execution_revision=EXECUTION_REVISION,
+        expected_session_sha256=session_digest,
+        requested_case_start=694,
+        requested_case_stop=696,
+    )
+
+    assert receipt["job"]["name"] == (
+        "Structural Runtime Audit, Replay, or Campaign Slice"
+    )
 
 
 def test_receipt_cli_consumes_retained_github_responses_atomically(

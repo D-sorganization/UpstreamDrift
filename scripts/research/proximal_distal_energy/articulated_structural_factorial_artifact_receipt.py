@@ -26,7 +26,10 @@ _CROSS_BOUND_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.3.0"
 _RAW_RESPONSE_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.4.0"
 _ATTESTED_SCHEMA = "articulated-structural-factorial-artifact-receipt/1.5.0"
 _SESSION_SCHEMA = "articulated-structural-factorial-session/1.0.0"
-_JOB_NAME = "Structural Runtime Audit or Campaign Slice"
+_JOB_NAMES = (
+    "Structural Runtime Audit or Campaign Slice",
+    "Structural Runtime Audit, Replay, or Campaign Slice",
+)
 _CAMPAIGN_STEP = "Run Registered Structural Campaign Slice"
 _UPLOAD_STEP = "Upload Structural Campaign Checkpoints"
 _SHA40 = re.compile(r"[0-9a-f]{40}")
@@ -89,6 +92,23 @@ def _exact_named_record(
     if len(matches) != 1:
         raise ValueError(
             f"{collection_name} must contain exactly one {expected_name!r} record"
+        )
+    return matches[0]
+
+
+def _exact_allowlisted_record(
+    values: object, *, expected_names: Sequence[str], collection_name: str
+) -> Mapping[str, object]:
+    if not isinstance(values, list):
+        raise ValueError(f"{collection_name} must be a list")
+    matches = [
+        _mapping(value, name=f"{collection_name} record")
+        for value in values
+        if isinstance(value, Mapping) and value.get("name") in expected_names
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"{collection_name} must contain exactly one allowlisted record"
         )
     return matches[0]
 
@@ -254,8 +274,8 @@ def build_structural_artifact_receipt(
     run_conclusion = _terminal_record(run_record, name="run")
 
     jobs_record = _mapping(jobs, name="jobs response")
-    job = _exact_named_record(
-        jobs_record.get("jobs"), expected_name=_JOB_NAME, collection_name="jobs"
+    job = _exact_allowlisted_record(
+        jobs_record.get("jobs"), expected_names=_JOB_NAMES, collection_name="jobs"
     )
     if (
         job.get("run_id") != expected_run_id
