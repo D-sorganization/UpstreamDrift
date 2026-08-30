@@ -592,6 +592,10 @@
       "sha256": "43f75c28aea4ddb559f57a19d36eb17a2892a0ef813debca63637a99f90a61eb",
       "bytes": 328471
     },
+    "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_registration.json": {
+      "sha256": "6d6848380f4d868ad210172ce985da388a924330c17e88ee0cce8a56b2b83171",
+      "bytes": 9736
+    },
     "docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json": {
       "sha256": "83175bdafbaefb8cacc001bbaf51f63c58da4d5d5fa295ba99eb36bd6ce90014",
       "bytes": 4983
@@ -2119,6 +2123,10 @@
     "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": {
       "sha256": "305e1542d0dfa95fe86cc9f7b2fe86d90f44be86db71c45053eaa61789ee0c57",
       "bytes": 19165
+    },
+    "scripts/research/proximal_distal_energy/articulated_distributed_smoke_registration.py": {
+      "sha256": "10e18a28f1671b01a9096d97809484482f2f3d242810a5a6eafc481084f46178",
+      "bytes": 11227
     },
     "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py": {
       "sha256": "4a7508f6f033ff2f490b0221a96fef6494a2a8a24e506dbf3ffb2adbfec3d720",

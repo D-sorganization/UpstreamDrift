@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 08:44 PDT
+Updated: 2026-08-30 09:18 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -9,82 +9,78 @@ design-manual program.
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
-  `ebc372aed21937d345854aeedab0385373969dd6`, the squash merge of PR #9305.
-- PR #9305 added the typed event-aligned forward impulse/work kernel and bounded
-  rigid-contact same-trajectory attribution adapter. Its reviewed head and
-  squash tree are exactly `709aef6cb91c2a3a7e8ae7a952018d25a8639f8d`.
-- PR #9302 remains the cross-version manufactured-evidence qualification parent
-  at `7dc5f86af68907f19bc953c509d96d05f505cdab`.
-- PR #9299 remains its direct CRBA requalification parent at
-  `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
-- PR #9299 requalified the CRBA-dependent publication after routing four native
-  Pinocchio consumers through one finite, square, symmetric-matrix adapter.
+  `f98bf7b382083322c609bfd7d680e4e82d71aed8`, the verified squash merge of PR
+  #9306. Its reviewed head and squash merge share exact tree
+  `e04e7357bdb32a2e966549bd61535c38c3874504`.
+- #9306 adds signed-gap retention, bracketed opening/reattachment location on a
+  declared linear state interpolant, duplicate-time event alignment, and the
+  distributed replay adapter into the protected attribution kernel.
+- CI Standard run `33320578643`, Optional Stack run `33320578618`, and Bot CI
+  Trigger run `33320578587` passed on the final reviewed head. Protected merge
+  evidence is recorded on #9153 in comment `issuecomment-5469769326`.
+- PR #9302 remains the manufactured-evidence qualification parent at
+  `7dc5f86af68907f19bc953c509d96d05f505cdab`; PR #9299 remains its CRBA
+  requalification parent at `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
 - The requalified paper has 253 pages, 2,011,818 bytes, and SHA-256
   `554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36`.
-- Its 328 claims, 1,181 candidates, 498/498 literals, 709 release artifacts,
-  2,501 evidence references, and 421 local artifacts qualify computationally.
   Tagged-PDF and embedded-font gates remain open archival limitations.
 - AffineDrift #3993 pins the exact #9152 authority as protected squash
-  `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995
-  merged as `6cc909273d63147392b17078a35c6c4da034e1da`.
+  `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995 merged
+  as `6cc909273d63147392b17078a35c6c4da034e1da`.
 - Tools force-source frame #4873 merged as
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
 
-## Active Distributed Event-Boundary Slice: #9153
+## Active Prospective Smoke Registration: #9153
 
-- Worktree: `UpstreamDrift-worktrees/9153-crba-symmetry`.
-- Branch: `feat/9153-distributed-event-boundaries`, based exactly on protected
-  #9305 squash `ebc372aed21937d345854aeedab0385373969dd6`.
-- PR #9306 is open with squash auto-merge preserved. Its prior exact head was
-  `2683764952be298b1bfbd373f41f901e22fdce13`; CI Standard run `33320260016`
-  passed both Python lanes and the scientific gates but found one actionable
-  suite-marker ratchet failure in the new event test file.
-- This slice may port only distributed tension-contact event-surface retention,
-  bracketed root location on the declared linear state interpolant, duplicate-
-  time pre/post alignment, and the adapter into the protected attribution
-  kernel. It excludes stateful friction, campaign outputs, preregistrations,
-  launch workflows, summaries, figures, and stale handoffs.
-- The adapter must use the protected `ForwardAttributionInputs` contract rather
-  than the quarantined positional API. It must preserve zero compliant-event
-  impulse/work as an explicit model statement, not infer physical impact.
-- Event locations qualify the retained discrete trajectory only; they are not
-  claimed as the continuous integrator's exact event solution or causal
-  counterfactual evidence.
-- Current commits through `268376495` include source/tests/SPEC, deterministic
-  release records, and this handoff. The missing `scientific` suite marker is
-  fixed locally; the exact ratchet, eight event tests, and five release-bundle
-  tests pass. Thirty-three focused tests, architecture, Ruff, format, title,
-  file-size, design-manual, claim/evidence, PDF, and 711-artifact release
-  qualification gates passed before the protected run.
-- PR #9305 passed every required protected gate, including the 8m53s full unit
-  suite, and its release bundle validates 709 artifacts. The non-required
-  optional-stack job remained queued after merge and was not redundantly rerun.
+- Worktree: `UpstreamDrift-worktrees/9153-current-main-smoke-prereg`.
+- Branch: `feat/9153-current-main-smoke-prereg`, based exactly on protected
+  #9306 squash `f98bf7b382083322c609bfd7d680e4e82d71aed8`.
+- New registration source:
+  `scripts/research/proximal_distal_energy/articulated_distributed_smoke_registration.py`.
+- New frozen protocol:
+  `docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_registration.json`.
+- The prospective matrix contains six cases: MuJoCo and Pinocchio at 1.0,
+  0.5, and 0.25 ms, using source case 0/sample 6, one station per hand, 1.5 mm
+  slack, zero generalized initial velocity, 1 mm club displacement, and
+  -0.8 m/s initial club velocity over 50 ms.
+- Execution is explicitly `not_started`; retained outcomes are empty and
+  promotion authority is none. The registration binds the protected evaluator
+  revision/tree, seven evaluator-source hashes, and the 35,568-byte input NPZ
+  with SHA-256 `9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779`.
+- Only opening and reattachment are eligible. Friction-limit, static stick/slip,
+  inferred discrete impact, causal counterfactual, biological, human, and
+  coaching interpretations are prohibited.
+- TDD evidence: the missing module produced the expected RED import failure;
+  after implementation, four registration tests pass serially.
 
 ## Immediate Order
 
-1. Commit and push the narrow suite-marker fix; run the GitHub App setup
-   immediately before the GitHub push.
-2. Inspect PR #9306's new exact-head protected checks without redundant reruns.
-3. Fix actionable exact-head failures only, preserve squash auto-merge, and
-   verify the squash commit/tree on remote `main`.
-4. Record protected evidence on #9153 and refresh this handoff from remote main.
-5. Only after source/adapters merge, preregister fresh current-main smoke
-   execution. Never dispatch `[100,120)` from pre-fix authority.
+1. Run focused event, registration, specification, architecture, title, and
+   release-governance gates on this clean current-main branch.
+2. Commit the prospective registration slice and update deterministic release
+   manifests/checksums if the release qualifier requires them.
+3. Run the GitHub App setup immediately before every GitHub operation, verify
+   the #9153 lease, open a full protected PR, preserve squash auto-merge, and
+   fix only exact-head actionable failures.
+4. Verify the squash commit/tree on remote `main` and record exact evidence on
+   #9153.
+5. Only after the registration merges, implement the current-main single-worker
+   atomic smoke runner. Never import or relabel legacy checkpoints as outcomes.
 
 ## Scientific Boundaries
 
-- The #9151 decomposition is pointwise. It does not establish forward
-  persistence, impulse/work attribution, ZVCF, biological passivity, muscle
-  action, participant behavior, timing economy, safety, or coaching strategy.
+- Event locations qualify the retained discrete trajectory only; they are not
+  the continuous integrator's exact event solution.
+- Compliant opening/reattachment records zero discrete event impulse and work by
+  model definition; it is not evidence of a physical impact.
+- Same-trajectory attribution is descriptive. Divergent forward
+  counterfactuals require a separately registered design.
 - Energy transfer, momentum redistribution, joint work, contact power, event
   timing, and clubhead speed are distinct estimands.
 - Native-engine agreement verifies declared operators and the common contact
-  law; it does not independently calibrate anatomy, grip, shaft, or ground.
-- Ratios below the registered denominator floor are suppressed, not reported as
-  zero. Signed shares may be negative or exceed one under cancellation.
-- The next gate is matched forward impulse/work attribution through contact
-  transitions, shaft/base coupling, uncertainty, and adverse loads.
+  law; it does not calibrate anatomy, grip, shaft, ground, equipment, or human
+  strategy.
 - #8556/#9004 remain governed human-data boundaries. Synthetic evidence cannot
   substitute for bilateral six-axis participant grip wrenches.
 
@@ -101,7 +97,7 @@ design-manual program.
 - The accumulated campaign worktree is
   `UpstreamDrift-worktrees/9153-forward-impulse-work`, last remote-equal at
   `1e5e823ca2fa9391134e8a0ccf140a36036a88a7`, with 233 commits ahead and 48
-  behind at the last audit. Preserve its legacy evidence and quarantine.
+  behind at the last audit. Preserve its evidence and quarantine.
 
 ## Active AffineDrift Companion Boundary
 
@@ -113,19 +109,17 @@ design-manual program.
 - ADR-0043 and schema v1 are one-way UpstreamDrift software-fact authority for
   AffineDrift #4010. #9064 remains design-manual authority and #9070 remains
   typed calculation-manifest authority.
-- Do not accept payloads unless commit-named artifacts, acquisition identity,
-  attestations, embedded commit, and exact bytes all verify.
 
 ## Validation
 
-Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` for
-portable tests and `-n 0` for pytest.
+Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` and
+`-n 0` for pytest.
 
 ```powershell
-python -m pytest -n 0 -q tests/research/test_articulated_manufactured_solution.py
-python -m pytest -n 0 -q tests/research/test_articulated_crba_requalification.py
-python -m pytest -n 0 -q tests/scripts/test_doc_governance_checks.py tests/scripts/test_design_manual_governance_contract.py
-python -m scripts.research.proximal_distal_energy.articulated_crba_requalification validate
+python -m pytest -n 0 -q tests/research/test_articulated_distributed_smoke_registration.py
+python -m pytest -n 0 -q tests/research/test_articulated_contact_events.py
+python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution.py
+python -m scripts.research.proximal_distal_energy.articulated_distributed_smoke_registration validate
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py

@@ -1,0 +1,225 @@
+{
+  "schema_version": "proximal-distal-articulated-distributed-smoke-registration/1.0.0",
+  "classification": "prospective_current_main_pipeline_smoke",
+  "execution_status": "not_started",
+  "evidence_status": "prospective_no_smoke_outcome",
+  "registration_status": "frozen_before_first_execution",
+  "evaluator_authority": {
+    "repository": "D-sorganization/UpstreamDrift",
+    "pull_request": 9306,
+    "revision": "f98bf7b382083322c609bfd7d680e4e82d71aed8",
+    "tree": "e04e7357bdb32a2e966549bd61535c38c3874504",
+    "source_authorities": [
+      {
+        "path": "scripts/research/proximal_distal_energy/articulated_contact_events.py",
+        "sha256": "7fc8c796398c6a3bee10f5080b652b2039c84093abf721165c1deaca8317d60b",
+        "bytes": 15830
+      },
+      {
+        "path": "scripts/research/proximal_distal_energy/articulated_distributed_event_attribution.py",
+        "sha256": "08c225bc36edcb671c062e1014e33d4aa81f08029608bb75ac1509216d9f908f",
+        "bytes": 8986
+      },
+      {
+        "path": "scripts/research/proximal_distal_energy/articulated_distributed_forward.py",
+        "sha256": "373c5288e4021cfb8674882f833157576af0621d3656a4f08e0cadc5208283f7",
+        "bytes": 14282
+      },
+      {
+        "path": "scripts/research/proximal_distal_energy/articulated_distributed_grip.py",
+        "sha256": "305e1542d0dfa95fe86cc9f7b2fe86d90f44be86db71c45053eaa61789ee0c57",
+        "bytes": 19165
+      },
+      {
+        "path": "scripts/research/proximal_distal_energy/articulated_forward_attribution.py",
+        "sha256": "70a8a252839fab352f2237b4f363a8e9bf5e5769a6b203df03c1d1bb0b49ae6c",
+        "bytes": 20725
+      },
+      {
+        "path": "scripts/research/proximal_distal_energy/articulated_forward_integration.py",
+        "sha256": "85e03a999fb27599eff2e83a17104ad765bcac392ec145a07457564bca43e85b",
+        "bytes": 8550
+      },
+      {
+        "path": "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "sha256": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
+        "bytes": 18563
+      }
+    ]
+  },
+  "input_authority": {
+    "path": "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+    "sha256": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
+    "bytes": 35568
+  },
+  "qualified_environment": {
+    "operating_system": "linux_x86_64",
+    "supported_python": "3.11.x_or_3.12.x",
+    "mujoco_distribution": "mujoco",
+    "mujoco_version": "3.8.0",
+    "pinocchio_distribution": "pin",
+    "pinocchio_version": "3.8.0",
+    "maximum_workers": 1,
+    "thread_limits": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    }
+  },
+  "study_design": {
+    "purpose": "runtime_and_pipeline_smoke_only",
+    "duration_s": 0.05,
+    "engines": ["mujoco", "pinocchio"],
+    "time_steps_s": [0.001, 0.0005, 0.00025],
+    "distributed_grip": {
+      "station_count_per_hand": 1,
+      "station_width_m": 0.0,
+      "slack_distance_m": 0.0015,
+      "friction_coefficient": 0.0
+    },
+    "cases": [
+      {
+        "case_id": "event_probe_mujoco_dt_1000us",
+        "engine": "mujoco",
+        "time_step_s": 0.001,
+        "source_case_index": 0,
+        "source_sample_index": 6,
+        "initial_velocity_policy": "all_generalized_velocities_zero",
+        "initial_club_displacement_m": 0.001,
+        "initial_club_velocity_m_s": -0.8,
+        "checkpoint_policy": "atomic_per_case",
+        "checkpoint_path": "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_checkpoints/event_probe_mujoco_dt_1000us.npz"
+      },
+      {
+        "case_id": "event_probe_mujoco_dt_0500us",
+        "engine": "mujoco",
+        "time_step_s": 0.0005,
+        "source_case_index": 0,
+        "source_sample_index": 6,
+        "initial_velocity_policy": "all_generalized_velocities_zero",
+        "initial_club_displacement_m": 0.001,
+        "initial_club_velocity_m_s": -0.8,
+        "checkpoint_policy": "atomic_per_case",
+        "checkpoint_path": "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_checkpoints/event_probe_mujoco_dt_0500us.npz"
+      },
+      {
+        "case_id": "event_probe_mujoco_dt_0250us",
+        "engine": "mujoco",
+        "time_step_s": 0.00025,
+        "source_case_index": 0,
+        "source_sample_index": 6,
+        "initial_velocity_policy": "all_generalized_velocities_zero",
+        "initial_club_displacement_m": 0.001,
+        "initial_club_velocity_m_s": -0.8,
+        "checkpoint_policy": "atomic_per_case",
+        "checkpoint_path": "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_checkpoints/event_probe_mujoco_dt_0250us.npz"
+      },
+      {
+        "case_id": "event_probe_pinocchio_dt_1000us",
+        "engine": "pinocchio",
+        "time_step_s": 0.001,
+        "source_case_index": 0,
+        "source_sample_index": 6,
+        "initial_velocity_policy": "all_generalized_velocities_zero",
+        "initial_club_displacement_m": 0.001,
+        "initial_club_velocity_m_s": -0.8,
+        "checkpoint_policy": "atomic_per_case",
+        "checkpoint_path": "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_checkpoints/event_probe_pinocchio_dt_1000us.npz"
+      },
+      {
+        "case_id": "event_probe_pinocchio_dt_0500us",
+        "engine": "pinocchio",
+        "time_step_s": 0.0005,
+        "source_case_index": 0,
+        "source_sample_index": 6,
+        "initial_velocity_policy": "all_generalized_velocities_zero",
+        "initial_club_displacement_m": 0.001,
+        "initial_club_velocity_m_s": -0.8,
+        "checkpoint_policy": "atomic_per_case",
+        "checkpoint_path": "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_checkpoints/event_probe_pinocchio_dt_0500us.npz"
+      },
+      {
+        "case_id": "event_probe_pinocchio_dt_0250us",
+        "engine": "pinocchio",
+        "time_step_s": 0.00025,
+        "source_case_index": 0,
+        "source_sample_index": 6,
+        "initial_velocity_policy": "all_generalized_velocities_zero",
+        "initial_club_displacement_m": 0.001,
+        "initial_club_velocity_m_s": -0.8,
+        "checkpoint_policy": "atomic_per_case",
+        "checkpoint_path": "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_checkpoints/event_probe_pinocchio_dt_0250us.npz"
+      }
+    ],
+    "execution_order": "case_list_order",
+    "checkpoint_policy": "atomic_per_case",
+    "aggregate_policy": "only_after_all_cases_are_retained"
+  },
+  "event_contract": {
+    "supported_event_kinds": ["opening", "reattachment"],
+    "state_path_model": "linear_generalized_state_interpolant",
+    "active_state_rule": "strictly_positive_signed_gap",
+    "simultaneous_event_rule": "one_duplicate_time_boundary_per_event_group",
+    "gap_tolerance_m": 1e-10,
+    "time_tolerance_s": 1e-12,
+    "maximum_root_iterations": 80,
+    "discrete_event_impulse_policy": "exact_zero_for_compliant_transition",
+    "discrete_event_work_policy": "exact_zero_for_compliant_transition",
+    "prohibited_inferences": [
+      "friction_limit_entry_or_exit",
+      "static_stick_or_slip_transition",
+      "discrete_impact_from_compliant_transition"
+    ]
+  },
+  "acceptance_gates": {
+    "identity": [
+      "evaluator_revision_and_tree_match_protected_pr_9306",
+      "all_evaluator_source_hashes_match",
+      "input_path_hash_and_bytes_match",
+      "native_engine_versions_match_the_registered_environment"
+    ],
+    "case_completeness": {
+      "registered_case_count": 6,
+      "retain_every_case_and_typed_failure": true,
+      "missing_or_duplicate_case_fails": true
+    },
+    "trajectory": {
+      "all_retained_arrays_finite": true,
+      "signed_gap_and_active_state_parity_required": true,
+      "required_event_kinds_per_case": ["opening", "reattachment"],
+      "unsupported_event_kind_fails": true,
+      "maximum_absolute_gap_residual_m": 1e-10,
+      "maximum_final_bracket_width_s": 1e-12,
+      "quadrature_may_cross_event_boundary": false
+    },
+    "force_and_attribution": {
+      "maximum_pointwise_generalized_force_closure_residual": 1e-12,
+      "maximum_absolute_discrete_event_impulse": 0.0,
+      "maximum_absolute_discrete_event_work_j": 0.0,
+      "momentum_and_work_closure": "finite_and_retained_not_promoted",
+      "signed_shares": "retain_without_clipping",
+      "undefined_ratio_rule": "suppress_below_registered_denominator_floor"
+    },
+    "comparison": {
+      "same_trajectory_attribution_only": true,
+      "cross_engine_event_timing": "report_without_equivalence_claim",
+      "time_step_refinement": "report_without_post_hoc_tolerance_change",
+      "counterfactual_eligibility": "requires_separate_registration"
+    }
+  },
+  "killswitches": [
+    "source_or_environment_identity_drift",
+    "active_state_and_signed_gap_disagreement",
+    "active_transition_without_a_bracketed_root",
+    "gap_evaluator_shape_or_endpoint_mismatch",
+    "unsupported_or_invented_event_kind",
+    "missing_duplicate_time_event_alignment",
+    "missing_duplicate_or reordered_case",
+    "nonfinite_trace_force_or_attribution_value",
+    "pointwise_generalized_force_closure_failure"
+  ],
+  "retained_outcomes": [],
+  "promotion_eligible": false,
+  "promotion_authority": "none_from_smoke_execution",
+  "inference_boundary": "This smoke can qualify current-main execution, event retention, and same-trajectory numerical bookkeeping for the declared synthetic probe only. It cannot establish a causal counterfactual, stateful friction, equipment calibration, anatomical force allocation, biological passivity, human behavior, injury risk, or coaching guidance."
+}

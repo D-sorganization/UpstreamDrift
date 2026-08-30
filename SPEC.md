@@ -5000,6 +5000,34 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   campaign evidence, human validation, biological passivity, causal strategy
   attribution, or coaching guidance.
 
+### F-8557.34: Prospective Distributed Event-Attribution Smoke Registration
+
+- Fresh distributed event-attribution execution shall begin from a checked-in,
+  outcome-blind registration bound to the exact protected evaluator revision,
+  evaluator tree, evaluator-source hashes, input-data path, input-data hash,
+  input byte count, and native-engine environment. Legacy campaign plans,
+  checkpoints, and summaries shall not satisfy this authority.
+- The first current-main smoke matrix shall use one worker, fixed one-thread
+  numerical-library limits, two native engines, three declared refinement
+  steps, one closed-state source index, one source sample, and atomic per-case
+  checkpoints. Every registered case and typed failure shall be retained in
+  frozen order before aggregation.
+- Opening and reattachment are the only supported event kinds. Friction-limit
+  entry or exit, static stick or slip, and discrete impact inferred from a
+  compliant transition are prohibited. The retained active state shall equal
+  the strictly positive signed-gap state and every located root shall meet the
+  registered gap and time tolerances.
+- The smoke gate shall require finite retained arrays, duplicate-time event
+  alignment, pointwise generalized-force closure, and exact zero discrete
+  event impulse and work for the compliant law. Momentum/work closure,
+  cross-engine event timing, and time-step refinement shall be retained for
+  diagnosis without post-hoc tolerance changes or scientific promotion.
+- Passing the smoke shall qualify only current-main runtime, event retention,
+  and same-trajectory bookkeeping for the declared synthetic probe. Any causal
+  counterfactual requires a separate prospective registration. No smoke result
+  can establish stateful friction, equipment calibration, anatomy, biological
+  passivity, human behavior, injury risk, or coaching guidance.
+
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
