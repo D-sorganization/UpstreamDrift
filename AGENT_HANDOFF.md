@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 20:45 PDT (2026-08-30 03:45 UTC)
+Updated: 2026-08-29 20:52 PDT (2026-08-30 03:52 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -19,9 +19,9 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
-  branch `feat/9153-forward-impulse-work` is clean
-  and remote-equal at turnover head `1b374f328`. Runtime attestation landed at
-  `a76a1e360`; the active repeat was preregistered/dispatched from
+  branch `feat/9153-forward-impulse-work` must be clean and remote-equal; verify
+  its exact turnover head with `git rev-parse HEAD`. Runtime attestation landed
+  at `a76a1e360`; the second repeat was preregistered/dispatched from
   `e3b8b8dea978ae36ea650c9610ddc68acd73aa6a`. No PR exists.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
@@ -87,22 +87,23 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   SHA is `68fdf686aa21` and corruption-audit SHA is `a375a94f6661`. Exact audit
   SHA `3021c3fc5d9d` matches legacy only, supporting a first-enriched-replay
   anomaly. It authorizes no promotion, effect reading, or human inference.
+- Runtime-attested probes 33290346007 and 33290812945 both passed their exact
+  runtime gates and produced byte-identical JSON/NPZ/session evidence matching
+  legacy only. Second runtime/checkpoint ZIP SHAs are `479c06bd0245` and
+  `5f3575d37eec`; receipt SHA is `53c086cfab84`; corruption audit SHA is
+  `bc543900ff93`; repeatability audit SHA
+  remains `3021c3fc5d9d`. Retained at `C:\Users\diete\Campaigns\UpstreamDrift-9153-runtime-attested-repeat-2-case-0080-run-33290812945`; trace is issue comment 5466564997.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
-1. Run 33290812945/job 99202003097 is the only live structural process. It is
-   an exact second attested [80,81) repeat at `e3b8b8dea978`; do not cancel or
-   duplicate it. Query once after GitHub App setup. On success, first retain the
-   raw run/jobs/artifacts API bodies under `C:\Users\diete\Campaigns\UpstreamDrift-9153-runtime-attested-repeat-2-case-0080-run-33290812945`, then
-   retain and digest both runtime-replay and checkpoint ZIPs, build receipt 1.4
-   plus corruption/repeatability audits, and compare JSON/NPZ digests with run 33290346007. On failure, retain APIs/artifacts/logs and do not auto-rerun.
+1. No structural process is live. Before any dispatch, preregister a fresh
+   runtime-attested [0,100) replay in 20-case slices, with exact dependency and
+   recovery order; do not silently mix old unbound and new attested evidence.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
-   If the live repeat is exact, preregister a fresh attested [0,100) replay in
-   20-case slices before any dispatch; do not mix old unbound evidence silently.
 3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 4. The contrast summary is implemented locally; after completion, validate the
