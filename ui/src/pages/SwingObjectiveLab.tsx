@@ -28,6 +28,7 @@ const OBJECTIVE_LABELS: Record<string, string> = {
   coriolis: "Coriolis Transfer",
   energy_transfer: "Energy Transfer",
   impulse_transfer: "Grip Impulse",
+  hand_path_impulse: "Signed Hand-Path Impulse",
 };
 
 function formatObjectiveName(key: string): string {
