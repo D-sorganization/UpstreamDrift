@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 07:47 PDT
+Updated: 2026-08-30 09:00 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -9,9 +9,10 @@ design-manual program.
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
-  `7dc5f86af68907f19bc953c509d96d05f505cdab`, the squash merge of PR #9302.
-- PR #9299 remains its direct CRBA requalification parent at
-  `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
+  `ebc372aed21937d345854aeedab0385373969dd6`, the squash merge of PR #9305.
+- PR #9302 remains its direct manufactured-evidence parent at
+  `7dc5f86af68907f19bc953c509d96d05f505cdab`; PR #9299 is the preceding CRBA
+  requalification authority at `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
 - PR #9299 requalified the CRBA-dependent publication after routing four native
   Pinocchio consumers through one finite, square, symmetric-matrix adapter.
 - PR #9302 qualified the manufactured-evidence contract across versioned native
@@ -28,15 +29,15 @@ design-manual program.
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
 
-## Active Forward-Attribution Kernel Slice: #9153
+## Protected Forward-Attribution Kernel: #9153
 
-- Worktree: `UpstreamDrift-worktrees/9153-crba-symmetry`.
-- Branch: `feat/9153-forward-attribution-kernel`, based exactly on protected
-  `main`; no PR exists yet.
-- This slice ports only the mature event-aligned generalized impulse/work
-  kernel, the bounded rigid-contact replay adapter, and manufactured scientific
-  tests from the quarantined branch. It excludes all campaign outputs,
-  preregistrations, launch workflows, summaries, figures, and stale handoffs.
+- PR #9305 protected-squash-merged the event-aligned generalized impulse/work
+  kernel, bounded rigid-contact replay adapter, manufactured scientific tests,
+  and governed evidence as `ebc372aed21937d345854aeedab0385373969dd6`.
+- Issue #9153 remains open. Do not infer its closure or any campaign authority
+  from the source merge; verify post-merge checks and its explicit issue gates.
+- The protected slice excludes campaign outputs, preregistrations, launch
+  workflows, summaries, figures, and the quarantined accumulated branch.
 - The kernel splits quadrature at duplicate-time segment transitions, retains
   continuous generalized impulse/work, `Mdot v` momentum transport,
   `0.5 v^T Mdot v` kinetic-geometry work, and declared event impulse/work.
@@ -46,22 +47,23 @@ design-manual program.
 - The rigid replay is descriptive same-trajectory attribution, not a divergent
   causal ablation and not evidence of anatomy, biological passivity, or a human
   strategy.
-- Current focused state: 13 scientific tests pass; focused MyPy, Ruff, format,
-  file-size, and architecture checks pass. F-8557.32 records the contract.
-- #9302 passed every protected gate, including the 9m43s unit suite and 7m26s
-  latest-dependency optional stack. Its remote tree was verified exactly.
+- F-8557.32 records the forward-attribution contract. Revalidate the exact
+  protected commit before using its artifacts as downstream evidence.
 
 ## Immediate Order
 
-1. Complete focused validation, document the exact diff, and commit this clean
-   source/test/SPEC/handoff slice without importing generated evidence.
-2. Push and open one protected PR linked to #9153. Run the GitHub App setup
-   immediately before every GitHub operation.
-3. Fix actionable exact-head failures only, preserve squash auto-merge, and
-   verify the squash commit/tree on remote `main`.
-4. Next port the distributed event-surface/root-location adapter as a separate
+1. Review companion workflow PR #9307 at its exact head and protected-main
+   base. Fix actionable exact-head failures only; never reroute or restart
+   capacity-only jobs.
+2. Merge #9307 only through ordinary protection, then verify its squash commit,
+   remote tree, post-merge CI evidence, and #9190 issue state.
+3. Keep #9174/#9191/#9192/#9193 open until their independent publication,
+   screenshot, compatibility, and acquisition gates are met.
+4. For #9153, verify the protected #9305 checks and explicit remaining issue
+   gates before closure. Do not revive the pre-merge branch as authority.
+5. Next port the distributed event-surface/root-location adapter as a separate
    dependency slice. Do not combine it with stateful friction or campaigns.
-5. Only after source/adapters merge, preregister fresh current-main smoke
+6. Only after source/adapters merge, preregister fresh current-main smoke
    execution. Never dispatch `[100,120)` from pre-fix authority.
 
 ## Scientific Boundaries
@@ -103,11 +105,11 @@ design-manual program.
   no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes,
   acquisition identity, and attestations; #9174 remains open.
 - #9190 worktree: `worktrees/UpstreamDrift-9190-workflows`; replacement branch
-  `feat/9190-governed-workflows-v2`, implementation checkpoint
-  `e8ca04e989cab2e951d24fc60e636e16ce89b5a7`, reconciled onto protected
-  `origin/main` `7dc5f86af68907f19bc953c509d96d05f505cdab`. Protected PR #9304 supersedes
-  conflicting PR #9303 without force-pushing; it is not protected authority
-  until reviewed and merged.
+  `feat/9190-governed-workflows-v3`, reconciled onto protected `origin/main`
+  `ebc372aed21937d345854aeedab0385373969dd6`.
+  Protected PR #9307 supersedes conflicting PRs #9303 and #9304 without
+  force-pushing either published branch; it is not protected authority until
+  reviewed and merged.
 - ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
   authority for AffineDrift #4010; #9064 remains design-manual authority and
   #9070 remains typed calculation-manifest authority.
