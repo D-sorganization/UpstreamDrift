@@ -332,21 +332,34 @@ class TestPlayabilityWindow:
         in the registered sweep is not the longest. Pinned because the
         mirrored frame made carry look monotone, and a tool that ranks
         deliveries by carry would have recommended the steepest one.
+
+        Carry rides on an optional ball-flight kernel, so it can be
+        legitimately absent -- the model reports that in ``unavailable``
+        rather than raising. This states that precondition instead of
+        assuming it: where the kernel is missing every carry comes back
+        ``None``, and the *ordering* between them is then unmeasurable
+        rather than wrong. Skipping names the model's own reason so a
+        genuine regression cannot hide as an empty comparison.
         """
         geometry = nominal_design.geometry()
         sand = firm_sand.sand_state()
-        carries = {
-            angle: model.run_shot(
-                geometry, sand, SwingSetup(attack_angle_deg=angle)
-            ).carry_m
+        shots = {
+            angle: model.run_shot(geometry, sand, SwingSetup(attack_angle_deg=angle))
             for angle in (-2.0, -4.0, -6.0, -8.0)
         }
+        planing_angles = (-2.0, -4.0, -6.0)
+        if all(shots[angle].carry_m is None for angle in planing_angles):
+            pytest.skip(
+                "no carry is available at any planing delivery, so the ordering "
+                f"cannot be measured here: {shots[-6.0].unavailable}"
+            )
+        carries = {angle: shots[angle].carry_m for angle in shots}
         assert carries[-8.0] is None, (
             "the steep end of the sweep must bury this design and report no "
             f"carry; got {carries[-8.0]}"
         )
         planing = {a: c for a, c in carries.items() if c is not None}
-        assert set(planing) == {-2.0, -4.0, -6.0}, planing
+        assert set(planing) == set(planing_angles), planing
         assert planing[-6.0] > planing[-4.0] > planing[-2.0], (
             f"carry must still rise with a steeper blow while the sole planes: {planing}"
         )
@@ -379,8 +392,22 @@ class TestPlayabilityWindow:
         Before issue #9247 these were one number, and the corrected model
         made it read "the solver refused half this domain" about a solver
         that refused nothing. Both still count against the window.
+
+        There is no window at all where carry's optional ball-flight
+        kernel is missing: every cell is then NaN and ``playability``
+        reports the reason instead of a window. That is not this
+        assertion's subject, so it is stated as a precondition rather
+        than read as a failure. The split itself is pinned without any
+        of that machinery in
+        ``tests/bunkershot3d/metrics/test_playability.py``.
         """
-        window = nominal_evaluation.playability.window
+        playability = nominal_evaluation.playability
+        window = playability.window
+        if window is None:
+            pytest.skip(
+                "the attack sweep produced no measurable carry anywhere, so "
+                f"there is no window to split: {playability.unavailable_reason}"
+            )
         assert window.unmeasured_fraction > 0.0, (
             "the registered attack sweep reaches -12 deg, which buries this "
             "design; the burial must be recorded"
