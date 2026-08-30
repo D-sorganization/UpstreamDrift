@@ -188,6 +188,43 @@ def entry_velocity_m_s(
     )
 
 
+def _delivered_direction(
+    static: NDArray[np.float64],
+    *,
+    lie_deg: float,
+    face_open_deg: float,
+    shaft_lean_deg: float,
+) -> NDArray[np.float64]:
+    """Rotate a static body-frame unit vector into the delivered frame.
+
+    The face normal and the sole normal differ only in the vector they
+    start from -- the rotation that carries either into the delivered
+    frame is the same one. Sharing it is not only brevity: issue #9247
+    was a *mirror* between the head frame and the delivery frame that
+    survived because two conventions were stated separately in prose. One
+    rotation applied in one place is one convention, so the two normals
+    cannot drift apart again.
+
+    Args:
+        static: The body-frame unit vector to carry.
+        lie_deg: Lie angle.
+        face_open_deg: Face open angle.
+        shaft_lean_deg: Shaft lean angle.
+
+    Returns:
+        The vector in the delivered frame.
+    """
+    return np.asarray(
+        delivered_rotation(
+            lie_deg=lie_deg,
+            face_open_deg=face_open_deg,
+            shaft_lean_deg=shaft_lean_deg,
+        )
+        @ static,
+        dtype=np.float64,
+    )
+
+
 def delivered_face_normal(
     *,
     loft_deg: float,
@@ -202,14 +239,11 @@ def delivered_face_normal(
     """
     loft_rad = math.radians(loft_deg)
     static = np.array([-math.cos(loft_rad), 0.0, math.sin(loft_rad)])
-    return np.asarray(
-        delivered_rotation(
-            lie_deg=lie_deg,
-            face_open_deg=face_open_deg,
-            shaft_lean_deg=shaft_lean_deg,
-        )
-        @ static,
-        dtype=np.float64,
+    return _delivered_direction(
+        static,
+        lie_deg=lie_deg,
+        face_open_deg=face_open_deg,
+        shaft_lean_deg=shaft_lean_deg,
     )
 
 
@@ -227,14 +261,11 @@ def delivered_sole_normal(
     """
     bounce_rad = math.radians(bounce_deg)
     static = np.array([-math.sin(bounce_rad), 0.0, -math.cos(bounce_rad)])
-    return np.asarray(
-        delivered_rotation(
-            lie_deg=lie_deg,
-            face_open_deg=face_open_deg,
-            shaft_lean_deg=shaft_lean_deg,
-        )
-        @ static,
-        dtype=np.float64,
+    return _delivered_direction(
+        static,
+        lie_deg=lie_deg,
+        face_open_deg=face_open_deg,
+        shaft_lean_deg=shaft_lean_deg,
     )
 
 
