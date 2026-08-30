@@ -37,6 +37,22 @@ large unmerged pull request containing the last ten days of work:
 The #9308 source diff is eight files, +703/-71. It is not a bundled feature
 backlog. It contains registration and governance only, with no smoke outcome.
 
+## Active Turnover Pull Request
+
+- Full PR: #9309, `Document Protected Proximal–Distal Program Turnover`.
+- Main-rooted branch: `docs/9153-turnover-main`.
+- Reviewed head: `3c99bfaef8c8d333adaa7c7604d26546a085e806`.
+- Diff: two documentation files, +223/-22; it does not repeat #9308.
+- Squash auto-merge is enabled.
+- CI Standard `33323662717`, docs quality `33323662727`, document governance
+  `33323662712`, SPEC freshness `33323662716`, LoD `33323662707`, and guards
+  passed on the reviewed head.
+- Bot CI Trigger run `33323662694`, job `99289907941`, is queued for
+  `d-sorg-fleet-docker` with no runner assigned. Preserve the existing run; do
+  not create a capacity-only rerun.
+- After auto-merge, verify the squash SHA, remote-main ancestry, and exact tree
+  equality before starting runner implementation.
+
 ## Paper and Release Authority
 
 - Qualified paper:
@@ -74,7 +90,8 @@ It binds the exact evaluator revision/tree, seven evaluator-source hashes, and
 
 ## Next Dependency-Ordered Work
 
-1. Protected-squash-merge the turnover-only branch `docs/9153-turnover`.
+1. Shepherd existing turnover PR #9309 without bypassing or duplicating its
+   queued Bot CI Trigger.
 2. From that exact protected base, implement a single-worker runner that reads
    the frozen registration without rewriting it.
 3. Write RED contracts first for exact protocol identity, complete six-case
