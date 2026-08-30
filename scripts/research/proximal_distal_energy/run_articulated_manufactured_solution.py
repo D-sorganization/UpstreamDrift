@@ -482,6 +482,62 @@ def _compatibility_tolerances(record: dict[str, Any]) -> dict[str, float]:
     return tolerances
 
 
+def _resolve_compatibility_path(
+    record: dict[str, Any], dotted_path: str, record_role: str
+) -> float:
+    parts = dotted_path.split(".")
+    current: object = record
+    offset = 0
+    while offset < len(parts):
+        if isinstance(current, dict):
+            match = next(
+                (
+                    (end, ".".join(parts[offset:end]))
+                    for end in range(offset + 1, len(parts) + 1)
+                    if ".".join(parts[offset:end]) in current
+                ),
+                None,
+            )
+            if match is None:
+                raise ValueError(
+                    "required semantic compatibility path is missing from "
+                    f"{record_role} record: {dotted_path}"
+                )
+            end, key = match
+            current = current[key]
+            offset = end
+            continue
+        if isinstance(current, list):
+            token = parts[offset]
+            if not token.isdecimal():
+                raise ValueError(
+                    "required semantic compatibility path has a malformed index in "
+                    f"{record_role} record: {dotted_path}"
+                )
+            index = int(token)
+            if index >= len(current):
+                raise ValueError(
+                    "required semantic compatibility path is missing from "
+                    f"{record_role} record: {dotted_path}"
+                )
+            current = current[index]
+            offset += 1
+            continue
+        raise ValueError(
+            "required semantic compatibility path is not traversable in "
+            f"{record_role} record: {dotted_path}"
+        )
+    try:
+        return _finite_value(
+            current, f"{record_role} semantic compatibility path {dotted_path}"
+        )
+    except ValueError as error:
+        raise ValueError(
+            "required semantic compatibility path is not a finite numeric value in "
+            f"{record_role} record: {dotted_path}"
+        ) from error
+
+
 def _compare_values(
     authority: object,
     rolling: object,
@@ -556,6 +612,9 @@ def compare_semantic_evidence(
     tolerances = _compatibility_tolerances(authority)
     if tolerances != _compatibility_tolerances(rolling):
         raise ValueError("semantic compatibility tolerance policies differ")
+    for path in tolerances:
+        _resolve_compatibility_path(authority, path, "authority")
+        _resolve_compatibility_path(rolling, path, "rolling")
     _validate_numeric_gates(authority)
     _validate_numeric_gates(rolling)
     for field in ("free_body", "constrained_motion"):
