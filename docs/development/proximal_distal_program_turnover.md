@@ -29,9 +29,10 @@ large unmerged pull request containing the last ten days of work:
 5. #9306 added signed-gap event retention, bracketed opening/reattachment
    location, duplicate-time alignment, and distributed replay.
 6. #9308 adds only the prospective six-case distributed-contact smoke
-   registration. Its reviewed head is
-   `142662fb3de86fbb8086b83772df09425897f9c2`; replace this sentence with its
-   protected squash and tree evidence immediately after auto-merge.
+   registration. It protected-squash-merged as
+   `651de90a4cf8e1195ec7f3ab3ae16883ec8f6172`; reviewed head
+   `142662fb3de86fbb8086b83772df09425897f9c2` and the squash share exact tree
+   `a0dd17ed057c0aea45f112172d406ace971610df`. Remote `main` equals the squash.
 
 The #9308 source diff is eight files, +703/-71. It is not a bundled feature
 backlog. It contains registration and governance only, with no smoke outcome.
@@ -73,22 +74,19 @@ It binds the exact evaluator revision/tree, seven evaluator-source hashes, and
 
 ## Next Dependency-Ordered Work
 
-1. Verify #9308 is protected-squash-merged, fetch remote `main`, and prove the
-   squash tree equals the reviewed head tree.
-2. Record exact head, run IDs, squash SHA/tree, and scientific limitations on
-   #9153 and update the root `AGENT_HANDOFF.md`.
-3. From that exact protected base, implement a single-worker runner that reads
+1. Protected-squash-merge the turnover-only branch `docs/9153-turnover`.
+2. From that exact protected base, implement a single-worker runner that reads
    the frozen registration without rewriting it.
-4. Write RED contracts first for exact protocol identity, complete six-case
+3. Write RED contracts first for exact protocol identity, complete six-case
    enumeration, atomic checkpoint/resume behavior, typed failure retention,
    thread limits, source/input digest rejection, and no outcome promotion.
-5. Execute the six cases once only after the runner and tests are protected.
+4. Execute the six cases once only after the runner and tests are protected.
    Retain every success, null, mismatch, and numerical/event failure.
-6. Add an outcome qualifier that checks completeness, cross-resolution event
+5. Add an outcome qualifier that checks completeness, cross-resolution event
    consistency, native-engine tolerances, work/impulse balance, and common
    support without relaxing thresholds after inspection.
-7. Register any divergent counterfactual separately before execution.
-8. Integrate only qualified results into claims, figures, the paper, release
+6. Register any divergent counterfactual separately before execution.
+7. Integrate only qualified results into claims, figures, the paper, release
    manifests, and then an immutable AffineDrift projection.
 
 ## Validation Commands
@@ -170,22 +168,6 @@ Observed at the turnover cut; recheck before acting:
 - Safe UpstreamDrift turnover checkpoint:
   `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-turnover` on
   `docs/9153-turnover`.
-
-## Pending Runner Gate Evidence
-
-- #9308 Bot CI Trigger run `33322180972`, job `99285986356`, is queued for
-  `d-sorg-fleet-docker` with no runner assigned.
-- DeskComputer's local capacity endpoint reported two online idle generic
-  runner services at 2026-08-30 09:47 PDT. That does not prove either service
-  carries the required Docker label or is eligible for the organization runner
-  group.
-- The repository-scoped runner inventory returned no runner with the required
-  label. The GitHub App cannot read organization-scoped runner inventory
-  (`403 Resource not accessible by integration`). Therefore label capacity is
-  unknown, not proven healthy or saturated.
-- Preserve the existing run and auto-merge. Do not start services, change
-  labels or routing, or create a redundant run without separate runner-layer
-  authority and eligibility evidence.
 
 ## Scientific Interpretation Guardrails
 
