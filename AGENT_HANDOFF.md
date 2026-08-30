@@ -1,66 +1,70 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 06:44 PDT
-Epic #8557 is canonical; issue state, local files, and checkpoints are not completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
+Updated: 2026-08-30 07:25 PDT
+
+Epic #8557 is canonical; issue state, local files, and checkpoints are not
+completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
+design-manual program.
 
 ## Protected Authority
 
-- Protected `main` was `727bda2de2d4656e8d9a3abbbc3a72b30fa06ebb`; re-check before push/merge.
+- UpstreamDrift protected `main` is
+  `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`, the squash merge of PR #9299.
+- PR #9299 requalified the CRBA-dependent publication after routing four native
+  Pinocchio consumers through one finite, square, symmetric-matrix adapter.
 - The requalified paper has 253 pages, 2,011,818 bytes, and SHA-256
   `554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36`.
 - Its 328 claims, 1,181 candidates, 498/498 literals, 707 release artifacts,
-  2,501 evidence references, and 421 local artifacts qualify computationally;
-  tagged-PDF and font-resource gates remain open.
-- AffineDrift PR #3993 pins the exact #9152 authority as protected squash
+  2,501 evidence references, and 421 local artifacts qualify computationally.
+  Tagged-PDF and embedded-font gates remain open archival limitations.
+- AffineDrift #3993 pins the exact #9152 authority as protected squash
   `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995
-  merged as `6cc909273d63147392b17078a35c6c4da034e1da`. All hosted checks passed.
-- Tools force-source frame PR #4873 merged as
-  `cc883cbaf63157b58c71cba385a683df2762b0cb`; the current pin branch advances
-  `vendor/ud-tools` to that exact authority. Tools #4142 remains the broader
+  merged as `6cc909273d63147392b17078a35c6c4da034e1da`.
+- Tools force-source frame #4873 merged as
+  `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
-- Tools R14.6 registration/acceptance, calibrated renderer, and extension map
-  merged through protected squashes `b2d7f721`, `d7a95e2a`, and `da0759c7`.
-  The trusted rendered-evidence run remains capacity-pending; do not rerun it.
 
-## Active Reproducibility Fix: #9153
+## Active Protected Follow-Up: #9302
 
-- Worktree `UpstreamDrift-worktrees/9153-crba-symmetry`, branch
-  `fix/9153-pinocchio-crba-symmetry`, backs open PR #9299. Latest pushed head is
-  `d1e8db1a76e95fd3ee76dc5e714523c17a890603`; closure below is uncommitted.
-- Source audit of the quarantined structural replay found that robotics
-  Pinocchio CRBA only guarantees its upper triangle, while four research paths
-  consumed the reusable native matrix without completing the lower triangle.
-- The fix adds one shared finite/square/symmetry adapter, routes all four
-  research consumers through it, and has a poisoned-lower-triangle regression
-  test. The protected publication gate correctly fails because pre-fix source
-  hashes remain in the release authority; do not patch hashes alone.
-- Requalification v1 stopped on timestamp/random-ID figure drift. V2 then ran
-  twice from clean snapshots under Linux/Python 3.11, MuJoCo/robotics Pinocchio
-  3.8.0, exact cmeel pins, one worker, and one numerical thread per library.
-  Six JSON/NPZ families and eleven vector figures reproduce exactly. The
-  hash-frozen 102-line figure writer exception expires 2026-09-15; do not
-  refactor it before this evidence merges.
-- The copied exact registry exposed one stale reciprocal link under focused
-  testing. Canonical reconciliation changed two review links and no material
-  claim field; the v2 replay report now rejects nonreciprocal registries.
-- All 47 native/focused and 50 claim/release/PDF tests, claim audit, release
-  qualification, and all-page inspection pass; final pages 141--142 were viewed.
-- The large campaign worktree remains
-  `UpstreamDrift-worktrees/9153-forward-impulse-work`, remote-equal at
-  `1e5e823ca2fa9391134e8a0ccf140a36036a88a7` before this isolated fix. Its
-  exact replay failure, legacy evidence, and `[100,120)` prohibition remain.
+- Worktree: `UpstreamDrift-worktrees/9153-crba-symmetry`.
+- Branch: `fix/9300-manufactured-engine-qualification`.
+- PR: #9302, titled
+  `Test: Qualify Manufactured Evidence Across Versioned Dependencies`.
+- The reviewed scientific delta is commit
+  `624f6dd901352cc5cfcfed38ab347a3148d5e3a1`; this handoff-only successor
+  will change `HEAD`, so verify `git rev-parse HEAD` before every operation.
+- Squash auto-merge is enabled. Never bypass reviews or protected checks.
+- The original optional-stack failure compared MuJoCo/Pinocchio 3.12/4.1 bytes
+  against evidence qualified with 3.8/3.8. That was an invalid cross-version
+  byte-identity requirement, not a mechanics failure.
+- The corrected contract requires two builds in the same environment to be byte
+  exact. When engine identities match the frozen qualification environment, the
+  record must also be semantically equal to frozen evidence. Across engine
+  versions, immutable model, design, source, limitation, and gate contracts must
+  agree; bytes and numerical payload are not asserted equal.
+- The artifact was regenerated in the qualified 3.8/3.8 WSL environment.
+  Numerical payload, model, design, gates, and limitations are unchanged; only
+  normalized formatting and the test-source hash changed.
+- Qualified native suite: 6/6 passed. Portable combined suite: 52 passed and
+  four native skips. Release validation: 707/707 artifacts valid.
+- The old anti-phantom run saw the former title containing `Engine`; rerunning
+  that same run reused its old pull-request payload. This substantive handoff
+  commit creates a new `synchronize` event with the corrected title. Do not
+  rerun the stale event again.
 
 ## Immediate Order
 
-1. Commit the reviewed requalified evidence, paper, authorities, tests, SPEC,
-   and this handoff; all registered local gates are green.
-2. Run the GitHub App setup immediately before pushing to PR #9299, then inspect
-   the exact protected-check state without redundant reruns.
-3. Merge #9299 only after exact-head protected gates prove the final tree and
-   verify the squash commit is an ancestor of remote `main`.
-4. Reconcile the 233-commit #9153 campaign branch with protected `main` as
-   reviewable dependency slices; never open the entire accumulated branch as a
-   single PR and never dispatch `[100,120)` from the pre-fix authority.
+1. Validate this handoff, keep it at or below 150 lines, commit, and push it.
+2. Run the GitHub App setup immediately before every GitHub operation.
+3. Inspect all checks on the exact new #9302 head. Do not create redundant
+   reruns when only runner capacity is pending.
+4. The optional stack must prove the corrected latest-version invariant. Fix
+   actionable source failures only; do not weaken scientific tolerances.
+5. Let squash auto-merge operate only after every protected gate is green.
+6. Fetch protected `main`, verify #9302's squash commit and tree remotely, then
+   update #9153/#8557 status with the exact evidence.
+7. Reconcile the accumulated campaign branch as reviewable dependency slices;
+   never open it as one PR and never dispatch `[100,120)` from pre-fix authority.
 
 ## Scientific Boundaries
 
@@ -68,8 +72,8 @@ Epic #8557 is canonical; issue state, local files, and checkpoints are not compl
   persistence, impulse/work attribution, ZVCF, biological passivity, muscle
   action, participant behavior, timing economy, safety, or coaching strategy.
 - Energy transfer, momentum redistribution, joint work, contact power, event
-  timing, and clubhead speed remain distinct estimands.
-- Native-engine agreement verifies the declared operators and common contact
+  timing, and clubhead speed are distinct estimands.
+- Native-engine agreement verifies declared operators and the common contact
   law; it does not independently calibrate anatomy, grip, shaft, or ground.
 - Ratios below the registered denominator floor are suppressed, not reported as
   zero. Signed shares may be negative or exceed one under cancellation.
@@ -86,62 +90,42 @@ Epic #8557 is canonical; issue state, local files, and checkpoints are not compl
   unreadable (`0x80070570`). Do not retry WSL, repair/mount/copy/mutate the
   VHDX, restart services, or launch a replacement without explicit approval
   and a recoverability plan.
-- DeskComputer remains runner-drained; keep tests serial and web tests at <=2 workers.
+- DeskComputer remains runner-drained; keep tests serial and web tests at no
+  more than two workers.
+- The accumulated campaign worktree is
+  `UpstreamDrift-worktrees/9153-forward-impulse-work`, last remote-equal at
+  `1e5e823ca2fa9391134e8a0ccf140a36036a88a7`, with 233 commits ahead and 46
+  behind at the last audit. Preserve its legacy evidence and quarantine.
 
-## Active AffineDrift Companion Provider Slice: #9174
+## Active AffineDrift Companion Boundary
 
-- Foundation PR #9180 protected-merged as
-  `1af18489e8755933a0d189aa8edafe787fa94d0f`; issue #9174 was reopened and
-  remains the completion authority. Publication PR #9214 protected-merged as
-  `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
-- #9222 reviewed head `7b992f2a` and protected squash `e9c0f934` have exact
-  tree `c468c0db`, but protected-main run 33277175052 was cancelled with zero
-  jobs or artifacts. #9192 is reopened until post-#9236 exact bytes,
-  acquisition identity, and attestations are verified; #9174 stays open.
-- Lease/worktree: `worktrees/UpstreamDrift-9236-b1`; branch
-  `fix/9236-articulated-provenance`. Do not use the dirty primary checkout.
-- ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
-  authority for AffineDrift #4010; #9064 remains design-manual authority and
-  #9070 remains typed calculation-manifest authority.
-- `scripts/companion_catalog.py` owns local-only discovery and exact source
-  provenance. `scripts/companion_publication.py` is the sole protected-main/tag
-  delivery wrapper and must refuse dirty or non-authoritative state.
-- #9192 packages the manifest, both schemas, compatibility policy, and detached
-  hashes as one commit-named 30-day Actions artifact; acquisition evidence must
-  record the exact run/artifact identity and lack of a durable URL.
-- Schema 1.0.0 is current and `previous_supported` is empty; declare a prior
-  version only with a validating fixture. No tag or release is authorized here.
-- The exact failure is optional-stack run 33271527700 / job 99150747357:
-  recorded `spatial_full_body.py` SHA-256 `bb195bf...` versus tracked
-  `b386ec...`. #9236 updates this and the nested closed-contact provenance edge,
-  checksum/manifest cascade, and test pin only. Numeric results, tolerances,
-  claims, and qualification are unchanged.
-- Exact-head gates must include same-environment native two-build byte equality,
-  source pins, release/claim integrity, SPEC duplicate ratchet, Ruff, Bandit,
-  and the full protected matrix. Never reroute, restart, force-push, or bypass.
-- Merge only when exact head/base/tree and every required check are green. Then
-  accept only post-repair commit-named payload/evidence artifacts; verify their
-  attestation, acquisition identity, embedded commit, and exact bytes before
-  closing #9192. Keep #9174 open for #9190, #9191, and #9193.
+- Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`;
+  publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
+- #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with
+  no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes,
+  acquisition identity, and attestations; #9174 remains open.
+- ADR-0043 and schema v1 are one-way UpstreamDrift software-fact authority for
+  AffineDrift #4010. #9064 remains design-manual authority and #9070 remains
+  typed calculation-manifest authority.
+- Do not accept payloads unless commit-named artifacts, acquisition identity,
+  attestations, embedded commit, and exact bytes all verify.
 
 ## Validation
 
 Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` for
-portable tests. Run Python tests with `-n 0`.
+portable tests and `-n 0` for pytest.
 
 ```powershell
-python -m pytest -n 0 -q tests/research/test_articulated_drift_contact_attribution.py
+python -m pytest -n 0 -q tests/research/test_articulated_manufactured_solution.py
 python -m pytest -n 0 -q tests/research/test_articulated_crba_requalification.py
+python -m pytest -n 0 -q tests/scripts/test_doc_governance_checks.py tests/scripts/test_design_manual_governance_contract.py
 python -m scripts.research.proximal_distal_energy.articulated_crba_requalification validate
-python -m ruff check scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py tests/research/test_articulated_drift_contact_attribution.py
-python -m ruff format --check scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py tests/research/test_articulated_drift_contact_attribution.py
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
 ```
 
-Also run claim/evidence integrity, release qualification, PDF build/inspection,
-and affected full gates after publication artifacts are added. Run the GitHub
-App setup script immediately before every GitHub operation. Never force-push,
-bypass protection/review, relax scientific tolerances after inspecting results,
-or create redundant CI reruns.
+Also run claim/evidence integrity, release qualification, PDF inspection, and
+affected full gates after publication changes. Never force-push, bypass branch
+protection, relax tolerances after inspecting results, or create capacity-only
+reruns.
