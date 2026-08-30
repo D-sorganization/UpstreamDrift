@@ -199,7 +199,7 @@ def test_catalog_pins_exact_provider_and_input_provenance() -> None:
 
     assert len(source["commit"]) == 40
     assert tools["pin_kind"] == "gitlink"
-    assert tools["pinned_commit"] == "b46f58df52df86b6c5a3db44460b26ac8919da70"
+    assert tools["pinned_commit"] == "95a59544972064cff9f4191a8f15eaa02c10ce81"
     assert tools["vendor_path"] == "vendor/ud-tools"
     assert {item["path"] for item in source["inputs"]} == {
         "pyproject.toml",
