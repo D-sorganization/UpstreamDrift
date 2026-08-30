@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 23:39 PDT (2026-08-30 06:39 UTC)
+Updated: 2026-08-29 23:50 PDT (2026-08-30 06:50 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -92,17 +92,15 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Immediate Order
 
-1. Recovery runs 33291836517 and 33294119255 completed exact [0,20) and
-   [20,40) slices at dispatch heads `9ec22b4a14d0` and `429ef9d97c`.
-   Second SHAs: receipt 1.5 `aa18d78d45dc`, corruption `3189b4a4f2e7`,
-   collection 1.4 `c4099337544b`, legacy view `e9e7e9853848`, enrichment
-   `d8fcb768d68d`, and boundary 1.1 SHA `48e022a7fc02`; every outcome-blind
-   gate passes and the next missing index is 40. #9273 is closed. #9281 run
-   33296773419 failed before case execution at exact head `85f529533b5199efcfd63d3892a31ec930e88b1e`:
-   environment matched, but native-smoke eigenvalue low bits drifted. Raw APIs
-   and runtime ZIP SHA `40e7a1d33d99` are retained. `240633a90` pins Haswell
-   without tolerance relaxation; 133 tests pass. Next preregister qualification
-   plus independent replay; if exact restart [0,20). Never mix runtime identities.
+1. Old-runtime [0,40) boundary `48e022a7fc02` passes, but #9281 run 33296773419
+   failed before cases when native-smoke eigenvalue low bits drifted; runtime ZIP
+   SHA `40e7a1d33d99` is retained. `240633a90` pins Haswell without tolerance
+   relaxation; `63f02a265` adds replay-only execution. #9282 qualification run
+   33297583257 and independent replay 33297683794 pass exact at `63f02a265`;
+   runtime identity is `58b7cc58cffc`, audit ZIP SHA `c27495a5aaf4`, replay ZIP
+   SHA `a3c655b658c4`, replay JSON SHA `7ea57a01ce0f`, and no case/checkpoint ran.
+   Close #9282, retire #9281, then separately preregister a new [0,20) basis.
+   Never mix old/new runtime identities or dispatch any later range first.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
