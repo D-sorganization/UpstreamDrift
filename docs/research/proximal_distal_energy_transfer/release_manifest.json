@@ -2804,6 +2804,10 @@
       "sha256": "44545d6a622de738281462fe799a6fee26ee0d7c798b26f61b865294b976d0f1",
       "bytes": 863
     },
+    "scripts/research/proximal_distal_energy/run_articulated_distributed_smoke.py": {
+      "sha256": "90d6e4f72b55980c67f4a96d880f247f5496782425edaef3a85b9e95fb9bb246",
+      "bytes": 20191
+    },
     "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py": {
       "sha256": "bce22951219072ef520e08f83487b9b9a66656d884c2b4b8b8930672b16b450d",
       "bytes": 893
