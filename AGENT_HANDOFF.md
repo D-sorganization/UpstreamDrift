@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 04:01 PDT (2026-08-30 11:01 UTC)
+Updated: 2026-08-30 05:12 PDT (2026-08-30 12:12 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -20,7 +20,8 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
 
 - #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must be clean and remote-equal after
-  this handoff commit; #9294 run 33307831234/job 99247422818 is sole live [80,100) at `1bcd17635`; no PR.
+  this handoff commit; #9294 run 33307831234/job 99247422818 passed [80,100)
+  at `1bcd17635`, but its exact enrichment gate failed closed; no PR.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
@@ -80,13 +81,12 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   but all 14 completed new cases change `horizons`, `numerical`, and seven
   legacy arrays. Six non-completed cases retain status. No audit artifact was
   written, no outcomes were interpreted, and [100,120) must not be dispatched.
-- Exact probe 33289155154 and runtime-attested probes 33290346007/33290812945
-  produced byte-identical JSON/NPZ/session evidence matching legacy only.
-  Repeatability audit SHA `3021c3fc5d9d` supports a first-enriched-replay
-  anomaly but no promotion/effect/human inference. The second attested evidence
-  is retained at `C:\Users\diete\Campaigns\UpstreamDrift-9153-runtime-attested-repeat-2-case-0080-run-33290812945`; trace is issue comment 5466564997.
-- Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
-  step fails even when the endpoint ratio passes.
+- Exact probe 33289155154 and runtime-attested probes 33290346007/33290812945 produced byte-identical JSON/NPZ/session evidence matching legacy only.
+  Repeatability audit SHA `3021c3fc5d9d` supports a first-enriched-replay anomaly but no promotion/effect/human inference. The second attested evidence is retained at `C:\Users\diete\Campaigns\UpstreamDrift-9153-runtime-attested-repeat-2-case-0080-run-33290812945`; trace is issue comment 5466564997.
+- Pinned-runtime recovery #9294 run 33307831234 passed [80,100) at `1bcd17635`;
+  checkpoint/runtime ZIP SHAs are `d6cef5aa55ed`/`8ffb680e6b34`, and receipt/corruption SHAs are `6a6cc6a82cb8`/`8e82c6fd97f1`.
+  Fresh [0,100) collection/legacy-view SHAs are `909b8408438d`/`092b0d29010a`. The enrichment audit failed closed before emitting an artifact because at least one legacy JSON result changed. Outcomes remain unopened; no rerun or [100,120) dispatch is authorized.
+- Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
@@ -102,10 +102,10 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    `d5a45955d0c3`; collection/boundary SHAs are `a7a4d1203152`/`ecb18f483fbf`;
    40 cases/360 arrays pass exactly. #9285 run 33302869012 passed [40,60);
    ZIP/receipt/corruption SHAs are `455ae2400f11`/`cb8be588c5d2`/`6db837906327`/`e362e20e81eb`.
-   #9288 run 33304874677 passed [60,80) at `1dd4a950f`; ZIP/receipt/corruption SHAs are `617f43a32c18`/`d3560780bf03`/`d47ea0ab0836`/`5a8004e21e5b`; collection/legacy/audit/boundary SHAs are `19670088e854`/`7e18fe9c1ac0`/`f26ccf158ec0`/`30d9e0ddd783`; 80 cases/720 arrays pass exactly, outcomes remain unopened; #9294 run 33307831234 is the sole registered [80,100) execution; do not cancel, duplicate, inspect, or dispatch [100,120).
-2. Preserve the case-100 mismatch, legacy-only repeat classification, and
-   adverse first enriched replay. Do not weaken exact equality, add tolerance,
-   overwrite evidence, read effects, promote results, or dispatch [100,120).
+   #9288 run 33304874677 passed [60,80) at `1dd4a950f`; its collection/audit/boundary SHAs are `19670088e854`/`f26ccf158ec0`/`30d9e0ddd783`.
+   #9294 run 33307831234 passed [80,100), retained 100 cases, then failed the exact enrichment gate on a changed legacy JSON result. Do not rerun or dispatch [100,120).
+2. Preserve both [80,100) failure boundaries, the legacy-only repeat classification,
+   and the adverse first enriched replay. Do not weaken exact equality, add tolerance, overwrite evidence, read effects, promote results, or dispatch [100,120).
 3. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 4. The contrast summary is implemented locally; after completion, validate the
