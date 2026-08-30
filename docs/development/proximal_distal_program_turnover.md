@@ -171,6 +171,22 @@ Observed at the turnover cut; recheck before acting:
   `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-turnover` on
   `docs/9153-turnover`.
 
+## Pending Runner Gate Evidence
+
+- #9308 Bot CI Trigger run `33322180972`, job `99285986356`, is queued for
+  `d-sorg-fleet-docker` with no runner assigned.
+- DeskComputer's local capacity endpoint reported two online idle generic
+  runner services at 2026-08-30 09:47 PDT. That does not prove either service
+  carries the required Docker label or is eligible for the organization runner
+  group.
+- The repository-scoped runner inventory returned no runner with the required
+  label. The GitHub App cannot read organization-scoped runner inventory
+  (`403 Resource not accessible by integration`). Therefore label capacity is
+  unknown, not proven healthy or saturated.
+- Preserve the existing run and auto-merge. Do not start services, change
+  labels or routing, or create a redundant run without separate runner-layer
+  authority and eligibility evidence.
+
 ## Scientific Interpretation Guardrails
 
 - Keep energy transfer, momentum redistribution, joint work, constraint-force
