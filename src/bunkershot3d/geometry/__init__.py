@@ -29,12 +29,15 @@ from .bounce import (
 )
 from .clubhead import ClubheadGenerator
 from .delivery import (
+    TRAVEL_AXIS_BODY,
     DeliveredGeometry,
     DeliveryCondition,
     deliver_wedge,
+    delivered_rotation,
     effective_bounce_deg,
     effective_loft_closed_form_deg,
     effective_loft_deg,
+    entry_velocity_m_s,
 )
 from .design_bounds import check_camber_design_space
 from .lofting import (
@@ -90,6 +93,7 @@ __all__: list[str] = [
     "ProvenanceKind",
     "SoleProfile",
     "StationCamber",
+    "TRAVEL_AXIS_BODY",
     "TriangleMesh",
     "WedgeGeometry",
     "build_section_polygon",
@@ -100,9 +104,11 @@ __all__: list[str] = [
     "compute_mass_properties",
     "constructible_camber_range_m2",
     "deliver_wedge",
+    "delivered_rotation",
     "effective_bounce_deg",
     "effective_loft_closed_form_deg",
     "effective_loft_deg",
+    "entry_velocity_m_s",
     "geometric_from_marketed",
     "get_preset",
     "loft_wedge",

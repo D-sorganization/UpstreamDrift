@@ -53,6 +53,7 @@ from bunkershot3d.ball import (
     compute_bunker_launch,
 )
 from bunkershot3d.geometry import (
+    TRAVEL_AXIS_BODY,
     DeliveredGeometry,
     StationCamber,
     WedgeGeometry,
@@ -177,7 +178,7 @@ def _strike_scene(ball_depth_m: float) -> StrikeScene:
         ball_position_m=np.array(
             [0.0, 0.0, BallLie(depth_m=ball_depth_m).center_z_m()], dtype=np.float64
         ),
-        travel_axis=np.array([1.0, 0.0, 0.0], dtype=np.float64),
+        travel_axis=np.array(TRAVEL_AXIS_BODY, dtype=np.float64),
     )
 
 
