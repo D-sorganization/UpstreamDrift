@@ -47,6 +47,10 @@ design-manual program.
 - Event locations qualify the retained discrete trajectory only; they are not
   claimed as the continuous integrator's exact event solution or causal
   counterfactual evidence.
+- Current commits are `30fd30ad8` (source/tests/SPEC) and `fee08a65c`
+  (deterministic release records). Thirty-three focused tests pass; architecture,
+  Ruff, format, title, file-size, design-manual, claim/evidence, PDF, and 711-
+  artifact release qualification gates pass locally. No PR exists yet.
 - PR #9305 passed every required protected gate, including the 8m53s full unit
   suite, and its release bundle validates 709 artifacts. The non-required
   optional-stack job remained queued after merge and was not redundantly rerun.
