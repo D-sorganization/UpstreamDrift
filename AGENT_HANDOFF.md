@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 21:18 PDT (2026-08-30 04:18 UTC)
+Updated: 2026-08-29 22:25 PDT (2026-08-30 05:25 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -19,10 +19,10 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
 ## Active Slice: UpstreamDrift #9153
 
 - #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
-  branch `feat/9153-forward-impulse-work` must be clean and remote-equal; verify
-  its exact turnover head with `git rev-parse HEAD`. Runtime attestation landed
-  at `a76a1e360`; the second repeat was preregistered/dispatched from
-  `e3b8b8dea978ae36ea650c9610ddc68acd73aa6a`. No PR exists.
+  branch `feat/9153-forward-impulse-work` is clean and remote-equal at turnover
+  head `5cb9695452a13260dbc1f54da8de456481af686a`. The registered recovery
+  run remains pinned to dispatch head `9ec22b4a14d0208acfac722e8760beae2bfeb97e`.
+  No PR exists.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
@@ -95,10 +95,14 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 1. Run 33291836517/job 99204705076 is the sole live structural process: exact
    [0,20) at `9ec22b4a14d0` against runtime audit 33277601263. Registration SHA
    `124ac709ea90` and the hosted registration gate passed before runtime replay.
+   At 2026-08-29 22:25 PDT the campaign step remained `in_progress`; every
+   registration/runtime gate before it had passed.
    Do not cancel, duplicate, or dispatch [20,40). On terminal success retain
-   raw APIs, both ZIPs, receipt 1.4, corruption audit, gap-free attested prefix,
-   legacy projection, exact enrichment, and the recovery-boundary audit; any
-   failure blocks progress.
+   raw APIs and both ZIPs. Before collection, finish the planned attested
+   receipt/collection upgrade so each source cryptographically binds its
+   run-local runtime-replay artifact; then run corruption, gap-free collection,
+   legacy projection, exact enrichment, and recovery-boundary gates. Any failure
+   blocks progress.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
