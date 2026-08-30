@@ -523,6 +523,37 @@ for every legacy array. It binds all three checkpoint pairs by SHA-256 and
 classifies enriched-only, legacy-only, neither, or nondiscriminating matches;
 none of those branches authorizes campaign promotion, effect interpretation,
 or human or coaching inference.
+
+### Attested Recovery Registration
+
+If repeated exact probes support a run-local anomaly, register any larger
+recovery before dispatch. The tracked recovery contract binds the qualified
+runtime, anomalous run, independent repeats, exact audit, gap-free slice order,
+one-run concurrency limit, per-slice evidence, and fail-closed stop conditions.
+It prohibits checkpoint reuse, attested/unattested source mixing, tolerance
+substitution, scientific outcome inspection, and any `[100,120)` dispatch.
+The hosted workflow validates the requested half-open range against this
+contract before it downloads the qualified runtime audit or executes a case.
+
+```bash
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_recovery_registration validate \
+  --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+  --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+  --registration docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_recovery_registration.json
+python3 -m scripts.research.proximal_distal_energy.articulated_structural_factorial_recovery_registration validate-slice \
+  --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+  --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+  --registration docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_recovery_registration.json \
+  --case-start CASE_START \
+  --case-stop CASE_STOP
+```
+
+Passing `validate-slice` proves only that the requested range is an exact
+registered slice. Every slice after `[0,20)` remains blocked until the prior
+run is terminal, retained under receipt 1.4, accumulated into a gap-free
+attested prefix, and exact against the legacy projection. Registration and
+runtime qualification do not make a scientific result promotable.
+
 Artifact receipt 1.3 requires GitHub's recorded byte size and SHA-256 digest to
 equal the retained ZIP exactly and cross-binds the run, structural job, and artifact
 workflow-run IDs and dispatch heads. A readable archive or API record from a

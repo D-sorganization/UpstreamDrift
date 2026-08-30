@@ -1,0 +1,100 @@
+{
+  "schema_version": "articulated-structural-factorial-recovery-registration/1.0.0",
+  "classification": "outcome_blind_recovery_preregistration",
+  "identity": {
+    "plan_sha256": "1575b1cb0ee7c5d8b42848a8c427a2379b22a156e239b01f399dc1fa2c878a87",
+    "execution_revision": "ccb171ed3185164e21c635e36de53d6a3cca3ed5",
+    "qualified_runtime_audit_run_id": 33277601263,
+    "qualified_runtime_identity_sha256": "5ceeb5af7815aece95ed859e749b72e8696e0ab8d6f183d4193700b525d16bb4"
+  },
+  "trigger_evidence": {
+    "first_enriched_replay_run_id": 33286379004,
+    "first_enriched_replay_dispatch_head": "0824aa69321c576aeef5f69eee351cada5d4977c",
+    "repeat_run_ids": [33289155154, 33290346007, 33290812945],
+    "attested_repeat_run_ids": [33290346007, 33290812945],
+    "repeatability_audit_sha256": "3021c3fc5d9dc392d1efa53aede5a0a022cce03503a3788f52cf7b8def96c71e",
+    "classification": "first_enriched_replay_anomaly_supported"
+  },
+  "registered_prefix": {
+    "case_start": 0,
+    "case_stop": 100,
+    "slice_width": 20,
+    "slice_count": 5
+  },
+  "slices": [
+    {
+      "ordinal": 1,
+      "case_start": 0,
+      "case_stop": 20,
+      "depends_on_case_stop": null,
+      "status": "authorized_after_registration_is_committed"
+    },
+    {
+      "ordinal": 2,
+      "case_start": 20,
+      "case_stop": 40,
+      "depends_on_case_stop": 20,
+      "status": "blocked_pending_prior_cumulative_exact_gate"
+    },
+    {
+      "ordinal": 3,
+      "case_start": 40,
+      "case_stop": 60,
+      "depends_on_case_stop": 40,
+      "status": "blocked_pending_prior_cumulative_exact_gate"
+    },
+    {
+      "ordinal": 4,
+      "case_start": 60,
+      "case_stop": 80,
+      "depends_on_case_stop": 60,
+      "status": "blocked_pending_prior_cumulative_exact_gate"
+    },
+    {
+      "ordinal": 5,
+      "case_start": 80,
+      "case_stop": 100,
+      "depends_on_case_stop": 80,
+      "status": "blocked_pending_prior_cumulative_exact_gate"
+    }
+  ],
+  "execution_policy": {
+    "maximum_concurrent_structural_runs": 1,
+    "dispatch_only_after_prior_slice_is_terminal_and_retained": true,
+    "runtime_replay_gate_required_before_every_slice": true,
+    "dispatch_head_recorded_before_each_slice": true,
+    "automatic_rerun_permitted": false,
+    "case_100_to_120_dispatch_permitted": false
+  },
+  "evidence_policy": {
+    "required_per_slice": [
+      "raw_run_jobs_artifacts_api_responses",
+      "runtime_replay_artifact_and_exact_gate",
+      "checkpoint_artifact_zip_and_github_digest",
+      "artifact_receipt_schema_1_4",
+      "source_derived_corruption_audit",
+      "gap_free_collection_manifest_schema_1_3",
+      "exact_legacy_enrichment_audit"
+    ],
+    "reuse_prior_checkpoint_bytes": false,
+    "mix_attested_and_unattested_checkpoint_sources": false,
+    "exact_equality_only": true,
+    "tolerance_substitution_permitted": false
+  },
+  "stop_conditions": [
+    "runtime_replay_contract_drift",
+    "workflow_or_artifact_failure",
+    "receipt_or_api_identity_failure",
+    "corruption_killswitch_failure",
+    "checkpoint_status_or_result_mismatch",
+    "legacy_array_mismatch",
+    "missing_or_corrupt_enriched_sidecar",
+    "non_gap_free_cumulative_prefix"
+  ],
+  "claim_boundary": {
+    "scientific_outcomes_may_be_inspected": false,
+    "effect_direction_may_be_interpreted": false,
+    "campaign_promotion_authorized": false,
+    "human_or_coaching_inference_authorized": false
+  }
+}

@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29 20:52 PDT (2026-08-30 03:52 UTC)
+Updated: 2026-08-29 21:04 PDT (2026-08-30 04:04 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -98,9 +98,10 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Immediate Order
 
-1. No structural process is live. Before any dispatch, preregister a fresh
-   runtime-attested [0,100) replay in 20-case slices, with exact dependency and
-   recovery order; do not silently mix old unbound and new attested evidence.
+1. No structural process is live. Recovery registration SHA `124ac709ea90`
+   binds fresh attested [0,100) slices, serial dependencies, stop conditions,
+   and no checkpoint reuse. Commit/push it, bind the exact head on #9153, then
+   dispatch only [0,20) against qualified runtime-audit run 33277601263.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
@@ -124,15 +125,14 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Validation
 
-Use Python 3.12 and serial pytest. Current focused structural/workflow: 97 pass;
+Use Python 3.12 and serial pytest. Current focused structural/workflow: 111 pass;
 Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
-the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
-stops in NumPy stubs because its configured language target rejects `type`;
-it does not reach project analysis.
+the qualified hosted runtime; direct MyPy reaches the pre-existing NumPy-stub
+error at `articulated_structural_factorial_runner.py:381`.
 
 Invoke the receipt, corruption, collection, and enrichment-audit entry points
 with `python -m scripts.research.proximal_distal_energy.<module>` from the repo
-root. Direct file-path execution cannot resolve the `scripts.research` package.
+root.
 
 Never force-push, bypass checks/review, relax a tolerance after seeing results,
 or create redundant CI reruns. Run the GitHub App setup script immediately

@@ -156,6 +156,18 @@ jobs:
           python -m pip install numpy scipy mujoco "pin>=2.6.0,<5.0.0"
           python audit-tools/scripts/ci/check_pinocchio_dynamics_api.py
 
+      - name: Validate Registered Recovery Slice
+        if: ${{ inputs.structural_campaign_slice == true }}
+        working-directory: audit-tools
+        shell: bash
+        run: |
+          python -m scripts.research.proximal_distal_energy.articulated_structural_factorial_recovery_registration validate-slice \
+            --plan docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_plan.json \
+            --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
+            --registration docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_recovery_registration.json \
+            --case-start ${{ inputs.structural_case_start }} \
+            --case-stop ${{ inputs.structural_case_stop }}
+
       - name: Generate Exact-Revision Runtime Audit
         if: ${{ inputs.structural_runtime_audit == true }}
         working-directory: execution-source

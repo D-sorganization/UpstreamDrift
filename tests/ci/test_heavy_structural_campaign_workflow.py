@@ -43,11 +43,19 @@ def test_structural_campaign_replays_runtime_contract_before_execution() -> None
         "VECLIB_MAXIMUM_THREADS": "1",
     }
     names = [step.get("name") for step in job["steps"]]
+    registration = names.index("Validate Registered Recovery Slice")
     observed = names.index("Generate Current-Run Runtime Audit")
     replay = names.index("Compare Qualified and Current Runtime")
     retain = names.index("Upload Structural Runtime Replay Evidence")
     execute = names.index("Run Registered Structural Campaign Slice")
-    assert observed < replay < retain < execute
+    assert registration < observed < replay < retain < execute
+    registration_step = job["steps"][registration]
+    assert (
+        "structural_factorial_recovery_registration validate-slice"
+        in (registration_step["run"])
+    )
+    assert "structural_case_start" in registration_step["run"]
+    assert "structural_case_stop" in registration_step["run"]
     upload = job["steps"][retain]
     assert "always()" in upload["if"]
     assert upload["with"]["if-no-files-found"] == "error"
