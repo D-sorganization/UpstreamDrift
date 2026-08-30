@@ -80,12 +80,12 @@ validation-v1`; manifest SHA is `7ff363120b4c`, with archive sizes 7,098,230
 - Real size-binding validation against run 33279075050 matches 8,143,272 API
   and retained bytes at `Campaigns/UpstreamDrift-9153-receipt-v1.3-size-
 validation-run-33279075050`; deterministic receipt SHA is `2e765f0aed41`.
-- Real receipt-1.4 validation against the same governed slice retains 20/20
-  sidecars and all three raw API-response digests at `Campaigns/UpstreamDrift-
-9153-receipt-v1.4-validation-run-33279075050`; receipt SHA is `a276c3bb2d52`.
-  A fresh collection-1.3 [0,40) proof is at `Campaigns/UpstreamDrift-9153-
-enriched-collected-prefix-0040-receipt-v1.4-collection-v1.3-validation-v1`;
-  manifest SHA `fd7492310c65` exposes receipt, archive, and API-response digests.
+- Real receipt-1.4 validations for governed runs 33277732709 and 33279075050
+  retain 20/20 sidecars and all raw API digests at matching `Campaigns/
+UpstreamDrift-9153-receipt-v1.4-validation-run-*` paths; receipt SHAs are
+  `1fd798290ad3` and `a276c3bb2d52`. The all-v1.4 [0,40) collection is at
+  `Campaigns/UpstreamDrift-9153-enriched-collected-prefix-0040-all-receipt-
+v1.4-collection-v1.3-v1`; manifest SHA is `4e866fa61965`.
 - Cumulative [0,40) collection manifest is `151e60ade22a`; immutable legacy
   view is `e9e7e9853848`; exact audit `d8fcb768d68d` passes 40 statuses/JSON
   results, 360 legacy arrays, and every enriched sidecar without outcome
