@@ -24,6 +24,12 @@
       "owner": "@docs-team",
       "reason": "Expanded functional test matrix tracked by consolidation commit #8129; split or archive after the backlog recovery window.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
+      "owner": "@physics-team",
+      "reason": "CRBA requalification context for issue #9153 temporarily exceeds the chapter budget; split this governed chapter only after the protected evidence release is merged.",
+      "expires_on": "2026-09-15"
     }
   ]
 }
