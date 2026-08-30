@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 19:38 PDT (2026-08-30 02:38 UTC)
+Updated: 2026-08-29 19:55 PDT (2026-08-30 02:55 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -88,9 +88,11 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 ## Immediate Order
 
 1. Preserve the exact case-100 mismatch and do not weaken equality, overwrite
-   retained evidence, or dispatch [100,120). Diagnose why the qualified
-   enriched execution changes every completed legacy result in [80,100), then
-   choose a preregistered recovery that preserves the adverse comparison.
+   retained evidence, or dispatch [100,120). The preregistered diagnostic is
+   an exact [80,81) repeat at frozen execution `ccb171ed3` and audit run 33277601263. Exact match to enriched-only supports a source delta; match to
+   legacy-only supports a first-replay anomaly; match to neither demonstrates
+   cross-run non-repeatability. No tolerance, promotion, or outcome reading is
+   permitted; preserve the adverse comparison under every branch.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
