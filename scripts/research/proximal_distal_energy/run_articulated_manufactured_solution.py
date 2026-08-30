@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
+import importlib.metadata
 import json
+import math
+import platform
 from pathlib import Path
-from typing import Any
+import sys
+from typing import Any, Literal
 
 import numpy as np
 
@@ -25,7 +30,22 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 DATA = ARTICLE / "data"
 OUTPUT = DATA / "articulated_manufactured_solution.json"
+AUTHORITY_LOCK = ROOT / "requirements-articulated-authority-py311.lock"
+AUTHORITY_PROFILE = "articulated-manufactured-authority-py311-v1"
+ROLLING_PROFILE = "articulated-manufactured-rolling-native-v1"
+RecordProfile = Literal["authority", "rolling"]
+_AUTHORITY_DISTRIBUTIONS = {
+    "mujoco": "3.8.0",
+    "numpy": "2.3.5",
+    "pin": "3.8.0",
+    "scipy": "1.15.3",
+}
+_CROSS_ENGINE_TOLERANCE = 1.0e-8
+_POSITION_TOLERANCE_M = 1.0e-10
+_VELOCITY_TOLERANCE_M_S = 1.0e-10
+_VIRTUAL_POWER_TOLERANCE_W = 1.0e-9
 SOURCE_PATHS = (
+    "requirements-articulated-authority-py311.in",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
     "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
@@ -33,11 +53,89 @@ SOURCE_PATHS = (
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
     "scripts/research/proximal_distal_energy/spatial_full_body.py",
     "tests/research/test_articulated_manufactured_solution.py",
+    "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
 )
 
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def canonical_record_bytes(record: dict[str, Any]) -> bytes:
+    """Return canonical UTF-8/LF JSON and reject every non-finite number."""
+
+    try:
+        text = json.dumps(
+            record,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+    except ValueError as error:
+        raise ValueError("record contains a non-finite numeric value") from error
+    return f"{text}\n".encode()
+
+
+def _distribution_version(name: str) -> str:
+    try:
+        return importlib.metadata.version(name)
+    except importlib.metadata.PackageNotFoundError as error:
+        raise RuntimeError(f"required distribution is unavailable: {name}") from error
+
+
+def validate_authority_environment() -> None:
+    """Fail unless execution is the exact governed CPython/Linux stack."""
+
+    actual_platform = (platform.system(), platform.machine().lower())
+    if actual_platform != ("Linux", "x86_64"):
+        raise RuntimeError("authority requires Linux x86_64")
+    if platform.python_implementation() != "CPython":
+        raise RuntimeError("authority requires CPython")
+    if sys.version_info[:2] != (3, 11):
+        raise RuntimeError("authority requires Python 3.11")
+    mismatches: dict[str, tuple[str, str]] = {}
+    for name, expected in _AUTHORITY_DISTRIBUTIONS.items():
+        actual = _distribution_version(name)
+        if actual != expected:
+            mismatches[name] = (expected, actual)
+    if mismatches:
+        raise RuntimeError(
+            f"authority dependency versions do not match lock: {mismatches}"
+        )
+
+
+def _execution_profile(profile: RecordProfile) -> dict[str, Any]:
+    if profile == "authority":
+        validate_authority_environment()
+        return {
+            "id": AUTHORITY_PROFILE,
+            "publication_authority": "authoritative",
+            "publication_eligible": True,
+            "python_minor": "3.11",
+            "platform": "linux-x86_64",
+            "dependency_lock": {
+                "path": AUTHORITY_LOCK.relative_to(ROOT).as_posix(),
+                "sha256": _sha256(AUTHORITY_LOCK),
+            },
+            "runtime_versions": {
+                "python": platform.python_version(),
+                "numpy": _distribution_version("numpy"),
+                "mujoco": _distribution_version("mujoco"),
+                "pinocchio": _distribution_version("pin"),
+            },
+        }
+    return {
+        "id": ROLLING_PROFILE,
+        "publication_authority": "non_authoritative_compatibility_only",
+        "publication_eligible": False,
+        "runtime_versions": {
+            "python": sys.version.split()[0],
+            "numpy": _distribution_version("numpy"),
+            "mujoco": _distribution_version("mujoco"),
+            "pin": _distribution_version("pin"),
+        },
+    }
 
 
 def _free_record(result: Any) -> dict[str, Any]:
@@ -82,9 +180,10 @@ def _constrained_record(result: Any) -> dict[str, Any]:
     }
 
 
-def build_record() -> dict[str, Any]:
+def build_record(profile: RecordProfile = "authority") -> dict[str, Any]:
     """Execute the registered controls and return a release record."""
 
+    execution_profile = _execution_profile(profile)
     import mujoco
     import pinocchio as pin
 
@@ -104,9 +203,10 @@ def build_record() -> dict[str, Any]:
         hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
     )
     return {
-        "schema_version": "1.0.0",
+        "schema_version": "1.1.0",
         "study_id": "articulated-manufactured-solution-independent-v1",
         "classification": "synthetic_numerical_verification_not_human_evidence",
+        "execution_profile": execution_profile,
         "model": {
             "canonical_sha256": model.canonical_hash,
             "coordinate_count": model.nq,
@@ -124,6 +224,10 @@ def build_record() -> dict[str, Any]:
             "registered_richardson_order_interval": [0.9, 1.1],
             "inverse_dynamics_relative_tolerance": 0.05,
             "conservation_relative_tolerance": 0.02,
+            "cross_engine_relative_tolerance": _CROSS_ENGINE_TOLERANCE,
+            "constraint_position_tolerance_m": _POSITION_TOLERANCE_M,
+            "constraint_velocity_tolerance_m_s": _VELOCITY_TOLERANCE_M_S,
+            "constraint_virtual_power_tolerance_w": _VIRTUAL_POWER_TOLERANCE_W,
             "conservation_scope": "gravity_free_zero_torque_free_floating_club_subtree",
             "killswitch": "add_10_nm_to_mujoco_inverse_and_require_gate_failure",
         },
@@ -141,17 +245,171 @@ def build_record() -> dict[str, Any]:
     }
 
 
-def write_record(path: Path = OUTPUT) -> Path:
+def _registered_gates(record: dict[str, Any]) -> tuple[bool, bool, bool]:
+    free_body = record.get("free_body")
+    constrained = record.get("constrained_motion")
+    if not isinstance(free_body, dict) or not isinstance(constrained, dict):
+        raise ValueError("semantic record is missing registered gate sections")
+    return (
+        record.get("all_gates_pass") is True,
+        free_body.get("all_gates_pass") is True,
+        constrained.get("all_gates_pass") is True,
+    )
+
+
+def _mapping(record: dict[str, Any], field: str) -> dict[str, Any]:
+    value = record.get(field)
+    if not isinstance(value, dict):
+        raise ValueError(f"semantic record is missing mapping: {field}")
+    return value
+
+
+def _finite(mapping: dict[str, Any], field: str) -> float:
+    value = mapping.get(field)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"semantic field is not numeric: {field}")
+    numeric = float(value)
+    if not math.isfinite(numeric):
+        raise ValueError(f"semantic field is not finite: {field}")
+    return numeric
+
+
+def _validate_numeric_gates(record: dict[str, Any]) -> None:
+    design = _mapping(record, "design")
+    free = _mapping(record, "free_body")
+    inverse = _mapping(free, "inverse_dynamics_relative_error")
+    drift = _mapping(free, "gravity_free_zero_torque_relative_drift")
+    constrained = _mapping(record, "constrained_motion")
+    inverse_limit = _finite(design, "inverse_dynamics_relative_tolerance")
+    conservation_limit = _finite(design, "conservation_relative_tolerance")
+    order_bounds = design.get("registered_richardson_order_interval")
+    orders = free.get("richardson_orders")
+    if not isinstance(order_bounds, list) or len(order_bounds) != 2:
+        raise ValueError("semantic record has invalid Richardson bounds")
+    if not isinstance(orders, list) or not orders:
+        raise ValueError("semantic record has no Richardson evidence")
+    inverse_values = tuple(_finite(inverse, name) for name in inverse)
+    drift_values = tuple(_finite(drift, name) for name in drift)
+    order_values = tuple(float(value) for value in orders)
+    constrained_values = (
+        _finite(constrained, "multiplier_relative_residual"),
+        _finite(constrained, "equilibrium_relative_residual"),
+    )
+    passed = (
+        free.get("independent_engine_difference_detected") is True
+        and constrained.get("independent_engine_difference_detected") is True
+        and max(inverse_values) < inverse_limit
+        and max(drift_values) < conservation_limit
+        and all(
+            float(order_bounds[0]) <= value <= float(order_bounds[1])
+            for value in order_values
+        )
+        and max(constrained_values) < inverse_limit
+        and _finite(constrained, "cross_engine_multiplier_relative_residual")
+        < _CROSS_ENGINE_TOLERANCE
+        and _finite(constrained, "position_residual_m") < _POSITION_TOLERANCE_M
+        and _finite(constrained, "velocity_residual_m_s") < _VELOCITY_TOLERANCE_M_S
+        and _finite(constrained, "virtual_power_residual_w")
+        < _VIRTUAL_POWER_TOLERANCE_W
+    )
+    if not passed:
+        raise ValueError("semantic numeric gate comparison failed")
+
+
+def _require_profile(record: dict[str, Any], profile_id: str, authority: str) -> None:
+    profile = record.get("execution_profile")
+    if not isinstance(profile, dict):
+        raise ValueError("semantic record is missing execution provenance")
+    if profile.get("id") != profile_id:
+        raise ValueError(f"unexpected execution profile: {profile.get('id')}")
+    if profile.get("publication_authority") != authority:
+        raise ValueError("execution profile has invalid publication authority")
+    expected_eligibility = authority == "authoritative"
+    if profile.get("publication_eligible") is not expected_eligibility:
+        raise ValueError("execution profile has invalid publication eligibility")
+
+
+def compare_semantic_evidence(
+    authority: dict[str, Any], rolling: dict[str, Any]
+) -> dict[str, Any]:
+    """Compare scientific identity and gates while excluding runtime provenance."""
+
+    _require_profile(authority, AUTHORITY_PROFILE, "authoritative")
+    _require_profile(
+        rolling,
+        ROLLING_PROFILE,
+        "non_authoritative_compatibility_only",
+    )
+    identity_fields = (
+        "schema_version",
+        "study_id",
+        "classification",
+        "model",
+        "design",
+        "limitations",
+        "source_sha256",
+    )
+    mismatches = [
+        field for field in identity_fields if authority.get(field) != rolling.get(field)
+    ]
+    if mismatches:
+        raise ValueError(f"semantic identity mismatch: {mismatches}")
+    authority_gates = _registered_gates(authority)
+    rolling_gates = _registered_gates(rolling)
+    if not all(authority_gates) or not all(rolling_gates):
+        raise ValueError("semantic gate comparison failed")
+    _validate_numeric_gates(authority)
+    _validate_numeric_gates(rolling)
+    for field in ("free_body", "constrained_motion"):
+        authority_section = authority[field]
+        rolling_section = rolling[field]
+        if not isinstance(authority_section, dict) or not isinstance(
+            rolling_section, dict
+        ):
+            raise ValueError(f"semantic section is malformed: {field}")
+        if authority_section.keys() != rolling_section.keys():
+            raise ValueError(f"semantic section fields differ: {field}")
+        canonical_record_bytes({field: rolling_section})
+    return {
+        "all_registered_gates_pass": True,
+        "scientific_identity_matches": True,
+        "authority_profile": authority.get("execution_profile"),
+        "rolling_profile": rolling.get("execution_profile"),
+    }
+
+
+def write_record(path: Path = OUTPUT, *, profile: RecordProfile = "authority") -> Path:
     """Write the deterministic evidence record."""
 
-    record = build_record()
+    if profile == "rolling" and path.resolve() == OUTPUT.resolve():
+        raise ValueError("rolling evidence cannot replace the authoritative record")
+    record = build_record(profile)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    path.write_bytes(canonical_record_bytes(record))
     return path
 
 
 def main() -> None:
-    print(write_record())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, default=OUTPUT)
+    parser.add_argument(
+        "--profile", choices=("authority", "rolling"), default="authority"
+    )
+    parser.add_argument("--compare-committed", action="store_true")
+    arguments = parser.parse_args()
+    if arguments.compare_committed and arguments.output.resolve() == OUTPUT.resolve():
+        parser.error("--compare-committed requires a temporary --output path")
+    output = write_record(arguments.output, profile=arguments.profile)
+    if arguments.compare_committed:
+        generated = json.loads(output.read_text(encoding="utf-8"))
+        committed = json.loads(OUTPUT.read_text(encoding="utf-8"))
+        if (
+            arguments.profile == "authority"
+            and output.read_bytes() != OUTPUT.read_bytes()
+        ):
+            raise SystemExit("authoritative bytes differ from committed record")
+        compare_semantic_evidence(committed, generated)
+    print(output)
 
 
 if __name__ == "__main__":

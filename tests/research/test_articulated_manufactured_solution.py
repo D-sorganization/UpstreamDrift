@@ -156,7 +156,7 @@ def test_committed_manufactured_solution_evidence_is_current_and_nontrivial() ->
     """Release evidence must be source-pinned and contain measured residuals."""
 
     record = json.loads((DATA / "articulated_manufactured_solution.json").read_text())
-    assert record["schema_version"] == "1.0.0"
+    assert record["schema_version"] == "1.1.0"
     assert record["all_gates_pass"] is True
     assert record["classification"] == (
         "synthetic_numerical_verification_not_human_evidence"
