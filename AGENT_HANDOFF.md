@@ -22,8 +22,9 @@ are not completion evidence.
 - #9153 lease is held; worktree `UpstreamDrift-worktrees/9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` must remain clean and remote-equal.
   Scientific/collector content head is `442c6d70a626df56e73cdccfe47682a5b1a0678a`;
-  exact handoff/preregistration head is
-  `0aa431ca4e23cb4ab3c2cc87ff9af97824990cfb`. No PR exists.
+  exact preregistration/dispatch head is
+  `0aa431ca4e23cb4ab3c2cc87ff9af97824990cfb`; resolve the turnover-only
+  successor with `git rev-parse HEAD`. No PR exists.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
