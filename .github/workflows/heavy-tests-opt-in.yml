@@ -29,6 +29,11 @@ on:
         required: false
         default: false
         type: boolean
+      structural_runtime_replay_probe:
+        description: "Replay a qualified structural runtime without campaign cases"
+        required: false
+        default: false
+        type: boolean
       structural_campaign_slice:
         description: "Run one exact half-open structural campaign slice"
         required: false
@@ -59,7 +64,7 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
-    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.structural_runtime_audit != true && inputs.structural_campaign_slice != true) }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.structural_runtime_audit != true && inputs.structural_runtime_replay_probe != true && inputs.structural_campaign_slice != true) }}
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
@@ -78,8 +83,8 @@ jobs:
           echo "runner=d-sorg-fleet-docker" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
   structural-runtime-audit:
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.structural_runtime_audit == true || inputs.structural_campaign_slice == true) }}
-    name: Structural Runtime Audit or Campaign Slice
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.structural_runtime_audit == true || inputs.structural_runtime_replay_probe == true || inputs.structural_campaign_slice == true) }}
+    name: Structural Runtime Audit, Replay, or Campaign Slice
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -99,13 +104,25 @@ jobs:
       - name: Validate Structural Mode
         shell: bash
         run: |
-          if [[ "${{ inputs.structural_runtime_audit }}" == "${{ inputs.structural_campaign_slice }}" ]]; then
+          mode_count=0
+          if [[ "${{ inputs.structural_runtime_audit }}" == "true" ]]; then
+            ((mode_count += 1))
+          fi
+          if [[ "${{ inputs.structural_runtime_replay_probe }}" == "true" ]]; then
+            ((mode_count += 1))
+          fi
+          if [[ "${{ inputs.structural_campaign_slice }}" == "true" ]]; then
+            ((mode_count += 1))
+          fi
+          if ((mode_count != 1)); then
             echo "exactly one structural mode must be selected" >&2
             exit 2
           fi
           if [[ "${{ inputs.structural_campaign_slice }}" == "true" ]]; then
             [[ "${{ inputs.structural_case_start }}" =~ ^[0-9]+$ ]]
             [[ "${{ inputs.structural_case_stop }}" =~ ^[0-9]+$ ]]
+          fi
+          if [[ "${{ inputs.structural_campaign_slice }}" == "true" || "${{ inputs.structural_runtime_replay_probe }}" == "true" ]]; then
             [[ "${{ inputs.structural_runtime_audit_run_id }}" =~ ^[0-9]+$ ]]
           fi
 
@@ -193,7 +210,7 @@ jobs:
           retention-days: 30
 
       - name: Download Qualified Runtime Audit
-        if: ${{ inputs.structural_campaign_slice == true }}
+        if: ${{ inputs.structural_campaign_slice == true || inputs.structural_runtime_replay_probe == true }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: structural-runtime-audit-${{ inputs.structural_runtime_audit_run_id }}
@@ -202,7 +219,7 @@ jobs:
           run-id: ${{ inputs.structural_runtime_audit_run_id }}
 
       - name: Generate Current-Run Runtime Audit
-        if: ${{ inputs.structural_campaign_slice == true }}
+        if: ${{ inputs.structural_campaign_slice == true || inputs.structural_runtime_replay_probe == true }}
         working-directory: execution-source
         env:
           PYTHONPATH: ${{ github.workspace }}/execution-source
@@ -216,7 +233,7 @@ jobs:
             --output ../structural-runtime-observed.json
 
       - name: Compare Qualified and Current Runtime
-        if: ${{ inputs.structural_campaign_slice == true }}
+        if: ${{ inputs.structural_campaign_slice == true || inputs.structural_runtime_replay_probe == true }}
         working-directory: execution-source
         env:
           PYTHONPATH: ${{ github.workspace }}/execution-source
@@ -230,7 +247,7 @@ jobs:
             --output ../structural-runtime-replay-audit.json
 
       - name: Upload Structural Runtime Replay Evidence
-        if: ${{ inputs.structural_campaign_slice == true && always() }}
+        if: ${{ (inputs.structural_campaign_slice == true || inputs.structural_runtime_replay_probe == true) && always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: structural-runtime-replay-${{ github.run_id }}
@@ -266,7 +283,7 @@ jobs:
 
   run-heavy-tests:
     needs: pick-runner
-    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.structural_runtime_audit != true && inputs.structural_campaign_slice != true) }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.structural_runtime_audit != true && inputs.structural_runtime_replay_probe != true && inputs.structural_campaign_slice != true) }}
     name: Heavy Integration Tests (${{ matrix.engine }})
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 90

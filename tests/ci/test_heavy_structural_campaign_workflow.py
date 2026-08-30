@@ -60,3 +60,34 @@ def test_structural_campaign_replays_runtime_contract_before_execution() -> None
     upload = job["steps"][retain]
     assert "always()" in upload["if"]
     assert upload["with"]["if-no-files-found"] == "error"
+
+
+def test_structural_runtime_replay_probe_cannot_execute_campaign_cases() -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/heavy-tests-opt-in.yml").read_text(encoding="utf-8")
+    )
+    inputs = workflow[True]["workflow_dispatch"]["inputs"]
+    job = workflow["jobs"]["structural-runtime-audit"]
+    steps = {step["name"]: step for step in job["steps"]}
+
+    assert inputs["structural_runtime_replay_probe"] == {
+        "description": "Replay a qualified structural runtime without campaign cases",
+        "required": False,
+        "default": False,
+        "type": "boolean",
+    }
+    assert "structural_runtime_replay_probe == true" in job["if"]
+    assert "mode_count" in steps["Validate Structural Mode"]["run"]
+    for name in (
+        "Download Qualified Runtime Audit",
+        "Generate Current-Run Runtime Audit",
+        "Compare Qualified and Current Runtime",
+        "Upload Structural Runtime Replay Evidence",
+    ):
+        assert "structural_runtime_replay_probe == true" in steps[name]["if"]
+    for name in (
+        "Validate Registered Recovery Slice",
+        "Run Registered Structural Campaign Slice",
+        "Upload Structural Campaign Checkpoints",
+    ):
+        assert "structural_runtime_replay_probe" not in steps[name]["if"]

@@ -483,6 +483,12 @@ Evidence produced before this control remains retained as diagnostic/adverse
 evidence and must not be mixed into a collection qualified under the pinned
 kernel contract.
 
+The hosted workflow provides a separate `structural_runtime_replay_probe`
+mode. It downloads one preregistered qualification artifact, regenerates the
+runtime audit on an independent runner, performs the exact replay comparison,
+and retains the replay artifact without accepting case indices or invoking the
+campaign launcher. A campaign slice is authorized only after this probe passes.
+
 After replaying the frozen legacy prefix under the enriched revision, require
 an exact noninterpretive reproduction audit before continuing beyond that
 prefix:
