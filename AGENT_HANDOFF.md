@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 00:34 PDT (2026-08-30 07:34 UTC)
+Updated: 2026-08-30 00:56 PDT (2026-08-30 07:56 UTC)
 Epic #8557 is the completion authority; local artifacts and partial campaigns are not completion evidence.
 
 ## Protected Authority
@@ -20,7 +20,7 @@ Epic #8557 is the completion authority; local artifacts and partial campaigns ar
 
 - #9153 lease is held at `C:\Users\diete\Repositories\UpstreamDrift-worktrees\9153-forward-impulse-work`;
   branch `feat/9153-forward-impulse-work` is clean and remote-equal at
-  `7c4cd1dc6e8c9205166120208db62c836fc1e7a5`; recovery is pinned here; no PR.
+  `ff823beac015a2d5161b9756c76cfc0c73e9833d`; run 33299342024 is pinned to `7c4cd1dc6`; no PR.
 - Do not use the occupied primary `UpstreamDrift` checkout. Resume only in the
   leased worktree above, verify `git status --short --branch`, and fetch before
   comparing its branch with the remote.
@@ -97,12 +97,12 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    33297583257 and independent replay 33297683794 pass exact at `63f02a265`;
    runtime identity is `58b7cc58cffc`, audit ZIP SHA `c27495a5aaf4`, replay ZIP
    SHA `a3c655b658c4`, replay JSON SHA `7ea57a01ce0f`, and no case/checkpoint ran.
-   #9283 run 33297882357 is terminal but non-promotable: its plan says
-   DeskComputer and old registration names audit 33277601263, while hosted run
-   used 33297583257. Retained checkpoint/runtime ZIP SHAs are `fd751968e8f8` /
-   `58041bf22374`. Run 33299342024/job 99224393310 is the sole live [0,20)
-   replacement at `7c4cd1dc6`; v1.1 placement and runtime replay gates passed.
-   It is executing; do not inspect outcomes, cancel, duplicate, or advance.
+   #9283 run 33297882357 is non-promotable due to its placement/audit conflict;
+   corrected run 33299342024 passed; ZIP SHAs are `2d37d758b3ce` / `ed27776934ab`.
+   Receipt/corruption/collection/legacy SHAs are `24d5ef943b75`, `449b65b3b5bd`,
+   `b6784792e585`, and `0eaa55ccb355`; enrichment/boundary SHAs are
+   `7b00bb69fbbe` (20 cases/180 arrays) / `7b5b4db054b1`. All gates pass without
+   outcome inspection; [20,40) needs separate issue preregistration.
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
