@@ -100,9 +100,18 @@ class TestNominalShot:
         """ADR-0032 buys the F0 tier for ~ms/shot; the budget is 50 ms."""
         assert nominal_shot.runtime_s < 0.5
 
-    def test_delivered_loft_reflects_the_open_face_and_shaft_lean(
+    def test_delivered_loft_reflects_the_open_face(
         self, nominal_shot, nominal_design
     ) -> None:
+        """The default delivery leans the shaft 0 deg, so only the face acts.
+
+        This was named "...and shaft lean" while the default leaned 6 deg
+        forward. Issue #9247 set that to 0 -- forward lean is a full-shot
+        delivery -- so the name would now claim coverage this fixture
+        does not exercise. The degree-for-degree lean behaviour is pinned
+        directly in ``tests/bunkershot3d/geometry/test_wedge_delivery.py``
+        (``TestShaftLean``), so nothing is lost by narrowing the name.
+        """
         static_loft = nominal_design.geometry().loft_deg
         delivered = nominal_shot.delivered.effective_loft_deg
         assert delivered != pytest.approx(static_loft)
