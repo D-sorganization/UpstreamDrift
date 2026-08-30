@@ -107,8 +107,10 @@ design-manual program.
   no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes,
   acquisition identity, and attestations; #9174 remains open.
 - #9190 worktree: `worktrees/UpstreamDrift-9190-workflows`; branch
-  `feat/9190-governed-workflows`, based on exact `origin/main` `727bda2d`.
-  This branch is not protected authority until reviewed and merged.
+  `feat/9190-governed-workflows`, head
+  `e8ca04e989cab2e951d24fc60e636e16ce89b5a7`, based on exact `origin/main`
+  `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`. Protected PR #9303 is open;
+  this branch is not protected authority until reviewed and merged.
 - ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
   authority for AffineDrift #4010; #9064 remains design-manual authority and
   #9070 remains typed calculation-manifest authority.
@@ -143,6 +145,8 @@ Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` for
 portable tests and `-n 0` for pytest.
 
 ```powershell
+python -m pytest -n 0 -q tests/companion
+python -m scripts.companion_workflows --repo-root . execute-all --report dist/companion-workflows/execution-report.v1.json
 python -m pytest -n 0 -q tests/research/test_articulated_manufactured_solution.py
 python -m pytest -n 0 -q tests/research/test_articulated_crba_requalification.py
 python -m pytest -n 0 -q tests/scripts/test_doc_governance_checks.py tests/scripts/test_design_manual_governance_contract.py
