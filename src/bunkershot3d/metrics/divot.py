@@ -87,19 +87,16 @@ The sign is the point: deeper is more dig. Holding the delivery fixed, the
 design axes alone still move the ratio by 0.11 (at -2 deg of attack) to 0.18
 (at -14 deg), against 0.0012 for the whole of the old signal.
 
-**One caveat the verdict carries rather than hides.** Over that same workbench
-sweep the ratio falls from 0.424 to 0.339 as marketed bounce rises from 8 to
-26 deg at -14 deg of attack and a 24 mm sole -- more bounce reading as *more*
-dig, which is the opposite of fitting practice. That is the model, not the
-metric: maximum sole depth over the same span rises from 18.0 to 21.5 mm, so
-the F0 solver itself puts the higher-bounce sole deeper in this shallow,
-non-burying regime. Where the head does bury -- three shipped presets at
-5.0/8.0/14.42 deg of marketed bounce, run through ``simulate_shot`` directly --
-the ordering is the expected one: at -10 deg of attack the 5 deg sole buries
-75 mm and returns 0.35 of its descent while the 14.42 deg sole buries 13 mm and
-returns 0.51. Both measurements are reported;
-:data:`DIG_SKID_BOUNCE_ORDERING_REASON` travels with every verdict so that
-nobody reads one as a bounce recommendation.
+**The bounce caveat is gone, because the defect it covered is fixed.** This
+metric was the first one able to see that F0 answered marketed bounce with the
+wrong sign, and until issue #9247 a ``DIG_SKID_BOUNCE_ORDERING_REASON`` rode on
+every verdict so nobody read one as a bounce recommendation. The cause was a
+delivery frame mirrored against the head frame, which drove the head through
+the sand trailing edge first; with it un-mirrored, more bounce is shallower and
+moves less sand in both the planing and the burying regime, and the ordering is
+now asserted directly in ``tests/bunkershot3d/solvers/test_bounce_ordering_9247``.
+A temporary caveat left standing after its cause is fixed is not caution, it is
+noise, so it was removed with the fix rather than kept as cover.
 
 **Still uncalibrated.** Separating is not the same as being measured. Nobody
 has published a vertical restitution for a wedge sole leaving bunker sand, so
@@ -132,7 +129,6 @@ from .trace import STANDARD_GRAVITY_MPS2, HeadModel, StrikeScene, StrikeTrace
 __all__ = [
     "DEFAULT_DIG_DESCENT_RETURN",
     "DEFAULT_SKID_DESCENT_RETURN",
-    "DIG_SKID_BOUNCE_ORDERING_REASON",
     "DIG_SKID_COARSE_WINDOW_REASON",
     "DIG_SKID_UNCALIBRATED_REASON",
     "MIN_RESOLVED_SUBMERGED_SAMPLES",
@@ -184,18 +180,6 @@ DIG_SKID_UNCALIBRATED_REASON = (
     "rather than measurements (issue #8703)."
 )
 """Why a dig-versus-skid verdict is never a finding, however clean the trace."""
-
-DIG_SKID_BOUNCE_ORDERING_REASON = (
-    "the F0 model's response to marketed bounce disagrees with fitting "
-    "practice in the shallow, non-burying regime: over the workbench sweep the "
-    "ratio falls from 0.424 to 0.339 as marketed bounce rises from 8 to 26 deg "
-    "at -14 deg of attack, and maximum sole depth rises from 18.0 to 21.5 mm "
-    "over the same span, so the solver -- not this metric -- puts more bounce "
-    "deeper there. Where the head buries the ordering is the expected one. "
-    "Read the verdict as what the model did, never as a bounce recommendation "
-    "(issue #8703)."
-)
-"""The one ordering a designer must not take at face value from this verdict."""
 
 DIG_SKID_COARSE_WINDOW_REASON = (
     "the entry and exit speeds are centred differences over a submerged window "
@@ -738,7 +722,7 @@ def _dig_skid_calibration(
     Returns:
         The record, never reporting itself calibrated.
     """
-    reasons = [DIG_SKID_UNCALIBRATED_REASON, DIG_SKID_BOUNCE_ORDERING_REASON]
+    reasons = [DIG_SKID_UNCALIBRATED_REASON]
     if submerged_samples < MIN_RESOLVED_SUBMERGED_SAMPLES:
         reasons.append(
             DIG_SKID_COARSE_WINDOW_REASON.format(

@@ -30,7 +30,6 @@ import pytest
 from bunkershot3d.metrics import (
     DEFAULT_DIG_DESCENT_RETURN,
     DEFAULT_SKID_DESCENT_RETURN,
-    DIG_SKID_BOUNCE_ORDERING_REASON,
     DIG_SKID_COARSE_WINDOW_REASON,
     DIG_SKID_UNCALIBRATED_REASON,
     MIN_RESOLVED_SUBMERGED_SAMPLES,
@@ -76,14 +75,21 @@ class TestEveryVerdictDeclaresItselfUncalibrated:
         assert "8703" in DIG_SKID_UNCALIBRATED_REASON
         assert "restitution" in DIG_SKID_UNCALIBRATED_REASON
 
-    def test_the_bounce_ordering_caveat_travels_with_every_verdict(
-        self, vee_trace, head, scene
-    ) -> None:
-        """A designer must not read the verdict as a bounce recommendation."""
+    def test_the_bounce_ordering_caveat_is_gone(self, vee_trace, head, scene) -> None:
+        """It covered issue #9247, and #9247 is fixed.
+
+        The caveat existed because F0 answered marketed bounce with the
+        wrong sign, so a verdict could not be read as a bounce
+        recommendation. The frame that inverted it is un-mirrored and the
+        ordering is asserted directly in
+        ``tests/bunkershot3d/solvers/test_bounce_ordering_9247``. A
+        temporary caveat left standing after its cause is fixed is not
+        caution but permanent noise on every verdict, so this pins its
+        removal rather than leaving the reason string unowned.
+        """
         reasons = dig_vs_skid(vee_trace, head, scene).calibration.reasons
 
-        assert DIG_SKID_BOUNCE_ORDERING_REASON in reasons
-        assert "bounce" in DIG_SKID_BOUNCE_ORDERING_REASON
+        assert not any("bounce" in reason for reason in reasons), reasons
 
     def test_the_calibration_names_the_thresholds_the_verdict_used(
         self, vee_trace, head, scene
