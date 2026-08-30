@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 17:31 PDT (2026-08-30 00:31 UTC)
+Updated: 2026-08-29 18:10 PDT (2026-08-30 01:10 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -73,7 +73,7 @@ collected-prefix-0060-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   `52404c77b8a6` passes 60 statuses/results, 540 arrays, and every enriched
   sidecar without outcome inspection, human/coaching inference, or promotion.
 - Replay 33283267821 executes [60,80) at dispatch head `42f1acda4` using
-  qualified audit 33277601263. At 2026-08-30 00:31 UTC, job 99181938431 was
+  qualified audit 33277601263. At 2026-08-30 01:09 UTC, job 99181938431 was
   still running registered-campaign step 11; upload step 12 was pending and no
   artifact existed. It is the sole authorized structural process; do not
   cancel, rerun, duplicate, or dispatch another while it is live.
@@ -112,6 +112,10 @@ Ruff/Black and configured pre-push gates pass. Native sidecar replay requires
 the qualified hosted runtime; local MuJoCo import stops at DLL error 1114. Direct MyPy under local 3.13
 stops in NumPy stubs because its configured language target rejects `type`;
 it does not reach project analysis.
+
+Invoke the receipt, corruption, collection, and enrichment-audit entry points
+with `python -m scripts.research.proximal_distal_energy.<module>` from the repo
+root. Direct file-path execution cannot resolve the `scripts.research` package.
 
 Never force-push, bypass checks/review, relax a tolerance after seeing results,
 or create redundant CI reruns. Run the GitHub App setup script immediately
