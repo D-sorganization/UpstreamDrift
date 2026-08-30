@@ -191,7 +191,64 @@ class TestEvaluationAndComparisonReports:
         text = comparison_report(comparison)
         assert "left" in text
         assert "right" in text
-        assert "Leader" in text
+        assert "Verdict" in text
+
+    def test_the_comparison_no_longer_headlines_a_leader(
+        self, model, firm_sand, tour_swing
+    ) -> None:
+        """Issue #9243: a leader was named whether or not the bands separated.
+
+        The headline is now the verdict, which is allowed to be a tie, and the
+        word "Leader" is gone from this report so that a reader skimming for
+        one cannot find a design name that the uncertainty does not support.
+        """
+        from src.tools.bunker_shot_gui.design import WedgeDesign
+
+        comparison = model.compare(
+            WedgeDesign(name="left", marketed_bounce_deg=6.0),
+            WedgeDesign(name="right", marketed_bounce_deg=13.0),
+            firm_sand,
+            tour_swing,
+        )
+        text = comparison_report(comparison)
+        assert "Leader" not in text
+        assert ("INDISTINGUISHABLE" in text) == (comparison.winner is None)
+
+    def test_the_comparison_reports_the_uncertainty_budget(
+        self, model, firm_sand, tour_swing
+    ) -> None:
+        """The split, the dominant term and the unsized terms all appear."""
+        from src.tools.bunker_shot_gui.design import WedgeDesign
+
+        comparison = model.compare(
+            WedgeDesign(name="left", marketed_bounce_deg=6.0),
+            WedgeDesign(name="right", marketed_bounce_deg=13.0),
+            firm_sand,
+            tour_swing,
+        )
+        text = comparison_report(comparison)
+        assert "Uncertainty budget" in text
+        assert "model-form" in text
+        assert "sampling" in text
+        assert "Dominant term" in text
+        assert "UNQUANTIFIED" in text
+        assert "NOT a confidence interval" in text
+
+    def test_the_bootstrap_interval_is_qualified(
+        self, model, firm_sand, tour_swing
+    ) -> None:
+        """It covers the delivery sweep only, and the report has to say so."""
+        from src.tools.bunker_shot_gui.design import WedgeDesign
+
+        comparison = model.compare(
+            WedgeDesign(name="left", marketed_bounce_deg=6.0),
+            WedgeDesign(name="right", marketed_bounce_deg=13.0),
+            firm_sand,
+            tour_swing,
+        )
+        text = comparison_report(comparison)
+        assert "NOT the whole uncertainty" in text
+        assert "#8659" in text
 
     def test_an_overlapping_comparison_says_it_does_not_separate(
         self, model, firm_sand, tour_swing
@@ -205,7 +262,7 @@ class TestEvaluationAndComparisonReports:
             tour_swing,
         )
         text = comparison_report(comparison)
-        expected = "yes" if comparison.separated else "does not"
+        expected = "is better" if comparison.separated else "not ordered"
         assert expected in text
 
     def test_an_unrankable_comparison_says_why(
@@ -221,4 +278,5 @@ class TestEvaluationAndComparisonReports:
         )
         text = comparison_report(comparison)
         assert "not available" in text
-        assert "Leader" not in text
+        assert "Uncertainty budget" not in text
+        assert "is better" not in text

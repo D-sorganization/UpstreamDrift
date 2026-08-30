@@ -40,13 +40,14 @@ from __future__ import annotations
 import logging
 import math
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TypeVar
 
 import numpy as np
 from numpy.typing import NDArray
 
 from bunkershot3d.ball import (
+    BallLaunchResult,
     BallLie,
     BunkerShotState,
     SandDelivery,
@@ -89,6 +90,13 @@ from bunkershot3d.solvers import (
     worst_of,
 )
 from bunkershot3d.study.comparison import DesignComparison, compare_designs
+from bunkershot3d.study.ranking import BandedRanking, RankingVerdict, rank_with_bands
+from bunkershot3d.vandv.band import ConsistencyBand
+from bunkershot3d.vandv.budget import (
+    UncertaintyBudget,
+    UncertaintyClass,
+    UncertaintyTerm,
+)
 from src.shared.python.core.contracts import require
 
 from .bridge import (
@@ -111,21 +119,44 @@ from .design import (
 )
 from .field import ContactPatch, SoleLoadField, contact_patch
 from .shot3d import ShotScene, shot_scene
+from .outcomes import DesignEvaluation, ShotOutcome, WorkbenchComparison
 from .traces import ShotTraces, shot_traces
+from .uncertainty import (
+    CARRY_BAND_SOURCE,
+    CARRY_NUMERICAL_UNQUANTIFIED,
+    LAUNCH_DIRECTION_UNQUANTIFIED,
+    TRANSFER_EFFICIENCY_UNQUANTIFIED,
+    CarryEstimate,
+    CarrySweep,
+    PlayabilityOutcome,
+    objective_band,
+    objective_budget,
+    propagate_carry_band,
+)
 
 __all__ = [
     "ATTACK_ANGLE_SWEEP_DEG",
+    "CARRY_BAND_SOURCE",
+    "CARRY_NUMERICAL_UNQUANTIFIED",
     "COMPARISON_SEED",
+    "LAUNCH_DIRECTION_UNQUANTIFIED",
+    "TRANSFER_EFFICIENCY_UNQUANTIFIED",
+    "BandedRanking",
     "CarryEstimate",
+    "ConsistencyBand",
     "ContactPatch",
     "DesignEvaluation",
     "HeadBuild",
     "PlayabilityOutcome",
+    "RankingVerdict",
     "ShotOutcome",
     "ShotScene",
     "ShotTraces",
     "SoleLoadField",
     "SoleLoadMap",
+    "UncertaintyBudget",
+    "UncertaintyClass",
+    "UncertaintyTerm",
     "WorkbenchComparison",
     "WorkbenchModel",
 ]
@@ -141,27 +172,6 @@ COMPARISON_SEED = 20260814
 """Fixed entropy for the A/B bootstrap, so a comparison is reproducible."""
 
 _MAX_FLIGHT_TIME_S = 10.0
-
-
-@dataclass(frozen=True, slots=True)
-class CarryEstimate:
-    """A carry number and the verdict it may only ever be quoted with.
-
-    Issue #8657: carry is derived from the impulse the solver delivered and
-    the divot mass the metrics layer measured, through an **uncalibrated**
-    transfer efficiency, and there is no published measurement of ball speed
-    or launch angle out of sand to calibrate it against (issue #8616). Pairing
-    the number with its verdict in one value object is what stops the two
-    being separated on the way to a display.
-
-    Attributes:
-        carry_m: Carry distance [m].
-        verdict: The shot's verdict combined with the launch model's own,
-            never better than ``BEYOND_VALIDATION``.
-    """
-
-    carry_m: float
-    verdict: ValidityVerdict
 
 
 def _strike_scene(ball_depth_m: float) -> StrikeScene:
@@ -257,271 +267,6 @@ class _ShotViews:
     patch: ContactPatch | None
     scene: ShotScene | None
     traces: ShotTraces | None
-
-
-@dataclass(frozen=True)
-class ShotOutcome:
-    """One shot: its verdict first, its numbers only if there are any.
-
-    Attributes:
-        verdict: The validity statement for the whole trace.
-        fidelity_tier: Which rung of the ADR-0032 ladder produced it.
-        refused: True when the solver declined to answer. Every numeric
-            field is ``None`` in that case, by construction.
-        delivered: Effective loft, bounce and aim at impact.
-        peak_force_n: Largest resultant sand force.
-        impulse_n_s: Magnitude of the time-integrated sand force.
-        entry_speed_mps: Head speed at the first sample.
-        exit_speed_mps: Head speed at the last sample.
-        max_depth_m: Deepest submerged point.
-        contact_duration_s: Time with at least one engaged element.
-        peak_inertial_fraction: Largest share of force carried by the
-            dynamic term. ADR-0032 predicts roughly 0.9 at 25 m/s.
-        runtime_s: Wall-clock cost of the integration.
-        loads: Peak/mean head loads, when the trace supports them.
-        divot: Divot geometry, when the sole entered and left the sand.
-        dig_skid: The dig-versus-skid discriminator.
-        sole_load: The bounce-utilisation map: the strike binned onto a
-            12x12 sole grid and summed over time.
-        sole_field: The same load *before* either reduction -- per element,
-            per sample, with the depth-linear and inertial terms separated
-            (issue #8705).
-        contact_patch: The engaged element set followed through the shot
-            (issue #8707).
-        scene: The 3-D scene -- pose, free surface and swept divot section --
-            for the animated view (issue #8706).
-        traces: The scalar traces and the per-sample validity band, on the
-            same time axis as the scene and the field (issue #8708).
-        carry_m: Carry from the splash and flight models.
-        carry_verdict: The validity statement the carry may be quoted under.
-            Present whenever ``carry_m`` is, and absent whenever it is not.
-        unavailable: One line per metric that could not be computed, with
-            the reason. Empty when everything was.
-    """
-
-    verdict: ValidityVerdict
-    fidelity_tier: FidelityTier
-    refused: bool
-    delivered: DeliveredGeometry
-    peak_force_n: float | None = None
-    impulse_n_s: float | None = None
-    entry_speed_mps: float | None = None
-    exit_speed_mps: float | None = None
-    max_depth_m: float | None = None
-    contact_duration_s: float | None = None
-    peak_inertial_fraction: float | None = None
-    runtime_s: float | None = None
-    loads: HeadLoadMetrics | None = None
-    divot: DivotMetrics | None = None
-    dig_skid: DigSkidResult | None = None
-    sole_load: SoleLoadMap | None = None
-    sole_field: SoleLoadField | None = None
-    contact_patch: ContactPatch | None = None
-    scene: ShotScene | None = None
-    traces: ShotTraces | None = None
-    carry_m: float | None = None
-    carry_verdict: ValidityVerdict | None = None
-    unavailable: tuple[str, ...] = ()
-
-    def __post_init__(self) -> None:
-        """Enforce the refusal rule and the carry-verdict rule.
-
-        Raises:
-            ValueError: If a refused outcome carries any number, or if a carry
-                number arrives without the verdict it may be quoted under.
-                ADR-0032 makes the first the single most important behaviour
-                of the tier and issue #8657 makes the second the condition on
-                displaying carry at all, so both are a ``raise`` rather than a
-                contract decorator -- ``DBC_LEVEL=off`` must not switch either
-                off.
-        """
-        if (self.carry_m is None) != (self.carry_verdict is None):
-            raise ValueError(
-                "a carry number and its validity verdict travel together. No "
-                "published measurement of ball speed or launch angle out of "
-                "sand exists (issue #8616), so a carry shown on its own would "
-                "read as though it had been measured"
-            )
-        if not self.refused:
-            return
-        numbers = (
-            self.peak_force_n,
-            self.impulse_n_s,
-            self.max_depth_m,
-            self.carry_m,
-            self.sole_field,
-            self.contact_patch,
-            self.scene,
-            self.traces,
-        )
-        if any(value is not None for value in numbers):
-            raise ValueError(
-                "a refused shot must not carry a force, a depth, a carry, a "
-                "load field or a 3-D scene: 3D-RFT declined this query, and "
-                "animating a head through sand beside a REFUSED verdict is "
-                "exactly what ADR-0032 forbids"
-            )
-
-    @property
-    def status(self) -> EnvelopeStatus:
-        """How much of the answer may be believed."""
-        return self.verdict.status
-
-    @property
-    def is_within_stated_envelope(self) -> bool:
-        """True only inside 3D-RFT's own published limits."""
-        return self.verdict.is_within_stated_envelope
-
-
-@dataclass(frozen=True)
-class PlayabilityOutcome:
-    """The playability window, or the reason there is not one.
-
-    Attributes:
-        window: The measured window, or ``None`` when it could not be
-            measured.
-        unavailable_reason: Why, when ``window`` is ``None``.
-        carry_m: ``(na, nb)`` carry grid [m]; NaN where the solver refused.
-        attack_angle_deg: ``(na,)`` swept attack angles, for display.
-        firmness_kg_per_cm2: ``(nb,)`` swept penetrometer readings.
-        carry_verdict: The worst verdict over the answered grid points, which
-            the whole grid must be read under. Present whenever any cell of
-            ``carry_m`` is finite.
-    """
-
-    window: PlayabilityWindow | None
-    unavailable_reason: str = ""
-    carry_m: NDArray[np.float64] = field(
-        default_factory=lambda: np.zeros((0, 0), dtype=np.float64)
-    )
-    attack_angle_deg: NDArray[np.float64] = field(
-        default_factory=lambda: np.zeros(0, dtype=np.float64)
-    )
-    firmness_kg_per_cm2: NDArray[np.float64] = field(
-        default_factory=lambda: np.zeros(0, dtype=np.float64)
-    )
-    carry_verdict: ValidityVerdict | None = None
-
-    def __post_init__(self) -> None:
-        """Enforce the carry-verdict rule on the grid as well as the shot.
-
-        Raises:
-            ValueError: If any grid point holds a carry number and no verdict
-                accompanies the grid (issue #8657).
-        """
-        if bool(np.isfinite(self.carry_m).any()) and self.carry_verdict is None:
-            raise ValueError(
-                "a carry grid and its validity verdict travel together; "
-                f"{int(np.isfinite(self.carry_m).sum())} point(s) carry a "
-                "number with no verdict to read them under"
-            )
-
-    @property
-    def available(self) -> bool:
-        """True when a window was measured."""
-        return self.window is not None
-
-
-@dataclass(frozen=True)
-class DesignEvaluation:
-    """Everything the workbench knows about one candidate sole.
-
-    Attributes:
-        design: The designer's inputs.
-        geometry: The resolved design vector.
-        sand: The sand state the shot was run in.
-        shot: The nominal shot.
-        playability: The playability window over the delivery sweep.
-        effective_camber_area_m2: The camber area the lofted head actually
-            carries. A sole cannot host an arbitrarily large camber for its
-            width and bounce, so the declared area in :attr:`geometry` is
-            fitted to what the sole admits; carrying the realised value here
-            is what lets the report state both (issue #8698).
-        camber_stations: The lofter's per-station camber account, heel to
-            toe. Carried because :attr:`effective_camber_area_m2` alone
-            cannot answer whether the sole was substituted: it is the
-            *declared* width's number, and the relieved heel and toe
-            stations have their own, narrower bands.
-    """
-
-    design: WedgeDesign
-    geometry: WedgeGeometry
-    sand: SandState
-    shot: ShotOutcome
-    playability: PlayabilityOutcome
-    effective_camber_area_m2: float
-    camber_stations: tuple[StationCamber, ...]
-
-    @property
-    def aggregate_camber_was_clamped(self) -> bool:
-        """Whether the *declared* camber area itself had to be substituted.
-
-        Narrowly scoped, and ``False`` on the shipped presets even when
-        stations were refitted; see :attr:`any_camber_was_clamped`.
-        """
-        return self.effective_camber_area_m2 != self.geometry.sole_camber_area_m2
-
-    @property
-    def clamped_camber_stations(self) -> tuple[StationCamber, ...]:
-        """Every spanwise station refitted to its own constructible band."""
-        return tuple(station for station in self.camber_stations if station.was_clamped)
-
-    @property
-    def any_camber_was_clamped(self) -> bool:
-        """Whether any camber substitution occurred, aggregate or per station.
-
-        Cannot read ``False`` while :attr:`clamped_camber_stations` holds
-        anything, which is the property that stops a one-boolean caller being
-        told a substituted sole was built as declared (issue #8698).
-        """
-        return self.aggregate_camber_was_clamped or bool(self.clamped_camber_stations)
-
-    @property
-    def verdict(self) -> ValidityVerdict:
-        """The validity statement the nominal shot carried."""
-        return self.shot.verdict
-
-    @property
-    def status(self) -> EnvelopeStatus:
-        """How much of this evaluation may be believed."""
-        return self.shot.status
-
-
-@dataclass(frozen=True)
-class WorkbenchComparison:
-    """Two candidate soles, side by side, with the uncertainty attached.
-
-    Attributes:
-        left: The first design's evaluation.
-        right: The second design's evaluation.
-        ranking: Bootstrap ranking on carry error over the shared delivery
-            sweep, or ``None`` when the two designs share too few answerable
-            grid points to say anything.
-        ranking_unavailable_reason: Why, when ``ranking`` is ``None``.
-        shared_points: Number of grid points both designs answered.
-    """
-
-    left: DesignEvaluation
-    right: DesignEvaluation
-    ranking: DesignComparison | None = None
-    ranking_unavailable_reason: str = ""
-    shared_points: int = 0
-
-    @property
-    def separated(self) -> bool:
-        """True when the ranking distinguishes the leader from the rival."""
-        return self.ranking is not None and self.ranking.is_separated()
-
-    @property
-    def worst_status(self) -> EnvelopeStatus:
-        """The worse of the two verdicts.
-
-        A comparison is only as trustworthy as its least trustworthy half, so
-        this is what the verdict banner shows. Combining the verdicts here
-        rather than in the view keeps the ordering of the statuses in the one
-        place that defines it.
-        """
-        return worst_of((self.left.verdict, self.right.verdict)).status
 
 
 def _firmness_kpa(readings: NDArray[np.float64] | float) -> NDArray[np.float64]:
@@ -753,6 +498,8 @@ class WorkbenchModel:
             traces=views.traces,
             carry_m=None if carry is None else carry.carry_m,
             carry_verdict=None if carry is None else carry.verdict,
+            carry_band=None if carry is None else carry.band,
+            carry_band_reasons=() if carry is None else carry.band_reasons,
             unavailable=tuple(missing),
         )
 
@@ -897,18 +644,42 @@ class WorkbenchModel:
             RuntimeError: If the ball-flight kernel is unavailable. Reported
                 as a missing metric rather than replaced by an estimate.
         """
+        delivered = deliver_wedge(geometry, swing.delivery())
+        state = BunkerShotState(
+            club_loft_deg=float(delivered.effective_loft_deg),
+            ball_lie=BallLie(depth_m=float(swing.ball_depth_m)),
+            delivery=delivery,
+            club_mass_kg=geometry.head_mass_kg,
+        )
+        launch = compute_bunker_launch(state)
+        central = self._flight_carry_m(launch)
+        band, reasons = propagate_carry_band(
+            state,
+            central,
+            lambda edge: self._flight_carry_m(compute_bunker_launch(edge)),
+        )
+        return CarryEstimate(
+            carry_m=central,
+            verdict=launch.verdict,
+            band=band,
+            band_reasons=reasons,
+        )
+
+    def _flight_carry_m(self, launch: BallLaunchResult) -> float:
+        """Fly one launch and report its carry.
+
+        Args:
+            launch: The launch conditions the splash model produced.
+
+        Returns:
+            Carry distance [m].
+
+        Raises:
+            RuntimeError: If the ball-flight kernel is unavailable.
+        """
         from src.shared.python.physics.ball_launch_conditions import LaunchConditions
         from src.shared.python.physics.ball_simulator import BallFlightSimulator
 
-        delivered = deliver_wedge(geometry, swing.delivery())
-        launch = compute_bunker_launch(
-            BunkerShotState(
-                club_loft_deg=float(delivered.effective_loft_deg),
-                ball_lie=BallLie(depth_m=float(swing.ball_depth_m)),
-                delivery=delivery,
-                club_mass_kg=geometry.head_mass_kg,
-            )
-        )
         simulator = BallFlightSimulator()
         trajectory = simulator.simulate_trajectory(
             LaunchConditions(
@@ -920,10 +691,7 @@ class WorkbenchModel:
             max_time=_MAX_FLIGHT_TIME_S,
             dt=self._settings.flight_time_step_s,
         )
-        return CarryEstimate(
-            carry_m=float(simulator.analyze_trajectory(trajectory)["carry_distance"]),
-            verdict=launch.verdict,
-        )
+        return float(simulator.analyze_trajectory(trajectory)["carry_distance"])
 
     # ---------------------------------------------------------- playability
 
@@ -950,35 +718,36 @@ class WorkbenchModel:
         points = self._settings.playability_points
         attack_deg = np.linspace(*ATTACK_ANGLE_SWEEP_DEG, points, dtype=np.float64)
         firmness = np.linspace(*FIRMNESS_RANGE_KG_PER_CM2, points, dtype=np.float64)
-        carry = np.full((points, points), np.nan, dtype=np.float64)
-        reasons: list[str] = []
-        verdicts: list[ValidityVerdict] = []
+        sweep = CarrySweep(points)
         for column, reading in enumerate(firmness):
             state = sand.with_firmness(float(reading)).sand_state()
             for row, angle in enumerate(attack_deg):
-                estimate = self._grid_carry(
-                    geometry, state, swing.with_attack_angle(float(angle)), reasons
+                sweep.record(
+                    row,
+                    column,
+                    self._grid_carry(
+                        geometry,
+                        state,
+                        swing.with_attack_angle(float(angle)),
+                        sweep.reasons,
+                    ),
                 )
-                if estimate is None:
-                    continue
-                carry[row, column] = estimate.carry_m
-                verdicts.append(estimate.verdict)
-        if not np.isfinite(carry).any():
+        if not np.isfinite(sweep.carry).any():
             return PlayabilityOutcome(
                 window=None,
                 unavailable_reason=(
-                    reasons[0]
-                    if reasons
+                    sweep.reasons[0]
+                    if sweep.reasons
                     else "every point in the delivery sweep was refused"
                 ),
-                carry_m=carry,
+                carry_m=sweep.carry,
                 attack_angle_deg=attack_deg,
                 firmness_kg_per_cm2=firmness,
             )
         window = playability_window(
             PlayabilityAxis("attack_angle", "rad", np.radians(attack_deg)),
             PlayabilityAxis("sand_firmness", "kPa", _firmness_kpa(firmness)),
-            carry,
+            sweep.carry,
             target_carry_m=self._settings.target_carry_m,
             tolerance_fraction=self._settings.carry_tolerance_fraction,
             nominal=(
@@ -988,10 +757,13 @@ class WorkbenchModel:
         )
         return PlayabilityOutcome(
             window=window,
-            carry_m=carry,
+            carry_m=sweep.carry,
             attack_angle_deg=attack_deg,
             firmness_kg_per_cm2=firmness,
-            carry_verdict=worst_of(verdicts),
+            carry_verdict=worst_of(sweep.verdicts),
+            carry_lower_m=sweep.lower,
+            carry_upper_m=sweep.upper,
+            band_reasons=sweep.unique_band_reasons(),
         )
 
     def _grid_carry(
@@ -1152,16 +924,56 @@ class WorkbenchModel:
                 ),
                 shared_points=int(shared.sum()),
             )
+        ranking = compare_designs(
+            (left.name, right.name),
+            np.vstack([errors[0][shared], errors[1][shared]]),
+            lower_is_better=True,
+            seed=COMPARISON_SEED,
+        )
         return WorkbenchComparison(
             left=first,
             right=second,
-            ranking=compare_designs(
-                (left.name, right.name),
-                np.vstack([errors[0][shared], errors[1][shared]]),
-                lower_is_better=True,
-                seed=COMPARISON_SEED,
-            ),
+            ranking=ranking,
             shared_points=int(shared.sum()),
+            banded=rank_with_bands(
+                left.name,
+                self.objective_budget(first, shared, float(ranking.std_error[0])),
+                right.name,
+                self.objective_budget(second, shared, float(ranking.std_error[1])),
+                lower_is_better=True,
+            ),
+        )
+
+    def objective_budget(
+        self,
+        evaluation: DesignEvaluation,
+        shared: NDArray[np.bool_],
+        sampling_std_error: float,
+    ) -> UncertaintyBudget:
+        """Assemble one design's uncertainty budget for the ranking objective.
+
+        A thin delegate to
+        :func:`~src.tools.bunker_shot_gui.uncertainty.objective_budget`, which
+        holds the arithmetic and the reasons; this method only supplies the
+        target the settings define.
+
+        Args:
+            evaluation: The design's evaluation, carrying the carry grids.
+            shared: Boolean mask over the flattened grid, true where both
+                designs answered.
+            sampling_std_error: Bootstrap standard error of this design's mean
+                objective, from
+                :func:`~bunkershot3d.study.comparison.compare_designs`.
+
+        Returns:
+            The budget, whose centre is the mean absolute carry error.
+        """
+        return objective_budget(
+            evaluation.design.name,
+            evaluation.playability,
+            shared,
+            target_carry_m=self._settings.target_carry_m,
+            sampling_std_error=sampling_std_error,
         )
 
 
