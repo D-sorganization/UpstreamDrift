@@ -41,6 +41,7 @@ import logging
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import partial
 from typing import TypeVar
 
 import numpy as np
@@ -132,6 +133,7 @@ from .uncertainty import (
     objective_band,
     objective_budget,
     propagate_carry_band,
+    window_area_band,
 )
 
 __all__ = [
@@ -744,10 +746,10 @@ class WorkbenchModel:
                 attack_angle_deg=attack_deg,
                 firmness_kg_per_cm2=firmness,
             )
-        window = playability_window(
+        measure = partial(
+            playability_window,
             PlayabilityAxis("attack_angle", "rad", np.radians(attack_deg)),
             PlayabilityAxis("sand_firmness", "kPa", _firmness_kpa(firmness)),
-            sweep.carry,
             target_carry_m=self._settings.target_carry_m,
             tolerance_fraction=self._settings.carry_tolerance_fraction,
             nominal=(
@@ -755,6 +757,8 @@ class WorkbenchModel:
                 float(_firmness_kpa(sand.sand_state().firmness_kg_per_cm2)),
             ),
         )
+        window = measure(sweep.carry)
+        area_band, area_reasons = window_area_band(window, sweep, measure)
         return PlayabilityOutcome(
             window=window,
             carry_m=sweep.carry,
@@ -763,7 +767,8 @@ class WorkbenchModel:
             carry_verdict=worst_of(sweep.verdicts),
             carry_lower_m=sweep.lower,
             carry_upper_m=sweep.upper,
-            band_reasons=sweep.unique_band_reasons(),
+            band_reasons=(*sweep.unique_band_reasons(), *area_reasons),
+            window_area_band=area_band,
         )
 
     def _grid_carry(

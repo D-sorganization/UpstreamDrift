@@ -62,7 +62,7 @@ from bunkershot3d.vandv.budget import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
 __all__ = [
     "CARRY_BAND_SOURCE",
@@ -72,9 +72,11 @@ __all__ = [
     "CarryEstimate",
     "CarrySweep",
     "PlayabilityOutcome",
+    "band_about",
     "objective_band",
     "objective_budget",
     "propagate_carry_band",
+    "window_area_band",
 ]
 
 TRANSFER_EFFICIENCY_UNQUANTIFIED = UnquantifiedTerm(
@@ -226,18 +228,60 @@ def propagate_carry_band(
                 "interval it was propagated from (issue #8659)"
             )
         carries.append(fly(_at_mass(state, usable_kg)))
-    low, high = sorted(carries)
-    if not low <= central_m <= high:
-        reasons.append(
-            f"the central carry {central_m:.4g} m fell outside the edges' "
-            f"carries [{low:.4g}, {high:.4g}] m, so the band was widened to "
-            "contain it rather than reported as an interval it is not inside; "
-            "the mass-to-carry map is not monotone here"
-        )
-        low, high = min(low, central_m), max(high, central_m)
+    band, widening = band_about(central_m, carries, quantity="carry", unit="m")
+    return band, (*reasons, *widening)
+
+
+def band_about(
+    central: float,
+    edges: Sequence[float],
+    *,
+    quantity: str,
+    unit: str = "",
+) -> tuple[ConsistencyBand, tuple[str, ...]]:
+    """Build a band from two edge evaluations around a central one.
+
+    The edges are sorted rather than assumed ordered, because the maps this
+    module pushes through are monotone *decreasing* as often as increasing.
+
+    When the central value falls **outside** the edges the band is widened to
+    contain it and the widening is reported. Widening rather than raising is
+    the honest choice: the three numbers are three real model evaluations, and
+    reporting an interval that excludes its own centre would be a claim none of
+    them supports. It happens where the map is not monotone -- the playability
+    window area, for instance, can be larger at the centre than at either edge
+    if the target band sits between them.
+
+    Args:
+        central: The central evaluation.
+        edges: The edge evaluations. Any number, in any order.
+        quantity: What is being banded, for the reason text.
+        unit: Unit suffix for the reason text.
+
+    Returns:
+        The band and any reasons it carries.
+
+    Raises:
+        ValueError: If no edges are given, since there is then no band.
+    """
+    values = [float(value) for value in edges]
+    if not values:
+        raise ValueError(f"a band for {quantity!r} needs at least one edge evaluation")
+    low, high = min(values), max(values)
+    if low <= central <= high:
+        return ConsistencyBand(lower=low, central=central, upper=high), ()
+    suffix = f" {unit}" if unit else ""
     return (
-        ConsistencyBand(lower=low, central=central_m, upper=high),
-        tuple(reasons),
+        ConsistencyBand(
+            lower=min(low, central), central=central, upper=max(high, central)
+        ),
+        (
+            f"the central {quantity} {central:.4g}{suffix} fell outside the "
+            f"edges' [{low:.4g}, {high:.4g}]{suffix}, so the band was widened "
+            "to contain it rather than reported as an interval it is not "
+            f"inside; the map from accelerated mass to {quantity} is not "
+            "monotone here",
+        ),
     )
 
 
@@ -287,6 +331,9 @@ class PlayabilityOutcome:
             the longest carry the models are consistent with.
         band_reasons: Everything the band propagation had to say over the
             whole grid, de-duplicated.
+        window_area_band: The window area measured on the two edge grids as
+            well as the central one, or ``None`` when the sweep carried no
+            bands. Its centre is :attr:`window`'s own area.
     """
 
     window: PlayabilityWindow | None
@@ -308,6 +355,7 @@ class PlayabilityOutcome:
         default_factory=lambda: np.zeros((0, 0), dtype=np.float64)
     )
     band_reasons: tuple[str, ...] = ()
+    window_area_band: ConsistencyBand | None = None
 
     def __post_init__(self) -> None:
         """Enforce the carry-verdict rule on the grid as well as the shot.
@@ -324,6 +372,31 @@ class PlayabilityOutcome:
                 "number with no verdict to read them under"
             )
         self._require_bracketing_bands()
+        self._require_window_band()
+
+    def _require_window_band(self) -> None:
+        """Keep the area band and the window it is the band of together.
+
+        Raises:
+            ValueError: If an area band arrived without a window, or is not
+                centred on that window's own area.
+        """
+        if self.window_area_band is None:
+            return
+        if self.window is None:
+            raise ValueError(
+                "a playability window area band arrived with no window to be "
+                "the band of; the two travel together"
+            )
+        if not math.isclose(
+            self.window_area_band.central, float(self.window.area), rel_tol=1e-9
+        ):
+            raise ValueError(
+                f"the window area band is centred on "
+                f"{self.window_area_band.central!r} but the window measures "
+                f"{self.window.area!r}; a band around a different number is a "
+                "different claim"
+            )
 
     def _require_bracketing_bands(self) -> None:
         """Refuse band grids that do not contain the grid they describe.
@@ -421,6 +494,41 @@ class CarrySweep:
             The distinct reasons.
         """
         return tuple(dict.fromkeys(self._band_reasons))
+
+
+def window_area_band(
+    window: PlayabilityWindow,
+    sweep: CarrySweep,
+    measure: Callable[[NDArray[np.float64]], PlayabilityWindow],
+) -> tuple[ConsistencyBand | None, tuple[str, ...]]:
+    """The playability window area, as a band over the carry band's edges.
+
+    Free, in solver terms: the two edge carry grids were already computed by
+    the sweep, so this only re-runs the window measurement on them. Worth
+    reporting because the window is the headline playability number and it is
+    the number a designer would otherwise read as exact.
+
+    **Not monotone**, and that is why it goes through :func:`band_about`. The
+    window counts grid points whose carry lies within a tolerance of the
+    target, so a grid shifted by the mass band can move *into* the acceptance
+    band as easily as out of it: a central grid can score a larger window than
+    either edge, and a band that excluded its own centre would be a claim none
+    of the three measurements supports.
+
+    Args:
+        window: The window measured on the central carry grid.
+        sweep: The completed sweep, carrying the two edge grids.
+        measure: Measures a window on one carry grid, with the axes, target
+            and tolerance already bound.
+
+    Returns:
+        The area band and any reasons it carries, or ``(None, ())`` when the
+        sweep produced no bands to measure.
+    """
+    if not np.isfinite(sweep.lower).any():
+        return None, ()
+    edges = [float(measure(grid).area) for grid in (sweep.lower, sweep.upper)]
+    return band_about(float(window.area), edges, quantity="playability window area")
 
 
 def objective_band(

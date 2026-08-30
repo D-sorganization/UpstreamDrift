@@ -37,12 +37,14 @@ from src.tools.bunker_shot_gui.design import (
 )
 from src.tools.bunker_shot_gui.model import (
     ConsistencyBand,
+    PlayabilityOutcome,
     RankingVerdict,
     ShotOutcome,
     UncertaintyClass,
     WorkbenchComparison,
     WorkbenchModel,
 )
+from src.tools.bunker_shot_gui.uncertainty import band_about
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
@@ -216,6 +218,79 @@ class TestPlayabilityGridCarriesBands:
         playability = comparison.left.playability
         assert playability.carry_lower_m.shape == playability.carry_m.shape
         assert playability.carry_upper_m.shape == playability.carry_m.shape
+
+
+class TestPlayabilityWindowCarriesABand:
+    """The headline playability number is banded too, and cheaply."""
+
+    @pytest.fixture(scope="class")
+    def reachable(self, banded_model: WorkbenchModel) -> PlayabilityOutcome:
+        """A sweep against a target the model can actually reach.
+
+        At the shipped 12 m target every carry is far outside the acceptance
+        band and the window is empty for all three grids, which would make the
+        band trivially a point and prove nothing.
+        """
+        return WorkbenchModel(
+            replace(_SEPARATING_SETTINGS, target_carry_m=2.0)
+        ).playability(
+            WedgeDesign(name="nominal").geometry(), SandCondition(), SwingSetup()
+        )
+
+    def test_the_window_carries_an_area_band(
+        self, reachable: PlayabilityOutcome
+    ) -> None:
+        """Measured on the two edge grids the sweep already produced."""
+        assert reachable.window_area_band is not None
+
+    def test_the_area_band_is_centred_on_the_window(
+        self, reachable: PlayabilityOutcome
+    ) -> None:
+        """A band around a different number would be a different claim."""
+        assert reachable.window is not None
+        assert reachable.window_area_band is not None
+        assert reachable.window_area_band.central == pytest.approx(
+            reachable.window.area
+        )
+
+    def test_the_area_band_is_not_decorative(
+        self, reachable: PlayabilityOutcome
+    ) -> None:
+        """The mass interval moves the window between empty and several times
+        the central area, which is the number a designer would read as exact."""
+        band = reachable.window_area_band
+        assert band is not None
+        assert band.width > band.central
+
+    def test_a_window_band_without_a_window_is_refused(self) -> None:
+        """The pairing is a constructor invariant, not a convention."""
+        with pytest.raises(ValueError, match="no window"):
+            PlayabilityOutcome(
+                window=None,
+                window_area_band=ConsistencyBand(0.0, 1.0, 2.0),
+            )
+
+
+class TestBandAbout:
+    """The shared helper both propagations end in."""
+
+    def test_edges_are_sorted_not_assumed(self) -> None:
+        """Decreasing maps hand their edges over in the wrong order."""
+        band, reasons = band_about(1.5, [3.0, 1.0], quantity="carry")
+        assert (band.lower, band.upper) == pytest.approx((1.0, 3.0))
+        assert reasons == ()
+
+    def test_a_centre_outside_its_edges_widens_and_says_so(self) -> None:
+        """Non-monotone maps do this, and a silent band would hide it."""
+        band, reasons = band_about(5.0, [1.0, 3.0], quantity="window area")
+        assert band.upper == pytest.approx(5.0)
+        assert len(reasons) == 1
+        assert "not monotone" in reasons[0]
+
+    def test_no_edges_is_refused(self) -> None:
+        """A band with nothing to bound is not a band."""
+        with pytest.raises(ValueError, match="at least one edge"):
+            band_about(1.0, [], quantity="carry")
 
 
 class TestTheComparisonRefusesToRank:

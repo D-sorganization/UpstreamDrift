@@ -583,7 +583,7 @@ def playability_text(playability: PlayabilityOutcome) -> str:
         f"  {CARRY_CAVEAT}",
         _line("Target carry", f"{window.target_carry_m:.4g} m"),
         _line("Acceptance band", f"{low:.4g} to {high:.4g} m"),
-        _line("Window area", f"{window.area:.4g} {window.area_unit}"),
+        _line("Window area", _window_area_text(playability)),
         _line("Share of the domain", f"{window.fraction:.1%}"),
         _line("Largest connected region", f"{window.largest_connected_area:.4g}"),
         _line("Refused share", f"{window.refused_fraction:.1%}"),
@@ -852,6 +852,29 @@ _SHOT_UNITS: dict[str, tuple[str, float]] = {
 }
 
 
+def _window_area_text(playability: PlayabilityOutcome) -> str:
+    """The window area, as its band when the sweep produced one (#9243).
+
+    The window is the headline playability number, so it is the last place a
+    point estimate may stand in for an interval: at the shipped nominal shot
+    the accelerated-mass band takes the window from empty to five times the
+    central area.
+
+    Args:
+        playability: The outcome carrying the window and its band.
+
+    Returns:
+        The formatted area, with a unit.
+    """
+    window = playability.window
+    if window is None:
+        return "-"
+    band = playability.window_area_band
+    if band is None:
+        return f"{window.area:.4g} {window.area_unit}"
+    return f"{band.central:.4g} [{band.lower:.4g}, {band.upper:.4g}] {window.area_unit}"
+
+
 def _comparison_rows(
     left: DesignEvaluation, right: DesignEvaluation
 ) -> tuple[tuple[str, str, str], ...]:
@@ -886,7 +909,7 @@ def _comparison_cell(evaluation: DesignEvaluation, key: str) -> str:
         utilisation = shot.sole_load.utilisation
         return f"{utilisation.utilisation_fraction * 100.0:.1f}%"
     if key == "window_area":
-        return "-" if window is None else f"{window.area:.4g}"
+        return "-" if window is None else _window_area_text(evaluation.playability)
     if key == "window_fraction":
         return "-" if window is None else f"{window.fraction * 100.0:.1f}%"
     value = getattr(shot, key)

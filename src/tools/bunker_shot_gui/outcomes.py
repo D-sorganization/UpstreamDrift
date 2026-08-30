@@ -282,8 +282,7 @@ class WorkbenchComparison:
 
     @property
     def winner(self) -> str | None:
-        """The better design's name, or ``None`` when the two cannot be told
-        apart.
+        """The better design, or ``None`` when the two cannot be told apart.
 
         ``None`` is the point: a caller that reads a name off every comparison
         cannot accidentally present a tie as a win. The bootstrap's own
