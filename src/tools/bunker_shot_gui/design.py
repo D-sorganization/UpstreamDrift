@@ -297,6 +297,40 @@ class SandCondition:
 class SwingSetup:
     """How the head is delivered, plus where the ball sits.
 
+    **The defaults describe a greenside splash shot (issue #9247).** They
+    used to read ``attack_angle_deg=-8.0`` with ``shaft_lean_deg=6.0``,
+    which is a full-shot delivery: the shaft leaning forward de-lofts the
+    face and *subtracts* from the effective bounce, which is the opposite
+    of what a bunker shot is played for. That combination survived
+    because the delivery frame was mirrored, so forward lean was silently
+    *adding* bounce instead of removing it. With the frame corrected it
+    delivers a **negative** presentation bounce on three of the six
+    shipped presets -- the leading edge leads into the bed, and the head
+    ploughs rather than skids: 57-77 mm deep, 100-148 ms in the sand, and
+    leaving at 0.7-3.1 m/s from a 25 m/s delivery, with no measurable
+    divot because the trace reverses inside its own crater.
+
+    A splash shot is played to *use* the bounce: face open, shaft
+    neutral, and a shallow sweeping strike rather than a steep descending
+    blow. That is what these defaults now say -- 25 m/s, -6 deg of
+    attack, 10 deg open, no lean. All six presets skid there, over
+    presentation bounces of 3.4-12.8 deg, 8.5-10.7 mm deep and 12-18 ms
+    in the sand, and they order the right way round: the lowest
+    presentation bounce cuts deepest.
+
+    The attack angle moved as well as the lean because the lean alone
+    leaves the default on a cliff -- at -8 deg of attack this design goes
+    from 12.5 mm to 43 mm between 3 deg of lean and none. The registered
+    sweep is -12 to -2 deg (``ATTACK_ANGLE_SWEEP_DEG``) and -6 sits mid
+    range, which keeps the *default* clear of the burying regime without
+    narrowing what can be asked for. That matters beyond tidiness: the
+    F0 tier models a flat half-space with no crater and no divot memory,
+    so it over-predicts deep digs, and a default sitting in the burying
+    regime is a default sitting where the model is least trustworthy.
+    Steep deliveries remain available, and the tool still reports that
+    they dig -- which is now the honest answer rather than an inverted
+    one.
+
     Attributes:
         clubhead_speed_mps: Speed at impact. Greenside delivery is 20-27 m/s,
             which is well above the 6.8 m/s depth/inertia crossover.
@@ -316,9 +350,9 @@ class SwingSetup:
     """
 
     clubhead_speed_mps: float = 25.0
-    attack_angle_deg: float = -8.0
+    attack_angle_deg: float = -6.0
     face_open_deg: float = 10.0
-    shaft_lean_deg: float = 6.0
+    shaft_lean_deg: float = 0.0
     entry_distance_behind_ball_m: float = 0.080
     ball_depth_m: float = 0.005
     dynamic_terms_active: bool = True

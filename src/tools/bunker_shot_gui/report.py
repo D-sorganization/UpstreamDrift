@@ -581,6 +581,7 @@ def playability_text(playability: PlayabilityOutcome) -> str:
         _line("Share of the domain", f"{window.fraction:.1%}"),
         _line("Largest connected region", f"{window.largest_connected_area:.4g}"),
         _line("Refused share", f"{window.refused_fraction:.1%}"),
+        _line("Buried, no carry", f"{window.unmeasured_fraction:.1%}"),
         _line(
             "Nominal delivery inside",
             "yes" if window.contains_nominal else "no",
