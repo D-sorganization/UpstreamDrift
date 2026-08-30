@@ -1,21 +1,16 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30
-
-Epic #8557 is the canonical completion authority. Issue state, local files, and
-partial campaign checkpoints are not completion evidence.
+Updated: 2026-08-30 06:44 PDT
+Epic #8557 is canonical; issue state, local files, and checkpoints are not completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
 
 ## Protected Authority
 
-- UpstreamDrift protected `main` was
-  `4cf39347be49adb0e700edebb05390717c5ce2ec` when the Tools pin branch started;
-  re-check remote authority before every push or merge.
-- The qualified paper has 252 pages and SHA-256
-  `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
-- Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
-  evidence references, and 419 local evidence artifacts are computationally
-  qualified. The PDF remains non-archival because tagged-PDF and font-resource
-  gates are still open.
+- Protected `main` was `727bda2de2d4656e8d9a3abbbc3a72b30fa06ebb`; re-check before push/merge.
+- The requalified paper has 253 pages, 2,011,818 bytes, and SHA-256
+  `554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36`.
+- Its 328 claims, 1,181 candidates, 498/498 literals, 707 release artifacts,
+  2,501 evidence references, and 421 local artifacts qualify computationally;
+  tagged-PDF and font-resource gates remain open.
 - AffineDrift PR #3993 pins the exact #9152 authority as protected squash
   `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995
   merged as `6cc909273d63147392b17078a35c6c4da034e1da`. All hosted checks passed.
@@ -27,31 +22,45 @@ partial campaign checkpoints are not completion evidence.
   merged through protected squashes `b2d7f721`, `d7a95e2a`, and `da0759c7`.
   The trusted rendered-evidence run remains capacity-pending; do not rerun it.
 
-## Active Publication Integrity Slice: #9142 / PR #9147
+## Active Reproducibility Fix: #9153
 
-- #9142 prevents the generated claim-adjudication chapter from emitting
-  repository-relative `data/` links that break when AffineDrift republishes the
-  chapter. PR #9147 owns the implementation; do not create a duplicate PR.
-- Worktree: `UpstreamDrift-worktrees/9142-portable-links`.
-- Local branch: `fix/9142-portable-links`, tracking the PR branch through a
-  merge-only reconciliation with current `origin/main`; never force-push.
-- The source now emits portable UpstreamDrift `blob/main` links, while the
-  AffineDrift publication boundary remains responsible for immutable SHA
-  rewriting. The focused five-test generator/committed-artifact suite passes.
-- Release manifests were regenerated after reconciling #9151. Complete serial
-  validation, commit the merge, push to the existing PR branch, preserve squash
-  auto-merge, inspect actionable hosted failures, and verify its squash on
-  remote `main` before closing this slice.
+- Worktree `UpstreamDrift-worktrees/9153-crba-symmetry`, branch
+  `fix/9153-pinocchio-crba-symmetry`, backs open PR #9299. Latest pushed head is
+  `d1e8db1a76e95fd3ee76dc5e714523c17a890603`; closure below is uncommitted.
+- Source audit of the quarantined structural replay found that robotics
+  Pinocchio CRBA only guarantees its upper triangle, while four research paths
+  consumed the reusable native matrix without completing the lower triangle.
+- The fix adds one shared finite/square/symmetry adapter, routes all four
+  research consumers through it, and has a poisoned-lower-triangle regression
+  test. The protected publication gate correctly fails because pre-fix source
+  hashes remain in the release authority; do not patch hashes alone.
+- Requalification v1 stopped on timestamp/random-ID figure drift. V2 then ran
+  twice from clean snapshots under Linux/Python 3.11, MuJoCo/robotics Pinocchio
+  3.8.0, exact cmeel pins, one worker, and one numerical thread per library.
+  Six JSON/NPZ families and eleven vector figures reproduce exactly. The
+  hash-frozen 102-line figure writer exception expires 2026-09-15; do not
+  refactor it before this evidence merges.
+- The copied exact registry exposed one stale reciprocal link under focused
+  testing. Canonical reconciliation changed two review links and no material
+  claim field; the v2 replay report now rejects nonreciprocal registries.
+- All 47 native/focused and 50 claim/release/PDF tests, claim audit, release
+  qualification, and all-page inspection pass; final pages 141--142 were viewed.
+- The large campaign worktree remains
+  `UpstreamDrift-worktrees/9153-forward-impulse-work`, remote-equal at
+  `1e5e823ca2fa9391134e8a0ccf140a36036a88a7` before this isolated fix. Its
+  exact replay failure, legacy evidence, and `[100,120)` prohibition remain.
 
 ## Immediate Order
 
-1. Finish and protected-merge #9147 without changing scientific content.
-2. Register the next #8557 child for matched forward impulse/work attribution
-   through contact transitions. Its contract must freeze event surfaces,
-   contact-state matching, impulse/work estimands, shaft/base coupling,
-   uncertainty, adverse loads, killswitches, and evidence promotion rules.
-3. Implement that child from a clean leased worktree only after its issue and
-   dependency order are visible in #8557.
+1. Commit the reviewed requalified evidence, paper, authorities, tests, SPEC,
+   and this handoff; all registered local gates are green.
+2. Run the GitHub App setup immediately before pushing to PR #9299, then inspect
+   the exact protected-check state without redundant reruns.
+3. Merge #9299 only after exact-head protected gates prove the final tree and
+   verify the squash commit is an ancestor of remote `main`.
+4. Reconcile the 233-commit #9153 campaign branch with protected `main` as
+   reviewable dependency slices; never open the entire accumulated branch as a
+   single PR and never dispatch `[100,120)` from the pre-fix authority.
 
 ## Scientific Boundaries
 
@@ -77,8 +86,7 @@ partial campaign checkpoints are not completion evidence.
   unreadable (`0x80070570`). Do not retry WSL, repair/mount/copy/mutate the
   VHDX, restart services, or launch a replacement without explicit approval
   and a recoverability plan.
-- DeskComputer remains runner-drained. Keep local tests serial and web tests at
-  no more than two workers.
+- DeskComputer remains runner-drained; keep tests serial and web tests at <=2 workers.
 
 ## Active AffineDrift Companion Provider Slice: #9174
 
@@ -123,6 +131,8 @@ portable tests. Run Python tests with `-n 0`.
 
 ```powershell
 python -m pytest -n 0 -q tests/research/test_articulated_drift_contact_attribution.py
+python -m pytest -n 0 -q tests/research/test_articulated_crba_requalification.py
+python -m scripts.research.proximal_distal_energy.articulated_crba_requalification validate
 python -m ruff check scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py tests/research/test_articulated_drift_contact_attribution.py
 python -m ruff format --check scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py tests/research/test_articulated_drift_contact_attribution.py
 python scripts/check_document_title_case.py --changed-from origin/main
@@ -135,13 +145,3 @@ and affected full gates after publication artifacts are added. Run the GitHub
 App setup script immediately before every GitHub operation. Never force-push,
 bypass protection/review, relax scientific tolerances after inspecting results,
 or create redundant CI reruns.
-
-## Other Repository Programs
-
-- UP-D0 (#9066) establishes `manuals/upstreamdrift` QMD as the sole editable
-  engineering-manual authority; generated manual formats are non-editable and
-  unapproved. UP-D1 (#9067) must inventory and classify every in-scope
-  calculation and module before any manual coverage or release claim.
-- Markerless mocap still follows Tools provider -> Upstream orchestration ->
-  Affine sanitized projection. Camera candidates are not procurement or lab
-  qualification.

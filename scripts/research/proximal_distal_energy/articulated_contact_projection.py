@@ -19,6 +19,7 @@ from numpy.typing import NDArray
 from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
     build_pinocchio_articulated_model,
     finite_difference_kinematics,
+    pinocchio_crba_mass_matrix,
 )
 from scripts.research.proximal_distal_energy.spatial_forward_contract import (
     contact_pair,
@@ -338,7 +339,7 @@ def _evaluate_projection_case(
         q_perturbed[14] += config.club_translation_perturbation_m
         qd_perturbed[14] += config.club_velocity_perturbation_m_s
         matrix_m, bias_m = mujoco_mass_matrix_and_bias(model, q_perturbed, qd_perturbed)
-        matrix_p = np.asarray(pin.crba(native, native_data, q_perturbed)).copy()
+        matrix_p = pinocchio_crba_mass_matrix(pin, native, native_data, q_perturbed)
         bias_p = np.asarray(
             pin.nonLinearEffects(  # type: ignore[attr-defined]
                 native, native_data, q_perturbed, qd_perturbed

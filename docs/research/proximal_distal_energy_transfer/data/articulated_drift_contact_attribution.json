@@ -7,8 +7,16 @@
     "profile_count": 6,
     "grip_span_count": 3,
     "coordinate_count": 20,
-    "engine_names": ["mujoco", "pinocchio"],
-    "contribution_names": ["configuration", "velocity", "contact", "active"],
+    "engine_names": [
+      "mujoco",
+      "pinocchio"
+    ],
+    "contribution_names": [
+      "configuration",
+      "velocity",
+      "contact",
+      "active"
+    ],
     "applied_input": "exactly_zero_in_baseline",
     "forward_steps": 0
   },
@@ -22,34 +30,34 @@
     "acceleration_share": "(qdd_i^T M qdd_total)/(qdd_total^T M qdd_total)"
   },
   "engines": {
-    "mujoco": "3.12.0",
-    "pinocchio": "4.1.0"
+    "mujoco": "3.8.0",
+    "pinocchio": "3.8.0"
   },
   "tolerances": {
     "acceleration_closure_tolerance": 1e-10,
     "power_closure_tolerance_w": 1e-10,
-    "engine_relative_tolerance": 1e-8,
+    "engine_relative_tolerance": 1e-08,
     "scaling_invariance_tolerance": 1e-10,
     "pathway_killswitch_tolerance": 1e-12,
     "share_denominator_floor": 1e-10,
     "corruption_force_nm": 0.001,
-    "corruption_detection_floor": 1e-6,
+    "corruption_detection_floor": 1e-06,
     "contact": {
       "contact_stiffness": 1800.0,
       "contact_damping": 18.0,
       "club_translation_perturbation_m": 0.001,
       "club_velocity_perturbation_m_s": 0.05,
-      "zero_preload_force_tolerance_n": 1e-6,
+      "zero_preload_force_tolerance_n": 1e-06,
       "action_reaction_tolerance_n": 1e-12,
       "virtual_power_tolerance_w": 1e-10,
       "geometry_control_tolerance_nm": 1e-12,
-      "acceleration_relative_tolerance": 1e-8
+      "acceleration_relative_tolerance": 1e-08
     }
   },
   "results": {
     "failed_engine_state_count": 0,
     "all_registered_gates_passed": true,
-    "maximum_acceleration_closure_residual": 7.650233855118303e-13,
+    "maximum_acceleration_closure_residual": 7.588532925636044e-13,
     "maximum_power_closure_residual_w": 2.1316282072803006e-14,
     "maximum_engine_contribution_relative_error": 3.905098466816526e-12,
     "maximum_engine_total_relative_error": 4.859020463208928e-13,
@@ -61,7 +69,7 @@
     "minimum_corruption_detection_residual": 0.001095774245075443,
     "acceleration_share_suppressed_count": 0,
     "power_share_suppressed_count": 0,
-    "maximum_finite_acceleration_cancellation_index": 1.0556238494957666,
+    "maximum_finite_acceleration_cancellation_index": 1.0556238494957668,
     "maximum_finite_power_cancellation_index": 1.0042132230828265
   },
   "controls": {
@@ -82,11 +90,11 @@
   },
   "next_gate": "integrate matched forward trajectories and attribute impulse and work through contact transitions, shaft/base coupling, uncertainty, and adverse loads",
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "0d9f4d7d9e479b5c611294662d73d92c11f197bd85e91ee1af7c98c7785d5df2",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json": "2e9d4601d29afaa3402261e664156734f9d03e86f696f534c8447ab7d4cdb417",
-    "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz": "05c0975a758ecaac333f3608189d3226cc0f438eae40ce2f5dced6aa1b97b5c4",
-    "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py": "e7dac294da347b49155ccf18b4a1853497bdfa38e4b62fd861a4d5202695446d",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.json": "c5a019edc85b4b9f4715bf72683a1ec73ae14a1461bf677380b6dcc146e1e9f5",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_contact_projection.npz": "fa91f1b06178a97a43f532f52d5e581fb93f2e91ed336b9e62c58ea06755eb01",
+    "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py": "4a7508f6f033ff2f490b0221a96fef6494a2a8a24e506dbf3ffb2adbfec3d720",
     "scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py": "bce22951219072ef520e08f83487b9b9a66656d884c2b4b8b8930672b16b450d",
     "tests/research/test_articulated_drift_contact_attribution.py": "5c990b06aab49a7e743681c63a155e0b58465ea7e7e2e80097c5f04ada63d0b8"
   }

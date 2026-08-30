@@ -7,6 +7,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scripts.research.proximal_distal_energy.deterministic_vector_figure import (
+    save_vector_figure,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 DATA = ARTICLE / "data/articulated_distributed_grip_atlas.npz"
@@ -170,15 +174,10 @@ def main() -> None:
         "Bounded Coefficients; No Tissue, Intent, or Human Strategy Inference",
         fontsize=13,
     )
-    fig.savefig(OUTPUT.with_suffix(".pdf"), bbox_inches="tight")
-    svg_path = OUTPUT.with_suffix(".svg")
-    fig.savefig(svg_path, bbox_inches="tight")
-    svg_path.write_text(
-        "\n".join(
-            line.rstrip() for line in svg_path.read_text(encoding="utf-8").splitlines()
-        )
-        + "\n",
-        encoding="utf-8",
+    save_vector_figure(
+        fig,
+        OUTPUT,
+        salt="articulated-distributed-grip-atlas-v1",
     )
     plt.close(fig)
 
