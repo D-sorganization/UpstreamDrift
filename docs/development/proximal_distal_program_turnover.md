@@ -41,15 +41,13 @@ backlog. It contains registration and governance only, with no smoke outcome.
 
 - Full PR: #9309, `Document Protected Proximal–Distal Program Turnover`.
 - Main-rooted branch: `docs/9153-turnover-main`.
-- Reviewed head: `3c99bfaef8c8d333adaa7c7604d26546a085e806`.
-- Diff: two documentation files, +223/-22; it does not repeat #9308.
+- Diff: two documentation files; it does not repeat #9308.
 - Squash auto-merge is enabled.
-- CI Standard `33323662717`, docs quality `33323662727`, document governance
-  `33323662712`, SPEC freshness `33323662716`, LoD `33323662707`, and guards
-  passed on the reviewed head.
-- Bot CI Trigger run `33323662694`, job `99289907941`, is queued for
-  `d-sorg-fleet-docker` with no runner assigned. Preserve the existing run; do
-  not create a capacity-only rerun.
+- The final turnover checkpoint necessarily changed the PR head. Query #9309
+  for its exact head and require its exact-head Standard, documentation, SPEC,
+  LoD, guard, and Bot CI checks. The latest #9153 turnover comment records the
+  post-push handles without changing this branch again.
+- Preserve existing runs and auto-merge; do not create a capacity-only rerun.
 - After auto-merge, verify the squash SHA, remote-main ancestry, and exact tree
   equality before starting runner implementation.
 
