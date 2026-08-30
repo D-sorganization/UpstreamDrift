@@ -111,6 +111,136 @@ def _to_serializable(val: Any) -> Any:
     return val
 
 
+def _build_integration_case(
+    case_spec: Mapping[str, Any],
+    root: Path,
+    model: Any,
+    metadata: Mapping[str, Any],
+    engine: str,
+    time_step_s: float,
+) -> DistributedIntegrationCase:
+    """Build the integration case model inputs from case specifications."""
+    npz_path = (
+        root
+        / "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz"
+    )
+    with np.load(npz_path) as source:
+        source_case_idx = int(case_spec.get("source_case_index", 0))
+        source_sample_idx = int(case_spec.get("source_sample_index", 6))
+        q = np.asarray(
+            source["solution_q"][source_case_idx, source_sample_idx], dtype=float
+        )
+        grip_span_m = float(source["case_grip_span_m"][source_case_idx])
+
+    grip = DistributedGripConfig(
+        station_count_per_hand=1,
+        station_width_m=0.0,
+        slack_distance_m=float(case_spec.get("slack_distance_m", 0.0015)),
+        friction_coefficient=0.0,
+    )
+
+    return DistributedIntegrationCase(
+        q=q,
+        qd=np.zeros(model.nq),
+        grip_span_m=grip_span_m,
+        hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
+        time_step_s=time_step_s,
+        initial_club_displacement_m=float(
+            case_spec.get("initial_club_displacement_m", 0.001)
+        ),
+        initial_club_velocity_m_s=float(
+            case_spec.get("initial_club_velocity_m_s", -0.8)
+        ),
+        engine=engine,
+        grip=grip,
+    )
+
+
+def _extract_completed_case_metrics(
+    evidence: Any,
+    case_id: str,
+    engine: str,
+    time_step_s: float,
+) -> CaseExecutionResult:
+    """Extract metrics from completed trajectory attribution evidence."""
+    events = evidence.events
+    event_kinds = tuple(
+        e.kind.value if hasattr(e.kind, "value") else str(e.kind) for e in events
+    )
+    events_detail = [
+        {
+            "kind": e.kind.value if hasattr(e.kind, "value") else str(e.kind),
+            "time_s": float(e.time_s),
+            "gap_residual_m": float(e.gap_residual_m),
+            "final_bracket_width_s": float(e.final_bracket_width_s),
+            "path_model": str(e.path_model),
+        }
+        for e in events
+    ]
+
+    max_gap_residual = max((abs(e.gap_residual_m) for e in events), default=0.0)
+    max_bracket_width = max((e.final_bracket_width_s for e in events), default=0.0)
+    max_force_closure = float(np.max(np.abs(evidence.pointwise_force_closure_residual)))
+
+    attr = evidence.attribution
+    total_event_impulse = float(np.sum(np.abs(attr.total_event_impulse)))
+    total_event_work = float(abs(attr.total_event_work_j))
+
+    return CaseExecutionResult(
+        case_id=case_id,
+        engine=engine,
+        time_step_s=time_step_s,
+        status="completed",
+        event_count=len(events),
+        event_kinds=event_kinds,
+        events_detail=events_detail,
+        maximum_absolute_gap_residual_m=max_gap_residual,
+        maximum_final_bracket_width_s=max_bracket_width,
+        maximum_force_closure_residual=max_force_closure,
+        total_discrete_event_impulse=total_event_impulse,
+        total_discrete_event_work_j=total_event_work,
+        momentum_change=[float(x) for x in attr.momentum_change],
+        kinetic_energy_change_j=float(attr.kinetic_energy_change_j),
+        continuous_work_j=float(attr.continuous_work_j),
+        work_closure_residual_j=float(attr.work_closure_residual_j),
+        generalized_work_j=[float(x) for x in attr.generalized_work_j],
+        impulse_shares=[[float(y) for y in x] for x in attr.impulse_shares],
+        work_shares=[float(x) for x in attr.work_shares],
+    )
+
+
+def _build_failed_case_result(
+    case_id: str,
+    engine: str,
+    time_step_s: float,
+    exc: BaseException,
+) -> CaseExecutionResult:
+    """Build a typed failed execution result without promoting data."""
+    return CaseExecutionResult(
+        case_id=case_id,
+        engine=engine,
+        time_step_s=time_step_s,
+        status="failed",
+        event_count=0,
+        event_kinds=(),
+        events_detail=[],
+        maximum_absolute_gap_residual_m=float("nan"),
+        maximum_final_bracket_width_s=float("nan"),
+        maximum_force_closure_residual=float("nan"),
+        total_discrete_event_impulse=float("nan"),
+        total_discrete_event_work_j=float("nan"),
+        momentum_change=[],
+        kinetic_energy_change_j=float("nan"),
+        continuous_work_j=float("nan"),
+        work_closure_residual_j=float("nan"),
+        generalized_work_j=[],
+        impulse_shares=[],
+        work_shares=[],
+        error_type=type(exc).__name__,
+        error_message=str(exc),
+    )
+
+
 def execute_smoke_case(
     case_spec: Mapping[str, Any], root: Path = ROOT
 ) -> CaseExecutionResult:
@@ -125,123 +255,22 @@ def execute_smoke_case(
             raise ValueError(f"unknown or unsupported engine: {engine}")
 
         model, metadata = build_subject_scaled_model(default_synthetic_profiles()[0])
-        npz_path = (
-            root
-            / "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz"
+        case = _build_integration_case(
+            case_spec, root, model, metadata, engine, time_step_s
         )
-        with np.load(npz_path) as source:
-            source_case_idx = int(case_spec.get("source_case_index", 0))
-            source_sample_idx = int(case_spec.get("source_sample_index", 6))
-            q = np.asarray(
-                source["solution_q"][source_case_idx, source_sample_idx], dtype=float
-            )
-            grip_span_m = float(source["case_grip_span_m"][source_case_idx])
-
-        grip = DistributedGripConfig(
-            station_count_per_hand=1,
-            station_width_m=0.0,
-            slack_distance_m=float(case_spec.get("slack_distance_m", 0.0015)),
-            friction_coefficient=0.0,
-        )
-
-        case = DistributedIntegrationCase(
-            q=q,
-            qd=np.zeros(model.nq),
-            grip_span_m=grip_span_m,
-            hand_contact_local_x_m=float(metadata["hand_contact_local_x_m"]),
-            time_step_s=time_step_s,
-            initial_club_displacement_m=float(
-                case_spec.get("initial_club_displacement_m", 0.001)
-            ),
-            initial_club_velocity_m_s=float(
-                case_spec.get("initial_club_velocity_m_s", -0.8)
-            ),
-            engine=engine,
-            grip=grip,
-        )
-
         config = DistributedForwardConfig(
             duration_s=0.05,
             time_steps_s=(0.001, 0.0005, 0.00025),
         )
-
         evidence = attribute_distributed_contact_trajectory(
             model=model,
             case=case,
             config=config,
         )
-
-        events = evidence.events
-        event_kinds = tuple(
-            e.kind.value if hasattr(e.kind, "value") else str(e.kind) for e in events
-        )
-        events_detail = [
-            {
-                "kind": e.kind.value if hasattr(e.kind, "value") else str(e.kind),
-                "time_s": float(e.time_s),
-                "gap_residual_m": float(e.gap_residual_m),
-                "final_bracket_width_s": float(e.final_bracket_width_s),
-                "path_model": str(e.path_model),
-            }
-            for e in events
-        ]
-
-        max_gap_residual = max((abs(e.gap_residual_m) for e in events), default=0.0)
-        max_bracket_width = max((e.final_bracket_width_s for e in events), default=0.0)
-        max_force_closure = float(
-            np.max(np.abs(evidence.pointwise_force_closure_residual))
-        )
-
-        attr = evidence.attribution
-        total_event_impulse = float(np.sum(np.abs(attr.total_event_impulse)))
-        total_event_work = float(abs(attr.total_event_work_j))
-
-        return CaseExecutionResult(
-            case_id=case_id,
-            engine=engine,
-            time_step_s=time_step_s,
-            status="completed",
-            event_count=len(events),
-            event_kinds=event_kinds,
-            events_detail=events_detail,
-            maximum_absolute_gap_residual_m=max_gap_residual,
-            maximum_final_bracket_width_s=max_bracket_width,
-            maximum_force_closure_residual=max_force_closure,
-            total_discrete_event_impulse=total_event_impulse,
-            total_discrete_event_work_j=total_event_work,
-            momentum_change=[float(x) for x in attr.momentum_change],
-            kinetic_energy_change_j=float(attr.kinetic_energy_change_j),
-            continuous_work_j=float(attr.continuous_work_j),
-            work_closure_residual_j=float(attr.work_closure_residual_j),
-            generalized_work_j=[float(x) for x in attr.generalized_work_j],
-            impulse_shares=[[float(y) for y in x] for x in attr.impulse_shares],
-            work_shares=[float(x) for x in attr.work_shares],
-        )
-    except Exception as exc:
+        return _extract_completed_case_metrics(evidence, case_id, engine, time_step_s)
+    except (ValueError, TypeError, KeyError, RuntimeError, OSError, ImportError) as exc:
         logger.exception("Failed to execute smoke case %s: %s", case_id, exc)
-        return CaseExecutionResult(
-            case_id=case_id,
-            engine=engine,
-            time_step_s=time_step_s,
-            status="failed",
-            event_count=0,
-            event_kinds=(),
-            events_detail=[],
-            maximum_absolute_gap_residual_m=float("nan"),
-            maximum_final_bracket_width_s=float("nan"),
-            maximum_force_closure_residual=float("nan"),
-            total_discrete_event_impulse=float("nan"),
-            total_discrete_event_work_j=float("nan"),
-            momentum_change=[],
-            kinetic_energy_change_j=float("nan"),
-            continuous_work_j=float("nan"),
-            work_closure_residual_j=float("nan"),
-            generalized_work_j=[],
-            impulse_shares=[],
-            work_shares=[],
-            error_type=type(exc).__name__,
-            error_message=str(exc),
-        )
+        return _build_failed_case_result(case_id, engine, time_step_s, exc)
 
 
 class DistributedSmokeRunner:
