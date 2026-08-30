@@ -14,6 +14,8 @@ design-manual program.
   `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
 - PR #9299 requalified the CRBA-dependent publication after routing four native
   Pinocchio consumers through one finite, square, symmetric-matrix adapter.
+- PR #9302 qualified the manufactured-evidence contract across versioned native
+  dependencies while preserving same-environment byte equality.
 - The requalified paper has 253 pages, 2,011,818 bytes, and SHA-256
   `554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36`.
 - Its 328 claims, 1,181 candidates, 498/498 literals, 707 release artifacts,
@@ -100,11 +102,36 @@ design-manual program.
 - #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with
   no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes,
   acquisition identity, and attestations; #9174 remains open.
-- ADR-0043 and schema v1 are one-way UpstreamDrift software-fact authority for
-  AffineDrift #4010. #9064 remains design-manual authority and #9070 remains
-  typed calculation-manifest authority.
-- Do not accept payloads unless commit-named artifacts, acquisition identity,
-  attestations, embedded commit, and exact bytes all verify.
+- #9190 worktree: `worktrees/UpstreamDrift-9190-workflows`; branch
+  `feat/9190-governed-workflows`, based on exact `origin/main` `727bda2d`.
+  This branch is not protected authority until reviewed and merged.
+- ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
+  authority for AffineDrift #4010; #9064 remains design-manual authority and
+  #9070 remains typed calculation-manifest authority.
+- `scripts/companion_catalog.py` owns local-only discovery and exact source
+  provenance. `scripts/companion_publication.py` is the sole protected-main/tag
+  delivery wrapper and must refuse dirty or non-authoritative state.
+- `scripts/config/companion_workflows.v1.json` and
+  `scripts/companion_workflows.py` own #9190: 10 successful workflows, four
+  deterministic failure fixtures, and one unavailable non-executable record.
+  Run the public executor from a clean exact commit; it refuses stale commits,
+  unsafe commands/paths/environment, missing artifacts, and undeclared output.
+- #9192 packages the manifest, both schemas, compatibility policy, and detached
+  hashes as one commit-named 30-day Actions artifact; acquisition evidence must
+  record the exact run/artifact identity and lack of a durable URL.
+- Schema 1.0.0 is current and `previous_supported` is empty; declare a prior
+  version only with a validating fixture. No tag or release is authorized here.
+- #9190 CI executes every available registry record on code PRs and protected
+  `main`, uploads exact-commit 30-day evidence, and joins `quality-gate`. This
+  evidence is not publication or scientific/native-engine/GUI qualification.
+- Exact-head gates must include same-environment native two-build byte equality,
+  source pins, release/claim integrity, SPEC duplicate ratchet, Ruff, Bandit,
+  and the full protected matrix. Never reroute, restart, force-push, or bypass.
+- Merge only when exact head/base/tree and every required check are green. Then
+  accept only post-repair commit-named payload/evidence artifacts; verify their
+  attestation, acquisition identity, embedded commit, and exact bytes before
+  closing #9192. Keep #9174 open for #9191 and #9193; #9190 still requires
+  protected review/merge and post-merge CI evidence.
 
 ## Validation
 
