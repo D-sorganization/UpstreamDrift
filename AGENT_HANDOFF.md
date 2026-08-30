@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 20:04 PDT (2026-08-30 03:04 UTC)
+Updated: 2026-08-29 20:16 PDT (2026-08-30 03:16 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -84,19 +84,23 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   but all 14 completed new cases change `horizons`, `numerical`, and seven
   legacy arrays. Six non-completed cases retain status. No audit artifact was
   written, no outcomes were interpreted, and [100,120) must not be dispatched.
+- Exact [80,81) probe 33289155154/job 99197600514 passed at `0aa431ca4e23`.
+  Artifact 9725478419 is 713,240 bytes, archive SHA `99f1c3ad7602`; receipt
+  SHA is `68fdf686aa21` and corruption-audit SHA is `a375a94f6661`. Exact audit
+  SHA `3021c3fc5d9d` matches legacy only, supporting a first-enriched-replay
+  anomaly. It authorizes no promotion, effect reading, or human inference.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
 ## Immediate Order
 
 1. Preserve the exact case-100 mismatch and do not weaken equality, overwrite
-   retained evidence, or dispatch [100,120). The preregistered diagnostic is
-   an exact [80,81) repeat at frozen execution `ccb171ed3` and audit run 33277601263. Hosted run 33289155154, job 99197600514, is in progress at
-   exact head `0aa431ca4e23`; do not cancel, restart, or duplicate it. Exact match
-   to enriched-only supports a source delta; match to legacy-only supports a
-   first-replay anomaly; match to neither demonstrates
-   cross-run non-repeatability. No tolerance, promotion, or outcome reading is
-   permitted; preserve the adverse comparison under every branch.
+   retained evidence, or dispatch [100,120). Preserve the legacy-only probe
+   classification and the adverse first enriched replay. Audit implementation
+   `30dc38038` is pushed with 99 focused tests green. Next localize why identical
+   frozen execution can produce both authorities: bind each run's actual
+   package/platform/operator identity and deterministic thread environment,
+   then preregister any recovery replay before dispatch. Do not add tolerance.
 2. Preserve all three refinement failures, typed Pinocchio absence, original
    smoke failure, and excluded pilot; do not weaken the 0.8 threshold.
 3. The contrast summary is implemented locally; after completion, validate the
