@@ -21,6 +21,7 @@ from src.bunkershot3d.vandv.budget import (
     UnquantifiedTerm,
 )
 from src.bunkershot3d.vandv.exceptions import VandVError
+from src.bunkershot3d.vandv.gci import ConvergenceType, GCIResult
 
 pytestmark = pytest.mark.unit
 
@@ -350,3 +351,79 @@ class TestNonFinite:
         """A budget about NaN cannot be ranked."""
         with pytest.raises(ValueError, match="finite"):
             UncertaintyBudget(quantity="carry", central=math.nan)
+
+
+class TestFromGCI:
+    """The bridge from a solution-verification study into a budget."""
+
+    def _study(self, convergence: ConvergenceType) -> GCIResult:
+        """A GCI result with the fields this bridge reads."""
+        return GCIResult(
+            quantity="cylinder inertial force, x",
+            fine_value=100.0,
+            apparent_order=2.0,
+            order_assumed=False,
+            order_converged=True,
+            convergence=convergence,
+            refinement_ratio=2.0,
+            extrapolated_value=101.0,
+            approximate_relative_error=0.01,
+            extrapolated_relative_error=0.01,
+            factor_of_safety=1.25,
+            gci_fine=0.02,
+            n_grids=3,
+            comfortable_refinement=True,
+        )
+
+    def test_the_half_width_is_the_v20_u_h(self) -> None:
+        """GCI x |phi1| over k = 2, in the refined quantity's own units."""
+        term = UncertaintyTerm.from_gci(
+            self._study(ConvergenceType.MONOTONIC), basis=NumericalBasis.SPATIAL
+        )
+        assert term.half_width == pytest.approx(1.0)
+        assert term.uncertainty_class is UncertaintyClass.NUMERICAL
+
+    def test_the_basis_has_no_default(self) -> None:
+        """The two shipped studies need different answers, silently."""
+        with pytest.raises(TypeError):
+            UncertaintyTerm.from_gci(self._study(ConvergenceType.MONOTONIC))  # type: ignore[call-arg]
+
+    def test_a_space_time_study_stays_space_time(self) -> None:
+        """Declared here, refused later by as_v20_numerical."""
+        term = UncertaintyTerm.from_gci(
+            self._study(ConvergenceType.MONOTONIC),
+            basis=NumericalBasis.SPACE_TIME,
+        )
+        budget = UncertaintyBudget(quantity="carry", central=10.0, terms=(term,))
+        with pytest.raises(VandVError, match="Courant"):
+            budget.as_v20_numerical()
+
+    def test_a_divergent_study_is_refused(self) -> None:
+        """A Richardson estimate off a diverging triplet is not uncertainty."""
+        with pytest.raises(VandVError, match="diverged"):
+            UncertaintyTerm.from_gci(
+                self._study(ConvergenceType.MONOTONIC_DIVERGENCE),
+                basis=NumericalBasis.SPATIAL,
+            )
+
+    def test_an_oscillatory_study_carries_its_caveat_in_the_source(self) -> None:
+        """Admitted, but never silently: Celik says Richardson is unreliable."""
+        term = UncertaintyTerm.from_gci(
+            self._study(ConvergenceType.OSCILLATORY), basis=NumericalBasis.SPATIAL
+        )
+        assert "OSCILLATORY" in term.source
+
+    def test_the_source_records_the_study(self) -> None:
+        """A budget line has to say where its number came from."""
+        term = UncertaintyTerm.from_gci(
+            self._study(ConvergenceType.MONOTONIC), basis=NumericalBasis.SPATIAL
+        )
+        assert "GCI (spatial)" in term.source
+        assert "3 grids" in term.source
+
+    def test_the_name_defaults_to_the_studied_quantity(self) -> None:
+        """So a budget reads as the study did."""
+        term = UncertaintyTerm.from_gci(
+            self._study(ConvergenceType.MONOTONIC), basis=NumericalBasis.SPATIAL
+        )
+        assert term.name == "cylinder inertial force, x"

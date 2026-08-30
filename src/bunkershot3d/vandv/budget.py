@@ -72,6 +72,7 @@ from enum import StrEnum
 
 from .band import ConsistencyBand
 from .exceptions import VandVError
+from .gci import ConvergenceType, GCIResult
 from .validation import NumericalUncertainty
 
 __all__ = [
@@ -84,6 +85,14 @@ __all__ = [
     "UncertaintyTerm",
     "UnquantifiedTerm",
 ]
+
+_DIVERGENT = frozenset(
+    {
+        ConvergenceType.OSCILLATORY_DIVERGENCE,
+        ConvergenceType.MONOTONIC_DIVERGENCE,
+    }
+)
+"""Refinement outcomes that produce no usable uncertainty at all."""
 
 DOMINANCE_SHARE = 0.75
 """Share of the combined width above which one term is said to *swamp*.
@@ -238,6 +247,74 @@ class UncertaintyTerm:
             uncertainty_class=uncertainty_class,
             lower_offset=half_width,
             upper_offset=half_width,
+            source=source,
+            basis=basis,
+        )
+
+    @classmethod
+    def from_gci(
+        cls,
+        gci: GCIResult,
+        *,
+        basis: NumericalBasis,
+        name: str | None = None,
+    ) -> UncertaintyTerm:
+        """Read a numerical term off a Grid Convergence Index study.
+
+        The bridge from :mod:`bunkershot3d.vandv.gci` into a budget, so that a
+        solution-verification result enters a design comparison as the
+        ``NUMERICAL`` term it is rather than being re-derived by hand. The
+        half-width is :attr:`~bunkershot3d.vandv.gci.GCIResult.standard_numerical_uncertainty`
+        -- the expanded GCI band divided by ``k = 2``, which is what V&V 20
+        calls ``u_h`` -- in the refined quantity's own units.
+
+        ``basis`` is required and has no default, because the two shipped
+        studies need different answers and getting it wrong is silent:
+        ``vandv.studies.surface_refinement_study`` refines facet count at a
+        fixed step and is ``SPATIAL``, while
+        ``solvers.mpm.verification.column_grid_convergence`` holds the Courant
+        number fixed so its step shrinks with its cell size, making it
+        ``SPACE_TIME`` (ADR-0033). Declaring the second as the first would
+        report a combined space-and-time error as a purely spatial one.
+
+        Args:
+            gci: The completed study for one quantity.
+            basis: What the study actually refined.
+            name: Term name; defaults to the GCI's own quantity label.
+
+        Returns:
+            The term, in the refined quantity's units. A caller applying it to
+            a *different* quantity must scale it and say so in its source.
+
+        Raises:
+            VandVError: If the study diverged, where the Richardson estimate
+                is not an uncertainty at all. Oscillatory convergence is
+                admitted but the caveat is carried in the term's source, the
+                same treatment :meth:`GCIResult.summary` gives it.
+        """
+        if gci.convergence in _DIVERGENT:
+            raise VandVError(
+                f"the GCI study for {gci.quantity!r} came back "
+                f"{gci.convergence.value} -- it diverged under refinement, so "
+                "its Richardson extrapolation is not an uncertainty and must "
+                "not be entered in a budget as one"
+            )
+        source = (
+            f"GCI ({basis.value}): {gci.gci_fine:.3%} of "
+            f"phi1={gci.fine_value:.6g} over {gci.n_grids} grids, "
+            f"p={gci.apparent_order:.3g}"
+            f"{' (assumed)' if gci.order_assumed else ''}, "
+            f"r21={gci.refinement_ratio:.3g}, {gci.convergence.value}"
+        )
+        if gci.is_oscillatory:
+            source += (
+                " -- OSCILLATORY, so the Richardson estimate is not "
+                "trustworthy and this width is indicative"
+            )
+        return cls.symmetric(
+            name=name or gci.quantity or "discretisation",
+            uncertainty_class=UncertaintyClass.NUMERICAL,
+            half_width=gci.standard_numerical_uncertainty,
             source=source,
             basis=basis,
         )
