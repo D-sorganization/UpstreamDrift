@@ -37,7 +37,7 @@
 # guard therefore never blocked anything. This file restores the ledger and
 # records the four regressions explicitly rather than laundering them.
 #
-# Shadow count is currently 32 of 32 vendor modules. That number is the debt.
+# Shadow count is currently 33 of 33 vendor modules. That number is the debt.
 # It should only ever go down.
 
 schema_version: 1
@@ -145,4 +145,12 @@ shadows:
     sunset_date: "2026-12-31"
   upstream_drift_tools:
     tracking_issue: 8322
+    sunset_date: "2026-12-31"
+
+  # ── Pre-existing UD package surfaced by the Tools #4872 pin ───────────────
+  # UpstreamDrift's plotting package predates the provider package added to
+  # Tools. The pin reveals the overlap; it does not introduce another UD copy.
+  # Keep the debt explicit under the original shared-module migration issue.
+  plotting:
+    tracking_issue: 5623
     sunset_date: "2026-12-31"
