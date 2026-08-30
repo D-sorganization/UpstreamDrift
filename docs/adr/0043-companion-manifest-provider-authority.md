@@ -3,7 +3,7 @@
 - Status: Accepted
 - Date: 2026-08-28
 - Decision Makers: UpstreamDrift maintainers and AffineDrift companion owners
-- Related Issues/PRs: UpstreamDrift #9174, #9192, #9064, #9070;
+- Related Issues/PRs: UpstreamDrift #9174, #9190, #9192, #9064, #9070;
   AffineDrift #4010, #4030
 
 ## Context
@@ -45,17 +45,18 @@ the schema does not use current counts as `const`, `minItems`, or `maxItems`.
 
 ### Source Ownership
 
-| Fact                               | Editable Authority                        | Companion Treatment                                 |
-| ---------------------------------- | ----------------------------------------- | --------------------------------------------------- |
-| Native model and launch metadata   | `src/config/models.yaml`                  | Local-only normalized program record                |
-| Web launcher metadata              | `src/config/launcher_manifest.json`       | Merged by stable program ID, with source provenance |
-| Shell parity, gaps, and exemptions | `src/config/feature_parity.json`          | Feature record with parity kept separate            |
-| Package and Python compatibility   | `pyproject.toml` plus supported CI matrix | Exact package version/specifier and tested minors   |
-| Engine support tier                | UpstreamDrift support policy              | `supported`, `extended`, or `experimental` only     |
-| Tools provider revision            | `vendor/ud-tools` Git gitlink             | Exact immutable 40-character commit                 |
-| Equations/calculations/uncertainty | #9070 calculation manifest                | Link later; never copy or redefine                  |
-| Design-manual content/approval     | #9064 governed QMD authority              | Link later; never infer approval                    |
-| Scientific qualification           | Qualification evidence authority          | Conservative explicit state; inclusion grants none  |
+| Fact                               | Editable Authority                           | Companion Treatment                                   |
+| ---------------------------------- | -------------------------------------------- | ----------------------------------------------------- |
+| Native model and launch metadata   | `src/config/models.yaml`                     | Local-only normalized program record                  |
+| Web launcher metadata              | `src/config/launcher_manifest.json`          | Merged by stable program ID, with source provenance   |
+| Shell parity, gaps, and exemptions | `src/config/feature_parity.json`             | Feature record with parity kept separate              |
+| Package and Python compatibility   | `pyproject.toml` plus supported CI matrix    | Exact package version/specifier and tested minors     |
+| Engine support tier                | UpstreamDrift support policy                 | `supported`, `extended`, or `experimental` only       |
+| Tools provider revision            | `vendor/ud-tools` Git gitlink                | Exact immutable 40-character commit                   |
+| Equations/calculations/uncertainty | #9070 calculation manifest                   | Link later; never copy or redefine                    |
+| Design-manual content/approval     | #9064 governed QMD authority                 | Link later; never infer approval                      |
+| Scientific qualification           | Qualification evidence authority             | Conservative explicit state; inclusion grants none    |
+| Governed workflow declarations     | `scripts/config/companion_workflows.v1.json` | Hashed records executed only by the provider boundary |
 
 The export keeps these independent dimensions:
 
@@ -90,9 +91,15 @@ inputs.
 Postconditions require unique, deterministically sorted program and feature
 IDs, exact input hashes, exact provider pins, resolvable feature/program
 references, a strict-schema-valid document, and a detached digest over the
-rendered bytes. Publication remains `draft` while capability evidence,
-workflow/document inventories, screenshot qualification, and immutable
-release acquisition are incomplete.
+rendered bytes. The workflow registry adds its referenced committed fixtures to
+the hashed input set. Its executor accepts only declared Python modules, argv
+arrays, allowlisted environment values, repository-relative working directories
+and outputs, and uses `shell=False`. It verifies exact exit codes, declared
+artifact types and digests, rejects undeclared outputs, and refuses source
+commit mismatch. Unavailable records have no executor, argv, exit code, or
+artifacts and cannot be run. Publication remains `draft` while capability
+evidence, documentation, screenshot qualification, and protected completion
+evidence are incomplete.
 
 ### Provider and Consumer Boundary
 
@@ -140,9 +147,9 @@ depend on AffineDrift.
   without schema churn; DbC rejects ambiguous publication inputs.
 - Negative: a clean committed checkout is required to generate an authoritative
   artifact, so local drafts cannot be presented as publishable output.
-- Negative: this foundation emits empty documentation, workflow, and screenshot
-  inventories. Those empty arrays are explicit negative evidence, not #9174
-  completion or a publishable companion.
+- Negative: documentation and screenshot inventories remain incomplete. The
+  governed workflows prove only their declared deterministic software paths;
+  they do not establish native GUI/engine availability or scientific validity.
 
 ### Foundation Boundary and Remaining Provider Ownership
 
@@ -165,6 +172,24 @@ by four linked children:
 The local ignored files produced by #9180 validate deterministic generation;
 they have no durable release acquisition URL and must not be represented as a
 released provider artifact. No ad hoc tag or release is part of this slice.
+
+### Governed Workflow Authority
+
+Issue #9190 establishes one strict workflow registry and one public executor.
+Ten successful records cover installation, headless launch resolution,
+simulation and analysis, import/export, program export, counterfactual, report,
+and plot paths. Four failure records deterministically represent unsupported
+dependency, bad input, unavailable engine, and stale-version behavior with
+distinct non-zero exits. The optional native OpenSim GUI record is explicitly
+unavailable and structurally non-executable until its prerequisite and evidence
+authority exist.
+
+Every code pull request and protected-main push runs all fourteen available
+records and uploads exact-commit evidence for 30 days. This job is an aggregate
+quality-gate dependency, not a publication channel. Local development may skip
+the self-referential catalog-export record only through the private test API
+while the tree is dirty; the public CLI and CI always require a clean exact
+commit and execute the complete available registry.
 
 ### Protected Publication and Acquisition
 

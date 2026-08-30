@@ -52,6 +52,8 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "program_records": 70,
         "feature_records": 41,
         "feature_surface_paths": 79,
+        "workflow_records": 15,
+        "executable_workflow_records": 14,
     }
     assert len({record["id"] for record in catalog["programs"]}) == 70
     assert len({record["id"] for record in catalog["features"]}) == 41
@@ -202,10 +204,14 @@ def test_catalog_pins_exact_provider_and_input_provenance() -> None:
     assert tools["pinned_commit"] == "cc883cbaf63157b58c71cba385a683df2762b0cb"
     assert tools["vendor_path"] == "vendor/ud-tools"
     assert {item["path"] for item in source["inputs"]} == {
+        "docs/api/contracts/upstreamdrift-companion-compatibility-v1.json",
+        "docs/api/contracts/upstreamdrift-companion-v1.schema.json",
         "pyproject.toml",
+        "scripts/config/companion_workflows.v1.json",
         "src/config/feature_parity.json",
         "src/config/launcher_manifest.json",
         "src/config/models.yaml",
+        "tests/fixtures/launch_monitor/trackman.csv",
     }
     assert all(len(item["sha256"]) == 64 for item in source["inputs"])
 

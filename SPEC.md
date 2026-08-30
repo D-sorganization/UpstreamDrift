@@ -51,6 +51,20 @@ Failure to establish that working directory is negative publication evidence:
 no artifact or attestation may be accepted, and #9192 remains open until a new
 protected-main run publishes and verifies the exact protected commit bytes.
 
+## Deterministic Companion Workflow Authority (#9190)
+
+ADR-0043 amendment establishes UpstreamDrift as the workflow-execution authority
+for the 15 registered companion workflows. Ten success workflows cover
+installation, launch resolution, simulation, import/export, catalog export,
+counterfactual mechanics, reports, and plotting; four deterministic failure
+fixtures cover unsupported dependency, bad input, unavailable engine, and stale
+version; one native OpenSim GUI workflow is explicitly unavailable until
+native-engine UI and screenshot authority exist. All workflows execute through
+`scripts.companion_workflows` using `shell=False` arguments and emit structured
+execution records with exact command strings, exits, durations, and outputs.
+CI job `companion-workflows` runs all available records and verifies execution
+evidence against schema `upstreamdrift-companion-v1.schema.json`.
+
 ## Ball-Sand Interaction: What Reaches the Ball (#8712)
 
 Issue #8712 resolves the sand arriving at the ball inside the F1 plane-strain
