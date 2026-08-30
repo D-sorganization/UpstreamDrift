@@ -370,9 +370,7 @@ def _integration_errors(free: dict[str, Any]) -> tuple[tuple[float, float], ...]
     return ordered
 
 
-def _validate_numeric_gates(
-    record: dict[str, Any], *, authority_maximum: float | None = None
-) -> float:
+def _validate_numeric_gates(record: dict[str, Any]) -> None:
     design = _mapping(record, "design")
     free = _mapping(record, "free_body")
     inverse = _mapping(free, "inverse_dynamics_relative_error")
@@ -402,7 +400,7 @@ def _validate_numeric_gates(
     _nonnegative_values(inverse, "inverse_dynamics_relative_error")
     maximum = _finite(inverse, "maximum")
     computed_maximum = max(inverse_components.values())
-    if maximum != computed_maximum and maximum != authority_maximum:
+    if maximum != computed_maximum:
         raise ValueError("semantic inverse-dynamics maximum is inconsistent")
     _nonnegative_values(drift, "gravity_free_zero_torque_relative_drift")
     drift_values = tuple(_finite(drift, name) for name in drift)
@@ -441,7 +439,6 @@ def _validate_numeric_gates(
     )
     if not passed:
         raise ValueError("semantic numeric gate comparison failed")
-    return maximum
 
 
 def _require_profile(record: dict[str, Any], profile_id: str, authority: str) -> None:
@@ -559,8 +556,8 @@ def compare_semantic_evidence(
     tolerances = _compatibility_tolerances(authority)
     if tolerances != _compatibility_tolerances(rolling):
         raise ValueError("semantic compatibility tolerance policies differ")
-    authority_maximum = _validate_numeric_gates(authority)
-    _validate_numeric_gates(rolling, authority_maximum=authority_maximum)
+    _validate_numeric_gates(authority)
+    _validate_numeric_gates(rolling)
     for field in ("free_body", "constrained_motion"):
         authority_section = authority[field]
         rolling_section = rolling[field]
