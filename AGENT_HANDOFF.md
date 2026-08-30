@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 07:25 PDT
+Updated: 2026-08-30 07:47 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -9,7 +9,9 @@ design-manual program.
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
-  `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`, the squash merge of PR #9299.
+  `7dc5f86af68907f19bc953c509d96d05f505cdab`, the squash merge of PR #9302.
+- PR #9299 remains its direct CRBA requalification parent at
+  `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
 - PR #9299 requalified the CRBA-dependent publication after routing four native
   Pinocchio consumers through one finite, square, symmetric-matrix adapter.
 - The requalified paper has 253 pages, 2,011,818 bytes, and SHA-256
@@ -24,47 +26,41 @@ design-manual program.
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
 
-## Active Protected Follow-Up: #9302
+## Active Forward-Attribution Kernel Slice: #9153
 
 - Worktree: `UpstreamDrift-worktrees/9153-crba-symmetry`.
-- Branch: `fix/9300-manufactured-engine-qualification`.
-- PR: #9302, titled
-  `Test: Qualify Manufactured Evidence Across Versioned Dependencies`.
-- The reviewed scientific delta is commit
-  `624f6dd901352cc5cfcfed38ab347a3148d5e3a1`; this handoff-only successor
-  will change `HEAD`, so verify `git rev-parse HEAD` before every operation.
-- Squash auto-merge is enabled. Never bypass reviews or protected checks.
-- The original optional-stack failure compared MuJoCo/Pinocchio 3.12/4.1 bytes
-  against evidence qualified with 3.8/3.8. That was an invalid cross-version
-  byte-identity requirement, not a mechanics failure.
-- The corrected contract requires two builds in the same environment to be byte
-  exact. When engine identities match the frozen qualification environment, the
-  record must also be semantically equal to frozen evidence. Across engine
-  versions, immutable model, design, source, limitation, and gate contracts must
-  agree; bytes and numerical payload are not asserted equal.
-- The artifact was regenerated in the qualified 3.8/3.8 WSL environment.
-  Numerical payload, model, design, gates, and limitations are unchanged; only
-  normalized formatting and the test-source hash changed.
-- Qualified native suite: 6/6 passed. Portable combined suite: 52 passed and
-  four native skips. Release validation: 707/707 artifacts valid.
-- The old anti-phantom run saw the former title containing `Engine`; rerunning
-  that same run reused its old pull-request payload. This substantive handoff
-  commit creates a new `synchronize` event with the corrected title. Do not
-  rerun the stale event again.
+- Branch: `feat/9153-forward-attribution-kernel`, based exactly on protected
+  `main`; no PR exists yet.
+- This slice ports only the mature event-aligned generalized impulse/work
+  kernel, the bounded rigid-contact replay adapter, and manufactured scientific
+  tests from the quarantined branch. It excludes all campaign outputs,
+  preregistrations, launch workflows, summaries, figures, and stale handoffs.
+- The kernel splits quadrature at duplicate-time segment transitions, retains
+  continuous generalized impulse/work, `Mdot v` momentum transport,
+  `0.5 v^T Mdot v` kinetic-geometry work, and declared event impulse/work.
+- Signed cancellation remains visible; ratios below the declared denominator
+  floor are undefined rather than zero. Coordinate-scaling and corruption
+  controls fail closed.
+- The rigid replay is descriptive same-trajectory attribution, not a divergent
+  causal ablation and not evidence of anatomy, biological passivity, or a human
+  strategy.
+- Current focused state: 13 scientific tests pass; focused MyPy, Ruff, format,
+  file-size, and architecture checks pass. F-8557.32 records the contract.
+- #9302 passed every protected gate, including the 9m43s unit suite and 7m26s
+  latest-dependency optional stack. Its remote tree was verified exactly.
 
 ## Immediate Order
 
-1. Validate this handoff, keep it at or below 150 lines, commit, and push it.
-2. Run the GitHub App setup immediately before every GitHub operation.
-3. Inspect all checks on the exact new #9302 head. Do not create redundant
-   reruns when only runner capacity is pending.
-4. The optional stack must prove the corrected latest-version invariant. Fix
-   actionable source failures only; do not weaken scientific tolerances.
-5. Let squash auto-merge operate only after every protected gate is green.
-6. Fetch protected `main`, verify #9302's squash commit and tree remotely, then
-   update #9153/#8557 status with the exact evidence.
-7. Reconcile the accumulated campaign branch as reviewable dependency slices;
-   never open it as one PR and never dispatch `[100,120)` from pre-fix authority.
+1. Complete focused validation, document the exact diff, and commit this clean
+   source/test/SPEC/handoff slice without importing generated evidence.
+2. Push and open one protected PR linked to #9153. Run the GitHub App setup
+   immediately before every GitHub operation.
+3. Fix actionable exact-head failures only, preserve squash auto-merge, and
+   verify the squash commit/tree on remote `main`.
+4. Next port the distributed event-surface/root-location adapter as a separate
+   dependency slice. Do not combine it with stateful friction or campaigns.
+5. Only after source/adapters merge, preregister fresh current-main smoke
+   execution. Never dispatch `[100,120)` from pre-fix authority.
 
 ## Scientific Boundaries
 

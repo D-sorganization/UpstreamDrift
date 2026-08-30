@@ -4944,6 +4944,32 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   shall not establish human intent, anatomy, population effects, injury risk,
   or coaching guidance.
 
+### F-8557.32: Event-Aligned Forward Attribution Kernel
+
+- Forward generalized-force attribution shall integrate continuous impulse and
+  generalized work only within registered continuous segments. Every event
+  boundary shall use duplicate pre/post times with a segment transition; a
+  quadrature interval shall never cross that boundary.
+- The momentum balance shall retain both the continuous generalized-force
+  impulse and the configuration-dependent transport term
+  `integral((dM/dt) v dt)`. The work balance shall separately retain
+  `integral(0.5 v^T (dM/dt) v dt)`, continuous generalized work, and declared
+  event work. Neither balance may silently identify `integral(Q dt)` with
+  `delta(Mv)` for a configuration-dependent mass matrix.
+- Event impulses and event work shall remain separate observables. A continuous
+  compliant-force replay with no discrete impact law shall record zero event
+  impulse/work rather than infer one from duplicate samples.
+- Signed shares shall preserve cancellation and may be negative or exceed one.
+  Ratios whose registered denominator is below its floor shall be suppressed as
+  undefined, not reported as zero.
+- Manufactured gates shall cover constant force/work, variable-mass transport,
+  duplicate event times, corrupted closure, sign reversal, coordinate scaling,
+  directional mass differentiation, and a bounded native rigid-contact replay.
+- Same-trajectory contribution attribution is descriptive. It shall not be
+  presented as a causal ablation, human strategy, passive biological mechanism,
+  or coaching recommendation; divergent forward counterfactuals require a
+  separately registered design.
+
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
