@@ -97,7 +97,8 @@ projection. The analyses contain no stochastic elements. Re-runs should
 reproduce the recorded values up to floating-point environment differences.
 The prospective native-engine structural factorial uses a stricter contract:
 the frozen source and execution-module digests, package and engine versions,
-thread settings, and numerical-kernel dispatch are qualified before execution.
+declared runner placement, thread settings, and numerical-kernel dispatch are
+qualified before execution.
 The actual campaign runner must reproduce that audit exactly before any case is
 evaluated. The OpenBLAS kernel path is pinned with
 [`OPENBLAS_CORETYPE=Haswell`](https://github.com/OpenMathLib/OpenBLAS/wiki/Faq/0ed685dd80eab9b96751a75b2713049891bd4f16),

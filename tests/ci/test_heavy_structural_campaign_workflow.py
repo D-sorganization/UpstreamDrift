@@ -57,6 +57,13 @@ def test_structural_campaign_replays_runtime_contract_before_execution() -> None
     )
     assert "structural_case_start" in registration_step["run"]
     assert "structural_case_stop" in registration_step["run"]
+    assert job["runs-on"] == "ubuntu-latest"
+    assert '--runner-environment "$RUNNER_ENVIRONMENT"' in registration_step["run"]
+    assert '--runner-os "$RUNNER_OS"' in registration_step["run"]
+    assert '--runner-arch "$RUNNER_ARCH"' in registration_step["run"]
+    assert '--runner-image-os "$ImageOS"' in registration_step["run"]
+    assert "--runtime-audit-run-id" in registration_step["run"]
+    assert "structural_runtime_audit_run_id" in registration_step["run"]
     upload = job["steps"][retain]
     assert "always()" in upload["if"]
     assert upload["with"]["if-no-files-found"] == "error"

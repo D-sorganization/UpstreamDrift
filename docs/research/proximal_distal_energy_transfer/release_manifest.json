@@ -413,8 +413,8 @@
       "bytes": 15020
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_appendices.qmd": {
-      "sha256": "74d6c6bb2fca683435ad78eb66bf61f0b9e7e8d2b1afbf39569285935de1e52f",
-      "bytes": 16832
+      "sha256": "93e88c9f02346efda6318a173f00bbafb73ea06f665409c306d414d159a15d8e",
+      "bytes": 16859
     },
     "docs/research/proximal_distal_energy_transfer/chapters/_ch01_introduction.qmd": {
       "sha256": "5a92dfd140bd7d22389912d5d5b732b1fabc63d862883707cce73446cd416387",
@@ -2121,8 +2121,8 @@
       "bytes": 15513
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_recovery_registration.json": {
-      "sha256": "124ac709ea9045fbf33b72b1929fccba509c15721474873c12841f978ec7453b",
-      "bytes": 3412
+      "sha256": "8478a6bf44129a4e0a73294ff9ae792c22b0336a63938ba765aba37f99dbea57",
+      "bytes": 4226
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_uncertainty_study.json": {
       "sha256": "8230941e0aa51ba4c389b58161a18e172ce781805b00161b72e48300c2211fc2",
@@ -3529,8 +3529,8 @@
       "bytes": 69285
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.pdf": {
-      "sha256": "2e294d8b7541ac9c22f53c1dedaa01d9cb5c37d1690d4dc269f2eaf2429a0330",
-      "bytes": 2012267
+      "sha256": "72334a25bffb2d0c1cf4eafe8de9290f91dc30656352eb82fc66877d295f8064",
+      "bytes": 2012265
     },
     "docs/research/proximal_distal_energy_transfer/proximal_distal_energy_transfer.qmd": {
       "sha256": "0f963245c75dad095f50e64772ff4b68c8b97a877adbac57d6991ba60197733b",
@@ -3765,8 +3765,8 @@
       "bytes": 16645
     },
     "scripts/research/proximal_distal_energy/articulated_structural_factorial_recovery_registration.py": {
-      "sha256": "559633ba4262c859544b7303a855b75ec66f0dd5379c412dda3e9b90445e4a78",
-      "bytes": 15963
+      "sha256": "09155ce6ba1e8f6e1441f0a339590ec74049be258913b618f73ed6c9a824dd0b",
+      "bytes": 21623
     },
     "scripts/research/proximal_distal_energy/articulated_structural_factorial_repeatability_audit.py": {
       "sha256": "a8d1a05f30b3d668439abe2f7fd375c03ff56f1bb6ad2899b15d35cde84e0960",

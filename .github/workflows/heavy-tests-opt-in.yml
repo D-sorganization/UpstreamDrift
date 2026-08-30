@@ -184,7 +184,12 @@ jobs:
             --launch docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_launch.json \
             --registration docs/research/proximal_distal_energy_transfer/data/articulated_structural_factorial_recovery_registration.json \
             --case-start ${{ inputs.structural_case_start }} \
-            --case-stop ${{ inputs.structural_case_stop }}
+            --case-stop ${{ inputs.structural_case_stop }} \
+            --runner-environment "$RUNNER_ENVIRONMENT" \
+            --runner-os "$RUNNER_OS" \
+            --runner-arch "$RUNNER_ARCH" \
+            --runner-image-os "$ImageOS" \
+            --runtime-audit-run-id ${{ inputs.structural_runtime_audit_run_id }}
 
       - name: Generate Exact-Revision Runtime Audit
         if: ${{ inputs.structural_runtime_audit == true }}

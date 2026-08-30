@@ -524,7 +524,7 @@ available with the document for independent inspection and reuse.
 
 \chapter{Introduction}\label{sec-intro}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6, toptitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toprule=.15mm, arc=.35mm, opacityback=0, rightrule=.15mm, colback=white, colbacktitle=quarto-callout-note-color!10!white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, coltitle=black, bottomtitle=1mm, left=2mm, bottomrule=.15mm, opacitybacktitle=0.6, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Scope and Evidence Categories}, toptitle=1mm, opacityback=0, colback=white, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, rightrule=.15mm]
 
 This document distinguishes three kinds of statement. \textbf{Empirical
 findings} summarize published measurements of golfers.
@@ -2829,7 +2829,7 @@ velocity-bias terms. In that limited, useful sense, earlier proximal
 work can be expressed later as a motion-dependent distal drive. The flow
 is state mediated, not force free.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6, toptitle=1mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toprule=.15mm, arc=.35mm, opacityback=0, rightrule=.15mm, colback=white, colbacktitle=quarto-callout-note-color!10!white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, colframe=quarto-callout-note-color-frame, leftrule=.75mm, coltitle=black, bottomtitle=1mm, left=2mm, bottomrule=.15mm, opacitybacktitle=0.6, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Plain-language picture}, toptitle=1mm, opacityback=0, colback=white, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, rightrule=.15mm]
 
 Imagine swinging a partly folded two-section ruler. Pulling and turning
 it builds motion. As the hinge opens, the same moving mass must be
@@ -14105,10 +14105,11 @@ analysis uses velocity Verlet with mass-metric projection. The analyses
 contain no stochastic elements. Re-runs should reproduce the recorded
 values up to floating-point environment differences. The prospective
 native-engine structural factorial uses a stricter contract: the frozen
-source and execution-module digests, package and engine versions, thread
-settings, and numerical-kernel dispatch are qualified before execution.
-The actual campaign runner must reproduce that audit exactly before any
-case is evaluated. The OpenBLAS kernel path is pinned with
+source and execution-module digests, package and engine versions,
+declared runner placement, thread settings, and numerical-kernel
+dispatch are qualified before execution. The actual campaign runner must
+reproduce that audit exactly before any case is evaluated. The OpenBLAS
+kernel path is pinned with
 \href{https://github.com/OpenMathLib/OpenBLAS/wiki/Faq/0ed685dd80eab9b96751a75b2713049891bd4f16}{\texttt{OPENBLAS\_CORETYPE=Haswell}},
 and a replay-only run independently tests the qualification without
 invoking the campaign. Runtime drift is retained as adverse

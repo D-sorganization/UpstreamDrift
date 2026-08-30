@@ -1,11 +1,21 @@
 {
-  "schema_version": "articulated-structural-factorial-recovery-registration/1.0.0",
+  "schema_version": "articulated-structural-factorial-recovery-registration/1.1.0",
   "classification": "outcome_blind_recovery_preregistration",
+  "operational_amendment": {
+    "timing": "after_runner_placement_conflict_before_replacement_execution",
+    "superseded_registration_sha256": "124ac709ea9045fbf33b72b1929fccba509c15721474873c12841f978ec7453b",
+    "conflicting_run_id": 33297882357,
+    "conflicting_dispatch_head": "693ffcf5b7678a746b82dd941fb2f0faeb5916b5",
+    "conflicting_plan_resource_contract": "DeskComputer serial CPU only; no ControlTower, WSL, or VHDX access",
+    "conflicting_run_promotable": false,
+    "registered_design_or_numerical_gate_change": false,
+    "checkpoint_reuse_permitted": false
+  },
   "identity": {
     "plan_sha256": "1575b1cb0ee7c5d8b42848a8c427a2379b22a156e239b01f399dc1fa2c878a87",
     "execution_revision": "ccb171ed3185164e21c635e36de53d6a3cca3ed5",
-    "qualified_runtime_audit_run_id": 33277601263,
-    "qualified_runtime_identity_sha256": "5ceeb5af7815aece95ed859e749b72e8696e0ab8d6f183d4193700b525d16bb4"
+    "qualified_runtime_audit_run_id": 33297583257,
+    "qualified_runtime_identity_sha256": "58b7cc58cffcc20e6736b662bd8f9119d8cd2374d9406d59d5c1dd44ee41dc7d"
   },
   "trigger_evidence": {
     "first_enriched_replay_run_id": 33286379004,
@@ -27,7 +37,7 @@
       "case_start": 0,
       "case_stop": 20,
       "depends_on_case_stop": null,
-      "status": "authorized_after_registration_is_committed"
+      "status": "authorized_only_after_conflict_run_terminal_and_retained"
     },
     {
       "ordinal": 2,
@@ -64,7 +74,14 @@
     "runtime_replay_gate_required_before_every_slice": true,
     "dispatch_head_recorded_before_each_slice": true,
     "automatic_rerun_permitted": false,
-    "case_100_to_120_dispatch_permitted": false
+    "case_100_to_120_dispatch_permitted": false,
+    "runner_placement": {
+      "workflow_runner_label": "ubuntu-latest",
+      "runner_environment": "github-hosted",
+      "runner_os": "Linux",
+      "runner_arch": "X64",
+      "image_os_prefix": "ubuntu"
+    }
   },
   "evidence_policy": {
     "required_per_slice": [

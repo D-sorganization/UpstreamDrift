@@ -99,10 +99,10 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
    33297583257 and independent replay 33297683794 pass exact at `63f02a265`;
    runtime identity is `58b7cc58cffc`, audit ZIP SHA `c27495a5aaf4`, replay ZIP
    SHA `a3c655b658c4`, replay JSON SHA `7ea57a01ce0f`, and no case/checkpoint ran.
-   #9282 is closed and #9281 retired. #9283 preregisters new [0,20); run
-   33297882357/job 99220559724 is sole-live at head `693ffcf5b`, audit 33297583257.
-   Do not cancel, duplicate, mix runtime identities, inspect outcomes, or dispatch
-   [20,40). On success retain raw APIs/ZIPs before building the fresh gate set.
+   #9283 run 33297882357/job 99220559724 is sole-live but non-promotable: its
+   plan says DeskComputer and old registration names audit 33277601263, while
+   hosted execution uses 33297583257. Retain it; v1.1 prospectively binds hosted
+   placement/audit 33297583257, then replace [0,20). Never dispatch [20,40).
 2. Preserve the case-100 mismatch, legacy-only repeat classification, and
    adverse first enriched replay. Do not weaken exact equality, add tolerance,
    overwrite evidence, read effects, promote results, or dispatch [100,120).
@@ -126,9 +126,9 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
 
 ## Validation
 
-Use serial pytest. All 134 structural-factorial/workflow tests pass; Python 3.11
+Use serial pytest. All 137 structural-factorial/workflow tests pass; Python 3.11
 MyPy, repository Ruff, and changed-file Black pass. The 256-page PDF candidate
-`2e294d8b7541` passes the 1,115-artifact computational release gate and visual
+`72334a25bffb` passes the 1,115-artifact computational release gate and visual
 QA. Full collection retains 44 environment/baseline errors; native replay needs
 the hosted qualified runtime, so do not call the whole repository green here.
 

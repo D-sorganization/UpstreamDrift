@@ -36,9 +36,9 @@ REGISTRATION_PATH = PLAN_PATH.with_name(
 
 def _registration() -> StructuralFactorialRecoveryRegistration:
     return StructuralFactorialRecoveryRegistration(
-        qualified_runtime_audit_run_id=33277601263,
+        qualified_runtime_audit_run_id=33297583257,
         qualified_runtime_identity_sha256=(
-            "5ceeb5af7815aece95ed859e749b72e8696e0ab8d6f183d4193700b525d16bb4"
+            "58b7cc58cffcc20e6736b662bd8f9119d8cd2374d9406d59d5c1dd44ee41dc7d"
         ),
         triggering_run_id=33286379004,
         triggering_dispatch_head="0824aa69321c576aeef5f69eee351cada5d4977c",
@@ -47,6 +47,11 @@ def _registration() -> StructuralFactorialRecoveryRegistration:
         repeatability_audit_sha256=(
             "3021c3fc5d9dc392d1efa53aede5a0a022cce03503a3788f52cf7b8def96c71e"
         ),
+        superseded_registration_sha256=(
+            "124ac709ea9045fbf33b72b1929fccba509c15721474873c12841f978ec7453b"
+        ),
+        runner_conflict_run_id=33297882357,
+        runner_conflict_dispatch_head=("693ffcf5b7678a746b82dd941fb2f0faeb5916b5"),
     )
 
 
@@ -83,6 +88,19 @@ def test_recovery_registration_is_canonical_and_dependency_ordered() -> None:
         80,
     ]
     assert execution_policy["maximum_concurrent_structural_runs"] == 1
+    assert execution_policy["runner_placement"] == {
+        "workflow_runner_label": "ubuntu-latest",
+        "runner_environment": "github-hosted",
+        "runner_os": "Linux",
+        "runner_arch": "X64",
+        "image_os_prefix": "ubuntu",
+    }
+    amendment = cast(dict[str, object], manifest["operational_amendment"])
+    assert amendment["timing"] == (
+        "after_runner_placement_conflict_before_replacement_execution"
+    )
+    assert amendment["conflicting_run_promotable"] is False
+    assert amendment["registered_design_or_numerical_gate_change"] is False
     assert evidence_policy["reuse_prior_checkpoint_bytes"] is False
     assert claim_boundary["scientific_outcomes_may_be_inspected"] is False
 
@@ -105,6 +123,11 @@ def test_registered_slice_gate_accepts_only_exact_preregistered_slice() -> None:
         launch=launch,
         case_start=0,
         case_stop=20,
+        runner_environment="github-hosted",
+        runner_os="Linux",
+        runner_arch="X64",
+        runner_image_os="ubuntu24",
+        runtime_audit_run_id=33297583257,
     )
 
     assert record["ordinal"] == 1
@@ -116,7 +139,65 @@ def test_registered_slice_gate_accepts_only_exact_preregistered_slice() -> None:
                 launch=launch,
                 case_start=case_start,
                 case_stop=case_stop,
+                runner_environment="github-hosted",
+                runner_os="Linux",
+                runner_arch="X64",
+                runner_image_os="ubuntu24",
+                runtime_audit_run_id=33297583257,
             )
+
+
+@pytest.mark.parametrize(
+    ("changes", "message"),
+    [
+        ({"runner_environment": "self-hosted"}, "runner environment"),
+        ({"runner_os": "Windows"}, "runner OS"),
+        ({"runner_arch": "ARM64"}, "runner architecture"),
+        ({"runner_image_os": "windows2025"}, "runner image"),
+    ],
+)
+def test_registered_slice_gate_rejects_unregistered_runner_placement(
+    changes: dict[str, str], message: str
+) -> None:
+    plan, launch = _inputs()
+    manifest = _registration().to_manifest(plan=plan, launch=launch)
+    placement = {
+        "runner_environment": "github-hosted",
+        "runner_os": "Linux",
+        "runner_arch": "X64",
+        "runner_image_os": "ubuntu24",
+        "runtime_audit_run_id": 33297583257,
+    }
+    placement.update(changes)
+
+    with pytest.raises(ValueError, match=message):
+        validate_registered_slice(
+            manifest=manifest,
+            plan=plan,
+            launch=launch,
+            case_start=0,
+            case_stop=20,
+            **placement,
+        )
+
+
+def test_registered_slice_gate_rejects_unregistered_runtime_audit() -> None:
+    plan, launch = _inputs()
+    manifest = _registration().to_manifest(plan=plan, launch=launch)
+
+    with pytest.raises(ValueError, match="runtime audit run"):
+        validate_registered_slice(
+            manifest=manifest,
+            plan=plan,
+            launch=launch,
+            case_start=0,
+            case_stop=20,
+            runner_environment="github-hosted",
+            runner_os="Linux",
+            runner_arch="X64",
+            runner_image_os="ubuntu24",
+            runtime_audit_run_id=33277601263,
+        )
 
 
 @pytest.mark.parametrize(
