@@ -55,5 +55,11 @@
     "1.0.630": 2,
     "1.0.631": 2,
     "1.0.632": 2
-  }
+  },
+  "duplicate_text": {
+    "85d49f1ea7858898": ["1.0.466", "1.0.467"],
+    "6a83afcd5b77ffd9": ["1.0.308", "1.0.308"],
+    "c331c210d6ed15b8": ["1.0.303", "1.0.303"]
+  },
+  "_comment_text": "Changelog rows whose prose is identical under different version numbers. These arise when a hot-prepend conflict is resolved by keeping 'both' rows where one was already a renumbered copy of the other. Each entry lists the versions currently sharing one body. Shrink this map when a pair is genuinely reconciled; never grow it to make a build pass."
 }
