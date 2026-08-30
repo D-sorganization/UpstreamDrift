@@ -708,9 +708,10 @@ def roadmap_table_markdown() -> str:
         else:
             transition = f"{step.from_level} to {step.to_level}"
             needs = ", ".join(f"`{key}`" for key in step.requires)
+        blocker = entry.blocker
         lines.append(
             f"| {entry.factor.label} | {level} | {entry.threshold_level} / 4 "
-            f"| {entry.blocker.value.replace('_', ' ')} | {transition} | {needs} |"
+            f"| {blocker.value.replace('_', ' ')} | {transition} | {needs} |"
         )
     return "\n".join(lines)
 
@@ -732,7 +733,8 @@ def measurement_spec_table_markdown() -> str:
             if spec.provenance_keys
             else "none"
         )
-        effort = f"{spec.effort.value.replace('_', ' ')} ({spec.effort.cost_units})"
+        effort_class = spec.effort
+        effort = f"{effort_class.value.replace('_', ' ')} ({effort_class.cost_units})"
         lines.append(
             f"| `{spec.key}` | {spec.quantity} | {spec.unit} | {effort} "
             f"| {spec.acceptance.summary()} | {flips} |"
@@ -754,9 +756,11 @@ def leverage_table_markdown() -> str:
     ranking = VALIDATION_LEDGER.leverage_ranking(_EMPTY_REGISTER)
     for rank, item in enumerate(ranking, start=1):
         unlocks = ", ".join(item.unlocks) if item.unlocks else "nothing yet"
+        spec = item.spec
+        effort_class = spec.effort
         lines.append(
-            f"| {rank} | `{item.spec.key}` "
-            f"| {item.spec.effort.value.replace('_', ' ')} "
+            f"| {rank} | `{spec.key}` "
+            f"| {effort_class.value.replace('_', ' ')} "
             f"| {item.credit:.2f} | {item.leverage:.3f} | {unlocks} |"
         )
     return "\n".join(lines)

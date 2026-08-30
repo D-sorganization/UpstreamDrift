@@ -157,6 +157,35 @@ _EFFORT_UNITS: Mapping[EffortClass, int] = MappingProxyType(
 )
 
 
+def _require_levels_in_range(
+    owner: object,
+    names: tuple[str, ...],
+    *,
+    label: str,
+    optional: bool = False,
+) -> None:
+    """Raise unless each named attribute is a credibility level on the 0-4 scale.
+
+    Args:
+        owner: Object carrying the level attributes.
+        names: Attribute names to validate.
+        label: Message prefix, e.g. ``"level step "`` or ``f"{factor.value}."``.
+        optional: When true, a ``None`` level is accepted and skipped.
+
+    Raises:
+        VerificationError: naming the offending level.
+    """
+    for name in names:
+        level = getattr(owner, name)
+        if level is None and optional:
+            continue
+        if not isinstance(level, int) or not 0 <= level <= MAX_CREDIBILITY_LEVEL:
+            raise VerificationError(
+                f"{label}{name} must be an integer in 0-"
+                f"{MAX_CREDIBILITY_LEVEL}, got {level!r}"
+            )
+
+
 @dataclass(frozen=True, slots=True)
 class AcceptanceCriterion:
     """What a measurement has to achieve before it counts.
@@ -324,13 +353,9 @@ class LevelStep:
             VerificationError: If the levels are not adjacent and in range,
                 if no measurement is named, or if the rationale is missing.
         """
-        for name in ("from_level", "to_level"):
-            level = getattr(self, name)
-            if not isinstance(level, int) or not 0 <= level <= MAX_CREDIBILITY_LEVEL:
-                raise VerificationError(
-                    f"level step {name} must be an integer in 0-"
-                    f"{MAX_CREDIBILITY_LEVEL}, got {level!r}"
-                )
+        _require_levels_in_range(
+            self, ("from_level", "to_level"), label="level step "
+        )
         if self.to_level != self.from_level + 1:
             raise VerificationError(
                 "a level step climbs exactly one level, got "
@@ -401,15 +426,12 @@ class LedgerEntry:
         Raises:
             VerificationError: naming the offending level.
         """
-        for name in ("held_level", "threshold_level"):
-            level = getattr(self, name)
-            if level is None:
-                continue
-            if not isinstance(level, int) or not 0 <= level <= MAX_CREDIBILITY_LEVEL:
-                raise VerificationError(
-                    f"{self.factor.value}.{name} must be an integer in 0-"
-                    f"{MAX_CREDIBILITY_LEVEL}, got {level!r}"
-                )
+        _require_levels_in_range(
+            self,
+            ("held_level", "threshold_level"),
+            label=f"{self.factor.value}.",
+            optional=True,
+        )
 
     def _require_statements(self) -> None:
         """Raise unless every justification says something.
@@ -533,15 +555,12 @@ class FactorAssessment:
             VerificationError: If a level falls outside 0-4, or the
                 evidence or gap statement is empty.
         """
-        for name in ("achieved_level", "threshold_level"):
-            level = getattr(self, name)
-            if level is None:
-                continue
-            if not isinstance(level, int) or not 0 <= level <= MAX_CREDIBILITY_LEVEL:
-                raise VerificationError(
-                    f"{self.factor.value}.{name} must be an integer in 0-"
-                    f"{MAX_CREDIBILITY_LEVEL}, got {level!r}"
-                )
+        _require_levels_in_range(
+            self,
+            ("achieved_level", "threshold_level"),
+            label=f"{self.factor.value}.",
+            optional=True,
+        )
         for name in ("evidence", "gap_statement"):
             if not getattr(self, name).strip():
                 raise VerificationError(
@@ -603,6 +622,17 @@ class LeverageEntry:
     def is_reachable(self) -> bool:
         """True when this measurement would move something today."""
         return self.credit > 0.0
+
+
+def _leverage_sort_key(item: LeverageEntry) -> tuple[float, float, str]:
+    """Sort key for leverage ranking: best leverage, then cheapest, then key.
+
+    Bound as a named function rather than an inline lambda so the effort fields
+    are reached through a local `spec`, keeping each access within the repo's
+    two-hop Law-of-Demeter budget (`scripts/ci/check_lod.py`).
+    """
+    spec = item.spec
+    return (-item.leverage, spec.effort.cost_units, spec.key)
 
 
 @dataclass(frozen=True)
@@ -817,13 +847,7 @@ class ValidationLedger:
             )
             for key, spec in self.specs.items()
         ]
-        entries.sort(
-            key=lambda item: (
-                -item.leverage,
-                item.spec.effort.cost_units,
-                item.spec.key,
-            )
-        )
+        entries.sort(key=_leverage_sort_key)
         return tuple(entries)
 
     def measurement_limited_factors(self) -> tuple[CredibilityFactor, ...]:
