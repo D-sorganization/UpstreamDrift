@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal--Distal Research Program
 
-Updated: 2026-08-29 18:45 PDT (2026-08-30 01:45 UTC)
+Updated: 2026-08-29 18:49 PDT (2026-08-30 01:49 UTC)
 Epic #8557 is the completion authority. Local artifacts and partial campaigns
 are not completion evidence.
 
@@ -75,8 +75,10 @@ collected-prefix-0080-all-receipt-v1.4-collection-v1.3-v1`, manifest SHA
   The separately preserved `REJECTED-mixed-receipts-v1` collection is not
   authority.
 - Replay 33286379004 executes [80,100) at exact dispatch head `0824aa693` using
-  qualified audit 33277601263. It is the sole authorized structural process;
-  do not cancel, rerun, duplicate, or dispatch another while it is live.
+  qualified audit 33277601263. Job 99190171132 was last verified in progress
+  at step 11 (`Run Registered Structural Campaign Slice`) at 01:49 UTC. It is
+  the sole authorized structural process; do not cancel, rerun, duplicate, or
+  dispatch another while it is live.
 - Summary v1.4 applies 0.8 to every successive residual ratio; a stalled final
   step fails even when the endpoint ratio passes.
 
