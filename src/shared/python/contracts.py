@@ -267,6 +267,15 @@ def _evaluate_precondition(
     """
     if condition is None:
         raise ValueError("condition must be provided")
+
+    try:
+        func_sig = inspect.signature(func)
+        cond_sig = inspect.signature(condition)
+        if set(cond_sig.parameters).issubset(set(func_sig.parameters)):
+            return _evaluate_precondition_by_name(condition, func, args, kwargs)
+    except (TypeError, ValueError):
+        pass
+
     try:
         inspect.signature(condition).bind(*args, **kwargs)
     except TypeError:
