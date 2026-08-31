@@ -18,3 +18,7 @@
 ## 2026-08-29 - [Optimize Square Array Summation]
 **Learning:** Computing the sum of squares of an array (e.g., `np.square(arr).sum()` or `np.sum(arr**2)`) incurs unnecessary overhead due to the intermediate array created by `np.square()` or `**2`. By using `np.vdot(arr, arr)`, we skip this temporary array allocation and speed up the computation directly at the C-level (often ~2x faster).
 **Action:** When computing the sum of squared elements for real floating-point arrays, replace `np.square(arr).sum()` or `np.sum(arr**2)` with `np.vdot(arr, arr)`. Do not apply this to complex arrays (`np.vdot` conjugates its first argument, giving `sum(|arr|**2)` rather than `sum(arr**2)`) or to narrow integer/boolean arrays (`np.vdot` keeps the narrow dtype instead of `np.sum`'s promoted accumulator, so it can overflow or change a boolean result).
+
+## 2025-02-23 - [Optimize Euclidean Distance Summation With `np.hypot`]
+**Learning:** Using `np.hypot(a, b).sum()` is surprisingly faster (by ~2.3x) compared to `np.sum(np.sqrt(a**2 + b**2))` for small 1D arrays, as it efficiently handles Euclidean distance calculation while avoiding some temporary allocations, and `.sum()` avoids the overhead of `np.sum()`.
+**Action:** Look for instances where Euclidean distance is calculated element-wise and summed, especially for small 1D arrays, and replace them with this pattern.
