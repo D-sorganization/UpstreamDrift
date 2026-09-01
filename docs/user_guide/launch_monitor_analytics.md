@@ -88,7 +88,7 @@ Jobs are process-local and bounded. A server restart clears their status and
 results; resubmit the same immutable reference. A structured `unavailable`
 state distinguishes missing authorization or data, repository/commit/hash/row
 count mismatches, and unavailable dependencies without leaking a private path.
-See [ADR 0036](../adr/0036-immutable-launch-monitor-dataset-jobs.md) for the
+See [ADR 0037](../adr/0037-immutable-launch-monitor-dataset-jobs.md) for the
 security and retention rationale.
 
 ## Workflow
@@ -239,28 +239,6 @@ causality, improvement, or device-model equivalence.
 Exports retain source references and source-joinable backing hashes rather
 than copying restricted row values. Selected-pair results contain player labels;
 store and share them according to the source dataset's privacy and usage terms.
-
-### Source-Backed Strokes Gained
-
-True strokes gained requires more than carry and lateral dispersion. Each row
-must identify the start and finish lie, context, target or hole, and distance.
-The expected-strokes benchmark must be versioned, cited by HTTP(S) source URL,
-license-declared, and protected by the canonical table SHA-256. The application
-fails closed when a row is outside benchmark support or lacks a required state.
-
-The governed result reports:
-
-- `SG = E(start state) - 1 - E(finish state)` in strokes;
-- the exact benchmark version, source, license, and hash;
-- row-level interpolation inputs, input hashes, and exclusions;
-- sampling confidence intervals and benchmark uncertainty when supplied;
-- explicit units and non-causal limitations; and
-- player/session/club and longitudinal summaries only for user-attested or
-  externally verified identifiers and order fields.
-
-Target-relative radial error remains available as a dispersion proxy in yards.
-It is explicitly labeled **not strokes gained** because it has no versioned
-expected-strokes baseline or complete course state.
 
 ### Public Reference Data
 
