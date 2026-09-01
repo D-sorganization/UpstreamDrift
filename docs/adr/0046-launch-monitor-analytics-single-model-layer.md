@@ -83,7 +83,7 @@ any stage.
 - Follow-ups (own issues, sized after approval): G0 gates (#9354, merged);
   G1 port plan per module — the reviewed inventory of the 30 UD modules with
   keep-port-already-home classification is
-  [ADR-0046 G1: Launch-Monitor Port Plan](0046-g1-port-plan.md) (#9348);
+  [ADR-0046 G1: Launch-Monitor Port Plan](0048-launch-monitor-port-plan.md) (#9348);
   G2 re-pointing PRs per tab.
 
 ## Validation
@@ -113,5 +113,5 @@ the inventory it feeds must not repeat them:
    express.
 
 The authoritative inventory, decisions, and port order live in
-[0046-g1-port-plan.md](0046-g1-port-plan.md) (G1, #9348), which supersedes
+[0048-launch-monitor-port-plan.md](0048-launch-monitor-port-plan.md) (G1, #9348), which supersedes
 this record's capability lists where they conflict.
