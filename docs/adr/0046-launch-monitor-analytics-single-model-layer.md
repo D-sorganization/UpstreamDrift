@@ -1,8 +1,8 @@
 # ADR-0046: Launch-Monitor Analytics — Two Workbenches, One Model Layer
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-30
-- Decision Makers: repo owner (approval required before any implementation)
+- Decision Makers: repo owner (accepted 2026-08-30)
 - Related Issues/PRs: launcher tiles `launch_monitor_analytics` and `rate_of_closure`; Tools launch-monitor epic (#4583 line); UD `src/shared/python/launch_monitor/`
 
 ## Context
