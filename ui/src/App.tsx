@@ -1,14 +1,14 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router';
-import { ScrollToTop } from './utils/ScrollToTop';
-import { RouteTitle } from './utils/RouteTitle';
-import { ToastProvider } from './components/ui/Toast';
-import { ErrorBoundary } from './components/ui/ErrorBoundary';
-import { useWebSettingsBootstrap } from './api/useWebSettings';
-import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
-import { HelpPanel } from './components/ui/HelpPanel';
-import { useUIStore } from './stores';
-import { NotFoundPage } from './pages/NotFound';
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router";
+import { ScrollToTop } from "./utils/ScrollToTop";
+import { RouteTitle } from "./utils/RouteTitle";
+import { ToastProvider } from "./components/ui/Toast";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
+import { useWebSettingsBootstrap } from "./api/useWebSettings";
+import { DiagnosticsPanel } from "./components/ui/DiagnosticsPanel";
+import { HelpPanel } from "./components/ui/HelpPanel";
+import { useUIStore } from "./stores";
+import { NotFoundPage } from "./pages/NotFound";
 
 /**
  * Route-level code splitting (#7433): every page is lazy so the initial bundle
@@ -17,58 +17,71 @@ import { NotFoundPage } from './pages/NotFound';
  * named exports, so each import is mapped to a `default` for `React.lazy`.
  */
 const DashboardPage = lazy(() =>
-  import('./pages/Dashboard').then((m) => ({ default: m.DashboardPage })),
+  import("./pages/Dashboard").then((m) => ({ default: m.DashboardPage })),
 );
 const SimulationPage = lazy(() =>
-  import('./pages/Simulation').then((m) => ({ default: m.SimulationPage })),
+  import("./pages/Simulation").then((m) => ({ default: m.SimulationPage })),
 );
 const ModelExplorerPage = lazy(() =>
-  import('./pages/ModelExplorer').then((m) => ({ default: m.ModelExplorerPage })),
+  import("./pages/ModelExplorer").then((m) => ({
+    default: m.ModelExplorerPage,
+  })),
 );
 const PuttingGreenPage = lazy(() =>
-  import('./pages/PuttingGreen').then((m) => ({ default: m.PuttingGreenPage })),
+  import("./pages/PuttingGreen").then((m) => ({ default: m.PuttingGreenPage })),
+);
+const ImpactExplorerPage = lazy(() =>
+  import("./pages/ImpactExplorer").then((m) => ({
+    default: m.ImpactExplorerPage,
+  })),
 );
 const VideoAnalyzerPage = lazy(() =>
-  import('./pages/VideoAnalyzer').then((m) => ({ default: m.VideoAnalyzerPage })),
+  import("./pages/VideoAnalyzer").then((m) => ({
+    default: m.VideoAnalyzerPage,
+  })),
 );
 const DataExplorerPage = lazy(() =>
-  import('./pages/DataExplorer').then((m) => ({ default: m.DataExplorerPage })),
+  import("./pages/DataExplorer").then((m) => ({ default: m.DataExplorerPage })),
 );
 const MotionCapturePage = lazy(() =>
-  import('./pages/MotionCapture').then((m) => ({ default: m.MotionCapturePage })),
+  import("./pages/MotionCapture").then((m) => ({
+    default: m.MotionCapturePage,
+  })),
 );
 const ChatPage = lazy(() =>
-  import('./pages/Chat').then((m) => ({ default: m.ChatPage })),
+  import("./pages/Chat").then((m) => ({ default: m.ChatPage })),
 );
 const TerrainPage = lazy(() =>
-  import('./pages/Terrain').then((m) => ({ default: m.TerrainPage })),
+  import("./pages/Terrain").then((m) => ({ default: m.TerrainPage })),
 );
 const DatasetGeneratorPage = lazy(() =>
-  import('./pages/DatasetGenerator').then((m) => ({
+  import("./pages/DatasetGenerator").then((m) => ({
     default: m.DatasetGeneratorPage,
   })),
 );
 const AnalysisToolsPage = lazy(() =>
-  import('./pages/AnalysisTools').then((m) => ({ default: m.AnalysisToolsPage })),
+  import("./pages/AnalysisTools").then((m) => ({
+    default: m.AnalysisToolsPage,
+  })),
 );
 const CharacterBuilderPage = lazy(() =>
-  import('./pages/CharacterBuilder').then((m) => ({
+  import("./pages/CharacterBuilder").then((m) => ({
     default: m.CharacterBuilderPage,
   })),
 );
 const CanonicalCoreShellPage = lazy(() =>
-  import('./pages/CanonicalCoreShell').then((m) => ({
+  import("./pages/CanonicalCoreShell").then((m) => ({
     default: m.CanonicalCoreShellPage,
   })),
 );
 const BallFlightPage = lazy(() =>
-  import('./pages/BallFlight').then((m) => ({ default: m.BallFlightPage })),
+  import("./pages/BallFlight").then((m) => ({ default: m.BallFlightPage })),
 );
 const SettingsPage = lazy(() =>
-  import('./pages/Settings').then((m) => ({ default: m.SettingsPage })),
+  import("./pages/Settings").then((m) => ({ default: m.SettingsPage })),
 );
 const SwingObjectiveLabPage = lazy(() =>
-  import('./pages/SwingObjectiveLab').then((m) => ({
+  import("./pages/SwingObjectiveLab").then((m) => ({
     default: m.SwingObjectiveLabPage,
   })),
 );
@@ -106,6 +119,10 @@ function RoutedContent() {
           <Route path="/simulation" element={<SimulationPage />} />
           <Route path="/tools/model-explorer" element={<ModelExplorerPage />} />
           {/* Phase 5: Tool pages (#1206) */}
+          <Route
+            path="/tools/impact-explorer"
+            element={<ImpactExplorerPage />}
+          />
           <Route path="/tools/putting-green" element={<PuttingGreenPage />} />
           <Route path="/tools/video-analyzer" element={<VideoAnalyzerPage />} />
           <Route path="/tools/data-explorer" element={<DataExplorerPage />} />
@@ -113,7 +130,10 @@ function RoutedContent() {
           <Route path="/tools/terrain" element={<TerrainPage />} />
           <Route path="/tools/dataset" element={<DatasetGeneratorPage />} />
           <Route path="/tools/analysis" element={<AnalysisToolsPage />} />
-          <Route path="/tools/character-builder" element={<CharacterBuilderPage />} />
+          <Route
+            path="/tools/character-builder"
+            element={<CharacterBuilderPage />}
+          />
           <Route
             path="/tools/canonical-core/estimation"
             element={<CanonicalCoreShellPage mode="estimation" />}
@@ -124,7 +144,10 @@ function RoutedContent() {
           />
           {/* Shot Tracer / ball-flight comparison (#7456) */}
           <Route path="/ball-flight" element={<BallFlightPage />} />
-          <Route path="/tools/swing-objective-lab" element={<SwingObjectiveLabPage />} />
+          <Route
+            path="/tools/swing-objective-lab"
+            element={<SwingObjectiveLabPage />}
+          />
           {/* Chat (#3505): wires chat_ws backend into the UI */}
           <Route path="/chat" element={<ChatPage />} />
           {/* Settings (#7457): server-persisted preferences surface */}
