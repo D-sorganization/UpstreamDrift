@@ -1,6 +1,6 @@
 # UpstreamDrift Documentation
 
-> Last reviewed: 2026-05-25
+> Last reviewed: 2026-09-01
 
 Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
@@ -95,10 +95,7 @@ docs/
 ├── troubleshooting/       # Problem Solving
 │   └── (troubleshooting guides)
 │
-└── archive/               # Historical Documentation
-    ├── assessments_jan2026/
-    ├── phase_plans/
-    └── historical/
+└── historical/             # Archived phase summaries and session notes
 ```
 
 ---
@@ -285,7 +282,7 @@ repository maintenance guidance.
 
 ## Archived Documentation
 
-Historical assessments, phase plans, and old implementation reports have been moved to [archive/](historical/).
+Historical assessments, phase plans, and old implementation reports have been moved to [historical/](historical/).
 
 ---
 
