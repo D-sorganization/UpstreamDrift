@@ -66,7 +66,15 @@ class EnvironmentDialog(QDialog):
         tabs = QTabWidget()
         layout.addWidget(tabs)
 
-        # Build Tab
+        tab_build = self._build_docker_tab()
+        tabs.addTab(tab_build, "Build Docker")
+
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        layout.addWidget(close_btn)
+
+    def _build_docker_tab(self) -> QWidget:
+        """Build the "Build Docker" tab contents and return the tab widget."""
         tab_build = QWidget()
         tab_build_layout = QVBoxLayout(tab_build)
 
@@ -158,11 +166,7 @@ class EnvironmentDialog(QDialog):
         )
 
         tab_build_layout.addWidget(scroll)
-        tabs.addTab(tab_build, "Build Docker")
-
-        close_btn = QPushButton("Close")
-        close_btn.clicked.connect(self.accept)
-        layout.addWidget(close_btn)
+        return tab_build
 
     def _apply_combo_tooltips(self) -> None:
         """Attach a per-item hover tooltip describing each profile."""
