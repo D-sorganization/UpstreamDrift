@@ -2304,6 +2304,16 @@ jobs:
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short
+      # ADR-0046 G0: the cross-stack drift gates need the vendored Tools
+      # stack, which only this job materialises (fetch-pinned-tools). The
+      # main tests job checks out no submodule, where the suite's guard
+      # skips locally but FAILS under CI - so a placement mistake can never
+      # again report green without executing.
+      - name: Run Launch-Monitor Drift Gates (ADR-0046 G0)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest tests/integration/launch_monitor_drift/             --timeout=120             --timeout-method=thread             -v --tb=short
 
   frontend-tests:
     needs: [pick-runner, changed-paths]

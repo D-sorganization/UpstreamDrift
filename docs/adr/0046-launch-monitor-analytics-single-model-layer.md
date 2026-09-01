@@ -1,8 +1,8 @@
 # ADR-0046: Launch-Monitor Analytics — Two Workbenches, One Model Layer
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-30
-- Decision Makers: repo owner (approval required before any implementation)
+- Decision Makers: repo owner (accepted 2026-08-30)
 - Related Issues/PRs: launcher tiles `launch_monitor_analytics` and `rate_of_closure`; Tools launch-monitor epic (#4583 line); UD `src/shared/python/launch_monitor/`
 
 ## Context
@@ -94,3 +94,24 @@ any stage.
   removal of a private module with failing or skipped tab tests is the
   explicit non-goal.
 - The launcher-manifest parity contract keeps both tiles' claims honest.
+
+## Amendment 1 (2026-08-30) — G0/G1 Evidence Corrections
+
+Measurement corrected two factual claims in this record; the decision stands,
+the inventory it feeds must not repeat them:
+
+1. **`flexible_analysis` and `player_covariation` are NOT UD-only.** Tools
+   carries same-shaped counterparts (six identically named frozen dataclasses
+   in the flexible-analysis pair; the same three-module within-player +
+   Fisher-z design in covariation, 1,098 vs 570 lines). Neither side is a
+   superset. Both pairs need the G0 treatment — measured comparison on the
+   shared fixture (G0.1) — before classification.
+2. **The taxonomy needs a merge bucket.** `corpus.py` (UD) and
+   `launch_monitor_private_corpus.py` (Tools) share the same env var and
+   parquet path with complementary, non-overlapping guarantees; the correct
+   outcome is a merged module, which port-up/already-home/app-local cannot
+   express.
+
+The authoritative inventory, decisions, and port order live in
+[0046-g1-port-plan.md](0046-g1-port-plan.md) (G1, #9348), which supersedes
+this record's capability lists where they conflict.
