@@ -80,9 +80,11 @@ any stage.
 - Negative: Stage 1 is real porting work with review load; during the
   transition the drift gates are the safety net; vendored-pin bumps become
   load-bearing for the UD workbench.
-- Follow-ups (own issues, sized after approval): G0 gates; G1 port plan
-  per module (an inventory table of the 30 UD modules with
-  keep-port-already-home classification); G2 re-pointing PRs per tab.
+- Follow-ups (own issues, sized after approval): G0 gates (#9354, merged);
+  G1 port plan per module — the reviewed inventory of the 30 UD modules with
+  keep-port-already-home classification is
+  [ADR-0046 G1: Launch-Monitor Port Plan](0046-g1-port-plan.md) (#9348);
+  G2 re-pointing PRs per tab.
 
 ## Validation
 
