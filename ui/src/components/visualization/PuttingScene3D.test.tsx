@@ -15,6 +15,7 @@ vi.mock("@react-three/drei", () => ({
 }));
 
 const result: Putt3DSimulationResponse = {
+  roll_model: "usga-stimp-roll/1",
   samples: [
     {
       t_s: 0,

@@ -11,7 +11,8 @@ Design by Contract:
     * :func:`build_putt_scene` validates every control against its documented
       range and raises ``ValueError`` with a descriptive message.
     * Postcondition: the returned scene always carries a non-empty trajectory
-      whose points lie on the rendered terrain grid.
+      whose points lie on the rendered terrain grid, and always names the roll
+      model that produced it (ADR-0045 F1, issue #9343).
 """
 
 from __future__ import annotations
@@ -82,6 +83,9 @@ class PuttScene:
     duration_s: float
     peak_break_m: float
     launch_speed_ms: float
+    #: Roll model that produced this scene (ADR-0045 F1); scenes from
+    #: different models must never be compared without it.
+    roll_model: str
 
 
 def _validate(config: PuttConfig) -> None:
@@ -236,4 +240,5 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         duration_s=float(result.duration),
         peak_break_m=_perpendicular_break(positions, ball_xy, np.array([cup_x, mid_y])),
         launch_speed_ms=launch_speed,
+        roll_model=result.roll_model,
     )
