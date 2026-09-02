@@ -2,6 +2,58 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## ADR-0045 F1: Roll-Model Provenance in Every Result (#9343, #9356)
+
+Implements F1 of accepted ADR-0045 (`docs/adr/0045-putting-integration-one-experience-two-preserved-stacks.md`).
+Both roll models remain preserved and active across the putting green architecture:
+
+- `UD_LEGACY_ROLL_MODEL = "ud-legacy-roll/1"` ($\mu \approx 0.196/\text{stimp} \times \text{height-of-cut/condition/grain}$) in `ball_roll_physics.py`.
+- `USGA_STIMP_ROLL_MODEL = "usga-stimp-roll/1"` ($\mu \approx 0.559/\text{stimp}$, USGA 1.83 m/s release + Holmes/Penner capture).
+  Results from different models are strictly forbidden from numerical comparison without their model names attached.
+  All result documents carry `roll_model` fail-closed (`SimulationResult`, export/load results, `simulate_putt`, `simulate_with_feedback`, `simulate_scatter`, `compute_aim_line`, `get_current_trajectory`, `/simulate`, `/scatter`, `/read-green`, `/simulate-3d`, and `PuttScene`).
+  Checkpoints are versioned (`schema_version = 2` carrying `roll_model`), preserving archive readability for legacy v1 payloads without silent relabeling.
+
+## ADR-0045 F4: Green-Surface Adapter Physics Consumer Contract (#9346)
+
+Issue #9346 completes the #9143 rider called for in ADR-0045's Validation section: the UD-side
+consumer-contract test drives UpstreamDrift's own `ball_roll_physics.BallRollPhysics` /
+`turf_properties.TurfProperties` engine (not a reimplementation) against the vendored Tools
+integrator `shared.python.swing_sim.putting.simulate_putt_on_surface`, on the same green and the
+same launch. `tests/integration/putting_green_drift/test_green_surface_adapter_consumer.py` adds:
+a round trip that authors a green with UD's own `ContourPoint`/`GreenSurface` code, synthesizes the
+UD topography JSON field-for-field, imports it through the vendored `green_surface_from_ud_json`,
+and exports it back into a fresh UD `GreenSurface`, geometry preserved at every grid node; the
+shared-physics gates from the `ud_adapter` module docstring (flat-green straight line, break sign
+matching the cross slope, roll-out monotone in stimp) run on both engines from the same authored
+green; and the documented `mu_tools / mu_ud ≈ 2.854` roll-out ratio (Tools #4819) is pinned
+**empirically** from both engines' own `simulate_putt` / `simulate_putt_on_surface` calls, isolating
+the rolling-resistance phase by starting each simulator already in pure roll. A weighted-slope UD
+field is proven genuinely UD-loadable (`GreenSurface.load_from_file`, live gravity contribution)
+before asserting the adapter refuses it with its documented non-conservative-slope reason. The
+`tests/integration/launch_monitor_drift` CI-guard helper (`require_vendored_tools_stack`) is
+imported, not reimplemented, for the same skip-locally/run-in-CI posture.
+
+## Vendored Tools Pin: Flight-Interchange Authority (ADR-0047 H1)
+
+The `vendor/ud-tools` gitlink advances from
+`cc883cbaf63157b58c71cba385a683df2762b0cb` to
+`5e0eaade29441dd65d667151b5108c8925774d73`, the Tools `main` squash commit for
+Tools #4888, which adds the `shared.python.swing_sim.flight_interchange`
+package to the vendored tree. The
+vendored reader is the interchange authority for the
+`swing_sim.ball_flight_trajectory/1` record; UpstreamDrift's exporter in
+`src/shared/python/physics/flight_trajectory_export.py` is verified against it
+by the four `TestCrossFamilySanity` gates in
+`tests/unit/physics/test_flight_trajectory_export.py`, which arm automatically
+once the pin carries the module: records parse with the vendored reader and
+round-trip byte-identically, the reimplemented SHA-256 parameter digest equals
+Tools' `parameter_digest`, and the two flight-model families produce same-order
+carry for identical launch conditions. The companion catalog provenance
+contract (`tests/companion/test_companion_catalog.py`) pins the exact gitlink
+and moves with it. No UpstreamDrift runtime behavior changes; the prior pin
+statement under "Swing Objective Lab Web Parity (#9128)" is superseded by this
+section.
+
 ## Deterministic AffineDrift Companion Authority (#9174)
 
 ADR-0043 establishes UpstreamDrift as the one-way provider of the strict v1
@@ -983,8 +1035,8 @@ inventory and reopen adjudication until every new candidate is reviewed.
 | **Primary Language(s)** | Python 3.11+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.1                                              |
-| **Spec Version**        | 1.0.683                                            |
-| **Last Spec Update**    | 2026-09-01                                         |
+| **Spec Version**        | 1.0.684                                            |
+| **Last Spec Update**    | 2026-09-02                                         |
 
 ## 2. Purpose & Mission
 
@@ -3682,6 +3734,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-02 | 1.0.684 | ADR-0045 F4 (#9346): added the UD-side consumer-contract test for the Tools green-surface adapter, completing the #9143 rider per ADR-0045's Validation section. `tests/integration/putting_green_drift/test_green_surface_adapter_consumer.py` drives UpstreamDrift's own `ball_roll_physics.BallRollPhysics`/`turf_properties.TurfProperties` (not a reimplementation) against the vendored `shared.python.swing_sim.putting.simulate_putt_on_surface`, on the same green and the same launch. Covers: a round trip authoring a green with UD's own `ContourPoint`/`GreenSurface` code, through the vendored `green_surface_from_ud_json`, and back into a fresh UD `GreenSurface`, geometry preserved at every grid node; the shared-physics gates from the `ud_adapter` module docstring (flat-green straight line, break sign matching the cross slope on both downhill directions, roll-out monotone in stimp) on both engines; the documented `mu_tools / mu_ud ~= 2.854` roll-out ratio (Tools#4819) pinned empirically from both engines' own simulate calls by starting each simulator already in pure roll to isolate the rolling-resistance phase from each engine's own skid model; and a weighted-slope UD field proven genuinely UD-loadable before asserting the adapter refuses it with its documented non-conservative-slope reason. CI-guard posture (skip locally without `vendor/ud-tools`, run for real in every CI job that fetches the pinned Tools checkout) reuses `tests/integration/launch_monitor_drift`'s `require_vendored_tools_stack` helper rather than reimplementing it. |
 | 2026-09-01 | 1.0.683 | Audited the architecture-budget exceptions expiring 2026-08-31 (`scripts/config/architecture_budget.json`), rather than accepting the blanket 2026-08-31 -> 2026-09-30 renewal an unrelated Bolt PR (1.0.680) had already applied with no per-function review. Seven exception entries (`train_surrogate`, `_train_loop` in `training.py`; `optimize_sequence` in `optimize.py`; `train` in `train.py`; `create_chat_router`, `chat_stream` in `router_factory.py`; `ChatDockWidget._setup_ui`) were dead: issue #7294 was closed by PR #7317, which already split them below budget, but the leftover exceptions were never removed and kept renewing on autopilot. Removed those seven. Split seven functions that were genuinely still over budget via pure extract-method refactors verified against each file's existing test suite, with no behaviour change: `docker_dialog.EnvironmentDialog.setup_ui`, `fit_swing_mujoco` (comment-delineated into compile/objective/solve/assemble stages), `viewer_3d_tab.Viewer3DTab._init_ui`/`_rebuild_scene`, `launcher_dialogs.DependencyErrorDialog.__init__`, `settings_dialog.SettingsWidget._create_layout_tab`/`_create_configuration_tab` (this last split briefly pushed `settings_dialog.py` over the 1200-line file-size budget; trimmed three over-long docstrings to land back under it). Wrote an honest, re-justified renewal for the one case that is not a quick fix rather than renewing blind again: `ChatDockWidget.__init__` (16 parameters). Its prior justification cited issue #7362, which is closed and unrelated to this signature. Unlike a genuinely irreducible-parameter case, these 16 group into cohesive connection/presentation/integration-hooks config objects, so it is real, tractable follow-up work tracked in new issue #9357 (breaking constructor change across 5 in-repo call sites) rather than kicked down the road again, expiring 2026-10-15. Verified via `check_architecture_budget.py --all` (repo-wide) and the changed-file scan (matches CI), plus 114+ passing tests across every touched file. |
 | 2026-09-01 | 1.0.682 | ADR-0047 H1: export this repo's flight results as the shared `swing_sim.ball_flight_trajectory/1` record. `src/shared/python/physics/flight_trajectory_export.py` builds the versioned, fail-closed interchange payload from the documented Tools contract (D-sorganization/Tools#4888) rather than importing the vendored package at runtime — the same runtime-free posture Tools' own `swing_sim.putting.ud_adapter` takes toward this repository, and the reason a pin bump cannot silently change what this repo emits. Provenance is mandatory and attributable: family `ud.flight_models`, the model's display name, and a SHA-256 digest of `FlightResult.coefficients` — the aero-coefficient set the producing model actually integrated with (#8978) — so a Shot Tracer curve and a Tools `swing_sim` flight can share axes because each is labelled, never because the families were reconciled. A result carrying no declared coefficients is refused rather than exported with an empty digest, and an optional `model_type` is cross-checked against the result so one model's samples can never carry another's identity. The record declares its frame (x forward / y left / z up) instead of leaving a consumer to infer it, and its samples are the retained integrator points, never resampled. 25 gates in `tests/unit/physics/test_flight_trajectory_export.py`: schema-valid records from Waterloo/Penner and MacDonald-Hanzely flights (asserted longhand, because those assertions *are* this side's copy of the contract), byte-deterministic sorted-keys JSON, the digest algorithm reproduced from first principles, and every refusal path. Four cross-family gates parse a record produced here with the vendored reader, compare digests across repositories, and assert same-order carry against the sibling family; they skip with a stated reason on a pin predating Tools#4888 and arm themselves on the next vendor bump with no edit (verified green against that branch: 244.65 m from both families, ratio 1.0000). Also corrects two pre-existing `np.bool_`-vs-`bool` mypy errors in `contact_reaction_decomposition.py`, which `physics/__init__.py` imports and which therefore failed the changed-file mypy gate for any physics PR. |
 | 2026-09-01 | 1.0.681 | Optimize Euclidean norm calculation (`np.linalg.norm` to `np.sqrt(np.einsum)`) in `src/bunkershot3d/study/morris.py` for ~30% faster 2D distance execution. (spec-exempt: micro-optimization) |

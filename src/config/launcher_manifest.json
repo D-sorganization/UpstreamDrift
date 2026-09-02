@@ -176,7 +176,7 @@
     {
       "id": "putting_green",
       "name": "Putting Green",
-      "description": "Realistic putting green simulation with ball rolling physics",
+      "description": "Author and practice on realistic greens: surface presets, terrain import, wind, and ball-roll physics (ud-legacy-roll/1). Greens export to the Impact Explorer's putting analytics via the shared green-surface wire.",
       "category": "simulation",
       "type": "putting_green",
       "path": "src/engines/physics_engines/putting_green/python/simulator.py",
