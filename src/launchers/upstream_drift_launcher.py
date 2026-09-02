@@ -557,6 +557,10 @@ class UpstreamDriftLauncher(QMainWindow):
                 item = self.grid_layout.takeAt(0)
                 widget = item.widget() if item is not None else None
                 if widget is not None:
+                    # Hide before deleteLater() so widgets that stop
+                    # per-widget resources in hideEvent (e.g. SkeletonCard's
+                    # pulse animation, #8906) actually get a chance to.
+                    widget.hide()
                     widget.deleteLater()
 
             _SkeletonCard: Any = None
