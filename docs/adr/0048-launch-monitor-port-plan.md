@@ -377,6 +377,107 @@ module whose Tools twin has never been measured. The port cannot proceed past
 tier 1 until G1-D4's first gate lands. This is the tightest constraint in the
 plan and it is not visible from ADR-0046.
 
+## Stage 2 Blocker (G2): The Canonical Import Path Is Shadowed
+
+Discovered 2026-09-02 attempting ADR-0046 Stage 2 wave 1 (`dispersion`,
+`multivariate`, `trends`, `comparison`, `schema`, `treatment`) against the
+vendored layer at pin `6238889a9`. The port order above prescribes the Stage 2
+re-point as a mechanical rewrite:
+
+```
+src.shared.python.launch_monitor.X  ->  shared.python.launch_monitor.X
+```
+
+**In UpstreamDrift that rewrite is a no-op alias.** It resolves back to the
+module it is supposed to replace, and once that module is deleted the import
+fails outright.
+
+### The Measurement
+
+`shared` and `shared.python` are reachable through two roots at once —
+UpstreamDrift's `src/` and the vendor tree's `vendor/ud-tools/src/` — and both
+carry an `__init__.py` for `launch_monitor`. A regular package is not a
+namespace portion: the **first** `shared.python.__path__` entry that contains
+`launch_monitor` wins outright, and the UpstreamDrift entry precedes the vendor
+entry under the repository's own path wiring
+(`pyproject.toml` `[tool.pytest.ini_options] pythonpath`, then
+`tests/conftest.py::pytest_configure` in its default `--tools-mode=local`,
+which inserts `src/shared/python` at `sys.path[0]`).
+
+```sh
+# Under the repository's real test wiring:
+#   shared.python.__path__ == [src/shared/python, vendor/ud-tools/src/shared/python]
+#   shared.python.launch_monitor -> src/shared/python/launch_monitor
+```
+
+Performing the full wave-1 rewrite and deleting the six UpstreamDrift modules
+produces, on the first import of the package façade:
+
+```
+src/shared/python/launch_monitor/__init__.py:8: in <module>
+    from shared.python.launch_monitor.comparison import (
+src/shared/python/launch_monitor/__init__.py:8: in <module>
+    from shared.python.launch_monitor.comparison import (
+E   ModuleNotFoundError: No module named 'shared.python.launch_monitor.comparison'
+```
+
+The doubled frame is the whole finding: the façade is importing **itself**
+under the canonical name.
+
+### Why It Cannot Be Worked Around per Module
+
+This is not per-module coupling — the six wave-1 modules are tier-0 leaves with
+no intra-package imports, and each is byte-for-byte equivalent to its canonical
+twin modulo the port's docstrings, `__all__`, and the P3 `TrendResult` rename
+(pinned by `tests/unit/launch_monitor/test_canonical_layer_parity.py`). The
+blocker is at package granularity, and so is the guard that tracks it:
+`tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py` enumerates
+**top-level entries** under `vendor/ud-tools/src/shared/python/` and compares
+them with top-level entries under `src/shared/python/`. `launch_monitor` is one
+entry either way. Retiring six of its thirty files changes nothing the guard
+can see, and `scripts/config/shadow_modules.yaml` cannot be narrowed to "six
+files retired" because it has no per-file vocabulary.
+
+`shadow_modules.yaml`'s own header states the resolution procedure, and it is
+all-or-nothing: "move the canonical implementation into Tools, land it there,
+bump the `vendor/ud-tools` pin, **delete the UD-side copy**, and drop the line".
+Module-by-module retirement of a shadowed package is not something
+UpstreamDrift's import layout supports today. That constraint is invisible from
+ADR-0046, which assumed the two layers could coexist during the transition.
+
+### Options for the Owner
+
+Each unblocks Stage 2; they differ in blast radius and in what they cost the
+wave structure.
+
+1. **Move UpstreamDrift's transitional copy out of the `shared.python`
+   namespace** (for example to an app-local package beside the workbench).
+   This clears the `launch_monitor` ledger entry immediately, makes
+   `shared.python.launch_monitor` unambiguous, and lets waves 1..N proceed
+   exactly as the port order writes them. It is a mechanical move of the
+   remaining modules plus their import statements, with no behaviour change,
+   and it wants its own PR so that the retirements that follow stay reviewable
+   as no-ops. ADR-0048 already classifies `__init__.py` and `project.py` as
+   `app-local`, so this is where two of the thirty modules were going anyway.
+2. **Retire the whole package atomically** in one Stage 2 PR. Cheapest in
+   sequencing, but it forces the `needs-decision` rows (`flexible_analysis`,
+   `player_covariation*`, `corpus`) and the behaviour-changing merges
+   (P19's mandatory manifest validation, G1-D1/D2/D3) through in the same
+   change, which contradicts ADR-0046's "measure before anything moves" and
+   its per-tab validation rule.
+3. **Overlay the vendored directory onto the package's `__path__`** so retired
+   modules fall through to the vendor tree while the import strings stay as
+   they are. It works and it is deterministic, but the consuming code no longer
+   says where its behaviour comes from, and it introduces a failure mode for
+   any distribution of UpstreamDrift that does not carry the vendor tree.
+   Recorded for completeness; not recommended.
+
+Until one of these is chosen, Stage 2 wave 1 is blocked at step 2 of its own
+procedure. Wave 1's step 1 (consumer inventory) and its identity premise are
+complete and pinned in `test_canonical_layer_parity.py`; no UpstreamDrift
+module has been retired, because retiring one with a failing import is the
+explicit non-goal ADR-0046 names.
+
 ## Risks
 
 ### The Vendored-Pin Cadence Is Already Load-Bearing and Already Unguarded
