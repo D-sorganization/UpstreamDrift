@@ -129,9 +129,7 @@ class TestCarryBandReachesTheShot:
         assert nominal_shot.carry_band is not None
         assert nominal_shot.carry_band.relative_half_width > 0.3
 
-    def test_a_refused_shot_carries_no_band(
-        self, banded_model: WorkbenchModel
-    ) -> None:
+    def test_a_refused_shot_carries_no_band(self, banded_model: WorkbenchModel) -> None:
         """ADR-0032's refusal rule extends to the band, not just the number."""
         shot = banded_model.run_shot(
             WedgeDesign(name="nominal").geometry(),

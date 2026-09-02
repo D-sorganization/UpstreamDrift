@@ -12,16 +12,16 @@ import math
 
 import pytest
 
-from src.bunkershot3d.vandv.band import ConsistencyBand
-from src.bunkershot3d.vandv.budget import (
+from bunkershot3d.vandv.band import ConsistencyBand
+from bunkershot3d.vandv.budget import (
     NumericalBasis,
     UncertaintyBudget,
     UncertaintyClass,
     UncertaintyTerm,
     UnquantifiedTerm,
 )
-from src.bunkershot3d.vandv.exceptions import VandVError
-from src.bunkershot3d.vandv.gci import ConvergenceType, GCIResult
+from bunkershot3d.vandv.exceptions import VandVError
+from bunkershot3d.vandv.gci import ConvergenceType, GCIResult
 
 pytestmark = pytest.mark.unit
 

@@ -10,12 +10,12 @@ from __future__ import annotations
 
 import pytest
 
-from src.bunkershot3d.study.ranking import (
+from bunkershot3d.study.ranking import (
     BandedRanking,
     RankingVerdict,
     rank_with_bands,
 )
-from src.bunkershot3d.vandv.budget import (
+from bunkershot3d.vandv.budget import (
     NumericalBasis,
     UncertaintyBudget,
     UncertaintyClass,

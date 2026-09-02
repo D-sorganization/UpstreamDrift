@@ -12,7 +12,7 @@ import math
 
 import pytest
 
-from src.bunkershot3d.vandv.band import (
+from bunkershot3d.vandv.band import (
     CONSISTENCY_BAND_NAMING_REASON,
     ConsistencyBand,
 )
