@@ -170,3 +170,13 @@ paths:
     rationale: UpstreamDrift process-model calculator with no same-relative Tools source.
     tracking_issue: 5623
     review_date: "2026-12-31"
+  sidekick/process_calculators/scrubber/tests/__init__.py:
+    owner: UpstreamDrift
+    rationale: Test package for UpstreamDrift's local ScrubberEngine; Tools removed its own scrubber/tests/ directory as dead/duplicate code (Tools#4889), leaving this UD file without a same-relative Tools counterpart.
+    tracking_issue: 5623
+    review_date: "2026-12-31"
+  sidekick/process_calculators/scrubber/tests/test_scrubber_engine.py:
+    owner: UpstreamDrift
+    rationale: Unit tests for UpstreamDrift's local ScrubberEngine and ScrubberInputs; Tools removed its own scrubber/tests/ directory as dead/duplicate code (Tools#4889), leaving this UD file without a same-relative Tools counterpart.
+    tracking_issue: 5623
+    review_date: "2026-12-31"

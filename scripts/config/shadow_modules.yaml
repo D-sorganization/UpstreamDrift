@@ -154,3 +154,18 @@ shadows:
   plotting:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
+
+  # ── ADR-0046 Stage 1 canonical launch-monitor layer (Tools#4899-#4907) ────
+  # Tools' src/shared/python/launch_monitor/ did not exist before this pin
+  # (previously `Tools has no shared/python/launch_monitor package`, per
+  # ADR-0046). The Tools#4899-#4907 port ladder built it there as the fleet's
+  # canonical layer, ported up from this UD package with attribution
+  # preserved (ADR-0046 Stage 1). This is Stage 1 landing, not Stage 2
+  # consumption: the UD 9-tab workbench keeps importing its own copy until
+  # each module is re-pointed at the vendored layer with its tests passing
+  # against it, per ADR-0046's G1 port-plan inventory (#9348), which
+  # classifies each of these 30 modules port-up/already-home/app-local and
+  # orders the Stage 2 re-point.
+  launch_monitor:
+    tracking_issue: 9348
+    sunset_date: "2026-12-31"
