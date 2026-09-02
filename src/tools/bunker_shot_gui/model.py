@@ -720,6 +720,7 @@ class WorkbenchModel:
         """
         points = self._settings.playability_points
         attack_deg = np.linspace(*ATTACK_ANGLE_SWEEP_DEG, points, dtype=np.float64)
+        firmness = np.linspace(*FIRMNESS_RANGE_KG_PER_CM2, points, dtype=np.float64)
         sweep = CarrySweep(points)
         refused = np.zeros((points, points), dtype=bool)
         for column, reading in enumerate(firmness):

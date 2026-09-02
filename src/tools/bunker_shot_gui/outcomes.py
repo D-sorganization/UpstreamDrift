@@ -277,7 +277,7 @@ class WorkbenchComparison:
         alone only when no budget could be built.
         """
         if self.banded is not None:
-            return self.banded.verdict.is_decided
+            return self.banded.is_decided
         return self.ranking is not None and self.ranking.is_separated()
 
     @property

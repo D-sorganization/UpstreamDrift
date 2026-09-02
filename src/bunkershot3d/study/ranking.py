@@ -100,6 +100,11 @@ class BandedRanking:
     unquantified: tuple[UnquantifiedTerm, ...]
 
     @property
+    def is_decided(self) -> bool:
+        """True when the comparison separated the two designs."""
+        return self.verdict.is_decided
+
+    @property
     def bands(self) -> tuple[ConsistencyBand, ConsistencyBand]:
         """Each design's band, in input order."""
         return (self.budgets[0].band(), self.budgets[1].band())
