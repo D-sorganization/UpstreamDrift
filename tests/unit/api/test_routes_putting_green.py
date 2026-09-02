@@ -141,3 +141,66 @@ def test_simulate_putt_3d_rejects_hosel_outside_head(
     )
 
     assert response.status_code == 422
+
+
+# -- ADR-0045 F1 roll-model provenance (issue #9343) --
+
+
+def test_simulate_putt_names_the_ud_legacy_roll_model(client: TestClient) -> None:
+    """Every UD-engine putt response names the model that produced it."""
+    response = client.post(
+        "/tools/putting-green/simulate",
+        json={"direction_x": 0.0, "direction_y": 1.0, "speed": 2.0},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["roll_model"] == "ud-legacy-roll/1"
+
+
+def test_scatter_names_the_ud_legacy_roll_model(client: TestClient) -> None:
+    response = client.post(
+        "/tools/putting-green/scatter",
+        json={"direction_x": 0.0, "direction_y": 1.0, "n_simulations": 2},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["roll_model"] == "ud-legacy-roll/1"
+
+
+def test_read_green_names_the_ud_legacy_roll_model(client: TestClient) -> None:
+    response = client.post("/tools/putting-green/read-green", json={})
+    assert response.status_code == 200, response.text
+    assert response.json()["roll_model"] == "ud-legacy-roll/1"
+
+
+def test_simulate_3d_names_the_usga_stimp_roll_model(client: TestClient) -> None:
+    """The 3-D route runs the preserved counterpart law, and says so."""
+    response = client.post("/tools/putting-green/simulate-3d", json={})
+    assert response.status_code == 200, response.text
+    assert response.json()["roll_model"] == "usga-stimp-roll/1"
+
+
+def test_the_two_routes_report_different_models(client: TestClient) -> None:
+    """ADR-0045: the divergence is named, never silent."""
+    legacy = client.post(
+        "/tools/putting-green/simulate",
+        json={"direction_x": 0.0, "direction_y": 1.0},
+    ).json()["roll_model"]
+    usga = client.post("/tools/putting-green/simulate-3d", json={}).json()["roll_model"]
+    assert legacy != usga
+
+
+def test_response_models_refuse_an_unnamed_result() -> None:
+    """Fail-closed at the API boundary: roll_model has no default."""
+    from pydantic import ValidationError
+
+    from src.api.routes.putting_green import PuttSimulationResponse
+
+    with pytest.raises(ValidationError):
+        PuttSimulationResponse(
+            positions=[[0.0, 0.0]],
+            velocities=[[0.0, 0.0]],
+            times=[0.0],
+            holed=False,
+            final_position=[0.0, 0.0],
+            total_distance=0.0,
+            duration=0.0,
+        )
