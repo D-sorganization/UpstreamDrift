@@ -9,6 +9,7 @@ See issue #7218.
 from __future__ import annotations
 
 import math
+from typing import Any
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field, model_validator
@@ -19,6 +20,11 @@ from src.shared.python.physics.flight_models import (
     FlightModelType,
     TrajectoryPoint,
     UnifiedLaunchConditions,
+)
+from src.api.routes._ball_flight_trajectory_import import (
+    ImportedBallFlightTrajectory,
+    import_trajectory_record,
+    summarize_imported_trajectory,
 )
 
 router = APIRouter(prefix="/tools/ball-flight", tags=["ball-flight"])
@@ -231,3 +237,117 @@ async def simulate_ball_flight(
         summary=first.summary,
         results=results,
     )
+
+
+# =============================================================================
+# Import — ADR-0047 H3 (issue #9352)
+# =============================================================================
+
+
+class ImportBallFlightTrajectoryRequest(BaseModel):
+    """One ``swing_sim.ball_flight_trajectory/1`` record to import for overlay.
+
+    ``record`` is accepted as an opaque JSON object rather than a typed
+    model on purpose: the wire's own shape is validated by the vendored
+    Tools reader (fail-closed), not re-declared here. Passing it through
+    unmodified means every field the reader checks — unknown fields,
+    missing fields, malformed provenance, non-monotone samples — is
+    enforced exactly as the wire defines it, from either flight-model
+    family (issue #9352, ADR-0047).
+    """
+
+    record: dict[str, Any] = Field(
+        ...,
+        description=(
+            "A ball_flight_trajectory/1 JSON record produced by either "
+            "flight-model family (ud.flight_models or swing_sim.flight)."
+        ),
+    )
+
+
+class ImportedTrajectorySample(BaseModel):
+    """Single imported trajectory sample, already in the plot frame."""
+
+    time_s: float
+    position_m: list[float]
+    velocity_mps: list[float] | None = None
+
+
+class ImportedBallFlightResponse(BaseModel):
+    """An accepted import, in the same shape the page already plots.
+
+    ``model_name`` and ``trajectory``/``summary`` mirror
+    :class:`BallFlightModelResult` so the page can render an imported
+    curve through the same 3D scene, profile charts, and metrics table
+    as a computed one. ``model_family`` and ``parameter_digest`` carry
+    the provenance the wire mandates; the page always labels an
+    imported curve with both ``model_family`` and ``model_name``
+    (ADR-0047), never ``model_name`` alone, so it is never confused
+    with a computed curve from the UD registry.
+    """
+
+    model_name: str
+    #: Stable, collision-free chart/legend key: computed curves key by a
+    #: bare ``FlightModelType`` value (e.g. ``"waterloo_penner"``); this
+    #: is always ``"<model_family>:<model_name>"`` instead.
+    model_key: str
+    model_family: str
+    parameter_digest: str
+    source_id: str
+    frame_id: str
+    trajectory: list[ImportedTrajectorySample]
+    summary: BallFlightSummary
+
+
+def _imported_response(
+    imported: ImportedBallFlightTrajectory,
+) -> ImportedBallFlightResponse:
+    """Build the API response from a validated, frame-converted import."""
+    trajectory = [
+        ImportedTrajectorySample(
+            time_s=sample.time_s,
+            position_m=list(sample.position_m),
+            velocity_mps=(
+                list(sample.velocity_mps) if sample.velocity_mps is not None else None
+            ),
+        )
+        for sample in imported.samples
+    ]
+    summary = summarize_imported_trajectory(imported)
+    return ImportedBallFlightResponse(
+        model_name=imported.model_name,
+        model_key=f"{imported.model_family}:{imported.model_name}",
+        model_family=imported.model_family,
+        parameter_digest=imported.parameter_digest,
+        source_id=imported.source_id,
+        frame_id=imported.frame_id,
+        trajectory=trajectory,
+        summary=BallFlightSummary(
+            carry_m=summary.carry_m,
+            apex_m=summary.apex_m,
+            flight_time_s=summary.flight_time_s,
+            landing_angle_deg=summary.landing_angle_deg,
+            lateral_deviation_m=summary.lateral_deviation_m,
+        ),
+    )
+
+
+@router.post("/import", response_model=ImportedBallFlightResponse)
+@handle_api_errors
+async def import_ball_flight_trajectory(
+    payload: ImportBallFlightTrajectoryRequest,
+) -> ImportedBallFlightResponse:
+    """Import a ``ball_flight_trajectory/1`` record for overlay (ADR-0047 H3).
+
+    Validated fail-closed through the vendored Tools reader — never
+    reimplemented here. Records from either flight-model family are
+    accepted; the record's declared frame is converted explicitly into
+    the page's plot frame, and a frame this endpoint has not implemented
+    is refused by name rather than silently mis-plotted. Every refusal
+    (unknown/missing wire fields, malformed provenance, non-monotone
+    samples, an unsupported frame, or an unresolvable Tools checkout)
+    surfaces as a 400 whose ``detail`` is the specific reason. See
+    issue #9352.
+    """
+    imported = import_trajectory_record(payload.record)
+    return _imported_response(imported)
