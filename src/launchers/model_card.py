@@ -15,6 +15,7 @@ from PyQt6.QtCore import (
     QMimeData,
     QPoint,
     QPropertyAnimation,
+    QSequentialAnimationGroup,
     Qt,
 )
 from PyQt6.QtGui import (
@@ -30,6 +31,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QFrame,
     QGraphicsDropShadowEffect,
+    QGraphicsOpacityEffect,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -131,16 +133,31 @@ class SkeletonCard(QFrame):
             }
         """)
 
-        self.effect = QGraphicsDropShadowEffect(self)
-        self.effect.setBlurRadius(20)
-        self.effect.setColor(QColor(0, 0, 0, 80))
+        # Qt only allows one QGraphicsEffect per widget, and a real pulse
+        # needs a QGraphicsOpacityEffect (setWindowOpacity() is a no-op on
+        # a non top-level widget -- issue #8906), so the opacity effect
+        # replaces the drop shadow as the card's active effect.
+        self.effect = QGraphicsOpacityEffect(self)
+        self.effect.setOpacity(0.35)
         self.setGraphicsEffect(self.effect)
 
-        self._pulse_opacity: float = 0.3
-        self._anim = QPropertyAnimation(self, b"pulseOpacity")
-        self._anim.setDuration(1000)
-        self._anim.setStartValue(0.3)
-        self._anim.setEndValue(0.3)
+        self._pulse_opacity: float = 0.35
+
+        pulse_up = QPropertyAnimation(self, b"pulseOpacity")
+        pulse_up.setDuration(1000)
+        pulse_up.setStartValue(0.35)
+        pulse_up.setEndValue(0.85)
+        pulse_up.setEasingCurve(QEasingCurve.Type.InOutSine)
+
+        pulse_down = QPropertyAnimation(self, b"pulseOpacity")
+        pulse_down.setDuration(1000)
+        pulse_down.setStartValue(0.85)
+        pulse_down.setEndValue(0.35)
+        pulse_down.setEasingCurve(QEasingCurve.Type.InOutSine)
+
+        self._anim = QSequentialAnimationGroup(self)
+        self._anim.addAnimation(pulse_up)
+        self._anim.addAnimation(pulse_down)
         self._anim.setLoopCount(-1)
         self._anim.start()
 
@@ -151,7 +168,17 @@ class SkeletonCard(QFrame):
     @pulseOpacity.setter  # type: ignore[no-redef]
     def pulseOpacity(self, value: float) -> None:
         self._pulse_opacity = value
-        self.setWindowOpacity(value)
+        self.effect.setOpacity(value)
+
+    def hideEvent(self, event: QEvent | None) -> None:
+        """Stop the pulse animation once the skeleton is hidden.
+
+        Without this, `_anim`'s loop-forever animation keeps running after
+        the card is torn down (e.g. by `_rebuild_grid`'s grid-teardown
+        loop), leaking a timer for the lifetime of the process (#8906).
+        """
+        self._anim.stop()
+        super().hideEvent(event)
 
 
 class DraggableModelCard(QFrame):
