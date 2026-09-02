@@ -30,6 +30,7 @@ disk through ``load_strokes_gained_baseline``.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -55,7 +56,17 @@ def _repo_root() -> Path:
 
 
 def require_vendored_tools_stack() -> None:
-    """Skip when the ``vendor/ud-tools`` submodule is not materialised."""
+    """Skip locally, FAIL in CI, when ``vendor/ud-tools`` is absent.
+
+    The distinction is load-bearing (found in G1, #9348): CI's default
+    checkout materialises no submodule, so a plain skip let all 28 drift
+    gates report green without executing while ``vendor-freshness.yml``
+    advanced the pin nightly - the exact silent-pass this suite exists to
+    prevent. In CI these gates run inside the
+    ``shared-tools-consumer-contracts`` job, which materialises the pin via
+    ``fetch-pinned-tools``; any other CI placement now fails loudly instead
+    of skipping. Local developer checkouts keep the friendly skip.
+    """
     vendored = (
         _repo_root()
         / "vendor"
@@ -64,12 +75,24 @@ def require_vendored_tools_stack() -> None:
         / "rate_of_closure"
         / "launch_monitor_strokes_gained.py"
     )
-    if not vendored.is_file():
-        pytest.skip(
-            "vendor/ud-tools submodule is not materialised; run "
-            "`git submodule update --init vendor/ud-tools`",
-            allow_module_level=True,
+    if vendored.is_file():
+        return
+    message = (
+        "vendor/ud-tools submodule is not materialised; run "
+        "`git submodule update --init vendor/ud-tools`"
+    )
+    if (
+        os.environ.get("REQUIRE_DRIFT_GATES") == "1"
+        or os.environ.get("REQUIRE_REAL_TOOLS_REPO") == "1"
+    ):
+        pytest.fail(
+            "ADR-0046 G0 drift gates cannot run: " + message + ". In CI this "
+            "is a hard failure, never a skip - a skipped drift gate reports "
+            "green while guarding nothing. Run this suite in the "
+            "shared-tools-consumer-contracts job (it materialises the pin).",
+            pytrace=False,
         )
+    pytest.skip(message, allow_module_level=True)
 
 
 @pytest.fixture(scope="session")
