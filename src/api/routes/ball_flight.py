@@ -314,9 +314,16 @@ def _imported_response(
         for sample in imported.samples
     ]
     summary = summarize_imported_trajectory(imported)
+    key_suffix = (
+        f":{imported.source_id}"
+        if imported.source_id
+        else f":{imported.parameter_digest[:8]}"
+        if imported.parameter_digest
+        else ""
+    )
     return ImportedBallFlightResponse(
         model_name=imported.model_name,
-        model_key=f"{imported.model_family}:{imported.model_name}",
+        model_key=f"{imported.model_family}:{imported.model_name}{key_suffix}",
         model_family=imported.model_family,
         parameter_digest=imported.parameter_digest,
         source_id=imported.source_id,
