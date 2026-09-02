@@ -111,7 +111,7 @@ def test_zero_torque_falls_under_gravity_full() -> None:
 
     out = simulate_with_coefficients(theta, opts)
 
-    assert out.solver_status == "ok"
+    assert out.solver_status == "success"
     # Grip Z at the end is strictly below grip Z at the start under gravity.
     assert out.grip[-1, 2] < out.grip[0, 2] - 1e-3, (
         f"grip Z did not drop under gravity: "
@@ -130,7 +130,7 @@ def test_zero_torque_falls_under_gravity_upper() -> None:
     nu = mujoco.MjModel.from_xml_string(UPPER_BODY_GOLF_SWING_XML).nu
     theta = np.zeros(nu * 7, dtype=np.float64)
     out = simulate_with_coefficients(theta, opts)
-    assert out.solver_status == "ok"
+    assert out.solver_status == "success"
     assert out.clubhead[-1, 2] < out.clubhead[0, 2]
 
 
@@ -244,8 +244,8 @@ def test_output_shapes_match_canonical_grid() -> None:
     assert out.grip_quat.shape == (n_expected, 4)
     assert out.clubhead.shape == (n_expected, 3)
     assert out.club_quat.shape == (n_expected, 4)
-    assert out.solver_status == "ok"
-    assert out.wall_clock_s > 0.0
+    assert out.solver_status == "success"
+    assert out.duration_s > 0.0
 
 
 def test_output_unit_quaternions() -> None:
@@ -304,7 +304,7 @@ def test_perf_under_100ms_per_swing() -> None:
     out = simulate_with_coefficients(theta, opts)
     elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
-    assert out.solver_status == "ok"
+    assert out.solver_status == "success"
     # The spec target is <100 ms; allow 300 ms as a stable upper bound.
     assert elapsed_ms < 300.0, (
         f"forward-sim wall-clock {elapsed_ms:.1f} ms exceeds 300 ms "

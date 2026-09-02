@@ -1,45 +1,43 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-29
+Updated: 2026-08-30 10:02 PDT
 
-Epic #8557 is the canonical completion authority. Issue state, local files, and
-partial campaign checkpoints are not completion evidence.
+Epic #8557 is canonical; issue state, local files, and checkpoints are not
+completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
+design-manual program.
+
+Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
+contract, recovery constraints, and next commands are in
+`docs/development/proximal_distal_program_turnover.md`.
 
 ## Protected Authority
 
-- UpstreamDrift protected `origin/main` was
-  `58413d2c24e5a9cfae32ebfa10caf9e0bc58d27c` at the current #9236
-  reconciliation. Re-check remote authority before every push or merge.
-- The qualified paper has 252 pages and SHA-256
-  `0527465cd0bf6b69c4ae4c541986b0aecad28d5c05dfdabdbda0d493433e19ec`.
-- Its 328 claims, 498/498 governed literals, 702 release artifacts, 2,495
-  evidence references, and 419 local evidence artifacts are computationally
-  qualified. The PDF remains non-archival because tagged-PDF and font-resource
-  gates are still open.
-- AffineDrift PR #3993 pins the exact #9152 authority as protected squash
-  `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995
-  merged as `6cc909273d63147392b17078a35c6c4da034e1da`. All hosted checks passed.
-- Tools PR #4669 merged as `f9730033fd279ba8b4abe03bab2aadd950400b47`;
-  UpstreamDrift #8358 is closed after protected consumer integration. Tools
-  #4142 remains the broader reusable-variation completion authority.
-- Tools R14.6 registration/acceptance, calibrated renderer, and extension map
-  merged through protected squashes `b2d7f721`, `d7a95e2a`, and `da0759c7`.
-  The trusted rendered-evidence run remains capacity-pending; do not rerun it.
+- UpstreamDrift protected `main` is
+  `3503674a90e3ca6d75e81f084f011299f5e95794`, the verified squash merge of
+  turnover PR #9309. Its reviewed head and squash merge share exact tree
+  `827608120154ecdfb6dc8b9f0c53b988a0454343`.
+- #9306 adds signed-gap retention, bracketed opening/reattachment location on a
+  declared linear state interpolant, duplicate-time event alignment, and the
+  distributed replay adapter into the protected attribution kernel.
+- #9308 adds the prospective six-case current-main smoke registration without
+  executing or promoting an outcome. CI Standard run `33322181043`, Optional
+  Stack run `33322180991`, and Bot CI Trigger run `33322180972` passed. Exact
+  turnover evidence is recorded on #9153 in comment `issuecomment-5469958455`.
+- PR #9302 remains the manufactured-evidence qualification parent at
+  `7dc5f86af68907f19bc953c509d96d05f505cdab`; PR #9299 remains its CRBA
+  requalification parent at `c8a283f4ffb408d5932bdc2da3f2f0c64665ef83`.
+- The requalified paper has 253 pages, 2,011,818 bytes, and SHA-256
+  `554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36`.
+  Tagged-PDF and embedded-font gates remain open archival limitations.
+- AffineDrift #3993 pins the exact #9152 authority as protected squash
+  `9b9cbcc2199f1fbf8cd281beb08c57d543b552b1`; handoff correction #3995 merged
+  as `6cc909273d63147392b17078a35c6c4da034e1da`.
+- Tools force-source frame #4873 merged as
+  `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
+  reusable-variation completion authority.
 
 ## Active Hybrid Authority Repair: #9236
 
-- Branch `fix/9236-hybrid-authority-red` is isolated in
-  `C:\Users\diete\Repositories\worktrees\UpstreamDrift-9236-hybrid-red` at
-  independently reviewed implementation head
-  `0f2f4aed2d1aa2c231c241aabe464249f1586b0f`. It is clean, contains 11
-  changed paths, has 2,080 additions and 15 edits against `origin/main`, and
-  deletes no path. It has not been pushed and has no PR.
-- Protected optional-stack run `33278810705`, job `99170340423`, passed 12 of
-  13 checks but failed exact record-byte reproduction. The runner reported
-  MuJoCo 3.12.0 and Pinocchio 4.1.0 while the committed record declared 3.8.0
-  for both. The current generator also could not reproduce the committed JSON
-  serialization. That protected result is negative authority evidence; do not
-  close #9192, #9174, or AffineDrift #4022 from it.
 - The candidate adds a study-scoped, hash-locked CPython 3.11.15 manylinux
   environment and an isolated runner-temp native job. The canonical serializer
   is deterministic, rejects NaN, writes atomically, and records the exact
@@ -48,60 +46,66 @@ partial campaign checkpoints are not completion evidence.
   in both records, finite numeric leaves, and an internally derived maximum for
   each record. Missing paths, policy entries, stale profiles, inconsistent
   maxima, negative residuals, and non-monotone convergence fail closed.
-- Independent adversarial review is GO for the implementation. The cumulative
-  corrective suite passes 83 tests; the exact original 42-test partition is 33
-  passed, 6 justified Windows native-stack skips, and exactly 3 intentional
-  REDs. Those REDs reserve publication because the protected schema-1.0 record
-  lacks the new execution profile and authority fields. They are not permission
-  to manufacture or hand-edit authority on Windows.
 - The committed scientific record, checksum, release manifest, and
   claim-evidence manifest are byte-identical to `origin/main`. The next step is
   an ordinary protected PR that runs the exact locked Linux CPython 3.11.15
   native job. Accept a regenerated record only when two same-environment builds
   are byte-identical, the declared dependency/profile identity matches the job,
   all numeric evidence satisfies the declared comparison policy, and the
-  checksum/manifest cascade is regenerated by canonical commands. Then rerun
-  exact-head hosted gates and obtain a fresh independent review before merge.
+  checksum/manifest cascade is regenerated by canonical commands.
 
-## Active Publication Integrity Slice: #9142 / PR #9147
+## Protected Prospective Smoke Registration: #9153
 
-- #9142 prevents the generated claim-adjudication chapter from emitting
-  repository-relative `data/` links that break when AffineDrift republishes the
-  chapter. PR #9147 owns the implementation; do not create a duplicate PR.
-- Worktree: `UpstreamDrift-worktrees/9142-portable-links`.
-- Local branch: `fix/9142-portable-links`, tracking the PR branch through a
-  merge-only reconciliation with current `origin/main`; never force-push.
-- The source now emits portable UpstreamDrift `blob/main` links, while the
-  AffineDrift publication boundary remains responsible for immutable SHA
-  rewriting. The focused five-test generator/committed-artifact suite passes.
-- Release manifests were regenerated after reconciling #9151. Complete serial
-  validation, commit the merge, push to the existing PR branch, preserve squash
-  auto-merge, inspect actionable hosted failures, and verify its squash on
-  remote `main` before closing this slice.
+- PR #9308 protected-squash-merged as
+  `651de90a4cf8e1195ec7f3ab3ae16883ec8f6172`. Reviewed head
+  `142662fb3de86fbb8086b83772df09425897f9c2` and merge share tree
+  `a0dd17ed057c0aea45f112172d406ace971610df`; remote `main` equals the squash.
+- PR #9309 changed only this root handoff and the detailed turnover document;
+  it introduced no runtime, smoke outcome, scientific promotion, human
+  validation, or coaching authority. Any post-merge turnover correction PR is
+  recorded in the latest #9153 comment rather than self-referentially embedded
+  here; verify it is protected before implementation resumes.
+- New registration source:
+  `scripts/research/proximal_distal_energy/articulated_distributed_smoke_registration.py`.
+- New frozen protocol:
+  `docs/research/proximal_distal_energy_transfer/data/articulated_distributed_smoke_registration.json`.
+- The prospective matrix contains six cases: MuJoCo and Pinocchio at 1.0,
+  0.5, and 0.25 ms, using source case 0/sample 6, one station per hand, 1.5 mm
+  slack, zero generalized initial velocity, 1 mm club displacement, and
+  -0.8 m/s initial club velocity over 50 ms.
+- Execution is explicitly `not_started`; retained outcomes are empty and
+  promotion authority is none. The registration binds the protected evaluator
+  revision/tree, seven evaluator-source hashes, and the 35,568-byte input NPZ
+  with SHA-256 `9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779`.
+- Only opening and reattachment are eligible. Friction-limit, static stick/slip,
+  inferred discrete impact, causal counterfactual, biological, human, and
+  coaching interpretations are prohibited.
+- TDD evidence: the missing module produced the expected RED import failure;
+  after implementation, four registration tests pass serially.
 
 ## Immediate Order
 
-1. Finish and protected-merge #9147 without changing scientific content.
-2. Register the next #8557 child for matched forward impulse/work attribution
-   through contact transitions. Its contract must freeze event surfaces,
-   contact-state matching, impulse/work estimands, shaft/base coupling,
-   uncertainty, adverse loads, killswitches, and evidence promotion rules.
-3. Implement that child from a clean leased worktree only after its issue and
-   dependency order are visible in #8557.
+1. Verify the latest turnover-correction PR recorded on #9153 is protected on
+   remote `main`; preserve its existing runs and auto-merge.
+2. From that exact protected base, implement the current-main single-worker
+   atomic smoke runner with RED contracts for registration identity, complete
+   case enumeration, atomic resume, typed failures, and no outcome promotion.
+3. Execute the six registered cases only after runner code and tests merge.
+   Never import or relabel legacy checkpoints as outcomes.
 
 ## Scientific Boundaries
 
-- The #9151 decomposition is pointwise. It does not establish forward
-  persistence, impulse/work attribution, ZVCF, biological passivity, muscle
-  action, participant behavior, timing economy, safety, or coaching strategy.
+- Event locations qualify the retained discrete trajectory only; they are not
+  the continuous integrator's exact event solution.
+- Compliant opening/reattachment records zero discrete event impulse and work by
+  model definition; it is not evidence of a physical impact.
+- Same-trajectory attribution is descriptive. Divergent forward
+  counterfactuals require a separately registered design.
 - Energy transfer, momentum redistribution, joint work, contact power, event
-  timing, and clubhead speed remain distinct estimands.
-- Native-engine agreement verifies the declared operators and common contact
-  law; it does not independently calibrate anatomy, grip, shaft, or ground.
-- Ratios below the registered denominator floor are suppressed, not reported as
-  zero. Signed shares may be negative or exceed one under cancellation.
-- The next gate is matched forward impulse/work attribution through contact
-  transitions, shaft/base coupling, uncertainty, and adverse loads.
+  timing, and clubhead speed are distinct estimands.
+- Native-engine agreement verifies declared operators and the common contact
+  law; it does not calibrate anatomy, grip, shaft, ground, equipment, or human
+  strategy.
 - #8556/#9004 remain governed human-data boundaries. Synthetic evidence cannot
   substitute for bilateral six-axis participant grip wrenches.
 
@@ -113,71 +117,42 @@ partial campaign checkpoints are not completion evidence.
   unreadable (`0x80070570`). Do not retry WSL, repair/mount/copy/mutate the
   VHDX, restart services, or launch a replacement without explicit approval
   and a recoverability plan.
-- DeskComputer remains runner-drained. Keep local tests serial and web tests at
-  no more than two workers.
+- DeskComputer remains runner-drained; keep tests serial and web tests at no
+  more than two workers.
+- The accumulated campaign worktree is
+  `UpstreamDrift-worktrees/9153-forward-impulse-work`, last remote-equal at
+  `1e5e823ca2fa9391134e8a0ccf140a36036a88a7`, with 233 commits ahead and 48
+  behind at the last audit. Preserve its evidence and quarantine.
 
-## Active AffineDrift Companion Provider Slice: #9174
+## Active AffineDrift Companion Boundary
 
-- Foundation PR #9180 protected-merged as
-  `1af18489e8755933a0d189aa8edafe787fa94d0f`; issue #9174 was reopened and
-  remains the completion authority. Publication PR #9214 protected-merged as
-  `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
-- #9222 reviewed head `7b992f2a` and protected squash `e9c0f934` have exact
-  tree `c468c0db`, but protected-main run 33277175052 was cancelled with zero
-  jobs or artifacts. #9192 is reopened until post-#9236 exact bytes,
-  acquisition identity, and attestations are verified; #9174 stays open.
-- Lease/worktree: `worktrees/UpstreamDrift-9236-b1`; branch
-  `fix/9236-articulated-provenance`. Do not use the dirty primary checkout.
-- ADR-0043 and the strict v1 schema are one-way UpstreamDrift software-fact
-  authority for AffineDrift #4010; #9064 remains design-manual authority and
-  #9070 remains typed calculation-manifest authority.
-- `scripts/companion_catalog.py` owns local-only discovery and exact source
-  provenance. `scripts/companion_publication.py` is the sole protected-main/tag
-  delivery wrapper and must refuse dirty or non-authoritative state.
-- #9192 packages the manifest, both schemas, compatibility policy, and detached
-  hashes as one commit-named 30-day Actions artifact; acquisition evidence must
-  record the exact run/artifact identity and lack of a durable URL.
-- Schema 1.0.0 is current and `previous_supported` is empty; declare a prior
-  version only with a validating fixture. No tag or release is authorized here.
-- The exact failure is optional-stack run 33271527700 / job 99150747357:
-  recorded `spatial_full_body.py` SHA-256 `bb195bf...` versus tracked
-  `b386ec...`. #9236 updates this and the nested closed-contact provenance edge,
-  checksum/manifest cascade, and test pin only. Numeric results, tolerances,
-  claims, and qualification are unchanged.
-- Exact-head gates must include same-environment native two-build byte equality,
-  source pins, release/claim integrity, SPEC duplicate ratchet, Ruff, Bandit,
-  and the full protected matrix. Never reroute, restart, force-push, or bypass.
-- Merge only when exact head/base/tree and every required check are green. Then
-  accept only post-repair commit-named payload/evidence artifacts; verify their
-  attestation, acquisition identity, embedded commit, and exact bytes before
-  closing #9192. Keep #9174 open for #9190, #9191, and #9193.
+- Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`;
+  publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
+- Governed companion workflows (#9190) define the 15-record registry, public
+  executor, and CI execution evidence across 10 success and 4 failure fixtures.
+- #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with
+  no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes,
+  acquisition identity, and attestations; #9174 remains open.
+- ADR-0043 and schema v1 are one-way UpstreamDrift software-fact authority for
+  AffineDrift #4010. #9064 remains design-manual authority and #9070 remains
+  typed calculation-manifest authority.
 
 ## Validation
 
-Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` for
-portable tests. Run Python tests with `-n 0`.
+Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` and
+`-n 0` for pytest.
 
 ```powershell
-python -m pytest -n 0 -q tests/research/test_articulated_drift_contact_attribution.py
-python -m ruff check scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py tests/research/test_articulated_drift_contact_attribution.py
-python -m ruff format --check scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py scripts/research/proximal_distal_energy/run_articulated_drift_contact_attribution.py tests/research/test_articulated_drift_contact_attribution.py
+python -m pytest -n 0 -q tests/research/test_articulated_distributed_smoke_registration.py
+python -m pytest -n 0 -q tests/research/test_articulated_contact_events.py
+python -m pytest -n 0 -q tests/research/test_articulated_forward_attribution.py
+python -m scripts.research.proximal_distal_energy.articulated_distributed_smoke_registration validate
 python scripts/check_document_title_case.py --changed-from origin/main
 python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
 ```
 
-Also run claim/evidence integrity, release qualification, PDF build/inspection,
-and affected full gates after publication artifacts are added. Run the GitHub
-App setup script immediately before every GitHub operation. Never force-push,
-bypass protection/review, relax scientific tolerances after inspecting results,
-or create redundant CI reruns.
-
-## Other Repository Programs
-
-- UP-D0 (#9066) establishes `manuals/upstreamdrift` QMD as the sole editable
-  engineering-manual authority; generated manual formats are non-editable and
-  unapproved. UP-D1 (#9067) must inventory and classify every in-scope
-  calculation and module before any manual coverage or release claim.
-- Markerless mocap still follows Tools provider -> Upstream orchestration ->
-  Affine sanitized projection. Camera candidates are not procurement or lab
-  qualification.
+Also run claim/evidence integrity, release qualification, PDF inspection, and
+affected full gates after publication changes. Never force-push, bypass branch
+protection, relax tolerances after inspecting results, or create capacity-only
+reruns.

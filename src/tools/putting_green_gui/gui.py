@@ -346,6 +346,7 @@ def _format_metrics(scene: PuttScene) -> str:
         f"Roll time:     {scene.duration_s:.2f} s\n"
         f"Peak break:    {scene.peak_break_m * 100.0:.1f} cm\n"
         f"Launch speed:  {scene.launch_speed_ms:.2f} m/s\n"
+        f"Roll model:    {scene.roll_model}\n"
         f"Track colour:  amber = skidding, green = pure roll, grey = stopped\n"
     )
 

@@ -8,6 +8,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scripts.research.proximal_distal_energy.deterministic_vector_figure import (
+    save_vector_figure,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 STUDY_DIR = REPO_ROOT / "docs/research/proximal_distal_energy_transfer"
 STEM = STUDY_DIR / "figures/fig_articulated_inertia_cross_engine"
@@ -66,15 +70,12 @@ def main() -> int:
         f"{result['maximum_inverse_dynamics_relative_error']:.2e}",
         fontsize=14,
     )
-    STEM.parent.mkdir(parents=True, exist_ok=True)
-    metadata = {"Title": "Articulated Inertia Cross-Engine Audit"}
-    fig.savefig(STEM.with_suffix(".pdf"), metadata=metadata)
-    fig.savefig(STEM.with_suffix(".svg"), metadata=metadata)
-    svg_path = STEM.with_suffix(".svg")
-    svg_text = svg_path.read_text(encoding="utf-8")
-    svg_path.write_text(
-        "\n".join(line.rstrip() for line in svg_text.splitlines()) + "\n",
-        encoding="utf-8",
+    save_vector_figure(
+        fig,
+        STEM,
+        salt="articulated-inertia-cross-engine-v1",
+        title="Articulated Inertia Cross-Engine Audit",
+        bbox_inches=None,
     )
     plt.close(fig)
     return 0

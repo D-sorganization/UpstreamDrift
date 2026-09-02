@@ -18,14 +18,16 @@ from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
+from scripts import companion_workflows
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
 
 SCHEMA_ID = "https://upstreamdrift.dev/schemas/upstreamdrift-companion-v1.schema.json"
 SCHEMA_VERSION = "1.0.0"
-GENERATOR_VERSION = "1.0.0"
+GENERATOR_VERSION = "1.1.0"
 DEFAULT_OUTPUT = Path("dist/companion/upstreamdrift-companion.v1.json")
 INPUT_PATHS = (
     Path("pyproject.toml"),
+    companion_workflows.REGISTRY_PATH,
     Path("src/config/feature_parity.json"),
     Path("src/config/launcher_manifest.json"),
     Path("src/config/models.yaml"),
@@ -152,8 +154,10 @@ def _read_input(repo_root: Path, relative: Path, *, require_committed: bool) -> 
         capture_output=True,
         shell=False,
     )
-    if committed.returncode != 0:
+    if committed.returncode != 0 and require_committed:
         raise CatalogAuthorityError(f"input is not tracked at HEAD: {normalized}")
+    if committed.returncode != 0:
+        return path.read_bytes()
     if diff.returncode == 0:
         # Hash and parse committed blob bytes so checkout line-ending policy
         # cannot change the manifest on Windows versus Linux.
@@ -390,7 +394,7 @@ def _source_provenance(
         },
         "inputs": [
             {"path": relative.as_posix(), "sha256": _sha256(payloads[relative])}
-            for relative in INPUT_PATHS
+            for relative in sorted(payloads, key=lambda path: path.as_posix())
         ],
     }
 
@@ -402,8 +406,7 @@ def _catalog_payload(
     payloads: Mapping[Path, bytes],
     source: Mapping[str, Any],
     tools_commit: str,
-    programs: Sequence[Mapping[str, Any]],
-    features: Sequence[Mapping[str, Any]],
+    inventories: Mapping[str, Sequence[Mapping[str, Any]]],
     summary: Mapping[str, int],
 ) -> dict[str, Any]:
     """Assemble the strict schema shape from already validated facts."""
@@ -445,6 +448,12 @@ def _catalog_payload(
             "version": None,
             "discovery_mode": "local-only",
         },
+        {
+            "id": "workflow_registry",
+            "path": companion_workflows.REGISTRY_PATH.as_posix(),
+            "version": companion_workflows.REGISTRY_VERSION,
+            "discovery_mode": "local-only",
+        },
     ]
     engines = [
         {
@@ -465,7 +474,7 @@ def _catalog_payload(
             "state": "draft",
             "blockers": [
                 "Engine capability claims require qualification evidence.",
-                "Workflow and screenshot inventories are scheduled for later slices.",
+                "Documentation and screenshot inventories require their governed provider slices.",
             ],
         },
         "source": dict(source),
@@ -480,10 +489,10 @@ def _catalog_payload(
             },
         },
         "engines": engines,
-        "programs": list(programs),
-        "features": list(features),
+        "programs": list(inventories["programs"]),
+        "features": list(inventories["features"]),
         "documentation": [],
-        "workflows": [],
+        "workflows": list(inventories["workflows"]),
         "screenshots": [],
         "summary": dict(summary),
     }
@@ -523,6 +532,18 @@ def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, A
     models = registry.get_all_models()
     features, feature_ids_by_program, surface_count = _features(parity["features"])
     programs = _merge_programs(launcher["tiles"], models, feature_ids_by_program)
+    source_commit = _git_commit(root)
+    workflows = companion_workflows.parse_registry(
+        payloads[companion_workflows.REGISTRY_PATH],
+        repo_root=root,
+        source_commit=source_commit,
+        program_ids={program["id"] for program in programs},
+    )
+    for fixture_path in companion_workflows.referenced_fixture_paths(workflows):
+        payloads.setdefault(
+            fixture_path,
+            _read_input(root, fixture_path, require_committed=require_clean),
+        )
     source = _source_provenance(root, payloads)
     tools_commit = _tools_gitlink(root)
     summary = {
@@ -531,6 +552,10 @@ def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, A
         "program_records": len(programs),
         "feature_records": len(features),
         "feature_surface_paths": surface_count,
+        "workflow_records": len(workflows),
+        "executable_workflow_records": sum(
+            workflow["availability"]["state"] == "available" for workflow in workflows
+        ),
     }
     return _catalog_payload(
         launcher=launcher,
@@ -538,8 +563,11 @@ def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, A
         payloads=payloads,
         source=source,
         tools_commit=tools_commit,
-        programs=programs,
-        features=features,
+        inventories={
+            "programs": programs,
+            "features": features,
+            "workflows": workflows,
+        },
         summary=summary,
     )
 
