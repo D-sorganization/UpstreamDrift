@@ -17,10 +17,18 @@ from pathlib import Path
 _SCRIPT_DIR = Path(__file__).resolve().parent
 
 _PROJECT_ROOT = _SCRIPT_DIR.parent
+_SRC_ROOT = _PROJECT_ROOT / "src"
 
 # Ensure the project root is on sys.path so ``src`` is importable.
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
+
+# Some src/ modules do a bare ``import bunkershot3d`` (not ``src.bunkershot3d``),
+# which only resolves when src/ itself -- not just the project root -- is on
+# sys.path. Without this, validate_launchers() fails with
+# "No module named 'bunkershot3d'" even though the launcher code is fine.
+if str(_SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SRC_ROOT))
 
 from src.shared.python.data_io.path_utils import get_src_root  # noqa: E402
 
@@ -39,7 +47,8 @@ def validate_directory_structure() -> bool:
 
     suite_root = SUITE_ROOT
 
-    expected_dirs = [
+    # Paths under src/ (the migrated layout).
+    expected_src_dirs = [
         "engines/Simscape_Multibody_Models/2D_Golf_Model",
         "engines/Simscape_Multibody_Models/3D_Golf_Model",
         "engines/physics_engines/mujoco",
@@ -50,14 +59,27 @@ def validate_directory_structure() -> bool:
         "shared/python",
         "shared/matlab",
         "tools",
+    ]
+    # docs/ and output/ live at the project root, not under src/ -- they
+    # were never part of the migrated src/ layout (issue #8834).
+    expected_root_dirs = [
         "docs",
         "output",
     ]
 
     missing_dirs = []
 
-    for dir_path in expected_dirs:
+    for dir_path in expected_src_dirs:
         full_path = suite_root / dir_path
+
+        if not full_path.exists():
+            missing_dirs.append(dir_path)
+
+        else:
+            logger.info(f"  ✅ {dir_path}")
+
+    for dir_path in expected_root_dirs:
+        full_path = _PROJECT_ROOT / dir_path
 
         if not full_path.exists():
             missing_dirs.append(dir_path)
@@ -129,7 +151,7 @@ def validate_shared_components() -> bool:
     try:
         # Test shared Python utilities
 
-        from shared.python.data_io.common_utils import (
+        from src.shared.python.data_io.common_utils import (
             convert_units,
             ensure_output_dir,
             load_golf_data,
@@ -151,15 +173,19 @@ def validate_shared_components() -> bool:
 
         # Test shared constants
 
-        from shared.python import (
+        # NOTE: aliased to avoid shadowing the module-level SUITE_ROOT (this
+        # repo's src/ root) with core.constants.SUITE_ROOT, which names a
+        # different, more narrowly-scoped path (src/shared) -- shadowing it
+        # here previously broke the MATLAB file check below (issue #8834).
+        from src.shared.python.core import (
             DRAKE_ROOT,
             ENGINES_ROOT,
             MUJOCO_ROOT,
             PINOCCHIO_ROOT,
-            SUITE_ROOT,
+            SUITE_ROOT as _CORE_SUITE_ROOT,
         )
 
-        _ = (DRAKE_ROOT, ENGINES_ROOT, MUJOCO_ROOT, PINOCCHIO_ROOT, SUITE_ROOT)
+        _ = (DRAKE_ROOT, ENGINES_ROOT, MUJOCO_ROOT, PINOCCHIO_ROOT, _CORE_SUITE_ROOT)
 
         logger.info("  ✅ Shared constants available")
 
@@ -245,9 +271,10 @@ def validate_git_repository() -> bool:
 
     logger.info("Validating Git repository...")
 
-    suite_root = SUITE_ROOT
+    # .git/ lives at the project root, not under src/ (issue #8834).
+    project_root = _PROJECT_ROOT
 
-    git_dir = suite_root / ".git"
+    git_dir = project_root / ".git"
 
     if not git_dir.exists():
         logger.error("Not a Git repository - missing .git directory")
@@ -259,7 +286,7 @@ def validate_git_repository() -> bool:
     git_files = [".git/config", ".git/HEAD", ".gitignore"]
 
     for git_file in git_files:
-        if not (suite_root / git_file).exists():
+        if not (project_root / git_file).exists():
             logger.error(f"Missing Git file: {git_file}")
 
             return False
@@ -276,7 +303,9 @@ def validate_configuration_files() -> bool:
 
     logger.info("Validating configuration files...")
 
-    suite_root = SUITE_ROOT
+    # .gitignore, README.md, and docs/ live at the project root, not under
+    # src/ (issue #8834).
+    project_root = _PROJECT_ROOT
 
     config_files = [
         ".gitignore",
@@ -285,7 +314,7 @@ def validate_configuration_files() -> bool:
     ]
 
     for config_file in config_files:
-        if not (suite_root / config_file).exists():
+        if not (project_root / config_file).exists():
             logger.error(f"Missing configuration file: {config_file}")
 
             return False
