@@ -48,7 +48,7 @@ import sys
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from src.launchers.tools_repo_path import resolve_tools_repo
 from src.shared.python.physics.flight_trajectory_export import FLIGHT_FRAME_ID
@@ -195,7 +195,7 @@ def _load_vendored_reader() -> Callable[[str], Any]:
             f"vendored flight_interchange reader unavailable at {resolution.path}: "
             f"{exc}"
         ) from exc
-    return ball_flight_trajectory_from_json
+    return cast("Callable[[str], Any]", ball_flight_trajectory_from_json)
 
 
 def import_trajectory_record(record: Mapping[str, Any]) -> ImportedBallFlightTrajectory:
