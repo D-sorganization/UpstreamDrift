@@ -81,7 +81,10 @@ def require_vendored_tools_stack() -> None:
         "vendor/ud-tools submodule is not materialised; run "
         "`git submodule update --init vendor/ud-tools`"
     )
-    if os.environ.get("GITHUB_ACTIONS") == "true":
+    if (
+        os.environ.get("REQUIRE_DRIFT_GATES") == "1"
+        or os.environ.get("REQUIRE_REAL_TOOLS_REPO") == "1"
+    ):
         pytest.fail(
             "ADR-0046 G0 drift gates cannot run: " + message + ". In CI this "
             "is a hard failure, never a skip - a skipped drift gate reports "

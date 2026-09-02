@@ -2314,6 +2314,7 @@ jobs:
       - name: Run Launch-Monitor Drift Gates (ADR-0046 G0)
         env:
           QT_QPA_PLATFORM: offscreen
+          REQUIRE_DRIFT_GATES: "1"
         run: |
           drift_suites="tests/integration/launch_monitor_drift/"
           if [ -d tests/integration/putting_green_drift ]; then
