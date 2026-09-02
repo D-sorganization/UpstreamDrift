@@ -159,7 +159,7 @@
       "web": "ui/src/pages/BallFlight.tsx",
       "status": "parity",
       "tiles": ["shot_tracer"],
-      "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API."
+      "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 H3 (#9352) adds POST /tools/ball-flight/import: the web page overlays imported swing_sim.ball_flight_trajectory/1 records from either flight-model family, labeled with model_family/model_name. This is currently web-first — the PyQt6 Shot Tracer gains the same import via ADR-0047 H2 (#9351), tracked separately; status stays 'parity' because the underlying multi-model comparison feature itself is unaffected."
     },
     "simulation.swing_objective_lab": {
       "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",
@@ -256,12 +256,12 @@
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
     "tools.rate_of_closure": {
-      "title": "Rate of Closure Impact Explorer (clubhead impact-point delivery analysis)",
-      "pyqt": null,
-      "api": null,
-      "web": null,
-      "status": "exempt",
-      "reason": "Vendored Tools desktop GUI (vendor/ud-tools src/rate_of_closure); web surface is served by the Tools repo's own build, not UpstreamDrift.",
+      "title": "Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite)",
+      "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
+      "api": "src/api/local_server.py",
+      "web": "ui/src/pages/ImpactExplorer.tsx",
+      "status": "parity",
+      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
       "tiles": ["rate_of_closure"]
     },
     "tools.launch_monitor_analytics": {

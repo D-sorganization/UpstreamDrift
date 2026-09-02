@@ -216,7 +216,7 @@ class TestSimulateWithCoefficients:
         assert out.clubhead.shape == (n_samples, 3)
         assert out.club_quat.shape == (n_samples, 4)
         assert isinstance(out.solver_status, str)
-        assert out.wall_clock_s >= 0.0
+        assert out.duration_s >= 0.0
 
     def test_solver_status_success_for_nominal_inputs(
         self,

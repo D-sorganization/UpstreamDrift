@@ -19,6 +19,7 @@ from scripts.research.proximal_distal_energy.articulated_forward_contract import
 )
 from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
     build_pinocchio_articulated_model,
+    pinocchio_crba_mass_matrix,
     require_robotics_pinocchio,
 )
 from scripts.research.proximal_distal_energy.spatial_full_body import (
@@ -95,7 +96,7 @@ def native_dynamics_operator(
     data_pin = native.createData()
 
     def evaluate(q: FloatArray, qd: FloatArray) -> tuple[FloatArray, FloatArray]:
-        matrix = np.asarray(pin.crba(native, data_pin, q)).copy()
+        matrix = pinocchio_crba_mass_matrix(pin, native, data_pin, q)
         bias = np.asarray(
             pin.nonLinearEffects(native, data_pin, q, qd)  # type: ignore[attr-defined]
         ).copy()

@@ -56,7 +56,12 @@ def firm_sand() -> SandCondition:
 
 @pytest.fixture(scope="session")
 def tour_swing() -> SwingSetup:
-    """A tour greenside delivery: 25 m/s, -8 deg, face open, shaft leaning."""
+    """A tour greenside delivery: 25 m/s, -6 deg, face open, shaft neutral.
+
+    This used to lean the shaft 6 deg forward, which issue #9247 showed
+    is a full-shot delivery that buries the head once the delivery frame
+    is un-mirrored. See :class:`~.design.SwingSetup` for the measurements.
+    """
     return SwingSetup()
 
 

@@ -94,5 +94,18 @@ export function buildDevProxy(
       // `/api/ws` still upgrades instead of silently failing.
       ws: true,
     },
+    // The vendored Impact Explorer bundle is served by the Python API
+    // (`_mount_impact_explorer_directory`), not by Vite. Without this entry
+    // the dev server answers the page's availability probe with its own SPA
+    // fallback (HTTP 200), so /tools/impact-explorer would embed a broken
+    // frame in dev while working in production — the exact silent divergence
+    // the probe exists to prevent.
+    '/impact-explorer-app': {
+      target: `http://localhost:${apiPort}`,
+      changeOrigin: true,
+      // Static bundle needs no upgrades, but the proxy contract test holds
+      // every entry to the same defence-in-depth posture as /api.
+      ws: true,
+    },
   };
 }

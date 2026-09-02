@@ -162,11 +162,37 @@ class TestTheRecordedPoseReachesF1Unchanged:
 class TestTheDivergenceIsReportedRatherThanSmoothed:
     """Sign and structure, not numbers a coarse bed would move."""
 
-    def test_both_tiers_oppose_the_head(self, comparison) -> None:  # type: ignore[no-untyped-def]
-        """The one physical claim a pair of uncalibrated models can support."""
+    def test_neither_tier_ever_adds_energy_to_the_head(self, comparison) -> None:  # type: ignore[no-untyped-def]
+        """The one physical claim a pair of uncalibrated models can support.
+
+        Sand is dissipative. Whatever else two uncalibrated models
+        disagree about, neither may push the head along its own
+        velocity, so ``F . v <= 0`` at every probe -- with equality only
+        where the solver reports no force at all, on the disengaged tail
+        the march integrates through.
+
+        This used to be written as "the vertical force is upward", which
+        is the same claim only while the sole *planes*. Once the
+        presentation angle goes negative the face submerges and drives
+        the head down -- that is what digging is, and it is why a
+        low-bounce sole buries. The vertical form therefore asserted a
+        regime rather than a physical law, and it could only ever pass
+        because the mirrored delivery frame of issue #9247 had the head
+        striking with its back, where the face never met the sand at all.
+        """
         for probe in comparison.shot_probes:
-            assert probe.check.f0_force_n[2] > 0.0, probe.check.summary()
-            assert probe.check.f1_force_n[2] > 0.0, probe.check.summary()
+            velocity = np.asarray(comparison.f0_velocity_m_s[probe.frame])
+            for tier, force in (
+                ("F0", np.asarray(probe.check.f0_force_n)),
+                ("F1", np.asarray(probe.check.f1_force_n)),
+            ):
+                power_w = float(force @ velocity)
+                assert power_w <= 0.0, f"{tier} adds energy: {probe.check.summary()}"
+                if float(np.linalg.norm(force)) > 0.0:
+                    assert power_w < 0.0, (
+                        f"{tier} carries force but no dissipation: "
+                        f"{probe.check.summary()}"
+                    )
 
     def test_f1_carries_a_divot_f0_cannot(self, comparison) -> None:  # type: ignore[no-untyped-def]
         """The reason ADR-0033 chose a continuum at all."""

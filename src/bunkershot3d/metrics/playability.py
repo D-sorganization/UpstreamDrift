@@ -32,10 +32,21 @@ optimiser (:mod:`bunkershot3d.study.optimisation`).
 
 Two honesty features:
 
-* A **NaN carry means the solver refused** -- out of its validity envelope, per
-  ADR-0032. Refused points are counted as outside the window and reported
-  separately as ``refused_fraction``. A large refused fraction means the window
-  is unmeasured, not wide.
+* A **NaN carry means no carry was produced**, and the two ways that happens
+  are different claims, so they are reported as two numbers. ``refused_fraction``
+  is ADR-0032 refusal: the solver declined the query as outside its validity
+  envelope. ``unmeasured_fraction`` is the solver answering and the answer not
+  supporting a carry -- a head that buried, whose trace reverses inside its own
+  crater, leaving no prismatic divot for the launch to divide by. Both count as
+  outside the window; a large fraction of either means the window is unmeasured,
+  not wide.
+
+  These were one number until issue #9247. Nothing distinguished them while the
+  delivery frame was mirrored, because every delivery in the registered sweep
+  planed and burial was unreachable, so every NaN really was a refusal. Once the
+  frame was corrected the steep end of the attack sweep buries, and the single
+  number reported "the solver refused half this domain" about a solver that had
+  refused nothing.
 * The **largest connected** window is reported alongside the total. A design
   whose window is scattered islands is not forgiving, however much area the
   islands add up to.
@@ -127,7 +138,13 @@ class PlayabilityWindow:
         fraction: ``area / domain_area``; dimensionless, so it survives a change
             of sweep ranges.
         largest_connected_area: Area of the largest 4-connected window region.
-        refused_fraction: Weighted fraction of the domain where carry was NaN.
+        refused_fraction: Weighted fraction of the domain the **envelope**
+            refused, in the ADR-0032 sense: the solver declined to answer.
+        unmeasured_fraction: Weighted fraction of the domain where the solver
+            *did* answer but no carry could be derived from the answer --
+            in practice a head that buried, whose trace reverses inside its
+            own crater and so has no prismatic divot to divide by. Disjoint
+            from :attr:`refused_fraction`; both count against the window.
         contains_nominal: Whether the nominal delivery is inside the window, or
             ``None`` when no nominal point was given.
     """
@@ -143,6 +160,7 @@ class PlayabilityWindow:
     fraction: float
     largest_connected_area: float
     refused_fraction: float
+    unmeasured_fraction: float
     contains_nominal: bool | None
 
     @property
@@ -211,6 +229,7 @@ def playability_window(
     target_carry_m: float,
     tolerance_fraction: float = DEFAULT_CARRY_TOLERANCE_FRACTION,
     nominal: tuple[float, float] | None = None,
+    refused: np.ndarray | None = None,
 ) -> PlayabilityWindow:
     """Measure the area over which carry stays within tolerance of the target.
 
@@ -218,19 +237,26 @@ def playability_window(
         axis_a: First swept factor; indexes the rows of ``carry_m``.
         axis_b: Second swept factor; indexes the columns.
         carry_m: ``(len(axis_a), len(axis_b))`` carry distances [m]. Use NaN for
-            a point the solver refused; it is counted as outside the window.
+            a point that produced no carry; it is counted as outside the window.
         target_carry_m: Target carry [m]; must be positive.
         tolerance_fraction: Half-width of the acceptance band as a fraction of
             the target. Must be in ``(0, 1]``.
         nominal: Optional ``(a, b)`` nominal delivery, reported as
             ``contains_nominal`` at the nearest grid node.
+        refused: Optional boolean grid marking the points the **envelope**
+            refused, in the ADR-0032 sense. Supply it whenever a NaN can
+            arise for any other reason, so that the two are reported
+            apart -- see :attr:`PlayabilityWindow.unmeasured_fraction`.
+            Omitted, every NaN is attributed to refusal, which is what
+            this function meant when refusal was the only way to get one.
 
     Returns:
         The measured window.
 
     Raises:
         ValueError: If the grid shape does not match the axes, the target is not
-            positive, or the tolerance is outside ``(0, 1]``.
+            positive, the tolerance is outside ``(0, 1]``, ``refused`` does not
+            match the grid, or a refused point carries a finite carry.
     """
     carry = np.asarray(carry_m, dtype=float)
     expected = (axis_a.values.size, axis_b.values.size)
@@ -248,11 +274,25 @@ def playability_window(
         raise ValueError("carry_m must be finite or NaN; found an infinity")
     weights = _weight_grid(axis_a, axis_b)
     domain_area = axis_a.span * axis_b.span
-    refused = np.isnan(carry)
+    missing = np.isnan(carry)
+    if refused is None:
+        refused_mask = missing
+    else:
+        refused_mask = np.asarray(refused, dtype=bool)
+        if refused_mask.shape != expected:
+            raise ValueError(
+                f"refused must have shape {expected}, got {refused_mask.shape}"
+            )
+        if np.any(refused_mask & ~missing):
+            raise ValueError(
+                "a refused point cannot also report a carry; found a finite "
+                "carry marked refused"
+            )
+    unmeasured = missing & ~refused_mask
     half_band = tolerance_fraction * target_carry_m
     with np.errstate(invalid="ignore"):
         mask = np.abs(carry - target_carry_m) <= half_band
-    mask &= ~refused
+    mask &= ~missing
     area = float((weights * mask).sum())
     return PlayabilityWindow(
         axis_a=axis_a,
@@ -265,7 +305,8 @@ def playability_window(
         domain_area=domain_area,
         fraction=area / domain_area,
         largest_connected_area=_largest_connected_area(mask, weights),
-        refused_fraction=float((weights * refused).sum()) / domain_area,
+        refused_fraction=float((weights * refused_mask).sum()) / domain_area,
+        unmeasured_fraction=float((weights * unmeasured).sum()) / domain_area,
         contains_nominal=_nominal_in_window(axis_a, axis_b, mask, nominal),
     )
 

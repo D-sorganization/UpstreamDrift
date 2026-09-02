@@ -129,3 +129,5 @@ def test_five_fiber_trace_is_finite_passive_and_power_closed() -> None:
     assert np.max(np.abs(trace["virtual_power_residual_w"])) <= 1.0e-10
     assert np.all(trace["station_load_concentration"] >= 0.0)
     assert np.all(trace["station_load_concentration"] <= 1.0)
+    assert trace["station_signed_gap_m"].shape == trace["station_active"].shape
+    assert np.array_equal(trace["station_signed_gap_m"] > 0.0, trace["station_active"])

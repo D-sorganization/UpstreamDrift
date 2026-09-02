@@ -7,6 +7,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scripts.research.proximal_distal_energy.deterministic_vector_figure import (
+    save_vector_figure,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 DATA = ARTICLE / "data/articulated_native_constraint_discrepancy.npz"
@@ -110,11 +114,14 @@ def make_figure(output: Path = OUTPUT) -> Path:
         fontsize=14,
         fontweight="bold",
     )
-    output.parent.mkdir(parents=True, exist_ok=True)
-    temporary = output.with_name(f"{output.stem}.tmp{output.suffix}")
-    figure.savefig(temporary, bbox_inches="tight")
+    save_vector_figure(
+        figure,
+        output,
+        salt="articulated-native-constraint-discrepancy-v1",
+        write_svg=False,
+        atomic_pdf=True,
+    )
     plt.close(figure)
-    temporary.replace(output)
     return output
 
 

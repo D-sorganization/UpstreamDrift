@@ -15,12 +15,14 @@ CLAIM_IDS = {"PD-CLAIM-274", "PD-CLAIM-275", "PD-CLAIM-276"}
 ARTIFACTS = [
     "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.json",
     "docs/research/proximal_distal_energy_transfer/data/articulated_inertia_cross_engine.npz",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_crba_requalification_report.json",
     "docs/research/proximal_distal_energy_transfer/figures/fig_articulated_inertia_cross_engine.pdf",
     "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
     "scripts/research/proximal_distal_energy/run_articulated_inertia_cross_engine.py",
     "scripts/research/proximal_distal_energy/make_articulated_inertia_cross_engine_figure.py",
     "scripts/research/proximal_distal_energy/register_articulated_inertia_claims.py",
     "tests/research/test_articulated_inertia_cross_engine.py",
+    "tests/research/test_articulated_crba_replay_report.py",
 ]
 
 
@@ -55,6 +57,7 @@ def _claim(
         "classification": classification,
         "published_status": status,
         "audit_status": "native_articulated_mass_bias_inverse_dynamics_and_positive_definiteness_checked",
+        "adjudication_outcome": "supported",
         "source_locations": [
             f"{candidate['source_path']}:{candidate['line_start']}"
             for candidate in candidates
@@ -99,6 +102,10 @@ def _build_claims(
             candidates,
             "All 234 states pass the preregistered mass-matrix",
         ),
+        "requalification": _find(
+            candidates,
+            "An independent release requalification audited",
+        ),
         "boundary": _find(candidates, "This closes an engine-transport question"),
     }
     claims = [
@@ -123,7 +130,7 @@ def _build_claims(
         ),
         _claim(
             "PD-CLAIM-275",
-            [selected["result"]],
+            [selected["result"], selected["requalification"]],
             statement=(
                 "All 234 states pass native mass-matrix, bias-force, "
                 "inverse-dynamics, symmetry, and positive-definiteness gates."

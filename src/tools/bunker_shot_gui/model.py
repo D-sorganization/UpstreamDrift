@@ -55,6 +55,7 @@ from bunkershot3d.ball import (
     compute_bunker_launch,
 )
 from bunkershot3d.geometry import (
+    TRAVEL_AXIS_BODY,
     DeliveredGeometry,
     StationCamber,
     WedgeGeometry,
@@ -190,7 +191,7 @@ def _strike_scene(ball_depth_m: float) -> StrikeScene:
         ball_position_m=np.array(
             [0.0, 0.0, BallLie(depth_m=ball_depth_m).center_z_m()], dtype=np.float64
         ),
-        travel_axis=np.array([1.0, 0.0, 0.0], dtype=np.float64),
+        travel_axis=np.array(TRAVEL_AXIS_BODY, dtype=np.float64),
     )
 
 
@@ -719,21 +720,19 @@ class WorkbenchModel:
         """
         points = self._settings.playability_points
         attack_deg = np.linspace(*ATTACK_ANGLE_SWEEP_DEG, points, dtype=np.float64)
-        firmness = np.linspace(*FIRMNESS_RANGE_KG_PER_CM2, points, dtype=np.float64)
         sweep = CarrySweep(points)
+        refused = np.zeros((points, points), dtype=bool)
         for column, reading in enumerate(firmness):
             state = sand.with_firmness(float(reading)).sand_state()
             for row, angle in enumerate(attack_deg):
-                sweep.record(
-                    row,
-                    column,
-                    self._grid_carry(
-                        geometry,
-                        state,
-                        swing.with_attack_angle(float(angle)),
-                        sweep.reasons,
-                    ),
+                estimate, was_refused = self._grid_carry(
+                    geometry,
+                    state,
+                    swing.with_attack_angle(float(angle)),
+                    sweep.reasons,
                 )
+                refused[row, column] = was_refused
+                sweep.record(row, column, estimate)
         if not np.isfinite(sweep.carry).any():
             return PlayabilityOutcome(
                 window=None,
@@ -756,6 +755,7 @@ class WorkbenchModel:
                 math.radians(swing.attack_angle_deg),
                 float(_firmness_kpa(sand.sand_state().firmness_kg_per_cm2)),
             ),
+            refused=refused,
         )
         window = measure(sweep.carry)
         area_band, area_reasons = window_area_band(window, sweep, measure)
@@ -777,7 +777,7 @@ class WorkbenchModel:
         sand: SandState,
         swing: SwingSetup,
         reasons: list[str],
-    ) -> CarryEstimate | None:
+    ) -> tuple[CarryEstimate | None, bool]:
         """Carry at one grid point, or ``None`` when it is unanswerable.
 
         Args:
@@ -787,7 +787,12 @@ class WorkbenchModel:
             reasons: Accumulator for why a point could not be answered.
 
         Returns:
-            The carry and its verdict, or ``None``.
+            The carry and its verdict, or ``None``, and whether the
+            **envelope refused**. The two ways a point yields no carry
+            must not be collapsed (issue #9247): the envelope declining
+            is ADR-0032 refusal, while a head that buries *did* answer
+            and has no prismatic divot to divide by -- reporting the
+            second as the first says the tool refused a real delivery.
         """
         build = self.head_build(geometry)
         solver = self.solver(sand, swing)
@@ -806,7 +811,7 @@ class WorkbenchModel:
             )
         except OutOfEnvelopeError:
             reasons.append("the solver refused every point in the delivery sweep")
-            return None
+            return None, True
         try:
             trace = strike_trace(result)
             divot = self._divot(
@@ -816,12 +821,13 @@ class WorkbenchModel:
                 geometry,
                 sand,
             )
-            return self.carry_estimate(
+            estimate = self.carry_estimate(
                 geometry, swing, _sand_delivery(result, _measured_divot(divot), sand)
             )
+            return estimate, False
         except (RuntimeError, ImportError, ValueError) as error:
             reasons.append(f"carry is unavailable: {error}")
-            return None
+            return None, False
 
     # -------------------------------------------------------------- top level
 
