@@ -47,6 +47,7 @@ absent from this table (today, the wire's other declared frame,
 
 from __future__ import annotations
 
+import importlib
 import json
 import math
 import os
@@ -59,6 +60,8 @@ from typing import Any, cast
 from src.shared.python.physics.flight_trajectory_export import FLIGHT_FRAME_ID
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
+
+_VENDOR_INTERCHANGE_MODULE = "shared.python.swing_sim.flight_interchange"
 
 __all__ = [
     "ImportedBallFlightSummary",
@@ -194,16 +197,27 @@ def _load_vendored_reader() -> Callable[[str], Any]:
     if src_dir not in sys.path:
         sys.path.insert(0, src_dir)
 
+    # Imported dynamically by name, not `from shared.python.swing_sim...
+    # import ...`: a static import needs a `type: ignore[import-not-found]`
+    # here, whose necessity flips between mypy environments in this repo
+    # depending on what each one puts on MYPYPATH (some resolve the vendored
+    # package as an unannotated namespace, making the ignore "unused"; others
+    # cannot resolve it at all). `importlib.import_module` sidesteps that
+    # divergence entirely: mypy never attempts to resolve the target module.
     try:
-        from shared.python.swing_sim.flight_interchange import (  # type: ignore[import-not-found]
-            ball_flight_trajectory_from_json,
-        )
+        module = importlib.import_module(_VENDOR_INTERCHANGE_MODULE)
     except ImportError as exc:
         raise TrajectoryImportError(
             f"vendored flight_interchange reader unavailable at {resolution.path}: "
             f"{exc}"
         ) from exc
-    return cast("Callable[[str], Any]", ball_flight_trajectory_from_json)
+    reader = getattr(module, "ball_flight_trajectory_from_json", None)
+    if reader is None:
+        raise TrajectoryImportError(
+            f"vendored flight_interchange reader unavailable at {resolution.path}: "
+            f"{_VENDOR_INTERCHANGE_MODULE} has no ball_flight_trajectory_from_json"
+        )
+    return cast("Callable[[str], Any]", reader)
 
 
 def import_trajectory_record(record: Mapping[str, Any]) -> ImportedBallFlightTrajectory:
