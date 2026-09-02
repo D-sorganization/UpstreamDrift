@@ -47,7 +47,11 @@ DIFFER — documented and pinned below
          74.480825075496 and Tools 74.48082507549292, an absolute difference of
          3.083755473198835e-12 — three times the reporting quantum, though only
          4.14e-14 in relative terms. UD also normalises the within-player
-         intercept to 0.0 where Tools reports 2.9491001136044283e-15.
+         intercept to 0.0 where Tools reports order-1e-15 accumulation noise
+         (2.9491001136044283e-15 on Windows, 2.8086667748613606e-15 on the
+         Linux CI runner). UD's rounded values are pinned to the bit; Tools'
+         raw values are pinned to a few ulps, because they are the ones that
+         move with the BLAS.
     D22. **Tools reports a between-player Fisher interval that UD withholds.**
          With four player means Tools returns [-0.6655142653044201,
          0.9960866924324187] — a Fisher-z interval on n-3 = 1 degree of
@@ -464,21 +468,28 @@ def test_divergence_d21_reporting_quantum_and_summation_order(
     deltas = {name: abs(ud - tools) for name, ud, tools in pairs}
     worst_name = max(deltas, key=lambda key: deltas[key])
     assert worst_name == "meta.q_statistic"
-    assert deltas[worst_name] == pytest.approx(MAX_ABSOLUTE_DELTA, rel=1e-6)
+    assert deltas[worst_name] == pytest.approx(MAX_ABSOLUTE_DELTA, rel=1e-3, abs=0.0)
     assert deltas[worst_name] < REPORTING_QUANTUM
 
     mismatched = [name for name, ud, tools in pairs if round(tools, 12) != ud]
     assert mismatched == ["meta.q_statistic"]
+    # UD's value is exact because ``_reported_float`` rounds it; Tools' is not,
+    # so it is pinned to a few ulps rather than to the bit.
     assert ud_result.meta_analysis.q_statistic == UD_Q_STATISTIC
-    assert tools_result.meta_analysis.q_statistic == TOOLS_Q_STATISTIC
-    assert round(TOOLS_Q_STATISTIC, 12) != UD_Q_STATISTIC
+    tools_q_statistic = tools_result.meta_analysis.q_statistic
+    assert tools_q_statistic == pytest.approx(TOOLS_Q_STATISTIC, rel=1e-14, abs=0.0)
+    assert round(tools_q_statistic, 12) != UD_Q_STATISTIC
 
-    # UD also normalises a residual-scale intercept to a clean zero.
+    # UD also normalises a residual-scale intercept to a clean zero. Tools'
+    # value is BLAS-dependent accumulation noise, so only its scale is pinned.
     assert ud_result.within_player.intercept == 0.0
-    assert tools_result.within_player.intercept == pytest.approx(
-        TOOLS_WITHIN_INTERCEPT, rel=1e-9
+    tools_intercept = tools_result.within_player.intercept
+    assert tools_intercept != 0.0
+    assert abs(tools_intercept) < REPORTING_QUANTUM
+    assert abs(tools_intercept) == pytest.approx(
+        abs(TOOLS_WITHIN_INTERCEPT), rel=0.5, abs=0.0
     )
-    assert tools_result.within_player.intercept != 0.0
+    assert round(tools_intercept, 12) == 0.0
 
 
 def test_divergence_d21_accumulation_gap_widens_in_derived_heterogeneity(
@@ -502,13 +513,16 @@ def test_divergence_d21_accumulation_gap_widens_in_derived_heterogeneity(
     tools_pair = tools_scan.ranking.iloc[HETEROGENEOUS_SCAN_RANK - 1]
     assert (ud_pair.x_column, ud_pair.y_column) == HETEROGENEOUS_SCAN_PAIR
 
+    tools_i_squared = float(tools_pair["i_squared_pct"])
     assert ud_pair.i_squared_pct == UD_SCAN_I_SQUARED_PCT
-    assert float(tools_pair["i_squared_pct"]) == TOOLS_SCAN_I_SQUARED_PCT
-    delta = abs(UD_SCAN_I_SQUARED_PCT - TOOLS_SCAN_I_SQUARED_PCT)
-    assert delta == pytest.approx(SCAN_I_SQUARED_ABSOLUTE_DELTA, rel=1e-6)
+    assert tools_i_squared == pytest.approx(
+        TOOLS_SCAN_I_SQUARED_PCT, rel=1e-14, abs=0.0
+    )
+    delta = abs(UD_SCAN_I_SQUARED_PCT - tools_i_squared)
+    assert delta == pytest.approx(SCAN_I_SQUARED_ABSOLUTE_DELTA, rel=1e-3, abs=0.0)
     assert delta > REPORTING_QUANTUM
-    assert delta / TOOLS_SCAN_I_SQUARED_PCT < 1e-13
-    assert round(TOOLS_SCAN_I_SQUARED_PCT, 12) != UD_SCAN_I_SQUARED_PCT
+    assert delta / tools_i_squared < 1e-13
+    assert round(tools_i_squared, 12) != UD_SCAN_I_SQUARED_PCT
 
 
 def test_divergence_d22_between_player_interval_exists_only_in_tools(
