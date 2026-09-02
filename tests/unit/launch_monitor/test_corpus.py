@@ -1,9 +1,17 @@
-"""Tests for the private-corpus loader over synthetic Parquet fixtures."""
+"""Tests for the private-corpus loader over synthetic Parquet fixtures.
+
+Covers the ADR-0031 canonicalisation the loader has always done and the
+ADR-0048 D30 manifest gate it gained from Tools#4907's P19 canonical merge.
+Every refusal is asserted **by name** - which of the five checks fired - so a
+check that silently stops firing cannot pass as a different one.
+"""
 
 from __future__ import annotations
 
+import json
 import math
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -11,8 +19,14 @@ import pytest
 pytest.importorskip("pyarrow")
 
 from src.shared.python.launch_monitor.corpus import (
+    MANIFEST_FILENAME,
+    MAX_RETAINED_ROWS,
+    SUPPORTED_MANIFEST_SCHEMA_VERSION,
+    CorpusManifest,
     corpus_dataset_path,
     load_private_corpus,
+    read_corpus_manifest,
+    validate_corpus_manifest,
 )
 
 
@@ -54,7 +68,31 @@ def _synthetic_checkout(tmp_path: Path) -> Path:
         partition = dataset / f"source_id={source_id}"
         partition.mkdir(parents=True)
         group.to_parquet(partition / "part-0.parquet", index=False)
+    _write_manifest(dataset)
     return checkout
+
+
+def _write_manifest(dataset: Path, manifest: dict[str, Any] | None = None) -> Path:
+    """Write the authority manifest the D30 gate validates against."""
+    if manifest is None:
+        sources = sorted(
+            entry.name.split("=", 1)[1]
+            for entry in dataset.iterdir()
+            if entry.is_dir() and entry.name.startswith("source_id=")
+        )
+        manifest = {
+            "schema_version": SUPPORTED_MANIFEST_SCHEMA_VERSION,
+            "sources": dict.fromkeys(sources, {}),
+            "total_rows": sum(
+                len(pd.read_parquet(path))
+                for path in sorted(dataset.rglob("*.parquet"))
+            ),
+        }
+    path = dataset / MANIFEST_FILENAME
+    path.write_bytes(
+        json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    )
+    return path
 
 
 def test_load_private_corpus_converts_to_canonical_units(tmp_path: Path) -> None:
@@ -135,6 +173,7 @@ def test_lateral_flight_and_capture_columns_reach_canonical_schema(
         }
     )
     rows.to_parquet(partition / "part-0.parquet", index=False)
+    _write_manifest(dataset)
 
     frame = load_private_corpus(root=checkout)
 
@@ -151,3 +190,182 @@ def test_corpus_predating_the_new_columns_still_loads(tmp_path: Path) -> None:
     assert len(frame) == 2
     assert "lateral_carry" not in frame.columns
     assert "captured_at" not in frame.columns
+
+
+# --- ADR-0048 D30: the fail-closed manifest gate ----------------------------
+#
+# Ported from the canonical Tools module
+# ``src/shared/python/launch_monitor/corpus.py`` (Tools#4907, P19), which
+# merged this repo's canonicalisation with ``rate_of_closure``'s validation.
+# Each case names the check it exercises; the loader must refuse, and refuse
+# for that reason.
+
+
+def test_gate_refuses_a_corpus_with_no_manifest(tmp_path: Path) -> None:
+    """missing_manifest: bytes with no published description are not a corpus."""
+    checkout = _synthetic_checkout(tmp_path)
+    dataset = corpus_dataset_path(checkout)
+    (dataset / MANIFEST_FILENAME).unlink()
+
+    with pytest.raises(FileNotFoundError, match="manifest not found"):
+        load_private_corpus(root=checkout)
+
+
+def test_gate_refuses_an_unsupported_manifest_schema(tmp_path: Path) -> None:
+    """unsupported_schema: a future schema is refused, not best-effort read."""
+    checkout = _synthetic_checkout(tmp_path)
+    dataset = corpus_dataset_path(checkout)
+    _write_manifest(
+        dataset,
+        {
+            "schema_version": SUPPORTED_MANIFEST_SCHEMA_VERSION + 1,
+            "sources": {},
+            "total_rows": 2,
+        },
+    )
+
+    with pytest.raises(ValueError, match="manifest schema is unsupported"):
+        load_private_corpus(root=checkout)
+
+
+def test_gate_refuses_a_manifest_whose_sources_are_not_an_object(
+    tmp_path: Path,
+) -> None:
+    """unsupported_schema: ``sources`` must be a mapping, not a list."""
+    checkout = _synthetic_checkout(tmp_path)
+    _write_manifest(
+        corpus_dataset_path(checkout),
+        {"schema_version": 1, "sources": ["synthetic_mevo"], "total_rows": 2},
+    )
+
+    with pytest.raises(ValueError, match="manifest schema is unsupported"):
+        load_private_corpus(root=checkout)
+
+
+@pytest.mark.parametrize("declared", [-1, MAX_RETAINED_ROWS + 1])
+def test_gate_refuses_a_row_count_outside_the_desktop_cap(
+    tmp_path: Path, declared: int
+) -> None:
+    """row_cap_exceeded: the retained-data limit is a refusal, not a warning."""
+    checkout = _synthetic_checkout(tmp_path)
+    _write_manifest(
+        corpus_dataset_path(checkout),
+        {
+            "schema_version": 1,
+            "sources": dict.fromkeys(("synthetic_trackman", "synthetic_mevo"), {}),
+            "total_rows": declared,
+        },
+    )
+
+    with pytest.raises(ValueError, match="outside the desktop retained-"):
+        load_private_corpus(root=checkout)
+
+
+def test_gate_refuses_a_row_count_that_disagrees_with_the_corpus(
+    tmp_path: Path,
+) -> None:
+    """row_count_mismatch: the manifest must describe the rows on disk."""
+    checkout = _synthetic_checkout(tmp_path)
+    _write_manifest(
+        corpus_dataset_path(checkout),
+        {
+            "schema_version": 1,
+            "sources": dict.fromkeys(("synthetic_trackman", "synthetic_mevo"), {}),
+            "total_rows": 99,
+        },
+    )
+
+    with pytest.raises(ValueError, match=r"row count mismatch: expected 99, loaded 2"):
+        load_private_corpus(root=checkout)
+
+
+def test_gate_refuses_a_source_set_that_disagrees_with_the_partitions(
+    tmp_path: Path,
+) -> None:
+    """source_set_mismatch: the partition tree must be the declared one."""
+    checkout = _synthetic_checkout(tmp_path)
+    _write_manifest(
+        corpus_dataset_path(checkout),
+        {"schema_version": 1, "sources": {"someone_elses_corpus": {}}, "total_rows": 2},
+    )
+
+    with pytest.raises(ValueError, match="source IDs do not match the manifest"):
+        load_private_corpus(root=checkout)
+
+
+def test_gate_basis_is_the_whole_corpus_not_the_caller_selection(
+    tmp_path: Path,
+) -> None:
+    """A selection cannot buy its way past the gate.
+
+    The manifest below describes exactly the ``synthetic_mevo`` slice - one row,
+    one source - which is precisely what the selection asks for. The gate still
+    refuses, because it counts the unfiltered dataset and reads the partition
+    directory names, not the loaded frame.
+    """
+    checkout = _synthetic_checkout(tmp_path)
+    _write_manifest(
+        corpus_dataset_path(checkout),
+        {"schema_version": 1, "sources": {"synthetic_mevo": {}}, "total_rows": 1},
+    )
+
+    with pytest.raises(ValueError, match="row count mismatch: expected 1, loaded 2"):
+        load_private_corpus(
+            root=checkout, sources=["synthetic_mevo"], metrics=["carry_distance"]
+        )
+
+
+def test_gate_runs_before_an_unknown_selection_is_reported(tmp_path: Path) -> None:
+    """The gate is first: an invalid corpus is refused before a bad request."""
+    checkout = _synthetic_checkout(tmp_path)
+    (corpus_dataset_path(checkout) / MANIFEST_FILENAME).unlink()
+
+    with pytest.raises(FileNotFoundError, match="manifest not found"):
+        load_private_corpus(root=checkout, metrics=["warp_speed"])
+
+
+def test_read_corpus_manifest_content_addresses_the_exact_bytes(
+    tmp_path: Path,
+) -> None:
+    """The digest is over the manifest bytes; the corpus rows are never hashed."""
+    import hashlib
+
+    checkout = _synthetic_checkout(tmp_path)
+    manifest_path = corpus_dataset_path(checkout) / MANIFEST_FILENAME
+
+    manifest = read_corpus_manifest(corpus_dataset_path(checkout))
+
+    assert isinstance(manifest, CorpusManifest)
+    assert manifest.schema_version == SUPPORTED_MANIFEST_SCHEMA_VERSION
+    assert manifest.total_rows == 2
+    assert manifest.source_count == 2
+    assert (
+        manifest.manifest_sha256
+        == hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    )
+    assert len(manifest.manifest_sha256) == 64
+
+
+def test_validate_corpus_manifest_accepts_a_corpus_its_manifest_describes() -> None:
+    """The happy path is silent: a matching corpus raises nothing."""
+    manifest = CorpusManifest(
+        schema_version=1,
+        sources={"a": {}, "b": {}},
+        total_rows=4,
+        manifest_sha256="0" * 64,
+    )
+
+    assert (
+        validate_corpus_manifest(manifest, observed_rows=4, observed_sources={"a", "b"})
+        is None
+    )
+
+
+def test_desktop_row_cap_matches_the_authority_limit() -> None:
+    """``MAX_RETAINED_ROWS`` is redefined here, not imported; pin its value.
+
+    The cross-stack seam - equality with ``rate_of_closure``'s constant - is
+    pinned by ``tests/integration/launch_monitor_drift/test_corpus_drift.py``,
+    which is the only place allowed to import the vendored package.
+    """
+    assert MAX_RETAINED_ROWS == 300_000
