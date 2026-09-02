@@ -5085,3 +5085,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Replaced `np.linalg.norm` with `math.hypot` for contact force slices in humanoid_golf visualization. (spec-exempt: micro-optimization)
 - Replaced `np.linalg.norm` over multi-dimensional arrays with `np.sqrt(np.einsum)` in `src/bunkershot3d/metrics/loads.py` to optimize array magnitude calculation. (spec-exempt: micro-optimization)
 - Replaced `np.sum()` with `.sum()` for small array math in `physics.py` logic. This avoids numpy dispatch and yields measurable speedup. (spec-exempt: micro-optimization)
+- Added the ADR-0046 G0.1 cross-stack drift gates for the three ungated launch-monitor twin pairs named in ADR-0048 (flexible analysis, player covariation, private corpus), pinning 17 new divergences D15-D31 against the existing `adr0046_cross_stack_session_v1.json` fixture (#9348).
