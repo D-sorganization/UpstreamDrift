@@ -197,7 +197,9 @@ def require_tools_repo(
 
 
 def ensure_tools_importable(
-    repo_root: Path, env_value: str | None = None
+    repo_root: Path,
+    env_value: str | None = None,
+    error_cls: type[Exception] = RuntimeError,
 ) -> ToolsRepoResolution:
     """Resolve Tools repository and ensure its src/ directory is on sys.path.
 
@@ -208,9 +210,14 @@ def ensure_tools_importable(
         ``resolution.path / 'src'`` is present in ``sys.path``.
 
     Raises:
-        RuntimeError: If Tools checkout cannot be resolved or is invalid.
+        RuntimeError or error_cls: If Tools checkout cannot be resolved or is invalid.
     """
-    resolution = require_tools_repo(repo_root, env_value)
+    try:
+        resolution = require_tools_repo(repo_root, env_value)
+    except RuntimeError as exc:
+        if error_cls is RuntimeError:
+            raise
+        raise error_cls(str(exc)) from exc
     src_dir = str(resolution.path / "src")
     if src_dir not in sys.path:
         sys.path.insert(0, src_dir)

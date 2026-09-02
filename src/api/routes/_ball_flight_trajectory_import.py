@@ -218,12 +218,11 @@ def _load_vendored_reader() -> Callable[[str], Any]:
     # Deferred rather than module-level: see the module docstring.
     from src.launchers.tools_repo_path import ensure_tools_importable
 
-    try:
-        resolution = ensure_tools_importable(
-            _REPO_ROOT, os.environ.get("TOOLS_REPO_PATH")
-        )
-    except RuntimeError as exc:
-        raise TrajectoryImportError(str(exc)) from exc
+    resolution = ensure_tools_importable(
+        _REPO_ROOT,
+        os.environ.get("TOOLS_REPO_PATH"),
+        error_cls=TrajectoryImportError,
+    )
 
     try:
         module = importlib.import_module(_VENDOR_INTERCHANGE_MODULE)

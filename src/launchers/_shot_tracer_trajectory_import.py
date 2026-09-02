@@ -134,12 +134,11 @@ def _load_vendored_reader() -> tuple[Callable[[str], Any], type[Exception]]:
             or the vendored ``flight_interchange`` package fails to
             import from it.
     """
-    try:
-        resolution = ensure_tools_importable(
-            _REPO_ROOT, os.environ.get("TOOLS_REPO_PATH")
-        )
-    except RuntimeError as exc:
-        raise TrajectoryImportError(str(exc)) from exc
+    resolution = ensure_tools_importable(
+        _REPO_ROOT,
+        os.environ.get("TOOLS_REPO_PATH"),
+        error_cls=TrajectoryImportError,
+    )
 
     try:
         from shared.python.contracts import (  # type: ignore[import-not-found]
