@@ -2,6 +2,17 @@
 
 ## Current Scientific Audit State (2026-08-27)
 
+## ADR-0045 F1: Roll-Model Provenance in Every Result (#9343, #9356)
+
+Implements F1 of accepted ADR-0045 (`docs/adr/0045-putting-integration-one-experience-two-preserved-stacks.md`).
+Both roll models remain preserved and active across the putting green architecture:
+
+- `UD_LEGACY_ROLL_MODEL = "ud-legacy-roll/1"` ($\mu \approx 0.196/\text{stimp} \times \text{height-of-cut/condition/grain}$) in `ball_roll_physics.py`.
+- `USGA_STIMP_ROLL_MODEL = "usga-stimp-roll/1"` ($\mu \approx 0.559/\text{stimp}$, USGA 1.83 m/s release + Holmes/Penner capture).
+  Results from different models are strictly forbidden from numerical comparison without their model names attached.
+  All result documents carry `roll_model` fail-closed (`SimulationResult`, export/load results, `simulate_putt`, `simulate_with_feedback`, `simulate_scatter`, `compute_aim_line`, `get_current_trajectory`, `/simulate`, `/scatter`, `/read-green`, `/simulate-3d`, and `PuttScene`).
+  Checkpoints are versioned (`schema_version = 2` carrying `roll_model`), preserving archive readability for legacy v1 payloads without silent relabeling.
+
 ## ADR-0045 F4: Green-Surface Adapter Physics Consumer Contract (#9346)
 
 Issue #9346 completes the #9143 rider called for in ADR-0045's Validation section: the UD-side
@@ -21,6 +32,27 @@ field is proven genuinely UD-loadable (`GreenSurface.load_from_file`, live gravi
 before asserting the adapter refuses it with its documented non-conservative-slope reason. The
 `tests/integration/launch_monitor_drift` CI-guard helper (`require_vendored_tools_stack`) is
 imported, not reimplemented, for the same skip-locally/run-in-CI posture.
+
+## Vendored Tools Pin: Flight-Interchange Authority (ADR-0047 H1)
+
+The `vendor/ud-tools` gitlink advances from
+`cc883cbaf63157b58c71cba385a683df2762b0cb` to
+`5e0eaade29441dd65d667151b5108c8925774d73`, the Tools `main` squash commit for
+Tools #4888, which adds the `shared.python.swing_sim.flight_interchange`
+package to the vendored tree. The
+vendored reader is the interchange authority for the
+`swing_sim.ball_flight_trajectory/1` record; UpstreamDrift's exporter in
+`src/shared/python/physics/flight_trajectory_export.py` is verified against it
+by the four `TestCrossFamilySanity` gates in
+`tests/unit/physics/test_flight_trajectory_export.py`, which arm automatically
+once the pin carries the module: records parse with the vendored reader and
+round-trip byte-identically, the reimplemented SHA-256 parameter digest equals
+Tools' `parameter_digest`, and the two flight-model families produce same-order
+carry for identical launch conditions. The companion catalog provenance
+contract (`tests/companion/test_companion_catalog.py`) pins the exact gitlink
+and moves with it. No UpstreamDrift runtime behavior changes; the prior pin
+statement under "Swing Objective Lab Web Parity (#9128)" is superseded by this
+section.
 
 ## Deterministic AffineDrift Companion Authority (#9174)
 

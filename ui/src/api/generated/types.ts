@@ -1433,6 +1433,8 @@ export interface GreenReadingRequest {
  * Response with green reading data.
  */
 export interface GreenReadingResponse {
+  /** Roll model behind the recommended speed (ADR-0045 F1) */
+  roll_model: string;
   distance: number;
   total_break: number;
   recommended_speed: number;
@@ -2223,6 +2225,8 @@ export interface Putt3DSimulationRequest {
  * Complete deterministic playback payload for the R3F client.
  */
 export interface Putt3DSimulationResponse {
+  /** Roll model that produced this playback (ADR-0045 F1) */
+  roll_model: string;
   samples: Putt3DSampleResponse[];
   collision: Putt3DCollisionResponse;
   surface: Putt3DSurfaceResponse;
@@ -2280,6 +2284,8 @@ export interface PuttSimulationRequest {
  * Response containing putt simulation results.
  */
 export interface PuttSimulationResponse {
+  /** Roll model that produced this result (ADR-0045 F1) */
+  roll_model: string;
   positions: number[][];
   velocities: number[][];
   times: number[];
@@ -2350,6 +2356,8 @@ export interface ScatterAnalysisRequest {
  * Response with scatter analysis results.
  */
 export interface ScatterAnalysisResponse {
+  /** Roll model that produced these results (ADR-0045 F1) */
+  roll_model: string;
   final_positions: number[][];
   holed_count: number;
   total_simulations: number;

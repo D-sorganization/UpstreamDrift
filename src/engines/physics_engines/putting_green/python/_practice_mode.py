@@ -9,6 +9,9 @@ import numpy as np
 from src.engines.physics_engines.putting_green.python._sim_config import (
     SimulationResult,
 )
+from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
+    ROLL_MODEL_FIELD,
+)
 from src.engines.physics_engines.putting_green.python.putter_stroke import (
     StrokeParameters,
 )
@@ -45,6 +48,7 @@ def simulate_with_feedback(
         "distance_from_hole": distance_from_hole,
         "holed": result.holed,
         "total_distance": result.total_distance,
+        ROLL_MODEL_FIELD: result.roll_model,
     }
 
     if result.holed:
@@ -151,6 +155,7 @@ def compute_aim_line(
         "break_direction": break_info["break_direction"],
         "recommended_speed": recommended_speed,
         "distance": distance,
+        ROLL_MODEL_FIELD: sim.roll_model,
     }
 
 
@@ -183,15 +188,50 @@ def read_green(
         "total_break": break_info["total_break"],
         "recommended_speed": aim_info["recommended_speed"],
         "aim_point": aim_info["aim_point"],
+        ROLL_MODEL_FIELD: aim_info[ROLL_MODEL_FIELD],
     }
 
 
 def export_result(result: SimulationResult, path: str) -> None:
     """Export simulation result to file.
 
+    The written document always names its roll model (ADR-0045 F1), because
+    :meth:`SimulationResult.to_dict` cannot omit it.
+
     Args:
         result: Simulation result
         path: Output file path
     """
+    if result is None:
+        raise ValueError("result must be provided")
     with open(path, "w") as f:
         json.dump(result.to_dict(), f, indent=2)
+
+
+def load_result(path: str) -> SimulationResult:
+    """Load an exported putt result, refusing a payload without a roll model.
+
+    Fail-closed reader (ADR-0045 F1): exported results are UD-written
+    documents, not third-party archives, so an unnamed one is refused rather
+    than guessed at. The two preserved roll models differ by the ~2.854
+    roll-out ratio (Tools#4819), so an unnamed result cannot be compared with
+    anything.
+
+    Args:
+        path: Path to a document written by :func:`export_result`.
+
+    Returns:
+        The reconstructed result, tagged with the document's roll model.
+
+    Raises:
+        ValueError: If ``path`` is empty.
+        RollModelProvenanceError: If the document does not name a preserved
+            roll model.
+        OSError: If the file cannot be read.
+        json.JSONDecodeError: If the file is not valid JSON.
+    """
+    if not path:
+        raise ValueError("path must be a non-empty file path")
+    with open(path) as f:
+        payload = json.load(f)
+    return SimulationResult.from_dict(payload, source=path)
