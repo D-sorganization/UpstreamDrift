@@ -256,12 +256,12 @@
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
     "tools.rate_of_closure": {
-      "title": "Rate of Closure Impact Explorer (clubhead impact-point delivery analysis)",
-      "pyqt": null,
-      "api": null,
-      "web": null,
-      "status": "exempt",
-      "reason": "Vendored Tools desktop GUI (vendor/ud-tools src/rate_of_closure); web surface is served by the Tools repo's own build, not UpstreamDrift.",
+      "title": "Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite)",
+      "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
+      "api": "src/api/local_server.py",
+      "web": "ui/src/pages/ImpactExplorer.tsx",
+      "status": "parity",
+      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
       "tiles": ["rate_of_closure"]
     },
     "tools.launch_monitor_analytics": {
