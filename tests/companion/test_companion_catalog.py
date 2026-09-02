@@ -201,7 +201,7 @@ def test_catalog_pins_exact_provider_and_input_provenance() -> None:
 
     assert len(source["commit"]) == 40
     assert tools["pin_kind"] == "gitlink"
-    assert tools["pinned_commit"] == "cc883cbaf63157b58c71cba385a683df2762b0cb"
+    assert tools["pinned_commit"] == "5e0eaade29441dd65d667151b5108c8925774d73"
     assert tools["vendor_path"] == "vendor/ud-tools"
     assert {item["path"] for item in source["inputs"]} == {
         "docs/api/contracts/upstreamdrift-companion-compatibility-v1.json",
