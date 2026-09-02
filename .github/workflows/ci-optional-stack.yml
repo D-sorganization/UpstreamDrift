@@ -449,3 +449,114 @@ jobs:
             /tmp/pinocchio-test-results.txt
             /tmp/unit-test-results.txt
             /tmp/pinocchio_install.log
+
+  articulated-manufactured-authority:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .:src
+      MUJOCO_GL: egl
+      PYTHONNOUSERSITE: "1"
+      PIP_CONFIG_FILE: /dev/null
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11.15"
+      - name: Create Isolated Authority Runtime
+        run: python -m venv "$RUNNER_TEMP/articulated-manufactured-authority-venv"
+      - name: Install Hash-Locked Authority Runtime
+        run: |
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" \
+            -m pip install --require-hashes --no-deps \
+            -r scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" -m pip check
+      - name: Run Non-Vacuous Authority and Killswitch Contracts
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python" -m pytest \
+            tests/research/test_articulated_manufactured_solution.py \
+            tests/research/test_articulated_manufactured_hybrid_authority_red.py \
+            -v --tb=short \
+            -k "same_environment_two_process or killswitch" \
+            2>&1 | tee "$RUNNER_TEMP/articulated-authority-tests.txt"
+          passed=$(grep -c "PASSED" "$RUNNER_TEMP/articulated-authority-tests.txt" || true)
+          if [[ "$passed" -eq 0 ]]; then
+            echo "::error::Authority native contracts executed zero passing tests."
+            exit 1
+          fi
+      - name: Generate and Validate Deterministic Authority Candidates
+        run: |
+          authority_python="$RUNNER_TEMP/articulated-manufactured-authority-venv/bin/python"
+          first="$RUNNER_TEMP/articulated-authority-first.json"
+          second="$RUNNER_TEMP/articulated-authority-second.json"
+          "$authority_python" \
+            -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
+            --profile authority \
+            --output "$first" \
+            --validate-generated
+          "$authority_python" \
+            -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
+            --profile authority \
+            --output "$second" \
+            --validate-generated
+          cmp --silent "$first" "$second"
+          sha256sum "$first" "$second"
+      - name: Compare Candidate With Committed Publication Authority
+        run: |
+          candidate="$RUNNER_TEMP/articulated-authority-first.json"
+          committed="docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json"
+          if ! cmp --silent "$candidate" "$committed"; then
+            echo "::error::Deterministic authority candidate differs from committed publication authority."
+            exit 1
+          fi
+      - name: Upload Independently Reviewable Authority Candidate
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: articulated-manufactured-authority-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/articulated-authority-first.json
+          if-no-files-found: error
+          retention-days: 14
+          overwrite: false
+
+  articulated-manufactured-rolling:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: .:src
+      MUJOCO_GL: egl
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+      - name: Install Rolling Native Compatibility Runtime
+        run: |
+          python -m pip install \
+            "defusedxml>=0.7,<1" "pydantic>=2.12,<3" "PyYAML>=6.0,<7" \
+            "numpy>=2.2,<3" "scipy>=1.13,<2" \
+            "mujoco>=3.6,<4" "pin>=2.6,<5" "pytest>=8,<10"
+          python -m pip check
+      - name: Run Non-Vacuous Rolling and Killswitch Contracts
+        run: |
+          set -o pipefail
+          python -m pytest \
+            tests/research/test_articulated_manufactured_solution.py \
+            tests/research/test_articulated_manufactured_hybrid_authority_red.py \
+            -v --tb=short \
+            -k "rolling_native_output or killswitch" \
+            2>&1 | tee "$RUNNER_TEMP/articulated-rolling-tests.txt"
+          passed=$(grep -c "PASSED" "$RUNNER_TEMP/articulated-rolling-tests.txt" || true)
+          if [[ "$passed" -eq 0 ]]; then
+            echo "::error::Rolling native contracts executed zero passing tests."
+            exit 1
+          fi
+      - name: Compare Non-Authoritative Rolling Semantics
+        run: |
+          python -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
+            --profile rolling \
+            --output "$RUNNER_TEMP/articulated-non-authoritative-rolling.json" \
+            --compare-committed
