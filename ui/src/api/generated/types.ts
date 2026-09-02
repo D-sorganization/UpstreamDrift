@@ -1461,6 +1461,14 @@ export interface HTTPValidationError {
 }
 
 /**
+ * One ``swing_sim.ball_flight_trajectory/1`` record to import for overlay. ``record`` is accepted as an opaque JSON object rather than a typed model on purpose: the wire's own shape is validated by the vendored Tools reader (fail-closed), not re-declared here. Passing it through unmodified means every field the reader checks — unknown fields, missing fields, malformed provenance, non-monotone samples — is enforced exactly as the wire defines it, from either flight-model family (issue #9352, ADR-0047).
+ */
+export interface ImportBallFlightTrajectoryRequest {
+  /** A ball_flight_trajectory/1 JSON record produced by either flight-model family (ud.flight_models or swing_sim.flight). */
+  record: Record<string, unknown>;
+}
+
+/**
  * Response after importing a dataset.
  */
 export interface ImportResponse {
@@ -1469,6 +1477,29 @@ export interface ImportResponse {
   format: string;
   columns: string[];
   row_count: number;
+}
+
+/**
+ * An accepted import, in the same shape the page already plots. ``model_name`` and ``trajectory``/``summary`` mirror :class:`BallFlightModelResult` so the page can render an imported curve through the same 3D scene, profile charts, and metrics table as a computed one. ``model_family`` and ``parameter_digest`` carry the provenance the wire mandates; the page always labels an imported curve with both ``model_family`` and ``model_name`` (ADR-0047), never ``model_name`` alone, so it is never confused with a computed curve from the UD registry.
+ */
+export interface ImportedBallFlightResponse {
+  model_name: string;
+  model_key: string;
+  model_family: string;
+  parameter_digest: string;
+  source_id: string;
+  frame_id: string;
+  trajectory: ImportedTrajectorySample[];
+  summary: BallFlightSummary;
+}
+
+/**
+ * Single imported trajectory sample, already in the plot frame.
+ */
+export interface ImportedTrajectorySample {
+  time_s: number;
+  position_m: number[];
+  velocity_mps?: number[] | null;
 }
 
 /**
