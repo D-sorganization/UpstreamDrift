@@ -1919,6 +1919,8 @@ jobs:
             --timeout=60 \
             --timeout-method=thread \
             --ignore=tests/shared_contracts \
+            --ignore=tests/integration/launch_monitor_drift \
+            --ignore=tests/integration/putting_green_drift \
             --ignore=tests/heavy_integration \
             --ignore=tests/benchmarks \
             --ignore=src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests \
@@ -2313,7 +2315,14 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest tests/integration/launch_monitor_drift/             --timeout=120             --timeout-method=thread             -v --tb=short
+          drift_suites="tests/integration/launch_monitor_drift/"
+          if [ -d tests/integration/putting_green_drift ]; then
+            drift_suites="$drift_suites tests/integration/putting_green_drift/"
+          fi
+          python -m pytest $drift_suites \
+            --timeout=120 \
+            --timeout-method=thread \
+            -v --tb=short
 
   frontend-tests:
     needs: [pick-runner, changed-paths]
