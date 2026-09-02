@@ -49,9 +49,9 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0042](0042-engineering-design-manual-authority.md)                     | Engineering Design Manual Authority and Release Boundary                          | Accepted | 2026-08-25 |
 | [0043](0043-companion-manifest-provider-authority.md)                   | Companion Manifest Provider Authority                                             | Accepted | 2026-08-28 |
 | [0044](0044-out-of-plane-fidelity-for-bunkershot3d.md)                  | Out-of-Plane Fidelity for BunkerShot3D                                            | Proposed | 2026-08-29 |
-| [0045](0045-putting-integration-one-experience-two-preserved-stacks.md) | Putting Integration — One Experience, Two Preserved Physics Stacks                | Proposed | 2026-08-30 |
-| [0046](0046-launch-monitor-analytics-single-model-layer.md)             | Launch-Monitor Analytics — Two Workbenches, One Model Layer                       | Proposed | 2026-08-30 |
-| [0047](0047-trajectory-visualization-shared-wire-preserved-viewers.md)  | Trajectory Visualization — Shared Wire, Preserved Viewers                         | Proposed | 2026-08-30 |
+| [0045](0045-putting-integration-one-experience-two-preserved-stacks.md) | Putting Integration — One Experience, Two Preserved Physics Stacks                | Accepted | 2026-08-30 |
+| [0046](0046-launch-monitor-analytics-single-model-layer.md)             | Launch-Monitor Analytics — Two Workbenches, One Model Layer                       | Accepted | 2026-08-30 |
+| [0047](0047-trajectory-visualization-shared-wire-preserved-viewers.md)  | Trajectory Visualization — Shared Wire, Preserved Viewers                         | Accepted | 2026-08-30 |
 | [0048](0048-launch-monitor-port-plan.md)                                | Launch-Monitor Port Plan                                                          | Proposed | 2026-09-01 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32

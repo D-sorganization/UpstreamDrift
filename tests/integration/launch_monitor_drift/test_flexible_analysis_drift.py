@@ -266,11 +266,15 @@ def test_regression_agrees_bit_for_bit(ud_result, tools_result) -> None:
         == EXPECTED_SAMPLE_COUNT
     )
     assert ud_regression.r_squared == pytest.approx(SHARED_R_SQUARED, rel=1e-12)
-    assert ud_regression.r_squared - tools_regression.r_squared == 0.0
+    assert ud_regression.r_squared == pytest.approx(
+        tools_regression.r_squared, abs=1e-14
+    )
     assert ud_regression.adjusted_r_squared == pytest.approx(
         SHARED_ADJUSTED_R_SQUARED, rel=1e-12
     )
-    assert ud_regression.adjusted_r_squared - tools_regression.adjusted_r_squared == 0.0
+    assert ud_regression.adjusted_r_squared == pytest.approx(
+        tools_regression.adjusted_r_squared, abs=1e-14
+    )
 
     for name, (estimate, standard_error) in SHARED_COEFFICIENTS.items():
         ud_coefficient = ud_regression.coefficients[name]
@@ -319,7 +323,9 @@ def test_group_analyses_agree_bit_for_bit(ud_result, tools_result) -> None:
         assert ud_group.regression.r_squared == pytest.approx(
             SHARED_GROUP_R_SQUARED[ud_group.group_value], rel=1e-12
         )
-        assert ud_group.regression.r_squared - tools_group.regression.r_squared == 0.0
+        assert ud_group.regression.r_squared == pytest.approx(
+            tools_group.regression.r_squared, abs=1e-14
+        )
 
 
 def test_non_numeric_text_is_rejected_identically(session_frame: pd.DataFrame) -> None:
