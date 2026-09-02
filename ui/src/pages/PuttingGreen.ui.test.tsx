@@ -16,6 +16,7 @@ vi.mock("@/components/visualization/PuttingScene3D", () => ({
 }));
 
 const response: Putt3DSimulationResponse = {
+  roll_model: "usga-stimp-roll/1",
   samples: [
     {
       t_s: 0,
