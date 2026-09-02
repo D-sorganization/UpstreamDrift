@@ -13,6 +13,7 @@ visualization utility for shot analysis.
 """
 
 import sys
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -22,11 +23,13 @@ from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
     QDoubleSpinBox,
+    QFileDialog,
     QFormLayout,
     QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QListWidget,
     QMainWindow,
     QMessageBox,
     QPushButton,
@@ -47,6 +50,11 @@ PYQTGRAPH_AVAILABLE: bool | None = None
 pg: Any = None
 gl: Any = None
 
+from src.launchers._shot_tracer_trajectory_import import (  # noqa: E402
+    ImportedTrajectoryCurve,
+    TrajectoryImportError,
+    import_trajectory_record,
+)
 from src.shared.python.physics.flight_models import (  # noqa: E402
     FlightModelRegistry,
     FlightModelType,
@@ -66,16 +74,28 @@ TRAJECTORY_COLORS = [
     (1.0, 1.0, 0.0, 1.0),  # Yellow - future models
 ]
 
+# Distinct palette for imported records (ADR-0047 H2, #9351): never reuses
+# a native-model color, so an imported curve's provenance label is never
+# the only thing distinguishing it on the plot.
+IMPORTED_TRAJECTORY_COLORS = [
+    (0.6, 0.4, 1.0, 1.0),  # Violet
+    (1.0, 1.0, 1.0, 1.0),  # White
+    (0.5, 0.5, 0.5, 1.0),  # Grey
+]
+
 _PATCHABLE_PUBLIC_NAMES = (
     "FlightModelRegistry",
     "FlightModelType",
     "QApplication",
+    "QFileDialog",
     "QMessageBox",
     "MultiModelShotTracerWindow",
     "PYQTGRAPH_AVAILABLE",
+    "TrajectoryImportError",
     "UnifiedLaunchConditions",
     "compare_models",
     "gl",
+    "import_trajectory_record",
     "sys",
 )
 
@@ -124,6 +144,7 @@ class MultiModelShotTracerWidget(QWidget):
         super().__init__(parent)
         self.results: dict[str, FlightResult] = {}
         self.trajectory_plots: dict[str, Any] = {}
+        self.imported_trajectories: dict[str, ImportedTrajectoryCurve] = {}
 
         self._setup_ui()
         self._connect_signals()
@@ -240,7 +261,33 @@ class MultiModelShotTracerWidget(QWidget):
         self.clear_btn = QPushButton("Clear")
         button_layout.addWidget(self.clear_btn)
 
+        self.import_btn = QPushButton("Import Trajectory Record…")
+        self.import_btn.setToolTip(
+            "Import a swing_sim.ball_flight_trajectory/1 JSON record "
+            "(ADR-0047 H2) and plot it alongside the native models."
+        )
+        button_layout.addWidget(self.import_btn)
+
         return button_layout
+
+    def _create_imported_trajectories_group(self) -> QGroupBox:
+        """Group listing every imported record, labeled by provenance.
+
+        This list is the source of truth for what has been imported,
+        independent of whether OpenGL/pyqtgraph is available to actually
+        render it — a record that fails validation never reaches it.
+        """
+        group = QGroupBox("Imported Trajectories (ADR-0047)")
+        layout = QVBoxLayout()
+
+        self.imported_list = QListWidget()
+        self.imported_list.setToolTip(
+            "Each entry is one imported record, labeled “model_family / model_name”."
+        )
+        layout.addWidget(self.imported_list)
+
+        group.setLayout(layout)
+        return group
 
     def _create_legend_group(self) -> QGroupBox:
         legend_group = QGroupBox("Legend")
@@ -275,6 +322,7 @@ class MultiModelShotTracerWidget(QWidget):
         layout.addWidget(self._create_presets_group())
         layout.addLayout(self._create_action_buttons())
         layout.addWidget(self._create_legend_group())
+        layout.addWidget(self._create_imported_trajectories_group())
         layout.addStretch()
 
         return panel
@@ -336,6 +384,7 @@ class MultiModelShotTracerWidget(QWidget):
         """Connect widget signals to handlers."""
         self.simulate_btn.clicked.connect(self._run_comparison)
         self.clear_btn.clicked.connect(self._clear_visualization)
+        self.import_btn.clicked.connect(self._import_trajectory_record)
 
     def _apply_preset(self, club: str) -> None:
         """Apply preset values for a club type."""
@@ -392,6 +441,40 @@ class MultiModelShotTracerWidget(QWidget):
             logger.exception("Comparison failed")
             QMessageBox.warning(self, "Simulation Error", str(e))
 
+    def _import_trajectory_record(self) -> None:
+        """Prompt for a trajectory record file and import it (ADR-0047 H2)."""
+        path_str, _selected_filter = QFileDialog.getOpenFileName(
+            self,
+            "Import Trajectory Record",
+            "",
+            "Trajectory records (*.json);;All files (*)",
+        )
+        if not path_str:
+            return
+        self._load_trajectory_record(Path(path_str))
+
+    def _load_trajectory_record(self, path: Path) -> None:
+        """Import one trajectory record file and add it to the plot.
+
+        Args:
+            path: Path to a ``swing_sim.ball_flight_trajectory/1`` JSON
+                file, produced by either flight-model family.
+
+        A refusal (wire violation, unsupported frame, or unavailable
+        vendored reader) surfaces to the user as a dialog naming the
+        specific reason — the record is never dropped silently.
+        """
+        try:
+            curve = import_trajectory_record(path)
+        except TrajectoryImportError as e:
+            logger.exception("Trajectory import refused")
+            QMessageBox.warning(self, "Import Refused", str(e))
+            return
+
+        self.imported_trajectories[curve.label] = curve
+        self.imported_list.addItem(curve.label)
+        self._update_visualization()
+
     def _update_visualization(self) -> None:
         """Update the 3D visualization with all trajectories."""
         if not _load_pyqtgraph():
@@ -403,7 +486,7 @@ class MultiModelShotTracerWidget(QWidget):
                 self.gl_widget.removeItem(plot_item)
         self.trajectory_plots.clear()
 
-        # Plot each model's trajectory
+        # Plot each native model's trajectory
         for i, (model_name, result) in enumerate(self.results.items()):
             positions = result.to_position_array()
             color = TRAJECTORY_COLORS[i % len(TRAJECTORY_COLORS)]
@@ -414,11 +497,23 @@ class MultiModelShotTracerWidget(QWidget):
             self.gl_widget.addItem(line)
             self.trajectory_plots[model_name] = line
 
-        # Adjust camera to fit all trajectories
-        if self.results:
-            all_positions = np.vstack(
-                [r.to_position_array() for r in self.results.values()]
+        # Plot each imported record's trajectory, labeled by provenance
+        # and never sharing a color with a native model (ADR-0047 H2).
+        for i, curve in enumerate(self.imported_trajectories.values()):
+            color = IMPORTED_TRAJECTORY_COLORS[i % len(IMPORTED_TRAJECTORY_COLORS)]
+
+            imported_line = gl.GLLinePlotItem(
+                pos=curve.positions, color=color, width=3, antialias=True
             )
+            self.gl_widget.addItem(imported_line)
+            self.trajectory_plots[f"imported:{curve.label}"] = imported_line
+
+        # Adjust camera to fit all trajectories, native and imported alike
+        position_arrays = [r.to_position_array() for r in self.results.values()] + [
+            curve.positions for curve in self.imported_trajectories.values()
+        ]
+        if position_arrays:
+            all_positions = np.vstack(position_arrays)
             max_x = np.max(all_positions[:, 0])
             self.gl_widget.setCameraPosition(
                 distance=max(200, max_x * 1.2), elevation=20, azimuth=45
@@ -446,7 +541,7 @@ class MultiModelShotTracerWidget(QWidget):
         self.results_table.resizeColumnsToContents()
 
     def _clear_visualization(self) -> None:
-        """Clear all trajectories and results."""
+        """Clear all trajectories and results, native and imported alike."""
         if _load_pyqtgraph():
             for plot_item in self.trajectory_plots.values():
                 if plot_item is not None:
@@ -455,6 +550,8 @@ class MultiModelShotTracerWidget(QWidget):
 
         self.results.clear()
         self.results_table.setRowCount(0)
+        self.imported_trajectories.clear()
+        self.imported_list.clear()
 
 
 class MultiModelShotTracerWindow(QMainWindow):

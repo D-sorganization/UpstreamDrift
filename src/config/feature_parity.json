@@ -157,9 +157,10 @@
       "pyqt": "src/launchers/_shot_tracer_gui.py",
       "api": "src/api/routes/ball_flight.py",
       "web": "ui/src/pages/BallFlight.tsx",
-      "status": "parity",
+      "status": "gap",
+      "issue": 9352,
       "tiles": ["shot_tracer"],
-      "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API."
+      "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 H2 (#9351) gave the PyQt tile cross-family trajectory-record import (a Tools swing_sim flight overlaid on native models); the web BallFlight page gains the same via ADR-0047 H3, tracked in #9352."
     },
     "simulation.swing_objective_lab": {
       "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",

@@ -1,8 +1,12 @@
-"""Tests for shot_tracer."""
+"""Tests for shot_tracer.
+
+The ``mock_flight_models``/``tracer_widget`` fixtures used below live in
+``tests/launchers/conftest.py`` (moved there in ADR-0047 H2, #9351) so
+every test module in this directory can use them without an import.
+"""
 
 import runpy
 from pathlib import Path
-from collections.abc import Generator  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -12,38 +16,6 @@ from src.launchers.shot_tracer import (  # noqa: E402
 )
 
 pytestmark = pytest.mark.unit
-
-
-@pytest.fixture
-def mock_flight_models() -> Generator[tuple[MagicMock, MagicMock], None, None]:
-    class MockModelType:
-        value = "mock"
-
-    class MockModel:
-        name = "Mock Model"
-        description = "Mock Description"
-        reference = "Mock Ref"
-
-    with (
-        patch(
-            "src.launchers.shot_tracer.FlightModelType", [MockModelType]
-        ) as ModelTypeMock,
-        patch("src.launchers.shot_tracer.FlightModelRegistry") as RegistryMock,
-    ):
-        RegistryMock.get_model.return_value = MockModel()
-        yield ModelTypeMock, RegistryMock
-
-
-@pytest.fixture
-def tracer_widget(
-    qapp, mock_flight_models
-) -> Generator[MultiModelShotTracerWidget, None, None]:
-    with patch("src.launchers.shot_tracer.PYQTGRAPH_AVAILABLE", False):
-        from PyQt6.QtWidgets import QWidget
-
-        parent_widget = QWidget()
-        widget = MultiModelShotTracerWidget(parent=parent_widget)
-        yield widget
 
 
 def test_widget_init(tracer_widget) -> None:
