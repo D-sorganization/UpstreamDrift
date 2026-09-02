@@ -191,16 +191,6 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         tab = QWidget()
         tab_layout = QVBoxLayout(tab)
 
-        tab_layout.addWidget(self._build_tile_layout_group())
-        tab_layout.addWidget(self._build_view_mode_group())
-        tab_layout.addWidget(self._build_tile_zoom_group())
-        self._sync_layout_tab_with_launcher()
-
-        tab_layout.addStretch()
-        return tab
-
-    def _build_tile_layout_group(self) -> QGroupBox:
-        """Build the "Tile Layout" group: lock toggle, edit tiles, reset."""
         group = QGroupBox("Tile Layout")
         inner = QVBoxLayout(group)
 
@@ -228,10 +218,9 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         btn_reset.clicked.connect(self._on_reset_layout)
         inner.addWidget(btn_reset)
 
-        return group
+        tab_layout.addWidget(group)
 
-    def _build_view_mode_group(self) -> QGroupBox:
-        """Build the "View Mode" group with the tile/list view combo box."""
+        # --- View Mode --------------------------------------------------
         view_mode_group = QGroupBox("View Mode")
         view_mode_inner = QVBoxLayout(view_mode_group)
 
@@ -249,10 +238,9 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
             pass
 
         view_mode_inner.addWidget(self.combo_view_mode)
-        return view_mode_group
+        tab_layout.addWidget(view_mode_group)
 
-    def _build_tile_zoom_group(self) -> QGroupBox:
-        """Build the "Tile Zoom" group with the tile-size slider."""
+        # --- Tile Zoom --------------------------------------------------
         zoom_group = QGroupBox("Tile Zoom")
         zoom_inner = QHBoxLayout(zoom_group)
 
@@ -271,10 +259,9 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         zoom_inner.addWidget(QLabel("Larger"))
         zoom_inner.addSpacing(10)
         zoom_inner.addWidget(self.lbl_zoom_pct)
-        return zoom_group
+        tab_layout.addWidget(zoom_group)
 
-    def _sync_layout_tab_with_launcher(self) -> None:
-        """Wire the layout tab's widgets to the parent launcher's live state."""
+        # Sync with parent launcher
         launcher = self._launcher
         # ``btn_modify_layout`` no longer exists (issue #8023); the checkable
         # ``View > Edit Layout Mode`` QAction owns the layout-edit state.
@@ -324,10 +311,25 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
 
                 self.zoom_slider.valueChanged.connect(on_zoom)
 
+        tab_layout.addStretch()
+        return tab
+
     # ── Configuration tab ───────────────────────────────────────────
 
     def _create_configuration_tab(self) -> QWidget:
-        """Configuration tab: engine runtime, simulation options, and Docker image build (the image-build group stays visible regardless of the active runtime)."""
+        """Configuration tab: engine runtime + simulation opts + Docker image build.
+
+        The three groups answer three different user questions:
+
+        * **Engine Runtime** — *where do physics engines actually run?*
+          (Native Windows / Docker container / WSL2). Inline ``?`` button
+          opens the shared help dialog with full pros/cons.
+        * **Simulation Options** — per-run knobs (live viz, GPU).
+        * **Docker Image** — *build* the container image used by the
+          Docker runtime. This group is always visible regardless of
+          the active runtime; it's the only place an image build makes
+          sense, and the runtime selection is independent.
+        """
         from src.launchers.runtime_mode_help import (
             make_runtime_mode_help_button,
             show_runtime_mode_help,
@@ -336,70 +338,21 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         container = QWidget()
         tab_layout = QVBoxLayout(container)
 
-        tab_layout.addWidget(
-            self._build_runtime_preferences_group(make_runtime_mode_help_button)
-        )
-        tab_layout.addWidget(
-            self._build_docker_image_group(
-                make_runtime_mode_help_button, show_runtime_mode_help
-            )
-        )
-
-        self._sync_configuration_tab_with_launcher()
-
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setWidget(container)
-
-        # DbC postconditions
-        assert scroll.widget() is container, (
-            "Postcondition: scroll area must wrap the configuration container"
-        )
-        assert container.layout() is not None, (
-            "Postcondition: configuration container must have an active layout"
-        )
-
-        return scroll
-
-    def _build_runtime_preferences_group(
-        self, make_help_button: Callable[..., QPushButton]
-    ) -> QGroupBox:
-        """Build the "Runtime & Preferences" group: engine runtime, sim opts, sidekick (renamed from "Execution Environment" to make clear it's the engines' runtime, not the launcher's)."""
+        # --- Engine Runtime ---------------------------------------------
+        # Renamed from "Execution Environment" — "Engine Runtime" makes
+        # explicit that this controls where *engines* run, separate from
+        # where the launcher itself runs (always Windows).
+        # --- Preferences & Engine Runtime --------------------------------
         pref_group = QGroupBox("Runtime & Preferences")
         pref_layout = QHBoxLayout(pref_group)
 
-        col_runtime = self._build_engine_runtime_column(make_help_button)
-        col_sim = self._build_simulation_options_column()
-        col_sidekick = self._build_sidekick_column()
-
-        # Helper function to create divider line
-        def make_v_divider() -> QFrame:
-            frame = QFrame()
-            frame.setFrameShape(QFrame.Shape.VLine)
-            frame.setFrameShadow(QFrame.Shadow.Sunken)
-            frame.setStyleSheet("color: #3a3a3a;")
-            return frame
-
-        # Add to main horizontal preferences layout
-        pref_layout.addLayout(col_runtime, stretch=1)
-        pref_layout.addWidget(make_v_divider())
-        pref_layout.addLayout(col_sim, stretch=1)
-        pref_layout.addWidget(make_v_divider())
-        pref_layout.addLayout(col_sidekick, stretch=1)
-
-        return pref_group
-
-    def _build_engine_runtime_column(
-        self, make_help_button: Callable[..., QPushButton]
-    ) -> QVBoxLayout:
-        """Build the "Engine Runtime" column: Windows/Docker/WSL selection."""
+        # Column 1: Engine Runtime
         col_runtime = QVBoxLayout()
         runtime_header = QHBoxLayout()
         lbl_runtime = QLabel("<b>Engine Runtime</b> (pick one):")
         lbl_runtime.setToolTip("Select where physics engines execute.")
         runtime_header.addWidget(lbl_runtime)
-        runtime_header.addWidget(make_help_button(self))
+        runtime_header.addWidget(make_runtime_mode_help_button(self))
         runtime_header.addStretch()
         col_runtime.addLayout(runtime_header)
 
@@ -467,10 +420,7 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         self.env_group_buttons.addButton(self.chk_docker)
         self.env_group_buttons.addButton(self.chk_wsl)
 
-        return col_runtime
-
-    def _build_simulation_options_column(self) -> QVBoxLayout:
-        """Build the "Simulation Options" column: live viz, GPU acceleration."""
+        # Column 2: Simulation Options
         col_sim = QVBoxLayout()
         lbl_sim = QLabel("<b>Simulation Options</b>:")
         col_sim.addWidget(lbl_sim)
@@ -490,10 +440,7 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         col_sim.addWidget(self.chk_gpu)
         col_sim.addStretch()
 
-        return col_sim
-
-    def _build_sidekick_column(self) -> QVBoxLayout:
-        """Build the "Sidekick AI Assistant" column: context-sharing toggle."""
+        # Column 3: Sidekick AI Assistant
         col_sidekick = QVBoxLayout()
         lbl_sidekick = QLabel("<b>Sidekick AI Assistant</b>:")
         col_sidekick.addWidget(lbl_sidekick)
@@ -518,44 +465,36 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         col_sidekick.addWidget(sidekick_footer)
         col_sidekick.addStretch()
 
-        return col_sidekick
+        # Helper function to create divider line
+        def make_v_divider() -> QFrame:
+            frame = QFrame()
+            frame.setFrameShape(QFrame.Shape.VLine)
+            frame.setFrameShadow(QFrame.Shadow.Sunken)
+            frame.setStyleSheet("color: #3a3a3a;")
+            return frame
 
-    def _build_docker_image_group(
-        self,
-        make_help_button: Callable[..., QPushButton],
-        show_help: Callable[[QWidget], None],
-    ) -> QGroupBox:
-        """Build the "Docker Image" group: stage picker, build/cancel, console (renamed from "Rebuild Environment" — building the image is independent of the runtime selection above)."""
+        # Add to main horizontal preferences layout
+        pref_layout.addLayout(col_runtime, stretch=1)
+        pref_layout.addWidget(make_v_divider())
+        pref_layout.addLayout(col_sim, stretch=1)
+        pref_layout.addWidget(make_v_divider())
+        pref_layout.addLayout(col_sidekick, stretch=1)
+
+        tab_layout.addWidget(pref_group)
+
+        # --- Docker Image build -----------------------------------------
+        # Renamed from "Rebuild Environment" — that label conflated the
+        # runtime selection with the image build, which are independent.
+        # Building the image just puts upstream-drift:engine into your
+        # local image store; *using* it requires ticking Docker above.
         build_group = QGroupBox("Docker Image")
         build_inner = QVBoxLayout(build_group)
         build_inner.setContentsMargins(8, 8, 8, 8)
 
         # Create vertical splitter for resizable parts
         splitter = QSplitter(Qt.Orientation.Vertical)
-        splitter.addWidget(
-            self._build_docker_image_upper_section(make_help_button, show_help)
-        )
 
-        # Build Console (Lower part of splitter)
-        self.build_console = QTextEdit()
-        self.build_console.setReadOnly(True)
-        self.build_console.setMinimumHeight(150)
-        self.build_console.setStyleSheet(Styles.CONSOLE_BUILD)
-        splitter.addWidget(self.build_console)
-
-        # Set default proportions
-        splitter.setSizes([220, 200])
-
-        build_inner.addWidget(splitter)
-
-        return build_group
-
-    def _build_docker_image_upper_section(
-        self,
-        make_help_button: Callable[..., QPushButton],
-        show_help: Callable[[QWidget], None],
-    ) -> QWidget:
-        """Build the upper Docker-Image section: stage, tier details, build buttons."""
+        # Upper container for Docker stage, status, and buttons
         upper_widget = QWidget()
         upper_layout = QVBoxLayout(upper_widget)
         upper_layout.setContentsMargins(0, 0, 0, 0)
@@ -569,14 +508,14 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
             )
         )
         build_header.addStretch()
-        build_help = make_help_button(self)
+        build_help = make_runtime_mode_help_button(self)
         build_help.setToolTip(
             "What does the Docker image contain? Click for full details."
         )
         # The same shared help dialog covers building too — the help
         # text explains how runtime selection and image build relate.
         build_help.clicked.disconnect()
-        build_help.clicked.connect(lambda: show_help(self))
+        build_help.clicked.connect(lambda: show_runtime_mode_help(self))
         build_header.addWidget(build_help)
         upper_layout.addLayout(build_header)
 
@@ -625,10 +564,23 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
         self._build_status = QLabel("")
         upper_layout.addWidget(self._build_status)
 
-        return upper_widget
+        splitter.addWidget(upper_widget)
 
-    def _sync_configuration_tab_with_launcher(self) -> None:
-        """Wire the configuration tab's checkboxes to the parent launcher's state."""
+        # Build Console (Lower part of splitter)
+        self.build_console = QTextEdit()
+        self.build_console.setReadOnly(True)
+        self.build_console.setMinimumHeight(150)
+        self.build_console.setStyleSheet(Styles.CONSOLE_BUILD)
+        splitter.addWidget(self.build_console)
+
+        # Set default proportions
+        splitter.setSizes([220, 200])
+
+        build_inner.addWidget(splitter)
+
+        tab_layout.addWidget(build_group)
+
+        # Sync checkboxes with parent launcher state
         launcher = self._launcher
         if launcher:
             # Sync states from launcher
@@ -692,6 +644,21 @@ class SettingsWidget(SettingsAuxiliaryTabsMixin, QWidget):
                 launcher.chk_live.toggled.connect(self.chk_live_viz.setChecked)
             if hasattr(launcher, "chk_gpu"):
                 launcher.chk_gpu.toggled.connect(self.chk_gpu.setChecked)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(container)
+
+        # DbC postconditions
+        assert scroll.widget() is container, (
+            "Postcondition: scroll area must wrap the configuration container"
+        )
+        assert container.layout() is not None, (
+            "Postcondition: configuration container must have an active layout"
+        )
+
+        return scroll
 
     # ── MCP Servers tab ─────────────────────────────────────────────
 

@@ -143,16 +143,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         layout = QtWidgets.QHBoxLayout(self)
 
         left_panel = QtWidgets.QVBoxLayout()
-        self._build_selection_and_list(left_panel)
-        self._build_playback_row(left_panel)
-        self._build_toggle_and_style_rows(left_panel)
-        self._build_view_and_frame_controls(left_panel)
-        layout.addLayout(left_panel, 1)
 
-        right_panel = self._build_right_panel()
-        layout.addLayout(right_panel, 3)
-
-    def _build_selection_and_list(self, left_panel: QtWidgets.QVBoxLayout) -> None:
         # Selection helpers.
         sel_row = QtWidgets.QHBoxLayout()
         self.btn_select_all = QtWidgets.QPushButton("Select all")
@@ -180,7 +171,6 @@ class Viewer3DTab(QtWidgets.QWidget):
         self.list_markers_3d.itemSelectionChanged.connect(self._on_selection_changed)
         left_panel.addWidget(self.list_markers_3d)
 
-    def _build_playback_row(self, left_panel: QtWidgets.QVBoxLayout) -> None:
         # Playback controls.
         playback_row = QtWidgets.QHBoxLayout()
         self.btn_play = QtWidgets.QToolButton()
@@ -204,7 +194,6 @@ class Viewer3DTab(QtWidgets.QWidget):
         playback_row.addStretch()
         left_panel.addLayout(playback_row)
 
-    def _build_toggle_and_style_rows(self, left_panel: QtWidgets.QVBoxLayout) -> None:
         # View / overlay toggles.
         toggles_row = QtWidgets.QHBoxLayout()
         self.check_skeleton = QtWidgets.QCheckBox("Show skeleton")
@@ -244,7 +233,6 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._color_channel_layout.setContentsMargins(0, 0, 0, 0)
         left_panel.addWidget(self._color_channel_holder)
 
-    def _build_view_and_frame_controls(self, left_panel: QtWidgets.QVBoxLayout) -> None:
         # View-angle presets.
         view_row = QtWidgets.QHBoxLayout()
         view_row.addWidget(QtWidgets.QLabel("View:"))
@@ -279,7 +267,8 @@ class Viewer3DTab(QtWidgets.QWidget):
         self.label_frame_info = QtWidgets.QLabel("Frame: - / Time: -")
         left_panel.addWidget(self.label_frame_info)
 
-    def _build_right_panel(self) -> QtWidgets.QVBoxLayout:
+        layout.addLayout(left_panel, 1)
+
         right_panel = QtWidgets.QVBoxLayout()
         self.canvas_3d = MplCanvas(self, width=5, height=4, dpi=100)
         right_panel.addWidget(self.canvas_3d)
@@ -300,7 +289,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         except Exception:  # pragma: no cover - optional dep  # noqa: BLE001
             pass
 
-        return right_panel
+        layout.addLayout(right_panel, 3)
 
     # ------------------------------------------------- Anthropometrics
     def set_selected_segment_properties(self, props: Any | None) -> None:
@@ -651,26 +640,9 @@ class Viewer3DTab(QtWidgets.QWidget):
             self.label_frame_info.setText("Frame: - / Time: -")
             return
 
+        # Cache positions: shape (M, N, 3); pad missing with NaN.
         if self._n_frames <= 0:
             return
-        positions = self._cache_selected_positions(selected)
-
-        self.canvas_3d.fig.clear()
-        ax = self.canvas_3d.add_subplot(111, projection="3d")
-        self._ax = ax
-
-        self._build_trail_and_point_artists(ax, selected, positions)
-        self._build_skeleton_overlay(ax, selected)
-        self._finalize_scene_view(ax, positions, selected)
-
-        self._user_segment_renderer.rebuild(self._ax, self.model, self._n_frames)
-
-        self.canvas_3d.fig.tight_layout()
-        self._render_current_frame()
-
-    def _cache_selected_positions(self, selected: list[str]) -> np.ndarray:
-        """Cache positions/colors for ``selected`` and return positions."""
-        # Cache positions: shape (M, N, 3); pad missing with NaN.
         positions: np.ndarray = np.full(
             (len(selected), self._n_frames, 3), np.nan, dtype=float
         )
@@ -689,11 +661,11 @@ class Viewer3DTab(QtWidgets.QWidget):
         self._marker_colors = [
             mcolors.to_rgba(cmap(i / denom)) for i in range(len(selected))
         ]
-        return positions
 
-    def _build_trail_and_point_artists(
-        self, ax: Any, selected: list[str], positions: np.ndarray
-    ) -> None:
+        self.canvas_3d.fig.clear()
+        ax = self.canvas_3d.add_subplot(111, projection="3d")
+        self._ax = ax
+
         self._trail_lines = []
         for i, name in enumerate(selected):
             pos = positions[i]
@@ -729,7 +701,7 @@ class Viewer3DTab(QtWidgets.QWidget):
             txt.set_visible(self.check_labels.isChecked())
             self._label_texts.append(txt)
 
-    def _build_skeleton_overlay(self, ax: Any, selected: list[str]) -> None:
+        # Skeleton overlay.
         segs = default_body_segments(selected)
         self._skeleton_segments = tuple((s.a, s.b) for s in segs)
         # Seed with a degenerate origin segment because ``add_collection3d``
@@ -747,9 +719,6 @@ class Viewer3DTab(QtWidgets.QWidget):
             self.check_skeleton.isChecked() and bool(self._skeleton_segments)
         )
 
-    def _finalize_scene_view(
-        self, ax: Any, positions: np.ndarray, selected: list[str]
-    ) -> None:
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
         ax.set_zlabel("Z")
@@ -770,6 +739,11 @@ class Viewer3DTab(QtWidgets.QWidget):
 
         if len(selected) <= 12:
             ax.legend(loc="upper right", fontsize=8)
+
+        self._user_segment_renderer.rebuild(self._ax, self.model, self._n_frames)
+
+        self.canvas_3d.fig.tight_layout()
+        self._render_current_frame()
 
     def _teardown_artists(self) -> None:
         self._trail_lines = []
