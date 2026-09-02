@@ -30,3 +30,5 @@
 ## 2026-09-01 - [Optimize Norm Calculation in Morris Design]
 **Learning:** Using `np.sqrt(np.einsum("ij,ij->i", diff, diff))` is significantly faster (~30%) than `np.linalg.norm(diff, axis=1)` for 2D differences, avoiding intermediate array allocation in the inner loops of combinatorial design sampling algorithms.
 **Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.
+
+## 2024-05-19 - [Optimize Sum of Squares]
