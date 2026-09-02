@@ -113,9 +113,27 @@ def test_window_init(qapp, mock_flight_models) -> None:
         assert isinstance(window.central_widget, MultiModelShotTracerWidget)
 
 
-@patch("src.launchers.shot_tracer.PYQTGRAPH_AVAILABLE", True)
+@patch("src.launchers._shot_tracer_gui.gl")
+@patch("src.launchers._shot_tracer_gui.PYQTGRAPH_AVAILABLE", True)
 @patch("src.launchers.shot_tracer.gl")
-def test_pyqtgraph_available_visualization(mock_gl, qapp, mock_flight_models) -> None:
+@patch("src.launchers.shot_tracer.PYQTGRAPH_AVAILABLE", True)
+def test_pyqtgraph_available_visualization(
+    mock_gl, _mock_impl_gl, qapp, mock_flight_models
+) -> None:
+    # Also patches the _shot_tracer_gui implementation module's own
+    # PYQTGRAPH_AVAILABLE/gl (the unused _mock_impl_gl parameter), purely
+    # so mock.patch restores THEM to their pre-test value on teardown.
+    # _sync_public_overrides() copies the facade's gl/PYQTGRAPH_AVAILABLE
+    # into the implementation module on every _load_pyqtgraph() call
+    # whenever the facade's own copy is non-None -- which during this
+    # test it always is -- so mock_gl (not _mock_impl_gl) is what
+    # actually renders below. Without this second patch, only the
+    # facade's copy would be restored when the decorators unwind (back
+    # to None); the sync guard skips re-syncing a None facade value, so
+    # the implementation module's True/mock_gl would leak past this
+    # test and corrupt any later test that constructs a widget without
+    # itself patching pyqtgraph availability (e.g.
+    # tests/unit/test_shot_tracer.py's ``widget`` fixture).
     from PyQt6.QtWidgets import QWidget
 
     parent_widget = QWidget()
