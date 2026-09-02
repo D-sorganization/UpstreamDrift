@@ -361,6 +361,11 @@ class UncertaintyTerm:
         """Half the total reach, for the symmetric V&V 20 components."""
         return 0.5 * self.width
 
+    @property
+    def uncertainty_class_value(self) -> str:
+        """String representation of uncertainty class."""
+        return self.uncertainty_class.value
+
 
 @dataclass(frozen=True, slots=True)
 class UnquantifiedTerm:
@@ -434,6 +439,21 @@ class DominantTerm:
     term: UncertaintyTerm
     share: float
     swamps: bool
+
+    @property
+    def term_name(self) -> str:
+        """Name of the dominant uncertainty term."""
+        return self.term.name
+
+    @property
+    def uncertainty_class_value(self) -> str:
+        """Class value string of the dominant uncertainty term."""
+        return self.term.uncertainty_class_value
+
+    @property
+    def source(self) -> str:
+        """Provenance source string of the dominant uncertainty term."""
+        return self.term.source
 
 
 _QUADRATURE_CLASSES = frozenset({UncertaintyClass.SAMPLING})
@@ -652,9 +672,9 @@ class UncertaintyBudget:
         if dominant is not None:
             verb = "swamps the budget at" if dominant.swamps else "leads at"
             lines.append(
-                f"  dominant term: {dominant.term.name} "
-                f"({dominant.term.uncertainty_class.value}) {verb} "
-                f"{dominant.share:.0%} of the width -- {dominant.term.source}"
+                f"  dominant term: {dominant.term_name} "
+                f"({dominant.uncertainty_class_value}) {verb} "
+                f"{dominant.share:.0%} of the width -- {dominant.source}"
             )
         for term in self.unquantified:
             lines.append(

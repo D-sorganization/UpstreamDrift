@@ -146,10 +146,10 @@ class BandedRanking:
             )
         verb = "swamps the budget at" if self.dominant.swamps else "leads at"
         return (
-            f"{self.dominant.term.name} "
-            f"({self.dominant.term.uncertainty_class.value}) {verb} "
+            f"{self.dominant.term_name} "
+            f"({self.dominant.uncertainty_class_value}) {verb} "
             f"{self.dominant.share:.0%} of the band -- "
-            f"{self.dominant.term.source}"
+            f"{self.dominant.source}"
         )
 
     def statement(self) -> str:
