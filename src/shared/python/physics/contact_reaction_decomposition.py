@@ -243,8 +243,7 @@ def evaluate_reaction_prediction(
     estimate = _finite_array("predicted", predicted, 2)
     scale = _finite_array("normalization_scale", normalization_scale, 1)
     require(
-        t.size >= 2 and bool(np.all(np.diff(t) > 0.0)),
-        "time must be strictly increasing",
+        t.size >= 2 and np.all(np.diff(t) > 0.0), "time must be strictly increasing"
     )
     require(
         observed.shape == estimate.shape,
@@ -262,7 +261,7 @@ def evaluate_reaction_prediction(
         value=scale.shape,
     )
     require(
-        bool(np.all(scale > 0.0)),
+        np.all(scale > 0.0),
         "normalization_scale must be strictly positive",
         value=scale,
     )

@@ -40,7 +40,7 @@ import platform
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Literal, NamedTuple
+from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -296,51 +296,21 @@ def fit_swing_mujoco(target: ClubTarget, options: FitOptions) -> FitResult:
     t_wall_start = time.perf_counter()
     timestamp_utc = datetime.now(UTC).isoformat()
 
-    n_joints, bounds, theta0 = _prepare_fit_bounds(options)
-    outcome = _solve_theta(theta0, bounds, target, options)
-    return _finalize_fit_result(
-        outcome, target, options, n_joints, t_wall_start, timestamp_utc
-    )
-
-
-# --- Helpers ----------------------------------------------------------------
-
-
-class _SolveOutcome(NamedTuple):
-    """Result of driving the SLSQP minimizer over ``theta``."""
-
-    res: Any
-    history: tuple[float, ...]
-    n_eval: int
-    scipy_options: dict[str, Any]
-    jac_mode: str
-
-
-def _prepare_fit_bounds(
-    options: FitOptions,
-) -> tuple[int, list[tuple[float, float]], NDArray[np.float64]]:
-    """Discover ``n_joints``, compute torque bounds, and draw the warm start.
-
-    We can't compute bounds without ``model.nu``; the obvious way is to
-    call simulate once, but a degenerate first eval would waste a rollout.
-    Compile-and-discard (via ``_discover_n_joints``) is < 10 ms.
-    """
+    # --- 1. Compile the model once to discover ``n_joints``. ---------------
+    # We can't compute bounds without ``model.nu``; the obvious way is to
+    # call simulate once, but a degenerate first eval would waste a
+    # rollout. Compile-and-discard is < 10 ms.
     n_joints = _discover_n_joints(options.sim)
+
     lb, ub = polynomial_torque_bounds(n_joints)
     bounds = list(zip(lb.tolist(), ub.tolist(), strict=True))
+
     theta0 = _warm_start_theta(options.minimizer, lb, ub, options.rng_seed)
-    return n_joints, bounds, theta0
 
-
-def _solve_theta(
-    theta0: NDArray[np.float64],
-    bounds: list[tuple[float, float]],
-    target: ClubTarget,
-    options: FitOptions,
-) -> _SolveOutcome:
-    """Build the history-tracking objective and drive scipy SLSQP."""
+    # --- 2. Objective with history tracking -------------------------------
     history: list[float] = []
     n_eval = 0
+
     sim_opts = options.sim
 
     def _sim_fn(theta: NDArray[np.float64]) -> SimOutput:
@@ -359,6 +329,7 @@ def _solve_theta(
         history.append(float(cost))
         return float(cost)
 
+    # --- 3. Drive scipy SLSQP --------------------------------------------
     from scipy.optimize import minimize  # heavy import; deferred until call
 
     scipy_options = {"maxiter": options.maxiter, "ftol": options.ftol}
@@ -396,38 +367,17 @@ def _solve_theta(
             "'finite_difference' or 'analytical'"
         )
 
-    return _SolveOutcome(
-        res=res,
-        history=tuple(history),
-        n_eval=n_eval,
-        scipy_options=scipy_options,
-        jac_mode=jac_mode,
-    )
-
-
-def _finalize_fit_result(
-    outcome: _SolveOutcome,
-    target: ClubTarget,
-    options: FitOptions,
-    n_joints: int,
-    t_wall_start: float,
-    timestamp_utc: str,
-) -> FitResult:
-    """Re-evaluate the optimum for a clean ``SimOutput`` and assemble ``FitResult``.
-
-    Spec §2.2: post-fit ``theta_optimal`` must satisfy length+finiteness
-    before we hand it to the next forward-sim. SLSQP can return
-    ``inf`` / ``nan`` on a hard solver failure; surfacing that here as a
-    ``ValueError`` is preferable to a silent NaN trajectory.
-    """
-    res = outcome.res
-    sim_opts = options.sim
+    # --- 4. Re-evaluate the optimum to get a clean SimOutput -------------
+    # Spec §2.2: post-fit ``theta_optimal`` must satisfy length+finiteness
+    # before we hand it to the next forward-sim. SLSQP can return
+    # ``inf`` / ``nan`` on a hard solver failure; surfacing that here as
+    # a ``ValueError`` is preferable to a silent NaN trajectory.
     theta_star = validate_theta(
         np.asarray(res.x, dtype=np.float64),
         n_joints=n_joints,
         name="theta_optimal",
     )
-    final_sim_out = _simulate_for_cost(theta_star, sim_opts, target)
+    final_sim_out = _sim_fn(theta_star)
     final_cost, breakdown = compute_cost(
         theta_star, target, lambda _t: final_sim_out, options.cost
     )
@@ -436,10 +386,10 @@ def _finalize_fit_result(
 
     duration_s = time.perf_counter() - t_wall_start
     solver_options = {
-        **outcome.scipy_options,
+        **scipy_options,
         "warm_start_scale": options.minimizer.warm_start_scale,
         "rng_seed": options.rng_seed,
-        "jac_mode": outcome.jac_mode,
+        "jac_mode": jac_mode,
         "platform": platform.platform(),
     }
 
@@ -453,10 +403,10 @@ def _finalize_fit_result(
             else ("warning" if "iteration" in str(res.message).lower() else "failed")
         ),
         iterations=int(getattr(res, "nit", 0)),
-        n_evaluations=outcome.n_eval,
+        n_evaluations=n_eval,
         wall_clock_s=duration_s,
         message=str(res.message),
-        history=outcome.history,
+        history=tuple(history),
         method=options.method,
         git_commit=_git_commit_short(),
         engine_version=_mujoco_version(),
@@ -466,6 +416,9 @@ def _finalize_fit_result(
         final_total_work_J=work_J,
         solver_options=solver_options,
     )
+
+
+# --- Helpers ----------------------------------------------------------------
 
 
 def _discover_n_joints(sim_opts: SimOptions) -> int:
