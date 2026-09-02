@@ -188,6 +188,7 @@ __all__ = [
     "StrikeInterval",
     "dig_vs_skid",
     "divot_metrics",
+    "lateral_spread_factor",
     "sole_depth_profile",
     "submerged_interval",
 ]
