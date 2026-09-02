@@ -164,12 +164,34 @@ rather than guessed at.
 """
 
 
+def _reader_from_module(module: Any, *, source: str) -> Callable[[str], Any]:
+    """Extract the reader symbol from an already-imported interchange module."""
+    reader = getattr(module, "ball_flight_trajectory_from_json", None)
+    if reader is None:
+        raise TrajectoryImportError(
+            f"vendored flight_interchange reader unavailable at {source}: "
+            f"{_VENDOR_INTERCHANGE_MODULE} has no ball_flight_trajectory_from_json"
+        )
+    return cast("Callable[[str], Any]", reader)
+
+
 def _load_vendored_reader() -> Callable[[str], Any]:
     """Resolve ``vendor/ud-tools`` and import its trajectory reader.
 
-    Uses the same canonical resolution facade as every other production
-    consumer of vendored Tools code (env override, then the pinned
-    ``vendor/ud-tools`` gitlink, then dev-mode sibling discovery).
+    Tries a plain import first: every test in this repo already runs with
+    ``vendor/ud-tools/src`` on ``sys.path`` (the ``pythonpath`` entries in
+    ``pyproject.toml``'s ``[tool.pytest.ini_options]``), and some CI lanes
+    materialise the pinned Tools source by a path other than a real git
+    submodule checkout — which the stricter git-based validation inside
+    :func:`~src.shared.python.config.tools_vendor_authority.inspect_tools_vendor_authority`
+    can fail even though the files themselves are present and importable
+    (mirrors ``tests/unit/physics/test_flight_trajectory_export.py``'s own
+    cross-family gate, which imports the vendored package the same
+    lightweight way rather than through this facade). Falls back to the
+    canonical resolution facade (env override, then the pinned
+    ``vendor/ud-tools`` gitlink, then dev-mode sibling discovery) — the
+    path a real running API server needs, since nothing there has already
+    put the vendored source on ``sys.path``.
 
     Returns:
         The vendored ``ball_flight_trajectory_from_json`` function.
@@ -179,6 +201,20 @@ def _load_vendored_reader() -> Callable[[str], Any]:
             or the vendored ``flight_interchange`` package fails to
             import from it.
     """
+    # Imported dynamically by name, not `from shared.python.swing_sim...
+    # import ...`: a static import needs a `type: ignore[import-not-found]`
+    # here, whose necessity flips between mypy environments in this repo
+    # depending on what each one puts on MYPYPATH (some resolve the vendored
+    # package as an unannotated namespace, making the ignore "unused"; others
+    # cannot resolve it at all). `importlib.import_module` sidesteps that
+    # divergence entirely: mypy never attempts to resolve the target module.
+    try:
+        already_importable = importlib.import_module(_VENDOR_INTERCHANGE_MODULE)
+    except ImportError:
+        already_importable = None
+    if already_importable is not None:
+        return _reader_from_module(already_importable, source="sys.path")
+
     # Deferred rather than module-level: see the module docstring.
     from src.launchers.tools_repo_path import resolve_tools_repo
 
@@ -197,13 +233,6 @@ def _load_vendored_reader() -> Callable[[str], Any]:
     if src_dir not in sys.path:
         sys.path.insert(0, src_dir)
 
-    # Imported dynamically by name, not `from shared.python.swing_sim...
-    # import ...`: a static import needs a `type: ignore[import-not-found]`
-    # here, whose necessity flips between mypy environments in this repo
-    # depending on what each one puts on MYPYPATH (some resolve the vendored
-    # package as an unannotated namespace, making the ignore "unused"; others
-    # cannot resolve it at all). `importlib.import_module` sidesteps that
-    # divergence entirely: mypy never attempts to resolve the target module.
     try:
         module = importlib.import_module(_VENDOR_INTERCHANGE_MODULE)
     except ImportError as exc:
@@ -211,13 +240,7 @@ def _load_vendored_reader() -> Callable[[str], Any]:
             f"vendored flight_interchange reader unavailable at {resolution.path}: "
             f"{exc}"
         ) from exc
-    reader = getattr(module, "ball_flight_trajectory_from_json", None)
-    if reader is None:
-        raise TrajectoryImportError(
-            f"vendored flight_interchange reader unavailable at {resolution.path}: "
-            f"{_VENDOR_INTERCHANGE_MODULE} has no ball_flight_trajectory_from_json"
-        )
-    return cast("Callable[[str], Any]", reader)
+    return _reader_from_module(module, source=str(resolution.path))
 
 
 def import_trajectory_record(record: Mapping[str, Any]) -> ImportedBallFlightTrajectory:
