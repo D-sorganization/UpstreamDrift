@@ -58,6 +58,8 @@ def mock_flight_models() -> Generator[tuple[MagicMock, MagicMock], None, None]:
             "src.launchers.shot_tracer.FlightModelType", [MockModelType]
         ) as ModelTypeMock,
         patch("src.launchers.shot_tracer.FlightModelRegistry") as RegistryMock,
+        patch("src.launchers._shot_tracer_gui.FlightModelType", [MockModelType]),
+        patch("src.launchers._shot_tracer_gui.FlightModelRegistry", RegistryMock),
     ):
         RegistryMock.get_model.return_value = MockModel()
         yield ModelTypeMock, RegistryMock

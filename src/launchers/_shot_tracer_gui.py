@@ -99,6 +99,8 @@ _PATCHABLE_PUBLIC_NAMES = (
     "sys",
 )
 
+_CANONICAL_DEFAULTS = {name: globals().get(name) for name in _PATCHABLE_PUBLIC_NAMES}
+
 
 def _sync_public_overrides() -> None:
     public_module = sys.modules.get("src.launchers.shot_tracer")
