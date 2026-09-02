@@ -512,9 +512,9 @@ models:
         "3d_visualization",
       ]
     launcher:
-      category: "biomechanics"
+      category: "simulation"
       logo: "rate_of_closure.svg"
-      status: "ready"
+      status: "gui_ready"
       default_launch: "tab"
 
   - id: "sidekick"

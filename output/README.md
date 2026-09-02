@@ -81,14 +81,12 @@ formats `save_simulation_results` / `load_simulation_results` understand:
 - **CSV** (`OutputFormat.CSV`, default)
 - **JSON** (`OutputFormat.JSON`)
 - **HDF5** (`OutputFormat.HDF5`)
-- **Pickle** (`OutputFormat.PICKLE`)
 - **Parquet** (`OutputFormat.PARQUET`)
 
-`export_analysis_report` only supports `format_type="json"` or `"html"`.
-Every save also embeds a `ProvenanceInfo` record (timestamp, git SHA, model
-file hash if given, and any explicit `parameters`) — a JSON-format save
-nests it under `provenance`; a CSV-format save gets a commented provenance
-header.
+*(Note: `OutputFormat.PICKLE` is disabled for security and deliberately raises a `ValueError` if requested.)*
+
+`export_analysis_report` supports `format_type="json"` or `"html"`.
+For formats that support metadata serialization (JSON and CSV), a `ProvenanceInfo` record (timestamp, git SHA, model file hash if provided, and parameters) is embedded: JSON nests it under a top-level `provenance` key, while CSV prepends commented provenance header lines. Raw binary formats like HDF5 and Parquet store dataframe records directly.
 
 ## Usage Examples
 
@@ -136,18 +134,18 @@ programmatic listing, loading, or cleanup.
 
 ## Cleanup and Maintenance
 
-`OutputManager.cleanup_old_files(max_age_days=30)` removes files older than
-`max_age_days` from the `cache/`, `simulations/`, and `analysis/`
-directories (see `src/shared/python/data_io/_simulation_store.py`). There is
-no automatic/scheduled cleanup and no configurable cache-size threshold or
-archival step — those must be scripted or run manually by calling this
-method.
+`OutputManager.cleanup_old_files(max_age_days=30)` cleans up output directories
+(see `src/shared/python/data_io/_simulation_store.py`):
+- Removes temporary files from `cache/temp/` that are older than 1 day.
+- Moves files older than `max_age_days` from `simulations/` and `analysis/` into `<base_path>/archive/` preserving directory structure.
+
+There is no automatic background cleanup; call this method periodically or as part of a scheduled maintenance routine.
 
 ```python
 from src.shared.python.data_io.output_manager import OutputManager
 
 output = OutputManager()
-removed_count = output.cleanup_old_files(max_age_days=30)
+cleaned_count = output.cleanup_old_files(max_age_days=30)
 ```
 
 ## Best Practices

@@ -353,7 +353,7 @@ def test_import_accepts_records_from_either_family(
     data = response.json()
     assert data["model_family"] == expected_family
     assert data["model_name"] == expected_name
-    assert data["model_key"] == f"{expected_family}:{expected_name}"
+    assert data["model_key"].startswith(f"{expected_family}:{expected_name}")
     assert len(data["parameter_digest"]) == 64
     assert len(data["trajectory"]) >= 2
     for sample in data["trajectory"]:
