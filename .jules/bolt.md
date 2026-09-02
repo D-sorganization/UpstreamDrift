@@ -30,3 +30,6 @@
 ## 2026-09-01 - [Optimize Norm Calculation in Morris Design]
 **Learning:** Using `np.sqrt(np.einsum("ij,ij->i", diff, diff))` is significantly faster (~30%) than `np.linalg.norm(diff, axis=1)` for 2D differences, avoiding intermediate array allocation in the inner loops of combinatorial design sampling algorithms.
 **Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.
+## 2026-09-02 - [Optimize Argmax of Vector Magnitude in Collision Generator]
+**Learning:** Calculating the maximum vector magnitude across an array (`np.max(np.linalg.norm(arr, axis=1))`) incurs significant overhead due to intermediate array creations in `np.linalg.norm` and unnecessary square root calculations per element. By computing the maximum of squared magnitudes via `np.einsum('ij,ij->i', arr, arr)` and then applying the square root, we bypass this overhead.
+**Action:** Replaced `np.max(np.linalg.norm(vertices, axis=1))` with `np.sqrt(np.max(np.einsum("ij,ij->i", vertices, vertices)))` in `src/shared/python/humanoid_character_builder/mesh/collision_generator.py`.
