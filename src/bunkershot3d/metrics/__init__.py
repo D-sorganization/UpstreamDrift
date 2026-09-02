@@ -55,6 +55,13 @@ plane-strain tier has no span to distribute across.
 
 from __future__ import annotations
 
+from .accelerated_mass import (
+    ACCELERATED_MASS_CONSISTENCY_REASON,
+    ACCELERATED_MASS_LATERAL_REASON,
+    F1_ENTRAINMENT_FACTOR_BOUNDS,
+    AcceleratedSandMass,
+    lateral_spread_factor,
+)
 from .bounce_map import (
     DEFAULT_LOAD_THRESHOLD_FRACTION,
     BounceUtilisation,
@@ -63,16 +70,12 @@ from .bounce_map import (
     bounce_utilisation,
 )
 from .divot import (
-    ACCELERATED_MASS_CONSISTENCY_REASON,
-    ACCELERATED_MASS_LATERAL_REASON,
     DEFAULT_DIG_DESCENT_RETURN,
     DEFAULT_SKID_DESCENT_RETURN,
     DIG_SKID_COARSE_WINDOW_REASON,
     DIG_SKID_UNCALIBRATED_REASON,
-    F1_ENTRAINMENT_FACTOR_BOUNDS,
     MIN_RESOLVED_SUBMERGED_SAMPLES,
     MIN_SUBMERGED_SAMPLES,
-    AcceleratedSandMass,
     DigSkidCalibration,
     DigSkidResult,
     DivotMetrics,
@@ -80,7 +83,6 @@ from .divot import (
     StrikeInterval,
     dig_vs_skid,
     divot_metrics,
-    lateral_spread_factor,
     sole_depth_profile,
     submerged_interval,
 )

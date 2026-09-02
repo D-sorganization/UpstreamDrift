@@ -76,7 +76,7 @@ nominal greenside shot the solver's 2.917 N.s over the prism's 63.7 g is sand
 leaving at 45.8 m/s, out of a head arriving at 25.0 m/s. The prism counts only
 what the sole passed over; a splash also throws the bow wave, the heave and
 the divot's own walls. So this module now takes
-:attr:`bunkershot3d.metrics.divot.AcceleratedSandMass.central_kg`, and
+:attr:`bunkershot3d.metrics.accelerated_mass.AcceleratedSandMass.central_kg`, and
 :meth:`SandDelivery._require_admissible_ejecta` **refuses** any pair that
 implies ejecta faster than the head. A refusal, not a clamp: capping the speed
 would restore exactly the impulse-blindness #8657 removed.
@@ -220,7 +220,7 @@ INADMISSIBLE_EJECTA_REFUSAL = (
     "arrived at {entry:.4g} m/s. Sand cannot leave faster than the thing that "
     "threw it, so this pair of numbers does not describe a strike and no ball "
     "launch is derivable from it. The mass is the suspect quantity: see "
-    "bunkershot3d.metrics.divot.AcceleratedSandMass, which is what a shipped "
+    "bunkershot3d.metrics.accelerated_mass.AcceleratedSandMass, which is what a shipped "
     "caller passes here (issue #8659)"
 )
 """Message of the refusal that replaces #8657's supersonic-ejecta diagnostic.
@@ -446,7 +446,7 @@ class SandDelivery:
         displaced_mass_kg: The mass of sand the strike **accelerated** [kg],
             which is not the swept divot prism. Since issue #8659 a shipped
             caller passes
-            :attr:`bunkershot3d.metrics.divot.AcceleratedSandMass.central_kg`;
+            :attr:`bunkershot3d.metrics.accelerated_mass.AcceleratedSandMass.central_kg`;
             the prism counted only the sand under the sole path and dividing
             the delivered impulse by it implied ejecta leaving faster than the
             head that threw it.
@@ -460,7 +460,7 @@ class SandDelivery:
             the mass rather than written here, because this module does not
             know how the number was arrived at and must not invent a
             provenance for it; the workbench passes
-            :data:`bunkershot3d.metrics.divot.ACCELERATED_MASS_CONSISTENCY_REASON`.
+            :data:`bunkershot3d.metrics.accelerated_mass.ACCELERATED_MASS_CONSISTENCY_REASON`.
         contact_duration_s: Time the sole spent engaged with the bed [s].
         entry_speed_m_s: Head speed at the first sample [m/s].
         exit_speed_m_s: Head speed at the last sample [m/s].
