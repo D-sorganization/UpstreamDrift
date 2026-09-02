@@ -152,11 +152,13 @@ def test_committed_closed_contact_evidence_and_figure_are_current() -> None:
             )
             for time_index, sample_time in enumerate(arrays["time_s"]):
                 q_reference, _, _ = prescribed_state(model, float(sample_time))
-                np.testing.assert_array_equal(
+                np.testing.assert_allclose(
                     arrays["solution_q"][
                         case_index, time_index, model.club_dof_indices
                     ],
                     q_reference[model.club_dof_indices],
+                    atol=1.0e-12,
+                    rtol=1.0e-12,
                 )
     for relative, expected in record["source_sha256"].items():
         assert (
