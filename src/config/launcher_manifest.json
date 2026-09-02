@@ -176,7 +176,7 @@
     {
       "id": "putting_green",
       "name": "Putting Green",
-      "description": "Realistic putting green simulation with ball rolling physics",
+      "description": "Author and practice on realistic greens: surface presets, terrain import, wind, and ball-roll physics (ud-legacy-roll/1). Greens export to the Impact Explorer's putting analytics via the shared green-surface wire.",
       "category": "simulation",
       "type": "putting_green",
       "path": "src/engines/physics_engines/putting_green/python/simulator.py",
@@ -351,7 +351,7 @@
     {
       "id": "rate_of_closure",
       "name": "Rate of Closure Impact Explorer",
-      "description": "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)",
+      "description": "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center). Putting analytics accepts greens authored in Putting Green.",
       "category": "biomechanics",
       "type": "special_app",
       "path": "src/rate_of_closure/launch_pyqt6.py",
