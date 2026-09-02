@@ -206,7 +206,12 @@ def test_lock_records_generator_index_and_exact_input_digest() -> None:
 
     authority_input = _authority_input()
     text = runner.AUTHORITY_LOCK.read_text(encoding="utf-8")
-    expected_input_sha = hashlib.sha256(authority_input.read_bytes()).hexdigest()
+    normalized_input = (
+        authority_input.read_text(encoding="utf-8")
+        .replace("\r\n", "\n")
+        .encode("utf-8")
+    )
+    expected_input_sha = hashlib.sha256(normalized_input).hexdigest()
 
     assert re.search(r"(?m)^# generator: uv==\d+\.\d+\.\d+$", text)
     assert re.search(r"(?m)^# index-url: https://pypi\.org/simple$", text)
