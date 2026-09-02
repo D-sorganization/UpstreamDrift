@@ -25,7 +25,7 @@ See issue #1206
 from __future__ import annotations
 
 import math
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 from fastapi import APIRouter, Request
@@ -34,6 +34,9 @@ from pydantic import BaseModel, Field
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition
+
+if TYPE_CHECKING:
+    from src.shared.python.putting_dynamics import HeightField, PutterState, SurfaceSpec
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
@@ -222,17 +225,9 @@ class Putt3DSimulationResponse(BaseModel):
 # -- Endpoints --
 
 
-@router.post("/simulate-3d", response_model=Putt3DSimulationResponse)
-@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
-@handle_api_errors
-async def simulate_putt_3d(
-    request: Request, payload: Putt3DSimulationRequest
-) -> Putt3DSimulationResponse:
-    """Run the canonical surface-aware strike model for R3F playback."""
-    del request
-    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
-        USGA_STIMP_ROLL_MODEL,
-    )
+def _build_putting_3d_surface(
+    payload: Putt3DSimulationRequest, extent_m: float = 20.0
+) -> tuple[SurfaceSpec, HeightField, PutterState]:
     from src.shared.python.putting_dynamics import (
         FrictionField,
         FrictionParams,
@@ -241,11 +236,9 @@ async def simulate_putt_3d(
         SurfaceSpec,
         bumpy_friction_field,
         bumpy_height_field,
-        simulate_strike,
         stimp_to_rolling_mu,
     )
 
-    extent_m = 20.0
     height = HeightField.planar(
         grade_percent=payload.grade_percent,
         aspect_deg=payload.downhill_aspect_deg,
@@ -287,6 +280,24 @@ async def simulate_putt_3d(
         hosel_toe_m=payload.hosel_toe_m,
         hosel_forward_m=payload.hosel_forward_m,
     )
+    return surface, height, putter
+
+
+@router.post("/simulate-3d", response_model=Putt3DSimulationResponse)
+@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
+@handle_api_errors
+async def simulate_putt_3d(
+    request: Request, payload: Putt3DSimulationRequest
+) -> Putt3DSimulationResponse:
+    """Run the canonical surface-aware strike model for R3F playback."""
+    del request
+    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
+        USGA_STIMP_ROLL_MODEL,
+    )
+    from src.shared.python.putting_dynamics import simulate_strike
+
+    extent_m = 20.0
+    surface, height, putter = _build_putting_3d_surface(payload, extent_m)
     result = simulate_strike(
         putter,
         surface,
