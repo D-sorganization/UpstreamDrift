@@ -1,8 +1,8 @@
 # ADR-0045: Putting Integration — One Experience, Two Preserved Physics Stacks
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-30
-- Decision Makers: repo owner (approval required before any implementation)
+- Decision Makers: repo owner (accepted 2026-08-30)
 - Related Issues/PRs: #9143, Tools#4800 (P2/P9), Tools#4816, Tools#4819, launcher tiles `putting_green` and `rate_of_closure`
 
 ## Context
