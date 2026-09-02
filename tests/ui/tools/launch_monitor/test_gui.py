@@ -262,6 +262,18 @@ def _write_synthetic_corpus(root: Path) -> Path:
         partition = dataset / f"source_id={source_id}"
         partition.mkdir(parents=True)
         group.to_parquet(partition / "part-0.parquet", index=False)
+    # The ADR-0048 D30 gate refuses a corpus its manifest does not describe.
+    (dataset / "_MANIFEST.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "sources": {"synthetic_trackman": {}, "synthetic_mevo": {}},
+                "total_rows": len(rows),
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
     (root / "data" / "authority" / "AUTHORITY_MANIFEST.json").write_text(
         "{}", encoding="utf-8"
     )
@@ -308,6 +320,20 @@ def test_load_private_corpus_fails_closed_without_authority(
 ) -> None:
     with pytest.raises(FileNotFoundError):
         widget.load_private_corpus_sessions(tmp_path / "absent")
+    assert widget.project.sessions == []
+
+
+def test_load_private_corpus_fails_closed_on_an_unvalidated_corpus(
+    widget,  # noqa: ANN001
+    tmp_path: Path,
+) -> None:
+    """ADR-0048 D30: the workbench refuses a corpus its manifest disowns."""
+    root = _write_synthetic_corpus(tmp_path / "checkout")
+    dataset = root / "data" / "authority" / "database" / "shot_corpus_parquet"
+    (dataset / "_MANIFEST.json").unlink()
+
+    with pytest.raises(FileNotFoundError, match="manifest not found"):
+        widget.load_private_corpus_sessions(root)
     assert widget.project.sessions == []
 
 

@@ -54,6 +54,18 @@ infer monitor identity from headers, filename, or directory layout. Missing
 access or a missing pinned file fails closed; there is no public download
 fallback.
 
+Loading the partitioned shot corpus (`load_private_corpus`, and the workbench's
+**Load Private Corpus** action) additionally requires the authority's
+`_MANIFEST.json` beside the `source_id=` partitions, and refuses a corpus that
+manifest does not describe. Five checks fail closed before any row is read: a
+missing manifest, an unsupported `schema_version`, a declared `total_rows`
+outside the 300,000-row desktop retained-data cap, a row count that disagrees
+with the corpus on disk, and a source set that disagrees with the partition
+directories. Each refusal names the check that fired. The checks always measure
+the whole corpus, so restricting a load to some sources or metrics neither
+weakens nor bypasses them. There is no option to skip validation: an
+unvalidated corpus is not a corpus.
+
 ### Full-Corpus Dataset Jobs
 
 Authorized web clients can analyze a corpus larger than the 20,000-record
