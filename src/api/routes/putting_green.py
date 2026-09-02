@@ -6,13 +6,26 @@ Provides REST endpoints for the putting green simulation tool page:
 - Get aim-line assist calculations
 - Scatter analysis for practice mode
 
+Roll-model provenance (ADR-0045 F1, issue #9343):
+    Two roll models are preserved and both are reachable from this router, so
+    every response that reports a roll-out result names the model that produced
+    it. ``/simulate``, ``/scatter`` and ``/read-green`` run the UD engine
+    (``ud-legacy-roll/1``); ``/simulate-3d`` runs the surface-aware strike model
+    in ``src.shared.python.putting_dynamics``, which restates the Tools
+    stimpmeter law (``usga-stimp-roll/1``). The two differ by the ~2.854
+    roll-out ratio pinned in Tools#4819, so their numbers must never be
+    compared without the names. ``roll_model`` is a required response field:
+    a handler that fails to set it raises rather than emitting an unnamed
+    result. ``/contours`` reports surface geometry only — no roll model is
+    involved, so it carries no name.
+
 See issue #1206
 """
 
 from __future__ import annotations
 
 import math
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 from fastapi import APIRouter, Request
@@ -21,6 +34,9 @@ from pydantic import BaseModel, Field
 from src.api.middleware.error_handler import handle_api_errors
 from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import PostconditionError, precondition
+
+if TYPE_CHECKING:
+    from src.shared.python.putting_dynamics import HeightField, PutterState, SurfaceSpec
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
 
@@ -51,6 +67,9 @@ class PuttSimulationRequest(BaseModel):
 class PuttSimulationResponse(BaseModel):
     """Response containing putt simulation results."""
 
+    roll_model: str = Field(
+        description="Roll model that produced this result (ADR-0045 F1)"
+    )
     positions: list[list[float]]
     velocities: list[list[float]]
     times: list[float]
@@ -75,6 +94,9 @@ class GreenReadingRequest(BaseModel):
 class GreenReadingResponse(BaseModel):
     """Response with green reading data."""
 
+    roll_model: str = Field(
+        description="Roll model behind the recommended speed (ADR-0045 F1)"
+    )
     distance: float
     total_break: float
     recommended_speed: float
@@ -102,6 +124,9 @@ class ScatterAnalysisRequest(BaseModel):
 class ScatterAnalysisResponse(BaseModel):
     """Response with scatter analysis results."""
 
+    roll_model: str = Field(
+        description="Roll model that produced these results (ADR-0045 F1)"
+    )
     final_positions: list[list[float]]
     holed_count: int
     total_simulations: int
@@ -185,6 +210,9 @@ class Putt3DSurfaceResponse(BaseModel):
 class Putt3DSimulationResponse(BaseModel):
     """Complete deterministic playback payload for the R3F client."""
 
+    roll_model: str = Field(
+        description="Roll model that produced this playback (ADR-0045 F1)"
+    )
     samples: list[Putt3DSampleResponse]
     collision: Putt3DCollisionResponse
     surface: Putt3DSurfaceResponse
@@ -197,14 +225,9 @@ class Putt3DSimulationResponse(BaseModel):
 # -- Endpoints --
 
 
-@router.post("/simulate-3d", response_model=Putt3DSimulationResponse)
-@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
-@handle_api_errors
-async def simulate_putt_3d(
-    request: Request, payload: Putt3DSimulationRequest
-) -> Putt3DSimulationResponse:
-    """Run the canonical surface-aware strike model for R3F playback."""
-    del request
+def _build_putting_3d_surface(
+    payload: Putt3DSimulationRequest, extent_m: float = 20.0
+) -> tuple[SurfaceSpec, HeightField, PutterState]:
     from src.shared.python.putting_dynamics import (
         FrictionField,
         FrictionParams,
@@ -213,11 +236,9 @@ async def simulate_putt_3d(
         SurfaceSpec,
         bumpy_friction_field,
         bumpy_height_field,
-        simulate_strike,
         stimp_to_rolling_mu,
     )
 
-    extent_m = 20.0
     height = HeightField.planar(
         grade_percent=payload.grade_percent,
         aspect_deg=payload.downhill_aspect_deg,
@@ -259,6 +280,24 @@ async def simulate_putt_3d(
         hosel_toe_m=payload.hosel_toe_m,
         hosel_forward_m=payload.hosel_forward_m,
     )
+    return surface, height, putter
+
+
+@router.post("/simulate-3d", response_model=Putt3DSimulationResponse)
+@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
+@handle_api_errors
+async def simulate_putt_3d(
+    request: Request, payload: Putt3DSimulationRequest
+) -> Putt3DSimulationResponse:
+    """Run the canonical surface-aware strike model for R3F playback."""
+    del request
+    from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
+        USGA_STIMP_ROLL_MODEL,
+    )
+    from src.shared.python.putting_dynamics import simulate_strike
+
+    extent_m = 20.0
+    surface, height, putter = _build_putting_3d_surface(payload, extent_m)
     result = simulate_strike(
         putter,
         surface,
@@ -287,6 +326,7 @@ async def simulate_putt_3d(
         for sample in result.samples
     ]
     return Putt3DSimulationResponse(
+        roll_model=USGA_STIMP_ROLL_MODEL,
         samples=samples,
         collision=Putt3DCollisionResponse(
             ball_speed_mps=collision.ball_speed_mps,
@@ -371,6 +411,7 @@ async def simulate_putt(
     )
 
     return PuttSimulationResponse(
+        roll_model=result.roll_model,
         positions=result.positions.tolist(),
         velocities=result.velocities.tolist(),
         times=result.times.tolist(),
@@ -392,6 +433,7 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
         GreenSurface,
     )
     from src.engines.physics_engines.putting_green.python.simulator import (
+        ROLL_MODEL_FIELD,
         PuttingGreenSimulator,
     )
     from src.engines.physics_engines.putting_green.python.turf_properties import (
@@ -413,6 +455,7 @@ async def read_green(request: GreenReadingRequest) -> GreenReadingResponse:
     )
 
     return GreenReadingResponse(
+        roll_model=str(reading[ROLL_MODEL_FIELD]),
         distance=float(reading["distance"]),
         total_break=float(reading["total_break"]),
         recommended_speed=float(reading["recommended_speed"]),
@@ -483,6 +526,7 @@ async def scatter_analysis(
         avg_dist = float("nan")
 
     return ScatterAnalysisResponse(
+        roll_model=sim.roll_model,
         final_positions=final_positions,
         holed_count=holed_count,
         total_simulations=len(results),

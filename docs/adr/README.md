@@ -52,12 +52,14 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0045](0045-putting-integration-one-experience-two-preserved-stacks.md) | Putting Integration — One Experience, Two Preserved Physics Stacks                | Accepted | 2026-08-30 |
 | [0046](0046-launch-monitor-analytics-single-model-layer.md)             | Launch-Monitor Analytics — Two Workbenches, One Model Layer                       | Accepted | 2026-08-30 |
 | [0047](0047-trajectory-visualization-shared-wire-preserved-viewers.md)  | Trajectory Visualization — Shared Wire, Preserved Viewers                         | Accepted | 2026-08-30 |
+| [0048](0048-launch-monitor-port-plan.md)                                | Launch-Monitor Port Plan                                                          | Proposed | 2026-09-01 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.
 
 ## Recent Amendments
 
+- **2026-09-02:** ADR-0044 corrected `ShotResult` force field name reference from `forces_n_m` to `forces_n` (#9375).
 - **2026-08-29:** ADR-0044 keeps BunkerShot3D in-plane: F1's
   `RefusedQuantity.OUT_OF_PLANE`, the `EXTRUDED` slice labelling, and the
   ball-as-cylinder caveat are recorded as the tool's durable position rather

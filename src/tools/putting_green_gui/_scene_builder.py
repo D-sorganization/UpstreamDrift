@@ -11,7 +11,8 @@ Design by Contract:
     * :func:`build_putt_scene` validates every control against its documented
       range and raises ``ValueError`` with a descriptive message.
     * Postcondition: the returned scene always carries a non-empty trajectory
-      whose points lie on the rendered terrain grid.
+      whose points lie on the rendered terrain grid, and always names the roll
+      model that produced it (ADR-0045 F1, issue #9343).
 """
 
 from __future__ import annotations
@@ -82,6 +83,9 @@ class PuttScene:
     duration_s: float
     peak_break_m: float
     launch_speed_ms: float
+    #: Roll model that produced this scene (ADR-0045 F1); scenes from
+    #: different models must never be compared without it.
+    roll_model: str
 
 
 def _validate(config: PuttConfig) -> None:
@@ -129,21 +133,11 @@ def _perpendicular_break(
     return float(np.max(cross)) if cross.size else 0.0
 
 
-def build_putt_scene(config: PuttConfig) -> PuttScene:
-    """Run the real putting-green engine and package a render-ready scene.
-
-    Args:
-        config: Validated putt configuration.
-
-    Returns:
-        A :class:`PuttScene` with terrain, trajectory, and summary metrics.
-
-    Raises:
-        ValueError: If any control is outside its documented range.
-    """
-    _validate(config)
-
-    dist_m = config.cup_distance_ft * _FT_TO_M
+def _setup_grid_and_green(
+    config: PuttConfig, dist_m: float
+) -> tuple[
+    float, float, float, float, float, np.ndarray, np.ndarray, np.ndarray, GreenSurface
+]:
     margin_back, margin_front = 0.9, 1.4
     ball_x = margin_back
     cup_x = ball_x + dist_m
@@ -162,34 +156,37 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
     green = GreenSurface(width=width_x, height=height_y, turf=turf)
     green.set_heightmap(grid_z, smooth=False)
     green.set_hole_position(np.array([cup_x, mid_y]))
+    return ball_x, cup_x, width_x, height_y, mid_y, grid_x, grid_y, grid_z, green
 
-    sim = PuttingGreenSimulator(
-        green=green,
-        config=SimulationConfig(
-            integrator=config.integrator,
-            record_trajectory=True,
-            timestep=config.timestep_s,
-        ),
-    )
 
-    aim_rad = np.radians(config.aim_deg)
-    direction = np.array([np.cos(aim_rad), np.sin(aim_rad)])
-    stroke = StrokeParameters(speed=config.putter_speed_ms, direction=direction)
-    ball_xy = np.array([ball_x, mid_y])
-    result = sim.simulate_putt(stroke, ball_position=ball_xy)
-
-    positions = np.asarray(result.positions, dtype=float).reshape(-1, 2)
+def _compute_scene_trajectory(
+    result: object,
+    green: GreenSurface,
+    ball_xy: np.ndarray,
+) -> tuple[np.ndarray, list[str]]:
+    positions = np.asarray(getattr(result, "positions", []), dtype=float).reshape(-1, 2)
     if positions.shape[0] == 0:
         positions = ball_xy.reshape(1, 2)
     elevations = np.array([green.get_elevation_at(p) for p in positions])
     trajectory_xyz = np.column_stack([positions, elevations + _BALL_LIFT_M])
 
-    modes = result.modes or []
+    modes = getattr(result, "modes", None) or []
     roll_modes = [str(m) for m in modes]
     if len(roll_modes) < positions.shape[0]:
         roll_modes += ["RollMode.STOPPED"] * (positions.shape[0] - len(roll_modes))
     roll_modes = roll_modes[: positions.shape[0]]
+    return trajectory_xyz, roll_modes
 
+
+def _compute_scene_lines(
+    green: GreenSurface,
+    ball_xy: np.ndarray,
+    ball_x: float,
+    mid_y: float,
+    cup_x: float,
+    direction: np.ndarray,
+    dist_m: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     cup_z = float(green.get_elevation_at(np.array([cup_x, mid_y])))
     start_z = float(green.get_elevation_at(ball_xy))
     start_xyz = np.array([ball_x, mid_y, start_z + _BALL_LIFT_M])
@@ -208,6 +205,57 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
     )
     target_line_xyz = np.array(
         [[ball_x, mid_y, start_z + _BALL_LIFT_M], [cup_x, mid_y, cup_z + _BALL_LIFT_M]]
+    )
+    return start_xyz, cup_xyz, aim_line_xyz, target_line_xyz
+
+
+def build_putt_scene(config: PuttConfig) -> PuttScene:
+    """Run the real putting-green engine and package a render-ready scene.
+
+    Args:
+        config: Validated putt configuration.
+
+    Returns:
+        A :class:`PuttScene` with terrain, trajectory, and summary metrics.
+
+    Raises:
+        ValueError: If any control is outside its documented range.
+    """
+    _validate(config)
+
+    dist_m = config.cup_distance_ft * _FT_TO_M
+    (
+        ball_x,
+        cup_x,
+        width_x,
+        height_y,
+        mid_y,
+        grid_x,
+        grid_y,
+        grid_z,
+        green,
+    ) = _setup_grid_and_green(config, dist_m)
+
+    sim = PuttingGreenSimulator(
+        green=green,
+        config=SimulationConfig(
+            integrator=config.integrator,
+            record_trajectory=True,
+            timestep=config.timestep_s,
+        ),
+    )
+
+    aim_rad = np.radians(config.aim_deg)
+    direction = np.array([np.cos(aim_rad), np.sin(aim_rad)])
+    stroke = StrokeParameters(speed=config.putter_speed_ms, direction=direction)
+    ball_xy = np.array([ball_x, mid_y])
+    result = sim.simulate_putt(stroke, ball_position=ball_xy)
+
+    trajectory_xyz, roll_modes = _compute_scene_trajectory(result, green, ball_xy)
+    positions = trajectory_xyz[:, :2]
+
+    start_xyz, cup_xyz, aim_line_xyz, target_line_xyz = _compute_scene_lines(
+        green, ball_xy, ball_x, mid_y, cup_x, direction, dist_m
     )
 
     final_xy = np.asarray(result.final_position, dtype=float).reshape(-1)[:2]
@@ -236,4 +284,5 @@ def build_putt_scene(config: PuttConfig) -> PuttScene:
         duration_s=float(result.duration),
         peak_break_m=_perpendicular_break(positions, ball_xy, np.array([cup_x, mid_y])),
         launch_speed_ms=launch_speed,
+        roll_model=result.roll_model,
     )
