@@ -6,7 +6,9 @@ from typing import Any
 import numpy as np
 
 from src.engines.physics_engines.putting_green.python._checkpoint import (
+    CheckpointProvenance,
     get_checkpoint,
+    read_checkpoint_provenance,
     restore_checkpoint,
 )
 from src.engines.physics_engines.putting_green.python._dynamics import (
@@ -29,6 +31,7 @@ from src.engines.physics_engines.putting_green.python._green_loader import (
 from src.engines.physics_engines.putting_green.python._practice_mode import (
     compute_aim_line,
     export_result,
+    load_result,
     read_green,
     simulate_scatter,
     simulate_with_feedback,
@@ -41,6 +44,7 @@ from src.engines.physics_engines.putting_green.python._wind_physics import (
     compute_wind_force,
 )
 from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
+    ROLL_MODEL_FIELD,
     BallRollPhysics,
     BallState,
     RollMode,
@@ -132,6 +136,15 @@ class PuttingGreenSimulator:
     def model_name(self) -> str:
         """Return model name."""
         return "putting_green"
+
+    @property
+    def roll_model(self) -> str:
+        """Name of the roll model behind every result this engine emits.
+
+        ADR-0045 F1: results carrying different roll-model names must never be
+        compared numerically. Delegates to the physics that owns the law.
+        """
+        return self._physics.roll_model
 
     @property
     def ball_mass(self) -> float:
@@ -337,6 +350,7 @@ class PuttingGreenSimulator:
             holed=holed,
             final_position=self._ball_state.position.copy(),
             modes=self._trajectory["modes"],
+            roll_model=self.roll_model,
         )
 
     def _record_terminal_step(self) -> None:
@@ -349,11 +363,12 @@ class PuttingGreenSimulator:
         )
 
     def get_current_trajectory(self) -> dict[str, Any]:
-        """Get trajectory recorded so far."""
+        """Get trajectory recorded so far, named with its roll model."""
         return {
             "positions": np.array(self._trajectory["positions"]),
             "velocities": np.array(self._trajectory["velocities"]),
             "times": np.array(self._trajectory["times"]),
+            ROLL_MODEL_FIELD: self.roll_model,
         }
 
     def get_checkpoint(self) -> StateCheckpoint:
@@ -361,8 +376,18 @@ class PuttingGreenSimulator:
         return get_checkpoint(self)
 
     def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
-        """Restore state from checkpoint."""
+        """Restore state from checkpoint (archive-tolerant, see #9343)."""
         restore_checkpoint(self, checkpoint)
+
+    def checkpoint_provenance(
+        self, checkpoint: StateCheckpoint
+    ) -> CheckpointProvenance:
+        """Classify a checkpoint's roll-model provenance.
+
+        Pre-ADR-0045 archives read back with ``roll_model=None`` instead of
+        being relabelled with the model in use today.
+        """
+        return read_checkpoint_provenance(checkpoint)
 
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute mass matrix (scalar mass for single ball)."""
@@ -463,5 +488,9 @@ class PuttingGreenSimulator:
         return read_green(self, ball_position, target)
 
     def export_result(self, result: SimulationResult, path: str) -> None:
-        """Export simulation result to file."""
+        """Export simulation result to file (always names its roll model)."""
         export_result(result, path)
+
+    def load_result(self, path: str) -> SimulationResult:
+        """Load an exported result, refusing a payload without a roll model."""
+        return load_result(path)
