@@ -21,7 +21,7 @@ from src.shared.python.physics.flight_models import (
     TrajectoryPoint,
     UnifiedLaunchConditions,
 )
-from src.shared.python.physics.flight_trajectory_import import (
+from src.api.routes._ball_flight_trajectory_import import (
     ImportedBallFlightTrajectory,
     import_trajectory_record,
     summarize_imported_trajectory,

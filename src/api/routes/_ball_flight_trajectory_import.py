@@ -1,13 +1,19 @@
-"""Import ``ball_flight_trajectory/1`` records for the BallFlight page (ADR-0047 H3, #9352).
+"""Import ``ball_flight_trajectory/1`` records for the BallFlight route (ADR-0047 H3, #9352).
 
-The import half of the H1 wire (:mod:`.flight_trajectory_export` is the
-UD export half; Tools' ``flight_interchange.adapters`` is the other).
-This module never reimplements the wire's own validation: it resolves
-the vendored Tools checkout through the canonical facade
-(:func:`src.launchers.tools_repo_path.resolve_tools_repo` — the same
-posture every other production consumer of vendored Tools code uses,
-e.g. :mod:`src.shared.python.biomechanics.force_source_attribution`)
-and calls the vendored reader,
+Private helper for :mod:`src.api.routes.ball_flight` — the import half of
+the H1 wire (:mod:`src.shared.python.physics.flight_trajectory_export` is
+the UD export half; Tools' ``flight_interchange.adapters`` is the other).
+Lives under ``src/api/routes/`` rather than ``src/shared/python/`` because
+it resolves the vendored Tools checkout through the canonical
+application-layer facade
+(:func:`src.launchers.tools_repo_path.resolve_tools_repo`), and
+``src/shared/python/`` may never import upward from ``src.launchers`` or
+``src.api`` (``tests/unit/repo_hygiene/test_import_boundaries.py`` enforces
+this). This module never reimplements the wire's own validation: it
+resolves the checkout via that facade — the same posture every other
+production consumer of vendored Tools code uses, e.g.
+:mod:`src.shared.python.biomechanics.force_source_attribution` — and calls
+the vendored reader,
 ``shared.python.swing_sim.flight_interchange.ball_flight_trajectory_from_json``,
 directly. A record produced by either flight-model family — UD's
 ``physics/flight_models.py`` or Tools' ``swing_sim.flight`` — parses
@@ -47,7 +53,7 @@ from typing import Any
 from src.launchers.tools_repo_path import resolve_tools_repo
 from src.shared.python.physics.flight_trajectory_export import FLIGHT_FRAME_ID
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 
 __all__ = [
     "ImportedBallFlightSummary",
