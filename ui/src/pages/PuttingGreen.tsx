@@ -500,6 +500,9 @@ export function PuttingGreenPage() {
               `${(result.total_distance_m / METERS_PER_YARD).toFixed(2)} yd`,
             ],
             ["Outcome", result.holed ? "Holed" : "Stopped"],
+            // ADR-0045 F1 (#9343): results from different roll models
+            // must never be compared without the model name shown.
+            ["Roll Model", result.roll_model],
           ].map(([label, value]) => (
             <div
               key={label}
