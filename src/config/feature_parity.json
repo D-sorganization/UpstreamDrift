@@ -157,10 +157,9 @@
       "pyqt": "src/launchers/_shot_tracer_gui.py",
       "api": "src/api/routes/ball_flight.py",
       "web": "ui/src/pages/BallFlight.tsx",
-      "status": "gap",
-      "issue": 9352,
+      "status": "parity",
       "tiles": ["shot_tracer"],
-      "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 H2 (#9351) gave the PyQt tile cross-family trajectory-record import (a Tools swing_sim flight overlaid on native models); the web BallFlight page gains the same via ADR-0047 H3, tracked in #9352."
+      "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 gave both surfaces cross-family trajectory-record import, each overlaying imported swing_sim.ball_flight_trajectory/1 records from either flight-model family and labeling them by model_family/model_name: the web BallFlight page via H3 (#9352, POST /tools/ball-flight/import), and the PyQt6 Shot Tracer via H2 (#9351, the vendored flight_interchange reader)."
     },
     "simulation.swing_objective_lab": {
       "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",
@@ -257,12 +256,12 @@
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
     "tools.rate_of_closure": {
-      "title": "Rate of Closure Impact Explorer (clubhead impact-point delivery analysis)",
-      "pyqt": null,
-      "api": null,
-      "web": null,
-      "status": "exempt",
-      "reason": "Vendored Tools desktop GUI (vendor/ud-tools src/rate_of_closure); web surface is served by the Tools repo's own build, not UpstreamDrift.",
+      "title": "Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite)",
+      "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
+      "api": "src/api/local_server.py",
+      "web": "ui/src/pages/ImpactExplorer.tsx",
+      "status": "parity",
+      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
       "tiles": ["rate_of_closure"]
     },
     "tools.launch_monitor_analytics": {

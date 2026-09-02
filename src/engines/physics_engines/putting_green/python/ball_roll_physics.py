@@ -21,14 +21,38 @@ Design by Contract:
     - Positions in meters
     - Time steps should be small (<= 0.01s) for accuracy
 
+Roll-model provenance (ADR-0045 F1, issue #9343):
+    UpstreamDrift preserves two putting roll models, and this module implements
+    exactly one of them: ``ud-legacy-roll/1`` (:data:`UD_LEGACY_ROLL_MODEL`),
+    the agronomic law ``mu ~= 0.196/stimp`` scaled by height-of-cut, condition,
+    and grain factors (see :mod:`.turf_properties`).
+
+    The preserved counterpart is ``usga-stimp-roll/1``
+    (:data:`USGA_STIMP_ROLL_MODEL`), the Tools stack's stimpmeter-geometry law
+    ``mu ~= 0.559/stimp`` (1.83 m/s USGA release speed) with Holmes/Penner
+    speed-dependent hole capture; inside this repository that law is
+    implemented by ``src.shared.python.putting_dynamics`` (restated from Tools
+    ``swing_sim.putting.roll``) and reached by the ``/simulate-3d`` route.
+
+    The divergence is physics, not a bug: both laws share the ``1/stimp`` form
+    and assume different stimpmeter release speeds, which pins the roll-out
+    ratio between them at the constant ~2.854 gated by Tools#4819 (P9).
+    Because the two models disagree by that fixed factor, **results produced by
+    different models must never be compared numerically without their model
+    names attached.** Every result document this engine emits therefore carries
+    a ``roll_model`` field (:data:`ROLL_MODEL_FIELD`), and readers of those
+    documents call :func:`require_roll_model` to refuse an unnamed payload.
+
 References:
     - Cross, R. (2006). Physics of Ball Rolling. American Journal of Physics.
     - Penner, A.R. (2002). The Physics of Putting. Canadian Journal of Physics.
+    - ADR-0045 ``docs/adr/0045-putting-integration-one-experience-two-preserved-stacks.md``
 """
 
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
@@ -44,6 +68,93 @@ from src.shared.python.core.physics_constants import (
     GOLF_BALL_RADIUS_M,
     GRAVITY_M_S2,
 )
+
+
+#: Provenance name of the roll model implemented in this module (ADR-0045 F1).
+UD_LEGACY_ROLL_MODEL = "ud-legacy-roll/1"
+
+#: Provenance name of the preserved counterpart model (Tools stimpmeter law).
+USGA_STIMP_ROLL_MODEL = "usga-stimp-roll/1"
+
+#: Key under which every putt result document carries its roll-model name.
+ROLL_MODEL_FIELD = "roll_model"
+
+#: The roll models ADR-0045 preserves. Readers accept no other name.
+KNOWN_ROLL_MODELS = frozenset({UD_LEGACY_ROLL_MODEL, USGA_STIMP_ROLL_MODEL})
+
+
+class RollModelProvenanceError(ValueError):
+    """A result document is missing, blank, or misnaming its roll model.
+
+    Raised by the fail-closed readers required by ADR-0045: an unnamed putt
+    result cannot be compared with anything, because the two preserved models
+    differ by the ~2.854 roll-out ratio pinned in Tools#4819.
+    """
+
+
+def require_roll_model(document: Mapping[str, Any], *, source: str) -> str:
+    """Read the roll-model name from a result document, fail-closed.
+
+    Design by Contract:
+        Preconditions:
+            - ``source`` is a non-empty description used in error messages.
+        Postconditions:
+            - The returned name is a member of :data:`KNOWN_ROLL_MODELS`.
+
+    Args:
+        document: Result document (mapping) to inspect.
+        source: Human-readable origin of the document, quoted in errors.
+
+    Returns:
+        The roll-model name carried by the document.
+
+    Raises:
+        ValueError: If ``source`` is empty.
+        RollModelProvenanceError: If the document is not a mapping, omits
+            :data:`ROLL_MODEL_FIELD`, carries a blank name, or names a model
+            this repository does not preserve.
+    """
+    if not source:
+        raise ValueError("source must be a non-empty description")
+    if not isinstance(document, Mapping):
+        raise RollModelProvenanceError(
+            f"{source}: expected a result document mapping carrying "
+            f"{ROLL_MODEL_FIELD!r}, got {type(document).__name__}"
+        )
+    if ROLL_MODEL_FIELD not in document:
+        raise RollModelProvenanceError(
+            f"{source}: result document has no {ROLL_MODEL_FIELD!r} field; "
+            "ADR-0045 requires every putt result to name its roll model "
+            f"(expected one of {sorted(KNOWN_ROLL_MODELS)})"
+        )
+    name = document[ROLL_MODEL_FIELD]
+    if not isinstance(name, str) or not name.strip():
+        raise RollModelProvenanceError(
+            f"{source}: {ROLL_MODEL_FIELD!r} must be a non-empty model name, "
+            f"got {name!r}"
+        )
+    if name not in KNOWN_ROLL_MODELS:
+        raise RollModelProvenanceError(
+            f"{source}: unknown roll model {name!r}; ADR-0045 preserves "
+            f"{sorted(KNOWN_ROLL_MODELS)}"
+        )
+    return name
+
+
+def validate_roll_model_name(name: str, *, source: str) -> str:
+    """Validate a bare roll-model name (not a whole document), fail-closed.
+
+    Args:
+        name: Candidate roll-model name.
+        source: Human-readable origin, quoted in errors.
+
+    Returns:
+        The validated name.
+
+    Raises:
+        RollModelProvenanceError: If the name is blank or unknown.
+    """
+    return require_roll_model({ROLL_MODEL_FIELD: name}, source=source)
 
 
 class RollMode(Enum):
@@ -159,6 +270,14 @@ class BallRollPhysics:
 
         # Previous acceleration for Verlet integration
         self._prev_acceleration: np.ndarray | None = None
+
+    @property
+    def roll_model(self) -> str:
+        """Name of the roll model these dynamics implement (ADR-0045 F1).
+
+        Postcondition: the returned name is in :data:`KNOWN_ROLL_MODELS`.
+        """
+        return UD_LEGACY_ROLL_MODEL
 
     def determine_roll_mode(self, state: BallState) -> RollMode:
         """Determine current rolling mode from state.
@@ -596,4 +715,5 @@ class BallRollPhysics:
             "holed": holed,
             "final_position": state.position.copy(),
             "final_velocity": state.velocity.copy(),
+            ROLL_MODEL_FIELD: self.roll_model,
         }
