@@ -8,8 +8,14 @@ it resolves the vendored Tools checkout through the canonical
 application-layer facade
 (:func:`src.launchers.tools_repo_path.resolve_tools_repo`), and
 ``src/shared/python/`` may never import upward from ``src.launchers`` or
-``src.api`` (``tests/unit/repo_hygiene/test_import_boundaries.py`` enforces
-this). This module never reimplements the wire's own validation: it
+``src.api`` (``tests/unit/repo_hygiene/test_import_boundaries.py``
+enforces this). The facade import itself is deferred to first use inside
+:func:`_load_vendored_reader` rather than hoisted to module level:
+``scripts/check_dependency_direction.py`` forbids ``src/api`` from taking
+a *module-level* dependency on ``src.launchers`` (the same posture
+:mod:`src.api.services.launcher_service` and
+:mod:`src.api.routes.diagnostics` already use for their own launchers
+imports). This module never reimplements the wire's own validation: it
 resolves the checkout via that facade — the same posture every other
 production consumer of vendored Tools code uses, e.g.
 :mod:`src.shared.python.biomechanics.force_source_attribution` — and calls
@@ -50,7 +56,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-from src.launchers.tools_repo_path import resolve_tools_repo
 from src.shared.python.physics.flight_trajectory_export import FLIGHT_FRAME_ID
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -171,6 +176,9 @@ def _load_vendored_reader() -> Callable[[str], Any]:
             or the vendored ``flight_interchange`` package fails to
             import from it.
     """
+    # Deferred rather than module-level: see the module docstring.
+    from src.launchers.tools_repo_path import resolve_tools_repo
+
     try:
         resolution = resolve_tools_repo(_REPO_ROOT, os.environ.get("TOOLS_REPO_PATH"))
     except RuntimeError as exc:
