@@ -33,6 +33,27 @@ before asserting the adapter refuses it with its documented non-conservative-slo
 `tests/integration/launch_monitor_drift` CI-guard helper (`require_vendored_tools_stack`) is
 imported, not reimplemented, for the same skip-locally/run-in-CI posture.
 
+## Vendored Tools Pin: Flight-Interchange Authority (ADR-0047 H1)
+
+The `vendor/ud-tools` gitlink advances from
+`cc883cbaf63157b58c71cba385a683df2762b0cb` to
+`5e0eaade29441dd65d667151b5108c8925774d73`, the Tools `main` squash commit for
+Tools #4888, which adds the `shared.python.swing_sim.flight_interchange`
+package to the vendored tree. The
+vendored reader is the interchange authority for the
+`swing_sim.ball_flight_trajectory/1` record; UpstreamDrift's exporter in
+`src/shared/python/physics/flight_trajectory_export.py` is verified against it
+by the four `TestCrossFamilySanity` gates in
+`tests/unit/physics/test_flight_trajectory_export.py`, which arm automatically
+once the pin carries the module: records parse with the vendored reader and
+round-trip byte-identically, the reimplemented SHA-256 parameter digest equals
+Tools' `parameter_digest`, and the two flight-model families produce same-order
+carry for identical launch conditions. The companion catalog provenance
+contract (`tests/companion/test_companion_catalog.py`) pins the exact gitlink
+and moves with it. No UpstreamDrift runtime behavior changes; the prior pin
+statement under "Swing Objective Lab Web Parity (#9128)" is superseded by this
+section.
+
 ## Deterministic AffineDrift Companion Authority (#9174)
 
 ADR-0043 establishes UpstreamDrift as the one-way provider of the strict v1
