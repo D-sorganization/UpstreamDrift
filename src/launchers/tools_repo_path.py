@@ -14,6 +14,7 @@ themselves (Law of Demeter, issue #8858):
 from __future__ import annotations
 
 import logging
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -167,8 +168,59 @@ def resolve_tools_source_root(repo_root: Path, env_value: str | None) -> Path:
     return vendor_source
 
 
+def require_tools_repo(
+    repo_root: Path, env_value: str | None = None
+) -> ToolsRepoResolution:
+    """Resolve the Tools repository or raise RuntimeError when unavailable.
+
+    Preconditions:
+        ``repo_root`` is a ``pathlib.Path`` (the UpstreamDrift checkout root);
+        ``env_value`` is the raw ``TOOLS_REPO_PATH`` value or ``None``.
+
+    Postconditions:
+        Returns a valid ``ToolsRepoResolution``.
+
+    Raises:
+        RuntimeError: If Tools checkout cannot be resolved or is invalid.
+    """
+    try:
+        resolution = resolve_tools_repo(repo_root, env_value)
+    except RuntimeError as exc:
+        raise RuntimeError(f"Tools checkout unavailable: {exc}") from exc
+    if resolution is None:
+        raise RuntimeError(
+            "Tools repository not found: no TOOLS_REPO_PATH, no vendored "
+            "vendor/ud-tools, no sibling checkout. Initialize the vendored "
+            "submodule with 'git submodule update --init vendor/ud-tools'."
+        )
+    return resolution
+
+
+def ensure_tools_importable(
+    repo_root: Path, env_value: str | None = None
+) -> ToolsRepoResolution:
+    """Resolve Tools repository and ensure its src/ directory is on sys.path.
+
+    Preconditions:
+        ``repo_root`` is a ``pathlib.Path``; ``env_value`` is a string or None.
+
+    Postconditions:
+        ``resolution.path / 'src'`` is present in ``sys.path``.
+
+    Raises:
+        RuntimeError: If Tools checkout cannot be resolved or is invalid.
+    """
+    resolution = require_tools_repo(repo_root, env_value)
+    src_dir = str(resolution.path / "src")
+    if src_dir not in sys.path:
+        sys.path.insert(0, src_dir)
+    return resolution
+
+
 __all__ = [
     "ToolsRepoResolution",
+    "ensure_tools_importable",
+    "require_tools_repo",
     "resolve_explicit_tools_root",
     "resolve_tools_repo",
     "resolve_tools_source_root",

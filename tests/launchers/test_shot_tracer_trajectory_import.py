@@ -234,7 +234,10 @@ def test_import_refuses_when_vendor_unavailable(
     """A missing/unresolvable Tools checkout is refused, never a crash."""
     import src.launchers._shot_tracer_trajectory_import as import_module
 
-    monkeypatch.setattr(import_module, "resolve_tools_repo", lambda *_a, **_k: None)
+    def _mock_ensure(*_a: object, **_k: object) -> None:
+        raise RuntimeError("Tools repository not found: no vendored checkout")
+
+    monkeypatch.setattr(import_module, "ensure_tools_importable", _mock_ensure)
     record = _ud_family_record()
     path = _write_record(tmp_path, record, "ud_record.json")
 

@@ -51,7 +51,7 @@ from typing import Any
 
 import numpy as np
 
-from src.launchers.tools_repo_path import resolve_tools_repo
+from src.launchers.tools_repo_path import ensure_tools_importable
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.flight_trajectory_export import FLIGHT_FRAME_ID
 
@@ -135,19 +135,11 @@ def _load_vendored_reader() -> tuple[Callable[[str], Any], type[Exception]]:
             import from it.
     """
     try:
-        resolution = resolve_tools_repo(_REPO_ROOT, os.environ.get("TOOLS_REPO_PATH"))
-    except RuntimeError as exc:
-        raise TrajectoryImportError(f"Tools checkout unavailable: {exc}") from exc
-    if resolution is None:
-        raise TrajectoryImportError(
-            "Tools repository not found: no TOOLS_REPO_PATH, no vendored "
-            "vendor/ud-tools, no sibling checkout. Initialize the vendored "
-            "submodule with 'git submodule update --init vendor/ud-tools'."
+        resolution = ensure_tools_importable(
+            _REPO_ROOT, os.environ.get("TOOLS_REPO_PATH")
         )
-
-    src_dir = str(resolution.path / "src")
-    if src_dir not in sys.path:
-        sys.path.insert(0, src_dir)
+    except RuntimeError as exc:
+        raise TrajectoryImportError(str(exc)) from exc
 
     try:
         from shared.python.contracts import (  # type: ignore[import-not-found]

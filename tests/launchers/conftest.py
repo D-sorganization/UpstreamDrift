@@ -69,7 +69,10 @@ def tracer_widget(qapp, mock_flight_models) -> Generator[object, None, None]:
 
     from src.launchers.shot_tracer import MultiModelShotTracerWidget
 
-    with patch("src.launchers.shot_tracer.PYQTGRAPH_AVAILABLE", False):
+    with (
+        patch("src.launchers.shot_tracer.PYQTGRAPH_AVAILABLE", False),
+        patch("src.launchers._shot_tracer_gui.PYQTGRAPH_AVAILABLE", False),
+    ):
         parent_widget = QWidget()
         widget = MultiModelShotTracerWidget(parent=parent_widget)
         yield widget
