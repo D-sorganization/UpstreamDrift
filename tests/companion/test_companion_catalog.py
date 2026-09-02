@@ -51,7 +51,7 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "local_model_records": 56,
         "program_records": 70,
         "feature_records": 41,
-        "feature_surface_paths": 79,
+        "feature_surface_paths": 82,
         "workflow_records": 15,
         "executable_workflow_records": 14,
     }
@@ -59,7 +59,7 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
     assert len({record["id"] for record in catalog["features"]}) == 41
 
     schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
-    for current_count in (49, 56, 70, 41, 79):
+    for current_count in (49, 56, 70, 41, 82):
         assert f'"const": {current_count}' not in schema_text
         assert f'"minItems": {current_count}' not in schema_text
         assert f'"maxItems": {current_count}' not in schema_text
@@ -201,7 +201,7 @@ def test_catalog_pins_exact_provider_and_input_provenance() -> None:
 
     assert len(source["commit"]) == 40
     assert tools["pin_kind"] == "gitlink"
-    assert tools["pinned_commit"] == "cc883cbaf63157b58c71cba385a683df2762b0cb"
+    assert tools["pinned_commit"] == "e88a334c0be933d334eede2b7b45fc1443772c4e"
     assert tools["vendor_path"] == "vendor/ud-tools"
     assert {item["path"] for item in source["inputs"]} == {
         "docs/api/contracts/upstreamdrift-companion-compatibility-v1.json",

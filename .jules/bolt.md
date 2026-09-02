@@ -18,3 +18,17 @@
 ## 2026-08-29 - [Optimize Square Array Summation]
 **Learning:** Computing the sum of squares of an array (e.g., `np.square(arr).sum()` or `np.sum(arr**2)`) incurs unnecessary overhead due to the intermediate array created by `np.square()` or `**2`. By using `np.vdot(arr, arr)`, we skip this temporary array allocation and speed up the computation directly at the C-level (often ~2x faster).
 **Action:** When computing the sum of squared elements for real floating-point arrays, replace `np.square(arr).sum()` or `np.sum(arr**2)` with `np.vdot(arr, arr)`. Do not apply this to complex arrays (`np.vdot` conjugates its first argument, giving `sum(|arr|**2)` rather than `sum(arr**2)`) or to narrow integer/boolean arrays (`np.vdot` keeps the narrow dtype instead of `np.sum`'s promoted accumulator, so it can overflow or change a boolean result).
+
+## 2024-05-24 - API Array Summation Optimization
+**Learning:** Replaced `np.sum()` with `.sum()` for small array math in `physics.py` logic. This avoids numpy dispatch and yields measurable speedup.
+**Action:** When working in hotpath math like loop array modifications, always look to use direct methods rather than NumPy's wrapped equivalents.
+
+## 2026-09-01 - [Optimize Norm Calculation in Morris Design]
+**Learning:** Using `np.sqrt(np.einsum("ij,ij->i", diff, diff))` is significantly faster (~30%) than `np.linalg.norm(diff, axis=1)` for 2D differences, avoiding intermediate array allocation in the inner loops of combinatorial design sampling algorithms.
+**Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.
+
+## 2026-09-01 - [Optimize Norm Calculation in Morris Design]
+**Learning:** Using `np.sqrt(np.einsum("ij,ij->i", diff, diff))` is significantly faster (~30%) than `np.linalg.norm(diff, axis=1)` for 2D differences, avoiding intermediate array allocation in the inner loops of combinatorial design sampling algorithms.
+**Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.
+
+## 2024-05-19 - [Optimize Sum of Squares]

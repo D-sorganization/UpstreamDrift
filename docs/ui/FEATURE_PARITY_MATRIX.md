@@ -1,5 +1,14 @@
 # PyQt6 vs React UI Feature Parity Matrix
 
+> **DEPRECATED — superseded by the generated matrix.** This document is a
+> hand-written snapshot from 2026-06-12 and is no longer maintained. The
+> authoritative, machine-generated feature parity matrix is
+> [`docs/development/feature_parity_matrix.md`](../development/feature_parity_matrix.md),
+> produced from [`src/config/feature_parity.json`](../../src/config/feature_parity.json)
+> via `python -m scripts.generate_feature_parity_matrix` (see epic #7462 /
+> registry mechanism #7445). Prefer that document; this one is retained only
+> for historical context and may be removed in a future cleanup.
+
 **Document Date:** 2026-05-10  
 **Last Updated:** 2026-06-12
 **Related Issue:** #4913  
