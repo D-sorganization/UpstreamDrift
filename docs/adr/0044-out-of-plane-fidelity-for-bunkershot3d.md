@@ -50,7 +50,7 @@ that `TriangleMesh` — centroid, normal and area per triangle, heel to toe.
 `DRFTSolver` integrates a per-element resistive response over that whole
 surface (`solvers/drft.py`) and sums it into one `Wrench`. The geometry is
 there in every per-element computation; **`ShotResult` only ever exposes the
-aggregate `forces_n_m` / `torques_n_m` time series** (`solvers/shot.py`), so
+aggregate `forces_n` / `torques_n_m` time series** (`solvers/shot.py`), so
 nothing downstream can currently ask "how much of that came from the toe."
 
 **F0's other problem is not a gap but an open, unresolved inversion of its
