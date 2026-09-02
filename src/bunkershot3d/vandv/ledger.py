@@ -353,9 +353,7 @@ class LevelStep:
             VerificationError: If the levels are not adjacent and in range,
                 if no measurement is named, or if the rationale is missing.
         """
-        _require_levels_in_range(
-            self, ("from_level", "to_level"), label="level step "
-        )
+        _require_levels_in_range(self, ("from_level", "to_level"), label="level step ")
         if self.to_level != self.from_level + 1:
             raise VerificationError(
                 "a level step climbs exactly one level, got "
