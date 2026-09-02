@@ -19,6 +19,7 @@ Two producer fixtures cover both flight-model families named in ADR-0047:
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,7 @@ from src.launchers._shot_tracer_trajectory_import import (
     TrajectoryImportError,
     import_trajectory_record,
 )
+from src.launchers.tools_repo_path import resolve_tools_repo
 from src.shared.python.physics.flight_models import (
     FlightModelRegistry,
     FlightModelType,
@@ -44,6 +46,32 @@ from src.shared.python.physics.flight_trajectory_export import (
 )
 
 pytestmark = pytest.mark.unit
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _tools_vendor_available() -> bool:
+    """Mirror the module's own resolution so the skip reason is exact.
+
+    ``unit-test-gate`` does not materialize ``vendor/ud-tools`` (only
+    ``shared-tools-consumer-contracts`` does, see #9361) so every test
+    below that exercises the real vendored reader must skip there rather
+    than fail on an unrelated "Tools repository not found" message.
+    """
+    try:
+        return (
+            resolve_tools_repo(_REPO_ROOT, os.environ.get("TOOLS_REPO_PATH"))
+            is not None
+        )
+    except RuntimeError:
+        return False
+
+
+requires_tools_vendor = pytest.mark.skipif(
+    not _tools_vendor_available(),
+    reason="requires the real vendored Tools checkout (vendor/ud-tools); "
+    "not materialized in this CI job",
+)
 
 
 def _ud_family_record() -> dict[str, Any]:
@@ -105,6 +133,7 @@ def _write_record(tmp_path: Path, record: dict[str, Any], name: str) -> Path:
     return path
 
 
+@requires_tools_vendor
 def test_import_ud_family_record(tmp_path: Path) -> None:
     """A native UD-family record round-trips through export -> import."""
     record = _ud_family_record()
@@ -122,6 +151,7 @@ def test_import_ud_family_record(tmp_path: Path) -> None:
     np.testing.assert_allclose(curve.positions[-1], record["samples"][-1]["position_m"])
 
 
+@requires_tools_vendor
 def test_import_tools_family_record(tmp_path: Path) -> None:
     """A Tools-family record (hand-authored per the wire) imports too."""
     record = _tools_family_record()
@@ -137,6 +167,7 @@ def test_import_tools_family_record(tmp_path: Path) -> None:
     np.testing.assert_allclose(curve.positions[1], [29.0, 0.0, 6.5])
 
 
+@requires_tools_vendor
 def test_import_refuses_unsupported_frame(tmp_path: Path) -> None:
     """A record declaring the wire's other valid frame is refused by name.
 
@@ -157,6 +188,7 @@ def test_import_refuses_unsupported_frame(tmp_path: Path) -> None:
     assert APP_FRAME_ID in message
 
 
+@requires_tools_vendor
 def test_import_refuses_unknown_field(tmp_path: Path) -> None:
     """An extra top-level field is refused with the reader's own reason."""
     record = _ud_family_record()
@@ -170,6 +202,7 @@ def test_import_refuses_unknown_field(tmp_path: Path) -> None:
     assert "extra_field" in str(excinfo.value)
 
 
+@requires_tools_vendor
 def test_import_refuses_malformed_json(tmp_path: Path) -> None:
     """Malformed JSON is refused, not raised as an uncaught exception."""
     path = tmp_path / "malformed.json"
@@ -179,6 +212,7 @@ def test_import_refuses_malformed_json(tmp_path: Path) -> None:
         import_trajectory_record(path)
 
 
+@requires_tools_vendor
 def test_import_refuses_missing_file(tmp_path: Path) -> None:
     """A missing path is refused with a reason naming the path."""
     missing = tmp_path / "does_not_exist.json"
@@ -208,6 +242,7 @@ def test_import_refuses_when_vendor_unavailable(
         import_trajectory_record(path)
 
 
+@requires_tools_vendor
 def test_import_refuses_malformed_provenance(tmp_path: Path) -> None:
     """A provenance section missing a mandatory key is refused by name."""
     record = _tools_family_record()
