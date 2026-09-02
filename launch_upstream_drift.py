@@ -104,9 +104,12 @@ def _retry_parent_shared_alias_installer() -> bool:
     """Retry the source-package alias installer after canonical path bootstrap."""
     import src
 
-    installed = src._install_parent_shared_aliases()
-    src._PARENT_SHARED_ALIASES_INSTALLED = installed
-    return installed
+    installer = getattr(src, "_install_parent_shared_aliases", None)
+    if callable(installer):
+        installed = installer()
+        src._PARENT_SHARED_ALIASES_INSTALLED = installed
+        return installed
+    return False
 
 
 _PARENT_SHARED_ALIASES_INSTALLED = _retry_parent_shared_alias_installer()
