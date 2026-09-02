@@ -694,10 +694,15 @@ def _manufactured_level(
     difference = discrete[inside] - exact[inside]
     count = int(inside.sum())
     first, second = field.hencky_strains(horizontal, vertical)
+    exact_in = exact[inside]
     return ManufacturedLevel(
         cell_size_m=cell_size_m,
-        error_rms_m_s2=math.sqrt(float((difference**2).sum()) / count),
-        exact_rms_m_s2=math.sqrt(float((exact[inside] ** 2).sum()) / count),
+        error_rms_m_s2=math.sqrt(
+            float(np.vdot(difference, difference)) / count
+        ),  # ⚡ Bolt: np.vdot avoids temporary allocation and is faster
+        exact_rms_m_s2=math.sqrt(
+            float(np.vdot(exact_in, exact_in)) / count
+        ),  # ⚡ Bolt: np.vdot avoids temporary allocation and is faster
         n_particles=particles.n_particles,
         n_interior=count,
         worst_yield_pa=float(
