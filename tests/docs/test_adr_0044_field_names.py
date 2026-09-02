@@ -32,7 +32,7 @@ def test_adr_0044_does_not_reference_nonexistent_forces_field() -> None:
 
 def test_adr_0044_field_reference_matches_shot_result() -> None:
     """The corrected identifier must actually exist on ShotResult."""
-    from src.bunkershot3d.solvers.shot import ShotResult
+    from bunkershot3d.solvers.shot import ShotResult
 
     field_names = {f.name for f in dataclasses.fields(ShotResult)}
 
