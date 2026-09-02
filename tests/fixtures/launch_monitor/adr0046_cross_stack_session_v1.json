@@ -1,7 +1,7 @@
 {
   "fixture_id": "adr0046-cross-stack-launch-monitor-session/1",
   "seed": 20460046,
-  "generator": "tests/fixtures/launch_monitor/README (see test docstrings)",
+  "generator": "tests/fixtures/launch_monitor/README.md",
   "baseline": {
     "contract_version": "launch-monitor-strokes-gained-baseline/2.0.0",
     "baseline_id": "adr0046-g0-synthetic-baseline",
