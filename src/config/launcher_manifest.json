@@ -351,7 +351,7 @@
     {
       "id": "rate_of_closure",
       "name": "Rate of Closure Impact Explorer",
-      "description": "Full swing-impact-ball-flight simulation suite: 3D clubhead delivery, impact physics with gear effect, ball flight, putting with green surfaces, launch-monitor analytics, and 3D shot playback",
+      "description": "Full swing-impact-ball-flight simulation suite: 3D clubhead delivery, impact physics with gear effect, ball flight, putting with green surfaces, launch-monitor analytics, and 3D shot playback. Putting analytics accepts greens authored in Putting Green.",
       "category": "simulation",
       "type": "special_app",
       "path": "src/rate_of_closure/launch_pyqt6.py",
