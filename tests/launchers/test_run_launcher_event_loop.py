@@ -10,19 +10,21 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 import pytest
 
+from PyQt6.QtWidgets import QApplication
+import src.launchers.base as base_launcher_mod
 from src.launchers.base import run_launcher
 
 
 @pytest.mark.unit
 def test_run_launcher_reuses_existing_qapp_without_exec() -> None:
     """When QApplication exists, run_launcher does not enter an inner event loop."""
-    mock_app = MagicMock()
+    mock_app = MagicMock(spec=QApplication)
     mock_launcher_cls = MagicMock()
 
-    mock_qapp_cls = MagicMock()
-    mock_qapp_cls.instance.return_value = mock_app
-
-    with patch("src.launchers.base.QApplication", mock_qapp_cls):
+    with (
+        patch.object(base_launcher_mod.QApplication, "instance", return_value=mock_app),
+        patch.object(QApplication, "instance", return_value=mock_app),
+    ):
         exit_code = run_launcher(mock_launcher_cls)
         assert exit_code == 0
         mock_app.exec.assert_not_called()
@@ -42,7 +44,11 @@ def test_run_launcher_executes_when_it_created_app() -> None:
     mock_qapp_cls.instance.return_value = None
     mock_qapp_cls.return_value = mock_app
 
-    with patch("src.launchers.base.QApplication", mock_qapp_cls):
+    with (
+        patch.object(base_launcher_mod, "QApplication", mock_qapp_cls),
+        patch("launchers.base.QApplication", mock_qapp_cls, create=True),
+        patch.object(QApplication, "instance", return_value=None),
+    ):
         exit_code = run_launcher(mock_launcher_cls)
         assert exit_code == 42
         mock_qapp_cls.assert_called_once()
