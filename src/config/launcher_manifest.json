@@ -185,7 +185,7 @@
       "status": "simulator",
       "web_route": "/tools/putting-green",
       "capabilities": ["surface_modeling", "ball_physics", "terrain"],
-      "order": 7,
+      "order": 8,
       "web": {
         "mode": "route",
         "route": "/tools/putting-green"
@@ -201,7 +201,7 @@
       "logo": "matlab_logo.svg",
       "status": "external",
       "capabilities": ["simscape_2d", "simscape_3d", "analysis_tools"],
-      "order": 8,
+      "order": 9,
       "web": {
         "mode": "native-window"
       }
@@ -217,7 +217,7 @@
       "status": "utility",
       "capabilities": ["c3d", "mocap", "club", "body", "preview"],
       "tags": ["c3d", "mocap", "club", "body", "preview"],
-      "order": 9,
+      "order": 10,
       "web": {
         "mode": "native-window"
       }
@@ -242,7 +242,7 @@
         "signal_processing",
         "scaling"
       ],
-      "order": 10,
+      "order": 11,
       "web": {
         "mode": "route",
         "route": "/tools/motion-capture"
@@ -267,7 +267,7 @@
         "motion_tracking",
         "frame_analysis"
       ],
-      "order": 11,
+      "order": 12,
       "web": {
         "mode": "route",
         "route": "/tools/video-analyzer"
@@ -292,7 +292,7 @@
         "frame_extraction",
         "media_analysis"
       ],
-      "order": 12,
+      "order": 13,
       "web": {
         "mode": "native-window"
       }
@@ -311,7 +311,7 @@
       "status": "external",
       "web_route": "/tools/data-explorer",
       "capabilities": ["data_import", "filtering", "visualization", "export"],
-      "order": 13,
+      "order": 14,
       "web": {
         "mode": "route",
         "route": "/tools/data-explorer"
@@ -343,7 +343,7 @@
         "export",
         "process_calculators"
       ],
-      "order": 14,
+      "order": 15,
       "web": {
         "mode": "native-window"
       }
@@ -351,26 +351,29 @@
     {
       "id": "rate_of_closure",
       "name": "Rate of Closure Impact Explorer",
-      "description": "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center). Putting analytics accepts greens authored in Putting Green.",
-      "category": "biomechanics",
+      "description": "Full swing-impact-ball-flight simulation suite: 3D clubhead delivery, impact physics with gear effect, ball flight, putting with green surfaces, launch-monitor analytics, and 3D shot playback. Putting analytics accepts greens authored in Putting Green.",
+      "category": "simulation",
       "type": "special_app",
       "path": "src/rate_of_closure/launch_pyqt6.py",
       "provider": "tools",
       "working_dir": ".",
       "python_paths": ["src", "src/shared/python"],
       "logo": "rate_of_closure.svg",
-      "status": "external",
+      "status": "gui_ready",
       "capabilities": [
         "rate_of_closure",
         "impact_analysis",
         "clubhead_kinematics",
         "attack_angle",
         "face_rotation",
+        "putting_simulation",
+        "launch_monitor_analytics",
         "3d_visualization"
       ],
-      "order": 46,
+      "order": 7,
       "web": {
-        "mode": "native-window"
+        "mode": "route",
+        "route": "/tools/impact-explorer"
       }
     },
     {
@@ -387,7 +390,7 @@
         "feature_discovery",
         "project_overview"
       ],
-      "order": 15,
+      "order": 16,
       "web": {
         "mode": "unavailable",
         "reason": "Documentation file; no dedicated web page yet"
@@ -409,7 +412,7 @@
         "comparison",
         "cross_engine_robustness"
       ],
-      "order": 16,
+      "order": 17,
       "web": {
         "mode": "native-window"
       }
@@ -429,7 +432,7 @@
         "swing_modification",
         "exercise_presets"
       ],
-      "order": 17,
+      "order": 18,
       "web": {
         "mode": "native-window"
       }
@@ -445,7 +448,7 @@
       "status": "gui_ready",
       "capabilities": ["trajectory_visualization", "multi_model_comparison"],
       "web_route": "/ball-flight",
-      "order": 18,
+      "order": 19,
       "web": {
         "mode": "route",
         "route": "/ball-flight"
@@ -461,7 +464,7 @@
       "logo": "pose_studio.svg",
       "status": "gui_ready",
       "capabilities": ["pose_editing", "retargeting", "joint_manipulation"],
-      "order": 19,
+      "order": 20,
       "web": {
         "mode": "native-window"
       }
@@ -476,7 +479,7 @@
       "logo": "golf_logo.svg",
       "status": "gui_ready",
       "capabilities": ["full_simulation", "parameter_sweep", "batch_runs"],
-      "order": 20,
+      "order": 21,
       "web": {
         "mode": "native-window"
       }
@@ -495,7 +498,7 @@
         "constraint_solving",
         "cost_functions"
       ],
-      "order": 21,
+      "order": 22,
       "web": {
         "mode": "native-window"
       }
@@ -515,7 +518,7 @@
         "spinal_load",
         "swing_modification"
       ],
-      "order": 22,
+      "order": 23,
       "web": {
         "mode": "native-window"
       }
@@ -536,7 +539,7 @@
         "topography",
         "terrain_query"
       ],
-      "order": 23,
+      "order": 24,
       "web": {
         "mode": "route",
         "route": "/tools/terrain"
@@ -558,7 +561,7 @@
         "parameter_sweep",
         "export"
       ],
-      "order": 24,
+      "order": 25,
       "web": {
         "mode": "route",
         "route": "/tools/dataset"
@@ -581,7 +584,7 @@
         "ab_comparison",
         "validity_envelope"
       ],
-      "order": 25,
+      "order": 26,
       "web": {
         "mode": "native-window"
       }
@@ -606,7 +609,7 @@
         "counterfactuals",
         "force_vectors"
       ],
-      "order": 26,
+      "order": 27,
       "web": {
         "mode": "native-window"
       }
@@ -632,7 +635,7 @@
         "counterfactuals"
       ],
       "web_route": "/tools/swing-objective-lab",
-      "order": 100,
+      "order": 101,
       "web": {
         "mode": "route",
         "route": "/tools/swing-objective-lab"
@@ -654,7 +657,7 @@
         "workspace",
         "data_explorer"
       ],
-      "order": 27,
+      "order": 28,
       "web": {
         "mode": "route",
         "route": "/chat"
@@ -675,7 +678,7 @@
         "mesh_generation",
         "collision_geometry"
       ],
-      "order": 28,
+      "order": 29,
       "web": {
         "mode": "route",
         "route": "/tools/character-builder"
@@ -699,7 +702,7 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 29,
+      "order": 30,
       "web": {
         "mode": "native-window"
       }
@@ -722,7 +725,7 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 30,
+      "order": 31,
       "web": {
         "mode": "native-window"
       }
@@ -745,7 +748,7 @@
         "recorder",
         "advanced_analysis"
       ],
-      "order": 31,
+      "order": 32,
       "web": {
         "mode": "native-window"
       }
@@ -768,7 +771,7 @@
         "services_layer",
         "biomechanics"
       ],
-      "order": 32,
+      "order": 33,
       "web": {
         "mode": "route",
         "route": "/tools/canonical-core/estimation"
@@ -792,7 +795,7 @@
         "services_layer",
         "biomechanics"
       ],
-      "order": 33,
+      "order": 34,
       "web": {
         "mode": "route",
         "route": "/tools/canonical-core/comparison"
@@ -809,7 +812,7 @@
       "logo": "data_explorer.svg",
       "status": "ready",
       "capabilities": ["swing_metrics", "biomechanics", "api"],
-      "order": 34,
+      "order": 35,
       "web": {
         "mode": "route",
         "route": "/tools/analysis"
@@ -826,7 +829,7 @@
       "logo": "c3d_icon.svg",
       "status": "experimental",
       "capabilities": ["markerless_mocap", "forward_dynamics", "pipeline"],
-      "order": 35,
+      "order": 36,
       "web": {
         "mode": "unavailable",
         "reason": "REST API service; no dedicated web page yet"
@@ -843,7 +846,7 @@
       "logo": "data_explorer.svg",
       "status": "experimental",
       "capabilities": ["perturbation", "robustness", "cross_engine"],
-      "order": 36,
+      "order": 37,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -860,7 +863,7 @@
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
       "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
-      "order": 37,
+      "order": 38,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -877,7 +880,7 @@
       "logo": "data_explorer.svg",
       "status": "experimental",
       "capabilities": ["websocket", "realtime", "pubsub"],
-      "order": 38,
+      "order": 39,
       "web": {
         "mode": "unavailable",
         "reason": "WebSocket endpoint only; no dedicated web page yet"
@@ -894,7 +897,7 @@
       "logo": "golf_logo.svg",
       "status": "experimental",
       "capabilities": ["ai_methods", "protocol", "dispatch"],
-      "order": 39,
+      "order": 40,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -911,7 +914,7 @@
       "logo": "mujoco_humanoid.svg",
       "status": "experimental",
       "capabilities": ["actuator_tuning", "control_schemes", "realtime"],
-      "order": 40,
+      "order": 41,
       "web": {
         "mode": "unavailable",
         "reason": "REST API endpoint only; no dedicated web page yet"
@@ -928,7 +931,7 @@
       "logo": "golf_logo.svg",
       "status": "external",
       "capabilities": ["streaming", "vr", "visualization"],
-      "order": 41,
+      "order": 42,
       "web": {
         "mode": "unavailable",
         "reason": "Python integration library; no dedicated web page yet"
@@ -945,7 +948,7 @@
       "logo": "drake.svg",
       "status": "experimental",
       "capabilities": ["locomotion", "contact", "planning"],
-      "order": 42,
+      "order": 43,
       "web": {
         "mode": "unavailable",
         "reason": "Python module; no dedicated web page yet"
@@ -969,7 +972,7 @@
       "logo": "data_explorer.svg",
       "status": "external",
       "capabilities": ["process_calculators", "engineering", "analysis"],
-      "order": 43,
+      "order": 44,
       "web": {
         "mode": "native-window"
       }
@@ -985,7 +988,7 @@
       "logo": "data_explorer.svg",
       "status": "experimental",
       "capabilities": ["pid_generation", "isa_5_1", "diagrams"],
-      "order": 44,
+      "order": 45,
       "web": {
         "mode": "unavailable",
         "reason": "CLI tool (generate-pid); no GUI or web page yet"
@@ -1010,7 +1013,7 @@
         "dispersion",
         "longitudinal_trends"
       ],
-      "order": 47,
+      "order": 48,
       "web": {
         "mode": "native-window"
       }
@@ -1028,7 +1031,7 @@
       "hidden_reason": "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries.",
       "hidden_owner": "@launcher",
       "capabilities": ["c3d", "mocap", "club", "body", "preview"],
-      "order": 99,
+      "order": 100,
       "web": {
         "mode": "native-window"
       }
@@ -1050,7 +1053,7 @@
         "ztcf_zvcf",
         "hdf5_export"
       ],
-      "order": 45,
+      "order": 46,
       "web": {
         "mode": "native-window"
       }
