@@ -1919,6 +1919,8 @@ jobs:
             --timeout=60 \
             --timeout-method=thread \
             --ignore=tests/shared_contracts \
+            --ignore=tests/integration/launch_monitor_drift \
+            --ignore=tests/integration/putting_green_drift \
             --ignore=tests/heavy_integration \
             --ignore=tests/benchmarks \
             --ignore=src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests \
@@ -2302,6 +2304,24 @@ jobs:
             -p no:xvfb \
             --tools-mode=vendored \
             --timeout=60 \
+            --timeout-method=thread \
+            -v --tb=short
+      # ADR-0046 G0: the cross-stack drift gates need the vendored Tools
+      # stack, which only this job materialises (fetch-pinned-tools). The
+      # main tests job checks out no submodule, where the suite's guard
+      # skips locally but FAILS under CI - so a placement mistake can never
+      # again report green without executing.
+      - name: Run Launch-Monitor Drift Gates (ADR-0046 G0)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          REQUIRE_DRIFT_GATES: "1"
+        run: |
+          drift_suites="tests/integration/launch_monitor_drift/"
+          if [ -d tests/integration/putting_green_drift ]; then
+            drift_suites="$drift_suites tests/integration/putting_green_drift/"
+          fi
+          python -m pytest $drift_suites \
+            --timeout=120 \
             --timeout-method=thread \
             -v --tb=short
 

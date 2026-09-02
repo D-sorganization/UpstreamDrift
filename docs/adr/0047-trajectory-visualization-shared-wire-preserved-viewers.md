@@ -1,8 +1,8 @@
 # ADR-0047: Trajectory Visualization — Shared Wire, Preserved Viewers
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-30
-- Decision Makers: repo owner (approval required before any implementation)
+- Decision Makers: repo owner (accepted 2026-08-30)
 - Related Issues/PRs: launcher tiles `shot_tracer`, `rate_of_closure`; `ui/src/pages/BallFlight.tsx`; `src/api/routes/ball_flight.py`; Tools#4800 P8 (#4820/#4852)
 
 ## Context
