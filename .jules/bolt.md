@@ -22,3 +22,15 @@
 ## 2025-02-23 - [Optimize Euclidean Distance Summation With `np.hypot`]
 **Learning:** Using `np.hypot(a, b).sum()` is surprisingly faster (by ~2.3x) compared to `np.sum(np.sqrt(a**2 + b**2))` for small 1D arrays, as it efficiently handles Euclidean distance calculation while avoiding some temporary allocations, and `.sum()` avoids the overhead of `np.sum()`.
 **Action:** Look for instances where Euclidean distance is calculated element-wise and summed, especially for small 1D arrays, and replace them with this pattern.
+
+## 2024-05-24 - API Array Summation Optimization
+**Learning:** Replaced `np.sum()` with `.sum()` for small array math in `physics.py` logic. This avoids numpy dispatch and yields measurable speedup.
+**Action:** When working in hotpath math like loop array modifications, always look to use direct methods rather than NumPy's wrapped equivalents.
+
+## 2026-09-01 - [Optimize Norm Calculation in Morris Design]
+**Learning:** Using `np.sqrt(np.einsum("ij,ij->i", diff, diff))` is significantly faster (~30%) than `np.linalg.norm(diff, axis=1)` for 2D differences, avoiding intermediate array allocation in the inner loops of combinatorial design sampling algorithms.
+**Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.
+
+## 2026-09-01 - [Optimize Norm Calculation in Morris Design]
+**Learning:** Using `np.sqrt(np.einsum("ij,ij->i", diff, diff))` is significantly faster (~30%) than `np.linalg.norm(diff, axis=1)` for 2D differences, avoiding intermediate array allocation in the inner loops of combinatorial design sampling algorithms.
+**Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.

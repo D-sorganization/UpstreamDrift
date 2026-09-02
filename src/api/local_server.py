@@ -863,10 +863,62 @@ def _register_error_page_catch_all(app: FastAPI) -> None:
         return HTMLResponse(content=_get_ui_not_built_html(), status_code=503)
 
 
+def _resolve_impact_explorer_dist_path() -> Path:
+    """Return the vendored Impact Explorer web build directory.
+
+    The Rate of Closure Impact Explorer ships a complete React app inside
+    the vendored Tools tree; Tools builds it to a static bundle
+    (``npm ci && npm run build`` in the directory below). When that bundle
+    exists, the launcher tile's ``/tools/impact-explorer`` route can embed
+    the real product instead of pointing web users at a desktop-only
+    ``native-window`` dead end.
+    """
+    return (
+        Path(__file__).parent.parent.parent
+        / "vendor"
+        / "ud-tools"
+        / "src"
+        / "rate_of_closure"
+        / "web"
+        / "dist"
+    )
+
+
+def _mount_impact_explorer_directory(app: FastAPI) -> None:
+    """Mount the vendored Impact Explorer web bundle when it has been built.
+
+    Missing bundle is tolerated (same posture as the UI build itself): the
+    ``/tools/impact-explorer`` page shows an honest fallback that names the
+    build command, and ``_startup_metrics['impact_explorer_web']`` records
+    availability either way so degradation is explicit, never silent.
+    """
+    dist = _resolve_impact_explorer_dist_path()
+    if dist.exists():
+        app.mount(
+            "/impact-explorer-app",
+            StaticFiles(directory=str(dist), html=True),
+            name="impact_explorer_app",
+        )
+        _startup_metrics["impact_explorer_web"] = True
+        logger.info(f"Mounted /impact-explorer-app from {dist}")
+    else:
+        _startup_metrics["impact_explorer_web"] = False
+        logger.info(
+            "Impact Explorer web bundle not built at %s; the "
+            "/tools/impact-explorer page will show its fallback",
+            dist,
+        )
+
+
 def _mount_static_files_and_spa(app: FastAPI) -> None:
     """Mount static UI files and SPA catch-all, or an error page if UI is not built."""
     ui_path = _resolve_ui_dist_path()
     _startup_metrics["ui_path"] = str(ui_path)
+
+    # The vendored Impact Explorer bundle is independent of the host UI
+    # build: the Vite dev server proxies /impact-explorer-app straight here,
+    # so dev mode (no ui/dist) must still serve it.
+    _mount_impact_explorer_directory(app)
 
     if ui_path.exists():
         logger.info(f"UI build found at {ui_path}, mounting static files")

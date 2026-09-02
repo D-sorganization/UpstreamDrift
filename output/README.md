@@ -30,201 +30,141 @@ tree on every run.
 
 ## Directory Structure
 
+`OutputManager.create_output_structure()` creates this tree under
+`base_path` (the individual save methods create only the specific
+sub-directory they need, on demand):
+
 ```
 output/
-├── simulations/          # Raw simulation results
-│   ├── mujoco/          # MuJoCo engine results
-│   ├── drake/           # Drake engine results
-│   ├── pinocchio/       # Pinocchio engine results
-│   └── matlab/          # MATLAB Simscape results
-├── analysis/            # Processed analysis results
-│   ├── biomechanics/    # Biomechanical analysis
-│   ├── trajectories/    # Ball trajectory analysis
-│   ├── optimization/    # Swing optimization results
-│   └── comparisons/     # Cross-engine comparisons
-├── exports/             # Exported data and media
-│   ├── videos/          # Simulation videos
-│   ├── images/          # Plots and visualizations
-│   ├── data/           # Exported datasets (CSV, JSON, HDF5)
-│   └── c3d/            # Motion capture exports
-├── reports/             # Generated reports
-│   ├── pdf/            # PDF reports
-│   ├── html/           # HTML reports
-│   └── presentations/   # Presentation materials
-└── cache/              # Temporary and cache files
-    ├── models/         # Cached model files
-    ├── computations/   # Cached computation results
-    └── temp/           # Temporary files
+├── simulations/          # Raw simulation results (save_simulation_results)
+│   ├── mujoco/
+│   ├── drake/
+│   ├── pinocchio/
+│   └── matlab/
+├── analysis/             # Pre-created subdirectories (not yet wired to a save method)
+│   ├── biomechanics/
+│   ├── trajectories/
+│   ├── optimization/
+│   └── comparisons/
+├── exports/              # Pre-created subdirectories (not yet wired to a save method)
+│   ├── videos/
+│   ├── images/
+│   ├── data/
+│   └── c3d/
+├── reports/               # export_analysis_report() writes into reports/<format_type>/
+│   ├── json/
+│   └── html/
+└── cache/                 # Reserved for cleanup_old_files(); no subdirectories are created
 ```
 
-## File Naming Conventions
+Only `simulations/<engine>/` and `reports/<format_type>/` are actually
+populated by `OutputManager` today. The `analysis/` and `exports/`
+subdirectories are created by `create_output_structure()` for future use,
+but nothing currently writes into them through this class.
 
-### Simulation Results
+## File Naming
 
-- Format: `{engine}_{model}_{timestamp}_{parameters}.{ext}`
-- Example: `mujoco_golf_swing_20241218_120000_speed100mph.csv`
+`save_simulation_results(results, filename, ...)` sanitizes `filename` via
+`sanitize_filename()`: if the name has no digits in it, a timestamp suffix
+is appended automatically so repeated saves never collide. The final name
+is `<sanitized-filename>.<format>` under `simulations/<engine>/`.
 
-### Analysis Results
-
-- Format: `analysis_{type}_{timestamp}_{description}.{ext}`
-- Example: `analysis_biomechanics_20241218_120000_muscle_activation.json`
-
-### Exports
-
-- Videos: `{engine}_{description}_{timestamp}.mp4`
-- Images: `{type}_{description}_{timestamp}.png`
-- Data: `export_{format}_{timestamp}_{description}.{ext}`
-
-### Reports
-
-- Format: `report_{type}_{timestamp}_{description}.{ext}`
-- Example: `report_swing_analysis_20241218_120000_optimization_study.pdf`
+`export_analysis_report(analysis_data, report_name, format_type="json")`
+always appends its own timestamp suffix: `<report_name>_<timestamp>.<format_type>`
+under `reports/<format_type>/`.
 
 ## Data Formats
 
-### Supported Formats
+`OutputFormat` (`src/shared/python/data_io/_format_handlers.py`) defines the
+formats `save_simulation_results` / `load_simulation_results` understand:
 
-- **CSV**: Tabular data, time series
-- **JSON**: Metadata, configuration, structured results
-- **HDF5**: Large datasets, hierarchical data
-- **Pickle**: Python objects, complex data structures
-- **C3D**: Motion capture data
-- **MP4**: Video exports
-- **PNG/JPG**: Images and plots
-- **PDF**: Reports and documentation
+- **CSV** (`OutputFormat.CSV`, default)
+- **JSON** (`OutputFormat.JSON`)
+- **HDF5** (`OutputFormat.HDF5`)
+- **Pickle** (`OutputFormat.PICKLE`)
+- **Parquet** (`OutputFormat.PARQUET`)
 
-### Data Schema
-
-All simulation results follow a standardized schema:
-
-```json
-{
-  "metadata": {
-    "engine": "mujoco|drake|pinocchio|matlab",
-    "model": "golf_swing|pendulum|biomechanical",
-    "timestamp": "ISO 8601 format",
-    "version": "suite version",
-    "parameters": {...}
-  },
-  "results": {
-    "ball_trajectory": [...],
-    "club_motion": [...],
-    "biomechanics": {...},
-    "performance_metrics": {...}
-  }
-}
-```
+`export_analysis_report` only supports `format_type="json"` or `"html"`.
+Every save also embeds a `ProvenanceInfo` record (timestamp, git SHA, model
+file hash if given, and any explicit `parameters`) — a JSON-format save
+nests it under `provenance`; a CSV-format save gets a commented provenance
+header.
 
 ## Usage Examples
 
 ### Accessing Results Programmatically
 
 ```python
-from golf_modeling_suite.output import OutputManager
+from src.shared.python.data_io.output_manager import OutputManager, OutputFormat
 
-# Initialize output manager
+# Initialize output manager (base_path defaults to <repo root>/output,
+# or $UPSTREAM_DRIFT_OUTPUT_DIR if set)
 output = OutputManager()
+output.create_output_structure()
+
+# Save simulation results
+path = output.save_simulation_results(
+    results_df, "swing_001", format_type=OutputFormat.CSV, engine="mujoco"
+)
 
 # List available simulations
-simulations = output.get_simulation_list()
+simulations = output.get_simulation_list(engine="mujoco")
 
-# Load specific simulation
-results = output.load_simulation("mujoco_golf_swing_20241218_120000.csv")
+# Load a specific simulation
+results = output.load_simulation_results("swing_001", engine="mujoco")
 
-# Export analysis
+# Export an analysis report
 output.export_analysis_report(analysis_data, "swing_optimization")
+
+# Clean up files older than 30 days
+output.cleanup_old_files(max_age_days=30)
 ```
 
-### Command Line Access
+Module-level `save_results()` / `load_results()` convenience functions
+(same module) wrap a default-constructed `OutputManager` for one-off calls.
 
-```bash
-# List recent simulations
-upstream-drift output list --recent 10
+### Command Line
 
-# Export simulation data
-upstream-drift output export --simulation sim_001 --format csv
-
-# Generate report
-upstream-drift output report --type biomechanics --output pdf
-```
+There is currently no `upstream-drift output` subcommand — the
+`upstream-drift` console script (`launch_upstream_drift.py`) only exposes
+`--classic`, `--api-only`, `--engine`, `--port`, and `--no-browser` for
+launching the application itself. Output files are produced as a side
+effect of running simulations (via the REST API, the desktop app, or the
+video-pose pipeline — see the REST API Integration section above), not
+through a dedicated CLI. Use the `OutputManager` API above for
+programmatic listing, loading, or cleanup.
 
 ## Cleanup and Maintenance
 
-### Automatic Cleanup
-
-- Temporary files are cleaned automatically after 24 hours
-- Cache files are cleaned when they exceed 1GB total size
-- Old simulation results are archived after 30 days (configurable)
-
-### Manual Cleanup
+`OutputManager.cleanup_old_files(max_age_days=30)` removes files older than
+`max_age_days` from the `cache/`, `simulations/`, and `analysis/`
+directories (see `src/shared/python/data_io/_simulation_store.py`). There is
+no automatic/scheduled cleanup and no configurable cache-size threshold or
+archival step — those must be scripted or run manually by calling this
+method.
 
 ```python
-from golf_modeling_suite.output import OutputManager
+from src.shared.python.data_io.output_manager import OutputManager
 
 output = OutputManager()
-
-# Clean old files (older than 30 days)
-output.cleanup_old_files(max_age_days=30)
-
-# Clear cache
-output.clear_cache()
-
-# Archive old results
-output.archive_old_results(archive_path="/path/to/archive")
-```
-
-## Configuration
-
-Output behavior can be configured in `shared/python/config/output_config.yaml`:
-
-```yaml
-output:
-  base_directory: "output"
-  auto_cleanup: true
-  max_cache_size_gb: 1.0
-  archive_after_days: 30
-  default_formats:
-    simulation: "csv"
-    analysis: "json"
-    export: "hdf5"
-  compression:
-    enabled: true
-    level: 6
+removed_count = output.cleanup_old_files(max_age_days=30)
 ```
 
 ## Best Practices
 
-1. **Organize by Project**: Create subdirectories for different research projects
-2. **Use Descriptive Names**: Include key parameters in filenames
-3. **Regular Cleanup**: Archive or delete old results regularly
-4. **Backup Important Results**: Keep copies of significant findings
-5. **Document Analysis**: Include metadata and documentation with results
-6. **Version Control**: Track analysis scripts and configurations separately
+1. **Use Descriptive Filenames**: Include key parameters so saves stay identifiable even after the timestamp suffix is appended.
+2. **Regular Cleanup**: Call `cleanup_old_files()` periodically to bound `output/` growth.
+3. **Backup Important Results**: Keep copies of significant findings outside `output/`.
+4. **Don't Rely on `analysis/`/`exports/` Subdirectories**: They are pre-created but not populated by `OutputManager` — check the producing tool's own docs for where it actually writes.
 
 ## Troubleshooting
 
-### Common Issues
-
-**Disk Space**: Monitor output directory size, enable auto-cleanup
+**Disk Space**: Monitor output directory size and run `cleanup_old_files()` regularly.
 
 ```bash
 du -sh output/
 ```
 
-**Permission Errors**: Ensure write permissions to output directory
+**Permission Errors**: Ensure write permissions to the output directory (the `base_path.exists()` invariant on `OutputManager` will raise if the directory is missing entirely).
 
-```bash
-chmod -R 755 output/
-```
-
-**Corrupted Files**: Use validation tools to check file integrity
-
-```python
-output.validate_simulation_file("simulation.csv")
-```
-
-**Missing Results**: Check simulation logs and error messages
-
-```python
-output.get_simulation_logs("simulation_id")
-```
+**Missing Results**: Use `get_simulation_list(engine=...)` to confirm what was actually persisted, and check application logs — `OutputManager` logs `simulation_results_saved` / `simulation_save_failed` events via the standard `logging` module.

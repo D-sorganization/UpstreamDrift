@@ -839,15 +839,7 @@ class DependencyErrorDialog(QDialog):
     ):
         super().__init__(parent)
         from PyQt6.QtCore import Qt
-        from PyQt6.QtGui import QColor
-        from PyQt6.QtWidgets import (
-            QVBoxLayout,
-            QLabel,
-            QHBoxLayout,
-            QPushButton,
-            QGraphicsDropShadowEffect,
-            QFrame,
-        )
+        from PyQt6.QtWidgets import QVBoxLayout, QFrame
 
         self.install_cmd = install_cmd
         self.doc_url = doc_url
@@ -867,6 +859,23 @@ class DependencyErrorDialog(QDialog):
         self.frame.setStyleSheet(
             "QFrame { background-color: #24272e; border: 1px solid #c92a2a; border-radius: 8px; }"
         )
+        self._apply_error_frame_shadow()
+
+        frame_layout = QVBoxLayout(self.frame)
+        frame_layout.setContentsMargins(20, 20, 20, 20)
+        frame_layout.setSpacing(15)
+
+        self._build_header_section(
+            frame_layout, model_name, dependency_name, error_detail
+        )
+        self._build_install_command_section(frame_layout, install_cmd)
+        self._build_button_row(frame_layout, doc_url)
+
+        layout.addWidget(self.frame)
+
+    def _apply_error_frame_shadow(self) -> None:
+        from PyQt6.QtGui import QColor
+        from PyQt6.QtWidgets import QGraphicsDropShadowEffect
 
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(20)
@@ -874,9 +883,10 @@ class DependencyErrorDialog(QDialog):
         shadow.setOffset(0, 4)
         self.frame.setGraphicsEffect(shadow)
 
-        frame_layout = QVBoxLayout(self.frame)
-        frame_layout.setContentsMargins(20, 20, 20, 20)
-        frame_layout.setSpacing(15)
+    def _build_header_section(
+        self, frame_layout, model_name: str, dependency_name: str, error_detail: str
+    ) -> None:
+        from PyQt6.QtWidgets import QLabel
 
         lbl_title = QLabel(f"Dependency Missing: {dependency_name}")
         lbl_title.setStyleSheet(
@@ -898,32 +908,40 @@ class DependencyErrorDialog(QDialog):
         lbl_msg.setWordWrap(True)
         frame_layout.addWidget(lbl_msg)
 
-        if install_cmd:
-            cmd_group = QFrame()
-            cmd_group.setStyleSheet(
-                "QFrame { background-color: #1e2026; border: 1px solid #2d3139; border-radius: 4px; padding: 8px; }"
-            )
-            cmd_layout = QHBoxLayout(cmd_group)
-            cmd_layout.setContentsMargins(5, 5, 5, 5)
+    def _build_install_command_section(self, frame_layout, install_cmd: str) -> None:
+        from PyQt6.QtWidgets import QLabel, QHBoxLayout, QPushButton, QFrame
 
-            self.lbl_cmd = QLabel(install_cmd)
-            self.lbl_cmd.setStyleSheet(
-                "color: #51cf66; font-family: monospace; font-size: 12px; border: none; background: transparent;"
-            )
-            self.lbl_cmd.setWordWrap(True)
-            cmd_layout.addWidget(self.lbl_cmd, stretch=1)
+        if not install_cmd:
+            return
 
-            self.btn_copy = QPushButton("Copy")
-            self.btn_copy.setFixedWidth(60)
-            self.btn_copy.setStyleSheet(
-                "QPushButton { background-color: #3b5bdb; color: white; border: none; border-radius: 3px; padding: 4px; font-size: 11px; }"
-                "QPushButton:hover { background-color: #4c6ef5; }"
-                "QPushButton:pressed { background-color: #2b4bcb; }"
-            )
-            self.btn_copy.clicked.connect(self._copy_command)
-            cmd_layout.addWidget(self.btn_copy)
+        cmd_group = QFrame()
+        cmd_group.setStyleSheet(
+            "QFrame { background-color: #1e2026; border: 1px solid #2d3139; border-radius: 4px; padding: 8px; }"
+        )
+        cmd_layout = QHBoxLayout(cmd_group)
+        cmd_layout.setContentsMargins(5, 5, 5, 5)
 
-            frame_layout.addWidget(cmd_group)
+        self.lbl_cmd = QLabel(install_cmd)
+        self.lbl_cmd.setStyleSheet(
+            "color: #51cf66; font-family: monospace; font-size: 12px; border: none; background: transparent;"
+        )
+        self.lbl_cmd.setWordWrap(True)
+        cmd_layout.addWidget(self.lbl_cmd, stretch=1)
+
+        self.btn_copy = QPushButton("Copy")
+        self.btn_copy.setFixedWidth(60)
+        self.btn_copy.setStyleSheet(
+            "QPushButton { background-color: #3b5bdb; color: white; border: none; border-radius: 3px; padding: 4px; font-size: 11px; }"
+            "QPushButton:hover { background-color: #4c6ef5; }"
+            "QPushButton:pressed { background-color: #2b4bcb; }"
+        )
+        self.btn_copy.clicked.connect(self._copy_command)
+        cmd_layout.addWidget(self.btn_copy)
+
+        frame_layout.addWidget(cmd_group)
+
+    def _build_button_row(self, frame_layout, doc_url: str) -> None:
+        from PyQt6.QtWidgets import QHBoxLayout, QPushButton
 
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(10)
@@ -947,7 +965,6 @@ class DependencyErrorDialog(QDialog):
         btn_layout.addWidget(self.btn_close)
 
         frame_layout.addLayout(btn_layout)
-        layout.addWidget(self.frame)
 
     def _copy_command(self) -> None:
         from PyQt6.QtWidgets import QApplication
