@@ -92,6 +92,7 @@ class TestPuttSimulationResponseContract:
     def test_valid_response(self) -> None:
         """Valid response parses correctly."""
         resp = PuttSimulationResponse(
+            roll_model="ud-legacy-roll/1",
             positions=[[5.0, 10.0], [5.0, 12.0], [5.0, 14.5]],
             velocities=[[0.0, 2.0], [0.0, 1.5], [0.0, 0.2]],
             times=[0.0, 0.5, 1.5],
@@ -107,6 +108,7 @@ class TestPuttSimulationResponseContract:
     def test_holed_response(self) -> None:
         """Holed putt response."""
         resp = PuttSimulationResponse(
+            roll_model="ud-legacy-roll/1",
             positions=[[10.0, 5.0], [10.0, 15.0]],
             velocities=[[0.0, 2.0], [0.0, 0.0]],
             times=[0.0, 2.5],
@@ -130,6 +132,7 @@ class TestGreenReadingContract:
     def test_reading_response(self) -> None:
         """Valid reading response."""
         resp = GreenReadingResponse(
+            roll_model="ud-legacy-roll/1",
             distance=11.0,
             total_break=0.05,
             recommended_speed=2.1,
@@ -158,6 +161,7 @@ class TestScatterAnalysisContract:
     def test_scatter_response(self) -> None:
         """Valid scatter response."""
         resp = ScatterAnalysisResponse(
+            roll_model="ud-legacy-roll/1",
             final_positions=[[10.0, 14.9], [10.1, 15.0]],
             holed_count=1,
             total_simulations=2,

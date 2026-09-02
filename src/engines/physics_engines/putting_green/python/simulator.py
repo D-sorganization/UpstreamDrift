@@ -22,6 +22,11 @@ Design by Contract:
     - Deterministic simulation (same inputs = same outputs)
 """
 
+from src.engines.physics_engines.putting_green.python._checkpoint import (
+    PUTTING_CHECKPOINT_SCHEMA_VERSION,
+    CheckpointProvenance,
+    read_checkpoint_provenance,
+)
 from src.engines.physics_engines.putting_green.python._sim_config import (
     SimulationConfig,
     SimulationResult,
@@ -29,9 +34,26 @@ from src.engines.physics_engines.putting_green.python._sim_config import (
 from src.engines.physics_engines.putting_green.python._sim_core import (
     PuttingGreenSimulator,
 )
+from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
+    KNOWN_ROLL_MODELS,
+    ROLL_MODEL_FIELD,
+    UD_LEGACY_ROLL_MODEL,
+    USGA_STIMP_ROLL_MODEL,
+    RollModelProvenanceError,
+    require_roll_model,
+)
 
 __all__ = [
+    "KNOWN_ROLL_MODELS",
+    "PUTTING_CHECKPOINT_SCHEMA_VERSION",
+    "ROLL_MODEL_FIELD",
+    "UD_LEGACY_ROLL_MODEL",
+    "USGA_STIMP_ROLL_MODEL",
+    "CheckpointProvenance",
+    "RollModelProvenanceError",
     "SimulationConfig",
     "SimulationResult",
     "PuttingGreenSimulator",
+    "read_checkpoint_provenance",
+    "require_roll_model",
 ]
