@@ -38,7 +38,8 @@ imported, not reimplemented, for the same skip-locally/run-in-CI posture.
 The `vendor/ud-tools` gitlink advances from
 `cc883cbaf63157b58c71cba385a683df2762b0cb` to
 `5e0eaade29441dd65d667151b5108c8925774d73`, the Tools `main` squash commit for
-Tools #4888, which adds `src/shared/python/swing_sim/flight_interchange/`. The
+Tools #4888, which adds the `shared.python.swing_sim.flight_interchange`
+package to the vendored tree. The
 vendored reader is the interchange authority for the
 `swing_sim.ball_flight_trajectory/1` record; UpstreamDrift's exporter in
 `src/shared/python/physics/flight_trajectory_export.py` is verified against it
