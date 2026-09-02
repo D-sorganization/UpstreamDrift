@@ -74,6 +74,32 @@ def require_robotics_pinocchio(pin: Any) -> str:
     return str(version)
 
 
+def pinocchio_crba_mass_matrix(
+    pin: Any,
+    native_model: Any,
+    native_data: Any,
+    q: NDArray[Any],
+) -> FloatArray:
+    """Return Pinocchio CRBA output as a complete symmetric mass matrix.
+
+    Pinocchio's CRBA contract only guarantees the upper triangle. The lower
+    triangle in its reusable data object may therefore contain stale values.
+    Postcondition: the result is an independent, finite square matrix whose
+    lower triangle is copied from the upper one.
+    """
+
+    upper = np.asarray(pin.crba(native_model, native_data, q), dtype=np.float64)
+    if (
+        upper.ndim != 2
+        or upper.shape[0] != upper.shape[1]
+        or np.any(~np.isfinite(np.triu(upper)))
+    ):
+        raise RuntimeError("Pinocchio CRBA returned an invalid upper triangle")
+    matrix = np.triu(upper).copy()
+    matrix += np.triu(upper, k=1).T
+    return matrix
+
+
 @dataclass(frozen=True, slots=True)
 class ArticulatedInertiaConfig:
     """Preoutcome equivalence and positive-definiteness gates."""
@@ -224,7 +250,7 @@ def _evaluate_native_operators(
             qd = velocity[sample]
             qdd = acceleration[sample]
             matrix_m, bias_m = mujoco_mass_matrix_and_bias(model, q, qd)
-            matrix_p = np.asarray(pin.crba(native, native_data, q)).copy()
+            matrix_p = pinocchio_crba_mass_matrix(pin, native, native_data, q)
             bias_p = np.asarray(nonlinear_effects(native, native_data, q, qd)).copy()
             inverse_m = mujoco_inverse_dynamics(model, q, qd, qdd, np.zeros(model.nq))
             inverse_p = np.asarray(pin.rnea(native, native_data, q, qd, qdd)).copy()
@@ -389,5 +415,6 @@ __all__ = [
     "ArticulatedInertiaConfig",
     "build_pinocchio_articulated_model",
     "finite_difference_kinematics",
+    "pinocchio_crba_mass_matrix",
     "run_articulated_inertia_atlas",
 ]

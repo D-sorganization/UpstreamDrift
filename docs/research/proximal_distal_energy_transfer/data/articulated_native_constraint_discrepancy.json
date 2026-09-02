@@ -3,13 +3,16 @@
   "study_id": "bilateral-native-connect-versus-projected-compliant-contact",
   "configuration": {
     "duration_s": 0.004,
-    "time_steps_s": [0.0005, 0.00025],
+    "time_steps_s": [
+      0.0005,
+      0.00025
+    ],
     "case_index": 0,
     "sample_index": 6,
     "initial_club_displacement_m": 0.001,
     "contact_stiffness": 1800.0,
     "contact_damping": 20.0,
-    "minimum_active_force": 1e-8,
+    "minimum_active_force": 1e-08,
     "killswitch_force_tolerance": 1e-12,
     "initial_state_tolerance": 1e-15,
     "minimum_nonzero_discrepancy": 1e-12
@@ -30,7 +33,7 @@
     "integrator": "Euler",
     "integrator_operator": "mj_step",
     "generalized_force_source": "qfrc_constraint",
-    "engine_version": "3.3.4"
+    "engine_version": "3.8.0"
   },
   "projected_branch": {
     "contact_law": "bilateral Kelvin--Voigt point-force projection",
@@ -38,14 +41,14 @@
     "integrator": "project-authored semi-implicit Euler"
   },
   "results": {
-    "maximum_native_generalized_constraint_force": 2.0445016473909523,
+    "maximum_native_generalized_constraint_force": 2.044501647390957,
     "maximum_projected_generalized_contact_force": 3.7059401846317677,
     "maximum_killswitch_generalized_constraint_force": 0.0,
     "initial_state_absolute_discrepancy": 0.0,
-    "maximum_trajectory_absolute_discrepancy": 0.00011204794104813232,
-    "finest_final_trajectory_absolute_discrepancy": 0.00010429966173408634,
+    "maximum_trajectory_absolute_discrepancy": 0.00011204110207152507,
+    "finest_final_trajectory_absolute_discrepancy": 0.00010429275719414655,
     "native_initial_attachment_separation_m": 0.0010000000000000009,
-    "native_final_attachment_separation_m": 0.0009870034042796275,
+    "native_final_attachment_separation_m": 0.000986991982540054,
     "projected_final_attachment_separation_m": 0.0009076192400806923,
     "registered_gates": {
       "finite": true,
@@ -68,15 +71,15 @@
   },
   "classification": "synthetic_formulation_discrepancy_not_human_or_engine_equivalence_evidence",
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "0d9f4d7d9e479b5c611294662d73d92c11f197bd85e91ee1af7c98c7785d5df2",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "a5914695739fd3f2137c3be0905f707b8de11f4dea3edc1d0c04897853149fd3",
+    "scripts/research/proximal_distal_energy/articulated_contact_projection.py": "54ecf9402e0b5e2fd72bd3a668eeb0e8a6313439d25ac5d72cd3f7b929ed6d0f",
     "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
-    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "c21da21dc11b56abd4199e10bed5d96cf2320c00492399ababe78c89d8aeb9cf",
+    "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "85e03a999fb27599eff2e83a17104ad765bcac392ec145a07457564bca43e85b",
     "scripts/research/proximal_distal_energy/articulated_native_constraint_discrepancy.py": "e1c6f0f066e4ad3f157557d003e4e12ae83842cc275ccc0965f263e1fc21220a",
-    "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py": "612603f379e28a0491a3fda92937cce041e0057570dc99a5cff3afd92f90d2dd",
+    "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py": "854b4432e9fbee7def1848229fd779d2877b7f0b5c85677e02081b7d80f3ceb5",
     "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py": "6a3d450ac009efd777b0051ab988171952b975ed7c6e61628f2d009bccd04f49",
-    "scripts/research/proximal_distal_energy/spatial_full_body.py": "862fdc4b176cbcc8d4d139a00be745f3d8a37c0f81cd899e55a03707893f8e6a",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
     "tests/research/test_articulated_native_constraint_discrepancy.py": "876594e8643179cfd6df01e34cb006ebdfd96f9d6b5eae9302cfd435fbe9419c"
   }

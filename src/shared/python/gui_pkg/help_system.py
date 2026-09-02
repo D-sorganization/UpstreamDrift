@@ -53,7 +53,7 @@ from src.shared.python import SUITE_ROOT
 # Get paths
 DOCS_DIR = SUITE_ROOT / "docs"
 HELP_DIR = DOCS_DIR / "help"
-USER_MANUAL_PATH = DOCS_DIR / "USER_MANUAL.md"
+USER_MANUAL_PATH = DOCS_DIR / "user_guide" / "user_manual.md"
 
 
 def get_user_manual_content() -> str:

@@ -43,6 +43,8 @@
     "local_model_records": 0,
     "program_records": 0,
     "feature_records": 0,
-    "feature_surface_paths": 0
+    "feature_surface_paths": 0,
+    "workflow_records": 0,
+    "executable_workflow_records": 0
   }
 }
