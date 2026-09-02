@@ -468,7 +468,7 @@ class MultiModelShotTracerWidget(QWidget):
         """
         try:
             curve = import_trajectory_record(path)
-        except TrajectoryImportError as e:
+        except (TrajectoryImportError, Exception) as e:
             logger.exception("Trajectory import refused")
             QMessageBox.warning(self, "Import Refused", str(e))
             return
