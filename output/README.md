@@ -83,7 +83,7 @@ formats `save_simulation_results` / `load_simulation_results` understand:
 - **HDF5** (`OutputFormat.HDF5`)
 - **Parquet** (`OutputFormat.PARQUET`)
 
-*(Note: `OutputFormat.PICKLE` is disabled for security and deliberately raises a `ValueError` if requested.)*
+_(Note: `OutputFormat.PICKLE` is disabled for security and deliberately raises a `ValueError` if requested.)_
 
 `export_analysis_report` supports `format_type="json"` or `"html"`.
 For formats that support metadata serialization (JSON and CSV), a `ProvenanceInfo` record (timestamp, git SHA, model file hash if provided, and parameters) is embedded: JSON nests it under a top-level `provenance` key, while CSV prepends commented provenance header lines. Raw binary formats like HDF5 and Parquet store dataframe records directly.
@@ -136,6 +136,7 @@ programmatic listing, loading, or cleanup.
 
 `OutputManager.cleanup_old_files(max_age_days=30)` cleans up output directories
 (see `src/shared/python/data_io/_simulation_store.py`):
+
 - Removes temporary files from `cache/temp/` that are older than 1 day.
 - Moves files older than `max_age_days` from `simulations/` and `analysis/` into `<base_path>/archive/` preserving directory structure.
 
