@@ -59,6 +59,7 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 
 ## Recent Amendments
 
+- **2026-09-02:** ADR-0048 records the repo owner's rulings on four of G0.1's pinned launch-monitor divergences: D15 (FDR multiplicity denominator excludes under-sampled predictors before correcting, Tools' existing posture), D17 (UD's boolean-as-0/1 capability is preserved but the projection must be explicit in the result), D22 (the low-dof between-player Fisher interval is withheld per UD's posture), and D23 (the column-name-suffix unit heuristic is deleted in favor of canonical-registry resolution, also UD's posture) (#9392).
 - **2026-09-02:** ADR-0044 corrected `ShotResult` force field name reference from `forces_n_m` to `forces_n` (#9375).
 - **2026-08-29:** ADR-0044 keeps BunkerShot3D in-plane: F1's
   `RefusedQuantity.OUT_OF_PLANE`, the `EXTRUDED` slice labelling, and the
