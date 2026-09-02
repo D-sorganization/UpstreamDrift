@@ -11,43 +11,43 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from PyQt6.QtWidgets import QApplication
-from src.launchers.base import BaseLauncher, run_launcher
-
-
-class DummyLauncher(BaseLauncher):
-    """Minimal concrete BaseLauncher for testing."""
-
-    def __init__(self, **kwargs: object) -> None:
-        super().__init__(**kwargs)
-        self.init_ui_called = False
-
-    def init_ui(self) -> None:
-        self.init_ui_called = True
+from src.launchers.base import run_launcher
 
 
 @pytest.mark.unit
-def test_run_launcher_reuses_existing_qapp_without_exec(qapp: QApplication) -> None:
+def test_run_launcher_reuses_existing_qapp_without_exec() -> None:
     """When QApplication exists, run_launcher does not enter an inner event loop."""
-    with patch.object(qapp, "exec", return_value=123) as mock_exec:
-        exit_code = run_launcher(DummyLauncher)
+    mock_existing_app = MagicMock(spec=QApplication)
+    mock_launcher_cls = MagicMock()
+
+    with patch(
+        "src.launchers.base.QApplication.instance", return_value=mock_existing_app
+    ):
+        exit_code = run_launcher(mock_launcher_cls)
         assert exit_code == 0
-        mock_exec.assert_not_called()
+        mock_existing_app.exec.assert_not_called()
+        mock_launcher_cls.assert_called_once()
+        mock_launcher_cls.return_value.init_ui.assert_called_once()
+        mock_launcher_cls.return_value.show.assert_called_once()
 
 
 @pytest.mark.unit
 def test_run_launcher_executes_when_it_created_app() -> None:
     """When run_launcher creates the QApplication, it calls app.exec() and returns the code."""
-    mock_app = MagicMock()
-    mock_app.exec.return_value = 42
+    mock_new_app = MagicMock(spec=QApplication)
+    mock_new_app.exec.return_value = 42
+    mock_launcher_cls = MagicMock()
 
-    with (
-        patch("src.launchers.base.QApplication") as mock_qapp_class,
-        patch.object(DummyLauncher, "center_window"),
-        patch.object(DummyLauncher, "show"),
-    ):
-        mock_qapp_class.instance.return_value = None
-        mock_qapp_class.return_value = mock_app
-        exit_code = run_launcher(DummyLauncher)
+    mock_qapp_cls = MagicMock()
+    mock_qapp_cls.instance.return_value = None
+    mock_qapp_cls.return_value = mock_new_app
+
+    with patch("src.launchers.base.QApplication", mock_qapp_cls):
+        exit_code = run_launcher(mock_launcher_cls)
         assert exit_code == 42
-        mock_qapp_class.assert_called_once()
-        mock_app.exec.assert_called_once()
+        mock_qapp_cls.assert_called_once()
+        mock_new_app.setStyle.assert_called_once_with("Fusion")
+        mock_new_app.exec.assert_called_once()
+        mock_launcher_cls.assert_called_once()
+        mock_launcher_cls.return_value.init_ui.assert_called_once()
+        mock_launcher_cls.return_value.show.assert_called_once()
