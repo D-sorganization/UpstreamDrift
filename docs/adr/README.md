@@ -59,6 +59,7 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 
 ## Recent Amendments
 
+- **2026-09-02:** ADR-0048's "Stage 2 Blocker (G2)" records that Option 1 was executed: UpstreamDrift's transitional launch-monitor copy moved out of the `shared.python` namespace to `src/tools/launch_monitor_model/`, beside the workbench that consumes it. The `launch_monitor` shadow-ledger entry cleared, `shared.python.launch_monitor` now resolves to the vendored canonical package, and ADR-0046 Stage 2 wave 1 is unblocked (#9420).
 - **2026-09-02:** ADR-0046's Consequences record the repo owner's ruling on
   the TypeScript-twin obligation ADR-0048 G1 sized and flagged as unsized:
   **deferred-twin policy** — canonical Python modules in the Tools model

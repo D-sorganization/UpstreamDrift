@@ -74,10 +74,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.shared.python.launch_monitor.flexible_analysis import (
+from src.tools.launch_monitor_model.flexible_analysis import (
     CONTRACT_VERSION as UD_CONTRACT_VERSION,
 )
-from src.shared.python.launch_monitor.flexible_analysis import (
+from src.tools.launch_monitor_model.flexible_analysis import (
     AnalysisMode,
     CorrelationMethod,
     FlexibleAnalysisRequest,

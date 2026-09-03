@@ -5,13 +5,13 @@ only the core scientific/data dependencies; the shallow MLP imports
 scikit-learn lazily when selected.
 """
 
-from src.shared.python.launch_monitor.comparison import (
+from src.tools.launch_monitor_model.comparison import (
     MonitorComparisonResult,
     MonitorSummary,
     PairwiseMonitorComparison,
     compare_monitors,
 )
-from src.shared.python.launch_monitor.conformance_bundle import (
+from src.tools.launch_monitor_model.conformance_bundle import (
     LAUNCH_MONITOR_CONFORMANCE_BUNDLE_VERSION,
     LaunchMonitorConformanceBundleV1,
     LaunchMonitorConformanceScenarioV1,
@@ -19,12 +19,12 @@ from src.shared.python.launch_monitor.conformance_bundle import (
     launch_monitor_conformance_bundle_sha256,
     launch_monitor_conformance_scenario_sha256,
 )
-from src.shared.python.launch_monitor.corpus import (
+from src.tools.launch_monitor_model.corpus import (
     CORPUS_COLUMN_MAP,
     corpus_dataset_path,
     load_private_corpus,
 )
-from src.shared.python.launch_monitor.contract_v2 import (
+from src.tools.launch_monitor_model.contract_v2 import (
     CONTRACT_VERSION_V2,
     AnalysisContextV2,
     AnalysisLineageV2,
@@ -47,11 +47,11 @@ from src.shared.python.launch_monitor.contract_v2 import (
     build_analysis_lineage_v2,
     contract_v2_json_schema,
 )
-from src.shared.python.launch_monitor.dispersion import (
+from src.tools.launch_monitor_model.dispersion import (
     DispersionResult,
     analyze_dispersion,
 )
-from src.shared.python.launch_monitor.dataset_reference import (
+from src.tools.launch_monitor_model.dataset_reference import (
     DATASET_JOB_CONTRACT_VERSION,
     DatasetJobRequestV1,
     DatasetOperationV1,
@@ -60,7 +60,7 @@ from src.shared.python.launch_monitor.dataset_reference import (
     dataset_content_sha256,
     dataset_job_contract_json_schema,
 )
-from src.shared.python.launch_monitor.flexible_analysis import (
+from src.tools.launch_monitor_model.flexible_analysis import (
     CONTRACT_VERSION,
     AnalysisMode,
     CoefficientEstimate,
@@ -75,12 +75,12 @@ from src.shared.python.launch_monitor.flexible_analysis import (
     ResidualDiagnostics,
     analyze_variables,
 )
-from src.shared.python.launch_monitor.importer import import_session
-from src.shared.python.launch_monitor.longitudinal import (
+from src.tools.launch_monitor_model.importer import import_session
+from src.tools.launch_monitor_model.longitudinal import (
     analyze_longitudinal_sessions,
     longitudinal_session_contract_json_schema,
 )
-from src.shared.python.launch_monitor.longitudinal_types import (
+from src.tools.launch_monitor_model.longitudinal_types import (
     LONGITUDINAL_SESSION_CONTRACT_VERSION,
     LongitudinalClaimsV1,
     LongitudinalDesignV1,
@@ -91,23 +91,23 @@ from src.shared.python.launch_monitor.longitudinal_types import (
     PooledAssociationV1,
     SessionAggregateV1,
 )
-from src.shared.python.launch_monitor.modeling import (
+from src.tools.launch_monitor_model.modeling import (
     PredictiveModelResult,
     fit_predictive_model,
 )
-from src.shared.python.launch_monitor.multivariate import (
+from src.tools.launch_monitor_model.multivariate import (
     PCAResult,
     VIFResult,
     compute_pca,
     compute_vif,
 )
-from src.shared.python.launch_monitor.outcome_proxy import analyze_outcome_proxy
-from src.shared.python.launch_monitor.player_covariation import (
+from src.tools.launch_monitor_model.outcome_proxy import analyze_outcome_proxy
+from src.tools.launch_monitor_model.player_covariation import (
     analyze_player_covariation_v1,
     player_covariation_contract_json_schema,
     scan_player_covariation_v1,
 )
-from src.shared.python.launch_monitor.player_covariation_types import (
+from src.tools.launch_monitor_model.player_covariation_types import (
     PLAYER_COVARIATION_CONTRACT_VERSION,
     AssociationEstimateV1,
     CovariationMissingnessV1,
@@ -121,20 +121,20 @@ from src.shared.python.launch_monitor.player_covariation_types import (
     PlayerCovariationScanRequestV1,
     PlayerCovariationScanResultV1,
 )
-from src.shared.python.launch_monitor.profiles import (
+from src.tools.launch_monitor_model.profiles import (
     PROFILES,
     ImportProfile,
     ProfileDetection,
     detect_profile,
     normalize_header,
 )
-from src.shared.python.launch_monitor.project import LaunchMonitorProject
-from src.shared.python.launch_monitor.relationships import (
+from src.tools.launch_monitor_model.project import LaunchMonitorProject
+from src.tools.launch_monitor_model.relationships import (
     CorrelationResult,
     DependencyEdge,
     compute_correlations,
 )
-from src.shared.python.launch_monitor.schema import (
+from src.tools.launch_monitor_model.schema import (
     IDENTITY_COLUMNS,
     METRICS,
     ColumnMapping,
@@ -144,16 +144,16 @@ from src.shared.python.launch_monitor.schema import (
     MetricDefinition,
     numeric_metric_columns,
 )
-from src.shared.python.launch_monitor.trends import (
+from src.tools.launch_monitor_model.trends import (
     ChangeCandidate,
     TrendResult,
     analyze_trend,
 )
-from src.shared.python.launch_monitor.strokes_gained import (
+from src.tools.launch_monitor_model.strokes_gained import (
     analyze_source_backed_strokes_gained,
     strokes_gained_contract_json_schema,
 )
-from src.shared.python.launch_monitor.strokes_gained_types import (
+from src.tools.launch_monitor_model.strokes_gained_types import (
     BASELINE_CONTRACT_VERSION,
     OUTCOME_PROXY_CONTRACT_VERSION,
     STROKES_GAINED_CONTRACT_VERSION,
@@ -168,7 +168,7 @@ from src.shared.python.launch_monitor.strokes_gained_types import (
     StrokesGainedRequestV1,
     baseline_table_sha256,
 )
-from src.shared.python.launch_monitor.treatment import (
+from src.tools.launch_monitor_model.treatment import (
     TreatmentConfig,
     TreatmentResult,
     FilterRule,

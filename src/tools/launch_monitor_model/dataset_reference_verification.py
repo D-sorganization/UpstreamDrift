@@ -10,7 +10,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.launch_monitor.dataset_reference_contract import (
+from src.tools.launch_monitor_model.dataset_reference_contract import (
     DatasetReferenceV1,
     unavailable,
 )

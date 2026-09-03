@@ -16,7 +16,7 @@ import pandas as pd
 from matplotlib.dates import date2num
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     CorrelationResult,
     FilterRule,
     ImportedSession,

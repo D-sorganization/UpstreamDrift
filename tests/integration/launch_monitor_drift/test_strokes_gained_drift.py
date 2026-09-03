@@ -15,16 +15,26 @@ AGREE — asserted exactly
       float noise.
     * Session mean SG: 0.80592372152815683 on both, bit-for-bit (delta 0.0).
 
+RESOLVED — was a divergence, now an agreement
+    D1. Malformed rows. **Resolved by ADR-0048 decision G1-D3**, "the canonical
+        error posture is exclude-and-audit". Both stacks now exclude the row,
+        record it against the same ``reason_code``, degrade ``status`` to
+        ``"partial"``, and return an unchanged mean. Tools previously raised
+        ``ValueError`` and lost the whole session for 3 of the 4 failure modes;
+        for the 4th (blank lie/context/target) it silently dropped the row with
+        no exclusion record at all — which G1-D3 called "the worst outcome
+        available". This gate no longer measures a divergence here; it measures
+        that the resolution holds on both sides, and it fails if either stack
+        regresses to raising or to silence.
+
 DIFFER — documented and pinned below
-    D1. Malformed rows. UD excludes the row, records a ``reason_code``, and
-        returns ``status="partial"`` with an unchanged mean. Tools raises
-        ``ValueError`` and loses the whole session for 3 of the 4 failure
-        modes; for the 4th (blank lie/context/target) Tools silently drops the
-        row with **no exclusion record at all**.
     D2. Uncertainty. UD reports sd/standard error/Student-t CI plus a combined
-        benchmark standard error. Tools' result carries only ``mean``: the
-        Tools loader parses ``standard_error`` off the baseline and then
-        discards it in ``_expected``.
+        benchmark standard error. Tools' result carries no uncertainty at all:
+        the Tools loader parses ``standard_error`` off the baseline and then
+        discards it in ``_expected``. The Tools field set pinned below **grew
+        by three** with G1-D3 (``status``, ``excluded_rows``, ``exclusions``)
+        and ``mean`` widened to optional; that addition is the audit surface,
+        not uncertainty, so D2 itself is unchanged and still open.
     D3. Grouped SG. UD computes per-player/session/club estimates in-process.
         Tools' local calculator has no grouping; ``TrustedSummaryRequest``
         only builds a *payload to send to UpstreamDrift*, so today the Tools
@@ -46,10 +56,10 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from src.shared.python.launch_monitor.strokes_gained import (
+from src.tools.launch_monitor_model.strokes_gained import (
     analyze_source_backed_strokes_gained,
 )
-from src.shared.python.launch_monitor.strokes_gained_types import (
+from src.tools.launch_monitor_model.strokes_gained_types import (
     CourseStateColumnsV1,
     ExpectedStrokesBaselineV2,
     GroupingDimensionV1,
@@ -96,12 +106,16 @@ UD_ONLY_PLAYER_MEANS = {
     "P4": 0.68237377051109649,
 }
 
-# D1 pins: what each stack does with one malformed row appended to 160 clean.
+# D1 pins (RESOLVED per ADR-0048 G1-D3): the single ``reason_code`` **both**
+# stacks must record for one malformed row appended to 160 clean. Before the
+# resolution this mapped each case to a UD reason code *and* a divergent Tools
+# behaviour ("raises" for three cases, "silently_drops" for the fourth); the
+# Tools half now agrees, so one code per case is the whole contract.
 DEGENERATE_EXPECTATIONS = {
-    "outside_baseline_start": ("outside_baseline", "raises"),
-    "missing_course_state": ("missing_course_state", "silently_drops"),
-    "negative_finish_distance": ("invalid_distance", "raises"),
-    "unknown_stratum": ("outside_baseline", "raises"),
+    "outside_baseline_start": "outside_baseline",
+    "missing_course_state": "missing_course_state",
+    "negative_finish_distance": "invalid_distance",
+    "unknown_stratum": "outside_baseline",
 }
 
 
@@ -252,6 +266,11 @@ def test_divergence_d2_only_ud_reports_strokes_gained_uncertainty(
         "table_sha256",
         "backing_rows",
         "formula",
+        # Added by ADR-0048 G1-D3's audit surface. Additive: the eleven fields
+        # above are all still present.
+        "status",
+        "excluded_rows",
+        "exclusions",
     }
     assert not tools_fields & {
         "standard_deviation",
@@ -298,27 +317,35 @@ def test_divergence_d4_d5_longitudinal_strokes_gained_estimand(
 
 
 @pytest.mark.parametrize("case", sorted(DEGENERATE_EXPECTATIONS))
-def test_divergence_d1_malformed_row_handling(
+def test_resolved_d1_both_stacks_exclude_and_audit_a_malformed_row(
     case: str,
     session_frame: pd.DataFrame,
     degenerate_frame: pd.DataFrame,
     baseline_document: dict[str, Any],
     baseline_path: Path,
 ) -> None:
-    """DIFFER (D1): UD excludes and audits; Tools raises or silently drops.
+    """RESOLVED (D1, ADR-0048 G1-D3): both stacks exclude, audit, and continue.
 
     Appending exactly one malformed row to the 160 clean shots:
 
-    ==========================  =====================  ======================
+    ==========================  =====================  =====================
     case                        UD                     Tools
-    ==========================  =====================  ======================
-    outside_baseline_start      excluded, partial      ValueError, no result
-    missing_course_state        excluded, partial      dropped, no record
-    negative_finish_distance    excluded, partial      ValueError, no result
-    unknown_stratum             excluded, partial      ValueError, no result
-    ==========================  =====================  ======================
+    ==========================  =====================  =====================
+    outside_baseline_start      excluded, partial      excluded, partial
+    missing_course_state        excluded, partial      excluded, partial
+    negative_finish_distance    excluded, partial      excluded, partial
+    unknown_stratum             excluded, partial      excluded, partial
+    ==========================  =====================  =====================
+
+    Before G1-D3 the Tools column read "ValueError, no result" for the first,
+    third and fourth cases and "dropped, no record" for the second. Both
+    stacks now agree on the ``reason_code`` as well as the outcome, and both
+    means are unchanged at ``PINNED_MEAN_STROKES_GAINED`` — the 160 good rows
+    survive one bad row on both sides.
+
+    This test fails if either stack regresses to raising *or* to silence.
     """
-    reason_code, tools_behaviour = DEGENERATE_EXPECTATIONS[case]
+    reason_code = DEGENERATE_EXPECTATIONS[case]
     row = degenerate_frame.loc[degenerate_frame["degenerate_case"] == case].drop(
         columns=["degenerate_case"]
     )
@@ -335,12 +362,73 @@ def test_divergence_d1_malformed_row_handling(
     assert ud.value_summary.mean == pytest.approx(PINNED_MEAN_STROKES_GAINED, rel=1e-12)
 
     baseline = load_strokes_gained_baseline(baseline_path)
-    if tools_behaviour == "raises":
-        with pytest.raises(ValueError, match="outside the baseline"):
-            calculate_source_backed_strokes_gained(mixed, baseline, _tools_request())
-        return
-
     tools = calculate_source_backed_strokes_gained(mixed, baseline, _tools_request())
+
+    assert tools.status == "partial"
     assert len(tools.values) == EXPECTED_INCLUDED_ROWS
     assert tools.mean == pytest.approx(PINNED_MEAN_STROKES_GAINED, rel=1e-12)
-    assert not hasattr(tools, "excluded_rows")
+
+    # The audit surface itself, not merely the surviving mean.
+    assert tools.exclusions.by_reason == {reason_code: 1}
+    assert tools.exclusions.input_row_count == EXPECTED_INCLUDED_ROWS + 1
+    assert tools.exclusions.included_row_count == EXPECTED_INCLUDED_ROWS
+    assert tools.exclusions.total_excluded == 1
+    assert len(tools.excluded_rows) == 1
+    assert tools.excluded_rows[0].reason_code == reason_code
+    assert tools.excluded_rows[0].source_index == EXPECTED_INCLUDED_ROWS
+    assert tools.excluded_rows[0].message
+
+    # Cross-stack agreement, asserted directly rather than case by case.
+    assert tools.exclusions.by_reason == ud.exclusions.by_reason
+    assert tools.status == ud.status
+    assert tools.exclusions.included_row_count == ud.exclusions.included_row_count
+    assert tools.exclusions.total_excluded == ud.exclusions.total_excluded
+    assert [excluded.reason_code for excluded in tools.excluded_rows] == [
+        excluded.reason_code for excluded in ud.excluded_rows
+    ]
+    assert [excluded.source_index for excluded in tools.excluded_rows] == [
+        excluded.source_index for excluded in ud.excluded_rows
+    ]
+
+
+def test_resolved_d1_neither_stack_drops_a_row_in_silence(
+    session_frame: pd.DataFrame,
+    degenerate_frame: pd.DataFrame,
+    baseline_document: dict[str, Any],
+    baseline_path: Path,
+) -> None:
+    """RESOLVED (D1): every supplied row is accounted for on both sides.
+
+    G1-D3 prohibits a silent drop outright, and the pre-resolution Tools stack
+    committed exactly that on the ``missing_course_state`` case. With all four
+    malformed rows appended at once, both stacks must report
+    ``input == included + excluded`` and must name all four causes.
+    """
+    malformed = degenerate_frame.drop(columns=["degenerate_case"])
+    mixed = pd.concat([session_frame, malformed], ignore_index=True)
+    expected_by_reason = {
+        "outside_baseline": 2,
+        "missing_course_state": 1,
+        "invalid_distance": 1,
+    }
+
+    ud = analyze_source_backed_strokes_gained(
+        mixed,
+        ExpectedStrokesBaselineV2.model_validate(baseline_document),
+        _ud_request(),
+    )
+    tools = calculate_source_backed_strokes_gained(
+        mixed, load_strokes_gained_baseline(baseline_path), _tools_request()
+    )
+
+    for summary in (ud.exclusions, tools.exclusions):
+        assert summary.input_row_count == len(mixed)
+        assert summary.included_row_count == EXPECTED_INCLUDED_ROWS
+        assert summary.total_excluded == len(degenerate_frame)
+        assert summary.included_row_count + summary.total_excluded == len(mixed)
+        assert summary.by_reason == expected_by_reason
+
+    assert ud.status == tools.status == "partial"
+    assert len(tools.excluded_rows) == len(ud.excluded_rows) == len(degenerate_frame)
+    assert tools.mean == pytest.approx(PINNED_MEAN_STROKES_GAINED, rel=1e-12)
+    assert ud.value_summary.mean == pytest.approx(PINNED_MEAN_STROKES_GAINED, rel=1e-12)

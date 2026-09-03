@@ -1,12 +1,12 @@
 # Launch Monitor Analytics API
 
-The headless API lives in `src.shared.python.launch_monitor` and imports without
+The headless API lives in `src.tools.launch_monitor_model` and imports without
 PyQt6. The shallow MLP loads scikit-learn only when requested.
 
 ## Import and Aggregate
 
 ```python
-from src.shared.python.launch_monitor import LaunchMonitorProject, import_session
+from src.tools.launch_monitor_model import LaunchMonitorProject, import_session
 
 project = LaunchMonitorProject("Player Study")
 project.add_session(import_session("trackman-session.csv"))
@@ -22,7 +22,7 @@ selected profile, confidence, matched fingerprints, and alternatives.
 ## Treat and Filter
 
 ```python
-from src.shared.python.launch_monitor import FilterRule, TreatmentConfig, apply_treatment
+from src.tools.launch_monitor_model import FilterRule, TreatmentConfig, apply_treatment
 
 treated = apply_treatment(
     shots,
@@ -42,7 +42,7 @@ row-level flags, and serializable audit actions.
 ## Relationships and Multivariate Diagnostics
 
 ```python
-from src.shared.python.launch_monitor import compute_correlations, compute_pca, compute_vif
+from src.tools.launch_monitor_model import compute_correlations, compute_pca, compute_vif
 
 metrics = ("club_speed", "ball_speed", "attack_angle", "carry_distance")
 relations = compute_correlations(
@@ -62,7 +62,7 @@ count, optional partial-correlation matrices, derived metrics, and screened
 ## Predictive Models
 
 ```python
-from src.shared.python.launch_monitor import fit_predictive_model
+from src.tools.launch_monitor_model import fit_predictive_model
 
 model = fit_predictive_model(
     treated.data,
@@ -112,7 +112,7 @@ the unchanged v1 numerical result:
 Use the Python authority directly:
 
 ```python
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     AnalysisContextV2,
     DatasetAuthorityV2,
     FlexibleAnalysisRequest,

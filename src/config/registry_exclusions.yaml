@@ -34,6 +34,14 @@ exclusions:
       License-isolation subprocess sidecar for the CC-BY-NC 4D-Humans/HMR
       2.0 pipeline; invoked by the motion pipeline via HMR2_COMMAND, never
       launched directly by users.
+  - package: launch_monitor_model
+    reason: >-
+      Headless model layer behind the launch_monitor_analytics tile and the
+      launch-monitor API routes; a library package with no window, dock, or
+      entry point of its own. Sited beside the workbench (ADR-0048 "Stage 2
+      Blocker (G2)", Option 1) so that shared.python.launch_monitor resolves
+      unambiguously to the vendored canonical layer.
+    issue: "#9348"
   - package: matlab_utilities
     reason: >-
       Script grab-bag supporting the MATLAB/Simscape suite; the user-facing

@@ -6,7 +6,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel, model_validator
 
-from src.shared.python.launch_monitor.contract_v2 import (
+from src.tools.launch_monitor_model.contract_v2 import (
     AnalysisLineageV2,
     AvailabilityState,
     AvailabilityV2,
