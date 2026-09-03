@@ -44,6 +44,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.ui.tile_help import attach_tile_help
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:  # pragma: no cover - type hints only
@@ -192,6 +193,7 @@ class MainWindow(QMainWindow):
         self._main_widget = MainWidget(self)
         self.setCentralWidget(self._main_widget)
         self.resize(1000, 700)
+        attach_tile_help(self, "myosim_suite")
 
     @property
     def main_widget(self) -> MainWidget:

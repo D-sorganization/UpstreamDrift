@@ -371,6 +371,203 @@ feature, module, and tool in the UpstreamDrift Golf Modeling Suite.
         ],
         "see_also": ["engine_selection", "analysis_tools"],
     },
+    # -------------------------------------------------------------------------
+    # Topics added for issue #9413 / #8843.
+    #
+    # ``UI_HELP_TOPICS`` registered 35 components but ``FEATURE_HELP`` only
+    # defined six topics, so 11 components resolved to ``None`` and their
+    # help buttons did nothing. Each entry below points at the document that
+    # is actually maintained for that area rather than restating it, so the
+    # two cannot drift apart.
+    # -------------------------------------------------------------------------
+    "getting_started": {
+        "title": "Getting Started",
+        "short": "First launch, prerequisites, and where to go next",
+        "description": """
+The launcher is the entry point for every tool in the suite. Tiles are
+declared in `src/config/models.yaml`; each tile carries a maturity level
+(ready, beta, experimental) and a help page reachable with **F1**.
+
+**First steps**
+1. Install the Python environment (`docs/installation/`).
+2. Launch the suite and pick a tile from the grid.
+3. Press **F1** inside any tool to open that tool's help page.
+
+**Where the details live**
+- `docs/user_guide/getting_started.md` -- guided first run
+- `docs/installation/` -- platform prerequisites
+- `docs/user_guide/installing_optional_features.md` -- optional engines
+""",
+        "tips": [
+            "Press F1 in any tool to open that tool's own help page",
+            "Type in the launcher search box to filter tiles",
+            "Experimental tiles may change without notice",
+        ],
+        "see_also": ["engine_selection", "configuration"],
+    },
+    "docker_setup": {
+        "title": "Docker Mode",
+        "short": "Run engines inside containers instead of the host environment",
+        "description": """
+Docker mode runs a physics engine inside a container so engine-specific
+native dependencies do not have to be installed on the host.
+
+**Where the details live**
+- `docs/development/DOCKER_SETUP.md` -- building and running the images
+- `docs/operations/docker-gpu.md` -- GPU passthrough
+- `docs/operations/DOCKER_CLEANUP_RUNBOOK.md` -- reclaiming disk space
+
+**Limitations**
+Container builds are large and GPU passthrough is platform dependent;
+consult the runbook before enabling it on a machine with little free disk.
+""",
+        "tips": [
+            "Build the image once before enabling Docker mode in the launcher",
+            "Docker build cache grows quickly -- see the cleanup runbook",
+        ],
+        "see_also": ["engine_selection", "wsl_setup"],
+    },
+    "wsl_setup": {
+        "title": "WSL Mode",
+        "short": "Run Linux-only engines from a Windows host via WSL",
+        "description": """
+WSL mode targets engines that only ship Linux builds. The launcher shells
+into the configured WSL distribution to start the engine process.
+
+**Where the details live**
+- `docs/development/wsl_setup.md` -- distribution setup and known pitfalls
+
+**Limitations**
+Windows-only. GUI forwarding depends on the WSL and GPU driver versions
+installed on the host.
+""",
+        "tips": [
+            "Verify the distribution starts from a plain shell before using the launcher",
+        ],
+        "see_also": ["docker_setup", "engine_selection"],
+    },
+    "matlab_integration": {
+        "title": "MATLAB and Simscape Integration",
+        "short": "Simscape Multibody models and the MATLAB tool suite",
+        "description": """
+The suite ships MATLAB/Simscape Multibody golf models plus Python bridges
+for reading their outputs.
+
+**Where the details live**
+- `docs/engines/matlab.md` -- MATLAB engine notes
+- `docs/engines/simscape.md` -- Simscape Multibody models
+
+**Limitations**
+A licensed MATLAB installation is required; the Python-side viewers can read
+exported data without MATLAB, but cannot run the models.
+""",
+        "tips": [
+            "The C3D viewer reads Simscape exports without needing MATLAB",
+        ],
+        "see_also": ["engine_selection", "motion_capture"],
+    },
+    "data_export": {
+        "title": "Exporting Simulation Data",
+        "short": "Save recorded runs for offline analysis",
+        "description": """
+Recorded simulation runs can be written out for offline analysis.
+
+**Typical flow**
+1. Enable recording before starting the run.
+2. Run the simulation to completion.
+3. Export from the tool's export control.
+
+**Limitations**
+Exports capture what the running engine recorded; enabling recording after
+a run has started does not backfill earlier frames.
+""",
+        "tips": [
+            "Enable recording *before* starting the run",
+            "Prefer CSV for spreadsheet work and JSON for structured records",
+        ],
+        "see_also": ["simulation_controls", "analysis_tools"],
+    },
+    "urdf_generator": {
+        "title": "URDF Subsystem",
+        "short": "Generate and inspect URDF robot descriptions",
+        "description": """
+URDF generation and validation is a shared subsystem used by several
+engines rather than a single tool.
+
+**Where the details live**
+- `docs/architecture/URDF_SUBSYSTEM_BOUNDARY.md` -- module boundary
+- `docs/adr/0020-canonical-urdf-subsystem.md` -- the decision record
+
+**Limitations**
+Engines differ in which URDF features they accept; a description that loads
+in one engine may be rejected by another.
+""",
+        "tips": [
+            "Validate a generated URDF in the Model Explorer before simulating it",
+        ],
+        "see_also": ["model_explorer", "engine_selection"],
+    },
+    "model_explorer": {
+        "title": "Model Explorer",
+        "short": "Browse and inspect model description files",
+        "description": """
+The Model Explorer browses model description files (URDF, MJCF and related
+formats) and shows their link/joint structure.
+
+**Where the details live**
+- `docs/model_explorer/` -- tool documentation
+- `src/tools/model_explorer/` -- source of truth for behaviour
+
+**Limitations**
+It inspects descriptions; it does not simulate them.
+""",
+        "tips": [
+            "Use it to confirm joint names before wiring a controller",
+        ],
+        "see_also": ["urdf_generator", "engine_selection"],
+    },
+    "ball_flight": {
+        "title": "Ball Flight and Shot Tracing",
+        "short": "Trajectory models for launch conditions",
+        "description": """
+The ball-flight tools propagate a ball trajectory from launch conditions
+(speed, launch angle, spin) and render the resulting flight.
+
+**Where the details live**
+- `docs/help/ball_flight_simulator.md` -- the tile's help page
+- `docs/help/shot_tracer.md` -- shot-tracing overlay
+
+**Limitations**
+Trajectories are model output, not measurement. Read the tile help pages
+for the aerodynamic model each tool uses and what it omits.
+""",
+        "tips": [
+            "Spin rate dominates carry more than launch angle for most drivers",
+            "Compare against measured data before drawing conclusions",
+        ],
+        "see_also": ["simulation_controls", "analysis_tools"],
+    },
+    "configuration": {
+        "title": "Configuration",
+        "short": "Settings files and where they live",
+        "description": """
+Suite-wide configuration lives under `src/config/`; `models.yaml` is the
+single registry of launcher tiles and the help page each one opens.
+
+**Where the details live**
+- `docs/user_guide/configuration.md` -- user-facing settings
+- `docs/config/` -- configuration reference
+- `src/config/models.yaml` -- tile registry (tiles, maturity, help pages)
+
+**Limitations**
+Editing `models.yaml` by hand requires regenerating the derived artifacts
+with `python -m scripts.registry.generate_registry_artifacts`.
+""",
+        "tips": [
+            "Run the registry generator after editing models.yaml",
+        ],
+        "see_also": ["getting_started", "engine_selection"],
+    },
 }
 
 
