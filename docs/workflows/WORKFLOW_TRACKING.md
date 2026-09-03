@@ -11,6 +11,7 @@ This document lists all active GitHub Workflows in this repository hub.
 | **Vendor Freshness**     | `vendor-freshness.yml`           | Active   | Submodule staleness + Cargo/pyproject Tools-pin consistency (`check_tools_pins.py`, UD #9406). |
 | **CI Fast Tests**        | `ci-fast-tests.yml`              | Active   | Runs unit and integration tests (non-slow).                                                    |
 | **Nightly Cross-Engine** | `nightly-cross-engine.yml`       | Active   | Dedicated native-engine validation lane with strict import checks.                             |
+| **Cross-Engine Equivalence** | `cross-engine-equivalence.yml`   | Active   | Cross-engine equivalence + canonical conformance gate; its tool-cache ownership repair is scoped to `$RUNNER_TOOL_CACHE` only — it must never `chown -R` a runner `_work` tree, which invalidates git's index stat cache and breaks the next job's checkout (UD #9443, RM #1507). |
 | **Critical Files Guard** | `critical-files-guard.yml`       | Active   | Prevents accidental deletion of core files.                                                    |
 | **Assessment Generator** | `Jules-Assessment-Generator.yml` | Active   | Automated architecture & quality audits.                                                       |
 | **Auto-Repair**          | `Jules-Auto-Repair.yml`          | Disabled | Automatically fixes CI failures (Disabled via `if: false`).                                    |
