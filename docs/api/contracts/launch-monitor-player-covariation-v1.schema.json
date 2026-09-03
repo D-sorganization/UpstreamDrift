@@ -96,6 +96,22 @@
           "default": null,
           "title": "Intercept"
         },
+        "interval_withheld_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "insufficient_degrees_of_freedom",
+                "clustered_observations"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interval Withheld Reason"
+        },
         "pearson_r": {
           "anyOf": [
             {
@@ -614,6 +630,18 @@
           "title": "Assumptions",
           "type": "array"
         },
+        "between_player_interval": {
+          "const": "fisher-z-above-min-groups",
+          "default": "fisher-z-above-min-groups",
+          "title": "Between Player Interval",
+          "type": "string"
+        },
+        "between_player_interval_min_groups": {
+          "default": 5,
+          "minimum": 4,
+          "title": "Between Player Interval Min Groups",
+          "type": "integer"
+        },
         "confidence_level": {
           "exclusiveMaximum": 1.0,
           "exclusiveMinimum": 0.5,
@@ -1025,6 +1053,11 @@
         "meta_analysis": {
           "$ref": "#/$defs/MetaAnalysisSummaryV1"
         },
+        "method_description": {
+          "minLength": 1,
+          "title": "Method Description",
+          "type": "string"
+        },
         "missingness": {
           "$ref": "#/$defs/CovariationMissingnessV1"
         },
@@ -1093,7 +1126,8 @@
         "player_identity",
         "vendor_provenance",
         "definitions",
-        "warnings"
+        "warnings",
+        "method_description"
       ],
       "title": "PlayerCovariationResultV1",
       "type": "object"
