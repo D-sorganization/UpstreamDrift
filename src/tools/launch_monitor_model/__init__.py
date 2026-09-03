@@ -172,7 +172,7 @@ from src.tools.launch_monitor_model.flexible_analysis import (
     ResidualDiagnostics,
     analyze_variables,
 )
-from src.tools.launch_monitor_model.importer import import_session
+from shared.python.launch_monitor.importer import import_session
 from src.tools.launch_monitor_model.longitudinal import (
     analyze_longitudinal_sessions,
     longitudinal_session_contract_json_schema,
@@ -188,7 +188,7 @@ from src.tools.launch_monitor_model.longitudinal_types import (
     PooledAssociationV1,
     SessionAggregateV1,
 )
-from src.tools.launch_monitor_model.modeling import (
+from shared.python.launch_monitor.modeling import (
     PredictiveModelResult,
     fit_predictive_model,
 )
@@ -218,7 +218,7 @@ from src.tools.launch_monitor_model.player_covariation_types import (
     PlayerCovariationScanRequestV1,
     PlayerCovariationScanResultV1,
 )
-from src.tools.launch_monitor_model.profiles import (
+from shared.python.launch_monitor.profiles import (
     PROFILES,
     ImportProfile,
     ProfileDetection,
@@ -226,7 +226,7 @@ from src.tools.launch_monitor_model.profiles import (
     normalize_header,
 )
 from src.tools.launch_monitor_model.project import LaunchMonitorProject
-from src.tools.launch_monitor_model.relationships import (
+from shared.python.launch_monitor.relationships import (
     CorrelationResult,
     DependencyEdge,
     compute_correlations,
