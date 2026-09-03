@@ -634,3 +634,49 @@ def test_npm_error_message_prefers_stderr():
 def test_npm_error_message_falls_back_to_stdout():
     err = subprocess.CalledProcessError(1, "npm", stderr="", output="stdout msg")
     assert build_hooks.UIBuildHook._npm_error_message(err) == "stdout msg"
+
+
+def test_register_ui_bundle_force_includes_existing_bundle(tmp_path) -> None:
+    """A present bundle must be force-included at the wheel's install root.
+
+    ``packages = ["src"]`` narrows the wheel's file selection, so ``ui/dist``
+    only ships when this registration runs (#8018, #9449).
+    """
+    dist_dir = tmp_path / "ui" / "dist"
+    dist_dir.mkdir(parents=True)
+    (dist_dir / "index.html").write_text("<!doctype html>", encoding="utf-8")
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+    build_data: dict = {}
+
+    hook._register_ui_bundle("1.0.0", build_data)
+
+    assert build_data["force_include"] == {str(dist_dir): "ui/dist"}
+
+
+def test_register_ui_bundle_warns_when_bundle_missing(tmp_path, caplog) -> None:
+    """A missing bundle must warn instead of registering an absent source.
+
+    This is the branch that let the v2.1.1 release produce a UI-less wheel, so
+    ``tests/smoke/python_wheel`` asserts the payload on the built artifact
+    (#9449).
+    """
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+    build_data: dict = {}
+
+    with caplog.at_level("WARNING", logger="build_hooks"):
+        hook._register_ui_bundle("1.0.0", build_data)
+
+    assert build_data == {}
+    assert "No UI bundle at" in caplog.text
+
+
+def test_register_ui_bundle_skips_editable_installs(tmp_path) -> None:
+    """Editable installs resolve ui/dist from the checkout, not site-packages."""
+    dist_dir = tmp_path / "ui" / "dist"
+    dist_dir.mkdir(parents=True)
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+    build_data: dict = {}
+
+    hook._register_ui_bundle("editable", build_data)
+
+    assert build_data == {}
