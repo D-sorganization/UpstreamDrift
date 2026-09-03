@@ -66,6 +66,59 @@ release version must stay aligned with `src/api/_version.py`,
     acquisition-record digest, attestation IDs/URLs, and protected workflow run
     in the release handoff.
 
+## Failed release recovery — fix forward, never move a tag
+
+A tag whose `release.yml` run failed leaves the repository with a published Git
+tag and no release, wheel, SBOM, or PyPI distribution. `v2.1.1` is the worked
+example: the `build` job failed because `build_hooks.py` requires `ui/dist` and
+the workflow never compiled the frontend (#9449), so every downstream job was
+skipped.
+
+**Do not delete and re-push the failed tag.** A tag that has been pushed is
+already fetchable — consumers, mirrors, forks, and CI caches may hold it, and
+`git tag -d`/force-push makes the same name resolve to two different commits
+for different observers. Instead cut the next patch version. The failed tag is
+left in place with no release attached, which is itself the accurate record
+that nothing shipped from it.
+
+Recovery steps (human release operator with signing keys; this development
+environment must not create or push tags):
+
+1. Merge the fix that makes the release workflow able to build.
+2. Confirm `main` is green and that the workflow change is present on the
+   commit you are about to tag.
+3. Bump the version to the next patch, e.g. `2.1.1` -> `2.1.2`, in
+   `pyproject.toml` `[project].version` and every mirrored surface:
+   `src/api/_version.py`, `ui/package.json`, root `Cargo.toml`,
+   `rust_core/upstream-physics/pyproject.toml`, and `VERSION`.
+4. Move the `CHANGELOG.md` entries for the failed version under the new
+   version heading and note that the previous tag published nothing.
+5. Verify the version surfaces agree:
+
+   ```console
+   python3 scripts/check_version_consistency.py
+   ```
+
+6. Merge the version-bump PR, then tag the merge commit and push:
+
+   ```console
+   git tag -s v2.1.2 -m "v2.1.2" && git push origin v2.1.2
+   ```
+
+7. Watch the run and confirm the `build` job's UI steps, then that
+   `smoke-python-wheel`, `publish-pypi`, `create-release`, and
+   `record-companion-release` all ran:
+
+   ```console
+   gh run list --workflow release.yml --limit 1
+   gh release view v2.1.2
+   ```
+
+   The release must list the `.whl`, the CycloneDX SBOM, `SHA256SUMS.txt`, and
+   the companion payloads.
+8. Leave a comment on the failed tag's tracking issue recording that the tag
+   was retained and superseded, and by which version.
+
 ## Post-release
 
 1. Open a fresh `[Unreleased]` section in `CHANGELOG.md`.
