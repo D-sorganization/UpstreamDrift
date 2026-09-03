@@ -472,11 +472,17 @@ wave structure.
    any distribution of UpstreamDrift that does not carry the vendor tree.
    Recorded for completeness; not recommended.
 
-Until one of these is chosen, Stage 2 wave 1 is blocked at step 2 of its own
-procedure. Wave 1's step 1 (consumer inventory) and its identity premise are
-complete and pinned in `test_canonical_layer_parity.py`; no UpstreamDrift
-module has been retired, because retiring one with a failing import is the
-explicit non-goal ADR-0046 names.
+**Executed 2026-09-02 (#9420): Option 1.** UpstreamDrift's transitional copy
+moved from `src/shared/python/launch_monitor/` to
+`src/tools/launch_monitor_model/`, beside the workbench; the `launch_monitor`
+shadow-ledger entry cleared, and `shared.python.launch_monitor` now resolves to
+the vendored canonical package, unblocking Stage 2 wave 1.
+
+Before that, Stage 2 wave 1 was blocked at step 2 of its own procedure. Wave
+1's step 1 (consumer inventory) and its identity premise were complete and
+pinned in `test_canonical_layer_parity.py`; no UpstreamDrift module had been
+retired, because retiring one with a failing import is the explicit non-goal
+ADR-0046 names.
 
 ## Risks
 
