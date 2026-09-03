@@ -7,7 +7,7 @@ never disagree (UD #9406, Phase 1 of RM #1505):
 * ``Cargo.toml`` ``[workspace.dependencies] tools-core = { git = ..., rev = ... }``
   (the Rust kernel),
 * any ``ud-tools @ git+https://github.com/D-sorganization/Tools.git@<sha>``
-  pin inside ``pyproject.toml`` (the pip consumption path).
+  pin inside ``pyproject.toml`` or ``requirements-tools.txt`` (the pip path).
 
 A ``ud_tools @ https://github.com/D-sorganization/Tools/releases/download/...whl``
 release-wheel pin is *reported* with its version but not compared: releases are
@@ -33,6 +33,8 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 SUBMODULE_PATH = "vendor/ud-tools"
 TOOLS_REPO_URL = "https://github.com/D-sorganization/Tools.git"
+# Files that may carry a pip pin for Tools (git sha or release wheel).
+PIP_PIN_FILES = ("pyproject.toml", "requirements-tools.txt")
 
 _CARGO_RE = re.compile(
     r'^\s*tools-core\s*=\s*\{[^}]*git\s*=\s*"([^"]+)"[^}]*rev\s*=\s*"([0-9a-fA-F]{7,40})"',
@@ -108,16 +110,14 @@ def collect_pins(repo_root: Path) -> list[Pin]:
     pins.append(Pin("Cargo.toml tools-core", "Cargo.toml", rev))
     if url is not None and url.rstrip("/") != TOOLS_REPO_URL:
         pins.append(Pin("Cargo.toml tools-core url", "Cargo.toml", f"UNEXPECTED:{url}"))
-    for index, sha in enumerate(read_pyproject_pins(repo_root / "pyproject.toml")):
-        pins.append(Pin(f"pyproject ud-tools pin #{index + 1}", "pyproject.toml", sha))
-    for tag, version in read_pyproject_wheel_pins(repo_root / "pyproject.toml"):
-        # A release wheel is versioned, not sha-pinned. The gitlink still wins
-        # for the source tree; the wheel is reported, never compared (UD #9406).
-        pins.append(
-            Pin(
-                f"pyproject ud_tools wheel v{tag}", "pyproject.toml", f"WHEEL:{version}"
-            )
-        )
+    for name in PIP_PIN_FILES:
+        path = repo_root / name
+        for index, sha in enumerate(read_pyproject_pins(path)):
+            pins.append(Pin(f"{name} ud-tools git pin #{index + 1}", name, sha))
+        for tag, version in read_pyproject_wheel_pins(path):
+            # A release wheel is versioned, not sha-pinned. The gitlink still
+            # wins for the source tree; the wheel is reported, never compared.
+            pins.append(Pin(f"{name} ud_tools wheel v{tag}", name, f"WHEEL:{version}"))
     return pins
 
 
