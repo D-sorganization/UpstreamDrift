@@ -5,7 +5,10 @@ Issue #757: Linked sliders (synergies) and improved visualization.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+# defusedxml is a drop-in replacement for *parsing* (fromstring/parse); only
+# parsing is used here, so the swap is behaviour-preserving. Required by the
+# `use-defused-xml` SAST rule, which this file trips on any change (UD #9474).
+import defusedxml.ElementTree as ET
 
 import mujoco
 import pytest
