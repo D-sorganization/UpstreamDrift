@@ -21,29 +21,53 @@ import sys
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
+_CANONICAL_RELATIVE_PATH = Path("src/shared/python/launch_monitor/__init__.py")
+
+
+def _bind_canonical_search_path(tools_root: Path) -> None:
+    """Point the ``shared.python`` package at *tools_root*'s canonical layer.
+
+    Putting the directory on ``sys.path`` is not enough on its own. ``shared``
+    is a regular package, so its ``__path__`` is fixed at first import, and the
+    probe in :func:`_ensure_canonical_layer_importable` binds ``shared.python``
+    to UpstreamDrift's own ``src/shared/python`` on its way to discovering that
+    ``launch_monitor`` is not there. The vendored directory is therefore
+    *appended* to that ``__path__`` -- the same thing ``tests/conftest.py``
+    does for the test session, and the reason the canonical import resolves
+    under pytest today. Appending rather than prepending keeps UpstreamDrift's
+    own shared modules first; only names UpstreamDrift does not provide fall
+    through, and ``launch_monitor`` is now exactly such a name.
+    """
+    src_dir = str(tools_root / "src")
+    if src_dir not in sys.path:
+        sys.path.insert(0, src_dir)
+
+    vendored = str(tools_root / "src" / "shared" / "python")
+    search_path = getattr(sys.modules.get("shared.python"), "__path__", None)
+    if search_path is not None and vendored not in search_path:
+        search_path.append(vendored)
 
 
 def _ensure_canonical_layer_importable() -> None:
     """Make ``shared.python.launch_monitor`` resolvable before it is imported.
 
     A no-op wherever the vendored Tools source is already reachable, which is
-    every test run and every installed wheel. Where it is not, the resolution
-    facade in :mod:`src.launchers.tools_repo_path` owns the precedence order
-    (``TOOLS_REPO_PATH``, then the pinned ``vendor/ud-tools`` gitlink, then
-    dev-mode sibling discovery) and puts the Tools ``src`` directory on
-    ``sys.path``. Duplicating that precedence here would be a second answer to
-    a question that already has one.
+    every test run and every installed wheel.
 
-    Adding the path is not sufficient on its own. ``shared`` is a regular
-    package, so its ``__path__`` is fixed at first import, and the probe above
-    binds ``shared.python`` to UpstreamDrift's own ``src/shared/python`` on its
-    way to discovering that ``launch_monitor`` is not there. The vendored
-    directory is therefore *appended* to that ``__path__`` -- the same thing
-    ``tests/conftest.py`` does for the test session, and the reason the
-    canonical import resolves under pytest today. Appending rather than
-    prepending keeps UpstreamDrift's own shared modules first; only names
-    UpstreamDrift does not provide fall through, and ``launch_monitor`` is now
-    exactly such a name.
+    Where it is not, the pinned ``vendor/ud-tools`` tree is used directly when
+    its files are present. That deliberately skips the git-level validation in
+    :func:`~src.launchers.tools_repo_path.require_tools_repo`, because several
+    CI lanes materialise the pinned Tools source as a plain checkout rather
+    than a real submodule, which that validation rejects even though the files
+    are present and importable. The same "already-present wins, validate only
+    when searching" shape is what
+    ``src/api/routes/_ball_flight_trajectory_import.py`` uses, and for the same
+    reason.
+
+    Only when the vendored tree is genuinely absent does the resolution facade
+    take over: it owns ``TOOLS_REPO_PATH`` and dev-mode sibling discovery, and
+    duplicating that precedence here would be a second answer to a question
+    that already has one.
 
     Raises:
         ModuleNotFoundError: If no Tools checkout resolves. Failing at import
@@ -57,21 +81,21 @@ def _ensure_canonical_layer_importable() -> None:
     except ImportError:
         pass
 
-    # Deferred: only a source-checkout process reaches this branch, and the
-    # canonical resolution facade lives in the launcher package.
-    from src.launchers.tools_repo_path import ensure_tools_importable
+    vendor_root = _REPO_ROOT / "vendor" / "ud-tools"
+    if (vendor_root / _CANONICAL_RELATIVE_PATH).is_file():
+        _bind_canonical_search_path(vendor_root)
+    else:
+        # Deferred: only a source checkout with no vendored tree reaches this,
+        # and the canonical resolution facade lives in the launcher package.
+        from src.launchers.tools_repo_path import require_tools_repo
 
-    resolution = ensure_tools_importable(
-        _REPO_ROOT,
-        os.environ.get("TOOLS_REPO_PATH"),
-        error_cls=ModuleNotFoundError,
-    )
-
-    vendored = str(resolution.path / "src" / "shared" / "python")
-    shared_python = sys.modules.get("shared.python")
-    search_path = getattr(shared_python, "__path__", None)
-    if search_path is not None and vendored not in search_path:
-        search_path.append(vendored)
+        try:
+            resolution = require_tools_repo(
+                _REPO_ROOT, os.environ.get("TOOLS_REPO_PATH")
+            )
+        except RuntimeError as exc:
+            raise ModuleNotFoundError(str(exc)) from exc
+        _bind_canonical_search_path(resolution.path)
 
     importlib.import_module("shared.python.launch_monitor")
 
