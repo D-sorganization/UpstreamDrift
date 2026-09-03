@@ -65,6 +65,7 @@ source-adjacent references. The catalog below records where each belongs.
 | `review_archive/`       | @quality-team         | archived  | Older review records retained until consolidated into `reviews/archive/`.                                                           |
 | `reviews/`              | @quality-team         | stable    | Current review records, remediation notes, and quality findings.                                                                    |
 | `sg_optimizer/`         | @physics-team         | draft     | Strokes Gained Optimizer spec, data sources, and documentation.                                                                     |
+| `shared_tools/`         | @platform-team        | stable    | UpstreamDrift <-> Tools seam: divergence inventory, per-package rulings, drift-gate docs (UD #9406).                          |
 | `sidekick/`             | @platform-team        | stable    | Sidekick shared-utilities docs, launcher sidebar, chat/provider integration, tools library, and integration guides.                 |
 | `simulation_backends/`  | @physics-team         | stable    | Backend-agnostic golf-model simulation layer (ODE / MuJoCo CPU / MuJoCo Warp GPU): user guide, launcher tile, and cross-validation. |
 | `specs/`                | @architecture-team    | stable    | Specifications that expand or support the root `SPEC.md` contract.                                                                  |
