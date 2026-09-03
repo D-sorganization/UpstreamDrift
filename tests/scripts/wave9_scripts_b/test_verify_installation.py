@@ -9,6 +9,8 @@ import pytest
 
 from scripts.ci import verify_installation as mod
 
+pytestmark = pytest.mark.unit
+
 
 def test_check_python_version_ok() -> None:
     ok, msg = mod.check_python_version()
