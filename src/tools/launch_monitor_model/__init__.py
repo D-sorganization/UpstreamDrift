@@ -3,9 +3,106 @@
 The package keeps PyQt6 and scikit-learn optional. Importing this façade needs
 only the core scientific/data dependencies; the shallow MLP imports
 scikit-learn lazily when selected.
+
+ADR-0046 Stage 2 retires modules from here onto the canonical layer Tools
+owns, imported as ``shared.python.launch_monitor.<module>``. That name only
+resolves where ``vendor/ud-tools/src`` is on ``sys.path``. The test session
+gets it from ``pyproject.toml``'s pytest ``pythonpath``; an installed wheel
+gets it from ``build_hooks.py``, which force-includes the canonical ``shared``
+package at the top level. A process started from a source checkout -- the API
+server, the launcher, a companion workflow -- gets it from neither, so this
+module puts it there before the first canonical import runs. See
+:func:`_ensure_canonical_layer_importable`.
 """
 
-from src.tools.launch_monitor_model.comparison import (
+import importlib
+import os
+import sys
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_CANONICAL_RELATIVE_PATH = Path("src/shared/python/launch_monitor/__init__.py")
+
+
+def _bind_canonical_search_path(tools_root: Path) -> None:
+    """Point the ``shared.python`` package at *tools_root*'s canonical layer.
+
+    Putting the directory on ``sys.path`` is not enough on its own. ``shared``
+    is a regular package, so its ``__path__`` is fixed at first import, and the
+    probe in :func:`_ensure_canonical_layer_importable` binds ``shared.python``
+    to UpstreamDrift's own ``src/shared/python`` on its way to discovering that
+    ``launch_monitor`` is not there. The vendored directory is therefore
+    *appended* to that ``__path__`` -- the same thing ``tests/conftest.py``
+    does for the test session, and the reason the canonical import resolves
+    under pytest today. Appending rather than prepending keeps UpstreamDrift's
+    own shared modules first; only names UpstreamDrift does not provide fall
+    through, and ``launch_monitor`` is now exactly such a name.
+    """
+    src_dir = str(tools_root / "src")
+    if src_dir not in sys.path:
+        sys.path.insert(0, src_dir)
+
+    vendored = str(tools_root / "src" / "shared" / "python")
+    search_path = getattr(sys.modules.get("shared.python"), "__path__", None)
+    if search_path is not None and vendored not in search_path:
+        search_path.append(vendored)
+
+
+def _ensure_canonical_layer_importable() -> None:
+    """Make ``shared.python.launch_monitor`` resolvable before it is imported.
+
+    A no-op wherever the vendored Tools source is already reachable, which is
+    every test run and every installed wheel.
+
+    Where it is not, the pinned ``vendor/ud-tools`` tree is used directly when
+    its files are present. That deliberately skips the git-level validation in
+    :func:`~src.launchers.tools_repo_path.require_tools_repo`, because several
+    CI lanes materialise the pinned Tools source as a plain checkout rather
+    than a real submodule, which that validation rejects even though the files
+    are present and importable. The same "already-present wins, validate only
+    when searching" shape is what
+    ``src/api/routes/_ball_flight_trajectory_import.py`` uses, and for the same
+    reason.
+
+    Only when the vendored tree is genuinely absent does the resolution facade
+    take over: it owns ``TOOLS_REPO_PATH`` and dev-mode sibling discovery, and
+    duplicating that precedence here would be a second answer to a question
+    that already has one.
+
+    Raises:
+        ModuleNotFoundError: If no Tools checkout resolves. Failing at import
+            is deliberate: the modules ADR-0046 Stage 2 retired are not served
+            by UpstreamDrift any more, so a façade that imported without them
+            would be a façade over nothing.
+    """
+    try:
+        importlib.import_module("shared.python.launch_monitor")
+        return
+    except ImportError:
+        pass
+
+    vendor_root = _REPO_ROOT / "vendor" / "ud-tools"
+    if (vendor_root / _CANONICAL_RELATIVE_PATH).is_file():
+        _bind_canonical_search_path(vendor_root)
+    else:
+        # Deferred: only a source checkout with no vendored tree reaches this,
+        # and the canonical resolution facade lives in the launcher package.
+        from src.launchers.tools_repo_path import require_tools_repo
+
+        try:
+            resolution = require_tools_repo(
+                _REPO_ROOT, os.environ.get("TOOLS_REPO_PATH")
+            )
+        except RuntimeError as exc:
+            raise ModuleNotFoundError(str(exc)) from exc
+        _bind_canonical_search_path(resolution.path)
+
+    importlib.import_module("shared.python.launch_monitor")
+
+
+_ensure_canonical_layer_importable()
+
+from shared.python.launch_monitor.comparison import (
     MonitorComparisonResult,
     MonitorSummary,
     PairwiseMonitorComparison,
@@ -47,7 +144,7 @@ from src.tools.launch_monitor_model.contract_v2 import (
     build_analysis_lineage_v2,
     contract_v2_json_schema,
 )
-from src.tools.launch_monitor_model.dispersion import (
+from shared.python.launch_monitor.dispersion import (
     DispersionResult,
     analyze_dispersion,
 )
@@ -95,7 +192,7 @@ from src.tools.launch_monitor_model.modeling import (
     PredictiveModelResult,
     fit_predictive_model,
 )
-from src.tools.launch_monitor_model.multivariate import (
+from shared.python.launch_monitor.multivariate import (
     PCAResult,
     VIFResult,
     compute_pca,
@@ -134,7 +231,7 @@ from src.tools.launch_monitor_model.relationships import (
     DependencyEdge,
     compute_correlations,
 )
-from src.tools.launch_monitor_model.schema import (
+from shared.python.launch_monitor.schema import (
     IDENTITY_COLUMNS,
     METRICS,
     ColumnMapping,
@@ -144,9 +241,9 @@ from src.tools.launch_monitor_model.schema import (
     MetricDefinition,
     numeric_metric_columns,
 )
-from src.tools.launch_monitor_model.trends import (
+from shared.python.launch_monitor.trends import (
     ChangeCandidate,
-    TrendResult,
+    TemporalTrendResult,
     analyze_trend,
 )
 from src.tools.launch_monitor_model.strokes_gained import (
@@ -168,7 +265,7 @@ from src.tools.launch_monitor_model.strokes_gained_types import (
     StrokesGainedRequestV1,
     baseline_table_sha256,
 )
-from src.tools.launch_monitor_model.treatment import (
+from shared.python.launch_monitor.treatment import (
     TreatmentConfig,
     TreatmentResult,
     FilterRule,
@@ -267,7 +364,7 @@ __all__ = [
     "TreatmentResult",
     "TransformRecordV2",
     "FilterRule",
-    "TrendResult",
+    "TemporalTrendResult",
     "VIFResult",
     "UncertaintyV2",
     "VendorProvenanceV2",
