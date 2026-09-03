@@ -36,7 +36,8 @@ For developers and advanced users who need full control over the installation.
 ### Software Prerequisites
 
 - **Python 3.11+** ([Download from python.org](https://www.python.org/downloads/))
-- **Git with Git LFS** ([Download from git-scm.com](https://git-scm.com/))
+- **Git** ([Download from git-scm.com](https://git-scm.com/)) -- Git LFS is
+  not used; the shared Tools layer is a pinned submodule (`vendor/ud-tools`)
 - **Visual Studio Build Tools** (for some physics engines)
 
 ## 🔧 Step-by-Step Installation
@@ -51,10 +52,9 @@ For developers and advanced users who need full control over the installation.
 python --version
 pip --version
 
-# Install Git with Git LFS
+# Install Git
 # Download from git-scm.com and install with default options
 git --version
-git lfs install
 ```
 
 ### 2. Create Virtual Environment (Recommended)
@@ -73,12 +73,12 @@ where python
 ### 3. Clone Repository
 
 ```powershell
-# Clone the repository with LFS support
-git clone https://github.com/dieterolson/UpstreamDrift.git
-cd Golf_Modeling_Suite
+# Clone the repository
+git clone https://github.com/D-sorganization/UpstreamDrift.git
+cd UpstreamDrift
 
-# Pull large files (models, meshes)
-git lfs pull
+# Fetch the pinned Tools submodule (required; the model submodules are optional)
+git submodule update --init --recursive vendor/ud-tools
 ```
 
 ### 4. Install Base Package
@@ -198,10 +198,11 @@ pip install "boto3>=1.34.0" "azure-storage-blob>=12.19.0"
 - Ensure Python is added to PATH during installation
 - Restart command prompt after Python installation
 
-#### "Git LFS not working"
+#### "No module named 'utils'" / "cannot import theme"
 
-- Run `git lfs install` in command prompt
-- Re-clone repository if LFS files are missing
+- The pinned Tools submodule is missing; run
+  `git submodule update --init --recursive vendor/ud-tools`
+- Re-run `python scripts/ci/verify_installation.py` to confirm
 
 #### "Physics engine import errors"
 
@@ -213,7 +214,8 @@ pip install "boto3>=1.34.0" "azure-storage-blob>=12.19.0"
 
 - Run the model setup command again
 - Check internet connection for model downloads
-- Verify Git LFS is working properly
+- For OpenSim/MyoSuite models, initialise the optional model submodules
+  (`git submodule update --init shared/models/opensim/opensim-models`)
 
 ### Performance Optimization
 
@@ -268,9 +270,9 @@ pre-commit install
 ## 📊 Installation Verification Checklist
 
 - [ ] Python 3.11+ installed and in PATH
-- [ ] Git with Git LFS installed and configured
+- [ ] Git installed and configured
 - [ ] Virtual environment created and activated
-- [ ] Repository cloned with LFS files
+- [ ] Repository cloned and `vendor/ud-tools` submodule initialised
 - [ ] Base package installed successfully
 - [ ] At least one physics engine working
 - [ ] Standard models downloaded

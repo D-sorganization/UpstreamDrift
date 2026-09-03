@@ -17,9 +17,11 @@ Options:
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import logging
 import sys
+import warnings
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -27,16 +29,86 @@ logger = logging.getLogger(__name__)
 # This script lives in scripts/ci/, so sys.path[0] is scripts/ci -- not the
 # repository root. Without this the `src.*` suite checks either fail outright
 # or silently resolve against some *other* editable install on the machine.
-# Mirrors the `pythonpath` entries in pyproject.toml [tool.pytest.ini_options].
+# Mirrors the `pythonpath` entries in pyproject.toml [tool.pytest.ini_options]:
+# the pinned Tools submodule (vendor/ud-tools) must win over the committed
+# src/shared/python child copy, exactly as it does under pytest.
 _REPO_ROOT = Path(__file__).resolve().parents[2]
+_VENDOR_TOOLS_ROOT = _REPO_ROOT / "vendor" / "ud-tools"
+VENDOR_SUBMODULE_HINT = "git submodule update --init --recursive vendor/ud-tools"
 for _entry in (
-    _REPO_ROOT,
-    _REPO_ROOT / "src",
     _REPO_ROOT / "src" / "shared" / "python",
+    _REPO_ROOT / "src",
+    _REPO_ROOT,
+    _VENDOR_TOOLS_ROOT / "src",
+    _VENDOR_TOOLS_ROOT / "src" / "python" / "src",
+    _VENDOR_TOOLS_ROOT / "src" / "shared" / "python",
 ):
     _path = str(_entry)
     if _entry.is_dir() and _path not in sys.path:
         sys.path.insert(0, _path)
+
+
+def vendor_shared_python_root(repo_root: Path = _REPO_ROOT) -> Path:
+    """Return the canonical Tools ``src/shared/python`` path inside the submodule."""
+    return repo_root / "vendor" / "ud-tools" / "src" / "shared" / "python"
+
+
+def check_vendor_tools(repo_root: Path = _REPO_ROOT) -> tuple[bool, str]:
+    """Check that the pinned ``vendor/ud-tools`` submodule is materialised.
+
+    Without it, ``theme``, ``sidekick``, ``chat`` and every other alias-resolved
+    Tools package either falls back to the diverged child copy or fails to
+    import at all (``utils`` only exists in the submodule).
+    """
+    vendor_root = vendor_shared_python_root(repo_root)
+    if vendor_root.is_dir():
+        return True, f"✓ vendor/ud-tools submodule present ({vendor_root})"
+    return (
+        False,
+        f"✗ vendor/ud-tools submodule missing ({vendor_root}); run: "
+        f"{VENDOR_SUBMODULE_HINT}",
+    )
+
+
+def shared_alias_roots() -> tuple[str, ...]:
+    """Return the roots served by ``SharedImportAliasFinder``, sorted."""
+    from src.shared.python import import_aliases
+
+    return tuple(sorted(import_aliases._SHARED_ROOTS))
+
+
+def check_shared_alias_roots(
+    roots: tuple[str, ...] | None = None,
+) -> list[tuple[str, bool, str]]:
+    """Resolve one import per shared alias root without executing packages.
+
+    ``importlib.util.find_spec`` goes through ``SharedImportAliasFinder`` so
+    the result is exactly what ``import <root>`` would bind to. Executing the
+    packages is deliberately avoided (``sidekick`` pulls in Qt).
+
+    Returns:
+        List of (root, resolved, message) tuples.
+    """
+    from src.shared.python import import_aliases
+
+    import_aliases.install_shared_import_aliases()
+    results: list[tuple[str, bool, str]] = []
+    for root in roots or shared_alias_roots():
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                spec = importlib.util.find_spec(root)
+        except Exception as exc:  # noqa: BLE001 - report, do not crash the report
+            results.append((root, False, f"✗ {root}: {exc}"))
+            continue
+        if spec is None or spec.loader is None:
+            results.append((root, False, f"✗ {root}: no module spec"))
+            continue
+        origin = spec.origin or (
+            next(iter(spec.submodule_search_locations or []), None)
+        )
+        results.append((root, True, f"✓ {root} -> {origin}"))
+    return results
 
 
 def check_python_version() -> tuple[bool, str]:
@@ -114,6 +186,10 @@ def main() -> int:
     # Check virtualenv (advisory)
     venv_success, venv_msg = check_virtualenv()
     logger.info(venv_msg)
+
+    # Check the pinned Tools submodule (critical: alias-resolved imports need it)
+    vendor_success, vendor_msg = check_vendor_tools()
+    logger.info(vendor_msg)
 
     logger.info("")
 
@@ -197,6 +273,21 @@ def main() -> int:
         suite_results.append(success)
 
     logger.info("")
+    logger.info("Checking shared Tools alias roots (vendor/ud-tools):")
+    logger.info("-" * 40)
+
+    alias_results: list[bool] = []
+    if vendor_success:
+        for _root, success, message in check_shared_alias_roots():
+            if success:
+                logger.info(message)
+            else:
+                logger.warning(message)
+            alias_results.append(success)
+    else:
+        logger.warning("- skipped: %s", VENDOR_SUBMODULE_HINT)
+
+    logger.info("")
     logger.info("=" * 60)
 
     # Summary
@@ -205,30 +296,36 @@ def main() -> int:
     core_total = len(core_results)
     suite_passed = sum(suite_results)
     suite_total = len(suite_results)
-    total_passed = core_passed + suite_passed
-    total_checks = core_total + suite_total
+    alias_passed = sum(alias_results)
+    alias_total = len(alias_results)
+    total_passed = core_passed + suite_passed + alias_passed
+    total_checks = core_total + suite_total + alias_total
 
     logger.info("Python version:    %s", "OK" if py_critical else "FAILED")
+    logger.info("vendor/ud-tools:   %s", "OK" if vendor_success else "MISSING")
     logger.info("Core dependencies: %d/%d passed", core_passed, core_total)
     logger.info("Suite modules:     %d/%d passed", suite_passed, suite_total)
+    logger.info("Alias roots:       %d/%d passed", alias_passed, alias_total)
     logger.info("Overall:           %d/%d passed", total_passed, total_checks)
     logger.info("")
+
+    all_passed = py_critical and vendor_success and total_passed == total_checks
 
     if json_output:
         result = {
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
             "python_ok": py_critical,
             "in_virtualenv": venv_success,
+            "vendor_tools_ok": vendor_success,
             "core_checks": {"passed": core_passed, "total": core_total},
             "suite_checks": {"passed": suite_passed, "total": suite_total},
+            "alias_root_checks": {"passed": alias_passed, "total": alias_total},
             "overall": {"passed": total_passed, "total": total_checks},
-            "status": (
-                "passed" if (py_critical and total_passed == total_checks) else "failed"
-            ),
+            "status": "passed" if all_passed else "failed",
         }
         print(json.dumps(result, indent=2))
 
-    if py_critical and total_passed == total_checks:
+    if all_passed:
         logger.info("✓ Installation verified successfully!")
         logger.info("")
         logger.info("You can now run:")
@@ -245,6 +342,9 @@ def main() -> int:
     logger.info("     (optional engines: '.[all-engines]', '.[biomechanics]')")
     if not py_critical:
         logger.info("  4. Your Python version is too old; upgrade to 3.11+")
+    if not vendor_success:
+        logger.info("  5. The pinned Tools submodule is missing; run:")
+        logger.info("     %s", VENDOR_SUBMODULE_HINT)
     return 1
 
 
