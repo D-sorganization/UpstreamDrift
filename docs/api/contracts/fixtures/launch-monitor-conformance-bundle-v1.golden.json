@@ -1,5 +1,5 @@
 {
-  "bundle_sha256": "11010e9b5e01ec5b6f3b1ba39f95ba1ec387f20516d9961b16fe9c4f9e934370",
+  "bundle_sha256": "5d6ca1ff758b7dbf1844ffdf00fe86dac13ee9e17eeb123c2716e8af844b299b",
   "bundle_version": "launch-monitor-analytics-conformance/1.0.0",
   "data_classification": "synthetic_contract_fixture_no_private_rows",
   "description": "Synthetic, data-free consumer outputs for canonical launch-monitor analytics; no observed or private shot rows are embedded.",
@@ -85,6 +85,7 @@
               "ci_lower": 0.9613613,
               "ci_upper": 0.99957378,
               "coefficient": 0.99591,
+              "is_boolean_projected": false,
               "method": "pearson",
               "p_value": 2.50579e-5,
               "predictor": "club_speed",
@@ -276,7 +277,7 @@
         "trust_level": "not_provided"
       },
       "scenario_id": "analysis-v2-available",
-      "scenario_sha256": "99db507c2626708708fbd391b2205395b3dfb1e42922911fd1a3fdb4843db6bb",
+      "scenario_sha256": "4befc36239b7c7d528e4f9a3760187c6c9497e3b5ed30cdacf3420a70df2cdb1",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -352,6 +353,7 @@
               "ci_lower": null,
               "ci_upper": null,
               "coefficient": null,
+              "is_boolean_projected": false,
               "method": "pearson",
               "p_value": null,
               "predictor": "club_speed",
@@ -511,7 +513,7 @@
         "trust_level": "not_provided"
       },
       "scenario_id": "analysis-v2-unavailable",
-      "scenario_sha256": "705e13547a0401a62eabff1ef71aaba814d7764a89c3a82f41b67bdfb66a0dd9",
+      "scenario_sha256": "e827a7a740ac3173644a6db62eab70be4dcf6c5daada7d1076b6f25ae5b5a24a",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -683,6 +685,7 @@
           "ci_upper": null,
           "group_count": 2,
           "intercept": 0.0,
+          "interval_withheld_reason": "insufficient_degrees_of_freedom",
           "pearson_r": 1.0,
           "r_squared": 1.0,
           "reason_code": null,
@@ -799,6 +802,7 @@
           "tau_squared": 0.0,
           "total_sample_count": 8
         },
+        "method_description": "Pairwise-complete Pearson, Spearman, and OLS estimates; Fisher confidence intervals and meta-analysis apply only to Pearson r. Spearman is descriptive. Association does not imply causation.",
         "missingness": {
           "eligible_player_count": 2,
           "excluded_by_reason": {
@@ -829,6 +833,7 @@
               "ci_upper": -0.9999496,
               "group_count": 1,
               "intercept": 3.0,
+              "interval_withheld_reason": null,
               "pearson_r": -1.0,
               "r_squared": 1.0,
               "reason_code": null,
@@ -847,6 +852,7 @@
               "ci_upper": -0.9999496,
               "group_count": 1,
               "intercept": 23.0,
+              "interval_withheld_reason": null,
               "pearson_r": -1.0,
               "r_squared": 1.0,
               "reason_code": null,
@@ -870,6 +876,7 @@
           "ci_upper": 0.98282422,
           "group_count": 2,
           "intercept": 0.61904762,
+          "interval_withheld_reason": null,
           "pearson_r": 0.9047619,
           "r_squared": 0.8185941,
           "reason_code": null,
@@ -892,8 +899,11 @@
             "Fisher-z intervals assume approximately independent observations.",
             "The pooled interval is not adjusted for repeated shots by player.",
             "DerSimonian-Laird estimates between-player effect heterogeneity.",
-            "Population generalization requires a representative player sample."
+            "Population generalization requires a representative player sample.",
+            "The between-player interval is withheld below 5 player means, where its degrees of freedom describe the Fisher transform rather than the coefficient."
           ],
+          "between_player_interval": "fisher-z-above-min-groups",
+          "between_player_interval_min_groups": 5,
           "confidence_level": 0.95,
           "fixed_effect_method": "inverse-variance-fisher-z",
           "per_player_interval": "fisher-z",
@@ -925,13 +935,15 @@
         "warnings": [
           "Associations are observational and do not establish causality.",
           "Pooled and between-player estimates do not substitute for within-player effects.",
-          "Possible aggregation reversal: pooled and within-player Pearson correlations have opposite signs; inspect group structure."
+          "Possible aggregation reversal: pooled and within-player Pearson correlations have opposite signs; inspect group structure.",
+          "The between-player Fisher interval is withheld: 2 player means leave 0 degrees of freedom, below the 2 required by the 5-group threshold."
         ],
         "within_player": {
           "ci_lower": null,
           "ci_upper": null,
           "group_count": 2,
           "intercept": 0.0,
+          "interval_withheld_reason": "clustered_observations",
           "pearson_r": -1.0,
           "r_squared": 1.0,
           "reason_code": null,
@@ -947,7 +959,7 @@
         "trust_level": "explicit_user_attested"
       },
       "scenario_id": "player-covariation-available",
-      "scenario_sha256": "5f668191279b736e5ab3e7f5b335c7ba73fcf59764c475c8aaa94f254b1e342c",
+      "scenario_sha256": "9ae210d5e65951f3502c4b3d774c0ed09e64c43b14bf20540bdb730da590863d",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -1063,6 +1075,7 @@
           "ci_upper": null,
           "group_count": 1,
           "intercept": null,
+          "interval_withheld_reason": null,
           "pearson_r": null,
           "r_squared": null,
           "reason_code": "insufficient_groups",
@@ -1131,6 +1144,7 @@
           "tau_squared": null,
           "total_sample_count": 0
         },
+        "method_description": "Pairwise-complete Pearson, Spearman, and OLS estimates; Fisher confidence intervals and meta-analysis apply only to Pearson r. Spearman is descriptive. Association does not imply causation.",
         "missingness": {
           "eligible_player_count": 0,
           "excluded_by_reason": {
@@ -1163,6 +1177,7 @@
               "ci_upper": null,
               "group_count": 1,
               "intercept": null,
+              "interval_withheld_reason": null,
               "pearson_r": null,
               "r_squared": null,
               "reason_code": "insufficient_samples",
@@ -1186,6 +1201,7 @@
           "ci_upper": null,
           "group_count": 1,
           "intercept": null,
+          "interval_withheld_reason": null,
           "pearson_r": null,
           "r_squared": null,
           "reason_code": "insufficient_samples",
@@ -1208,8 +1224,11 @@
             "Fisher-z intervals assume approximately independent observations.",
             "The pooled interval is not adjusted for repeated shots by player.",
             "DerSimonian-Laird estimates between-player effect heterogeneity.",
-            "Population generalization requires a representative player sample."
+            "Population generalization requires a representative player sample.",
+            "The between-player interval is withheld below 5 player means, where its degrees of freedom describe the Fisher transform rather than the coefficient."
           ],
+          "between_player_interval": "fisher-z-above-min-groups",
+          "between_player_interval_min_groups": 5,
           "confidence_level": 0.95,
           "fixed_effect_method": "inverse-variance-fisher-z",
           "per_player_interval": "fisher-z",
@@ -1249,6 +1268,7 @@
           "ci_upper": null,
           "group_count": 1,
           "intercept": null,
+          "interval_withheld_reason": null,
           "pearson_r": null,
           "r_squared": null,
           "reason_code": "insufficient_samples",
@@ -1264,7 +1284,7 @@
         "trust_level": "explicit_user_attested"
       },
       "scenario_id": "player-covariation-unavailable",
-      "scenario_sha256": "b2c17cf33dfd4859a053c3b62eb25c7ef556129298a6d4a45012c64bf5a02f39",
+      "scenario_sha256": "f78e52a1abd799e46e76371081337ac02c091d2218fefead1b9da1ee4df7b16a",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -1639,7 +1659,7 @@
             "state": "available"
           },
           {
-            "message": null,
+            "message": "Player fixed-effects OLS with standard errors clustered by player and a finite-cluster corrected sandwich covariance.",
             "observed_count": 4,
             "reason_code": null,
             "required_count": 4,
@@ -1995,35 +2015,59 @@
         },
         "player_associations": [
           {
+            "ci_lower": 1.2,
+            "ci_upper": 1.2,
             "direction": "increasing",
             "estimate_per_order_unit": 1.2,
+            "first_to_last_change": 2.4,
+            "p_value": 9.0031632e-11,
             "player_id": "player-1",
+            "r_squared": 1.0,
             "reason_code": null,
             "session_count": 3,
+            "standard_error": 0.0,
             "state": "available"
           },
           {
+            "ci_lower": 1.4,
+            "ci_upper": 1.4,
             "direction": "increasing",
             "estimate_per_order_unit": 1.4,
+            "first_to_last_change": 2.8,
+            "p_value": 9.0031632e-11,
             "player_id": "player-2",
+            "r_squared": 1.0,
             "reason_code": null,
             "session_count": 3,
+            "standard_error": 0.0,
             "state": "available"
           },
           {
+            "ci_lower": 1.6,
+            "ci_upper": 1.6,
             "direction": "increasing",
             "estimate_per_order_unit": 1.6,
+            "first_to_last_change": 3.2,
+            "p_value": 9.0031632e-11,
             "player_id": "player-3",
+            "r_squared": 1.0,
             "reason_code": null,
             "session_count": 3,
+            "standard_error": 0.0,
             "state": "available"
           },
           {
+            "ci_lower": 1.8,
+            "ci_upper": 1.8,
             "direction": "increasing",
             "estimate_per_order_unit": 1.8,
+            "first_to_last_change": 3.6,
+            "p_value": 9.0031632e-11,
             "player_id": "player-4",
+            "r_squared": 1.0,
             "reason_code": null,
             "session_count": 3,
+            "standard_error": 0.0,
             "state": "available"
           }
         ],
@@ -2038,10 +2082,14 @@
           "confidence_interval_low": 0.9849697,
           "confidence_level": 0.95,
           "estimate_per_order_unit": 1.5,
-          "method": "player_fixed_effects_ols_clustered_by_player",
+          "i_squared_pct": null,
+          "improvement_probability": null,
+          "method": "ud-cluster-robust-fe/1",
           "p_value": 0.0026577006,
+          "q_statistic": null,
           "session_cell_count": 12,
           "standard_error": 0.16183472,
+          "tau_squared": null,
           "uncertainty_state": "available"
         },
         "request": {
@@ -2051,6 +2099,7 @@
           "metric": "carry_distance",
           "minimum_player_clusters": 4,
           "minimum_sessions_per_player": 3,
+          "pooled_method": "ud-cluster-robust-fe/1",
           "session_aggregate": "mean",
           "strata": []
         },
@@ -2184,7 +2233,8 @@
         "status": "available",
         "warnings": [
           "Associations are descriptive and do not establish player improvement.",
-          "Shot rows were aggregated before inference to avoid pseudo-replication."
+          "Shot rows were aggregated before inference to avoid pseudo-replication.",
+          "The pooled estimate uses ud-cluster-robust-fe/1; results from different pooled estimators are not numerically comparable."
         ]
       },
       "player_identity": {
@@ -2193,7 +2243,7 @@
         "trust_level": "explicit_user_attested"
       },
       "scenario_id": "attested-longitudinal-available",
-      "scenario_sha256": "308db50efe345e76362adfe980eb34de3b3177e2fe2bbf1b3f42006e83d3eacd",
+      "scenario_sha256": "8c524ebe6f9fa3fbe6a7631ec351adb2e2e808311b4ddfd964899ad64c53dbd7",
       "session_identity": {
         "evidence": "The source export reports session boundaries.",
         "identifier_column": "session_id",
@@ -2889,6 +2939,7 @@
           "metric": "carry_distance",
           "minimum_player_clusters": 4,
           "minimum_sessions_per_player": 3,
+          "pooled_method": "ud-cluster-robust-fe/1",
           "session_aggregate": "mean",
           "strata": []
         },
@@ -2907,7 +2958,7 @@
         "trust_level": "explicit_user_attested"
       },
       "scenario_id": "attested-longitudinal-unavailable",
-      "scenario_sha256": "5b644aa87dac0bef64adc32adf4a4df9dc9df06825d2e9442cdf53f2d647b1e5",
+      "scenario_sha256": "b474dc47c2317e7d78e1c5cfe5e1f70d1cb095ad9e463cc6fb62cec2cd1c6302",
       "session_identity": {
         "evidence": "The source export reports session boundaries.",
         "identifier_column": "session_id",
