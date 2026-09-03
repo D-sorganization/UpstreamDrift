@@ -156,6 +156,22 @@ shadows:
     sunset_date: "2026-12-31"
 
   # ── ADR-0046 Stage 1 canonical launch-monitor layer (Tools#4899-#4907) ────
+  #
+  # STAGE 2 STATUS (2026-09-02): this entry cannot be narrowed, and the
+  # attempt to narrow it is what found the blocker. The guard above enumerates
+  # TOP-LEVEL entries under vendor/ud-tools/src/shared/python/ and compares
+  # them with top-level entries under src/shared/python/, so `launch_monitor`
+  # is one entry regardless of how many of its thirty files have been retired
+  # — there is no per-file vocabulary to narrow to. Worse, the same
+  # package-granularity is what blocks the retirement itself: while
+  # src/shared/python/launch_monitor/ exists, `shared.python.launch_monitor`
+  # resolves to it and not to the vendored canonical package, so the Stage 2
+  # import rewrite ADR-0048 prescribes is a self-referential no-op. The
+  # procedure in this file's header is therefore the operative one for this
+  # entry too — the UD-side copy goes as a unit, not module by module. See
+  # docs/adr/0048-launch-monitor-port-plan.md, "Stage 2 Blocker (G2)", and
+  # tests/unit/launch_monitor/test_canonical_layer_parity.py, which pins both
+  # the shadow and the wave-1 modules' identity to their canonical twins.
   # Tools' src/shared/python/launch_monitor/ did not exist before this pin
   # (previously `Tools has no shared/python/launch_monitor package`, per
   # ADR-0046). The Tools#4899-#4907 port ladder built it there as the fleet's
