@@ -14,16 +14,17 @@ ledger: Tools #4915.
 | `divergence_inventory.v1.json` / `.md` | `python -m scripts.shared_tools.divergence_inventory --write` | Every path under `src/shared/python` classified against the pinned Tools tree (`identical` / `diverged` / `ud-only` / `tools-only`, plus `spelling_only`), with authorship on both sides. `--check` fails when stale. |
 | `seam_rulings.v1.json` | hand-maintained | One ruling per top-level entry of the Tools shared tree: `tools-canonical`, `ud-canonical`, `split` or `deferred`, with status `pending-cleanup` / `cleaned` / `n/a`. |
 | (gate) `scripts/shared_tools/check_seam_drift.py` | CI job `seam-drift-gate` (needed by `quality-gate`) | Enforces the rulings: a cleaned package may not regrow a UD copy; a `ud-canonical` package needs a Tools ledger row. |
-| (gate) `scripts/shared_tools/check_tools_pins.py` | `vendor-freshness.yml` | Cargo `tools-core` rev == `vendor/ud-tools` gitlink == any `ud-tools @ git+...` pin in `pyproject.toml`. |
+| (gate) `scripts/shared_tools/check_tools_pins.py` | `vendor-freshness.yml` | Cargo `tools-core` rev == `vendor/ud-tools` gitlink == any `ud-tools @ git+...` pin in `pyproject.toml` / `requirements-tools.txt`; the release-wheel pin is reported. |
 
 ## Where the Tools Code Comes From
 
 There are three possible sources, in this precedence:
 
-1. **Installed distribution** — `pip install "upstream-drift[tools]"` installs
-   the Tools release wheel pinned in `pyproject.toml`
+1. **Installed distribution** — `pip install -r requirements-tools.txt`
+   installs the Tools release wheel pinned there
    (`ud_tools @ https://github.com/D-sorganization/Tools/releases/download/v1.15.0/ud_tools-1.15.0-py3-none-any.whl`,
-   Tools #4920). The wheel is cut from the release tag commit (v1.15.0 =
+   Tools #4920; kept out of `pyproject.toml` because PyPI rejects direct URL
+   references). The wheel is cut from the release tag commit (v1.15.0 =
    `e87b04105`), which is **not** the submodule gitlink (`c0a395d5`);
    `check_tools_pins.py` reports both and the gitlink wins for the source
    tree. When `importlib.metadata` can see `ud-tools`, the launcher and

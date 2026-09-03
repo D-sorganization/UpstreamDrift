@@ -295,16 +295,12 @@ gui-test = [
 # These are the runtime deps the desktop tile-launcher needs to actually
 # launch any tile.  Kept separate from `gui-test` so unit-only CI runs
 # don't pull pytest-qt.
-# Shared Tools as an installable dependency (UD #9406, RM #1505 Phase 1).
-# Pinned to the Tools release wheel (Tools #4920, tag v1.15.0 = Tools commit
-# e87b04105). The vendor/ud-tools gitlink (c0a395d5) is a different Tools
-# commit: the gitlink wins for the source tree (tests, Docker, launcher
-# fallback); the wheel is what `pip install "upstream-drift[tools]"` users get.
-# scripts/shared_tools/check_tools_pins.py reports both. A `ud-tools @ git+...@sha`
-# pin, if ever used instead, must equal the gitlink exactly.
-tools = [
-    "ud_tools @ https://github.com/D-sorganization/Tools/releases/download/v1.15.0/ud_tools-1.15.0-py3-none-any.whl",
-]
+# Shared Tools as an installable dependency (UD #9406, RM #1505 Phase 1) lives
+# in requirements-tools.txt, not here: the Tools release wheel is a direct URL
+# reference (PEP 508), which hatch refuses by default and PyPI rejects in
+# published metadata (release.yml uploads this project). Install with
+# `pip install -r requirements-tools.txt`; scripts/shared_tools/check_tools_pins.py
+# reports that pin beside the vendor/ud-tools gitlink and the Cargo rev.
 gui-tools = [
     "PyQt6>=6.5.0",
     "matplotlib>=3.10.8",
