@@ -32,6 +32,8 @@ from __future__ import annotations
 import importlib
 import importlib.util
 import os
+import subprocess  # nosec B404 - fixed interpreter invocation, no shell
+import sys
 from pathlib import Path
 
 import pytest
@@ -137,6 +139,59 @@ def test_trends_exposes_the_renamed_result_without_a_back_compat_alias() -> None
     assert "TrendResult" not in facade.__all__, (
         "The UpstreamDrift façade re-exports TrendResult again. Wave 1 moved "
         "its consumers to TemporalTrendResult with no alias."
+    )
+
+
+def test_facade_imports_without_the_pytest_path_wiring() -> None:
+    """The façade must import in a plain source-checkout process, not just here.
+
+    This test's own session is the easy case: ``pyproject.toml``'s pytest
+    ``pythonpath`` and ``tests/conftest.py`` both put the vendored Tools source
+    within reach, so `shared.python.launch_monitor` resolves before anything
+    in the façade runs. A running API server, the launcher, and the
+    launch-monitor companion workflow get neither, and after wave 1 the façade
+    cannot import at all without them — which is a shipped-behaviour break
+    that no in-session test would notice. The façade's
+    ``_ensure_canonical_layer_importable`` bootstrap exists for that case and
+    this subprocess is what measures it.
+    """
+    _require_vendored_package()
+
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join((".", "src", "src/shared/python"))
+    env.pop("TOOLS_REPO_PATH", None)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env["MPLBACKEND"] = "Agg"
+
+    completed = subprocess.run(  # nosec B603 - fixed argv, no shell
+        [
+            sys.executable,
+            "-c",
+            "import src.tools.launch_monitor_model as m;"
+            "import shared.python.launch_monitor.trends as t;"
+            "print(t.__file__)",
+        ],
+        cwd=_REPO_ROOT,
+        env=env,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=180,
+        check=False,
+    )
+
+    assert completed.returncode == 0, (
+        "The launch-monitor façade does not import in a plain source-checkout "
+        "process. After ADR-0046 Stage 2 wave 1 it depends on "
+        "shared.python.launch_monitor, which only resolves where the vendored "
+        "Tools source is reachable; the pytest session gets that for free and "
+        "a running server does not.\n\n"
+        f"stdout:\n{completed.stdout}\n\nstderr:\n{completed.stderr}"
+    )
+    assert str(_VENDORED_PACKAGE.resolve()) in completed.stdout, (
+        "The subprocess imported the trends module from "
+        f"{completed.stdout.strip()!r}, not from the vendored canonical "
+        "package."
     )
 
 

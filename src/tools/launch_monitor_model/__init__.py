@@ -3,7 +3,80 @@
 The package keeps PyQt6 and scikit-learn optional. Importing this façade needs
 only the core scientific/data dependencies; the shallow MLP imports
 scikit-learn lazily when selected.
+
+ADR-0046 Stage 2 retires modules from here onto the canonical layer Tools
+owns, imported as ``shared.python.launch_monitor.<module>``. That name only
+resolves where ``vendor/ud-tools/src`` is on ``sys.path``. The test session
+gets it from ``pyproject.toml``'s pytest ``pythonpath``; an installed wheel
+gets it from ``build_hooks.py``, which force-includes the canonical ``shared``
+package at the top level. A process started from a source checkout -- the API
+server, the launcher, a companion workflow -- gets it from neither, so this
+module puts it there before the first canonical import runs. See
+:func:`_ensure_canonical_layer_importable`.
 """
+
+import importlib
+import os
+import sys
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _ensure_canonical_layer_importable() -> None:
+    """Make ``shared.python.launch_monitor`` resolvable before it is imported.
+
+    A no-op wherever the vendored Tools source is already reachable, which is
+    every test run and every installed wheel. Where it is not, the resolution
+    facade in :mod:`src.launchers.tools_repo_path` owns the precedence order
+    (``TOOLS_REPO_PATH``, then the pinned ``vendor/ud-tools`` gitlink, then
+    dev-mode sibling discovery) and puts the Tools ``src`` directory on
+    ``sys.path``. Duplicating that precedence here would be a second answer to
+    a question that already has one.
+
+    Adding the path is not sufficient on its own. ``shared`` is a regular
+    package, so its ``__path__`` is fixed at first import, and the probe above
+    binds ``shared.python`` to UpstreamDrift's own ``src/shared/python`` on its
+    way to discovering that ``launch_monitor`` is not there. The vendored
+    directory is therefore *appended* to that ``__path__`` -- the same thing
+    ``tests/conftest.py`` does for the test session, and the reason the
+    canonical import resolves under pytest today. Appending rather than
+    prepending keeps UpstreamDrift's own shared modules first; only names
+    UpstreamDrift does not provide fall through, and ``launch_monitor`` is now
+    exactly such a name.
+
+    Raises:
+        ModuleNotFoundError: If no Tools checkout resolves. Failing at import
+            is deliberate: the modules ADR-0046 Stage 2 retired are not served
+            by UpstreamDrift any more, so a façade that imported without them
+            would be a façade over nothing.
+    """
+    try:
+        importlib.import_module("shared.python.launch_monitor")
+        return
+    except ImportError:
+        pass
+
+    # Deferred: only a source-checkout process reaches this branch, and the
+    # canonical resolution facade lives in the launcher package.
+    from src.launchers.tools_repo_path import ensure_tools_importable
+
+    resolution = ensure_tools_importable(
+        _REPO_ROOT,
+        os.environ.get("TOOLS_REPO_PATH"),
+        error_cls=ModuleNotFoundError,
+    )
+
+    vendored = str(resolution.path / "src" / "shared" / "python")
+    shared_python = sys.modules.get("shared.python")
+    search_path = getattr(shared_python, "__path__", None)
+    if search_path is not None and vendored not in search_path:
+        search_path.append(vendored)
+
+    importlib.import_module("shared.python.launch_monitor")
+
+
+_ensure_canonical_layer_importable()
 
 from shared.python.launch_monitor.comparison import (
     MonitorComparisonResult,
