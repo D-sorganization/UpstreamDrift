@@ -273,6 +273,51 @@ def pinned_tools_sha(repo_root: Path) -> str | None:
     return None
 
 
+def _classify(
+    relative: str, ud_path: Path | None, tools_path: Path | None
+) -> FileRecord:
+    """Classify one relative path present in either tree."""
+    package, subpackage = _package_of(relative)
+    ud_content = _read_lf(ud_path) if ud_path else None
+    tools_content = _read_lf(tools_path) if tools_path else None
+    ud_bytes = None if ud_content is None else len(ud_content)
+    tools_bytes = None if tools_content is None else len(tools_content)
+    header = bool(
+        ud_content is not None
+        and ud_content.lstrip().startswith(CHILD_COPY_HEADER.encode("utf-8"))
+    )
+    byte_identical = False
+    spelling_only = False
+    if ud_content is None:
+        classification = "tools-only"
+    elif tools_content is None:
+        classification = "ud-only"
+    else:
+        byte_identical = ud_content == tools_content
+        classification = (
+            "identical"
+            if byte_identical or normalise(ud_content) == normalise(tools_content)
+            else "diverged"
+        )
+        if classification == "diverged":
+            spelling_only = normalise(
+                ud_content, fold_import_spelling=True
+            ) == normalise(tools_content, fold_import_spelling=True)
+    delta = None if ud_bytes is None or tools_bytes is None else ud_bytes - tools_bytes
+    return FileRecord(
+        path=relative,
+        classification=classification,
+        package=package,
+        subpackage=subpackage,
+        ud_bytes=ud_bytes,
+        tools_bytes=tools_bytes,
+        byte_delta=delta,
+        byte_identical=byte_identical,
+        ud_has_child_copy_header=header,
+        spelling_only=spelling_only,
+    )
+
+
 def build_inventory(
     repo_root: Path,
     *,
@@ -291,56 +336,10 @@ def build_inventory(
     ud_files = _iter_files(ud_abs)
     tools_files = _iter_files(tools_abs)
 
-    records: list[FileRecord] = []
-    for relative in sorted(set(ud_files) | set(tools_files)):
-        ud_path = ud_files.get(relative)
-        tools_path = tools_files.get(relative)
-        package, subpackage = _package_of(relative)
-        # Line endings are normalised before sizing so the inventory is the
-        # same on Windows (autocrlf) and Linux CI checkouts.
-        ud_content = _read_lf(ud_path) if ud_path else None
-        tools_content = _read_lf(tools_path) if tools_path else None
-        ud_bytes = None if ud_content is None else len(ud_content)
-        tools_bytes = None if tools_content is None else len(tools_content)
-        header = bool(
-            ud_content is not None
-            and ud_content.lstrip().startswith(CHILD_COPY_HEADER.encode("utf-8"))
-        )
-        spelling_only = False
-        if ud_content is None:
-            classification = "tools-only"
-            byte_identical = False
-        elif tools_content is None:
-            classification = "ud-only"
-            byte_identical = False
-        else:
-            byte_identical = ud_content == tools_content
-            classification = (
-                "identical"
-                if byte_identical or normalise(ud_content) == normalise(tools_content)
-                else "diverged"
-            )
-            if classification == "diverged":
-                spelling_only = normalise(
-                    ud_content, fold_import_spelling=True
-                ) == normalise(tools_content, fold_import_spelling=True)
-        delta = (
-            None if ud_bytes is None or tools_bytes is None else ud_bytes - tools_bytes
-        )
-        records.append(
-            FileRecord(
-                path=relative,
-                classification=classification,
-                package=package,
-                subpackage=subpackage,
-                ud_bytes=ud_bytes,
-                tools_bytes=tools_bytes,
-                byte_delta=delta,
-                byte_identical=byte_identical,
-                ud_has_child_copy_header=header,
-                spelling_only=spelling_only,
-            )
-        )
+    records = [
+        _classify(relative, ud_files.get(relative), tools_files.get(relative))
+        for relative in sorted(set(ud_files) | set(tools_files))
+    ]
 
     authorship: list[DivergedAuthorship] = []
     if with_authorship:
