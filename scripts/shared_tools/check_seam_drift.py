@@ -103,6 +103,104 @@ def _top_level_entries(root: Path) -> set[str]:
     }
 
 
+@dataclass(frozen=True)
+class _PackageState:
+    name: str
+    entry: dict[str, object]
+    ud_pkg: Path
+    ud_files: set[str]
+    tools_files: set[str]
+    overlap: list[str]
+
+    @property
+    def status(self) -> str:
+        return str(self.entry["status"])
+
+
+def _check_tools_canonical(
+    state: _PackageState, ud_root: Path, strict: bool
+) -> tuple[list[Violation], list[str]]:
+    name = state.name
+    if not state.ud_files:
+        if state.status == "pending-cleanup":
+            return [], [f"{name}: no UD copy left; status can become 'cleaned'"]
+        return [], []
+    if state.status == "cleaned":
+        pkg = state.ud_pkg
+        leftovers = [
+            f
+            for f in sorted(state.ud_files)
+            if not (
+                (pkg.is_file() and _is_shim(pkg))
+                or (f == "__init__.py" and _is_shim(pkg / f))
+            )
+        ]
+        if leftovers:
+            return [
+                Violation(
+                    name,
+                    "ruled tools-canonical and marked cleaned but "
+                    f"{len(leftovers)} file(s) remain under {ud_root}: "
+                    + ", ".join(leftovers[:5]),
+                )
+            ], []
+        return [], []
+    if strict:
+        return [
+            Violation(name, f"pending-cleanup with {len(state.ud_files)} UD file(s)")
+        ], []
+    return [], [
+        f"{name}: pending-cleanup, {len(state.ud_files)} UD file(s), "
+        f"{len(state.overlap)} overlapping"
+    ]
+
+
+def _check_split(
+    state: _PackageState, strict: bool
+) -> tuple[list[Violation], list[str]]:
+    name, overlap = state.name, state.overlap
+    if state.status == "cleaned":
+        if overlap and not (
+            overlap == ["__init__.py"] and _is_shim(state.ud_pkg / "__init__.py")
+        ):
+            return [
+                Violation(
+                    name,
+                    "ruled split and marked cleaned but "
+                    f"{len(overlap)} path(s) still overlap the Tools copy: "
+                    + ", ".join(overlap[:5]),
+                )
+            ], []
+        return [], []
+    if strict and overlap:
+        return [Violation(name, f"pending-cleanup with {len(overlap)} overlap(s)")], []
+    return [], [f"{name}: split pending, {len(overlap)} overlapping"]
+
+
+def _check_ud_canonical(state: _PackageState) -> tuple[list[Violation], list[str]]:
+    if state.tools_files and not str(state.entry.get("tools_ledger_row", "")).strip():
+        return [
+            Violation(
+                state.name,
+                "ruled ud-canonical, the pinned Tools tree still carries a "
+                "copy, and no 'tools_ledger_row' points at the Tools "
+                "divergence ledger (Tools #4915)",
+            )
+        ], []
+    if not state.tools_files:
+        return [], [f"{state.name}: ud-canonical, Tools copy retired"]
+    return [], []
+
+
+def _check_deferred(state: _PackageState) -> tuple[list[Violation], list[str]]:
+    violations = []
+    if not str(state.entry.get("deferred_reason", "")).strip():
+        violations.append(
+            Violation(state.name, "deferred rulings need 'deferred_reason'")
+        )
+    return violations, [f"{state.name}: deferred ({len(state.overlap)} overlapping)"]
+
+
 def check(
     repo_root: Path,
     *,
@@ -120,7 +218,6 @@ def check(
 
     violations: list[Violation] = []
     notes: list[str] = []
-
     for name in sorted(_top_level_entries(tools_abs)):
         if name not in rulings:
             violations.append(
@@ -128,90 +225,27 @@ def check(
             )
 
     for name, entry in sorted(rulings.items()):
+        ud_files = _files_under(ud_abs / name)
+        tools_files = _files_under(tools_abs / name)
+        state = _PackageState(
+            name,
+            entry,
+            ud_abs / name,
+            ud_files,
+            tools_files,
+            sorted(ud_files & tools_files),
+        )
         ruling = str(entry["ruling"])
-        status = str(entry["status"])
-        ud_pkg = ud_abs / name
-        tools_pkg = tools_abs / name
-        ud_files = _files_under(ud_pkg)
-        tools_files = _files_under(tools_pkg)
-        overlap = sorted(ud_files & tools_files)
-
         if ruling == "tools-canonical":
-            if not ud_files:
-                if status == "pending-cleanup":
-                    notes.append(
-                        f"{name}: no UD copy left; status can become 'cleaned'"
-                    )
-                continue
-            if status == "cleaned":
-                leftovers = [
-                    f
-                    for f in sorted(ud_files)
-                    if not (
-                        (ud_pkg.is_file() and _is_shim(ud_pkg))
-                        or (f == "__init__.py" and _is_shim(ud_pkg / f))
-                    )
-                ]
-                if leftovers:
-                    violations.append(
-                        Violation(
-                            name,
-                            "ruled tools-canonical and marked cleaned but "
-                            f"{len(leftovers)} file(s) remain under {ud_root}: "
-                            + ", ".join(leftovers[:5]),
-                        )
-                    )
-            elif strict:
-                violations.append(
-                    Violation(name, f"pending-cleanup with {len(ud_files)} UD file(s)")
-                )
-            else:
-                notes.append(
-                    f"{name}: pending-cleanup, {len(ud_files)} UD file(s), "
-                    f"{len(overlap)} overlapping"
-                )
+            found, noted = _check_tools_canonical(state, ud_root, strict)
         elif ruling == "split":
-            if status == "cleaned" and overlap:
-                shim_ok = overlap == ["__init__.py"] and _is_shim(
-                    ud_pkg / "__init__.py"
-                )
-                if not shim_ok:
-                    violations.append(
-                        Violation(
-                            name,
-                            "ruled split and marked cleaned but "
-                            f"{len(overlap)} path(s) still overlap the Tools copy: "
-                            + ", ".join(overlap[:5]),
-                        )
-                    )
-            elif status != "cleaned":
-                if strict and overlap:
-                    violations.append(
-                        Violation(
-                            name, f"pending-cleanup with {len(overlap)} overlap(s)"
-                        )
-                    )
-                else:
-                    notes.append(f"{name}: split pending, {len(overlap)} overlapping")
+            found, noted = _check_split(state, strict)
         elif ruling == "ud-canonical":
-            if tools_files and not str(entry.get("tools_ledger_row", "")).strip():
-                violations.append(
-                    Violation(
-                        name,
-                        "ruled ud-canonical, the pinned Tools tree still carries a "
-                        "copy, and no 'tools_ledger_row' points at the Tools "
-                        "divergence ledger (Tools #4915)",
-                    )
-                )
-            elif not tools_files:
-                notes.append(f"{name}: ud-canonical, Tools copy retired")
-        elif ruling == "deferred":
-            reason = str(entry.get("deferred_reason", "")).strip()
-            if not reason:
-                violations.append(
-                    Violation(name, "deferred rulings need 'deferred_reason'")
-                )
-            notes.append(f"{name}: deferred ({len(overlap)} overlapping)")
+            found, noted = _check_ud_canonical(state)
+        else:
+            found, noted = _check_deferred(state)
+        violations.extend(found)
+        notes.extend(noted)
     return violations, notes
 
 
