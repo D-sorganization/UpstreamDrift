@@ -92,7 +92,7 @@ def test_package_table_has_totals_row(fake_repo: Path) -> None:
     inventory = inv.build_inventory(fake_repo, with_authorship=False)
     table = inv.render_package_table(inventory)
     assert table.splitlines()[0].startswith("| Package |")
-    assert "| `ai` | 0 | 1 | 0 | 0 | 1 |" in table
+    assert "| `ai` | 0 | 1 | 0 | 0 | 0 | 1 |" in table
     assert table.splitlines()[-1].startswith("| **Total** |")
 
 
@@ -137,3 +137,19 @@ def test_committed_inventory_is_current_when_vendor_present() -> None:
         pytest.skip("vendor/ud-tools not materialised")
     errors = inv.check_inventory(repo_root, repo_root / inv.DEFAULT_JSON)
     assert errors == [], "\n".join(errors[:20])
+
+
+def test_spelling_only_divergence_is_flagged(tmp_path: Path) -> None:
+    ud = tmp_path / inv.DEFAULT_UD_ROOT
+    tools = tmp_path / inv.DEFAULT_TOOLS_ROOT
+    _write(ud / "pid/__init__.py", "from src.shared.python.pid.cli import main\n")
+    _write(tools / "pid/__init__.py", "from shared.python.pid.cli import main\n")
+    _write(ud / "pid/real.py", "from src.shared.python.pid.cli import main\nx = 1\n")
+    _write(tools / "pid/real.py", "from shared.python.pid.cli import main\nx = 2\n")
+    inventory = inv.build_inventory(tmp_path, with_authorship=False)
+    by_path = {record.path: record for record in inventory.files}
+    assert by_path["pid/__init__.py"].classification == "diverged"
+    assert by_path["pid/__init__.py"].spelling_only is True
+    assert by_path["pid/real.py"].spelling_only is False
+    assert inventory.to_json_dict()["totals"]["spelling-only"] == 1
+    assert "| `pid` | 0 | 2 | 1 | 0 | 0 | 2 |" in inv.render_package_table(inventory)
