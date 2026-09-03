@@ -13,7 +13,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
-from src.shared.python.launch_monitor.dataset_reference import (
+from src.tools.launch_monitor_model.dataset_reference import (
     DatasetJobRequestV1,
     DatasetOperationV1,
     DatasetReferenceV1,

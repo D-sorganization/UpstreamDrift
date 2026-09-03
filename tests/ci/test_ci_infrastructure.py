@@ -861,6 +861,7 @@ class TestCIEnvironmentCompatibility:
             "unit-test-gate",
             "publication-quality",
             "rust-wheel-parity",
+            "shared-tools-consumer-contracts",
         }
         assert job["if"] == "always()"
         aggregate_step = next(
@@ -873,6 +874,9 @@ class TestCIEnvironmentCompatibility:
         assert aggregate_step["env"]["TESTS"] == "${{ needs.tests.result }}"
         assert aggregate_step["env"]["PUBLICATION_QUALITY"] == (
             "${{ needs.publication-quality.result }}"
+        )
+        assert aggregate_step["env"]["SHARED_TOOLS_CONSUMER_CONTRACTS"] == (
+            "${{ needs.shared-tools-consumer-contracts.result }}"
         )
 
         # A docs-only PR skips the general gates, so `skipped` has to be accepted -

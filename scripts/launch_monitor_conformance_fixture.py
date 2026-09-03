@@ -11,7 +11,7 @@ from typing import Any
 import pandas as pd
 from pydantic import BaseModel
 
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     AnalysisContextV2,
     BackingRecordV2,
     CourseStateColumnsV1,
