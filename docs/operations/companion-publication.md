@@ -77,7 +77,7 @@ the publication job needs only `jsonschema` and `pyyaml` (#9416). Registry
 keys the catalog does not export are ignored so registry additions cannot
 break publication.
 
-### Consumer entry point (AffineDrift)
+### Consumer Entry Point (AffineDrift)
 
 Consumers read `manifest.json`. The contract version is carried inside the
 document by `schema_version` (`"1.0.0"`) and `manifest_id`
@@ -103,7 +103,7 @@ Tagged releases attach the same file set as release assets:
 gh release download <tag> -R D-sorganization/UpstreamDrift -p 'manifest.json'
 ```
 
-### Local and pull-request check
+### Local and Pull-Request Check
 
 ```text
 python3 -m scripts.companion_publication --repo-root . check [--allow-dirty]
