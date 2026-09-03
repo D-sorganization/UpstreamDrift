@@ -452,13 +452,13 @@ wave structure.
 
 1. **Move UpstreamDrift's transitional copy out of the `shared.python`
    namespace** (for example to an app-local package beside the workbench).
-   This clears the `launch_monitor` ledger entry immediately, makes
+   This clears the ledger entry immediately, makes
    `shared.python.launch_monitor` unambiguous, and lets waves 1..N proceed
-   exactly as the port order writes them. It is a mechanical move of the
-   remaining modules plus their import statements, with no behaviour change,
-   and it wants its own PR so that the retirements that follow stay reviewable
-   as no-ops. ADR-0048 already classifies `__init__.py` and `project.py` as
-   `app-local`, so this is where two of the thirty modules were going anyway.
+   exactly as the port order writes them. A mechanical move of the modules and
+   their import statements, no behaviour change, and it wants its own PR so
+   the retirements that follow stay reviewable as no-ops. This ADR already
+   classifies `__init__.py` and `project.py` as `app-local`, so it is where
+   two of the thirty modules were going anyway.
 2. **Retire the whole package atomically** in one Stage 2 PR. Cheapest in
    sequencing, but it forces the `needs-decision` rows (`flexible_analysis`,
    `player_covariation*`, `corpus`) and the behaviour-changing merges
@@ -467,16 +467,15 @@ wave structure.
    its per-tab validation rule.
 3. **Overlay the vendored directory onto the package's `__path__`** so retired
    modules fall through to the vendor tree while the import strings stay as
-   they are. It works and it is deterministic, but the consuming code no longer
-   says where its behaviour comes from, and it introduces a failure mode for
-   any distribution of UpstreamDrift that does not carry the vendor tree.
-   Recorded for completeness; not recommended.
+   they are. Deterministic, but the consuming code stops saying where its
+   behaviour comes from, and any distribution of UpstreamDrift without the
+   vendor tree breaks. Not recommended.
 
-Until one of these is chosen, Stage 2 wave 1 is blocked at step 2 of its own
-procedure. Wave 1's step 1 (consumer inventory) and its identity premise are
-complete and pinned in `test_canonical_layer_parity.py`; no UpstreamDrift
-module has been retired, because retiring one with a failing import is the
-explicit non-goal ADR-0046 names.
+**Executed 2026-09-02 (#9420): Option 1.** The copy moved to
+`src/tools/launch_monitor_model/`, beside the workbench; the ledger entry
+cleared and `shared.python.launch_monitor` now resolves to the vendored
+package, so wave 1 — blocked at step 2 until then, its step 1 and identity
+premise already pinned in `test_canonical_layer_parity.py` — is unblocked.
 
 ## Risks
 

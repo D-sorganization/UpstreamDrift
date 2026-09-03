@@ -19,7 +19,7 @@ from src.api.services.launch_monitor_dataset_jobs import (
     DatasetJobStatusV1,
     DatasetRootRegistry,
 )
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     CONTRACT_VERSION,
     CONTRACT_VERSION_V2,
     LONGITUDINAL_SESSION_CONTRACT_VERSION,
@@ -56,7 +56,7 @@ from src.shared.python.launch_monitor import (
     scan_player_covariation_v1,
     strokes_gained_contract_json_schema,
 )
-from src.shared.python.launch_monitor.dataset_reference import (
+from src.tools.launch_monitor_model.dataset_reference import (
     MAX_PAGE_SIZE,
     DatasetJobRequestV1,
     dataset_job_contract_json_schema,

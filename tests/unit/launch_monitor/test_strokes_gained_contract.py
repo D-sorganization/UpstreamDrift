@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     CourseStateColumnsV1,
     ExpectedStrokesBaselineV2,
     ExpectedStrokesStateV2,

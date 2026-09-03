@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 from PyQt6 import QtCore, QtWidgets
 
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     IDENTITY_COLUMNS,
     METRICS,
     PROFILES,

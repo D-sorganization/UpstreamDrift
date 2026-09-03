@@ -17,13 +17,13 @@ import numpy as np
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from src.shared.python.launch_monitor.flexible_analysis import (
+from src.tools.launch_monitor_model.flexible_analysis import (
     CONTRACT_VERSION,
     FlexibleAnalysisRequest,
     FlexibleAnalysisResult,
     analyze_variables,
 )
-from src.shared.python.launch_monitor.schema import METRICS
+from src.tools.launch_monitor_model.schema import METRICS
 
 CONTRACT_VERSION_V2: Literal["2.0.0"] = "2.0.0"
 PlayerIdentityTrust = Literal[
