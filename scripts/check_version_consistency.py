@@ -365,24 +365,8 @@ def check_versions(
     )
 
 
-def set_versions(repo_root: Path, target_version: str) -> None:
-    """Update all version surfaces to the given target version.
-
-    Preconditions: ``repo_root`` is an existing directory and ``target_version``
-    matches the SemVer pattern.
-    Postcondition: all checked surfaces, SBOM baseline, and SECURITY.md are updated.
-    """
-    if not isinstance(repo_root, Path):
-        raise TypeError("repo_root must be a pathlib.Path")
-    if not repo_root.is_dir():
-        raise ValueError(f"repo_root must be an existing directory: {repo_root}")
-    match = _SEMVER_RE.match(target_version)
-    if match is None:
-        raise ValueError(
-            f"target_version must be SemVer-compatible: {target_version!r}"
-        )
-
-    # 1. pyproject.toml: replace version = "..." in [project]
+def _set_code_manifest_versions(repo_root: Path, target_version: str) -> None:
+    """Update pyproject.toml, Cargo.toml, _version.py, and VERSION surfaces."""
     pyproject_path = repo_root / "pyproject.toml"
     if pyproject_path.is_file():
         content = pyproject_path.read_text(encoding="utf-8")
@@ -394,7 +378,6 @@ def set_versions(repo_root: Path, target_version: str) -> None:
         )
         pyproject_path.write_text(content, encoding="utf-8")
 
-    # 2. src/api/_version.py: replace __version__ = "..."
     version_py = repo_root / "src" / "api" / "_version.py"
     if version_py.is_file():
         content = version_py.read_text(encoding="utf-8")
@@ -406,14 +389,41 @@ def set_versions(repo_root: Path, target_version: str) -> None:
         )
         version_py.write_text(content, encoding="utf-8")
 
-    # 3. ui/package.json
+    cargo_toml = repo_root / "Cargo.toml"
+    if cargo_toml.is_file():
+        content = cargo_toml.read_text(encoding="utf-8")
+        content = re.sub(
+            r'(?ms)(\[workspace\.package\].*?^\s*version\s*=\s*")[^"]+(")',
+            rf"\g<1>{target_version}\g<2>",
+            content,
+            count=1,
+        )
+        cargo_toml.write_text(content, encoding="utf-8")
+
+    physics_toml = repo_root / "rust_core" / "upstream-physics" / "pyproject.toml"
+    if physics_toml.is_file():
+        content = physics_toml.read_text(encoding="utf-8")
+        content = re.sub(
+            r'(?m)^(\s*version\s*=\s*")[^"]+(")',
+            rf"\g<1>{target_version}\g<2>",
+            content,
+            count=1,
+        )
+        physics_toml.write_text(content, encoding="utf-8")
+
+    version_file = repo_root / "VERSION"
+    if version_file.is_file():
+        version_file.write_text(f"{target_version}\n", encoding="utf-8")
+
+
+def _set_ui_manifest_versions(repo_root: Path, target_version: str) -> None:
+    """Update UI package manifests and Tauri config surfaces."""
     pkg_json = repo_root / "ui" / "package.json"
     if pkg_json.is_file():
         data = json.loads(pkg_json.read_text(encoding="utf-8"))
         data["version"] = target_version
         pkg_json.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
-    # 4. ui/package-lock.json
     pkg_lock = repo_root / "ui" / "package-lock.json"
     if pkg_lock.is_file():
         data = json.loads(pkg_lock.read_text(encoding="utf-8"))
@@ -426,43 +436,17 @@ def set_versions(repo_root: Path, target_version: str) -> None:
             data["packages"][""]["version"] = target_version
         pkg_lock.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
-    # 5. Cargo.toml: under [workspace.package]
-    cargo_toml = repo_root / "Cargo.toml"
-    if cargo_toml.is_file():
-        content = cargo_toml.read_text(encoding="utf-8")
-        content = re.sub(
-            r'(?ms)(\[workspace\.package\].*?^\s*version\s*=\s*")[^"]+(")',
-            rf"\g<1>{target_version}\g<2>",
-            content,
-            count=1,
-        )
-        cargo_toml.write_text(content, encoding="utf-8")
-
-    # 6. rust_core/upstream-physics/pyproject.toml
-    physics_toml = repo_root / "rust_core" / "upstream-physics" / "pyproject.toml"
-    if physics_toml.is_file():
-        content = physics_toml.read_text(encoding="utf-8")
-        content = re.sub(
-            r'(?m)^(\s*version\s*=\s*")[^"]+(")',
-            rf"\g<1>{target_version}\g<2>",
-            content,
-            count=1,
-        )
-        physics_toml.write_text(content, encoding="utf-8")
-
-    # 7. VERSION
-    version_file = repo_root / "VERSION"
-    if version_file.is_file():
-        version_file.write_text(f"{target_version}\n", encoding="utf-8")
-
-    # 8. ui/src-tauri/tauri.conf.json
     tauri_conf = repo_root / "ui" / "src-tauri" / "tauri.conf.json"
     if tauri_conf.is_file():
         data = json.loads(tauri_conf.read_text(encoding="utf-8"))
         data["version"] = target_version
         tauri_conf.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
-    # 9. scripts/config/sbom_baseline.json
+
+def _set_release_metadata_versions(
+    repo_root: Path, target_version: str, series: str
+) -> None:
+    """Update SBOM baseline artifacts and SECURITY.md supported series."""
     sbom_path = repo_root / "scripts" / "config" / "sbom_baseline.json"
     if sbom_path.is_file():
         data = json.loads(sbom_path.read_text(encoding="utf-8"))
@@ -485,11 +469,8 @@ def set_versions(repo_root: Path, target_version: str) -> None:
             data["expected_artifacts"] = new_artifacts
         sbom_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
-    # 10. SECURITY.md supported series
     sec_path = repo_root / "SECURITY.md"
     if sec_path.is_file():
-        major, minor, _ = match.groups()
-        series = f"{major}.{minor}"
         text = sec_path.read_text(encoding="utf-8")
         if f"| {series}.x" not in text:
             row = f"| {series}.x   | :white_check_mark: |\n"
@@ -498,6 +479,28 @@ def set_versions(repo_root: Path, target_version: str) -> None:
                 pos = match_header.end()
                 text = text[:pos] + row + text[pos:]
                 sec_path.write_text(text, encoding="utf-8")
+
+
+def set_versions(repo_root: Path, target_version: str) -> None:
+    """Update all version surfaces to the given target version.
+
+    Preconditions: ``repo_root`` is an existing directory and ``target_version``
+    matches the SemVer pattern.
+    Postcondition: all checked surfaces, SBOM baseline, and SECURITY.md are updated.
+    """
+    if not isinstance(repo_root, Path):
+        raise TypeError("repo_root must be a pathlib.Path")
+    if not repo_root.is_dir():
+        raise ValueError(f"repo_root must be an existing directory: {repo_root}")
+    match = _SEMVER_RE.match(target_version)
+    if match is None:
+        raise ValueError(
+            f"target_version must be SemVer-compatible: {target_version!r}"
+        )
+    major, minor, _ = match.groups()
+    _set_code_manifest_versions(repo_root, target_version)
+    _set_ui_manifest_versions(repo_root, target_version)
+    _set_release_metadata_versions(repo_root, target_version, f"{major}.{minor}")
 
 
 def _format_report(report: VersionReport) -> str:
