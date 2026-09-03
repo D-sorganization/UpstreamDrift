@@ -46,9 +46,14 @@ covered by smoke tests in `tests/ui/tools/pose_studio/`.
 - Undo/redo (Ctrl+Z / Ctrl+Shift+Z).
 - Pose Library: load `canonical_zero_pose` or
   `canonical_from_reference_setup`.
+- Save/Load an engine-native starting state (Ctrl+S / Ctrl+O). Writes and
+  reads through `src.shared.python.pose_interchange.pose_io`; the on-disk
+  shape per engine is documented in
+  [save_formats.md](../../../docs/user_guide/pose_studio/save_formats.md).
+- Unsaved-edit tracking: closing the window (standalone) or the launcher
+  tab (embedded) prompts Save / Discard / Cancel.
 
 ## Out of scope (deferred follow-ups)
 
 - IK drag-handles — drag a clubhead, solve back through the chain.
-- Save/load to JSON — lives in Subtask 6 / #4900.
 - Mocap scrubbing — lives in Subtask 7 / #4901.

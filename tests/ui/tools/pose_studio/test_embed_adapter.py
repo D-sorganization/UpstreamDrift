@@ -119,8 +119,12 @@ class TestIsDirty:
         assert hasattr(adapter, "is_dirty")
         assert callable(adapter.is_dirty)
 
-    def test_is_dirty_returns_false_by_default(self) -> None:
-        """Verify is_dirty returns False (Pose Studio doesn't track dirty state)."""
+    def test_is_dirty_returns_false_without_a_widget(self) -> None:
+        """No embedded widget means nothing can be dirty (#8882).
+
+        Dirty tracking with a live widget is covered by
+        ``tests/unit/tools/pose_studio/test_save_load.py``.
+        """
         adapter = _EmbedAdapter()
         assert adapter.is_dirty() is False
 
