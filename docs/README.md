@@ -6,19 +6,19 @@ Welcome to UpstreamDrift - a professional biomechanical analysis and physics sim
 
 ## Quick Navigation
 
-| I want to...            | Go to...                                                    |
-| ----------------------- | ----------------------------------------------------------- |
-| Get started quickly     | [Quick Start](#quick-start)                                 |
-| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)                 |
-| Develop new features    | [Development Guide](api/DEVELOPMENT.md)                     |
-| Add a physics engine    | [Adapter Authoring Guide](adapters/authoring_guide.md)      |
-| Choose a physics engine | [Engine Selection Guide](engines/engine_selection_guide.md) |
-| Track motion capture    | [Motion Pipeline](motion_pipeline/README.md)                |
-| Review architecture     | [ADRs](adr/)                                                |
-| Read the specification  | [SPEC](../SPEC.md)                                          |
-| Find any document       | [Documentation catalog](index.md)                           |
+| I want to...             | Go to...                                                                 |
+| ------------------------ | ------------------------------------------------------------------------ |
+| Get started quickly      | [Quick Start](#quick-start)                                              |
+| Understand the API       | [API Architecture](api/API_ARCHITECTURE.md)                              |
+| Develop new features     | [Development Guide](api/DEVELOPMENT.md)                                  |
+| Add a physics engine     | [Adapter Authoring Guide](adapters/authoring_guide.md)                   |
+| Choose a physics engine  | [Engine Selection Guide](engines/engine_selection_guide.md)              |
+| Track motion capture     | [Motion Pipeline](motion_pipeline/README.md)                             |
+| Review architecture      | [ADRs](adr/)                                                             |
+| Read the specification   | [SPEC](../SPEC.md)                                                       |
+| Find any document        | [Documentation catalog](index.md)                                        |
 | Read a calculation sheet | [Calculation references](index.md#calculation-and-derivation-references) |
-| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                         |
+| Troubleshoot issues      | [Troubleshooting](troubleshooting/)                                      |
 
 ---
 
