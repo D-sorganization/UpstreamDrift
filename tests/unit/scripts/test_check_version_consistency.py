@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -48,6 +49,48 @@ def _write_project(root: Path, *, version: str) -> None:
         f'[project]\nname = "upstream-physics"\nversion = "{version}"\n',
         encoding="utf-8",
     )
+    (root / "VERSION").write_text(f"{version}\n", encoding="utf-8")
+    (root / "ui" / "src-tauri").mkdir(parents=True)
+    (root / "ui" / "src-tauri" / "tauri.conf.json").write_text(
+        f'{{"productName": "UpstreamDrift", "version": "{version}"}}\n',
+        encoding="utf-8",
+    )
+    _write_sbom_baseline(root, version=version)
+    major, minor, _patch = version.split(".")
+    _write_security_md(root, supported=f"{major}.{minor}")
+
+
+def _write_sbom_baseline(root: Path, *, version: str) -> None:
+    (root / "scripts" / "config").mkdir(parents=True, exist_ok=True)
+    (root / "scripts" / "config" / "sbom_baseline.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "project": "upstream-drift",
+                "version": version,
+                "tiers": {
+                    "core": {"install_spec": f"upstream-drift=={version}"},
+                    "full": {"install_spec": f"upstream-drift[all]=={version}"},
+                },
+                "expected_artifacts": [
+                    f"upstream-drift-{version}.cyclonedx.core.json",
+                    f"upstream-drift-{version}.spdx.full.json",
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_security_md(root: Path, *, supported: str) -> None:
+    (root / "SECURITY.md").write_text(
+        "# Security Policy\n\n## Supported Versions\n\n"
+        "| Version | Supported          |\n"
+        "| ------- | ------------------ |\n"
+        f"| {supported}.x   | :white_check_mark: |\n"
+        f"| < {supported}   | :x:                |\n",
+        encoding="utf-8",
+    )
 
 
 def test_check_versions_passes_when_all_surfaces_match_latest_tag(
@@ -79,6 +122,69 @@ def test_check_versions_reports_surface_drift(tmp_path: Path) -> None:
 
     assert report.ok is False
     assert any("ui/package.json" in error for error in report.errors)
+
+
+def test_check_versions_reports_tauri_conf_drift(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.1")
+    (tmp_path / "ui" / "src-tauri" / "tauri.conf.json").write_text(
+        '{"productName": "UpstreamDrift", "version": "2.1.0"}\n',
+        encoding="utf-8",
+    )
+
+    report = module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+    assert report.ok is False
+    assert any("ui/src-tauri/tauri.conf.json" in error for error in report.errors)
+
+
+def test_check_versions_reports_version_file_drift(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.1")
+    (tmp_path / "VERSION").write_text("2.1.0\n", encoding="utf-8")
+
+    report = module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+    assert report.ok is False
+    assert any(error.startswith("VERSION version") for error in report.errors)
+
+
+def test_check_versions_reports_sbom_baseline_drift(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.1")
+    _write_sbom_baseline(tmp_path, version="2.1.0")
+
+    report = module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+    assert report.ok is False
+    sbom_errors = [e for e in report.errors if "sbom_baseline.json" in e]
+    # top-level version + 2 install_spec pins + 2 expected artifact names
+    assert len(sbom_errors) == 5
+
+
+def test_check_versions_reports_security_md_series_drift(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.1")
+    _write_security_md(tmp_path, supported="1.0")
+
+    report = module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+    assert report.ok is False
+    assert any("SECURITY.md supported versions" in error for error in report.errors)
+    assert any("'2.1.x'" in error for error in report.errors)
+
+
+def test_check_versions_reports_security_md_without_supported_row(
+    tmp_path: Path,
+) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.1")
+    (tmp_path / "SECURITY.md").write_text("# Security Policy\n", encoding="utf-8")
+
+    report = module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+    assert report.ok is False
+    assert any("at least one supported" in error for error in report.errors)
 
 
 def test_check_versions_reports_missing_semver_tag(tmp_path: Path) -> None:
