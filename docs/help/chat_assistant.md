@@ -98,7 +98,6 @@ credentials reach the assistant.
 - Persistence is per-machine plain files in the home directory, with no
   access control beyond filesystem permissions.
 
-## See also
-
+## See Also
 - [Sidekick](sidekick.md) - the desktop equivalent of this tile
 - [Data Explorer](data_explorer.md)

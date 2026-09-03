@@ -94,8 +94,7 @@ with the module mapping in
 - Without `pyqtgraph` and OpenGL the 3D pane is absent; the numeric results
   still compute.
 
-## See also
-
+## See Also
 - [Ball Flight Simulator](ball_flight_simulator.md) - flight only, with environment controls
 - [Shot Tracer](shot_tracer.md) - the flight question across several models
 - [Engine Selection Guide](engine_selection.md)

@@ -91,8 +91,7 @@ the MediaPipe and OpenPose tiles.
   There is no wiring from this tile into the canonical observation
   format.
 
-## See also
-
+## See Also
 - [Video analysis tutorial](../tutorials/content/04_video_analysis.md)
 - [MediaPipe](mediapipe_analysis.md), [OpenPose](openpose_analysis.md)
 - [Motion pipeline format matrix](../motion_pipeline/formats.md) - what the pipeline will actually ingest

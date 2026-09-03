@@ -93,8 +93,7 @@ The two produce visibly different windows. Files inspected:
 `src/tools/golf_simulation_suite/_embed_adapter.py`,
 `src/config/launcher_manifest.json`.
 
-## See also
-
+## See Also
 - [Ball Flight Simulator](ball_flight_simulator.md) - a working flight simulation
 - [Putting Green](putting_green.md) - a working putting simulation
 - [ADR-0013: Launcher Composability](../adr/0013-launcher-composability.md)

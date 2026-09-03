@@ -145,8 +145,7 @@ Security and retention rationale for dataset jobs:
 - Selected-pair results contain player labels. Store and share them according
   to the source dataset privacy and usage terms.
 
-## See also
-
+## See Also
 - [Launch Monitor Analytics user guide](../user_guide/launch_monitor_analytics.md)
 - [ADR 0037: immutable launch monitor dataset jobs](../adr/0037-immutable-launch-monitor-dataset-jobs.md)
 - [Analysis Tools calculation sheet](analysis_tools_api.md)

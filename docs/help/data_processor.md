@@ -79,8 +79,7 @@ Sidekick startup does not depend on the full Data Processor UI stack.
 - Do not edit `vendor/ud-tools/`. It is a vendored, pinned copy of the
   Tools repository; fixes belong upstream in Tools.
 
-## See also
-
+## See Also
 - [Tools Calculator Suite](tools_calculator_hub.md) - shares this exact
   entry point
 - [Data Explorer](data_explorer.md) - the other Tools-provided data tile

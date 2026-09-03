@@ -99,8 +99,7 @@ process-wide embeddable-tool registry at import time, requesting a tab
   `pragma: no cover - GUI smoke follows later`, so the Qt surface is not
   covered by tests.
 
-## See also
-
+## See Also
 - [Engine selection](engine_selection.md)
 - [Simulation controls](simulation_controls.md)
 - [Model Explorer](model_explorer.md) - where model dimensions come from

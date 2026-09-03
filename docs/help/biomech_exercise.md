@@ -94,8 +94,7 @@ lives in `VIRTUAL_PREFIXES` in
 - Exercise names are not validated. An unknown name simply discovers no engines
   and lands on the fallback list.
 
-## See also
-
+## See Also
 - [Gait Model](biomech_gait.md)
 - [Sit-to-Stand Model](biomech_sit_to_stand.md)
 - [Engine Selection](engine_selection.md)

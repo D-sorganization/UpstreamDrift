@@ -104,8 +104,7 @@ Model background is in
 - Without `pyqtgraph` and OpenGL the 3D pane is replaced by an install hint;
   the comparison table still populates.
 
-## See also
-
+## See Also
 - [ADR-0047: Trajectory Visualization - Shared Wire, Preserved Viewers](../adr/0047-trajectory-visualization-shared-wire-preserved-viewers.md)
 - [Ball Flight Simulator](ball_flight_simulator.md) - one model, with environment controls
 - [Golf Ball Physics: Scientific Basis and Model Documentation](../physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md)

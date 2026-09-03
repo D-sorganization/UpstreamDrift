@@ -76,8 +76,7 @@ which is the same registry pair that declares this tile.
   declares considerably more, so treat that count as a snapshot rather than a
   current inventory.
 
-## See also
-
+## See Also
 - [Project Map document](../architecture/PROJECT_MAP.md)
 - [System overview](../architecture/system_overview.md)
 - [Feature roadmap](../architecture/feature_roadmap.md)

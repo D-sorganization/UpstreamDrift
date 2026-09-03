@@ -82,8 +82,7 @@ submodule or set `TOOLS_REPO_PATH`.
 - Statistics are descriptive only. There is no fitting, no regression,
   and no cross-dataset join.
 
-## See also
-
+## See Also
 - [Data Processor](data_processor.md) - the other Tools-provided data tile
 - [Dataset Generator](dataset_generator.md) - produces datasets to explore
 - [Vendored Tools repository notes](../../vendor/README.md)

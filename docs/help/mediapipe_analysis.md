@@ -84,8 +84,7 @@ coordinates, partial 3D via relative depth) is recorded in the
 - Single-person only: the estimator reads MediaPipe Pose's single
   `pose_landmarks` result and has no multi-person path.
 
-## See also
-
+## See Also
 - [Video analysis tutorial](../tutorials/content/04_video_analysis.md)
 - [Motion pipeline format matrix](../motion_pipeline/formats.md)
 - [Motion pipeline troubleshooting](../motion_pipeline/troubleshooting.md)

@@ -86,8 +86,7 @@ cost - in [MATLAB engine reference](../engines/matlab.md).
   initialise paths, per [Simscape Multibody models](../engines/simscape.md).
   The tile does not do this for you.
 
-## See also
-
+## See Also
 - [MATLAB engine reference](../engines/matlab.md)
 - [Simscape Multibody models](../engines/simscape.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)

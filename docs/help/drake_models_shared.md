@@ -65,8 +65,7 @@ are consumed elsewhere in the suite as ``sdformat-1.8``, per the
 - Editing files here changes the sibling repository, not UpstreamDrift. Nothing
   in this tile commits, syncs or version-checks those edits.
 
-## See also
-
+## See Also
 - [ADR-0014: shared biomech models](../adr/0014-shared-biomech-models.md)
 - [Biomech workspace setup](../architecture/biomech_workspace.md)
 - [External provider onboarding](../development/external_provider_onboarding.md)

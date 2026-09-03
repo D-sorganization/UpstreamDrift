@@ -120,8 +120,7 @@ prefix `/dataset`). That router exposes `POST /generate`,
 - The generator trains nothing. It only produces the corpus; see
   Training Controller for the training side.
 
-## See also
-
+## See Also
 - [Training Controller](training_controller.md) - consumes generated datasets
 - [Data Explorer](data_explorer.md) - inspects generated datasets
 - [Analysis tools](analysis_tools.md)

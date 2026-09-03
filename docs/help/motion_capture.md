@@ -82,8 +82,7 @@ FreeMoCap's own landmark estimation is MediaPipe-based, and its
   happens here.** Those belong to the motion pipeline downstream.
 - The tile is registered at maturity `beta`.
 
-## See also
-
+## See Also
 - [FreeMoCap sidecar pipeline](../motion_capture/freemocap_sidecar.md)
 - [FreeMoCap integration](../motion_capture/freemocap.md)
 - [Markerless mocap acceptance criteria](../motion_capture/markerless_mocap_acceptance.md)

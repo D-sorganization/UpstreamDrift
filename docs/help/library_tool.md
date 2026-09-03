@@ -96,8 +96,7 @@ Defining module: `src/launchers/library_widget.py`.
 - Single-user and machine-local. The index lives under the user home directory
   with no sharing, sync or export.
 
-## See also
-
+## See Also
 - [Project Map](../architecture/PROJECT_MAP.md)
 - [Launchers](../user_guide/launchers.md)
 - [User manual](../user_guide/user_manual.md)

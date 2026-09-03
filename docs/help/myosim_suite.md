@@ -68,8 +68,7 @@ there is no separate half-sarcomere solver in this repository.
 - The probe result is a point-in-time import check. It does not validate that
   any particular MyoSuite environment id can be constructed.
 
-## See also
-
+## See Also
 - [MyoSim engine reference](../engines/myosim.md)
 - [MuJoCo engine reference](../engines/mujoco.md) - MyoSuite is built on MuJoCo
 - [Engine capabilities matrix](../engines/engine_capabilities.md)
