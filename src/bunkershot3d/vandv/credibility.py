@@ -28,6 +28,19 @@ The factor levels here are a self-assessment of the model, not of the
 people who built it.  :attr:`CredibilityFactor.PEOPLE_QUALIFICATIONS` is
 therefore recorded as **not assessed** rather than given a number, since
 a self-scored competence rating is not evidence.
+
+Where the numbers come from
+---------------------------
+
+Nowhere in this module.  :data:`CREDIBILITY_ASSESSMENT` is *derived* from
+:data:`~bunkershot3d.vandv.roadmap.VALIDATION_LEDGER` and the shipped
+measurement register, which is empty.  The ledger states, per factor, the
+level it is held at, what holds it there, and -- for the three factors an
+experiment could move -- the minimum measurement that would lift it one
+level, with its conditions, its instrument class and its acceptance
+criterion.  Keeping the assessment and the roadmap in one structure is not
+tidiness: a published table saying 0 next to a plan written as though it
+were 2 is the failure mode, and it is silent by nature.
 """
 
 from __future__ import annotations
@@ -35,7 +48,6 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
-from enum import StrEnum
 from types import MappingProxyType
 
 from ..metrics.forgiveness import SWEEP_RANGES
@@ -45,7 +57,15 @@ from ..solvers.envelope import (
     RFT_FROUDE_LIMIT,
 )
 from .exceptions import VerificationError
+from .ledger import (
+    MAX_CREDIBILITY_LEVEL,
+    CredibilityFactor,
+    FactorAssessment,
+)
+from .measurement import MeasurementRegister
+from .measurement_intake import shipped_register
 from .reference_data import WIVOU_2016, DomainOverlap, domain_overlap
+from .roadmap import VALIDATION_LEDGER
 
 __all__ = [
     "CREDIBILITY_ASSESSMENT",
@@ -55,14 +75,12 @@ __all__ = [
     "CredibilityFactor",
     "EnvelopeExceedance",
     "FactorAssessment",
+    "credibility_assessment",
     "credibility_table_markdown",
     "domain_of_applicability",
     "domain_table_markdown",
     "envelope_exceedance",
 ]
-
-MAX_CREDIBILITY_LEVEL = 4
-"""Top of the NASA-STD-7009B 0-4 scale."""
 
 DESIGN_SPEED_M_S = 25.0
 """Greenside delivery speed the tool is built for (the 20-27 m/s band)."""
@@ -76,245 +94,38 @@ used for the headline number precisely so the headline cannot be accused
 of being picked to look bad."""
 
 
-class CredibilityFactor(StrEnum):
-    """The eight NASA-STD-7009B credibility factors."""
+def credibility_assessment(
+    register: MeasurementRegister | None = None,
+) -> tuple[FactorAssessment, ...]:
+    """Derive the eight-factor assessment from the ledger.
 
-    VERIFICATION = "verification"
-    VALIDATION = "validation"
-    INPUT_PEDIGREE = "input_pedigree"
-    RESULTS_UNCERTAINTY = "results_uncertainty"
-    RESULTS_ROBUSTNESS = "results_robustness"
-    USE_HISTORY = "use_history"
-    MS_MANAGEMENT = "ms_management"
-    PEOPLE_QUALIFICATIONS = "people_qualifications"
+    This is the only place a credibility level is produced.  There is no
+    hand-maintained table of numbers to fall out of step with the roadmap,
+    because there is no second table: :data:`VALIDATION_LEDGER` states the
+    level each factor is held at, what holds it there, and which
+    measurement would lift it, and the level reported here is that level
+    plus whatever ``register`` has actually bought.
 
-    @property
-    def label(self) -> str:
-        """Human-readable factor name, as NASA-STD-7009B writes it."""
-        if self is CredibilityFactor.MS_MANAGEMENT:
-            return "M&S Management"
-        return self.value.replace("_", " ").title()
+    Args:
+        register: The measurements on hand.  ``None`` means the shipped
+            register, which is empty and must stay empty until something is
+            measured.
 
-
-@dataclass(frozen=True)
-class FactorAssessment:
-    """One factor's achieved level, its threshold, and the gap between them.
-
-    Attributes:
-        factor: Which factor.
-        achieved_level: 0-4, or ``None`` when the factor cannot honestly
-            be self-assessed.
-        threshold_level: The level the intended use -- choosing between
-            two wedge sole geometries and believing the answer -- demands.
-        evidence: What the achieved level rests on.
-        gap_statement: What is missing, stated as work rather than as a
-            euphemism.
+    Returns:
+        One assessment per factor, in ledger order.
     """
-
-    factor: CredibilityFactor
-    achieved_level: int | None
-    threshold_level: int
-    evidence: str
-    gap_statement: str
-
-    def __post_init__(self) -> None:
-        """Validate the levels.
-
-        Raises:
-            VerificationError: If a level falls outside 0-4, or the
-                evidence or gap statement is empty.
-        """
-        for name in ("achieved_level", "threshold_level"):
-            level = getattr(self, name)
-            if level is None:
-                continue
-            if not isinstance(level, int) or not 0 <= level <= MAX_CREDIBILITY_LEVEL:
-                raise VerificationError(
-                    f"{self.factor.value}.{name} must be an integer in 0-"
-                    f"{MAX_CREDIBILITY_LEVEL}, got {level!r}"
-                )
-        for name in ("evidence", "gap_statement"):
-            if not getattr(self, name).strip():
-                raise VerificationError(
-                    f"{self.factor.value} has an empty {name}; an unexplained "
-                    "credibility level is a number without evidence"
-                )
-
-    @property
-    def is_assessed(self) -> bool:
-        """False when the factor was deliberately not self-scored."""
-        return self.achieved_level is not None
-
-    @property
-    def gap(self) -> int | None:
-        """``threshold - achieved``, never negative; ``None`` if unassessed."""
-        if self.achieved_level is None:
-            return None
-        return max(self.threshold_level - self.achieved_level, 0)
-
-    @property
-    def meets_threshold(self) -> bool:
-        """True only when the factor is assessed and clears its threshold."""
-        return self.achieved_level is not None and self.achieved_level >= (
-            self.threshold_level
-        )
-
-    def level_text(self) -> str:
-        """The achieved level rendered for a table cell."""
-        if self.achieved_level is None:
-            return "not assessed"
-        return f"{self.achieved_level} / {MAX_CREDIBILITY_LEVEL}"
-
-    def gap_text(self) -> str:
-        """The gap rendered for a table cell."""
-        if self.gap is None:
-            return "n/a"
-        return "met" if self.gap == 0 else f"{self.gap} level(s) short"
+    supplied = shipped_register() if register is None else register
+    return VALIDATION_LEDGER.assessment(supplied)
 
 
-CREDIBILITY_ASSESSMENT: tuple[FactorAssessment, ...] = (
-    FactorAssessment(
-        factor=CredibilityFactor.VERIFICATION,
-        achieved_level=2,
-        threshold_level=3,
-        evidence=(
-            "Formal code verification of the F0 tier: conservation residuals "
-            "split into round-off and truncation classes, an angular-momentum "
-            "check against a naive per-element oracle, order of accuracy "
-            "against a closed-form cylinder integral, and analytic flat-plate "
-            "and zero-speed limits. Solution verification is implemented as a "
-            "Celik GCI with Richardson extrapolation."
-        ),
-        gap_statement=(
-            "No method of manufactured solutions for the coupled shot, and no "
-            "verification at all of the F1, F2 or F3 tiers. The surface "
-            "refinement study also runs into the package's own envelope: I_G "
-            "grows as the mesh is refined, so a mesh fine enough to converge "
-            "the quadrature is further outside RFT's superposition argument."
-        ),
-    ),
-    FactorAssessment(
-        factor=CredibilityFactor.VALIDATION,
-        achieved_level=0,
-        threshold_level=3,
-        evidence=(
-            "None. The one comparison that can be formed against a published "
-            "measurement -- the material-scaling prediction of the vertical "
-            "plate response against the Quikrete analogue's 2.02 N/cm^3 -- is "
-            "noise-limited under V&V 20, so it carries no information about "
-            "model error."
-        ),
-        gap_statement=(
-            "No published data exists for ball launch angle, speed or spin "
-            "from a splash shot, for clubhead deceleration in sand, for the "
-            "energy split, or for ejecta mass. This is a gap in the field, "
-            "not a search failure, so it cannot be closed by reading more. "
-            "Closing it needs either the Wivou carry correlations compared "
-            "against a computed model correlation, or an instrumented "
-            "experiment: plate penetration at three plate areas, a 6x6 cm "
-            "direct shear box, and one drag test at 20-27 m/s to fit lambda."
-        ),
-    ),
-    FactorAssessment(
-        factor=CredibilityFactor.INPUT_PEDIGREE,
-        achieved_level=2,
-        threshold_level=3,
-        evidence=(
-            "Every fitted constant is traced to a published analogue: the "
-            "3D-RFT polynomial to a generic frictional-plastic medium, the "
-            "friction angle and packing fraction to Quikrete medium sand, and "
-            "lambda to plate-drag and wheel experiments. One fully "
-            "characterised commercial bunker sand (Covia Signature 500, ASTM "
-            "F1632 Method B and F1815) seeds the sand presets, and every entry "
-            "carries a ProvenanceBasis."
-        ),
-        gap_statement=(
-            "Nothing is measured on the sand actually being modelled, and the "
-            "one characterised sand is a single lab report on a single "
-            "commercial product, not a population. lambda and delta_h have no "
-            "wedge value at all."
-        ),
-    ),
-    FactorAssessment(
-        factor=CredibilityFactor.RESULTS_UNCERTAINTY,
-        achieved_level=2,
-        threshold_level=3,
-        evidence=(
-            "Discretisation uncertainty is estimated by GCI and converted to a "
-            "V&V 20 u_h; u_num is formed by simple addition of u_h, u_it and "
-            "u_ro as the standard requires, and u_val by quadrature."
-        ),
-        gap_statement=(
-            "No input uncertainty is propagated through a shot, and no "
-            "model-form uncertainty is quantified anywhere -- which is the "
-            "direct consequence of validation being at level 0. The reported "
-            "u_num covers the numerics only and must not be read as an error "
-            "bar on the physics."
-        ),
-    ),
-    FactorAssessment(
-        factor=CredibilityFactor.RESULTS_ROBUSTNESS,
-        achieved_level=1,
-        threshold_level=2,
-        evidence=(
-            "Metamorphic relations (translation, rotation, reflection, "
-            "permutation, scaling, monotonicity) cover the solver, and the "
-            "study package provides variance-based sensitivity over the "
-            "declared sweep ranges."
-        ),
-        gap_statement=(
-            "No sensitivity study over the constants that actually dominate "
-            "the answer -- lambda across its published 1.0-2.8 spread and the "
-            "delta_h saturation fraction -- and no independent review of the "
-            "F0 tier by anyone who did not write it."
-        ),
-    ),
-    FactorAssessment(
-        factor=CredibilityFactor.USE_HISTORY,
-        achieved_level=0,
-        threshold_level=2,
-        evidence=(
-            "None. The F0 solver has never been used to make a design "
-            "decision, and no predecessor of it has either."
-        ),
-        gap_statement=(
-            "Use history accrues only by use. Until a design produced by this "
-            "tool is built and measured, this factor cannot move."
-        ),
-    ),
-    FactorAssessment(
-        factor=CredibilityFactor.MS_MANAGEMENT,
-        achieved_level=3,
-        threshold_level=3,
-        evidence=(
-            "ADR-0032 records the architecture and its rejected alternatives; "
-            "every run emits a manifest with config hash, physics hash, RNG "
-            "seed entropy, library versions, git SHA, fidelity tier and "
-            "validity verdict; and CI enforces lint, format, file-size, "
-            "architecture and marker gates on every change."
-        ),
-        gap_statement=(
-            "Threshold met. The remaining gap to level 4 is a formal "
-            "configuration-management process with a defined release and "
-            "approval path, which this repository does not have."
-        ),
-    ),
-    FactorAssessment(
-        factor=CredibilityFactor.PEOPLE_QUALIFICATIONS,
-        achieved_level=None,
-        threshold_level=2,
-        evidence=(
-            "Deliberately not self-assessed. A team scoring its own competence "
-            "is not evidence, and a number here would dilute the seven factors "
-            "that are backed by artefacts."
-        ),
-        gap_statement=(
-            "Assess externally, or leave blank. Do not fill it in to make the "
-            "table look complete."
-        ),
-    ),
-)
-"""The credibility assessment, achieved level and gap per factor."""
+CREDIBILITY_ASSESSMENT: tuple[FactorAssessment, ...] = credibility_assessment()
+"""The credibility assessment, achieved level and gap per factor.
+
+Derived from :data:`~bunkershot3d.vandv.roadmap.VALIDATION_LEDGER` and the
+shipped measurement register.  The register is empty, so this is the level
+the ledger holds -- validation at 0 of 4 -- and writing the roadmap did not
+change it.  Supplying a measurement through
+:mod:`bunkershot3d.vandv.measurement_intake` is the only thing that will."""
 
 
 @dataclass(frozen=True, slots=True)
