@@ -9,11 +9,11 @@ Issue: #8776 (re-parented under the seam epic #9406)
 protective configuration, and that the gates which should have caught it were
 themselves disabled:
 
-| Merge | Subject | Files / lines |
-| --- | --- | --- |
-| `3e09be404` | feat(sidekick): overhaul assistant settings | 158 files, +21,529 / -2,733 |
-| `0575fb4b8` (#8322) | chore: consolidate overlapping UpstreamDrift PR backlog | 1,248 files, +40,796 / -24,827 |
-| #8746 | Bolt: memoize recursive ModelTree node (bundled a `--write-baseline` regeneration) | DRY baseline |
+| Merge               | Subject                                                                            | Files / lines                  |
+| ------------------- | ---------------------------------------------------------------------------------- | ------------------------------ |
+| `3e09be404`         | feat(sidekick): overhaul assistant settings                                        | 158 files, +21,529 / -2,733    |
+| `0575fb4b8` (#8322) | chore: consolidate overlapping UpstreamDrift PR backlog                            | 1,248 files, +40,796 / -24,827 |
+| #8746               | Bolt: memoize recursive ModelTree node (bundled a `--write-baseline` regeneration) | DRY baseline                   |
 
 This audit re-checks every item in the issue against `origin/main` at
 `bb067bb5f` (2026-09-03) **and** against the pinned Tools tree
@@ -25,17 +25,17 @@ a Tools-owned child copy under `src/shared/python/ai/` — the seam rulings in
 
 ### 1. Provider Formatters: `if current_message.strip():` Guard (From `3e09be404`)
 
-| Adapter | UD copy `src/shared/python/ai/adapters/` | Tools copy `vendor/ud-tools/.../ai/adapters/` |
-| --- | --- | --- |
-| anthropic | **absent** | present (1 site) |
-| openai | **absent** | present (1 site) |
-| ollama | **absent** | present (1 site) |
-| gemini | **absent** | present as `if not effective_message.strip() and msg_list:` plus DbC preconditions `bool(message.strip())` |
+| Adapter   | UD copy `src/shared/python/ai/adapters/` | Tools copy `vendor/ud-tools/.../ai/adapters/`                                                              |
+| --------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| anthropic | **absent**                               | present (1 site)                                                                                           |
+| openai    | **absent**                               | present (1 site)                                                                                           |
+| ollama    | **absent**                               | present (1 site)                                                                                           |
+| gemini    | **absent**                               | present as `if not effective_message.strip() and msg_list:` plus DbC preconditions `bool(message.strip())` |
 
 Status: **restored upstream, not in UD's copy.** Tools carries the guard on
 every provider (Tools last-touch 2026-08-18/25); UD's copies are the
 2026-08-01 #8322 snapshot and still send the empty trailing user turn.
-UpstreamDrift runs the *Tools* copy under the launcher and under pytest only
+UpstreamDrift runs the _Tools_ copy under the launcher and under pytest only
 when `shared.python.ai` resolves to vendor — which, as the seam inventory
 showed, it does not (`tests/conftest.py` puts `src/` first). The live bug
 therefore persists in UD desktop sessions until `ai/adapters` is deleted from
@@ -50,10 +50,10 @@ on 2026-08-20. Closed.
 
 ### 3. BitNet `_MAX_PROMPT_BYTES` / `_build_validated_prompt()` (From #8322)
 
-| Copy | State |
-| --- | --- |
+| Copy                                                 | State                                                                |
+| ---------------------------------------------------- | -------------------------------------------------------------------- |
 | UD `src/shared/python/ai/adapters/bitnet_adapter.py` | **absent** (no prompt size ceiling, no UTF-8 validation before argv) |
-| Tools `vendor/ud-tools/.../bitnet_adapter.py` | present (Tools 2026-08-25, 2,079 bytes larger than UD's) |
+| Tools `vendor/ud-tools/.../bitnet_adapter.py`        | present (Tools 2026-08-25, 2,079 bytes larger than UD's)             |
 
 Status: same as finding 1 — fixed in Tools, still missing in the UD shadow.
 Resolution is deletion of the shadow, not a third copy of the fix.
@@ -101,15 +101,15 @@ since restored (findings 1–2); it did not touch `src/api`.
 
 ## Summary
 
-| Item | Dropped by | Present in Tools pin `c0a395d5` | Present in UD shadow | Action |
-| --- | --- | --- | --- | --- |
-| strip guards (4 providers) | 3e09be404 | yes | **no** | delete UD `ai/adapters` (seam PR-3 follow-up) |
-| Ollama error ladder | 3e09be404 | yes | yes (#8775) | none |
-| BitNet prompt ceiling | #8322 | yes | **no** | delete UD `ai/adapters` |
-| `src/shared/python/tests` testpath | #8322 | n/a (Tools CI) | files removed 2026-08-18 | none |
-| root test artifacts | #8322 | n/a | removed | none |
-| DRY baseline | #8746 | n/a | restored | none |
-| API security headers / CORS / auth | — | — | unchanged | none |
+| Item                               | Dropped by | Present in Tools pin `c0a395d5` | Present in UD shadow     | Action                                        |
+| ---------------------------------- | ---------- | ------------------------------- | ------------------------ | --------------------------------------------- |
+| strip guards (4 providers)         | 3e09be404  | yes                             | **no**                   | delete UD `ai/adapters` (seam PR-3 follow-up) |
+| Ollama error ladder                | 3e09be404  | yes                             | yes (#8775)              | none                                          |
+| BitNet prompt ceiling              | #8322      | yes                             | **no**                   | delete UD `ai/adapters`                       |
+| `src/shared/python/tests` testpath | #8322      | n/a (Tools CI)                  | files removed 2026-08-18 | none                                          |
+| root test artifacts                | #8322      | n/a                             | removed                  | none                                          |
+| DRY baseline                       | #8746      | n/a                             | restored                 | none                                          |
+| API security headers / CORS / auth | —          | —                               | unchanged                | none                                          |
 
 The two remaining gaps are in a package this repository must not edit
 (`src/shared/python/ai` is a Tools child copy; `error_handling_baseline.json`
