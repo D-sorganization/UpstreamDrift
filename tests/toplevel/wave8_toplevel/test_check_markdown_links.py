@@ -123,16 +123,52 @@ class TestMain:
     def test_main_exits_zero_no_errors(self, tmp_path: Path, monkeypatch) -> None:
         monkeypatch.chdir(tmp_path)
         with pytest.raises(SystemExit) as ei:
-            cml.main()
+            cml.main([])
         assert ei.value.code == 0
 
-    def test_main_exits_zero_with_errors(
+    @pytest.mark.unit
+    def test_main_exits_nonzero_with_errors(
         self, tmp_path: Path, monkeypatch, caplog
     ) -> None:
+        """A broken link must fail the process so CI can gate on it (#8851)."""
         monkeypatch.chdir(tmp_path)
         (tmp_path / "doc.md").write_text("[bad](missing.md)")
         caplog.set_level(logging.WARNING, logger=cml.logger.name)
         with pytest.raises(SystemExit) as ei:
-            cml.main()
-        assert ei.value.code == 0
+            cml.main([])
+        assert ei.value.code == 1
         assert any("Broken link" in r.message for r in caplog.records)
+
+    @pytest.mark.unit
+    def test_main_scans_explicit_paths(self, tmp_path: Path, monkeypatch) -> None:
+        """Explicit paths override the default documentation roots."""
+        monkeypatch.chdir(tmp_path)
+        clean = tmp_path / "clean"
+        clean.mkdir()
+        (clean / "ok.md").write_text("[self](ok.md)")
+        (tmp_path / "broken.md").write_text("[bad](missing.md)")
+        with pytest.raises(SystemExit) as ei:
+            cml.main(["clean"])
+        assert ei.value.code == 0
+
+    @pytest.mark.unit
+    def test_default_roots_include_docs_help(self, tmp_path: Path) -> None:
+        """docs/help/ is in scope by default (#9413)."""
+        help_dir = tmp_path / "docs" / "help"
+        help_dir.mkdir(parents=True)
+        (tmp_path / "README.md").write_text("# root")
+        roots = cml.default_roots(tmp_path)
+        assert help_dir in roots
+        assert tmp_path / "docs" in roots
+        assert tmp_path / "README.md" in roots
+
+    @pytest.mark.unit
+    def test_exempt_link_prefix_is_skipped(self, tmp_path: Path) -> None:
+        """Uninitialised submodule targets are not reported as broken."""
+        (tmp_path / "doc.md").write_text("[vendored](vendor/ud-tools/thing.md)")
+        assert cml.check_links(tmp_path) == []
+
+    @pytest.mark.unit
+    def test_placeholder_link_is_skipped(self, tmp_path: Path) -> None:
+        """Documentation placeholders are not treated as paths."""
+        assert cml.extract_links_from_markdown("[x](<pyproject URL>)") == []

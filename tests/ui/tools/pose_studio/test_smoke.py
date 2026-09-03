@@ -38,6 +38,11 @@ def studio(qapp):  # noqa: ANN001, ANN201
 
     win = PoseStudioWindow()
     yield win
+    # Since #8882 the window prompts on close when the pose has unsaved
+    # edits, and several of these tests edit the pose. Drop the dirty flag
+    # so teardown does not block on a modal dialog. Tests that exercise the
+    # prompt itself live in tests/unit/tools/pose_studio/test_save_load.py.
+    win.main_widget._dirty = False
     win.close()
 
 
@@ -86,7 +91,16 @@ def test_view_3d_updates_with_pose(studio) -> None:  # noqa: ANN001
     studio.view_3d.update_pose(canonical_from_reference_setup())
 
 
-def test_save_load_buttons_show_stub_tooltip(studio) -> None:  # noqa: ANN001
-    """Save/Load buttons must surface the #4900 stub tooltip."""
-    assert "#4900" in studio.btn_save.toolTip()
-    assert "#4900" in studio.btn_load.toolTip()
+def test_save_load_buttons_describe_real_behaviour(studio) -> None:  # noqa: ANN001
+    """Save/Load are real since #8882, and their tooltips must say so.
+
+    This test previously asserted the opposite -- that the tooltips carried
+    the internal tracker id "#4900" and the word "stub" -- which pinned the
+    defect in place: two enabled buttons that only flashed a transient
+    tooltip at the user. Behavioural coverage of the real save/load path is
+    in tests/unit/tools/pose_studio/test_save_load.py.
+    """
+    for tooltip in (studio.btn_save.toolTip(), studio.btn_load.toolTip()):
+        assert tooltip
+        assert "#" not in tooltip, "no internal issue ids in user-facing text"
+        assert "stub" not in tooltip.lower()
