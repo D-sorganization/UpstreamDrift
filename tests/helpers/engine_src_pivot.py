@@ -80,6 +80,31 @@ def _relink_to_parent(name: str, module: ModuleType) -> None:
     holding a throwaway child, so ``from a import b`` and ``import a.b`` hand
     out different objects -- the same duplicate-module bug one level down.
 
+    A parent missing from ``sys.modules`` entirely is re-imported first
+    (PR #9446). The snapshot can hold a child without its parent when a
+    third-party cleanup (an autouse fixture popping ``sys.modules`` keys by
+    prefix, say) removed the parent's key while the child's key stayed cached.
+    Restoring that child orphaned-by-key plants a *delayed* ``AttributeError``:
+    the next ``import parent`` executes a fresh, childless parent module, and
+    the import system never rebinds a cached child onto it (the child's
+    ``sys.modules`` entry short-circuits ``_find_and_load``), so every
+    dotted-string patch target -- ``monkeypatch.setattr("src.x.y.attr", ...)``,
+    ``mock.patch("src.x.y.f")`` -- resolves ``y`` off the parent by plain
+    ``getattr`` and crashes, while the module-object form still works.
+    Re-importing the parent here and linking the restored child onto it keeps
+    the attribute chain mirroring the ``sys.modules`` layout the snapshot
+    captured.
+
+    The ``src.shared`` keep-set is exempt from that healing: the import-alias
+    machinery (``src/shared/python/import_aliases.py`` and the conftest's
+    contract/training seeding) deliberately plants child-only alias entries
+    there (``src.shared.python.upstream_drift_tools.*`` spellings, for
+    example), so a missing parent key under the keep-set is the *intended*
+    pre-pivot layout and re-importing it would add ``sys.modules`` keys the
+    outermost :meth:`EngineSrcPivot.exit` is contracted not to invent. The
+    keep-set is also never evicted by the pivot, so it cannot exhibit the
+    restore asymmetry in the first place.
+
     Only a stale module of the same dotted name is replaced: many packages
     re-export a *function* under the name of one of their own submodules
     (``forward_kinematics`` is both), and clobbering that with the module
@@ -90,7 +115,12 @@ def _relink_to_parent(name: str, module: ModuleType) -> None:
         return
     parent = sys.modules.get(parent_name)
     if parent is None:
-        return
+        if name == _KEEP_PREFIX or name.startswith(_KEEP_PREFIX + "."):
+            return
+        try:
+            parent = importlib.import_module(parent_name)
+        except ImportError:
+            return
     current = getattr(parent, child, None)
     if current is module:
         return
@@ -109,7 +139,12 @@ class EngineSrcPivot:
     Postconditions: between :meth:`enter` and the matching :meth:`exit`,
     ``sys.modules["src"]`` is the engine package. After the outermost
     :meth:`exit`, ``sys.modules``' ``src`` namespace and ``sys.path`` are
-    byte-for-byte what they were before the outermost :meth:`enter`.
+    byte-for-byte what they were before the outermost :meth:`enter` -- with
+    one healing exception: a saved child module whose parent key a
+    third-party cleanup had popped before :meth:`enter` is restored *with*
+    its parent re-imported and re-linked, so dotted-string patch targets
+    (``monkeypatch.setattr("src.x.y.attr", ...)``) keep resolving instead of
+    raising ``AttributeError`` after the next fresh parent import (PR #9446).
     """
 
     def __init__(self, repo_root: Path, *, precache: tuple[str, ...] = ()) -> None:
@@ -146,7 +181,11 @@ class EngineSrcPivot:
             if name not in self._saved_modules:
                 del sys.modules[name]
         sys.modules.update(self._saved_modules)
-        for name, module in self._saved_modules.items():
+        # Parents first, so a parent `_relink_to_parent` had to re-import is
+        # already in place when its own children come up for re-linking.
+        for name, module in sorted(
+            self._saved_modules.items(), key=lambda item: item[0].count(".")
+        ):
             _relink_to_parent(name, module)
         self._saved_modules = {}
 
