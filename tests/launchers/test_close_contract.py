@@ -81,9 +81,7 @@ def test_guard_tells_the_user_when_the_thread_outlives_the_join(qapp) -> None:
             "src.launchers.build_close_guard.QMessageBox.question",
             return_value=QMessageBox.StandardButton.Yes,
         ),
-        patch(
-            "src.launchers.build_close_guard.QMessageBox.information"
-        ) as information,
+        patch("src.launchers.build_close_guard.QMessageBox.information") as information,
     ):
         assert (
             confirm_cancel_running_build_for_close(
@@ -135,10 +133,7 @@ def test_docker_dialog_close_button_routes_through_close_event() -> None:
     from pathlib import Path
 
     source = (
-        Path(__file__).resolve().parents[2]
-        / "src"
-        / "launchers"
-        / "docker_dialog.py"
+        Path(__file__).resolve().parents[2] / "src" / "launchers" / "docker_dialog.py"
     ).read_text(encoding="utf-8")
 
     assert "close_btn.clicked.connect(self.close)" in source
@@ -149,10 +144,7 @@ def test_settings_dialog_close_button_routes_through_close_event() -> None:
     from pathlib import Path
 
     source = (
-        Path(__file__).resolve().parents[2]
-        / "src"
-        / "launchers"
-        / "settings_dialog.py"
+        Path(__file__).resolve().parents[2] / "src" / "launchers" / "settings_dialog.py"
     ).read_text(encoding="utf-8")
 
     assert "buttons.rejected.connect(self.close)" in source
