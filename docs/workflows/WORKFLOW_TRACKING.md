@@ -42,3 +42,12 @@ Update this document whenever a new workflow is added or the status of an existi
   `src/config/launcher_manifest.json`, the `feature_parity.json` tile
   bindings and the README tile table never drift from the single tile
   registry `src/config/models.yaml` (issue #9412, RM #1507).
+- `ci-standard.yml` job `tests` still refuses a pull request that deletes a
+  Python test file (#7368) — a deletion has to be reviewed, not silent. Since
+  #9412 the review is *recordable*: the guard hands the deleted-path list to
+  `python3 scripts/ci/check_reviewed_test_deletions.py`, which requires an
+  entry in `scripts/config/reviewed_test_deletions.json` naming the
+  replacement test (verified to exist on disk), the tracking issue, and an
+  expiry. A deletion with no entry, an expired entry, or a replacement that
+  does not exist still fails the job. The record lands in the same diff as the
+  deletion, so approving one approves the other (RM #1507).

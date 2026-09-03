@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "reviewed_deletions": [
+    {
+      "path": "tests/config/test_launcher_registry_parity.py",
+      "replacement": "tests/config/test_tile_registry.py",
+      "reason": "Encoded the 21/14 desktop-vs-web divergence as a hard-coded allowlist, which is exactly the two-registry split #8853 exists to remove. Superseded by the tile-registry suite, whose test_both_launchers_see_the_same_tile_set_unless_justified derives parity from src/config/models.yaml instead of restating a frozen difference.",
+      "tracked_in": "https://github.com/D-sorganization/UpstreamDrift/issues/9412",
+      "expires_on": "2027-09-30"
+    }
+  ]
+}
