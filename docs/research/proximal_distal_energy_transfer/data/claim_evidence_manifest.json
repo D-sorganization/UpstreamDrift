@@ -8836,8 +8836,8 @@
       ]
     },
     "tests/research/test_subject_scaled_closed_contact.py": {
-      "sha256": "e5d9dcbef9c0915db89a7bda6f4e42d3301c4218db1dff7fa04bea3bedeae803",
-      "bytes": 5909,
+      "sha256": "d365c6b454518638c927201a03658c9a310d339ca9240106ddae4e27541dd85f",
+      "bytes": 7588,
       "referenced_by": [
         "PD-CLAIM-260",
         "PD-CLAIM-261",

@@ -310,12 +310,15 @@
       ],
       "properties": {
         "requires_python": {
-          "const": ">=3.11"
+          "description": "PEP 440 Python specifier copied verbatim from the provider's pyproject.toml [project].requires-python. Deliberately not a const: the exact value is derived from pyproject at export time and asserted against it by tests/companion/test_companion_catalog.py, so this schema never duplicates the version literal.",
+          "type": "string",
+          "pattern": "^>=\\d+\\.\\d+(,<\\d+\\.\\d+)?$"
         },
         "supported_python_minors": {
           "type": "array",
           "items": {
-            "enum": ["3.11", "3.12"]
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+$"
           },
           "uniqueItems": true
         },

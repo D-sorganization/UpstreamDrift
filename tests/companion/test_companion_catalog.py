@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
+import tomllib
 from pathlib import Path
 
 import jsonschema
@@ -21,6 +23,18 @@ def _catalog_module():
     from scripts import companion_catalog
 
     return companion_catalog
+
+
+def _pyproject_requires_python() -> str:
+    """Read ``[project].requires-python`` from the provider's pyproject.toml."""
+    with (REPO_ROOT / "pyproject.toml").open("rb") as handle:
+        data = tomllib.load(handle)
+    return str(data["project"]["requires-python"])
+
+
+def _requires_python_schema() -> dict:
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    return schema["$defs"]["compatibility"]["properties"]["requires_python"]
 
 
 def test_model_registry_explicit_local_only_ignores_hybrid_environment(
@@ -128,11 +142,72 @@ def test_every_declared_object_schema_is_strict() -> None:
     walk(schema)
 
 
+def test_schema_requires_python_is_not_a_duplicated_version_literal() -> None:
+    """The schema must constrain the shape of ``requires_python``, never its value.
+
+    A ``const`` (or any embedded version literal) makes the schema a second
+    source of truth for the supported Python range, which silently rejects every
+    legitimate ``pyproject.toml`` change.  Guard against re-introducing it.
+    """
+    node = _requires_python_schema()
+
+    assert "const" not in node, (
+        "requires_python must not be a const: the value is derived from "
+        "pyproject.toml [project].requires-python at export time"
+    )
+    assert "enum" not in node
+    assert node["type"] == "string"
+    assert not re.search(r"\d+\.\d+", node["pattern"]), (
+        f"schema pattern {node['pattern']!r} embeds a Python version literal"
+    )
+
+
+def test_schema_accepts_the_live_pyproject_requires_python() -> None:
+    """Whatever ``pyproject.toml`` declares must validate against the schema."""
+    pattern = _requires_python_schema()["pattern"]
+
+    assert re.match(pattern, _pyproject_requires_python()) is not None
+
+
+@pytest.mark.parametrize(
+    "specifier",
+    ["3.11", ">3.11", ">=3", "", ">=3.11,<3.13,!=3.12", ">=3.11, <3.13"],
+)
+def test_schema_rejects_malformed_requires_python(specifier: str) -> None:
+    """The shape constraint still fails closed on non-canonical specifiers."""
+    pattern = _requires_python_schema()["pattern"]
+
+    assert re.match(pattern, specifier) is None
+
+
+def test_catalog_requires_python_is_derived_from_pyproject() -> None:
+    """The exported manifest must copy ``requires-python`` verbatim."""
+    catalog = _catalog_module().build_catalog(REPO_ROOT, require_clean=False)
+
+    assert catalog["compatibility"]["requires_python"] == _pyproject_requires_python()
+
+
+def test_catalog_supported_minors_match_the_pyproject_range() -> None:
+    """The advertised minors must be exactly those the declared range admits."""
+    catalog = _catalog_module().build_catalog(REPO_ROOT, require_clean=False)
+    specifier = _pyproject_requires_python()
+    match = re.fullmatch(r">=3\.(\d+),<3\.(\d+)", specifier)
+
+    assert match is not None, (
+        f"requires-python {specifier!r} is not a bounded 3.x range, so the "
+        "supported minors cannot be derived; widen this test deliberately"
+    )
+    floor, ceiling = int(match.group(1)), int(match.group(2))
+    expected = [f"3.{minor}" for minor in range(floor, ceiling)]
+
+    assert catalog["compatibility"]["supported_python_minors"] == expected
+
+
 def test_catalog_compatibility_contract_is_exact() -> None:
     catalog = _catalog_module().build_catalog(REPO_ROOT, require_clean=False)
 
     assert catalog["compatibility"] == {
-        "requires_python": ">=3.11",
+        "requires_python": _pyproject_requires_python(),
         "supported_python_minors": ["3.11", "3.12"],
         "verification_command": {
             "executable": "python",

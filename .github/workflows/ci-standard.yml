@@ -30,7 +30,11 @@ on:
     - cron: "0 6 * * 1"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # On main the group is per-commit so consecutive merges queue instead of
+  # cancelling each other (main was never verified: every run was cancelled by
+  # the next push). PR/branch refs keep the per-ref group so superseded pushes
+  # still cancel. RM #1507 / #9409.
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
   cancel-in-progress: true
 
 permissions:
