@@ -25,6 +25,10 @@ from src.config.tile_registry import REPO_ROOT, load_tile_registry
 from src.shared.python.ui import tile_help
 from src.shared.python.gui_pkg.help_content import UI_HELP_TOPICS, get_component_help
 
+# Registry/doc assertions and the Qt affordance checks are all fast,
+# in-process and headless-safe, so the whole module is a unit suite.
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="module")
 def registry():
