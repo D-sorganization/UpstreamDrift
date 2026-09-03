@@ -36,5 +36,13 @@ Update this document whenever a new workflow is added or the status of an existi
   merges queue instead of cancelling each other and `main` always finishes a
   run (RM #1507, #9409). `cancel-in-progress: true` stays literal because
   `lint-workflow-files.yml` greps for it.
+- `ci-standard.yml` `tests (3.x)` budget: `timeout-minutes: 150`, measured
+  2026-09-03 from run 33779933815 (RM #1507, UD #9431). The lane runs serially
+  (`-n 0`, since 2026-06-13) with coverage over 40,488 selected tests at
+  ~5.27 tests/s, so a full pass needs ~135 min. The previous 35-minute budget
+  predated the serialisation and killed every `main` run at exactly 35
+  minutes, failing `quality-gate` without reporting any assertion. Re-measure
+  this budget whenever the lane's parallelism or selection changes; per-test
+  hangs are bounded separately by `--timeout=60 --timeout-method=thread`.
 - `nightly-cross-engine.yml` is the repo's dedicated cross-engine lane and is
   the right place to expand stricter native-engine validation over time.
