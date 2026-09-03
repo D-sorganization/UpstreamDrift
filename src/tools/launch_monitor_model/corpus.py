@@ -71,7 +71,7 @@ from typing import Any
 
 import pandas as pd
 
-from src.tools.launch_monitor_model.importer import _convert
+from shared.python.launch_monitor.importer import _convert
 
 MANIFEST_FILENAME = "_MANIFEST.json"
 SUPPORTED_MANIFEST_SCHEMA_VERSION = 1
