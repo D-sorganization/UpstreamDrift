@@ -7,7 +7,7 @@ from math import sqrt
 import numpy as np
 from scipy import stats
 
-from src.shared.python.launch_monitor.strokes_gained_types import (
+from src.tools.launch_monitor_model.strokes_gained_types import (
     ConfidenceIntervalV1,
     EstimateSummaryV1,
     GroupingDimensionV1,

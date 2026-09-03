@@ -7,8 +7,8 @@ from typing import Literal
 
 import pandas as pd
 
-from src.shared.python.launch_monitor._scoring_statistics import estimate_summary
-from src.shared.python.launch_monitor.strokes_gained_types import (
+from src.tools.launch_monitor_model._scoring_statistics import estimate_summary
+from src.tools.launch_monitor_model.strokes_gained_types import (
     ExclusionSummaryV1,
     OutcomeProxyRequestV1,
     OutcomeProxyResultV1,

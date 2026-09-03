@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     CONTRACT_VERSION,
     CONTRACT_VERSION_V2,
     AnalysisContextV2,

@@ -7,7 +7,7 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 
-from src.shared.python.launch_monitor.contract_v2 import (
+from src.tools.launch_monitor_model.contract_v2 import (
     AnalysisContextV2,
     AvailabilityState,
     AvailabilityV2,
@@ -15,11 +15,11 @@ from src.shared.python.launch_monitor.contract_v2 import (
     metric_units_v2,
     vendor_provenance_v2,
 )
-from src.shared.python.launch_monitor.player_covariation_core import (
+from src.tools.launch_monitor_model.player_covariation_core import (
     PairStatistics,
     compute_pair_statistics,
 )
-from src.shared.python.launch_monitor.player_covariation_types import (
+from src.tools.launch_monitor_model.player_covariation_types import (
     CovariationPairRankV1,
     CovariationUncertaintyV1,
     PlayerCovariationContractV1,
@@ -28,7 +28,7 @@ from src.shared.python.launch_monitor.player_covariation_types import (
     PlayerCovariationScanRequestV1,
     PlayerCovariationScanResultV1,
 )
-from src.shared.python.launch_monitor.schema import IDENTITY_COLUMNS
+from src.tools.launch_monitor_model.schema import IDENTITY_COLUMNS
 
 _DEFAULT_SCAN_EXCLUSIONS = frozenset(
     (*IDENTITY_COLUMNS, "source_id", "row_order", "filename", "file_name")

@@ -11,8 +11,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.shared.python.launch_monitor.profiles import PROFILES, detect_profile
-from src.shared.python.launch_monitor.schema import (
+from src.tools.launch_monitor_model.profiles import PROFILES, detect_profile
+from src.tools.launch_monitor_model.schema import (
     IDENTITY_COLUMNS,
     METRICS,
     ColumnMapping,

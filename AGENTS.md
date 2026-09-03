@@ -320,7 +320,7 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 
 ### Launch Monitor Analytics
 
-`src/shared/python/launch_monitor/` is the canonical vendor-neutral shot-data
+`src/tools/launch_monitor_model/` is the canonical vendor-neutral shot-data
 stack. Use it for TrackMan, Foresight, FlightScope, Garmin, SkyTrak, Uneekor,
 Full Swing, Rapsodo, GSPro/Open Connect, or generic tabular imports instead of
 adding a one-off CSV reader.
