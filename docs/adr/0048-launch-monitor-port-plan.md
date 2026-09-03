@@ -534,13 +534,10 @@ lands first and the twin is a tracked follow-up. Whichever is chosen belongs in
 ADR-0046's Consequences, because it changes the size of Stage 1 by more than the
 port itself.
 
-**Owner ruling (2026-09-02):** deferred-twin policy. The Python module lands
-first in the Tools canonical layer and stands alone; the TypeScript twin is a
-tracked follow-up rather than a landing prerequisite, prioritized when a web
-surface actually needs that module (Stage 2's re-pointing of the UD workbench
-and the Impact Explorer tab is what reveals which). Recorded in
-[ADR-0046's Consequences](0046-launch-monitor-analytics-single-model-layer.md#consequences)
-(2026-09-02).
+**Owner ruling (2026-09-02):** deferred-twin — the Python module lands
+first and stands alone; the TS twin is a tracked follow-up, prioritized
+when a web surface (Stage 2 re-pointing) needs it. Recorded in
+[ADR-0046's Consequences](0046-launch-monitor-analytics-single-model-layer.md#consequences).
 
 ### Tools' Stated Architecture Contradicts Hosting the Canonical Inferential Layer
 
