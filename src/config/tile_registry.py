@@ -340,16 +340,7 @@ def _parse_web(
     return web
 
 
-def _parse_tile(entry: Mapping[str, Any], *, source: str) -> TileRecord:
-    if not isinstance(entry, Mapping):
-        raise TileRegistryError(
-            f"{source} entries must be mappings, got {type(entry).__name__}"
-        )
-    tile_id = entry.get("id")
-    if not isinstance(tile_id, str) or not tile_id.strip():
-        raise TileRegistryError(f"{source} entry without a non-empty 'id': {entry!r}")
-    tile_id = tile_id.strip()
-
+def _parse_launcher(entry: Mapping[str, Any], tile_id: str) -> Mapping[str, Any]:
     launcher = entry.get("launcher")
     if not isinstance(launcher, Mapping):
         raise TileRegistryError(f"tile {tile_id!r}: missing 'launcher' block")
@@ -358,12 +349,12 @@ def _parse_tile(entry: Mapping[str, Any], *, source: str) -> TileRecord:
             raise TileRegistryError(
                 f"tile {tile_id!r}: launcher.{key} must be a non-empty string"
             )
+    return launcher
 
-    maturity = entry.get("maturity")
-    if maturity not in MATURITY_LEVELS:
-        raise TileRegistryError(
-            f"tile {tile_id!r}: maturity must be one of {sorted(MATURITY_LEVELS)}, got {maturity!r}"
-        )
+
+def _parse_surfaces(
+    entry: Mapping[str, Any], tile_id: str, *, source: str
+) -> tuple[tuple[str, ...], str | None]:
     surfaces = _string_tuple(entry, "surfaces", tile_id)
     if not surfaces:
         raise TileRegistryError(
@@ -377,35 +368,39 @@ def _parse_tile(entry: Mapping[str, Any], *, source: str) -> TileRecord:
     surface_reason = _string(entry, "surface_reason", tile_id, required=False)
     if set(surfaces) != set(SURFACES) and not surface_reason:
         raise TileRegistryError(
-            f"tile {tile_id!r}: surfaces {list(surfaces)} omit a surface; 'surface_reason' is required"
+            f"tile {tile_id!r}: surfaces {list(surfaces)} omit a surface; "
+            "'surface_reason' is required"
         )
     if source == "web_catalog" and "pyqt" in surfaces:
         raise TileRegistryError(
             f"tile {tile_id!r}: web_catalog entries cannot declare the pyqt surface"
         )
+    return surfaces, surface_reason
 
+
+def _parse_hidden(
+    entry: Mapping[str, Any], tile_id: str, maturity: str
+) -> tuple[bool, str | None, str | None]:
     hidden = bool(entry.get("hidden", False))
     if hidden != (maturity == "hidden"):
         raise TileRegistryError(
             f"tile {tile_id!r}: 'hidden: true' and 'maturity: hidden' must agree "
             f"(hidden={hidden}, maturity={maturity!r})"
         )
-    hidden_reason = _string(entry, "hidden_reason", tile_id, required=hidden)
-    hidden_owner = _string(entry, "hidden_owner", tile_id, required=hidden)
+    return (
+        hidden,
+        _string(entry, "hidden_reason", tile_id, required=hidden),
+        _string(entry, "hidden_owner", tile_id, required=hidden),
+    )
 
-    order = entry.get("order")
-    if not isinstance(order, int) or isinstance(order, bool) or order < 0:
-        raise TileRegistryError(
-            f"tile {tile_id!r}: 'order' must be a non-negative integer"
-        )
 
-    if "feature_id" not in entry or "help" not in entry:
-        raise TileRegistryError(
-            f"tile {tile_id!r}: 'feature_id' and 'help' must be declared (null allowed)"
-        )
-    help_path = _string(entry, "help", tile_id, required=False)
-    feature_id = _string(entry, "feature_id", tile_id, required=False)
-
+def _parse_launch_target(
+    entry: Mapping[str, Any],
+    tile_id: str,
+    *,
+    source: str,
+    launcher: Mapping[str, Any],
+) -> tuple[str, str | None, dict[str, str]]:
     path = _string(entry, "path", tile_id, required=False) or ""
     entry_type = _string(entry, "type", tile_id, required=True) or ""
     if not path and entry_type in METADATA_ONLY_TYPES:
@@ -415,14 +410,48 @@ def _parse_tile(entry: Mapping[str, Any], *, source: str) -> TileRecord:
         path = f"virtual/{entry_type}/{tile_id}"
     if source == "models" and not path:
         raise TileRegistryError(f"tile {tile_id!r}: native tiles need a non-empty path")
+    launcher_route = launcher.get("web_route")
     web_route = _string(entry, "web_route", tile_id, required=False) or (
-        launcher.get("web_route").strip()
-        if isinstance(launcher.get("web_route"), str)
-        else None
+        launcher_route.strip() if isinstance(launcher_route, str) else None
     )
     web = _parse_web(entry, tile_id, path=path, web_route=web_route)
     if web["mode"] == "route" and not web_route:
         web_route = web["route"]
+    return path, web_route, web
+
+
+def _parse_tile(entry: Mapping[str, Any], *, source: str) -> TileRecord:
+    if not isinstance(entry, Mapping):
+        raise TileRegistryError(
+            f"{source} entries must be mappings, got {type(entry).__name__}"
+        )
+    tile_id = entry.get("id")
+    if not isinstance(tile_id, str) or not tile_id.strip():
+        raise TileRegistryError(f"{source} entry without a non-empty 'id': {entry!r}")
+    tile_id = tile_id.strip()
+    launcher = _parse_launcher(entry, tile_id)
+
+    maturity = entry.get("maturity")
+    if maturity not in MATURITY_LEVELS:
+        raise TileRegistryError(
+            f"tile {tile_id!r}: maturity must be one of {sorted(MATURITY_LEVELS)}, "
+            f"got {maturity!r}"
+        )
+    surfaces, surface_reason = _parse_surfaces(entry, tile_id, source=source)
+    hidden, hidden_reason, hidden_owner = _parse_hidden(entry, tile_id, str(maturity))
+
+    order = entry.get("order")
+    if not isinstance(order, int) or isinstance(order, bool) or order < 0:
+        raise TileRegistryError(
+            f"tile {tile_id!r}: 'order' must be a non-negative integer"
+        )
+    if "feature_id" not in entry or "help" not in entry:
+        raise TileRegistryError(
+            f"tile {tile_id!r}: 'feature_id' and 'help' must be declared (null allowed)"
+        )
+    path, web_route, web = _parse_launch_target(
+        entry, tile_id, source=source, launcher=launcher
+    )
 
     return TileRecord(
         id=tile_id,
@@ -438,8 +467,8 @@ def _parse_tile(entry: Mapping[str, Any], *, source: str) -> TileRecord:
         surfaces=surfaces,
         web=web,
         source=source,
-        help=help_path,
-        feature_id=feature_id,
+        help=_string(entry, "help", tile_id, required=False),
+        feature_id=_string(entry, "feature_id", tile_id, required=False),
         surface_reason=surface_reason,
         maturity_reason=_string(entry, "maturity_reason", tile_id, required=False),
         web_route=web_route,
