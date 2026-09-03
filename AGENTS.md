@@ -833,6 +833,39 @@ Fleet-wide policy from `Repository_Management#1390`:
 
 ---
 
+<!-- BEGIN FLEET-MANAGED: spec-changelog-rows -->
+
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/AGENTS.md.
+
+### Change-log rows are keyed by pull request
+
+Binding fleet-wide from
+[Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520)
+(program [#1505](https://github.com/D-sorganization/Repository_Management/issues/1505)):
+
+- A substantive pull request adds **exactly one** row to the SPEC.md change
+  log: `| YYYY-MM-DD | #<your PR or issue> | one-line summary |`.
+- **Never put a serial spec version in a row**, and **never bump the
+  `Spec Version` field**. That field is release-derived — set by
+  `scripts/bump_spec_version.py` when a release is cut.
+- **Never renumber, reorder, or reword another contributor's row**, including
+  while resolving a rebase. If a rebase conflicts inside the table, keep both
+  rows; that is always the correct resolution.
+- Register the merge driver once per clone so git resolves it for you:
+  `python scripts/install_spec_merge_driver.py`.
+- Verify locally with `python shared_scripts/fleet_hooks.py spec-changelog`.
+
+Rationale: a serial version plus a header field that must match it are global
+counters. Two concurrent pull requests necessarily choose the same next value
+and necessarily edit the same two lines, so every second merge conflicted and
+the only resolution was a mechanical renumber — twelve of them in one day
+across four repositories. A pull request number cannot collide.
+
+<!-- END FLEET-MANAGED: spec-changelog-rows -->
+
+---
+
 <!-- BEGIN FLEET-MANAGED: repo-context-codemap -->
 
 ## 🧭 Repo Context & Codemap Freshness

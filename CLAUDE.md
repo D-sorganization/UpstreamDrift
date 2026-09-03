@@ -256,6 +256,31 @@ When implementing an issue:
 - Run the tests locally before pushing; don't rely on CI to find basic breakage
 - If you can't fully implement, leave the issue open and post a status comment instead of closing
 
+## SPEC.md change-log rows are keyed by pull request
+
+Since [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520)
+a Section 12 row is `| YYYY-MM-DD | #<your PR or issue> | one-line summary |`.
+
+- Add **exactly one** row, for your own pull request, at the top of the table.
+- **Never** put a serial spec version in a row and **never** bump the
+  `Spec Version` field. (`Current Version` is the release field and is guarded
+  separately by `scripts/ci/check_version_consistency.py` — do not confuse the
+  two.)
+- **Never** renumber, reorder, or reword another contributor's row, including
+  while resolving a rebase. If a rebase conflicts inside the table, keep both
+  rows; that is always the correct resolution.
+- Verify with `python3 scripts/ci/check_spec_changelog_duplicates.py`.
+- Optional, per clone: `python3 scripts/install_spec_merge_driver.py` registers
+  a merge driver that resolves table conflicts by keeping both rows.
+
+Why: a serial version is a global counter, so two concurrent pull requests
+always claimed the same next value and edited the same line. Every second merge
+conflicted and the only resolution was a mechanical renumber — this repository's
+own change log contains entries whose entire content is a record of doing that.
+A pull request number cannot collide.
+
+The binding fleet text is the `spec-changelog-rows` block in `AGENTS.md`.
+
 ## Hook bypass policy
 
 **Never use `git commit --no-verify` or `git push --no-verify` unless the hook itself is broken** (tooling not installed, hook script crashes). It is _not_ an acceptable workaround for a hook that flags real issues.
