@@ -96,8 +96,7 @@ Files and locations inspected: `src/config/launcher_manifest.json`,
 `assets/logos/rate_of_closure.svg`, and the Tools provider checkout at
 `../Tools/src/`.
 
-## See also
-
+## See Also
 - [ADR-0045: Putting Integration - One Experience, Two Preserved Physics Stacks](../adr/0045-putting-integration-one-experience-two-preserved-stacks.md)
 - [ADR-0004: Launcher Provider Migration](../adr/0004-launcher-provider-migration.md)
 - [Putting Green](putting_green.md) - the other preserved putting stack

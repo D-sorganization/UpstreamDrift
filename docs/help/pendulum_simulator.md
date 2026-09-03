@@ -122,8 +122,7 @@ double-pendulum parameterisation are analysed in
 - Matplotlib is needed for the analysis plots; without it that panel degrades
   to a placeholder while the simulation still runs.
 
-## See also
-
+## See Also
 - [Pendulum Models](../engines/pendulum.md)
 - [Double Pendulum Identifiability](../research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md)
 - [Swing Objective Lab](swing_objective_lab.md) - optimises this model class against competing objectives

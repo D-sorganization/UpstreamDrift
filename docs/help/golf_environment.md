@@ -83,8 +83,7 @@ caller supplies them.
 - `pyqtgraph` is required. Without it the tile shows a single line of text
   saying so and renders nothing.
 
-## See also
-
+## See Also
 - [Terrain Engine](terrain_engine.md) - real surface geometry and material queries
 - [Ball Flight Simulator](ball_flight_simulator.md) - produces trajectories worth overlaying
 - [Shot Tracer](shot_tracer.md)

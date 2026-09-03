@@ -111,8 +111,7 @@ Turf and stimpmeter references, with provenance classes, are collected in
 - Without `pyqtgraph` and OpenGL the 3D scene is absent; the metrics panel
   still computes.
 
-## See also
-
+## See Also
 - [ADR-0045: Putting Integration - One Experience, Two Preserved Physics Stacks](../adr/0045-putting-integration-one-experience-two-preserved-stacks.md)
 - [Putting Kinematics and Kinetics - Public-Data Review](../physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md)
 - [Terrain Engine](terrain_engine.md) - surface presets and material queries

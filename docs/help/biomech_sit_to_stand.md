@@ -92,8 +92,7 @@ The template's Outputs section cannot be completed from this repository.
   as "standardized", but no cross-engine parity contract or test for this
   exercise was found in this checkout.
 
-## See also
-
+## See Also
 - [Exercise Dashboard](biomech_exercise.md)
 - [Gait Model](biomech_gait.md)
 - [Biomechanics workspace architecture](../architecture/biomech_workspace.md)

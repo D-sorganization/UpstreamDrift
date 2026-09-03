@@ -120,8 +120,7 @@ widget to the launcher.
   `__main__.py`, and `_embed_adapter.py` are "deferred to a follow-up
   PR". All three now exist. Treat this page as current.
 
-## See also
-
+## See Also
 - [Training Controller package README](../../src/tools/training_controller/README.md)
   (stale in the way noted above)
 - [Dataset Generator](dataset_generator.md) - produces the datasets jobs consume

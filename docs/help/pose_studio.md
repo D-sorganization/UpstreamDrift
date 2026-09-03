@@ -81,8 +81,7 @@ and does not change any value you see.
   editor.
 - The tile is registered at maturity `beta`.
 
-## See also
-
+## See Also
 - [Pose Studio README](../../src/tools/pose_studio/README.md)
 - [Motion-Match Preview](motion_target_preview.md) - consumes the canonical pose as a starting-pose seed
 - [Motion matching](../motion_matching/README.md)

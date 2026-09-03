@@ -143,8 +143,7 @@ Files inspected: `src/api/routes/swing_objectives.py`,
 `src/shared/python/optimization/_swing_objectives.py`,
 `src/config/launcher_manifest.json`.
 
-## See also
-
+## See Also
 - [Pendulum Simulator](pendulum_simulator.md) - the model class being optimised
 - [Pendulum Models](../engines/pendulum.md)
 - [ADR-0004: Launcher Provider Migration](../adr/0004-launcher-provider-migration.md)

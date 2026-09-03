@@ -130,8 +130,7 @@ and squat, full-squat, deadlift, bench-press configurations), `exercises/`
   beside this one, the tile resolves as unavailable on this machine even though
   a vendored copy of the package exists in `src/shared/python/`.
 
-## See also
-
+## See Also
 - [Exercise Dashboard](biomech_exercise.md)
 - [Analysis Tools calculation sheet](analysis_tools_api.md)
 - [Biomechanics workspace architecture](../architecture/biomech_workspace.md)

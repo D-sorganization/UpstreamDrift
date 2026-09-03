@@ -99,8 +99,7 @@ Files examined: `src/config/models.yaml` (tile entry, read only),
 matches only in registry data, generated artifacts, docs, and test
 allow-lists - never in implementation code.
 
-## See also
-
+## See Also
 - [Data Processor](data_processor.md) - shares this tile's entry point
 - [Data Explorer](data_explorer.md)
 - [Feature parity matrix](../development/feature_parity_matrix.md)

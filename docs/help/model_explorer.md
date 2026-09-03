@@ -78,8 +78,7 @@ URDF/MJCF file into a node tree
   progress" although `visualization_widget.py` and `mujoco_viewer.py`
   are present. Treat this page, not that README, as current.
 
-## See also
-
+## See Also
 - [Model Explorer package README](../../src/tools/model_explorer/README.md)
   (stale in the ways noted above)
 - [Attachment manifests](../model_explorer/attachment-manifests.md)

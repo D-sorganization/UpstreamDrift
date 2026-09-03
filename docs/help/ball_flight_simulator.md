@@ -85,8 +85,7 @@ the mapping from that literature to specific modules is in
 - Without `pyqtgraph` and OpenGL the 3D pane is simply absent; the numeric
   results still compute.
 
-## See also
-
+## See Also
 - [Simulation Controls](simulation_controls.md)
 - [Visualization Settings](visualization.md)
 - [Shot Tracer](shot_tracer.md) - the same flight question across several models

@@ -128,8 +128,7 @@ converters, library) and `src/shared/python/humanoid_character_builder`
 - No simulation happens here. Character Builder produces model files; loading,
   running and validating them is the physics engines' job.
 
-## See also
-
+## See Also
 - [Character Builder quickstart](../user_guide/character_builder_quickstart.md)
 - [Anthropometrics user guide](../user_guide/anthropometrics.md)
 - [Character presets reference](../user_guide/character_presets.md)

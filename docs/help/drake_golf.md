@@ -90,8 +90,7 @@ The engine adapter used elsewhere in the suite is `DrakePhysicsEngine` in
   back to a stub that returns `(None, None, None)` and the tile builds an empty
   finalised plant instead of a golfer.
 
-## See also
-
+## See Also
 - [Drake engine reference](../engines/drake.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)
 - [Engine support tiers](../engines/support_tiers.md)

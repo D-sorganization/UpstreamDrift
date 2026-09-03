@@ -98,8 +98,7 @@ The template's Outputs section cannot be completed from this repository.
   contains `phase_detection.py` for swing phases; no gait-cycle equivalent was
   found.
 
-## See also
-
+## See Also
 - [Exercise Dashboard](biomech_exercise.md)
 - [Sit-to-Stand Model](biomech_sit_to_stand.md)
 - [ZMP and gait scope audit](../architecture/zmp_gait_scope.md)

@@ -77,8 +77,7 @@ capability list for this tile is declared in `src/config/models.yaml` under
 - Model fidelity is whatever the built-in MJCF declares. Nothing here validates
   a model's segment masses or inertias against a real golfer.
 
-## See also
-
+## See Also
 - [MuJoCo engine reference](../engines/mujoco.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)
 - [Engine support tiers](../engines/support_tiers.md)

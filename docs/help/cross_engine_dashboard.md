@@ -89,8 +89,7 @@ path for CI, and the GUI path also falls back to headless when PyQt6 is absent.
   that, use the cross-validation in the
   [Simulation Backends tile](simulation_backends.md).
 
-## See also
-
+## See Also
 - [Simulation Backends tile](simulation_backends.md)
 - [Cross-engine comparison reports](../simulation_backends/cross_engine_comparison.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)

@@ -65,8 +65,7 @@ declares `/api/analysis`.
 
 ## Method
 
-### Energy analysis
-
+### Energy Analysis
 **Kinetic energy.** The API computes, per sample,
 
 $$T = \tfrac{1}{2}\, v^{\mathsf T} M(q)\, v \quad [\mathrm{J}]$$
@@ -131,8 +130,7 @@ energy accounting in the analysis package; inter-segmental power flow is listed
 as a planned enhancement in the docstring of
 `src/shared/python/biomechanics/kinematic_sequence.py`.
 
-### Kinematic sequence
-
+### Kinematic Sequence
 `SegmentTimingAnalyzer.analyze(segment_velocities, times)`
 (`src/shared/python/biomechanics/kinematic_sequence.py`;
 `KinematicSequenceAnalyzer` and `KinematicSequenceResult` are
@@ -182,8 +180,7 @@ interchangeable.
 
 Neither variant is exposed by the analysis endpoints; both are library calls.
 
-### Jacobian analysis
-
+### Jacobian Analysis
 **End-effector velocity mapping.** For a body Jacobian $J(q)$,
 
 $$\dot x = J(q)\, v$$
@@ -230,8 +227,7 @@ singular-value spectrum and `is_near_singular` at the first threshold, over the
 golf task points `clubhead`, `grip`, `left_hand`, `right_hand` and
 `shaft_mid`.
 
-### Statistics, export and measurement
-
+### Statistics, Export and Measurement
 `/analysis/metrics` appends each snapshot to a bounded in-memory buffer
 (`max_history = 500`, oldest dropped). `/analysis/statistics` scans that buffer
 for scalar, non-NaN keys and reports per key the minimum, maximum, mean and
@@ -254,8 +250,7 @@ control generalized force, from caller-supplied arrays
 `/analysis/tools/contraction/estimate` estimates a local contraction rate from
 nearby deterministic rollouts (`src/tools/contraction/verifier.py`).
 
-## Method citations
-
+## Method Citations
 `src/shared/python/analysis/dataclasses.py` defines a frozen `MethodCitation`
 dataclass (`name`, `authors`, `year`, `title`, `doi`, `notes`) and four
 pre-defined citations. They are attached to analysis results as a `methodology`
@@ -322,8 +317,7 @@ here.
   `src/shared/python/analysis/dataclasses.py` compare two engines and are not
   called by any endpoint here.
 
-## See also
-
+## See Also
 - [Analysis Tools narrative guide](analysis_tools.md)
 - [Simulation Controls](simulation_controls.md)
 - [Engine Selection](engine_selection.md)

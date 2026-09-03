@@ -84,8 +84,7 @@ prints an install hint on `ImportError`. The tile's own reference document is
   PyQt6 plus the matplotlib QtAgg backend. Without them the module entry point
   writes an install hint to stderr and exits non-zero.
 
-## See also
-
+## See Also
 - [Simulation backends overview](../simulation_backends/README.md)
 - [Simulation backends user guide](../simulation_backends/USER_GUIDE.md)
 - [Cross-engine comparison reports](../simulation_backends/cross_engine_comparison.md)

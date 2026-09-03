@@ -85,8 +85,7 @@ ingestion format (2D only, BODY_25 or COCO_18 JSON) is in the
   UpstreamDrift, and the tile is registered as *Academic License*.
   Without them the run fails with an install hint.
 
-## See also
-
+## See Also
 - [OpenPose integration](../engines/openpose.md)
 - [Video analysis tutorial](../tutorials/content/04_video_analysis.md)
 - [Motion pipeline format matrix](../motion_pipeline/formats.md)

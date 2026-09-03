@@ -94,8 +94,7 @@ notes and issue history are in its
   polish (#4481), input-MAT editor (#4366), layer-visibility
   refinements (#4486).
 
-## See also
-
+## See Also
 - [Starting-Pose Matcher README](../../src/tools/starting_pose_matcher/README.md)
 - [Motion matching](../motion_matching/README.md)
 - [Surrogate training guide](../motion_matching/SURROGATE_TRAINING_GUIDE.md)

@@ -80,8 +80,7 @@ C3D's place in the wider ingestion story is described in the
   naming metres explicitly.
 - Requires `ezc3d`. Without it, loading fails.
 
-## See also
-
+## See Also
 - [Motion pipeline format matrix](../motion_pipeline/formats.md)
 - [Motion pipeline workflow guide](../motion_pipeline/README.md)
 - [Motion pipeline troubleshooting](../motion_pipeline/troubleshooting.md) - start here for millimetre-versus-metre and occlusion symptoms

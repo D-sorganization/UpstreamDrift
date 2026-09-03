@@ -90,8 +90,7 @@ and per-material coefficients are all defined by those modules.
   remain on screen next to an error message. Check the message before trusting
   the numbers.
 
-## See also
-
+## See Also
 - [Putting Green](putting_green.md) - the roll simulation that consumes a green surface
 - [Golf Environment](golf_environment.md) - the 3D range and hole viewer
 - [Simulation Controls](simulation_controls.md)

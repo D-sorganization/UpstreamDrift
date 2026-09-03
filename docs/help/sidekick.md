@@ -83,7 +83,6 @@ conversation state cheaply and holds no scarce GPU resource.
   `sidekick_action_service`; embedded in a host that does not, the
   assistant is conversation-only.
 
-## See also
-
+## See Also
 - [AI Assistant](chat_assistant.md) - the web equivalent of this tile
 - [Vendored Tools repository notes](../../vendor/README.md)

@@ -86,8 +86,7 @@ The engine adapter used elsewhere in the suite is `OpenSimPhysicsEngine` - see
 - No recording/export surface and no live 3D viewport: output is the four
   matplotlib panels only.
 
-## See also
-
+## See Also
 - [OpenSim engine reference](../engines/opensim.md)
 - [Engine capabilities matrix](../engines/engine_capabilities.md)
 - [Engine support tiers](../engines/support_tiers.md)
