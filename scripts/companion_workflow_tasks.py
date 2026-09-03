@@ -182,7 +182,7 @@ def _reference_analysis(root: Path, output: Path) -> int:
 
 
 def _launch_monitor_roundtrip(root: Path, output: Path, csv_output: Path) -> int:
-    from src.shared.python.launch_monitor import import_session
+    from src.tools.launch_monitor_model import import_session
 
     fixture = root / "tests/fixtures/launch_monitor/trackman.csv"
     session = import_session(fixture)

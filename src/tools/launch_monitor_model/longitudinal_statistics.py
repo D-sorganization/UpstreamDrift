@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from src.shared.python.launch_monitor.longitudinal_types import (
+from src.tools.launch_monitor_model.longitudinal_types import (
     LongitudinalPlayerAssociationV1,
     LongitudinalSessionRequestV1,
     PooledAssociationV1,

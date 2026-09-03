@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 
 from scripts.generate_launch_monitor_contract import player_covariation_golden_fixture
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     CONTRACT_VERSION,
     CONTRACT_VERSION_V2,
     PLAYER_COVARIATION_CONTRACT_VERSION,
