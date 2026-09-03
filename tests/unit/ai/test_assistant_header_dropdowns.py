@@ -1,257 +1,183 @@
-"""Tests for the AI Assistant header UI.
+"""Tests for the AI Assistant header's provider/model dropdowns.
 
-Tests the Python-level behavior of the header helper methods extracted into
-the _MockPanel test double:
-- _get_models_for_provider() returns ChatModelInfo lists per provider
-- _get_thinking_capabilities_for_model() returns ThinkingCapabilities
-- _on_provider_changed() calls _model_combo.clear()
-- _on_model_changed() calls _thinking_combo.setEnabled()
+These exercise the **production** helpers in
+``src.shared.python.ai.gui._provider_registry_data`` -- ``PROVIDER_INFO`` and
+the ``populate_*``/``provider_*`` functions that ``_panel_header.AIPanelHeader``
+actually calls -- plus the post-split panel attributes.
 
-Also verifies that a constructed AIAssistantPanel (from the post-split
-assistant sub-package) exposes the expected header attributes.
+History (#9474): this file used to define a ``_MockPanel`` test double that
+**copied** ``_get_models_for_provider`` and ``_get_thinking_capabilities_for_model``
+out of ``AIAssistantPanel``, with a comment reading "Methods copied from
+AIAssistantPanel (must stay in sync)". They did not stay in sync. The panel was
+split in #5493 and both methods were deleted from production; the copies lived
+on, importing ``ChatModelInfo``/``ThinkingCapabilities`` from
+``src.shared.python.ai.types``, where neither name has ever existed. All sixteen
+tests raised ImportError, so the file asserted nothing about the product for
+months -- it tested its own copy, and then stopped even doing that.
 
-These tests use a lightweight mock panel object to avoid Qt widget construction
-issues in headless/mocked environments.
+The duplication is removed rather than repaired: every assertion below runs
+against the single source of truth, so the drift that caused this cannot recur.
+No coverage is lost -- ``thinking_capabilities()`` is covered per adapter in
+``tests/unit/ai/test_adapter_capabilities.py``, which is where the behaviour
+now lives.
 """
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
 
-class _MockPanel:
-    """Minimal stand-in for AIAssistantPanel exposing only the new methods.
+from src.shared.python.ai.gui._provider_registry_data import (
+    PROVIDER_INFO,
+    AIProvider,
+    populate_model_combo,
+    populate_provider_combo,
+    provider_default_model,
+    provider_display_name,
+    provider_model_names,
+)
 
-    This avoids full Qt widget construction while testing the pure-Python
-    business logic added to AIAssistantPanel.
+
+class _FakeCombo:
+    """Minimal stand-in for the QComboBox subset the populate helpers use.
+
+    Using a fake rather than a real widget keeps these tests headless and
+    Qt-free; the subject under test is the production function, not the widget.
     """
 
     def __init__(self) -> None:
-        # Mock the combo attributes that the methods access
-        self._provider_combo = MagicMock()
-        self._model_combo = MagicMock()
-        self._thinking_combo = MagicMock()
-        self._model_combo.blockSignals = MagicMock()
-        self._model_combo.clear = MagicMock()
-        self._model_combo.addItem = MagicMock()
-        self._model_combo.currentData = MagicMock(return_value=None)
-        self._thinking_combo.setEnabled = MagicMock()
+        self.items: list[tuple[str, object]] = []
+        self.current_index = -1
+        self.clear_calls = 0
 
-    # -- Methods copied from AIAssistantPanel (must stay in sync) --
+    def clear(self) -> None:
+        self.clear_calls += 1
+        self.items = []
+        self.current_index = -1
 
-    def _get_models_for_provider(self, provider_label: str) -> list:
-        from src.shared.python.ai.types import ChatModelInfo
+    def addItem(self, text: str, data: object = None) -> None:  # noqa: N802
+        self.items.append((text, data))
 
-        _static: dict = {
-            "Ollama": [
-                ChatModelInfo("llama3.1:8b"),
-                ChatModelInfo("llama3.1:70b"),
-                ChatModelInfo("mistral"),
-                ChatModelInfo("codellama"),
-                ChatModelInfo("deepseek-coder"),
-                ChatModelInfo("phi3"),
-            ],
-            "OpenAI": [
-                ChatModelInfo("gpt-4o", "GPT-4o"),
-                ChatModelInfo("gpt-4o-mini", "GPT-4o Mini"),
-                ChatModelInfo("gpt-4-turbo", "GPT-4 Turbo"),
-                ChatModelInfo("o1", "o1"),
-                ChatModelInfo("o3-mini", "o3-mini"),
-            ],
-            "Anthropic": [
-                ChatModelInfo("claude-sonnet-4-6", "Claude Sonnet 4.6"),
-                ChatModelInfo("claude-3-5-sonnet-20241022", "Claude 3.5 Sonnet"),
-                ChatModelInfo("claude-3-5-haiku-20241022", "Claude 3.5 Haiku"),
-                ChatModelInfo("claude-3-opus-20240229", "Claude 3 Opus"),
-            ],
-            "Gemini": [
-                ChatModelInfo("gemini-2.0-flash", "Gemini 2.0 Flash"),
-                ChatModelInfo("gemini-1.5-pro", "Gemini 1.5 Pro"),
-                ChatModelInfo("gemini-1.5-flash", "Gemini 1.5 Flash"),
-            ],
-        }
-        return _static.get(provider_label, [])
+    def findText(self, text: str) -> int:  # noqa: N802
+        for index, (label, _data) in enumerate(self.items):
+            if label == text:
+                return index
+        return -1
 
-    def _get_thinking_capabilities_for_model(self, model_id: str):
-        from src.shared.python.ai.types import ThinkingCapabilities, ThinkingLevel
+    def count(self) -> int:
+        return len(self.items)
 
-        _thinking_models = {
-            "claude-sonnet-4-6",
-            "claude-3-5-sonnet-20241022",
-            "claude-3-5-sonnet-20240620",
-            "gemini-2.0-flash",
-            "gemini-1.5-pro",
-            "o1",
-            "o3-mini",
-            "o3",
-        }
-        supports = any(m in model_id for m in _thinking_models)
-        if supports:
-            return ThinkingCapabilities(
-                supports_levels=True,
-                available_levels=[
-                    ThinkingLevel.OFF,
-                    ThinkingLevel.LOW,
-                    ThinkingLevel.MEDIUM,
-                    ThinkingLevel.HIGH,
-                ],
-            )
-        return ThinkingCapabilities(
-            supports_levels=False,
-            available_levels=[ThinkingLevel.OFF],
+    def setCurrentIndex(self, index: int) -> None:  # noqa: N802
+        self.current_index = index
+
+    def currentText(self) -> str:  # noqa: N802
+        if 0 <= self.current_index < len(self.items):
+            return self.items[self.current_index][0]
+        return ""
+
+
+ALL_PROVIDERS = list(AIProvider)
+
+
+class TestProviderRegistry:
+    """``PROVIDER_INFO`` must describe every provider completely."""
+
+    @pytest.mark.parametrize("provider", ALL_PROVIDERS)
+    def test_every_provider_has_a_nonempty_model_catalogue(
+        self, provider: AIProvider
+    ) -> None:
+        models = provider_model_names(provider)
+
+        assert models, f"{provider.name} has no models"
+        assert all(isinstance(name, str) and name.strip() for name in models)
+
+    @pytest.mark.parametrize("provider", ALL_PROVIDERS)
+    def test_default_model_is_one_of_the_listed_models(
+        self, provider: AIProvider
+    ) -> None:
+        """The default must be selectable, or the dropdown opens on the wrong row."""
+        assert provider_default_model(provider) in provider_model_names(provider)
+
+    @pytest.mark.parametrize("provider", ALL_PROVIDERS)
+    def test_every_provider_has_a_display_name(self, provider: AIProvider) -> None:
+        assert provider_display_name(provider).strip()
+
+    def test_registry_covers_the_whole_enum(self) -> None:
+        """A new ``AIProvider`` member without registry data must fail here."""
+        assert set(PROVIDER_INFO) == set(AIProvider)
+
+
+class TestPopulateProviderCombo:
+    """``populate_provider_combo`` fills a combo from the registry."""
+
+    def test_adds_one_entry_per_provider_carrying_the_enum_member(self) -> None:
+        combo = _FakeCombo()
+
+        populate_provider_combo(combo)
+
+        assert [label for label, _ in combo.items] == [
+            provider_display_name(p) for p in AIProvider
+        ]
+        assert [data for _, data in combo.items] == list(AIProvider)
+
+    def test_clears_before_populating(self) -> None:
+        combo = _FakeCombo()
+        combo.addItem("stale", None)
+
+        populate_provider_combo(combo)
+
+        assert combo.clear_calls == 1
+        assert ("stale", None) not in combo.items
+
+
+class TestPopulateModelCombo:
+    """``populate_model_combo`` is what the header calls on provider change."""
+
+    @pytest.mark.parametrize("provider", ALL_PROVIDERS)
+    def test_lists_exactly_the_registry_models(self, provider: AIProvider) -> None:
+        combo = _FakeCombo()
+
+        populate_model_combo(combo, provider)
+
+        assert [label for label, _ in combo.items] == provider_model_names(provider)
+
+    @pytest.mark.parametrize("provider", ALL_PROVIDERS)
+    def test_selects_the_default_model_when_none_requested(
+        self, provider: AIProvider
+    ) -> None:
+        combo = _FakeCombo()
+
+        populate_model_combo(combo, provider)
+
+        assert combo.currentText() == provider_default_model(provider)
+
+    def test_keeps_a_still_valid_selection_across_repopulation(self) -> None:
+        combo = _FakeCombo()
+        keep = provider_model_names(AIProvider.ANTHROPIC)[-1]
+
+        populate_model_combo(combo, AIProvider.ANTHROPIC, keep)
+
+        assert combo.currentText() == keep
+
+    def test_falls_back_to_the_default_for_a_foreign_selection(self) -> None:
+        """Switching providers must not leave the previous provider's model."""
+        combo = _FakeCombo()
+
+        populate_model_combo(combo, AIProvider.OLLAMA, "gpt-4o")
+
+        assert combo.currentText() == provider_default_model(AIProvider.OLLAMA)
+
+    def test_clears_the_previous_providers_models(self) -> None:
+        combo = _FakeCombo()
+
+        populate_model_combo(combo, AIProvider.OPENAI)
+        populate_model_combo(combo, AIProvider.OLLAMA)
+
+        assert [label for label, _ in combo.items] == provider_model_names(
+            AIProvider.OLLAMA
         )
-
-    def _on_provider_changed(self, provider_label: str) -> None:
-        if not hasattr(self, "_model_combo"):
-            return
-        models = self._get_models_for_provider(provider_label)
-        self._model_combo.blockSignals(True)
-        self._model_combo.clear()
-        for m in models:
-            self._model_combo.addItem(m.display_name or m.model_id, m.model_id)
-        self._model_combo.blockSignals(False)
-        if models and hasattr(self, "_thinking_combo"):
-            self._on_model_changed(models[0].model_id)
-
-    def _on_model_changed(self, model_text: str) -> None:
-        if not hasattr(self, "_thinking_combo"):
-            return
-        if hasattr(self, "_model_combo"):
-            model_id = self._model_combo.currentData() or model_text
-        else:
-            model_id = model_text
-        caps = self._get_thinking_capabilities_for_model(model_id)
-        self._thinking_combo.setEnabled(caps.supports_levels)
-
-
-class TestGetModelsForProvider:
-    """_get_models_for_provider must return non-empty lists for main providers."""
-
-    def test_returns_nonempty_list_for_ollama(self) -> None:
-        panel = _MockPanel()
-        models = panel._get_models_for_provider("Ollama")
-        assert len(models) >= 1
-        assert all(hasattr(m, "model_id") for m in models)
-
-    def test_returns_nonempty_list_for_openai(self) -> None:
-        panel = _MockPanel()
-        models = panel._get_models_for_provider("OpenAI")
-        assert len(models) >= 1
-
-    def test_returns_nonempty_list_for_anthropic(self) -> None:
-        panel = _MockPanel()
-        models = panel._get_models_for_provider("Anthropic")
-        assert len(models) >= 1
-
-    def test_returns_nonempty_list_for_gemini(self) -> None:
-        panel = _MockPanel()
-        models = panel._get_models_for_provider("Gemini")
-        assert len(models) >= 1
-
-    def test_returns_empty_list_for_unknown_provider(self) -> None:
-        panel = _MockPanel()
-        models = panel._get_models_for_provider("UnknownProvider")
-        assert models == []
-
-    def test_all_entries_are_chat_model_info(self) -> None:
-        from src.shared.python.ai.types import ChatModelInfo
-
-        panel = _MockPanel()
-        for provider in ("Ollama", "OpenAI", "Anthropic", "Gemini"):
-            models = panel._get_models_for_provider(provider)
-            assert all(isinstance(m, ChatModelInfo) for m in models), (
-                f"All models for {provider} must be ChatModelInfo instances"
-            )
-
-
-class TestGetThinkingCapabilitiesForModel:
-    """_get_thinking_capabilities_for_model returns correct ThinkingCapabilities."""
-
-    def test_claude_sonnet_supports_thinking(self) -> None:
-        panel = _MockPanel()
-        caps = panel._get_thinking_capabilities_for_model("claude-3-5-sonnet-20241022")
-        assert caps.supports_levels is True
-
-    def test_llama_does_not_support_thinking(self) -> None:
-        panel = _MockPanel()
-        caps = panel._get_thinking_capabilities_for_model("llama3.1:8b")
-        assert caps.supports_levels is False
-
-    def test_o1_supports_thinking(self) -> None:
-        panel = _MockPanel()
-        caps = panel._get_thinking_capabilities_for_model("o1")
-        assert caps.supports_levels is True
-
-    def test_gemini_pro_supports_thinking(self) -> None:
-        panel = _MockPanel()
-        caps = panel._get_thinking_capabilities_for_model("gemini-1.5-pro")
-        assert caps.supports_levels is True
-
-    def test_returns_thinking_capabilities_dataclass(self) -> None:
-        from src.shared.python.ai.types import ThinkingCapabilities
-
-        panel = _MockPanel()
-        caps = panel._get_thinking_capabilities_for_model("llama3.1:8b")
-        assert isinstance(caps, ThinkingCapabilities)
-        assert isinstance(caps.supports_levels, bool)
-        assert isinstance(caps.available_levels, list)
-
-
-class TestOnProviderChanged:
-    """_on_provider_changed must clear and repopulate the model combo."""
-
-    def test_clears_model_combo_on_provider_change(self) -> None:
-        panel = _MockPanel()
-        panel._on_provider_changed("Ollama")
-        panel._model_combo.clear.assert_called()
-
-    def test_adds_items_for_known_provider(self) -> None:
-        panel = _MockPanel()
-        panel._on_provider_changed("Anthropic")
-        assert panel._model_combo.addItem.called, (
-            "addItem must be called for each model when provider is known"
-        )
-
-    def test_provider_change_triggers_thinking_update(self) -> None:
-        """After provider change, _on_model_changed is called for first model."""
-        panel = _MockPanel()
-        panel._on_provider_changed("Anthropic")
-        # Claude Sonnet is the first Anthropic model and supports thinking
-        panel._thinking_combo.setEnabled.assert_called_with(True)
-
-
-class TestOnModelChanged:
-    """_on_model_changed must enable/disable thinking combo."""
-
-    def test_disables_thinking_for_non_thinking_model(self) -> None:
-        from src.shared.python.ai.types import ThinkingCapabilities
-
-        panel = _MockPanel()
-        no_thinking = ThinkingCapabilities(supports_levels=False, available_levels=[])
-
-        with patch.object(
-            panel, "_get_thinking_capabilities_for_model", return_value=no_thinking
-        ):
-            panel._on_model_changed("llama3.1:8b")
-
-        panel._thinking_combo.setEnabled.assert_called_with(False)
-
-    def test_enables_thinking_for_thinking_model(self) -> None:
-        from src.shared.python.ai.types import ThinkingCapabilities, ThinkingLevel
-
-        panel = _MockPanel()
-        thinking = ThinkingCapabilities(
-            supports_levels=True,
-            available_levels=[ThinkingLevel.OFF, ThinkingLevel.HIGH],
-        )
-
-        with patch.object(
-            panel, "_get_thinking_capabilities_for_model", return_value=thinking
-        ):
-            panel._on_model_changed("claude-3-5-sonnet-20241022")
-
-        panel._thinking_combo.setEnabled.assert_called_with(True)
+        assert combo.clear_calls == 2
 
 
 @pytest.mark.headless_safe
