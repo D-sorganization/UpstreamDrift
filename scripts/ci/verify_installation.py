@@ -165,6 +165,47 @@ def check_import(
         return False, f"✗ {display_name}: Unexpected error - {e}"
 
 
+# Third-party model repositories are git submodules (see .gitmodules). They are
+# optional: only the experimental OpenSim/MyoSuite engines and the humanoid
+# build scripts read them. The plain-blob copies that used to sit under
+# src/shared/models/ were removed in #9415, so a missing submodule is the only
+# reason these paths can be empty.
+MODEL_SUBMODULES: tuple[tuple[str, str], ...] = (
+    ("shared/models/opensim/opensim-models", "OpenSim models (opensim-org)"),
+    ("shared/models/myosuite/myo_sim", "MyoSim musculoskeletal models (MyoHub)"),
+    ("src/shared/tools/human-gazebo", "human-gazebo URDF models"),
+)
+
+
+def check_model_submodules(
+    repo_root: Path = _REPO_ROOT,
+) -> list[tuple[str, bool, str]]:
+    """Report whether each optional model submodule is materialised.
+
+    Advisory only: a core install is valid without them. The message for a
+    missing submodule carries the exact command that fetches it.
+
+    Returns:
+        List of (path, present, message) tuples.
+    """
+    results: list[tuple[str, bool, str]] = []
+    for rel_path, label in MODEL_SUBMODULES:
+        path = repo_root / rel_path
+        present = path.is_dir() and any(path.iterdir())
+        if present:
+            results.append((rel_path, True, f"✓ {label} present ({rel_path})"))
+        else:
+            results.append(
+                (
+                    rel_path,
+                    False,
+                    f"- {label} not initialised (optional); run: "
+                    f"git submodule update --init {rel_path}",
+                )
+            )
+    return results
+
+
 # Core dependency checks: (display_name, import_path, version_attr). These must
 # all come from [project].dependencies in pyproject.toml -- anything that only
 # ships in an optional extra belongs in OPTIONAL_CHECKS.
@@ -235,6 +276,12 @@ def _run_optional_checks() -> None:
             logger.info(message)
         else:
             logger.info("- %s not installed (optional extra)", display_name)
+
+
+def _run_model_submodule_hints() -> None:
+    _section("Checking optional model submodules (advisory):")
+    for _rel_path, _present, message in check_model_submodules():
+        logger.info(message)
 
 
 def _run_suite_checks() -> list[bool]:
@@ -349,6 +396,7 @@ def main() -> int:
 
     core = _run_core_checks()
     _run_optional_checks()
+    _run_model_submodule_hints()
     suite = _run_suite_checks()
     alias = _run_alias_root_checks(vendor_ok)
 
