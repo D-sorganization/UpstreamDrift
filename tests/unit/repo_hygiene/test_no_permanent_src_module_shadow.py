@@ -72,6 +72,13 @@ _PIVOT_CONFTESTS = (
 # broke ``tests/unit/utils/test_path_validation.py``.
 _EVICTED_PROBE_MODULE = "src.api.utils.path_validation"
 
+# Its parent package. ``src/api/utils/__init__.py`` deliberately does NOT
+# import ``path_validation``, which is what makes the pair a faithful probe
+# for the PR #9446 asymmetry: a *fresh* import of the parent leaves the child
+# unbound as an attribute whenever the child's ``sys.modules`` entry already
+# exists (the import system short-circuits and never rebinds it).
+_EVICTED_PROBE_PARENT = "src.api.utils"
+
 
 def _load_conftest(path: Path) -> ModuleType:
     """Load a directory-scoped conftest.py under a private module name.
@@ -221,3 +228,79 @@ def test_pivot_exit_restores_the_whole_src_namespace(conftest_path: Path) -> Non
         )
     finally:
         _restore(saved, saved_path)
+
+
+@pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)
+def test_pivot_exit_relinks_child_when_parent_key_was_popped(
+    conftest_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A child-without-parent snapshot must not plant a delayed AttributeError.
+
+    Regression coverage for the restore asymmetry documented in PR #9446.
+
+    Genesis: a third-party cleanup (e.g. an autouse fixture that snapshots and
+    pops ``sys.modules`` keys by prefix) removes a parent package's key while
+    the child's key stays cached. The pivot then snapshots exactly that
+    child-without-parent state. Before the fix, exit() restored the child
+    orphaned-by-key; the next ``import src.api.utils`` anywhere executed a
+    *fresh*, childless parent module, and the import system never rebinds a
+    cached child onto it (the child's ``sys.modules`` entry short-circuits
+    ``_find_and_load``) -- so the dotted-string form
+
+        monkeypatch.setattr("src.api.utils.path_validation.<attr>", ...)
+
+    raised ``AttributeError: module 'src.api.utils' has no attribute
+    'path_validation'`` (the shape of the CI failure PR #9446 worked around by
+    switching tests/unit/engines/myosuite/test_canonical_adapter.py to the
+    module-object form), while the module-object form kept working. The fix
+    makes exit() re-import the missing parent and re-link the restored child,
+    mirroring the ``sys.modules`` layout the snapshot captured.
+    """
+    pivot = _load_conftest(conftest_path)._PIVOT
+
+    child = importlib.import_module(_EVICTED_PROBE_MODULE)
+    parent = importlib.import_module(_EVICTED_PROBE_PARENT)
+    saved = _src_namespace()
+    saved_path = list(sys.path)
+    grandparent_name, _, parent_attr = _EVICTED_PROBE_PARENT.rpartition(".")
+    try:
+        # A third-party cleanup pops the parent's key; the child's key stays.
+        del sys.modules[_EVICTED_PROBE_PARENT]
+
+        pivot.enter()
+        pivot.exit()
+
+        restored_parent = sys.modules.get(_EVICTED_PROBE_PARENT)
+        assert restored_parent is not None, (
+            "exit restored a child module whose parent key had been popped "
+            "without re-importing the parent -- the next fresh import of "
+            f"{_EVICTED_PROBE_PARENT} can never re-link the cached child, so "
+            "dotted-string patch targets under it raise AttributeError"
+        )
+        assert getattr(restored_parent, "path_validation", None) is child, (
+            "exit must re-link the restored child as an attribute of the "
+            "(re-imported) parent package, mirroring what the snapshot captured"
+        )
+
+        # Any later test's import of the parent must now hand back the linked
+        # parent rather than executing a fresh, childless copy.
+        reimported = importlib.import_module(_EVICTED_PROBE_PARENT)
+        assert reimported.path_validation is child
+
+        # The exact pattern that reddened CI: a dotted-string monkeypatch
+        # target under the popped parent. Resolving the string walks the
+        # parent and reads the child off it as an attribute.
+        sentinel = object()
+        monkeypatch.setattr(f"{_EVICTED_PROBE_MODULE}.validate_model_path", sentinel)
+        assert child.validate_model_path is sentinel, (
+            "the dotted-string form must patch the identical child module "
+            "object the rest of the suite already holds"
+        )
+    finally:
+        _restore(saved, saved_path)
+        # _restore fixes sys.modules keys, not attributes: re-point the
+        # grandparent at the original parent in case exit re-imported a
+        # replacement while the assertions above were failing.
+        grandparent = sys.modules.get(grandparent_name)
+        if grandparent is not None:
+            setattr(grandparent, parent_attr, parent)
