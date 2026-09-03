@@ -217,33 +217,6 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/tools/launch_monitor_model/flexible_analysis.py",
-      "symbol": "analyze_variables",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 9014,
-      "reason": "Issue #9014: pre-existing function exceeds budget due to logic layout; PR only optimizes array summation via count_nonzero.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/tools/launch_monitor_model/comparison.py",
-      "symbol": "compare_monitors",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 9348,
-      "reason": "Issue #9348: pre-existing at 105 lines, surfaced not introduced by ADR-0048 G2 Option 1, which renamed the package and so made every file 'changed' for this whole-file gate. It cannot be split here: tests/unit/launch_monitor/test_canonical_layer_parity.py pins this module AST-identical to its canonical twin in vendor/ud-tools, so a UD-side decomposition would fail that gate. The split belongs in Tools; this UD copy retires in ADR-0046 Stage 2 wave 1, which removes the exception rather than renewing it.",
-      "expires_on": "2026-10-31"
-    },
-    {
-      "path": "src/tools/launch_monitor_model/modeling.py",
-      "symbol": "fit_predictive_model",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 9348,
-      "reason": "Issue #9348: pre-existing at 106 lines, surfaced not introduced by ADR-0048 G2 Option 1's package rename, which made every file in the package 'changed' for this whole-file gate. The module is byte-identical to its origin/main version. Decomposition belongs with ADR-0048's P8 port of modeling.py into the canonical layer, not with a rename.",
-      "expires_on": "2026-10-31"
-    },
-    {
       "path": "scripts/research/proximal_distal_energy/articulated_drift_contact_attribution.py",
       "symbol": "_evaluate_controls",
       "rule": "parameters",

@@ -1,24 +1,24 @@
 {
   "schema_version": 1,
   "project": "upstream-drift",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "tiers": {
     "core": {
-      "install_spec": "upstream-drift==2.1.0"
+      "install_spec": "upstream-drift==2.1.2"
     },
     "extended": {
-      "install_spec": "upstream-drift[all-engines]==2.1.0"
+      "install_spec": "upstream-drift[all-engines]==2.1.2"
     },
     "full": {
-      "install_spec": "upstream-drift[all]==2.1.0"
+      "install_spec": "upstream-drift[all]==2.1.2"
     }
   },
   "expected_artifacts": [
-    "upstream-drift-2.1.0.cyclonedx.core.json",
-    "upstream-drift-2.1.0.spdx.core.json",
-    "upstream-drift-2.1.0.cyclonedx.extended.json",
-    "upstream-drift-2.1.0.spdx.extended.json",
-    "upstream-drift-2.1.0.cyclonedx.full.json",
-    "upstream-drift-2.1.0.spdx.full.json"
+    "upstream-drift-2.1.2.cyclonedx.core.json",
+    "upstream-drift-2.1.2.spdx.core.json",
+    "upstream-drift-2.1.2.cyclonedx.extended.json",
+    "upstream-drift-2.1.2.spdx.extended.json",
+    "upstream-drift-2.1.2.cyclonedx.full.json",
+    "upstream-drift-2.1.2.spdx.full.json"
   ]
 }
