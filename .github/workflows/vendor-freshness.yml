@@ -80,6 +80,11 @@ jobs:
 
       - name: Purge pip cache
         run: python -m pip cache purge || true
+      - name: Check Cargo / pyproject Tools pins equal the submodule gitlink
+        # UD #9406 (RM #1505 Phase 1): the Rust `tools-core` rev and any
+        # `ud-tools @ git+...` pip pin must match vendor/ud-tools exactly.
+        run: python scripts/shared_tools/check_tools_pins.py
+
       - name: Run freshness check
         id: check
         run: |
