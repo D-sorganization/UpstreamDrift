@@ -22,7 +22,7 @@
 | [#121](https://github.com/dieterolson/UpstreamDrift/issues/121)                                                  | Phase 1.3: Implement Duplicate File Prevention     | 🟢 Medium   | Open        |
 | [#120](https://github.com/dieterolson/UpstreamDrift/issues/120)                                                  | Phase 1.2: Consolidate Dependency Management       | 🟡 High     | Open        |
 | [#119](https://github.com/dieterolson/UpstreamDrift/issues/119)                                                  | Phase 1.1: Fix Pytest Coverage Configuration       | 🟢 Medium   | Open        |
-| [#500](c:/Users/diete/Repositories/Golf_Modeling_Suite/docs/assessments/issues/ISSUE_DRY_ORTHOGONAL_REFACTOR.md) | Comprehensive DRY & Orthogonality Overhaul         | 🔴 High     | In Progress |
+| [#500](ISSUE_DRY_ORTHOGONAL_REFACTOR.md) | Comprehensive DRY & Orthogonality Overhaul         | 🔴 High     | In Progress |
 
 ---
 
