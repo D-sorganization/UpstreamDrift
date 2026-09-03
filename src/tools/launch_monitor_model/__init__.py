@@ -116,12 +116,12 @@ from src.tools.launch_monitor_model.conformance_bundle import (
     launch_monitor_conformance_bundle_sha256,
     launch_monitor_conformance_scenario_sha256,
 )
-from src.tools.launch_monitor_model.corpus import (
+from shared.python.launch_monitor.corpus import (
     CORPUS_COLUMN_MAP,
     corpus_dataset_path,
     load_private_corpus,
 )
-from src.tools.launch_monitor_model.contract_v2 import (
+from shared.python.launch_monitor.contract_v2 import (
     CONTRACT_VERSION_V2,
     AnalysisContextV2,
     AnalysisLineageV2,
@@ -148,7 +148,7 @@ from shared.python.launch_monitor.dispersion import (
     DispersionResult,
     analyze_dispersion,
 )
-from src.tools.launch_monitor_model.dataset_reference import (
+from shared.python.launch_monitor.dataset_reference import (
     DATASET_JOB_CONTRACT_VERSION,
     DatasetJobRequestV1,
     DatasetOperationV1,
@@ -157,7 +157,7 @@ from src.tools.launch_monitor_model.dataset_reference import (
     dataset_content_sha256,
     dataset_job_contract_json_schema,
 )
-from src.tools.launch_monitor_model.flexible_analysis import (
+from shared.python.launch_monitor.flexible_analysis import (
     CONTRACT_VERSION,
     AnalysisMode,
     CoefficientEstimate,
@@ -173,11 +173,11 @@ from src.tools.launch_monitor_model.flexible_analysis import (
     analyze_variables,
 )
 from shared.python.launch_monitor.importer import import_session
-from src.tools.launch_monitor_model.longitudinal import (
+from shared.python.launch_monitor.longitudinal import (
     analyze_longitudinal_sessions,
     longitudinal_session_contract_json_schema,
 )
-from src.tools.launch_monitor_model.longitudinal_types import (
+from shared.python.launch_monitor.longitudinal_types import (
     LONGITUDINAL_SESSION_CONTRACT_VERSION,
     LongitudinalClaimsV1,
     LongitudinalDesignV1,

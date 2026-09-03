@@ -94,7 +94,7 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from src.tools.launch_monitor_model.contract_v2 import (
+from shared.python.launch_monitor.contract_v2 import (
     AnalysisContextV2,
     PlayerIdentityV2,
 )

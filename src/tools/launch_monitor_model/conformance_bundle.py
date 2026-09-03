@@ -9,7 +9,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from src.tools.launch_monitor_model.contract_v2 import (
+from shared.python.launch_monitor.contract_v2 import (
     BackingRecordV2,
     LaunchMonitorAnalysisResultV2,
     MetricUnitsV2,
@@ -18,7 +18,7 @@ from src.tools.launch_monitor_model.contract_v2 import (
     SessionIdentityV2,
     SourceFileReferenceV2,
 )
-from src.tools.launch_monitor_model.longitudinal_types import (
+from shared.python.launch_monitor.longitudinal_types import (
     LongitudinalSessionResultV1,
 )
 from src.tools.launch_monitor_model.player_covariation_types import (
@@ -115,9 +115,16 @@ class LaunchMonitorConformanceScenarioV1(_StrictModel):
     @model_validator(mode="after")
     def validate_case(self) -> LaunchMonitorConformanceScenarioV1:
         expected_type = _PAYLOAD_TYPES[self.analysis_kind]
+        # Read the status before the isinstance check: that check narrows
+        # ``self.payload`` to the declared ``type[BaseModel]``, and since
+        # ADR-0046 Stage 2 wave 3a two of the five payload models are served
+        # by the vendored canonical layer, which mypy sees as ``Any`` because
+        # ``vendor/`` is excluded from the type check. Every payload model
+        # carries ``status``; the raise order is unchanged.
+        payload_status = self.payload.status
         if not isinstance(self.payload, expected_type):
             raise ValueError("analysis_kind does not match the result payload contract")
-        if self.payload.status != self.expected_status:
+        if payload_status != self.expected_status:
             raise ValueError("expected_status does not match the result payload status")
         source_ids = {source.source_id for source in self.sources}
         if any(record.source_id not in source_ids for record in self.backing_records):

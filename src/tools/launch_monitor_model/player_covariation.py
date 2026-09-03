@@ -7,7 +7,7 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 
-from src.tools.launch_monitor_model.contract_v2 import (
+from shared.python.launch_monitor.contract_v2 import (
     AnalysisContextV2,
     AvailabilityState,
     AvailabilityV2,

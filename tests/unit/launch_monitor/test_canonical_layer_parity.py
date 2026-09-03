@@ -41,6 +41,30 @@ is additive (`CorrelationResult.boolean_projected`,
 :func:`test_relationships_gains_the_d17_boolean_projection_fields_additively`
 pins that distinction directly rather than folding `relationships` into the
 identical-twin parametrization.
+
+Wave 3a retires the contract spine and the longitudinal tier: `corpus`,
+`flexible_analysis`, `contract_v2`, `longitudinal_types`,
+`longitudinal_statistics`, `longitudinal`, and the four `dataset_reference*`
+modules. Unlike waves 1 and 2 this wave could not be assembled out of
+behaviour-neutral modules, because the canonical dependency graph does not
+contain a behaviour-neutral downward-closed set: canonical `contract_v2`
+imports canonical `flexible_analysis` (owner rulings D15/D17) and canonical
+`dataset_reference_contract` imports canonical `corpus` (the P19 merge), so
+retiring either consumer while its dependency still resolved to UpstreamDrift
+would leave two copies of the same dataclass in one process. The wave is
+therefore ordered by that graph rather than by how quiet each module is, and
+the three rulings it carries are pinned directly:
+
+* **D15** (`flexible_analysis`) — under-sampled predictors leave the
+  Benjamini-Hochberg pool before correction. Measured in
+  ``tests/integration/launch_monitor_drift/test_flexible_analysis_drift.py``.
+* **D17** (`flexible_analysis`) — the boolean 0/1 projection is preserved and
+  now labelled, carried up from `relationships` (wave 2) onto
+  ``CorrelationEstimate.is_boolean_projected``.
+* **G1-D1** (`longitudinal*`) — the pooled estimator is a named-method pair,
+  pinned by :func:`test_wave_3a_longitudinal_carries_the_g1_d1_named_method_pair`
+  below and measured against ``rate_of_closure`` in
+  ``tests/integration/launch_monitor_drift/test_longitudinal_drift.py``.
 """
 
 from __future__ import annotations
@@ -87,6 +111,27 @@ WAVE_2_MODULES = (
     "modeling",
     "profiles",
     "relationships",
+)
+
+# ADR-0046 Stage 2 wave 3a: ADR-0048's P10, P11, P15, P16, P19 and P20, plus
+# the P19 `corpus` merge that P20 sits on. Ordered by the canonical dependency
+# graph, not by port-order number: `contract_v2` (P11) cannot retire before
+# `flexible_analysis` (P10) because the canonical module imports it, and the
+# `dataset_reference*` tier (P20) cannot retire before `corpus` (P19) for the
+# same reason. Retiring a consumer ahead of its dependency would put two
+# copies of `FlexibleAnalysisResult` (or of `CORPUS_COLUMN_MAP`) in one
+# process, which is the fork ADR-0046 exists to end rather than to introduce.
+WAVE_3A_MODULES = (
+    "contract_v2",
+    "corpus",
+    "dataset_reference",
+    "dataset_reference_contract",
+    "dataset_reference_operations",
+    "dataset_reference_verification",
+    "flexible_analysis",
+    "longitudinal",
+    "longitudinal_statistics",
+    "longitudinal_types",
 )
 
 _MISSING_VENDOR_HINT = (
@@ -415,3 +460,210 @@ def test_canonical_import_path_resolves_into_the_vendored_tools_layer() -> None:
         "canonical layer again — see ADR-0048, 'Stage 2 Blocker (G2)', and "
         "scripts/config/shadow_modules.yaml."
     )
+
+
+@pytest.mark.parametrize("module_name", WAVE_3A_MODULES)
+def test_wave_3a_module_is_retired_and_served_by_the_canonical_layer(
+    module_name: str,
+) -> None:
+    """Wave 3a's ten modules pass the same retirement check waves 1-2 did.
+
+    Same shape as the two parametrizations above, kept separate so a wave-3a
+    regression reads as a wave-3a failure. Twin status is deliberately not
+    asserted here: three of these ten carry owner rulings and are *not*
+    identical twins, and the rulings are pinned by the dedicated tests below
+    and by the drift gates rather than by a blanket identity claim.
+    """
+    vendored_package = _require_vendored_package()
+
+    ud_copy = _UD_PACKAGE / f"{module_name}.py"
+    assert not ud_copy.exists(), (
+        f"{ud_copy.relative_to(_REPO_ROOT)} exists again. ADR-0046 Stage 2 "
+        "wave 3a retired this module; UpstreamDrift consumes the canonical "
+        "implementation from Tools through "
+        f"shared.python.launch_monitor.{module_name}. A re-added copy shadows "
+        "nothing here but does fork the implementation, which is the "
+        "divergence ADR-0046 was accepted to end. Land the change in Tools "
+        "and bump the vendor pin."
+    )
+
+    module = importlib.import_module(f"shared.python.launch_monitor.{module_name}")
+    assert module.__file__ is not None
+    resolved = Path(module.__file__).resolve()
+    assert resolved == (vendored_package / f"{module_name}.py").resolve(), (
+        f"shared.python.launch_monitor.{module_name} imported from {resolved}, "
+        f"not from the vendored canonical package at "
+        f"{vendored_package / f'{module_name}.py'}."
+    )
+
+
+def test_wave_3a_retirements_are_dependency_legal() -> None:
+    """No retired module may depend on one still served by UpstreamDrift.
+
+    This is the constraint that decided wave 3a's contents, and it is not
+    visible from ADR-0048's port order, which is ordered by UpstreamDrift's
+    intra-package graph. The canonical modules import each other by the
+    canonical name, so a canonical module whose dependency is still an
+    UpstreamDrift file gets the *canonical* dependency while the façade
+    exports the *UpstreamDrift* one — two `FlexibleAnalysisResult` classes,
+    two `AnalysisContextV2` classes, in one process, with pydantic validation
+    failing across the seam. Asserting the property directly is cheaper than
+    rediscovering it one ValidationError at a time in a later wave.
+    """
+    vendored_package = _require_vendored_package()
+
+    retired = set(WAVE_1_MODULES) | set(WAVE_2_MODULES) | set(WAVE_3A_MODULES)
+    prefix = "from shared.python.launch_monitor."
+    still_local = {
+        path.stem
+        for path in _UD_PACKAGE.glob("*.py")
+        if path.stem not in {"__init__", "project"}
+    }
+
+    for module_name in sorted(retired):
+        source = (vendored_package / f"{module_name}.py").read_text(encoding="utf-8")
+        dependencies = {
+            line.split(prefix, 1)[1].split(" ", 1)[0].rstrip(".,")
+            for line in source.splitlines()
+            if line.startswith(prefix)
+        }
+        leaked = dependencies & still_local
+        assert not leaked, (
+            f"shared.python.launch_monitor.{module_name} is retired but "
+            f"imports {sorted(leaked)}, which UpstreamDrift still serves from "
+            f"{_UD_PACKAGE.relative_to(_REPO_ROOT)}. Retire the dependency in "
+            "the same wave, or the two layers hold separate copies of the "
+            "same classes."
+        )
+
+
+def test_wave_3a_longitudinal_carries_the_g1_d1_named_method_pair() -> None:
+    """ADR-0048 Decision G1-D1 lands as a renamed, required method identifier.
+
+    Unlike wave 2's D17, this one is *not* purely additive: the pooled
+    estimator's `method` was a single-valued `Literal` defaulting to
+    ``"player_fixed_effects_ols_clustered_by_player"``, and it is now a
+    required two-valued identifier with no default and no back-compat alias —
+    the same posture as wave 1's `TrendResult` rename, and for the same
+    reason. G1-D1 states it plainly: "results from different estimators are
+    never numerically compared without the names attached", which is only
+    enforceable if naming is mandatory. The old string's absence is asserted
+    rather than assumed, because a re-added alias would let a
+    ``dl-random-effects/1`` number be read under the cluster-robust name.
+
+    The per-player and heterogeneity fields the decision adds are additive and
+    optional, so a caller that reads only what it read before still works.
+    """
+    _require_vendored_package()
+
+    types_module = importlib.import_module(
+        "shared.python.launch_monitor.longitudinal_types"
+    )
+    pooled = types_module.PooledAssociationV1
+    assert set(types_module.POOLED_METHOD_DESCRIPTIONS) == {
+        "ud-cluster-robust-fe/1",
+        "dl-random-effects/1",
+    }
+    assert pooled.model_fields["method"].is_required(), (
+        "PooledAssociationV1.method gained a default again. G1-D1 makes the "
+        "estimator identifier mandatory precisely so a pooled number can "
+        "never be read without knowing which estimator produced it."
+    )
+    assert "player_fixed_effects_ols_clustered_by_player" not in str(
+        pooled.model_fields["method"].annotation
+    ), (
+        "The pre-G1-D1 method string is back in PooledAssociationV1. It was "
+        "renamed to ud-cluster-robust-fe/1 with no alias; re-adding it "
+        "reintroduces the unnamed-estimator hazard the decision removed."
+    )
+
+    player = types_module.LongitudinalPlayerAssociationV1
+    for added in (
+        "standard_error",
+        "ci_lower",
+        "ci_upper",
+        "p_value",
+        "r_squared",
+        "first_to_last_change",
+    ):
+        assert added in player.model_fields, (
+            f"LongitudinalPlayerAssociationV1 lost the D11 field {added}."
+        )
+        assert not player.model_fields[added].is_required(), (
+            f"{added} became required. D11's fields are optional so a fit "
+            "that cannot support one says so by absence rather than by "
+            "inventing a number."
+        )
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "PooledAssociationV1" in facade.__all__
+    assert "LongitudinalPlayerAssociationV1" in facade.__all__
+
+
+def test_wave_3a_flexible_analysis_carries_d15_and_d17() -> None:
+    """The two flexible-analysis rulings are visible on the canonical module.
+
+    D17 is additive: `CorrelationEstimate` gains `is_boolean_projected` and
+    keeps every field it had. D15 is not additive and cannot be — it changes
+    a reported number — so it is pinned where a number can be measured, in
+    ``test_flexible_analysis_drift.py``'s
+    ``test_resolved_d15_the_fdr_denominator_agrees``. What is asserted here is
+    the structural half: that the pool really is filtered before correction,
+    read off the source rather than inferred from a value that could coincide.
+    """
+    vendored_package = _require_vendored_package()
+
+    flexible = importlib.import_module("shared.python.launch_monitor.flexible_analysis")
+    fields = {field.name for field in dataclasses.fields(flexible.CorrelationEstimate)}
+    assert "is_boolean_projected" in fields, (
+        "shared.python.launch_monitor.flexible_analysis.CorrelationEstimate "
+        "lost the D17 is_boolean_projected label."
+    )
+    assert {
+        "predictor",
+        "coefficient",
+        "p_value",
+        "adjusted_p_value",
+        "ci_lower",
+        "ci_upper",
+        "sample_count",
+        "method",
+    } <= fields
+
+    source = (vendored_package / "flexible_analysis.py").read_text(encoding="utf-8")
+    assert "correction_input" in source and "min_samples" in source, (
+        "The D15 correction pool no longer filters by min_samples before "
+        "calling _adjust_p_values. Under-sampled predictors are back in the "
+        "Benjamini-Hochberg denominator; see ADR-0048's owner ruling on D15."
+    )
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "CorrelationEstimate" in facade.__all__
+    assert "analyze_variables" in facade.__all__
+
+
+def test_wave_3a_corpus_keeps_the_dataframe_entry_point_and_gains_provenance() -> None:
+    """P19's merge is additive at the entry point UpstreamDrift consumers use.
+
+    ``load_private_corpus`` still returns a plain ``DataFrame`` — that is the
+    signature `gui.py` and the analytics routes call — and the merge adds
+    ``load_private_corpus_with_provenance`` beside it for callers that want
+    the content-addressed manifest identity. The mandatory manifest gate is
+    unchanged in kind: UpstreamDrift's copy already carried the same five
+    fail-closed checks (#9401), which is what made this retirement a
+    re-point rather than a behaviour change.
+    """
+    _require_vendored_package()
+
+    corpus = importlib.import_module("shared.python.launch_monitor.corpus")
+    assert corpus.load_private_corpus.__annotations__["return"] in {
+        "pd.DataFrame",
+        pd.DataFrame,
+    }
+    assert hasattr(corpus, "load_private_corpus_with_provenance")
+    assert corpus.MAX_RETAINED_ROWS == 300_000
+    assert corpus.SUPPORTED_MANIFEST_SCHEMA_VERSION == 1
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "load_private_corpus" in facade.__all__
+    assert "CORPUS_COLUMN_MAP" in facade.__all__

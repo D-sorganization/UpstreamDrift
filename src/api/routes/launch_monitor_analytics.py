@@ -56,7 +56,7 @@ from src.tools.launch_monitor_model import (
     scan_player_covariation_v1,
     strokes_gained_contract_json_schema,
 )
-from src.tools.launch_monitor_model.dataset_reference import (
+from shared.python.launch_monitor.dataset_reference import (
     MAX_PAGE_SIZE,
     DatasetJobRequestV1,
     dataset_job_contract_json_schema,
@@ -205,7 +205,8 @@ async def capabilities() -> dict[str, object]:
 async def contract_v2() -> dict[str, object]:
     """Publish the canonical JSON Schema used by OpenAPI v2 clients."""
 
-    return contract_v2_json_schema()
+    schema: dict[str, object] = contract_v2_json_schema()
+    return schema
 
 
 @router.get("/contracts/strokes-gained/v1")
@@ -221,7 +222,8 @@ async def strokes_gained_contract_v1() -> dict[str, object]:
 async def dataset_jobs_contract_v1() -> dict[str, object]:
     """Publish the immutable dataset-reference job request schema."""
 
-    return dataset_job_contract_json_schema()
+    schema: dict[str, object] = dataset_job_contract_json_schema()
+    return schema
 
 
 @router.get("/contracts/longitudinal-sessions/v1")
@@ -229,7 +231,8 @@ async def dataset_jobs_contract_v1() -> dict[str, object]:
 async def longitudinal_sessions_contract_v1() -> dict[str, object]:
     """Publish the attested session-unit longitudinal result schema."""
 
-    return longitudinal_session_contract_json_schema()
+    schema: dict[str, object] = longitudinal_session_contract_json_schema()
+    return schema
 
 
 @router.post(
