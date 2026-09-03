@@ -8,6 +8,7 @@ This document lists all active GitHub Workflows in this repository hub.
 | **PR Compiler**          | `Jules-PR-Compiler.yml`          | Active   | Compiles PR info for fleet management.                             |
 | **CI Standard**          | `ci-standard.yml`                | Active   | Core lint/test lane; does not claim full optional-engine coverage. |
 | **Vendor Freshness**     | `vendor-freshness.yml`           | Active   | Submodule staleness + Cargo/pyproject Tools-pin consistency (`check_tools_pins.py`, UD #9406). |
+| **Seam Drift Gate**      | `ci-standard.yml` (job)          | Active   | `seam-drift-gate`: enforces `docs/shared_tools/seam_rulings.v1.json` (UD #9406). |
 | **CI Fast Tests**        | `ci-fast-tests.yml`              | Active   | Runs unit and integration tests (non-slow).                        |
 | **Nightly Cross-Engine** | `nightly-cross-engine.yml`       | Active   | Dedicated native-engine validation lane with strict import checks. |
 | **Critical Files Guard** | `critical-files-guard.yml`       | Active   | Prevents accidental deletion of core files.                        |
