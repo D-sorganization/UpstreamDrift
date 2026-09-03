@@ -85,6 +85,21 @@ any stage.
   keep-port-already-home classification is
   [ADR-0046 G1: Launch-Monitor Port Plan](0048-launch-monitor-port-plan.md) (#9348);
   G2 re-pointing PRs per tab.
+- **Owner ruling (2026-09-02) — TypeScript-Twin Obligation: deferred-twin
+  policy.** ADR-0048 G1 sized the TS-twin obligation implied by this record's
+  "arrive in the canonical layer's TS twins" framing above and found it
+  unsized — potentially tripling the web model surface — and asked the owner
+  to choose between twins-for-the-gated-overlap-set, twins-with-a-documented-
+  exemption-class, or a deferred-twin policy (see
+  [ADR-0046 G1 §"The TypeScript-Twin Obligation Is Unsized"](0048-launch-monitor-port-plan.md#the-typescript-twin-obligation-is-unsized)).
+  The owner rules **deferred-twin**: canonical Python modules in the Tools
+  model layer stand alone; each TypeScript twin is a tracked follow-up, not a
+  landing prerequisite, prioritized when a web surface actually needs that
+  module — ADR-0046 Stage 2's re-pointing of the UD workbench and the Impact
+  Explorer tab is what reveals which. Rationale: keeps the twin obligation an
+  explicit ledger rather than a blocker on Stage 1 porting, and defers its
+  cost until demand for a given module's web surface is proven rather than
+  assumed.
 
 ## Validation
 
