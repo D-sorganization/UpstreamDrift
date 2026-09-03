@@ -214,6 +214,16 @@ class TestParity:
                 and not (_REPO_ROOT / "vendor" / "ud-tools" / "src").is_dir()
             ):
                 native_status = "provider_unavailable"
+            elif (
+                native.provider != "tools"
+                and isinstance(native.source_root, str)
+                and not Path(native.source_root).exists()
+            ):
+                # Sibling-checkout tiles (e.g. movement_optimizer) degrade to
+                # provider_unavailable when the sibling is absent - the same
+                # rule the loader applies (issue #9412 surfaces every
+                # registry tile on the web, not only the former manifest set).
+                native_status = "provider_unavailable"
             native_fields = {
                 "category": native_launcher.category,
                 "status": native_status,

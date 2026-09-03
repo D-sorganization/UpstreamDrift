@@ -37,8 +37,12 @@ _state: dict[str, object] = {"key": None, "manifest": None}
 
 
 def _watched_paths() -> tuple[Path, ...]:
-    """Files whose on-disk changes must invalidate the cached manifest."""
-    return (_loader_module.MANIFEST_PATH, _loader_module.REGISTRY_PATH)
+    """Files whose on-disk changes must invalidate the cached manifest.
+
+    Only the single registry (``models.yaml``) is read at runtime (#9412);
+    the generated ``launcher_manifest.json`` is not an input any more.
+    """
+    return (_loader_module.REGISTRY_PATH,)
 
 
 def _file_signature(path: Path) -> tuple[float, int]:

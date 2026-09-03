@@ -84,12 +84,29 @@ def _iter_entry_point_adapter_modules() -> list[str]:
     ]
 
 
+def _registry_declared_adapter_modules() -> list[str]:
+    """Adapter modules declared as ``embed_adapter`` in models.yaml (#9412).
+
+    The single tile registry is the source of which tools are embeddable;
+    the static fallback list below only covers adapters that live outside
+    the registry (e.g. Simscape). Unreadable registries degrade to nothing.
+    """
+    try:
+        from src.config.registry_adapters import embed_adapter_modules
+
+        return embed_adapter_modules()
+    except Exception as exc:  # noqa: BLE001 - bootstrap must not abort
+        logger.warning("Could not read embed adapters from the tile registry: %s", exc)
+        return []
+
+
 def _adapter_modules_for_bootstrap() -> list[str]:
     """Return entry-point adapters plus fallback adapters without duplicates."""
     adapter_modules: list[str] = []
     seen: set[str] = set()
     for module_path in [
         *_iter_entry_point_adapter_modules(),
+        *_registry_declared_adapter_modules(),
         *FALLBACK_ADAPTER_MODULES,
     ]:
         if module_path in seen:

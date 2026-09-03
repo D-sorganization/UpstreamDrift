@@ -518,7 +518,7 @@
       "required": ["state", "issue", "reason", "pending_decision"],
       "properties": {
         "state": {
-          "enum": ["parity", "gap", "exempt"]
+          "enum": ["parity", "gap", "exempt", "api_only"]
         },
         "issue": {
           "type": ["integer", "null"],

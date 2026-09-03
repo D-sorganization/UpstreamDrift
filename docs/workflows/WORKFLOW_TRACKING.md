@@ -30,3 +30,8 @@ Update this document whenever a new workflow is added or the status of an existi
   honest about optional-engine coverage.
 - `nightly-cross-engine.yml` is the repo's dedicated cross-engine lane and is
   the right place to expand stricter native-engine validation over time.
+- `ci-standard.yml` job `repo-structure-gates` runs
+  `python3 -m scripts.registry.generate_registry_artifacts --check` so
+  `src/config/launcher_manifest.json`, the `feature_parity.json` tile
+  bindings and the README tile table never drift from the single tile
+  registry `src/config/models.yaml` (issue #9412, RM #1507).

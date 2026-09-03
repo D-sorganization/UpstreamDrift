@@ -870,6 +870,12 @@ jobs:
       - name: SPEC Drift Check
         run: python3 scripts/check_spec_paths.py
 
+      # Single tile registry (issue #9412; RM #1507): launcher_manifest.json,
+      # the feature_parity.json tile bindings and the README tile table are
+      # generated from src/config/models.yaml. Needs only PyYAML.
+      - name: Registry Artifact Drift Check (issue #9412)
+        run: python3 -m scripts.registry.generate_registry_artifacts --check
+
       - name: Agent Docs Consistency Check
         run: python3 scripts/check_agent_docs_consistency.py
 

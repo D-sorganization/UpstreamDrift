@@ -32,7 +32,10 @@ logger = get_logger(__name__)
 CONFIG_DIR = Path(__file__).parent
 REGISTRY_PATH = CONFIG_DIR / "feature_parity.json"
 
-VALID_STATUSES = frozenset({"parity", "gap", "exempt"})
+# ``api_only``: the feature is an API/WebSocket endpoint with no dedicated
+# surface in either shell; both shells are thin consumers (issue #8861). It
+# is neither achieved parity nor a gap, and requires a ``reason``.
+VALID_STATUSES = frozenset({"parity", "gap", "exempt", "api_only"})
 
 
 def _is_valid_issue(value: Any) -> bool:
@@ -118,9 +121,11 @@ class FeatureParityEntry:
             raise ValueError(f"Entry '{feature_id}' has invalid issue number {issue!r}")
 
         reason = data.get("reason")
-        if status == "exempt" and (not isinstance(reason, str) or not reason.strip()):
+        if status in ("exempt", "api_only") and (
+            not isinstance(reason, str) or not reason.strip()
+        ):
             raise ValueError(
-                f"Exempt entry '{feature_id}' requires a non-empty 'reason'"
+                f"{status.capitalize()} entry '{feature_id}' requires a non-empty 'reason'"
             )
 
         for path_field in ("pyqt", "api", "web"):
