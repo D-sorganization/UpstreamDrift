@@ -217,7 +217,7 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/shared/python/launch_monitor/flexible_analysis.py",
+      "path": "src/tools/launch_monitor_model/flexible_analysis.py",
       "symbol": "analyze_variables",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",

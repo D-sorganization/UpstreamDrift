@@ -71,7 +71,7 @@ from typing import Any
 
 import pandas as pd
 
-from src.shared.python.launch_monitor.importer import _convert
+from src.tools.launch_monitor_model.importer import _convert
 
 MANIFEST_FILENAME = "_MANIFEST.json"
 SUPPORTED_MANIFEST_SCHEMA_VERSION = 1
@@ -253,7 +253,7 @@ def _canonicalize_metrics(
     frame: pd.DataFrame, selected_map: dict[str, tuple[str, str]]
 ) -> pd.DataFrame:
     """Convert native corpus columns to canonical units and metric names."""
-    from src.shared.python.launch_monitor.schema import METRICS
+    from src.tools.launch_monitor_model.schema import METRICS
 
     present = {
         column: value

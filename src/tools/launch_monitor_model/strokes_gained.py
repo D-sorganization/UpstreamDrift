@@ -9,16 +9,16 @@ from typing import Literal
 
 import pandas as pd
 
-from src.shared.python.launch_monitor._scoring_statistics import (
+from src.tools.launch_monitor_model._scoring_statistics import (
     estimate_summary,
     group_summaries,
     longitudinal_summaries,
 )
-from src.shared.python.launch_monitor.contract_v2 import (
+from src.tools.launch_monitor_model.contract_v2 import (
     AnalysisContextV2,
     _record_digest,
 )
-from src.shared.python.launch_monitor.strokes_gained_types import (
+from src.tools.launch_monitor_model.strokes_gained_types import (
     AvailabilityV1,
     BaselineProvenanceV1,
     CourseStateColumnsV1,

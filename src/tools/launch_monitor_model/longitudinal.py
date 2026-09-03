@@ -8,16 +8,16 @@ from typing import Any, Literal
 import numpy as np
 import pandas as pd
 
-from src.shared.python.launch_monitor.contract_v2 import (
+from src.tools.launch_monitor_model.contract_v2 import (
     AnalysisContextV2,
     AvailabilityV2,
     build_analysis_lineage_v2,
 )
-from src.shared.python.launch_monitor.longitudinal_statistics import (
+from src.tools.launch_monitor_model.longitudinal_statistics import (
     clustered_pooled_association,
     player_associations,
 )
-from src.shared.python.launch_monitor.longitudinal_types import (
+from src.tools.launch_monitor_model.longitudinal_types import (
     LongitudinalDesignV1,
     LongitudinalMissingnessV1,
     LongitudinalSessionRequestV1,

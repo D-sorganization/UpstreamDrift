@@ -37,8 +37,10 @@
 # guard therefore never blocked anything. This file restores the ledger and
 # records the four regressions explicitly rather than laundering them.
 #
-# Shadow count is currently 33 of 33 vendor modules. That number is the debt.
-# It should only ever go down.
+# Shadow count is currently 33 of 37 vendor modules. That number is the debt.
+# It should only ever go down. It last moved 34 -> 33 on 2026-09-02, when
+# ADR-0048's Option 1 moved UpstreamDrift's transitional launch-monitor copy
+# out of this namespace — see the note at the end of this file.
 
 schema_version: 1
 
@@ -155,33 +157,21 @@ shadows:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
 
-  # ── ADR-0046 Stage 1 canonical launch-monitor layer (Tools#4899-#4907) ────
+  # ── ADR-0046 Stage 1 canonical launch-monitor layer — CLEARED 2026-09-02 ──
   #
-  # STAGE 2 STATUS (2026-09-02): this entry cannot be narrowed, and the
-  # attempt to narrow it is what found the blocker. The guard above enumerates
-  # TOP-LEVEL entries under vendor/ud-tools/src/shared/python/ and compares
-  # them with top-level entries under src/shared/python/, so `launch_monitor`
-  # is one entry regardless of how many of its thirty files have been retired
-  # — there is no per-file vocabulary to narrow to. Worse, the same
-  # package-granularity is what blocks the retirement itself: while
-  # src/shared/python/launch_monitor/ exists, `shared.python.launch_monitor`
-  # resolves to it and not to the vendored canonical package, so the Stage 2
-  # import rewrite ADR-0048 prescribes is a self-referential no-op. The
-  # procedure in this file's header is therefore the operative one for this
-  # entry too — the UD-side copy goes as a unit, not module by module. See
-  # docs/adr/0048-launch-monitor-port-plan.md, "Stage 2 Blocker (G2)", and
-  # tests/unit/launch_monitor/test_canonical_layer_parity.py, which pins both
-  # the shadow and the wave-1 modules' identity to their canonical twins.
-  # Tools' src/shared/python/launch_monitor/ did not exist before this pin
-  # (previously `Tools has no shared/python/launch_monitor package`, per
-  # ADR-0046). The Tools#4899-#4907 port ladder built it there as the fleet's
-  # canonical layer, ported up from this UD package with attribution
-  # preserved (ADR-0046 Stage 1). This is Stage 1 landing, not Stage 2
-  # consumption: the UD 9-tab workbench keeps importing its own copy until
-  # each module is re-pointed at the vendored layer with its tests passing
-  # against it, per ADR-0046's G1 port-plan inventory (#9348), which
-  # classifies each of these 30 modules port-up/already-home/app-local and
-  # orders the Stage 2 re-point.
-  launch_monitor:
-    tracking_issue: 9348
-    sunset_date: "2026-12-31"
+  # The `launch_monitor` entry that stood here is gone, and this note records
+  # how, because it is the first entry in this ledger to be cleared by a move
+  # rather than by a port. The Tools#4899-#4907 ladder built the canonical
+  # layer at vendor/ud-tools/src/shared/python/launch_monitor/ (ADR-0046
+  # Stage 1, pinned by UD#9400), but UpstreamDrift's transitional copy still
+  # sat at src/shared/python/launch_monitor/ and won `shared.python.__path__`
+  # outright, so the Stage 2 import rewrite ADR-0048 prescribes resolved back
+  # to the module it was meant to replace. ADR-0048 "Stage 2 Blocker (G2)"
+  # Option 1 moved that copy out of the shared.python namespace to
+  # src/tools/launch_monitor_model/ — beside the workbench that consumes it —
+  # which is a rename, not a retirement: all thirty modules still exist and
+  # UpstreamDrift still runs its own code. What changed is that no UD entry
+  # named `launch_monitor` remains under src/shared/python/, so the guard
+  # above no longer sees a shadow and `shared.python.launch_monitor` now
+  # resolves to the vendored canonical package. The port-up debt itself lives
+  # on in ADR-0048's port order (#9348), not here.
