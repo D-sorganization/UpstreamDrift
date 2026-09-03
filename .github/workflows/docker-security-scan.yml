@@ -35,6 +35,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
+      - name: Fetch pinned Tools packages
+        # The primary Dockerfile now COPYs vendor/ud-tools (UD #9406).
+        uses: ./.github/actions/fetch-pinned-tools
+
       - name: Build Docker image
         # --target runtime avoids pulling in the ~10 GB training stage (PyTorch + CUDA)
         shell: bash
