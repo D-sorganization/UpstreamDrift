@@ -56,7 +56,8 @@ Thumbs.db
 data/raw/
 output/**/temp/
 # Run artifacts and agent scratch (issue #9415): never commit these again.
-/output/
+/output/*
+!/output/.gitkeep
 /.scratch/
 /motion_matching_training/
 reports/pip_audit.json
