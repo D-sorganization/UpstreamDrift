@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import sys
+import tomllib
 import venv
 import zipfile
 from pathlib import Path
@@ -39,6 +40,23 @@ def test_wheel_artifact_requires_explicit_build_output(
 
     with pytest.raises(AssertionError, match=_WHEEL_ENV):
         _wheel_artifact()
+
+
+@pytest.fixture(autouse=True)
+def _require_wheel_artifact(request: pytest.FixtureRequest) -> None:
+    """Skip the suite when this job did not build a wheel to inspect.
+
+    ``release.yml``'s ``smoke-python-wheel`` job always sets
+    ``UPSTREAM_DRIFT_WHEEL``, so the release gate is unaffected. Other lanes
+    collect this module without a wheel present, where a missing artifact is
+    an absent precondition rather than a release regression.
+    ``test_wheel_artifact_requires_explicit_build_output`` asserts that absent
+    precondition itself and so opts out.
+    """
+    if request.function is test_wheel_artifact_requires_explicit_build_output:
+        return
+    if not os.environ.get(_WHEEL_ENV):
+        pytest.skip(f"{_WHEEL_ENV} is unset; wheel smoke runs from release.yml")
 
 
 def _venv_python(tmp_path: Path) -> Path:
@@ -124,13 +142,73 @@ def test_api_server_imports_from_core_only_install(tmp_path: Path) -> None:
 
 
 def test_wheel_contains_ui_bundle() -> None:
-    """The compiled frontend must ship inside the wheel (#8018)."""
+    """The compiled frontend must ship inside the wheel (#8018, #9449).
+
+    ``build_hooks.UIBuildHook._register_ui_bundle`` force-includes ``ui/dist``
+    at the install root only when the bundle exists, and downgrades to a log
+    warning when it does not. A release that never built the frontend would
+    therefore publish a UI-less wheel silently, so the payload is asserted
+    here rather than trusted.
+    """
     with zipfile.ZipFile(_wheel_artifact()) as wheel:
         names = wheel.namelist()
     assert "ui/dist/index.html" in names, (
         "wheel is missing the compiled UI bundle; "
         f"top-level entries: {sorted({n.split('/')[0] for n in names})}"
     )
+    bundle_payload = [
+        name for name in names if name.startswith("ui/dist/") and not name.endswith("/")
+    ]
+    assert len(bundle_payload) > 1, (
+        "wheel ships ui/dist/index.html with no bundled payload; "
+        f"entries: {sorted(bundle_payload)}"
+    )
+    assert any(
+        name.startswith("ui/dist/assets/") and name.endswith(".js")
+        for name in bundle_payload
+    ), (
+        "wheel is missing the compiled UI JavaScript bundle under "
+        f"ui/dist/assets/; entries: {sorted(bundle_payload)}"
+    )
+
+
+def _project_version() -> str:
+    """Return the canonical project version from ``pyproject.toml``."""
+    with (REPO_ROOT / "pyproject.toml").open("rb") as handle:
+        return str(tomllib.load(handle)["project"]["version"])
+
+
+def test_wheel_version_matches_project_and_tag() -> None:
+    """The wheel must carry the version of the tag that is being released.
+
+    ``release.yml`` already fails the ``build`` job when the tag and
+    ``pyproject.toml`` disagree; this asserts the same identity on the
+    artifact that actually reaches PyPI and the GitHub release, so a stale
+    downloaded ``dist/`` artifact cannot be published under the wrong tag.
+    """
+    expected = _project_version()
+    wheel_path = _wheel_artifact()
+    wheel_version = wheel_path.name.split("-")[1]
+    assert wheel_version == expected, (
+        f"wheel {wheel_path.name} does not carry pyproject version {expected}"
+    )
+
+    with zipfile.ZipFile(wheel_path) as wheel:
+        dist_infos = {
+            name.split("/", 1)[0]
+            for name in wheel.namelist()
+            if name.endswith(".dist-info/METADATA")
+        }
+    assert dist_infos == {f"upstream_drift-{expected}.dist-info"}, (
+        f"unexpected dist-info for version {expected}: {sorted(dist_infos)}"
+    )
+
+    ref_name = os.environ.get("GITHUB_REF_NAME", "")
+    ref_type = os.environ.get("GITHUB_REF_TYPE", "")
+    if ref_type == "tag" and ref_name.startswith("v"):
+        assert ref_name == f"v{expected}", (
+            f"tag {ref_name} does not match the built wheel version {expected}"
+        )
 
 
 def test_wheel_excludes_sidekick_tests() -> None:

@@ -1102,6 +1102,21 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 
 ### Recent Spec Updates
 
+- **2026-09-03** - Made the tag-driven release able to produce a wheel at all
+  (issue #9449). `build_hooks.py` refuses to package once `CI` is set and
+  `ui/dist` is absent, but `release.yml`'s `build` job never compiled the
+  frontend, so the PEP 517 backend failed and tag `v2.1.1` published no
+  release, wheel, SBOM, or PyPI distribution. The `build` job now installs
+  Node 24 with an `ui/package-lock.json`-keyed npm cache, runs `npm ci` and
+  `npm run build` in `ui/`, and asserts `ui/dist/index.html` before
+  `python -m build`. Because `_register_ui_bundle` only warns when the bundle
+  is missing, the release-blocking wheel smoke suite now asserts that the
+  published wheel carries the `ui/dist` payload including a compiled
+  `ui/dist/assets/*.js` bundle, and that the wheel version equals the
+  `pyproject.toml` version and, on a tag run, the tag itself. A failed tag is
+  recovered by fixing forward to the next patch version rather than moving a
+  published tag; `docs/operations/release-runbook.md` carries the procedure.
+
 - **2026-08-22** - Made the modular Docker build boundary independently
   verifiable for issue #8996. Reusable pinned-Tools setup emits the exact
   `vendor/ud-tools` gitlink plus a deterministic SHA-256 over the minimal
