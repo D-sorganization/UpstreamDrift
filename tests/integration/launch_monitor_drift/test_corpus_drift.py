@@ -79,15 +79,15 @@ import pytest
 
 pytest.importorskip("pyarrow")
 
-from src.tools.launch_monitor_model import corpus as ud_corpus_module  # noqa: E402
-from src.tools.launch_monitor_model.corpus import (  # noqa: E402
+from shared.python.launch_monitor import corpus as ud_corpus_module  # noqa: E402
+from shared.python.launch_monitor.corpus import (  # noqa: E402
     CORPUS_COLUMN_MAP,
     corpus_dataset_path,
 )
-from src.tools.launch_monitor_model.corpus import (  # noqa: E402
+from shared.python.launch_monitor.corpus import (  # noqa: E402
     MAX_RETAINED_ROWS as UD_MAX_RETAINED_ROWS,
 )
-from src.tools.launch_monitor_model.corpus import (  # noqa: E402
+from shared.python.launch_monitor.corpus import (  # noqa: E402
     load_private_corpus as ud_load_private_corpus,
 )
 from shared.python.launch_monitor.schema import METRICS  # noqa: E402
