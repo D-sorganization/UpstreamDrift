@@ -1469,7 +1469,20 @@ jobs:
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 35 # Prevent runaway tests while allowing bounded core-suite completion
+    # Budget measured from CI run 33779933815 (job 100731026646, `tests (3.11)`,
+    # commit ee247039, 2026-09-03): the serial core lane needed 2m36s to collect
+    # and had executed 24% of its 40,488 selected tests after 30m45s (5.27
+    # tests/s), i.e. ~135 min for the full lane including install/collection.
+    # The old 35-minute budget was set on 2026-06-11 (6bc73cb93) while this lane
+    # still ran under xdist; it was serialised to `-n 0` on 2026-06-13
+    # (b4ddf7b30) to stop native GUI/MuJoCo worker termination from destroying
+    # coverage data, and the budget was never re-measured. Every `main` run
+    # since has been killed at exactly 35 minutes, which fails `quality-gate`
+    # without reporting a single assertion (RM #1507, #1505; UD #9431).
+    # 150 = measured ~135 min + ~10% headroom for self-hosted runner contention.
+    # Per-test hangs stay bounded by `--timeout=60 --timeout-method=thread`
+    # below; this budget only bounds the lane as a whole.
+    timeout-minutes: 150
     env:
       # Debt ledger (scripts/config/unit_gate_quarantine.json, issue #8766):
       # the dependency-light lane below only executes when a PR touches src
