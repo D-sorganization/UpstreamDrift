@@ -318,6 +318,7 @@ export interface AssociationEstimateV1 {
   r_squared?: number | null;
   ci_lower?: number | null;
   ci_upper?: number | null;
+  interval_withheld_reason?: "insufficient_degrees_of_freedom" | "clustered_observations" | null;
 }
 
 export interface AvailabilityV1 {
@@ -809,6 +810,8 @@ export interface CovariationUncertaintyV1 {
   per_player_interval: "fisher-z";
   pooled_interval: "fisher-z-unclustered";
   within_player_interval: "unavailable-clustered";
+  between_player_interval: "fisher-z-above-min-groups";
+  between_player_interval_min_groups: number;
   fixed_effect_method: "inverse-variance-fisher-z";
   random_effect_method: "dersimonian-laird-fisher-z";
   assumptions: string[];
@@ -1710,6 +1713,7 @@ export interface LongitudinalDimensionV1 {
   trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
   evidence: string;
   min_samples: number;
+  method: "session-cell-sg-trend/1" | "shot-level-sg-trend/1";
 }
 
 export interface LongitudinalMissingnessV1 {
@@ -1726,6 +1730,12 @@ export interface LongitudinalPlayerAssociationV1 {
   direction: "increasing" | "decreasing" | "flat" | "unavailable";
   state: "available" | "unavailable";
   reason_code?: string | null;
+  standard_error?: number | null;
+  ci_lower?: number | null;
+  ci_upper?: number | null;
+  p_value?: number | null;
+  r_squared?: number | null;
+  first_to_last_change?: number | null;
 }
 
 /**
@@ -1749,6 +1759,7 @@ export interface LongitudinalSessionRequestV1 {
   minimum_sessions_per_player: number;
   minimum_player_clusters: number;
   confidence_level: number;
+  pooled_method: "ud-cluster-robust-fe/1" | "dl-random-effects/1";
 }
 
 /**
@@ -1775,6 +1786,7 @@ export interface LongitudinalSessionResultV1 {
 export interface LongitudinalSummaryV1 {
   group_dimension: "player" | "session" | "club" | "all";
   group_value: string;
+  method: "session-cell-sg-trend/1" | "shot-level-sg-trend/1";
   sample_count: number;
   slope: number;
   intercept: number;
@@ -2070,6 +2082,7 @@ export interface PlayerCovariationResultV1 {
   claims?: ClaimsV2;
   definitions: Record<string, string>;
   warnings: string[];
+  method_description: string;
 }
 
 /**
@@ -2138,17 +2151,24 @@ export interface PlotTypesResponse {
   plot_types: PlotTypeInfo[];
 }
 
+/**
+ * One pooled estimate, always carrying the name of the estimator. G1-D1: results from different estimators are never numerically compared without the names attached, so ``method`` is required and has no default. ``standard_error``, ``confidence_interval_*`` and ``confidence_level`` are produced by both estimators; ``p_value`` by ``ud-cluster-robust-fe/1``; the heterogeneity block and ``improvement_probability`` by ``dl-random-effects/1``.
+ */
 export interface PooledAssociationV1 {
-  method: "player_fixed_effects_ols_clustered_by_player";
+  method: "ud-cluster-robust-fe/1" | "dl-random-effects/1";
   estimate_per_order_unit: number;
   standard_error: number;
   confidence_interval_low: number;
   confidence_interval_high: number;
-  p_value: number;
+  p_value?: number | null;
   confidence_level: number;
   cluster_count: number;
   session_cell_count: number;
   uncertainty_state: "available";
+  tau_squared?: number | null;
+  q_statistic?: number | null;
+  i_squared_pct?: number | null;
+  improvement_probability?: number | null;
 }
 
 /**
