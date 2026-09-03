@@ -44,5 +44,18 @@ Update this document whenever a new workflow is added or the status of an existi
   minutes, failing `quality-gate` without reporting any assertion. Re-measure
   this budget whenever the lane's parallelism or selection changes; per-test
   hangs are bounded separately by `--timeout=60 --timeout-method=thread`.
+- `ci-standard.yml` `tests (3.x)` failure reporting: each pytest invocation in
+  the lane writes JUnit XML to `$RUNNER_TEMP/junit/` and the
+  `Upload JUnit Test Results` step publishes it as the `junit-tests-<python>`
+  artifact (`if: always()`, 14-day retention, RM #1507, UD #9474). Fetch it
+  with `gh run download <run-id> -R D-sorganization/UpstreamDrift -n junit-tests-3.12`.
+  The XML is a second copy of the terminal summary, not a replacement for it:
+  both are written during pytest's terminal-summary phase, so a run that dies
+  before that phase produces neither. `main` @ `4ec3da33` did exactly that -
+  a test replaced `builtins.__import__` with a hook that raised for every
+  unrecognised name, pytest's failure formatter could not complete its own
+  lazy import, and the session aborted with `INTERNALERROR` (exit code 3)
+  after counting 305 failures without naming one. The guard against that
+  regression is `tests/unit/repo_hygiene/test_no_non_delegating_import_hook.py`.
 - `nightly-cross-engine.yml` is the repo's dedicated cross-engine lane and is
   the right place to expand stricter native-engine validation over time.
