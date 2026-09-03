@@ -13,12 +13,15 @@ pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SPEC_PATH = _REPO_ROOT / "SPEC.md"
 _CHANGE_LOG_HEADING = "## 12. Change Log"
-_CHANGE_LOG_ROW = re.compile(r"^\|\s*\d{4}-\d{2}-\d{2}\s*\|\s*\d+\.\d+\.\d+\s*\|")
-# Prettier renders the separator with as many cells as the widest row (three
-# historical rows carry unescaped pipes), so accept any all-dash pipe row.
+# Rows are keyed by pull request since Repository_Management#1520, not by a
+# serial spec version: `| YYYY-MM-DD | #<pr> | ... |`. Migrated historical rows
+# that referenced nothing carry the `n/a` marker instead of a key.
+_CHANGE_LOG_ROW = re.compile(r"^\|\s*\d{4}-\d{2}-\d{2}\s*\|\s*(?:#\d+|n/a)\s*\|")
+# The separator may carry as many cells as the widest row (three historical
+# rows carry unescaped pipes), so accept any all-dash pipe row.
 _HEADER_SEPARATOR_ROW = re.compile(r"^\|(?:\s*:?-{3,}:?\s*\|){3,}\s*$")
 _REPAIR_ENTRY = (
-    "| 2026-08-22 | 1.0.574 | Retained PR #8995's MediaPipe landmark-mean optimization"
+    "| 2026-08-22 | #8995 | Retained PR #8995's MediaPipe landmark-mean optimization"
 )
 
 
@@ -63,7 +66,7 @@ def test_spec_repair_entry_is_recorded_exactly_once() -> None:
 def test_no_changelog_rows_outside_section_12() -> None:
     """Every dated change-log row must live inside the Section 12 table.
 
-    Git's merge machinery repeatedly anchors ``| YYYY-MM-DD | 1.0.N | ... |``
+    Git's merge machinery repeatedly anchors ``| YYYY-MM-DD | #<pr> | ... |``
     rows into *other* pipe tables (Section 8's tool table, the post-Section-12
     note sections) because all pipe rows share the same shape, so a textual
     auto-merge cannot tell the tables apart. This gate makes such a bad merge
@@ -81,7 +84,7 @@ def test_no_changelog_rows_outside_section_12() -> None:
     assert offenders == [], (
         "Dated change-log rows found outside the '## 12. Change Log' section, "
         "almost certainly grafted there by a git auto-merge. Move them into "
-        "the Section 12 table (in version order), or delete them if they "
+        "the Section 12 table (newest first), or delete them if they "
         "duplicate an existing Section 12 row:\n" + "\n".join(offenders)
     )
 

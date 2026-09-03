@@ -2,11 +2,11 @@
 
 This document lists all active GitHub Workflows in this repository hub.
 
-| Workflow Name            | Filename                         | Status   | Purpose                                                                                        |
-| :----------------------- | :------------------------------- | :------- | :--------------------------------------------------------------------------------------------- |
-| **Control Tower**        | `Jules-Control-Tower.yml`        | Active   | Orchestrates agentic workers.                                                                  |
-| **PR Compiler**          | `Jules-PR-Compiler.yml`          | Active   | Compiles PR info for fleet management.                                                         |
-| **CI Standard**          | `ci-standard.yml`                | Active   | Core lint/test lane; does not claim full optional-engine coverage.                             |
+| Workflow Name            | Filename                         | Status   | Purpose                                                                                                                                                                                                                                                                            |
+| :----------------------- | :------------------------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Control Tower**        | `Jules-Control-Tower.yml`        | Active   | Orchestrates agentic workers.                                                                                                                                                                                                                                                      |
+| **PR Compiler**          | `Jules-PR-Compiler.yml`          | Active   | Compiles PR info for fleet management.                                                                                                                                                                                                                                             |
+| **CI Standard**          | `ci-standard.yml`                | Active   | Core lint/test lane; does not claim full optional-engine coverage.                                                                                                                                                                                                                 |
 | **Release**              | `release.yml`                    | Active   | Tag-driven wheel/sdist build, PyPI publish, GitHub release; `build` compiles `ui/dist` with Node 24 before `python -m build` because `build_hooks.py` refuses to package without it (UD #9449); wheel smoke asserts the UI bundle and version on Python 3.11–3.12 only (RM #1507). |
 | **Vendor Freshness**     | `vendor-freshness.yml`           | Active   | Submodule staleness + Cargo/pyproject Tools-pin consistency (`check_tools_pins.py`, UD #9406). |
 | **Seam Drift Gate**      | `ci-standard.yml` (job)          | Active   | `seam-drift-gate`: enforces `docs/shared_tools/seam_rulings.v1.json` (UD #9406). |
@@ -31,5 +31,10 @@ Update this document whenever a new workflow is added or the status of an existi
 
 - `ci-standard.yml` is the default core PR lane. It is intentionally fast and
   honest about optional-engine coverage.
+- `ci-standard.yml` concurrency: the group is per-ref on branches/PRs (a newer
+  push cancels the superseded run) but per-commit on `main`, so consecutive
+  merges queue instead of cancelling each other and `main` always finishes a
+  run (RM #1507, #9409). `cancel-in-progress: true` stays literal because
+  `lint-workflow-files.yml` greps for it.
 - `nightly-cross-engine.yml` is the repo's dedicated cross-engine lane and is
   the right place to expand stricter native-engine validation over time.
