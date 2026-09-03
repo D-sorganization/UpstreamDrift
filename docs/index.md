@@ -208,7 +208,7 @@ Issue #8840 recorded four consolidations that this catalog described as pending
 rather than performing. Each is now decided. Dated entries, newest first; a
 decision recorded here is final unless a later dated entry supersedes it.
 
-### 2026-09-03 -- `strategic/` into `plans/`: DONE
+### 2026-09-03 -- `strategic/` Into `plans/`: DONE
 
 `docs/strategic/` held two draft planning documents that belonged with the rest
 of the roadmap material. Both moved to `plans/`
@@ -217,7 +217,7 @@ of the roadmap material. Both moved to `plans/`
 redirect stub was left: the only inbound references were this catalog and two
 dated historical notes, which are preserved as written.
 
-### 2026-09-03 -- `audits/` alongside `audit_reports/`: NO MERGE, catalog corrected
+### 2026-09-03 -- `audits/` Alongside `audit_reports/`: NO MERGE, Catalog Corrected
 
 The premise was wrong. `audits/` was tagged `archived` and described as "legacy
 notes", but it holds the *newest* audit records in the repository, including
@@ -227,7 +227,7 @@ holds a single generated report. The directories are therefore not a duplicate
 pair to be merged; the defect was the catalog metadata. `audits/` is now tagged
 `stable` and described as dated audit records. No files move.
 
-### 2026-09-03 -- `review_archive/` into `reviews/archive/`: DEFERRED
+### 2026-09-03 -- `review_archive/` Into `reviews/archive/`: DEFERRED
 
 Deliberately not performed here. `docs/review_archive/` is referenced by path
 from `.github/workflows/Nightly-Doc-Organizer.yml` and
@@ -239,7 +239,7 @@ stability tag, which already gives readers the navigational precedence the
 issue asked for. The "retained until consolidated" wording has been removed so
 the catalog no longer advertises pending work.
 
-### 2026-09-03 -- 72 dated `assessments/` entries: NO RESTRUCTURE
+### 2026-09-03 -- 72 Dated `assessments/` Entries: NO RESTRUCTURE
 
 `assessments/` carries 294 Markdown pages in dated batches and is already
 tagged `archived`, which is the signal a reader needs to tell superseded
