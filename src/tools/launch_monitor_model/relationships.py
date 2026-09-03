@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from src.tools.launch_monitor_model.schema import METRICS
+from shared.python.launch_monitor.schema import METRICS
 
 
 @dataclass(frozen=True)

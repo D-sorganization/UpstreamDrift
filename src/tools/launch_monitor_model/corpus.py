@@ -253,7 +253,7 @@ def _canonicalize_metrics(
     frame: pd.DataFrame, selected_map: dict[str, tuple[str, str]]
 ) -> pd.DataFrame:
     """Convert native corpus columns to canonical units and metric names."""
-    from src.tools.launch_monitor_model.schema import METRICS
+    from shared.python.launch_monitor.schema import METRICS
 
     present = {
         column: value

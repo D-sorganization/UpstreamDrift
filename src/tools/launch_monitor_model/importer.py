@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from src.tools.launch_monitor_model.profiles import PROFILES, detect_profile
-from src.tools.launch_monitor_model.schema import (
+from shared.python.launch_monitor.schema import (
     IDENTITY_COLUMNS,
     METRICS,
     ColumnMapping,
