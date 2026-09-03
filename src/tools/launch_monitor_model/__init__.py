@@ -108,7 +108,7 @@ from shared.python.launch_monitor.comparison import (
     PairwiseMonitorComparison,
     compare_monitors,
 )
-from src.tools.launch_monitor_model.conformance_bundle import (
+from shared.python.launch_monitor.conformance_bundle import (
     LAUNCH_MONITOR_CONFORMANCE_BUNDLE_VERSION,
     LaunchMonitorConformanceBundleV1,
     LaunchMonitorConformanceScenarioV1,
@@ -198,13 +198,13 @@ from shared.python.launch_monitor.multivariate import (
     compute_pca,
     compute_vif,
 )
-from src.tools.launch_monitor_model.outcome_proxy import analyze_outcome_proxy
-from src.tools.launch_monitor_model.player_covariation import (
+from shared.python.launch_monitor.outcome_proxy import analyze_outcome_proxy
+from shared.python.launch_monitor.player_covariation import (
     analyze_player_covariation_v1,
     player_covariation_contract_json_schema,
     scan_player_covariation_v1,
 )
-from src.tools.launch_monitor_model.player_covariation_types import (
+from shared.python.launch_monitor.player_covariation_types import (
     PLAYER_COVARIATION_CONTRACT_VERSION,
     AssociationEstimateV1,
     CovariationMissingnessV1,
@@ -246,23 +246,35 @@ from shared.python.launch_monitor.trends import (
     TemporalTrendResult,
     analyze_trend,
 )
-from src.tools.launch_monitor_model.strokes_gained import (
+from shared.python.launch_monitor.strokes_gained import (
     analyze_source_backed_strokes_gained,
     strokes_gained_contract_json_schema,
 )
-from src.tools.launch_monitor_model.strokes_gained_types import (
+from shared.python.launch_monitor.strokes_gained_types import (
     BASELINE_CONTRACT_VERSION,
     OUTCOME_PROXY_CONTRACT_VERSION,
     STROKES_GAINED_CONTRACT_VERSION,
     CourseStateColumnsV1,
-    ExpectedStrokesBaselineV2,
-    ExpectedStrokesStateV2,
+    ExpectedStrokesBaselineLike,
+    ExpectedStrokesStateLike,
     GroupingDimensionV1,
     LongitudinalDimensionV1,
+    LongitudinalMethod,
     OutcomeProxyRequestV1,
     OutcomeProxyResultV1,
     StrokesGainedAnalysisResultV1,
     StrokesGainedRequestV1,
+)
+
+# ADR-0048 step P12 deliberately left the expected-strokes baseline half out of
+# the canonical port: Tools' ``rate_of_closure.launch_monitor_strokes_gained_
+# baseline`` is already the authority for loading and digest-verifying that
+# artifact, so the canonical layer types its ``baseline`` argument against a
+# protocol instead. UpstreamDrift still needs a *validating* model, because the
+# analytics API parses one off the wire. See ``strokes_gained_baseline``.
+from src.tools.launch_monitor_model.strokes_gained_baseline import (
+    ExpectedStrokesBaselineV2,
+    ExpectedStrokesStateV2,
     baseline_table_sha256,
 )
 from shared.python.launch_monitor.treatment import (
@@ -307,7 +319,9 @@ __all__ = [
     "DispersionResult",
     "FlexibleAnalysisRequest",
     "FlexibleAnalysisResult",
+    "ExpectedStrokesBaselineLike",
     "ExpectedStrokesBaselineV2",
+    "ExpectedStrokesStateLike",
     "ExpectedStrokesStateV2",
     "GroupingDimensionV1",
     "GroupAnalysis",
@@ -321,6 +335,7 @@ __all__ = [
     "LaunchMonitorConformanceScenarioV1",
     "LONGITUDINAL_SESSION_CONTRACT_VERSION",
     "LongitudinalDimensionV1",
+    "LongitudinalMethod",
     "LongitudinalClaimsV1",
     "LongitudinalDesignV1",
     "LongitudinalMissingnessV1",

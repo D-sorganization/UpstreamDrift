@@ -77,10 +77,17 @@ DIFFER — documented and pinned below
          an explicitly attested ``PlayerIdentityV2``; Tools has no identity
          concept. Tools' result carries a 160x6 ``backing_data`` frame holding
          the raw x/y values; UD's ``lineage`` carries content-addressed backing
-         records instead. UD's result exposes 19 fields to Tools' 11, the
+         records instead. UD's result exposes 20 fields to Tools' 11, the
          difference being the evidence layer (availability, missingness,
          uncertainty, lineage, identity, provenance, claims, status,
-         contract/analysis kind).
+         contract/analysis kind). **``method_description`` is no longer
+         Tools-only**: ADR-0048's P18 union folded it in from
+         ``rate_of_closure``'s ``PlayerCovariationAnalysis``, so the field
+         count moved 19 -> 20 and the Tools-only set narrowed to
+         ``backing_data`` alone -- which stays Tools-only by design, because a
+         row-free result is what keeps the private-corpus boundary intact.
+         ``covariation_backing_frame`` gives a caller the same 160x6 frame on
+         demand without embedding rows in the wire document.
     D27. **Exclusion accounting.** A blank player identifier is booked by UD as
          ``excluded_by_reason={"blank_player_identity": 1}``; Tools reports it
          as "1 rows were excluded for missing or non-finite values", which
@@ -98,11 +105,11 @@ from shared.python.launch_monitor.contract_v2 import (
     AnalysisContextV2,
     PlayerIdentityV2,
 )
-from src.tools.launch_monitor_model.player_covariation import (
+from shared.python.launch_monitor.player_covariation import (
     analyze_player_covariation_v1,
     scan_player_covariation_v1,
 )
-from src.tools.launch_monitor_model.player_covariation_types import (
+from shared.python.launch_monitor.player_covariation_types import (
     PlayerCovariationRequestV1,
     PlayerCovariationScanRequestV1,
 )
@@ -176,8 +183,10 @@ TOOLS_ONLY_BETWEEN_CI = (-0.6655142653044201, 0.9960866924324187)
 TOOLS_LOW_CONFIDENCE_POOLED_CI = (0.03992526547944134, 0.080212402987504)
 UD_SCAN_COLUMN_CAP = 20
 
-# D26 pins.
-UD_RESULT_FIELD_COUNT = 19
+# D26 pins. 19 -> 20: ADR-0048 P18's union folded ``method_description`` in
+# from ``rate_of_closure``, which is why the count moved and why the Tools-only
+# field set below is down to ``backing_data``.
+UD_RESULT_FIELD_COUNT = 20
 TOOLS_RESULT_FIELD_COUNT = 11
 TOOLS_BACKING_DATA_SHAPE = (160, 6)
 
@@ -678,9 +687,15 @@ def test_divergence_d26_identity_trust_and_row_retention(
         "uncertainty",
         "vendor_provenance",
     }
+    # P18's union left exactly one field on the legacy side, and deliberately:
+    # ``backing_data`` embeds 160 raw rows, which a wire result must not carry
+    # (ADR-0046's "no private rows in project files"). The union folded in the
+    # *capability* as ``covariation_backing_frame`` instead, so a caller can
+    # still plot the within-player centring without the rows travelling.
     assert set(type(tools_result).__dataclass_fields__) - set(
         type(ud_result).model_fields
-    ) == {"backing_data", "method_description"}
+    ) == {"backing_data"}
+    assert ud_result.method_description == tools_result.method_description
 
 
 def test_divergence_d27_exclusion_accounting_names_the_cause_only_in_ud(

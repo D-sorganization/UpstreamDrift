@@ -318,6 +318,7 @@ export interface AssociationEstimateV1 {
   r_squared?: number | null;
   ci_lower?: number | null;
   ci_upper?: number | null;
+  interval_withheld_reason?: "insufficient_degrees_of_freedom" | "clustered_observations" | null;
 }
 
 export interface AvailabilityV1 {
@@ -809,6 +810,8 @@ export interface CovariationUncertaintyV1 {
   per_player_interval: "fisher-z";
   pooled_interval: "fisher-z-unclustered";
   within_player_interval: "unavailable-clustered";
+  between_player_interval: "fisher-z-above-min-groups";
+  between_player_interval_min_groups: number;
   fixed_effect_method: "inverse-variance-fisher-z";
   random_effect_method: "dersimonian-laird-fisher-z";
   assumptions: string[];
@@ -1710,6 +1713,7 @@ export interface LongitudinalDimensionV1 {
   trust_level: "explicit_user_attested" | "pseudonymous_stable" | "verified_external";
   evidence: string;
   min_samples: number;
+  method: "session-cell-sg-trend/1" | "shot-level-sg-trend/1";
 }
 
 export interface LongitudinalMissingnessV1 {
@@ -1782,6 +1786,7 @@ export interface LongitudinalSessionResultV1 {
 export interface LongitudinalSummaryV1 {
   group_dimension: "player" | "session" | "club" | "all";
   group_value: string;
+  method: "session-cell-sg-trend/1" | "shot-level-sg-trend/1";
   sample_count: number;
   slope: number;
   intercept: number;
@@ -2077,6 +2082,7 @@ export interface PlayerCovariationResultV1 {
   claims?: ClaimsV2;
   definitions: Record<string, string>;
   warnings: string[];
+  method_description: string;
 }
 
 /**

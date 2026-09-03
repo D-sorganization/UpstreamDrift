@@ -214,7 +214,8 @@ async def contract_v2() -> dict[str, object]:
 async def strokes_gained_contract_v1() -> dict[str, object]:
     """Publish the canonical source-backed scoring result schema."""
 
-    return strokes_gained_contract_json_schema()
+    schema: dict[str, object] = strokes_gained_contract_json_schema()
+    return schema
 
 
 @router.get("/contracts/dataset-jobs/v1")
@@ -302,7 +303,8 @@ async def get_dataset_job_results(
 async def player_covariation_contract_v1() -> dict[str, object]:
     """Publish the canonical player/population covariation schema."""
 
-    return player_covariation_contract_json_schema()
+    schema: dict[str, object] = player_covariation_contract_json_schema()
+    return schema
 
 
 @router.post("/analyze")
