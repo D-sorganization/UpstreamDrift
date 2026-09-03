@@ -14,7 +14,11 @@ This directory contains MyoSuite environments and MyoSim models for muscle-drive
 
 ## Official MyoSim Models (Submodule)
 
-The `myo_sim/` directory contains the **official MyoSim musculoskeletal models** from MyoHub.
+The **official MyoSim musculoskeletal models** from MyoHub are the git
+submodule at `shared/models/myosuite/myo_sim/` (repository root, not under
+`src/`). It is optional and empty until you run
+`git submodule update --init shared/models/myosuite/myo_sim`.
+Paths below are relative to that submodule.
 
 ### Available Body Regions
 
