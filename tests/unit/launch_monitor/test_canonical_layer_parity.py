@@ -25,10 +25,27 @@ cleared it (#9420) by moving the UpstreamDrift copy out of that namespace to
 and is still asserted here: it is the provenance probe every remaining wave
 depends on, and it goes red if a UpstreamDrift package ever re-enters the
 namespace.
+
+Wave 2 retires four more tier-1 modules — ADR-0048's port order steps P7
+(`relationships`), P8 (`modeling`), and P9 (`profiles` + `importer`) — onto
+the same canonical layer. `modeling`, `profiles`, and `importer` are AST-
+identical twins exactly like every wave-1 module, so
+:func:`test_wave_2_module_is_retired_and_served_by_the_canonical_layer` below
+is the same shape as wave 1's assertion. `relationships` is not identical: its
+canonical twin carries owner ruling **D17** (ADR-0048 "Owner Rulings
+(2026-09-02)") — booleans are still analysed as 0/1, but the projection is now
+explicit rather than silent. That is not a rename like P3's `TrendResult`; it
+is additive (`CorrelationResult.boolean_projected`,
+`DependencyEdge.includes_boolean_projection`), so retiring it is a behaviour
+*addition*, not a behaviour change, and
+:func:`test_relationships_gains_the_d17_boolean_projection_fields_additively`
+pins that distinction directly rather than folding `relationships` into the
+identical-twin parametrization.
 """
 
 from __future__ import annotations
 
+import dataclasses
 import importlib
 import importlib.util
 import os
@@ -36,6 +53,8 @@ import subprocess  # nosec B404 - fixed interpreter invocation, no shell
 import sys
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import pytest
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
@@ -55,6 +74,19 @@ WAVE_1_MODULES = (
     "schema",
     "treatment",
     "trends",
+)
+
+# ADR-0046 Stage 2 wave 2: P7-P9 of ADR-0048's port order. All four retire
+# together and share the same "file gone, canonical import resolves"
+# assertion below regardless of twin status; `relationships` additionally
+# gets test_relationships_gains_the_d17_boolean_projection_fields_additively
+# because unlike the other three it is not an identical twin — owner ruling
+# D17 makes it an additive behaviour change, not a pure re-point.
+WAVE_2_MODULES = (
+    "importer",
+    "modeling",
+    "profiles",
+    "relationships",
 )
 
 _MISSING_VENDOR_HINT = (
@@ -109,6 +141,157 @@ def test_wave_1_module_is_retired_and_served_by_the_canonical_layer(
         f"not from the vendored canonical package at "
         f"{vendored_package / f'{module_name}.py'}."
     )
+
+
+@pytest.mark.parametrize("module_name", WAVE_2_MODULES)
+def test_wave_2_module_is_retired_and_served_by_the_canonical_layer(
+    module_name: str,
+) -> None:
+    """Wave 2's four modules pass the same retirement check wave 1's did.
+
+    Identical in shape to
+    :func:`test_wave_1_module_is_retired_and_served_by_the_canonical_layer`;
+    kept as a second parametrization rather than merged into
+    ``WAVE_1_MODULES`` so a wave-2 regression reads as a wave-2 failure. This
+    check does not care whether the retired module is an identical twin —
+    that is a separate claim, made for `relationships` by
+    :func:`test_relationships_gains_the_d17_boolean_projection_fields_additively`
+    below.
+    """
+    vendored_package = _require_vendored_package()
+
+    ud_copy = _UD_PACKAGE / f"{module_name}.py"
+    assert not ud_copy.exists(), (
+        f"{ud_copy.relative_to(_REPO_ROOT)} exists again. ADR-0046 Stage 2 "
+        "wave 2 retired this module; UpstreamDrift consumes the canonical "
+        "implementation from Tools through "
+        f"shared.python.launch_monitor.{module_name}. A re-added copy shadows "
+        "nothing here but does fork the implementation, which is the "
+        "divergence ADR-0046 was accepted to end. Land the change in Tools "
+        "and bump the vendor pin."
+    )
+
+    module = importlib.import_module(f"shared.python.launch_monitor.{module_name}")
+    assert module.__file__ is not None
+    resolved = Path(module.__file__).resolve()
+    assert resolved == (vendored_package / f"{module_name}.py").resolve(), (
+        f"shared.python.launch_monitor.{module_name} imported from {resolved}, "
+        f"not from the vendored canonical package at "
+        f"{vendored_package / f'{module_name}.py'}."
+    )
+
+
+def _shots(n: int = 80) -> pd.DataFrame:
+    """The deterministic synthetic shot frame every relationships test uses.
+
+    Same seed, same columns, same coefficients as
+    ``tests/unit/launch_monitor/test_analysis.py``'s private ``_shots`` helper
+    and Tools' ported ``build_shots``
+    (``vendor/ud-tools/tests/shared/python/launch_monitor/conftest.py``) --
+    duplicated here rather than imported across test modules so this file
+    stays self-contained, matching its existing style.
+    """
+    rng = np.random.default_rng(42)
+    club = np.linspace(35.0, 50.0, n)
+    attack = rng.normal(-0.04, 0.025, n)
+    ball = 1.47 * club + 3.0 * attack + rng.normal(0.0, 0.7, n)
+    return pd.DataFrame(
+        {
+            "shot_id": [f"s{i}" for i in range(n)],
+            "session_id": np.where(np.arange(n) < n / 2, "a", "b"),
+            "monitor_vendor": np.where(np.arange(n) % 2, "Garmin", "TrackMan"),
+            "captured_at": pd.date_range("2026-01-01", periods=n, freq="D"),
+            "club_speed": club,
+            "attack_angle": attack,
+            "ball_speed": ball,
+            "smash_factor": ball / club,
+            "carry_distance": 3.4 * ball + rng.normal(0.0, 2.0, n),
+            "lateral_carry": rng.normal(2.0, 8.0, n),
+        }
+    )
+
+
+def test_relationships_gains_the_d17_boolean_projection_fields_additively() -> None:
+    """Owner ruling D17 lands as an additive field pair, not a rename.
+
+    ADR-0048's port order table lists P7 (`relationships`) as retiring
+    verbatim first, with a note that a follow-up applies D15/D17-class
+    rulings afterward; by the time wave 2 retires it, D17 (ADR-0048 "Owner
+    Rulings (2026-09-02)") is already applied in the canonical module. Unlike
+    the P3 `trends` rename this is additive: `CorrelationResult` gains
+    `boolean_projected` and `DependencyEdge` gains
+    `includes_boolean_projection`; every field either dataclass carried before
+    D17 is still there, unrenamed, so a consumer that only reads the fields it
+    already knew about -- the workbench Relationships tab
+    (`gui.py::run_relationship_analysis`, which reads only `.coefficients`,
+    `.method`, and `.edges`) -- does not break on the addition.
+
+    The math is unchanged: a boolean column still projects to 0/1 and its
+    coefficient is bit-identical to analysing the same values pre-cast to
+    float. The pinned value reproduces Tools' own pin
+    (``tests/shared/python/launch_monitor/test_relationships.py``,
+    ``test_boolean_column_projection_is_labelled_and_math_is_unchanged``)
+    against the same fixture, rather than trusting the vendored test alone.
+    """
+    _require_vendored_package()
+
+    relationships = importlib.import_module(
+        "shared.python.launch_monitor.relationships"
+    )
+
+    result_fields = {
+        field.name for field in dataclasses.fields(relationships.CorrelationResult)
+    }
+    edge_fields = {
+        field.name for field in dataclasses.fields(relationships.DependencyEdge)
+    }
+    assert "boolean_projected" in result_fields, (
+        "shared.python.launch_monitor.relationships.CorrelationResult lost "
+        "the D17 boolean_projected field."
+    )
+    assert "includes_boolean_projection" in edge_fields, (
+        "shared.python.launch_monitor.relationships.DependencyEdge lost the "
+        "D17 includes_boolean_projection field."
+    )
+    # D17 adds; it does not remove or rename what was already there.
+    assert {
+        "method",
+        "coefficients",
+        "p_values",
+        "adjusted_p_values",
+        "pair_counts",
+        "partial_coefficients",
+        "derived_metrics",
+        "edges",
+    } <= result_fields
+    assert {
+        "source",
+        "target",
+        "coefficient",
+        "p_value",
+        "adjusted_p_value",
+        "sample_count",
+        "includes_derived_metric",
+    } <= edge_fields
+
+    frame = _shots(40)
+    frame["is_trackman"] = frame["monitor_vendor"] == "TrackMan"
+    boolean = relationships.compute_correlations(
+        frame, metrics=("club_speed", "is_trackman")
+    )
+    r = boolean.coefficients.loc["club_speed", "is_trackman"]
+    assert r == pytest.approx(-0.04331480818242096), (
+        "The D17 boolean-projection coefficient drifted from its pinned "
+        "value; the ruling only labels the projection, it must not change "
+        "the math."
+    )
+    assert boolean.boolean_projected == ("is_trackman",)
+    assert boolean.pair_counts.loc["club_speed", "is_trackman"] == 40
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "CorrelationResult" in facade.__all__
+    assert "DependencyEdge" in facade.__all__
+    assert "compute_correlations" in facade.__all__
 
 
 def test_trends_exposes_the_renamed_result_without_a_back_compat_alias() -> None:
