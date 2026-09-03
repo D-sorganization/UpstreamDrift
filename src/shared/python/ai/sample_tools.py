@@ -53,6 +53,7 @@ def register_golf_suite_tools(registry: ToolRegistry) -> None:
     _register_agent_control_tools(registry)
     _register_cli_tools(registry)
     _register_codemap_tools_proxy(registry)
+    _register_sidekick_analytics(registry)
     logger.info("Registered Golf Suite tools")
 
 
@@ -676,6 +677,21 @@ def _register_cli_tools(registry: ToolRegistry) -> None:
 
     except ImportError as e:
         logger.warning("Could not register CLI tools: %s", e)
+
+
+def _register_sidekick_analytics(registry: ToolRegistry) -> None:
+    """Register the Sidekick analytics tool on ``registry``.
+
+    Unlike the optional codemap proxy this is a mandatory member of the
+    Golf Suite tool set: ``system_prompts`` tells the assistant the tool
+    exists, so a silent registration failure would leave the assistant
+    advertising a tool it cannot call. Import errors therefore propagate.
+    """
+    from src.shared.python.ai.tools.sidekick_analytics import (
+        register_sidekick_analytics_tools,
+    )
+
+    register_sidekick_analytics_tools(registry)
 
 
 def _register_codemap_tools_proxy(registry: ToolRegistry) -> None:

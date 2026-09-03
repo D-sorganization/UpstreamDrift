@@ -18,6 +18,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from src.shared.python.ai.tools.sidekick_analytics import (
+    SIDEKICK_ANALYTICS_TOOL_NAME,
+)
+
 logger = logging.getLogger(__name__)
 
 # ── Application context registry ────────────────────────────────────
@@ -51,6 +55,10 @@ _APP_CONTEXTS: dict[str, dict[str, Any]] = {
             "Performing drift-control decomposition",
             "Generating visualizations and reports",
             "Cross-engine comparison analysis",
+            (
+                "Summarizing a stored simulation run by id with the "
+                f"`{SIDEKICK_ANALYTICS_TOOL_NAME}` tool"
+            ),
         ],
     },
     "tools": {

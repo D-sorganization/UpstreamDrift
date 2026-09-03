@@ -198,7 +198,15 @@ def summarize_simulation_run(run_id: str) -> dict[str, Any]:
 # ── Registry hookup ──────────────────────────────────────────────────
 
 
-_TOOL_NAME = "summarize_simulation_run"
+SIDEKICK_ANALYTICS_TOOL_NAME = "summarize_simulation_run"
+"""Canonical registry name of the Sidekick analytics tool.
+
+Public because two other modules must agree with it: ``sample_tools``
+registers it and ``system_prompts`` tells the assistant it exists. Both
+import this constant rather than repeating the literal.
+"""
+
+_TOOL_NAME = SIDEKICK_ANALYTICS_TOOL_NAME
 _TOOL_DESCRIPTION = (
     "Summarize a stored simulation run by id. Returns engine, duration, "
     "frame count, key metrics, and a deterministic natural-language "
