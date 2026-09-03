@@ -22,6 +22,10 @@ TagReader = Callable[[Path], tuple[str, ...]]
 
 _SEMVER_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:[.-]?(?:dev|a|b|rc).*)?$")
 _TAG_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
+# `| 2.1.x | :white_check_mark: |` rows in the SECURITY.md supported-versions table.
+_SECURITY_SUPPORTED_RE = re.compile(
+    r"^\|\s*(\d+\.\d+)\.x\s*\|\s*:white_check_mark:\s*\|", re.MULTILINE
+)
 
 
 @dataclass(frozen=True)
@@ -89,6 +93,65 @@ def _read_package_json_version(path: Path) -> str:
     if not isinstance(version, str) or not version:
         raise ValueError(f"{path} must contain a non-empty version")
     return version
+
+
+def _read_version_file(path: Path) -> str:
+    """Return the trimmed single-line ``VERSION`` file contents."""
+    if not path.is_file():
+        raise ValueError(f"Required version file is missing: {path}")
+    version = path.read_text(encoding="utf-8").strip()
+    if not version:
+        raise ValueError(f"{path} must contain a non-empty version")
+    return version
+
+
+def _read_json_version(path: Path) -> str:
+    """Return the top-level ``version`` key of a JSON document."""
+    if not path.is_file():
+        raise ValueError(f"Required version file is missing: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    version = data.get("version") if isinstance(data, dict) else None
+    if not isinstance(version, str) or not version:
+        raise ValueError(f"{path} must contain a non-empty top-level version")
+    return version
+
+
+def _sbom_baseline_errors(path: Path, canonical_version: str) -> list[str]:
+    """Return drift errors for the SBOM baseline's derived version strings."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    errors: list[str] = []
+    tiers = data.get("tiers")
+    if not isinstance(tiers, dict):
+        return [f"{path} must contain a tiers table"]
+    for tier, spec in tiers.items():
+        install_spec = spec.get("install_spec") if isinstance(spec, dict) else None
+        if not isinstance(install_spec, str) or not install_spec.endswith(
+            f"=={canonical_version}"
+        ):
+            errors.append(
+                f"scripts/config/sbom_baseline.json tier {tier!r} install_spec "
+                f"{install_spec!r} does not pin =={canonical_version}"
+            )
+    for artifact in data.get("expected_artifacts", []):
+        if canonical_version not in str(artifact):
+            errors.append(
+                f"scripts/config/sbom_baseline.json expected artifact {artifact!r} "
+                f"does not carry version {canonical_version!r}"
+            )
+    return errors
+
+
+def _security_supported_series(path: Path) -> tuple[str, ...]:
+    """Return the ``MAJOR.MINOR`` series marked supported in SECURITY.md."""
+    if not path.is_file():
+        raise ValueError(f"Required version file is missing: {path}")
+    text = path.read_text(encoding="utf-8")
+    series = tuple(dict.fromkeys(_SECURITY_SUPPORTED_RE.findall(text)))
+    if not series:
+        raise ValueError(
+            f"{path} must list at least one supported `| X.Y.x | :white_check_mark: |` row"
+        )
+    return series
 
 
 def _read_python_dunder_version(path: Path) -> str:
@@ -177,6 +240,21 @@ def _collect_surfaces(repo_root: Path) -> tuple[VersionSurface, ...]:
                 repo_root / "rust_core" / "upstream-physics" / "pyproject.toml"
             ),
         ),
+        VersionSurface(
+            "VERSION",
+            repo_root / "VERSION",
+            _read_version_file(repo_root / "VERSION"),
+        ),
+        VersionSurface(
+            "ui/src-tauri/tauri.conf.json",
+            repo_root / "ui" / "src-tauri" / "tauri.conf.json",
+            _read_json_version(repo_root / "ui" / "src-tauri" / "tauri.conf.json"),
+        ),
+        VersionSurface(
+            "scripts/config/sbom_baseline.json",
+            repo_root / "scripts" / "config" / "sbom_baseline.json",
+            _read_json_version(repo_root / "scripts" / "config" / "sbom_baseline.json"),
+        ),
     )
 
 
@@ -207,11 +285,30 @@ def check_versions(
                 f"pyproject.toml version {canonical_version!r}"
             )
 
+    errors.extend(
+        _sbom_baseline_errors(
+            repo_root / "scripts" / "config" / "sbom_baseline.json", canonical_version
+        )
+    )
+
     try:
         canonical_tuple = _release_tuple(canonical_version)
     except ValueError as exc:
         errors.append(str(exc))
         canonical_tuple = None
+
+    if canonical_tuple is not None:
+        series = f"{canonical_tuple[0]}.{canonical_tuple[1]}"
+        try:
+            supported = _security_supported_series(repo_root / "SECURITY.md")
+        except ValueError as exc:
+            errors.append(str(exc))
+        else:
+            if series not in supported:
+                errors.append(
+                    f"SECURITY.md supported versions {supported!r} do not include "
+                    f"the current series {series + '.x'!r}"
+                )
 
     latest_tag = _latest_semver_tag(tag_reader(repo_root))
     if latest_tag is None:
