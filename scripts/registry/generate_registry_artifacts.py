@@ -54,6 +54,44 @@ _MATURITY_LABELS = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Help-page coverage gate (issue #9413)
+#
+# Every ``ready`` / ``beta`` tile must declare a ``help:`` page that exists on
+# disk, so a new tile cannot ship without user-facing help. The tiles below
+# were already shipping without one when the gate was introduced
+# (2026-09-03); the set is a *shrink-only* ratchet — adding to it is a
+# regression the gate itself rejects, and it is deleted when the last entry
+# goes. Tracked by UpstreamDrift #9413.
+# ---------------------------------------------------------------------------
+HELP_RATCHET: frozenset[str] = frozenset(
+    {
+        "biomech_exercise",
+        "biomech_gait",
+        "biomech_sit_to_stand",
+        "character_builder",
+        "chat_assistant",
+        "config_setup_wizard",
+        "data_explorer",
+        "data_processor",
+        "dataset_generator",
+        "launch_monitor_analytics",
+        "library_tool",
+        "model_explorer",
+        "motion_target_preview",
+        "movement_optimizer",
+        "pose_studio",
+        "project_map",
+        "sidekick",
+        "tools_calculator_hub",
+        "training_controller",
+    }
+)
+
+#: Maturity levels whose tiles must carry a help page.
+HELP_REQUIRED_MATURITIES: frozenset[str] = frozenset({"ready", "beta"})
+
+
 class ArtifactDriftError(RuntimeError):
     """Raised by ``--check`` when a committed artifact is stale."""
 
@@ -172,6 +210,64 @@ def project_artifacts(
     return out
 
 
+def help_violations(
+    repo_root: Path, *, registry: TileRegistry | None = None
+) -> list[str]:
+    """Return human-readable help-coverage violations for the registry.
+
+    Three rules are enforced:
+
+    1. A tile that declares ``help:`` must point at a file that exists.
+    2. A ``ready`` / ``beta`` tile must declare ``help:`` unless it is listed
+       in :data:`HELP_RATCHET`.
+    3. :data:`HELP_RATCHET` may only shrink — an entry that now has a help
+       page, or that no longer names a real ready/beta tile, must be removed.
+
+    Args:
+        repo_root: Repository root that owns ``docs/`` and ``src/config/``.
+        registry: Pre-loaded registry; loaded from ``repo_root`` when omitted.
+
+    Returns:
+        A list of violation messages. Empty means the gate passes.
+    """
+    reg = registry or load_tile_registry(
+        repo_root / REGISTRY_PATH.relative_to(REPO_ROOT)
+    )
+    problems: list[str] = []
+    covered: set[str] = set()
+
+    for tile in sorted(reg.tiles, key=lambda t: t.id):
+        if tile.help:
+            if (repo_root / tile.help).is_file():
+                covered.add(tile.id)
+            else:
+                problems.append(
+                    f"tile {tile.id!r} declares help {tile.help!r} but that "
+                    "file does not exist"
+                )
+        elif tile.maturity in HELP_REQUIRED_MATURITIES:
+            if tile.id not in HELP_RATCHET:
+                problems.append(
+                    f"tile {tile.id!r} is {tile.maturity} but declares no "
+                    "help page; add `help: docs/help/<tile_id>.md` and write "
+                    "the page (purpose, inputs, outputs, method, limitations)"
+                )
+
+    required_ids = {
+        tile.id for tile in reg.tiles if tile.maturity in HELP_REQUIRED_MATURITIES
+    }
+    for stale in sorted(HELP_RATCHET & covered):
+        problems.append(
+            f"tile {stale!r} now has a help page; remove it from "
+            "HELP_RATCHET in scripts/registry/generate_registry_artifacts.py"
+        )
+    for gone in sorted(HELP_RATCHET - required_ids):
+        problems.append(
+            f"HELP_RATCHET entry {gone!r} is not a ready/beta tile any more; remove it"
+        )
+    return problems
+
+
 def check(repo_root: Path) -> list[Path]:
     """Return the artifacts whose committed text differs from the projection."""
     return [
@@ -207,6 +303,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     repo_root = args.repo_root.resolve()
     try:
         if args.check:
+            if problems := help_violations(repo_root):
+                sys.stderr.write("registry help coverage failed:\n")
+                for problem in problems:
+                    sys.stderr.write(f"  - {problem}\n")
+                return 1
             stale = check(repo_root)
             if stale:
                 names = ", ".join(str(p.relative_to(repo_root)) for p in stale)

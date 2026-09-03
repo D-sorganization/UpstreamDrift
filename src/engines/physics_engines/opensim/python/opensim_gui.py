@@ -40,6 +40,7 @@ except ImportError:
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from matplotlib.figure import Figure
+from src.shared.python.ui.tile_help import attach_tile_help
 
 try:
     from src.engines.physics_engines.opensim.python.opensim_golf.core import (
@@ -84,6 +85,7 @@ class OpenSimGolfGUI(QMainWindow):
         self.resize(1000, 800)
         self._main_widget = MainWidget(self, model_path=model_path)
         self.setCentralWidget(self._main_widget)
+        attach_tile_help(self, "opensim_golf")
 
     # The original public surface delegated through the central widget
     # so existing callers (and any downstream tests) continue to work.

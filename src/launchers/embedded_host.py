@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.ui.tile_help import attach_tile_help
 from src.shared.python.launcher_embed import (
     EmbeddableTool,
     InMemoryLauncherContext,
@@ -356,6 +357,7 @@ class EmbeddedHostWidget(QWidget):
         widget = tool.create_main_widget(self)
         if widget is None:
             raise ValueError(f"tool {tool_id!r} create_main_widget returned None")
+        attach_tile_help(widget, tool_id)
 
         index = self._tab_widget.addTab(widget, tool.tool_id)
         self._tab_widget.setCurrentIndex(index)
@@ -752,6 +754,7 @@ class EmbeddedHostWidget(QWidget):
         widget = tool.create_main_widget(self)
         if widget is None:
             raise ValueError(f"tool {tool_id!r} create_main_widget returned None")
+        attach_tile_help(widget, tool_id)
 
         dock = QDockWidget(tool.tool_id, self._host_window)
         dock.setObjectName(f"embedded_dock::{tool.tool_id}")

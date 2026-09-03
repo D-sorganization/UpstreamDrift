@@ -31,6 +31,7 @@ from src.launchers.launcher_model_sources import (
     get_model_source_root,
     resolve_model_artifact_path,
 )
+from src.shared.python.ui.tile_help import attach_tile_help
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import (
@@ -908,6 +909,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
                 ui_widget = tool.create_main_widget(self.launcher)
                 if ui_widget:
+                    attach_tile_help(ui_widget, getattr(tool, "tool_id", None))
                     ui_widget.destroyed.connect(tool.cleanup)
                     self.dock_widget_as_tab(ui_widget, "Model Explorer")
                     self.show_toast("Model Explorer loaded as tab.", "success")
@@ -966,6 +968,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
                 ui_widget = tool.create_main_widget(self.launcher)
                 if ui_widget:
+                    attach_tile_help(ui_widget, getattr(tool, "tool_id", None))
                     ui_widget.destroyed.connect(tool.cleanup)
                     self.dock_widget_as_tab(ui_widget, "Training")
                     self.show_toast("Training Controller loaded as tab.", "success")
@@ -1001,6 +1004,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
                 ui_widget = tool.create_main_widget(self.launcher)
                 if ui_widget:
+                    attach_tile_help(ui_widget, getattr(tool, "tool_id", None))
                     ui_widget.destroyed.connect(tool.cleanup)
                     self.dock_widget_as_tab(ui_widget, "C3D Viewer")
                     self.show_toast("C3D Viewer loaded as tab.", "success")

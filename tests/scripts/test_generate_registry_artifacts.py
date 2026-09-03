@@ -44,7 +44,23 @@ def _scratch_repo(tmp_path: Path) -> Path:
         "README.md",
     ):
         shutil.copy(REPO_ROOT / rel, root / rel)
+    # The help-coverage gate (#9413) reads the pages the registry points at,
+    # so the scratch repo needs the real docs/help tree.
+    shutil.copytree(REPO_ROOT / "docs" / "help", root / "docs" / "help")
     return root
+
+
+def test_help_gate_rejects_a_declared_page_that_does_not_exist(
+    tmp_path: Path,
+) -> None:
+    """A tile may not point at a help page that is not in the tree (#9413)."""
+    root = _scratch_repo(tmp_path)
+    assert gen.help_violations(root) == []
+    (root / "docs" / "help" / "engine_selection.md").unlink()
+    problems = gen.help_violations(root)
+    assert problems
+    assert any("engine_selection.md" in problem for problem in problems)
+    assert gen.main(["--check", "--repo-root", str(root)]) == 1
 
 
 def test_check_detects_drift_and_generate_repairs_it(tmp_path: Path) -> None:

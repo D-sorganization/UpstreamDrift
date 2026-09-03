@@ -66,6 +66,11 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
     WINDOW_HEIGHT: int = 800
     TIMER_INTERVAL_MS: int = 10  # ~100 Hz default
 
+    #: Registry tile id (``src/config/models.yaml``) whose ``help:`` page
+    #: backs F1 and the Help menu for this window. Subclasses set this so
+    #: every engine GUI ships the same help affordance (issue #9413).
+    HELP_TILE_ID: str | None = None
+
     # Styles for run/stop button
     STYLE_BUTTON_RUN: str = Styles.BTN_RUN
     STYLE_BUTTON_STOP: str = Styles.BTN_STOP
@@ -101,6 +106,11 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
 
         # -- Build shared UI skeleton -----------------------------------
         self._build_base_ui()
+
+        # -- Shared help affordance (F1 + Help menu), issue #9413 -------
+        from src.shared.python.ui.tile_help import attach_tile_help
+
+        attach_tile_help(self, self.HELP_TILE_ID)
 
     # ==================================================================
     # UI construction
