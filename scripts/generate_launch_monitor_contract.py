@@ -15,7 +15,7 @@ if str(REPO_ROOT) not in sys.path:
 from scripts.launch_monitor_conformance_fixture import (  # noqa: E402
     launch_monitor_conformance_bundle as _build_conformance_bundle,
 )
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     AnalysisContextV2,
     PlayerCovariationRequestV1,
     PlayerCovariationScanRequestV1,

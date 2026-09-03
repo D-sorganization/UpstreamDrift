@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from scripts.generate_launch_monitor_contract import launch_monitor_conformance_bundle
 from scripts.launch_monitor_conformance_fixture import _portable_snapshot_value
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     LAUNCH_MONITOR_CONFORMANCE_BUNDLE_VERSION,
     LaunchMonitorConformanceBundleV1,
     launch_monitor_conformance_bundle_json_schema,

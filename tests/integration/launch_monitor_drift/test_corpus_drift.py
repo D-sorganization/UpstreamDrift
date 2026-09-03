@@ -7,9 +7,10 @@ environment variable, same ``data/authority/database/shot_corpus_parquet``
 partition tree — but they read it for opposite reasons, and neither is a subset
 of the other.
 
-    UD    ``launch_monitor/corpus.py`` (197) — canonicalises the source-native
-          imperial columns into the ADR-0031 schema and derives shot identity.
-          Validates nothing about the corpus itself.
+    UD    ``launch_monitor/corpus.py`` — canonicalises the source-native
+          imperial columns into the ADR-0031 schema, derives shot identity,
+          and (since the D30 resolution below) refuses a corpus its manifest
+          does not describe.
     Tools ``rate_of_closure/launch_monitor_private_corpus.py`` (106) —
           validates the manifest digest, schema version, retained-row cap,
           row count and source-partition set, then hands back the *native*
@@ -28,6 +29,8 @@ AGREE — asserted exactly
       return exactly 15 columns.
     * Both fail closed when no root is supplied and the environment variable is
       unset (UD ``FileNotFoundError``, Tools ``ValueError``).
+    * Both refuse the same five unvalidated corpora in the same reason class
+      (see D30 below, resolved).
 
 DIFFER — documented and pinned below
     D28. **The output schemas are almost disjoint.** Of 15 columns each, only
@@ -38,14 +41,24 @@ DIFFER — documented and pinned below
          rpm -> rad/s 0.10471975511965977. Tools returns the native imperial
          values. UD additionally drops ``apex_native`` (its unit varies by
          source, so it cannot be converted safely) and Tools passes it through.
-    D30. **Manifest validation exists only in Tools**, and UD accepts every
-         corpus Tools refuses. Five fail-closed checks — missing manifest,
-         unsupported ``schema_version``, a ``total_rows`` above the 300,000-row
-         desktop cap, a row-count mismatch, and a source-set mismatch — reject
-         the load in Tools and are accepted silently by UD, which returns the
-         same 4 rows in all five cases. Tools alone reports the
-         content-addressed ``manifest_sha256`` and the privacy-safe
-         ``source_name`` label built from it.
+    D30. **RESOLVED — both stacks now refuse an unvalidated corpus.** As
+         originally measured, manifest validation existed only in Tools and UD
+         accepted every corpus Tools refused, returning the same 4 rows in all
+         five cases. ADR-0048's owner-decision row 3 resolved the pair as a
+         *merge* rather than a port; Tools#4907's P19 landed the canonical
+         half (``shared/python/launch_monitor/corpus.py``, validation mandatory
+         and ahead of canonicalisation), and this repo's half ports the same
+         five fail-closed checks into ``src/shared/python/launch_monitor/
+         corpus.py`` — missing manifest, unsupported ``schema_version``, a
+         ``total_rows`` above the 300,000-row desktop cap, a row-count
+         mismatch, and a source-set mismatch. The gate below now asserts the
+         resolved contract: **both sides refuse all five, in the same reason
+         class**, UD checking against the *whole* corpus (an unfiltered
+         ``count_rows()`` and the ``source_id=`` partition names) so the D31
+         pushdown cannot weaken it. What remains a divergence is narrower:
+         Tools alone *reports* the content-addressed ``manifest_sha256`` and
+         the privacy-safe ``source_name`` label built from it, pinned by
+         ``test_divergence_d30_only_tools_reports_the_manifest_digest``.
     D31. **Selection pushdown exists only in UD.** UD takes a ``source_id``
          allowlist and a canonical-metric allowlist, pushes both into the
          Parquet reader, and raises on an unknown value in either. Tools reads
@@ -54,7 +67,9 @@ DIFFER — documented and pinned below
 
 from __future__ import annotations
 
+import ast
 import hashlib
+import inspect
 import json
 from pathlib import Path
 from typing import Any
@@ -64,14 +79,18 @@ import pytest
 
 pytest.importorskip("pyarrow")
 
-from src.shared.python.launch_monitor.corpus import (  # noqa: E402
+from src.tools.launch_monitor_model import corpus as ud_corpus_module  # noqa: E402
+from src.tools.launch_monitor_model.corpus import (  # noqa: E402
     CORPUS_COLUMN_MAP,
     corpus_dataset_path,
 )
-from src.shared.python.launch_monitor.corpus import (  # noqa: E402
+from src.tools.launch_monitor_model.corpus import (  # noqa: E402
+    MAX_RETAINED_ROWS as UD_MAX_RETAINED_ROWS,
+)
+from src.tools.launch_monitor_model.corpus import (  # noqa: E402
     load_private_corpus as ud_load_private_corpus,
 )
-from src.shared.python.launch_monitor.schema import METRICS  # noqa: E402
+from shared.python.launch_monitor.schema import METRICS  # noqa: E402
 from tests.integration.launch_monitor_drift.conftest import (  # noqa: E402
     require_vendored_tools_stack,
 )
@@ -310,13 +329,14 @@ def test_divergence_d29_only_ud_canonicalises_units(ud_frame, tools_corpus) -> N
 
 
 @pytest.mark.parametrize(
-    ("label", "manifest", "write_manifest", "match"),
+    ("label", "manifest", "write_manifest", "expected", "match"),
     [
-        ("missing_manifest", None, False, "manifest not found"),
+        ("missing_manifest", None, False, FileNotFoundError, "manifest not found"),
         (
             "unsupported_schema",
             {"schema_version": 2, "sources": {}, "total_rows": EXPECTED_ROW_COUNT},
             True,
+            ValueError,
             "manifest schema is unsupported",
         ),
         (
@@ -327,6 +347,7 @@ def test_divergence_d29_only_ud_canonicalises_units(ud_frame, tools_corpus) -> N
                 "total_rows": EXPECTED_DESKTOP_ROW_CAP + 1,
             },
             True,
+            ValueError,
             "outside the desktop retained-",
         ),
         (
@@ -337,6 +358,7 @@ def test_divergence_d29_only_ud_canonicalises_units(ud_frame, tools_corpus) -> N
                 "total_rows": EXPECTED_ROW_COUNT - 1,
             },
             True,
+            ValueError,
             "row count mismatch",
         ),
         (
@@ -347,27 +369,80 @@ def test_divergence_d29_only_ud_canonicalises_units(ud_frame, tools_corpus) -> N
                 "total_rows": EXPECTED_ROW_COUNT,
             },
             True,
+            ValueError,
             "source IDs do not match",
         ),
     ],
 )
-def test_divergence_d30_manifest_validation_exists_only_in_tools(
+def test_resolved_d30_both_stacks_refuse_an_unvalidated_corpus(
     tmp_path: Path,
     label: str,
     manifest: dict[str, Any] | None,
     write_manifest: bool,
+    expected: type[Exception],
     match: str,
 ) -> None:
-    """DIFFER (D30): Tools refuses five corpora UD loads without comment."""
+    """RESOLVED (D30): the five corpora Tools refuses, UD now refuses too.
+
+    These five cases previously pinned UD's permissiveness — Tools raised and
+    UD returned the same four rows regardless. ADR-0048 row 3 resolved the pair
+    as a merge; Tools#4907's P19 landed the canonical half and this repo's
+    ``corpus.py`` gained the same gate. The assertion is now symmetric: the
+    same corpus, the same refusal, the same exception class, the same message
+    substring naming which check fired.
+    """
     root = _build_checkout(
         tmp_path / label, manifest=manifest, write_manifest=write_manifest
     )
 
-    with pytest.raises((ValueError, FileNotFoundError), match=match):
+    with pytest.raises(expected, match=match):
         tools_load_private_corpus(root)
+    with pytest.raises(expected, match=match):
+        ud_load_private_corpus(root)
 
-    accepted = ud_load_private_corpus(root)
-    assert len(accepted) == EXPECTED_ROW_COUNT
+
+def test_resolved_d30_ud_validates_the_whole_corpus_not_the_selection(
+    tmp_path: Path,
+) -> None:
+    """RESOLVED (D30): the D31 pushdown cannot buy its way past the gate.
+
+    A ``sources``/``metrics`` selection that would satisfy the manifest's
+    declared row count for the *slice* still fails, because UD's check basis is
+    the unfiltered ``count_rows()`` and the ``source_id=`` partition names.
+    """
+    root = _build_checkout(
+        tmp_path / "selection_cannot_weaken_the_gate",
+        manifest={
+            "schema_version": 1,
+            "sources": {"synthetic_mevo": {}},
+            "total_rows": 2,
+        },
+    )
+
+    # The mevo partition alone is exactly 2 rows and exactly that source set,
+    # so a selection-scoped check would pass. The whole corpus is 4 rows.
+    with pytest.raises(ValueError, match="row count mismatch"):
+        ud_load_private_corpus(
+            root, sources=["synthetic_mevo"], metrics=["carry_distance"]
+        )
+
+
+def test_resolved_d30_the_desktop_row_cap_is_one_number_on_both_sides() -> None:
+    """RESOLVED (D30): UD redefines ``MAX_RETAINED_ROWS``; the seam pins it."""
+    assert UD_MAX_RETAINED_ROWS == MAX_RETAINED_ROWS == EXPECTED_DESKTOP_ROW_CAP
+    # UD reimplements rather than imports: the vendored package is a
+    # measurement dependency of this gate, never a runtime dependency of UD.
+    imported = {
+        alias.name
+        for node in ast.walk(ast.parse(inspect.getsource(ud_corpus_module)))
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    } | {
+        node.module or ""
+        for node in ast.walk(ast.parse(inspect.getsource(ud_corpus_module)))
+        if isinstance(node, ast.ImportFrom)
+    }
+    assert not any(name.startswith("rate_of_closure") for name in imported)
 
 
 def test_divergence_d30_only_tools_reports_the_manifest_digest(

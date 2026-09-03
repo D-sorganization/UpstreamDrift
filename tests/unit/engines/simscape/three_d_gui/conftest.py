@@ -1,103 +1,69 @@
-"""Per-directory conftest that pivots sys.path for the C3D viewer tests."""
+"""Per-directory conftest that pivots ``src`` for the 3D-Golf-Model GUI tests.
+
+These tests import the engine's own ``src.apps.*`` package, whose top-level name
+collides with the repo's ``src`` package, so ``sys.modules["src"]`` is rebound
+while this directory collects and runs.
+
+The pivot is process-global state, so it is installed through the shared,
+fully-restoring :class:`tests.helpers.engine_src_pivot.EngineSrcPivot` -- see
+that module for why restoring only ``sys.modules["src"]`` is not enough and
+which unrelated suites the leftover eviction used to break.
+
+``pytest_make_collect_report``, ``pytest_runtest_setup`` and
+``pytest_runtest_teardown`` are all directory-scoped by pytest itself (a
+conftest's hooks are only consulted for collectors/items at or below its own
+directory), so the pivot window never covers anything outside this directory,
+regardless of how xdist interleaves work across workers.
+"""
 
 from __future__ import annotations
 
-import contextlib
 import os
-import sys
+from collections.abc import Generator
 from pathlib import Path
+
+import pytest
+
+from tests.helpers.engine_src_pivot import EngineSrcPivot
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("MPLBACKEND", "Agg")
 
-
-def _pivot_sys_path() -> None:
-    here = Path(__file__).resolve()
-    repo_root = here.parents[5]
-    engine_python = (
-        repo_root
-        / "src"
-        / "engines"
-        / "Simscape_Multibody_Models"
-        / "3D_Golf_Model"
-        / "python"
-    )
-    engine_src = engine_python / "src"
-    if not engine_src.is_dir():
-        return
-
-    # Pre-cache shared deps the viewer uses so they survive the pivot.
-    repo_root_str = str(repo_root)
-    if repo_root_str not in sys.path:
-        sys.path.insert(0, repo_root_str)
-    import importlib
-
-    # Ensure ``src.shared`` and ``src.shared.python`` are concretely loaded
-    # so they remain in ``sys.modules`` after we drop ``src`` itself.
-    # Without these, ``from src import shared`` after the pivot fails
-    # because the engine's ``src/__init__.py`` has no ``shared`` attribute.
-    for qual in (
-        "src",
-        "src.shared",
-        "src.shared.python",
+# tests/unit/engines/simscape/three_d_gui/conftest.py -> repo root is parents[5].
+_PIVOT = EngineSrcPivot(
+    Path(__file__).resolve().parents[5],
+    precache=(
         "sidekick.lab.bio.c3d_reader",
         "src.shared.python.qt_utils.wheel_event_filter",
         "src.shared.python.motion_matching.body_skeleton",
-    ):
-        with contextlib.suppress(ImportError):
-            sys.modules[qual] = importlib.import_module(qual)
-
-    # Drop the repo's ``src`` package so we can rebind it to the engine's.
-    # Keep ``src.shared`` and everything beneath it so test conftests
-    # that import ``src.shared.python.*`` after the pivot still resolve.
-    keep_prefix = "src.shared"
-    preserved_shared = sys.modules.get("src.shared")
-    for modname in list(sys.modules):
-        if modname == "src" or modname.startswith("src."):
-            if modname == keep_prefix or modname.startswith(keep_prefix + "."):
-                continue
-            del sys.modules[modname]
-
-    # Bind ``src`` directly to the engine's package via importlib.util so we
-    # don't have to fight pytest's sys.path mutations.
-    import importlib.util as _util
-
-    spec = _util.spec_from_file_location(
-        "src",
-        str(engine_src / "__init__.py"),
-        submodule_search_locations=[str(engine_src)],
-    )
-    if spec is None or spec.loader is None:
-        return
-    src_mod = _util.module_from_spec(spec)
-    sys.modules["src"] = src_mod
-    spec.loader.exec_module(src_mod)
-    # Make ``src`` a multi-rooted package so submodules from EITHER the
-    # engine src/ or the repo src/ resolve cleanly. Engine path comes
-    # first so ``src.apps`` (engine-only) wins; repo path supplies
-    # ``src.tools``, ``src.shared``, etc.
-    repo_src = repo_root / "src"
-    src_mod.__path__ = [str(engine_src), str(repo_src)]
-    if preserved_shared is not None:
-        src_mod.shared = preserved_shared
-
-    # Re-attach any preserved ``src.<sub>`` modules as attributes of the
-    # freshly rebound ``src`` package. CPython's import machinery uses
-    # ``getattr(parent, child)`` for ``from parent import child``, so
-    # leaving them only in ``sys.modules`` is not enough — the lookup
-    # walks ``src.__dict__`` first and raises ``ImportError`` if missing.
-    for modname, mod in list(sys.modules.items()):
-        if not modname.startswith("src."):
-            continue
-        parts = modname.split(".")
-        if len(parts) != 2:
-            continue  # only attach direct children; nested attrs cascade
-        setattr(src_mod, parts[1], mod)
-
-    # Add ``<repo>/src`` for bare ``shared.python.*`` imports the viewer does.
-    repo_src_str = str(repo_src)
-    if repo_src_str not in sys.path:
-        sys.path.append(repo_src_str)
+    ),
+)
 
 
-_pivot_sys_path()
+@pytest.hookimpl(hookwrapper=True)
+def pytest_make_collect_report(
+    collector: pytest.Collector,  # noqa: ARG001
+) -> Generator[None, None, None]:
+    """Keep the engine ``src`` shadow active only while collecting this dir."""
+    _PIVOT.enter()
+    try:
+        yield
+    finally:
+        _PIVOT.exit()
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_setup(item: pytest.Item) -> Generator[None, None, None]:  # noqa: ARG001
+    """Enter the pivot ahead of this dir's fixture setup."""
+    _PIVOT.enter()
+    yield
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_teardown(
+    item: pytest.Item,  # noqa: ARG001
+    nextitem: pytest.Item | None,  # noqa: ARG001
+) -> Generator[None, None, None]:
+    """Leave the pivot only after this dir's fixture finalizers have run."""
+    yield
+    _PIVOT.exit()

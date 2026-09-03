@@ -53,16 +53,16 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from src.shared.python.launch_monitor.contract_v2 import (
+from src.tools.launch_monitor_model.contract_v2 import (
     AnalysisContextV2,
     OrderEvidenceV2,
     PlayerIdentityV2,
     SessionIdentityV2,
 )
-from src.shared.python.launch_monitor.longitudinal import (
+from src.tools.launch_monitor_model.longitudinal import (
     analyze_longitudinal_sessions,
 )
-from src.shared.python.launch_monitor.longitudinal_types import (
+from src.tools.launch_monitor_model.longitudinal_types import (
     LongitudinalSessionRequestV1,
 )
 from tests.integration.launch_monitor_drift.conftest import (

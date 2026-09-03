@@ -217,12 +217,21 @@
       "expires_on": "2026-12-31"
     },
     {
-      "path": "src/shared/python/launch_monitor/flexible_analysis.py",
+      "path": "src/tools/launch_monitor_model/flexible_analysis.py",
       "symbol": "analyze_variables",
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 9014,
       "reason": "Issue #9014: pre-existing function exceeds budget due to logic layout; PR only optimizes array summation via count_nonzero.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/launch_monitor_model/modeling.py",
+      "symbol": "fit_predictive_model",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9348,
+      "reason": "Issue #9348: pre-existing at 106 lines, surfaced not introduced by ADR-0048 G2 Option 1's package rename, which made every file in the package 'changed' for this whole-file gate. The module is byte-identical to its origin/main version. Decomposition belongs with ADR-0048's P8 port of modeling.py into the canonical layer, not with a rename.",
       "expires_on": "2026-10-31"
     },
     {

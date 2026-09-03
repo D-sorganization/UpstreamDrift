@@ -55,6 +55,21 @@ fi
 
 if [ "$INSTALL_SOURCE" = "." ]; then
     echo "Using local checkout at $(pwd)"
+    # The shared Tools layer (theme, sidekick, chat, utils, ...) lives in the
+    # pinned vendor/ud-tools submodule; the package does not import without it.
+    # Only that submodule is required -- the model submodules stay optional.
+    # (pip's git+ install path runs `git submodule update --init --recursive`
+    # itself, so the remote branch below needs no extra step.)
+    if [ -f ".gitmodules" ] && [ ! -d "vendor/ud-tools/src/shared/python" ]; then
+        if command -v git &> /dev/null && [ -d ".git" -o -f ".git" ]; then
+            echo "Fetching pinned Tools submodule (vendor/ud-tools)..."
+            git submodule update --init --recursive vendor/ud-tools
+        else
+            echo "✗ vendor/ud-tools is missing and this is not a git checkout."
+            echo "  Run: git submodule update --init --recursive vendor/ud-tools"
+            exit 1
+        fi
+    fi
 else
     echo "Using remote install source: $INSTALL_SOURCE"
 fi
