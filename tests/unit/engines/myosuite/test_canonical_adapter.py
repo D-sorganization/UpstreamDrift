@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.engines.physics_engines.myosuite.python import canonical_adapter
 from src.engines.physics_engines.myosuite.python.canonical_adapter import (
     CANONICAL_CONVENTION,
     MyoSuiteCanonicalAdapter,
@@ -84,9 +85,23 @@ def test_activation_advance_routes_through_upstream_muscle(monkeypatch) -> None:
         called["args"] = (u.copy(), a.copy(), dt)
         return np.full_like(a, 0.42)
 
+    # Patch the module object, not a dotted string. ``monkeypatch.setattr``
+    # resolves a string target by walking ``src.engines.physics_engines.
+    # myosuite.python`` and reading ``canonical_adapter`` off it as an
+    # attribute, and the reversible ``sys.modules["src"]`` pivot the C3D-viewer
+    # and three_d_gui suites install (``tests/helpers/engine_src_pivot.py``)
+    # can leave that parent as a freshly imported module object while the child
+    # is restored from the pivot's snapshot -- so the child is in
+    # ``sys.modules`` but is not an attribute of its parent, and the string
+    # form raises ``AttributeError``. Under ``pytest-xdist`` whether this
+    # worker sees that state depends on how tests were distributed, which is
+    # why it surfaces as an unrelated PR reddening the unit gate. The module
+    # object bound at import time is the same one ``MyoSuiteCanonicalAdapter``
+    # above came from, so patching it directly is both immune to the pivot and
+    # a more direct statement of what the test is faking.
     monkeypatch.setattr(
-        "src.engines.physics_engines.myosuite.python.canonical_adapter."
-        "rust_muscle.activation_step_batch",
+        canonical_adapter.rust_muscle,
+        "activation_step_batch",
         fake_activation_step_batch,
     )
 
