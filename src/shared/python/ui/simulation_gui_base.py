@@ -108,9 +108,14 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
         self._build_base_ui()
 
         # -- Shared help affordance (F1 + Help menu), issue #9413 -------
-        from src.shared.python.ui.tile_help import attach_tile_help
+        # Subclasses normally set HELP_TILE_ID; windows whose module cannot
+        # take the edit are named in tile_help.WINDOW_CLASS_TILE_IDS instead.
+        from src.shared.python.ui.tile_help import (
+            attach_tile_help,
+            tile_id_for_window,
+        )
 
-        attach_tile_help(self, self.HELP_TILE_ID)
+        attach_tile_help(self, self.HELP_TILE_ID or tile_id_for_window(self))
 
     # ==================================================================
     # UI construction

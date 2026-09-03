@@ -95,6 +95,34 @@ def test_help_gate_passes_for_the_committed_registry() -> None:
     assert help_violations(REPO_ROOT) == []
 
 
+def test_window_class_tile_ids_name_real_tiles(registry) -> None:
+    """The class-name fallback must not point at tiles that do not exist."""
+    unknown = sorted(
+        tile_id
+        for tile_id in tile_help.WINDOW_CLASS_TILE_IDS.values()
+        if registry.get(tile_id) is None
+    )
+    assert not unknown, f"WINDOW_CLASS_TILE_IDS names unknown tiles: {unknown}"
+
+
+def test_tile_id_for_window_resolves_by_class_name() -> None:
+    """Windows that cannot declare HELP_TILE_ID still resolve to their tile.
+
+    `pinocchio_golf/gui.py` and its `ui/main_window.py` both define
+    `PinocchioGUI` and both carry pre-existing mypy debt, so the tile id is
+    declared centrally rather than by editing those modules (#9413).
+    """
+
+    class PinocchioGUI:
+        pass
+
+    class SomethingElse:
+        pass
+
+    assert tile_help.tile_id_for_window(PinocchioGUI()) == "pinocchio_golf"
+    assert tile_help.tile_id_for_window(SomethingElse()) is None
+
+
 def test_help_relpath_for_unknown_tile_is_none() -> None:
     assert tile_help.help_relpath_for("no_such_tile") is None
     assert tile_help.help_relpath_for("") is None
