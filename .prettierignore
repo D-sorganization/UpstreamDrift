@@ -2,3 +2,15 @@ docs/research/proximal_distal_energy_transfer/data/articulated_crba_requalificat
 docs/research/proximal_distal_energy_transfer/data/articulated_drift_contact_attribution.json
 docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json
 docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json
+# Repository_Management#1520: SPEC.md's change-log table is left unpadded on
+# purpose. Prettier pads markdown table cells to the width of the widest row,
+# so a single new change-log row would rewrite every other row -- turning a
+# one-line addition into a whole-table diff that conflicts with every
+# concurrent pull request. That is the exact failure #1520 removes.
+#
+# The table also carries <!-- prettier-ignore-start/end --> markers, which are
+# the narrower mechanism and are sufficient on their own in Tools. They are NOT
+# sufficient here: with them in place `prettier --check SPEC.md` still reports
+# this file. The acceptance test is `prettier --check SPEC.md`, not the
+# presence of either mechanism.
+SPEC.md
