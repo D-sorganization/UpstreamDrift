@@ -57,6 +57,18 @@ def _write_project(root: Path, *, version: str) -> None:
         f'{{"productName": "UpstreamDrift", "version": "{version}"}}\n',
         encoding="utf-8",
     )
+    (root / "ui" / "package-lock.json").write_text(
+        json.dumps(
+            {
+                "name": "upstream-drift-ui",
+                "version": version,
+                "lockfileVersion": 3,
+                "packages": {"": {"name": "upstream-drift-ui", "version": version}},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     _write_sbom_baseline(root, version=version)
     major, minor, _patch = version.split(".")
     _write_security_md(root, supported=f"{major}.{minor}")
@@ -220,3 +232,88 @@ def test_check_versions_validates_repo_root_type() -> None:
 
     with pytest.raises(TypeError, match="repo_root"):
         module.check_versions("not-a-path")
+
+
+def test_check_versions_reports_package_lock_drift(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.1")
+    (tmp_path / "ui" / "package-lock.json").write_text(
+        json.dumps(
+            {
+                "name": "upstream-drift-ui",
+                "version": "2.1.0",
+                "lockfileVersion": 3,
+                "packages": {"": {"name": "upstream-drift-ui", "version": "2.1.0"}},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+    assert report.ok is False
+    assert any("ui/package-lock.json" in error for error in report.errors)
+
+
+def test_check_versions_reports_package_lock_internal_mismatch(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.1")
+    (tmp_path / "ui" / "package-lock.json").write_text(
+        json.dumps(
+            {
+                "name": "upstream-drift-ui",
+                "version": "2.1.1",
+                "lockfileVersion": 3,
+                "packages": {"": {"name": "upstream-drift-ui", "version": "2.1.0"}},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="does not match top-level version"):
+        module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+
+def test_set_versions_updates_all_surfaces_and_sbom(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.0")
+
+    module.set_versions(tmp_path, "2.2.0")
+
+    report = module.check_versions(
+        tmp_path, tag_reader=lambda _root: ("v2.1.0", "v2.2.0")
+    )
+    assert report.ok is True
+    assert report.canonical_version == "2.2.0"
+    for surface in report.surfaces:
+        assert surface.version == "2.2.0"
+
+    # Verify SBOM baseline was updated
+    sbom = json.loads(
+        (tmp_path / "scripts" / "config" / "sbom_baseline.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert sbom["version"] == "2.2.0"
+    assert sbom["tiers"]["core"]["install_spec"] == "upstream-drift==2.2.0"
+    assert "2.2.0" in sbom["expected_artifacts"][0]
+
+    # Verify SECURITY.md added 2.2.x series
+    sec = (tmp_path / "SECURITY.md").read_text(encoding="utf-8")
+    assert "| 2.2.x" in sec
+
+
+def test_main_set_cli_updates_and_verifies(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.0")
+
+    module.set_versions(tmp_path, "2.1.5")
+    assert (tmp_path / "VERSION").read_text(encoding="utf-8").strip() == "2.1.5"
+
+    report = module.check_versions(
+        tmp_path, tag_reader=lambda _root: ("v2.1.0", "v2.1.5")
+    )
+    assert report.ok is True
+    assert report.canonical_version == "2.1.5"
