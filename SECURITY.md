@@ -6,17 +6,21 @@ We actively support the following versions with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+| 2.1.x   | :white_check_mark: |
+| < 2.1   | :x:                |
+
+The supported series is kept in step with `VERSION` by
+`scripts/check_version_consistency.py` (run in `ci-standard` and `release.yml`).
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in the Golf Modeling Suite, please report it to us responsibly.
+If you discover a security vulnerability in UpstreamDrift, please report it to us responsibly.
 
 ### How to Report
 
 1. **DO NOT** create a public GitHub issue for security vulnerabilities
-2. Email security concerns to: [project maintainer email]
+2. Open a private security advisory:
+   <https://github.com/D-sorganization/UpstreamDrift/security/advisories/new>
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce
@@ -290,11 +294,12 @@ Before major releases:
 
 ## Contact
 
-For security concerns: [Maintainer contact information]
+For security concerns: <https://github.com/D-sorganization/UpstreamDrift/security/advisories/new>
+(private security advisory; do not file a public issue)
 
-For general issues: <https://github.com/dieterolson/UpstreamDrift/issues>
+For general issues: <https://github.com/D-sorganization/UpstreamDrift/issues>
 
 ---
 
-**Last Updated**: January 13, 2026
-**Version**: 1.0.0
+**Last Updated**: September 2, 2026
+**Version**: 2.1.1

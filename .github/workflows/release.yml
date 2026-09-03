@@ -217,11 +217,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Keep in step with `requires-python` in pyproject.toml (3.11–3.12).
         include:
-          - { runner: d-sorg-fleet-docker, python: "3.10" }
           - { runner: d-sorg-fleet-docker, python: "3.11" }
           - { runner: d-sorg-fleet-docker, python: "3.12" }
-          - { runner: d-sorg-fleet-docker, python: "3.13" }
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
