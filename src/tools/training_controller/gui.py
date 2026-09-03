@@ -217,21 +217,55 @@ class MainWidget(QWidget):
         self.update_ui()
 
     def _init_layout(self) -> None:
+        """Compose the dashboard: actions + job table left, tabs right."""
         main_h_layout = QHBoxLayout(self)
         main_h_layout.setContentsMargins(10, 10, 10, 10)
         main_h_layout.setSpacing(10)
 
-        # Splitter to allow resizing the side panels
         self.splitter = QSplitter(Qt.Orientation.Horizontal, self)
         main_h_layout.addWidget(self.splitter)
 
-        # Left Panel (Actions + Jobs)
+        self.splitter.addWidget(self._build_left_panel())
+        self.splitter.addWidget(self._build_right_panel())
+
+        # Give the left side more space by default.
+        self.splitter.setSizes([600, 400])
+
+    # ---- layout builders -------------------------------------------------
+    #
+    # Split out of _init_layout, which had grown past the repo's 100-line
+    # function budget (#8884 added the action status strip to it).
+
+    def _build_left_panel(self) -> QWidget:
+        """Actions toolbar, job table, and the two status strips."""
         left_widget = QWidget(self)
         left_layout = QVBoxLayout(left_widget)
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(10)
 
-        # Actions Toolbar
+        left_layout.addLayout(self._build_actions_toolbar())
+        left_layout.addWidget(self._build_job_table())
+
+        # Action status strip -- the visible outcome of cancel/pause/resume
+        # (#8884). Sits directly under the job table so the message appears
+        # next to the row the user just acted on.
+        self.action_status_label = QLabel("", self)
+        self.action_status_label.setObjectName("action-status")
+        self.action_status_label.setWordWrap(True)
+        self.action_status_label.setStyleSheet(
+            "color: #cccccc; font-size: 12px; padding: 4px;"
+        )
+        left_layout.addWidget(self.action_status_label)
+
+        self.resource_label = QLabel("System resource monitoring unavailable", self)
+        self.resource_label.setStyleSheet(
+            "color: #888888; font-size: 12px; padding: 4px;"
+        )
+        left_layout.addWidget(self.resource_label)
+        return left_widget
+
+    def _build_actions_toolbar(self) -> QHBoxLayout:
+        """Submit / Cancel / Pause / Resume."""
         actions_layout = QHBoxLayout()
         actions_layout.setSpacing(8)
 
@@ -248,14 +282,18 @@ class MainWidget(QWidget):
         self.resume_button = QPushButton("Resume", self)
         self.resume_button.setToolTip("Resume execution of the paused job")
 
-        actions_layout.addWidget(self.submit_button)
-        actions_layout.addWidget(self.cancel_button)
-        actions_layout.addWidget(self.pause_button)
-        actions_layout.addWidget(self.resume_button)
+        for button in (
+            self.submit_button,
+            self.cancel_button,
+            self.pause_button,
+            self.resume_button,
+        ):
+            actions_layout.addWidget(button)
         actions_layout.addStretch(1)
-        left_layout.addLayout(actions_layout)
+        return actions_layout
 
-        # Job List Table
+    def _build_job_table(self) -> QTableWidget:
+        """The job list, one row per submitted training job."""
         self.job_table = QTableWidget(self)
         self.job_table.setColumnCount(6)
         self.job_table.setHorizontalHeaderLabels(
@@ -270,35 +308,21 @@ class MainWidget(QWidget):
         self.job_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.job_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.job_table.setAlternatingRowColors(True)
-        left_layout.addWidget(self.job_table)
+        return self.job_table
 
-        # Action status strip -- the visible outcome of cancel/pause/resume
-        # (#8884). Sits directly under the job table so the message appears
-        # next to the row the user just acted on.
-        self.action_status_label = QLabel("", self)
-        self.action_status_label.setObjectName("action-status")
-        self.action_status_label.setWordWrap(True)
-        self.action_status_label.setStyleSheet(
-            "color: #cccccc; font-size: 12px; padding: 4px;"
-        )
-        left_layout.addWidget(self.action_status_label)
-
-        # Resource status strip at bottom left
-        self.resource_label = QLabel("System resource monitoring unavailable", self)
-        self.resource_label.setStyleSheet(
-            "color: #888888; font-size: 12px; padding: 4px;"
-        )
-        left_layout.addWidget(self.resource_label)
-
-        self.splitter.addWidget(left_widget)
-
-        # Right Panel (Tabs + Dataset dock)
+    def _build_right_panel(self) -> QSplitter:
+        """Metrics/summary tabs above the dataset library dock."""
         right_splitter = QSplitter(Qt.Orientation.Vertical, self)
-
-        # Tabs container
         self.tabs = QTabWidget(self)
+        self.tabs.addTab(self._build_plot_stack(), "Live Metrics")
+        self.tabs.addTab(self._build_summary_pane(), "Job Detail Summary")
+        right_splitter.addWidget(self.tabs)
+        right_splitter.addWidget(self._build_dataset_dock())
+        right_splitter.setSizes([450, 200])
+        return right_splitter
 
-        # Tab 1: Live Metrics Graph
+    def _build_plot_stack(self) -> QStackedWidget:
+        """Placeholder + live metrics canvas (or a note when matplotlib is absent)."""
         self.plot_stack = QStackedWidget(self)
 
         self.plot_placeholder = QLabel(
@@ -314,7 +338,6 @@ class MainWidget(QWidget):
             self.plot_widget = QWidget(self)
             plot_layout = QVBoxLayout(self.plot_widget)
             plot_layout.setContentsMargins(5, 5, 5, 5)
-
             self.figure = Figure(figsize=(6, 4), dpi=100)
             self.canvas = FigureCanvas(self.figure)
             plot_layout.addWidget(self.canvas)
@@ -323,10 +346,10 @@ class MainWidget(QWidget):
             self.plot_widget = QLabel("Matplotlib is unavailable.", self)
             self.plot_widget.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.plot_stack.addWidget(self.plot_widget)
+        return self.plot_stack
 
-        self.tabs.addTab(self.plot_stack, "Live Metrics")
-
-        # Tab 2: Job Summary & Config Details
+    def _build_summary_pane(self) -> QScrollArea:
+        """Scrollable rich-text detail for the selected job."""
         self.summary_scroll = QScrollArea(self)
         self.summary_scroll.setWidgetResizable(True)
         self.summary_label = QLabel("", self)
@@ -336,11 +359,10 @@ class MainWidget(QWidget):
             Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft
         )
         self.summary_scroll.setWidget(self.summary_label)
+        return self.summary_scroll
 
-        self.tabs.addTab(self.summary_scroll, "Job Detail Summary")
-        right_splitter.addWidget(self.tabs)
-
-        # Dataset Dock (as a collapsible/resizable list at the bottom right)
+    def _build_dataset_dock(self) -> QWidget:
+        """Collapsible dataset library list at the bottom right."""
         dataset_dock = QWidget(self)
         dock_layout = QVBoxLayout(dataset_dock)
         dock_layout.setContentsMargins(0, 5, 0, 0)
@@ -352,13 +374,7 @@ class MainWidget(QWidget):
 
         self.dataset_list = QListWidget(self)
         dock_layout.addWidget(self.dataset_list)
-        right_splitter.addWidget(dataset_dock)
-
-        right_splitter.setSizes([450, 200])
-        self.splitter.addWidget(right_splitter)
-
-        # Give left side more space default
-        self.splitter.setSizes([600, 400])
+        return dataset_dock
 
     def _connect_signals(self) -> None:
         self.submit_button.clicked.connect(self._on_submit_clicked)
