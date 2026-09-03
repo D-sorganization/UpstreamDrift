@@ -188,8 +188,12 @@ RUN /opt/venv/bin/python -m pip uninstall -y pip && \
     /usr/local/bin/python -m pip uninstall -y pip
 
 # /workspace is the project root; "from src.xxx" imports resolve here
+# Import precedence mirrors launch_upstream_drift.py and the pytest
+# `pythonpath`: the pinned Tools tree (vendor/ud-tools) wins over the committed
+# src/shared/python child copy, so the image runs the same code the tests
+# verify (UD #9406, RM #1505 Phase 1). Dockerfile.modular already does this.
 ENV PATH="/opt/venv/bin:$PATH" \
-    PYTHONPATH="/workspace" \
+    PYTHONPATH="/workspace/vendor/ud-tools/src/shared/python:/workspace/vendor/ud-tools/src:/workspace/vendor/ud-tools/src/python/src:/workspace" \
     # Headless MuJoCo rendering default (issue #7161 D3): set in the image so a
     # bare `docker run` matches the compose default (MUJOCO_GL=osmesa) instead
     # of only being defined in docker-compose.yml (K — reproducibility).
@@ -201,6 +205,14 @@ WORKDIR /workspace
 
 # src/engines/Simscape_Multibody_Models/ (MATLAB) excluded via .dockerignore
 COPY --chown=${USER_NAME}:${USER_NAME} src/ ./src/
+# The pinned Tools package roots (same five as Dockerfile.modular and
+# build_hooks.py). The build context must have vendor/ud-tools materialised
+# at the gitlink (CI: .github/actions/fetch-pinned-tools).
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/shared/ ./vendor/ud-tools/src/shared/
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/sidekick/ ./vendor/ud-tools/src/sidekick/
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/chat/ ./vendor/ud-tools/src/chat/
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/python/src/utils/ ./vendor/ud-tools/src/python/src/utils/
+COPY --chown=${USER_NAME}:${USER_NAME} vendor/ud-tools/src/contracts.py ./vendor/ud-tools/src/contracts.py
 COPY --chown=${USER_NAME}:${USER_NAME} pyproject.toml ./
 COPY --chown=${USER_NAME}:${USER_NAME} launch_golf_suite.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} scripts/ci/start_api_server.py ./
