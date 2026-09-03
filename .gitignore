@@ -55,6 +55,16 @@ Thumbs.db
 # Data & Outputs
 data/raw/
 output/**/temp/
+# Run artifacts and agent scratch (issue #9415): never commit these again.
+/output/
+/.scratch/
+/motion_matching_training/
+reports/pip_audit.json
+reports/semgrep.json
+# Third-party model repos are git submodules at shared/models/…; the plain-blob
+# copies that used to live under src/shared/models/ were removed in #9415.
+/src/shared/models/opensim/opensim-models/
+/src/shared/models/myosuite/myo_sim/
 logs/
 *.log
 
