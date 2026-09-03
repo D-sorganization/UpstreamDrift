@@ -47,6 +47,38 @@ _GENERAL_DOCS = (
     "docs/troubleshooting/FAQ.md",
 )
 
+#: Fallback tile ids for windows that cannot declare ``HELP_TILE_ID``
+#: themselves.
+#:
+#: The normal way an engine window names its tile is the ``HELP_TILE_ID``
+#: class attribute on :class:`SimulationGUIBase`. That requires editing the
+#: window's module, and CI runs mypy over the *changed file set*, so adding
+#: one attribute to a module that already carries type debt fails the build
+#: on errors the change did not introduce (`pinocchio_golf/gui.py` and its
+#: `ui/main_window.py` have pre-existing `ndarray | None` assignment and
+#: mixin `self`-argument errors). Naming those windows here keeps the help
+#: wiring out of files it would otherwise hold hostage.
+#:
+#: Keyed by class name because the two Pinocchio modules both define
+#: ``PinocchioGUI`` and both mean the same tile. Prefer ``HELP_TILE_ID``
+#: for anything new; this map is for modules that cannot take the edit.
+WINDOW_CLASS_TILE_IDS: dict[str, str] = {
+    "PinocchioGUI": "pinocchio_golf",
+}
+
+
+def tile_id_for_window(window: Any) -> str | None:
+    """Return the tile id declared for ``window``'s class, if any.
+
+    Args:
+        window: A window instance, normally a ``SimulationGUIBase`` subclass.
+
+    Returns:
+        The tile id from :data:`WINDOW_CLASS_TILE_IDS`, or ``None`` when the
+        class is not listed.
+    """
+    return WINDOW_CLASS_TILE_IDS.get(type(window).__name__)
+
 
 def _registry(registry: TileRegistry | None = None) -> TileRegistry:
     return registry if registry is not None else load_tile_registry()

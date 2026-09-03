@@ -84,7 +84,6 @@ class PinocchioGUI(
 ):
     """Main GUI widget for Pinocchio robot visualization and computation."""
 
-    HELP_TILE_ID = "pinocchio_golf"
     WINDOW_TITLE = "Pinocchio Golf Model (Dynamics & Kinematics)"
     WINDOW_WIDTH = 1000
     WINDOW_HEIGHT = 900
