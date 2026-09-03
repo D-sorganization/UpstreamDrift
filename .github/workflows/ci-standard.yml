@@ -1767,6 +1767,13 @@ jobs:
           QT_API: pyqt6
         run: |
           export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
+          # Machine-readable failure record. `-ra` alone is not enough:
+          # pytest skips every terminal-summary section when a run dies
+          # with INTERNALERROR, which is how `main` reported 305 failures
+          # without naming one of them (UD #9474, RM #1507). The JUnit XML
+          # is written by the same terminal-summary phase, so it is a
+          # second copy of the same signal, not a replacement for the log.
+          mkdir -p "$RUNNER_TEMP/junit"
           coverage_args=(--cov=src)
           coverage_report_args=(
             --cov-report=term-missing
@@ -1936,6 +1943,8 @@ jobs:
                 -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
                 -o addopts="" \
                 "${coverage_mode[@]}" \
+                --junitxml="$RUNNER_TEMP/junit/pr-scoped-${{ matrix.python }}.xml" \
+                -ra \
                 --tb=short \
                 -v
               pytest_exit_code=$?
@@ -2033,9 +2042,20 @@ jobs:
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             "${coverage_args[@]}" \
             "${coverage_report_args[@]}" \
+            --junitxml="$RUNNER_TEMP/junit/core-${{ matrix.python }}.xml" \
+            -ra \
             --tb=short \
             --durations=20 \
             -v
+
+      - name: Upload JUnit Test Results
+        if: always() && steps.core-test-changes.outputs.skip != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: junit-tests-${{ matrix.python }}
+          path: ${{ runner.temp }}/junit/*.xml
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Stop Xvfb
         if: always() && steps.core-test-changes.outputs.skip != 'true'
