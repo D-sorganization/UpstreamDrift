@@ -1,22 +1,24 @@
 # UpstreamDrift Documentation
 
-> Last reviewed: 2026-09-01
+> Last reviewed: 2026-09-03
 
 Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
 ## Quick Navigation
 
-| I want to...            | Go to...                                                    |
-| ----------------------- | ----------------------------------------------------------- |
-| Get started quickly     | [Quick Start](#quick-start)                                 |
-| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)                 |
-| Develop new features    | [Development Guide](api/DEVELOPMENT.md)                     |
-| Add a physics engine    | [Adapter Authoring Guide](adapters/authoring_guide.md)      |
-| Choose a physics engine | [Engine Selection Guide](engines/engine_selection_guide.md) |
-| Track motion capture    | [Motion Pipeline](motion_pipeline/README.md)                |
-| Review architecture     | [ADRs](adr/)                                                |
-| Read the specification  | [SPEC](../SPEC.md)                                          |
-| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                         |
+| I want to...             | Go to...                                                                 |
+| ------------------------ | ------------------------------------------------------------------------ |
+| Get started quickly      | [Quick Start](#quick-start)                                              |
+| Understand the API       | [API Architecture](api/API_ARCHITECTURE.md)                              |
+| Develop new features     | [Development Guide](api/DEVELOPMENT.md)                                  |
+| Add a physics engine     | [Adapter Authoring Guide](adapters/authoring_guide.md)                   |
+| Choose a physics engine  | [Engine Selection Guide](engines/engine_selection_guide.md)              |
+| Track motion capture     | [Motion Pipeline](motion_pipeline/README.md)                             |
+| Review architecture      | [ADRs](adr/)                                                             |
+| Read the specification   | [SPEC](../SPEC.md)                                                       |
+| Find any document        | [Documentation catalog](index.md)                                        |
+| Read a calculation sheet | [Calculation references](index.md#calculation-and-derivation-references) |
+| Troubleshoot issues      | [Troubleshooting](troubleshooting/)                                      |
 
 ---
 
@@ -56,47 +58,80 @@ curl -X POST http://localhost:8000/simulate \
 
 ## Documentation Structure
 
-```
+<!-- BEGIN GENERATED: docs-structure (scripts/generate_docs_map.py) -->
+
+```text
 docs/
-├── README.md              ← You are here
-│
-├── api/                   # API Reference
-│   ├── API_ARCHITECTURE.md   # Complete API architecture
-│   ├── DEVELOPMENT.md        # Developer guide
-│   ├── engines.md            # Engine APIs
-│   └── shared.md             # Shared utilities
-│
-├── adapters/              # Engine adapter authoring
-│   └── authoring_guide.md    # Contract, remap, capability, and conformance checklist
-│
-├── user_guide/            # End User Documentation
-│   ├── installation.md       # Setup instructions
-│   ├── getting_started.md    # First steps
-│   └── launchers.md          # GUI launchers
-│
-├── engines/               # Physics Engine Docs
-│   ├── mujoco.md            # MuJoCo integration
-│   ├── drake.md             # Drake integration
-│   ├── pinocchio.md         # Pinocchio integration
-│   ├── opensim.md           # OpenSim integration
-│   └── simscape.md          # MATLAB Simscape
-│
-├── development/           # Developer Resources
-│   ├── architecture.md      # System design
-│   ├── design_by_contract.md # DbC patterns
-│   ├── contributing.md      # Contribution guide
-│   └── agent_templates/     # AI agent templates
-│
-├── architecture/          # Technical Architecture
-│   ├── system_overview.md
-│   ├── engine_loading_flow.md
-│   └── data_pipeline.md
-│
-├── troubleshooting/       # Problem Solving
-│   └── (troubleshooting guides)
-│
-└── historical/             # Archived phase summaries and session notes
+|-- README.md   <- you are here (task-oriented hub)
+|-- index.md    <- catalog: owner, stability, and full map
+|-- adapters/                 # 1 page
+|-- adr/                      # 51 pages
+|-- ai_implementation/        # 5 pages
+|-- api/                      # 7 pages
+|-- architecture/             # 19 pages
+|-- assessments/              # 294 pages
+|-- audit_reports/            # 1 page
+|-- audits/                   # 7 pages
+|-- bunkershot3d/             # 8 pages
+|-- code-quality/             # 1 page
+|-- codemap/                  # 3 pages
+|-- competitive_analysis/     # 1 page
+|-- config/                   # 1 page
+|-- conformance/              # no Markdown pages
+|-- conventions/              # 3 pages
+|-- deployment/               # 1 page
+|-- design/                   # 2 pages
+|-- development/              # 118 pages
+|-- engineering/              # 2 pages
+|-- engines/                  # 15 pages
+|-- estimation/               # 1 page
+|-- examples/                 # no Markdown pages
+|-- golf-model/               # 1 page
+|-- governance/               # 6 pages
+|-- help/                     # 5 pages
+|-- historical/               # 4 pages
+|-- installation/             # 2 pages
+|-- issues/                   # 56 pages
+|-- legal/                    # 1 page
+|-- model_explorer/           # 1 page
+|-- motion_capture/           # 3 pages
+|-- motion_matching/          # 2 pages
+|-- motion_pipeline/          # 6 pages
+|-- motion_training/          # 1 page
+|-- operations/               # 17 pages
+|-- physics/                  # 3 pages
+|-- plans/                    # 17 pages
+|-- portfolio/                # 1 page
+|-- proposals/                # 1 page
+|-- references/               # 1 page
+|-- research/                 # 32 pages
+|-- review_archive/           # 24 pages
+|-- reviews/                  # 3 pages
+|-- sg_optimizer/             # 3 pages
+|-- sidekick/                 # 3 pages
+|-- simulation_backends/      # 4 pages
+|-- specs/                    # 4 pages
+|-- sphinx/                   # 1 page
+|-- status/                   # no Markdown pages
+|-- status_quo_analysis/      # 1 page
+|-- technical/                # 7 pages
+|-- technical_debt/           # 1 page
+|-- testing/                  # 8 pages
+|-- troubleshooting/          # 6 pages
+|-- tutorials/                # 6 pages
+|-- ui/                       # 1 page
+|-- user_guide/               # 30 pages
+|-- ux/                       # 1 page
+|-- validation/               # 1 page
+|-- workflows/                # 2 pages
 ```
+
+That is 60 top-level directories. The tree above is
+generated by `scripts/generate_docs_map.py` from the real filesystem;
+do not edit it by hand. For owners, stability tags, and per-directory
+descriptions see [the documentation catalog](index.md).
+
+<!-- END GENERATED: docs-structure -->
 
 ---
 
@@ -282,7 +317,11 @@ repository maintenance guidance.
 
 ## Archived Documentation
 
-Historical assessments, phase plans, and old implementation reports have been moved to [historical/](historical/).
+Historical assessments, phase plans, and old implementation reports live in
+[historical/](historical/), [assessments/](assessments/), and
+[review_archive/](review_archive/). All three are tagged `archived` in the
+[documentation catalog](index.md); see its consolidation decisions section for
+why they remain at the top level.
 
 ---
 
