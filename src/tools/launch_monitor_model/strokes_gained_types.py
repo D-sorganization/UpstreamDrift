@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from src.tools.launch_monitor_model.contract_v2 import AnalysisContextV2
+from shared.python.launch_monitor.contract_v2 import AnalysisContextV2
 
 BASELINE_CONTRACT_VERSION: Literal["launch-monitor-strokes-gained-baseline/2.0.0"] = (
     "launch-monitor-strokes-gained-baseline/2.0.0"

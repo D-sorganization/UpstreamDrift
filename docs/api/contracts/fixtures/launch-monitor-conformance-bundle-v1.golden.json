@@ -1,5 +1,5 @@
 {
-  "bundle_sha256": "11010e9b5e01ec5b6f3b1ba39f95ba1ec387f20516d9961b16fe9c4f9e934370",
+  "bundle_sha256": "10de9216102adc5474d20c39f5030ad4897a18a73b884b0b3b5233fe3f740596",
   "bundle_version": "launch-monitor-analytics-conformance/1.0.0",
   "data_classification": "synthetic_contract_fixture_no_private_rows",
   "description": "Synthetic, data-free consumer outputs for canonical launch-monitor analytics; no observed or private shot rows are embedded.",
@@ -85,6 +85,7 @@
               "ci_lower": 0.9613613,
               "ci_upper": 0.99957378,
               "coefficient": 0.99591,
+              "is_boolean_projected": false,
               "method": "pearson",
               "p_value": 2.50579e-5,
               "predictor": "club_speed",
@@ -276,7 +277,7 @@
         "trust_level": "not_provided"
       },
       "scenario_id": "analysis-v2-available",
-      "scenario_sha256": "99db507c2626708708fbd391b2205395b3dfb1e42922911fd1a3fdb4843db6bb",
+      "scenario_sha256": "4befc36239b7c7d528e4f9a3760187c6c9497e3b5ed30cdacf3420a70df2cdb1",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -352,6 +353,7 @@
               "ci_lower": null,
               "ci_upper": null,
               "coefficient": null,
+              "is_boolean_projected": false,
               "method": "pearson",
               "p_value": null,
               "predictor": "club_speed",
@@ -511,7 +513,7 @@
         "trust_level": "not_provided"
       },
       "scenario_id": "analysis-v2-unavailable",
-      "scenario_sha256": "705e13547a0401a62eabff1ef71aaba814d7764a89c3a82f41b67bdfb66a0dd9",
+      "scenario_sha256": "e827a7a740ac3173644a6db62eab70be4dcf6c5daada7d1076b6f25ae5b5a24a",
       "session_identity": {
         "evidence": null,
         "identifier_column": null,
@@ -1639,7 +1641,7 @@
             "state": "available"
           },
           {
-            "message": null,
+            "message": "Player fixed-effects OLS with standard errors clustered by player and a finite-cluster corrected sandwich covariance.",
             "observed_count": 4,
             "reason_code": null,
             "required_count": 4,
@@ -1995,35 +1997,59 @@
         },
         "player_associations": [
           {
+            "ci_lower": 1.2,
+            "ci_upper": 1.2,
             "direction": "increasing",
             "estimate_per_order_unit": 1.2,
+            "first_to_last_change": 2.4,
+            "p_value": 9.0031632e-11,
             "player_id": "player-1",
+            "r_squared": 1.0,
             "reason_code": null,
             "session_count": 3,
+            "standard_error": 0.0,
             "state": "available"
           },
           {
+            "ci_lower": 1.4,
+            "ci_upper": 1.4,
             "direction": "increasing",
             "estimate_per_order_unit": 1.4,
+            "first_to_last_change": 2.8,
+            "p_value": 9.0031632e-11,
             "player_id": "player-2",
+            "r_squared": 1.0,
             "reason_code": null,
             "session_count": 3,
+            "standard_error": 0.0,
             "state": "available"
           },
           {
+            "ci_lower": 1.6,
+            "ci_upper": 1.6,
             "direction": "increasing",
             "estimate_per_order_unit": 1.6,
+            "first_to_last_change": 3.2,
+            "p_value": 9.0031632e-11,
             "player_id": "player-3",
+            "r_squared": 1.0,
             "reason_code": null,
             "session_count": 3,
+            "standard_error": 0.0,
             "state": "available"
           },
           {
+            "ci_lower": 1.8,
+            "ci_upper": 1.8,
             "direction": "increasing",
             "estimate_per_order_unit": 1.8,
+            "first_to_last_change": 3.6,
+            "p_value": 9.0031632e-11,
             "player_id": "player-4",
+            "r_squared": 1.0,
             "reason_code": null,
             "session_count": 3,
+            "standard_error": 0.0,
             "state": "available"
           }
         ],
@@ -2038,10 +2064,14 @@
           "confidence_interval_low": 0.9849697,
           "confidence_level": 0.95,
           "estimate_per_order_unit": 1.5,
-          "method": "player_fixed_effects_ols_clustered_by_player",
+          "i_squared_pct": null,
+          "improvement_probability": null,
+          "method": "ud-cluster-robust-fe/1",
           "p_value": 0.0026577006,
+          "q_statistic": null,
           "session_cell_count": 12,
           "standard_error": 0.16183472,
+          "tau_squared": null,
           "uncertainty_state": "available"
         },
         "request": {
@@ -2051,6 +2081,7 @@
           "metric": "carry_distance",
           "minimum_player_clusters": 4,
           "minimum_sessions_per_player": 3,
+          "pooled_method": "ud-cluster-robust-fe/1",
           "session_aggregate": "mean",
           "strata": []
         },
@@ -2184,7 +2215,8 @@
         "status": "available",
         "warnings": [
           "Associations are descriptive and do not establish player improvement.",
-          "Shot rows were aggregated before inference to avoid pseudo-replication."
+          "Shot rows were aggregated before inference to avoid pseudo-replication.",
+          "The pooled estimate uses ud-cluster-robust-fe/1; results from different pooled estimators are not numerically comparable."
         ]
       },
       "player_identity": {
@@ -2193,7 +2225,7 @@
         "trust_level": "explicit_user_attested"
       },
       "scenario_id": "attested-longitudinal-available",
-      "scenario_sha256": "308db50efe345e76362adfe980eb34de3b3177e2fe2bbf1b3f42006e83d3eacd",
+      "scenario_sha256": "8c524ebe6f9fa3fbe6a7631ec351adb2e2e808311b4ddfd964899ad64c53dbd7",
       "session_identity": {
         "evidence": "The source export reports session boundaries.",
         "identifier_column": "session_id",
@@ -2889,6 +2921,7 @@
           "metric": "carry_distance",
           "minimum_player_clusters": 4,
           "minimum_sessions_per_player": 3,
+          "pooled_method": "ud-cluster-robust-fe/1",
           "session_aggregate": "mean",
           "strata": []
         },
@@ -2907,7 +2940,7 @@
         "trust_level": "explicit_user_attested"
       },
       "scenario_id": "attested-longitudinal-unavailable",
-      "scenario_sha256": "5b644aa87dac0bef64adc32adf4a4df9dc9df06825d2e9442cdf53f2d647b1e5",
+      "scenario_sha256": "b474dc47c2317e7d78e1c5cfe5e1f70d1cb095ad9e463cc6fb62cec2cd1c6302",
       "session_identity": {
         "evidence": "The source export reports session boundaries.",
         "identifier_column": "session_id",

@@ -1726,6 +1726,12 @@ export interface LongitudinalPlayerAssociationV1 {
   direction: "increasing" | "decreasing" | "flat" | "unavailable";
   state: "available" | "unavailable";
   reason_code?: string | null;
+  standard_error?: number | null;
+  ci_lower?: number | null;
+  ci_upper?: number | null;
+  p_value?: number | null;
+  r_squared?: number | null;
+  first_to_last_change?: number | null;
 }
 
 /**
@@ -1749,6 +1755,7 @@ export interface LongitudinalSessionRequestV1 {
   minimum_sessions_per_player: number;
   minimum_player_clusters: number;
   confidence_level: number;
+  pooled_method: "ud-cluster-robust-fe/1" | "dl-random-effects/1";
 }
 
 /**
@@ -2138,17 +2145,24 @@ export interface PlotTypesResponse {
   plot_types: PlotTypeInfo[];
 }
 
+/**
+ * One pooled estimate, always carrying the name of the estimator. G1-D1: results from different estimators are never numerically compared without the names attached, so ``method`` is required and has no default. ``standard_error``, ``confidence_interval_*`` and ``confidence_level`` are produced by both estimators; ``p_value`` by ``ud-cluster-robust-fe/1``; the heterogeneity block and ``improvement_probability`` by ``dl-random-effects/1``.
+ */
 export interface PooledAssociationV1 {
-  method: "player_fixed_effects_ols_clustered_by_player";
+  method: "ud-cluster-robust-fe/1" | "dl-random-effects/1";
   estimate_per_order_unit: number;
   standard_error: number;
   confidence_interval_low: number;
   confidence_interval_high: number;
-  p_value: number;
+  p_value?: number | null;
   confidence_level: number;
   cluster_count: number;
   session_cell_count: number;
   uncertainty_state: "available";
+  tau_squared?: number | null;
+  q_statistic?: number | null;
+  i_squared_pct?: number | null;
+  improvement_probability?: number | null;
 }
 
 /**

@@ -1290,6 +1290,30 @@
     "LongitudinalPlayerAssociationV1": {
       "additionalProperties": false,
       "properties": {
+        "ci_lower": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci Lower"
+        },
+        "ci_upper": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci Upper"
+        },
         "direction": {
           "enum": ["increasing", "decreasing", "flat", "unavailable"],
           "title": "Direction",
@@ -1307,9 +1331,49 @@
           "default": null,
           "title": "Estimate Per Order Unit"
         },
+        "first_to_last_change": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First To Last Change"
+        },
+        "p_value": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P Value"
+        },
         "player_id": {
           "title": "Player Id",
           "type": "string"
+        },
+        "r_squared": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "R Squared"
         },
         "reason_code": {
           "anyOf": [
@@ -1327,6 +1391,19 @@
           "minimum": 0,
           "title": "Session Count",
           "type": "integer"
+        },
+        "standard_error": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standard Error"
         },
         "state": {
           "enum": ["available", "unavailable"],
@@ -1379,6 +1456,12 @@
           "minimum": 3,
           "title": "Minimum Sessions Per Player",
           "type": "integer"
+        },
+        "pooled_method": {
+          "default": "ud-cluster-robust-fe/1",
+          "enum": ["ud-cluster-robust-fe/1", "dl-random-effects/1"],
+          "title": "Pooled Method",
+          "type": "string"
         },
         "session_aggregate": {
           "default": "mean",
@@ -2325,6 +2408,7 @@
     },
     "PooledAssociationV1": {
       "additionalProperties": false,
+      "description": "One pooled estimate, always carrying the name of the estimator.\n\nG1-D1: results from different estimators are never numerically compared\nwithout the names attached, so ``method`` is required and has no default.\n``standard_error``, ``confidence_interval_*`` and ``confidence_level`` are\nproduced by both estimators; ``p_value`` by ``ud-cluster-robust-fe/1``; the\nheterogeneity block and ``improvement_probability`` by\n``dl-random-effects/1``.",
       "properties": {
         "cluster_count": {
           "minimum": 1,
@@ -2347,15 +2431,65 @@
           "title": "Estimate Per Order Unit",
           "type": "number"
         },
+        "i_squared_pct": {
+          "anyOf": [
+            {
+              "maximum": 100.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "I Squared Pct"
+        },
+        "improvement_probability": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Improvement Probability"
+        },
         "method": {
-          "const": "player_fixed_effects_ols_clustered_by_player",
-          "default": "player_fixed_effects_ols_clustered_by_player",
+          "enum": ["ud-cluster-robust-fe/1", "dl-random-effects/1"],
           "title": "Method",
           "type": "string"
         },
         "p_value": {
-          "title": "P Value",
-          "type": "number"
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P Value"
+        },
+        "q_statistic": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Q Statistic"
         },
         "session_cell_count": {
           "minimum": 1,
@@ -2366,6 +2500,19 @@
           "title": "Standard Error",
           "type": "number"
         },
+        "tau_squared": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tau Squared"
+        },
         "uncertainty_state": {
           "const": "available",
           "default": "available",
@@ -2374,11 +2521,11 @@
         }
       },
       "required": [
+        "method",
         "estimate_per_order_unit",
         "standard_error",
         "confidence_interval_low",
         "confidence_interval_high",
-        "p_value",
         "confidence_level",
         "cluster_count",
         "session_cell_count"
