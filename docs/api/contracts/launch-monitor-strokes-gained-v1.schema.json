@@ -467,6 +467,11 @@
           "title": "Intercept",
           "type": "number"
         },
+        "method": {
+          "enum": ["session-cell-sg-trend/1", "shot-level-sg-trend/1"],
+          "title": "Method",
+          "type": "string"
+        },
         "p_value": {
           "maximum": 1.0,
           "minimum": 0.0,
@@ -505,6 +510,7 @@
       "required": [
         "group_dimension",
         "group_value",
+        "method",
         "sample_count",
         "slope",
         "intercept",

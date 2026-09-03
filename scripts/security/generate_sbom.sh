@@ -2,7 +2,7 @@
 set -euo pipefail
 
 tier="${1:?usage: generate_sbom.sh <core|extended|full> [version]}"
-version="${2:-2.1.0}"
+version="${2:-2.1.1}"
 dist_dir="${SBOM_DIST_DIR:-dist}"
 artifact_prefix="upstream-drift-${version}"
 venv_dir=".venv-sbom-${tier}"

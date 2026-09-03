@@ -41,6 +41,58 @@ is additive (`CorrelationResult.boolean_projected`,
 :func:`test_relationships_gains_the_d17_boolean_projection_fields_additively`
 pins that distinction directly rather than folding `relationships` into the
 identical-twin parametrization.
+
+Wave 3a retires the contract spine and the longitudinal tier: `corpus`,
+`flexible_analysis`, `contract_v2`, `longitudinal_types`,
+`longitudinal_statistics`, `longitudinal`, and the four `dataset_reference*`
+modules. Unlike waves 1 and 2 this wave could not be assembled out of
+behaviour-neutral modules, because the canonical dependency graph does not
+contain a behaviour-neutral downward-closed set: canonical `contract_v2`
+imports canonical `flexible_analysis` (owner rulings D15/D17) and canonical
+`dataset_reference_contract` imports canonical `corpus` (the P19 merge), so
+retiring either consumer while its dependency still resolved to UpstreamDrift
+would leave two copies of the same dataclass in one process. The wave is
+therefore ordered by that graph rather than by how quiet each module is, and
+the three rulings it carries are pinned directly:
+
+* **D15** (`flexible_analysis`) — under-sampled predictors leave the
+  Benjamini-Hochberg pool before correction. Measured in
+  ``tests/integration/launch_monitor_drift/test_flexible_analysis_drift.py``.
+* **D17** (`flexible_analysis`) — the boolean 0/1 projection is preserved and
+  now labelled, carried up from `relationships` (wave 2) onto
+  ``CorrelationEstimate.is_boolean_projected``.
+* **G1-D1** (`longitudinal*`) — the pooled estimator is a named-method pair,
+  pinned by :func:`test_wave_3a_longitudinal_carries_the_g1_d1_named_method_pair`
+  below and measured against ``rate_of_closure`` in
+  ``tests/integration/launch_monitor_drift/test_longitudinal_drift.py``.
+
+Wave 3b retires the last eight — `strokes_gained_types`,
+`_scoring_statistics`, `strokes_gained`, `outcome_proxy`, the
+`player_covariation` trio and `conformance_bundle` — and with them **ADR-0046
+Stage 2's module retirement is complete**. What is left in
+``src/tools/launch_monitor_model/`` is asserted exhaustively by
+:func:`test_stage_2_module_retirement_is_complete`: the façade, the app-local
+`project`, and `strokes_gained_baseline`. That third file is not a leftover.
+ADR-0048's port order marks P12 as "``strokes_gained_types.py`` (minus
+baseline half)" because Tools' ``rate_of_closure.launch_monitor_strokes_gained
+_baseline`` is already the authority for that artifact, so the canonical layer
+types its ``baseline`` argument against runtime-checkable *protocols*. A
+protocol validates nothing at a trust boundary, and the analytics API parses a
+baseline off the wire, so UpstreamDrift keeps the hash-verifying pydantic model
+app-local. :func:`test_app_local_baseline_satisfies_the_canonical_protocols`
+pins the seam between the two.
+
+Wave 3b's rulings:
+
+* **G1-D2** (`strokes_gained*`) — the canonical inference unit is the session
+  cell; UpstreamDrift's shot-level fit survives as `shot-level-sg-trend/1`.
+  Measured in ``test_strokes_gained_drift.py``.
+* **G1-D3** (`strokes_gained`) — exclude-and-audit. Already this module's
+  posture; the legacy half was re-pinned in #9419.
+* **D22 / D23** (`player_covariation*`) — the between-player Fisher interval is
+  withheld below five groups with the absence explained, and units come from
+  the registry rather than from a column-name suffix. Both rulings adopted
+  *UpstreamDrift's* posture, so no UpstreamDrift-side number moves.
 """
 
 from __future__ import annotations
@@ -87,6 +139,50 @@ WAVE_2_MODULES = (
     "modeling",
     "profiles",
     "relationships",
+)
+
+# ADR-0046 Stage 2 wave 3a: ADR-0048's P10, P11, P15, P16, P19 and P20, plus
+# the P19 `corpus` merge that P20 sits on. Ordered by the canonical dependency
+# graph, not by port-order number: `contract_v2` (P11) cannot retire before
+# `flexible_analysis` (P10) because the canonical module imports it, and the
+# `dataset_reference*` tier (P20) cannot retire before `corpus` (P19) for the
+# same reason. Retiring a consumer ahead of its dependency would put two
+# copies of `FlexibleAnalysisResult` (or of `CORPUS_COLUMN_MAP`) in one
+# process, which is the fork ADR-0046 exists to end rather than to introduce.
+WAVE_3A_MODULES = (
+    "contract_v2",
+    "corpus",
+    "dataset_reference",
+    "dataset_reference_contract",
+    "dataset_reference_operations",
+    "dataset_reference_verification",
+    "flexible_analysis",
+    "longitudinal",
+    "longitudinal_statistics",
+    "longitudinal_types",
+)
+
+# ADR-0046 Stage 2 wave 3b: the last eight. Downward-closed given wave 3a —
+# every one of these depends only on `contract_v2`, `schema` and each other,
+# all of which the canonical layer already serves.
+WAVE_3B_MODULES = (
+    "_scoring_statistics",
+    "conformance_bundle",
+    "outcome_proxy",
+    "player_covariation",
+    "player_covariation_core",
+    "player_covariation_types",
+    "strokes_gained",
+    "strokes_gained_types",
+)
+
+# What ADR-0046 Stage 2 leaves behind in UpstreamDrift, exhaustively.
+APP_LOCAL_MODULES = frozenset(
+    {
+        "__init__",  # the re-export façade and the canonical-layer bootstrap
+        "project",  # workbench project file I/O; never had a Tools twin
+        "strokes_gained_baseline",  # ADR-0048 P12's deliberate exclusion
+    }
 )
 
 _MISSING_VENDOR_HINT = (
@@ -415,3 +511,403 @@ def test_canonical_import_path_resolves_into_the_vendored_tools_layer() -> None:
         "canonical layer again — see ADR-0048, 'Stage 2 Blocker (G2)', and "
         "scripts/config/shadow_modules.yaml."
     )
+
+
+@pytest.mark.parametrize("module_name", WAVE_3A_MODULES)
+def test_wave_3a_module_is_retired_and_served_by_the_canonical_layer(
+    module_name: str,
+) -> None:
+    """Wave 3a's ten modules pass the same retirement check waves 1-2 did.
+
+    Same shape as the two parametrizations above, kept separate so a wave-3a
+    regression reads as a wave-3a failure. Twin status is deliberately not
+    asserted here: three of these ten carry owner rulings and are *not*
+    identical twins, and the rulings are pinned by the dedicated tests below
+    and by the drift gates rather than by a blanket identity claim.
+    """
+    vendored_package = _require_vendored_package()
+
+    ud_copy = _UD_PACKAGE / f"{module_name}.py"
+    assert not ud_copy.exists(), (
+        f"{ud_copy.relative_to(_REPO_ROOT)} exists again. ADR-0046 Stage 2 "
+        "wave 3a retired this module; UpstreamDrift consumes the canonical "
+        "implementation from Tools through "
+        f"shared.python.launch_monitor.{module_name}. A re-added copy shadows "
+        "nothing here but does fork the implementation, which is the "
+        "divergence ADR-0046 was accepted to end. Land the change in Tools "
+        "and bump the vendor pin."
+    )
+
+    module = importlib.import_module(f"shared.python.launch_monitor.{module_name}")
+    assert module.__file__ is not None
+    resolved = Path(module.__file__).resolve()
+    assert resolved == (vendored_package / f"{module_name}.py").resolve(), (
+        f"shared.python.launch_monitor.{module_name} imported from {resolved}, "
+        f"not from the vendored canonical package at "
+        f"{vendored_package / f'{module_name}.py'}."
+    )
+
+
+def test_wave_3a_retirements_are_dependency_legal() -> None:
+    """No retired module may depend on one still served by UpstreamDrift.
+
+    This is the constraint that decided wave 3a's contents, and it is not
+    visible from ADR-0048's port order, which is ordered by UpstreamDrift's
+    intra-package graph. The canonical modules import each other by the
+    canonical name, so a canonical module whose dependency is still an
+    UpstreamDrift file gets the *canonical* dependency while the façade
+    exports the *UpstreamDrift* one — two `FlexibleAnalysisResult` classes,
+    two `AnalysisContextV2` classes, in one process, with pydantic validation
+    failing across the seam. Asserting the property directly is cheaper than
+    rediscovering it one ValidationError at a time in a later wave.
+    """
+    vendored_package = _require_vendored_package()
+
+    retired = set(WAVE_1_MODULES) | set(WAVE_2_MODULES) | set(WAVE_3A_MODULES)
+    prefix = "from shared.python.launch_monitor."
+    still_local = {
+        path.stem
+        for path in _UD_PACKAGE.glob("*.py")
+        if path.stem not in {"__init__", "project"}
+    }
+
+    for module_name in sorted(retired):
+        source = (vendored_package / f"{module_name}.py").read_text(encoding="utf-8")
+        dependencies = {
+            line.split(prefix, 1)[1].split(" ", 1)[0].rstrip(".,")
+            for line in source.splitlines()
+            if line.startswith(prefix)
+        }
+        leaked = dependencies & still_local
+        assert not leaked, (
+            f"shared.python.launch_monitor.{module_name} is retired but "
+            f"imports {sorted(leaked)}, which UpstreamDrift still serves from "
+            f"{_UD_PACKAGE.relative_to(_REPO_ROOT)}. Retire the dependency in "
+            "the same wave, or the two layers hold separate copies of the "
+            "same classes."
+        )
+
+
+def test_wave_3a_longitudinal_carries_the_g1_d1_named_method_pair() -> None:
+    """ADR-0048 Decision G1-D1 lands as a renamed, required method identifier.
+
+    Unlike wave 2's D17, this one is *not* purely additive: the pooled
+    estimator's `method` was a single-valued `Literal` defaulting to
+    ``"player_fixed_effects_ols_clustered_by_player"``, and it is now a
+    required two-valued identifier with no default and no back-compat alias —
+    the same posture as wave 1's `TrendResult` rename, and for the same
+    reason. G1-D1 states it plainly: "results from different estimators are
+    never numerically compared without the names attached", which is only
+    enforceable if naming is mandatory. The old string's absence is asserted
+    rather than assumed, because a re-added alias would let a
+    ``dl-random-effects/1`` number be read under the cluster-robust name.
+
+    The per-player and heterogeneity fields the decision adds are additive and
+    optional, so a caller that reads only what it read before still works.
+    """
+    _require_vendored_package()
+
+    types_module = importlib.import_module(
+        "shared.python.launch_monitor.longitudinal_types"
+    )
+    pooled = types_module.PooledAssociationV1
+    assert set(types_module.POOLED_METHOD_DESCRIPTIONS) == {
+        "ud-cluster-robust-fe/1",
+        "dl-random-effects/1",
+    }
+    assert pooled.model_fields["method"].is_required(), (
+        "PooledAssociationV1.method gained a default again. G1-D1 makes the "
+        "estimator identifier mandatory precisely so a pooled number can "
+        "never be read without knowing which estimator produced it."
+    )
+    assert "player_fixed_effects_ols_clustered_by_player" not in str(
+        pooled.model_fields["method"].annotation
+    ), (
+        "The pre-G1-D1 method string is back in PooledAssociationV1. It was "
+        "renamed to ud-cluster-robust-fe/1 with no alias; re-adding it "
+        "reintroduces the unnamed-estimator hazard the decision removed."
+    )
+
+    player = types_module.LongitudinalPlayerAssociationV1
+    for added in (
+        "standard_error",
+        "ci_lower",
+        "ci_upper",
+        "p_value",
+        "r_squared",
+        "first_to_last_change",
+    ):
+        assert added in player.model_fields, (
+            f"LongitudinalPlayerAssociationV1 lost the D11 field {added}."
+        )
+        assert not player.model_fields[added].is_required(), (
+            f"{added} became required. D11's fields are optional so a fit "
+            "that cannot support one says so by absence rather than by "
+            "inventing a number."
+        )
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "PooledAssociationV1" in facade.__all__
+    assert "LongitudinalPlayerAssociationV1" in facade.__all__
+
+
+def test_wave_3a_flexible_analysis_carries_d15_and_d17() -> None:
+    """The two flexible-analysis rulings are visible on the canonical module.
+
+    D17 is additive: `CorrelationEstimate` gains `is_boolean_projected` and
+    keeps every field it had. D15 is not additive and cannot be — it changes
+    a reported number — so it is pinned where a number can be measured, in
+    ``test_flexible_analysis_drift.py``'s
+    ``test_resolved_d15_the_fdr_denominator_agrees``. What is asserted here is
+    the structural half: that the pool really is filtered before correction,
+    read off the source rather than inferred from a value that could coincide.
+    """
+    vendored_package = _require_vendored_package()
+
+    flexible = importlib.import_module("shared.python.launch_monitor.flexible_analysis")
+    fields = {field.name for field in dataclasses.fields(flexible.CorrelationEstimate)}
+    assert "is_boolean_projected" in fields, (
+        "shared.python.launch_monitor.flexible_analysis.CorrelationEstimate "
+        "lost the D17 is_boolean_projected label."
+    )
+    assert {
+        "predictor",
+        "coefficient",
+        "p_value",
+        "adjusted_p_value",
+        "ci_lower",
+        "ci_upper",
+        "sample_count",
+        "method",
+    } <= fields
+
+    source = (vendored_package / "flexible_analysis.py").read_text(encoding="utf-8")
+    assert "correction_input" in source and "min_samples" in source, (
+        "The D15 correction pool no longer filters by min_samples before "
+        "calling _adjust_p_values. Under-sampled predictors are back in the "
+        "Benjamini-Hochberg denominator; see ADR-0048's owner ruling on D15."
+    )
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "CorrelationEstimate" in facade.__all__
+    assert "analyze_variables" in facade.__all__
+
+
+def test_wave_3a_corpus_keeps_the_dataframe_entry_point_and_gains_provenance() -> None:
+    """P19's merge is additive at the entry point UpstreamDrift consumers use.
+
+    ``load_private_corpus`` still returns a plain ``DataFrame`` — that is the
+    signature `gui.py` and the analytics routes call — and the merge adds
+    ``load_private_corpus_with_provenance`` beside it for callers that want
+    the content-addressed manifest identity. The mandatory manifest gate is
+    unchanged in kind: UpstreamDrift's copy already carried the same five
+    fail-closed checks (#9401), which is what made this retirement a
+    re-point rather than a behaviour change.
+    """
+    _require_vendored_package()
+
+    corpus = importlib.import_module("shared.python.launch_monitor.corpus")
+    assert corpus.load_private_corpus.__annotations__["return"] in {
+        "pd.DataFrame",
+        pd.DataFrame,
+    }
+    assert hasattr(corpus, "load_private_corpus_with_provenance")
+    assert corpus.MAX_RETAINED_ROWS == 300_000
+    assert corpus.SUPPORTED_MANIFEST_SCHEMA_VERSION == 1
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "load_private_corpus" in facade.__all__
+    assert "CORPUS_COLUMN_MAP" in facade.__all__
+
+
+@pytest.mark.parametrize("module_name", WAVE_3B_MODULES)
+def test_wave_3b_module_is_retired_and_served_by_the_canonical_layer(
+    module_name: str,
+) -> None:
+    """Wave 3b's eight modules pass the same retirement check waves 1-3a did."""
+    vendored_package = _require_vendored_package()
+
+    ud_copy = _UD_PACKAGE / f"{module_name}.py"
+    assert not ud_copy.exists(), (
+        f"{ud_copy.relative_to(_REPO_ROOT)} exists again. ADR-0046 Stage 2 "
+        "wave 3b retired this module; UpstreamDrift consumes the canonical "
+        "implementation from Tools through "
+        f"shared.python.launch_monitor.{module_name}. A re-added copy shadows "
+        "nothing here but does fork the implementation, which is the "
+        "divergence ADR-0046 was accepted to end. Land the change in Tools "
+        "and bump the vendor pin."
+    )
+
+    module = importlib.import_module(f"shared.python.launch_monitor.{module_name}")
+    assert module.__file__ is not None
+    resolved = Path(module.__file__).resolve()
+    assert resolved == (vendored_package / f"{module_name}.py").resolve(), (
+        f"shared.python.launch_monitor.{module_name} imported from {resolved}, "
+        f"not from the vendored canonical package at "
+        f"{vendored_package / f'{module_name}.py'}."
+    )
+
+
+def test_stage_2_module_retirement_is_complete() -> None:
+    """Nothing is left in the package but the façade and two app-local files.
+
+    This is the terminal assertion of ADR-0046 Stage 2. All twenty-eight modules
+    ADR-0048's inventory classified ``port-up`` or ``merge`` are gone from
+    UpstreamDrift and served by the canonical layer; what remains is exactly
+    the set the ADR classified ``app-local``, plus P12's documented baseline
+    exclusion. Written as an equality rather than a subset on purpose: a
+    *new* module appearing here is the beginning of the next fork, and this
+    test is where it should be argued for, not noticed later.
+    """
+    _require_vendored_package()
+
+    present = {path.stem for path in _UD_PACKAGE.glob("*.py")}
+    assert present == set(APP_LOCAL_MODULES), (
+        "src/tools/launch_monitor_model/ no longer holds exactly the app-local "
+        f"set. Present: {sorted(present)}; expected: {sorted(APP_LOCAL_MODULES)}. "
+        "ADR-0046 Stage 2 retired every port-up and merge module onto the "
+        "canonical layer; a new file here forks the implementation again. If "
+        "one is genuinely app-local, add it to APP_LOCAL_MODULES with the "
+        "reason, and say so in ADR-0048."
+    )
+
+    retired = (
+        set(WAVE_1_MODULES)
+        | set(WAVE_2_MODULES)
+        | set(WAVE_3A_MODULES)
+        | set(WAVE_3B_MODULES)
+    )
+    assert len(retired) == 28, (
+        f"Expected 28 retired modules across the four waves, found {len(retired)}."
+    )
+
+
+def test_app_local_baseline_satisfies_the_canonical_protocols() -> None:
+    """P12's seam: UpstreamDrift's model is what the canonical protocols accept.
+
+    The canonical ``strokes_gained``/``outcome_proxy`` modules type their
+    ``baseline`` argument as ``ExpectedStrokesBaselineLike``, a
+    ``runtime_checkable`` ``Protocol``, precisely so the already-home Tools
+    loader *and* UpstreamDrift's validating model both flow in without the
+    canonical package importing ``rate_of_closure``. Asserting ``isinstance``
+    against the protocol is the honest form of that claim: it is what the
+    structural contract actually promises, and it survives a field being
+    renamed on either side in a way a hand-copied field list would not.
+    """
+    _require_vendored_package()
+
+    canonical = importlib.import_module(
+        "shared.python.launch_monitor.strokes_gained_types"
+    )
+    local = importlib.import_module(
+        "src.tools.launch_monitor_model.strokes_gained_baseline"
+    )
+
+    # The baseline half is gone from the canonical module, by decision.
+    assert not hasattr(canonical, "ExpectedStrokesBaselineV2")
+    assert not hasattr(canonical, "baseline_table_sha256")
+    assert canonical.BASELINE_CONTRACT_VERSION == local.BASELINE_CONTRACT_VERSION
+
+    states = tuple(
+        local.ExpectedStrokesStateV2(
+            lie="fairway",
+            context="approach",
+            target="green",
+            distance_yards=float(distance),
+            expected_strokes=2.5 + index * 0.1,
+            standard_error=0.05,
+        )
+        for index, distance in enumerate((100.0, 150.0))
+    )
+    baseline = local.ExpectedStrokesBaselineV2(
+        baseline_id="parity-fixture",
+        version="1",
+        source_url="https://example.invalid/baseline.json",
+        license="CC0-1.0",
+        table_sha256=local.baseline_table_sha256(states),
+        states=states,
+    )
+
+    assert isinstance(baseline, canonical.ExpectedStrokesBaselineLike)
+    assert all(
+        isinstance(state, canonical.ExpectedStrokesStateLike) for state in states
+    )
+
+    # And the model is a real gate, not a shape: the digest is verified.
+    with pytest.raises(ValueError, match="table_sha256"):
+        local.ExpectedStrokesBaselineV2(
+            baseline_id="parity-fixture",
+            version="1",
+            source_url="https://example.invalid/baseline.json",
+            license="CC0-1.0",
+            table_sha256="0" * 64,
+            states=states,
+        )
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "ExpectedStrokesBaselineV2" in facade.__all__
+    assert "ExpectedStrokesBaselineLike" in facade.__all__
+
+
+def test_wave_3b_strokes_gained_carries_the_g1_d2_named_estimand_pair() -> None:
+    """G1-D2 lands as a named estimand on the request *and* on every result.
+
+    Naming it in only one place would not be enough: a request could select
+    ``shot-level-sg-trend/1`` and hand back a summary that never says so, which
+    is the unlabelled-comparison hazard the decision exists to close. The
+    canonical default is the session cell, and the result field is required
+    with no default so a summary cannot be built without naming its estimand.
+    """
+    _require_vendored_package()
+
+    types_module = importlib.import_module(
+        "shared.python.launch_monitor.strokes_gained_types"
+    )
+    dimension = types_module.LongitudinalDimensionV1
+    summary = types_module.LongitudinalSummaryV1
+
+    assert "session-cell-sg-trend/1" in str(types_module.LongitudinalMethod)
+    assert "shot-level-sg-trend/1" in str(types_module.LongitudinalMethod)
+    assert dimension.model_fields["method"].default == "session-cell-sg-trend/1", (
+        "The canonical default stopped being the session cell. G1-D2 makes "
+        "session-cell the canonical estimand; shot-level is the preserved "
+        "variant, not the default."
+    )
+    assert summary.model_fields["method"].is_required(), (
+        "LongitudinalSummaryV1.method gained a default. Every summary must "
+        "name the estimand that produced it."
+    )
+
+
+def test_wave_3b_player_covariation_carries_d22_and_d23() -> None:
+    """D22 and D23 adopted UpstreamDrift's postures; the union adds to them.
+
+    Neither ruling moves an UpstreamDrift number — that is the point, and it
+    is why ``test_player_covariation_drift.py``'s pins are unchanged. What is
+    new is that the withholding is now *explained* rather than a bare ``None``
+    (D22) and that the threshold behind it is a documented constant rather
+    than an anonymous literal.
+    """
+    _require_vendored_package()
+
+    types_module = importlib.import_module(
+        "shared.python.launch_monitor.player_covariation_types"
+    )
+    assert types_module.BETWEEN_PLAYER_INTERVAL_MIN_GROUPS == 5, (
+        "The D22 threshold moved. Five player means, because the Fisher-z "
+        "standard error is 1/sqrt(n-3): at n=4 that is exactly 1.0, and "
+        "tanh(+/-1.96) then spans [-0.96, +0.96] whatever the estimate."
+    )
+    assert types_module.MIN_FISHER_SAMPLES == 4
+
+    estimate_fields = types_module.AssociationEstimateV1.model_fields
+    assert "interval_withheld_reason" in estimate_fields, (
+        "D22 requires that a withheld interval carry a typed reason rather "
+        "than reading as a silent None."
+    )
+
+    uncertainty_fields = types_module.CovariationUncertaintyV1.model_fields
+    assert "between_player_interval_min_groups" in uncertainty_fields
+
+    facade = importlib.import_module("src.tools.launch_monitor_model")
+    assert "AssociationEstimateV1" in facade.__all__

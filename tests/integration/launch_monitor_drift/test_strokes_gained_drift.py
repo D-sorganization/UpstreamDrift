@@ -41,11 +41,16 @@ DIFFER — documented and pinned below
         stack cannot compute grouped SG at all.
     D4. Longitudinal SG trend. UD fits per-player slope/R2/p. Tools' SG module
         has none.
-    D5. Estimand note (intra-UD, recorded for the G1 port plan): UD's SG
-        longitudinal fit is **shot-level** (sample_count 40 per player = 5
-        sessions x 8 shots), while UD's own ``longitudinal.py`` aggregates to
-        20 player-session cells first and warns against pseudo-replication.
-        The canonical layer must pick one.
+    D5. **RESOLVED - the canonical estimand is the session cell.** UD's SG
+        longitudinal fit was shot-level (sample_count 40 per player = 5
+        sessions x 8 shots) while UD's own ``longitudinal.py`` aggregated to
+        20 player-session cells first and warned against pseudo-replication.
+        ADR-0048 Decision **G1-D2** settled that intra-UD contradiction in
+        favour of the session cell -- "when a repository's two modules
+        disagree and one of them has already written down why the other is
+        wrong, the written-down argument wins" -- and preserved the shot-level
+        fit as the named variant ``shot-level-sg-trend/1``. Both estimands are
+        pinned below, and every result names which one produced it.
 """
 
 from __future__ import annotations
@@ -56,15 +61,21 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from src.tools.launch_monitor_model.strokes_gained import (
+from shared.python.launch_monitor.strokes_gained import (
     analyze_source_backed_strokes_gained,
 )
-from src.tools.launch_monitor_model.strokes_gained_types import (
+from shared.python.launch_monitor.strokes_gained_types import (
     CourseStateColumnsV1,
-    ExpectedStrokesBaselineV2,
     GroupingDimensionV1,
     LongitudinalDimensionV1,
     StrokesGainedRequestV1,
+)
+
+# ADR-0048 P12 left the expected-strokes baseline half out of the canonical
+# port; UpstreamDrift keeps the validating model app-local. See
+# ``src/tools/launch_monitor_model/strokes_gained_baseline.py``.
+from src.tools.launch_monitor_model.strokes_gained_baseline import (
+    ExpectedStrokesBaselineV2,
     baseline_table_sha256,
 )
 from tests.integration.launch_monitor_drift.conftest import (
@@ -117,6 +128,24 @@ DEGENERATE_EXPECTATIONS = {
     "negative_finish_distance": "invalid_distance",
     "unknown_stratum": "outside_baseline",
 }
+
+
+# D4/D5 pins, both halves of G1-D2's named estimand pair. The *slope* is the
+# same number to 15 significant figures under either method -- equal-weight
+# session cells with equal shot counts reproduce the shot-level OLS slope
+# exactly -- so what the decision moved is the sample size and the uncertainty
+# claim built on it, not the point estimate. On P4 the shot-level fit reads
+# p = 0.0121 ("significant") from 40 pseudo-replicated observations; the
+# session-cell fit reads p = 0.1411 from the 5 independent ones.
+SESSION_CELL_METHOD = "session-cell-sg-trend/1"
+SHOT_LEVEL_METHOD = "shot-level-sg-trend/1"
+SESSION_CELL_SAMPLE_COUNT = 5
+SHOT_LEVEL_SAMPLE_COUNT = 40
+P4_SLOPE = 0.075881035543697128
+P4_SESSION_CELL_R_SQUARED = 0.5682576505731145
+P4_SESSION_CELL_P_VALUE = 0.1410798565763777
+P4_SHOT_LEVEL_R_SQUARED = 0.15450437016457175
+P4_SHOT_LEVEL_P_VALUE = 0.012104880151308768
 
 
 def _ud_request() -> StrokesGainedRequestV1:
@@ -176,6 +205,28 @@ def _tools_request() -> SourceBackedStrokesGainedRequest:
 def ud_result(session_frame: pd.DataFrame, baseline_document: dict[str, Any]):
     baseline = ExpectedStrokesBaselineV2.model_validate(baseline_document)
     return analyze_source_backed_strokes_gained(session_frame, baseline, _ud_request())
+
+
+@pytest.fixture(scope="module")
+def ud_shot_level_result(
+    session_frame: pd.DataFrame, baseline_document: dict[str, Any]
+):
+    """The same analysis under G1-D2's other named estimand."""
+    baseline = ExpectedStrokesBaselineV2.model_validate(baseline_document)
+    request = _ud_request()
+    longitudinal = request.longitudinal
+    assert longitudinal is not None
+    return analyze_source_backed_strokes_gained(
+        session_frame,
+        baseline,
+        request.model_copy(
+            update={
+                "longitudinal": longitudinal.model_copy(
+                    update={"method": SHOT_LEVEL_METHOD}
+                )
+            }
+        ),
+    )
 
 
 @pytest.fixture(scope="module")
@@ -298,21 +349,58 @@ def test_divergence_d3_only_ud_computes_grouped_strokes_gained(
     assert not hasattr(tools_result, "group_summaries")
 
 
-def test_divergence_d4_d5_longitudinal_strokes_gained_estimand(
-    ud_result, tools_result
+def test_resolved_d5_the_named_estimand_pair_moves_inference_not_the_slope(
+    ud_result, ud_shot_level_result, tools_result
 ) -> None:
-    """DIFFER (D4/D5): only UD fits an SG trend, and it fits shot-level.
+    """RESOLVED (D5): session cell is canonical; shot-level survives, named.
 
-    Each UD per-player fit uses sample_count 40 (every shot), not the 20
-    player-session cells that UD's own ``longitudinal.py`` insists on. The
-    canonical layer has to choose one estimand.
+    D4 is untouched and still a divergence -- only this stack fits an SG trend
+    at all. D5 was the *intra-UD* half: two modules in one repository
+    disagreeing about what an independent observation is. ADR-0048's Decision
+    G1-D2 settled it for the session cell, and the numbers below are why the
+    settlement matters: the point estimate is unmoved, so nothing about the
+    measured trend changed, but the significance verdict flips because 40
+    pseudo-replicated shots were never 40 independent observations.
     """
     trends = {item.group_value: item for item in ud_result.longitudinal_summaries}
-    assert set(trends) == {"P1", "P2", "P3", "P4"}
-    assert all(item.sample_count == 40 for item in trends.values())
-    assert trends["P4"].slope == pytest.approx(0.075881035543697128, rel=1e-9)
-    assert trends["P4"].r_squared == pytest.approx(0.15450437016457175, rel=1e-9)
+    shot_level = {
+        item.group_value: item for item in ud_shot_level_result.longitudinal_summaries
+    }
+    assert set(trends) == set(shot_level) == {"P1", "P2", "P3", "P4"}
 
+    # Every result names its estimand; the canonical default is the session cell.
+    assert all(item.method == SESSION_CELL_METHOD for item in trends.values())
+    assert all(item.method == SHOT_LEVEL_METHOD for item in shot_level.values())
+    assert all(
+        item.sample_count == SESSION_CELL_SAMPLE_COUNT for item in trends.values()
+    )
+    assert all(
+        item.sample_count == SHOT_LEVEL_SAMPLE_COUNT for item in shot_level.values()
+    )
+
+    # The slope is the same estimate under either estimand, for every player:
+    # equal-weight session cells with equal shot counts reproduce the
+    # shot-level OLS slope. G1-D2 changed what the fit *claims*, not what it
+    # measures.
+    for player, cell_fit in trends.items():
+        assert cell_fit.slope == pytest.approx(shot_level[player].slope, rel=1e-12)
+    assert trends["P4"].slope == pytest.approx(P4_SLOPE, rel=1e-9)
+    assert shot_level["P4"].slope == pytest.approx(P4_SLOPE, rel=1e-9)
+
+    # What moved: the sample size, and the uncertainty built on it. The
+    # shot-level R2 pin is the value G0 recorded; it is kept, under the name of
+    # the estimand that actually produces it.
+    assert shot_level["P4"].r_squared == pytest.approx(
+        P4_SHOT_LEVEL_R_SQUARED, rel=1e-9
+    )
+    assert trends["P4"].r_squared == pytest.approx(P4_SESSION_CELL_R_SQUARED, rel=1e-9)
+    assert shot_level["P4"].p_value == pytest.approx(P4_SHOT_LEVEL_P_VALUE, rel=1e-9)
+    assert trends["P4"].p_value == pytest.approx(P4_SESSION_CELL_P_VALUE, rel=1e-9)
+
+    # The headline consequence: pseudo-replication called P4 significant.
+    assert shot_level["P4"].p_value < 0.05 < trends["P4"].p_value
+
+    # D4 is unchanged: the legacy stack fits no SG trend at all.
     assert not hasattr(tools_result, "longitudinal_summaries")
 
 
