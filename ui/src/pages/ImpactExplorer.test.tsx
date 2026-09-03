@@ -42,7 +42,7 @@ describe("ImpactExplorerPage", () => {
 
     await waitFor(() =>
       expect(
-        screen.getByText("Impact Explorer web bundle is not built"),
+        screen.getByText("Impact Explorer Web Bundle Is Not Built"),
       ).toBeInTheDocument(),
     );
     expect(
@@ -57,7 +57,7 @@ describe("ImpactExplorerPage", () => {
 
     await waitFor(() =>
       expect(
-        screen.getByText("Impact Explorer web bundle is not built"),
+        screen.getByText("Impact Explorer Web Bundle Is Not Built"),
       ).toBeInTheDocument(),
     );
   });
@@ -72,7 +72,7 @@ describe("ImpactExplorerPage", () => {
 
     expect(screen.getByTestId("impact-explorer-checking")).toBeInTheDocument();
     expect(
-      screen.queryByText("Impact Explorer web bundle is not built"),
+      screen.queryByText("Impact Explorer Web Bundle Is Not Built"),
     ).toBeNull();
   });
 });

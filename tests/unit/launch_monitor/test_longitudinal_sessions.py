@@ -12,7 +12,7 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     AnalysisContextV2,
     LongitudinalSessionRequestV1,
     analyze_longitudinal_sessions,

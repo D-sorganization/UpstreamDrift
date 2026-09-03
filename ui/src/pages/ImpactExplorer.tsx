@@ -74,7 +74,7 @@ export function ImpactExplorerPage() {
     <div className="flex h-screen items-center justify-center bg-gray-900 p-4">
       <div className="w-full max-w-xl rounded-md bg-gray-800 p-8 shadow-lg">
         <h1 className="text-xl font-semibold text-white">
-          Impact Explorer web bundle is not built
+          Impact Explorer Web Bundle Is Not Built
         </h1>
         <p className="mt-3 text-sm text-gray-300">
           The Rate of Closure Impact Explorer — the full swing, impact,

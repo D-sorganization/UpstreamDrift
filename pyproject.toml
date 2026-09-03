@@ -1,11 +1,11 @@
 # Upstream Drift — pyproject.toml
 [project]
 name = "upstream-drift"
-version = "2.1.1"
+version = "2.1.2"
 description = "Biomechanical golf simulation and analysis suite"
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 keywords = ["golf", "biomechanics", "simulation", "physics", "mujoco", "urdf"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -385,7 +385,7 @@ path = "build_hooks.py"
 [tool.ruff]
 src = ["src"]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
 # force-exclude ensures glob patterns are honoured even when files are passed explicitly.
 force-exclude = true
 # Exclude third-party model files (legacy Python 2 scripts from OpenSim).
@@ -438,13 +438,23 @@ ignore = [
 #   new violations must use src/shared/python/core/process_safety.narrow_catch
 #   or supply a justified `# noqa: BLE001 - <reason>` comment. Enforced via
 #   scripts/ci/check_error_handling_ratchet.py (issue #5911 / epic #5907).
-extend-ignore = ["E501", "C901", "E402", "I001", "SIM118", "SIM105", "SIM117", "PLE0604", "SIM102", "SIM113", "PERF403", "F841", "F401"]
+extend-ignore = ["E501", "C901", "E402", "I001", "SIM118", "SIM105", "SIM117", "PLE0604", "SIM102", "SIM113", "PERF403", "F841", "F401",
+    # target-version py310 -> py311 (#9414) surfaced 127 pyupgrade/refurb sites,
+    # 40 of them in the Tools-owned child copy under src/shared/python (must not
+    # be edited here) and 48 UP042 StrEnum rewrites that change str() semantics.
+    # Held at parity until the fixes land in Tools first; burn down separately.
+    "UP017", "UP035", "UP036", "UP041", "UP042", "FURB162",
+]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/**" = ["T201"]
+# Fleet-shared portable CLIs (Repository_Management#1520), copied verbatim so
+# they stay byte-identical across repositories; their reports go to stdout by
+# design, exactly like scripts/**.
+"shared_scripts/**" = ["T201"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
 # Runnable docs examples are CLI-style scripts: stdout is how they report results.

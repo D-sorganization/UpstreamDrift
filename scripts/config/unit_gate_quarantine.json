@@ -256,7 +256,6 @@
     "tests/unit/repo_hygiene/test_optional_dependency_mock_scope.py::test_no_module_scope_optional_dependency_sys_modules_mocks",
     "tests/unit/repo_hygiene/test_urdf_governance_docs.py::TestUrdfPackageDocs::test_humanoid_character_builder_docstring_describes_domain_layer",
     "tests/unit/repo_hygiene/test_urdf_governance_docs.py::TestUrdfPackageDocs::test_shared_python_index_describes_canonical_toolkit",
-    "tests/unit/research/test_proximal_distal_claim_evidence_integrity.py::test_committed_claim_evidence_manifest_matches_builder_and_validates",
     "tests/unit/research/test_release_claim_review.py::test_release_review_covers_every_release_claim_and_closes_only_review",
     "tests/unit/scripts/test_check_gitignore_dotenv.py::TestCheckGitignoreDotenvScript::test_script_exits_zero_on_real_repo",
     "tests/unit/scripts/test_check_mypy_exclusion_budget.py::test_ci_standard_runs_mypy_exclusion_budget",

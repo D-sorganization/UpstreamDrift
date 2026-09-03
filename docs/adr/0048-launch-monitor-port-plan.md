@@ -275,6 +275,54 @@ land them as **G0.1** under the same issue line, then classify. The covariation
 gate is the one to build first — it is the largest surface and the only one
 where an ADR statement is affirmatively wrong.
 
+## Owner Rulings (2026-09-02)
+
+G0.1 landed the flexible-analysis and player-covariation comparisons
+recommended above and pinned fourteen divergences (D15–D26) across
+`tests/integration/launch_monitor_drift/test_flexible_analysis_drift.py` and
+`tests/integration/launch_monitor_drift/test_player_covariation_drift.py`. The
+repo owner has now ruled on four of those, narrowing what the eventual
+flexible-analysis and covariation gates need to encode. The remaining pins in
+each file are unruled and do not carry a decision here.
+
+**D15 — FDR multiplicity denominator**
+(`test_divergence_d15_multiplicity_denominator_differs`). UD keeps an
+under-sampled predictor's raw p value in the Benjamini-Hochberg pool (below
+`min_samples`) and only blanks the reported values afterwards, correcting
+against k=4; Tools drops it before correcting, against k=3. **Ruling:** the
+canonical layer excludes under-sampled predictors from the FDR denominator
+before correcting — Tools' existing posture. UD's count-all behaviour is a
+defect, not a preserved method. This applies to the canonical
+`relationships.py`/flexible-analysis modules; the P7 port lands UD verbatim
+first, and a follow-up PR applies this ruling with updated pins.
+
+**D17 — boolean columns**
+(`test_divergence_d17_boolean_columns_are_analysed_only_by_ud`). UD's
+`pd.to_numeric` projects `True`/`False` to 1.0/0.0 and analyses the column;
+Tools' `finite_launch_monitor_scalar` refuses booleans and raises "Constant
+variables cannot be analyzed". **Ruling:** the canonical layer analyses
+booleans as 0/1 — UD's capability is preserved — but the projection must be
+explicit in the result: a column analysed via boolean projection is labelled
+as such and can never read as native numeric. Tools' refusal message becomes
+a pointer to the explicit path rather than a dead end.
+
+**D22 — low-dof Fisher intervals**
+(`test_divergence_d22_between_player_interval_exists_only_in_tools`). With
+four player means Tools returns a Fisher-z interval on n-3 = 1 degree of
+freedom; UD sets `include_interval=False` for that scope and returns `None`.
+**Ruling:** the canonical layer withholds the between-player Fisher interval
+when degrees of freedom make it uninformative — UD's posture — with the
+threshold documented and the absence explained in the result rather than
+silently `None`. Applies at P18 (`player_covariation*`).
+
+**D23 — unit labelling**
+(`test_divergence_d23_unit_resolution_differs`). Tools' column-name-suffix
+heuristic labels `start_distance_yards` as `"s"` (seconds); UD resolves units
+from the canonical registry and returns `canonical_unit="unknown"` rather than
+guessing. **Ruling:** the suffix heuristic is a defect and is deleted. The
+canonical layer resolves units from the canonical registry and returns
+unknown rather than guessing. Applies at P18.
+
 ## Port Order
 
 Target for every `port-up` module: `src/shared/python/launch_monitor/<same
@@ -287,29 +335,29 @@ Ordering is dependency-legal first, then smallest-first inside each tier. The
 intra-package graph has six modules with no internal dependencies at all; those
 form tier 0 and can proceed in any order.
 
-| PR  | Source module(s)                                                           |   LOC | Tests that travel                                                                                                                                             | Gate that must stay green                                                    |
-| --- | -------------------------------------------------------------------------- | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| P1  | `dispersion.py`                                                            |    70 | dispersion half of `tests/unit/launch_monitor/test_analysis.py::test_dispersion_and_longitudinal_trend_capture_change`, split into a new `test_dispersion.py` | `tests/integration/launch_monitor_drift/test_dispersion_drift.py` (all 7)    |
-| P2  | `multivariate.py`                                                          |   108 | `test_analysis.py::test_pca_and_vif_expose_multicollinearity`                                                                                                 | all three G0 files (regression only)                                         |
-| P3  | `trends.py`                                                                |   110 | trend half of the same split test                                                                                                                             | all three G0 files; plus the `TrendResult` rename                            |
-| P4  | `comparison.py`                                                            |   147 | `test_analysis.py::test_matched_monitor_comparison_recovers_bias_and_slope`                                                                                   | all three G0 files                                                           |
-| P5  | `schema.py`                                                                |   195 | `test_importer.py` mapping cases                                                                                                                              | all three G0 files                                                           |
-| P6  | `treatment.py`                                                             |   215 | two `test_analysis.py` treatment cases                                                                                                                        | all three G0 files                                                           |
-| P7  | `relationships.py`                                                         |   187 | `test_analysis.py::test_correlations_include_counts_significance_and_derived_warning`                                                                         | all three G0 files                                                           |
-| P8  | `modeling.py`                                                              |   226 | three `test_analysis.py` model cases including the leakage guard                                                                                              | all three G0 files                                                           |
-| P9  | `profiles.py` + `importer.py`                                              |   523 | `tests/unit/launch_monitor/test_importer.py` (6 of 7 cases)                                                                                                   | all three G0 files                                                           |
-| —   | **blocked on G1-D4** — `contract_v2.py` imports `flexible_analysis`        |       |                                                                                                                                                               |                                                                              |
-| P10 | `flexible_analysis.py` (after G0.1 + decision)                             |   415 | `test_flexible_analysis.py`                                                                                                                                   | new flexible-analysis gate                                                   |
-| P11 | `contract_v2.py`                                                           |   791 | `test_contract_v2.py`                                                                                                                                         | all three G0 files                                                           |
-| P12 | `strokes_gained_types.py` (minus baseline half) + `_scoring_statistics.py` |   567 | `test_strokes_gained_contract.py`, `tests/api/test_routes_launch_monitor_analytics.py` baseline cases                                                         | `test_strokes_gained_drift.py`                                               |
-| P13 | `outcome_proxy.py`                                                         |   114 | `test_strokes_gained_contract.py` proxy cases                                                                                                                 | new target-error gate landed in this PR                                      |
-| P14 | `strokes_gained.py`                                                        |   432 | `test_strokes_gained_contract.py`                                                                                                                             | `test_strokes_gained_drift.py`, with D1 re-pinned per G1-D3 and D5 per G1-D2 |
-| P15 | `longitudinal_types.py` + `longitudinal_statistics.py`                     |   291 | `test_longitudinal_sessions.py`, `tests/api/test_launch_monitor_longitudinal.py`                                                                              | `test_longitudinal_drift.py`                                                 |
-| P16 | `longitudinal.py`                                                          |   301 | `test_longitudinal_sessions.py`                                                                                                                               | `test_longitudinal_drift.py`, carrying G1-D1's named-method pair             |
-| P17 | `conformance_bundle.py`                                                    |   207 | `test_conformance_bundle.py`                                                                                                                                  | Tools' `launchMonitorConformanceGolden.test.ts`                              |
-| P18 | `player_covariation*` (after G0.1 + decision)                              | 1,098 | `test_player_covariation_contract.py`, `tests/api/test_routes_launch_monitor_covariation.py`                                                                  | new covariation gate                                                         |
-| P19 | `corpus.py` (after G0.1 + decision)                                        |   197 | `test_corpus.py`                                                                                                                                              | new corpus gate                                                              |
-| P20 | `dataset_reference*` (4 modules)                                           |   763 | `test_dataset_reference_jobs.py`, `tests/api/test_launch_monitor_dataset_jobs.py`                                                                             | all three G0 files                                                           |
+| PR  | Source module(s)                                                           |   LOC | Tests that travel                                                                                                                                             | Gate that must stay green                                                                                                                                                                            |
+| --- | -------------------------------------------------------------------------- | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P1  | `dispersion.py`                                                            |    70 | dispersion half of `tests/unit/launch_monitor/test_analysis.py::test_dispersion_and_longitudinal_trend_capture_change`, split into a new `test_dispersion.py` | `tests/integration/launch_monitor_drift/test_dispersion_drift.py` (all 7)                                                                                                                            |
+| P2  | `multivariate.py`                                                          |   108 | `test_analysis.py::test_pca_and_vif_expose_multicollinearity`                                                                                                 | all three G0 files (regression only)                                                                                                                                                                 |
+| P3  | `trends.py`                                                                |   110 | trend half of the same split test                                                                                                                             | all three G0 files; plus the `TrendResult` rename (executed in Tools#4899 as `TemporalTrendResult`, deliberately with no back-compat alias — Stage 2's import rewrite must special-case this symbol) |
+| P4  | `comparison.py`                                                            |   147 | `test_analysis.py::test_matched_monitor_comparison_recovers_bias_and_slope`                                                                                   | all three G0 files                                                                                                                                                                                   |
+| P5  | `schema.py`                                                                |   195 | `test_importer.py` mapping cases                                                                                                                              | all three G0 files                                                                                                                                                                                   |
+| P6  | `treatment.py`                                                             |   215 | two `test_analysis.py` treatment cases                                                                                                                        | all three G0 files                                                                                                                                                                                   |
+| P7  | `relationships.py`                                                         |   187 | `test_analysis.py::test_correlations_include_counts_significance_and_derived_warning`                                                                         | all three G0 files                                                                                                                                                                                   |
+| P8  | `modeling.py`                                                              |   226 | three `test_analysis.py` model cases including the leakage guard                                                                                              | all three G0 files                                                                                                                                                                                   |
+| P9  | `profiles.py` + `importer.py`                                              |   523 | `tests/unit/launch_monitor/test_importer.py` (6 of 7 cases)                                                                                                   | all three G0 files                                                                                                                                                                                   |
+| —   | **blocked on G1-D4** — `contract_v2.py` imports `flexible_analysis`        |       |                                                                                                                                                               |                                                                                                                                                                                                      |
+| P10 | `flexible_analysis.py` (after G0.1 + decision)                             |   415 | `test_flexible_analysis.py`                                                                                                                                   | new flexible-analysis gate                                                                                                                                                                           |
+| P11 | `contract_v2.py`                                                           |   791 | `test_contract_v2.py`                                                                                                                                         | all three G0 files                                                                                                                                                                                   |
+| P12 | `strokes_gained_types.py` (minus baseline half) + `_scoring_statistics.py` |   567 | `test_strokes_gained_contract.py`, `tests/api/test_routes_launch_monitor_analytics.py` baseline cases                                                         | `test_strokes_gained_drift.py`                                                                                                                                                                       |
+| P13 | `outcome_proxy.py`                                                         |   114 | `test_strokes_gained_contract.py` proxy cases                                                                                                                 | new target-error gate landed in this PR                                                                                                                                                              |
+| P14 | `strokes_gained.py`                                                        |   432 | `test_strokes_gained_contract.py`                                                                                                                             | `test_strokes_gained_drift.py`, with D1 re-pinned per G1-D3 and D5 per G1-D2                                                                                                                         |
+| P15 | `longitudinal_types.py` + `longitudinal_statistics.py`                     |   291 | `test_longitudinal_sessions.py`, `tests/api/test_launch_monitor_longitudinal.py`                                                                              | `test_longitudinal_drift.py`                                                                                                                                                                         |
+| P16 | `longitudinal.py`                                                          |   301 | `test_longitudinal_sessions.py`                                                                                                                               | `test_longitudinal_drift.py`, carrying G1-D1's named-method pair                                                                                                                                     |
+| P17 | `conformance_bundle.py`                                                    |   207 | `test_conformance_bundle.py`                                                                                                                                  | Tools' `launchMonitorConformanceGolden.test.ts`                                                                                                                                                      |
+| P18 | `player_covariation*` (after G0.1 + decision)                              | 1,098 | `test_player_covariation_contract.py`, `tests/api/test_routes_launch_monitor_covariation.py`                                                                  | new covariation gate                                                                                                                                                                                 |
+| P19 | `corpus.py` (after G0.1 + decision)                                        |   197 | `test_corpus.py`                                                                                                                                              | new corpus gate                                                                                                                                                                                      |
+| P20 | `dataset_reference*` (4 modules)                                           |   763 | `test_dataset_reference_jobs.py`, `tests/api/test_launch_monitor_dataset_jobs.py`                                                                             | all three G0 files                                                                                                                                                                                   |
 
 Two structural facts shape this order and should be read before it is changed.
 
@@ -328,6 +376,108 @@ layer, and everything above it (`strokes_gained_types`, `longitudinal_types`,
 module whose Tools twin has never been measured. The port cannot proceed past
 tier 1 until G1-D4's first gate lands. This is the tightest constraint in the
 plan and it is not visible from ADR-0046.
+
+## Stage 2 Blocker (G2): The Canonical Import Path Is Shadowed
+
+Discovered 2026-09-02 attempting ADR-0046 Stage 2 wave 1 (`dispersion`,
+`multivariate`, `trends`, `comparison`, `schema`, `treatment`) against the
+vendored layer at pin `6238889a9`. The port order above prescribes the Stage 2
+re-point as a mechanical rewrite:
+
+```
+src.shared.python.launch_monitor.X  ->  shared.python.launch_monitor.X
+```
+
+**In UpstreamDrift that rewrite is a no-op alias.** It resolves back to the
+module it is supposed to replace, and once that module is deleted the import
+fails outright.
+
+### The Measurement
+
+`shared` and `shared.python` are reachable through two roots at once —
+UpstreamDrift's `src/` and the vendor tree's `vendor/ud-tools/src/` — and both
+carry an `__init__.py` for `launch_monitor`. A regular package is not a
+namespace portion: the **first** `shared.python.__path__` entry that contains
+`launch_monitor` wins outright, and the UpstreamDrift entry precedes the vendor
+entry under the repository's own path wiring
+(`pyproject.toml` `[tool.pytest.ini_options] pythonpath`, then
+`tests/conftest.py::pytest_configure` in its default `--tools-mode=local`,
+which inserts `src/shared/python` at `sys.path[0]`).
+
+```sh
+# Under the repository's real test wiring:
+#   shared.python.__path__ == [src/shared/python, vendor/ud-tools/src/shared/python]
+#   shared.python.launch_monitor -> src/shared/python/launch_monitor
+```
+
+Performing the full wave-1 rewrite and deleting the six UpstreamDrift modules
+produces, on the first import of the package façade:
+
+```
+src/shared/python/launch_monitor/__init__.py:8: in <module>
+    from shared.python.launch_monitor.comparison import (
+src/shared/python/launch_monitor/__init__.py:8: in <module>
+    from shared.python.launch_monitor.comparison import (
+E   ModuleNotFoundError: No module named 'shared.python.launch_monitor.comparison'
+```
+
+The doubled frame is the whole finding: the façade is importing **itself**
+under the canonical name.
+
+### Why It Cannot Be Worked Around per Module
+
+This is not per-module coupling — the six wave-1 modules are tier-0 leaves with
+no intra-package imports, and each is byte-for-byte equivalent to its canonical
+twin modulo the port's docstrings, `__all__`, and the P3 `TrendResult` rename
+(pinned by `tests/unit/launch_monitor/test_canonical_layer_parity.py`). The
+blocker is at package granularity, and so is the guard that tracks it:
+`tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py` enumerates
+**top-level entries** under `vendor/ud-tools/src/shared/python/` and compares
+them with top-level entries under `src/shared/python/`. `launch_monitor` is one
+entry either way. Retiring six of its thirty files changes nothing the guard
+can see, and `scripts/config/shadow_modules.yaml` cannot be narrowed to "six
+files retired" because it has no per-file vocabulary.
+
+`shadow_modules.yaml`'s own header states the resolution procedure, and it is
+all-or-nothing: "move the canonical implementation into Tools, land it there,
+bump the `vendor/ud-tools` pin, **delete the UD-side copy**, and drop the line".
+Module-by-module retirement of a shadowed package is not something
+UpstreamDrift's import layout supports today. That constraint is invisible from
+ADR-0046, which assumed the two layers could coexist during the transition.
+
+### Options for the Owner
+
+Each unblocks Stage 2; they differ in blast radius and in what they cost the
+wave structure.
+
+1. **Move UpstreamDrift's transitional copy out of the `shared.python`
+   namespace** (for example to an app-local package beside the workbench).
+   This clears the ledger entry immediately, makes
+   `shared.python.launch_monitor` unambiguous, and lets waves 1..N proceed
+   exactly as the port order writes them. A mechanical move of the modules and
+   their import statements, no behaviour change, and it wants its own PR so
+   the retirements that follow stay reviewable as no-ops. This ADR already
+   classifies `__init__.py` and `project.py` as `app-local`, so it is where
+   two of the thirty modules were going anyway.
+2. **Retire the whole package atomically** in one Stage 2 PR. Cheapest in
+   sequencing, but it forces the `needs-decision` rows (`flexible_analysis`,
+   `player_covariation*`, `corpus`) and the behaviour-changing merges
+   (P19's mandatory manifest validation, G1-D1/D2/D3) through in the same
+   change, which contradicts ADR-0046's "measure before anything moves" and
+   its per-tab validation rule.
+3. **Overlay the vendored directory onto the package's `__path__`** so retired
+   modules fall through to the vendor tree while the import strings stay as
+   they are. Deterministic, but the consuming code stops saying where its
+   behaviour comes from, and any distribution of UpstreamDrift without the
+   vendor tree breaks. Not recommended.
+
+**Executed 2026-09-02 (#9420): Option 1.** The copy moved to
+`src/tools/launch_monitor_model/`, beside the workbench; the ledger entry
+cleared and `shared.python.launch_monitor` now resolves to the vendored
+package, unblocking wave 1.
+
+**Stage 2 complete 2026-09-03 (#9348).** All 28 `port-up`/`merge` modules are
+retired; only `__init__.py`, `project.py` and P12's baseline half remain.
 
 ## Risks
 
@@ -378,6 +528,11 @@ for desktop-only modules, or a deferred-twin policy where the Python module
 lands first and the twin is a tracked follow-up. Whichever is chosen belongs in
 ADR-0046's Consequences, because it changes the size of Stage 1 by more than the
 port itself.
+
+**Owner ruling (2026-09-02):** deferred-twin — the Python module lands
+first and stands alone; the TS twin is a tracked follow-up, prioritized
+when a web surface (Stage 2 re-pointing) needs it. Recorded in
+[ADR-0046's Consequences](0046-launch-monitor-analytics-single-model-layer.md#consequences).
 
 ### Tools' Stated Architecture Contradicts Hosting the Canonical Inferential Layer
 

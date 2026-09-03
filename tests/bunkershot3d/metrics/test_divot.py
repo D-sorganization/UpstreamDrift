@@ -487,3 +487,50 @@ class TestDigVersusSkid:
         assert result.constraint_vertical_impulse_Ns == pytest.approx(
             -1.6741104, rel=1e-6
         )
+
+
+class TestAcceleratedMassModuleReexports:
+    """Issue #9250: divot.py and metrics/__init__.py re-export accelerated_mass symbols."""
+
+    def test_divot_re_exports_accelerated_mass_symbols(self) -> None:
+        import bunkershot3d.metrics.accelerated_mass as am
+        import bunkershot3d.metrics.divot as divot
+
+        assert divot.AcceleratedSandMass is am.AcceleratedSandMass
+        assert divot.lateral_spread_factor is am.lateral_spread_factor
+        assert (
+            divot.ACCELERATED_MASS_CONSISTENCY_REASON
+            is am.ACCELERATED_MASS_CONSISTENCY_REASON
+        )
+        assert (
+            divot.ACCELERATED_MASS_LATERAL_REASON is am.ACCELERATED_MASS_LATERAL_REASON
+        )
+        assert divot.F1_ENTRAINMENT_FACTOR_BOUNDS is am.F1_ENTRAINMENT_FACTOR_BOUNDS
+
+        assert "AcceleratedSandMass" in divot.__all__
+        assert "lateral_spread_factor" in divot.__all__
+        assert "ACCELERATED_MASS_CONSISTENCY_REASON" in divot.__all__
+        assert "ACCELERATED_MASS_LATERAL_REASON" in divot.__all__
+        assert "F1_ENTRAINMENT_FACTOR_BOUNDS" in divot.__all__
+
+    def test_metrics_package_re_exports_accelerated_mass_symbols(self) -> None:
+        import bunkershot3d.metrics as metrics
+        import bunkershot3d.metrics.accelerated_mass as am
+
+        assert metrics.AcceleratedSandMass is am.AcceleratedSandMass
+        assert metrics.lateral_spread_factor is am.lateral_spread_factor
+        assert (
+            metrics.ACCELERATED_MASS_CONSISTENCY_REASON
+            is am.ACCELERATED_MASS_CONSISTENCY_REASON
+        )
+        assert (
+            metrics.ACCELERATED_MASS_LATERAL_REASON
+            is am.ACCELERATED_MASS_LATERAL_REASON
+        )
+        assert metrics.F1_ENTRAINMENT_FACTOR_BOUNDS is am.F1_ENTRAINMENT_FACTOR_BOUNDS
+
+        assert "AcceleratedSandMass" in metrics.__all__
+        assert "lateral_spread_factor" in metrics.__all__
+        assert "ACCELERATED_MASS_CONSISTENCY_REASON" in metrics.__all__
+        assert "ACCELERATED_MASS_LATERAL_REASON" in metrics.__all__
+        assert "F1_ENTRAINMENT_FACTOR_BOUNDS" in metrics.__all__

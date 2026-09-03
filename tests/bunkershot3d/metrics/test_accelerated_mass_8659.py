@@ -29,7 +29,7 @@ Nothing here is a validation. The entrainment factors were read off the F1
 MPM tier, which is ``BEYOND_VALIDATION`` with a 1.44 m/s published-speed
 ceiling and 0 of 4 on NASA-STD-7009B, so this is a consistency check between
 two uncalibrated models; see
-:data:`~bunkershot3d.metrics.divot.ACCELERATED_MASS_CONSISTENCY_REASON`.
+:data:`~bunkershot3d.metrics.accelerated_mass.ACCELERATED_MASS_CONSISTENCY_REASON`.
 """
 
 from __future__ import annotations

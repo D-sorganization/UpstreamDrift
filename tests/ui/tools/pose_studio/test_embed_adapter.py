@@ -120,7 +120,15 @@ class TestIsDirty:
         assert callable(adapter.is_dirty)
 
     def test_is_dirty_returns_false_by_default(self) -> None:
-        """Verify is_dirty returns False (Pose Studio doesn't track dirty state)."""
+        """No embedded widget means nothing can be dirty (#8882).
+
+        The name is historical; since #8882 the adapter does track dirty
+        state, it just has nothing to track before ``create_main_widget``.
+        Dirty tracking with a live widget is covered by
+        ``tests/unit/tools/pose_studio/test_save_load.py``. The name is kept
+        so the suite-marker ratchet does not see this as a net-new unmarked
+        test in a file that predates the marker requirement.
+        """
         adapter = _EmbedAdapter()
         assert adapter.is_dirty() is False
 

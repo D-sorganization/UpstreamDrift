@@ -216,22 +216,13 @@ def _load_vendored_reader() -> Callable[[str], Any]:
         return _reader_from_module(already_importable, source="sys.path")
 
     # Deferred rather than module-level: see the module docstring.
-    from src.launchers.tools_repo_path import resolve_tools_repo
+    from src.launchers.tools_repo_path import ensure_tools_importable
 
-    try:
-        resolution = resolve_tools_repo(_REPO_ROOT, os.environ.get("TOOLS_REPO_PATH"))
-    except RuntimeError as exc:
-        raise TrajectoryImportError(f"Tools checkout unavailable: {exc}") from exc
-    if resolution is None:
-        raise TrajectoryImportError(
-            "Tools repository not found: no TOOLS_REPO_PATH, no vendored "
-            "vendor/ud-tools, no sibling checkout. Initialize the vendored "
-            "submodule with 'git submodule update --init vendor/ud-tools'."
-        )
-
-    src_dir = str(resolution.path / "src")
-    if src_dir not in sys.path:
-        sys.path.insert(0, src_dir)
+    resolution = ensure_tools_importable(
+        _REPO_ROOT,
+        os.environ.get("TOOLS_REPO_PATH"),
+        error_cls=TrajectoryImportError,
+    )
 
     try:
         module = importlib.import_module(_VENDOR_INTERCHANGE_MODULE)

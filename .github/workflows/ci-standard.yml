@@ -30,7 +30,11 @@ on:
     - cron: "0 6 * * 1"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # On main the group is per-commit so consecutive merges queue instead of
+  # cancelling each other (main was never verified: every run was cancelled by
+  # the next push). PR/branch refs keep the per-ref group so superseded pushes
+  # still cancel. RM #1507 / #9409.
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -1153,6 +1157,14 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.11"
+      # ADR-0046 Stage 2 wave 1 (#9425): the launch-monitor import/export
+      # workflow imports the launch-monitor façade, which since wave 1 serves
+      # `dispersion`, `multivariate`, `trends`, `comparison`, `schema`, and
+      # `treatment` from the canonical Tools layer rather than from
+      # UpstreamDrift. This job checks out no submodule, so without this step
+      # the façade has nothing to resolve those six names against.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install governed companion workflow dependencies
         run: >-
           python3 -m pip install
@@ -1198,6 +1210,7 @@ jobs:
         unit-test-gate,
         publication-quality,
         rust-wheel-parity,
+        shared-tools-consumer-contracts,
       ]
     if: always()
     # This job is the ONLY required branch-protection check on `main`, and it
@@ -1230,6 +1243,7 @@ jobs:
           UNIT_TEST_GATE: ${{ needs.unit-test-gate.result }}
           PUBLICATION_QUALITY: ${{ needs.publication-quality.result }}
           RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
+          SHARED_TOOLS_CONSUMER_CONTRACTS: ${{ needs.shared-tools-consumer-contracts.result }}
         run: |
           set -uo pipefail
           failed=0
@@ -1241,6 +1255,7 @@ jobs:
           gates="$gates tests:$TESTS"
           gates="$gates unit-test-gate:$UNIT_TEST_GATE"
           gates="$gates rust-wheel-parity:$RUST_WHEEL_PARITY"
+          gates="$gates shared-tools-consumer-contracts:$SHARED_TOOLS_CONSUMER_CONTRACTS"
 
           {
             echo "## Quality Gate Summary"

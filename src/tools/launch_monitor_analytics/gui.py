@@ -16,7 +16,7 @@ import pandas as pd
 from matplotlib.dates import date2num
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from src.shared.python.launch_monitor import (
+from src.tools.launch_monitor_model import (
     CorrelationResult,
     FilterRule,
     ImportedSession,
@@ -450,9 +450,11 @@ class MainWidget(QtWidgets.QWidget):
 
         Returns the number of sessions added. Sources already present in the
         project are skipped rather than raising, so the action is repeatable.
-        Raises ``FileNotFoundError`` when no authorized checkout is available
-        and ``ImportError`` when the Parquet reader is not installed; callers
-        in the UI surface those as dialogs.
+        Raises ``FileNotFoundError`` when no authorized checkout or corpus
+        manifest is available, ``ValueError`` when the corpus disagrees with
+        the manifest that describes it (the ADR-0048 D30 gate), and
+        ``ImportError`` when the Parquet reader is not installed; callers in
+        the UI surface those as dialogs.
         """
         frame = load_private_corpus(root)
         existing = {session.session_id for session in self.project.sessions}

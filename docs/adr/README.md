@@ -59,6 +59,20 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 
 ## Recent Amendments
 
+- **2026-09-03:** ADR-0048's "Stage 2 Blocker (G2)" records that ADR-0046 Stage 2's module retirement is **complete**. All 28 `port-up`/`merge` launch-monitor modules are retired onto the canonical layer vendored from Tools across four waves (#9425, #9444, wave 3a, wave 3b); `src/tools/launch_monitor_model/` now holds only the re-export facade, the app-local `project`, and the expected-strokes baseline half that ADR-0048's step P12 deliberately excluded from the port because `rate_of_closure.launch_monitor_strokes_gained_baseline` is already its authority. Three owner rulings landed with the retirements and are pinned with old and new values in the drift gates: D15 (FDR denominator), D17 (boolean projection labelled), G1-D1 (pooled longitudinal estimator becomes a named-method pair), G1-D2 (session-cell inference unit), and D22/D23 (covariation interval withholding and registry units). The drift gates stay at 71 (#9348).
+- **2026-09-02:** ADR-0048's "Stage 2 Blocker (G2)" records that Option 1 was executed: UpstreamDrift's transitional launch-monitor copy moved out of the `shared.python` namespace to `src/tools/launch_monitor_model/`, beside the workbench that consumes it. The `launch_monitor` shadow-ledger entry cleared, `shared.python.launch_monitor` now resolves to the vendored canonical package, and ADR-0046 Stage 2 wave 1 is unblocked (#9420).
+- **2026-09-02:** ADR-0046's Consequences record the repo owner's ruling on
+  the TypeScript-twin obligation ADR-0048 G1 sized and flagged as unsized:
+  **deferred-twin policy** — canonical Python modules in the Tools model
+  layer stand alone, and each TypeScript twin is a tracked follow-up,
+  prioritized when a web surface (ADR-0046 Stage 2's re-pointing of the UD
+  workbench or the Impact Explorer tab) actually needs that module, rather
+  than a landing prerequisite.
+- **2026-09-02:** ADR-0048's "The TypeScript-Twin Obligation Is Unsized" risk
+  records the same deferred-twin ruling, cross-referenced to ADR-0046's
+  Consequences.
+- **2026-09-02:** ADR-0048 gains "Stage 2 Blocker (G2)": ADR-0046 Stage 2's module-by-module retirement cannot execute as written, because `shared.python.launch_monitor` resolves to UpstreamDrift's own package rather than the vendored canonical one — both carry an `__init__.py` on `shared.python.__path__` and the `src/` entry precedes the vendor entry, so the prescribed import rewrite is a self-referential no-op. The blocker is at package granularity, as is the shadow guard that tracks it, so the ledger entry cannot be narrowed per file. Three options are recorded for the owner (#9405).
+- **2026-09-02:** ADR-0048 records the repo owner's rulings on four of G0.1's pinned launch-monitor divergences: D15 (FDR multiplicity denominator excludes under-sampled predictors before correcting, Tools' existing posture), D17 (UD's boolean-as-0/1 capability is preserved but the projection must be explicit in the result), D22 (the low-dof between-player Fisher interval is withheld per UD's posture), and D23 (the column-name-suffix unit heuristic is deleted in favor of canonical-registry resolution, also UD's posture) (#9392).
 - **2026-09-02:** ADR-0044 corrected `ShotResult` force field name reference from `forces_n_m` to `forces_n` (#9375).
 - **2026-08-29:** ADR-0044 keeps BunkerShot3D in-plane: F1's
   `RefusedQuantity.OUT_OF_PLANE`, the `EXTRUDED` slice labelling, and the
