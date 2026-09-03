@@ -9,6 +9,12 @@ never disagree (UD #9406, Phase 1 of RM #1505):
 * any ``ud-tools @ git+https://github.com/D-sorganization/Tools.git@<sha>``
   pin inside ``pyproject.toml`` (the pip consumption path).
 
+A ``ud_tools @ https://github.com/D-sorganization/Tools/releases/download/...whl``
+release-wheel pin is *reported* with its version but not compared: releases are
+cut from a tag commit (v1.15.0 = e87b04105) that need not equal the gitlink.
+The gitlink wins for the source tree (tests, Docker, launcher fallback); the
+wheel is what ``pip install "upstream-drift[tools]"`` users receive.
+
 Exit 0 when every pin found equals the gitlink SHA, 1 otherwise. ``--json``
 prints the resolved pins for other tooling (e.g. vendor-freshness).
 """
@@ -31,6 +37,10 @@ TOOLS_REPO_URL = "https://github.com/D-sorganization/Tools.git"
 _CARGO_RE = re.compile(
     r'^\s*tools-core\s*=\s*\{[^}]*git\s*=\s*"([^"]+)"[^}]*rev\s*=\s*"([0-9a-fA-F]{7,40})"',
     re.MULTILINE,
+)
+_WHEEL_RE = re.compile(
+    r"ud[-_]tools\s*@\s*https://github\.com/D-sorganization/Tools/releases/download/"
+    r"v(?P<tag>[0-9][^/]*)/ud_tools-(?P<version>[^-]+)-py3-none-any\.whl"
 )
 _PIP_RE = re.compile(
     r"ud-tools\s*@\s*git\+" + re.escape(TOOLS_REPO_URL) + r"@([0-9a-fA-F]{7,40})"
@@ -82,6 +92,16 @@ def read_pyproject_pins(pyproject: Path) -> list[str]:
     return _PIP_RE.findall(pyproject.read_text(encoding="utf-8"))
 
 
+def read_pyproject_wheel_pins(pyproject: Path) -> list[tuple[str, str]]:
+    """Return ``(tag, version)`` for every Tools release-wheel pin."""
+    if not pyproject.is_file():
+        return []
+    return [
+        (m.group("tag"), m.group("version"))
+        for m in _WHEEL_RE.finditer(pyproject.read_text(encoding="utf-8"))
+    ]
+
+
 def collect_pins(repo_root: Path) -> list[Pin]:
     pins = [Pin("submodule gitlink", SUBMODULE_PATH, read_gitlink(repo_root))]
     url, rev = read_cargo_pin(repo_root / "Cargo.toml")
@@ -90,6 +110,14 @@ def collect_pins(repo_root: Path) -> list[Pin]:
         pins.append(Pin("Cargo.toml tools-core url", "Cargo.toml", f"UNEXPECTED:{url}"))
     for index, sha in enumerate(read_pyproject_pins(repo_root / "pyproject.toml")):
         pins.append(Pin(f"pyproject ud-tools pin #{index + 1}", "pyproject.toml", sha))
+    for tag, version in read_pyproject_wheel_pins(repo_root / "pyproject.toml"):
+        # A release wheel is versioned, not sha-pinned. The gitlink still wins
+        # for the source tree; the wheel is reported, never compared (UD #9406).
+        pins.append(
+            Pin(
+                f"pyproject ud_tools wheel v{tag}", "pyproject.toml", f"WHEEL:{version}"
+            )
+        )
     return pins
 
 
@@ -102,6 +130,8 @@ def check_pins(pins: list[Pin]) -> list[str]:
     for pin in pins[1:]:
         if pin.sha is None:
             errors.append(f"{pin.surface} ({pin.path}): no Tools pin found")
+        elif pin.sha.startswith("WHEEL:"):
+            continue  # informational: release wheel version, not a commit
         elif pin.sha.startswith("UNEXPECTED:"):
             errors.append(
                 f"{pin.surface}: {pin.sha[len('UNEXPECTED:') :]} is not {TOOLS_REPO_URL}"

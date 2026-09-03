@@ -2,7 +2,7 @@
   "schema_version": 1,
   "epic": "D-sorganization/UpstreamDrift#9406",
   "program": "D-sorganization/Repository_Management#1505",
-  "tools_ledger": "D-sorganization/Tools#4915 (docs/shared/divergence_ledger.v1.json)",
+  "tools_ledger": "D-sorganization/Tools#4915 (docs/shared/divergence_ledger.v1.json, 75 rows in Tools PR #4934; ADR-0049 via Tools #4931)",
   "inventory": "docs/shared_tools/divergence_inventory.v1.json (PR #9432, Tools pin c0a395d5)",
   "gate": "scripts/shared_tools/check_seam_drift.py (ci-standard.yml job seam-drift-gate, needs of quality-gate)",
   "ruling_values": {
@@ -19,7 +19,7 @@
   "todo": [
     {
       "id": "T1",
-      "note": "Replace the vendor/ud-tools submodule + git pin with the ud-tools wheel once Tools publishes one per release.",
+      "note": "Tools now publishes a release wheel (v1.15.0, ud_tools-1.15.0-py3-none-any.whl, tag commit e87b04105); pyproject [tools] pins it. Align the release cadence with the vendor/ud-tools gitlink (c0a395d5) so one Tools commit serves wheel, submodule and Cargo; then remove the submodule (Phase 2).",
       "issue": "D-sorganization/Tools#4920"
     },
     {
