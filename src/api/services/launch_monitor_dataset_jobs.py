@@ -14,7 +14,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.shared.python.launch_monitor.dataset_reference import (
+from src.tools.launch_monitor_model.dataset_reference import (
     DATASET_JOB_CONTRACT_VERSION,
     MAX_PAGE_SIZE,
     DatasetJobRequestV1,

@@ -16,23 +16,24 @@ not mask a real edit. Nothing else on either side is allowed to drift: if this
 fails, the re-point is no longer a no-op and the divergence must be measured
 (ADR-0046 G0) before anything moves.
 
-**Precondition 2 - the canonical name is reachable (currently NOT met).**
-``shared.python.launch_monitor`` does not resolve to the vendored package in
-this repository. It resolves to UpstreamDrift's own
-``src/shared/python/launch_monitor``, because both are regular packages on
-``shared.python.__path__`` and the UpstreamDrift entry precedes the vendor
-entry. The import rewrite ADR-0048's port order prescribes
-(``src.shared.python.launch_monitor.X`` -> ``shared.python.launch_monitor.X``)
-is therefore self-referential here: it resolves back to the module it is
-supposed to replace, and fails outright once that module is deleted. This is
-the shadow that ``scripts/config/shadow_modules.yaml`` tracks under
-``launch_monitor`` (#9348), and it is enforced per top-level package, not per
-file - so it cannot be cleared one module at a time.
+**Precondition 2 - the canonical name is reachable (now met).** Until
+2026-09-02 ``shared.python.launch_monitor`` did *not* resolve to the vendored
+package here. It resolved to UpstreamDrift's own
+``src/shared/python/launch_monitor``, because both were regular packages on
+``shared.python.__path__`` and the UpstreamDrift entry preceded the vendor
+entry, so the import rewrite ADR-0048's port order prescribes
+(``src.<ud path>.X`` -> ``shared.python.launch_monitor.X``) was
+self-referential: it resolved back to the module it was supposed to replace,
+and would have failed outright once that module was deleted. ADR-0048's
+"Stage 2 Blocker (G2)" Option 1 cleared that by moving UpstreamDrift's
+transitional copy out of the ``shared.python`` namespace to
+``src/tools/launch_monitor_model/``, beside the workbench that consumes it.
 
-The second test below pins that reachability fact. It is a characterisation
-test of a blocker, not an endorsement of it: when the shadow is resolved it
-starts failing, and its failure message is the signal that wave 1 can finally
-be executed as written. See ADR-0048, "Stage 2 Blocker (G2)".
+The second test below now pins the *resolved* state rather than the blocker:
+``shared.python.launch_monitor`` must resolve inside ``vendor/ud-tools``. It
+is the provenance probe every wave of Stage 2 depends on — if a UD package
+ever re-enters that namespace it goes red before a single retirement can be
+mistaken for a no-op. See ADR-0048, "Stage 2 Blocker (G2)".
 """
 
 from __future__ import annotations
@@ -47,7 +48,7 @@ import pytest
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
-_UD_PACKAGE = _REPO_ROOT / "src" / "shared" / "python" / "launch_monitor"
+_UD_PACKAGE = _REPO_ROOT / "src" / "tools" / "launch_monitor_model"
 _VENDORED_PACKAGE = (
     _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python" / "launch_monitor"
 )
@@ -153,39 +154,40 @@ def test_wave_1_module_is_identical_to_its_canonical_twin(module_name: str) -> N
     )
 
 
-def test_canonical_import_path_is_still_shadowed_by_the_ud_package() -> None:
-    """Pin the blocker: ``shared.python.launch_monitor`` is UpstreamDrift's copy.
+def test_canonical_import_path_resolves_into_the_vendored_tools_layer() -> None:
+    """``shared.python.launch_monitor`` must be the vendored canonical package.
 
-    ADR-0048's port order prescribes the Stage 2 re-point as a mechanical
-    rewrite of ``src.shared.python.launch_monitor.X`` to
-    ``shared.python.launch_monitor.X``. In this repository that rewrite is a
-    no-op alias: both packages carry an ``__init__.py``, so the first
-    ``shared.python.__path__`` entry wins outright, and
-    ``src/shared/python`` precedes ``vendor/ud-tools/src/shared/python``.
-    Deleting a UD module therefore does not fall through to the vendored one -
-    it raises ``ModuleNotFoundError`` for a module the rewritten import was
-    pointing at.
+    This is the provenance probe for every wave of ADR-0046 Stage 2. The
+    re-point ADR-0048's port order prescribes is only a re-point if the
+    canonical name resolves somewhere other than UpstreamDrift's own tree;
+    while both packages sat on ``shared.python.__path__`` it was a
+    self-referential alias, because the first entry that carries an
+    ``__init__.py`` wins outright and ``src/shared/python`` precedes
+    ``vendor/ud-tools/src/shared/python``.
 
-    **When this test fails, that is good news**: the shadow has been resolved
-    and ADR-0046 Stage 2 wave 1 can be executed as ADR-0048 writes it. Delete
-    this test in the PR that does so.
+    ADR-0048 "Stage 2 Blocker (G2)" Option 1 resolved that by moving the
+    UpstreamDrift copy to ``src/tools/launch_monitor_model/``. This test keeps
+    it resolved: if any UpstreamDrift package named ``launch_monitor`` ever
+    reappears under ``src/shared/python/``, the retirements that follow would
+    silently re-point at UpstreamDrift code while claiming to consume Tools,
+    and that regression fails here first.
     """
-    _require_vendored_package()
+    vendored_package = _require_vendored_package()
 
     spec = importlib.util.find_spec("shared.python.launch_monitor")
     assert spec is not None and spec.origin is not None, (
-        "shared.python.launch_monitor did not resolve at all, which is "
-        "neither the shadowed state this test pins nor the resolved state it "
-        "is waiting for. Check that vendor/ud-tools is materialised."
+        "shared.python.launch_monitor did not resolve at all. Stage 2 "
+        "consumers import through this name, so it must resolve to the "
+        "vendored canonical package. Check that vendor/ud-tools is "
+        "materialised."
     )
 
     resolved = Path(spec.origin).resolve()
-    assert resolved == (_UD_PACKAGE / "__init__.py").resolve(), (
-        "shared.python.launch_monitor now resolves to "
-        f"{resolved}, not to UpstreamDrift's own package. The shadow "
-        "recorded in scripts/config/shadow_modules.yaml (#9348) appears to be "
-        "resolved, which unblocks ADR-0046 Stage 2 wave 1: re-point the six "
-        "wave-1 modules onto shared.python.launch_monitor.<module>, retire "
-        "the UD copies, and delete this test. See ADR-0048, "
-        "'Stage 2 Blocker (G2)'."
+    assert resolved == (vendored_package / "__init__.py").resolve(), (
+        f"shared.python.launch_monitor resolves to {resolved}, not to the "
+        f"vendored canonical package at "
+        f"{(vendored_package / '__init__.py')}. A UpstreamDrift package has "
+        "re-entered the shared.python namespace and is shadowing the "
+        "canonical layer again — see ADR-0048, 'Stage 2 Blocker (G2)', and "
+        "scripts/config/shadow_modules.yaml."
     )

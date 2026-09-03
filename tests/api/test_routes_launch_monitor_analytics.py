@@ -66,7 +66,7 @@ def _strokes_gained_payload() -> dict[str, object]:
             "standard_error": 0.08,
         },
     ]
-    from src.shared.python.launch_monitor import baseline_table_sha256
+    from src.tools.launch_monitor_model import baseline_table_sha256
 
     records = [
         {

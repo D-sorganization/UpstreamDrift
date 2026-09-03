@@ -18,7 +18,7 @@ import pytest
 
 pytest.importorskip("pyarrow")
 
-from src.shared.python.launch_monitor.corpus import (
+from src.tools.launch_monitor_model.corpus import (
     MANIFEST_FILENAME,
     MAX_RETAINED_ROWS,
     SUPPORTED_MANIFEST_SCHEMA_VERSION,

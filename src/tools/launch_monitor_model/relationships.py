@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import pandas as pd
 from scipy import stats
 
-from src.shared.python.launch_monitor.schema import METRICS
+from src.tools.launch_monitor_model.schema import METRICS
 
 
 @dataclass(frozen=True)
@@ -47,6 +48,10 @@ def _pair_correlation(
         return float("nan"), float("nan"), count
     left = valid.iloc[:, 0].to_numpy(float)
     right = valid.iloc[:, 1].to_numpy(float)
+    # SciPy returns a different result class per test (PearsonRResult vs
+    # SignificanceResult); only the shared `.statistic`/`.pvalue` surface is
+    # used, so the binding is widened rather than narrowed to the first branch.
+    result: Any
     if method == "pearson":
         result = stats.pearsonr(left, right)
     elif method == "spearman":

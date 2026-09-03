@@ -42,7 +42,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.shared.python.launch_monitor.dispersion import (
+from src.tools.launch_monitor_model.dispersion import (
     analyze_dispersion as ud_analyze_dispersion,
 )
 from tests.integration.launch_monitor_drift.conftest import (
