@@ -13,7 +13,7 @@ import warnings
 from typing import TypeAlias
 
 #: Canonical API version — must match pyproject.toml [project].version
-__version__ = "2.1.1"
+__version__ = "2.1.2"
 
 PlatformInfo: TypeAlias = dict[str, tuple[str, ...]]
 
