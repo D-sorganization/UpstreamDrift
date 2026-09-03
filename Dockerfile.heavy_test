@@ -10,10 +10,10 @@
 #   docker/README.md and docs/adr/0021-container-strategy.md
 #
 # Build args:
-#   PYTHON_VERSION (default: 3.11)
+#   (none) -- the base image is the same digest-pinned python:3.12-slim used by
+#   Dockerfile and Dockerfile.modular (issue #9414: one Python line, 3.11-3.12).
 # ─────────────────────────────────────────────────────────────────────────────
-ARG PYTHON_VERSION=3.11
-FROM python:${PYTHON_VERSION}-bookworm
+FROM python:3.12-slim@sha256:c2d8472b831337ab296a8ce652e1ba786e9e3034fc445dc58b50a7f5251f0003
 
 # Avoid interactive prompts during apt
 ENV DEBIAN_FRONTEND=noninteractive

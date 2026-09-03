@@ -30,5 +30,10 @@ Update this document whenever a new workflow is added or the status of an existi
 
 - `ci-standard.yml` is the default core PR lane. It is intentionally fast and
   honest about optional-engine coverage.
+- `ci-standard.yml` concurrency: the group is per-ref on branches/PRs (a newer
+  push cancels the superseded run) but per-commit on `main`, so consecutive
+  merges queue instead of cancelling each other and `main` always finishes a
+  run (RM #1507, #9409). `cancel-in-progress: true` stays literal because
+  `lint-workflow-files.yml` greps for it.
 - `nightly-cross-engine.yml` is the repo's dedicated cross-engine lane and is
   the right place to expand stricter native-engine validation over time.
