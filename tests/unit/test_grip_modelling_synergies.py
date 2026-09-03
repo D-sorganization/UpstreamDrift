@@ -116,7 +116,15 @@ def test_grip_modelling_tab_ui_widths() -> None:
     assert app is not None
 
     tab = GripModellingTab()
-    assert tab.control_panel.width() == 450
-    assert tab.combo_hand.count() > 0
-    # Clean up
-    tab.deleteLater()
+    try:
+        assert tab.control_panel.width() == 450
+        assert tab.combo_hand.count() > 0
+    finally:
+        # `deleteLater()` alone is not cleanup here: it merely *posts* a
+        # DeferredDelete event, and the unit lane never runs a Qt event loop
+        # to process it. The tab -- and the 60 fps MuJoCo timer inside the
+        # sim widget it builds -- would survive for the rest of the session
+        # and fire during unrelated later tests (UD #9474). `close()` runs
+        # the tab's closeEvent synchronously, which releases that timer.
+        tab.close()
+        tab.deleteLater()

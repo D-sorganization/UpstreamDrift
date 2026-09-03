@@ -82,6 +82,20 @@ def _geom_point_velocity(
 class GripModellingTab(QtWidgets.QWidget):
     """Tab for manipulating advanced hand models (Shadow, Allegro)."""
 
+    def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        """Release the sim widget this tab owns.
+
+        Qt delivers ``closeEvent`` only to the widget being closed, never to
+        its children, so closing the tab would otherwise leave
+        ``self.sim_widget``'s 60 fps timer running for the life of the
+        process (UD #9474). The externally supplied ``external_sim_widget`` is
+        deliberately *not* stopped here: this tab does not own it.
+        """
+        own_sim_widget = getattr(self, "sim_widget", None)
+        if own_sim_widget is not None:
+            own_sim_widget.stop_simulation()
+        super().closeEvent(event)
+
     def connect_sim_widget(self, sim_widget: MuJoCoSimWidget) -> None:
         """Connect to an external simulation widget.
 
