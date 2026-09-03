@@ -90,7 +90,7 @@ from src.tools.launch_monitor_model.corpus import (  # noqa: E402
 from src.tools.launch_monitor_model.corpus import (  # noqa: E402
     load_private_corpus as ud_load_private_corpus,
 )
-from src.tools.launch_monitor_model.schema import METRICS  # noqa: E402
+from shared.python.launch_monitor.schema import METRICS  # noqa: E402
 from tests.integration.launch_monitor_drift.conftest import (  # noqa: E402
     require_vendored_tools_stack,
 )

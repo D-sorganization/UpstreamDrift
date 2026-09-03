@@ -23,7 +23,7 @@ from src.tools.launch_monitor_model.flexible_analysis import (
     FlexibleAnalysisResult,
     analyze_variables,
 )
-from src.tools.launch_monitor_model.schema import METRICS
+from shared.python.launch_monitor.schema import METRICS
 
 CONTRACT_VERSION_V2: Literal["2.0.0"] = "2.0.0"
 PlayerIdentityTrust = Literal[

@@ -28,7 +28,7 @@ from src.tools.launch_monitor_model.player_covariation_types import (
     PlayerCovariationScanRequestV1,
     PlayerCovariationScanResultV1,
 )
-from src.tools.launch_monitor_model.schema import IDENTITY_COLUMNS
+from shared.python.launch_monitor.schema import IDENTITY_COLUMNS
 
 _DEFAULT_SCAN_EXCLUSIONS = frozenset(
     (*IDENTITY_COLUMNS, "source_id", "row_order", "filename", "file_name")
