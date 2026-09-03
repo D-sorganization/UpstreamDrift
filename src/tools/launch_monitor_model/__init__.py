@@ -5,7 +5,7 @@ only the core scientific/data dependencies; the shallow MLP imports
 scikit-learn lazily when selected.
 """
 
-from src.tools.launch_monitor_model.comparison import (
+from shared.python.launch_monitor.comparison import (
     MonitorComparisonResult,
     MonitorSummary,
     PairwiseMonitorComparison,
@@ -47,7 +47,7 @@ from src.tools.launch_monitor_model.contract_v2 import (
     build_analysis_lineage_v2,
     contract_v2_json_schema,
 )
-from src.tools.launch_monitor_model.dispersion import (
+from shared.python.launch_monitor.dispersion import (
     DispersionResult,
     analyze_dispersion,
 )
@@ -95,7 +95,7 @@ from src.tools.launch_monitor_model.modeling import (
     PredictiveModelResult,
     fit_predictive_model,
 )
-from src.tools.launch_monitor_model.multivariate import (
+from shared.python.launch_monitor.multivariate import (
     PCAResult,
     VIFResult,
     compute_pca,
@@ -134,7 +134,7 @@ from src.tools.launch_monitor_model.relationships import (
     DependencyEdge,
     compute_correlations,
 )
-from src.tools.launch_monitor_model.schema import (
+from shared.python.launch_monitor.schema import (
     IDENTITY_COLUMNS,
     METRICS,
     ColumnMapping,
@@ -144,9 +144,9 @@ from src.tools.launch_monitor_model.schema import (
     MetricDefinition,
     numeric_metric_columns,
 )
-from src.tools.launch_monitor_model.trends import (
+from shared.python.launch_monitor.trends import (
     ChangeCandidate,
-    TrendResult,
+    TemporalTrendResult,
     analyze_trend,
 )
 from src.tools.launch_monitor_model.strokes_gained import (
@@ -168,7 +168,7 @@ from src.tools.launch_monitor_model.strokes_gained_types import (
     StrokesGainedRequestV1,
     baseline_table_sha256,
 )
-from src.tools.launch_monitor_model.treatment import (
+from shared.python.launch_monitor.treatment import (
     TreatmentConfig,
     TreatmentResult,
     FilterRule,
@@ -267,7 +267,7 @@ __all__ = [
     "TreatmentResult",
     "TransformRecordV2",
     "FilterRule",
-    "TrendResult",
+    "TemporalTrendResult",
     "VIFResult",
     "UncertaintyV2",
     "VendorProvenanceV2",

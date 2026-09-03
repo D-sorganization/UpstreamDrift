@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from src.tools.launch_monitor_model.schema import METRICS
+from shared.python.launch_monitor.schema import METRICS
 
 
 @dataclass(frozen=True)
