@@ -23,10 +23,10 @@ the top-level package so the seam epic (UD #9406) and the Tools divergence
 ledger (Tools #4915 / #4496) can rule per package.
 
 Outputs (``--write``): ``docs/shared_tools/divergence_inventory.v1.json`` and a
-markdown summary next to it. ``--check`` regenerates the stable core of the
-inventory (path, classification, package, sizes) and fails when the committed
-JSON no longer matches it; authorship is deliberately excluded from the
-staleness check because it changes on every unrelated touch of a file.
+markdown summary next to it. ``--check`` regenerates the inventory and fails
+when a path's classification, package or spelling-only flag no longer matches
+the committed JSON; byte sizes and authorship are deliberately excluded from
+the staleness check (they change on every unrelated touch of a file).
 
 Program: D-sorganization/Repository_Management#1505 (Phase 1, pillar P1).
 """
@@ -125,7 +125,7 @@ class Inventory:
         return dict(sorted(table.items()))
 
     def stable_core(self) -> list[dict[str, object]]:
-        """Return the part of the inventory that ``--check`` compares."""
+        """Return the per-file records written to the JSON."""
         return [asdict(record) for record in self.files]
 
     def to_json_dict(self) -> dict[str, object]:
@@ -205,6 +205,10 @@ def _iter_files(root: Path) -> dict[str, Path]:
             continue
         found[relative.as_posix()] = path
     return found
+
+
+def _read_lf(path: Path) -> bytes:
+    return path.read_bytes().replace(b"\r\n", b"\n")
 
 
 def _package_of(relative: str) -> tuple[str, str]:
@@ -292,8 +296,10 @@ def build_inventory(
         ud_path = ud_files.get(relative)
         tools_path = tools_files.get(relative)
         package, subpackage = _package_of(relative)
-        ud_content = ud_path.read_bytes() if ud_path else None
-        tools_content = tools_path.read_bytes() if tools_path else None
+        # Line endings are normalised before sizing so the inventory is the
+        # same on Windows (autocrlf) and Linux CI checkouts.
+        ud_content = _read_lf(ud_path) if ud_path else None
+        tools_content = _read_lf(tools_path) if tools_path else None
         ud_bytes = None if ud_content is None else len(ud_content)
         tools_bytes = None if tools_content is None else len(tools_content)
         header = bool(
@@ -432,7 +438,7 @@ def render_markdown(inventory: Inventory) -> str:
         "",
         render_package_table(inventory),
         "",
-        "## Diverged files by package",
+        "## Diverged Files by Package",
         "",
     ]
     diverged = [r for r in inventory.files if r.classification == "diverged"]
@@ -440,7 +446,7 @@ def render_markdown(inventory: Inventory) -> str:
     for record in diverged:
         grouped[record.package].append(record)
     for package, records in sorted(grouped.items()):
-        parts.append(f"### `{package}` ({len(records)} diverged)")
+        parts.append(f"### Package `{package}` ({len(records)} Diverged Files)")
         parts.append("")
         parts.append(
             "| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | "
@@ -473,6 +479,14 @@ def render_markdown(inventory: Inventory) -> str:
 # --------------------------------------------------------------------------
 
 
+_CHECK_FIELDS = ("path", "classification", "package", "subpackage", "spelling_only")
+
+
+def _check_projection(entry: dict[str, object]) -> dict[str, object]:
+    """The fields ``--check`` compares: classification only, never byte sizes."""
+    return {field: entry.get(field) for field in _CHECK_FIELDS}
+
+
 def check_inventory(repo_root: Path, json_path: Path) -> list[str]:
     """Return a list of staleness errors (empty when the JSON is current)."""
     if not json_path.is_file():
@@ -488,8 +502,12 @@ def check_inventory(repo_root: Path, json_path: Path) -> list[str]:
             f"tools_pin drift: committed {committed.get('tools_pin')} != "
             f"gitlink {current.tools_pin}"
         )
-    committed_core = {entry["path"]: entry for entry in committed.get("files", [])}
-    current_core = {entry["path"]: entry for entry in current.stable_core()}
+    committed_core = {
+        entry["path"]: _check_projection(entry) for entry in committed.get("files", [])
+    }
+    current_core = {
+        entry["path"]: _check_projection(entry) for entry in current.stable_core()
+    }
     for path in sorted(set(committed_core) | set(current_core)):
         old = committed_core.get(path)
         new = current_core.get(path)

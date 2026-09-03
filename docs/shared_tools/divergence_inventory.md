@@ -128,15 +128,15 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
 | **Total** | **519** | **292** | **152** | **1183** | **436** | **811** |
 
-## Diverged files by package
+## Diverged Files by Package
 
-### `__init__.py` (1 diverged)
+### Package `__init__.py` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `__init__.py` | +190 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 
-### `ai` (70 diverged)
+### Package `ai` (70 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -211,7 +211,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/tools/codemap_tools.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `ai/tools/file_ops.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 
-### `calc_backend` (14 diverged)
+### Package `calc_backend` (14 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -230,7 +230,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `calc_backend/tests/test_calc_backend_gaps.py` | +256 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `calc_backend/tests/test_symbolic_solver.py` | +12378 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-05-15 |
 
-### `chat` (17 diverged)
+### Package `chat` (17 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -252,7 +252,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `chat/tests/test_chat_drift.py` | +0 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-02 |
 | `chat/tests/test_workspace_bridge.py` | -290 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-02 |
 
-### `codemap` (6 diverged)
+### Package `codemap` (6 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -263,44 +263,44 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `codemap/mcp_server.py` | -2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 | `codemap/watcher.py` | -90 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 
-### `compatibility.py` (1 diverged)
+### Package `compatibility.py` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `compatibility.py` | -76 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-09 |
 
-### `config` (2 diverged)
+### Package `config` (2 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `config/__init__.py` | +4998 |  | codex-scheduled-tasks[bot] 2026-06-13 | codex-scheduled-tasks[bot] 2026-05-20 |
 | `config/environment.py` | +13621 |  | codex-scheduled-tasks[bot] 2026-05-26 | codex-scheduled-tasks[bot] 2026-05-20 |
 
-### `contracts.py` (1 diverged)
+### Package `contracts.py` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `contracts.py` | -709 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 
-### `cors.py` (1 diverged)
+### Package `cors.py` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `cors.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 
-### `data_processing` (1 diverged)
+### Package `data_processing` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `data_processing/processor.py` | +21 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 
-### `data_processor_io` (1 diverged)
+### Package `data_processor_io` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `data_processor_io/rust_engine.py` | -80 |  | Dieter Olson 2026-08-07 | Dieter Olson 2026-08-20 |
 
-### `gui_launcher` (5 diverged)
+### Package `gui_launcher` (5 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -310,7 +310,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher/tool_manifest.yaml` | +1 |  | Dieter Olson 2026-08-04 | d-sorgcodexagent[bot] 2026-08-16 |
 | `gui_launcher/tools_sidebar_integration.py` | +10123 |  | Dieter Olson 2026-05-29 | Dieter Olson 2026-08-20 |
 
-### `humanoid_character_builder` (24 diverged)
+### Package `humanoid_character_builder` (24 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -339,13 +339,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 
-### `import_aliases.py` (1 diverged)
+### Package `import_aliases.py` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `import_aliases.py` | -565 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-28 |
 
-### `model_generation` (49 diverged)
+### Package `model_generation` (49 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -399,7 +399,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/tests/test_github_importer.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-04-19 |
 | `model_generation/tests/test_physics_validation.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-01-30 |
 
-### `plot_engine` (3 diverged)
+### Package `plot_engine` (3 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -407,7 +407,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plot_engine/pyqt6_widget.py` | -1893 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-28 |
 | `plot_engine/trendline.py` | +125 |  | Dieter Olson 2026-08-05 | d-sorgclaudeagent[bot] 2026-08-25 |
 
-### `plotting` (3 diverged)
+### Package `plotting` (3 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -415,7 +415,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plotting/export.py` | +1736 |  | d-sorgclaudeagent[bot] 2026-08-29 | Dieter Olson 2026-08-28 |
 | `plotting/identity.py` | +120 |  | d-sorgclaudeagent[bot] 2026-08-29 | Dieter Olson 2026-08-28 |
 
-### `programmatic_pid` (14 diverged)
+### Package `programmatic_pid` (14 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -434,14 +434,14 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `programmatic_pid/title_block.py` | +29 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `programmatic_pid/validation.py` | +21 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 
-### `reporting` (2 diverged)
+### Package `reporting` (2 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-05-15 |
 | `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 
-### `rotation_transforms` (3 diverged)
+### Package `rotation_transforms` (3 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -449,7 +449,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `rotation_transforms/reference_frame_operations.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `rotation_transforms/rotation.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 
-### `sidekick` (63 diverged)
+### Package `sidekick` (63 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -476,7 +476,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/process_calculators/pressure_drop_calculator/engine/_friction_factors.py` | -836 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-02 |
 | `sidekick/process_calculators/pressure_drop_calculator/pressure_drop_results.py` | -11 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-05-22 |
 | `sidekick/process_calculators/pressure_drop_calculator/utils/flow_rate_converter.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `sidekick/process_calculators/psa_package/psa_analysis.ipynb` | -1178 |  | Dieter Olson 2026-05-20 | Dieter Olson 2026-08-20 |
+| `sidekick/process_calculators/psa_package/psa_analysis.ipynb` | +2 |  | Dieter Olson 2026-05-20 | Dieter Olson 2026-08-20 |
 | `sidekick/process_calculators/psa_package/psa_gui.py` | -48 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/process_calculators/psa_package/psa_webapp.py` | -24 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/process_calculators/psa_package/ui/main_window.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-15 |
@@ -517,7 +517,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/utils/json_io.py` | -1 |  | Dieter Olson 2026-08-01 | codex-scheduled-tasks[bot] 2026-06-12 |
 | `sidekick/utils/state_manager.py` | -14 |  | Dieter Olson 2026-08-01 | codex-scheduled-tasks[bot] 2026-06-12 |
 
-### `signal_toolkit` (6 diverged)
+### Package `signal_toolkit` (6 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -528,7 +528,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `signal_toolkit/polynomial_generator.py` | -143 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `signal_toolkit/widget_processing.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 
-### `theme` (3 diverged)
+### Package `theme` (3 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -536,7 +536,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `theme/palette.py` | -3914 |  | d-sorgclaudeagent[bot] 2026-08-22 | Dieter Olson 2026-08-25 |
 | `theme/zoom.py` | -71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-17 |
 
-### `upstream_drift_tools` (1 diverged)
+### Package `upstream_drift_tools` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
