@@ -1150,6 +1150,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Fetch pinned Tools packages
+        # Retired src/shared/python roots resolve to vendor/ud-tools (UD #9406);
+        # the companion workflow authority imports src.shared.python.logging_pkg.
+        uses: ./.github/actions/fetch-pinned-tools
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.11"

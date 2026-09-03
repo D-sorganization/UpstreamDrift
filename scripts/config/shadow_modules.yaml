@@ -37,8 +37,12 @@
 # guard therefore never blocked anything. This file restores the ledger and
 # records the four regressions explicitly rather than laundering them.
 #
-# Shadow count is currently 33 of 37 vendor modules. That number is the debt.
-# It should only ever go down. It last moved 34 -> 33 on 2026-09-02, when
+# Shadow count is currently 23 of 37 vendor modules. That number is the debt.
+# It should only ever go down. It moved 33 -> 23 on 2026-09-03 (UD #9406 PR-3:
+# logging_pkg, notes, plot_theme, chat_contracts, file_watcher, scripting,
+# safe_eval.py, safe_pandas_eval.py, deprecation.py, cors.py deleted; their
+# src.shared.python.* spellings resolve to the pinned Tools tree through
+# src/shared/python/_seam_redirect.py). Before that it moved 34 -> 33 on 2026-09-02, when
 # ADR-0048's Option 1 moved UpstreamDrift's transitional launch-monitor copy
 # out of this namespace — see the note at the end of this file.
 
@@ -67,16 +71,7 @@ shadows:
   contracts.py:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  cors.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   data_processing:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  deprecation.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  file_watcher:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   gui_launcher:
@@ -85,19 +80,10 @@ shadows:
   humanoid_character_builder:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  logging_pkg:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   model_generation:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  notes:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   plot_engine:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  plot_theme:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   programmatic_pid:
@@ -107,15 +93,6 @@ shadows:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   rotation_transforms:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  safe_eval.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  safe_pandas_eval.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  scripting:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   sidekick:
@@ -136,9 +113,6 @@ shadows:
   # the same commit that emptied this ledger. They are recorded here so the
   # ratchet has a truthful starting point, NOT because they are approved.
   # They are the first entries that should be paid down.
-  chat_contracts:
-    tracking_issue: 8322
-    sunset_date: "2026-12-31"
   data_processor_io:
     tracking_issue: 8322
     sunset_date: "2026-12-31"

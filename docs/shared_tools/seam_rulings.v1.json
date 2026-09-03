@@ -75,8 +75,9 @@
     },
     "chat_contracts": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "4 identical files; added to UD by #8322 while the shadow guard was disabled."
+      "status": "cleaned",
+      "rationale": "4 identical files; added to UD by #8322 while the shadow guard was disabled.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "codemap": {
       "ruling": "tools-canonical",
@@ -101,8 +102,9 @@
     },
     "cors.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Spelling-only divergence."
+      "status": "cleaned",
+      "rationale": "Spelling-only divergence.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "data_processing": {
       "ruling": "tools-canonical",
@@ -116,13 +118,15 @@
     },
     "deprecation.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "file_watcher": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (2 files)."
+      "status": "cleaned",
+      "rationale": "Identical (2 files).",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "golf_club": {
       "ruling": "tools-canonical",
@@ -153,8 +157,9 @@
     },
     "logging_pkg": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (3 files)."
+      "status": "cleaned",
+      "rationale": "Identical (3 files).",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "model_generation": {
       "ruling": "ud-canonical",
@@ -164,8 +169,9 @@
     },
     "notes": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "6 identical files; the UD-only test_notes_drift.py is a drift test that becomes moot."
+      "status": "cleaned",
+      "rationale": "6 identical files; the UD-only test_notes_drift.py is a drift test that becomes moot.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "plot_engine": {
       "ruling": "tools-canonical",
@@ -174,8 +180,9 @@
     },
     "plot_theme": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "6 identical files; UD-only drift test becomes moot."
+      "status": "cleaned",
+      "rationale": "6 identical files; UD-only drift test becomes moot.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "plotting": {
       "ruling": "ud-canonical",
@@ -201,18 +208,21 @@
     },
     "safe_eval.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "safe_pandas_eval.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "scripting": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (2 files)."
+      "status": "cleaned",
+      "rationale": "Identical (2 files).",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "sidekick": {
       "ruling": "split",
@@ -244,8 +254,9 @@
     },
     "theme": {
       "ruling": "split",
-      "status": "pending-cleanup",
-      "rationale": "22 overlapping files are tools-canonical: Tools' __init__ exports Colors/Sizes/Weights/get_qfont (fixes UD #8894), zoom.py has the int() guard, palette.py is newer; 4 UD-only modules (color_derivation, layout_metrics, sidekick_tokens, v1) are imported by launchers/tools and stay."
+      "status": "cleaned",
+      "rationale": "22 overlapping files are tools-canonical: Tools' __init__ exports Colors/Sizes/Weights/get_qfont (fixes UD #8894), zoom.py has the int() guard, palette.py is newer; 4 UD-only modules (color_derivation, layout_metrics, sidekick_tokens, v1) are imported by launchers/tools and stay.",
+      "cleaned_in": "UD #9406 PR-3 (2026-09-03)"
     },
     "trusted_git.py": {
       "ruling": "tools-canonical",
