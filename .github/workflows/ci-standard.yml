@@ -1184,6 +1184,87 @@ jobs:
   # competing check runs under the same required context - on PR #8728 this
   # aggregate reported `failure` while the other two reported `success` and the
   # PR merged anyway. They are now `lod-quality-gate` and `docs-quality-gate`.
+  # Always-on core lane (RM #1507 / #9409). This job deliberately has NO
+  # `needs` and NO `if:` -- it cannot be skipped by the docs-only
+  # `changed-paths` narrowing, and it does not consume the `pick-runner`
+  # dispatcher (a dispatcher failure must not silently skip it). It is the
+  # floor every push, PR, schedule and dispatch run must clear: a pinned
+  # requirements.lock install, `scripts/ci/verify_installation.py`, the
+  # shared-alias import smoke (`scripts/ci/import_smoke.py`), and the
+  # top-level smoke + Tools-provider contract tests. Budget: <= 10 minutes
+  # (requirements.lock only -- no torch/jax/GUI extras, pip cache on). The
+  # `quality-gate` aggregate below requires this job to report exactly
+  # `success` regardless of CODE_CHANGED.
+  unit-core-always:
+    name: unit-core-always
+    runs-on:
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
+      'd-sorg-fleet-docker' }}
+    timeout-minutes: 10
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      # src/__init__.py installs the Tools import aliases from
+      # shared.python.import_aliases, which resolve through vendor/ud-tools.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.lock
+      - name: Install core lock + test runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv-core-always
+          . .venv-core-always/bin/activate
+          python -m ensurepip --upgrade || true
+          python3 -m pip install --upgrade pip
+          mkdir -p ui/dist
+          python3 -m pip install -r requirements.lock
+          python3 -m pip install --no-deps -e .
+          python3 -m pip install pytest pytest-asyncio pytest-timeout pytest-xdist pytest-cov
+      - name: Verify installation
+        shell: bash
+        run: |
+          set -euo pipefail
+          . .venv-core-always/bin/activate
+          python3 scripts/ci/verify_installation.py
+      - name: Import smoke (shared alias roots + UD entry points)
+        shell: bash
+        run: |
+          set -euo pipefail
+          . .venv-core-always/bin/activate
+          python3 scripts/ci/import_smoke.py
+      - name: Smoke + shared-contract tests
+        # `-m` keeps the repo-default deselections but does NOT deselect
+        # `smoke` (pyproject addopts already selects it; restated here so a
+        # future addopts change cannot silently drop these files).
+        # tests/smoke/test_e2e_tool_registry_and_chat.py is excluded: its
+        # `summarize_simulation_run` expectations fail on main today
+        # (register_sidekick_analytics_tools is never wired) -- see the
+        # #9409 PR body; re-add once that tool is registered.
+        shell: bash
+        run: |
+          set -euo pipefail
+          . .venv-core-always/bin/activate
+          python3 -m pytest             tests/smoke/test_chat_launcher_discovery.py             tests/smoke/test_smoke_suite_contract.py             tests/shared_contracts             -m "not slow and not live_simulation and not e2e and not requires_network and not requires_mocap_fixtures"             -n 0             --timeout=60             --timeout-method=thread             -p no:cacheprovider             --no-cov             --tb=short
+
   quality-gate:
     name: quality-gate
     needs:
@@ -1199,7 +1280,10 @@ jobs:
         publication-quality,
         rust-wheel-parity,
         shared-tools-consumer-contracts,
+        unit-core-always,
       ]
+    # `always()` stays: on a docs-only PR every narrowed gate is `skipped`
+    # and this job must still run to report the required context.
     if: always()
     # This job is the ONLY required branch-protection check on `main`, and it
     # carries no scientific logic of its own - it aggregates the split jobs.
@@ -1232,6 +1316,7 @@ jobs:
           PUBLICATION_QUALITY: ${{ needs.publication-quality.result }}
           RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
           SHARED_TOOLS_CONSUMER_CONTRACTS: ${{ needs.shared-tools-consumer-contracts.result }}
+          UNIT_CORE_ALWAYS: ${{ needs.unit-core-always.result }}
         run: |
           set -uo pipefail
           failed=0
@@ -1255,7 +1340,16 @@ jobs:
             echo "| --- | ------ |"
             echo "| pick-runner | $PICK_RUNNER |"
             echo "| changed-paths | $CHANGED_PATHS |"
+            echo "| unit-core-always | $UNIT_CORE_ALWAYS |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+          # Always-on lane (RM #1507 / #9409): checked before the
+          # CODE_CHANGED branching because it is never allowed to be skipped.
+          echo "unit-core-always: $UNIT_CORE_ALWAYS"
+          if [ "$UNIT_CORE_ALWAYS" != "success" ]; then
+            echo "::error::unit-core-always reported '$UNIT_CORE_ALWAYS', expected 'success' (always-on lane, RM #1507 / #9409)."
+            exit 1
+          fi
 
           for entry in $gates; do
             echo "${entry%%:*}: ${entry#*:}"

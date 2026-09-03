@@ -30,3 +30,8 @@ Update this document whenever a new workflow is added or the status of an existi
   honest about optional-engine coverage.
 - `nightly-cross-engine.yml` is the repo's dedicated cross-engine lane and is
   the right place to expand stricter native-engine validation over time.
+- `ci-standard.yml` job `unit-core-always` is the always-on floor (RM #1507 /
+  #9409): no `needs`/`if`, <= 10 min, requirements.lock install +
+  `scripts/ci/verify_installation.py` + `scripts/ci/import_smoke.py` + the
+  top-level smoke and shared-contract tests. The `quality-gate` aggregate
+  requires it to report exactly `success` even on docs-only PRs.
