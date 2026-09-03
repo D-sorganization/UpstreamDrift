@@ -301,5 +301,5 @@ For general issues: <https://github.com/D-sorganization/UpstreamDrift/issues>
 
 ---
 
-**Last Updated**: September 2, 2026
-**Version**: 2.1.1
+**Last Updated**: September 3, 2026
+**Version**: 2.1.2
