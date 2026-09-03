@@ -9,6 +9,8 @@ import pytest
 
 from scripts.ci import verify_installation as mod
 
+pytestmark = pytest.mark.unit
+
 
 def test_check_python_version_ok() -> None:
     ok, msg = mod.check_python_version()
@@ -65,12 +67,21 @@ def test_check_import_rejects_non_string() -> None:
         mod.check_import("x", version_attr=5)  # type: ignore[arg-type]
 
 
+def _stub_vendor_checks(monkeypatch: pytest.MonkeyPatch, *, present: bool) -> None:
+    """Keep ``main`` hermetic: the vendor checks are unit-tested separately."""
+    monkeypatch.setattr(mod, "check_vendor_tools", lambda: (present, "vendor"))
+    monkeypatch.setattr(
+        mod, "check_shared_alias_roots", lambda: [("theme", True, "ok")]
+    )
+
+
 def test_main_runs(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     monkeypatch.setattr("sys.argv", ["verify"])
     # Stub check_import to avoid heavy actual imports
     monkeypatch.setattr(mod, "check_import", lambda *a, **k: (True, "ok"))
+    _stub_vendor_checks(monkeypatch, present=True)
     code = mod.main()
     assert code == 0
 
@@ -80,10 +91,13 @@ def test_main_json_output(
 ) -> None:
     monkeypatch.setattr("sys.argv", ["verify", "--json"])
     monkeypatch.setattr(mod, "check_import", lambda *a, **k: (True, "ok"))
+    _stub_vendor_checks(monkeypatch, present=True)
     code = mod.main()
     assert code == 0
     captured = capsys.readouterr()
     assert '"python_ok"' in captured.out
+    assert '"vendor_tools_ok": true' in captured.out
+    assert '"alias_root_checks"' in captured.out
 
 
 def test_main_failure_path(
@@ -91,4 +105,63 @@ def test_main_failure_path(
 ) -> None:
     monkeypatch.setattr("sys.argv", ["verify"])
     monkeypatch.setattr(mod, "check_import", lambda *a, **k: (False, "x"))
+    _stub_vendor_checks(monkeypatch, present=True)
     assert mod.main() == 1
+
+
+def test_main_fails_when_vendor_submodule_missing(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A missing vendor/ud-tools submodule is a critical failure (#9407)."""
+    monkeypatch.setattr("sys.argv", ["verify"])
+    monkeypatch.setattr(mod, "check_import", lambda *a, **k: (True, "ok"))
+    _stub_vendor_checks(monkeypatch, present=False)
+    with caplog.at_level("INFO"):
+        assert mod.main() == 1
+    assert mod.VENDOR_SUBMODULE_HINT in caplog.text
+
+
+# --- vendor/ud-tools submodule checks (#9407) ------------------------------
+
+
+def test_check_vendor_tools_missing_reports_submodule_command(tmp_path) -> None:
+    ok, msg = mod.check_vendor_tools(tmp_path)
+    assert not ok
+    assert "✗" in msg
+    assert "git submodule update --init --recursive vendor/ud-tools" in msg
+
+
+def test_check_vendor_tools_present(tmp_path) -> None:
+    (tmp_path / "vendor" / "ud-tools" / "src" / "shared" / "python").mkdir(parents=True)
+    ok, msg = mod.check_vendor_tools(tmp_path)
+    assert ok
+    assert "✓" in msg
+
+
+def test_shared_alias_roots_match_finder() -> None:
+    from src.shared.python import import_aliases
+
+    roots = mod.shared_alias_roots()
+    assert set(roots) == set(import_aliases._SHARED_ROOTS)
+    assert roots == tuple(sorted(roots))
+    assert {"theme", "sidekick", "chat"} <= set(roots)
+
+
+def test_check_shared_alias_roots_resolve_against_repo() -> None:
+    """Every SharedImportAliasFinder root must resolve once vendor/ud-tools exists."""
+    assert mod.check_vendor_tools()[0], mod.VENDOR_SUBMODULE_HINT
+    results = mod.check_shared_alias_roots()
+    assert [root for root, _ok, _msg in results] == list(mod.shared_alias_roots())
+    failures = [msg for _root, ok, msg in results if not ok]
+    assert not failures, failures
+
+
+def test_check_shared_alias_roots_reports_unresolvable_root() -> None:
+    results = mod.check_shared_alias_roots(("definitely_not_a_shared_root_xyz",))
+    assert results == [
+        (
+            "definitely_not_a_shared_root_xyz",
+            False,
+            "✗ definitely_not_a_shared_root_xyz: no module spec",
+        )
+    ]
