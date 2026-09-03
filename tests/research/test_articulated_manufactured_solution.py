@@ -24,6 +24,7 @@ from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine im
     require_robotics_pinocchio,
 )
 from scripts.research.proximal_distal_energy.run_articulated_manufactured_solution import (
+    validate_authority_environment,
     write_record,
 )
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
@@ -33,6 +34,23 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
+
+
+def _governed_authority_environment_available() -> bool:
+    """True only when the exact governed authority stack is live.
+
+    The authority profile requires exact CPython 3.11.15 plus the hash-locked
+    dependency set (see ``validate_authority_environment``). Only the dedicated
+    ``articulated-manufactured-authority`` CI job provisions that stack; the
+    optional-stack matrix lanes run unpinned patch versions where the exact-patch
+    precondition legitimately cannot hold.
+    """
+
+    try:
+        validate_authority_environment()
+    except RuntimeError:
+        return False
+    return True
 
 
 def _robotics_pinocchio_available() -> bool:
@@ -190,10 +208,22 @@ def test_committed_manufactured_solution_evidence_is_current_and_nontrivial() ->
 def test_manufactured_solution_record_is_byte_deterministic(
     tmp_path: Path,
 ) -> None:
-    """Native repeats are byte exact; frozen evidence is engine-qualified."""
+    """Native repeats are byte exact; frozen evidence is engine-qualified.
 
-    first = write_record(tmp_path / "first.json").read_bytes()
-    second = write_record(tmp_path / "second.json").read_bytes()
+    Uses the authority profile only when the governed stack is actually live
+    (the dedicated articulated-manufactured-authority CI job); everywhere else
+    (optional-stack matrix lanes with drifting interpreter patches, local
+    development) it uses the rolling profile, whose declared purpose is
+    non-authoritative compatibility execution. Native-repeat byte-determinism
+    is asserted in both environments; the strict comparison against the
+    committed authority record remains authority-environment-only.
+    """
+
+    governed = _governed_authority_environment_available()
+    profile = "authority" if governed else "rolling"
+
+    first = write_record(tmp_path / "first.json", profile=profile).read_bytes()
+    second = write_record(tmp_path / "second.json", profile=profile).read_bytes()
     current_record = json.loads(first)
     committed_record = json.loads(
         (DATA / "articulated_manufactured_solution.json").read_text()
@@ -204,5 +234,12 @@ def test_manufactured_solution_record_is_byte_deterministic(
     assert current_record["design"] == committed_record["design"]
     assert current_record["source_sha256"] == committed_record["source_sha256"]
     assert current_record["all_gates_pass"] is True
-    if current_record["engines"] == committed_record["engines"]:
-        assert current_record == committed_record
+    if governed:
+        assert current_record["publication_authority"] == "authoritative"
+        if current_record["engines"] == committed_record["engines"]:
+            assert current_record == committed_record
+    else:
+        assert (
+            current_record["publication_authority"]
+            == "non_authoritative_compatibility_only"
+        )
