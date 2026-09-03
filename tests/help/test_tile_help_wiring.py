@@ -5,8 +5,7 @@ and #8846 (24 of 25 tool GUIs had no help affordance and ``build_help_menu``
 was dead code). Concretely they assert that
 
 * every help page a tile declares exists on disk and is loadable,
-* every ``ready`` / ``beta`` tile either declares one or is on the shrink-only
-  ratchet in the registry generator,
+* every ``ready`` / ``beta`` tile declares a page of its own,
 * the help dock resolves a tile's page through the registry rather than a
   hand-maintained rule table,
 * ``attach_tile_help`` installs an F1 shortcut on plain widgets and a Help
@@ -19,7 +18,6 @@ from __future__ import annotations
 import pytest
 
 from scripts.registry.generate_registry_artifacts import (
-    HELP_RATCHET,
     HELP_REQUIRED_MATURITIES,
     help_violations,
 )
@@ -55,36 +53,42 @@ def test_every_non_hidden_tile_help_is_loadable(registry) -> None:
         if tile.maturity == "hidden" or tile.hidden or not tile.help:
             continue
         body = tile_help.load_help_markdown(tile.id, registry=registry)
-        if "could not be read" in body or "is missing from the checkout" in body:
+        # Compare against the file rather than sniffing for fallback phrases:
+        # a page is free to *describe* something missing, and one stub does.
+        if body != (REPO_ROOT / tile.help).read_text(encoding="utf-8"):
             unloadable.append(tile.id)
     assert not unloadable, f"help pages that would not load: {unloadable}"
 
 
-def test_ready_and_beta_tiles_declare_help_or_are_ratcheted(registry) -> None:
+def test_every_ready_and_beta_tile_declares_help(registry) -> None:
     """A new ready/beta tile cannot ship without a help page."""
     undeclared = sorted(
         tile.id
         for tile in registry.tiles
         if tile.maturity in HELP_REQUIRED_MATURITIES and not tile.help
     )
-    unexpected = [tile_id for tile_id in undeclared if tile_id not in HELP_RATCHET]
-    assert not unexpected, (
-        "these ready/beta tiles declare no help page and are not on the "
-        f"shrink-only ratchet: {unexpected}"
+    assert not undeclared, f"these ready/beta tiles declare no help page: {undeclared}"
+
+
+def test_every_ready_and_beta_tile_has_its_own_page(registry) -> None:
+    """The shared five-topic pages are no longer a tile's only help.
+
+    Before #9413 one `simulation_controls.md` served 16 tiles and
+    `engine_selection.md` served 6. Each tile now owns
+    `docs/help/<tile_id>.md`.
+    """
+    shared = sorted(
+        tile.id
+        for tile in registry.tiles
+        if tile.maturity in HELP_REQUIRED_MATURITIES
+        and tile.help != f"docs/help/{tile.id}.md"
     )
+    assert not shared, f"tiles still pointing at a shared help page: {shared}"
 
 
 def test_help_gate_passes_for_the_committed_registry() -> None:
     """The gate wired into ``--check`` must be green on the committed tree."""
     assert help_violations(REPO_ROOT) == []
-
-
-def test_help_ratchet_only_shrinks(registry) -> None:
-    """Ratchet entries that gained a page must be removed from the ratchet."""
-    with_help = {tile.id for tile in registry.tiles if tile.help}
-    assert not (HELP_RATCHET & with_help), (
-        "ratcheted tiles now have help pages; delete them from HELP_RATCHET"
-    )
 
 
 def test_help_relpath_for_unknown_tile_is_none() -> None:

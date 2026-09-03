@@ -10,7 +10,7 @@ models:
     order: 2
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/engine_selection.md"
+    help: "docs/help/mujoco_unified.md"
     feature_id: "engines.load_and_simulate"
     web:
       mode: "native-window"
@@ -60,7 +60,7 @@ models:
     order: 3
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/engine_selection.md"
+    help: "docs/help/drake_golf.md"
     feature_id: "engines.load_and_simulate"
     web:
       mode: "native-window"
@@ -98,7 +98,7 @@ models:
     order: 4
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/engine_selection.md"
+    help: "docs/help/pinocchio_golf.md"
     feature_id: "engines.load_and_simulate"
     web:
       mode: "native-window"
@@ -132,7 +132,7 @@ models:
     order: 5
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/engine_selection.md"
+    help: "docs/help/opensim_golf.md"
     feature_id: "engines.load_and_simulate"
     web:
       mode: "native-window"
@@ -159,7 +159,7 @@ models:
     order: 6
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/engine_selection.md"
+    help: "docs/help/myosim_suite.md"
     feature_id: "engines.load_and_simulate"
     web:
       mode: "native-window"
@@ -184,7 +184,7 @@ models:
     order: 9
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/engine_selection.md"
+    help: "docs/help/matlab_suite.md"
     feature_id: "tools.matlab_suite"
     web:
       mode: "native-window"
@@ -210,7 +210,7 @@ models:
     order: 21
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/golf_simulation_suite.md"
     feature_id: "simulation.golf_suite_batch"
     web:
       mode: "native-window"
@@ -233,7 +233,7 @@ models:
     order: 8
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/putting_green.md"
     feature_id: "tools.putting_green"
     web:
       mode: "route"
@@ -256,7 +256,7 @@ models:
     order: 47
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/mujoco_models_shared.md"
     feature_id: "launcher.model_repositories"
     web:
       mode: "native-window"
@@ -276,7 +276,7 @@ models:
     order: 49
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/drake_models_shared.md"
     feature_id: "launcher.model_repositories"
     web:
       mode: "native-window"
@@ -296,7 +296,7 @@ models:
     order: 50
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/pinocchio_models_shared.md"
     feature_id: "launcher.model_repositories"
     web:
       mode: "native-window"
@@ -316,7 +316,7 @@ models:
     order: 51
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/opensim_models_shared.md"
     feature_id: "launcher.model_repositories"
     web:
       mode: "native-window"
@@ -365,7 +365,7 @@ models:
     order: 27
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/pendulum_simulator.md"
     feature_id: "engines.load_and_simulate"
     web:
       mode: "native-window"
@@ -395,7 +395,7 @@ models:
     order: 101
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/swing_objective_lab.md"
     feature_id: "simulation.swing_objective_lab"
     web:
       mode: "route"
@@ -425,7 +425,7 @@ models:
     order: 19
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/shot_tracer.md"
     feature_id: "simulation.shot_tracer"
     web:
       mode: "route"
@@ -447,7 +447,7 @@ models:
     order: 17
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/cross_engine_dashboard.md"
     feature_id: "analysis.cross_engine_robustness"
     web:
       mode: "native-window"
@@ -471,7 +471,7 @@ models:
     order: 24
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/terrain_engine.md"
     feature_id: "tools.terrain_engine"
     web:
       mode: "route"
@@ -495,7 +495,7 @@ models:
     order: 52
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/golf_environment.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -520,7 +520,7 @@ models:
     order: 53
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/swing_flight_pipeline.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -542,7 +542,7 @@ models:
     order: 54
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/ball_flight_simulator.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -593,7 +593,7 @@ models:
     order: 10
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/motion_target_preview.md"
     feature_id: "mocap.breadth"
     web:
       mode: "native-window"
@@ -618,7 +618,7 @@ models:
     order: 20
     maturity: "beta"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/pose_studio.md"
     feature_id: "tools.pose_editing"
     web:
       mode: "native-window"
@@ -670,7 +670,7 @@ models:
     order: 55
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/motion_capture.md"
+    help: "docs/help/c3d_viewer.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -722,7 +722,7 @@ models:
     order: 13
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/motion_capture.md"
+    help: "docs/help/video_processor.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -751,7 +751,7 @@ models:
     order: 56
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/motion_capture.md"
+    help: "docs/help/openpose_analysis.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -772,7 +772,7 @@ models:
     order: 57
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/motion_capture.md"
+    help: "docs/help/mediapipe_analysis.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -797,7 +797,7 @@ models:
     order: 1
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/model_explorer.md"
     feature_id: "tools.model_explorer"
     web:
       mode: "route"
@@ -820,7 +820,7 @@ models:
     order: 14
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/data_explorer.md"
     feature_id: "tools.data_explorer"
     web:
       mode: "route"
@@ -850,7 +850,7 @@ models:
     order: 15
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/data_processor.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -884,7 +884,7 @@ models:
     order: 48
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/launch_monitor_analytics.md"
     feature_id: "tools.launch_monitor_analytics"
     web:
       mode: "native-window"
@@ -911,7 +911,7 @@ models:
     order: 7
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/rate_of_closure.md"
     feature_id: "tools.rate_of_closure"
     web:
       mode: "route"
@@ -944,7 +944,7 @@ models:
     order: 58
     maturity: "beta"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/sidekick.md"
     feature_id: "chat.transport"
     web:
       mode: "native-window"
@@ -966,7 +966,7 @@ models:
     order: 59
     maturity: "beta"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/training_controller.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -988,7 +988,7 @@ models:
     order: 60
     maturity: "beta"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/config_setup_wizard.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -1036,7 +1036,7 @@ models:
     order: 16
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/project_map.md"
     feature_id: "docs.document_library"
     web:
       mode: "unavailable"
@@ -1059,7 +1059,7 @@ models:
     order: 62
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/library_tool.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -1084,7 +1084,7 @@ models:
     order: 63
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/biomech_gait.md"
     feature_id: "biomech.exercise_injury_dashboards"
     web:
       mode: "native-window"
@@ -1106,7 +1106,7 @@ models:
     order: 64
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/biomech_sit_to_stand.md"
     feature_id: "biomech.exercise_injury_dashboards"
     web:
       mode: "native-window"
@@ -1128,7 +1128,7 @@ models:
     order: 65
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/movement_optimizer.md"
     feature_id: "launcher.tile_web_reachability"
     web:
       mode: "native-window"
@@ -1214,7 +1214,7 @@ models:
     order: 46
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: "docs/help/simulation_controls.md"
+    help: "docs/help/simulation_backends.md"
     feature_id: "analysis.counterfactuals"
     web:
       mode: "native-window"
@@ -1270,7 +1270,7 @@ models:
     order: 18
     maturity: "ready"
     surfaces: [pyqt, web]
-    help: null
+    help: "docs/help/biomech_exercise.md"
     feature_id: "biomech.exercise_injury_dashboards"
     web:
       mode: "native-window"
@@ -1503,7 +1503,7 @@ web_catalog:
     maturity: "ready"
     surfaces: [web]
     surface_reason: "web chat page (/chat); the desktop equivalent is the sidekick dock"
-    help: null
+    help: "docs/help/chat_assistant.md"
     feature_id: "chat.transport"
     web:
       mode: "route"
@@ -1528,7 +1528,7 @@ web_catalog:
     maturity: "ready"
     surfaces: [web]
     surface_reason: "web page (/tools/dataset); the native path is the MATLAB chooser"
-    help: null
+    help: "docs/help/dataset_generator.md"
     feature_id: "tools.dataset_generator"
     web:
       mode: "route"
@@ -1553,7 +1553,7 @@ web_catalog:
     maturity: "ready"
     surfaces: [web]
     surface_reason: "web page (/tools/character-builder); the native side is a CLI"
-    help: null
+    help: "docs/help/character_builder.md"
     feature_id: "tools.character_builder"
     web:
       mode: "route"
@@ -1578,7 +1578,7 @@ web_catalog:
     maturity: "ready"
     surfaces: [web]
     surface_reason: "web page (/tools/analysis) over REST endpoints"
-    help: "docs/help/analysis_tools.md"
+    help: "docs/help/analysis_tools_api.md"
     feature_id: "analysis.analysis_tools_api"
     web:
       mode: "route"
@@ -1803,7 +1803,7 @@ web_catalog:
     maturity: "beta"
     surfaces: [web]
     surface_reason: "alias surface over the Tools data processor"
-    help: null
+    help: "docs/help/tools_calculator_hub.md"
     feature_id: "launcher.tile_web_reachability"
     provider: "tools"
     working_dir: "."
