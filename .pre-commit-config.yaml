@@ -73,6 +73,7 @@ repos:
         name: "no print() in src (use logging)"
         entry: "^\\s*print\\("
         language: pygrep
+        types: [python]
         files: ^src/
         exclude: ^(src/.*/__main__\.py|tests/|\.github/|src/shared/python/codemap/(cli|watcher|mcp_server)\.py$)
 

@@ -48,7 +48,7 @@ data = mujoco.MjData(model)
 # Simulate
 for _ in range(1000):
     mujoco.mj_step(model, data)
-    print(f"Joint angle: {data.qpos[0]:.3f}")
+    logging.info(f"Joint angle: {data.qpos[0]:.3f}")
 ```
 
 ---
@@ -136,9 +136,9 @@ result = validator.compare_states(
 )
 
 if result.passed:
-    print("✅ Engines agree within tolerance")
+    logging.info("✅ Engines agree within tolerance")
 else:
-    print(f"⚠️ Deviation: {result.severity}")
+    logging.warning(f"⚠️ Deviation: {result.severity}")
 ```
 
 ---
