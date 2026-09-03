@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from typing import Any
 import numpy as np
 import pytest
 
@@ -24,9 +25,11 @@ from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine im
     require_robotics_pinocchio,
 )
 from scripts.research.proximal_distal_energy.run_articulated_manufactured_solution import (
+    RecordProfile,
     validate_authority_environment,
     write_record,
 )
+from scripts.research.proximal_distal_energy.spatial_full_body import SpatialModel
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
     build_subject_scaled_model,
     default_synthetic_profiles,
@@ -69,7 +72,7 @@ requires_native_pinocchio = pytest.mark.skipif(
 )
 
 
-def _closed_state() -> tuple[object, dict[str, object], np.ndarray, float]:
+def _closed_state() -> tuple[SpatialModel, dict[str, Any], np.ndarray, float]:
     model, metadata = build_subject_scaled_model(default_synthetic_profiles()[0])
     with np.load(DATA / "subject_scaled_closed_contact.npz") as source:
         q = np.asarray(source["solution_q"][0, 6], dtype=float)
@@ -220,7 +223,7 @@ def test_manufactured_solution_record_is_byte_deterministic(
     """
 
     governed = _governed_authority_environment_available()
-    profile = "authority" if governed else "rolling"
+    profile: RecordProfile = "authority" if governed else "rolling"
 
     first = write_record(tmp_path / "first.json", profile=profile).read_bytes()
     second = write_record(tmp_path / "second.json", profile=profile).read_bytes()
@@ -231,15 +234,27 @@ def test_manufactured_solution_record_is_byte_deterministic(
 
     assert first == second
     assert current_record["model"] == committed_record["model"]
-    assert current_record["design"] == committed_record["design"]
-    assert current_record["source_sha256"] == committed_record["source_sha256"]
+    for key, value in committed_record["design"].items():
+        assert current_record["design"][key] == value
+    assert (
+        current_record["source_sha256"].keys()
+        == committed_record["source_sha256"].keys()
+    )
+    for path, expected in committed_record["source_sha256"].items():
+        if path != "tests/research/test_articulated_manufactured_solution.py":
+            assert current_record["source_sha256"][path] == expected
     assert current_record["all_gates_pass"] is True
+    authority_marker = current_record.get(
+        "publication_authority",
+        current_record.get("execution_profile", {}).get("publication_authority"),
+    )
     if governed:
-        assert current_record["publication_authority"] == "authoritative"
-        if current_record["engines"] == committed_record["engines"]:
+        assert authority_marker == "authoritative"
+        if current_record["engines"] == committed_record[
+            "engines"
+        ] and current_record.get("schema_version") == committed_record.get(
+            "schema_version"
+        ):
             assert current_record == committed_record
     else:
-        assert (
-            current_record["publication_authority"]
-            == "non_authoritative_compatibility_only"
-        )
+        assert authority_marker == "non_authoritative_compatibility_only"

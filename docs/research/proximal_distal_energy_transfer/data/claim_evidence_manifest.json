@@ -8282,8 +8282,8 @@
       ]
     },
     "tests/research/test_articulated_manufactured_solution.py": {
-      "sha256": "11db446177dbd7ada2ade898f699da35998ee28262835d5770992fefa4210319",
-      "bytes": 8193,
+      "sha256": "361621ded5d1fdf24da1587bbc534a6a6d9daf98608e79b4ac52ef6fa09242bc",
+      "bytes": 10403,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
