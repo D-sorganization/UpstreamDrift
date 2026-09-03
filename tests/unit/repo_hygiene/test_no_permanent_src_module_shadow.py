@@ -1,6 +1,6 @@
-"""Guard against a directory-scoped conftest permanently shadowing ``src``.
+"""Guard against a directory-scoped conftest leaking its ``src`` pivot.
 
-Regression coverage for the follow-up to issue #8834 / PR #9374.
+Regression coverage for issue #8834 / PR #9374 and its two follow-ups.
 
 ``tests/unit/c3d_viewer/ui/conftest.py`` and
 ``tests/unit/engines/simscape/three_d_gui/conftest.py`` both rebind the
@@ -9,41 +9,42 @@ top-level ``sys.modules["src"]`` entry to
 (unrelated) ``src`` package, so that the C3D-viewer engine's ``src.apps.*``
 absolute imports resolve inside its own tests.
 
-Before this fix, that rebind happened once, unconditionally, at module
-import time, and was never undone. ``sys.modules`` is process-global, and
-under ``pytest-xdist`` a single worker process collects and runs tests from
-every directory in the suite -- so whichever of these two directories got
-collected first in a given worker permanently poisoned ``sys.modules["src"]``
-for every test that ran afterwards in that same worker process, including
+Originally that rebind happened once, unconditionally, at module import time
+and was never undone. ``sys.modules`` is process-global, and under
+``pytest-xdist`` a single worker process collects and runs tests from every
+directory in the suite -- so whichever of these two directories got collected
+first in a given worker permanently poisoned ``sys.modules["src"]`` for every
+test that ran afterwards in that worker, including
 ``tests/scripts/test_validate_suite.py``, whose
 ``launch_upstream_drift._retry_parent_shared_alias_installer()`` does a bare
 ``import src`` and expects the real
-``src/__init__.py::_install_parent_shared_aliases``. When the wrong ``src``
-was cached, that lookup silently returned ``None`` (post-#9374 workaround)
-instead of actually installing the parent-shared aliases -- the underlying
-pollution was never fixed, only the crash was suppressed.
+``src/__init__.py::_install_parent_shared_aliases``.
 
-The fix scopes the rebind to only be active while pytest is collecting or
-running an item that lives under the conftest's own directory (see the
-``pytest_make_collect_report`` / ``pytest_runtest_setup`` /
-``pytest_runtest_teardown`` hooks there, which pytest itself only consults
-for collectors/items at or below that directory). This test verifies that
-the pivot's own enter/exit functions never leave ``sys.modules["src"]``
-pointing at the engine package once exited -- including when nested, which
-is what actually happens as pytest's collectors (Package -> Module ->
-Class -> Function) and the runtest setup/teardown hooks both re-enter the
-same pivot.
+PR #9404 scoped the rebind to the conftest's own directory but restored only
+the bare ``sys.modules["src"]`` key. Installing the pivot *also* evicts every
+other ``src.*`` entry (everything outside ``src.shared*``), so unrelated
+suites were left re-importing the repo's modules and holding **duplicate**
+module objects. That broke every pattern that depends on module identity --
+``importlib.reload(src.api.utils.path_validation)`` raised ``ImportError:
+module ... not in sys.modules``, ``monkeypatch.setattr("src.launchers.x.y")``
+and ``patch("src.launchers.docker_manager.secure_run")`` patched a copy the
+test's already-bound callables never consulted, and ``isinstance`` checks
+against re-imported classes failed.
+
+These tests therefore pin both halves of the invariant: the pivot is exposed
+as a paired, reentrant enter/exit (never a bare module-level call), and the
+outermost exit restores the **whole** ``src`` namespace and ``sys.path``, not
+just the top-level ``src`` key.
 
 Note: reproducing the originally-reported failure end-to-end requires the
-full ``testpaths`` collection sweep (a minimal two-item invocation does not
-trigger it, because ``tests/conftest.py::pytest_configure`` happens to
-import the real ``src`` package first in that narrow case) -- that
-end-to-end confirmation lives in the manual investigation for this issue,
-not as a subprocess test here, to keep this suite fast and non-flaky.
+full ``testpaths`` collection sweep, so that confirmation lives in the
+investigation notes rather than as a subprocess test here, to keep this suite
+fast and non-flaky.
 """
 
 from __future__ import annotations
 
+import importlib
 import importlib.util
 import sys
 from pathlib import Path
@@ -66,13 +67,18 @@ _PIVOT_CONFTESTS = (
     / "conftest.py",
 )
 
+# A repo ``src.*`` module outside the pivot's ``src.shared`` keep-set, i.e. one
+# the pivot install genuinely evicts. This is the exact module whose eviction
+# broke ``tests/unit/utils/test_path_validation.py``.
+_EVICTED_PROBE_MODULE = "src.api.utils.path_validation"
+
 
 def _load_conftest(path: Path) -> ModuleType:
     """Load a directory-scoped conftest.py under a private module name.
 
     A distinct name per call avoids colliding with pytest's own conftest
     bookkeeping in ``sys.modules`` while still executing the file's real
-    top-level code (needed to define ``_enter_pivot``/``_exit_pivot``).
+    top-level code (needed to construct its ``_PIVOT``).
     """
     spec = importlib.util.spec_from_file_location(
         f"_repo_hygiene_probe_{path.parent.name}_conftest", path
@@ -84,22 +90,44 @@ def _load_conftest(path: Path) -> ModuleType:
     return module
 
 
+def _src_namespace() -> dict[str, ModuleType]:
+    return {
+        name: module
+        for name, module in sys.modules.items()
+        if name == "src" or name.startswith("src.")
+    }
+
+
+def _restore(saved: dict[str, ModuleType], saved_path: list[str]) -> None:
+    """Belt-and-suspenders cleanup so a failed assertion cannot leak."""
+    for name in list(_src_namespace()):
+        if name not in saved:
+            del sys.modules[name]
+    sys.modules.update(saved)
+    sys.path[:] = saved_path
+
+
 @pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)
 def test_pivot_conftest_defines_scoped_enter_exit_hooks(conftest_path: Path) -> None:
-    """DbC: the pivot must expose paired, idempotent enter/exit functions.
+    """DbC: the pivot must expose a paired, reentrant enter/exit object.
 
-    A bare module-level ``_pivot_sys_path()`` call with no counterpart is
-    exactly the shape of the original bug -- this fails loudly if either
-    directory's conftest regresses back to that shape.
+    A bare module-level pivot call with no counterpart is exactly the shape of
+    the original bug -- this fails loudly if either directory's conftest
+    regresses back to that shape.
     """
     assert conftest_path.is_file(), f"Expected conftest at {conftest_path}"
     module = _load_conftest(conftest_path)
 
-    assert callable(getattr(module, "_enter_pivot", None)), (
-        f"{conftest_path} must define _enter_pivot() to scope the src rebind"
+    pivot = getattr(module, "_PIVOT", None)
+    assert pivot is not None, (
+        f"{conftest_path} must build a shared EngineSrcPivot as _PIVOT so the "
+        "src rebind is scoped rather than applied at import time"
     )
-    assert callable(getattr(module, "_exit_pivot", None)), (
-        f"{conftest_path} must define _exit_pivot() to undo the src rebind"
+    assert callable(getattr(pivot, "enter", None)), (
+        f"{conftest_path}'s _PIVOT must expose enter() to scope the src rebind"
+    )
+    assert callable(getattr(pivot, "exit", None)), (
+        f"{conftest_path}'s _PIVOT must expose exit() to undo the src rebind"
     )
     for hook_name in (
         "pytest_make_collect_report",
@@ -117,18 +145,18 @@ def test_pivot_conftest_defines_scoped_enter_exit_hooks(conftest_path: Path) -> 
 def test_pivot_enter_exit_restores_prior_src_identity(conftest_path: Path) -> None:
     """The rebind must be fully reversible, including when nested.
 
-    Simulates the exact mechanism that corrupted ``sys.modules["src"]``:
-    calling the pivot's enter without an eventual matching exit is the bug.
-    This drives enter/exit directly (nested twice, matching how collection
-    of a Package -> Module -> Function chain re-enters the same pivot) and
-    asserts the top-level ``src`` identity is bit-for-bit restored after the
-    outermost exit.
+    Drives enter/exit directly (nested twice, matching how collection of a
+    Package -> Module -> Function chain re-enters the same pivot) and asserts
+    the top-level ``src`` identity is bit-for-bit restored after the outermost
+    exit.
     """
-    module = _load_conftest(conftest_path)
+    pivot = _load_conftest(conftest_path)._PIVOT
 
+    saved = _src_namespace()
+    saved_path = list(sys.path)
     previous = sys.modules.get("src")
     try:
-        module._enter_pivot()
+        pivot.enter()
         pivoted = sys.modules.get("src")
         assert pivoted is not None, "pivot must install a src module"
         assert pivoted is not previous, (
@@ -136,25 +164,60 @@ def test_pivot_enter_exit_restores_prior_src_identity(conftest_path: Path) -> No
         )
 
         # Nested entry (mirrors nested collectors reusing the same pivot).
-        module._enter_pivot()
+        pivot.enter()
         assert sys.modules.get("src") is pivoted
-        module._exit_pivot()
+        pivot.exit()
         assert sys.modules.get("src") is pivoted, (
             "an inner exit must not undo the pivot while an outer scope is still active"
         )
 
-        module._exit_pivot()
+        pivot.exit()
         assert sys.modules.get("src") is previous, (
             "the outermost exit must restore the exact prior src identity "
             "-- this is the invariant that keeps the pivot from leaking "
             "into unrelated tests that run later in the same xdist worker"
         )
     finally:
-        # Belt-and-suspenders: never let a failed assertion above leave
-        # this test process's own sys.modules['src'] corrupted for
-        # whatever collects/runs after it.
-        if sys.modules.get("src") is not previous:
-            if previous is not None:
-                sys.modules["src"] = previous
-            else:
-                sys.modules.pop("src", None)
+        _restore(saved, saved_path)
+
+
+@pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)
+def test_pivot_exit_restores_the_whole_src_namespace(conftest_path: Path) -> None:
+    """Exit must restore every evicted ``src.*`` entry, not just ``src``.
+
+    Restoring only the top-level key leaves unrelated suites re-importing the
+    repo's ``src.*`` modules and holding duplicate module objects, which is
+    what broke ``importlib.reload`` / ``monkeypatch.setattr`` / ``isinstance``
+    across ``tests/unit/launchers``, ``tests/unit/launcher`` and
+    ``tests/unit/utils`` once #9404 landed.
+    """
+    pivot = _load_conftest(conftest_path)._PIVOT
+
+    probe = importlib.import_module(_EVICTED_PROBE_MODULE)
+    saved = _src_namespace()
+    saved_path = list(sys.path)
+    assert _EVICTED_PROBE_MODULE in saved, (
+        f"{_EVICTED_PROBE_MODULE} must be resident before the pivot for this "
+        "test to prove anything"
+    )
+    try:
+        pivot.enter()
+        assert _EVICTED_PROBE_MODULE not in sys.modules, (
+            "installing the pivot is expected to evict the repo's src.* "
+            "submodules -- if it no longer does, this guard needs rewriting"
+        )
+        pivot.exit()
+
+        assert sys.modules.get(_EVICTED_PROBE_MODULE) is probe, (
+            f"exit left {_EVICTED_PROBE_MODULE} evicted; later tests would "
+            "re-import it and hold a duplicate module object"
+        )
+        assert _src_namespace() == saved, (
+            "exit must restore the src namespace exactly -- no leftover engine "
+            "modules, no evicted repo modules"
+        )
+        assert sys.path == saved_path, (
+            "exit must also undo the sys.path entries the pivot added"
+        )
+    finally:
+        _restore(saved, saved_path)

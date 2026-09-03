@@ -35,6 +35,10 @@ help:
 
 # Install dependencies (including dev tools: ruff, mypy, pytest)
 install:
+	@if [ -f .gitmodules ] && [ ! -d vendor/ud-tools/src/shared/python ]; then \
+		echo "Fetching pinned Tools submodule (vendor/ud-tools)..."; \
+		git submodule update --init --recursive vendor/ud-tools; \
+	fi
 	pip install -r requirements.txt
 	@if [ -f pyproject.toml ] || [ -f setup.py ]; then \
 		echo "Installing package in editable mode with dev dependencies..."; \

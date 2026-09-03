@@ -107,8 +107,9 @@ export for external analysis.
 ### Prerequisites
 
 - Python 3.11 or 3.12.
-- Git with Git LFS. Model assets are stored in LFS and the platform will not run
-  without them.
+- Git. The shared Tools layer (`theme`, `sidekick`, `chat`, `utils`, ...) is a
+  pinned submodule at `vendor/ud-tools`; the platform will not import without
+  it. The repository does not use Git LFS.
 - MATLAB R2023a or later with Simulink and Simscape Multibody, only for the
   MATLAB models.
 
@@ -121,12 +122,17 @@ hardware are recorded in the
 ```bash
 git clone https://github.com/D-sorganization/UpstreamDrift.git
 cd UpstreamDrift
-git lfs install && git lfs pull
+git submodule update --init --recursive vendor/ud-tools
 
 pip install -e ".[dev]"
 
 python scripts/ci/verify_installation.py
 ```
+
+Only the `vendor/ud-tools` submodule is required. The three model submodules
+(`shared/models/opensim/opensim-models`, `shared/models/myosuite/myo_sim`,
+`src/shared/tools/human-gazebo`) are optional and only needed for the
+experimental OpenSim/MyoSuite engines.
 
 `pyproject.toml` is the canonical dependency source. A Conda wrapper is
 generated from it:
