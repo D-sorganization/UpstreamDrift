@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from src.shared.python.launch_monitor.player_covariation_types import (
+from src.tools.launch_monitor_model.player_covariation_types import (
     AssociationEstimateV1,
     AssociationUnavailableReason,
     CovariationMissingnessV1,

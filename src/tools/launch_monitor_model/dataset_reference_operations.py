@@ -10,14 +10,14 @@ from typing import Any, cast
 
 import pandas as pd
 
-from src.shared.python.launch_monitor.corpus import load_private_corpus
-from src.shared.python.launch_monitor.dataset_reference_contract import (
+from src.tools.launch_monitor_model.corpus import load_private_corpus
+from src.tools.launch_monitor_model.dataset_reference_contract import (
     MAX_RESULT_ITEMS,
     MIN_AGGREGATE_ROWS,
     DatasetOperationV1,
     unavailable,
 )
-from src.shared.python.launch_monitor.dataset_reference_verification import (
+from src.tools.launch_monitor_model.dataset_reference_verification import (
     ACQUISITION_MANIFEST_RELATIVE_PATH,
     SOURCE_SUMMARY_RELATIVE_PATH,
     VerifiedDataset,

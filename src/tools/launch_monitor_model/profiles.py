@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from typing import Final
 
-from src.shared.python.launch_monitor.schema import ColumnMapping, METRICS
+from src.tools.launch_monitor_model.schema import ColumnMapping, METRICS
 
 
 def normalize_header(value: str) -> str:

@@ -1,6 +1,6 @@
 """Stable facade for immutable, aggregate-only private-dataset jobs."""
 
-from src.shared.python.launch_monitor.dataset_reference_contract import (
+from src.tools.launch_monitor_model.dataset_reference_contract import (
     DATASET_JOB_CONTRACT_VERSION,
     MAX_PAGE_SIZE,
     DatasetJobRequestV1,
@@ -10,10 +10,10 @@ from src.shared.python.launch_monitor.dataset_reference_contract import (
     DatasetUnavailableStateV1,
     dataset_job_contract_json_schema,
 )
-from src.shared.python.launch_monitor.dataset_reference_operations import (
+from src.tools.launch_monitor_model.dataset_reference_operations import (
     execute_dataset_operation,
 )
-from src.shared.python.launch_monitor.dataset_reference_verification import (
+from src.tools.launch_monitor_model.dataset_reference_verification import (
     VerifiedDataset,
     dataset_content_sha256,
     verify_dataset_reference,

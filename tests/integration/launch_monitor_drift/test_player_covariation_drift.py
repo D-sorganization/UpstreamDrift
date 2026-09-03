@@ -94,15 +94,15 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from src.shared.python.launch_monitor.contract_v2 import (
+from src.tools.launch_monitor_model.contract_v2 import (
     AnalysisContextV2,
     PlayerIdentityV2,
 )
-from src.shared.python.launch_monitor.player_covariation import (
+from src.tools.launch_monitor_model.player_covariation import (
     analyze_player_covariation_v1,
     scan_player_covariation_v1,
 )
-from src.shared.python.launch_monitor.player_covariation_types import (
+from src.tools.launch_monitor_model.player_covariation_types import (
     PlayerCovariationRequestV1,
     PlayerCovariationScanRequestV1,
 )

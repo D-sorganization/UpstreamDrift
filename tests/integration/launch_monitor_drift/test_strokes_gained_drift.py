@@ -56,10 +56,10 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from src.shared.python.launch_monitor.strokes_gained import (
+from src.tools.launch_monitor_model.strokes_gained import (
     analyze_source_backed_strokes_gained,
 )
-from src.shared.python.launch_monitor.strokes_gained_types import (
+from src.tools.launch_monitor_model.strokes_gained_types import (
     CourseStateColumnsV1,
     ExpectedStrokesBaselineV2,
     GroupingDimensionV1,
