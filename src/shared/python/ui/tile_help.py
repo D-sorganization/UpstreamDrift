@@ -260,15 +260,25 @@ def attach_tile_help(
         logger.debug("PyQt6 unavailable; skipping help wiring for %s", tile_id)
         return False
 
-    shortcut = QShortcut(HELP_SHORTCUT, widget)
-    shortcut.setObjectName(f"help:{tile_id}")
-    shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-    shortcut.activated.connect(lambda: show_tile_help(widget, tile_id))
+    # Help is an affordance, never a dependency: a widget that cannot carry a
+    # shortcut (a plain object, a test double, a C++-side object already gone)
+    # must not take a tool's launch down with it.
+    try:
+        shortcut = QShortcut(HELP_SHORTCUT, widget)
+        shortcut.setObjectName(f"help:{tile_id}")
+        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        shortcut.activated.connect(lambda: show_tile_help(widget, tile_id))
+    except (TypeError, RuntimeError, AttributeError) as exc:
+        logger.debug("cannot attach help shortcut for %s: %s", tile_id, exc)
+        return False
 
     if with_menu:
         _attach_help_menu(widget, tile_id)
 
-    setattr(widget, _ATTACHED_ATTR, tile_id)
+    try:
+        setattr(widget, _ATTACHED_ATTR, tile_id)
+    except AttributeError:  # pragma: no cover - slotted or frozen widget
+        logger.debug("cannot stamp help marker on %s", tile_id)
     return True
 
 
@@ -289,8 +299,8 @@ def _attach_help_menu(widget: Any, tile_id: str) -> None:
 
     try:
         menu = build_help_menu(menubar, widget)
-    except (ImportError, RuntimeError) as exc:  # pragma: no cover - defensive
-        logger.warning("could not build help menu for %s: %s", tile_id, exc)
+    except (ImportError, RuntimeError, TypeError, AttributeError) as exc:
+        logger.debug("could not build help menu for %s: %s", tile_id, exc)
         return
 
     from PyQt6.QtGui import QAction
