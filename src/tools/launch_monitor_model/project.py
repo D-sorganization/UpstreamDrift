@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.shared.python.launch_monitor.schema import ImportedSession, ImportManifest
+from src.tools.launch_monitor_model.schema import ImportedSession, ImportManifest
 
 
 class LaunchMonitorProject:

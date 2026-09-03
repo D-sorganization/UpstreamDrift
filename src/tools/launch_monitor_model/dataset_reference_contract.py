@@ -6,7 +6,7 @@ from typing import Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from src.shared.python.launch_monitor.corpus import CORPUS_COLUMN_MAP
+from src.tools.launch_monitor_model.corpus import CORPUS_COLUMN_MAP
 
 DATASET_JOB_CONTRACT_VERSION: Final = "launch-monitor-dataset-job/1.0.0"
 MAX_RESULT_ITEMS = 5_000

@@ -2,7 +2,28 @@
 
 Mirrors the pivot used by ``tests/unit/engines/simscape/three_d_gui``
 so the engine's ``src.apps.*`` namespace shadows the repo's top-level
-``src.`` package when running the C3D viewer plot-style tests.
+``src.`` package when collecting/running the C3D viewer plot-style tests.
+
+Issue: the bare top-level ``sys.modules["src"]`` entry is process-global.
+Under ``pytest-xdist`` every worker is a single long-lived process that
+collects and runs tests from *every* directory in the suite, so permanently
+rebinding ``sys.modules["src"]`` here (as this file used to do at import
+time, with no restore) leaked into unrelated tests that run later in the
+same worker -- most visibly ``tests/scripts/test_validate_suite.py``, whose
+``launch_upstream_drift._retry_parent_shared_alias_installer()`` does a bare
+``import src`` and expects the *real* ``src/__init__.py``
+(``_install_parent_shared_aliases``). If this directory's tests were
+collected first in a given worker, that bare ``import src`` silently
+resolved to this engine's package instead, which lacks the attribute.
+
+The fix: only the single ``sys.modules["src"]`` key is saved/rebound, and
+only for the duration of collecting or running an item that lives under
+this directory. ``pytest_make_collect_report``, ``pytest_runtest_setup``,
+and ``pytest_runtest_teardown`` are all directory-scoped by pytest itself
+(a conftest's hooks are only consulted for collectors/items at or below its
+own directory -- see the hookspec docs), so entering/exiting the pivot here
+can never affect collection or tests anywhere else in the suite, regardless
+of how xdist interleaves work across workers.
 """
 
 from __future__ import annotations
@@ -11,6 +32,8 @@ import contextlib
 import os
 import sys
 from pathlib import Path
+
+import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("MPLBACKEND", "Agg")
@@ -96,4 +119,60 @@ def _pivot_sys_path() -> None:
         sys.path.append(repo_src_str)
 
 
-_pivot_sys_path()
+# ---------------------------------------------------------------------------
+# Directory-scoped pivot lifecycle. Only the bare ``sys.modules["src"]`` key
+# is saved and restored -- ``src.shared.*`` and ``src.apps.*`` submodule
+# caching is left exactly as ``_pivot_sys_path`` already manages it (its own
+# keep/drop logic above), since those names never collide with anything
+# outside this engine's tests. A depth counter makes entry/exit reentrant
+# safe across nested collectors (Package -> Module -> Class -> Function).
+# ---------------------------------------------------------------------------
+_SAVED_TOP_LEVEL_SRC: object | None = None
+_PIVOT_DEPTH = 0
+
+
+def _enter_pivot() -> None:
+    global _SAVED_TOP_LEVEL_SRC, _PIVOT_DEPTH
+    if _PIVOT_DEPTH == 0:
+        _SAVED_TOP_LEVEL_SRC = sys.modules.get("src")
+        _pivot_sys_path()
+    _PIVOT_DEPTH += 1
+
+
+def _exit_pivot() -> None:
+    global _SAVED_TOP_LEVEL_SRC, _PIVOT_DEPTH
+    _PIVOT_DEPTH -= 1
+    if _PIVOT_DEPTH <= 0:
+        _PIVOT_DEPTH = 0
+        if _SAVED_TOP_LEVEL_SRC is not None:
+            sys.modules["src"] = _SAVED_TOP_LEVEL_SRC
+        else:
+            sys.modules.pop("src", None)
+        _SAVED_TOP_LEVEL_SRC = None
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_make_collect_report(collector: pytest.Collector):
+    """Keep the engine ``src`` shadow active only while collecting this dir.
+
+    Directory-scoped by pytest: only consulted for collectors at or below
+    this conftest's own directory, so it never touches unrelated modules'
+    collection elsewhere in the suite.
+    """
+    _enter_pivot()
+    try:
+        yield
+    finally:
+        _exit_pivot()
+
+
+def pytest_runtest_setup(item: pytest.Item) -> None:  # noqa: ARG001
+    """Keep the engine ``src`` shadow active only while running this dir's tests.
+
+    Directory-scoped by pytest the same way as ``pytest_make_collect_report``.
+    """
+    _enter_pivot()
+
+
+def pytest_runtest_teardown(item: pytest.Item, nextitem: pytest.Item | None) -> None:  # noqa: ARG001
+    _exit_pivot()
