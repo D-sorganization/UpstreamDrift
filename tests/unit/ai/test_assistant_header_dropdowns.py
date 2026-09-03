@@ -39,6 +39,9 @@ from src.shared.python.ai.gui._provider_registry_data import (
 )
 
 
+pytestmark = [pytest.mark.unit]
+
+
 class _FakeCombo:
     """Minimal stand-in for the QComboBox subset the populate helpers use.
 

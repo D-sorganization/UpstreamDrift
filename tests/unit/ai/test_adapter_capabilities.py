@@ -31,6 +31,9 @@ import pytest
 from src.shared.python.chat.models import ThinkingCapabilities
 
 
+pytestmark = [pytest.mark.unit]
+
+
 def _assert_model_catalogue(models: Any) -> None:
     """Assert ``models`` satisfies the ``list_models()`` contract."""
     assert isinstance(models, list)
