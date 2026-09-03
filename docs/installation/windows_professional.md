@@ -198,7 +198,7 @@ pip install "boto3>=1.34.0" "azure-storage-blob>=12.19.0"
 - Ensure Python is added to PATH during installation
 - Restart command prompt after Python installation
 
-#### "No module named 'utils'" / "cannot import theme"
+#### Missing Tools Submodule (Import Errors)
 
 - The pinned Tools submodule is missing; run
   `git submodule update --init --recursive vendor/ud-tools`
