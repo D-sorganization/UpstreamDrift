@@ -31,26 +31,38 @@ code, evidence, or claim-boundary response.
 
 ## Analytical Mechanism
 
-- Interaction-force vectors and geometry:
-  [`fig_force_vectors_geometry.svg`](figures/fig_force_vectors_geometry.svg)
-- Pointwise drift/control and forward killswitch comparisons:
-  [`fig_pointwise_vs_forward.svg`](figures/fig_pointwise_vs_forward.svg)
-- Timing, power, and work:
-  [`fig_power_transfer.svg`](figures/fig_power_transfer.svg)
 - Machine-readable summary:
   [`interaction_force_summary.json`](data/interaction_force_summary.json)
 
+> Figure references removed 2026-09-03 (issue #8851). Three figures listed here
+> -- `fig_force_vectors_geometry.svg`, `fig_pointwise_vs_forward.svg`, and
+> `fig_power_transfer.svg` -- were never present in `figures/` and are not
+> recoverable from the available git history. Several existing figures cover
+> adjacent ground (for example
+> [`fig_interaction_force_components.svg`](figures/fig_interaction_force_components.svg),
+> [`fig_interaction_geometry_coefficients.svg`](figures/fig_interaction_geometry_coefficients.svg),
+> [`fig_ztcf_drift_control.svg`](figures/fig_ztcf_drift_control.svg), and
+> [`fig_interaction_force_power.svg`](figures/fig_interaction_force_power.svg)),
+> but the original caption-to-panel mapping could not be verified, so the dead
+> references were removed rather than re-pointed at a guess. See
+> [`figures/`](figures/) for the full generated set.
+
 ## Two-Hand and Coupled Planar Models
 
-- Archived WSCG wrench reconstruction:
-  [`fig_two_hand_wrench_reconstruction.svg`](figures/fig_two_hand_wrench_reconstruction.svg)
-- Forward two-arm branch:
-  [`fig_forward_two_arm_killswitch.svg`](figures/fig_forward_two_arm_killswitch.svg)
-- Moving-base/flexible-club energy and couple:
-  [`fig_moving_base_flexible_energy.svg`](figures/fig_moving_base_flexible_energy.svg)
 - Evidence:
   [`forward_two_arm_study.json`](data/forward_two_arm_study.json) and
   [`moving_base_flexible_study.json`](data/moving_base_flexible_study.json)
+
+> Figure references removed 2026-09-03 (issue #8851). Three figures listed here
+> -- `fig_two_hand_wrench_reconstruction.svg`,
+> `fig_forward_two_arm_killswitch.svg`, and
+> `fig_moving_base_flexible_energy.svg` -- were never present in `figures/` and
+> are not recoverable from the available git history. Nearest surviving panels
+> are [`fig_wscg_registered_hand_forces.svg`](figures/fig_wscg_registered_hand_forces.svg),
+> [`fig_forward_two_hand_couple_killswitch.svg`](figures/fig_forward_two_hand_couple_killswitch.svg),
+> and [`fig_coupled_base_flex_transfer.svg`](figures/fig_coupled_base_flex_transfer.svg);
+> the mapping is unverified, so the dead references were removed rather than
+> silently re-pointed.
 
 ## Distributed-Shaft Structural Reference
 

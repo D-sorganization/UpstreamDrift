@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.1.1] - 2026-09-02
+## [2.1.2] - 2026-09-03
+
+This release carries every entry that was staged for 2.1.1. The `v2.1.1` tag was
+pushed on 2026-09-02 but published no artifacts: its `release.yml` run failed in
+the `build` job because `build_hooks.py` requires `ui/dist` while the workflow
+set `SKIP_UI_BUILD` and never compiled the frontend (#9449). Every downstream
+job was skipped, so no wheel, sdist, CycloneDX SBOM, `SHA256SUMS.txt`, PyPI
+distribution, or GitHub release exists for 2.1.1.
+
+The `v2.1.1` tag is retained exactly where it is. A pushed tag is already
+fetchable by consumers, mirrors, forks, and CI caches; deleting and re-pushing
+it would make one name resolve to two different commits for different
+observers. A tag with no release attached is itself the accurate record that
+nothing shipped. 2.1.1 is superseded by 2.1.2, which ships the same content on
+top of the release-workflow fix in #9450.
 
 ### Added
 
@@ -294,6 +308,15 @@ Critical security fixes for authentication, data exposure, and dependency vulner
 
 - Mypy errors in plotting module
 - Type annotations across physics engines
+
+## [2.1.1] - 2026-09-02
+
+Tagged but never published. The release workflow's `build` job failed (#9449),
+so no release, wheel, sdist, SBOM, checksum file, or PyPI distribution was ever
+produced for this version. The tag is retained as the record that nothing
+shipped from it and is superseded by 2.1.2. See
+`docs/operations/release-runbook.md`, "Failed Release Recovery -- Fix Forward,
+Never Move a Tag".
 
 ## [1.0.0] - 2026-01-10
 

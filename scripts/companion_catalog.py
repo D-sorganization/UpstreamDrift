@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import tomllib
@@ -411,6 +412,7 @@ def _catalog_payload(
 ) -> dict[str, Any]:
     """Assemble the strict schema shape from already validated facts."""
     project = tomllib.loads(payloads[Path("pyproject.toml")].decode("utf-8"))["project"]
+    requires_python = str(project["requires-python"])
     providers = [
         {
             "id": "tools",
@@ -481,8 +483,8 @@ def _catalog_payload(
         "providers": providers,
         "registries": registries,
         "compatibility": {
-            "requires_python": str(project["requires-python"]),
-            "supported_python_minors": ["3.11", "3.12"],
+            "requires_python": requires_python,
+            "supported_python_minors": _supported_python_minors(requires_python),
             "verification_command": {
                 "executable": "python",
                 "arguments": ["scripts/ci/verify_installation.py"],
@@ -496,6 +498,40 @@ def _catalog_payload(
         "screenshots": [],
         "summary": dict(summary),
     }
+
+
+_REQUIRES_PYTHON_RE = re.compile(
+    r">=(?P<floor_major>\d+)\.(?P<floor>\d+),<(?P<ceiling_major>\d+)\.(?P<ceiling>\d+)"
+)
+
+
+def _supported_python_minors(requires_python: str) -> list[str]:
+    """Derive the advertised minor versions from ``requires-python``.
+
+    The specifier in ``pyproject.toml`` is the single source of truth for the
+    supported range; duplicating the minor list as a literal here (or as a
+    schema ``const``/``enum``) is how the two drift apart.
+    """
+    match = _REQUIRES_PYTHON_RE.fullmatch(requires_python)
+    if match is None:
+        msg = (
+            "requires-python must be a bounded range such as '>=3.11,<3.13', "
+            f"got {requires_python!r}"
+        )
+        raise ValueError(msg)
+    major = match.group("floor_major")
+    if match.group("ceiling_major") != major:
+        msg = f"requires-python must not span major versions, got {requires_python!r}"
+        raise ValueError(msg)
+    floor = int(match.group("floor"))
+    ceiling = int(match.group("ceiling"))
+    if ceiling <= floor:
+        msg = (
+            "requires-python upper bound must exceed the floor, got "
+            f"{requires_python!r}"
+        )
+        raise ValueError(msg)
+    return [f"{major}.{minor}" for minor in range(floor, ceiling)]
 
 
 def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, Any]:
