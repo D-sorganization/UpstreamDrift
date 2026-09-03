@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from src.tools.launch_monitor_model.relationships import compute_correlations
-from src.tools.launch_monitor_model.schema import METRICS
+from shared.python.launch_monitor.relationships import compute_correlations
+from shared.python.launch_monitor.schema import METRICS
 
 AnalysisMode = Literal["correlation", "regression", "comprehensive"]
 MissingPolicy = Literal["pairwise", "listwise", "fail"]

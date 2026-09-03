@@ -1159,6 +1159,14 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.11"
+      # ADR-0046 Stage 2 wave 1 (#9425): the launch-monitor import/export
+      # workflow imports the launch-monitor façade, which since wave 1 serves
+      # `dispersion`, `multivariate`, `trends`, `comparison`, `schema`, and
+      # `treatment` from the canonical Tools layer rather than from
+      # UpstreamDrift. This job checks out no submodule, so without this step
+      # the façade has nothing to resolve those six names against.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install governed companion workflow dependencies
         run: >-
           python3 -m pip install
