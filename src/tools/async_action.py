@@ -143,6 +143,14 @@ class _CallableWorker(QObject):
         self._work = work
         self.context = WorkerContext(self)
 
+    def request_cancel(self) -> None:
+        """Set the worker's cooperative cancel flag.
+
+        A delegating method rather than letting callers reach through to
+        ``worker.context.request_cancel()`` (Law of Demeter).
+        """
+        self.context.request_cancel()
+
     def run(self) -> None:
         """Invoke the work callable, translating its outcome into signals."""
         if self.context.is_cancelled:
@@ -181,7 +189,7 @@ class WorkerHandle:
     def request_cancel(self) -> None:
         """Ask the work to stop at its next cancellation check."""
         if self._worker is not None:
-            self._worker.context.request_cancel()
+            self._worker.request_cancel()
         if self._thread is not None:
             self._thread.requestInterruption()
 
