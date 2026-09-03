@@ -825,6 +825,10 @@ jobs:
 
         with:
           fetch-depth: 0
+      - name: Fetch pinned Tools packages
+        # Retired src/shared/python roots resolve to vendor/ud-tools (UD #9406);
+        # check_tutorial_imports.py resolves src.shared.python.* specs.
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash
