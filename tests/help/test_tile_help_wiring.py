@@ -199,6 +199,27 @@ def test_attach_tile_help_is_a_noop_without_a_tile_id(qapp) -> None:
     widget.deleteLater()
 
 
+def test_attach_tile_help_never_breaks_a_launch(qapp, registry) -> None:
+    """Help is an affordance, not a dependency.
+
+    A widget that cannot carry a Qt shortcut — a plain object, a test double,
+    a C++-side object already destroyed — must make ``attach_tile_help``
+    return ``False``, not raise into the tool's launch path.
+    """
+    tile = _first_ready_tile_with_help(registry)
+
+    class NotAWidget:
+        pass
+
+    assert tile_help.attach_tile_help(NotAWidget(), tile.id) is False
+
+    from unittest.mock import MagicMock
+
+    from PyQt6.QtWidgets import QMainWindow
+
+    assert tile_help.attach_tile_help(MagicMock(spec=QMainWindow), tile.id) is False
+
+
 def test_help_dock_loads_every_declared_page(qapp, registry) -> None:
     """The dock must render each tile's registry page, not a "not found"."""
     from src.launchers.help_dialogs import ContextHelpDock
