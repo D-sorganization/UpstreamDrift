@@ -8,8 +8,11 @@ This guide addresses common installation issues identified in the project assess
 
 ```bash
 # Clone the repository
-git clone https://github.com/dieterolson/UpstreamDrift.git
-cd Golf_Modeling_Suite
+git clone https://github.com/D-sorganization/UpstreamDrift.git
+cd UpstreamDrift
+
+# Fetch the pinned Tools submodule (theme, sidekick, chat, utils, ...)
+git submodule update --init --recursive vendor/ud-tools
 
 # Create conda environment (handles binary dependencies)
 conda env create -f environment.yml
