@@ -269,8 +269,9 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 3.8     | 2026-04 | Added Completist Report 2026-04-26                                                                                                                                                                                                                                       |
 | 3.9     | 2026-05 | Added Assessment_H_CICD.md; updated A, B, C, D, F, G, I, K, L, M, N, O assessments for Python 3.10 compatibility; added issues ISSUE_Assessment_E_Performance.md and ISSUE_Assessment_J_API_Design.md; refreshed Comprehensive_Assessment.md and assessment_summary.json |
 | 4.0     | 2026-05 | Added comprehensive assessment 2026-05-07 (A-N categories + comprehensive report)                                                                                                                                                                                        |
+| 4.1     | 2026-09 | Link-graph repair (#9413): fixed the `FEATURE_ENGINE_MATRIX.md` engine-guide link and dropped a `PATH_FORWARD.md` that does not exist; made the `issues/summary.md` cross-link repository-relative instead of a hardcoded `c:/Users/...` path; unlinked the eight completist reports deleted by `987d67ccb` and added a dated note in `completist/issues/ISSUE_GAPS_AND_INACCURACIES.md` explaining the deletion. No assessment content changed. |
 
 ---
 
 _See individual Assessment_Prompt_X.md files for detailed prompts._
-Updated Sun May 3 2026
+Updated 2026-09-03
