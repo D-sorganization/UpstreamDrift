@@ -93,68 +93,81 @@ def check_import(
         return False, f"✗ {display_name}: Unexpected error - {e}"
 
 
-def main() -> int:
-    """Run all verification checks."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    json_output = "--json" in sys.argv
-
+def _log_header() -> tuple[bool, bool]:
+    """Print the banner and environment checks; return (python_ok, in_venv)."""
     logger.info("=" * 60)
     logger.info("Golf Modeling Suite - Installation Verification")
     logger.info("=" * 60)
     logger.info("")
-
     logger.info("Environment Checks:")
     logger.info("-" * 40)
-
-    # Check Python version
     py_success, py_msg = check_python_version()
     logger.info(py_msg)
-
-    # Check virtualenv (advisory)
     venv_success, venv_msg = check_virtualenv()
     logger.info(venv_msg)
-
     logger.info("")
+    return py_success, venv_success
 
-    # Define checks: (display_name, import_path, version_attr).
-    # These must all come from [project].dependencies in pyproject.toml --
-    # anything that only ships in an optional extra belongs in OPTIONAL_CHECKS.
-    checks: list[tuple[str, str | None, str]] = [
-        # Core scientific computing
-        ("numpy", None, "__version__"),
-        ("scipy", None, "__version__"),
-        # Physics engines
-        ("mujoco", None, "__version__"),
-        # Web framework
-        ("fastapi", None, "__version__"),
-        ("uvicorn", None, "__version__"),
-        ("pydantic", None, "__version__"),
-        # Data formats
-        ("yaml", "yaml", "__version__"),
-        ("h5py", None, "__version__"),
-        # Persistence
-        ("sqlalchemy", None, "__version__"),
-        # Security (auth uses bcrypt + PyJWT; passlib/python-jose are not deps)
-        ("bcrypt", None, "__version__"),
-        ("PyJWT", "jwt", "__version__"),
-    ]
 
-    # Optional / extras-only packages. Missing ones are reported but do not
-    # fail the run, because a core install is a valid install.
-    optional_checks: list[tuple[str, str | None, str]] = [
-        ("PyQt6", "PyQt6.QtCore", "PYQT_VERSION_STR"),  # extra: gui-test / tools
-        ("pandas", None, "__version__"),  # extra: data / dev
-        ("matplotlib", None, "__version__"),  # extra: dev
-        ("sympy", None, "__version__"),  # extra: dev
-        ("defusedxml", None, "__version__"),  # extra: urdf / dev
-    ]
+# Core checks: (display_name, import_path, version_attr). These must all come
+# from [project].dependencies in pyproject.toml -- anything that only ships in
+# an optional extra belongs in OPTIONAL_CHECKS.
+CORE_CHECKS: list[tuple[str, str | None, str]] = [
+    # Core scientific computing
+    ("numpy", None, "__version__"),
+    ("scipy", None, "__version__"),
+    # Physics engines
+    ("mujoco", None, "__version__"),
+    # Web framework
+    ("fastapi", None, "__version__"),
+    ("uvicorn", None, "__version__"),
+    ("pydantic", None, "__version__"),
+    # Data formats
+    ("yaml", "yaml", "__version__"),
+    ("h5py", None, "__version__"),
+    # Persistence
+    ("sqlalchemy", None, "__version__"),
+    # Security (auth uses bcrypt + PyJWT; passlib/python-jose are not deps)
+    ("bcrypt", None, "__version__"),
+    ("PyJWT", "jwt", "__version__"),
+]
 
+# Optional / extras-only packages. Missing ones are reported but do not
+# fail the run, because a core install is a valid install.
+OPTIONAL_CHECKS: list[tuple[str, str | None, str]] = [
+    ("PyQt6", "PyQt6.QtCore", "PYQT_VERSION_STR"),  # extra: gui-test / tools
+    ("pandas", None, "__version__"),  # extra: data / dev
+    ("matplotlib", None, "__version__"),  # extra: dev
+    ("sympy", None, "__version__"),  # extra: dev
+    ("defusedxml", None, "__version__"),  # extra: urdf / dev
+]
+
+# Project-specific modules that must import in a core install.
+SUITE_CHECKS: list[tuple[str, str | None]] = [
+    ("src.shared.python.engine_core.interfaces", None),
+    ("src.shared.python.physics.ball_flight_physics", None),
+    ("src.shared.python.physics.flight_models", None),
+    ("src.shared.python.engine_core.engine_manager", None),
+    ("src.shared.python.engine_core.engine_registry", None),
+    ("src.shared.python.validation_pkg.statistical_analysis", None),
+    ("src.api.server", None),
+]
+
+# Suite modules that only import with an optional extra installed. They are
+# reported but never fail the run: the always-on CI lane (#9409) runs this
+# script against a bare requirements.lock install, which has no matplotlib
+# (the `dev` extra) and therefore no plotting package.
+OPTIONAL_SUITE_CHECKS: list[tuple[str, str | None]] = [
+    ("src.shared.python.plotting", None),  # needs matplotlib (extra: dev)
+]
+
+
+def _check_dependencies() -> list[bool]:
+    """Run the core (blocking) and optional (advisory) dependency checks."""
     logger.info("Checking core dependencies:")
     logger.info("-" * 40)
-
     core_results = []
-    for display_name, import_path, version_attr in checks:
+    for display_name, import_path, version_attr in CORE_CHECKS:
         success, message = check_import(display_name, import_path, version_attr)
         logger.info(message)
         core_results.append(success)
@@ -162,63 +175,66 @@ def main() -> int:
     logger.info("")
     logger.info("Checking optional dependencies (advisory):")
     logger.info("-" * 40)
-
-    for display_name, import_path, version_attr in optional_checks:
+    for display_name, import_path, version_attr in OPTIONAL_CHECKS:
         success, message = check_import(display_name, import_path, version_attr)
         if success:
             logger.info(message)
         else:
             logger.info("- %s not installed (optional extra)", display_name)
-
     logger.info("")
+    return core_results
+
+
+def _check_suite_modules() -> list[bool]:
+    """Run the suite-module checks; only SUITE_CHECKS count toward the result."""
     logger.info("Checking Golf Suite modules:")
     logger.info("-" * 40)
-
-    # Project-specific modules
-    suite_checks: list[tuple[str, str | None]] = [
-        ("src.shared.python.engine_core.interfaces", None),
-        ("src.shared.python.physics.ball_flight_physics", None),
-        ("src.shared.python.physics.flight_models", None),
-        ("src.shared.python.engine_core.engine_manager", None),
-        ("src.shared.python.engine_core.engine_registry", None),
-        ("src.shared.python.validation_pkg.statistical_analysis", None),
-        ("src.api.server", None),
-    ]
-    # Suite modules that only import with an optional extra installed. They
-    # are reported but never fail the run: the always-on CI lane (#9409) runs
-    # this script against a bare requirements.lock install, which has no
-    # matplotlib (the `dev` extra) and therefore no plotting package.
-    optional_suite_checks: list[tuple[str, str | None]] = [
-        ("src.shared.python.plotting", None),  # needs matplotlib (extra: dev)
-    ]
-
     suite_results = []
-    for display_name, import_path in suite_checks:
-        success, message = check_import(display_name, import_path, "__version__")
+    for display_name, import_path in SUITE_CHECKS:
+        success, _message = check_import(display_name, import_path, "__version__")
         # Project modules may not have __version__, adjust message
         if success:
             logger.info("✓ %s", display_name)
         else:
             logger.warning("✗ %s: Import failed", display_name)
         suite_results.append(success)
-    for display_name, import_path in optional_suite_checks:
-        success, message = check_import(display_name, import_path, "__version__")
+    for display_name, import_path in OPTIONAL_SUITE_CHECKS:
+        success, _message = check_import(display_name, import_path, "__version__")
         if success:
             logger.info("✓ %s (optional)", display_name)
         else:
             logger.info("- %s not importable (needs an optional extra)", display_name)
-
     logger.info("")
     logger.info("=" * 60)
+    return suite_results
 
-    # Summary
-    py_critical = py_success
-    core_passed = sum(core_results)
-    core_total = len(core_results)
-    suite_passed = sum(suite_results)
-    suite_total = len(suite_results)
+
+def _log_troubleshooting(py_critical: bool) -> None:
+    logger.warning("✗ Some critical checks failed.")
+    logger.info("")
+    logger.info("Troubleshooting:")
+    logger.info("  1. See docs/troubleshooting/installation.md")
+    logger.info("  2. Try: conda env create -f environment.yml")
+    logger.info("  3. Or:  pip install -e '.[dev]'")
+    logger.info("     (optional engines: '.[all-engines]', '.[biomechanics]')")
+    if not py_critical:
+        logger.info("  4. Your Python version is too old; upgrade to 3.11+")
+
+
+def main() -> int:
+    """Run all verification checks."""
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    json_output = "--json" in sys.argv
+
+    py_critical, venv_success = _log_header()
+    core_results = _check_dependencies()
+    suite_results = _check_suite_modules()
+
+    core_passed, core_total = sum(core_results), len(core_results)
+    suite_passed, suite_total = sum(suite_results), len(suite_results)
     total_passed = core_passed + suite_passed
     total_checks = core_total + suite_total
+    all_ok = py_critical and total_passed == total_checks
 
     logger.info("Python version:    %s", "OK" if py_critical else "FAILED")
     logger.info("Core dependencies: %d/%d passed", core_passed, core_total)
@@ -234,13 +250,11 @@ def main() -> int:
             "core_checks": {"passed": core_passed, "total": core_total},
             "suite_checks": {"passed": suite_passed, "total": suite_total},
             "overall": {"passed": total_passed, "total": total_checks},
-            "status": (
-                "passed" if (py_critical and total_passed == total_checks) else "failed"
-            ),
+            "status": "passed" if all_ok else "failed",
         }
         print(json.dumps(result, indent=2))
 
-    if py_critical and total_passed == total_checks:
+    if all_ok:
         logger.info("✓ Installation verified successfully!")
         logger.info("")
         logger.info("You can now run:")
@@ -248,15 +262,7 @@ def main() -> int:
         logger.info("  python launch_upstream_drift.py")
         logger.info("  python -m src.api.local_server")
         return 0
-    logger.warning("✗ Some critical checks failed.")
-    logger.info("")
-    logger.info("Troubleshooting:")
-    logger.info("  1. See docs/troubleshooting/installation.md")
-    logger.info("  2. Try: conda env create -f environment.yml")
-    logger.info("  3. Or:  pip install -e '.[dev]'")
-    logger.info("     (optional engines: '.[all-engines]', '.[biomechanics]')")
-    if not py_critical:
-        logger.info("  4. Your Python version is too old; upgrade to 3.11+")
+    _log_troubleshooting(py_critical)
     return 1
 
 
