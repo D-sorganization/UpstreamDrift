@@ -42,6 +42,23 @@ def test_wheel_artifact_requires_explicit_build_output(
         _wheel_artifact()
 
 
+@pytest.fixture(autouse=True)
+def _require_wheel_artifact(request: pytest.FixtureRequest) -> None:
+    """Skip the suite when this job did not build a wheel to inspect.
+
+    ``release.yml``'s ``smoke-python-wheel`` job always sets
+    ``UPSTREAM_DRIFT_WHEEL``, so the release gate is unaffected. Other lanes
+    collect this module without a wheel present, where a missing artifact is
+    an absent precondition rather than a release regression.
+    ``test_wheel_artifact_requires_explicit_build_output`` asserts that absent
+    precondition itself and so opts out.
+    """
+    if request.function is test_wheel_artifact_requires_explicit_build_output:
+        return
+    if not os.environ.get(_WHEEL_ENV):
+        pytest.skip(f"{_WHEEL_ENV} is unset; wheel smoke runs from release.yml")
+
+
 def _venv_python(tmp_path: Path) -> Path:
     """Create a clean venv and return its Python executable."""
     venv_dir = tmp_path / "venv"

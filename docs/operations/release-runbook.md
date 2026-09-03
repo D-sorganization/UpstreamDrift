@@ -66,7 +66,7 @@ release version must stay aligned with `src/api/_version.py`,
     acquisition-record digest, attestation IDs/URLs, and protected workflow run
     in the release handoff.
 
-## Failed release recovery — fix forward, never move a tag
+## Failed Release Recovery — Fix Forward, Never Move a Tag
 
 A tag whose `release.yml` run failed leaves the repository with a published Git
 tag and no release, wheel, SBOM, or PyPI distribution. `v2.1.1` is the worked
