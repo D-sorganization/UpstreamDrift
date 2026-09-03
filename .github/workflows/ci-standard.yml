@@ -198,6 +198,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       code: ${{ steps.detect.outputs.code }}
+      docs: ${{ steps.detect.outputs.docs }}
       publication: ${{ steps.detect.outputs.publication }}
     steps:
       - name: Enable long Git paths
@@ -222,6 +223,7 @@ jobs:
           if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "Event '$EVENT_NAME' always runs the full suite."
             echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "docs=true" >> "$GITHUB_OUTPUT"
             echo "publication=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -231,6 +233,7 @@ jobs:
           echo "$changed"
 
           code=false
+          docs=false
           publication=false
           while IFS= read -r file; do
             [ -n "$file" ] || continue
@@ -244,6 +247,32 @@ jobs:
                 echo "Publication authority change: $file"
                 ;;
             esac
+            # Mirror of docs-governance.yml's trigger paths (plus this workflow
+            # and the shared composite action): these files feed the
+            # docs-governance-gates job, whose result the required
+            # `quality-gate` aggregate enforces. Before that job existed,
+            # auto-merge could land a governance regression while the
+            # non-required doc-governance check was still running (PR #9418).
+            case "$file" in
+              docs/* | \
+              manuals/upstreamdrift/* | \
+              scripts/config/design_manual_governance.json | \
+              scripts/check_design_manual_governance.py | \
+              scripts/design_manual_contract.py | \
+              scripts/check_docs_governance.py | \
+              scripts/check_doc_catalog.py | \
+              scripts/check_doc_size_budget.py | \
+              scripts/check_document_title_case.py | \
+              scripts/config/doc_size_budget.json | \
+              tests/scripts/test_doc_governance_checks.py | \
+              tests/scripts/test_document_title_case.py | \
+              tests/scripts/test_design_manual_governance_contract.py | \
+              .github/workflows/ci-standard.yml | \
+              .github/actions/docs-governance-checks/*)
+                docs=true
+                echo "Docs-governance change: $file"
+                ;;
+            esac
             case "$file" in
               docs/* | *.md | LICENSE | .gitignore) ;;
               *)
@@ -254,10 +283,12 @@ jobs:
           done <<< "$changed"
 
           echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "docs=$docs" >> "$GITHUB_OUTPUT"
           echo "publication=$publication" >> "$GITHUB_OUTPUT"
           {
             echo "## Changed paths"
             echo "- non-docs changes: \`$code\`"
+            echo "- docs-governance changes: \`$docs\`"
             echo "- publication authority changes: \`$publication\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -271,6 +302,9 @@ jobs:
   #   code-quality        — lint/format + mypy + install-dependent gates
   #   security-scans       — Semgrep / Bandit / detect-secrets / Trivy
   #   repo-structure-gates — structural / SPEC / budget checks with minimal parser deps
+  #   docs-governance-gates — docs governance (size budget, catalog, title case)
+  #                           on docs-touching PRs; shared composite action with
+  #                           docs-governance.yml (see that job's comment)
   # ---------------------------------------------------------------------------
   code-quality:
     name: code-quality
@@ -1141,6 +1175,31 @@ jobs:
             --source-revision "$(git rev-parse HEAD)" \
             --publication-profile computational
 
+  # Docs governance, folded into the required `quality-gate` aggregate
+  # (the repo's single required context — see the aggregate's comment). The
+  # standalone docs-governance.yml check `doc-governance` is not required, so
+  # auto-merge historically fired as soon as `quality-gate` passed and could
+  # land a governance regression the docs check caught seconds later: PR #9418
+  # merged a doc-size-budget violation red onto main this way. This job runs
+  # the identical steps via the shared composite action, keyed off the
+  # `changed-paths` docs classification, so `quality-gate` cannot go green on a
+  # docs-touching PR until docs governance passes.
+  docs-governance-gates:
+    name: docs-governance-gates
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.docs == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Run docs governance checks
+        uses: ./.github/actions/docs-governance-checks
+        with:
+          changed-from: ${{ github.event.pull_request.base.sha || github.event.before }}
+
   # Governed companion workflows execute on every code PR and protected-main
   # push. The job emits exact-commit evidence but does not publish or qualify it.
   companion-workflows:
@@ -1209,6 +1268,7 @@ jobs:
         tests,
         unit-test-gate,
         publication-quality,
+        docs-governance-gates,
         rust-wheel-parity,
         shared-tools-consumer-contracts,
       ]
@@ -1242,6 +1302,8 @@ jobs:
           TESTS: ${{ needs.tests.result }}
           UNIT_TEST_GATE: ${{ needs.unit-test-gate.result }}
           PUBLICATION_QUALITY: ${{ needs.publication-quality.result }}
+          DOCS_GOVERNANCE_GATES: ${{ needs.docs-governance-gates.result }}
+          DOCS_CHANGED: ${{ needs.changed-paths.outputs.docs }}
           RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
           SHARED_TOOLS_CONSUMER_CONTRACTS: ${{ needs.shared-tools-consumer-contracts.result }}
         run: |
@@ -1261,6 +1323,7 @@ jobs:
             echo "## Quality Gate Summary"
             echo ""
             echo "- non-docs changes: \`$CODE_CHANGED\`"
+            echo "- docs-governance changes: \`$DOCS_CHANGED\`"
             echo "- publication authority changes: \`$PUBLICATION_CHANGED\`"
             echo ""
             echo "| Job | Result |"
@@ -1283,6 +1346,21 @@ jobs:
           echo "| publication-quality | $PUBLICATION_QUALITY |" >> "$GITHUB_STEP_SUMMARY"
           if [ "$PUBLICATION_QUALITY" != "$publication_expected" ]; then
             echo "::error::publication-quality reported '$PUBLICATION_QUALITY', expected '$publication_expected'."
+            failed=1
+          fi
+
+          # Docs governance runs whenever docs-governance paths changed,
+          # independent of the code/docs-only split — a docs-only PR skips the
+          # general gates but must still pass docs governance (PR #9418).
+          if [ "$DOCS_CHANGED" = "true" ]; then
+            docs_expected="success"
+          else
+            docs_expected="skipped"
+          fi
+          echo "docs-governance-gates: $DOCS_GOVERNANCE_GATES"
+          echo "| docs-governance-gates | $DOCS_GOVERNANCE_GATES |" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DOCS_GOVERNANCE_GATES" != "$docs_expected" ]; then
+            echo "::error::docs-governance-gates reported '$DOCS_GOVERNANCE_GATES', expected '$docs_expected'."
             failed=1
           fi
 
@@ -1321,7 +1399,7 @@ jobs:
             if [ "$PUBLICATION_CHANGED" = "true" ]; then
               echo "Docs-only publication change: publication-quality succeeded; general gates correctly skipped."
             else
-              echo "Docs-only change: quality-gate jobs correctly skipped."
+              echo "Docs-only change: docs-governance-gates reported '$DOCS_GOVERNANCE_GATES'; general quality-gate jobs correctly skipped."
             fi
             exit 0
           fi

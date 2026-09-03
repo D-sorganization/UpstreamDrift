@@ -860,6 +860,7 @@ class TestCIEnvironmentCompatibility:
             "tests",
             "unit-test-gate",
             "publication-quality",
+            "docs-governance-gates",
             "rust-wheel-parity",
             "shared-tools-consumer-contracts",
         }
