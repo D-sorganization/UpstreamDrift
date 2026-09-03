@@ -322,6 +322,12 @@ measured on golf bunker sand.
 
 ## What Would Move the Needle
 
+**This list is now machine-readable.** The measurements below, the level each one buys,
+the conditions it must be made under and the bar it must clear live in
+`bunkershot3d.vandv.roadmap` as data, and the assessment table above is _derived_ from
+them — see [the validation roadmap](validation-roadmap.md). What follows is the physics
+argument; the roadmap is the version CI keeps honest.
+
 In order of leverage:
 
 1. **One drag test at wedge-representative speed (20–27 m/s) to fit `lambda`.** It carries
@@ -332,8 +338,25 @@ In order of leverage:
 3. **A model carry correlation**, to turn the Wivou comparison from implemented into run.
 4. **`delta_h` for a wedge**, from an F1/F2 tier or from PIV.
 5. Plate penetration at three plate areas (discard widths under 5 cm) and a 6 × 6 cm
-   direct shear box for `Phi`. **Not** angle of repose: three AoR methods on the same
-   powder produced rolling friction spanning 300×.
+   direct shear box for `Phi`.
+
+Items 1 and 2 are the physics leverage: they attack the constant that dominates the answer
+and the benchmark the constants came from. The roadmap ranks differently because it ranks
+by _credibility factors bought per unit of effort_, and neither of those two is currently
+expressible as a NASA-STD-7009B level step — the drag test needs a rig this project does
+not have, and the benchmark reproduction is analysis, not measurement. Both lists are
+right about different questions. Read them together.
+
+### On Angle of Repose
+
+Earlier revisions of this section said **not** angle of repose, on the grounds that three
+AoR methods on the same powder produced rolling frictions spanning 300×. That objection
+stands, and it is an objection to **inverting** a repose angle into a material constant.
+The roadmap does not invert. It uses repose **forward**: the model predicts a repose angle
+on a declared apparatus, and the measurement is of that same apparatus, so the comparison
+is a validation comparison and not a calibration. `Phi` still comes from the shear box, and
+`bunker_sand_angle_of_repose_deg` deliberately flips no `ProvenanceBasis` at all. Matched
+forward it is admissible; inverted to a constant it never is.
 
 ## How to Read a Result From This Tool
 

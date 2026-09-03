@@ -44,12 +44,18 @@ _SKIP_DIR_NAMES = frozenset(
     {"archive", "legacy", "node_modules", "vendor", ".git", "__pycache__"}
 )
 _REQUIRED_PIVOT_NAMES = (
-    "_enter_pivot",
-    "_exit_pivot",
     "pytest_make_collect_report",
     "pytest_runtest_setup",
     "pytest_runtest_teardown",
 )
+# A pivot conftest owns its enter/exit pair either as local functions (the
+# original #9404 shape) or as a module-level ``EngineSrcPivot`` instance (the
+# shared, fully-restoring helper introduced by #9439). One of the two is needed.
+_PIVOT_OWNER_NAME_SETS = (
+    frozenset({"_enter_pivot", "_exit_pivot"}),
+    frozenset({"_PIVOT"}),
+)
+_PIVOT_HELPER_MODULE = "tests.helpers.engine_src_pivot"
 _MUTATING_CALLS = frozenset(
     {"pop", "update", "setdefault", "__setitem__", "__delitem__"}
 )
@@ -194,8 +200,14 @@ def module_scope_src_pivots(source: str) -> list[int]:
 
 
 def references_src_module_entry(source: str) -> bool:
-    """True when the file touches ``sys.modules['src']`` anywhere (read or write)."""
+    """True when the file touches ``sys.modules['src']`` anywhere (read or write).
+
+    Delegating the pivot to :mod:`tests.helpers.engine_src_pivot` counts too:
+    that helper exists only to rebind ``sys.modules['src']`` (#9439).
+    """
     tree = ast.parse(source)
+    if _uses_pivot_helper(tree):
+        return True
     sys_names, modules_names = _sys_module_aliases(tree)
     for node in ast.walk(tree):
         if _is_src_subscript(node, sys_names, modules_names):
@@ -228,7 +240,18 @@ def missing_pivot_contract_names(source: str) -> list[str]:
         for target in node.targets
         if isinstance(target, ast.Name)
     }
-    return [name for name in _REQUIRED_PIVOT_NAMES if name not in defined]
+    missing = [name for name in _REQUIRED_PIVOT_NAMES if name not in defined]
+    if not any(owner <= defined for owner in _PIVOT_OWNER_NAME_SETS):
+        missing.insert(0, "_enter_pivot/_exit_pivot (or an EngineSrcPivot `_PIVOT`)")
+    return missing
+
+
+def _uses_pivot_helper(tree: ast.Module) -> bool:
+    """True when the file imports the shared #9439 ``EngineSrcPivot`` helper."""
+    return any(
+        isinstance(node, ast.ImportFrom) and node.module == _PIVOT_HELPER_MODULE
+        for node in ast.walk(tree)
+    )
 
 
 # --------------------------------------------------------------------------
@@ -352,6 +375,24 @@ def test_static_check_allows_function_scope_pivot() -> None:
         "pytest_runtest_setup",
         "pytest_runtest_teardown",
     ]
+
+
+def test_static_check_recognises_engine_src_pivot_helper() -> None:
+    helper = (
+        "from tests.helpers.engine_src_pivot import EngineSrcPivot\n"
+        "_PIVOT = EngineSrcPivot(object())\n"
+        "def pytest_make_collect_report(collector):\n"
+        "    _PIVOT.enter()\n"
+        "def pytest_runtest_setup(item):\n"
+        "    _PIVOT.enter()\n"
+        "def pytest_runtest_teardown(item, nextitem):\n"
+        "    _PIVOT.exit()\n"
+    )
+    assert module_scope_src_pivots(helper) == []
+    assert references_src_module_entry(helper)
+    assert missing_pivot_contract_names(helper) == []
+    bare = "import sys\ndef _enter_pivot():\n    sys.modules['src'] = object()\n"
+    assert missing_pivot_contract_names(bare)[0].startswith("_enter_pivot/_exit_pivot")
 
 
 def test_static_check_ignores_unrelated_sys_modules_use() -> None:
