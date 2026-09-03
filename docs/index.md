@@ -148,7 +148,7 @@ repository, which made them effectively unreachable.
 | `architecture/`         | @architecture-team    | stable    | System architecture diagrams, dependency boundaries, and design overviews.                                                          |
 | `assessments/`          | @quality-team         | archived  | Generated repository health assessments retained for historical comparison.                                                         |
 | `audit_reports/`        | @quality-team         | archived  | Audit outputs and review evidence from repository-wide inspections.                                                                 |
-| `audits/`               | @quality-team         | stable    | Dated audit records, including the current adversarial and hardening reviews.                                                   |
+| `audits/`               | @quality-team         | stable    | Dated audit records, including the current adversarial and hardening reviews.                                                       |
 | `bunkershot3d/`         | @physics-team         | draft     | Granular bunker-shot backend comparison notes (Project Chrono, LIGGGHTS, MuJoCo MPM).                                               |
 | `code-quality/`         | @quality-team         | stable    | Coding standards, quality gates, and maintainability guidance.                                                                      |
 | `codemap/`              | @docs-team            | stable    | Code-map indexer (chat + MCP) integration notes, agent setup, and MCP wiring guidance.                                              |
@@ -182,7 +182,7 @@ repository, which made them effectively unreachable.
 | `proposals/`            | @product-team         | draft     | Proposed changes and design alternatives pending acceptance or archival.                                                            |
 | `references/`           | @research-team        | stable    | External references, source maps, and supporting research material.                                                                 |
 | `research/`             | @research-team        | draft     | Long-form research articles (Quarto/LaTeX/PDF) produced from repository analyses, with verified bibliographies.                     |
-| `review_archive/`       | @quality-team         | archived  | Older review records retained in place; see the consolidation decisions below.                                                           |
+| `review_archive/`       | @quality-team         | archived  | Older review records retained in place; see the consolidation decisions below.                                                      |
 | `reviews/`              | @quality-team         | stable    | Current review records, remediation notes, and quality findings.                                                                    |
 | `sg_optimizer/`         | @physics-team         | draft     | Strokes Gained Optimizer spec, data sources, and documentation.                                                                     |
 | `sidekick/`             | @platform-team        | stable    | Sidekick shared-utilities docs, launcher sidebar, chat/provider integration, tools library, and integration guides.                 |
@@ -220,7 +220,7 @@ dated historical notes, which are preserved as written.
 ### 2026-09-03 -- `audits/` Alongside `audit_reports/`: NO MERGE, Catalog Corrected
 
 The premise was wrong. `audits/` was tagged `archived` and described as "legacy
-notes", but it holds the *newest* audit records in the repository, including
+notes", but it holds the _newest_ audit records in the repository, including
 `2026-08-21-adversarial-integration-review.md` (the review that produced this
 very issue) and `consolidation_hardening_audit_2026-09.md`. `audit_reports/`
 holds a single generated report. The directories are therefore not a duplicate
