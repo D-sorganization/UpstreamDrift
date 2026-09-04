@@ -270,8 +270,11 @@ class AIAssistantPanel(QWidget):
     def _on_session_loaded(self, context: ConversationContext) -> None:
         self._context = context
         self._refresh_prompt_memory()
-        self._messages.clear_messages()
-        self._messages.restore_from_context(self._context)
+        messages = getattr(self, "_messages", None)
+        if messages is None:
+            return
+        messages.clear_messages()
+        messages.restore_from_context(self._context)
 
     # ------------------------------------------------------------------
     # Tools registration
