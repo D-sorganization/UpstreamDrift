@@ -34,6 +34,20 @@ anybody tries.
 
 from __future__ import annotations
 
+from .band import (
+    CONSISTENCY_BAND_NAMING_REASON,
+    ConsistencyBand,
+)
+from .budget import (
+    DOMINANCE_SHARE,
+    ClassSubtotal,
+    DominantTerm,
+    NumericalBasis,
+    UncertaintyBudget,
+    UncertaintyClass,
+    UncertaintyTerm,
+    UnquantifiedTerm,
+)
 from .cases import (
     CylinderVerificationCase,
     FlatPlateVerificationCase,
@@ -141,10 +155,12 @@ from .validation import (
 
 __all__ = [
     "COMFORTABLE_REFINEMENT_RATIO",
+    "CONSISTENCY_BAND_NAMING_REASON",
     "COVERAGE_FACTOR",
     "CREDIBILITY_ASSESSMENT",
     "DESIGN_FEATURE_LENGTH_M",
     "DESIGN_SPEED_M_S",
+    "DOMINANCE_SHARE",
     "FACTOR_OF_SAFETY_THREE_GRID",
     "FACTOR_OF_SAFETY_TWO_GRID",
     "GCI_COVERAGE_FACTOR",
@@ -160,13 +176,16 @@ __all__ = [
     "WIVOU_2016",
     "WIVOU_CONTROLLED_VARIABLES",
     "ApparentOrder",
+    "ClassSubtotal",
     "ConservationClass",
     "ConservationClassError",
     "ConservationResidual",
+    "ConsistencyBand",
     "ConvergenceType",
     "CredibilityFactor",
     "CylinderVerificationCase",
     "DomainOverlap",
+    "DominantTerm",
     "EnvelopeExceedance",
     "FactorAssessment",
     "FlatPlateVerificationCase",
@@ -175,12 +194,17 @@ __all__ = [
     "GridSolution",
     "IntrusionBenchmark",
     "NoReferenceDataError",
+    "NumericalBasis",
     "NumericalUncertainty",
     "ObservedOrder",
     "ReferenceDataset",
     "ReferenceRange",
     "RefinementLevel",
     "SolutionVerificationError",
+    "UncertaintyBudget",
+    "UncertaintyClass",
+    "UncertaintyTerm",
+    "UnquantifiedTerm",
     "VandVError",
     "ValidationComparison",
     "ValidationReport",
