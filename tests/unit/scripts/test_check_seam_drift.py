@@ -151,11 +151,12 @@ def test_cli_exit_codes(repo: Path) -> None:
 
 
 def test_committed_rulings_pass_on_this_checkout() -> None:
-    """Fail closed in CI; skip locally when the submodule is absent."""
+    """Fail closed unless opted out via SEAM_TESTS_ALLOW_SKIP=1."""
+    from tests.helpers.seam_guards import require_vendor_path
+
     repo_root = Path(__file__).resolve().parents[3]
-    if not (repo_root / gate.DEFAULT_TOOLS_ROOT).is_dir():
-        if os.environ.get("CI"):
-            raise AssertionError("vendor/ud-tools missing in CI")
-        pytest.skip("vendor/ud-tools not materialised")
+    vendor_root = repo_root / gate.DEFAULT_TOOLS_ROOT
+    require_vendor_path(vendor_root)
+
     violations, _ = gate.check(repo_root)
     assert violations == [], "\n".join(str(v) for v in violations)
