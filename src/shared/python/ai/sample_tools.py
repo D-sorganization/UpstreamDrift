@@ -49,8 +49,11 @@ def _not_implemented_tool_result(
     never begun; this helper is the single place the honest verdict is built,
     so a new placeholder cannot hand-roll a dishonest dict.
 
-    Mirrors the canonical Tools implementation so the child copy stops
-    drifting from it (UpstreamDrift #9474, program #1505).
+    The invariant -- *a tool that reports queued must have enqueued something*,
+    contrapositive: *a tool that enqueues nothing must report failure* -- is
+    enforced as a real precondition/postcondition pair rather than by
+    convention, because convention is what failed: UpstreamDrift #7391
+    established the behaviour and #8322 silently reverted it.
 
     Args:
         capability: Stable identifier for the missing capability.
@@ -113,7 +116,24 @@ def register_golf_suite_tools(registry: ToolRegistry) -> None:
     _register_agent_control_tools(registry)
     _register_cli_tools(registry)
     _register_codemap_tools_proxy(registry)
+    _register_sidekick_analytics(registry)
     logger.info("Registered Golf Suite tools")
+
+
+def _register_sidekick_analytics(registry: ToolRegistry) -> None:
+    """Register the Sidekick analytics tool.
+
+    Unlike the neighbouring optional codemap proxy, an ImportError here is
+    deliberately allowed to propagate rather than logged and swallowed: the
+    system prompt advertises this tool unconditionally, so a silent
+    registration failure would leave the assistant offering a capability it
+    cannot invoke -- the defect this wiring exists to fix.
+    """
+    from src.shared.python.ai.tools.sidekick_analytics import (
+        register_sidekick_analytics_tools,
+    )
+
+    register_sidekick_analytics_tools(registry)
 
 
 def _register_list_sample_files_tool(registry: ToolRegistry) -> None:
@@ -681,7 +701,7 @@ def _register_validation_tools(registry: ToolRegistry) -> None:
 def _register_agent_control_tools(registry: ToolRegistry) -> None:
     """Register agent control tools for AI-powered app management."""
     try:
-        from shared.python.ai.tools.agent_control import (
+        from src.shared.python.ai.tools.agent_control import (
             AgentController,
             create_agent_tools_for_registry,
         )
@@ -706,7 +726,7 @@ def _register_agent_control_tools(registry: ToolRegistry) -> None:
 def _register_cli_tools(registry: ToolRegistry) -> None:
     """Register CLI tools (Claude Code, Codex, Shell)."""
     try:
-        from shared.python.ai.tools.cli_tools import (
+        from src.shared.python.ai.tools.cli_tools import (
             CLIToolManager,
             create_cli_tools_for_registry,
         )
@@ -731,7 +751,7 @@ def _register_cli_tools(registry: ToolRegistry) -> None:
 def _register_codemap_tools_proxy(registry: ToolRegistry) -> None:
     """Register codemap tools if available."""
     try:
-        from shared.python.ai.tools.codemap_tools import register_codemap_tools
+        from src.shared.python.ai.tools.codemap_tools import register_codemap_tools
 
         register_codemap_tools(registry)
     except ImportError as e:

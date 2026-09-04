@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 import os
+import re
 import shutil
 import subprocess  # nosec B404 - fixed git invocation, no shell
 import sys
@@ -189,6 +190,62 @@ def _base_revision_is_tools_child_copy(base: str, relative: Path) -> bool:
     return first_line == _HEADER
 
 
+# UpstreamDrift#9474: a child copy may be edited to *converge* on canonical Tools,
+# never to diverge from it. The two trees differ only by the documented seam
+# rewrites -- UpstreamDrift spells shared imports ``src.shared.python`` and its
+# copies may carry the DO-NOT-EDIT banner -- so normalising both sides for those
+# two differences turns "is this edit pure convergence?" into an exact string
+# test. Anything else (a UpstreamDrift-only tweak, a partial port, a stale copy)
+# still fails, so the guard keeps forbidding drift while allowing a fix that
+# already landed in Tools to reach the copy that actually runs.
+_SEAM_IMPORT_PREFIX = re.compile(r"(?m)^(\s*)from src\.shared\.python\.")
+
+
+def _normalise_seam_imports(text: str) -> str:
+    """Rewrite UpstreamDrift's ``src.shared.python`` spelling to canonical."""
+    return _SEAM_IMPORT_PREFIX.sub(r"\1from shared.python.", text)
+
+
+def _strip_child_copy_header(text: str) -> str:
+    """Drop the leading DO-NOT-EDIT banner, which canonical Tools never carries."""
+    lines = text.split("\n")
+    if not lines or not lines[0].startswith(_HEADER):
+        return text
+    index = 0
+    while index < len(lines) and lines[index].startswith("#"):
+        index += 1
+    while index < len(lines) and not lines[index].strip():
+        index += 1
+    return "\n".join(lines[index:])
+
+
+def _canonical_child_copy_text(relative: Path) -> str | None:
+    """Return the pinned Tools text for ``relative``, or ``None`` if absent."""
+    for repo, ref in _candidate_tools_repos():
+        result = _run_git(
+            "-C",
+            str(repo),
+            "show",
+            f"{ref}:src/shared/python/{relative.as_posix()}",
+        )
+        if result is not None and result.returncode == 0:
+            return result.stdout
+    return None
+
+
+def _converges_on_canonical(relative: Path) -> bool:
+    """Return True when the local copy equals pinned Tools modulo seam rewrites."""
+    canonical = _canonical_child_copy_text(relative)
+    if canonical is None:
+        return False
+    local_path = _SHARED_ROOT / relative
+    if not local_path.is_file():
+        return False
+    local = local_path.read_text(encoding="utf-8")
+    normalised_local = _normalise_seam_imports(_strip_child_copy_header(local))
+    return normalised_local == _normalise_seam_imports(canonical)
+
+
 def _direct_tools_edit_offenders(
     base: str,
     tools_paths: set[str],
@@ -197,9 +254,12 @@ def _direct_tools_edit_offenders(
     return [
         relative.as_posix()
         for relative in _changed_shared_python_paths(base)
-        if relative.as_posix() in tools_paths
-        or _base_revision_is_tools_child_copy(base, relative)
-        or _is_tools_child_copy(_SHARED_ROOT / relative)
+        if (
+            relative.as_posix() in tools_paths
+            or _base_revision_is_tools_child_copy(base, relative)
+            or _is_tools_child_copy(_SHARED_ROOT / relative)
+        )
+        and not _converges_on_canonical(relative)
     ]
 
 
@@ -480,3 +540,85 @@ def test_no_counterpart_files_have_file_level_ownership_manifest() -> None:
 
     assert set(entries) == ambiguous_paths
     assert not (set(entries) & tools_paths)
+
+
+_CANONICAL_FIXTURE = "from shared.python.ai.types import ExpertiseLevel\n\nVALUE = 1\n"
+_CHILD_COPY_FIXTURE = (
+    f"{_HEADER}\n"
+    "# This file is a child copy that shadows Tools.\n"
+    "\n"
+    "from src.shared.python.ai.types import ExpertiseLevel\n"
+    "\n"
+    "VALUE = 1\n"
+)
+
+
+def _stage_child_copy(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    local: str,
+    canonical: str | None,
+) -> Path:
+    """Point the convergence check at a throwaway shared tree."""
+    relative = Path("ai/demo.py")
+    shared_root = tmp_path / "shared" / "python"
+    (shared_root / relative.parent).mkdir(parents=True, exist_ok=True)
+    (shared_root / relative).write_text(local, encoding="utf-8")
+    monkeypatch.setattr(sys.modules[__name__], "_SHARED_ROOT", shared_root)
+    monkeypatch.setattr(
+        sys.modules[__name__],
+        "_canonical_child_copy_text",
+        lambda _relative: canonical,
+    )
+    return relative
+
+
+def test_convergence_exemption_accepts_an_exact_port_of_canonical(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A copy equal to Tools modulo header and import prefix is not an offender."""
+    relative = _stage_child_copy(
+        tmp_path,
+        monkeypatch,
+        local=_CHILD_COPY_FIXTURE,
+        canonical=_CANONICAL_FIXTURE,
+    )
+
+    assert _converges_on_canonical(relative) is True
+
+
+def test_convergence_exemption_rejects_any_divergence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """One changed character is still a direct child-copy edit.
+
+    This is the assertion that keeps the exemption honest: it may only be used
+    to carry a Tools fix into the copy verbatim, never to smuggle an
+    UpstreamDrift-only change past the guard.
+    """
+    relative = _stage_child_copy(
+        tmp_path,
+        monkeypatch,
+        local=_CHILD_COPY_FIXTURE.replace("VALUE = 1", "VALUE = 2"),
+        canonical=_CANONICAL_FIXTURE,
+    )
+
+    assert _converges_on_canonical(relative) is False
+
+
+def test_convergence_exemption_rejects_a_copy_with_no_counterpart(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """With nothing canonical to converge on, the edit stays forbidden."""
+    relative = _stage_child_copy(
+        tmp_path,
+        monkeypatch,
+        local=_CHILD_COPY_FIXTURE,
+        canonical=None,
+    )
+
+    assert _converges_on_canonical(relative) is False

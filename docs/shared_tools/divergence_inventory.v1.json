@@ -15,7 +15,7 @@
     "diverged": 294,
     "ud-only": 1182,
     "tools-only": 444,
-    "spelling-only": 150
+    "spelling-only": 153
   },
   "packages": {
     "README.md": {
@@ -86,7 +86,7 @@
       "diverged": 72,
       "ud-only": 20,
       "tools-only": 0,
-      "spelling-only": 53
+      "spelling-only": 56
     },
     "analysis": {
       "identical": 0,
@@ -2249,12 +2249,12 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "",
-      "ud_bytes": 25066,
+      "ud_bytes": 25989,
       "tools_bytes": 25953,
-      "byte_delta": -887,
+      "byte_delta": 36,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "ai/skills/__init__.py",
@@ -2369,12 +2369,12 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "",
-      "ud_bytes": 5245,
+      "ud_bytes": 5578,
       "tools_bytes": 5574,
-      "byte_delta": -329,
+      "byte_delta": 4,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "ai/tests/test_access_policy.py",
@@ -2525,12 +2525,12 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "tools",
-      "ud_bytes": 7605,
+      "ud_bytes": 8151,
       "tools_bytes": 7858,
-      "byte_delta": -253,
+      "byte_delta": 293,
       "byte_identical": false,
       "ud_has_child_copy_header": true,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "ai/types.py",
