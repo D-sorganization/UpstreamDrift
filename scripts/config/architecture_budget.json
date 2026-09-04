@@ -3,6 +3,24 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/api/services/chat_service.py",
+      "symbol": "ChatService.stream_response",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9495,
+      "reason": "Issue #9495: pre-existing legacy chat streaming method (237 lines) coordinates adapter thread lifecycle, SSE queue pumping, and session persistence; unblocking and thread join fix touched this function, full modularization tracked as part of chat service decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/api/services/chat_service.py",
+      "symbol": "ChatService.stream_response._stream_to_queue",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9495,
+      "reason": "Issue #9495: pre-existing inner thread worker function (143 lines) handles token streaming and tool call execution loops; full modularization tracked as part of chat service decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
       "symbol": "make_figure",
       "rule": "function-lines",
