@@ -224,6 +224,24 @@
       "issue": 9151,
       "reason": "Issue #9151: the native evidence artifact is hash-bound to this preregistered control evaluator. A context-object decomposition would invalidate the exact successful Ubuntu evidence source digest and requires a fresh native rerun; retain the explicit operator inputs temporarily and remove this exception with the next forward-attribution implementation.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py",
+      "symbol": "MuJoCoSimWidget._on_timer",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9492,
+      "reason": "Issue #9492: pre-existing on main -- checking these two files out from origin/main into an otherwise-unmodified tree reports the identical violation with the identical line count. Surfaced by PR #9490 (UD #9474), which fixes a Qt object-lifetime defect in this file and deliberately does not bundle a risky decomposition of the MuJoCo stepping/render path into a correctness fix. Decomposition tracked in #9492, tests first.",
+      "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py",
+      "symbol": "SimRenderingMixin._add_live_kinematics_overlays",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9492,
+      "reason": "Issue #9492: pre-existing on main -- checking these two files out from origin/main into an otherwise-unmodified tree reports the identical violation with the identical line count. Surfaced by PR #9490 (UD #9474), which fixes a Qt object-lifetime defect in this file and deliberately does not bundle a risky decomposition of the MuJoCo stepping/render path into a correctness fix. Decomposition tracked in #9492, tests first.",
+      "expires_on": "2026-11-30"
     }
   ]
 }
