@@ -14,11 +14,13 @@ from __future__ import annotations
 import numpy as np
 
 from bunkershot3d.solvers import EnvelopeStatus, ValidityVerdict
+from bunkershot3d.vandv.band import CONSISTENCY_BAND_NAMING_REASON
 
 from .field import ContactPatch, LoadComponent, SoleLoadField
 from .model import (
     DesignEvaluation,
     PlayabilityOutcome,
+    RankingVerdict,
     ShotOutcome,
     SoleLoadMap,
     WorkbenchComparison,
@@ -278,12 +280,16 @@ def _ball_lines(outcome: ShotOutcome) -> tuple[str, ...]:
     verdict = outcome.carry_verdict
     if outcome.carry_m is None or verdict is None:
         return ()
+    band = outcome.carry_band
+    carry = f"{outcome.carry_m:.4g} m" if band is None else band.statement(unit="m")
     return (
         "Ball",
         _THIN,
-        _line("Carry", f"{outcome.carry_m:.4g} m"),
+        _line("Carry", carry),
         _line("Carry validity", status_headline(verdict.status)),
         f"  {CARRY_CAVEAT}",
+        *(() if band is None else (f"  {CONSISTENCY_BAND_NAMING_REASON}",)),
+        *(f"  {reason}" for reason in outcome.carry_band_reasons),
         "",
     )
 
@@ -577,7 +583,7 @@ def playability_text(playability: PlayabilityOutcome) -> str:
         f"  {CARRY_CAVEAT}",
         _line("Target carry", f"{window.target_carry_m:.4g} m"),
         _line("Acceptance band", f"{low:.4g} to {high:.4g} m"),
-        _line("Window area", f"{window.area:.4g} {window.area_unit}"),
+        _line("Window area", _window_area_text(playability)),
         _line("Share of the domain", f"{window.fraction:.1%}"),
         _line("Largest connected region", f"{window.largest_connected_area:.4g}"),
         _line("Refused share", f"{window.refused_fraction:.1%}"),
@@ -735,27 +741,96 @@ def comparison_report(comparison: WorkbenchComparison) -> str:
             "Ranking on absolute carry error over the shared delivery sweep",
             _THIN,
             _line("Conditions compared", str(comparison.shared_points)),
-            _line("Leader", ranking.best),
-            _line(
-                "Probability it is better",
-                f"{float(ranking.probability_best.max()):.0%}",
-            ),
-            _line(
-                "Distinguishable",
-                "yes"
-                if comparison.separated
-                else "NO - the intervals overlap, so this study does not separate them",
-            ),
+            _line("Verdict", _verdict_headline(comparison)),
             "",
+        )
+    )
+    lines.extend(_uncertainty_lines(comparison))
+    lines.extend(
+        (
+            "Delivery-sweep spread alone (this is NOT the whole uncertainty)",
+            _THIN,
         )
     )
     for index, name in enumerate(ranking.names):
         lines.append(
             f"  {name:<24}mean {ranking.mean[index]:.3f} m  "
-            f"95% CI [{ranking.ci_low[index]:.3f}, {ranking.ci_high[index]:.3f}] m"
+            f"bootstrap 95% [{ranking.ci_low[index]:.3f}, "
+            f"{ranking.ci_high[index]:.3f}] m"
         )
-    lines.append("")
+    lines.extend(("", f"  {BOOTSTRAP_SCOPE_CAVEAT}", ""))
     return "\n".join(lines)
+
+
+BOOTSTRAP_SCOPE_CAVEAT = (
+    "the bootstrap interval above covers ONLY the spread across the delivery "
+    "conditions that were evaluated. It is not the uncertainty of the "
+    "comparison: it does not contain the accelerated-mass interval every one "
+    "of those conditions was computed under (#8659), and reading a winner off "
+    "it alone is the overclaim issue #9243 removed"
+)
+"""Why the bootstrap interval is shown second and qualified (issue #9243)."""
+
+
+def _verdict_headline(comparison: WorkbenchComparison) -> str:
+    """The one-line answer, which is allowed to be "cannot tell".
+
+    Args:
+        comparison: The comparison.
+
+    Returns:
+        The headline. Never a design name when the bands overlap.
+    """
+    banded = comparison.banded
+    if banded is None:
+        return "no banded comparison was built"
+    if banded.verdict is RankingVerdict.INDISTINGUISHABLE:
+        return (
+            "INDISTINGUISHABLE at this uncertainty - the bands overlap by "
+            f"{-banded.separation:.3f} m, so these two soles are not ordered"
+        )
+    return f"{banded.winner} is better, by a band gap of {banded.separation:.3f} m"
+
+
+def _uncertainty_lines(comparison: WorkbenchComparison) -> tuple[str, ...]:
+    """The budget behind the verdict: the bands, the split, what dominates.
+
+    Args:
+        comparison: The comparison.
+
+    Returns:
+        The section, or nothing when no budget was built.
+    """
+    banded = comparison.banded
+    if banded is None:
+        return ()
+    lines = ["Uncertainty budget on that objective", _THIN]
+    for name, budget in zip(banded.names, banded.budgets, strict=True):
+        lines.append(f"  {name:<24}{budget.band().statement(unit='m')}")
+        for subtotal in budget.by_class().values():
+            lines.append(
+                f"      {subtotal.uncertainty_class.value:<12}"
+                f"-{subtotal.lower_offset:.3f}/+{subtotal.upper_offset:.3f} m "
+                f"({subtotal.rule})"
+            )
+    lines.extend(("", f"  Dominant term: {banded.dominance_statement()}"))
+    for term in banded.unquantified:
+        lines.append(
+            f"  UNQUANTIFIED ({term.uncertainty_class.value}): "
+            f"{term.name} - {term.reason}"
+        )
+    if not banded.defensible:
+        lines.append(f"  {UNDEFENDED_VERDICT_CAVEAT}")
+    lines.extend((f"  {CONSISTENCY_BAND_NAMING_REASON}", ""))
+    return tuple(lines)
+
+
+UNDEFENDED_VERDICT_CAVEAT = (
+    "this verdict is NOT defensible on its own: known contributions above "
+    "have no number, so the bands are a lower bound on the spread and a "
+    "separation that survives them might not survive the rest"
+)
+"""What a separated verdict with unsized terms behind it must say."""
 
 
 #: The side-by-side table: label, key understood by :func:`_comparison_cell`.
@@ -778,6 +853,29 @@ _SHOT_UNITS: dict[str, tuple[str, float]] = {
 }
 
 
+def _window_area_text(playability: PlayabilityOutcome) -> str:
+    """The window area, as its band when the sweep produced one (#9243).
+
+    The window is the headline playability number, so it is the last place a
+    point estimate may stand in for an interval: at the shipped nominal shot
+    the accelerated-mass band takes the window from empty to five times the
+    central area.
+
+    Args:
+        playability: The outcome carrying the window and its band.
+
+    Returns:
+        The formatted area, with a unit.
+    """
+    window = playability.window
+    if window is None:
+        return "-"
+    band = playability.window_area_band
+    if band is None:
+        return f"{window.area:.4g} {window.area_unit}"
+    return f"{band.central:.4g} [{band.lower:.4g}, {band.upper:.4g}] {window.area_unit}"
+
+
 def _comparison_rows(
     left: DesignEvaluation, right: DesignEvaluation
 ) -> tuple[tuple[str, str, str], ...]:
@@ -789,9 +887,18 @@ def _comparison_rows(
 
 
 def _comparison_cell(evaluation: DesignEvaluation, key: str) -> str:
-    """Format one cell of the side-by-side table."""
+    """Format one cell of the side-by-side table.
+
+    Carry is shown as its band when it has one (issue #9243): a compact
+    side-by-side is exactly where a reader compares two numbers by eye, so it
+    is the last place a point estimate may stand in for an interval a factor
+    of two wide.
+    """
     shot = evaluation.shot
     window = evaluation.playability.window
+    if key == "carry_m" and shot.carry_band is not None:
+        band = shot.carry_band
+        return f"{band.lower:.3g}-{band.upper:.3g} m"
     if key == "status":
         return shot.status.value
     if key == "bounce":
@@ -803,7 +910,7 @@ def _comparison_cell(evaluation: DesignEvaluation, key: str) -> str:
         utilisation = shot.sole_load.utilisation
         return f"{utilisation.utilisation_fraction * 100.0:.1f}%"
     if key == "window_area":
-        return "-" if window is None else f"{window.area:.4g}"
+        return "-" if window is None else _window_area_text(evaluation.playability)
     if key == "window_fraction":
         return "-" if window is None else f"{window.fraction * 100.0:.1f}%"
     value = getattr(shot, key)
