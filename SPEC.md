@@ -5219,3 +5219,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Seam guards fail closed by default when `vendor/ud-tools` is absent or unpopulated, surfacing actionable `git archive` workaround instructions and requiring explicit `SEAM_TESTS_ALLOW_SKIP=1` to skip outside CI (#9501).
 - Isolated child pytest runners disable async and thread-spawning plugins and clear addopts to prevent interpreter shutdown hangs and bound subprocess execution (#9511).
 
+
+## Changelog
+| 2026-09-04 | #9528 | Refactored export_video to use managed_popen (spec-exempt: refactoring) |
