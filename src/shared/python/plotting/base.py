@@ -14,9 +14,11 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Qt backend - optional for headless environments
+# Qt backend - optional for headless environments.
+# Canonical definition lives in plotting.mpl_canvas (#9474); this module
+# only re-exports it and supplies the headless stub below.
 try:
-    from src.shared.python.ui.qt.plotting import MplCanvas
+    from src.shared.python.plotting.mpl_canvas import MplCanvas
 except ImportError:
     # Qt not available (e.g., in headless CI environments)
     class MplCanvas:  # type: ignore[no-redef]

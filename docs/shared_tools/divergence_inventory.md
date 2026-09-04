@@ -90,7 +90,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plot_labels.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `plot_style` | 0 | 0 | 0 | 34 | 0 | 0 |
 | `plot_theme` | 6 | 0 | 0 | 1 | 0 | 6 |
-| `plotting` | 0 | 3 | 0 | 24 | 0 | 3 |
+| `plotting` | 0 | 3 | 0 | 25 | 0 | 3 |
 | `pose_editor` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `pose_estimation` | 0 | 0 | 0 | 11 | 0 | 0 |
 | `pose_interchange` | 0 | 0 | 0 | 25 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **518** | **294** | **153** | **1182** | **444** | **812** |
+| **Total** | **518** | **294** | **153** | **1183** | **444** | **812** |
 
 ## Diverged Files by Package
 
@@ -202,8 +202,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/rag/context_provider.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
 | `ai/rag/indexer_worker.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
 | `ai/rag/simple_rag.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
-| `ai/sample_tools.py` | +36 | yes | Dieter Olson 2026-09-03 | d-sorgclaudeagent[bot] 2026-09-03 |
-| `ai/system_prompts.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
+| `ai/sample_tools.py` | +36 | yes | d-sorgclaudeagent[bot] 2026-09-04 | d-sorgclaudeagent[bot] 2026-09-03 |
+| `ai/system_prompts.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-09-04 | d-sorgclaudeagent[bot] 2026-09-03 |
 | `ai/thread_condensation.py` | -22 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
 | `ai/tool_registry.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
 | `ai/tools/__init__.py` | -283 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
@@ -211,7 +211,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/tools/cli_tools.py` | -119 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
 | `ai/tools/codemap_tools.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
 | `ai/tools/file_ops.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-03 |
-| `ai/tools/sidekick_analytics.py` | +293 | yes | Dieter Olson 2026-05-29 | d-sorgclaudeagent[bot] 2026-09-03 |
+| `ai/tools/sidekick_analytics.py` | +293 | yes | d-sorgclaudeagent[bot] 2026-09-04 | d-sorgclaudeagent[bot] 2026-09-03 |
 
 ### Package `calc_backend` (14 Diverged Files)
 
