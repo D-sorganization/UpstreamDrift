@@ -1243,6 +1243,31 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  # Seam drift gate (UD #9406, RM #1505 Phase 1, RM #1507 main-green):
+  # docs/shared_tools/seam_rulings.v1.json rules every top-level entry of the
+  # shared tree; this job fails when a package ruled tools-canonical/split and
+  # marked cleaned still has a UD copy under src/shared/python, when a
+  # ud-canonical package has no Tools ledger row, or when the pinned Tools
+  # tree gains a module without a ruling. Rulings start as pending-cleanup so
+  # the gate is green at merge and ratchets as copies are deleted.
+  seam-drift-gate:
+    name: seam-drift-gate
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Seam drift gate
+        run: python3 scripts/shared_tools/check_seam_drift.py
+
   # Required branch-protection check (issue #7064). The name `quality-gate` is
   # preserved exactly so the org ruleset `Repository_Protections` and the bot
   # workflows (Jules-Auto-Repair, Jules-PR-AutoFix, Bot-CI-Trigger) keep
@@ -1271,6 +1296,7 @@ jobs:
         docs-governance-gates,
         rust-wheel-parity,
         shared-tools-consumer-contracts,
+        seam-drift-gate,
       ]
     if: always()
     # This job is the ONLY required branch-protection check on `main`, and it
@@ -1306,6 +1332,7 @@ jobs:
           DOCS_CHANGED: ${{ needs.changed-paths.outputs.docs }}
           RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
           SHARED_TOOLS_CONSUMER_CONTRACTS: ${{ needs.shared-tools-consumer-contracts.result }}
+          SEAM_DRIFT_GATE: ${{ needs.seam-drift-gate.result }}
         run: |
           set -uo pipefail
           failed=0
@@ -1318,6 +1345,7 @@ jobs:
           gates="$gates unit-test-gate:$UNIT_TEST_GATE"
           gates="$gates rust-wheel-parity:$RUST_WHEEL_PARITY"
           gates="$gates shared-tools-consumer-contracts:$SHARED_TOOLS_CONSUMER_CONTRACTS"
+          gates="$gates seam-drift-gate:$SEAM_DRIFT_GATE"
 
           {
             echo "## Quality Gate Summary"
@@ -1767,6 +1795,13 @@ jobs:
           QT_API: pyqt6
         run: |
           export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
+          # Machine-readable failure record. `-ra` alone is not enough:
+          # pytest skips every terminal-summary section when a run dies
+          # with INTERNALERROR, which is how `main` reported 305 failures
+          # without naming one of them (UD #9474, RM #1507). The JUnit XML
+          # is written by the same terminal-summary phase, so it is a
+          # second copy of the same signal, not a replacement for the log.
+          mkdir -p "$RUNNER_TEMP/junit"
           coverage_args=(--cov=src)
           coverage_report_args=(
             --cov-report=term-missing
@@ -1936,6 +1971,8 @@ jobs:
                 -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
                 -o addopts="" \
                 "${coverage_mode[@]}" \
+                --junitxml="$RUNNER_TEMP/junit/pr-scoped-${{ matrix.python }}.xml" \
+                -ra \
                 --tb=short \
                 -v
               pytest_exit_code=$?
@@ -2033,9 +2070,20 @@ jobs:
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             "${coverage_args[@]}" \
             "${coverage_report_args[@]}" \
+            --junitxml="$RUNNER_TEMP/junit/core-${{ matrix.python }}.xml" \
+            -ra \
             --tb=short \
             --durations=20 \
             -v
+
+      - name: Upload JUnit Test Results
+        if: always() && steps.core-test-changes.outputs.skip != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: junit-tests-${{ matrix.python }}
+          path: ${{ runner.temp }}/junit/*.xml
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Stop Xvfb
         if: always() && steps.core-test-changes.outputs.skip != 'true'
