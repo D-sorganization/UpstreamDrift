@@ -104,19 +104,14 @@ class MainWidget(QWidget):
 
             sim_widget = getattr(self._inner, "sim_widget", None)
             if sim_widget is not None:
-                # ``MuJoCoSimWidget.set_running(False)`` pauses stepping
-                # without tearing down the model — safe to call multiple
-                # times and on widgets that are already stopped.
+                # Ask the widget to release its own timer rather than
+                # reaching through it to ``sim_widget.timer.stop()``: the
+                # widget owns that timer and is the only thing that should
+                # know it exists (UD #9474). Idempotent and safe on widgets
+                # that are already stopped.
                 try:
-                    sim_widget.set_running(False)
+                    sim_widget.stop_simulation()
                 except Exception:  # pragma: no cover - defensive  # noqa: BLE001
-                    logger.debug("sim_widget.set_running raised", exc_info=True)
-                # Stop the underlying QTimer if present.
-                inner_timer = getattr(sim_widget, "timer", None)
-                if inner_timer is not None:
-                    try:
-                        inner_timer.stop()
-                    except Exception:  # pragma: no cover - defensive  # noqa: BLE001
-                        logger.debug("sim_widget.timer.stop raised", exc_info=True)
+                    logger.debug("sim_widget.stop_simulation raised", exc_info=True)
         except Exception:  # pragma: no cover - defensive
             logger.exception("MuJoCo MainWidget cleanup raised")
