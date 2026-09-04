@@ -198,6 +198,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       code: ${{ steps.detect.outputs.code }}
+      docs: ${{ steps.detect.outputs.docs }}
       publication: ${{ steps.detect.outputs.publication }}
     steps:
       - name: Enable long Git paths
@@ -222,6 +223,7 @@ jobs:
           if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "Event '$EVENT_NAME' always runs the full suite."
             echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "docs=true" >> "$GITHUB_OUTPUT"
             echo "publication=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -231,6 +233,7 @@ jobs:
           echo "$changed"
 
           code=false
+          docs=false
           publication=false
           while IFS= read -r file; do
             [ -n "$file" ] || continue
@@ -244,6 +247,32 @@ jobs:
                 echo "Publication authority change: $file"
                 ;;
             esac
+            # Mirror of docs-governance.yml's trigger paths (plus this workflow
+            # and the shared composite action): these files feed the
+            # docs-governance-gates job, whose result the required
+            # `quality-gate` aggregate enforces. Before that job existed,
+            # auto-merge could land a governance regression while the
+            # non-required doc-governance check was still running (PR #9418).
+            case "$file" in
+              docs/* | \
+              manuals/upstreamdrift/* | \
+              scripts/config/design_manual_governance.json | \
+              scripts/check_design_manual_governance.py | \
+              scripts/design_manual_contract.py | \
+              scripts/check_docs_governance.py | \
+              scripts/check_doc_catalog.py | \
+              scripts/check_doc_size_budget.py | \
+              scripts/check_document_title_case.py | \
+              scripts/config/doc_size_budget.json | \
+              tests/scripts/test_doc_governance_checks.py | \
+              tests/scripts/test_document_title_case.py | \
+              tests/scripts/test_design_manual_governance_contract.py | \
+              .github/workflows/ci-standard.yml | \
+              .github/actions/docs-governance-checks/*)
+                docs=true
+                echo "Docs-governance change: $file"
+                ;;
+            esac
             case "$file" in
               docs/* | *.md | LICENSE | .gitignore) ;;
               *)
@@ -254,10 +283,12 @@ jobs:
           done <<< "$changed"
 
           echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "docs=$docs" >> "$GITHUB_OUTPUT"
           echo "publication=$publication" >> "$GITHUB_OUTPUT"
           {
             echo "## Changed paths"
             echo "- non-docs changes: \`$code\`"
+            echo "- docs-governance changes: \`$docs\`"
             echo "- publication authority changes: \`$publication\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -271,6 +302,9 @@ jobs:
   #   code-quality        — lint/format + mypy + install-dependent gates
   #   security-scans       — Semgrep / Bandit / detect-secrets / Trivy
   #   repo-structure-gates — structural / SPEC / budget checks with minimal parser deps
+  #   docs-governance-gates — docs governance (size budget, catalog, title case)
+  #                           on docs-touching PRs; shared composite action with
+  #                           docs-governance.yml (see that job's comment)
   # ---------------------------------------------------------------------------
   code-quality:
     name: code-quality
@@ -1141,6 +1175,31 @@ jobs:
             --source-revision "$(git rev-parse HEAD)" \
             --publication-profile computational
 
+  # Docs governance, folded into the required `quality-gate` aggregate
+  # (the repo's single required context — see the aggregate's comment). The
+  # standalone docs-governance.yml check `doc-governance` is not required, so
+  # auto-merge historically fired as soon as `quality-gate` passed and could
+  # land a governance regression the docs check caught seconds later: PR #9418
+  # merged a doc-size-budget violation red onto main this way. This job runs
+  # the identical steps via the shared composite action, keyed off the
+  # `changed-paths` docs classification, so `quality-gate` cannot go green on a
+  # docs-touching PR until docs governance passes.
+  docs-governance-gates:
+    name: docs-governance-gates
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.docs == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Run docs governance checks
+        uses: ./.github/actions/docs-governance-checks
+        with:
+          changed-from: ${{ github.event.pull_request.base.sha || github.event.before }}
+
   # Governed companion workflows execute on every code PR and protected-main
   # push. The job emits exact-commit evidence but does not publish or qualify it.
   companion-workflows:
@@ -1184,6 +1243,31 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  # Seam drift gate (UD #9406, RM #1505 Phase 1, RM #1507 main-green):
+  # docs/shared_tools/seam_rulings.v1.json rules every top-level entry of the
+  # shared tree; this job fails when a package ruled tools-canonical/split and
+  # marked cleaned still has a UD copy under src/shared/python, when a
+  # ud-canonical package has no Tools ledger row, or when the pinned Tools
+  # tree gains a module without a ruling. Rulings start as pending-cleanup so
+  # the gate is green at merge and ratchets as copies are deleted.
+  seam-drift-gate:
+    name: seam-drift-gate
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Seam drift gate
+        run: python3 scripts/shared_tools/check_seam_drift.py
+
   # Required branch-protection check (issue #7064). The name `quality-gate` is
   # preserved exactly so the org ruleset `Repository_Protections` and the bot
   # workflows (Jules-Auto-Repair, Jules-PR-AutoFix, Bot-CI-Trigger) keep
@@ -1209,8 +1293,10 @@ jobs:
         tests,
         unit-test-gate,
         publication-quality,
+        docs-governance-gates,
         rust-wheel-parity,
         shared-tools-consumer-contracts,
+        seam-drift-gate,
       ]
     if: always()
     # This job is the ONLY required branch-protection check on `main`, and it
@@ -1242,8 +1328,11 @@ jobs:
           TESTS: ${{ needs.tests.result }}
           UNIT_TEST_GATE: ${{ needs.unit-test-gate.result }}
           PUBLICATION_QUALITY: ${{ needs.publication-quality.result }}
+          DOCS_GOVERNANCE_GATES: ${{ needs.docs-governance-gates.result }}
+          DOCS_CHANGED: ${{ needs.changed-paths.outputs.docs }}
           RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
           SHARED_TOOLS_CONSUMER_CONTRACTS: ${{ needs.shared-tools-consumer-contracts.result }}
+          SEAM_DRIFT_GATE: ${{ needs.seam-drift-gate.result }}
         run: |
           set -uo pipefail
           failed=0
@@ -1256,11 +1345,13 @@ jobs:
           gates="$gates unit-test-gate:$UNIT_TEST_GATE"
           gates="$gates rust-wheel-parity:$RUST_WHEEL_PARITY"
           gates="$gates shared-tools-consumer-contracts:$SHARED_TOOLS_CONSUMER_CONTRACTS"
+          gates="$gates seam-drift-gate:$SEAM_DRIFT_GATE"
 
           {
             echo "## Quality Gate Summary"
             echo ""
             echo "- non-docs changes: \`$CODE_CHANGED\`"
+            echo "- docs-governance changes: \`$DOCS_CHANGED\`"
             echo "- publication authority changes: \`$PUBLICATION_CHANGED\`"
             echo ""
             echo "| Job | Result |"
@@ -1283,6 +1374,21 @@ jobs:
           echo "| publication-quality | $PUBLICATION_QUALITY |" >> "$GITHUB_STEP_SUMMARY"
           if [ "$PUBLICATION_QUALITY" != "$publication_expected" ]; then
             echo "::error::publication-quality reported '$PUBLICATION_QUALITY', expected '$publication_expected'."
+            failed=1
+          fi
+
+          # Docs governance runs whenever docs-governance paths changed,
+          # independent of the code/docs-only split — a docs-only PR skips the
+          # general gates but must still pass docs governance (PR #9418).
+          if [ "$DOCS_CHANGED" = "true" ]; then
+            docs_expected="success"
+          else
+            docs_expected="skipped"
+          fi
+          echo "docs-governance-gates: $DOCS_GOVERNANCE_GATES"
+          echo "| docs-governance-gates | $DOCS_GOVERNANCE_GATES |" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DOCS_GOVERNANCE_GATES" != "$docs_expected" ]; then
+            echo "::error::docs-governance-gates reported '$DOCS_GOVERNANCE_GATES', expected '$docs_expected'."
             failed=1
           fi
 
@@ -1321,7 +1427,7 @@ jobs:
             if [ "$PUBLICATION_CHANGED" = "true" ]; then
               echo "Docs-only publication change: publication-quality succeeded; general gates correctly skipped."
             else
-              echo "Docs-only change: quality-gate jobs correctly skipped."
+              echo "Docs-only change: docs-governance-gates reported '$DOCS_GOVERNANCE_GATES'; general quality-gate jobs correctly skipped."
             fi
             exit 0
           fi
@@ -1469,7 +1575,20 @@ jobs:
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 35 # Prevent runaway tests while allowing bounded core-suite completion
+    # Budget measured from CI run 33779933815 (job 100731026646, `tests (3.11)`,
+    # commit ee247039, 2026-09-03): the serial core lane needed 2m36s to collect
+    # and had executed 24% of its 40,488 selected tests after 30m45s (5.27
+    # tests/s), i.e. ~135 min for the full lane including install/collection.
+    # The old 35-minute budget was set on 2026-06-11 (6bc73cb93) while this lane
+    # still ran under xdist; it was serialised to `-n 0` on 2026-06-13
+    # (b4ddf7b30) to stop native GUI/MuJoCo worker termination from destroying
+    # coverage data, and the budget was never re-measured. Every `main` run
+    # since has been killed at exactly 35 minutes, which fails `quality-gate`
+    # without reporting a single assertion (RM #1507, #1505; UD #9431).
+    # 150 = measured ~135 min + ~10% headroom for self-hosted runner contention.
+    # Per-test hangs stay bounded by `--timeout=60 --timeout-method=thread`
+    # below; this budget only bounds the lane as a whole.
+    timeout-minutes: 150
     env:
       # Debt ledger (scripts/config/unit_gate_quarantine.json, issue #8766):
       # the dependency-light lane below only executes when a PR touches src
@@ -1676,6 +1795,13 @@ jobs:
           QT_API: pyqt6
         run: |
           export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
+          # Machine-readable failure record. `-ra` alone is not enough:
+          # pytest skips every terminal-summary section when a run dies
+          # with INTERNALERROR, which is how `main` reported 305 failures
+          # without naming one of them (UD #9474, RM #1507). The JUnit XML
+          # is written by the same terminal-summary phase, so it is a
+          # second copy of the same signal, not a replacement for the log.
+          mkdir -p "$RUNNER_TEMP/junit"
           coverage_args=(--cov=src)
           coverage_report_args=(
             --cov-report=term-missing
@@ -1845,6 +1971,8 @@ jobs:
                 -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
                 -o addopts="" \
                 "${coverage_mode[@]}" \
+                --junitxml="$RUNNER_TEMP/junit/pr-scoped-${{ matrix.python }}.xml" \
+                -ra \
                 --tb=short \
                 -v
               pytest_exit_code=$?
@@ -1942,9 +2070,20 @@ jobs:
             -m "not slow and not benchmark and not perf and not requires_gl and not requires_network and not requires_gpu and not requires_mocap_fixtures" \
             "${coverage_args[@]}" \
             "${coverage_report_args[@]}" \
+            --junitxml="$RUNNER_TEMP/junit/core-${{ matrix.python }}.xml" \
+            -ra \
             --tb=short \
             --durations=20 \
             -v
+
+      - name: Upload JUnit Test Results
+        if: always() && steps.core-test-changes.outputs.skip != 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: junit-tests-${{ matrix.python }}
+          path: ${{ runner.temp }}/junit/*.xml
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Stop Xvfb
         if: always() && steps.core-test-changes.outputs.skip != 'true'

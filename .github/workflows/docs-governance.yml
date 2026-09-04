@@ -17,6 +17,7 @@ on:
       - "tests/scripts/test_document_title_case.py"
       - "tests/scripts/test_design_manual_governance_contract.py"
       - ".github/workflows/docs-governance.yml"
+      - ".github/actions/docs-governance-checks/**"
   push:
     branches: [main]
     paths:
@@ -34,6 +35,7 @@ on:
       - "tests/scripts/test_document_title_case.py"
       - "tests/scripts/test_design_manual_governance_contract.py"
       - ".github/workflows/docs-governance.yml"
+      - ".github/actions/docs-governance-checks/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -54,40 +56,21 @@ jobs:
           echo "runner=${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
 
+  # The steps live in .github/actions/docs-governance-checks so this advisory
+  # check and the merge-blocking `docs-governance-gates` job in ci-standard.yml
+  # run the identical gate list. Edit the composite action, not this file, to
+  # change what docs governance checks.
   doc-governance:
     name: doc-governance
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
-      - name: Validate documentation governance files
-        run: python3 scripts/check_docs_governance.py
-
-      - name: Validate engineering design-manual governance
-        run: python3 -m scripts.check_design_manual_governance
-
-      - name: Install test dependencies
-        run: |
-          python3 -m venv "$RUNNER_TEMP/docs-governance-venv"
-          echo "$RUNNER_TEMP/docs-governance-venv/bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install --upgrade pip
-          "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest pytest-asyncio pytest-timeout pypdf
-
-      - name: Test documentation governance files
-        run: python -m pytest tests/scripts/test_doc_governance_checks.py tests/scripts/test_design_manual_governance_contract.py -q
-
-      - name: Validate documentation catalog
-        run: python3 scripts/check_doc_catalog.py
-
-      - name: Validate documentation size budget
-        run: python3 scripts/check_doc_size_budget.py
-
-      - name: Validate document title capitalization
-        run: python3 scripts/check_document_title_case.py --changed-from "${{ github.event.pull_request.base.sha || github.event.before }}"
-
-      - name: Run documentation governance tests
-        run: python -m pytest tests/scripts/test_doc_governance_checks.py tests/scripts/test_document_title_case.py -q
+      - name: Run docs governance checks
+        uses: ./.github/actions/docs-governance-checks
+        with:
+          changed-from: ${{ github.event.pull_request.base.sha || github.event.before }}

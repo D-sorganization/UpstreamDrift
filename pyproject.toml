@@ -1,7 +1,7 @@
 # Upstream Drift — pyproject.toml
 [project]
 name = "upstream-drift"
-version = "2.1.1"
+version = "2.1.2"
 description = "Biomechanical golf simulation and analysis suite"
 readme = "README.md"
 license = { text = "MIT" }
@@ -451,6 +451,10 @@ max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/**" = ["T201"]
+# Fleet-shared portable CLIs (Repository_Management#1520), copied verbatim so
+# they stay byte-identical across repositories; their reports go to stdout by
+# design, exactly like scripts/**.
+"shared_scripts/**" = ["T201"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
 # Runnable docs examples are CLI-style scripts: stdout is how they report results.
