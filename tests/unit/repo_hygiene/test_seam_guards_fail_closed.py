@@ -18,6 +18,8 @@ from tests.helpers.seam_guards import (
     seam_tests_allow_skip,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_seam_tests_allow_skip_defaults_false(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("SEAM_TESTS_ALLOW_SKIP", raising=False)
