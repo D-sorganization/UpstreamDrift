@@ -127,14 +127,13 @@ def test_authorship_without_git_repo_is_none(fake_repo: Path) -> None:
 
 
 def test_committed_inventory_is_current_when_vendor_present() -> None:
-    """Fail closed in CI; skip on a machine without the submodule."""
-    import os
+    """Fail closed unless opted out via SEAM_TESTS_ALLOW_SKIP=1."""
+    from tests.helpers.seam_guards import require_vendor_path
 
     repo_root = Path(__file__).resolve().parents[3]
-    if not (repo_root / inv.DEFAULT_TOOLS_ROOT).is_dir():
-        if os.environ.get("CI"):
-            raise AssertionError("vendor/ud-tools missing in CI")
-        pytest.skip("vendor/ud-tools not materialised")
+    vendor_root = repo_root / inv.DEFAULT_TOOLS_ROOT
+    require_vendor_path(vendor_root)
+
     errors = inv.check_inventory(repo_root, repo_root / inv.DEFAULT_JSON)
     assert errors == [], "\n".join(errors[:20])
 
