@@ -37,6 +37,9 @@ from src.tools.launch_monitor_model import (
     numeric_metric_columns,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.tools.launch_monitor_analytics.destructive_guards import (
+    DestructiveActionGuards,
+)
 from src.tools.launch_monitor_analytics.flexible_analysis_widget import (
     FlexibleAnalysisWidget,
 )
@@ -53,7 +56,7 @@ logger = get_logger(__name__)
 __all__ = ["LaunchMonitorAnalyticsWindow", "MainWidget", "PlotCanvas", "main"]
 
 
-class MainWidget(QtWidgets.QWidget):
+class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
     """Embeddable launch-monitor data-management and analysis workspace."""
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
@@ -128,8 +131,12 @@ class MainWidget(QtWidgets.QWidget):
         )
         self.open_project_button = QtWidgets.QPushButton("Open Project...")
         self.save_project_button = QtWidgets.QPushButton("Save Project...")
-        self.remove_session_button = QtWidgets.QPushButton("Remove Selected Sessions")
-        self.clear_project_button = QtWidgets.QPushButton("New Project")
+        self.remove_session_button = QtWidgets.QPushButton(
+            "Remove Selected Sessions..."
+        )
+        self.remove_session_button.setToolTip("Confirmed; cannot be undone.")
+        self.clear_project_button = QtWidgets.QPushButton("New Project...")
+        self.clear_project_button.setToolTip("Offers to save unsaved work first.")
         for button in (
             self.import_button,
             self.load_corpus_button,
@@ -402,8 +409,8 @@ class MainWidget(QtWidgets.QWidget):
         self.load_corpus_button.clicked.connect(self._on_load_private_corpus)
         self.open_project_button.clicked.connect(self._on_open_project)
         self.save_project_button.clicked.connect(self._on_save_project)
-        self.remove_session_button.clicked.connect(self._remove_selected_sessions)
-        self.clear_project_button.clicked.connect(self.clear_project)
+        self.remove_session_button.clicked.connect(self._on_remove_selected_sessions)
+        self.clear_project_button.clicked.connect(self._on_new_project)
         self.run_treatment_button.clicked.connect(self._run_treatment_ui)
         self.add_filter_button.clicked.connect(self._add_filter_row)
         self.remove_filter_button.clicked.connect(self._remove_filter_rows)
@@ -967,18 +974,9 @@ class MainWidget(QtWidgets.QWidget):
             except (ValueError, OSError) as exc:
                 self._show_error(f"Could Not Import {path.name}", exc)
 
-    def _remove_selected_sessions(self) -> None:
-        selected = self.session_tree.selectedItems()
-        if not selected:
-            return
-        for item in selected:
-            session_id = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
-            self.project.remove_session(str(session_id))
-        self.analysis_frame = self.project.combined_shots()
-        self._dirty = True
-        self._refresh_all()
-
     def _on_open_project(self) -> None:
+        if not self._confirm_discard_unsaved("opening another project"):
+            return
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Open Launch Monitor Project",
