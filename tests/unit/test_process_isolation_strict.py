@@ -28,12 +28,18 @@ ISOLATED_TESTS_DIR = Path(__file__).parent / "isolated"
 TEST_DRAKE_STRICT = ISOLATED_TESTS_DIR / "test_drake_strict.py"
 TEST_PINOCCHIO_STRICT = ISOLATED_TESTS_DIR / "test_pinocchio_strict.py"
 
-# The child runs a real pytest session and imports a physics engine, which is
-# far slower than a typical unit test. These two values are a pair and must keep
-# their ordering: the child is killed first so this test reports a clean
-# failure, and only a genuinely stuck kill path should ever reach the outer mark.
-_CHILD_TIMEOUT_SECONDS = 300
-_TEST_TIMEOUT_SECONDS = 360
+# The child does its actual work in under 5s -- both isolated modules skip when
+# Drake/Pinocchio are absent, which is the case in CI -- and then *hangs at
+# interpreter shutdown*: its captured stdout contains a complete
+# ``short test summary info`` and the process still never exits, so the parent
+# blocks in ``communicate()``. See UpstreamDrift#9511.
+#
+# These two values are a pair and must keep their ordering: the child is killed
+# first so this test reports a clean failure, and only a genuinely stuck kill
+# path should ever reach the outer mark. They are sized for the shutdown hang,
+# not for the test run -- a larger bound only buys more wasted lane time.
+_CHILD_TIMEOUT_SECONDS = 90
+_TEST_TIMEOUT_SECONDS = 120
 
 
 class TestProcessIsolationStrict:
@@ -69,8 +75,11 @@ class TestProcessIsolationStrict:
             stdout = expired.stdout or b""
             stderr = expired.stderr or b""
             pytest.fail(
-                f"Isolated test {test_file.name} did not finish within "
-                f"{_CHILD_TIMEOUT_SECONDS}s and was killed.\n"
+                f"Isolated test {test_file.name} did not exit within "
+                f"{_CHILD_TIMEOUT_SECONDS}s and was killed. If the captured stdout "
+                f"below ends in a complete pytest summary, the tests themselves "
+                f"finished and the child hung at interpreter shutdown "
+                f"(UpstreamDrift#9511), not during the run.\n"
                 f"--- STDOUT ---\n{_as_text(stdout)}\n"
                 f"--- STDERR ---\n{_as_text(stderr)}"
             )
@@ -135,7 +144,7 @@ class TestIsolatedChildTimeoutIsContained:
             TestProcessIsolationStrict().run_isolated_test(TEST_DRAKE_STRICT)
 
         message = str(excinfo.value)
-        assert "did not finish within" in message
+        assert "did not exit within" in message
         assert "partial stdout" in message
         assert "partial stderr" in message
 
