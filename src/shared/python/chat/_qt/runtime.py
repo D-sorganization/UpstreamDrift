@@ -420,11 +420,151 @@ def set_chat_dock_collapsed(dock: Any, collapsed: bool) -> None:
     dock.updateGeometry()
 
 
+def format_agent_label(dock: Any) -> str:
+    """Return human-readable label for the active AI agent."""
+    model = (getattr(dock, "_current_model", None) or "").strip()
+    provider = (getattr(dock, "_current_provider", None) or "").strip()
+    if model:
+        return f"Agent ({model})"
+    if provider:
+        return f"Agent ({provider})"
+    return "Agent"
+
+
+def add_bubble(dock: Any, role: str, content: str) -> Any:
+    """Add a message bubble to the scroll area."""
+    if role is None:
+        raise ValueError("role must be provided")
+    from .bubbles import ChatMessageBubble
+
+    agent_label = format_agent_label(dock) if role != "user" else None
+    bubble = ChatMessageBubble(
+        role,
+        content,
+        accent_color=dock._accent_color,
+        theme_provider=dock._theme_provider,
+        agent_label=agent_label,
+    )
+    count = dock._message_layout.count()
+    dock._message_layout.insertWidget(count - 1, bubble)
+    dock._scroll_to_bottom()
+    return bubble
+
+
+def populate_history(dock: Any, messages: list[dict]) -> None:
+    """Clear and rebuild message bubbles from history."""
+    if messages is None:
+        raise ValueError("messages must be provided")
+    while dock._message_layout.count() > 1:
+        item = dock._message_layout.takeAt(0)
+        if item:
+            w = item.widget()
+            if w:
+                w.deleteLater()
+    for msg in messages:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        if role in ("user", "assistant"):
+            dock._add_bubble(role, content)
+
+
+def resolve_init_parameters(
+    connection: Any,
+    presentation: Any,
+    integrations: Any,
+    identity: Any,
+    hooks: Any,
+    kwargs: dict[str, Any],
+    default_theme: Any,
+    default_registry_factory: Callable[[], Any],
+) -> dict[str, Any]:
+    """Resolve and validate constructor arguments into a unified dictionary."""
+    if "app_context" in kwargs and kwargs["app_context"] is None:
+        raise ValueError("app_context must be provided")
+
+    effective_hooks = hooks or integrations
+    app_context = (
+        kwargs.pop("app_context", None)
+        or (identity.app_context if identity else None)
+        or (connection.app_context if connection and connection.app_context else None)
+        or "unknown"
+    )
+    app_name = (
+        kwargs.pop("app_name", None)
+        or (identity.app_name if identity else None)
+        or (connection.app_name if connection and connection.app_name else None)
+        or "shared_chat"
+    )
+    project_root = (
+        kwargs.pop("project_root", None)
+        or (identity.project_root if identity else None)
+        or (connection.project_root if connection and connection.project_root else None)
+    )
+
+    return {
+        "app_context": app_context,
+        "app_name": app_name,
+        "project_root": Path(project_root).resolve() if project_root else Path.cwd(),
+        "server_url": kwargs.pop("server_url", None)
+        or (connection.server_url if connection else None),
+        "session_id": kwargs.pop("session_id", None)
+        or (connection.session_id if connection else None),
+        "ws_path_template": (
+            kwargs.pop("ws_path_template", None)
+            or (connection.ws_path_template if connection else None)
+            or "/api/ws/chat/{session_id}"
+        ),
+        "placeholder_text": (
+            kwargs.pop("placeholder_text", None)
+            or (presentation.placeholder_text if presentation else None)
+            or "Ask a question..."
+        ),
+        "accent_color": (
+            kwargs.pop("accent_color", None)
+            or (presentation.accent_color if presentation else None)
+            or "#FF8800"
+        ),
+        "auto_index_on_open": bool(
+            kwargs.pop("auto_index_on_open", None)
+            if "auto_index_on_open" in kwargs
+            else (presentation.auto_index_on_open if presentation else False)
+        ),
+        "theme_provider": (
+            kwargs.pop("theme_provider", None)
+            or (presentation.theme_provider if presentation else None)
+            or default_theme
+        ),
+        "terminal_registry": (
+            kwargs.pop("terminal_registry", None)
+            or (effective_hooks.terminal_registry if effective_hooks else None)
+            or default_registry_factory()
+        ),
+        "workspace_provider": (
+            kwargs.pop("workspace_provider", None)
+            or (effective_hooks.workspace_provider if effective_hooks else None)
+        ),
+        "plot_request_sink": (
+            kwargs.pop("plot_request_sink", None)
+            or (effective_hooks.plot_request_sink if effective_hooks else None)
+        ),
+        "session_manager": (
+            kwargs.pop("session_manager", None)
+            or (effective_hooks.session_manager if effective_hooks else None)
+        ),
+        "memory_manager_factory": (
+            kwargs.pop("memory_manager_factory", None)
+            or (effective_hooks.memory_manager_factory if effective_hooks else None)
+        ),
+    }
+
+
 __all__ = [
+    "add_bubble",
     "append_terminal_line",
     "connect",
     "connection_diagnostics",
     "current_mode",
+    "format_agent_label",
     "handle_message",
     "initialize_streaming_state",
     "on_disconnected",
@@ -432,8 +572,10 @@ __all__ = [
     "on_terminal_input",
     "on_terminal_start",
     "on_terminal_stop",
+    "populate_history",
     "populate_provider_combo",
     "populate_shell_combo",
+    "resolve_init_parameters",
     "set_chat_dock_collapsed",
     "set_terminal_runtime_available",
     "sync_terminal_controls",

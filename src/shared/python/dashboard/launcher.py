@@ -95,14 +95,20 @@ def launch_dashboard(
     try:
         from PyQt6.QtCore import Qt
 
-        from src.shared.python.chat import ChatDockWidget
+        from src.shared.python.chat.chat_dock_widget import (
+            ChatConnectionConfig,
+            ChatDockWidget,
+        )
 
         engine_name = (
             getattr(engine_class, "__name__", "engine")
             .lower()
             .replace("physicsengine", "")
         )
-        chat_dock = ChatDockWidget(app_context=engine_name, parent=window)
+        chat_dock = ChatDockWidget(
+            connection=ChatConnectionConfig(app_context=engine_name),
+            parent=window,
+        )
         window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, chat_dock)
     except (ImportError, TypeError, RuntimeError) as e:
         logger.debug("AI Chat dock not available: %s", e)

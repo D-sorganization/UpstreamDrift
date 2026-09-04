@@ -33,6 +33,7 @@ Usage::
 from __future__ import annotations
 
 import base64
+from dataclasses import dataclass
 import json
 import logging
 import threading
@@ -88,13 +89,79 @@ logger = logging.getLogger(__name__)
 # Re-exports kept for backwards compatibility — test suites and
 # downstream code patch these on the ``_chat_dock_widget_qt`` namespace.
 __all__ = [
+    "ChatConnectionConfig",
     "ChatDockWidget",
+    "ChatIntegrationHooks",
     "ChatMessageBubble",
+    "ChatPresentationConfig",
+    "ChatSessionIdentity",
     "HistorySidebar",
     "QFileDialog",
     "QWebSocket",
     "QWidget",
 ]
+
+
+@dataclass
+class ChatConnectionConfig:
+    """Connection and session-identity settings for ChatDockWidget."""
+
+    server_url: str | None = None
+    session_id: str | None = None
+    ws_path_template: str = "/api/ws/chat/{session_id}"
+    app_context: str = "unknown"
+    app_name: str = "shared_chat"
+    project_root: str | Path | None = None
+
+
+@dataclass
+class ChatSessionIdentity:
+    """Identity parameters for ChatDockWidget session."""
+
+    app_context: str = "unknown"
+    app_name: str = "shared_chat"
+    project_root: str | Path | None = None
+
+
+@dataclass
+class ChatPresentationConfig:
+    """Presentation and theming settings for ChatDockWidget."""
+
+    placeholder_text: str = "Ask a question..."
+    accent_color: str = "#FF8800"
+    theme_provider: ThemeProviderProtocol | None = None
+    auto_index_on_open: bool = False
+
+
+@dataclass
+class ChatIntegrationHooks:
+    """Dependency-injection hooks for host-application integrations."""
+
+    terminal_registry: TerminalProviderRegistry | None = None
+    workspace_provider: WorkspaceContextProtocol | None = None
+    plot_request_sink: Callable[[Any], None] | None = None
+    session_manager: Any | None = None
+    memory_manager_factory: Callable[[], Any] | None = None
+
+
+def _resolve_init_parameters(
+    connection: ChatConnectionConfig | None,
+    presentation: ChatPresentationConfig | None,
+    integrations: ChatIntegrationHooks | None,
+    identity: ChatSessionIdentity | None,
+    hooks: ChatIntegrationHooks | None,
+    kwargs: dict[str, Any],
+) -> dict[str, Any]:
+    return _runtime.resolve_init_parameters(
+        connection,
+        presentation,
+        integrations,
+        identity,
+        hooks,
+        kwargs,
+        _DefaultDarkTheme(),
+        build_default_terminal_provider_registry,
+    )
 
 
 def _build_default_session_manager(app_name: str) -> Any:
@@ -152,58 +219,40 @@ class ChatDockWidget(QDockWidget):
 
     def __init__(
         self,
-        app_context: str = "unknown",
-        app_name: str = "shared_chat",
-        server_url: str | None = None,
-        session_id: str | None = None,
-        ws_path_template: str = "/api/ws/chat/{session_id}",
-        placeholder_text: str = "Ask a question...",
-        accent_color: str = "#FF8800",
-        auto_index_on_open: bool = False,
-        project_root: str | Path | None = None,
-        terminal_registry: TerminalProviderRegistry | None = None,
-        theme_provider: ThemeProviderProtocol | None = None,
-        workspace_provider: WorkspaceContextProtocol | None = None,
-        plot_request_sink: Callable[[Any], None] | None = None,
+        connection: ChatConnectionConfig | None = None,
+        presentation: ChatPresentationConfig | None = None,
+        integrations: ChatIntegrationHooks | None = None,
         parent: QWidget | None = None,
         *,
-        session_manager: Any | None = None,
-        memory_manager_factory: Callable[[], Any] | None = None,
+        identity: ChatSessionIdentity | None = None,
+        hooks: ChatIntegrationHooks | None = None,
+        **kwargs: Any,
     ) -> None:
-        if app_context is None:
-            raise ValueError("app_context must be provided")
         super().__init__("AI Chat", parent)
-        self._app_context = app_context
-        self._app_name = app_name
-        resolved_server_url = server_url or _resolve_default_server()
+        params = _resolve_init_parameters(
+            connection, presentation, integrations, identity, hooks, kwargs
+        )
+        self._app_context = params["app_context"]
+        self._app_name = params["app_name"]
+        resolved_server_url = params["server_url"] or _resolve_default_server()
         self._server_url = resolved_server_url.rstrip("/")
-        self._ws_path_template = ws_path_template
-        self._accent_color = accent_color
-        self._placeholder_text = placeholder_text
-        self._auto_index_on_open = bool(auto_index_on_open)
-        self._project_root = (
-            Path(project_root).resolve() if project_root else Path.cwd()
-        )
-        self._terminal_registry = (
-            terminal_registry or build_default_terminal_provider_registry()
-        )
-        self._theme_provider: ThemeProviderProtocol = (
-            theme_provider or _DefaultDarkTheme()
-        )
-        self._workspace_provider: WorkspaceContextProtocol | None = workspace_provider
-        self._plot_request_sink: Callable[[Any], None] | None = plot_request_sink
+        self._ws_path_template = params["ws_path_template"]
+        self._accent_color = params["accent_color"]
+        self._placeholder_text = params["placeholder_text"]
+        self._auto_index_on_open = params["auto_index_on_open"]
+        self._project_root = params["project_root"]
+        self._terminal_registry = params["terminal_registry"]
+        self._theme_provider = params["theme_provider"]
+        self._workspace_provider = params["workspace_provider"]
+        self._plot_request_sink = params["plot_request_sink"]
         self._memory_manager_factory = (
-            memory_manager_factory or self._default_memory_manager_factory
+            params["memory_manager_factory"] or self._default_memory_manager_factory
         )
         _runtime.initialize_streaming_state(self, timer_factory=QTimer)
-        # Tools issue #2871: mid-thread provider/model/thinking state.
         self._message_history: list[dict[str, Any]] = []
         self._current_provider: str = "ollama"
         self._current_model: str = "llama3"
         self._current_thinking_level: str = "none"
-        # ADR-0022 / issue #6119: non-Qt controllers owned by composition.
-        # State stays on the widget (the ``current_*`` view properties bridge
-        # to ``_current_*``); the controllers hold only the routing rules.
         self._ai_settings = AiSettingsController(self)
         self._workspace_commands = WorkspaceCommandHandler(
             emit=lambda text: self._add_bubble("assistant", text),
@@ -214,18 +263,17 @@ class ChatDockWidget(QDockWidget):
         self._terminal_start_pending = False
         self._terminal_runtime_available = False
         self._socket: QWebSocket | None = None
-        self._session_file = _session_file_path(app_name)
-        # Tools issue #2872: conversation-management state.
+        self._session_file = _session_file_path(self._app_name)
         self._loaded_context_sessions: list[str] = []
-        self._session_manager = session_manager or _build_default_session_manager(
-            self._app_name
-        )
+        self._session_manager = params[
+            "session_manager"
+        ] or _build_default_session_manager(self._app_name)
         self._breadcrumb_widget: Any | None = None
         self._reconnect_timer = QTimer(self)
         self._reconnect_timer.setSingleShot(True)
         self._reconnect_timer.timeout.connect(self._connect)
 
-        # Resolve session ID: explicit > class-level > file > "new"
+        session_id = params["session_id"]
         if session_id:
             ChatDockWidget._set_shared_session_id(session_id)
         elif not ChatDockWidget._get_shared_session_id():
@@ -970,62 +1018,13 @@ class ChatDockWidget(QDockWidget):
             self._socket.sendTextMessage(json.dumps(payload))
 
     def _format_agent_label(self) -> str:
-        """Return the human-readable label for the current AI agent.
-
-        Format: ``Agent (<model>)`` when the active model name is known,
-        falling back to ``Agent (<provider>)`` when only the provider id
-        is set, and finally to plain ``Agent`` when neither is populated.
-        Centralised here so the bubble factory, header chrome, and any
-        future call sites (e.g. status pill, tooltips) share one source
-        of truth — DRY.
-
-        DbC postcondition: returned string is non-empty.
-        """
-        model = (self._current_model or "").strip()
-        provider = (self._current_provider or "").strip()
-        if model:
-            return f"Agent ({model})"
-        if provider:
-            return f"Agent ({provider})"
-        return "Agent"
+        return _runtime.format_agent_label(self)
 
     def _add_bubble(self, role: str, content: str) -> ChatMessageBubble:
-        """Add a message bubble to the scroll area.
-
-        Assistant bubbles get an ``"Agent (<model>)"`` label sourced from
-        the active provider/model state so users can tell which model
-        produced each turn (e.g. ``Agent (llama3.1:8b)``,
-        ``Agent (gpt-4o)``). User bubbles always show ``"You"``.
-        """
-        if role is None:
-            raise ValueError("role must be provided")
-        bubble = ChatMessageBubble(
-            role,
-            content,
-            accent_color=self._accent_color,
-            theme_provider=self._theme_provider,
-            agent_label=self._format_agent_label() if role != "user" else None,
-        )
-        count = self._message_layout.count()
-        self._message_layout.insertWidget(count - 1, bubble)
-        self._scroll_to_bottom()
-        return bubble
+        return _runtime.add_bubble(self, role, content)
 
     def _populate_history(self, messages: list[dict]) -> None:
-        """Clear and rebuild message bubbles from history."""
-        if messages is None:
-            raise ValueError("messages must be provided")
-        while self._message_layout.count() > 1:
-            item = self._message_layout.takeAt(0)
-            if item:
-                w = item.widget()
-                if w:
-                    w.deleteLater()
-        for msg in messages:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            if role in ("user", "assistant"):
-                self._add_bubble(role, content)
+        _runtime.populate_history(self, messages)
 
     def _scroll_to_bottom(self) -> None:
         QTimer.singleShot(

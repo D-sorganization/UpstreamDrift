@@ -55,15 +55,6 @@
       "expires_on": "2026-09-30"
     },
     {
-      "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
-      "symbol": "ChatDockWidget.__init__",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 9357,
-      "reason": "Audited 2026-09-01: the prior justification cited issue #7362, which is unrelated (import-layering) and already closed, so this had been renewed on autopilot without real review. Re-reviewed: the 16 keyword params group naturally into connection/presentation/integration-hooks config objects (see #9357), so unlike an irreducible-parameter case this genuinely should be split, but it is a breaking constructor-signature change across 5 in-repo call sites and is out of scope for the current pass. Tracked in #9357.",
-      "expires_on": "2026-10-15"
-    },
-    {
       "path": "src/launchers/launcher_ui_setup.py",
       "symbol": "UISetupManager.init_ui",
       "rule": "function-lines",
