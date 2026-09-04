@@ -38,7 +38,7 @@ def test_list_sample_files(tmp_path: Path) -> None:
         MockPath.return_value = mock_path_obj
 
         res = reg.execute("list_sample_files", {})
-        assert res.solver_status == "success"
+        assert res.success is True
         assert len(res.result["files"]) == 0
         assert "No sample data" in res.result["message"]
 
@@ -52,7 +52,7 @@ def test_list_sample_files(tmp_path: Path) -> None:
         mock_path_obj.glob.return_value = [mock_file]
 
         res2 = reg.execute("list_sample_files", {})
-        assert res2.solver_status == "success"
+        assert res2.success is True
         assert len(res2.result["files"]) == 1
         assert res2.result["files"][0]["name"] == "test_file"
         assert res2.result["files"][0]["size_kb"] == 2
@@ -64,7 +64,7 @@ def test_load_c3d() -> None:
 
     # Missing file
     res = reg.execute("load_c3d", {"file_path": "missing.c3d"})
-    assert res.solver_status == "success"  # It returns a structured dict
+    assert res.success is True  # It returns a structured dict
     assert res.result["success"] is False
     assert "File not found" in res.result["error"]
 
@@ -89,7 +89,7 @@ def test_get_marker_info() -> None:
         MockPath.return_value = mock_path_obj
 
         res = reg.execute("get_marker_info", {"file_path": "missing.c3d"})
-        assert res.solver_status == "success"
+        assert res.success is True
         assert res.result["success"] is False
 
 
@@ -100,7 +100,7 @@ def test_run_inverse_dynamics() -> None:
     res = reg.execute(
         "run_inverse_dynamics", {"file_path": "test.c3d", "engine": "mujoco"}
     )
-    assert res.solver_status == "success"
+    assert res.success is True
     assert res.result["success"] is False
     assert res.result["error"] == "not_implemented"
     assert res.result["status"] == "not_implemented"
@@ -120,7 +120,7 @@ def test_interpret_torques() -> None:
         "interpret_torques",
         {"shoulder_torque": 20, "hip_torque": 100, "wrist_torque": 100},
     )
-    assert res.solver_status == "success"
+    assert res.success is True
     assert "Below typical" in res.result["shoulder"]["classification"]
     assert "Within typical range" in res.result["hip"]["classification"]
     assert "Above typical" in res.result["wrist"]["classification"]
@@ -133,7 +133,7 @@ def test_explain_concept() -> None:
     res = reg.execute(
         "explain_concept", {"term": "inverse_dynamics", "expertise_level": 3}
     )
-    assert res.solver_status == "success"
+    assert res.success is True
     assert res.result["term"] == "inverse_dynamics"
     assert "M(q)q" in res.result["explanation"]
 
@@ -143,7 +143,7 @@ def test_list_glossary_terms() -> None:
     register_golf_suite_tools(reg)
 
     res = reg.execute("list_glossary_terms", {"category": "golf"})
-    assert res.solver_status == "success"
+    assert res.success is True
     assert "kinetic_chain" in res.result["terms"]
 
 
@@ -152,7 +152,7 @@ def test_search_glossary() -> None:
     register_golf_suite_tools(reg)
 
     res = reg.execute("search_glossary", {"query": "pinocchio"})
-    assert res.solver_status == "success"
+    assert res.success is True
     assert any(r["term"] == "Pinocchio" for r in res.result["results"])
 
 
@@ -161,7 +161,7 @@ def test_validate_cross_engine() -> None:
     register_golf_suite_tools(reg)
 
     res = reg.execute("validate_cross_engine", {"file_path": "test.c3d"})
-    assert res.solver_status == "success"
+    assert res.success is True
     assert res.result["success"] is False
     assert res.result["error"] == "not_implemented"
     assert res.result["status"] == "not_implemented"
@@ -172,7 +172,7 @@ def test_check_energy_conservation() -> None:
     register_golf_suite_tools(reg)
 
     res = reg.execute("check_energy_conservation", {})
-    assert res.solver_status == "success"
+    assert res.success is True
     assert res.result["success"] is False
     assert res.result["error"] == "not_implemented"
     assert res.result["status"] == "not_implemented"
@@ -205,7 +205,7 @@ def test_list_physics_engines() -> None:
         mock_find_spec.side_effect = lambda name: True if name == "mujoco" else None
 
         res = reg.execute("list_physics_engines", {})
-        assert res.solver_status == "success"
+        assert res.success is True
         assert res.result["available_count"] == 1
         engines = {e["name"]: e["status"] for e in res.result["engines"]}
         assert engines["MuJoCo"] == "available"

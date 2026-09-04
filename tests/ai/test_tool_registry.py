@@ -34,7 +34,7 @@ class TestToolRegistry:
             return a + b
 
         result = registry.execute("add", {"a": 5, "b": 3})
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result == 8
 
     def test_execution_param_validation(self, registry) -> None:
@@ -44,12 +44,12 @@ class TestToolRegistry:
 
         # Missing required
         res1 = registry.execute("echo", {})
-        assert res1.solver_status != "success"
+        assert res1.success is False
         assert "Missing required parameter" in res1.error
 
         # Unknown param
         res2 = registry.execute("echo", {"msg": "hi", "bad": 1})
-        assert res2.solver_status != "success"
+        assert res2.success is False
         assert "Unknown parameter" in res2.error
 
     def test_json_schema_generation(self, registry) -> None:
