@@ -160,6 +160,25 @@ jobs:
         run: |
           python -m ensurepip --upgrade || true
           python3 -m pip install build twine pip-audit jsonschema pyyaml
+      # build_hooks.py refuses to package without ui/dist once CI is set, so the
+      # UI bundle must be compiled here before `python -m build` (#9449).
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ui/package-lock.json
+      - name: Install UI dependencies
+        working-directory: ui
+        run: npm ci
+      - name: Build UI bundle
+        working-directory: ui
+        run: npm run build
+      - name: Verify UI bundle exists before packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f ui/dist/index.html
+          echo "UI bundle present at ui/dist"
       - name: Build package
         id: build-wheel
         shell: bash
@@ -217,11 +236,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Keep in step with `requires-python` in pyproject.toml (3.11–3.12).
         include:
-          - { runner: d-sorg-fleet-docker, python: "3.10" }
           - { runner: d-sorg-fleet-docker, python: "3.11" }
           - { runner: d-sorg-fleet-docker, python: "3.12" }
-          - { runner: d-sorg-fleet-docker, python: "3.13" }
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

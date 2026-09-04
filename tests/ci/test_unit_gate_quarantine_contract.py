@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -45,18 +46,47 @@ def _clusters(*selectors: tuple[str, list[str]]) -> dict[str, object]:
 
 
 def test_repository_ledger_has_unique_exact_cluster_coverage() -> None:
-    ledger = quarantine.load_json(
-        REPO_ROOT / "scripts" / "config" / "unit_gate_quarantine.json"
-    )
-    clusters = quarantine.load_json(
-        REPO_ROOT / "scripts" / "config" / "unit_gate_quarantine_clusters.json"
-    )
+    """Assert the ledger's invariants, never a hand-maintained entry count.
+
+    Every burn-down PR removes entries, so a literal count constant here would
+    have to be edited by hand on each one. The expectation is therefore derived
+    from the ledger file itself and the ratchet direction is enforced against
+    the base branch by ``test_repository_ledger_never_grows_against_baseline``
+    (see #9411).
+    """
+
+    ledger = quarantine.load_json(quarantine.LEDGER_PATH)
+    clusters = quarantine.load_json(quarantine.CLUSTER_PATH)
+    declared_node_ids = ledger["node_ids"]
 
     report = quarantine.validate_contract(ledger, clusters)
 
-    assert report.node_count == 520
+    assert isinstance(declared_node_ids, list)
+    # Uniqueness: the deduplicated count equals the declared count.
+    assert report.node_count == len(declared_node_ids)
+    assert report.node_count == len(set(declared_node_ids))
     assert report.cluster_count >= 8
+    # Exact cluster coverage: every node ID lands in exactly one cluster, and
+    # all cluster metadata is populated. validate_contract reports both.
     assert report.errors == ()
+
+
+def test_repository_ledger_never_grows_against_baseline() -> None:
+    """The ledger may only shrink relative to the integration branch (#8766)."""
+
+    ledger = quarantine.load_json(quarantine.LEDGER_PATH)
+    current = set(quarantine._node_ids(ledger))
+
+    for ref in ("origin/main", "main"):
+        try:
+            baseline = quarantine._baseline_node_ids(ref)
+        except (OSError, ValueError, subprocess.CalledProcessError):
+            continue
+        assert quarantine.removal_only_errors(current, baseline) == ()
+        assert len(current) <= len(baseline)
+        return
+
+    pytest.skip("no local main baseline is available for the quarantine ratchet")
 
 
 def test_duplicate_node_ids_fail_closed() -> None:

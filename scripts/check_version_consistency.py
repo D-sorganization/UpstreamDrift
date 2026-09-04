@@ -22,6 +22,10 @@ TagReader = Callable[[Path], tuple[str, ...]]
 
 _SEMVER_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:[.-]?(?:dev|a|b|rc).*)?$")
 _TAG_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
+# `| 2.1.x | :white_check_mark: |` rows in the SECURITY.md supported-versions table.
+_SECURITY_SUPPORTED_RE = re.compile(
+    r"^\|\s*(\d+\.\d+)\.x\s*\|\s*:white_check_mark:\s*\|", re.MULTILINE
+)
 
 
 @dataclass(frozen=True)
@@ -91,6 +95,90 @@ def _read_package_json_version(path: Path) -> str:
     return version
 
 
+def _read_version_file(path: Path) -> str:
+    """Return the trimmed single-line ``VERSION`` file contents."""
+    if not path.is_file():
+        raise ValueError(f"Required version file is missing: {path}")
+    version = path.read_text(encoding="utf-8").strip()
+    if not version:
+        raise ValueError(f"{path} must contain a non-empty version")
+    return version
+
+
+def _read_json_version(path: Path) -> str:
+    """Return the top-level ``version`` key of a JSON document."""
+    if not path.is_file():
+        raise ValueError(f"Required version file is missing: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    version = data.get("version") if isinstance(data, dict) else None
+    if not isinstance(version, str) or not version:
+        raise ValueError(f"{path} must contain a non-empty top-level version")
+    return version
+
+
+def _read_package_lock_version(path: Path) -> str:
+    """Return the package version from ui/package-lock.json.
+
+    Verifies that the top-level version matches packages['']['version'].
+    """
+    if not path.is_file():
+        raise ValueError(f"Required version file is missing: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"{path} must contain a JSON object")
+    version = data.get("version")
+    if not isinstance(version, str) or not version:
+        raise ValueError(f"{path} must contain a non-empty top-level version")
+    packages = data.get("packages")
+    if isinstance(packages, dict) and "" in packages:
+        root_pkg = packages[""]
+        root_version = root_pkg.get("version") if isinstance(root_pkg, dict) else None
+        if root_version != version:
+            raise ValueError(
+                f"{path} packages['']['version'] {root_version!r} does not match "
+                f"top-level version {version!r}"
+            )
+    return version
+
+
+def _sbom_baseline_errors(path: Path, canonical_version: str) -> list[str]:
+    """Return drift errors for the SBOM baseline's derived version strings."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    errors: list[str] = []
+    tiers = data.get("tiers")
+    if not isinstance(tiers, dict):
+        return [f"{path} must contain a tiers table"]
+    for tier, spec in tiers.items():
+        install_spec = spec.get("install_spec") if isinstance(spec, dict) else None
+        if not isinstance(install_spec, str) or not install_spec.endswith(
+            f"=={canonical_version}"
+        ):
+            errors.append(
+                f"scripts/config/sbom_baseline.json tier {tier!r} install_spec "
+                f"{install_spec!r} does not pin =={canonical_version}"
+            )
+    for artifact in data.get("expected_artifacts", []):
+        if canonical_version not in str(artifact):
+            errors.append(
+                f"scripts/config/sbom_baseline.json expected artifact {artifact!r} "
+                f"does not carry version {canonical_version!r}"
+            )
+    return errors
+
+
+def _security_supported_series(path: Path) -> tuple[str, ...]:
+    """Return the ``MAJOR.MINOR`` series marked supported in SECURITY.md."""
+    if not path.is_file():
+        raise ValueError(f"Required version file is missing: {path}")
+    text = path.read_text(encoding="utf-8")
+    series = tuple(dict.fromkeys(_SECURITY_SUPPORTED_RE.findall(text)))
+    if not series:
+        raise ValueError(
+            f"{path} must list at least one supported `| X.Y.x | :white_check_mark: |` row"
+        )
+    return series
+
+
 def _read_python_dunder_version(path: Path) -> str:
     if not path.is_file():
         raise ValueError(f"Required version file is missing: {path}")
@@ -129,10 +217,12 @@ def _default_tag_reader(repo_root: Path) -> tuple[str, ...]:
     result = subprocess.run(
         ["git", "tag", "--list"],
         cwd=repo_root,
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
     )
+    if result.returncode != 0:
+        return ()
     return tuple(line.strip() for line in result.stdout.splitlines() if line.strip())
 
 
@@ -177,6 +267,26 @@ def _collect_surfaces(repo_root: Path) -> tuple[VersionSurface, ...]:
                 repo_root / "rust_core" / "upstream-physics" / "pyproject.toml"
             ),
         ),
+        VersionSurface(
+            "VERSION",
+            repo_root / "VERSION",
+            _read_version_file(repo_root / "VERSION"),
+        ),
+        VersionSurface(
+            "ui/src-tauri/tauri.conf.json",
+            repo_root / "ui" / "src-tauri" / "tauri.conf.json",
+            _read_json_version(repo_root / "ui" / "src-tauri" / "tauri.conf.json"),
+        ),
+        VersionSurface(
+            "scripts/config/sbom_baseline.json",
+            repo_root / "scripts" / "config" / "sbom_baseline.json",
+            _read_json_version(repo_root / "scripts" / "config" / "sbom_baseline.json"),
+        ),
+        VersionSurface(
+            "ui/package-lock.json",
+            repo_root / "ui" / "package-lock.json",
+            _read_package_lock_version(repo_root / "ui" / "package-lock.json"),
+        ),
     )
 
 
@@ -207,11 +317,30 @@ def check_versions(
                 f"pyproject.toml version {canonical_version!r}"
             )
 
+    errors.extend(
+        _sbom_baseline_errors(
+            repo_root / "scripts" / "config" / "sbom_baseline.json", canonical_version
+        )
+    )
+
     try:
         canonical_tuple = _release_tuple(canonical_version)
     except ValueError as exc:
         errors.append(str(exc))
         canonical_tuple = None
+
+    if canonical_tuple is not None:
+        series = f"{canonical_tuple[0]}.{canonical_tuple[1]}"
+        try:
+            supported = _security_supported_series(repo_root / "SECURITY.md")
+        except ValueError as exc:
+            errors.append(str(exc))
+        else:
+            if series not in supported:
+                errors.append(
+                    f"SECURITY.md supported versions {supported!r} do not include "
+                    f"the current series {series + '.x'!r}"
+                )
 
     latest_tag = _latest_semver_tag(tag_reader(repo_root))
     if latest_tag is None:
@@ -234,6 +363,144 @@ def check_versions(
         surfaces=surfaces,
         errors=tuple(errors),
     )
+
+
+def _set_code_manifest_versions(repo_root: Path, target_version: str) -> None:
+    """Update pyproject.toml, Cargo.toml, _version.py, and VERSION surfaces."""
+    pyproject_path = repo_root / "pyproject.toml"
+    if pyproject_path.is_file():
+        content = pyproject_path.read_text(encoding="utf-8")
+        content = re.sub(
+            r'(?m)^(\s*version\s*=\s*")[^"]+(")',
+            rf"\g<1>{target_version}\g<2>",
+            content,
+            count=1,
+        )
+        pyproject_path.write_text(content, encoding="utf-8")
+
+    version_py = repo_root / "src" / "api" / "_version.py"
+    if version_py.is_file():
+        content = version_py.read_text(encoding="utf-8")
+        content = re.sub(
+            r'(?m)^(\s*__version__\s*=\s*")[^"]+(")',
+            rf"\g<1>{target_version}\g<2>",
+            content,
+            count=1,
+        )
+        version_py.write_text(content, encoding="utf-8")
+
+    cargo_toml = repo_root / "Cargo.toml"
+    if cargo_toml.is_file():
+        content = cargo_toml.read_text(encoding="utf-8")
+        content = re.sub(
+            r'(?ms)(\[workspace\.package\].*?^\s*version\s*=\s*")[^"]+(")',
+            rf"\g<1>{target_version}\g<2>",
+            content,
+            count=1,
+        )
+        cargo_toml.write_text(content, encoding="utf-8")
+
+    physics_toml = repo_root / "rust_core" / "upstream-physics" / "pyproject.toml"
+    if physics_toml.is_file():
+        content = physics_toml.read_text(encoding="utf-8")
+        content = re.sub(
+            r'(?m)^(\s*version\s*=\s*")[^"]+(")',
+            rf"\g<1>{target_version}\g<2>",
+            content,
+            count=1,
+        )
+        physics_toml.write_text(content, encoding="utf-8")
+
+    version_file = repo_root / "VERSION"
+    if version_file.is_file():
+        version_file.write_text(f"{target_version}\n", encoding="utf-8")
+
+
+def _set_ui_manifest_versions(repo_root: Path, target_version: str) -> None:
+    """Update UI package manifests and Tauri config surfaces."""
+    pkg_json = repo_root / "ui" / "package.json"
+    if pkg_json.is_file():
+        data = json.loads(pkg_json.read_text(encoding="utf-8"))
+        data["version"] = target_version
+        pkg_json.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+    pkg_lock = repo_root / "ui" / "package-lock.json"
+    if pkg_lock.is_file():
+        data = json.loads(pkg_lock.read_text(encoding="utf-8"))
+        data["version"] = target_version
+        if (
+            "packages" in data
+            and isinstance(data["packages"], dict)
+            and "" in data["packages"]
+        ):
+            data["packages"][""]["version"] = target_version
+        pkg_lock.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+    tauri_conf = repo_root / "ui" / "src-tauri" / "tauri.conf.json"
+    if tauri_conf.is_file():
+        data = json.loads(tauri_conf.read_text(encoding="utf-8"))
+        data["version"] = target_version
+        tauri_conf.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def _set_release_metadata_versions(
+    repo_root: Path, target_version: str, series: str
+) -> None:
+    """Update SBOM baseline artifacts and SECURITY.md supported series."""
+    sbom_path = repo_root / "scripts" / "config" / "sbom_baseline.json"
+    if sbom_path.is_file():
+        data = json.loads(sbom_path.read_text(encoding="utf-8"))
+        old_version = data.get("version", "")
+        data["version"] = target_version
+        if "tiers" in data and isinstance(data["tiers"], dict):
+            for spec in data["tiers"].values():
+                if isinstance(spec, dict) and "install_spec" in spec:
+                    pkg = spec["install_spec"].partition("==")[0]
+                    spec["install_spec"] = f"{pkg}=={target_version}"
+        if "expected_artifacts" in data and isinstance(
+            data["expected_artifacts"], list
+        ):
+            new_artifacts = []
+            for art in data["expected_artifacts"]:
+                if old_version and old_version in str(art):
+                    new_artifacts.append(str(art).replace(old_version, target_version))
+                else:
+                    new_artifacts.append(str(art))
+            data["expected_artifacts"] = new_artifacts
+        sbom_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+    sec_path = repo_root / "SECURITY.md"
+    if sec_path.is_file():
+        text = sec_path.read_text(encoding="utf-8")
+        if f"| {series}.x" not in text:
+            row = f"| {series}.x   | :white_check_mark: |\n"
+            match_header = re.search(r"(\| -+ \| -+ \|\r?\n)", text)
+            if match_header:
+                pos = match_header.end()
+                text = text[:pos] + row + text[pos:]
+                sec_path.write_text(text, encoding="utf-8")
+
+
+def set_versions(repo_root: Path, target_version: str) -> None:
+    """Update all version surfaces to the given target version.
+
+    Preconditions: ``repo_root`` is an existing directory and ``target_version``
+    matches the SemVer pattern.
+    Postcondition: all checked surfaces, SBOM baseline, and SECURITY.md are updated.
+    """
+    if not isinstance(repo_root, Path):
+        raise TypeError("repo_root must be a pathlib.Path")
+    if not repo_root.is_dir():
+        raise ValueError(f"repo_root must be an existing directory: {repo_root}")
+    match = _SEMVER_RE.match(target_version)
+    if match is None:
+        raise ValueError(
+            f"target_version must be SemVer-compatible: {target_version!r}"
+        )
+    major, minor, _ = match.groups()
+    _set_code_manifest_versions(repo_root, target_version)
+    _set_ui_manifest_versions(repo_root, target_version)
+    _set_release_metadata_versions(repo_root, target_version, f"{major}.{minor}")
 
 
 def _format_report(report: VersionReport) -> str:
@@ -262,7 +529,16 @@ def main(argv: list[str] | None = None) -> int:
         default=Path(__file__).resolve().parents[1],
         help="Repository root to check. Defaults to the script parent repository.",
     )
+    parser.add_argument(
+        "--set",
+        dest="target_version",
+        type=str,
+        default=None,
+        help="Update all version surfaces to this version before checking.",
+    )
     args = parser.parse_args(argv)
+    if args.target_version is not None:
+        set_versions(args.repo_root, args.target_version)
     report = check_versions(args.repo_root)
     print(_format_report(report))
     return 0 if report.ok else 1

@@ -474,8 +474,10 @@ wave structure.
 **Executed 2026-09-02 (#9420): Option 1.** The copy moved to
 `src/tools/launch_monitor_model/`, beside the workbench; the ledger entry
 cleared and `shared.python.launch_monitor` now resolves to the vendored
-package, so wave 1 — blocked at step 2 until then, its step 1 and identity
-premise already pinned in `test_canonical_layer_parity.py` — is unblocked.
+package, unblocking wave 1.
+
+**Stage 2 complete 2026-09-03 (#9348).** All 28 `port-up`/`merge` modules are
+retired; only `__init__.py`, `project.py` and P12's baseline half remain.
 
 ## Risks
 

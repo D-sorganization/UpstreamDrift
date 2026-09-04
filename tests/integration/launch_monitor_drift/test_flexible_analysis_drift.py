@@ -36,24 +36,26 @@ AGREE — asserted to bit equality on the 160-shot clean session
       leaving the same 158 complete rows.
 
 DIFFER — documented and pinned below
-    D15. **The multiplicity denominator differs.** An under-sampled predictor
-         (n=5 against ``min_samples=10``) still counts toward UD's
-         Benjamini-Hochberg correction and does not count toward Tools'. On the
-         same four-predictor request the three fully sampled predictors come
-         back adjusted to 0.9217169029997262 from UD and 0.8646154865187129
-         from Tools — a 6.6% difference in a reported FDR value, from identical
-         raw p values.
+    D15. **RESOLVED - the multiplicity denominator now agrees.** An
+         under-sampled predictor used to stay in UD's Benjamini-Hochberg pool
+         (corrected against k=4) and be dropped from Tools' (k=3), inflating
+         every surviving predictor's adjusted p value by 6.60%: 0.92171690
+         against 0.86461549 on this fixture. ADR-0048's owner
+         ruling called UD's count-all behaviour "a defect, not a preserved
+         method"; the canonical layer excludes under-sampled predictors before
+         correcting, and both stacks now report 0.86461549 at delta 0.0.
     D16. **UD fails closed on an unknown enum; Tools silently degrades.** UD
          validates ``analysis_mode``/``correlation_method``/``missing_policy``
          in ``__post_init__``. Tools validates none of them: an unknown
          ``correlation_method`` falls through to Kendall (bit-identical result
          0.010163995292918303) while still reporting ``method="bogus"``, and an
          unknown ``analysis_mode`` behaves as ``"comprehensive"``.
-    D17. **Boolean columns.** UD's ``pd.to_numeric`` projects ``True``/``False``
-         to 1.0/0.0 and analyses the column (r = 0.01854649955664114 over 160
-         rows); Tools' ``finite_launch_monitor_scalar`` refuses booleans, so the
-         column reads as all-null and Tools raises "Constant variables cannot
-         be analyzed".
+    D17. **Boolean columns are analysed only by UD**, and now say so. UD's
+         ``pd.to_numeric`` projects True/False to 1.0/0.0 and analyses the
+         column; Tools' ``finite_launch_monitor_scalar`` refuses it. ADR-0048's
+         owner ruling preserved the capability and removed the silence: the
+         estimate carries ``is_boolean_projected``, so a projected column can
+         never read as native numeric. The coefficient is unchanged.
     D18. **Blank provenance strings.** UD drops whitespace-only identifiers from
          ``DatasetSummary.session_ids`` (20 entries); Tools keeps them (21).
     D19. **Result surfaces are near-identical but not equal.** UD alone reports
@@ -74,10 +76,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.tools.launch_monitor_model.flexible_analysis import (
+from shared.python.launch_monitor.flexible_analysis import (
     CONTRACT_VERSION as UD_CONTRACT_VERSION,
 )
-from src.tools.launch_monitor_model.flexible_analysis import (
+from shared.python.launch_monitor.flexible_analysis import (
     AnalysisMode,
     CorrelationMethod,
     FlexibleAnalysisRequest,
@@ -150,11 +152,22 @@ SHARED_COEFFICIENTS = {
 }
 SHARED_TEXT_COMPLETE_ROWS = 158
 
-# D15 pins: the same three raw p values, two different FDR denominators.
+# D15 pins. ``LEGACY_UD_ADJUSTED_WITH_SPARSE`` is the value UD reported while
+# it corrected against k=4; ``ADJUSTED_WITH_SPARSE`` is the k=3 value both
+# stacks report now that owner ruling D15 removed the under-sampled predictor
+# from the Benjamini-Hochberg pool. The legacy number is kept as a pin so the
+# gate states what changed, not merely what holds.
 SPARSE_PREDICTORS = (*PREDICTORS, "sparse_metric")
 SPARSE_SAMPLE_COUNT = 5
-UD_ADJUSTED_WITH_SPARSE = 0.9217169029997262
-TOOLS_ADJUSTED_WITH_SPARSE = 0.8646154865187129
+LEGACY_UD_ADJUSTED_WITH_SPARSE = 0.9217169029997262
+ADJUSTED_WITH_SPARSE = 0.8646154865187129
+# The measured inflation the extra pool entry caused on this fixture: 6.60%,
+# not the k/(k-1) = 4/3 a naive reading of the denominator predicts. The
+# Benjamini-Hochberg step-up takes a running minimum over ranks, so inserting
+# a fourth p value both scales *and* re-ranks, and the two effects partly
+# cancel. Pinning the measured ratio rather than the algebraic one is the
+# point of a gate.
+D15_INFLATION_FACTOR = 1.0660425557618987
 
 # D16 pin: Tools' unknown-method fall-through equals its Kendall branch.
 TOOLS_BOGUS_METHOD_COEFFICIENT = 0.010163995292918303
@@ -355,15 +368,24 @@ def test_non_numeric_text_is_rejected_identically(session_frame: pd.DataFrame) -
     assert ud_text.coefficient - tools_text.coefficient == 0.0
 
 
-def test_divergence_d15_multiplicity_denominator_differs(
+def test_resolved_d15_the_fdr_denominator_agrees(
     session_frame: pd.DataFrame,
 ) -> None:
-    """DIFFER (D15): an under-sampled predictor counts in UD's FDR, not Tools'.
+    """RESOLVED (D15): both stacks now correct against the same denominator.
 
-    The raw p values are identical on both sides. UD keeps the under-sampled
-    predictor's raw p in the Benjamini-Hochberg pool and only blanks the
-    reported values afterwards, so it corrects against k=4; Tools drops it
-    before correcting, so it corrects against k=3.
+    As measured, UD kept an under-sampled predictor's raw p value in the
+    Benjamini-Hochberg pool and only blanked the reported values afterwards,
+    correcting against k=4, while ``rate_of_closure`` dropped it before
+    correcting, against k=3. The raw p values were identical on both sides;
+    only the denominator differed, and it inflated the adjusted p value of
+    every predictor that *did* survive by exactly 4/3.
+
+    ADR-0048's owner ruling on D15 is unambiguous - "UD's count-all behaviour
+    is a defect, not a preserved method" - and the canonical layer this
+    repository consumes applies it: an under-sampled predictor is excluded
+    from the correction pool before correcting. This gate now asserts the
+    agreement, and keeps the legacy value pinned so the size and direction of
+    the change stay legible.
     """
     frame = session_frame.copy()
     frame["sparse_metric"] = np.nan
@@ -395,16 +417,21 @@ def test_divergence_d15_multiplicity_denominator_differs(
         if ud_item.predictor == "sparse_metric":
             assert ud_item.sample_count == SPARSE_SAMPLE_COUNT
             continue
-        # Same raw p value ...
+        # Same raw p value, as it always was ...
         assert ud_item.p_value - tools_item.p_value == 0.0
-        # ... different adjusted p value.
+        # ... and now the same adjusted p value too, at delta exactly 0.0.
         assert ud_item.adjusted_p_value == pytest.approx(
-            UD_ADJUSTED_WITH_SPARSE, rel=1e-12
+            ADJUSTED_WITH_SPARSE, rel=1e-12
         )
-        assert tools_item.adjusted_p_value == pytest.approx(
-            TOOLS_ADJUSTED_WITH_SPARSE, rel=1e-12
-        )
-        assert ud_item.adjusted_p_value > tools_item.adjusted_p_value
+        assert ud_item.adjusted_p_value - tools_item.adjusted_p_value == 0.0
+
+    # The legacy inflation is gone. Its size is pinned so a future change that
+    # quietly reintroduces the count-all pool is measured, not just noticed:
+    # 6.60% on this fixture, always upward, so the defect could only ever make
+    # a discovery look less significant than the evidence supports.
+    inflated = ADJUSTED_WITH_SPARSE * D15_INFLATION_FACTOR
+    assert inflated == pytest.approx(LEGACY_UD_ADJUSTED_WITH_SPARSE, rel=1e-12)
+    assert inflated > ADJUSTED_WITH_SPARSE
 
 
 def test_divergence_d16_unknown_enum_values_fail_closed_only_in_ud(
@@ -465,7 +492,15 @@ def test_divergence_d16_unknown_enum_values_fail_closed_only_in_ud(
 def test_divergence_d17_boolean_columns_are_analysed_only_by_ud(
     session_frame: pd.DataFrame,
 ) -> None:
-    """DIFFER (D17): UD projects booleans to 1/0; Tools reads them as null."""
+    """DIFFER (D17): the canonical layer projects booleans; Tools refuses.
+
+    The divergence itself is unchanged and is preserved by owner ruling: the
+    canonical layer analyses a boolean column as 0/1, ``rate_of_closure``
+    raises "Constant variables cannot be analyzed". What the ruling changed is
+    the *silence* - the projection is now labelled on the estimate, so a
+    boolean-projected column can never read as native numeric. The coefficient
+    is unmoved by the label, which is asserted against the same pin as before.
+    """
     frame = session_frame.copy()
     frame["flagged"] = frame["shot_index"] % 2 == 0
     predictors = ("session_order", "flagged")
@@ -478,6 +513,12 @@ def test_divergence_d17_boolean_columns_are_analysed_only_by_ud(
     assert flagged.sample_count == EXPECTED_SAMPLE_COUNT
     assert flagged.coefficient == pytest.approx(UD_BOOLEAN_COEFFICIENT, rel=1e-12)
     assert ud.dataset.complete_row_count == EXPECTED_SAMPLE_COUNT
+
+    # The ruling's addition: the projection is explicit, and only where it
+    # actually happened.
+    assert flagged.is_boolean_projected is True
+    native = next(item for item in ud.correlations if item.predictor == "session_order")
+    assert native.is_boolean_projected is False
 
     with pytest.raises(ValueError, match=r"Constant variables cannot be analyzed"):
         analyze_launch_monitor_data(
