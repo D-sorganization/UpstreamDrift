@@ -1335,8 +1335,10 @@ def pytest_runtest_makereport(
         reason = str(longrepr)
 
     # Seam guard skip tracking and enforcement (issue #9501)
+    # Note: tests in tests/launchers/ are consumer integration tests that run against
+    # the real Tools tree in shared-tools-consumer-contracts rather than unit-test-gate.
     lowered = reason.lower()
-    if any(
+    is_seam_reason = any(
         k in lowered
         for k in (
             "vendor/ud-tools",
@@ -1344,7 +1346,8 @@ def pytest_runtest_makereport(
             "tools checkout is unavailable",
             "tools checkout unavailable",
         )
-    ):
+    )
+    if is_seam_reason and not item.nodeid.startswith("tests/launchers/"):
         if not hasattr(item.config, "_ud_seam_test_skips"):
             item.config._ud_seam_test_skips = []
         item.config._ud_seam_test_skips.append((item.nodeid, reason))
