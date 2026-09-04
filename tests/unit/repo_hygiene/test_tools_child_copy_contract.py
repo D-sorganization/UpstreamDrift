@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from datetime import date
 import os
+from pathlib import Path
 import shutil
 import subprocess  # nosec B404 - fixed git invocation, no shell
 import sys
-from pathlib import Path
 
 import pytest
 import yaml
+
+from tests.helpers.seam_guards import missing_vendor_instructions, seam_tests_allow_skip
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
@@ -104,13 +106,14 @@ def _tools_shared_paths() -> set[str] | None:
 
 
 def _require_tools_shared_paths(tools_paths: set[str] | None) -> set[str]:
-    """Return an authoritative Tools inventory or fail closed in CI."""
+    """Return an authoritative Tools inventory or fail closed unless opted out."""
     if tools_paths is not None:
         return tools_paths
-    if os.environ.get("CI"):
+    msg = missing_vendor_instructions(_REPO_ROOT / "vendor" / "ud-tools")
+    if os.environ.get("CI") or not seam_tests_allow_skip():
         raise AssertionError(
-            "An authoritative Tools path inventory is required in CI for "
-            "child-copy ownership enforcement"
+            f"An authoritative Tools path inventory is required for child-copy "
+            f"ownership enforcement (issue #9501).\n{msg}"
         )
     pytest.skip("Tools checkout is unavailable for child-copy counterpart check")
 
@@ -445,13 +448,25 @@ def test_missing_tools_inventory_fails_closed_in_ci(
         _require_tools_shared_paths(None)
 
 
-def test_missing_tools_inventory_skips_only_outside_ci(
+def test_missing_tools_inventory_skips_only_with_opt_out(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A developer without any Tools source receives an explicit local skip."""
+    """A developer without any Tools source receives a skip only if opted out."""
     monkeypatch.delenv("CI", raising=False)
+    monkeypatch.setenv("SEAM_TESTS_ALLOW_SKIP", "1")
 
     with pytest.raises(pytest.skip.Exception, match="Tools checkout is unavailable"):
+        _require_tools_shared_paths(None)
+
+
+def test_missing_tools_inventory_fails_locally_without_opt_out(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Without SEAM_TESTS_ALLOW_SKIP=1, missing Tools inventory fails closed locally."""
+    monkeypatch.delenv("CI", raising=False)
+    monkeypatch.delenv("SEAM_TESTS_ALLOW_SKIP", raising=False)
+
+    with pytest.raises(AssertionError, match="authoritative Tools path inventory"):
         _require_tools_shared_paths(None)
 
 
