@@ -27,6 +27,31 @@ from typing import Any
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def _check_no_thread_leak() -> Iterator[None]:
+    before_threads = {t.ident for t in threading.enumerate() if t.is_alive()}
+    yield
+    surviving = [
+        t
+        for t in threading.enumerate()
+        if t.is_alive() and t.ident not in before_threads
+    ]
+    leaked = [
+        t
+        for t in surviving
+        if (
+            "ChatService" in t.name
+            or "stream_to_queue"
+            in getattr(getattr(t, "_target", None), "__qualname__", "")
+            or not t.daemon
+        )
+    ]
+    assert not leaked, f"Leaked thread(s) survived test: {leaked}"
+
+
 # ---------------------------------------------------------------------------
 # Invariant 4 — WS URL default reads ``GOLF_API_PORT`` / ``API_PORT``
 # ---------------------------------------------------------------------------
@@ -206,30 +231,30 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
     """Producer thread that dies silently must not hang the consumer.
 
     Construct a ChatService with a stub adapter whose ``stream_response``
-    blocks forever (simulating a wedged provider). The two-stage timeout
-    in ``stream_response`` must yield a structured error chunk in well
-    under the historical 60s queue.Empty timeout.
+    blocks (simulating a wedged provider) until unblocked by cancellation
+    or teardown. The two-stage timeout in ``stream_response`` must yield a
+    structured error chunk in well under the historical 60s queue.Empty
+    timeout, and the producer thread must not leak (#9495).
     """
     from src.api.services.chat_service import ChatService
 
-    class _BlockingAdapter:
-        def stream_response(self, *_a: Any, **_kw: Any) -> Iterator[Any]:
-            import threading
+    unblock_event = threading.Event()
 
-            threading.Event().wait()  # block forever
+    class _BlockingAdapter:
+        def stream_response(self, *args: Any, **kwargs: Any) -> Iterator[Any]:
+            # Wait for cancellation stop_event or test unblock_event
+            ctx = args[1] if len(args) > 1 else kwargs.get("context")
+            stop_evt = getattr(ctx, "metadata", {}).get("stop_event") if ctx else None
+            if stop_evt is not None:
+                stop_evt.wait(timeout=10.0)
+            else:
+                unblock_event.wait(timeout=10.0)
             yield  # pragma: no cover - unreachable
 
     svc = ChatService()
     svc._adapter = _BlockingAdapter()
     ctx = svc.get_or_create_session(None)
     svc.add_user_message(ctx.session_id, "hi")
-
-    # Shrink the timeouts so the test completes quickly.
-    monkeypatch.setattr(
-        "src.api.services.chat_service.threading.Thread.join",
-        lambda self, timeout=None: None,
-        raising=False,
-    )
 
     # Patch the timeouts at the function scope via local symbols.
     # The cleanest hook is to monkey-patch ``asyncio.to_thread`` so the
@@ -249,10 +274,15 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
     monkeypatch.setattr("asyncio.to_thread", _fast_to_thread)
 
     chunks: list[Any] = []
-    async for chunk in svc.stream_response(ctx.session_id):
-        chunks.append(chunk)
-        if isinstance(chunk, dict) and chunk.get("type") == "error":
-            break
+    gen = svc.stream_response(ctx.session_id)
+    try:
+        async for chunk in gen:
+            chunks.append(chunk)
+            if isinstance(chunk, dict) and chunk.get("type") == "error":
+                break
+    finally:
+        await gen.aclose()
+        unblock_event.set()
 
     assert chunks, "expected at least one chunk before the stream closes"
     last = chunks[-1]
@@ -261,6 +291,14 @@ async def test_stream_response_yields_timeout_error_when_queue_stays_empty(
     assert "provider" in last.get("detail", "").lower(), (
         f"expected human-readable provider hint in detail, got {last!r}"
     )
+
+    # Verify no streaming worker thread remains alive (#9495)
+    worker_threads = [
+        t
+        for t in threading.enumerate()
+        if t.is_alive() and t.name == f"ChatService-StreamWorker-{ctx.session_id}"
+    ]
+    assert not worker_threads, f"Leaked streaming worker thread: {worker_threads}"
 
 
 # ---------------------------------------------------------------------------
