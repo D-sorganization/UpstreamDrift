@@ -2249,9 +2249,9 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "",
-      "ud_bytes": 23225,
+      "ud_bytes": 25066,
       "tools_bytes": 25953,
-      "byte_delta": -2728,
+      "byte_delta": -887,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -30885,8 +30885,8 @@
       "path": "ai/sample_tools.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-03",
+        "commit": "0111c38e5fbfaf7020b4bbebadf8c70d7e545be4"
       },
       "tools": {
         "author": "d-sorgclaudeagent[bot]",
