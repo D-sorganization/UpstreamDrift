@@ -331,7 +331,7 @@ def test_rate_of_closure_provider_exposes_governed_analysis_policy() -> None:
             if entry["surface"] == "pyqt" and entry["tab_id"] == "variation"
         )
         assert variation["sha256"] == (
-            "22f6640e896e9ea5c740e9db7e3d3201cdf7264f2cf1cff33966b539354f1d40"
+            "650267b346dab8651b6163d83046ed46cbe604c83c71908cca2b1168e84a78cd"
         )
         assert variation["tolerance"] == {
             "changed_channel_threshold": 1,
