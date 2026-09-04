@@ -692,9 +692,10 @@ class GripModellingTab(QtWidgets.QWidget):
             body2_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body2_id)
 
             def _is_hand(name: str | None) -> bool:
-                return bool(name) and (
-                    "hand" in name.lower() or "finger" in name.lower()
-                )
+                if not name:
+                    return False
+                lowered = name.lower()
+                return "hand" in lowered or "finger" in lowered
 
             hand_is_body1 = _is_hand(body1_name)
             hand_is_body2 = _is_hand(body2_name)
