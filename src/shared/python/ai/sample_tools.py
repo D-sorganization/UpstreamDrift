@@ -25,9 +25,69 @@ from typing import Any
 from src.shared.python.ai.education import EducationSystem
 from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 from src.shared.python.ai.types import ExpertiseLevel
+from src.shared.python.contracts import ensure, require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+# The verdict keys a placeholder result must carry. Metadata may not set them:
+# they are the whole point of the payload.
+_NOT_IMPLEMENTED_STATUS = "not_implemented"
+_RESERVED_VERDICT_KEYS = frozenset({"success", "error", "status"})
+
+
+def _not_implemented_tool_result(
+    *,
+    capability: str,
+    message: str,
+    **metadata: Any,
+) -> dict[str, Any]:
+    """Return an honest result for a registered-but-unimplemented chat tool.
+
+    A chat tool that starts no work must not describe a job. Three tools here
+    used to answer ``"... queued ..."`` with ``success=True`` for work that was
+    never begun; this helper is the single place the honest verdict is built,
+    so a new placeholder cannot hand-roll a dishonest dict.
+
+    Mirrors the canonical Tools implementation so the child copy stops
+    drifting from it (UpstreamDrift #9474, program #1505).
+
+    Args:
+        capability: Stable identifier for the missing capability.
+        message: Operator-facing text. Must not claim work is under way.
+        **metadata: Extra payload keys echoed back to the caller.
+
+    Returns:
+        A payload reporting ``success=False`` and ``status="not_implemented"``.
+
+    Raises:
+        PreconditionError: If ``metadata`` tries to set a verdict key.
+        PostconditionError: If the assembled payload is not an honest refusal.
+    """
+    require(
+        not _RESERVED_VERDICT_KEYS.intersection(metadata),
+        "Placeholder metadata may not override the verdict keys "
+        f"{sorted(_RESERVED_VERDICT_KEYS)}; got "
+        f"{sorted(_RESERVED_VERDICT_KEYS.intersection(metadata))}.",
+    )
+
+    payload: dict[str, Any] = {
+        "success": False,
+        "error": _NOT_IMPLEMENTED_STATUS,
+        "status": _NOT_IMPLEMENTED_STATUS,
+        "capability": capability,
+        "message": message,
+        **metadata,
+    }
+
+    ensure(
+        payload["success"] is False
+        and payload["status"] == _NOT_IMPLEMENTED_STATUS
+        and payload["error"] == _NOT_IMPLEMENTED_STATUS,
+        "A placeholder tool result must report an honest failure.",
+        value=payload,
+    )
+    return payload
 
 
 @functools.lru_cache(maxsize=1)
@@ -259,8 +319,6 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
         """
         if file_path is None:
             raise ValueError("file_path must be provided")
-        if file_path is None:
-            raise ValueError("file_path must be provided")
         valid_engines = ["mujoco", "drake", "pinocchio"]
         if engine.lower() not in valid_engines:
             return {
@@ -268,23 +326,16 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
                 "error": f"Invalid engine. Choose from: {valid_engines}",
             }
 
-        # This implementation requires integration with the physics engines.
-        # 1. Load the C3D data
-        # 2. Create/load the model
-        # 3. Run inverse dynamics
-        # 4. Return results
-
-        return {
-            "success": True,
-            "status": "simulation_pending",
-            "engine": engine,
-            "file": file_path,
-            "message": (
-                f"Inverse dynamics simulation queued using {engine}. "
-                "This would normally take 30-60 seconds for a typical swing."
+        return _not_implemented_tool_result(
+            capability="inverse_dynamics",
+            message=(
+                "Inverse dynamics is not available through chat yet; no "
+                "computation was performed. Use the biomechanics analysis API "
+                "or the motion pipeline to compute joint torques."
             ),
-            "note": ("Implementation requires physics engine integration."),
-        }
+            engine=engine,
+            file=file_path,
+        )
 
 
 def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
@@ -524,18 +575,17 @@ def _register_cross_engine_validation_tool(registry: ToolRegistry) -> None:
         Returns:
             Validation results.
         """
-        # Placeholder for actual cross-engine validation
-        return {
-            "status": "validation_pending",
-            "file": file_path,
-            "engines": ["mujoco", "drake", "pinocchio"],
-            "tolerance": tolerance,
-            "message": (
-                "Cross-engine validation queued. This compares results from "
-                "multiple physics engines to ensure accuracy."
+        return _not_implemented_tool_result(
+            capability="cross_engine_validation",
+            message=(
+                "Cross-engine validation is not available through chat yet; "
+                "no comparison was performed. Use the motion pipeline "
+                "validation API to compare engines on a real run."
             ),
-            "note": "Placeholder - requires full physics engine integration.",
-        }
+            file=file_path,
+            engines=["mujoco", "drake", "pinocchio"],
+            tolerance=tolerance,
+        )
 
 
 def _register_energy_conservation_tool(registry: ToolRegistry) -> None:
@@ -557,15 +607,15 @@ def _register_energy_conservation_tool(registry: ToolRegistry) -> None:
         Returns:
             Energy conservation check results.
         """
-        return {
-            "status": "check_pending",
-            "tolerance": tolerance,
-            "message": (
-                "Energy conservation check queued. This verifies that total "
-                "mechanical energy is properly accounted for throughout the motion."
+        return _not_implemented_tool_result(
+            capability="energy_conservation_check",
+            message=(
+                "Energy conservation checking is not available through chat "
+                "yet; no check was performed. It needs simulation data "
+                "supplied through the motion pipeline."
             ),
-            "note": "Placeholder - requires simulation data.",
-        }
+            tolerance=tolerance,
+        )
 
 
 def _register_list_physics_engines_tool(registry: ToolRegistry) -> None:
