@@ -13,7 +13,7 @@
   "totals": {
     "identical": 518,
     "diverged": 294,
-    "ud-only": 1182,
+    "ud-only": 1183,
     "tools-only": 444,
     "spelling-only": 153
   },
@@ -553,7 +553,7 @@
     "plotting": {
       "identical": 0,
       "diverged": 3,
-      "ud-only": 24,
+      "ud-only": 25,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -17441,7 +17441,7 @@
       "classification": "ud-only",
       "package": "plotting",
       "subpackage": "",
-      "ud_bytes": 2051,
+      "ud_bytes": 2189,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17514,6 +17514,18 @@
       "package": "plotting",
       "subpackage": "",
       "ud_bytes": 14655,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "plotting/mpl_canvas.py",
+      "classification": "ud-only",
+      "package": "plotting",
+      "subpackage": "",
+      "ud_bytes": 5046,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -30884,9 +30896,9 @@
     {
       "path": "ai/sample_tools.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-03",
-        "commit": "0111c38e5fbfaf7020b4bbebadf8c70d7e545be4"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-04",
+        "commit": "b88ce9af526537dc8cd7c9061c7cf43bda677e81"
       },
       "tools": {
         "author": "d-sorgclaudeagent[bot]",
@@ -30897,9 +30909,9 @@
     {
       "path": "ai/system_prompts.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-04",
+        "commit": "b88ce9af526537dc8cd7c9061c7cf43bda677e81"
       },
       "tools": {
         "author": "d-sorgclaudeagent[bot]",
@@ -31001,9 +31013,9 @@
     {
       "path": "ai/tools/sidekick_analytics.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-29",
-        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-04",
+        "commit": "b88ce9af526537dc8cd7c9061c7cf43bda677e81"
       },
       "tools": {
         "author": "d-sorgclaudeagent[bot]",
