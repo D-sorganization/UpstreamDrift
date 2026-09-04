@@ -5217,3 +5217,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Replaced `np.sum()` with `.sum()` for small array math in `physics.py` logic. This avoids numpy dispatch and yields measurable speedup. (spec-exempt: micro-optimization)
 - Replaced `np.sum([...list...], axis=0)` with `np.asarray([...list...]).sum(axis=0)` in `src/bunkershot3d/solvers/mpm/ballreach.py` to optimize list summation. (spec-exempt: micro-optimization)
 - Seam guards fail closed by default when `vendor/ud-tools` is absent or unpopulated, surfacing actionable `git archive` workaround instructions and requiring explicit `SEAM_TESTS_ALLOW_SKIP=1` to skip outside CI (#9501).
+- Isolated child pytest runners disable async and thread-spawning plugins and clear addopts to prevent interpreter shutdown hangs and bound subprocess execution (#9511).
+
