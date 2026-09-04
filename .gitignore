@@ -263,3 +263,10 @@ test_event_filter.py
 /base.*.provenance.json
 /pytest_report*.txt
 /golf_modeling_suite.db
+
+# Agent-local permission state. Claude Code records each approved tool call
+# verbatim in this file, so it can capture a credential that appeared in a
+# command line. Ignored here rather than relying only on a developer's
+# machine-local core.excludesFile.
+.claude/settings.local.json
+**/.claude/settings.local.json
