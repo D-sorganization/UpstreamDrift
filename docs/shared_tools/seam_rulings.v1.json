@@ -1,0 +1,266 @@
+{
+  "schema_version": 1,
+  "epic": "D-sorganization/UpstreamDrift#9406",
+  "program": "D-sorganization/Repository_Management#1505",
+  "tools_ledger": "D-sorganization/Tools#4915 (docs/shared/divergence_ledger.v1.json)",
+  "inventory": "docs/shared_tools/divergence_inventory.v1.json (PR #9432, Tools pin c0a395d5)",
+  "gate": "scripts/shared_tools/check_seam_drift.py (ci-standard.yml job seam-drift-gate, needs of quality-gate)",
+  "ruling_values": {
+    "tools-canonical": "Tools owns the module; delete the UD copy under src/shared/python (an import shim carrying SEAM_SHIM_MARKER may remain).",
+    "ud-canonical": "UpstreamDrift authored the module; upstream UD's version to Tools first (Tools #4494), then delete the UD copy. Needs a tools_ledger_row while Tools still carries a copy.",
+    "split": "The UD package mixes Tools-owned files (delete/shim) with UD-only modules that stay; the gate requires zero overlapping paths once cleaned.",
+    "deferred": "Could not be decided in <10 minutes; deferred_reason says why and what unblocks it."
+  },
+  "status_values": {
+    "pending-cleanup": "Ruling recorded, UD copy still present; the gate only reports.",
+    "cleaned": "The gate enforces the ruling.",
+    "n/a": "Nothing to clean in UD (Tools-only entry)."
+  },
+  "todo": [
+    {
+      "id": "T1",
+      "note": "Replace the vendor/ud-tools submodule + git pin with the ud-tools wheel once Tools publishes one per release.",
+      "issue": "D-sorganization/Tools#4920"
+    },
+    {
+      "id": "T2",
+      "note": "Rewrite the 152 spelling-only divergences (src.shared.python -> shared.python) in UD instead of carrying them as a fork; they vanish once the UD copies are deleted.",
+      "issue": "D-sorganization/UpstreamDrift#9406"
+    },
+    {
+      "id": "T3",
+      "note": "Deferred packages (config, reporting, gui_launcher, __init__.py) need a namespace decision with the Tools ledger owner.",
+      "issue": "D-sorganization/Tools#4915"
+    }
+  ],
+  "rulings": {
+    "README.md": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical copy of Tools' package README."
+    },
+    "__init__.py": {
+      "ruling": "deferred",
+      "status": "pending-cleanup",
+      "rationale": "The package root __init__ differs: UD's exports SUITE_ROOT and eagerly imports ai/cli_utils; Tools' is the canonical namespace init.",
+      "deferred_reason": "Root init cannot be deleted while UD-only packages live in the same namespace; converge on Tools' init plus pkgutil.extend_path once the UD-only packages have a home (Phase 2)."
+    },
+    "ai": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "117 overlapping files: 47 identical, 55 spelling-only, 15 real diffs where Tools is newer on every large file (adapters 2026-08-18/25 vs UD's 2026-08-01 #8322 snapshot); 21 UD-only files (ai/cli_providers 8, ai/gui 6) stay. Subpackages skills/data/peer_review are tools-canonical outright.",
+      "subpackages": {
+        "adapters": "tools-canonical (Tools carries the #8776 hardening: strip guards, Ollama error ladder, BitNet prompt ceiling)",
+        "gui": "tools-canonical for the 20 overlapping files; 6 UD-only widgets stay",
+        "mcp": "tools-canonical (pool.py Tools newer)",
+        "integrations": "tools-canonical (spelling-only except obsidian.py -20)",
+        "tools": "tools-canonical (agent_control/cli_tools Tools newer)",
+        "cli_providers": "ud-only, stays",
+        "skills": "tools-canonical (identical)",
+        "data": "tools-canonical (identical)",
+        "peer_review": "tools-canonical (coordinator -15, Tools newer)",
+        "rag": "tools-canonical (spelling-only)",
+        "auth": "tools-canonical (authentication.py Tools newer 2026-08-19)"
+      }
+    },
+    "calc_backend": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "Tools is newer on app.py/health.py/thermal_profile.py; but routers/symbolic_solver.py (+290, UD 2026-08-18) and its test (+12378) are a UD fix that must be upstreamed first (ud-canonical for that pair)."
+    },
+    "chat": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Tools rewrote _chat_dock_widget_qt.py and friends on 2026-09-02; UD's 17 diverged files are the older #8322 snapshot (10 spelling-only). chat/_qt/runtime.py is a UD extraction listed as Unresolved in shared_python_ownership_exceptions.yaml (#8687) and belongs upstream."
+    },
+    "chat_contracts": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "4 identical files; added to UD by #8322 while the shadow guard was disabled."
+    },
+    "codemap": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "All 6 diverged files are newer in Tools (2026-08-24/25) than UD's 2026-08-01 copy."
+    },
+    "compatibility.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Single compatibility shim owned by Tools (issue #7249 path in the child-copy contract)."
+    },
+    "config": {
+      "ruling": "deferred",
+      "status": "pending-cleanup",
+      "rationale": "UD's config/ is a 15-file UD-authored package (environment.py +13.6 KB, tools_vendor_authority.py, model_registry.py); only __init__.py and environment.py collide with Tools' 2-file config package.",
+      "deferred_reason": "Namespace collision between two unrelated packages; needs a rename on one side (Tools ledger decision), not a delete."
+    },
+    "contracts.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Tools' contracts.py is newer (2026-08-20) and the finder already aliases src.shared.python.contracts to it; UD-only _contracts_*.py helpers are unrelated and stay."
+    },
+    "cors.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Spelling-only divergence."
+    },
+    "data_processing": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "processor.py Tools newer (2026-08-20); the UD-only file is a drift test that becomes moot."
+    },
+    "data_processor_io": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "rust_engine.py Tools newer (2026-08-20); added to UD by #8322."
+    },
+    "deprecation.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical."
+    },
+    "file_watcher": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical (2 files)."
+    },
+    "golf_club": {
+      "ruling": "tools-canonical",
+      "status": "n/a",
+      "rationale": "Tools-only (38 files); UD has no copy."
+    },
+    "gui_launcher": {
+      "ruling": "deferred",
+      "status": "pending-cleanup",
+      "rationale": "launcher.py/registry.py/launcher_web.py are newer in Tools, but tools_sidebar_integration.py is +10 KB in UD (2026-05-29) and tool_manifest.yaml carries UD tiles; 3 UD-only files stay.",
+      "deferred_reason": "tools_sidebar_integration.py needs a line-level review to decide whether UD's extra 10 KB is a fix to upstream or dead code; ownership manifest also lists it."
+    },
+    "humanoid_character_builder": {
+      "ruling": "ud-canonical",
+      "status": "pending-cleanup",
+      "rationale": "UD authored it (Tools #4494: 105 UD commits vs 9, 27 UD-only files, Tools copy stale ~6 months). Upstream UD's tree to Tools, then delete here.",
+      "tools_ledger_row": "Tools#4915:humanoid_character_builder (Tools #4494)"
+    },
+    "import_aliases.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Tools' finder (2026-08-28) is a superset: aliases plot_engine/plot_theme/plotting/contracts and declines .tests. names; UD's copy is the #8322 snapshot."
+    },
+    "launch_monitor": {
+      "ruling": "tools-canonical",
+      "status": "n/a",
+      "rationale": "ADR-0046 Stage 1 canonical layer lives in Tools; UD's transitional 30-module copy was moved to src/tools/launch_monitor_model/ by ADR-0048 Option 1 (port order #9348)."
+    },
+    "logging_pkg": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical (3 files)."
+    },
+    "model_generation": {
+      "ruling": "ud-canonical",
+      "status": "pending-cleanup",
+      "rationale": "UD authored it (Tools #4494: 119 UD commits vs 18, 18 UD-only files incl. the SMPL-X backend and Rust facades). Upstream first, then delete here.",
+      "tools_ledger_row": "Tools#4915:model_generation (Tools #4494)"
+    },
+    "notes": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "6 identical files; the UD-only test_notes_drift.py is a drift test that becomes moot."
+    },
+    "plot_engine": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "All 3 diverged files newer in Tools (pyqt6_widget.py 2026-08-28, trendline.py 2026-08-25)."
+    },
+    "plot_theme": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "6 identical files; UD-only drift test becomes moot."
+    },
+    "plotting": {
+      "ruling": "ud-canonical",
+      "status": "pending-cleanup",
+      "rationale": "UD's plotting package (24 UD-only files) predates the 3-file provider package Tools added in #4872; UD's 3 overlapping files are larger and newer (2026-08-29). Upstream or rename, do not delete.",
+      "tools_ledger_row": "Tools#4915:plotting (Tools #4872)"
+    },
+    "programmatic_pid": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "10 of 14 diverged files are spelling-only; the rest are Tools-newer docstring/CLI edits (2026-08-20)."
+    },
+    "reporting": {
+      "ruling": "deferred",
+      "status": "pending-cleanup",
+      "rationale": "__init__.py is +387 bytes and newer in UD; generator.py newer in Tools; 5 UD-only _template modules.",
+      "deferred_reason": "Two-way divergence on a 2-file overlap; needs a merge, not a ruling."
+    },
+    "rotation_transforms": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "All 3 diverged files are spelling-only."
+    },
+    "safe_eval.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical."
+    },
+    "safe_pandas_eval.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical."
+    },
+    "scripting": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical (2 files)."
+    },
+    "sidekick": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "309 overlapping (246 identical, 25 spelling-only, 38 real diffs mostly in process_calculators/ui/standalone where Tools is newer); 36 UD-only calculators/lab extensions are recorded as UD-owned in shared_python_ownership_exceptions.yaml and stay.",
+      "subpackages": {
+        "process_calculators": "deferred inside the split: 20 diverged + 21 UD-only + 12 Tools-only; needs a per-calculator pass",
+        "ui": "tools-canonical (15 diverged, Tools newer)",
+        "standalone": "tools-canonical",
+        "calculators": "split (9 UD-only conversion/thermo modules stay)",
+        "lab": "split (6 UD-only bio modules stay; 10 Tools-only)",
+        "tests": "tools-canonical"
+      }
+    },
+    "signal_toolkit": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "Overlap is tools-canonical (io/polynomial_generator Tools newer, calculus/__init__ spelling-only) except fitting.py (+935, UD 2026-08-18 vs Tools 2026-08-24, two-way) which needs a merge; UD-only signal_processing.py (imported by dashboard/pose_estimation) stays."
+    },
+    "swing_sim": {
+      "ruling": "tools-canonical",
+      "status": "n/a",
+      "rationale": "Tools-only (339 files)."
+    },
+    "tests": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Tools' shared-tree test package; UD carries only an identical __init__.py."
+    },
+    "theme": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "22 overlapping files are tools-canonical: Tools' __init__ exports Colors/Sizes/Weights/get_qfont (fixes UD #8894), zoom.py has the int() guard, palette.py is newer; 4 UD-only modules (color_derivation, layout_metrics, sidekick_tokens, v1) are imported by launchers/tools and stay."
+    },
+    "trusted_git.py": {
+      "ruling": "tools-canonical",
+      "status": "n/a",
+      "rationale": "Tools-only."
+    },
+    "ui": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "4 identical Tools files; 27 UD-only widgets (toast, shortcuts_overlay, preferences_dialog, ...) stay."
+    },
+    "upstream_drift_tools": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Deprecated alias shim for sidekick; spelling-only divergence."
+    }
+  }
+}
