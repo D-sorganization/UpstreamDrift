@@ -1228,22 +1228,38 @@ def pytest_collection_modifyitems(
 def pytest_terminal_summary(
     terminalreporter: Any, exitstatus: int, config: pytest.Config
 ) -> None:
-    """Surface the unmarked-suite-marker count in the terminal summary."""
+    """Surface the unmarked-suite-marker count and seam test skip report in terminal summary."""
     count = getattr(config, "_ud_unmarked_suite_count", None)
-    if not count:
-        return
-    if suite_markers_enforced():
-        mode = "ENFORCED"
-    elif suite_marker_ratchet_enabled():
-        drift_count = getattr(config, "_ud_unmarked_suite_drift_count", 0)
-        mode = f"ratchet, drift={drift_count}"
-    else:
-        mode = "report-only"
-    terminalreporter.write_line(
-        f"[suite-markers:{mode}] {count} collected test(s) carry no suite marker "
-        f"(one of {sorted(SUITE_MARKERS)}); see issue #7158.",
-        yellow=True,
-    )
+    if count:
+        if suite_markers_enforced():
+            mode = "ENFORCED"
+        elif suite_marker_ratchet_enabled():
+            drift_count = getattr(config, "_ud_unmarked_suite_drift_count", 0)
+            mode = f"ratchet, drift={drift_count}"
+        else:
+            mode = "report-only"
+        terminalreporter.write_line(
+            f"[suite-markers:{mode}] {count} collected test(s) carry no suite marker "
+            f"(one of {sorted(SUITE_MARKERS)}); see issue #7158.",
+            yellow=True,
+        )
+
+    seam_skips: list[tuple[str, str]] = getattr(config, "_ud_seam_test_skips", [])
+    if seam_skips:
+        terminalreporter.write_sep(
+            "!",
+            f"WARNING: {len(seam_skips)} seam test(s) SKIPPED due to missing Tools vendor tree (issue #9501)",
+            red=True,
+            bold=True,
+        )
+        for nodeid, reason in seam_skips:
+            terminalreporter.write_line(f"  SKIPPED: {nodeid}", red=True)
+            terminalreporter.write_line(f"    Reason: {reason}", yellow=True)
+        terminalreporter.write_line(
+            "Populate vendor/ud-tools or set SEAM_TESTS_ALLOW_SKIP=1 to silence this warning.\n"
+            "Workaround for linked worktrees: git -C ../Tools archive <pin> | tar -x -C vendor/ud-tools",
+            yellow=True,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -1306,9 +1322,6 @@ def pytest_runtest_makereport(
     the wheel-installing CI lane cannot pass while silently skipping parity.
     """
     outcome = yield
-    if not _rust_wheels_expected():
-        return
-
     report = outcome.get_result()
     if not report.skipped:
         return
@@ -1320,6 +1333,41 @@ def pytest_runtest_makereport(
         reason = str(longrepr[2])
     else:
         reason = str(longrepr)
+
+    # Seam guard skip tracking and enforcement (issue #9501)
+    # Note: tests in tests/launchers/ are consumer integration tests that run against
+    # the real Tools tree in shared-tools-consumer-contracts rather than unit-test-gate.
+    lowered = reason.lower()
+    is_seam_reason = any(
+        k in lowered
+        for k in (
+            "vendor/ud-tools",
+            "tools repository not found",
+            "tools checkout is unavailable",
+            "tools checkout unavailable",
+        )
+    )
+    if is_seam_reason and not item.nodeid.startswith("tests/launchers/"):
+        if not hasattr(item.config, "_ud_seam_test_skips"):
+            item.config._ud_seam_test_skips = []
+        item.config._ud_seam_test_skips.append((item.nodeid, reason))
+
+        # In CI, or locally when SEAM_TESTS_ALLOW_SKIP is not set, seam skips are forbidden.
+        seam_allow_skip = os.environ.get("SEAM_TESTS_ALLOW_SKIP", "").strip() == "1"
+        if os.environ.get("CI") or not seam_allow_skip:
+            report.outcome = "failed"
+            report.longrepr = (
+                f"{item.nodeid} SKIPPED due to missing Tools vendor tree: {reason!r}.\n"
+                "Seam guards protect the Tools <-> UpstreamDrift convergence boundary and must "
+                "not pass vacuously (issue #9501).\n"
+                "Workaround for linked worktrees where submodule update fails:\n"
+                "    git -C ../Tools archive <pin> | tar -x -C vendor/ud-tools\n"
+                "To explicitly opt out and allow skipping locally, set SEAM_TESTS_ALLOW_SKIP=1."
+            )
+            return
+
+    if not _rust_wheels_expected():
+        return
 
     if _skip_reason_is_missing_rust_wheel(reason):
         report.outcome = "failed"
