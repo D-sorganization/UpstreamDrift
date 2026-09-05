@@ -42,10 +42,10 @@ AUTHORITY_PROFILE = "articulated-manufactured-authority-py311-v1"
 ROLLING_PROFILE = "articulated-manufactured-rolling-native-v1"
 RecordProfile = Literal["authority", "rolling"]
 _AUTHORITY_DISTRIBUTIONS = {
-    "mujoco": "3.8.0",
-    "numpy": "2.3.5",
-    "pin": "3.8.0",
-    "scipy": "1.15.3",
+    "mujoco": "3.12.0",
+    "numpy": "2.4.6",
+    "pin": "4.1.0",
+    "scipy": "1.17.1",
 }
 _CROSS_ENGINE_TOLERANCE = 1.0e-8
 _POSITION_TOLERANCE_M = 1.0e-10
