@@ -426,7 +426,7 @@
   },
   "interpretation_boundary": "The preregistered total-work match failed and remains the primary result. Alternative work definitions and unmatched speed differences are descriptive post-hoc sensitivities, not causal ground-pathway effects.",
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json": "253d88d7d4842ff53333b6234e6cf1cc48f3879a9fc27dbe42f01bb6f8c38830",
+    "docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json": "4934a4cf6168a339755794151eb70dbd36af7bce84c38d9efa9387944a2b1c15",
     "docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.npz": "0e85e2d2afa0fbb3858b83ae17e52df1a94d9fa32a764a0b0296ff60b82a0312",
     "scripts/research/proximal_distal_energy/articulated_ground_posthoc_sensitivity.py": "0bbd6dc84df534ee128eb6d62a091fc03f645db159fcd9bfa7ab6667f674dedf",
     "tests/research/test_articulated_ground_posthoc_sensitivity.py": "ff909d670523a0a2aa231d40997d49fdd43f1a865220d0ffd64d38351f59e452"

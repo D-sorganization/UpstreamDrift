@@ -162,7 +162,9 @@ def test_balanced_grid_quantifies_main_effects_without_causal_promotion(
 def test_outputs_replay_with_declared_numerical_tolerance(tmp_path: Path) -> None:
     replay_json, replay_npz = write_outputs(tmp_path / "replay")
 
-    assert replay_json.read_bytes() == RECORD.read_bytes()
+    assert replay_json.read_bytes().replace(
+        b"\r\n", b"\n"
+    ) == RECORD.read_bytes().replace(b"\r\n", b"\n")
     with np.load(replay_npz) as replay, np.load(TRACE_RECORD) as authority:
         assert replay.files == authority.files
         for name in authority.files:
