@@ -3,6 +3,33 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/launchers/launcher_layout_manager.py",
+      "symbol": "LayoutManager.rebuild_grid",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing layout manager rebuild_grid method exceeds function-lines budget; PR #9481 only reconciled tile category derivation without altering grid layout logic.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/config/model_pack_manifest.py",
+      "symbol": "_normalize_model_pack_v1",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing manifest normalizer exceeds function-lines budget by 1 line; PR #9481 touched LauncherPresentationMetadata in this file.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/config/model_pack_manifest.py",
+      "symbol": "ModelPackEntry.from_dict",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing model pack entry deserializer exceeds function-lines budget; PR #9481 touched LauncherPresentationMetadata in this file.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "src/api/services/chat_service.py",
       "symbol": "ChatService.stream_response",
       "rule": "function-lines",
