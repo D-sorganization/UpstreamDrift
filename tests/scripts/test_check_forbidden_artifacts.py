@@ -1,6 +1,10 @@
 from pathlib import Path
 
+import pytest
+
 from scripts.check_forbidden_artifacts import find_forbidden_artifacts
+
+pytestmark = pytest.mark.unit
 
 
 def test_find_forbidden_artifacts_reports_root_outputs(tmp_path: Path) -> None:
