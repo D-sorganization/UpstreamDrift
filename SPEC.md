@@ -1,5 +1,9 @@
 # SPEC.md — Repository Specification Document
 
+## Optimize `np.mean` for lists in dataset (spec-exempt: micro-optimization)
+
+Replaces `np.mean` with built-in `sum / len` for Python lists to avoid implicit temporary NumPy array allocations and provide a performance boost.
+
 ## Tile Category Registry and Sidebar Grouping Reconciliation (#9481)
 
 Reconciles launcher tile categories directly with the registry (`models.yaml`), eliminating

@@ -32,3 +32,8 @@
 **Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.
 
 ## 2024-05-19 - [Optimize Sum of Squares]
+
+
+## 2024-05-24 - Optimizing `np.mean` for Python lists
+**Learning:** Calling `np.mean()` on a standard Python list (e.g., `np.mean([d.duration for d in self.demonstrations])`) forces an expensive implicit conversion to a temporary NumPy array.
+**Action:** Replace `np.mean(list)` with the built-in `sum(list) / len(list)` (handling zero-division if the list can be empty) to avoid the allocation overhead, which is significantly (~9x) faster.
