@@ -417,8 +417,19 @@ class LayoutManager:
         t = str(getattr(model, "type", "") or "").lower()
         if any(term in t for term in ["biomech", "movement_optimizer"]):
             return "Biomechanics"
-        if t in ("drake", "mujoco", "pinocchio", "opensim", "myosim", "matlab_suite"):
+        if t in (
+            "custom_humanoid",
+            "drake",
+            "pinocchio",
+            "opensim",
+            "myosim",
+            "matlab_suite",
+        ):
             return "Physics Engines"
+        if t == "putting_green":
+            return "Simulation"
+        if t == "document":
+            return "Documentation"
         return "Tools & Data"
 
     def get_filtered_order(self) -> list[str]:
