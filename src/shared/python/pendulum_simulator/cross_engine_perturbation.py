@@ -377,25 +377,39 @@ class CrossEnginePerturbationRunner:
         )
 
     @staticmethod
+    def _invoke_scalar_engine_method(
+        engine: Any,
+        method_names: tuple[str, ...],
+        *args: Any,
+    ) -> float | None:
+        """Query scalar engine method candidate names, with or without args."""
+        for name in method_names:
+            fn = getattr(engine, name, None)
+            if callable(fn):
+                try:
+                    return float(fn())
+                except TypeError:
+                    try:
+                        return float(fn(*args))
+                    except Exception:  # noqa: BLE001
+                        pass
+                except Exception:  # noqa: BLE001
+                    pass
+        return None
+
+    @staticmethod
     def _eval_native_total_energy(
         engine: Any,
         q: np.ndarray,
         v: np.ndarray,
     ) -> float | None:
         """Query engine-native total energy methods if available."""
-        for method_name in ("get_total_energy", "total_energy", "compute_total_energy"):
-            fn = getattr(engine, method_name, None)
-            if callable(fn):
-                try:
-                    return float(fn())
-                except TypeError:
-                    try:
-                        return float(fn(q, v))
-                    except Exception:  # noqa: BLE001
-                        pass
-                except Exception:  # noqa: BLE001
-                    pass
-        return None
+        return CrossEnginePerturbationRunner._invoke_scalar_engine_method(
+            engine,
+            ("get_total_energy", "total_energy", "compute_total_energy"),
+            q,
+            v,
+        )
 
     @staticmethod
     def _eval_kinetic_potential_methods(
@@ -404,46 +418,17 @@ class CrossEnginePerturbationRunner:
         v: np.ndarray,
     ) -> tuple[float | None, float | None]:
         """Query separate kinetic and potential energy methods if available."""
-        ke: float | None = None
-        for ke_name in (
-            "get_kinetic_energy",
-            "compute_kinetic_energy",
-            "kinetic_energy",
-        ):
-            fn = getattr(engine, ke_name, None)
-            if callable(fn):
-                try:
-                    ke = float(fn())
-                    break
-                except TypeError:
-                    try:
-                        ke = float(fn(q, v))
-                        break
-                    except Exception:  # noqa: BLE001
-                        pass
-                except Exception:  # noqa: BLE001
-                    pass
-
-        pe: float | None = None
-        for pe_name in (
-            "get_potential_energy",
-            "compute_potential_energy",
-            "potential_energy",
-        ):
-            fn = getattr(engine, pe_name, None)
-            if callable(fn):
-                try:
-                    pe = float(fn())
-                    break
-                except TypeError:
-                    try:
-                        pe = float(fn(q))
-                        break
-                    except Exception:  # noqa: BLE001
-                        pass
-                except Exception:  # noqa: BLE001
-                    pass
-
+        ke = CrossEnginePerturbationRunner._invoke_scalar_engine_method(
+            engine,
+            ("get_kinetic_energy", "compute_kinetic_energy", "kinetic_energy"),
+            q,
+            v,
+        )
+        pe = CrossEnginePerturbationRunner._invoke_scalar_engine_method(
+            engine,
+            ("get_potential_energy", "compute_potential_energy", "potential_energy"),
+            q,
+        )
         return ke, pe
 
     @staticmethod
@@ -553,18 +538,14 @@ class CrossEnginePerturbationRunner:
         to the generalized velocity norm if no spatial geometry is defined.
         """
         # 1. Native end-effector speed or velocity
-        for name in ("get_end_effector_speed", "end_effector_speed"):
-            fn = getattr(engine, name, None)
-            if callable(fn):
-                try:
-                    return float(fn())
-                except TypeError:
-                    try:
-                        return float(fn(q, v))
-                    except Exception:  # noqa: BLE001
-                        pass
-                except Exception:  # noqa: BLE001
-                    pass
+        speed = CrossEnginePerturbationRunner._invoke_scalar_engine_method(
+            engine,
+            ("get_end_effector_speed", "end_effector_speed"),
+            q,
+            v,
+        )
+        if speed is not None:
+            return speed
 
         for name in (
             "get_end_effector_velocity",
