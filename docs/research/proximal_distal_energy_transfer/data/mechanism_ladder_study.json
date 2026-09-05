@@ -90,9 +90,9 @@
     "maximum_rank": 4,
     "minimum_nullspace_dimension": 1,
     "maximum_nullspace_dimension": 1,
-    "minimum_condition_number": 9.052293552169411,
-    "maximum_condition_number": 9.46477799550427,
-    "maximum_constraint_velocity_residual": 5.075937747629085e-16,
+    "minimum_condition_number": 9.052293552169415,
+    "maximum_condition_number": 9.464777995504267,
+    "maximum_constraint_velocity_residual": 6.7932984062127e-16,
     "interpretation": "Rank and conditioning describe kinematic constraint transmission; they do not determine contact-force magnitude without dynamics."
   },
   "model_discrepancy_table": [

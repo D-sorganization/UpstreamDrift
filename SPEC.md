@@ -7,7 +7,8 @@ records in `docs/research/proximal_distal_energy_transfer/data/` that drifted fo
 refactoring PRs (#8760, #8962, #8963, #9055, #9240, #9267, #9306, #9415, #9427).
 Fixes the table lookup directory in `run_two_hand_wscg_analysis.py` to match the canonical
 `matlab/Tables` directory location, normalizes hex digest casing in `two_hand_wscg_analysis.json`,
-and ensures cross-platform newline robustness in replay test assertions.
+updates `claim_evidence_manifest.json` with current artifact digests, and adds architecture-budget
+exceptions for pre-existing `run_two_hand_wscg_analysis.py` methods.
 
 ## ADR-0045 F1: Roll-Model Provenance in Every Result (#9343, #9356)
 
