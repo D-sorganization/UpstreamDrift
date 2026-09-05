@@ -24,7 +24,6 @@ MATLAB_TABLE_DIR = (
     / "Simscape_Multibody_Models"
     / "2D_Golf_Model"
     / "matlab"
-    / "Model Output"
     / "Tables"
 )
 CASE_NAMES = ("base", "ztcf", "delta")

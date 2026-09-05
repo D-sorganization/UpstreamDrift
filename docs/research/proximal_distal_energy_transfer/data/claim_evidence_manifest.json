@@ -4450,7 +4450,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_distributed_grip_atlas.json": {
-      "sha256": "af30f418affe4b5c72f46f04674d17aeeb2df81205659d59b7116a9d3582cdfd",
+      "sha256": "4183f7e8276bf3c5f527b9f589f356de4fe71cbcb195cfc7aeda61832a10485c",
       "bytes": 6414,
       "referenced_by": [
         "PD-CLAIM-286",
@@ -4504,7 +4504,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_ground_atlas.json": {
-      "sha256": "253d88d7d4842ff53333b6234e6cf1cc48f3879a9fc27dbe42f01bb6f8c38830",
+      "sha256": "ec8c37b73f22d97bda93d4fee4d586513a73d966ca0081c42cb05250112e8b31",
       "bytes": 5075,
       "referenced_by": [
         "PD-CLAIM-293",
@@ -4524,7 +4524,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_ground_diagnostic.json": {
-      "sha256": "36a1dc2f49ee08693fed9d380455de99e2593cd02e23d4281b6d23851f23c10a",
+      "sha256": "4e1512c9fe99891a2889aacb1cd02440889cc89a54738444068d1e4887e38f54",
       "bytes": 46822,
       "referenced_by": [
         "PD-CLAIM-293",
@@ -4534,7 +4534,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_ground_posthoc_sensitivity.json": {
-      "sha256": "615558176398b47c5ca3fac8d7ea8fdbf8ee6c14d016e88fb96a531be77817a6",
+      "sha256": "4e0e43ea29b73c597904e8b2d53595ac830541a524d1b723487d36a8b3e78858",
       "bytes": 12559,
       "referenced_by": [
         "PD-CLAIM-293",
@@ -4562,7 +4562,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "aa7d808b30afc9d716468867f2bbbf27014daf7b8b04986f03fbc8480ade815b",
+      "sha256": "4fbb40ac2302e8111a19fc97903bc1877ab2cb07ced7258b8f78994ca4d627d8",
       "bytes": 3562,
       "referenced_by": [
         "PD-CLAIM-297",
@@ -4591,7 +4591,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_atlas.json": {
-      "sha256": "2b074dabe952d98c3ac6e5e1582f65710f47b0566e4c5eccc5dfbc471a8b7864",
+      "sha256": "db8dd295895a3a2bfea0270e1c216767e77227aaa1079c335c9ce12a65e9f3de",
       "bytes": 6768,
       "referenced_by": [
         "PD-CLAIM-289",
@@ -4611,7 +4611,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_structural_basis.json": {
-      "sha256": "a30956a1e274a6b00eb6739290cc21c3cee18646eb1baebe9422d5a68a3f9476",
+      "sha256": "5cd74490235b01d59d9303b77d5d625aff53ed50847bef43651526c1834ae14e",
       "bytes": 984,
       "referenced_by": [
         "PD-CLAIM-289",
@@ -4631,7 +4631,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_shaft_time_step_diagnostic.json": {
-      "sha256": "071b943ede33744802daf2416461eefa3c7956aa1682f4722474ac477c737346",
+      "sha256": "b85004b0b942cce0a54393bdb2701c107d6330eb9a5674940d53c4824ee4212a",
       "bytes": 1626,
       "referenced_by": [
         "PD-CLAIM-289",
@@ -4641,7 +4641,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_slack_atlas.json": {
-      "sha256": "819f6d5207d5f215204b4c2af0eef8f1fa50394b98c6b52254b5c8742c2992db",
+      "sha256": "c9701decbf661622751ebc055b0e7155bec270ff8168f184b2f0e503f37d3141",
       "bytes": 10740,
       "referenced_by": [
         "PD-CLAIM-283",
@@ -4860,7 +4860,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/counterfactual_ensemble.json": {
-      "sha256": "fe3157680189c1e0486085e104f77dbd79db056d44c63ed2aa3dd891003c41f5",
+      "sha256": "c78e00b232874fb391533bd3f5b283f66d4b9ee741fccaf2d7d60bacec678eb6",
       "bytes": 115209,
       "referenced_by": [
         "PD-CLAIM-094",
@@ -5197,7 +5197,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/mechanism_ladder_study.json": {
-      "sha256": "59222b5ee38843f058f12be3c34b079a774885c692bc5a1ed1619986a3aad9a1",
+      "sha256": "b2b88fcae33d737bbc944b9e7b37f86f9687486b8e16248852f95e123cf10500",
       "bytes": 8296,
       "referenced_by": [
         "PD-CLAIM-119",
@@ -5327,7 +5327,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/moving_base_modal_shaft_study.json": {
-      "sha256": "3ed7cc8612b4ee979879b9860ee5395b36317d5b5d0d29536b0e2e5f190f550f",
+      "sha256": "013ae10eccf8800d2eb8a9ac5cbb921d5aab9aca0ceb011a2de77f03bf3c3874",
       "bytes": 16861,
       "referenced_by": [
         "PD-CLAIM-223",
@@ -5396,7 +5396,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/proximal_acceleration_transfer_study.json": {
-      "sha256": "44329534dbd2ffdff840642e5dfc5ebe64dc19de6afa5d5be9cbf811c074240a",
+      "sha256": "4e5ae50a6d592e21f760464fd32606e7739c65d75301dd0efc47a2039f927801",
       "bytes": 67829,
       "referenced_by": [
         "PD-CLAIM-081",
@@ -5570,7 +5570,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_strategy_study.json": {
-      "sha256": "3e0c47f86a5fcef84f72834ab13973e43cebb13c7492325b073d08492ae7b8b0",
+      "sha256": "784bb11b1ef53ada9fbd2f88401f76e322f329bc2615dbafc0e6521695152107",
       "bytes": 75245,
       "referenced_by": [
         "PD-CLAIM-081",
@@ -5610,7 +5610,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/shoulder_velocity_transfer_study.json": {
-      "sha256": "5f8f6ca1d7b17e666416f017df24ac5e16e46e0219fb47e8d9cb3cf83096a094",
+      "sha256": "b29c2458f8cddddc98fd4b83a4a2a26cbc37afc2bda6f3ec5fd4567cbfde673f",
       "bytes": 224911,
       "referenced_by": [
         "PD-CLAIM-081",
@@ -5650,7 +5650,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json": {
-      "sha256": "0af6b817c190978746f6736ec805801c013e1db3a69336e4e0e156f4720a4e51",
+      "sha256": "28f1bd152a43c33829329a7017c65d0822171a2e4bf562c597036c25ffafe157",
       "bytes": 11561,
       "referenced_by": [
         "PD-CLAIM-005",
@@ -5902,8 +5902,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/two_hand_wscg_analysis.json": {
-      "sha256": "56fcea4c627191291ec4f20f5da398e9705ec71542835a36e461c3d711942ba9",
-      "bytes": 32940,
+      "sha256": "1254e70ab8966d6e0779f459c77e625616ef2151563a9346e31c5b655ff5847e",
+      "bytes": 32901,
       "referenced_by": [
         "PD-CLAIM-002",
         "PD-CLAIM-104",
@@ -6322,7 +6322,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "30c7dee6244f47b69461215f76eb1885cc42ba156c42bc4193302f534938a9af",
+      "sha256": "05f6a94c6df4a4f38e72cdd7293ca1eea58cd7cde28a5c7ea0edcfc15526d4bf",
       "bytes": 162917,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -7751,8 +7751,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py": {
-      "sha256": "89d25ea5d88a18f6d7a5f2638c3a314a2698fbd129dae6cc583e8b5c5f39f8aa",
-      "bytes": 21885,
+      "sha256": "1f61d5b119c242909c8cb5a466f2ef543ab45dcdb3a2b0f4ca11a57f13feb8b2",
+      "bytes": 21864,
       "referenced_by": [
         "PD-CLAIM-104",
         "PD-CLAIM-105",

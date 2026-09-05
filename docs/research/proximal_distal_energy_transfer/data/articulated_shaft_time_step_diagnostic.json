@@ -30,8 +30,8 @@
   "calibration_status": "synthetic_reference_not_equipment_calibrated",
   "source_sha256": {
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "scripts/research/proximal_distal_energy/articulated_shaft.py": "37e7d5a51abd771e359bf81417246424e7d3dfb24e62ebe00201b383087972b1",
-    "scripts/research/proximal_distal_energy/articulated_shaft_forward.py": "d23c535f5fd6ea46f39b497293d5a78ccd16586e6ce0b2327f68113d3e11c544",
+    "scripts/research/proximal_distal_energy/articulated_shaft.py": "314371699ad92854817fb0f79bc60cd9e7febd827d2c5c9ad0a8a3a632a5ece1",
+    "scripts/research/proximal_distal_energy/articulated_shaft_forward.py": "0d3067e5c3ee11606f5719d6b9066ea4bc6c7568dcf653f85f1fba407f3c0323",
     "scripts/research/proximal_distal_energy/articulated_shaft_time_step_diagnostic.py": "480f43b75b66c59740f774f1f197dcd399c4e7a855d32ab15bfca5aebad08cb0"
   }
 }
