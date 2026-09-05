@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -129,12 +129,13 @@ class EngineTrialMetrics:
     Attributes
     ----------
     total_energy_final : float
-        Approximate total mechanical energy at end of simulation (J).
-        Computed as 0.5 * ||v||^2 (kinetic proxy, engine-agnostic).
+        Total mechanical energy at end of simulation in Joules (J).
+        Computed using the engine's mass matrix / inertia tensor M(q)
+        (0.5 * v^T M(q) v) and potential energy where available.
     end_effector_speed_final : float
-        L2-norm of the final velocity vector (rad/s or m/s depending on engine).
+        Cartesian end-effector speed at end of simulation in meters per second (m/s).
     peak_end_effector_speed : float
-        Maximum L2-norm of velocity observed across all timesteps.
+        Maximum Cartesian end-effector speed observed across all timesteps (m/s).
     trajectory_q : np.ndarray
         Position trajectory, shape (n_steps, n_dof).
     trajectory_v : np.ndarray
@@ -347,16 +348,16 @@ class CrossEnginePerturbationRunner:
             q, v = engine.get_state()
             traj_q.append(q.copy())
             traj_v.append(v.copy())
-            speed = float(np.linalg.norm(v))
+            speed = self._compute_end_effector_speed(engine, q, v)
             if speed > peak_speed:
                 peak_speed = speed
 
         q_arr = np.array(traj_q)
         v_arr = np.array(traj_v)
+        final_q = q_arr[-1] if len(q_arr) > 0 else np.zeros(1)
         final_v = v_arr[-1] if len(v_arr) > 0 else np.zeros(1)
-        final_speed = float(np.linalg.norm(final_v))
-        # Kinetic energy proxy: 0.5 * ||v_final||^2
-        total_energy = 0.5 * float(np.dot(final_v, final_v))
+        final_speed = self._compute_end_effector_speed(engine, final_q, final_v)
+        total_energy = self._compute_trial_energy(engine, final_q, final_v)
 
         logger.debug(
             "Trial %d: final_speed=%.4f, peak_speed=%.4f, energy=%.4f",
@@ -373,6 +374,230 @@ class CrossEnginePerturbationRunner:
             trajectory_q=q_arr,
             trajectory_v=v_arr,
         )
+
+    @staticmethod
+    def _compute_trial_energy(
+        engine: Any,
+        q: np.ndarray,
+        v: np.ndarray,
+    ) -> float:
+        """Compute total mechanical energy in Joules (J).
+
+        Queries engine-native energy methods if available (e.g.
+        ``get_total_energy()``, ``total_energy()``, or combined kinetic +
+        potential energy). Otherwise evaluates kinetic energy 0.5 * v^T M(q) v
+        using the engine's mass matrix, inertia, or mass properties, plus
+        potential energy if available.
+        """
+        # 1. Native total energy method
+        for method_name in ("get_total_energy", "total_energy", "compute_total_energy"):
+            fn = getattr(engine, method_name, None)
+            if callable(fn):
+                try:
+                    return float(fn())
+                except TypeError:
+                    try:
+                        return float(fn(q, v))
+                    except Exception:  # noqa: BLE001
+                        pass
+                except Exception:  # noqa: BLE001
+                    pass
+
+        # 2. Combined kinetic + potential energy
+        ke: float | None = None
+        for ke_name in (
+            "get_kinetic_energy",
+            "compute_kinetic_energy",
+            "kinetic_energy",
+        ):
+            fn = getattr(engine, ke_name, None)
+            if callable(fn):
+                try:
+                    ke = float(fn())
+                    break
+                except TypeError:
+                    try:
+                        ke = float(fn(q, v))
+                        break
+                    except Exception:  # noqa: BLE001
+                        pass
+                except Exception:  # noqa: BLE001
+                    pass
+
+        pe: float | None = None
+        for pe_name in (
+            "get_potential_energy",
+            "compute_potential_energy",
+            "potential_energy",
+        ):
+            fn = getattr(engine, pe_name, None)
+            if callable(fn):
+                try:
+                    pe = float(fn())
+                    break
+                except TypeError:
+                    try:
+                        pe = float(fn(q))
+                        break
+                    except Exception:  # noqa: BLE001
+                        pass
+                except Exception:  # noqa: BLE001
+                    pass
+
+        if ke is not None:
+            return ke + (pe if pe is not None else 0.0)
+
+        # 3. Mass matrix / inertia tensor: 0.5 * v.T @ M @ v
+        mass_matrix = None
+        if hasattr(engine, "get_mass_matrix") and callable(engine.get_mass_matrix):
+            try:
+                mass_matrix = engine.get_mass_matrix(q)
+            except Exception:  # noqa: BLE001
+                pass
+        elif hasattr(engine, "mass_matrix"):
+            mass_matrix = getattr(engine, "mass_matrix", None)
+
+        if mass_matrix is not None:
+            M = np.asarray(mass_matrix, dtype=float)
+            v_vec = np.asarray(v, dtype=float)
+            if M.ndim == 2 and M.shape[0] == len(v_vec) and M.shape[1] == len(v_vec):
+                ke = 0.5 * float(v_vec @ M @ v_vec)
+                return ke + (pe if pe is not None else 0.0)
+
+        # 4. Explicit inertia or mass parameter
+        inertia = getattr(engine, "inertia", None)
+        if inertia is not None:
+            v_vec = np.asarray(v, dtype=float)
+            if np.isscalar(inertia):
+                i_val = float(inertia)
+                ke = 0.5 * i_val * float(np.dot(v_vec, v_vec))
+                return ke + (pe if pe is not None else 0.0)
+            i_arr = np.asarray(inertia, dtype=float)
+            if i_arr.ndim == 1 and len(i_arr) == len(v_vec):
+                ke = 0.5 * float(np.sum(i_arr * (v_vec**2)))
+                return ke + (pe if pe is not None else 0.0)
+            if i_arr.ndim == 2 and i_arr.shape == (len(v_vec), len(v_vec)):
+                ke = 0.5 * float(v_vec @ i_arr @ v_vec)
+                return ke + (pe if pe is not None else 0.0)
+
+        mass = getattr(engine, "mass", None)
+        lengths = getattr(engine, "lengths", getattr(engine, "link_lengths", None))
+        if (
+            mass is not None
+            and lengths is not None
+            and np.isscalar(mass)
+            and len(lengths) == 1
+            and len(v) == 1
+        ):
+            # Single-link pendulum: I = m * L^2
+            i_val = float(mass) * (float(lengths[0]) ** 2)
+            ke = 0.5 * i_val * (float(v[0]) ** 2)
+            return ke + (pe if pe is not None else 0.0)
+
+        if mass is not None:
+            v_vec = np.asarray(v, dtype=float)
+            if np.isscalar(mass):
+                m_val = float(mass)
+                ke = 0.5 * m_val * float(np.dot(v_vec, v_vec))
+                return ke + (pe if pe is not None else 0.0)
+            m_arr = np.asarray(mass, dtype=float)
+            if m_arr.ndim == 1 and len(m_arr) == len(v_vec):
+                ke = 0.5 * float(np.sum(m_arr * (v_vec**2)))
+                return ke + (pe if pe is not None else 0.0)
+            if m_arr.ndim == 2 and m_arr.shape == (len(v_vec), len(v_vec)):
+                ke = 0.5 * float(v_vec @ m_arr @ v_vec)
+                return ke + (pe if pe is not None else 0.0)
+
+        # 5. Default unit mass (1.0 kg) with dimensional scaling
+        v_vec = np.asarray(v, dtype=float)
+        default_mass = float(getattr(engine, "default_mass", 1.0))
+        return 0.5 * default_mass * float(np.dot(v_vec, v_vec))
+
+    @staticmethod
+    def _compute_end_effector_speed(
+        engine: Any,
+        q: np.ndarray,
+        v: np.ndarray,
+    ) -> float:
+        """Compute Cartesian end-effector speed in meters per second (m/s).
+
+        Queries engine-native end-effector kinematics / Jacobians if available.
+        Falls back to link-length forward kinematics for planar chains, or
+        to the generalized velocity norm if no spatial geometry is defined.
+        """
+        # 1. Native end-effector speed or velocity
+        for name in ("get_end_effector_speed", "end_effector_speed"):
+            fn = getattr(engine, name, None)
+            if callable(fn):
+                try:
+                    return float(fn())
+                except TypeError:
+                    try:
+                        return float(fn(q, v))
+                    except Exception:  # noqa: BLE001
+                        pass
+                except Exception:  # noqa: BLE001
+                    pass
+
+        for name in (
+            "get_end_effector_velocity",
+            "compute_end_effector_velocity",
+            "end_effector_velocity",
+        ):
+            fn = getattr(engine, name, None)
+            if callable(fn):
+                try:
+                    vel = fn()
+                    return float(np.linalg.norm(vel))
+                except TypeError:
+                    try:
+                        vel = fn(q, v)
+                        return float(np.linalg.norm(vel))
+                    except Exception:  # noqa: BLE001
+                        pass
+                except Exception:  # noqa: BLE001
+                    pass
+
+        # 2. Jacobian: v_ee = J[:3] @ v (or J @ v if 2D/3D)
+        if hasattr(engine, "get_jacobian") and callable(engine.get_jacobian):
+            try:
+                J = np.asarray(engine.get_jacobian(q), dtype=float)
+                v_vec = np.asarray(v, dtype=float)
+                if J.shape[0] == 6:
+                    order = getattr(engine, "spatial_order", None)
+                    vel = (
+                        J[3:, :] @ v_vec
+                        if order == "angular_linear"
+                        else J[:3, :] @ v_vec
+                    )
+                else:
+                    vel = J @ v_vec
+                return float(np.linalg.norm(vel))
+            except Exception:  # noqa: BLE001
+                pass
+
+        # 3. Planar kinematic chain lengths
+        lengths = getattr(engine, "lengths", getattr(engine, "link_lengths", None))
+        if lengths is not None:
+            try:
+                l_arr = np.asarray(lengths, dtype=float)
+                q_arr = np.asarray(q, dtype=float)
+                v_arr = np.asarray(v, dtype=float)
+                if len(l_arr) == 1 and len(q_arr) >= 1 and len(v_arr) >= 1:
+                    return float(l_arr[0] * abs(v_arr[0]))
+                if len(l_arr) >= 2 and len(q_arr) >= 2 and len(v_arr) >= 2:
+                    vx = -l_arr[0] * np.sin(q_arr[0]) * v_arr[0] - l_arr[1] * np.sin(
+                        q_arr[0] + q_arr[1]
+                    ) * (v_arr[0] + v_arr[1])
+                    vy = l_arr[0] * np.cos(q_arr[0]) * v_arr[0] + l_arr[1] * np.cos(
+                        q_arr[0] + q_arr[1]
+                    ) * (v_arr[0] + v_arr[1])
+                    return float(np.hypot(vx, vy))
+            except Exception:  # noqa: BLE001
+                pass
+
+        # 4. Fallback norm of generalized velocities
+        return float(np.linalg.norm(v))
 
     @staticmethod
     def _aggregate(result: CrossEngineRunResult) -> None:
