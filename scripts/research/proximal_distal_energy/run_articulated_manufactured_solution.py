@@ -37,7 +37,7 @@ AUTHORITY_LOCK = (
     / "requirements"
     / "articulated-authority-py311.lock"
 )
-AUTHORITY_PYTHON_VERSION = "3.11.15"
+AUTHORITY_PYTHON_VERSION = "3.11.16"
 AUTHORITY_PROFILE = "articulated-manufactured-authority-py311-v1"
 ROLLING_PROFILE = "articulated-manufactured-rolling-native-v1"
 RecordProfile = Literal["authority", "rolling"]

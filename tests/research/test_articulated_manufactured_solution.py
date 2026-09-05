@@ -154,7 +154,7 @@ def test_manufactured_constrained_motion_checks() -> None:
 
 @pytest.mark.xfail(
     strict=False,
-    reason="The committed record source hashes await exact Linux CPython 3.11.15 regeneration",
+    reason="The committed record source hashes await exact Linux CPython 3.11.16 regeneration",
 )
 def test_committed_manufactured_solution_evidence_is_current_and_nontrivial() -> None:
     """Release evidence must be source-pinned and contain measured residuals."""
