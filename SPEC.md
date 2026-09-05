@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Clean-Machine Install Verification and Standalone Tutorial Execution (#9407)
+
+Verifies the clean-machine installation path and tutorial execution flow:
+- Resolves Windows charmap decode errors in `tests/unit/test_install_script.py` with UTF-8 decoding and Git Bash path translation, marked with unit test suite markers.
+- Updates tutorial examples (`examples/01_basic_simulation.py`, `examples/02_parameter_sweeps.py`, `examples/03_injury_risk_tutorial.py`) to resolve and prepend project root and source paths to `sys.path` so they execute cleanly from checkout without requiring editable installation.
+- Validates 40/40 verification checks passing in `scripts/ci/verify_installation.py`.
+
 ## Tile Category Registry and Sidebar Grouping Reconciliation (#9481)
 
 Reconciles launcher tile categories directly with the registry (`models.yaml`), eliminating
