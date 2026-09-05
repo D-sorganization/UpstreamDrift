@@ -391,9 +391,9 @@ class CrossEnginePerturbationRunner:
                 except TypeError:
                     try:
                         return float(fn(*args))
-                    except Exception:  # noqa: BLE001
+                    except (TypeError, ValueError, AttributeError, RuntimeError):
                         pass
-                except Exception:  # noqa: BLE001
+                except (ValueError, AttributeError, RuntimeError):
                     pass
         return None
 
@@ -442,7 +442,7 @@ class CrossEnginePerturbationRunner:
         if hasattr(engine, "get_mass_matrix") and callable(engine.get_mass_matrix):
             try:
                 mass_matrix = engine.get_mass_matrix(q)
-            except Exception:  # noqa: BLE001
+            except (TypeError, ValueError, AttributeError, RuntimeError):
                 pass
         elif hasattr(engine, "mass_matrix"):
             mass_matrix = getattr(engine, "mass_matrix", None)
@@ -561,9 +561,9 @@ class CrossEnginePerturbationRunner:
                     try:
                         vel = fn(q, v)
                         return float(np.linalg.norm(vel))
-                    except Exception:  # noqa: BLE001
+                    except (TypeError, ValueError, AttributeError, RuntimeError):
                         pass
-                except Exception:  # noqa: BLE001
+                except (ValueError, AttributeError, RuntimeError):
                     pass
 
         # 2. Jacobian: v_ee = J[:3] @ v (or J @ v if 2D/3D)
@@ -581,7 +581,7 @@ class CrossEnginePerturbationRunner:
                 else:
                     vel = J @ v_vec
                 return float(np.linalg.norm(vel))
-            except Exception:  # noqa: BLE001
+            except (TypeError, ValueError, AttributeError, RuntimeError, IndexError):
                 pass
 
         # 3. Planar kinematic chain lengths
@@ -601,7 +601,7 @@ class CrossEnginePerturbationRunner:
                         q_arr[0] + q_arr[1]
                     ) * (v_arr[0] + v_arr[1])
                     return float(np.hypot(vx, vy))
-            except Exception:  # noqa: BLE001
+            except (TypeError, ValueError, AttributeError, RuntimeError, IndexError):
                 pass
 
         # 4. Fallback norm of generalized velocities
