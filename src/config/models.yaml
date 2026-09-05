@@ -102,6 +102,9 @@ models:
     engine_type: "putting_green"
     launcher:
       category: "simulation"
+      categories:
+        - "simulation"
+        - "tool"
       logo: "assets/putting_green_modern.png"
       status: "ready"
 
@@ -223,6 +226,9 @@ models:
     path: "src/launchers/cross_engine_dashboard.py"
     launcher:
       category: "simulation"
+      categories:
+        - "simulation"
+        - "tool"
       logo: "cross_engine.svg"
       status: "ready"
       default_launch: "tab"
@@ -602,6 +608,9 @@ models:
       - "documents"
     launcher:
       category: "documentation"
+      categories:
+        - "documentation"
+        - "tool"
       logo: "assets/project_map.png"
       status: "ready"
 
@@ -655,6 +664,9 @@ models:
       - "biomechanics"
     launcher:
       category: "biomechanics"
+      categories:
+        - "biomechanics"
+        - "tool"
       logo: "project_map.svg"
       status: "ready"
       default_launch: "tab"

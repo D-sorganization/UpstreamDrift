@@ -357,122 +357,69 @@ class LayoutManager:
             return False  # ID not found
 
     def get_model_categories(self, model: Any) -> list[str]:
-        """Determine the list of categories this model belongs to."""
+        """Determine the list of categories this model belongs to from the registry."""
         launcher = getattr(model, "launcher", None)
-        cats = []
+        raw_cats: list[str] = []
         if isinstance(launcher, dict):
-            raw_cats = launcher.get("category") or launcher.get("categories")
-        else:
-            raw_cats = (
-                getattr(launcher, "category", None)
-                or getattr(launcher, "categories", None)
-                if launcher
-                else None
-            )
+            cat = launcher.get("category")
+            if cat:
+                raw_cats.append(str(cat))
+            cats_multi = launcher.get("categories")
+            if isinstance(cats_multi, (list, tuple)):
+                raw_cats.extend(str(c) for c in cats_multi)
+            elif isinstance(cats_multi, str) and cats_multi:
+                raw_cats.append(cats_multi)
+        elif launcher:
+            cat = getattr(launcher, "category", None)
+            if cat:
+                raw_cats.append(str(cat))
+            cats_multi = getattr(launcher, "categories", None)
+            if isinstance(cats_multi, (list, tuple)):
+                raw_cats.extend(str(c) for c in cats_multi)
+            elif isinstance(cats_multi, str) and cats_multi:
+                raw_cats.append(cats_multi)
 
-        if raw_cats:
-            if isinstance(raw_cats, str):
-                cats.append(raw_cats)
-            elif isinstance(raw_cats, list):
-                cats.extend(raw_cats)
-
-        mapped_cats = set()
         mapping = {
             "physics_engine": "Engines",
+            "engines": "Engines",
             "biomechanics": "Biomechanics",
             "simulation": "Simulation",
             "motion_matching": "Tools",
             "motion_capture": "Tools",
             "tool": "Tools",
+            "tools": "Tools",
+            "analysis": "Tools",
             "external": "Tools",
+            "developer_tools": "Tools",
             "documentation": "Documentation",
         }
-        for cat in cats:
+        mapped_cats: list[str] = []
+        for cat in raw_cats:
             cat_norm = str(cat).strip().lower()
-            if cat_norm in mapping:
-                mapped_cats.add(mapping[cat_norm])
+            mapped = mapping.get(cat_norm)
+            if mapped and mapped not in mapped_cats:
+                mapped_cats.append(mapped)
 
-        if not mapped_cats:
-            t = str(getattr(model, "type", "") or "").lower()
-            model_id = str(getattr(model, "id", "") or "").lower()
-
-            if t in (
-                "gait",
-                "sit_stand",
-                "movement_optimizer",
-                "opensim_biomech",
-                "biomechanics",
-                "physics_informed",
-            ) or any(
-                term in model_id or term in t
-                for term in ["gait", "sit_to_stand", "biomech", "pinn"]
-            ):
-                mapped_cats.add("Biomechanics")
-            elif t in (
-                "custom_humanoid",
-                "drake",
-                "pinocchio",
-                "opensim",
-                "myosim",
-                "matlab_suite",
-            ) or model_id in [
-                "mujoco_unified",
-                "drake_golf",
-                "pinocchio_golf",
-                "opensim_golf",
-                "myosim_suite",
-                "matlab_suite",
-            ]:
-                mapped_cats.add("Engines")
-            elif t in ("putting_green", "golf_simulation") or model_id in [
-                "putting_green",
-                "golf_simulation_suite",
-                "bunkershot3d",
-                "pendulum_simulator",
-                "shot_tracer",
-                "cross_engine_dashboard",
-                "terrain_engine",
-                "golf_environment",
-                "bunker_shot",
-                "swing_flight_pipeline",
-                "ball_flight_simulator",
-                "putting_green_gui",
-            ]:
-                mapped_cats.add("Simulation")
-            elif t == "document" or model_id in ["project_map", "library_tool"]:
-                mapped_cats.add("Documentation")
-            else:
-                mapped_cats.add("Tools")
-
-        model_id = getattr(model, "id", "").lower()
-        if model_id == "movement_optimizer":
-            mapped_cats.add("Tools")
-            mapped_cats.add("Biomechanics")
-        if model_id == "cross_engine_dashboard":
-            mapped_cats.add("Tools")
-            mapped_cats.add("Simulation")
-        if model_id == "putting_green":
-            mapped_cats.add("Tools")
-            mapped_cats.add("Simulation")
-        if model_id == "library_tool":
-            mapped_cats.add("Documentation")
-            mapped_cats.add("Tools")
-        if model_id == "project_map":
-            mapped_cats.add("Documentation")
-
-        return list(mapped_cats)
+        return mapped_cats
 
     def _get_model_category(self, model: Any) -> str:
         """Compatibility wrapper for legacy category queries."""
         cats = self.get_model_categories(model)
-        if not cats:
-            return "Tools & Data"
-        first = cats[0]
-        compat = {
-            "Engines": "Physics Engines",
-            "Tools": "Tools & Data",
-        }
-        return compat.get(first, first)
+        if cats:
+            first = cats[0]
+            compat = {
+                "Engines": "Physics Engines",
+                "Tools": "Tools & Data",
+            }
+            return compat.get(first, first)
+
+        # Legacy fallback for models without launcher metadata
+        t = str(getattr(model, "type", "") or "").lower()
+        if any(term in t for term in ["biomech", "movement_optimizer"]):
+            return "Biomechanics"
+        if t in ("drake", "mujoco", "pinocchio", "opensim", "myosim", "matlab_suite"):
+            return "Physics Engines"
+        return "Tools & Data"
 
     def get_filtered_order(self) -> list[str]:
         """Get model order filtered by current search text and category.
