@@ -1,10 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## Tile Category Registry and Sidebar Grouping Reconciliation (#9481)
+
+Reconciles launcher tile categories directly with the registry (`models.yaml`), eliminating
+hardcoded model IDs and type-based fallback heuristics from `LauncherLayoutManager.get_model_categories()`:
+- `LauncherPresentationMetadata` supports optional multi-category declarations (`categories: tuple[str, ...]`).
+- `models.yaml` explicitly declares secondary categories where appropriate (`movement_optimizer`, `cross_engine_dashboard`, `putting_green`, `library_tool`).
+- `_launcher_navigation_ui.py` sidebar buttons are collapsed from duplicate mappings to distinct categories (`Engines`, `Biomechanics`, `Simulation`, `Tools`, `Documentation`).
+- `test_category_registry_gate.py` enforces that `get_model_categories()` contains no model IDs in its AST, all categories map cleanly, and no sidebar filter is empty.
+
 ## Physics Metrics Dimensionality & Pinocchio Actuation Loop (#9477)
 
 Addresses GH-9477:
 1. **Actuator Torque in Pinocchio Simulation Loop**: Replaced hard-coded zero-torque vectors (`tau = zeros`) in `SimulationMixin._advance_physics()`, `_record_frame()`, and `PinocchioGUI.step_simulation()` with explicit commanded torque support (`self.commanded_tau`), enabling actuated dynamics rather than pure free-fall simulation. Added `set_commanded_torque()` and tests demonstrating that non-zero commanded torque alters trajectories compared to free-fall.
 2. **True Physical Energy and Cartesian Speed Metrics**: Replaced dimensionless velocity norm proxy in `CrossEnginePerturbationRunner._run_trial()` with genuine total mechanical energy in Joules ($J$), evaluating engine-native energy methods, kinetic energy with physical mass matrix/inertia ($0.5 v^T M(q) v$), and potential energy. Evaluated end-effector speed as Cartesian linear velocity in m/s via kinematics/Jacobians rather than generalized velocity norms. Added unit tests against an analytic single-link pendulum verifying mass scaling and kinematic speed. Decomposed energy evaluation helpers to conform to function-line budgets and refined numpy/GeometryModel type annotations.
+
 
 ## Research Evidence Source Hash Re-Registration (#9233)
 
