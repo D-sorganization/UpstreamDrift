@@ -1,6 +1,14 @@
 # SPEC.md — Repository Specification Document
 
-## Current Scientific Audit State (2026-08-27)
+## Research Evidence Source Hash Re-Registration (#9233)
+
+Re-registers `source_sha256` content digests across proximal-distal research evidence
+records in `docs/research/proximal_distal_energy_transfer/data/` that drifted following
+refactoring PRs (#8760, #8962, #8963, #9055, #9240, #9267, #9306, #9415, #9427).
+Fixes the table lookup directory in `run_two_hand_wscg_analysis.py` to match the canonical
+`matlab/Tables` directory location, normalizes hex digest casing in `two_hand_wscg_analysis.json`,
+updates `claim_evidence_manifest.json` with current artifact digests, and adds architecture-budget
+exceptions for pre-existing `run_two_hand_wscg_analysis.py` methods.
 
 ## ADR-0045 F1: Roll-Model Provenance in Every Result (#9343, #9356)
 

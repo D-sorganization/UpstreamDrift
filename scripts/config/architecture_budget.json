@@ -30,6 +30,24 @@
       "expires_on": "2026-09-15"
     },
     {
+      "path": "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+      "symbol": "_analyze_case",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9233,
+      "reason": "Issue #9233: pre-existing research analysis script exceeds function-lines budget; touched to fix MATLAB table path and re-register SHA256.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+      "symbol": "build_outputs",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9233,
+      "reason": "Issue #9233: pre-existing research analysis script exceeds function-lines budget; touched to fix MATLAB table path and re-register SHA256.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "src/shared/python/optimization/batch_swing_optimizer.py",
       "symbol": "BatchSwingOptimizer.__init__",
       "rule": "parameters",
