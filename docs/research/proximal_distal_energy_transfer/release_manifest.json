@@ -717,8 +717,8 @@
       "bytes": 1203291
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_numeric_comparison_evidence.json": {
-      "sha256": "b36ac07809a5e58402b1422ee78a45756df6b604a5dccaf77f29856c7160d6ba",
-      "bytes": 43652
+      "sha256": "1a748a08eac6409e8ee194ae05c127774680a053ce79b4729282584753c3862e",
+      "bytes": 51364
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_numeric_contracts.json": {
       "sha256": "f49129e8c5dc729906fd5f47ab134ec1255278625cb026c9def8fa7ad7bcf5f5",
@@ -2833,8 +2833,8 @@
       "bytes": 858
     },
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py": {
-      "sha256": "1ef3eda2b0d96562362e85b9939fa431aa502e90db86d82840b24c1fc7b2a692",
-      "bytes": 31356
+      "sha256": "3fd9ab7d2de47452d07adf65d39c26593596566dc4aa259e247ecd971d425987",
+      "bytes": 31357
     },
     "scripts/research/proximal_distal_energy/run_articulated_native_constraint_discrepancy.py": {
       "sha256": "6a3d450ac009efd777b0051ab988171952b975ed7c6e61628f2d009bccd04f49",
