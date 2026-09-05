@@ -91,17 +91,17 @@ class PinocchioGUI(
     def _init_internal_state(self) -> None:
         self.model: pin.Model | None = None
         self.data: pin.Data | None = None
-        self.visual_model: pin.VisualModel | None = None
-        self.collision_model: pin.CollisionModel | None = None
+        self.visual_model: pin.GeometryModel | None = None
+        self.collision_model: pin.GeometryModel | None = None
         self.viz: MeshcatVisualizer | None = None
-        self.q: np.ndarray | None = None
-        self.v: np.ndarray | None = None
+        self.q: np.ndarray | None = None  # type: ignore[assignment]
+        self.v: np.ndarray | None = None  # type: ignore[assignment]
         self.commanded_tau: np.ndarray | None = None
         self.applied_tau: np.ndarray | None = None
 
-        self.analyzer: InducedAccelerationAnalyzer | None = None
-        self.latest_induced: dict[str, np.ndarray] | None = None
-        self.latest_cf: dict[str, np.ndarray] | None = None
+        self.analyzer: InducedAccelerationAnalyzer | None = None  # type: ignore[assignment]
+        self.latest_induced: dict[str, np.ndarray] | None = None  # type: ignore[assignment]
+        self.latest_cf: dict[str, np.ndarray] | None = None  # type: ignore[assignment]
 
         self.manip_analyzer: PinocchioManipulabilityAnalyzer | None = None
         self.manip_checkboxes: dict[str, QtWidgets.QCheckBox] = {}

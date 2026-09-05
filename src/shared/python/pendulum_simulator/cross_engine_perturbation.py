@@ -269,6 +269,7 @@ class CrossEnginePerturbationRunner:
             )
         expected_steps = round(self._config.t_end / self._config.dt)
         profile = np.atleast_1d(np.asarray(base_torque_profile, dtype=float))
+        profile_2d: np.ndarray
         if profile.ndim == 1:
             # Shape (n_steps,) — same torque for all DOF; reshape to (n_steps, 1)
             profile_2d = profile.reshape(-1, 1)
@@ -376,20 +377,12 @@ class CrossEnginePerturbationRunner:
         )
 
     @staticmethod
-    def _compute_trial_energy(
+    def _eval_native_total_energy(
         engine: Any,
         q: np.ndarray,
         v: np.ndarray,
-    ) -> float:
-        """Compute total mechanical energy in Joules (J).
-
-        Queries engine-native energy methods if available (e.g.
-        ``get_total_energy()``, ``total_energy()``, or combined kinetic +
-        potential energy). Otherwise evaluates kinetic energy 0.5 * v^T M(q) v
-        using the engine's mass matrix, inertia, or mass properties, plus
-        potential energy if available.
-        """
-        # 1. Native total energy method
+    ) -> float | None:
+        """Query engine-native total energy methods if available."""
         for method_name in ("get_total_energy", "total_energy", "compute_total_energy"):
             fn = getattr(engine, method_name, None)
             if callable(fn):
@@ -402,8 +395,15 @@ class CrossEnginePerturbationRunner:
                         pass
                 except Exception:  # noqa: BLE001
                     pass
+        return None
 
-        # 2. Combined kinetic + potential energy
+    @staticmethod
+    def _eval_kinetic_potential_methods(
+        engine: Any,
+        q: np.ndarray,
+        v: np.ndarray,
+    ) -> tuple[float | None, float | None]:
+        """Query separate kinetic and potential energy methods if available."""
         ke: float | None = None
         for ke_name in (
             "get_kinetic_energy",
@@ -444,10 +444,15 @@ class CrossEnginePerturbationRunner:
                 except Exception:  # noqa: BLE001
                     pass
 
-        if ke is not None:
-            return ke + (pe if pe is not None else 0.0)
+        return ke, pe
 
-        # 3. Mass matrix / inertia tensor: 0.5 * v.T @ M @ v
+    @staticmethod
+    def _eval_mass_or_inertia_energy(
+        engine: Any,
+        q: np.ndarray,
+        v: np.ndarray,
+    ) -> float | None:
+        """Evaluate kinetic energy from mass matrix, inertia tensor, or mass."""
         mass_matrix = None
         if hasattr(engine, "get_mass_matrix") and callable(engine.get_mass_matrix):
             try:
@@ -457,28 +462,22 @@ class CrossEnginePerturbationRunner:
         elif hasattr(engine, "mass_matrix"):
             mass_matrix = getattr(engine, "mass_matrix", None)
 
+        v_vec = np.asarray(v, dtype=float)
         if mass_matrix is not None:
             M = np.asarray(mass_matrix, dtype=float)
-            v_vec = np.asarray(v, dtype=float)
             if M.ndim == 2 and M.shape[0] == len(v_vec) and M.shape[1] == len(v_vec):
-                ke = 0.5 * float(v_vec @ M @ v_vec)
-                return ke + (pe if pe is not None else 0.0)
+                return 0.5 * float(v_vec @ M @ v_vec)
 
-        # 4. Explicit inertia or mass parameter
         inertia = getattr(engine, "inertia", None)
         if inertia is not None:
-            v_vec = np.asarray(v, dtype=float)
             if np.isscalar(inertia):
-                i_val = float(inertia)
-                ke = 0.5 * i_val * float(np.dot(v_vec, v_vec))
-                return ke + (pe if pe is not None else 0.0)
+                i_val = float(np.asarray(inertia).item())
+                return 0.5 * i_val * float(np.dot(v_vec, v_vec))
             i_arr = np.asarray(inertia, dtype=float)
             if i_arr.ndim == 1 and len(i_arr) == len(v_vec):
-                ke = 0.5 * float(np.sum(i_arr * (v_vec**2)))
-                return ke + (pe if pe is not None else 0.0)
+                return 0.5 * float(np.sum(i_arr * (v_vec**2)))
             if i_arr.ndim == 2 and i_arr.shape == (len(v_vec), len(v_vec)):
-                ke = 0.5 * float(v_vec @ i_arr @ v_vec)
-                return ke + (pe if pe is not None else 0.0)
+                return 0.5 * float(v_vec @ i_arr @ v_vec)
 
         mass = getattr(engine, "mass", None)
         lengths = getattr(engine, "lengths", getattr(engine, "link_lengths", None))
@@ -489,29 +488,57 @@ class CrossEnginePerturbationRunner:
             and len(lengths) == 1
             and len(v) == 1
         ):
-            # Single-link pendulum: I = m * L^2
-            i_val = float(mass) * (float(lengths[0]) ** 2)
-            ke = 0.5 * i_val * (float(v[0]) ** 2)
-            return ke + (pe if pe is not None else 0.0)
+            i_val = float(np.asarray(mass).item()) * (float(lengths[0]) ** 2)
+            return 0.5 * i_val * (float(v[0]) ** 2)
 
         if mass is not None:
-            v_vec = np.asarray(v, dtype=float)
             if np.isscalar(mass):
-                m_val = float(mass)
-                ke = 0.5 * m_val * float(np.dot(v_vec, v_vec))
-                return ke + (pe if pe is not None else 0.0)
+                m_val = float(np.asarray(mass).item())
+                return 0.5 * m_val * float(np.dot(v_vec, v_vec))
             m_arr = np.asarray(mass, dtype=float)
             if m_arr.ndim == 1 and len(m_arr) == len(v_vec):
-                ke = 0.5 * float(np.sum(m_arr * (v_vec**2)))
-                return ke + (pe if pe is not None else 0.0)
+                return 0.5 * float(np.sum(m_arr * (v_vec**2)))
             if m_arr.ndim == 2 and m_arr.shape == (len(v_vec), len(v_vec)):
-                ke = 0.5 * float(v_vec @ m_arr @ v_vec)
-                return ke + (pe if pe is not None else 0.0)
+                return 0.5 * float(v_vec @ m_arr @ v_vec)
 
-        # 5. Default unit mass (1.0 kg) with dimensional scaling
+        return None
+
+    @staticmethod
+    def _compute_trial_energy(
+        engine: Any,
+        q: np.ndarray,
+        v: np.ndarray,
+    ) -> float:
+        """Compute total mechanical energy in Joules (J).
+
+        Queries engine-native energy methods if available (e.g.
+        ``get_total_energy()``, ``total_energy()``, or combined kinetic +
+        potential energy). Otherwise evaluates kinetic energy 0.5 * v^T M(q) v
+        using the engine's mass matrix, inertia, or mass properties, plus
+        potential energy if available.
+        """
+        native_te = CrossEnginePerturbationRunner._eval_native_total_energy(
+            engine, q, v
+        )
+        if native_te is not None:
+            return native_te
+
+        ke, pe = CrossEnginePerturbationRunner._eval_kinetic_potential_methods(
+            engine, q, v
+        )
+        pe_val = pe if pe is not None else 0.0
+        if ke is not None:
+            return ke + pe_val
+
+        matrix_ke = CrossEnginePerturbationRunner._eval_mass_or_inertia_energy(
+            engine, q, v
+        )
+        if matrix_ke is not None:
+            return matrix_ke + pe_val
+
         v_vec = np.asarray(v, dtype=float)
         default_mass = float(getattr(engine, "default_mass", 1.0))
-        return 0.5 * default_mass * float(np.dot(v_vec, v_vec))
+        return 0.5 * default_mass * float(np.dot(v_vec, v_vec)) + pe_val
 
     @staticmethod
     def _compute_end_effector_speed(
