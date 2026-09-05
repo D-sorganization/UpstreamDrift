@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-## Optimize `np.mean` for lists in dataset (spec-exempt: micro-optimization)
+## Optimize `np.mean` for Lists in Dataset (Spec-Exempt: Micro-Optimization)
 
 Replaces `np.mean` with built-in `sum / len` for Python lists to avoid implicit temporary NumPy array allocations and provide a performance boost.
 
