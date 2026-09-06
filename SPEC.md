@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Bunker Shot Pose Reflection Rejection and Exit Kinematics Preservation (#9542)
+
+Resolves posture admissibility and exit state fidelity defects in the bunker shot model:
+- Rejects orientation matrices that admit reflections (`det(R) ≈ -1`) in `HeadKinematics` and `SandDelivery`, strictly enforcing proper 3D rotations with `det(R) = +1` and finite elements.
+- Enforces immutability on input kinematics arrays (`velocity_m_s`, `position_m`, `angular_velocity_rad_s`, `orientation`) by setting `writeable = False` upon initialization, preventing post-construction mutation.
+- Exposes full exit kinematics on `ShotResult`: `exit_velocity_m_s`, `exit_angular_velocity_rad_s`, `exit_orientation`, and `exit_position_m`.
+- Extends `SandDelivery` to carry actual exit kinematics (`exit_velocity_m_s`, `exit_angular_velocity_rad_s`, `exit_orientation`).
+- Preserves actual 3D exit linear velocity and angular velocity during handoff to `PostImpactState` in `to_post_impact_state()`, eliminating forced projection to zero lateral speed and zero spin when measured exit kinematics are present.
+
 ## Pose2Sim Observation Confidence and Alignment Hardening (#9552)
 
 Resolves confidence assignment and multi-camera observation alignment defects in Pose2Sim ingestion:
