@@ -1,5 +1,28 @@
 # SPEC.md — Repository Specification Document
 
+## Resolve Sidekick Extension Scope Gate and Test Paths (#9572)
+
+Resolves test failures and runtime import gates blocking CI Standard on `main`:
+- Permits supported scopes (`chat`, `sidekick`) in `sidekick_extension_overlay._module_name()` instead of restricting strictly to `sidekick`, enabling manifest-approved UpstreamDrift extensions like `chat/_qt/runtime.py`.
+- Classifies `chat/_qt/runtime.py` owner as `UpstreamDrift` in `scripts/config/shared_python_ownership_exceptions.yaml`.
+- Anchors relative paths in `tests/launchers/test_simulation_guis.py` and `tests/docker/test_docker_compose.py` to project root so tests execute deterministically regardless of invocation directory.
+- Re-registers known architectural boundary exception in `tests/architecture/test_dependency_direction.py` for `api/routes/_ball_flight_trajectory_import.py`.
+- Restores markerless mocap authority section and handoff pointer in `SPEC.md` and `AGENT_HANDOFF.md`.
+
+## Markerless Mocap Program (#9063)
+
+Issue #9065 establishes ADR-0041 and an executable acceptance program before
+live markerless capture begins. Canonical camera, capture, time, calibration,
+observation, reconstruction, session, and C3D exchange contracts belong to
+Tools #4706. UpstreamDrift owns application orchestration, persistence,
+biomechanics integration, and matching PyQt6/React/API workflows. AffineDrift
+owns sanitized evidence publication. Tools_Private is not a dependency of the
+open runtime. The first consumer under #9069 must pin a protected Tools merge,
+reject missing or incompatible schema authority, and adapt existing C3D and
+motion-pipeline paths instead of copying shared code. This M0 slice makes no
+camera, inference, C3D round-trip, commercial, or physical-lab qualification
+claim.
+
 ## Enforce Declared Measurement Acceptance Conditions & Physical Bounds (#9286)
 
 Enforces measurement acceptance conditions, physical admissibility bounds, and genuine apparatus/condition declarations in the V&V validation ledger:
@@ -5296,4 +5319,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Replaced `np.sum([...list...], axis=0)` with `np.asarray([...list...]).sum(axis=0)` in `src/bunkershot3d/solvers/mpm/ballreach.py` to optimize list summation. (spec-exempt: micro-optimization)
 - Seam guards fail closed by default when `vendor/ud-tools` is absent or unpopulated, surfacing actionable `git archive` workaround instructions and requiring explicit `SEAM_TESTS_ALLOW_SKIP=1` to skip outside CI (#9501).
 - Isolated child pytest runners disable async and thread-spawning plugins and clear addopts to prevent interpreter shutdown hangs and bound subprocess execution (#9511).
+- Resolve sidekick extension overlay supported scopes and fix test path resolution (#9572).
 
