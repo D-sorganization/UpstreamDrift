@@ -44,18 +44,18 @@ def test_fallback_is_appended_so_a_present_child_copy_still_wins() -> None:
     would silently flip for the modules that still diverge -- the exact
     ambiguity the epic exists to remove.
     """
-    still_owned = "src.shared.python.import_aliases"
-    assert (_UD_SHARED / "import_aliases.py").is_file(), (
+    still_owned = "src.shared.python.contracts"
+    assert (_UD_SHARED / "contracts.py").is_file(), (
         "fixture assumption: this module is still an UpstreamDrift child copy"
     )
-    assert (_VENDORED_SHARED / "import_aliases.py").is_file(), (
+    assert (_VENDORED_SHARED / "contracts.py").is_file(), (
         "fixture assumption: the pinned tree also carries it, so both could match"
     )
 
     spec = importlib.util.find_spec(still_owned)
 
     assert spec is not None and spec.origin is not None
-    assert Path(spec.origin).resolve() == (_UD_SHARED / "import_aliases.py").resolve()
+    assert Path(spec.origin).resolve() == (_UD_SHARED / "contracts.py").resolve()
 
 
 @_requires_vendor

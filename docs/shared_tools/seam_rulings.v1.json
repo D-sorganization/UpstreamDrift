@@ -143,8 +143,8 @@
     },
     "import_aliases.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Tools' finder (2026-08-28) is a superset: aliases plot_engine/plot_theme/plotting/contracts and declines .tests. names; UD's copy is the #8322 snapshot."
+      "status": "cleaned",
+      "rationale": "Tools' finder (2026-08-28) is a superset: aliases plot_engine/plot_theme/plotting/contracts and declines .tests. names; UD's copy is the #8322 snapshot. UD copy retired 2026-09-06: canonical is strictly ahead (3 extra shared roots, `contracts` in the downstream alias roots, a fix declining `.tests.` names, and a widened repo-root check) with no UD-only content. src/__init__.py already bootstraps through the canonical spelling, so vendor's finder was already the one installing aliases. Verified adopting it does not change plot_theme/plot_engine resolution."
     },
     "launch_monitor": {
       "ruling": "tools-canonical",

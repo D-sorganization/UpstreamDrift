@@ -67,7 +67,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher` | 3 | 5 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `humanoid_character_builder` | 16 | 24 | 13 | 27 | 0 | 40 |
-| `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
+| `import_aliases.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `launch_monitor` | 0 | 0 | 0 | 0 | 29 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **504** | **286** | **148** | **1183** | **466** | **790** |
+| **Total** | **504** | **285** | **148** | **1183** | **467** | **789** |
 
 ## Diverged Files by Package
 
@@ -328,12 +328,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/presets/loader.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-
-### Package `import_aliases.py` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `import_aliases.py` | -565 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `model_generation` (49 Diverged Files)
 

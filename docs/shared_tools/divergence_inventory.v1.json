@@ -12,9 +12,9 @@
   },
   "totals": {
     "identical": 504,
-    "diverged": 286,
+    "diverged": 285,
     "ud-only": 1183,
-    "tools-only": 466,
+    "tools-only": 467,
     "spelling-only": 148
   },
   "packages": {
@@ -391,9 +391,9 @@
     },
     "import_aliases.py": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "injury": {
@@ -8894,12 +8894,12 @@
     },
     {
       "path": "import_aliases.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "import_aliases.py",
       "subpackage": "",
-      "ud_bytes": 10943,
+      "ud_bytes": null,
       "tools_bytes": 11508,
-      "byte_delta": -565,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -31935,19 +31935,6 @@
     },
     {
       "path": "humanoid_character_builder/validation/physics_validator.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "import_aliases.py",
       "ud": {
         "author": "Dieter Olson",
         "date": "2026-08-01",
