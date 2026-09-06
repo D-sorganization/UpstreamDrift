@@ -39,7 +39,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `cli_utils.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `club_data` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `codemap` | 8 | 6 | 0 | 0 | 0 | 14 |
-| `compatibility.py` | 0 | 1 | 0 | 0 | 0 | 1 |
+| `compatibility.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `config` | 0 | 2 | 0 | 13 | 0 | 2 |
 | `contracts.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `control_features_registry.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **504** | **287** | **148** | **1183** | **465** | **791** |
+| **Total** | **504** | **286** | **148** | **1183** | **466** | **790** |
 
 ## Diverged Files by Package
 
@@ -264,12 +264,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `codemap/indexer.py` | -735 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `codemap/mcp_server.py` | -2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `codemap/watcher.py` | -90 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-
-### Package `compatibility.py` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `compatibility.py` | -76 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `config` (2 Diverged Files)
 

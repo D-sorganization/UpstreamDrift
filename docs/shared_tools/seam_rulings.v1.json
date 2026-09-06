@@ -85,8 +85,8 @@
     },
     "compatibility.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Single compatibility shim owned by Tools (issue #7249 path in the child-copy contract)."
+      "status": "cleaned",
+      "rationale": "Single compatibility shim owned by Tools (issue #7249 path in the child-copy contract). UD copy retired 2026-09-06: the only difference was that canonical splits the TYPE_CHECKING branch so type checkers see explicit UTC/StrEnum imports, which is runtime-equivalent on this repo's 3.11 floor; the canonical 3.10 backport branch is inert here."
     },
     "config": {
       "ruling": "deferred",
