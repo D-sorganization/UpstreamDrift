@@ -58,6 +58,31 @@ class ModificationMixin:
         self, base_name: str, existing_names: set[str]
     ) -> str: ...  # type: ignore[empty-body]
 
+    def _get_writable_model(self, model_id: str) -> ParsedModel | None:
+        """Return the model if it exists and may be modified, else ``None``.
+
+        Every mutating operation on this mixin opened with the same three
+        lines -- look the model up, log and bail if it is missing, log and bail
+        if it is read-only. Duplicating that made it easy to omit the read-only
+        check, which fails silently by mutating a model the caller declared
+        immutable.
+
+        Args:
+            model_id: Identifier of the model to modify.
+
+        Returns:
+            The model, or ``None`` when it is unknown or read-only. Callers
+            return their own failure value; the reason is logged here.
+        """
+        model = self._models.get(model_id)
+        if not model:
+            logger.error(f"Model '{model_id}' not found")
+            return None
+        if model.read_only:
+            logger.error(f"Model '{model_id}' is read-only")
+            return None
+        return model
+
     # ============================================================
     # Direct Modifications
     # ============================================================
