@@ -1,5 +1,9 @@
 # SPEC.md — Repository Specification Document
 
+## Guard Optional Excel Export Tests (#9579)
+
+Guards `TestExportExcel` in `movement_optimizer/tests/test_export.py` with `pytest.importorskip("openpyxl")` so test suites pass when optional dependencies (`openpyxl`) are absent in minimal or optional test runners.
+
 ## Resolve Sidekick Extension Scope Gate and Test Paths (#9572)
 
 Resolves test failures and runtime import gates blocking CI Standard on `main`:
