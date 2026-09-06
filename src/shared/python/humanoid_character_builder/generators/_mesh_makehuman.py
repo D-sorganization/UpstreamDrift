@@ -16,6 +16,13 @@ from typing import Any
 import numpy as np
 from humanoid_character_builder.core.body_parameters import BodyParameters
 
+from ._mesh_export import (
+    MeshExportTarget,
+    export_all_segments,
+    export_segmented_mesh,
+    validate_makehuman_script_inputs,
+    validate_output_path_within_base,
+)
 from ._mesh_types import (
     GeneratedMeshResult,
     MeshGeneratorInterface,
@@ -193,8 +200,8 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
 
     def _export_segments(
         self,
-        all_vertices: np.ndarray[Any, Any],
-        all_faces: np.ndarray[Any, Any],
+        all_vertices: np.ndarray,
+        all_faces: np.ndarray,
         vertex_groups: dict[str, list[int]],
         visual_dir: Path,
         collision_dir: Path,
@@ -205,51 +212,20 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         )
         from . import mesh_generator as _mg
 
-        mesh_paths: dict[str, Path] = {}
-        collision_paths: dict[str, Path] = {}
-
-        for mh_group, segment_name in self.MH_VERTEX_GROUP_MAP.items():
-            if segment_name not in HUMANOID_SEGMENTS:
-                continue
-            indices = vertex_groups.get(mh_group, [])
-            if not indices:
-                continue
-            try:
-                seg_verts, seg_faces = segment_mesh_by_range(
-                    all_vertices,
-                    all_faces,
-                    min(indices),
-                    max(indices) + 1,
-                )
-                if len(seg_verts) == 0:
-                    continue
-                submesh = _mg._trimesh_module.Trimesh(  # type: ignore[union-attr]
-                    vertices=seg_verts, faces=seg_faces
-                )
-                vpath = visual_dir / f"{segment_name}.stl"
-                submesh.export(str(vpath))
-                mesh_paths[segment_name] = vpath
-                cpath = collision_dir / f"{segment_name}.stl"
-                try:
-                    submesh.convex_hull.export(str(cpath))
-                except (RuntimeError, ValueError, OSError) as hull_exc:
-                    logger.warning(
-                        "Convex hull failed for %s (%s); using segment mesh as collision",
-                        segment_name,
-                        hull_exc,
-                    )
-                    submesh.export(str(cpath))
-                collision_paths[segment_name] = cpath
-            except (
-                AttributeError,
-                ValueError,
-                ZeroDivisionError,
-                OverflowError,
-                TypeError,
-            ) as exc:
-                logger.warning("Failed to segment %s: %s", segment_name, exc)
-
-        return mesh_paths, collision_paths
+        target = MeshExportTarget(
+            visual_dir=visual_dir,
+            collision_dir=collision_dir,
+            trimesh_module=_mg._trimesh_module,
+            logger=logger,
+        )
+        return export_all_segments(
+            vertex_groups=vertex_groups,
+            allowed_segments=HUMANOID_SEGMENTS,
+            all_vertices=all_vertices,
+            all_faces=all_faces,
+            target=target,
+            name_map=self.MH_VERTEX_GROUP_MAP,
+        )
 
     def _generate_from_presets(
         self,
@@ -722,32 +698,5 @@ generate_human()
             logger.warning("MakeHuman script execution error: %s", exc)
             return False
 
-    @staticmethod
-    def _validate_output_path_within_base(output_path: Path, base: Path) -> None:
-        """Raise ValueError if output_path is not contained within base."""
-        try:
-            output_path.resolve().relative_to(base.resolve())
-        except ValueError:
-            raise ValueError(
-                f"Output path {output_path!r} escapes expected base {base!r}"
-            ) from None
-
-    @staticmethod
-    def _validate_makehuman_script_inputs(
-        modifiers: dict[str, float],
-        output_dir: Path,
-        base_output_dir: Path | None = None,
-    ) -> None:
-        """Validate generated-script inputs before invoking MakeHuman."""
-        output_path = output_dir.resolve()
-        if output_path.exists() and not output_path.is_dir():
-            raise ValueError("output_dir must resolve to a directory")
-        if base_output_dir is not None:
-            MakeHumanMeshGenerator._validate_output_path_within_base(
-                output_dir, base_output_dir
-            )
-        for key, value in modifiers.items():
-            if not isinstance(key, str) or not _MAKEHUMAN_MODIFIER_RE.fullmatch(key):
-                raise ValueError(f"Invalid MakeHuman modifier key: {key!r}")
-            if not isinstance(value, int | float) or not math.isfinite(float(value)):
-                raise ValueError(f"Invalid MakeHuman modifier value for {key!r}")
+    _validate_output_path_within_base = staticmethod(validate_output_path_within_base)
+    _validate_makehuman_script_inputs = staticmethod(validate_makehuman_script_inputs)

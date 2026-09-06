@@ -16,6 +16,10 @@ from src.shared.python.humanoid_character_builder.core.body_parameters import (
     BodyParameters,
 )
 
+from ._mesh_export import (
+    validate_makehuman_script_inputs,
+    validate_output_path_within_base,
+)
 from ._mesh_types import GeneratedMeshResult, MeshGeneratorInterface
 from ._primitive_generator import PrimitiveMeshGenerator
 
@@ -245,62 +249,8 @@ generate_human()
 """
         return script
 
-    @staticmethod
-    def _validate_output_path_within_base(output_path: Path, base: Path) -> None:
-        """Raise ``ValueError`` if *output_path* is not contained within *base*.
-
-        Both paths are resolved before comparison so that symlinks and ``..``
-        components cannot be used to escape the intended directory.
-
-        Args:
-            output_path: The candidate output path to validate.
-            base: The expected root directory that must contain *output_path*.
-
-        Raises:
-            ValueError: If *output_path* is not under *base*.
-        """
-        resolved_output = output_path.resolve()
-        resolved_base = base.resolve()
-        try:
-            resolved_output.relative_to(resolved_base)
-        except ValueError:
-            raise ValueError(  # noqa: B904
-                f"Output path {output_path!r} escapes the expected base directory"
-                f" {base!r}"
-            )
-
-    @staticmethod
-    def _validate_makehuman_script_inputs(
-        modifiers: dict[str, float],
-        output_dir: Path,
-        base_output_dir: Path | None = None,
-    ) -> None:
-        """Validate generated-script inputs before invoking MakeHuman.
-
-        Args:
-            modifiers: MakeHuman modifier key/value pairs to validate.
-            output_dir: The directory where the script will write output.
-            base_output_dir: When provided, the resolved *output_dir* must be
-                contained within this directory.  Prevents path-traversal
-                escapes from reaching the generated script.
-
-        Raises:
-            ValueError: For invalid modifier keys/values, if *output_dir*
-                exists but is not a directory, or if *output_dir* escapes
-                *base_output_dir*.
-        """
-        output_path = output_dir.resolve()
-        if output_path.exists() and not output_path.is_dir():
-            raise ValueError("output_dir must resolve to a directory")
-        if base_output_dir is not None:
-            MakeHumanMeshGenerator._validate_output_path_within_base(
-                output_dir, base_output_dir
-            )
-        for key, value in modifiers.items():
-            if not isinstance(key, str) or not _MAKEHUMAN_MODIFIER_RE.fullmatch(key):
-                raise ValueError(f"Invalid MakeHuman modifier key: {key!r}")
-            if not isinstance(value, int | float) or not math.isfinite(float(value)):
-                raise ValueError(f"Invalid MakeHuman modifier value for {key!r}")
+    _validate_output_path_within_base = staticmethod(validate_output_path_within_base)
+    _validate_makehuman_script_inputs = staticmethod(validate_makehuman_script_inputs)
 
     def _generate_from_presets(
         self,
