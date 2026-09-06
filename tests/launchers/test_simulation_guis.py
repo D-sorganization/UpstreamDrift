@@ -154,14 +154,7 @@ class TestSwingBallFlightPipelineSource:
 
     def test_pipeline_module_exists(self) -> None:
         """swing_ball_flight_pipeline.py must exist."""
-        p = (
-            Path(__file__).resolve().parents[2]
-            / "src"
-            / "shared"
-            / "python"
-            / "physics"
-            / "swing_ball_flight_pipeline.py"
-        )
+        p = Path("src/shared/python/physics/swing_ball_flight_pipeline.py")
         assert p.exists(), (
             f"Pipeline file missing: {p}. "
             "Cherry-pick from feat/5337-swing-ball-flight-pipeline."
@@ -190,7 +183,7 @@ class TestTileRegistration:
 
     @pytest.fixture()
     def yaml_content(self) -> str:
-        p = Path(__file__).resolve().parents[2] / "src" / "config" / "models.yaml"
+        p = Path("src/config/models.yaml")
         return p.read_text(encoding="utf-8")
 
     def test_swing_flight_pipeline_tile(self, yaml_content: str) -> None:

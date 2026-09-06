@@ -112,11 +112,6 @@ KNOWN_EXCEPTIONS: set[tuple[str, str]] = {
     # api/ importing launcher internals for health data -> #8055 (3)
     ("api/routes/diagnostics.py", "src.launchers.integrations_health_data"),
     ("api/routes/diagnostics.py", "src.launchers.launcher_diagnostics"),
-    # api/ lazily resolving Tools checkout via launchers facade (ADR-0047 H3, #9377)
-    (
-        "api/routes/_ball_flight_trajectory_import.py",
-        "src.launchers.tools_repo_path",
-    ),
     # shared/ lazily importing an api router (function-local) -> #8055 (4)
     ("shared/python/realtime/ws_pubsub.py", "src.api.routes.realtime"),
 }

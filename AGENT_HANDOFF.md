@@ -111,19 +111,31 @@ contract, recovery constraints, and next commands are in
 
 ## Frozen External Boundary
 
-- #8800 remains frozen at source `1bd4d57da7bd257b76b42b3cc19524b283b5f748`; only 93/830 checkpoints exist.
-- ControlTower ground stopped at 45/48 and shaft at 48/48. Its WSL VHDX is unreadable (`0x80070570`). Do not retry WSL, repair/mount/copy/mutate the VHDX, restart services, or launch a replacement without explicit approval and a recoverability plan.
-- DeskComputer remains runner-drained; keep tests serial and web tests at no more than two workers.
-- The accumulated campaign worktree is `UpstreamDrift-worktrees/9153-forward-impulse-work`, last remote-equal at `1e5e823ca2fa9391134e8a0ccf140a36036a88a7`, with 233 commits ahead and 48 behind at the last audit. Preserve its evidence and quarantine.
+- #8800 remains frozen at source
+  `1bd4d57da7bd257b76b42b3cc19524b283b5f748`; only 93/830 checkpoints exist.
+- ControlTower ground stopped at 45/48 and shaft at 48/48. Its WSL VHDX is
+  unreadable (`0x80070570`). Do not retry WSL, repair/mount/copy/mutate the
+  VHDX, restart services, or launch a replacement without explicit approval
+  and a recoverability plan.
+- DeskComputer remains runner-drained; keep tests serial and web tests at no
+  more than two workers.
+- The accumulated campaign worktree is
+  `UpstreamDrift-worktrees/9153-forward-impulse-work`, last remote-equal at
+  `1e5e823ca2fa9391134e8a0ccf140a36036a88a7`, with 233 commits ahead and 48
+  behind at the last audit. Preserve its evidence and quarantine.
 
-## Active AffineDrift and External Program Boundaries
+## Active AffineDrift Companion Boundary
 
-- Markerless Mocap Program (#9063): Tools #4706 owns capture/contract schemas;
-  UpstreamDrift #9069 owns app orchestration; makes no physical-lab qualification claim.
-- Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`; publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
-- Governed companion workflows (#9190) define the 15-record registry, public executor, and CI execution evidence across 10 success and 4 failure fixtures.
-- #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes; #9174 remains open.
-- ADR-0043 and schema v1 are one-way UpstreamDrift software-fact authority for AffineDrift #4010. #9064 remains design-manual authority and #9070 remains typed calculation-manifest authority.
+- Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`;
+  publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
+- Governed companion workflows (#9190) define the 15-record registry, public
+  executor, and CI execution evidence across 10 success and 4 failure fixtures.
+- #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with
+  no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes,
+  acquisition identity, and attestations; #9174 remains open.
+- ADR-0043 and schema v1 are one-way UpstreamDrift software-fact authority for
+  AffineDrift #4010. #9064 remains design-manual authority and #9070 remains
+  typed calculation-manifest authority.
 
 ## Validation
 
