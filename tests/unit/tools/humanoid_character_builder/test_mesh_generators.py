@@ -5,7 +5,7 @@ Tests use mocked external dependencies (smplx, trimesh, subprocess) so that
 the full pipeline logic can be validated without installing heavy optional
 packages.
 
-See issues #979 (MakeHuman) and #980 (SMPL-X).
+See issues #979 (MakeHuman), #980 (SMPL-X), and #9584 (split module wiring).
 """
 
 from __future__ import annotations

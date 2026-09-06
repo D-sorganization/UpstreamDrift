@@ -8,7 +8,9 @@
 from __future__ import annotations
 
 import logging
+import math
 from pathlib import Path
+import re
 from typing import Any
 
 import numpy as np
@@ -29,6 +31,8 @@ try:
 except ImportError:
     _trimesh_module = None  # type: ignore[assignment]
     TRIMESH_AVAILABLE = False
+
+_MAKEHUMAN_MODIFIER_RE = re.compile(r"^[A-Za-z0-9_./-]+$")
 
 
 class MakeHumanMeshGenerator(MeshGeneratorInterface):
@@ -99,6 +103,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         collision_dir.mkdir(parents=True, exist_ok=True)
 
         modifiers = self._convert_params_to_makehuman(params)
+        self._validate_makehuman_script_inputs(modifiers, output_dir)
 
         # Try the scripted MakeHuman API
         try:
@@ -164,67 +169,19 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
             if len(vertices) == 0:
                 raise RuntimeError("Parsed OBJ has no vertices")
 
-            # Segment the mesh and export per-body-part STLs
-            if not TRIMESH_AVAILABLE:
+            from . import mesh_generator as _mg
+
+            if not _mg.TRIMESH_AVAILABLE:
                 raise RuntimeError("trimesh required for mesh segmentation")
 
-            mesh = _trimesh_module.Trimesh(vertices=vertices, faces=faces)  # type: ignore[union-attr]
-
-            from humanoid_character_builder.core.segment_definitions import (
-                HUMANOID_SEGMENTS,
-            )
-
-            mesh_paths: dict[str, Path] = {}
-            collision_paths: dict[str, Path] = {}
-
-            all_vertices = (
+            mesh = _mg._trimesh_module.Trimesh(vertices=vertices, faces=faces)  # type: ignore[union-attr]
+            all_verts = (
                 np.array(mesh.vertices) if hasattr(mesh, "vertices") else vertices
             )
-            all_faces = np.array(mesh.faces) if hasattr(mesh, "faces") else faces
-
-            for mh_group, segment_name in self.MH_VERTEX_GROUP_MAP.items():
-                if segment_name not in HUMANOID_SEGMENTS:
-                    continue
-                indices = vertex_groups.get(mh_group, [])
-                if not indices:
-                    continue
-                try:
-                    seg_verts, seg_faces = segment_mesh_by_range(
-                        all_vertices,
-                        all_faces,
-                        min(indices),
-                        max(indices) + 1,
-                    )
-                    if len(seg_verts) == 0:
-                        continue
-                    submesh = _trimesh_module.Trimesh(  # type: ignore[union-attr]
-                        vertices=seg_verts, faces=seg_faces
-                    )
-                    vpath = visual_dir / f"{segment_name}.stl"
-                    submesh.export(str(vpath))
-                    mesh_paths[segment_name] = vpath
-                    cpath = collision_dir / f"{segment_name}.stl"
-                    # Convex hull can fail (e.g. qhull QH6214) when the segment
-                    # has too few or coplanar points. Fall back to the segment
-                    # mesh itself as collision geometry — better than skipping.
-                    try:
-                        submesh.convex_hull.export(str(cpath))
-                    except (RuntimeError, ValueError, OSError) as hull_exc:
-                        logger.warning(
-                            "Convex hull failed for %s (%s); using segment mesh as collision",
-                            segment_name,
-                            hull_exc,
-                        )
-                        submesh.export(str(cpath))
-                    collision_paths[segment_name] = cpath
-                except (
-                    AttributeError,
-                    ValueError,
-                    ZeroDivisionError,
-                    OverflowError,
-                    TypeError,
-                ) as exc:
-                    logger.warning("Failed to segment %s: %s", segment_name, exc)
+            all_fcs = np.array(mesh.faces) if hasattr(mesh, "faces") else faces
+            mesh_paths, collision_paths = self._export_segments(
+                all_verts, all_fcs, vertex_groups, visual_dir, collision_dir
+            )
 
         return GeneratedMeshResult(
             success=len(mesh_paths) > 0,
@@ -233,6 +190,66 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
             vertex_groups=vertex_groups,
             metadata={"backend": "makehuman"},
         )
+
+    def _export_segments(
+        self,
+        all_vertices: np.ndarray[Any, Any],
+        all_faces: np.ndarray[Any, Any],
+        vertex_groups: dict[str, list[int]],
+        visual_dir: Path,
+        collision_dir: Path,
+    ) -> tuple[dict[str, Path], dict[str, Path]]:
+        """Segment the mesh and export per-body-part visual and collision STLs."""
+        from humanoid_character_builder.core.segment_definitions import (
+            HUMANOID_SEGMENTS,
+        )
+        from . import mesh_generator as _mg
+
+        mesh_paths: dict[str, Path] = {}
+        collision_paths: dict[str, Path] = {}
+
+        for mh_group, segment_name in self.MH_VERTEX_GROUP_MAP.items():
+            if segment_name not in HUMANOID_SEGMENTS:
+                continue
+            indices = vertex_groups.get(mh_group, [])
+            if not indices:
+                continue
+            try:
+                seg_verts, seg_faces = segment_mesh_by_range(
+                    all_vertices,
+                    all_faces,
+                    min(indices),
+                    max(indices) + 1,
+                )
+                if len(seg_verts) == 0:
+                    continue
+                submesh = _mg._trimesh_module.Trimesh(  # type: ignore[union-attr]
+                    vertices=seg_verts, faces=seg_faces
+                )
+                vpath = visual_dir / f"{segment_name}.stl"
+                submesh.export(str(vpath))
+                mesh_paths[segment_name] = vpath
+                cpath = collision_dir / f"{segment_name}.stl"
+                try:
+                    submesh.convex_hull.export(str(cpath))
+                except (RuntimeError, ValueError, OSError) as hull_exc:
+                    logger.warning(
+                        "Convex hull failed for %s (%s); using segment mesh as collision",
+                        segment_name,
+                        hull_exc,
+                    )
+                    submesh.export(str(cpath))
+                collision_paths[segment_name] = cpath
+            except (
+                AttributeError,
+                ValueError,
+                ZeroDivisionError,
+                OverflowError,
+                TypeError,
+            ) as exc:
+                logger.warning("Failed to segment %s: %s", segment_name, exc)
+
+        return mesh_paths, collision_paths
 
     def _generate_from_presets(
         self,
@@ -704,3 +721,33 @@ generate_human()
         except (subprocess.TimeoutExpired, OSError) as exc:
             logger.warning("MakeHuman script execution error: %s", exc)
             return False
+
+    @staticmethod
+    def _validate_output_path_within_base(output_path: Path, base: Path) -> None:
+        """Raise ValueError if output_path is not contained within base."""
+        try:
+            output_path.resolve().relative_to(base.resolve())
+        except ValueError:
+            raise ValueError(
+                f"Output path {output_path!r} escapes expected base {base!r}"
+            ) from None
+
+    @staticmethod
+    def _validate_makehuman_script_inputs(
+        modifiers: dict[str, float],
+        output_dir: Path,
+        base_output_dir: Path | None = None,
+    ) -> None:
+        """Validate generated-script inputs before invoking MakeHuman."""
+        output_path = output_dir.resolve()
+        if output_path.exists() and not output_path.is_dir():
+            raise ValueError("output_dir must resolve to a directory")
+        if base_output_dir is not None:
+            MakeHumanMeshGenerator._validate_output_path_within_base(
+                output_dir, base_output_dir
+            )
+        for key, value in modifiers.items():
+            if not isinstance(key, str) or not _MAKEHUMAN_MODIFIER_RE.fullmatch(key):
+                raise ValueError(f"Invalid MakeHuman modifier key: {key!r}")
+            if not isinstance(value, int | float) or not math.isfinite(float(value)):
+                raise ValueError(f"Invalid MakeHuman modifier value for {key!r}")
