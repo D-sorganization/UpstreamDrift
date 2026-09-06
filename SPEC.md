@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Pose2Sim Observation Confidence and Alignment Hardening (#9552)
+
+Resolves confidence assignment and multi-camera observation alignment defects in Pose2Sim ingestion:
+- Eliminates 1.0 default confidence for missing evidence: empty or unsupported observations now return 0.0 reconstruction confidence with explicit quality status (`"unknown"`, `"invalid"`) and failure reasons (`"missing_observation"`, `"insufficient_views"`).
+- Replaces frame-index alignment with timestamp-synchronized lookup bounded by a tolerance envelope (`0.5 / fps`), preventing cross-frame pollution from dropped or delayed frames.
+- Replaces naive index fallback with strict schema and canonical name mapping across supported detector layouts (`MediaPipe_33`, `BODY_25`), eliminating positional mismatches across differing schemas.
+- Rejects duplicate camera stream IDs during session loading with explicit `ValueError` rather than silently overwriting earlier streams.
+- Preserves contributing camera view counts and individual per-view detector confidences in reconstruction quality metadata and provides `to_canonical_observations()` bridge to canonical CIR records without creating competing schemas.
+
 ## Headless MuJoCo Version Resolution and Example Dependency Gating (#9431)
 
 Resolves headless MuJoCo initialization crashes and un-isolated native dependencies in test suites:
