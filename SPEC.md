@@ -1,5 +1,20 @@
 # SPEC.md — Repository Specification Document
 
+## Enforce Declared Measurement Acceptance Conditions & Physical Bounds (#9286)
+
+Enforces measurement acceptance conditions, physical admissibility bounds, and genuine apparatus/condition declarations in the V&V validation ledger:
+- Extends `AcceptanceCriterion` with optional `value_min` and `value_max` bounds, strictly checking that finite values fall within declared physical ranges (`value_min <= record.value <= value_max`) during shortfall evaluation.
+- Populates physical bounds for all 7 standard `MeasurementSpec` entries in `roadmap.py`:
+  - `bunker_sand_angle_of_repose_deg`: `[0.0, 90.0]` deg.
+  - `bunker_sand_bulk_density_kg_m3`: `[500.0, 3000.0]` kg/m³.
+  - `bunker_sand_drained_friction_angle_deg`: `[0.0, 90.0]` deg.
+  - `bunker_sand_population_survey`: `[500.0, 3000.0]` kg/m³.
+  - `splash_shot_divot_cast_volume_m3`: `[0.0, 0.1]` m³.
+  - `ejecta_launch_high_speed_video`: `[0.0, 100.0]` m/s.
+  - `clubhead_delivery_shaft_strain`: `[0.0, 10000.0]` N.
+- Adds `shortfall()` to `MeasurementSpec` verifying spec key, matching units, and ensuring real instrument measurements (`INSTRUMENT` basis) declare genuine instrument classes and conditions (rejecting empty or dummy `"none"` placeholders).
+- Ensures `MeasurementSpec.is_satisfied_by()` delegates to `shortfall()`, preventing invalid or unphysical measurement records from advancing validation or credibility factor scores.
+
 ## Bunker Shot Pose Reflection Rejection and Exit Kinematics Preservation (#9542)
 
 Resolves posture admissibility and exit state fidelity defects in the bunker shot model:
