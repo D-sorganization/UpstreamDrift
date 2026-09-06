@@ -132,6 +132,18 @@ class TestShotTrace:
         assert shot.entry_speed_m_s == pytest.approx(_DELIVERY_SPEED_M_S, rel=1e-12)
         assert shot.exit_speed_m_s < shot.entry_speed_m_s
         assert shot.peak_force_n > 0.0
+        np.testing.assert_allclose(
+            shot.exit_velocity_m_s, shot.velocities_m_s[-1], rtol=0, atol=1e-12
+        )
+        np.testing.assert_allclose(
+            shot.exit_orientation, shot.orientations[-1], rtol=0, atol=1e-12
+        )
+        np.testing.assert_allclose(
+            shot.exit_position_m, shot.positions_m[-1], rtol=0, atol=1e-12
+        )
+        np.testing.assert_allclose(
+            shot.exit_angular_velocity_rad_s, np.zeros(3), rtol=0, atol=1e-12
+        )
 
     def test_the_impulse_accounts_for_the_momentum_lost(
         self, solver: DRFTSolver, sole_body: SurfaceElements
@@ -299,6 +311,30 @@ class TestPreconditions:
             HeadKinematics(
                 velocity_m_s=_entry_velocity(), orientation=np.full((3, 3), 0.5)
             )
+
+    def test_rejects_an_orientation_that_is_a_reflection(self) -> None:
+        """Issue #9542: an improper rotation (det = -1) passes orthogonality but is a reflection."""
+        reflected = np.diag([-1.0, 1.0, 1.0])
+        with pytest.raises(SolverInputError, match="reflection"):
+            HeadKinematics(velocity_m_s=_entry_velocity(), orientation=reflected)
+
+    def test_rejects_a_non_finite_orientation(self) -> None:
+        with pytest.raises(SolverInputError, match="non-finite"):
+            nan_matrix = np.eye(3)
+            nan_matrix[0, 0] = float("nan")
+            HeadKinematics(velocity_m_s=_entry_velocity(), orientation=nan_matrix)
+
+    def test_arrays_are_immutable(self) -> None:
+        """Issue #9542: internal arrays must not admit post-construction in-place mutation."""
+        kinematics = HeadKinematics(velocity_m_s=_entry_velocity())
+        with pytest.raises(ValueError):
+            kinematics.velocity_m_s[0] = 999.0
+        with pytest.raises(ValueError):
+            kinematics.position_m[0] = 999.0
+        with pytest.raises(ValueError):
+            kinematics.angular_velocity_rad_s[0] = 999.0
+        with pytest.raises(ValueError):
+            kinematics.orientation[0, 0] = 999.0
 
     def test_rejects_a_non_finite_velocity(self) -> None:
         with pytest.raises(SolverInputError):

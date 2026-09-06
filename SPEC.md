@@ -1,5 +1,67 @@
 # SPEC.md — Repository Specification Document
 
+## Resolve Sidekick Extension Scope Gate and Test Paths (#9572)
+
+Resolves test failures and runtime import gates blocking CI Standard on `main`:
+- Permits supported scopes (`chat`, `sidekick`) in `sidekick_extension_overlay._module_name()` instead of restricting strictly to `sidekick`, enabling manifest-approved UpstreamDrift extensions like `chat/_qt/runtime.py`.
+- Classifies `chat/_qt/runtime.py` owner as `UpstreamDrift` in `scripts/config/shared_python_ownership_exceptions.yaml`.
+- Anchors relative paths in `tests/launchers/test_simulation_guis.py` and `tests/docker/test_docker_compose.py` to project root so tests execute deterministically regardless of invocation directory.
+- Re-registers known architectural boundary exception in `tests/architecture/test_dependency_direction.py` for `api/routes/_ball_flight_trajectory_import.py`.
+- Restores markerless mocap authority section and handoff pointer in `SPEC.md` and `AGENT_HANDOFF.md`.
+
+## Markerless Mocap Program (#9063)
+
+Issue #9065 establishes ADR-0041 and an executable acceptance program before
+live markerless capture begins. Canonical camera, capture, time, calibration,
+observation, reconstruction, session, and C3D exchange contracts belong to
+Tools #4706. UpstreamDrift owns application orchestration, persistence,
+biomechanics integration, and matching PyQt6/React/API workflows. AffineDrift
+owns sanitized evidence publication. Tools_Private is not a dependency of the
+open runtime. The first consumer under #9069 must pin a protected Tools merge,
+reject missing or incompatible schema authority, and adapt existing C3D and
+motion-pipeline paths instead of copying shared code. This M0 slice makes no
+camera, inference, C3D round-trip, commercial, or physical-lab qualification
+claim.
+
+## Enforce Declared Measurement Acceptance Conditions & Physical Bounds (#9286)
+
+Enforces measurement acceptance conditions, physical admissibility bounds, and genuine apparatus/condition declarations in the V&V validation ledger:
+- Extends `AcceptanceCriterion` with optional `value_min` and `value_max` bounds, strictly checking that finite values fall within declared physical ranges (`value_min <= record.value <= value_max`) during shortfall evaluation.
+- Populates physical bounds for all 7 standard `MeasurementSpec` entries in `roadmap.py`:
+  - `bunker_sand_angle_of_repose_deg`: `[0.0, 90.0]` deg.
+  - `bunker_sand_bulk_density_kg_m3`: `[500.0, 3000.0]` kg/m³.
+  - `bunker_sand_drained_friction_angle_deg`: `[0.0, 90.0]` deg.
+  - `bunker_sand_population_survey`: `[500.0, 3000.0]` kg/m³.
+  - `splash_shot_divot_cast_volume_m3`: `[0.0, 0.1]` m³.
+  - `ejecta_launch_high_speed_video`: `[0.0, 100.0]` m/s.
+  - `clubhead_delivery_shaft_strain`: `[0.0, 10000.0]` N.
+- Adds `shortfall()` to `MeasurementSpec` verifying spec key, matching units, and ensuring real instrument measurements (`INSTRUMENT` basis) declare genuine instrument classes and conditions (rejecting empty or dummy `"none"` placeholders).
+- Ensures `MeasurementSpec.is_satisfied_by()` delegates to `shortfall()`, preventing invalid or unphysical measurement records from advancing validation or credibility factor scores.
+
+## Bunker Shot Pose Reflection Rejection and Exit Kinematics Preservation (#9542)
+
+Resolves posture admissibility and exit state fidelity defects in the bunker shot model:
+- Rejects orientation matrices that admit reflections (`det(R) ≈ -1`) in `HeadKinematics` and `SandDelivery`, strictly enforcing proper 3D rotations with `det(R) = +1` and finite elements.
+- Enforces immutability on input kinematics arrays (`velocity_m_s`, `position_m`, `angular_velocity_rad_s`, `orientation`) by setting `writeable = False` upon initialization, preventing post-construction mutation.
+- Exposes full exit kinematics on `ShotResult`: `exit_velocity_m_s`, `exit_angular_velocity_rad_s`, `exit_orientation`, and `exit_position_m`.
+- Extends `SandDelivery` to carry actual exit kinematics (`exit_velocity_m_s`, `exit_angular_velocity_rad_s`, `exit_orientation`).
+- Preserves actual 3D exit linear velocity and angular velocity during handoff to `PostImpactState` in `to_post_impact_state()`, eliminating forced projection to zero lateral speed and zero spin when measured exit kinematics are present.
+
+## Pose2Sim Observation Confidence and Alignment Hardening (#9552)
+
+Resolves confidence assignment and multi-camera observation alignment defects in Pose2Sim ingestion:
+- Eliminates 1.0 default confidence for missing evidence: empty or unsupported observations now return 0.0 reconstruction confidence with explicit quality status (`"unknown"`, `"invalid"`) and failure reasons (`"missing_observation"`, `"insufficient_views"`).
+- Replaces frame-index alignment with timestamp-synchronized lookup bounded by a tolerance envelope (`0.5 / fps`), preventing cross-frame pollution from dropped or delayed frames.
+- Replaces naive index fallback with strict schema and canonical name mapping across supported detector layouts (`MediaPipe_33`, `BODY_25`), eliminating positional mismatches across differing schemas.
+- Rejects duplicate camera stream IDs during session loading with explicit `ValueError` rather than silently overwriting earlier streams.
+- Preserves contributing camera view counts and individual per-view detector confidences in reconstruction quality metadata and provides `to_canonical_observations()` bridge to canonical CIR records without creating competing schemas.
+
+## Headless MuJoCo Version Resolution and Example Dependency Gating (#9431)
+
+Resolves headless MuJoCo initialization crashes and un-isolated native dependencies in test suites:
+- Updates `ProvenanceInfo.capture()` to safely resolve MuJoCo version via `sys.modules` or `importlib.metadata.version("mujoco")` without forcing an import of `mujoco`, avoiding headless OpenGL `glGetError` NoneType attribute crashes when generating simulation metadata in headless runners.
+- Gating examples requiring native Rust wheels (`basic_flight_simulation.py`) or external fixture files (`motion_training_demo.py`) in `tests/examples/test_examples_produce_output.py` using `pytest.skip` when optional runtime components are unavailable.
+
 ## Repository Hygiene & Artifact Gitignore Enforcement (#9415)
 
 Enforces repository hygiene and artifact gitignore coverage following the #9415 sweep:
@@ -5258,4 +5320,5 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Replaced `np.sum([...list...], axis=0)` with `np.asarray([...list...]).sum(axis=0)` in `src/bunkershot3d/solvers/mpm/ballreach.py` to optimize list summation. (spec-exempt: micro-optimization)
 - Seam guards fail closed by default when `vendor/ud-tools` is absent or unpopulated, surfacing actionable `git archive` workaround instructions and requiring explicit `SEAM_TESTS_ALLOW_SKIP=1` to skip outside CI (#9501).
 - Isolated child pytest runners disable async and thread-spawning plugins and clear addopts to prevent interpreter shutdown hangs and bound subprocess execution (#9511).
+- Resolve sidekick extension overlay supported scopes and fix test path resolution (#9572).
 
