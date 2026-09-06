@@ -59,11 +59,18 @@ output/**/temp/
 /output/*
 !/output/.gitkeep
 /.scratch/
+.scratch/
 /motion_matching_training/
+motion_matching_training/
 # Cross-engine leaderboard regeneration target (run_cross_engine_leaderboard.py
 # default --results-dir); the committed placeholder was a wrong-cwd artifact
 # removed by #9415.
 /motion_matching/
+motion_matching/
+/reports/*.json
+/reports/**/*.json
+reports/*.json
+reports/**/*.json
 reports/pip_audit.json
 reports/semgrep.json
 # Third-party model repos are git submodules at shared/models/…; the plain-blob
