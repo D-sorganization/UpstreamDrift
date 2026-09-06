@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 504,
-    "diverged": 285,
+    "identical": 496,
+    "diverged": 279,
     "ud-only": 1183,
-    "tools-only": 467,
+    "tools-only": 481,
     "spelling-only": 148
   },
   "packages": {
@@ -187,10 +187,10 @@
       "spelling-only": 0
     },
     "codemap": {
-      "identical": 8,
-      "diverged": 6,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 14,
       "spelling-only": 0
     },
     "compatibility.py": {
@@ -5498,168 +5498,168 @@
     },
     {
       "path": "codemap/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 762,
+      "ud_bytes": null,
       "tools_bytes": 762,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_js.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 5430,
+      "ud_bytes": null,
       "tools_bytes": 5430,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_markdown.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 1516,
+      "ud_bytes": null,
       "tools_bytes": 1516,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_python.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4440,
+      "ud_bytes": null,
       "tools_bytes": 4447,
-      "byte_delta": -7,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_rust.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 3220,
+      "ud_bytes": null,
       "tools_bytes": 3220,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_ts_common.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 3544,
+      "ud_bytes": null,
       "tools_bytes": 3693,
-      "byte_delta": -149,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/api.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 10316,
+      "ud_bytes": null,
       "tools_bytes": 10522,
-      "byte_delta": -206,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/cli.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4938,
+      "ud_bytes": null,
       "tools_bytes": 4938,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/db.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 6245,
+      "ud_bytes": null,
       "tools_bytes": 6245,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/embeddings.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 912,
+      "ud_bytes": null,
       "tools_bytes": 912,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/indexer.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 10033,
+      "ud_bytes": null,
       "tools_bytes": 10768,
-      "byte_delta": -735,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/mcp_server.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 2830,
+      "ud_bytes": null,
       "tools_bytes": 2832,
-      "byte_delta": -2,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/parsers.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 2533,
+      "ud_bytes": null,
       "tools_bytes": 2533,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/watcher.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4851,
+      "ud_bytes": null,
       "tools_bytes": 4941,
-      "byte_delta": -90,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -31415,84 +31415,6 @@
     },
     {
       "path": "chat/tests/test_workspace_bridge.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "codemap/_lang_python.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "codemap/_ts_common.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "codemap/api.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "codemap/indexer.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "codemap/mcp_server.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "codemap/watcher.py",
       "ud": {
         "author": "Dieter Olson",
         "date": "2026-08-01",

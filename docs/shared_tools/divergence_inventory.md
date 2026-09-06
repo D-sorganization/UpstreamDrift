@@ -38,7 +38,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `chat_contracts` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `cli_utils.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `club_data` | 0 | 0 | 0 | 5 | 0 | 0 |
-| `codemap` | 8 | 6 | 0 | 0 | 0 | 14 |
+| `codemap` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `compatibility.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `config` | 0 | 2 | 0 | 13 | 0 | 2 |
 | `contracts.py` | 0 | 1 | 0 | 0 | 0 | 1 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **504** | **285** | **148** | **1183** | **467** | **789** |
+| **Total** | **496** | **279** | **148** | **1183** | **481** | **775** |
 
 ## Diverged Files by Package
 
@@ -253,17 +253,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `chat/skills_manager.py` | -59 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `chat/tests/test_chat_drift.py` | +0 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `chat/tests/test_workspace_bridge.py` | -290 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-
-### Package `codemap` (6 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `codemap/_lang_python.py` | -7 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `codemap/_ts_common.py` | -149 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `codemap/api.py` | -206 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `codemap/indexer.py` | -735 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `codemap/mcp_server.py` | -2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `codemap/watcher.py` | -90 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `config` (2 Diverged Files)
 

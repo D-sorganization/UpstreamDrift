@@ -80,8 +80,8 @@
     },
     "codemap": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "All 6 diverged files are newer in Tools (2026-08-24/25) than UD's 2026-08-01 copy."
+      "status": "cleaned",
+      "rationale": "All 6 diverged files are newer in Tools (2026-08-24/25) than UD's 2026-08-01 copy. UD copy retired 2026-09-06: canonical was ahead in all six diverged files and UD held no unique content -- its differing lines were older forms of the same lines. Canonical narrows two blind `except Exception` to `except ImportError`, adds justified noqa annotations, and replaces bare `\"git\"` subprocess argv with `resolve_trusted_git_executable()` plus a graceful fallback, closing a PATH-hijack weakness UD still carried."
     },
     "compatibility.py": {
       "ruling": "tools-canonical",
