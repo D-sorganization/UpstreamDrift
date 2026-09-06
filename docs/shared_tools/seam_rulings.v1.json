@@ -169,8 +169,8 @@
     },
     "plot_engine": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "All 3 diverged files newer in Tools (pyqt6_widget.py 2026-08-28, trendline.py 2026-08-25)."
+      "status": "cleaned",
+      "rationale": "All 3 diverged files newer in Tools (pyqt6_widget.py 2026-08-28, trendline.py 2026-08-25). UD copy retired 2026-09-06: canonical was ahead and UD held nothing unique. `pyqt6_widget.py` gains export identity metadata and CSV export (56 added lines against 8 UD-only, all of which were superseded forms of the same lines); `matplotlib_renderer.py` is an equivalent early-return refactor that narrows types; `trendline.py` differs only in where the float cast sits. Verified UD's still-owned plotting/export.py and plotting/identity.py provide the names canonical imports."
     },
     "plot_theme": {
       "ruling": "tools-canonical",
@@ -185,8 +185,8 @@
     },
     "programmatic_pid": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "10 of 14 diverged files are spelling-only; the rest are Tools-newer docstring/CLI edits (2026-08-20)."
+      "status": "cleaned",
+      "rationale": "10 of 14 diverged files are spelling-only; the rest are Tools-newer docstring/CLI edits (2026-08-20). UD copy retired 2026-09-06: 10 of the 14 differing files were import-spelling only, and the remaining four differed purely cosmetically -- three in import line-wrapping and one in `chunks or [...]` vs `chunks if chunks else [...]`, which are semantically identical. No behavioural divergence existed."
     },
     "reporting": {
       "ruling": "deferred",

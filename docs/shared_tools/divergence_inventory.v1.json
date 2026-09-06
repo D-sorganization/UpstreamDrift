@@ -11,11 +11,11 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 496,
-    "diverged": 279,
+    "identical": 476,
+    "diverged": 262,
     "ud-only": 1183,
-    "tools-only": 481,
-    "spelling-only": 148
+    "tools-only": 518,
+    "spelling-only": 138
   },
   "packages": {
     "README.md": {
@@ -523,10 +523,10 @@
       "spelling-only": 0
     },
     "plot_engine": {
-      "identical": 10,
-      "diverged": 3,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 1,
+      "tools-only": 14,
       "spelling-only": 0
     },
     "plot_labels.py": {
@@ -579,11 +579,11 @@
       "spelling-only": 0
     },
     "programmatic_pid": {
-      "identical": 10,
-      "diverged": 14,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 10
+      "tools-only": 24,
+      "spelling-only": 0
     },
     "putting_dynamics": {
       "identical": 0,
@@ -16742,121 +16742,121 @@
     },
     {
       "path": "plot_engine/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 1212,
+      "ud_bytes": null,
       "tools_bytes": 1212,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/contour.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 2538,
+      "ud_bytes": null,
       "tools_bytes": 2538,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/matplotlib_renderer.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 17977,
+      "ud_bytes": null,
       "tools_bytes": 18042,
-      "byte_delta": -65,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/plotly_converter.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 13094,
+      "ud_bytes": null,
       "tools_bytes": 13094,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/protocols.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 1868,
+      "ud_bytes": null,
       "tools_bytes": 1868,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/pyqt6_widget.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 4886,
+      "ud_bytes": null,
       "tools_bytes": 6779,
-      "byte_delta": -1893,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/specs.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 3898,
+      "ud_bytes": null,
       "tools_bytes": 3898,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 40,
+      "ud_bytes": null,
       "tools_bytes": 40,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_matplotlib_renderer.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 15762,
+      "ud_bytes": null,
       "tools_bytes": 15762,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_plotly_converter.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 16539,
+      "ud_bytes": null,
       "tools_bytes": 16539,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -16874,36 +16874,36 @@
     },
     {
       "path": "plot_engine/tests/test_specs.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 13326,
+      "ud_bytes": null,
       "tools_bytes": 13326,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_trendline.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 8621,
+      "ud_bytes": null,
       "tools_bytes": 8621,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/trendline.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 6447,
+      "ud_bytes": null,
       "tools_bytes": 6322,
-      "byte_delta": 125,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -18230,288 +18230,288 @@
     },
     {
       "path": "programmatic_pid/AGENT_INSTRUCTIONS.md",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 11539,
+      "ud_bytes": null,
       "tools_bytes": 11539,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2865,
+      "ud_bytes": null,
       "tools_bytes": 2813,
-      "byte_delta": 52,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/cli.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 25845,
+      "ud_bytes": null,
       "tools_bytes": 25805,
-      "byte_delta": 40,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/controls.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 6160,
+      "ud_bytes": null,
       "tools_bytes": 6148,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/document.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 9536,
+      "ud_bytes": null,
       "tools_bytes": 9499,
-      "byte_delta": 37,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/equipment.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 15222,
+      "ud_bytes": null,
       "tools_bytes": 15218,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/generator.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2842,
+      "ud_bytes": null,
       "tools_bytes": 2790,
-      "byte_delta": 52,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/geometry.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 4180,
+      "ud_bytes": null,
       "tools_bytes": 4176,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/instruments.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 1941,
+      "ud_bytes": null,
       "tools_bytes": 1933,
-      "byte_delta": 8,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/layout.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 8686,
+      "ud_bytes": null,
       "tools_bytes": 8674,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/profiles.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 3528,
+      "ud_bytes": null,
       "tools_bytes": 3528,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/py.typed",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 0,
+      "ud_bytes": null,
       "tools_bytes": 0,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/rendering.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 10633,
+      "ud_bytes": null,
       "tools_bytes": 10637,
-      "byte_delta": -4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/spec_loader.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 10159,
+      "ud_bytes": null,
       "tools_bytes": 10143,
-      "byte_delta": 16,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/streams.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 5360,
+      "ud_bytes": null,
       "tools_bytes": 5348,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 36,
+      "ud_bytes": null,
       "tools_bytes": 36,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_edge_cases.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 5416,
+      "ud_bytes": null,
       "tools_bytes": 5416,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_geometry.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 6054,
+      "ud_bytes": null,
       "tools_bytes": 6054,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_pipeline_e2e.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 10919,
+      "ud_bytes": null,
       "tools_bytes": 10919,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_types.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 4343,
+      "ud_bytes": null,
       "tools_bytes": 4343,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_validation.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 7631,
+      "ud_bytes": null,
       "tools_bytes": 7631,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/title_block.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 7550,
+      "ud_bytes": null,
       "tools_bytes": 7521,
-      "byte_delta": 29,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/types.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2922,
+      "ud_bytes": null,
       "tools_bytes": 2922,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/validation.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 6644,
+      "ud_bytes": null,
       "tools_bytes": 6623,
-      "byte_delta": 21,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -32506,45 +32506,6 @@
       }
     },
     {
-      "path": "plot_engine/matplotlib_renderer.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "plot_engine/pyqt6_widget.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "plot_engine/trendline.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-05",
-        "commit": "e7ace0ecd9f3b19416ff246c556d2e3035a88eab"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
       "path": "plotting/__init__.py",
       "ud": {
         "author": "Dieter Olson",
@@ -32576,188 +32537,6 @@
         "author": "d-sorgclaudeagent[bot]",
         "date": "2026-08-29",
         "commit": "8817e6c2833f8aa0a5c119abbd57cfde6a9d525d"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/__init__.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/cli.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/controls.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/document.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/equipment.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/generator.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/geometry.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/instruments.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/layout.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/rendering.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/spec_loader.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/streams.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/title_block.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "programmatic_pid/validation.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "Dieter Olson",

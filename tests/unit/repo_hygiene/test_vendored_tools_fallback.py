@@ -132,6 +132,8 @@ def test_absent_module_still_raises_rather_than_resolving_to_nothing() -> None:
         "src.shared.python.compatibility",
         "src.shared.python.codemap.api",
         "src.shared.python.import_aliases",
+        "src.shared.python.programmatic_pid.generator",
+        "src.shared.python.plot_engine.trendline",
         "src.shared.python.cors",
         "src.shared.python.rotation_transforms.rotation",
     ],

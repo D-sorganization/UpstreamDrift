@@ -86,7 +86,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `physics` | 0 | 0 | 0 | 70 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
-| `plot_engine` | 10 | 3 | 0 | 0 | 1 | 13 |
+| `plot_engine` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `plot_labels.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `plot_style` | 0 | 0 | 0 | 34 | 0 | 0 |
 | `plot_theme` | 6 | 0 | 0 | 1 | 0 | 6 |
@@ -94,7 +94,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `pose_editor` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `pose_estimation` | 0 | 0 | 0 | 11 | 0 | 0 |
 | `pose_interchange` | 0 | 0 | 0 | 25 | 0 | 0 |
-| `programmatic_pid` | 10 | 14 | 10 | 0 | 0 | 24 |
+| `programmatic_pid` | 0 | 0 | 0 | 0 | 24 | 0 |
 | `putting_dynamics` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **496** | **279** | **148** | **1183** | **481** | **775** |
+| **Total** | **476** | **262** | **138** | **1183** | **518** | **738** |
 
 ## Diverged Files by Package
 
@@ -372,14 +372,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/tests/test_github_importer.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/tests/test_physics_validation.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
-### Package `plot_engine` (3 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `plot_engine/matplotlib_renderer.py` | -65 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `plot_engine/pyqt6_widget.py` | -1893 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `plot_engine/trendline.py` | +125 |  | Dieter Olson 2026-08-05 | Dieter Olson 2026-09-04 |
-
 ### Package `plotting` (3 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
@@ -387,25 +379,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plotting/__init__.py` | +712 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `plotting/export.py` | +1736 |  | d-sorgclaudeagent[bot] 2026-08-29 | Dieter Olson 2026-09-04 |
 | `plotting/identity.py` | +120 |  | d-sorgclaudeagent[bot] 2026-08-29 | Dieter Olson 2026-09-04 |
-
-### Package `programmatic_pid` (14 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `programmatic_pid/__init__.py` | +52 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/cli.py` | +40 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/controls.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/document.py` | +37 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/equipment.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/generator.py` | +52 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/geometry.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/instruments.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/layout.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/rendering.py` | -4 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/spec_loader.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/streams.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/title_block.py` | +29 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `programmatic_pid/validation.py` | +21 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `reporting` (2 Diverged Files)
 
