@@ -12,10 +12,10 @@
   },
   "totals": {
     "identical": 476,
-    "diverged": 262,
+    "diverged": 263,
     "ud-only": 1183,
-    "tools-only": 518,
-    "spelling-only": 138
+    "tools-only": 517,
+    "spelling-only": 133
   },
   "packages": {
     "README.md": {
@@ -391,9 +391,9 @@
     },
     "import_aliases.py": {
       "identical": 0,
-      "diverged": 0,
+      "diverged": 1,
       "ud-only": 0,
-      "tools-only": 1,
+      "tools-only": 0,
       "spelling-only": 0
     },
     "injury": {
@@ -450,7 +450,7 @@
       "diverged": 49,
       "ud-only": 18,
       "tools-only": 0,
-      "spelling-only": 27
+      "spelling-only": 22
     },
     "motion_matching": {
       "identical": 0,
@@ -8894,12 +8894,12 @@
     },
     {
       "path": "import_aliases.py",
-      "classification": "tools-only",
+      "classification": "diverged",
       "package": "import_aliases.py",
       "subpackage": "",
-      "ud_bytes": null,
+      "ud_bytes": 10943,
       "tools_bytes": 11508,
-      "byte_delta": null,
+      "byte_delta": -565,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9449,12 +9449,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "",
-      "ud_bytes": 2101,
+      "ud_bytes": 2149,
       "tools_bytes": 2089,
-      "byte_delta": 12,
+      "byte_delta": 60,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/_convenience.py",
@@ -9653,12 +9653,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 7324,
+      "ud_bytes": 9372,
       "tools_bytes": 7312,
-      "byte_delta": 12,
+      "byte_delta": 2060,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/builders/manual_builder.py",
@@ -10001,24 +10001,24 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6099,
+      "ud_bytes": 6261,
       "tools_bytes": 6095,
-      "byte_delta": 4,
+      "byte_delta": 166,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/editor_modifications.py",
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 22380,
+      "ud_bytes": 24874,
       "tools_bytes": 22376,
-      "byte_delta": 4,
+      "byte_delta": 2498,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/editor_types.py",
@@ -10037,12 +10037,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 21752,
+      "ud_bytes": 21958,
       "tools_bytes": 21744,
-      "byte_delta": 8,
+      "byte_delta": 214,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/text_editor.py",
@@ -10061,9 +10061,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6689,
+      "ud_bytes": 7355,
       "tools_bytes": 6764,
-      "byte_delta": -75,
+      "byte_delta": 591,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -31869,11 +31869,24 @@
       }
     },
     {
+      "path": "import_aliases.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-06",
+        "commit": "60b43791c5cf77a962efcfacf378961b535c7874"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
       "path": "model_generation/__init__.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-06",
+        "commit": "14e3eed3b4138b2ed354d3469150dc297fe4364a"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32002,8 +32015,8 @@
       "path": "model_generation/builders/base_builder.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-06",
+        "commit": "613cf5b2ef8861f5ad5105a9313ccabfea396167"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32236,8 +32249,8 @@
       "path": "model_generation/editor/editor_clipboard.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-06",
+        "commit": "613cf5b2ef8861f5ad5105a9313ccabfea396167"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32249,8 +32262,8 @@
       "path": "model_generation/editor/editor_modifications.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-06",
+        "commit": "14e3eed3b4138b2ed354d3469150dc297fe4364a"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32275,8 +32288,8 @@
       "path": "model_generation/editor/frankenstein_editor.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-06",
+        "commit": "613cf5b2ef8861f5ad5105a9313ccabfea396167"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32288,8 +32301,8 @@
       "path": "model_generation/editor/text_editor_diff_mixin.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-06",
+        "commit": "8fa6fefa8a4a3e9357011a32e17c30fcd66f19ee"
       },
       "tools": {
         "author": "Dieter Olson",

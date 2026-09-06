@@ -143,8 +143,8 @@
     },
     "import_aliases.py": {
       "ruling": "tools-canonical",
-      "status": "cleaned",
-      "rationale": "Tools' finder (2026-08-28) is a superset: aliases plot_engine/plot_theme/plotting/contracts and declines .tests. names; UD's copy is the #8322 snapshot. UD copy retired 2026-09-06: canonical is strictly ahead (3 extra shared roots, `contracts` in the downstream alias roots, a fix declining `.tests.` names, and a widened repo-root check) with no UD-only content. src/__init__.py already bootstraps through the canonical spelling, so vendor's finder was already the one installing aliases. Verified adopting it does not change plot_theme/plot_engine resolution."
+      "status": "pending-cleanup",
+      "rationale": "Tools owns the module. Retirement was attempted on 2026-09-06 and REVERTED: adopting canonical's finder changed alias resolution for clusters UpstreamDrift still owns, so `src.shared.python.ai.*` began resolving to the pinned tree and `test_gemini_adapter_capabilities` -- passing on main, not quarantined -- failed. Checking plot_theme/plot_engine resolution was not sufficient evidence. This module can only be retired after the clusters canonical's wider root set captures (ai, contracts) are themselves retired."
     },
     "launch_monitor": {
       "ruling": "tools-canonical",

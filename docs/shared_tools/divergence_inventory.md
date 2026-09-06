@@ -67,7 +67,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher` | 3 | 5 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `humanoid_character_builder` | 16 | 24 | 13 | 27 | 0 | 40 |
-| `import_aliases.py` | 0 | 0 | 0 | 0 | 1 | 0 |
+| `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `launch_monitor` | 0 | 0 | 0 | 0 | 29 | 0 |
@@ -75,7 +75,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_generation` | 31 | 49 | 27 | 18 | 0 | 80 |
+| `model_generation` | 31 | 49 | 22 | 18 | 0 | 80 |
 | `motion_matching` | 0 | 0 | 0 | 90 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **476** | **262** | **138** | **1183** | **518** | **738** |
+| **Total** | **476** | **263** | **133** | **1183** | **517** | **739** |
 
 ## Diverged Files by Package
 
@@ -318,11 +318,17 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
+### Package `import_aliases.py` (1 Diverged Files)
+
+| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
+|---|---:|:---:|---|---|
+| `import_aliases.py` | -565 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+
 ### Package `model_generation` (49 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `model_generation/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/__init__.py` | +60 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
 | `model_generation/_convenience.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/api/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/api/rest_api_assets.py` | -52 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
@@ -332,7 +338,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/api/rest_api_routes.py` | -977 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/api/rest_api_support.py` | -30 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/builders/__init__.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `model_generation/builders/base_builder.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/builders/base_builder.py` | +2060 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
 | `model_generation/builders/manual_builder.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/builders/parametric_builder.py` | +10 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/builders/urdf_writer.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
@@ -350,11 +356,11 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/core/types.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/core/validation.py` | +21 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/editor/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `model_generation/editor/editor_clipboard.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `model_generation/editor/editor_modifications.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/editor_clipboard.py` | +166 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/editor_modifications.py` | +2498 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
 | `model_generation/editor/editor_types.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `model_generation/editor/frankenstein_editor.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `model_generation/editor/text_editor_diff_mixin.py` | -75 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/frankenstein_editor.py` | +214 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/text_editor_diff_mixin.py` | +591 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
 | `model_generation/explorer/__init__.py` | -35 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/explorer/model_explorer.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `model_generation/export/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
