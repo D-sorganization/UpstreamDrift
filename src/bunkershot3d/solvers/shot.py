@@ -584,25 +584,7 @@ def _march(
     config: ShotSettings,
     sole_reference_body_m: NDArray[np.float64],
 ) -> tuple[_Trace, bool]:
-    """Step the head from free flight until its sole is back out of the sand.
-
-    Three things end the march, and they are not the same thing:
-
-    * the **sole clears the free surface** after contact -- the strike is
-      over and the record brackets the exit crossing;
-    * the head has effectively **stopped**, which is a physical outcome
-      and not a truncation;
-    * the step budget runs out, which is neither, and is reported by
-      :func:`simulate_shot` rather than swallowed here.
-
-    Note that clearing the surface is *not* the same as disengaging. The
-    solver reports zero force the moment no element is both submerged and
-    leading-edge, which happens while the sole is still geometrically in
-    the divot -- a sole moving away from the sand carries no traction.
-    Stopping there is what left every consumer to invent its own
-    ballistic continuation (issue #8702), so the march keeps integrating
-    through the disengaged tail. The wrench over that tail is the one the
-    solver returns, not an assumed zero.
+    """Step the head from free flight until its sole clears the sand or halts.
 
     Args:
         solver: Any solver implementing the ``GranularSolver`` protocol.
@@ -610,16 +592,13 @@ def _march(
         mass_kg: Head mass.
         kinematics: Entry pose and velocity.
         config: Integration settings.
-        sole_reference_body_m: Body-frame point whose depth bounds the
-            strike.
+        sole_reference_body_m: Body-frame point whose depth bounds the strike.
 
     Returns:
-        ``(trace, exited)``; ``exited`` is True when the record ends with
-        the sole back above the free surface.
+        ``(trace, exited)``; ``exited`` is True when sole clears free surface.
 
     Raises:
-        OutOfEnvelopeError: If the solver refuses any step under a strict
-            refusal policy.
+        OutOfEnvelopeError: If the solver refuses under strict policy.
     """
     orientation = kinematics.orientation.copy()
     position = (
