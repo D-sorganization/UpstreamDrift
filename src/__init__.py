@@ -3,8 +3,27 @@
 import importlib
 import sys
 from collections.abc import Mapping, Sequence
+from pathlib import Path
 from types import ModuleType
 from typing import Any
+
+# The pinned Tools tree, as a *fallback* import location for the shared
+# namespace (UpstreamDrift#9406).
+#
+# Every `tools-canonical` ruling in docs/shared_tools/seam_rulings.v1.json is
+# "delete UpstreamDrift's copy and let the pinned Tools tree answer", and all 36
+# actionable rulings sit at `pending-cleanup` because nothing put that tree on
+# the import path at runtime: deleting a child copy simply produced
+# ModuleNotFoundError. This is the mechanism those rulings were waiting for.
+#
+# It is APPENDED, never prepended. While a child copy exists it is still found
+# first, so this changes no import that resolves today -- it only answers the
+# ones that would otherwise fail. Prepending would silently flip resolution for
+# the 292 files that still diverge, which is exactly the ambiguity #9406 exists
+# to remove.
+_VENDORED_TOOLS_SRC = (
+    Path(__file__).resolve().parent.parent / "vendor" / "ud-tools" / "src"
+)
 
 _CANONICAL_ALIAS_MODULES = frozenset(
     {
@@ -56,4 +75,58 @@ def _install_parent_shared_aliases() -> bool:
     return True
 
 
+def _register_vendored_tools_fallback() -> bool:
+    """Append the pinned Tools tree so a retired child copy resolves upstream.
+
+    Returns:
+        True when the vendored tree was found and is on ``sys.path``.
+
+    Postcondition:
+        Appends at most one entry and never reorders ``sys.path``, so a module
+        that resolves before this call resolves identically after it.
+    """
+    if not (_VENDORED_TOOLS_SRC / "shared" / "python").is_dir():
+        # Absent in a wheel install: build_hooks.py copies the pinned tree into
+        # the package itself, so there is nothing to fall back to.
+        return False
+    location = str(_VENDORED_TOOLS_SRC)
+    if location not in sys.path:
+        sys.path.append(location)
+    return True
+
+
+def _extend_shared_namespace_path() -> bool:
+    """Let ``src.shared.python`` resolve retired child copies from the pinned tree.
+
+    Appending to ``sys.path`` is enough for the canonical ``shared.python.X``
+    spelling, but ``src.shared.python`` is a real package whose ``__path__``
+    lists only UpstreamDrift's own directory -- so a deleted child copy still
+    raised ``ModuleNotFoundError`` under that spelling, which is the one the
+    repository actually imports.
+
+    Returns:
+        True when the pinned location was added to the package's search path.
+
+    Postcondition:
+        The vendored location is appended, so UpstreamDrift's own directory is
+        still searched first and no currently-resolving import changes.
+    """
+    if not _VENDORED_TOOLS_FALLBACK_REGISTERED:
+        return False
+    module = sys.modules.get("src.shared.python")
+    search_path = getattr(module, "__path__", None)
+    if search_path is None:
+        return False
+    location = str(_VENDORED_TOOLS_SRC / "shared" / "python")
+    if location in list(search_path):
+        return False
+    try:
+        search_path.append(location)
+    except AttributeError:
+        module.__path__ = [*search_path, location]  # type: ignore[union-attr]
+    return True
+
+
+_VENDORED_TOOLS_FALLBACK_REGISTERED = _register_vendored_tools_fallback()
 _PARENT_SHARED_ALIASES_INSTALLED = _install_parent_shared_aliases()
+_SHARED_NAMESPACE_PATH_EXTENDED = _extend_shared_namespace_path()

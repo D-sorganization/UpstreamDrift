@@ -116,8 +116,8 @@
     },
     "deprecation.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical. UD copy retired 2026-09-05; src.shared.python.deprecation now resolves to the pinned Tools tree via the vendored-fallback path registered in src/__init__.py."
     },
     "file_watcher": {
       "ruling": "tools-canonical",
