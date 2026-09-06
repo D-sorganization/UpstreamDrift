@@ -14,6 +14,7 @@ from typing import Any
 import numpy as np
 from humanoid_character_builder.core.body_parameters import BodyParameters, GenderModel
 
+from ._mesh_export import MeshExportTarget, export_all_segments
 from ._mesh_types import (
     GeneratedMeshResult,
     MeshGeneratorInterface,
@@ -527,37 +528,22 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             else np.zeros((0, 3), dtype=np.int64)
         )
 
-        mesh_paths: dict[str, Path] = {}
-        collision_paths: dict[str, Path] = {}
+        from . import mesh_generator as _mg
 
-        for segment_name, indices in vertex_groups.items():
-            if segment_name not in HUMANOID_SEGMENTS or len(indices) < 10:
-                continue
-            try:
-                seg_verts, seg_faces = segment_mesh_by_range(
-                    all_vertices, all_faces, min(indices), max(indices) + 1
-                )
-                if len(seg_verts) == 0:
-                    continue
-                from . import mesh_generator as _mg
-
-                submesh = _mg._trimesh_module.Trimesh(  # type: ignore[union-attr]
-                    vertices=seg_verts, faces=seg_faces
-                )
-                vpath = visual_dir / f"{segment_name}.stl"
-                submesh.export(str(vpath))
-                mesh_paths[segment_name] = vpath
-                cpath = collision_dir / f"{segment_name}.stl"
-                submesh.convex_hull.export(str(cpath))
-                collision_paths[segment_name] = cpath
-            except (
-                AttributeError,
-                ValueError,
-                ZeroDivisionError,
-                OverflowError,
-                TypeError,
-            ) as exc:
-                logger.warning("Failed to segment %s: %s", segment_name, exc)
+        target = MeshExportTarget(
+            visual_dir=visual_dir,
+            collision_dir=collision_dir,
+            trimesh_module=_mg._trimesh_module,
+            logger=logger,
+        )
+        mesh_paths, collision_paths = export_all_segments(
+            vertex_groups=vertex_groups,
+            allowed_segments=HUMANOID_SEGMENTS,
+            all_vertices=all_vertices,
+            all_faces=all_faces,
+            target=target,
+            min_indices=10,
+        )
 
         return GeneratedMeshResult(
             success=len(mesh_paths) > 0,
