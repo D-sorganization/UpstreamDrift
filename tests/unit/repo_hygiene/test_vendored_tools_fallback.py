@@ -81,20 +81,67 @@ def test_a_retired_child_copy_resolves_to_the_pinned_tree() -> None:
 
 
 @_requires_vendor
-def test_the_fallback_never_reorders_the_search_path() -> None:
-    """The vendored location is appended to the package path, never inserted."""
-    assert ud_src._VENDORED_TOOLS_FALLBACK_REGISTERED is True
+def test_the_fallback_finder_is_consulted_last() -> None:
+    """The finder is appended to ``sys.meta_path``, never inserted.
 
-    import src.shared.python as shared_python
+    Being last is the whole safety argument: it is only reached once the normal
+    machinery has failed to find a module, so it cannot pre-empt a child copy
+    that still exists.
+    """
+    import sys
 
-    search_path = [Path(entry).resolve() for entry in list(shared_python.__path__)]
+    assert ud_src._VENDORED_TOOLS_FALLBACK_FINDER_INSTALLED is True
 
-    assert search_path[0] == _UD_SHARED.resolve(), (
-        "UpstreamDrift's own directory must stay first on the search path"
+    positions = [
+        index
+        for index, finder in enumerate(sys.meta_path)
+        if isinstance(finder, ud_src._VendoredToolsFallbackFinder)
+    ]
+
+    assert len(positions) == 1, "the fallback finder must be installed exactly once"
+    assert positions[0] == len(sys.meta_path) - 1, (
+        "the fallback finder must be last on sys.meta_path"
     )
-    assert _VENDORED_SHARED.resolve() in search_path
+
+
+@_requires_vendor
+def test_the_fallback_finder_declines_unrelated_modules() -> None:
+    """It answers only for the shared namespace, and only when the file exists."""
+    finder = ud_src._VendoredToolsFallbackFinder()
+
+    assert finder.find_spec("numpy") is None
+    assert finder.find_spec("src.engines.something") is None
+    assert finder.find_spec("src.shared.python.definitely_not_a_module") is None
 
 
 def test_absent_module_still_raises_rather_than_resolving_to_nothing() -> None:
     """The fallback must not turn a genuine typo into a silent success."""
     assert importlib.util.find_spec("src.shared.python.definitely_not_a_module") is None
+
+
+@_requires_vendor
+@pytest.mark.parametrize(
+    "module_name",
+    [
+        "src.shared.python.safe_eval",
+        "src.shared.python.safe_pandas_eval",
+        "src.shared.python.logging_pkg.logging_config",
+        "src.shared.python.chat_contracts.models",
+        "src.shared.python.file_watcher",
+        "src.shared.python.scripting",
+    ],
+)
+def test_retired_clusters_resolve_to_the_pinned_tree(module_name: str) -> None:
+    """Each retired cluster must still import, from Tools rather than from here.
+
+    These were deleted under their ``tools-canonical`` rulings after every
+    tracked file was confirmed byte-identical to the pinned tree, so the
+    fallback returns the same bytes that were removed. A failure here means a
+    retired module became unreachable, not merely relocated.
+    """
+    spec = importlib.util.find_spec(module_name)
+
+    assert spec is not None and spec.origin is not None, (
+        f"{module_name} was retired but no longer resolves at all"
+    )
+    assert Path(spec.origin).resolve().is_relative_to(_VENDORED_SHARED.resolve())

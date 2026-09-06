@@ -1,8 +1,10 @@
 """Golf Modeling Suite source package."""
 
 import importlib
+import importlib.util
 import sys
 from collections.abc import Mapping, Sequence
+from importlib.abc import MetaPathFinder
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -95,38 +97,59 @@ def _register_vendored_tools_fallback() -> bool:
     return True
 
 
-def _extend_shared_namespace_path() -> bool:
-    """Let ``src.shared.python`` resolve retired child copies from the pinned tree.
+class _VendoredToolsFallbackFinder(MetaPathFinder):
+    """Resolve retired child copies from the pinned Tools tree, and only those.
 
-    Appending to ``sys.path`` is enough for the canonical ``shared.python.X``
-    spelling, but ``src.shared.python`` is a real package whose ``__path__``
-    lists only UpstreamDrift's own directory -- so a deleted child copy still
-    raised ``ModuleNotFoundError`` under that spelling, which is the one the
-    repository actually imports.
+    Mutating ``src.shared.python.__path__`` is not sufficient, and the reason is
+    an ordering one: that package's own ``__init__`` imports submodules while it
+    executes (``from . import cli_utils``, which imports
+    ``src.shared.python.logging_pkg.logging_config``). Those imports run *before*
+    any code that could extend the finished module's ``__path__``, so a retired
+    copy still raised ``ModuleNotFoundError`` during package initialisation.
 
-    Returns:
-        True when the pinned location was added to the package's search path.
-
-    Postcondition:
-        The vendored location is appended, so UpstreamDrift's own directory is
-        still searched first and no currently-resolving import changes.
+    A meta-path finder has no such window: it is consulted on every import,
+    including the ones a package issues about itself. This one is **appended** to
+    ``sys.meta_path``, so it is asked last -- after the normal machinery has
+    failed -- which is what keeps a present child copy authoritative.
     """
+
+    _PREFIXES = ("src.shared.python.", "shared.python.")
+
+    def find_spec(
+        self,
+        fullname: str,
+        path: Sequence[str] | None = None,
+        target: ModuleType | None = None,
+    ) -> Any:
+        """Return a spec from the pinned tree, or None to defer to everything else."""
+        for prefix in self._PREFIXES:
+            if not fullname.startswith(prefix):
+                continue
+            relative = fullname[len(prefix) :].replace(".", "/")
+            base = _VENDORED_TOOLS_SRC / "shared" / "python" / relative
+            package_init = base / "__init__.py"
+            if package_init.is_file():
+                return importlib.util.spec_from_file_location(
+                    fullname, package_init, submodule_search_locations=[str(base)]
+                )
+            module_file = base.with_suffix(".py")
+            if module_file.is_file():
+                return importlib.util.spec_from_file_location(fullname, module_file)
+        return None
+
+
+def _install_vendored_tools_fallback_finder() -> bool:
+    """Append the fallback finder so retired child copies resolve upstream."""
     if not _VENDORED_TOOLS_FALLBACK_REGISTERED:
         return False
-    module = sys.modules.get("src.shared.python")
-    search_path = getattr(module, "__path__", None)
-    if search_path is None:
+    if any(
+        isinstance(finder, _VendoredToolsFallbackFinder) for finder in sys.meta_path
+    ):
         return False
-    location = str(_VENDORED_TOOLS_SRC / "shared" / "python")
-    if location in list(search_path):
-        return False
-    try:
-        search_path.append(location)
-    except AttributeError:
-        module.__path__ = [*search_path, location]  # type: ignore[union-attr]
+    sys.meta_path.append(_VendoredToolsFallbackFinder())
     return True
 
 
 _VENDORED_TOOLS_FALLBACK_REGISTERED = _register_vendored_tools_fallback()
+_VENDORED_TOOLS_FALLBACK_FINDER_INSTALLED = _install_vendored_tools_fallback_finder()
 _PARENT_SHARED_ALIASES_INSTALLED = _install_parent_shared_aliases()
-_SHARED_NAMESPACE_PATH_EXTENDED = _extend_shared_namespace_path()
