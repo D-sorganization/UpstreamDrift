@@ -14,7 +14,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Package | Identical | Diverged | of which spelling-only | UD-only | Tools-only | Overlap |
 |---|---:|---:|---:|---:|---:|---:|
-| `README.md` | 1 | 0 | 0 | 0 | 0 | 1 |
+| `README.md` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `README_PACKAGE.md` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `__init__.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `_contracts_decorators.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -35,7 +35,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `canonical_core` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `capabilities.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `chat` | 40 | 17 | 10 | 1 | 0 | 57 |
-| `chat_contracts` | 4 | 0 | 0 | 0 | 0 | 4 |
+| `chat_contracts` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `cli_utils.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `club_data` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `codemap` | 8 | 6 | 0 | 0 | 0 | 14 |
@@ -60,7 +60,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `estimation` | 0 | 0 | 0 | 8 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
-| `file_watcher` | 2 | 0 | 0 | 0 | 0 | 2 |
+| `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `golf_club` | 0 | 0 | 0 | 0 | 38 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -73,7 +73,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launch_monitor` | 0 | 0 | 0 | 0 | 29 | 0 |
 | `launcher_embed` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `logging_pkg` | 3 | 0 | 0 | 0 | 0 | 3 |
+| `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 31 | 49 | 27 | 18 | 0 | 80 |
 | `motion_matching` | 0 | 0 | 0 | 90 | 0 | 0 |
@@ -101,10 +101,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `realtime` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `reporting` | 0 | 2 | 0 | 5 | 0 | 2 |
 | `rotation_transforms` | 0 | 3 | 3 | 0 | 0 | 3 |
-| `safe_eval.py` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `safe_pandas_eval.py` | 1 | 0 | 0 | 0 | 0 | 1 |
+| `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
+| `safe_pandas_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `screw_theory` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `scripting` | 2 | 0 | 0 | 0 | 0 | 2 |
+| `scripting` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `sidekick` | 246 | 63 | 25 | 36 | 21 | 309 |
@@ -113,7 +113,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `swing_sim` | 0 | 0 | 0 | 0 | 348 | 0 |
-| `tests` | 1 | 0 | 0 | 0 | 5 | 1 |
+| `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `theme` | 21 | 1 | 0 | 4 | 0 | 22 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 26 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **519** | **292** | **153** | **1183** | **445** | **811** |
+| **Total** | **504** | **292** | **153** | **1183** | **460** | **796** |
 
 ## Diverged Files by Package
 

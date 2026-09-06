@@ -11,18 +11,18 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 519,
+    "identical": 504,
     "diverged": 292,
     "ud-only": 1183,
-    "tools-only": 445,
+    "tools-only": 460,
     "spelling-only": 153
   },
   "packages": {
     "README.md": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "README_PACKAGE.md": {
@@ -166,10 +166,10 @@
       "spelling-only": 10
     },
     "chat_contracts": {
-      "identical": 4,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 4,
       "spelling-only": 0
     },
     "cli_utils.py": {
@@ -341,10 +341,10 @@
       "spelling-only": 0
     },
     "file_watcher": {
-      "identical": 2,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 2,
       "spelling-only": 0
     },
     "golf_club": {
@@ -432,10 +432,10 @@
       "spelling-only": 0
     },
     "logging_pkg": {
-      "identical": 3,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 3,
       "spelling-only": 0
     },
     "math_utils": {
@@ -628,17 +628,17 @@
       "spelling-only": 3
     },
     "safe_eval.py": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "safe_pandas_eval.py": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "screw_theory": {
@@ -649,10 +649,10 @@
       "spelling-only": 0
     },
     "scripting": {
-      "identical": 2,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 2,
       "spelling-only": 0
     },
     "security": {
@@ -712,10 +712,10 @@
       "spelling-only": 0
     },
     "tests": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 5,
+      "tools-only": 6,
       "spelling-only": 0
     },
     "theme": {
@@ -806,13 +806,13 @@
   "files": [
     {
       "path": "README.md",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "README.md",
       "subpackage": "",
-      "ud_bytes": 4629,
+      "ud_bytes": null,
       "tools_bytes": 4629,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -5378,49 +5378,49 @@
     },
     {
       "path": "chat_contracts/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat_contracts",
       "subpackage": "",
-      "ud_bytes": 781,
+      "ud_bytes": null,
       "tools_bytes": 781,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat_contracts/conversation.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat_contracts",
       "subpackage": "",
-      "ud_bytes": 980,
+      "ud_bytes": null,
       "tools_bytes": 980,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat_contracts/credentials.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat_contracts",
       "subpackage": "",
-      "ud_bytes": 5021,
+      "ud_bytes": null,
       "tools_bytes": 5021,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat_contracts/models.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat_contracts",
       "subpackage": "",
-      "ud_bytes": 4642,
+      "ud_bytes": null,
       "tools_bytes": 4642,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -7262,25 +7262,25 @@
     },
     {
       "path": "file_watcher/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "file_watcher",
       "subpackage": "",
-      "ud_bytes": 1775,
+      "ud_bytes": null,
       "tools_bytes": 1775,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "file_watcher/_fallback.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "file_watcher",
       "subpackage": "",
-      "ud_bytes": 8179,
+      "ud_bytes": null,
       "tools_bytes": 8179,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -9386,37 +9386,37 @@
     },
     {
       "path": "logging_pkg/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "logging_pkg",
       "subpackage": "",
-      "ud_bytes": 714,
+      "ud_bytes": null,
       "tools_bytes": 714,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "logging_pkg/logger_utils.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "logging_pkg",
       "subpackage": "",
-      "ud_bytes": 1476,
+      "ud_bytes": null,
       "tools_bytes": 1476,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "logging_pkg/logging_config.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "logging_pkg",
       "subpackage": "",
-      "ud_bytes": 6295,
+      "ud_bytes": null,
       "tools_bytes": 6295,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -18830,25 +18830,25 @@
     },
     {
       "path": "safe_eval.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "safe_eval.py",
       "subpackage": "",
-      "ud_bytes": 15127,
+      "ud_bytes": null,
       "tools_bytes": 15127,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "safe_pandas_eval.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "safe_pandas_eval.py",
       "subpackage": "",
-      "ud_bytes": 3964,
+      "ud_bytes": null,
       "tools_bytes": 3964,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -18902,25 +18902,25 @@
     },
     {
       "path": "scripting/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "scripting",
       "subpackage": "",
-      "ud_bytes": 26,
+      "ud_bytes": null,
       "tools_bytes": 26,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "scripting/scripting_env.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "scripting",
       "subpackage": "",
-      "ud_bytes": 28878,
+      "ud_bytes": null,
       "tools_bytes": 28878,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -28598,13 +28598,13 @@
     },
     {
       "path": "tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "tests",
       "subpackage": "",
-      "ud_bytes": 36,
+      "ud_bytes": null,
       "tools_bytes": 36,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },

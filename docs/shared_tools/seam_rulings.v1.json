@@ -36,8 +36,8 @@
   "rulings": {
     "README.md": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical copy of Tools' package README."
+      "status": "cleaned",
+      "rationale": "Identical copy of Tools' package README. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "__init__.py": {
       "ruling": "deferred",
@@ -75,8 +75,8 @@
     },
     "chat_contracts": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "4 identical files; added to UD by #8322 while the shadow guard was disabled."
+      "status": "cleaned",
+      "rationale": "4 identical files; added to UD by #8322 while the shadow guard was disabled. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "codemap": {
       "ruling": "tools-canonical",
@@ -121,8 +121,8 @@
     },
     "file_watcher": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (2 files)."
+      "status": "cleaned",
+      "rationale": "Identical (2 files). UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "golf_club": {
       "ruling": "tools-canonical",
@@ -153,8 +153,8 @@
     },
     "logging_pkg": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (3 files)."
+      "status": "cleaned",
+      "rationale": "Identical (3 files). UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "model_generation": {
       "ruling": "ud-canonical",
@@ -201,18 +201,18 @@
     },
     "safe_eval.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "safe_pandas_eval.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "scripting": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (2 files)."
+      "status": "cleaned",
+      "rationale": "Identical (2 files). UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "sidekick": {
       "ruling": "split",
@@ -239,8 +239,8 @@
     },
     "tests": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Tools' shared-tree test package; UD carries only an identical __init__.py."
+      "status": "cleaned",
+      "rationale": "Tools' shared-tree test package; UD carries only an identical __init__.py. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "theme": {
       "ruling": "split",
