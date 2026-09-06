@@ -129,10 +129,17 @@ def test_absent_module_still_raises_rather_than_resolving_to_nothing() -> None:
         "src.shared.python.chat_contracts.models",
         "src.shared.python.file_watcher",
         "src.shared.python.scripting",
+        "src.shared.python.cors",
+        "src.shared.python.rotation_transforms.rotation",
     ],
 )
 def test_retired_clusters_resolve_to_the_pinned_tree(module_name: str) -> None:
     """Each retired cluster must still import, from Tools rather than from here.
+
+    ``upstream_drift_tools`` is deliberately absent from this list. It is a
+    deprecated *alias* for ``sidekick``, and ``sidekick`` is still an
+    UpstreamDrift-owned cluster, so it correctly resolves here rather than
+    upstream -- retiring the alias shim does not move its target.
 
     These were deleted under their ``tools-canonical`` rulings after every
     tracked file was confirmed byte-identical to the pinned tree, so the

@@ -101,8 +101,8 @@
     },
     "cors.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Spelling-only divergence."
+      "status": "cleaned",
+      "rationale": "Spelling-only divergence. UD copy retired 2026-09-06: every tracked file differed from the pinned tree only by the `src.shared.python` import spelling, which the seam absorbs, so the fallback returns equivalent bytes."
     },
     "data_processing": {
       "ruling": "tools-canonical",
@@ -196,8 +196,8 @@
     },
     "rotation_transforms": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "All 3 diverged files are spelling-only."
+      "status": "cleaned",
+      "rationale": "All 3 diverged files are spelling-only. UD copy retired 2026-09-06: every tracked file differed from the pinned tree only by the `src.shared.python` import spelling, which the seam absorbs, so the fallback returns equivalent bytes."
     },
     "safe_eval.py": {
       "ruling": "tools-canonical",
@@ -259,8 +259,8 @@
     },
     "upstream_drift_tools": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Deprecated alias shim for sidekick; spelling-only divergence."
+      "status": "cleaned",
+      "rationale": "Deprecated alias shim for sidekick; spelling-only divergence. UD copy retired 2026-09-06: every tracked file differed from the pinned tree only by the `src.shared.python` import spelling, which the seam absorbs, so the fallback returns equivalent bytes."
     }
   }
 }

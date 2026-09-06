@@ -45,7 +45,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `control_features_registry.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `control_interface.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `core` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `cors.py` | 0 | 1 | 1 | 0 | 0 | 1 |
+| `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `dashboard` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `data_io` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `data_processing` | 3 | 1 | 0 | 1 | 0 | 4 |
@@ -100,7 +100,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `realtime` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `reporting` | 0 | 2 | 0 | 5 | 0 | 2 |
-| `rotation_transforms` | 0 | 3 | 3 | 0 | 0 | 3 |
+| `rotation_transforms` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `safe_pandas_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `screw_theory` | 0 | 0 | 0 | 4 | 0 | 0 |
@@ -120,13 +120,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ui` | 4 | 0 | 0 | 27 | 0 | 4 |
 | `upstream_drift` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `upstream_drift_tools` | 0 | 1 | 1 | 0 | 0 | 1 |
+| `upstream_drift_tools` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ux` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **504** | **292** | **153** | **1183** | **460** | **796** |
+| **Total** | **504** | **287** | **148** | **1183** | **465** | **791** |
 
 ## Diverged Files by Package
 
@@ -284,12 +284,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 |---|---:|:---:|---|---|
 | `contracts.py` | -709 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
-### Package `cors.py` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `cors.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-
 ### Package `data_processing` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
@@ -443,14 +437,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 | `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
-### Package `rotation_transforms` (3 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `rotation_transforms/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `rotation_transforms/reference_frame_operations.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-| `rotation_transforms/rotation.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-
 ### Package `sidekick` (63 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
@@ -535,10 +521,4 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `theme/zoom.py` | -71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
-
-### Package `upstream_drift_tools` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `upstream_drift_tools/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 

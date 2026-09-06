@@ -12,10 +12,10 @@
   },
   "totals": {
     "identical": 504,
-    "diverged": 292,
+    "diverged": 287,
     "ud-only": 1183,
-    "tools-only": 460,
-    "spelling-only": 153
+    "tools-only": 465,
+    "spelling-only": 148
   },
   "packages": {
     "README.md": {
@@ -237,10 +237,10 @@
     },
     "cors.py": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 1
+      "tools-only": 1,
+      "spelling-only": 0
     },
     "dashboard": {
       "identical": 0,
@@ -622,10 +622,10 @@
     },
     "rotation_transforms": {
       "identical": 0,
-      "diverged": 3,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 3
+      "tools-only": 3,
+      "spelling-only": 0
     },
     "safe_eval.py": {
       "identical": 0,
@@ -762,10 +762,10 @@
     },
     "upstream_drift_tools": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 1
+      "tools-only": 1,
+      "spelling-only": 0
     },
     "ux": {
       "identical": 0,
@@ -6146,15 +6146,15 @@
     },
     {
       "path": "cors.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "cors.py",
       "subpackage": "",
-      "ud_bytes": 4336,
+      "ud_bytes": null,
       "tools_bytes": 4332,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "dashboard/__init__.py",
@@ -18794,39 +18794,39 @@
     },
     {
       "path": "rotation_transforms/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 802,
+      "ud_bytes": null,
       "tools_bytes": 794,
-      "byte_delta": 8,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "rotation_transforms/reference_frame_operations.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 7070,
+      "ud_bytes": null,
       "tools_bytes": 7066,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "rotation_transforms/rotation.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 6132,
+      "ud_bytes": null,
       "tools_bytes": 6128,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "safe_eval.py",
@@ -29726,15 +29726,15 @@
     },
     {
       "path": "upstream_drift_tools/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "upstream_drift_tools",
       "subpackage": "",
-      "ud_bytes": 853,
+      "ud_bytes": null,
       "tools_bytes": 849,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "ux/__init__.py",
@@ -31557,19 +31557,6 @@
       }
     },
     {
-      "path": "cors.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
       "path": "data_processing/processor.py",
       "ud": {
         "author": "Dieter Olson",
@@ -32909,45 +32896,6 @@
       }
     },
     {
-      "path": "rotation_transforms/__init__.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "rotation_transforms/reference_frame_operations.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "rotation_transforms/rotation.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
       "path": "sidekick/__main__.py",
       "ud": {
         "author": "Dieter Olson",
@@ -33846,19 +33794,6 @@
     },
     {
       "path": "theme/zoom.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
-      }
-    },
-    {
-      "path": "upstream_drift_tools/__init__.py",
       "ud": {
         "author": "Dieter Olson",
         "date": "2026-08-01",
