@@ -1,5 +1,10 @@
 # SPEC.md — Repository Specification Document
 
+## Optimise Norm Calculation in Shot3D (Spec-Exempt: Micro-Optimization)
+
+Replaces `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/tools/bunker_shot_gui/shot3d.py` for significant performance gains on small arrays.
+
+
 ## Bunker Shot Pose Reflection Rejection and Exit Kinematics Preservation (#9542)
 
 Resolves posture admissibility and exit state fidelity defects in the bunker shot model:
