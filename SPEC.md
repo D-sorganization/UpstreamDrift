@@ -1,5 +1,11 @@
 # SPEC.md — Repository Specification Document
 
+## Headless MuJoCo Version Resolution and Example Dependency Gating (#9431)
+
+Resolves headless MuJoCo initialization crashes and un-isolated native dependencies in test suites:
+- Updates `ProvenanceInfo.capture()` to safely resolve MuJoCo version via `sys.modules` or `importlib.metadata.version("mujoco")` without forcing an import of `mujoco`, avoiding headless OpenGL `glGetError` NoneType attribute crashes when generating simulation metadata in headless runners.
+- Gating examples requiring native Rust wheels (`basic_flight_simulation.py`) or external fixture files (`motion_training_demo.py`) in `tests/examples/test_examples_produce_output.py` using `pytest.skip` when optional runtime components are unavailable.
+
 ## Repository Hygiene & Artifact Gitignore Enforcement (#9415)
 
 Enforces repository hygiene and artifact gitignore coverage following the #9415 sweep:
