@@ -53,6 +53,7 @@ def _vector(name: str, value: ArrayLike) -> NDArray[np.float64]:
         raise SolverInputError(f"{name} must be a 3-vector, got {np.shape(value)!r}")
     if not np.all(np.isfinite(array)):
         raise SolverInputError(f"{name} contains non-finite values: {array!r}")
+    array.flags.writeable = False
     return array
 
 
@@ -91,8 +92,16 @@ class HeadKinematics:
         matrix = np.array(self.orientation, dtype=np.float64, copy=True)
         if matrix.shape != (3, 3):
             raise SolverInputError(f"orientation must be (3, 3), got {matrix.shape}")
+        if not np.all(np.isfinite(matrix)):
+            raise SolverInputError("orientation contains non-finite values")
         if not np.allclose(matrix @ matrix.T, np.eye(3), atol=1e-10):
             raise SolverInputError("orientation is not a rotation matrix")
+        det = float(np.linalg.det(matrix))
+        if not math.isclose(det, 1.0, abs_tol=1e-6):
+            raise SolverInputError(
+                f"orientation admits reflection (det = {det:.4g}); must be a proper rotation (det = +1)"
+            )
+        matrix.flags.writeable = False
         object.__setattr__(self, "orientation", matrix)
 
     @property
@@ -272,6 +281,54 @@ class ShotResult:
     def exit_speed_m_s(self) -> float:
         """Speed at the last sample."""
         return float(np.linalg.norm(self.velocities_m_s[-1])) if self.n_steps else 0.0
+
+    @property
+    def exit_velocity_m_s(self) -> NDArray[np.float64]:
+        """Linear velocity at the last sample, ``(3,)``."""
+        if not self.n_steps:
+            return np.zeros(3, dtype=np.float64)
+        return self.velocities_m_s[-1].copy()
+
+    @property
+    def exit_orientation(self) -> NDArray[np.float64]:
+        """Orientation at the last sample, ``(3, 3)``."""
+        if not self.n_steps:
+            return np.eye(3, dtype=np.float64)
+        return self.orientations[-1].copy()
+
+    @property
+    def exit_position_m(self) -> NDArray[np.float64]:
+        """Position of the body origin at the last sample, ``(3,)``."""
+        if not self.n_steps:
+            return np.zeros(3, dtype=np.float64)
+        return self.positions_m[-1].copy()
+
+    @property
+    def exit_angular_velocity_rad_s(self) -> NDArray[np.float64]:
+        """Prescribed angular velocity at exit, world frame, ``(3,)``."""
+        if not self.n_steps or self.n_steps < 2:
+            return np.zeros(3, dtype=np.float64)
+        dt = float(self.times_s[-1] - self.times_s[-2])
+        if dt <= 0.0:
+            return np.zeros(3, dtype=np.float64)
+        r_diff = self.orientations[-1] @ self.orientations[-2].T
+        trace_val = float(np.clip((np.trace(r_diff) - 1.0) / 2.0, -1.0, 1.0))
+        angle = math.acos(trace_val)
+        if math.isclose(angle, 0.0, abs_tol=1e-12):
+            return np.zeros(3, dtype=np.float64)
+        axis = np.array(
+            [
+                r_diff[2, 1] - r_diff[1, 2],
+                r_diff[0, 2] - r_diff[2, 0],
+                r_diff[1, 0] - r_diff[0, 1],
+            ],
+            dtype=np.float64,
+        )
+        norm = float(np.linalg.norm(axis))
+        if norm < 1e-12:
+            return np.zeros(3, dtype=np.float64)
+        omega = (axis / norm) * (angle / dt)
+        return omega
 
     @property
     def max_sole_depth_m(self) -> float:
