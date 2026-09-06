@@ -34,14 +34,20 @@ from src.shared.python.humanoid_character_builder.core.body_parameters import (
 )
 
 # Re-export sub-module symbols (public API unchanged)
-from ._makehuman_generator import MakeHumanMeshGenerator  # noqa: F401
+from ._mesh_makehuman import MakeHumanMeshGenerator  # noqa: F401
+from ._mesh_primitives import PrimitiveMeshGenerator  # noqa: F401
+from ._mesh_smplx import (  # noqa: F401
+    SMPLX_AVAILABLE,
+    TRIMESH_AVAILABLE,
+    SMPLXMeshGenerator,
+    _smplx_module,
+    _trimesh_module,
+)
 from ._mesh_types import (  # noqa: F401
     GeneratedMeshResult,
     MeshGeneratorBackend,
     MeshGeneratorInterface,
 )
-from ._primitive_generator import PrimitiveMeshGenerator  # noqa: F401
-from ._smplx_generator import SMPLXMeshGenerator  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
