@@ -42,6 +42,22 @@ def test_example_produces_output(example_file: Path) -> None:
     Run-only demos (aerodynamics_demo.py, etc.) just need to exit successfully.
     """
     repo_root = Path(__file__).parent.parent.parent
+
+    if example_file.name == "basic_flight_simulation.py":
+        from src.shared.python.physics.rust_kernel import is_rust_available
+
+        if not is_rust_available():
+            pytest.skip(
+                "basic_flight_simulation.py requires upstream_physics Rust wheel"
+            )
+
+    if example_file.name == "motion_training_demo.py":
+        data_file = repo_root / "data" / "Wiffle_ProV1_club_3D_data.xlsx"
+        if not data_file.exists():
+            pytest.skip(
+                "motion_training_demo.py requires data/Wiffle_ProV1_club_3D_data.xlsx fixture"
+            )
+
     env = os.environ.copy()
     env["PYTHONPATH"] = str(repo_root)
 
