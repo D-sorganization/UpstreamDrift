@@ -231,6 +231,135 @@ def test_pivot_exit_restores_the_whole_src_namespace(conftest_path: Path) -> Non
 
 
 @pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)
+def test_pivot_enter_rolls_back_when_install_raises(
+    conftest_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A failed ``enter()`` must not leave the engine ``src`` installed.
+
+    Regression coverage for issue #9387.
+
+    Every call site has the shape ``pivot.enter()`` followed by ``try: ...
+    finally: pivot.exit()`` -- pytest hookwrappers cannot do better, because
+    the undo has to be armed around the ``yield``, not around ``enter()``
+    itself. So the ``finally`` only exists once ``enter()`` has *returned*,
+    and an ``enter()`` that raises skips its own undo entirely.
+
+    ``_install`` is destructive before it can fail: it evicts the repo's whole
+    ``src`` namespace and binds ``sys.modules["src"]`` to the engine package
+    *before* executing the engine's ``__init__.py``. One engine-side import
+    error (an optional dependency missing on a CI image, say) therefore used
+    to shadow the repo's ``src`` for the entire remaining life of that
+    long-lived xdist worker, which is what produced both #9387 symptoms:
+    ``module 'src' has no attribute '_install_parent_shared_aliases'`` in
+    ``tests/scripts/test_validate_suite.py``, and ``mock.patch`` silently
+    binding to duplicate ``src.launchers.*`` modules in
+    ``tests/launchers/test_shot_tracer_import_gui.py``.
+    """
+    pivot = _load_conftest(conftest_path)._PIVOT
+
+    probe = importlib.import_module(_EVICTED_PROBE_MODULE)
+    saved = _src_namespace()
+    saved_path = list(sys.path)
+    previous = sys.modules.get("src")
+    boom = RuntimeError("engine src/__init__.py blew up mid-install")
+    real_spec_from_file_location = importlib.util.spec_from_file_location
+
+    class _ExplodingLoader:
+        """Stands in for the engine package's loader and fails in exec."""
+
+        def create_module(self, spec: object) -> None:
+            return None
+
+        def exec_module(self, module: ModuleType) -> None:
+            # The faithful failure point: _install has already evicted the repo
+            # namespace *and* bound sys.modules["src"] to the engine package by
+            # the time the engine's __init__ body runs.
+            raise boom
+
+    def _exploding_spec(*args: object, **kwargs: object) -> object:
+        spec = real_spec_from_file_location(*args, **kwargs)
+        spec.loader = _ExplodingLoader()
+        return spec
+
+    try:
+        monkeypatch.setattr(importlib.util, "spec_from_file_location", _exploding_spec)
+        with pytest.raises(RuntimeError) as excinfo:
+            pivot.enter()
+        assert excinfo.value is boom, (
+            "enter() must re-raise the original failure, not mask it behind "
+            "its own rollback"
+        )
+        monkeypatch.undo()
+
+        assert sys.modules.get("src") is previous, (
+            "a failed enter() left the engine src bound to sys.modules['src']; "
+            "no caller's finally: exit() can undo it, so every later test in "
+            "this xdist worker sees the wrong src package"
+        )
+        assert sys.modules.get(_EVICTED_PROBE_MODULE) is probe, (
+            "a failed enter() left the repo's src.* submodules evicted; later "
+            "tests re-import them and hold duplicate module objects"
+        )
+        assert _src_namespace() == saved, (
+            "a failed enter() must restore the src namespace exactly"
+        )
+        assert sys.path == saved_path, (
+            "a failed enter() must also undo the sys.path entries it added"
+        )
+
+        # The pivot must still be usable afterwards: the rollback resets the
+        # reentrancy depth rather than wedging it at a half-entered value.
+        pivot.enter()
+        assert sys.modules.get("src") is not previous
+        pivot.exit()
+        assert sys.modules.get("src") is previous
+    finally:
+        _restore(saved, saved_path)
+
+
+@pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)
+def test_pivot_exit_without_enter_is_a_noop(conftest_path: Path) -> None:
+    """An unbalanced ``exit()`` must not wipe the ``src`` namespace.
+
+    Regression coverage for issue #9387.
+
+    ``exit()`` restores from ``self._saved_modules``, and its first step is to
+    delete every ``src``/``src.*`` key that the snapshot does not contain.
+    With no pivot active that snapshot is empty, so an exit that never had a
+    matching enter would delete the entire ``src`` namespace and put nothing
+    back -- the same duplicate-module corruption the pivot exists to prevent,
+    reached from the opposite direction. Hook impls can end up unpaired
+    whenever an earlier hookwrapper in the chain raises before its own
+    ``yield``, so this has to be safe by construction rather than by call-site
+    discipline.
+    """
+    pivot = _load_conftest(conftest_path)._PIVOT
+
+    probe = importlib.import_module(_EVICTED_PROBE_MODULE)
+    saved = _src_namespace()
+    saved_path = list(sys.path)
+    try:
+        pivot.exit()
+
+        assert sys.modules.get(_EVICTED_PROBE_MODULE) is probe
+        assert _src_namespace() == saved, (
+            "exit() with no matching enter() must leave sys.modules untouched"
+        )
+        assert sys.path == saved_path
+
+        # The stray exit must not have driven the depth counter negative, or
+        # the next genuine enter/exit pair would no longer restore anything.
+        previous = sys.modules.get("src")
+        pivot.enter()
+        assert sys.modules.get("src") is not previous
+        pivot.exit()
+        assert sys.modules.get("src") is previous
+        assert _src_namespace() == saved
+    finally:
+        _restore(saved, saved_path)
+
+
+@pytest.mark.parametrize("conftest_path", _PIVOT_CONFTESTS, ids=lambda p: p.parent.name)
 def test_pivot_exit_relinks_child_when_parent_key_was_popped(
     conftest_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

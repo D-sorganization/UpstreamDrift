@@ -145,6 +145,10 @@ class EngineSrcPivot:
     its parent re-imported and re-linked, so dotted-string patch targets
     (``monkeypatch.setattr("src.x.y.attr", ...)``) keep resolving instead of
     raising ``AttributeError`` after the next fresh parent import (PR #9446).
+
+    The same postcondition holds for a :meth:`enter` that *raises* and for an
+    :meth:`exit` with no matching :meth:`enter`: neither may leave the engine
+    ``src`` installed, and neither may evict the repo namespace (issue #9387).
     """
 
     def __init__(self, repo_root: Path, *, precache: tuple[str, ...] = ()) -> None:
@@ -160,19 +164,52 @@ class EngineSrcPivot:
     # -- lifecycle ----------------------------------------------------------
 
     def enter(self) -> None:
-        """Install the pivot, or bump the reentrancy depth if already active."""
-        if self._depth == 0:
-            self._saved_modules = {name: sys.modules[name] for name in _src_namespace()}
-            self._added_paths = []
+        """Install the pivot, or bump the reentrancy depth if already active.
+
+        Atomic: if :meth:`_install` raises part-way through, the snapshot is
+        put back and the exception re-raised, so a *failed* enter leaves
+        ``sys.modules``/``sys.path`` exactly as it found them.
+
+        This is load-bearing rather than defensive tidiness. Every caller has
+        the shape ``pivot.enter()`` followed by ``try: ... finally:
+        pivot.exit()``, so the ``finally`` is only armed once ``enter()`` has
+        *returned*. A raising ``enter()`` therefore skips its own undo, and
+        ``_install`` mutates before it can fail: it evicts the repo's whole
+        ``src`` namespace and binds ``sys.modules["src"]`` to the engine
+        package *before* executing the engine's ``__init__``. A single
+        engine-side import error during collection would otherwise leave the
+        engine ``src`` shadowing the repo package for the rest of that
+        long-lived xdist worker -- ``import src`` in an unrelated test then
+        yields a package with no ``_install_parent_shared_aliases``, and every
+        repo ``src.*`` module a later test imports is a *duplicate* whose
+        ``mock.patch`` targets the already-bound callables never consult
+        (issue #9387).
+        """
+        if self._depth > 0:
+            self._depth += 1
+            return
+        self._saved_modules = {name: sys.modules[name] for name in _src_namespace()}
+        self._added_paths = []
+        self._depth = 1
+        try:
             self._install()
-        self._depth += 1
+        except BaseException:
+            self.exit()
+            raise
 
     def exit(self) -> None:
         """Undo the outermost :meth:`enter`, restoring ``sys.modules``/``sys.path``."""
+        if self._depth <= 0:
+            # Unbalanced exit (no pivot active). The restore below is driven by
+            # ``self._saved_modules``, which is empty here, so running it would
+            # delete the *entire* ``src`` namespace and put nothing back --
+            # turning a stray exit into the very corruption this class exists
+            # to prevent.
+            self._depth = 0
+            return
         self._depth -= 1
         if self._depth > 0:
             return
-        self._depth = 0
 
         # Evict everything the pivot added under ``src.`` (the engine's own
         # ``src.apps.*``, ``src.c3d_reader``, ...), then put back every repo
@@ -218,7 +255,13 @@ class EngineSrcPivot:
             submodule_search_locations=[str(self._engine_src)],
         )
         if spec is None or spec.loader is None:
-            return
+            # The repo ``src`` namespace has already been evicted above, so
+            # returning here would leave the process with no ``src`` at all.
+            # Raising hands control to ``enter()``'s rollback instead.
+            raise ImportError(
+                f"Could not build an import spec for the engine src package at "
+                f"{self._engine_src}"
+            )
         src_mod = importlib.util.module_from_spec(spec)
         sys.modules["src"] = src_mod
         spec.loader.exec_module(src_mod)
