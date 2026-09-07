@@ -295,9 +295,37 @@ def test_record_all_warms_up_then_signals_every_recorder_before_reaping(
         warmup_s=2.0,
         sleep=slept.append,
     )
-    assert slept == [12.0]
+    # NullRecorder never streams: the full warm-up is waited in polls, then
+    # the duration runs once.
+    assert sum(slept) == pytest.approx(12.0) and slept[-1] == 10.0
+    assert all(step <= 0.25 for step in slept[:-1])
     assert all(rec.signalled for rec in made)
     assert [r.identity for r in results] == ["2605160001", "2601240001"]
+
+
+def test_record_all_starts_the_clock_once_every_recorder_streams(
+    tmp_path: Path,
+) -> None:
+    from src.motion_capture.rig.recorder import NullRecorder, record_all
+
+    class Streams(NullRecorder):
+        polls = 0
+
+        def bytes_written(self) -> int:
+            Streams.polls += 1
+            return 10_000 if Streams.polls > 2 else 0  # streams on the third poll
+
+    slept: list[float] = []
+    record_all(
+        _plan(),
+        {"face_on": "r1", "down_line": "r2"},
+        10.0,
+        tmp_path,
+        Streams,
+        warmup_s=5.0,
+        sleep=slept.append,
+    )
+    assert slept == [0.25, 0.25, 10.0]
 
 
 def test_failed_recorder_keeps_ffmpeg_last_words_as_the_reason(tmp_path: Path) -> None:

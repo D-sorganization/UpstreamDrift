@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 from pathlib import Path
 
@@ -90,8 +91,16 @@ def test_https_opener_refuses_other_origins() -> None:
         https_opener(("http://plain.example/",))
 
 
-def test_body25_download_and_resolve_round_trip(tmp_path: Path) -> None:
-    files = openpose_models.BODY25_FILES
+def test_body25_download_and_resolve_round_trip(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The real specs pin digests of the published files; the fake payload here
+    # only has the right size, so use unpinned copies of the specs.
+    files = {
+        k: dataclasses.replace(v, sha256=None)
+        for k, v in openpose_models.BODY25_FILES.items()
+    }
+    monkeypatch.setattr(openpose_models, "BODY25_FILES", files)
 
     def opener(url: str):
         spec = next(s for s in files.values() if s.url == url)

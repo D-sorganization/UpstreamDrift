@@ -49,6 +49,19 @@ SHARED_JOINTS: tuple[str, ...] = (
 DEFAULT_MIN_CONFIDENCE = 0.5
 
 
+def _float_array(values: Any) -> np.ndarray:
+    """Float array where JSON ``null`` (a joint the detector omitted) is NaN."""
+    return np.array(
+        [
+            [np.nan if v is None else v for v in item]
+            if isinstance(item, list)
+            else (np.nan if item is None else item)
+            for item in values
+        ],
+        dtype=float,
+    )
+
+
 class JointMetrics(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -71,8 +84,8 @@ class DetectorSeries:
         for row in observations["frames"]:
             index = int(round(float(row["time_s"]) * self.fps))
             self._rows[index] = (
-                np.asarray(row["keypoints_px"], dtype=float),
-                np.asarray(row["confidence"], dtype=float),
+                _float_array(row["keypoints_px"]),
+                _float_array(row["confidence"]),
             )
 
     def joint(self, name: str, index: int, min_confidence: float) -> np.ndarray | None:

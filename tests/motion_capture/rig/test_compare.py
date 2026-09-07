@@ -89,3 +89,12 @@ def test_compare_view_report_and_markdown() -> None:
     assert single.agreement == {} and "agree" not in single.markdown()
     with pytest.raises(Exception, match="min_confidence"):
         joint_metrics(a, "nose", min_confidence=2.0)
+
+
+def test_series_accepts_json_null_for_omitted_joints() -> None:
+    pts, cf = _still(2)
+    pts[0][1] = [None, None]
+    cf[0][1] = 0.0
+    series = DetectorSeries(_obs(pts, cf))
+    assert series.joint("left_hip", 0, 0.5) is None
+    assert series.box_height(0, 0.5) == pytest.approx(400.0)

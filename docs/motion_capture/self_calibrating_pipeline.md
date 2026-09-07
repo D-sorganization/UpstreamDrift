@@ -104,6 +104,27 @@ bounds. It is the CI gate for every algorithm above; real takes add a
 take-over-take consistency metric (#9629). Thresholds live in
 [`markerless_mocap_acceptance.md`](markerless_mocap_acceptance.md).
 
+## Synthetic Evaluation Harness
+
+`src/motion_capture/reconstruct` (#9629) makes every later algorithm testable
+before it exists:
+
+```bash
+python3 -m motion_capture.reconstruct synth --out sessions/synthetic --frames 120   --noise-px 1.0 --occlusion 0.05 --outliers 0.02 --seed 0
+```
+
+writes `observations/<view>.json` in the exact schema `rig ingest` produces
+for three cameras around a rigid 15-joint skeleton on a swing-like motion,
+plus `truth.json`: 3-D joints per frame, the camera records
+(`T_world_from_camera`, K), the bone lengths, and the list of every
+observation that was occluded or turned into a gross outlier (moved by
+~120 px while keeping a high confidence — the case a robust fitter must
+catch). `PinholeCamera` bridges to `pose_estimation.observations`
+records in both directions, so a fitter tested here runs unchanged on a
+calibrated real rig. `metrics.py` scores camera pose (degrees, metres),
+relative bone-length error, joint-position error with missing counts, and
+outlier-flag precision/recall; the thresholds live in the acceptance document.
+
 ## Detector Comparison
 
 `python3 -m motion_capture.rig compare --session S --estimators mediapipe,openpose_dnn`
