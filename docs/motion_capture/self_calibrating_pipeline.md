@@ -85,6 +85,15 @@ flattening the peak of the downswing; the acceptance test injects one-frame
 spikes into a synthetic swing and requires club-head speed within 2 % of the
 truth (#9626).
 
+The first implementation is `reconstruct/temporal.py` (#9626): a penalised
+least-squares smoother in physical units — measurement noise estimated
+robustly from second differences, an acceleration prior `acceleration_sigma`
+in units per second squared, Huber reweighting, a residual gate that rejects
+and _lists_ each outlier, explicit velocity/acceleration bound checks that
+report every violation instead of clipping, and per-frame posterior
+uncertainty. It runs on any `(T, D)` series (pixels, metres, radians), so it
+serves both per-view cleaning and the joint-space stage after IK.
+
 ### Initialisation Without a Calibration Object
 
 The first take of a new camera placement has no extrinsics. Confident 2-D
