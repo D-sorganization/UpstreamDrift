@@ -13,7 +13,7 @@
   "totals": {
     "identical": 476,
     "diverged": 263,
-    "ud-only": 1193,
+    "ud-only": 1187,
     "tools-only": 517,
     "spelling-only": 133
   },
@@ -469,7 +469,7 @@
     "movement_optimizer": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 171,
+      "ud-only": 169,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -672,7 +672,7 @@
     "sidekick": {
       "identical": 246,
       "diverged": 63,
-      "ud-only": 40,
+      "ud-only": 36,
       "tools-only": 21,
       "spelling-only": 25
     },
@@ -12361,30 +12361,6 @@
       "spelling_only": false
     },
     {
-      "path": "movement_optimizer/.ruff_cache/.gitignore",
-      "classification": "ud-only",
-      "package": "movement_optimizer",
-      "subpackage": ".ruff_cache",
-      "ud_bytes": 35,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "movement_optimizer/.ruff_cache/CACHEDIR.TAG",
-      "classification": "ud-only",
-      "package": "movement_optimizer",
-      "subpackage": ".ruff_cache",
-      "ud_bytes": 43,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
       "path": "movement_optimizer/CHANGELOG.md",
       "classification": "ud-only",
       "package": "movement_optimizer",
@@ -20889,54 +20865,6 @@
       "tools_bytes": 13528,
       "byte_delta": 0,
       "byte_identical": true,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/process_calculators/psa_package/.ruff_cache/.gitignore",
-      "classification": "ud-only",
-      "package": "sidekick",
-      "subpackage": "process_calculators",
-      "ud_bytes": 35,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/process_calculators/psa_package/.ruff_cache/0.15.14/1022558036922189798",
-      "classification": "ud-only",
-      "package": "sidekick",
-      "subpackage": "process_calculators",
-      "ud_bytes": 174,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/process_calculators/psa_package/.ruff_cache/0.15.14/13784778837319628647",
-      "classification": "ud-only",
-      "package": "sidekick",
-      "subpackage": "process_calculators",
-      "ud_bytes": 174,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/process_calculators/psa_package/.ruff_cache/CACHEDIR.TAG",
-      "classification": "ud-only",
-      "package": "sidekick",
-      "subpackage": "process_calculators",
-      "ud_bytes": 43,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
