@@ -77,6 +77,7 @@ class RegisteredFrameEstimator:
         from src.shared.python.pose_estimation.registry import create_estimator
 
         self.name = name
+        self._options = dict(options)
         self._estimator = create_estimator(name, **options)
         self._estimator.load_model()
         cls = type(self._estimator)
@@ -108,6 +109,7 @@ class RegisteredFrameEstimator:
             f"{probe}_version": getattr(module, "__version__", None),
             "model_path": str(model_path) if model_path else None,
             "model_variant": getattr(self._estimator, "model_variant", None),
+            "options": dict(self._options),
         }
 
     def estimate(self, image: np.ndarray, timestamp_ms: int) -> FramePose | None:

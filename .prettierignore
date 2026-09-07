@@ -23,3 +23,5 @@ SPEC.md
 # so the generator's canonical output wins -- same rule as
 # docs/development/feature_parity_matrix.md.
 docs/shared_tools/divergence_inventory.md
+# generated from src/tools/capture_rig/workflow.py; byte-exact freshness test
+docs/motion_capture/user_guide.md

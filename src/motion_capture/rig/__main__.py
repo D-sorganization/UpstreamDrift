@@ -174,6 +174,13 @@ def _parser() -> argparse.ArgumentParser:
         "--out", type=Path, default=None, help="default: <session>/observations"
     )
     ing.add_argument("--estimator", default="mediapipe")
+    ing.add_argument(
+        "--option",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="estimator option, repeatable (e.g. min_detection_confidence=0.6)",
+    )
     ing.add_argument("--max-frames", type=int, default=None)
     cmp = sub.add_parser("compare", help="run two estimators on one bundle")
     cmp.add_argument("--session", type=Path, required=True)
@@ -196,11 +203,38 @@ def _parser() -> argparse.ArgumentParser:
     )
     rec3.add_argument("--anchor", required=True, metavar="SEGMENT=METRES")
     rec3.add_argument(
+        "--exclude-joints",
+        default="",
+        metavar="a,b",
+        help="fit joints to treat as unobserved (kept by the segment priors)",
+    )
+    rec3.add_argument(
         "--accel-sigma-px",
         type=float,
         default=20_000.0,
         help="acceleration prior in px/s^2",
     )
+    imp = sub.add_parser("import", help="build a bundle from existing video files")
+    imp.add_argument("--out", type=Path, required=True)
+    imp.add_argument(
+        "--view",
+        action="append",
+        required=True,
+        metavar="NAME=PATH",
+        help="one per view; a single --view is a single-camera session",
+    )
+    imp.add_argument("--name", default=None, help="plan name (default import:<out>)")
+    ana = sub.add_parser("analyze", help="2-D events and tempo per ingested view")
+    ana.add_argument("--session", type=Path, required=True)
+    ana.add_argument("--observations", default="observations", help="set directory")
+    ana.add_argument("--min-confidence", type=float, default=0.5)
+    rel = sub.add_parser("reliability", help="grade joints from every observation set")
+    rel.add_argument("--session", type=Path, required=True)
+    rel.add_argument("--min-confidence", type=float, default=0.5)
+    exp = sub.add_parser("export", help="reconstruction -> TRC + canonical JSON")
+    exp.add_argument("--session", type=Path, required=True)
+    exp.add_argument("--trc", type=Path, default=None)
+    exp.add_argument("--json", type=Path, default=None)
     cal = sub.add_parser("calibrate-intrinsics", help="chessboard intrinsics per view")
     cal.add_argument("--session", type=Path, required=True)
     cal.add_argument(
@@ -359,6 +393,73 @@ def cmd_proxy(args: argparse.Namespace) -> int:
     return 0 if index.ok else 1
 
 
+def parse_option_value(text: str) -> bool | int | float | str:
+    """``true``/``false``, ints, floats, else the string itself."""
+    low = text.strip().lower()
+    if low in ("true", "false"):
+        return low == "true"
+    for cast in (int, float):
+        try:
+            return cast(text)
+        except ValueError:
+            continue
+    return text
+
+
+def parse_options(items: list[str]) -> dict[str, bool | int | float | str]:
+    """``KEY=VALUE`` pairs → typed estimator options."""
+    out: dict[str, bool | int | float | str] = {}
+    for item in items:
+        key, sep, value = item.partition("=")
+        if sep != "=" or not key.strip():
+            raise SystemExit(f"--option must be KEY=VALUE, got {item!r}")
+        out[key.strip()] = parse_option_value(value)
+    return out
+
+
+def cmd_import(args: argparse.Namespace) -> int:
+    from .importer import import_videos, parse_view_spec
+
+    views = [parse_view_spec(v) for v in args.view]
+    manifest = import_videos(views, args.out, plan_name=args.name)
+    logger.info("import %s: %s", args.out, manifest.outcome.value)
+    return 0 if manifest.outcome.value != "blocked" else 1
+
+
+def cmd_analyze(args: argparse.Namespace) -> int:
+    from src.motion_capture.reconstruct.analytics2d import analyze_session_2d
+
+    written = analyze_session_2d(
+        args.session,
+        observations_dir=args.observations,
+        min_confidence=args.min_confidence,
+    )
+    for view, path in written.items():
+        logger.info("analysis_2d %s: %s", view, path)
+    return 0
+
+
+def cmd_reliability(args: argparse.Namespace) -> int:
+    from .reliability import reliability_report, write_reliability
+
+    report = reliability_report(args.session, min_confidence=args.min_confidence)
+    path = write_reliability(report, args.session)
+    logger.info("reliability -> %s", path)
+    logger.info("%s", report.markdown())
+    return 0
+
+
+def cmd_export(args: argparse.Namespace) -> int:
+    from src.motion_capture.reconstruct.export import export_reconstruction
+
+    written = export_reconstruction(
+        args.session / "reconstruct", trc_path=args.trc, json_path=args.json
+    )
+    for kind, path in written.items():
+        logger.info("export %s: %s", kind, path)
+    return 0
+
+
 def cmd_ingest(args: argparse.Namespace) -> int:
     # Imported here: the pose stack (MediaPipe, simulation backends) takes
     # seconds to import and no other command needs it.
@@ -368,7 +469,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     index = ingest_bundle(
         args.session,
         out_dir,
-        registry_estimator_factory(args.estimator),
+        registry_estimator_factory(args.estimator, **parse_options(args.option)),
         max_frames=args.max_frames,
     )
     for view in index.views:
@@ -442,6 +543,9 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
         intrinsics=intrinsics_from(args.intrinsics) if args.intrinsics else None,
         scale_anchor=_parse_anchor(args.anchor),
         acceleration_sigma_px=args.accel_sigma_px,
+        exclude_joints=tuple(
+            j.strip() for j in args.exclude_joints.split(",") if j.strip()
+        ),
     )
     logger.info(
         "reconstructed %s: rms %.2f px, rejections %s, %d unobservable points -> %s",
@@ -500,6 +604,10 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "reconstruct": cmd_reconstruct,
     "calibrate-intrinsics": cmd_calibrate_intrinsics,
     "ingest": cmd_ingest,
+    "import": cmd_import,
+    "export": cmd_export,
+    "analyze": cmd_analyze,
+    "reliability": cmd_reliability,
 }
 
 
