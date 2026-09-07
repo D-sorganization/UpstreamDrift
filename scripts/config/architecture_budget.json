@@ -305,6 +305,15 @@
       "issue": 9492,
       "reason": "Issue #9492: pre-existing on main -- checking these two files out from origin/main into an otherwise-unmodified tree reports the identical violation with the identical line count. Surfaced by PR #9490 (UD #9474), which fixes a Qt object-lifetime defect in this file and deliberately does not bundle a risky decomposition of the MuJoCo stepping/render path into a correctness fix. Decomposition tracked in #9492, tests first.",
       "expires_on": "2026-11-30"
+    },
+    {
+      "path": "src/shared/python/model_generation/editor/frankenstein_editor.py",
+      "symbol": "FrankensteinEditor._paste_links_and_joints",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9617,
+      "reason": "Issue #9617: pre-existing 9-parameter private paste helper, byte-identical on main; PR #9569 only added a contracts import and two require() guards in a different method of this file, which pulled it into the changed-file budget check.",
+      "expires_on": "2026-10-31"
     }
   ]
 }
