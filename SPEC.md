@@ -1,5 +1,11 @@
 # SPEC.md — Repository Specification Document
 
+## Enforce Vendored-Fallback Hard Failure in CI (#9655)
+
+Enforces hard failure for vendored-fallback tests (`tests/unit/repo_hygiene/test_vendored_tools_fallback.py`) under CI when `vendor/ud-tools/src/shared/python` is missing:
+- Adds `_check_vendored_tools()` fixture failing via `pytest.fail()` when `REQUIRE_VENDORED_FALLBACK=1` (or `REQUIRE_REAL_TOOLS_REPO=1` / `REQUIRE_DRIFT_GATES=1`) and the vendored submodule directory is absent, preventing silent test skipping from masking broken fallback resolution.
+- Adds `REQUIRE_VENDORED_FALLBACK: "1"` to `unit-test-gate` in `.github/workflows/ci-standard.yml`.
+
 ## Optimize Multidimensional Array Norm Calculations in BunkerShot3D (#9529)
 
 Replaces `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` across `bunkershot3d` modules (`elements.py`, `mpm/body.py`, `mpm/solver.py`, `mpm/wholeshot.py`, `shot.py`, `vandv/conservation.py`), and uses `np.sqrt(np.max(np.einsum(...)))` for peak force magnitude in `ShotResult`. (spec-exempt: micro-optimization)
