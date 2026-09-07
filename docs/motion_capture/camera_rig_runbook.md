@@ -20,11 +20,13 @@ described in [Camera Rig Capture](capture_rig.md).
    ports; the CalDigit TS4 carries at most one camera and is better left for
    networking and displays.
 3. Never chain the TS4 behind the Sonnet. Each dock goes to its own
-   Thunderbolt port on the laptop. (On 2026-09-06 a camera two hub tiers
-   deep behind a TS4 on the Sonnet did stream at 60 fps beside the other
-   two; the rule stays because the earlier TS4 hub failure was real, and
-   the topology walk reports `hub_depth` so the case is visible.)
-4. Do not add a hub between a dock and a camera; the 30 ft powered cable
+   Thunderbolt port on the laptop. (The earlier TS4 hub failure was real;
+   the topology walk reports `hub_depth` and the root port so a chained
+   dock is visible in `plan-check`.)
+4. Do not add a hub between a dock and a camera. A 30 ft powered (active)
+   cable is itself two hub tiers, which is fine for one camera per cable on
+   its own root port and is the planned wiring for all three views; never
+   put two cameras on one cable. The 30 ft powered cable
    already spends two of the five allowed hub tiers.
 5. After any cabling change, confirm the Sonnet routers are present (a
    Thunderbolt link drop is silent and turns every camera on it into a ghost):
@@ -149,8 +151,9 @@ conflicts; `session-check` on the second bundle reported no problems.
 
 ## Stability Across Sessions
 
-Six back-to-back three-camera `record` runs on 2026-09-06 (4 s each, TS4
-chained on the Sonnet with cam_c two hub tiers deep, against rule 3):
+Six back-to-back three-camera `record` runs on 2026-09-06 (4 s each; all
+three cameras on Sonnet jacks, cam_c through a 30 ft powered cable, which
+is two hub tiers):
 
 | Run | Mode           | Result                                                     |
 | --- | -------------- | ---------------------------------------------------------- |
@@ -163,8 +166,8 @@ One camera's `LastArrivalDate` moved to 20:50:23, so a unit dropped off the bus
 and re-enumerated during the series. Solo opens of every camera succeed. The
 rig therefore meets the rate on every view when the cameras open, but is not
 yet shown to open reliably session after session; #9613 tracks the
-soak test that decides whether the TS4 chain, Sonnet USB power, or the
-DirectShow open race is responsible. Until it closes, check `plan-check` and
+soak test that decides whether the active-cable hubs, Sonnet USB power, or
+the DirectShow open race is responsible. Until it closes, check `plan-check` and
 the bundle outcome before every take rather than trusting the previous one.
 
 ## Proxies for Playback

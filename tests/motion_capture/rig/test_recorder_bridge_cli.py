@@ -64,7 +64,7 @@ def test_null_recorder_lifecycle_and_record_all(tmp_path: Path) -> None:
         warmup_s=2.0,
         sleep=slept.append,
     )
-    assert slept == [5.0]  # warm-up + duration, one clock for every view
+    assert sum(slept) == pytest.approx(5.0)  # warm-up polls + one duration clock
     assert [r.identity for r in results] == ["1", "2"]
     assert all(isinstance(r, RecordingResult) and r.returncode == 0 for r in results)
     assert results[0].path.name == "a_1.mkv"

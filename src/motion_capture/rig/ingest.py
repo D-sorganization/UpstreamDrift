@@ -117,9 +117,23 @@ class RegisteredFrameEstimator:
             return None
         confidences = result.raw_confidences or {}
         names = self._layout.keypoint_names
-        keypoints = np.array([[points[n][0], points[n][1]] for n in names], dtype=float)
+        # A detector may omit joints it did not find (OpenPose below its peak
+        # threshold). KeypointObservation requires finite coordinates, so the
+        # row keeps its shape with a (0, 0) placeholder and confidence 0.0:
+        # confidence 0 means "unobserved" and consumers must gate on it.
+        keypoints = np.array(
+            [
+                [points[n][0], points[n][1]] if n in points else [0.0, 0.0]
+                for n in names
+            ],
+            dtype=float,
+        )
         confidence = np.array(
-            [confidences.get(n, result.confidence) for n in names], dtype=float
+            [
+                confidences.get(n, result.confidence) if n in points else 0.0
+                for n in names
+            ],
+            dtype=float,
         )
         return FramePose(
             keypoints_norm=keypoints, confidence=np.clip(confidence, 0.0, 1.0)

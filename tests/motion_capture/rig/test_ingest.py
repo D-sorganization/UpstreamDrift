@@ -180,3 +180,42 @@ def test_cli_ingest_uses_patched_factory(
     )
     assert [v["status"] for v in index["views"]] == ["available", "available"]
     assert index["views"][0]["frames_total"] == 3
+
+
+def test_adapter_marks_joints_the_detector_omitted_with_zero_confidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.motion_capture.rig import ingest as ingest_mod
+    from src.shared.python.pose_estimation.interface import PoseEstimationResult
+
+    class Partial:
+        LANDMARK_MAP = {0: "nose", 1: "left_wrist"}
+        LAYOUT_NAME = "partial_2"
+        model_path = None
+        model_variant = None
+
+        def load_model(self) -> None:
+            pass
+
+        def estimate_from_image(self, image, timestamp_ms=None):
+            return PoseEstimationResult(
+                joint_angles={},
+                confidence=0.8,
+                timestamp=0.0,
+                raw_keypoints={"nose": np.array([0.5, 0.5])},
+                raw_confidences={"nose": 0.8, "left_wrist": 0.01},
+            )
+
+    from src.shared.python.pose_estimation import registry as registry_mod
+
+    monkeypatch.setattr(registry_mod, "create_estimator", lambda name, **o: Partial())
+    monkeypatch.setattr(
+        registry_mod,
+        "get_estimator_info",
+        lambda name: type("I", (), {"probe_module": "json"})(),
+    )
+    est = ingest_mod.RegisteredFrameEstimator("partial")
+    pose = est.estimate(np.zeros((4, 4, 3), dtype=np.uint8), 0)
+    assert pose is not None
+    assert pose.keypoints_norm[1].tolist() == [0.0, 0.0] and pose.confidence[1] == 0.0
+    assert pose.keypoints_norm[0].tolist() == [0.5, 0.5]
