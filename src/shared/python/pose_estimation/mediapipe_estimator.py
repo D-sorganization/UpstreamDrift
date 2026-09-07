@@ -58,6 +58,7 @@ class MediaPipeEstimator(PoseEstimator):
     """
 
     # MediaPipe Pose landmark mapping (33 landmarks)
+    LAYOUT_NAME: ClassVar[str] = "mediapipe_pose_33"
     LANDMARK_MAP: ClassVar[dict[int, str]] = {
         0: "nose",
         1: "left_eye_inner",

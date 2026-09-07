@@ -156,9 +156,11 @@ def test_ingest_bundle_writes_index_and_marks_broken_views_unavailable(
     assert view_file["frames_with_pose"] == N - 1
 
 
-def test_registry_factory_only_adapts_mediapipe() -> None:
-    with pytest.raises(Exception, match="only the mediapipe estimator"):
-        registry_estimator_factory("openpose")
+def test_registry_factory_rejects_unknown_estimators_before_loading() -> None:
+    with pytest.raises(Exception, match="unknown estimator"):
+        registry_estimator_factory("no_such_estimator")
+    # a registered name is accepted lazily: nothing is loaded until called
+    assert callable(registry_estimator_factory("openpose_dnn"))
 
 
 def test_cli_ingest_uses_patched_factory(
