@@ -205,6 +205,33 @@ ingest reads the original MJPEG, and a failed transcode is listed with its
 reason rather than dropped. The PyQt6 MediaPipe/OpenPose GUIs can decode the
 `.mkv` directly once their file filter admits it (#9611).
 
+## Capture Rig Tool (Desktop)
+
+The launcher tile **Capture Rig** (`python3 -m src.tools.capture_rig`) is the
+desktop front end over the commands above. It does not re-implement any of
+them: every button starts `python -m src.motion_capture.rig ...` as a child
+process with the same flags, so a bundle made from the tool is
+indistinguishable from one made in a terminal.
+
+- **Capture** — plan file, capture mode preset (the advertised ELP modes),
+  view subset, exposure / gain / auto-exposure overrides (`--exposure`,
+  `--gain`, `--auto-exposure`, applied to every selected view and recorded
+  in the derived plan name), duration and dry run. _Plan check_ and _Record_.
+- **Process** — _Proxies_, _Ingest_ with any registered estimator (MediaPipe,
+  OpenPose, OpenPose BODY_25 DNN; unavailable ones are marked with the
+  install hint), _Calibrate intrinsics_ (board, square size) and
+  _Reconstruct_ (anchor segment and tape-measured length; a file named
+  `intrinsics*.json` starts a first take, anything else is taken as a
+  previous `reconstruction.json`).
+- **Review** — frame-accurate playback of any view (the H.264 proxy when it
+  exists, else the recording) with the ingested pose drawn on the frame it
+  came from; joints under the confidence threshold are drawn small and red
+  rather than hidden. The swing summary appears as a metric table once
+  `reconstruct/swing_summary.json` exists.
+
+The log pane shows the child's output verbatim and _Stop_ kills it. A
+session folder can also be loaded directly to review an earlier take.
+
 ## What This Does Not Show
 
 No calibration, no timing between cameras beyond arrival clocks (strobe
