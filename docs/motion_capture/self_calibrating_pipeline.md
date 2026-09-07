@@ -75,6 +75,28 @@ joint, residual). Nothing is imputed; a joint with no surviving observation in
 a frame is estimated from the dynamics prior and reported with its uncertainty
 (#9625).
 
+### Ball as the Shared Anchor
+
+`reconstruct/ball.py` (#9621) finds bright, pale, near-circular blobs of a
+plausible radius and ranks them; it returns candidates with scores, an
+optional operator hint steers the choice, and `ball_at_rest` requires a
+stable run of frames before it reports a position. On the real down-the-line
+frame the spare balls on the mat are found once the value gate matches the
+bay lighting; the addressed ball is hidden under the club head at that
+instant, so the rest phase before takeaway is where the anchor is read.
+
+### Per-View Cleaning
+
+`reconstruct/clean.py` applies the smoother joint by joint to a view's
+observation file: rejected detections keep their coordinates but drop to
+confidence 0, the fitted track and its uncertainty go to separate `fit_px`
+fields, and every rejection is listed with the residual that condemned it.
+On the synthetic harness (1 px noise, 3 % occlusion, 3 % gross outliers of
+up to 120 px) it flags injected outliers with recall 0.94-0.96 and precision
+0.92-0.96 across seeds; the misses are gross points in the first or last
+frames and offsets under about 10 px, which the multi-view gate (C5) is
+expected to catch.
+
 ### Dynamics Prior
 
 After the geometric fit, joint trajectories are re-estimated in joint space
@@ -84,6 +106,15 @@ bounds tuned on golf swings. This removes single-frame spikes without
 flattening the peak of the downswing; the acceptance test injects one-frame
 spikes into a synthetic swing and requires club-head speed within 2 % of the
 truth (#9626).
+
+The first implementation is `reconstruct/temporal.py` (#9626): a penalised
+least-squares smoother in physical units — measurement noise estimated
+robustly from second differences, an acceleration prior `acceleration_sigma`
+in units per second squared, Huber reweighting, a residual gate that rejects
+and _lists_ each outlier, explicit velocity/acceleration bound checks that
+report every violation instead of clipping, and per-frame posterior
+uncertainty. It runs on any `(T, D)` series (pixels, metres, radians), so it
+serves both per-view cleaning and the joint-space stage after IK.
 
 ### Initialisation Without a Calibration Object
 
