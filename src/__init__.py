@@ -88,12 +88,23 @@ def _register_vendored_tools_fallback() -> bool:
     dependency reachable. The finder below answers the shared namespace on its
     own, so the fallback stays scoped to what it is meant to serve.
 
+    Tools can live in either of two places, and a retired cluster must resolve
+    from whichever is present: the pinned tree at ``vendor/ud-tools``, or an
+    installed Tools distribution providing a top-level ``shared.python``.
+    Tools' own downstream-consumer contracts install the distribution into a
+    checkout that has no submodule at all, so gating on the vendored tree alone
+    left retired clusters unresolvable there (Tools#5048).
+
     Returns:
-        True when the vendored shared tree exists on disk. False in a wheel
-        install, where build_hooks.py copies the pinned tree into the package
-        and there is nothing to fall back to.
+        True when either Tools tree is reachable, so the finder has something
+        to serve. False when neither is, where there is nothing to fall back to.
     """
-    return (_VENDORED_TOOLS_SRC / "shared" / "python").is_dir()
+    if (_VENDORED_TOOLS_SRC / "shared" / "python").is_dir():
+        return True
+    try:
+        return importlib.util.find_spec("shared.python") is not None
+    except (ImportError, ValueError):
+        return False
 
 
 _UD_SHARED_PYTHON = Path(__file__).resolve().parent / "shared" / "python"
@@ -163,7 +174,51 @@ class _VendoredToolsFallbackFinder(MetaPathFinder):
             module_file = base.with_suffix(".py")
             if module_file.is_file():
                 return importlib.util.spec_from_file_location(fullname, module_file)
+            return self._installed_tools_spec(fullname, tail)
         return None
+
+    def _installed_tools_spec(self, fullname: str, tail: str) -> Any:
+        """Resolve a retired cluster from an installed Tools distribution.
+
+        The pinned tree is one of two places Tools can live. A consumer that
+        installs Tools as a distribution -- Tools' own downstream-consumer
+        contracts do exactly that -- has no ``vendor/ud-tools`` checkout at
+        all, so a retired cluster has nothing to fall back to there.
+
+        Until Tools#5048 that gap was hidden: ``SharedImportAliasFinder``
+        rewrote every ``src.shared.python.<root>`` to ``shared.python.<root>``,
+        which happened to cover retired clusters too. Correcting that predicate
+        stops the blanket rewrite -- rightly, since it also captured clusters
+        UpstreamDrift owns -- and leaves this finder to serve the retired ones
+        from whichever tree is present.
+
+        ``_cluster_is_still_owned`` has already run, so this cannot capture a
+        cluster UpstreamDrift still owns.
+        """
+        canonical = f"shared.python.{tail}"
+        if canonical in sys.modules:
+            return getattr(sys.modules[canonical], "__spec__", None)
+        removed = self in sys.meta_path
+        if removed:
+            sys.meta_path.remove(self)
+        try:
+            spec = importlib.util.find_spec(canonical)
+        except (ImportError, ValueError):
+            return None
+        finally:
+            if removed:
+                sys.meta_path.append(self)
+        if spec is None or spec.origin is None:
+            return None
+        return importlib.util.spec_from_file_location(
+            fullname,
+            spec.origin,
+            submodule_search_locations=(
+                list(spec.submodule_search_locations)
+                if spec.submodule_search_locations is not None
+                else None
+            ),
+        )
 
 
 def _install_vendored_tools_fallback_finder() -> bool:
