@@ -34,15 +34,21 @@ disagree: 153 of the 292 files classified `diverged` differ only by the
 `src.shared.python` import prefix. Only **139 differ in content**. Filter on
 `spelling_only` before sizing any of this work.
 
-**2. A large negative byte delta is not evidence of staleness.** In `codemap` it
-meant UpstreamDrift was behind. In `chat` the same signal meant UpstreamDrift had
-_decomposed_ the widget into `_qt/runtime.py` (#8553) while canonical is still
-the pre-refactor monolith — `initialize_streaming_state` appears zero times
-upstream. Retiring `chat` would delete that refactor while the drift gate, the
-divergence count and the ruling status all reported progress. `chat` needs
-re-ruling to `ud-canonical`. So do `notes` and `plot_theme`, which have zero real
-divergence but one UpstreamDrift-only file each — the schema's definition of
-`split`, not `tools-canonical`.
+**2. Neither a byte delta nor structure tells you which side is ahead — check
+dates.** In `codemap` a large negative delta meant UpstreamDrift was behind, and
+retiring it was right. In `chat` UpstreamDrift's widget is 16 KB smaller and
+carries an extra `_qt/runtime.py` that canonical lacks, which reads like
+UpstreamDrift being a refactor ahead. It is not: Tools' copy was last changed
+2026-09-04 and is still being fixed, while UpstreamDrift's has had no commits
+under `chat/` since 2026-08-12. Tools continued on its own line; UpstreamDrift
+holds the older snapshot. `chat` is ruled `tools-canonical` correctly.
+
+Likewise `notes` and `plot_theme` each have one UpstreamDrift-only file, which
+looks like the schema's definition of `split` — but both files are _drift
+tests_ (`test_notes_drift.py`, `test_plot_theme_drift.py`) that watch for
+divergence between the copies, so they legitimately become moot on retirement.
+Read what a ud-only file actually is before concluding a cluster is mis-ruled.
+I got both of these wrong first time; the recorded rationales were right.
 
 **3. `import_aliases.py` cannot be retired yet.** Adopting canonical widens
 `_external_src_package_is_available()` from an exact path equality to
