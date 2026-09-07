@@ -221,19 +221,9 @@ class CollisionGeometryGenerator:
 
         # Generate collision geometry
         try:
-            if method == SimplificationMethod.VHACD:
-                result = self._generate_vhacd(mesh, max_hulls, vhacd_params)
-            elif method == SimplificationMethod.PRIMITIVES:
-                result = self._generate_primitives(mesh, max_primitives)
-            elif method == SimplificationMethod.DECIMATION:
-                result = self._generate_decimated(mesh, max_triangles)
-            elif method == SimplificationMethod.CONVEX_HULL:
-                result = self._generate_convex_hull(mesh)
-            elif method == SimplificationMethod.HYBRID:
-                result = self._generate_hybrid(mesh, max_primitives, max_triangles)
-            else:
-                result = self._generate_decimated(mesh, max_triangles)
-
+            result = self._dispatch_generation(
+                method, mesh, max_hulls, vhacd_params, max_primitives, max_triangles
+            )
         except (ValueError, TypeError, RuntimeError, OSError) as e:
             logger.error(f"Collision generation failed: {e}")
             return CollisionGeometryResult(
@@ -268,6 +258,28 @@ class CollisionGeometryGenerator:
             primitive_fits=result.primitive_fits,
             warnings=result.warnings,
         )
+
+    def _dispatch_generation(
+        self,
+        method: SimplificationMethod,
+        mesh: Any,
+        max_hulls: int,
+        vhacd_params: VHACDParameters | None,
+        max_primitives: int,
+        max_triangles: int,
+    ) -> Any:
+        """Dispatch collision generation to specific method implementation."""
+        if method == SimplificationMethod.VHACD:
+            return self._generate_vhacd(mesh, max_hulls, vhacd_params)
+        if method == SimplificationMethod.PRIMITIVES:
+            return self._generate_primitives(mesh, max_primitives)
+        if method == SimplificationMethod.DECIMATION:
+            return self._generate_decimated(mesh, max_triangles)
+        if method == SimplificationMethod.CONVEX_HULL:
+            return self._generate_convex_hull(mesh)
+        if method == SimplificationMethod.HYBRID:
+            return self._generate_hybrid(mesh, max_primitives, max_triangles)
+        return self._generate_decimated(mesh, max_triangles)
 
     def _load_mesh(self, mesh_or_path: Any) -> Any:
         """Load mesh from path or return as-is."""
