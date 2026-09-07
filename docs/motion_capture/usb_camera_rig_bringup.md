@@ -149,13 +149,15 @@ about 200 MB/s per camera.
 
 ## Diagnostic Script
 
-`scripts/diagnose_mocap_camera_rig.py` enumerates the cameras through Windows
-PnP, walks each hub chain to its root port, maps each camera to its capture
-index through DirectShow enumeration order (which matches Media Foundation
-order), predicts how many cameras can stream, then measures a solo and a
-concurrent capture and compares the two. It writes `rig_report_<timestamp>.json`
-and one frame per camera. Exit code 0 means every camera streamed at 90 % of
-the target rate or better; 1 means a conflict; 2 means no cameras or no OpenCV.
+`scripts/diagnose_mocap_camera_rig.py` is a thin CLI over the
+[`motion_capture.rig`](capture_rig.md) package. It enumerates the cameras
+through Windows PnP, walks each hub chain to its root port, maps each camera to
+its capture index through DirectShow enumeration order (which matches Media
+Foundation order), predicts how many cameras can stream, then measures a solo
+and a concurrent capture session and compares the two. It writes
+`rig_report_<timestamp>.json` containing the session manifest. Exit code 0
+means every camera streamed at 90 % of the target rate or better; 1 means a
+conflict; 2 means no cameras or no OpenCV.
 
 ```bash
 python3 scripts/diagnose_mocap_camera_rig.py --out-dir /tmp/rig
