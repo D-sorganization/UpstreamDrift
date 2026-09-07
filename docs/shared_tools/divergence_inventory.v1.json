@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 462,
-    "diverged": 277,
+    "identical": 463,
+    "diverged": 276,
     "ud-only": 1188,
-    "tools-only": 518,
+    "tools-only": 519,
     "spelling-only": 129
   },
   "packages": {
@@ -82,8 +82,8 @@
       "spelling-only": 0
     },
     "ai": {
-      "identical": 46,
-      "diverged": 72,
+      "identical": 47,
+      "diverged": 71,
       "ud-only": 20,
       "tools-only": 0,
       "spelling-only": 56
@@ -673,7 +673,7 @@
       "identical": 235,
       "diverged": 74,
       "ud-only": 36,
-      "tools-only": 22,
+      "tools-only": 23,
       "spelling-only": 25
     },
     "signal_toolkit": {
@@ -2486,13 +2486,13 @@
     },
     {
       "path": "ai/tools/cli_tools.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "ai",
       "subpackage": "tools",
       "ud_bytes": 20262,
-      "tools_bytes": 19862,
-      "byte_delta": 400,
-      "byte_identical": false,
+      "tools_bytes": 20262,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20070,7 +20070,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 3108,
+      "tools_bytes": 2409,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -20082,7 +20082,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 1134,
+      "tools_bytes": 1543,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -20095,6 +20095,18 @@
       "subpackage": "lab",
       "ud_bytes": null,
       "tools_bytes": 2085,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/lab/mocap/acquisition.py",
+      "classification": "tools-only",
+      "package": "sidekick",
+      "subpackage": "lab",
+      "ud_bytes": null,
+      "tools_bytes": 13404,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31032,19 +31044,6 @@
     },
     {
       "path": "ai/tools/agent_control.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "0855f6b09ce60031a209554ec51c4e17f543b5cd"
-      }
-    },
-    {
-      "path": "ai/tools/cli_tools.py",
       "ud": {
         "author": "Dieter Olson",
         "date": "2026-08-01",
