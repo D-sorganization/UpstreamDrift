@@ -37,7 +37,7 @@ def test_is_video_file_is_suffix_based_and_case_insensitive() -> None:
 @pytest.mark.parametrize("gui", GUIS, ids=lambda p: p.stem)
 def test_guis_use_the_shared_filter_not_a_literal(gui: Path) -> None:
     source = gui.read_text(encoding="utf-8")
-    assert "video_dialog_filter()" in source
+    assert "load_video_into(self)" in source
     literals = [
         node.value
         for node in ast.walk(ast.parse(source))
