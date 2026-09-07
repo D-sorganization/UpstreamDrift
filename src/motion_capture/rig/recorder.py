@@ -146,6 +146,7 @@ class FfmpegStreamCopyRecorder:
         self._proc: Any = None
         self._identity: str | None = None
         self._path: Path | None = None
+        self._signalled = False
 
     def _exe(self) -> str:
         if self._ffmpeg is None:
@@ -175,13 +176,15 @@ class FfmpegStreamCopyRecorder:
             )
         )
         self._stack, self._identity, self._path = stack, identity, path
+        self._signalled = False
         logger.info("recording %s -> %s", identity, path)
 
     def signal_stop(self) -> None:
-        """Send ffmpeg its graceful quit key; safe when already closed."""
+        """Send ffmpeg its graceful quit key once; later calls are no-ops."""
         proc = self._proc
-        if proc is None or proc.stdin is None:
+        if self._signalled or proc is None or proc.stdin is None:
             return
+        self._signalled = True
         try:
             proc.stdin.write("q\n")
             proc.stdin.flush()
