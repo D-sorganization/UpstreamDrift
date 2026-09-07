@@ -66,7 +66,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
-| `humanoid_character_builder` | 15 | 25 | 13 | 27 | 0 | 40 |
+| `humanoid_character_builder` | 15 | 25 | 12 | 27 | 0 | 40 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **462** | **277** | **129** | **1188** | **518** | **739** |
+| **Total** | **462** | **277** | **128** | **1188** | **518** | **739** |
 
 ## Diverged Files by Package
 
@@ -173,7 +173,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/gui/_provider_registry_data.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `ai/gui/_providers_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `ai/gui/_rag_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `ai/gui/assistant_panel.py` | +6986 |  | Dieter Olson 2026-09-04 | Dieter Olson 2026-09-05 |
+| `ai/gui/assistant_panel.py` | +6986 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `ai/gui/assistant_widgets.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `ai/gui/history_sidebar.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `ai/gui/session_manager.py` | -207 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -300,10 +300,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/core/model.py` | +478 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/_makehuman_generator.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `humanoid_character_builder/generators/_mesh_types.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `humanoid_character_builder/generators/_mesh_types.py` | +1917 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/_primitive_generator.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/_smplx_generator.py` | +328 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-09-05 |
-| `humanoid_character_builder/generators/mesh_generator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `humanoid_character_builder/generators/mesh_generator.py` | +380 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/mesh_generator_primitive.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/mesh_generator_smplx.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
