@@ -1,5 +1,25 @@
 # SPEC.md — Repository Specification Document
 
+## Restore Reverted Capsule-Inertia and SE(3) Reparenting Fixes (#9474)
+
+Two correctness fixes reverted by the squash `b8d95ad25` are restored, each
+with a TDD test module already in the tree asserting the corrected behaviour.
+
+- **Capsule inertia parallel-axis term.** Two hemispheres of mass
+  `m_sphere / 2`, each offset by `hemisphere_offset`, contribute
+  `2 * (m_sphere / 2) * offset**2 = m_sphere * offset**2`, so the term carries
+  no factor of `0.5`. The reverted code understated the perpendicular moment
+  by that factor in both implementations —
+  `model_generation.inertia.primitives.capsule_inertia` and
+  `model_generation.core.types.Inertia.from_capsule` — giving every capsule
+  link a wrong inertia tensor.
+- **SE(3) composition when reparenting after `delete_link`.** The child
+  joint's new origin is composed as `p_pos + R(p_rpy) @ c_pos` for position
+  and `R(p_rpy) * R(c_rpy)` for rotation, instead of adding positions and
+  keeping the child's `rpy`. Position addition alone is correct only when the
+  parent joint has no rotation.
+
+
 ## Fix Command Injection Vulnerability in CLI Tools
 
 Secured the `ShellTool` in `src/shared/python/ai/tools/cli_tools.py` against command injection by explicitly blocking dangerous command flags like `-exec` and `-delete` that could execute arbitrary commands through whitelisted base tools. (spec-exempt: security fix)
@@ -3979,6 +3999,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| 2026-09-07 | #9697 | Restored two correctness fixes reverted by the squash `b8d95ad25`, each with a TDD module still in the tree asserting them. The capsule-inertia parallel-axis term carried a spurious `0.5` factor -- two hemispheres of mass `m_sphere/2` at `hemisphere_offset` contribute `m_sphere * offset**2`, not half that -- understating the perpendicular moment by 28% for the tested capsule (0.1356 against a first-principles 0.1897) in both `inertia/primitives.capsule_inertia` and `core/types.Inertia.from_capsule`, so every capsule link had a wrong inertia tensor. And `delete_link` reparented children by adding positions and keeping the child's `rpy`, which is correct only for an unrotated parent joint; it now composes the SE(3) transforms. `test_capsule_inertia_fix.py` 21 passed and `test_se3_transform_fix.py` 7 passed, both fully red before. `tests/unit/tools/model_generation/`: 74 failing at the start of this burndown, 6 now. (#9474) |
 | 2026-09-07 | #9686 | Repaired the humanoid mesh-generator split that `b8d95ad25` half-reverted: restored `segment_mesh_by_range` to `_mesh_types` (imported by three modules, defined in none, so all three raised ImportError on `origin/main`), `GeneratedMeshResult.solver_status` with the `__post_init__` that derives it from `success` (#4522), and the `SMPLX_AVAILABLE`/`TRIMESH_AVAILABLE`/`_smplx_module`/`_trimesh_module` re-exports that `_mesh_smplx` reads back through the facade so test patches take effect (#4528). Repointed the facade's `SMPLXMeshGenerator` from the reduced `_smplx_generator` to `_mesh_smplx`, which carries `validate_vertex_ranges`, `load_part_segmentation` and `SMPLX_SEGMENT_VERTEX_RANGES`; measured over the humanoid and security suites that is 85 failures -> 51, 34 newly passing and 0 newly failing, compared as failure sets rather than counts. Added import assertions to the #2486 contract suite, which previously checked only file existence and line counts and so stayed green while the modules could not be loaded. (#9675) |
 | 2026-09-07 | #9676 | Restored the model_generation REST API request pre-flight deleted by the squash `b8d95ad25` -- `MODEL_GEN_API_KEY` authentication with `secrets.compare_digest`, per-client-IP `MODEL_GEN_RATE_LIMIT` sliding-window rate limiting, and `MODEL_GEN_CORS_ORIGINS` CORS headers, all three of which had been inert. The deletion was not the #1953 facade split: `_add_security_headers` lived beside them and did survive into `rest_api_routes.py`. Both checks run before route matching so 401 cannot be distinguished from 404 to enumerate routes, and CORS is attached in `_secure_response` so error responses carry it too. Also fixed a path traversal in `ModelCache.get_cache_path`, where a bare `".."` survived separator flattening and resolved to the cache directory's parent, and made `ModelLibrary` name a rejected URL scheme rather than reporting it as non-absolute. `tests/unit/tools/model_generation/`: 74 failing -> 66 failing. (#9674) |
 | 2026-09-07 | #9673 | Restored xacro preprocessing, ROS `package://` resolution and GitHub API authentication/retry/pagination deleted by the 14-issue squash `b8d95ad25`, plus `CacheEntry.version` with checksum validation on retrieval and the opt-in Rust URDF fast path whose only call site the same commit removed. Each restore is folded into the hardening that landed since rather than reverted onto it: `_validate_mesh_filename` still runs before any `package://` lookup, GitHub requests still route through the `_urlopen_https` host allowlist, and `ModelCache.get` delegates to the existing `verify()` instead of duplicating the comparison. Deviating from a pure restore, `_split_search_path` rejoins Windows drive letters that the original `.split(":")` severed. `tests/unit/tools/model_generation/`: 74 failing -> 38 failing. (#9620) |
