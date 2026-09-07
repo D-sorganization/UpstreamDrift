@@ -11,8 +11,8 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 462,
-    "diverged": 277,
+    "identical": 463,
+    "diverged": 276,
     "ud-only": 1188,
     "tools-only": 519,
     "spelling-only": 129
@@ -82,8 +82,8 @@
       "spelling-only": 0
     },
     "ai": {
-      "identical": 46,
-      "diverged": 72,
+      "identical": 47,
+      "diverged": 71,
       "ud-only": 20,
       "tools-only": 0,
       "spelling-only": 56
@@ -2486,13 +2486,13 @@
     },
     {
       "path": "ai/tools/cli_tools.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "ai",
       "subpackage": "tools",
-      "ud_bytes": 20113,
+      "ud_bytes": 20262,
       "tools_bytes": 20262,
-      "byte_delta": -149,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -31053,19 +31053,6 @@
         "author": "Dieter Olson",
         "date": "2026-08-25",
         "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
-      }
-    },
-    {
-      "path": "ai/tools/cli_tools.py",
-      "ud": {
-        "author": "d-sorgcodexagent",
-        "date": "2026-09-07",
-        "commit": "82e15d6169ab877e89a13a4b4eedcb1638fbd46b"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-07",
-        "commit": "eab74a901a7c8467e1997049a73e2cfd2df74428"
       }
     },
     {
