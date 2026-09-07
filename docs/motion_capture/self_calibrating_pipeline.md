@@ -283,15 +283,16 @@ estimator in `pose_estimation.registry`, and `reconstruct.layouts` maps the
 detector's named keypoints onto the 15-joint fit (BODY_25 keeps its own
 `mid_hip` and `neck`; MediaPipe's are derived from hips and shoulders).
 
-| Route                                               | State                                     | Notes                                                |
-| --------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------- |
-| MediaPipe (`mediapipe`)                             | primary, in use                           | Apache-2.0, GPU-free, 33 landmarks                   |
-| OpenPose BODY_25 via OpenCV DNN (`openpose_dnn`)    | second opinion, in use                    | CPU ~1 s/frame; comparison only (#9628)              |
-| OpenPose native (`openpose`)                        | registered, not buildable on the lab host | needs `pyopenpose`                                   |
-| RTMPose / MoveNet                                   | not implemented                           | #9648: ONNX/TFLite behind the same registry contract |
-| HMR2 sidecar                                        | implemented, monocular SMPL               | CC-BY-NC; subprocess only                            |
-| FreeMoCap sidecar                                   | implemented, multi-camera                 | AGPL; subprocess only; its own triangulation         |
-| Pose2Sim / OpenCap / DeepLabCut / AlphaPose / HRNet | file adapters only                        | `motion_pipeline.sources` reads their outputs        |
+| Route                                               | State                                     | Notes                                                                                                                                                   |
+| --------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MediaPipe (`mediapipe`)                             | primary, in use                           | Apache-2.0, GPU-free, 33 landmarks                                                                                                                      |
+| OpenPose BODY_25 via OpenCV DNN (`openpose_dnn`)    | second opinion, in use                    | CPU ~1 s/frame; comparison only (#9628)                                                                                                                 |
+| OpenPose native (`openpose`)                        | registered, not buildable on the lab host | needs `pyopenpose`                                                                                                                                      |
+| RTMPose / MoveNet                                   | not implemented                           | #9648: ONNX/TFLite behind the same registry contract                                                                                                    |
+| MotionBERT monocular 3-D lifting                    | evaluated, not adopted (#9683)            | 103–165 mm MPJPE after alignment on the synthetic bundle, widths off by up to 46 %; Human3.6M weights are academic-only; see `motionbert_evaluation.md` |
+| HMR2 sidecar                                        | implemented, monocular SMPL               | CC-BY-NC; subprocess only                                                                                                                               |
+| FreeMoCap sidecar                                   | implemented, multi-camera                 | AGPL; subprocess only; its own triangulation                                                                                                            |
+| Pose2Sim / OpenCap / DeepLabCut / AlphaPose / HRNet | file adapters only                        | `motion_pipeline.sources` reads their outputs                                                                                                           |
 
 Desktop: the **Capture Rig** tile (`src/tools/capture_rig`) drives the rig
 commands, plays back any view with the pose overlay and shows the swing
