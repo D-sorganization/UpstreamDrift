@@ -17,6 +17,7 @@ Modules:
 - :mod:`.skeleton` — rigid 15-joint skeleton, forward kinematics, swing motion
 - :mod:`.synthetic` — scene rendering with noise, occlusion and outliers
 - :mod:`.metrics` — camera pose, bone length, joint position, outlier scores
+- :mod:`.temporal` — robust dynamics-constrained smoother with rejection reasons
 """
 
 from .cameras import PinholeCamera, look_at
@@ -28,11 +29,14 @@ from .metrics import (
 )
 from .skeleton import RigidSkeleton, swing_trajectory
 from .synthetic import RenderOptions, SyntheticScene, SyntheticTruth
+from .temporal import SmootherOptions, SmoothResult, smooth
 
 __all__ = [
     "PinholeCamera",
     "RenderOptions",
     "RigidSkeleton",
+    "SmoothResult",
+    "SmootherOptions",
     "SyntheticScene",
     "SyntheticTruth",
     "bone_length_errors",
@@ -40,5 +44,6 @@ __all__ = [
     "joint_position_errors",
     "look_at",
     "outlier_flag_scores",
+    "smooth",
     "swing_trajectory",
 ]
