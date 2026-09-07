@@ -177,6 +177,21 @@ report every violation instead of clipping, and per-frame posterior
 uncertainty. It runs on any `(T, D)` series (pixels, metres, radians), so it
 serves both per-view cleaning and the joint-space stage after IK.
 
+### Initialisation Without a Calibration Object, as Built
+
+`reconstruct/initialize.py` needs only each camera's intrinsics and the
+golfer: confident joints seen by two cameras in the same frame are
+correspondences, the essential matrix under RANSAC gives each camera's
+rotation and the direction to it from the first camera, the anchor segment
+triangulated with the unit baseline sets the scale, and the hip-to-neck
+direction at address with the first mid-hip as origin sets the world frame
+(yaw stays free until the ball line). A pair below 40 inliers is refused,
+not guessed. On the synthetic harness the start is coarse (optical-axis
+angles within about 10 degrees, baselines within 30 %) and the joint fit
+from that start reaches the same accuracy as from a good previous take.
+`rig reconstruct --intrinsics records.json` uses it for the first take of a
+new setup; later takes pass `--cameras` with the previous solution.
+
 ### Initialisation Without a Calibration Object
 
 The first take of a new camera placement has no extrinsics. Confident 2-D
