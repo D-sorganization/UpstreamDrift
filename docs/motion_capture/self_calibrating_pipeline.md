@@ -177,6 +177,19 @@ report every violation instead of clipping, and per-frame posterior
 uncertainty. It runs on any `(T, D)` series (pixels, metres, radians), so it
 serves both per-view cleaning and the joint-space stage after IK.
 
+### Intrinsics Once per Camera, as Built
+
+`reconstruct/intrinsics.py` and `rig calibrate-intrinsics --session S --board
+9x6 --square 0.025` find a printed, asymmetric chessboard in the sampled
+frames of each recording of a bundle and run Zhang calibration into an
+`intrinsics.json` keyed by view: `K`, distortion, reprojection RMS, frames
+used and frames where the board was missing. Fewer than eight usable frames
+refuses to calibrate and an RMS above 1 px is reported as below standard,
+never silently accepted. The synthetic test renders a board through a known
+lens (including distortion) and recovers focal lengths within 2 %, the
+principal point within 15 px and the first distortion term within 0.05.
+The file is the `--intrinsics` input of a first-take reconstruction.
+
 ### Initialisation Without a Calibration Object, as Built
 
 `reconstruct/initialize.py` needs only each camera's intrinsics and the
