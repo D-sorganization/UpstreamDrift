@@ -118,10 +118,12 @@ class RegisteredFrameEstimator:
         confidences = result.raw_confidences or {}
         names = self._layout.keypoint_names
         # A detector may omit joints it did not find (OpenPose below its peak
-        # threshold): keep the row shape, mark them NaN with zero confidence.
+        # threshold). KeypointObservation requires finite coordinates, so the
+        # row keeps its shape with a (0, 0) placeholder and confidence 0.0:
+        # confidence 0 means "unobserved" and consumers must gate on it.
         keypoints = np.array(
             [
-                [points[n][0], points[n][1]] if n in points else [np.nan, np.nan]
+                [points[n][0], points[n][1]] if n in points else [0.0, 0.0]
                 for n in names
             ],
             dtype=float,

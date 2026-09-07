@@ -182,7 +182,7 @@ def test_cli_ingest_uses_patched_factory(
     assert index["views"][0]["frames_total"] == 3
 
 
-def test_adapter_marks_joints_the_detector_omitted_as_nan_with_zero_confidence(
+def test_adapter_marks_joints_the_detector_omitted_with_zero_confidence(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from src.motion_capture.rig import ingest as ingest_mod
@@ -206,16 +206,16 @@ def test_adapter_marks_joints_the_detector_omitted_as_nan_with_zero_confidence(
                 raw_confidences={"nose": 0.8, "left_wrist": 0.01},
             )
 
+    from src.shared.python.pose_estimation import registry as registry_mod
+
+    monkeypatch.setattr(registry_mod, "create_estimator", lambda name, **o: Partial())
     monkeypatch.setattr(
-        "src.shared.python.pose_estimation.registry.create_estimator",
-        lambda name, **o: Partial(),
-    )
-    monkeypatch.setattr(
-        "src.shared.python.pose_estimation.registry.get_estimator_info",
+        registry_mod,
+        "get_estimator_info",
         lambda name: type("I", (), {"probe_module": "json"})(),
     )
     est = ingest_mod.RegisteredFrameEstimator("partial")
     pose = est.estimate(np.zeros((4, 4, 3), dtype=np.uint8), 0)
     assert pose is not None
-    assert np.isnan(pose.keypoints_norm[1]).all() and pose.confidence[1] == 0.0
+    assert pose.keypoints_norm[1].tolist() == [0.0, 0.0] and pose.confidence[1] == 0.0
     assert pose.keypoints_norm[0].tolist() == [0.5, 0.5]
