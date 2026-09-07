@@ -130,6 +130,34 @@ def _load_plan(args: argparse.Namespace) -> RigPlan:
     )
 
 
+def _add_coaching_parsers(sub: Any) -> None:
+    """Printable boards, annotated clips and take comparison (#9679-#9681)."""
+    brd = sub.add_parser("board", help="write a printable ChArUco board image")
+    brd.add_argument("--board", default="charuco:7x5:0.04:0.03")
+    brd.add_argument("--width", type=int, default=2100, help="pixels (A4 @ 254 dpi)")
+    brd.add_argument("--out", type=Path, required=True)
+    clp = sub.add_parser("clip", help="trimmed clip with overlay and slow motion")
+    clp.add_argument("--session", type=Path, required=True)
+    clp.add_argument("--view", required=True)
+    clp.add_argument(
+        "--from", dest="start", default="address-30", metavar="EVENT|FRAME"
+    )
+    clp.add_argument("--to", dest="end", default="finish+30", metavar="EVENT|FRAME")
+    clp.add_argument("--speed", type=float, default=0.25, help="1 = real time")
+    clp.add_argument("--set", default=None, help="observation set for the overlay")
+    clp.add_argument("--out", type=Path, required=True)
+    cmt = sub.add_parser("compare-takes", help="two takes side by side on an event")
+    cmt.add_argument("--session", type=Path, required=True)
+    cmt.add_argument("--view", required=True)
+    cmt.add_argument("--other-session", type=Path, required=True)
+    cmt.add_argument("--other-view", required=True)
+    cmt.add_argument(
+        "--align", default="top", choices=("address", "top", "peak", "finish")
+    )
+    cmt.add_argument("--speed", type=float, default=0.5)
+    cmt.add_argument("--out", type=Path, required=True)
+
+
 def _add_offline_parsers(sub: Any) -> None:
     """Commands that work on a session bundle rather than on cameras."""
     ing = sub.add_parser("ingest", help="pose-estimate every recording in a bundle")
@@ -188,30 +216,7 @@ def _add_offline_parsers(sub: Any) -> None:
         help="one per view; a single --view is a single-camera session",
     )
     imp.add_argument("--name", default=None, help="plan name (default import:<out>)")
-    brd = sub.add_parser("board", help="write a printable ChArUco board image")
-    brd.add_argument("--board", default="charuco:7x5:0.04:0.03")
-    brd.add_argument("--width", type=int, default=2100, help="pixels (A4 @ 254 dpi)")
-    brd.add_argument("--out", type=Path, required=True)
-    clp = sub.add_parser("clip", help="trimmed clip with overlay and slow motion")
-    clp.add_argument("--session", type=Path, required=True)
-    clp.add_argument("--view", required=True)
-    clp.add_argument(
-        "--from", dest="start", default="address-30", metavar="EVENT|FRAME"
-    )
-    clp.add_argument("--to", dest="end", default="finish+30", metavar="EVENT|FRAME")
-    clp.add_argument("--speed", type=float, default=0.25, help="1 = real time")
-    clp.add_argument("--set", default=None, help="observation set for the overlay")
-    clp.add_argument("--out", type=Path, required=True)
-    cmt = sub.add_parser("compare-takes", help="two takes side by side on an event")
-    cmt.add_argument("--session", type=Path, required=True)
-    cmt.add_argument("--view", required=True)
-    cmt.add_argument("--other-session", type=Path, required=True)
-    cmt.add_argument("--other-view", required=True)
-    cmt.add_argument(
-        "--align", default="top", choices=("address", "top", "peak", "finish")
-    )
-    cmt.add_argument("--speed", type=float, default=0.5)
-    cmt.add_argument("--out", type=Path, required=True)
+    _add_coaching_parsers(sub)
     ana = sub.add_parser("analyze", help="2-D events and tempo per ingested view")
     ana.add_argument("--session", type=Path, required=True)
     ana.add_argument("--observations", default="observations", help="set directory")
