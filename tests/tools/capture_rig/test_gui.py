@@ -23,9 +23,22 @@ from tests.tools.capture_rig.test_core import _bundle, _observations
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
 
 
+_APP: QApplication | None = None  # keep the application alive for the module
+
+
 def _app() -> QApplication:
+    """The one QApplication, held at module level.
+
+    A QApplication that is only returned and dropped is garbage-collected
+    with its C++ object; the next QWidget then aborts the process with no
+    Python traceback (fail-fast on Windows, SIGABRT on Linux).
+    """
+    global _APP
     app = QApplication.instance()
-    return app if app is not None else QApplication(sys.argv[:1])
+    if app is None:
+        app = QApplication(sys.argv[:1])
+    _APP = app  # type: ignore[assignment]
+    return _APP  # type: ignore[return-value]
 
 
 def test_panels_build_commands_from_their_inputs(tmp_path: Path) -> None:
