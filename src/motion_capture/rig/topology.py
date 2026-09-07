@@ -35,41 +35,26 @@ _ROOT_PORT = re.compile(r"Port_#(\d+)")
 
 _PS_TOPOLOGY = r"""
 $ErrorActionPreference = 'SilentlyContinue'
-# One device enumeration, then one bulk property query per hub tier (the
-# frontier of every camera's chain at once). Per-hop Get-PnpDevice calls
-# re-enumerate the whole tree and made a three-camera walk take over a minute.
-$all = Get-PnpDevice -PresentOnly
-$byId = @{}
-foreach ($d in $all) { $byId[$d.InstanceId] = $d }
-$cams = @($all | Where-Object { $_.Class -eq 'Camera' -and $_.InstanceId -match 'VID_@VENDOR@' })
-$parent = @{}; $loc = @{}
-$frontier = @($cams | ForEach-Object { $_.InstanceId }); $tier = 0
-while ($frontier.Count -gt 0 -and $tier -lt 32) {
-  $tier += 1
-  $props = Get-PnpDeviceProperty -InstanceId $frontier `
-    -KeyName 'DEVPKEY_Device_Parent','DEVPKEY_Device_LocationInfo'
-  foreach ($pr in $props) {
-    if ($pr.KeyName -eq 'DEVPKEY_Device_Parent') { $parent[$pr.InstanceId] = [string]$pr.Data }
-    elseif ($pr.KeyName -eq 'DEVPKEY_Device_LocationInfo') { $loc[$pr.InstanceId] = [string]$pr.Data }
-  }
-  $next = @()
-  foreach ($id in $frontier) {
-    if ($id -like 'PCI\*') { continue }
-    $up = $parent[$id]
-    if ($up -and -not $parent.ContainsKey($up)) { $next += $up }
-  }
-  $frontier = @($next | Select-Object -Unique)
-}
+# Cameras come from one class-filtered enumeration; every hop is resolved
+# with Get-PnpDeviceProperty on that single instance (fast, ~0.1 s). A bulk
+# query over an instance-id array silently drops entries, and a per-hop
+# Get-PnpDevice re-enumerates the whole tree (~1-2 s each), so neither is used.
+$cams = @(Get-PnpDevice -PresentOnly -Class Camera |
+  Where-Object { $_.InstanceId -match 'VID_@VENDOR@' })
 $out = @()
 foreach ($c in $cams) {
   $chain = @(); $cur = $c.InstanceId; $guard = 0
   while ($cur -and $guard -lt 32) {
     $guard += 1
-    $d = $byId[$cur]
-    $name = if ($d -and $d.FriendlyName) { [string]$d.FriendlyName } else { $cur }
-    $chain += [PSCustomObject]@{ name = $name; id = $cur; loc = [string]$loc[$cur] }
+    $props = Get-PnpDeviceProperty -InstanceId $cur `
+      -KeyName 'DEVPKEY_NAME','DEVPKEY_Device_LocationInfo','DEVPKEY_Device_Parent'
+    $name = [string](($props | Where-Object { $_.KeyName -eq 'DEVPKEY_NAME' } | Select-Object -First 1).Data)
+    $loc = [string](($props | Where-Object { $_.KeyName -eq 'DEVPKEY_Device_LocationInfo' } | Select-Object -First 1).Data)
+    $up = [string](($props | Where-Object { $_.KeyName -eq 'DEVPKEY_Device_Parent' } | Select-Object -First 1).Data)
+    if (-not $name) { $name = $cur }
+    $chain += [PSCustomObject]@{ name = $name; id = $cur; loc = $loc }
     if ($cur -like 'PCI\*') { break }
-    $cur = $parent[$cur]
+    $cur = $up
   }
   $out += [PSCustomObject]@{ camera = $c.InstanceId; chain = $chain }
 }
@@ -215,7 +200,7 @@ def conflicting_identities(cams: list[CameraLocation]) -> list[str]:
 def query_topology(
     vendor: str = VENDOR_ID, timeout_s: float = 600
 ) -> list[CameraLocation]:
-    """Walk every camera's hub chain through Windows PnP (one enumeration)."""
+    """Walk every camera's hub chain through Windows PnP (per-hop properties)."""
     require(timeout_s > 0, "timeout_s must be positive", timeout_s)
     result = subprocess.run(
         [

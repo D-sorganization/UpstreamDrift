@@ -62,7 +62,7 @@ def test_controls_as_overrides_skips_unset_and_casts_bool() -> None:
 
 
 def test_binding_requires_an_identity() -> None:
-    with pytest.raises(ValidationError, match="serial or a port_path"):
+    with pytest.raises(ValidationError, match="needs a serial"):
         CameraBinding(view="x")
     assert CameraBinding(view="x", port_path="path_a").identity == "path_a"
     assert CameraBinding(view="x", serial="s", port_path="p").identity == "s"
