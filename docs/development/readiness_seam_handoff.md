@@ -1,6 +1,6 @@
 # Readiness Program: Seam Retirement and Failure Triage
 
-Updated: 2026-09-06. Program is
+Updated: 2026-09-07. Program is
 [Repository_Management#1505](https://github.com/D-sorganization/Repository_Management/issues/1505).
 This document covers UpstreamDrift #9406 (retire the `src/shared/python` shadow
 tree) and #9474 (triage the `main` failure list). Live work is PR #9569.
@@ -26,7 +26,7 @@ Retired: `deprecation.py`, `README.md`, `chat_contracts`, `file_watcher`,
 `cors.py`, `rotation_transforms`, `upstream_drift_tools`, `compatibility.py`,
 `codemap`, `programmatic_pid`, `plot_engine`.
 
-## Three Traps This Work Has Already Hit
+## Four Traps This Work Has Already Hit
 
 **1. The `diverged` count is roughly twice the real figure.** Every inventory
 entry carries a `spelling_only` flag _alongside_ its classification, and the two
@@ -59,6 +59,36 @@ resolve upstream even though `ai` is still UpstreamDrift-owned, which broke
 ledger, so a real regression. Checking `plot_theme` / `plot_engine` resolution is
 **not** sufficient evidence: the predicate affects every `src.`-spelled shared
 import, not a named list. Retire `ai` and `contracts` first.
+
+**4. Retirement only works where the pinned Tools tree is materialised, and
+one CI job did not have it.** CI checkouts skip submodules deliberately (the
+other submodules are large model repositories), so `vendor/ud-tools` is
+populated by the `fetch-pinned-tools` composite action rather than by checkout.
+Twelve jobs in `ci-standard.yml` run it. `repo-structure-gates` did not, and
+nothing noticed until retirement moved a name out from under it: its
+`Tutorial Import Check` failed with
+
+```
+canonical module does not resolve: 'src.shared.python.engine_core.engine_manager'
+  -> ModuleNotFoundError: No module named 'src.shared.python.logging_pkg'
+```
+
+`engine_core` is UpstreamDrift-owned and untouched; it broke transitively.
+Fixed by adding the step (#9569, `626474d79`). **Before retiring another
+cluster, confirm every job that imports UpstreamDrift code runs
+`fetch-pinned-tools`.**
+
+Two corollaries. The fallback's own tests are `skipif`-guarded on that tree
+being present, so they skipped green through this exact breakage — tracked as
+#9634, with `REQUIRE_DRIFT_GATES` (ci-standard.yml ~2465) as the pattern to
+copy. And the same shape of gap makes the v2.1.2 wheel unusable: the packaged
+`shared.python.config.environment` is Tools' copy, which lacks
+`get_database_pool_pre_ping` that `src/api/database.py` imports — #9631. "The
+pinned tree answers" holds in a dev checkout and in fewer other environments
+than it looks.
+
+Verify claims like these causally, not by inference: move `vendor/ud-tools/src`
+aside, run the check, and confirm it reproduces.
 
 ## Failure Triage (#9474)
 
