@@ -36,3 +36,8 @@
 ## 2026-09-05 - Optimize np.linalg.norm for multidimensional arrays
 **Learning:** Using np.linalg.norm(..., axis=1) in NumPy forces multiple internal dispatch checks and temporary array allocations, which become a bottleneck in tight loops or large sweeps. Replacing it with np.sqrt(np.einsum('ij,ij->i', arr, arr)) bypasses this overhead and is ~2.4x faster for medium-sized multidimensional arrays.
 **Action:** Always prefer np.sqrt(np.einsum(...)) or math.hypot (for small slices) over np.linalg.norm when calculating magnitude along an axis in high-performance or simulation modules.
+
+## 2026-09-05 - Optimizing `np.mean` for Python Lists
+**Learning:** Calling `np.mean()` on a standard Python list (e.g., `np.mean([d.duration for d in self.demonstrations])`) forces an expensive implicit conversion to a temporary NumPy array.
+**Action:** Replace `np.mean(list)` with built-in `sum(list) / len(list)` (handling zero-division if the list can be empty) to avoid allocation overhead, which is significantly faster.
+
