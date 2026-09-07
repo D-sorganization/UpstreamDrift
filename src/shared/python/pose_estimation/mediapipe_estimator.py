@@ -179,15 +179,17 @@ class MediaPipeEstimator(PoseEstimator):
             raise ImportError("OpenCV (cv2) is not installed.")
         vision, base_options = _tasks_api()
         path = resolve_pose_model(model_path, self.model_variant)
+        running_modes = vision.RunningMode
+        landmarker_cls = vision.PoseLandmarker
         options = vision.PoseLandmarkerOptions(
             base_options=base_options(model_asset_path=str(path)),
-            running_mode=vision.RunningMode.VIDEO,
+            running_mode=running_modes.VIDEO,
             num_poses=1,
             min_pose_detection_confidence=self.min_detection_confidence,
             min_tracking_confidence=self.min_tracking_confidence,
         )
         try:
-            self.pose_detector = vision.PoseLandmarker.create_from_options(options)
+            self.pose_detector = landmarker_cls.create_from_options(options)
         except (RuntimeError, TypeError, ValueError):
             logger.exception("Failed to create MediaPipe PoseLandmarker from %s", path)
             raise
@@ -233,7 +235,8 @@ class MediaPipeEstimator(PoseEstimator):
         )
 
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
+        image_formats = mp.ImageFormat
+        mp_image = mp.Image(image_format=image_formats.SRGB, data=rgb_image)
         result = self.pose_detector.detect_for_video(
             mp_image, self._next_timestamp_ms(timestamp_ms)
         )
