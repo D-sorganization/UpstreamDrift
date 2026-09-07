@@ -15,7 +15,7 @@
     "diverged": 276,
     "ud-only": 1188,
     "tools-only": 519,
-    "spelling-only": 129
+    "spelling-only": 127
   },
   "packages": {
     "README.md": {
@@ -450,7 +450,7 @@
       "diverged": 52,
       "ud-only": 18,
       "tools-only": 0,
-      "spelling-only": 19
+      "spelling-only": 17
     },
     "motion_matching": {
       "identical": 0,
@@ -9689,12 +9689,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 25110,
+      "ud_bytes": 25483,
       "tools_bytes": 25102,
-      "byte_delta": 8,
+      "byte_delta": 381,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/canonical_model.py",
@@ -9941,12 +9941,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 23772,
+      "ud_bytes": 24083,
       "tools_bytes": 23768,
-      "byte_delta": 4,
+      "byte_delta": 315,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/core/validation.py",
@@ -32151,8 +32151,8 @@
       "path": "model_generation/builders/urdf_writer.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-07",
+        "commit": "cbb0f06eedf54dfd5c68960289095c1f19248b49"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32203,8 +32203,8 @@
       "path": "model_generation/converters/mjcf_converter.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-09-07",
-        "commit": "1ed204af4e94bcebff71559c03f9b91f41bfc76a"
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32307,8 +32307,8 @@
       "path": "model_generation/core/types.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-07",
+        "commit": "cbb0f06eedf54dfd5c68960289095c1f19248b49"
       },
       "tools": {
         "author": "Dieter Olson",
