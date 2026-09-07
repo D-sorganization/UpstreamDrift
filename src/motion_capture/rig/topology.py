@@ -35,19 +35,41 @@ _ROOT_PORT = re.compile(r"Port_#(\d+)")
 
 _PS_TOPOLOGY = r"""
 $ErrorActionPreference = 'SilentlyContinue'
-$cams = Get-PnpDevice -PresentOnly -Class Camera |
-  Where-Object { $_.InstanceId -match 'VID_@VENDOR@' }
+# One device enumeration, then one bulk property query per hub tier (the
+# frontier of every camera's chain at once). Per-hop Get-PnpDevice calls
+# re-enumerate the whole tree and made a three-camera walk take over a minute.
+$all = Get-PnpDevice -PresentOnly
+$byId = @{}
+foreach ($d in $all) { $byId[$d.InstanceId] = $d }
+$cams = @($all | Where-Object { $_.Class -eq 'Camera' -and $_.InstanceId -match 'VID_@VENDOR@' })
+$parent = @{}; $loc = @{}
+$frontier = @($cams | ForEach-Object { $_.InstanceId }); $tier = 0
+while ($frontier.Count -gt 0 -and $tier -lt 32) {
+  $tier += 1
+  $props = Get-PnpDeviceProperty -InstanceId $frontier `
+    -KeyName 'DEVPKEY_Device_Parent','DEVPKEY_Device_LocationInfo'
+  foreach ($pr in $props) {
+    if ($pr.KeyName -eq 'DEVPKEY_Device_Parent') { $parent[$pr.InstanceId] = [string]$pr.Data }
+    elseif ($pr.KeyName -eq 'DEVPKEY_Device_LocationInfo') { $loc[$pr.InstanceId] = [string]$pr.Data }
+  }
+  $next = @()
+  foreach ($id in $frontier) {
+    if ($id -like 'PCI\*') { continue }
+    $up = $parent[$id]
+    if ($up -and -not $parent.ContainsKey($up)) { $next += $up }
+  }
+  $frontier = @($next | Select-Object -Unique)
+}
 $out = @()
 foreach ($c in $cams) {
-  $chain = @(); $cur = $c.InstanceId
-  while ($cur) {
-    $d = Get-PnpDevice -InstanceId $cur
-    if (-not $d) { break }
-    $loc = (Get-PnpDeviceProperty -InstanceId $cur `
-      -KeyName 'DEVPKEY_Device_LocationInfo').Data
-    $chain += [PSCustomObject]@{ name = $d.FriendlyName; id = $cur; loc = [string]$loc }
-    if ($cur -match '^PCI\\') { break }
-    $cur = (Get-PnpDeviceProperty -InstanceId $cur -KeyName 'DEVPKEY_Device_Parent').Data
+  $chain = @(); $cur = $c.InstanceId; $guard = 0
+  while ($cur -and $guard -lt 32) {
+    $guard += 1
+    $d = $byId[$cur]
+    $name = if ($d -and $d.FriendlyName) { [string]$d.FriendlyName } else { $cur }
+    $chain += [PSCustomObject]@{ name = $name; id = $cur; loc = [string]$loc[$cur] }
+    if ($cur -like 'PCI\*') { break }
+    $cur = $parent[$cur]
   }
   $out += [PSCustomObject]@{ camera = $c.InstanceId; chain = $chain }
 }
@@ -122,7 +144,9 @@ def derive_camera(entry: dict[str, Any], vendor: str = VENDOR_ID) -> CameraLocat
             (x["id"] for x in chain if x["id"].upper().startswith("PCI\\")), None
         ),
         hub_depth=sum(
-            1 for x in chain if "Hub" in x["name"] and "Root" not in x["name"]
+            1
+            for x in chain
+            if "Hub" in (x.get("name") or "") and "Root" not in (x.get("name") or "")
         ),
         chain=chain,
     )
@@ -191,7 +215,7 @@ def conflicting_identities(cams: list[CameraLocation]) -> list[str]:
 def query_topology(
     vendor: str = VENDOR_ID, timeout_s: float = 600
 ) -> list[CameraLocation]:
-    """Walk every camera's hub chain through Windows PnP (seconds per hub tier)."""
+    """Walk every camera's hub chain through Windows PnP (one enumeration)."""
     require(timeout_s > 0, "timeout_s must be positive", timeout_s)
     result = subprocess.run(
         [
