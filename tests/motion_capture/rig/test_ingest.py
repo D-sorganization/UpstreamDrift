@@ -165,7 +165,12 @@ def test_cli_ingest_uses_patched_factory(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     bundle = _bundle(tmp_path)
-    monkeypatch.setattr(cli, "registry_estimator_factory", lambda name: FakeEstimator)
+    # The CLI imports ingest lazily, so patch the ingest module itself.
+    from src.motion_capture.rig import ingest as ingest_mod
+
+    monkeypatch.setattr(
+        ingest_mod, "registry_estimator_factory", lambda name: FakeEstimator
+    )
     code = cli.main(["ingest", "--session", str(bundle), "--max-frames", "3"])
     assert code == 0
     index = json.loads(

@@ -10,6 +10,7 @@ the live USB topology before anything is mounted.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -20,6 +21,28 @@ from src.shared.python.core.contracts import require
 from .topology import CameraLocation, conflicting_identities
 
 PLAN_SCHEMA_VERSION = "rig-plan/1.0.0"
+_MODE_RE = re.compile(r"^\s*(\d+)[xX](\d+)@(\d+)(?::([A-Za-z0-9]{4}))?\s*$")
+
+
+def parse_mode(text: str) -> CaptureMode:
+    """Parse an operator mode string ``WIDTHxHEIGHT@FPS[:FOURCC]``.
+
+    Raises ``ValueError`` naming the string when it is malformed or any
+    dimension is zero; ``CaptureMode`` enforces the positive bounds.
+    """
+    match = _MODE_RE.match(text or "")
+    if not match:
+        raise ValueError(f"mode must look like 1280x720@120[:MJPG], got {text!r}")
+    width, height, fps, fourcc = match.groups()
+    try:
+        return CaptureMode(
+            width=int(width),
+            height=int(height),
+            fps=int(fps),
+            fourcc=fourcc or "MJPG",
+        )
+    except ValueError as exc:
+        raise ValueError(f"invalid mode {text!r}: {exc}") from exc
 
 
 class CaptureMode(BaseModel):
@@ -104,6 +127,39 @@ class RigPlan(BaseModel):
 
     def binding_for(self, identity: str) -> CameraBinding | None:
         return next((c for c in self.cameras if c.identity == identity), None)
+
+    def with_overrides(
+        self,
+        *,
+        mode: CaptureMode | None = None,
+        views: Iterable[str] | None = None,
+    ) -> RigPlan:
+        """A derived plan for a quick change of condition without a new file.
+
+        ``mode`` replaces every selected view's capture mode; ``views`` keeps
+        only those views, in plan order. The name records the overrides so the
+        session bundle shows what actually ran. Precondition: every requested
+        view exists and at least one is selected. Postcondition: ``self`` is
+        unchanged.
+        """
+        selected = tuple(self.cameras)
+        name = self.name
+        if views is not None:
+            wanted = tuple(views)
+            known = {c.view for c in self.cameras}
+            unknown = [v for v in wanted if v not in known]
+            if unknown:
+                raise ValueError(f"unknown view(s) {unknown} in plan {self.name!r}")
+            if not wanted:
+                raise ValueError("at least one view must be selected")
+            selected = tuple(c for c in self.cameras if c.view in wanted)
+            name += "+" + ",".join(c.view for c in selected)
+        if mode is not None:
+            selected = tuple(c.model_copy(update={"mode": mode}) for c in selected)
+            name += f"+{mode.width}x{mode.height}@{mode.fps}"
+        if mode is None and views is None:
+            return self
+        return self.model_copy(update={"cameras": selected, "name": name})
 
     def save(self, path: Path) -> None:
         """Write the plan as indented JSON (creates parent directories)."""
