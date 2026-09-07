@@ -6,6 +6,13 @@ stream; copying the compressed stream to disk costs almost nothing (measured:
 duration of a recording — Windows grants one process exclusive access — so a
 session either *observes* through :mod:`.sources` or *records* through this
 module, never both on the same camera at once.
+
+Timing lesson from the rig: a DirectShow device takes one to two seconds to
+open inside ffmpeg, and stopping recorders one after another lets the last
+one run longest. :func:`record_all` therefore starts every recorder, waits a
+warm-up before the duration clock starts, and stops all of them together —
+signal first, then reap — so the views cover the same interval as closely as
+the hardware allows. The bundle still probes what actually landed on disk.
 """
 
 from __future__ import annotations
@@ -27,6 +34,7 @@ logger = get_logger(__name__)
 
 # KSCATEGORY_VIDEO_CAMERA — the DirectShow "alternative name" suffix.
 _DSHOW_CATEGORY = "{65e8773d-8f56-11d0-a3b9-00a0c9223196}"
+DEFAULT_WARMUP_S = 2.0
 
 
 @dataclass(frozen=True)
@@ -44,13 +52,19 @@ class RecordingResult:
 
 
 class Recorder(Protocol):
-    """Start/stop lifecycle of one camera recording."""
+    """Start / signal / stop lifecycle of one camera recording."""
 
     def start(
         self, identity: str, device_ref: str, mode: CaptureMode, path: Path
     ) -> None: ...
 
-    def stop(self) -> RecordingResult: ...
+    def signal_stop(self) -> None:
+        """Ask the recorder to finish; returns immediately."""
+        ...
+
+    def stop(self) -> RecordingResult:
+        """Wait for the recorder to finish and report."""
+        ...
 
 
 def dshow_device_ref(camera_instance_id: str) -> str:
@@ -101,11 +115,15 @@ class NullRecorder:
     def __init__(self) -> None:
         self._identity: str | None = None
         self._path: Path | None = None
+        self.signalled = False
 
     def start(
         self, identity: str, device_ref: str, mode: CaptureMode, path: Path
     ) -> None:
         self._identity, self._path = identity, path
+
+    def signal_stop(self) -> None:
+        self.signalled = True
 
     def stop(self) -> RecordingResult:
         if self._identity is None or self._path is None:
@@ -128,6 +146,7 @@ class FfmpegStreamCopyRecorder:
         self._proc: Any = None
         self._identity: str | None = None
         self._path: Path | None = None
+        self._signalled = False
 
     def _exe(self) -> str:
         if self._ffmpeg is None:
@@ -157,21 +176,30 @@ class FfmpegStreamCopyRecorder:
             )
         )
         self._stack, self._identity, self._path = stack, identity, path
+        self._signalled = False
         logger.info("recording %s -> %s", identity, path)
+
+    def signal_stop(self) -> None:
+        """Send ffmpeg its graceful quit key once; later calls are no-ops."""
+        proc = self._proc
+        if self._signalled or proc is None or proc.stdin is None:
+            return
+        self._signalled = True
+        try:
+            proc.stdin.write("q\n")
+            proc.stdin.flush()
+        except (OSError, ValueError):
+            logger.warning("ffmpeg stdin already closed for %s", self._identity)
 
     def stop(self) -> RecordingResult:
         if self._stack is None or self._identity is None or self._path is None:
             raise StateError("stop() before start()")
-        proc = self._proc
-        if proc.stdin is not None:
-            try:
-                proc.stdin.write("q\n")
-                proc.stdin.flush()
-            except (OSError, ValueError):
-                logger.warning("ffmpeg stdin already closed for %s", self._identity)
+        self.signal_stop()
         self._stack.close()  # waits up to stop_timeout, then terminates
         size = self._path.stat().st_size if self._path.exists() else 0
-        result = RecordingResult(self._identity, self._path, proc.returncode, size)
+        result = RecordingResult(
+            self._identity, self._path, self._proc.returncode, size
+        )
         self._stack = self._proc = self._identity = self._path = None
         return result
 
@@ -182,12 +210,19 @@ def record_all(
     duration_s: float,
     out_dir: Path,
     recorder_factory: Callable[[], Recorder],
+    *,
+    warmup_s: float = DEFAULT_WARMUP_S,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> list[RecordingResult]:
-    """Record every planned view for ``duration_s`` seconds, then stop them all.
+    """Record every planned view together for ``duration_s`` seconds.
 
+    Starts every recorder, waits ``warmup_s`` for the devices to open, runs the
+    duration clock, then signals every recorder before reaping any — so all
+    views stop within milliseconds of each other rather than in sequence.
     Precondition: ``device_refs`` maps every plan view to a DirectShow device ref.
     """
     require(duration_s > 0, "duration_s must be positive", duration_s)
+    require(warmup_s >= 0, "warmup_s must be non-negative", warmup_s)
     missing = [c.view for c in plan.cameras if c.view not in device_refs]
     require(not missing, "device_refs missing views", missing)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -201,5 +236,7 @@ def record_all(
             out_dir / f"{binding.view}_{binding.identity}.mkv",
         )
         active.append(rec)
-    time.sleep(duration_s)
+    sleep(warmup_s + duration_s)
+    for rec in active:
+        rec.signal_stop()
     return [rec.stop() for rec in active]
