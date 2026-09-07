@@ -234,6 +234,26 @@ python3 -m src.motion_capture.rig export --session S             # reconstruct/r
   `export` writes the fitted joints as a TRC marker file the motion pipeline
   and model-matching tools read directly.
 
+## Boards, Clips and Take Comparison
+
+```bash
+python3 -m src.motion_capture.rig board --board charuco:7x5:0.04:0.03 --out board.png   # print at 100 %, measure a square
+python3 -m src.motion_capture.rig calibrate-intrinsics --session S --board charuco:7x5:0.04:0.03
+python3 -m src.motion_capture.rig clip --session S --view cam_b --from address-30 --to finish+30 --speed 0.25 --out swing.mp4
+python3 -m src.motion_capture.rig compare-takes --session S --view cam_b --other-session T --other-view cam_b --align top --out ab.mp4
+```
+
+- **ChArUco boards** (#9679) are detected partially, with corner ids, so
+  frames at the edge of the field count; the plain `9x6` chessboard still
+  works. Print the generated image at 100 % and enter the measured square
+  and marker sizes.
+- **Clips** (#9680) keep every source frame and play at `fps x speed`, with
+  the pose overlay and a frame/time stamp; frame bounds are events
+  (`address`, `top`, `peak`, `finish`, with `+N`/`-N`) or numbers.
+- **Compare takes** (#9681) renders two views side by side aligned on the
+  chosen event (each at its own rate) and writes the metric deltas beside
+  the video. The tile offers both as _Export clip_ and _Compare takes_.
+
 ## Capture Rig Tool (Desktop)
 
 The launcher tile **Capture Rig** (`python3 -m src.tools.capture_rig`) is the
