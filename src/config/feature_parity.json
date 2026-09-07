@@ -87,7 +87,7 @@
     },
     "analysis.static_plots": {
       "title": "Static analysis plots (20+ plot types)",
-      "pyqt": "src/shared/python/plot_engine/pyqt6_widget.py",
+      "pyqt": "vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py",
       "api": "src/api/routes/analysis_plots.py",
       "web": "ui/src/components/analysis/PlotsSection.tsx",
       "status": "parity",
