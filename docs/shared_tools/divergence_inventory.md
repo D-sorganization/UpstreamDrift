@@ -75,7 +75,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_generation` | 29 | 51 | 22 | 18 | 0 | 80 |
+| `model_generation` | 29 | 51 | 21 | 18 | 0 | 80 |
 | `motion_matching` | 0 | 0 | 0 | 90 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **463** | **276** | **133** | **1188** | **518** | **739** |
+| **Total** | **463** | **276** | **132** | **1188** | **518** | **739** |
 
 ## Diverged Files by Package
 
@@ -310,7 +310,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/interfaces/__init__.py` | +74 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/interfaces/api.py` | +28 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | d-sorgcodexagent 2026-09-07 | Dieter Olson 2026-08-20 |
+| `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/primitive_inertia.py` | +90 |  | Dieter Olson 2026-08-03 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/presets/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
@@ -360,8 +360,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/editor/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/editor_clipboard.py` | +227 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/editor_modifications.py` | +1803 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/editor/editor_types.py` | +8 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `model_generation/editor/frankenstein_editor.py` | +214 |  | d-sorgclaudeagent[bot] 2026-09-06 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/editor/editor_types.py` | +1022 |  | Dieter Olson 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
+| `model_generation/editor/frankenstein_editor.py` | +330 |  | Dieter Olson 2026-09-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `model_generation/editor/text_editor_diff_mixin.py` | +591 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-08-20 |
 | `model_generation/explorer/__init__.py` | -35 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `model_generation/explorer/model_explorer.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-06-20 |
