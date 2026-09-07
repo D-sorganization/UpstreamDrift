@@ -983,6 +983,7 @@
       "description": "Programmatic P&ID Generator from the Tools repo - create ISA-5.1 piping diagrams",
       "category": "tool",
       "type": "special_app",
+      "provider": "tools",
       "path": "src/shared/python/programmatic_pid/cli.py",
       "web_route": "/docs/pid-generator",
       "logo": "data_explorer.svg",
