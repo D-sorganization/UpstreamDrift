@@ -30,13 +30,26 @@ never an OpenCV index, which reshuffles on replug and would silently swap views.
     { "view": "down_line", "serial": "2601240001", "mode": { "fps": 60 } },
     {
       "view": "overhead",
-      "port_path": "path_D-D35A8F7-0-0000",
+      "unserialized": true,
       "controls": { "exposure": -6, "auto_exposure": false }
     }
   ],
   "notes": "Sonnet root ports 4/5/6; TS4 free."
 }
 ```
+
+### Naming the Cameras
+
+The durable name of a camera is the **view** it is bound to; the binding is
+what follows the unit around. Two of the three ELP units expose a USB serial
+(`2605160001`, `2601240001`): Windows keys their device instance on it, so a
+serial binding recognises the unit on any jack of any dock. The third unit
+reports no serial. Bind it with `"unserialized": true`: `plan-check` resolves
+it by elimination (the one enumerated ELP without a serial), so it also keeps
+its view when moved. If a second serial-less unit ever appears the binding is
+reported ambiguous rather than guessed, and a `port_path` binding is the
+fallback for that case. Label the camera bodies with their serial (or "no
+serial") and the view name from the plan, and the label and the software agree.
 
 Changing an experimental condition means saving a new plan file, not editing
 code: resolution, frame rate, exposure and gain are per camera, and the plan

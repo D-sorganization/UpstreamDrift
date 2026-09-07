@@ -37,11 +37,13 @@ Get-PnpDevice -PresentOnly | Where-Object { $_.FriendlyName -match 'Sonnet' }
 
 The current lab layout is committed as
 [`plans/lab_three_view_sonnet.json`](plans/lab_three_view_sonnet.json): three
-views bound to `2605160001`, `2601240001` and the serial-less unit's port path
-`path_D-D35A8F7-0-0000`. A port-path identity changes if that unit is moved to
-another jack; `plan-check` reports it as missing, and the fix is to update the
-plan, never to guess. Start a new condition by copying the plan and changing
-what differs (resolution, rate, exposure, gain, view names).
+views bound to `2605160001`, `2601240001` and, as `"unserialized": true`, the
+one unit that reports no USB serial. Serial bindings recognise a unit on any
+jack; the unserialized binding is resolved by elimination, so it survives a
+move too, and is reported ambiguous (never guessed) if a second serial-less
+unit is ever attached. Label each body with its serial and view name. Start a
+new condition by copying the plan and changing what differs (resolution,
+rate, exposure, gain, view names).
 
 ## Choosing a Mode
 
