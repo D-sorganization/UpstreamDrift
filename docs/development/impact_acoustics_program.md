@@ -156,12 +156,12 @@ uncontrolled recording establishes a grip mechanism.
 ## Turnover
 
 - Worktree: `C:/Users/diete/Repositories/UpstreamDrift-impact-acoustics`.
-- Branch: `docs/9700-impact-acoustics-program`; commit `SELF`; PR not created yet.
+- Branch: `docs/9700-impact-acoustics-program`; commit `SELF`; PR #9706; initial implementation `077ae9df9`.
 - Completed: relevant implementation/test inventory, source ownership, state
   contract, study/validation design and linked implementation issues.
 - This slice changes documentation only; no engine solver or vendor pin changes.
 - Validation: document title-case and SPEC checks pass; no engine tests run
-  because this slice is documentation only. Next: focused U1 PR and review.
+  because this slice is documentation only. PR #9706 is open for normal protected review.
 - Preserve #8557/#9153 protected records and frozen ControlTower/WSL recovery
   restrictions in the root handoff. Do not import old checkpoints as new data.
 - Next implementation is #9703 after its provider dependency is reviewed and
