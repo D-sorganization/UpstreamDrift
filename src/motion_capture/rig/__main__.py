@@ -42,6 +42,7 @@ file; the derived plan name records the overrides in the bundle.
 from __future__ import annotations
 
 import argparse
+from typing import Any
 import logging
 import sys
 from collections.abc import Callable
@@ -129,45 +130,8 @@ def _load_plan(args: argparse.Namespace) -> RigPlan:
     )
 
 
-def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="motion_capture.rig", description=__doc__)
-    sub = parser.add_subparsers(dest="command", required=True)
-    check = sub.add_parser("plan-check", help="match a plan against enumerated cameras")
-    _add_plan_args(check)
-    cap = sub.add_parser("capture", help="capture every planned camera together")
-    _add_plan_args(cap)
-    cap.add_argument("--duration", type=float, default=8.0)
-    cap.add_argument("--out", type=Path, default=Path.cwd() / "capture")
-    cap.add_argument("--settle", type=float, default=2.0, help="seconds between opens")
-    cap.add_argument(
-        "--synthetic", action="store_true", help="use deterministic synthetic sources"
-    )
-    cap.add_argument(
-        "--timing",
-        action="store_true",
-        help="record per-frame brightness and align cameras on a shared strobe",
-    )
-    rec = sub.add_parser("record", help="stream-copy every planned camera to disk")
-    _add_plan_args(rec)
-    rec.add_argument("--duration", type=float, default=10.0)
-    rec.add_argument("--out", type=Path, default=Path.cwd() / "session")
-    rec.add_argument(
-        "--warmup",
-        type=float,
-        default=DEFAULT_WARMUP_S,
-        help="seconds for the devices to open before the duration clock starts",
-    )
-    rec.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="record nothing; write the bundle with NullRecorder results",
-    )
-    chk = sub.add_parser("session-check", help="validate a session bundle on disk")
-    chk.add_argument("--session", type=Path, required=True)
-    prx = sub.add_parser("proxy", help="write H.264 mp4 proxies beside the recordings")
-    prx.add_argument("--session", type=Path, required=True)
-    prx.add_argument("--encoder", choices=ENCODERS, default=DEFAULT_ENCODER)
-    prx.add_argument("--crf", type=int, default=DEFAULT_CRF, help="libx264 only")
+def _add_offline_parsers(sub: Any) -> None:
+    """Commands that work on a session bundle rather than on cameras."""
     ing = sub.add_parser("ingest", help="pose-estimate every recording in a bundle")
     ing.add_argument("--session", type=Path, required=True)
     ing.add_argument(
@@ -245,6 +209,48 @@ def _parser() -> argparse.ArgumentParser:
     cal.add_argument(
         "--out", type=Path, default=None, help="default: <session>/intrinsics.json"
     )
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="motion_capture.rig", description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    check = sub.add_parser("plan-check", help="match a plan against enumerated cameras")
+    _add_plan_args(check)
+    cap = sub.add_parser("capture", help="capture every planned camera together")
+    _add_plan_args(cap)
+    cap.add_argument("--duration", type=float, default=8.0)
+    cap.add_argument("--out", type=Path, default=Path.cwd() / "capture")
+    cap.add_argument("--settle", type=float, default=2.0, help="seconds between opens")
+    cap.add_argument(
+        "--synthetic", action="store_true", help="use deterministic synthetic sources"
+    )
+    cap.add_argument(
+        "--timing",
+        action="store_true",
+        help="record per-frame brightness and align cameras on a shared strobe",
+    )
+    rec = sub.add_parser("record", help="stream-copy every planned camera to disk")
+    _add_plan_args(rec)
+    rec.add_argument("--duration", type=float, default=10.0)
+    rec.add_argument("--out", type=Path, default=Path.cwd() / "session")
+    rec.add_argument(
+        "--warmup",
+        type=float,
+        default=DEFAULT_WARMUP_S,
+        help="seconds for the devices to open before the duration clock starts",
+    )
+    rec.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="record nothing; write the bundle with NullRecorder results",
+    )
+    chk = sub.add_parser("session-check", help="validate a session bundle on disk")
+    chk.add_argument("--session", type=Path, required=True)
+    prx = sub.add_parser("proxy", help="write H.264 mp4 proxies beside the recordings")
+    prx.add_argument("--session", type=Path, required=True)
+    prx.add_argument("--encoder", choices=ENCODERS, default=DEFAULT_ENCODER)
+    prx.add_argument("--crf", type=int, default=DEFAULT_CRF, help="libx264 only")
+    _add_offline_parsers(sub)
     return parser
 
 

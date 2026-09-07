@@ -8,8 +8,9 @@ session bundle on disk is the same either way (#9619).
 
 from __future__ import annotations
 
+import os
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -65,6 +66,21 @@ class PlanSelection:
         if self.controls.auto_exposure is not None:
             out += ["--auto-exposure", "on" if self.controls.auto_exposure else "off"]
         return out
+
+
+def child_environment(base: Mapping[str, str] | None = None) -> dict[str, str]:
+    """The child's environment: ``<repo>/src`` first on ``PYTHONPATH``.
+
+    The pose stack imports ``bunkershot3d`` and friends by their bare names,
+    which resolve only with ``src`` on the path (the test suite adds it the
+    same way). Postcondition: every other variable of ``base`` is kept.
+    """
+    env = dict(os.environ if base is None else base)
+    src = str(repo_root() / "src")
+    existing = env.get("PYTHONPATH", "")
+    parts = [p for p in existing.split(os.pathsep) if p and p != src]
+    env["PYTHONPATH"] = os.pathsep.join([src, *parts])
+    return env
 
 
 def python_module_command(args: Sequence[str]) -> list[str]:

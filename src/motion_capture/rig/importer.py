@@ -32,9 +32,8 @@ IMPORT_PREFIX = "file:"
 def parse_view_spec(text: str) -> tuple[str, Path]:
     """``NAME=PATH`` → ``(name, path)``; precondition: both parts non-empty."""
     name, sep, path = text.partition("=")
-    require(
-        sep == "=" and name.strip() and path.strip(), "view must be NAME=PATH", text
-    )
+    ok = sep == "=" and bool(name.strip()) and bool(path.strip())
+    require(ok, "view must be NAME=PATH", text)
     return name.strip(), Path(path.strip())
 
 
@@ -56,7 +55,7 @@ def import_videos(
     views: Mapping[str, Path] | Sequence[tuple[str, Path]],
     out_dir: Path,
     *,
-    prober: Prober = probe_recording,
+    prober: Prober | None = None,
     plan_name: str | None = None,
 ) -> SessionManifest:
     """Write a bundle in ``out_dir`` describing ``views``; return its manifest.
@@ -71,7 +70,8 @@ def import_videos(
     require(len(set(names)) == len(names), "view names must be unique", names)
     for _, path in items:
         require(path.is_file(), "video file must exist", str(path))
-    probes = {path.resolve(): prober(path) for _, path in items}
+    probe = prober or probe_recording  # resolved at call time so tests can patch it
+    probes = {path.resolve(): probe(path) for _, path in items}
     bindings = tuple(_binding(n, p, probes[p.resolve()]) for n, p in items)
     plan = RigPlan(
         name=plan_name or f"import:{out_dir.name}",

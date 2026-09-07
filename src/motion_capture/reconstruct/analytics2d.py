@@ -32,6 +32,7 @@ Array = npt.NDArray[np.float64]
 HAND_ACCELERATION_SIGMA_BH = 400.0  # box heights / s^2, the 3-D prior scaled
 HAND_POSITION_SIGMA_BH = 0.005
 MIN_FRAMES = 3
+MIN_SPAN_S = 0.5  # shortest run of coverage in which events may be declared
 SERIES_JOINTS = (
     "left_wrist",
     "right_wrist",
@@ -93,20 +94,55 @@ def _box_height(payload: dict[str, Any], *, min_confidence: float) -> float:
 
 
 def _line_tilt_deg(left: Array, right: Array) -> Array:
-    """Image-plane angle of the left->right line, unwrapped from frame 0."""
+    """Image-plane tilt of the left-right line in (-90, 90], relative to frame 0.
+
+    A line has no direction: when the shoulders cross in the image during a
+    turn the left->right vector flips, so the orientation is folded modulo
+    180 degrees instead of unwrapped. Frames without both joints are NaN.
+    """
     d = right - left
-    angle = np.arctan2(d[:, 1], d[:, 0])
-    angle = np.where(np.isfinite(angle), angle, 0.0)
-    return np.degrees(np.unwrap(angle - angle[0]))
+    angle = np.degrees(np.arctan2(d[:, 1], d[:, 0]))
+    folded = (angle + 90.0) % 180.0 - 90.0
+    rel = folded - folded[np.isfinite(folded)][0]
+    return (rel + 90.0) % 180.0 - 90.0
 
 
-def _fill(track: Array, ok: npt.NDArray[np.bool_]) -> Array:
-    """Linear interpolation over missing frames (edges held)."""
+def _masked(track: Array, ok: npt.NDArray[np.bool_]) -> Array:
+    """The track with unobserved frames as NaN; precondition: >= 2 observed."""
+    require(int(ok.sum()) >= 2, "need at least two confident frames")
     out = track.copy()
-    idx = np.flatnonzero(ok)
-    require(idx.size >= 2, "need at least two confident frames")
-    for c in range(track.shape[1]):
-        out[:, c] = np.interp(np.arange(track.shape[0]), idx, track[idx, c])
+    out[~ok] = np.nan
+    return out
+
+
+def _mean_track(a: Array, b: Array) -> Array:
+    """Per-frame mean of the tracks that are observed; NaN where neither is."""
+    stack = np.stack([a, b])
+    seen = np.asarray(np.isfinite(stack).all(axis=2), dtype=bool)
+    count = seen.sum(axis=0)
+    total = np.where(seen[:, :, None], stack, 0.0).sum(axis=0)
+    out = np.full_like(a, np.nan)
+    np.divide(total, count[:, None], out=out, where=count[:, None] > 0)
+    return out
+
+
+def _sustained(covered: npt.NDArray[np.bool_], fps: float) -> npt.NDArray[np.bool_]:
+    """Only runs of covered frames at least ``MIN_SPAN_S`` long, edges trimmed.
+
+    An isolated two-frame detection far from the golfer's real track is a
+    jump, not a swing; events are declared only inside sustained coverage.
+    """
+    out = np.zeros_like(covered)
+    min_len = max(int(round(MIN_SPAN_S * fps)), 3)
+    idx = np.flatnonzero(covered)
+    if idx.size == 0:
+        return out
+    breaks = np.flatnonzero(np.diff(idx) > 1)
+    starts = np.concatenate([[idx[0]], idx[breaks + 1]])
+    ends = np.concatenate([idx[breaks], [idx[-1]]])
+    for s, e in zip(starts, ends, strict=True):
+        if e - s + 1 >= min_len:
+            out[s + 1 : e] = True  # trim one frame at each edge (gradient)
     return out
 
 
@@ -119,17 +155,19 @@ def series_2d(
     require(int(payload["frames_total"]) >= MIN_FRAMES, "need at least three frames")
     scale = _box_height(payload, min_confidence=min_confidence)
     tracks = {
-        name: _fill(*_joint_track(payload, name, min_confidence=min_confidence))
+        name: _masked(*_joint_track(payload, name, min_confidence=min_confidence))
         for name in SERIES_JOINTS
     }
-    hands = 0.5 * (tracks["left_wrist"] + tracks["right_wrist"]) / scale
+    hands = _mean_track(tracks["left_wrist"], tracks["right_wrist"]) / scale
+    covered = _sustained(np.asarray(np.isfinite(hands).all(axis=1), dtype=bool), fps)
     options = SmootherOptions(
         acceleration_sigma=HAND_ACCELERATION_SIGMA_BH,
         measurement_sigma=HAND_POSITION_SIGMA_BH,
     )
-    fit = smooth(hands, None, fps, options)
+    fit = smooth(hands, None, fps, options)  # NaN frames follow the dynamics prior
     velocity = np.gradient(fit.values, 1.0 / fps, axis=0)
     speed = np.linalg.norm(velocity, axis=1)
+    speed[~covered] = 0.0  # no event can be declared where no hand was seen
     unc = np.sqrt(2.0) * np.linalg.norm(fit.uncertainty, axis=1) * fps / 2.0
     hips = _line_tilt_deg(tracks["left_hip"], tracks["right_hip"])
     shoulders = _line_tilt_deg(tracks["left_shoulder"], tracks["right_shoulder"])
@@ -142,6 +180,12 @@ def series_2d(
         hand_speed_uncertainty_mps=unc,
     )
     return series, scale
+
+
+def _robust_max(values: Array) -> float:
+    """95th percentile of |values| over observed frames: one glitch is not a max."""
+    finite = np.abs(values[np.isfinite(values)])
+    return float(np.percentile(finite, 95)) if finite.size else float("nan")
 
 
 def summarize_view_2d(
@@ -159,8 +203,8 @@ def summarize_view_2d(
         fps=fps,
         peak_hand_speed_bh_per_s=float(series.hand_speed_mps[peak]),
         peak_hand_speed_frame=peak,
-        max_shoulder_tilt_deg=float(np.max(np.abs(series.shoulder_turn_deg))),
-        max_hip_tilt_deg=float(np.max(np.abs(series.pelvis_turn_deg))),
+        max_shoulder_tilt_deg=_robust_max(series.shoulder_turn_deg),
+        max_hip_tilt_deg=_robust_max(series.pelvis_turn_deg),
         events=events,
     )
 
