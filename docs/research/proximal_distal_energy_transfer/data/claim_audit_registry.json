@@ -29,15 +29,18 @@
       "provider": "NotebookLM",
       "review_status": "blocked_on_reauthentication",
       "authority_status": "research_index_only",
-      "last_check": "2026-08-14",
-      "verification": "Original sources must be independently checked before use."
+      "last_check": "2026-09-06",
+      "verification": "Original sources must be independently checked before use.",
+      "reconciliation": "docs/research/proximal_distal_energy_transfer/data/grf_source_reconciliation.json",
+      "reconciliation_authority": "D-sorganization/UpstreamDrift#8496",
+      "reconciliation_note": "The ground-reaction, centre-of-pressure, free-moment, segment-power, and contact-model topics are reconciled against independently verified original sources while corpus enumeration stays blocked."
     },
     {
       "name": "Nonlinear Control",
       "provider": "NotebookLM",
       "review_status": "blocked_on_reauthentication",
       "authority_status": "research_index_only",
-      "last_check": "2026-08-14",
+      "last_check": "2026-09-06",
       "verification": "Original sources must be independently checked before use."
     }
   ],

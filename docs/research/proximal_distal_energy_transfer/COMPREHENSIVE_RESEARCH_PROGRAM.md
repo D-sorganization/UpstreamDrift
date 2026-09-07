@@ -140,8 +140,33 @@ change to the paper or bibliography is supported by an independently checked
 original source. The initial 2026-08-12 live review is explicitly pending
 because the local profile failed network token validation. The 2026-08-14
 retry again redirected to manual Google authentication; no credentials or
-authentication dialogs were automated. Repository evidence and independently
-checked original sources therefore remain the current authority.
+authentication dialogs were automated. The 2026-09-06 retry found no stored
+profile at all, so no notebook or source-inventory identifier can be recorded
+on that date. Repository evidence and independently checked original sources
+therefore remain the current authority.
+
+## Ground-Reaction Source Reconciliation
+
+Because the collection is a lead index rather than evidence, the ground-reaction
+bibliography is reconciled directly against original sources in
+[`data/grf_source_reconciliation.json`](data/grf_source_reconciliation.json).
+The register maps the ground-reaction force, centre-of-pressure, free-moment,
+segment-power, and contact-model topics to works already adjudicated in
+[`data/external_source_review.json`](data/external_source_review.json), each
+verified against its own DOI, PubMed or PMC record, or publisher record. It
+also records what no cited source answers: no golf free moment transported to a
+declared centre of pressure, no compliant or friction-cone foot-ground contact
+model qualified for the swing, no universal centre-of-pressure waveform, no
+released participant-level six-axis bilateral wrench series, and no golf
+measurement behind the borrowed segment-power language. Those remain declared
+scope limits. A gap closes only through an independently verified original
+source that the article also cites, never through generated prose and never
+through an uncited bibliography addition.
+[`scripts/research/proximal_distal_energy/grf_source_reconciliation.py`](../../../scripts/research/proximal_distal_energy/grf_source_reconciliation.py)
+fails closed when a mapped work is missing or ineligible in the source review,
+when a topic claim has no supporting work of its own, when a model-internal
+claim is given external support, or when a blocked corpus carries notebook
+identifiers.
 
 ## Independently Checked Biomechanics Leads
 

@@ -262,7 +262,11 @@ The arm--wrist allocation, role-reversal, and preload program is tracked in
 The advanced frame, biological, visual, and cross-engine expansion is tracked
 in [#8505](https://github.com/D-sorganization/UpstreamDrift/issues/8505).
 Ground-reaction drift attribution and human validation requirements are tracked
-in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493).
+in [#8493](https://github.com/D-sorganization/UpstreamDrift/issues/8493). The
+topic-by-topic reconciliation of that bibliography against original sources,
+and the still-blocked NotebookLM corpus enumeration, are recorded in
+[`data/grf_source_reconciliation.json`](data/grf_source_reconciliation.json)
+under [#8496](https://github.com/D-sorganization/UpstreamDrift/issues/8496).
 The independent review adjudication and its numerical remediation are tracked
 in [#8499](https://github.com/D-sorganization/UpstreamDrift/issues/8499), with
 the finding-by-finding record in
@@ -283,6 +287,7 @@ the finding-by-finding record in
 | [`data/claim_adjudication_summary.csv`](data/claim_adjudication_summary.csv)                                       | Accessible one-row-per-claim reviewer export                                                   |
 | [`data/claim_evidence_manifest.json`](data/claim_evidence_manifest.json)                                           | Claim-complete local hashes and external-support URL inventory                                 |
 | [`data/external_source_review.json`](data/external_source_review.json)                                             | Work-deduplicated source, correction, claim-fit, and link-availability review                  |
+| [`data/grf_source_reconciliation.json`](data/grf_source_reconciliation.json)                                       | Ground-reaction topic-to-original-source map, declared gaps, and corpus-access record          |
 | [`COMPREHENSIVE_RESEARCH_PROGRAM.md`](COMPREHENSIVE_RESEARCH_PROGRAM.md)                                           | Biomechanics, nonlinear-control, model-ladder, data, and validation roadmap                    |
 | [`HYBRID_SYSTEM_CONTRACT.md`](HYBRID_SYSTEM_CONTRACT.md)                                                           | Executable eight-tier hybrid topology, evidence boundary, and remaining qualification gates    |
 | [`LOCAL_LINEAR_DIAGNOSTICS.md`](LOCAL_LINEAR_DIAGNOSTICS.md)                                                       | Local analytical observability/controllability ranks, conditioning, killswitches, and limits   |
