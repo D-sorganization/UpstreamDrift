@@ -153,6 +153,8 @@ class MJCFConverter:
         else:
             xml_string = source
 
+        self._rust_structural_precheck(xml_string)
+
         # Parse MJCF
         root = DefusedET.fromstring(xml_string)
         model = self._parse_mjcf(root)
@@ -164,6 +166,36 @@ class MJCFConverter:
             Path(output_path).write_text(urdf_xml)
 
         return str(urdf_xml)
+
+    def _rust_structural_precheck(self, xml_string: str) -> None:
+        """Validate document structure through the Rust parser, if enabled.
+
+        Opt-in via ``UPSTREAM_URDF_USE_RUST=1``. The Rust parser handles only
+        document-level structure -- the pure-Python converter below still owns
+        MJCF-to-URDF flattening -- so this is a fast structural validator that
+        surfaces malformed MJCF earlier and with a clearer error. A failure is
+        never fatal: the Python path is authoritative and runs either way.
+
+        ``_mjcf_rust_facade`` kept its parity tests but lost this, its only
+        call site, in the squash `b8d95ad25`, leaving the opt-in unreachable
+        while nothing went red (#9675). See #5243 for the MJCF slice.
+        """
+        try:
+            from model_generation.converters import (
+                _mjcf_rust_facade as _mjcf_rust,
+            )
+        except ImportError:  # pragma: no cover - layout safety net
+            return
+        if not _mjcf_rust.should_use_rust():
+            return
+        try:
+            _mjcf_rust.parse_mjcf_to_dict(xml_string)
+        except Exception as exc:  # pragma: no cover - fallback path
+            logger.warning(
+                "upstream_urdf Rust MJCF parser failed (%s); "
+                "falling back to pure Python",
+                exc,
+            )
 
     def _build_mjcf(self, model: ParsedModel) -> str:
         """Build MJCF XML from parsed model."""

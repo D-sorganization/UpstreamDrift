@@ -347,11 +347,11 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/cli/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/format_utils.py` | -5 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/converters/mjcf_converter.py` | +1 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/converters/mjcf_converter.py` | +1413 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/converters/urdf_parser.py` | +7213 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/converters/urdf_parser.py` | +7213 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/physics_validation.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -370,11 +370,11 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/inertia/calculator.py` | +27 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/library/__init__.py` | +20 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/_rate_limiter.py` | +604 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
-| `model_generation/library/cache.py` | +957 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/_rate_limiter.py` | +604 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/cache.py` | +957 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/github_importer.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/library/model_library.py` | -569 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/repository.py` | +4968 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/repository.py` | +4968 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/mesh/__init__.py` | +64 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/tests/test_contracts.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |

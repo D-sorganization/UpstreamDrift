@@ -9785,9 +9785,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 21759,
+      "ud_bytes": 23171,
       "tools_bytes": 21758,
-      "byte_delta": 1,
+      "byte_delta": 1413,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -32255,9 +32255,9 @@
     {
       "path": "model_generation/converters/urdf_parser.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "be222b23ea674d1b86bd2cfe48050bf3200ea974"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32502,9 +32502,9 @@
     {
       "path": "model_generation/library/_rate_limiter.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "6a943bbfcd534c2d770f60d1e2c28a58d1b3adce"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32515,9 +32515,9 @@
     {
       "path": "model_generation/library/cache.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "6a943bbfcd534c2d770f60d1e2c28a58d1b3adce"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32554,9 +32554,9 @@
     {
       "path": "model_generation/library/repository.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "6a943bbfcd534c2d770f60d1e2c28a58d1b3adce"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
