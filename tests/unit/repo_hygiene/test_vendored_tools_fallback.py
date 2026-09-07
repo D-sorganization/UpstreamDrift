@@ -17,6 +17,7 @@ pin the two properties that make the cleanup safe to continue:
 from __future__ import annotations
 
 import importlib.util
+import os
 from pathlib import Path
 
 import pytest
@@ -29,10 +30,34 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 _UD_SHARED = _REPO_ROOT / "src" / "shared" / "python"
 _VENDORED_SHARED = _REPO_ROOT / "vendor" / "ud-tools" / "src" / "shared" / "python"
 
-_requires_vendor = pytest.mark.skipif(
-    not _VENDORED_SHARED.is_dir(),
-    reason="pinned Tools tree not materialised (git submodule update --init vendor/ud-tools)",
-)
+
+def _check_vendored_tools() -> None:
+    if _VENDORED_SHARED.is_dir():
+        return
+    message = "pinned Tools tree not materialised (git submodule update --init vendor/ud-tools)"
+    if (
+        os.environ.get("REQUIRE_VENDORED_FALLBACK") == "1"
+        or os.environ.get("REQUIRE_REAL_TOOLS_REPO") == "1"
+        or os.environ.get("REQUIRE_DRIFT_GATES") == "1"
+    ):
+        pytest.fail(
+            "Vendored Tools fallback tests cannot run: "
+            + message
+            + ". In CI this is a hard failure, never a skip — a skipped fallback test "
+            "reports green while the fallback mechanism is most likely broken.",
+            pytrace=False,
+        )
+    pytest.skip(message, allow_module_level=True)
+
+
+@pytest.fixture(autouse=True)
+def _ensure_vendored_tools_available() -> None:
+    """Ensure the vendored Tools tree is available, failing under CI if absent."""
+    _check_vendored_tools()
+
+
+# Backward-compatible decorator mark for tests requiring vendored tools
+_requires_vendor = pytest.mark.usefixtures("_ensure_vendored_tools_available")
 
 
 @_requires_vendor
