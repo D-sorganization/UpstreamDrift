@@ -16,6 +16,29 @@ both `_urdf_rust_facade` and `_mjcf_rust_facade` are reachable from their
 converters. It stubs the facades rather than requiring the `upstream_urdf`
 wheel, so unlike `tests/unit/urdf/test_rust_facade_parity.py` it does not skip
 where the wheel is absent.
+## Repair the Mesh-Generator Split (#9675)
+
+Restores four members deleted by the squash `b8d95ad25`, which left three
+modules in `src/shared/python/humanoid_character_builder/generators/`
+unimportable:
+
+- `segment_mesh_by_range` in `_mesh_types`, imported by `_mesh_smplx`,
+  `_mesh_makehuman` and `mesh_generator_models` and defined in none of them.
+- `GeneratedMeshResult.solver_status` and its `__post_init__`, which derives
+  the status from `success` when a caller sets only `success` (#4522).
+- `SMPLX_AVAILABLE`, `TRIMESH_AVAILABLE`, `_smplx_module` and `_trimesh_module`
+  re-exports from `mesh_generator`. `_mesh_smplx.SMPLXMeshGenerator` reads
+  these back through the facade so that test patches on
+  `mesh_generator.SMPLX_AVAILABLE` take effect (#4528).
+- The facade's `SMPLXMeshGenerator` binding, repointed from `_smplx_generator`
+  to `_mesh_smplx`, which carries `validate_vertex_ranges`,
+  `load_part_segmentation` and `SMPLX_SEGMENT_VERTEX_RANGES`.
+
+`tests/unit/test_mesh_generator_split_2486.py` gains
+`TestMeshGeneratorSplitModulesImport`, asserting that each split module
+imports and that `_mesh_types` exports `segment_mesh_by_range`. The existing
+contract tests check only file existence and line counts, so every one of them
+passed throughout the period when the modules could not be loaded.
 ## Restore REST API Authentication, Rate Limiting and CORS (#9674)
 
 Restores the `model_generation` REST API request pre-flight deleted by the
@@ -3970,6 +3993,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
 | 2026-09-07 | #9687 | Rewired `MJCFConverter.mjcf_to_urdf` to the Rust structural pre-check via a named `_rust_structural_precheck` helper. `b8d95ad25` had removed the only production call site of `_mjcf_rust_facade`, exactly as it did for `_urdf_rust_facade` (restored in #9673), so the opt-in `UPSTREAM_URDF_USE_RUST` path was unreachable for MJCF; nothing went red because each facade keeps its own parity tests, so both modules were imported and passing while never being invoked by the converters they accelerate. Added `test_rust_fast_path_wiring.py`, which asserts wiring rather than parity and stubs the facades so it does not skip where the Rust wheel is absent, unlike the `importorskip`-guarded parity suite. Verified non-vacuous by reverting the rewiring. (#9675) |
+| 2026-09-07 | #9686 | Repaired the humanoid mesh-generator split that `b8d95ad25` half-reverted: restored `segment_mesh_by_range` to `_mesh_types` (imported by three modules, defined in none, so all three raised ImportError on `origin/main`), `GeneratedMeshResult.solver_status` with the `__post_init__` that derives it from `success` (#4522), and the `SMPLX_AVAILABLE`/`TRIMESH_AVAILABLE`/`_smplx_module`/`_trimesh_module` re-exports that `_mesh_smplx` reads back through the facade so test patches take effect (#4528). Repointed the facade's `SMPLXMeshGenerator` from the reduced `_smplx_generator` to `_mesh_smplx`, which carries `validate_vertex_ranges`, `load_part_segmentation` and `SMPLX_SEGMENT_VERTEX_RANGES`; measured over the humanoid and security suites that is 85 failures -> 51, 34 newly passing and 0 newly failing, compared as failure sets rather than counts. Added import assertions to the #2486 contract suite, which previously checked only file existence and line counts and so stayed green while the modules could not be loaded. (#9675) |
 | 2026-09-07 | #9676 | Restored the model_generation REST API request pre-flight deleted by the squash `b8d95ad25` -- `MODEL_GEN_API_KEY` authentication with `secrets.compare_digest`, per-client-IP `MODEL_GEN_RATE_LIMIT` sliding-window rate limiting, and `MODEL_GEN_CORS_ORIGINS` CORS headers, all three of which had been inert. The deletion was not the #1953 facade split: `_add_security_headers` lived beside them and did survive into `rest_api_routes.py`. Both checks run before route matching so 401 cannot be distinguished from 404 to enumerate routes, and CORS is attached in `_secure_response` so error responses carry it too. Also fixed a path traversal in `ModelCache.get_cache_path`, where a bare `".."` survived separator flattening and resolved to the cache directory's parent, and made `ModelLibrary` name a rejected URL scheme rather than reporting it as non-absolute. `tests/unit/tools/model_generation/`: 74 failing -> 66 failing. (#9674) |
 | 2026-09-07 | #9673 | Restored xacro preprocessing, ROS `package://` resolution and GitHub API authentication/retry/pagination deleted by the 14-issue squash `b8d95ad25`, plus `CacheEntry.version` with checksum validation on retrieval and the opt-in Rust URDF fast path whose only call site the same commit removed. Each restore is folded into the hardening that landed since rather than reverted onto it: `_validate_mesh_filename` still runs before any `package://` lookup, GitHub requests still route through the `_urlopen_https` host allowlist, and `ModelCache.get` delegates to the existing `verify()` instead of duplicating the comparison. Deviating from a pure restore, `_split_search_path` rejoins Windows drive letters that the original `.split(":")` severed. `tests/unit/tools/model_generation/`: 74 failing -> 38 failing. (#9620) |
 | 2026-09-07 | n/a | Optimized vector magnitude checks in swing flight pipeline gui using math.hypot (spec-exempt: micro-optimization) |

@@ -66,7 +66,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
-| `humanoid_character_builder` | 15 | 25 | 13 | 27 | 0 | 40 |
+| `humanoid_character_builder` | 15 | 25 | 12 | 27 | 0 | 40 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **462** | **277** | **130** | **1188** | **518** | **739** |
+| **Total** | **462** | **277** | **129** | **1188** | **518** | **739** |
 
 ## Diverged Files by Package
 
@@ -300,10 +300,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/core/model.py` | +478 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/_makehuman_generator.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `humanoid_character_builder/generators/_mesh_types.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `humanoid_character_builder/generators/_mesh_types.py` | +1917 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/_primitive_generator.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/_smplx_generator.py` | +328 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-09-05 |
-| `humanoid_character_builder/generators/mesh_generator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `humanoid_character_builder/generators/mesh_generator.py` | +380 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/mesh_generator_primitive.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/mesh_generator_smplx.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -333,7 +333,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/api/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/api/rest_api.py` | +572 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-06 |
 | `model_generation/api/rest_api_assets.py` | -52 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/api/rest_api_core.py` | +4240 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/api/rest_api_core.py` | +4240 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/api/rest_api_fastapi.py` | -25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/api/rest_api_flask.py` | -70 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-06 |
 | `model_generation/api/rest_api_generation.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -373,7 +373,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/library/_rate_limiter.py` | +604 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/cache.py` | +1744 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/github_importer.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/model_library.py` | +242 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/library/model_library.py` | +242 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/repository.py` | +4968 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/mesh/__init__.py` | +64 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
