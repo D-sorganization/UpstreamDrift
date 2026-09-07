@@ -3884,6 +3884,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| 2026-09-07 | #9522 | ⚡ Bolt: Optimize bounding sphere magnitude calculation with np.einsum in `CollisionGeometryGenerator._fit_sphere` to avoid intermediate array allocations. |
 | 2026-09-07 | #9646 | `reconstruct.intrinsics` + `rig calibrate-intrinsics`: chessboard intrinsic calibration per view into `intrinsics.json` with K, distortion, RMS and frame evidence; < 8 usable frames refused, RMS > 1 px reported below standard (C2 #9622 of #9619). |
 | 2026-09-07 | #9643 | Acceptance program gains the synthetic algorithm thresholds the harness asserts in CI; camera rig runbook gains the ingest and reconstruct steps (#9619). |
 | 2026-09-07 | #9642 | `reconstruct.initialize`: camera placement from the golfer's joints alone (essential-matrix RANSAC per pair, anchor-segment scale, subject-defined world frame, pairs under 40 inliers refused); `rig reconstruct --intrinsics` for a first take, `--cameras` for later takes (C3 #9623 of #9619). |
