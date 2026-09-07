@@ -8,6 +8,7 @@ This module provides utilities for handling GitHub API rate limits:
 
 from __future__ import annotations
 
+import http.client
 import logging
 import time
 import urllib.error
@@ -89,7 +90,7 @@ def make_request_with_backoff(
     initial_backoff: float = DEFAULT_INITIAL_BACKOFF,
     max_backoff: float = DEFAULT_MAX_BACKOFF,
     headers: dict[str, str] | None = None,
-) -> urllib.request.Response:
+) -> http.client.HTTPResponse:
     """Make a request with exponential backoff for rate-limit errors.
 
     Args:
