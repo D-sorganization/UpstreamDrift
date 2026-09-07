@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
-
 import pytest
 
 from src.motion_capture.rig import __main__ as cli
@@ -56,11 +54,17 @@ def test_null_recorder_lifecycle_and_record_all(tmp_path: Path) -> None:
             CameraBinding(view="b", serial="2"),
         ),
     )
-    with patch("src.motion_capture.rig.recorder.time.sleep") as sleep:
-        results = record_all(
-            plan, {"a": "ref-a", "b": "ref-b"}, 3.0, tmp_path / "rec", NullRecorder
-        )
-    sleep.assert_called_once_with(3.0)
+    slept: list[float] = []
+    results = record_all(
+        plan,
+        {"a": "ref-a", "b": "ref-b"},
+        3.0,
+        tmp_path / "rec",
+        NullRecorder,
+        warmup_s=2.0,
+        sleep=slept.append,
+    )
+    assert slept == [5.0]  # warm-up + duration, one clock for every view
     assert [r.identity for r in results] == ["1", "2"]
     assert all(isinstance(r, RecordingResult) and r.returncode == 0 for r in results)
     assert results[0].path.name == "a_1.mkv"
