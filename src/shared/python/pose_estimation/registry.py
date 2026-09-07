@@ -52,6 +52,10 @@ class EstimatorInfo:
         factory: Lazy constructor; receives keyword options (e.g.
             ``min_confidence``) and returns a ``PoseEstimator``. Must not
             import heavy dependencies until called.
+        capture_source: Whether the estimator is offered as a live capture
+            source to the web and desktop front ends (#7454 parity). Offline
+            comparison estimators register with ``False`` and stay reachable
+            through the registry for ingest and scripts.
     """
 
     name: str
@@ -61,6 +65,7 @@ class EstimatorInfo:
     install_hint: str
     skeleton: tuple[dict[str, Any], ...] = field(default_factory=tuple)
     factory: Callable[..., PoseEstimator] | None = None
+    capture_source: bool = True
 
     def __post_init__(self) -> None:
         if not self.name or not self.name.strip():
@@ -83,6 +88,11 @@ def register_estimator(info: EstimatorInfo) -> EstimatorInfo:
 def unregister_estimator(name: str) -> None:
     """Remove an estimator (test hygiene; missing names are a no-op)."""
     _REGISTRY.pop(name, None)
+
+
+def capture_source_estimators() -> tuple[EstimatorInfo, ...]:
+    """Registered estimators offered as capture sources, in registration order."""
+    return tuple(info for info in list_estimators() if info.capture_source)
 
 
 def list_estimators() -> tuple[EstimatorInfo, ...]:
@@ -287,5 +297,6 @@ register_estimator(
         ),
         skeleton=_OPENPOSE_DNN_SKELETON,
         factory=_make_openpose_dnn,
+        capture_source=False,  # offline comparison detector (#9628), CPU-only
     )
 )
