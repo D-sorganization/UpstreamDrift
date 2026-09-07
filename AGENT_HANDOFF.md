@@ -10,6 +10,9 @@ Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
 contract, recovery constraints, and next commands are in
 `docs/development/proximal_distal_program_turnover.md`.
 
+Seam (#9406) and failure triage (#9474): see
+`docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
