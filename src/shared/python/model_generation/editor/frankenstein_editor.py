@@ -37,7 +37,6 @@ from src.shared.python.contracts import require
 from .editor_clipboard import ClipboardMixin
 from .editor_modifications import ModificationMixin
 from .editor_types import (
-    AttachmentSpec,
     ComponentReference,  # noqa: F401
     ComponentType,
     EditorState,
@@ -347,11 +346,9 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
             name_map,
             prefix,
             suffix,
-            AttachmentSpec(
-                attach_to=attach_to,
-                origin=attachment_origin,
-                joint_type=joint_type,
-            ),
+            attach_to,
+            attachment_origin,
+            joint_type,
         )
 
         logger.info(f"Pasted {len(created_links)} links to '{target_model_id}'")
@@ -413,7 +410,9 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         name_map: dict[str, str],
         prefix: str,
         suffix: str,
-        attachment: AttachmentSpec,
+        attach_to: str | None,
+        attachment_origin: Origin | None,
+        joint_type: JointType,
     ) -> list[str]:
         """Create renamed copies of links and joints in the target model."""
         if model is None:
@@ -440,11 +439,11 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
             if joint.parent in name_map:
                 new_joint.parent = name_map[joint.parent]
             elif joint.child == links[0].name if links else None:
-                if attachment.is_attached:
-                    new_joint.parent = attachment.attach_to
-                    new_joint.joint_type = attachment.joint_type
-                    if attachment.origin:
-                        new_joint.origin = attachment.origin
+                if attach_to:
+                    new_joint.parent = attach_to
+                    new_joint.joint_type = joint_type
+                    if attachment_origin:
+                        new_joint.origin = attachment_origin
                     attachment_created = True
                 else:
                     continue
@@ -454,16 +453,16 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
 
             model.joints.append(new_joint)
 
-        if attachment.is_attached and first_link and not attachment_created:
+        if attach_to and first_link and not attachment_created:
             attach_joint = Joint(
                 name=self._generate_unique_name(
-                    f"{attachment.attach_to}_to_{first_link}_joint",
+                    f"{attach_to}_to_{first_link}_joint",
                     {j.name for j in model.joints},
                 ),
-                joint_type=attachment.joint_type,
-                parent=attachment.attach_to,
+                joint_type=joint_type,
+                parent=attach_to,
                 child=first_link,
-                origin=attachment.origin or Origin(),
+                origin=attachment_origin or Origin(),
             )
             model.joints.append(attach_joint)
 

@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -99,7 +99,7 @@ class CLIToolBase:
                 return_code=-1,
                 command=" ".join(full_command),
             )
-        except Exception as e:  # noqa: BLE001 - catch unexpected subprocess errors
+        except Exception as e:
             return CLIExecutionResult(
                 success=False,
                 error=str(e),
@@ -352,8 +352,7 @@ class ShellTool(CLIToolBase):
             if base_cmd not in self._allowed_commands:
                 return False
 
-            # Prevent command injection through tool-specific arguments
-            # such as `find -exec` or `-delete`
+            # Prevent command injection through tool-specific arguments like `find -exec`
             dangerous_args = ["-exec", "--exec", "-execdir", "-ok", "-okdir", "-delete"]
 
             # Verify no token is a dangerous command
@@ -377,7 +376,7 @@ class ShellTool(CLIToolBase):
                         val = clean_token.split("=", 1)[1].strip()
                         if val in dangerous or Path(val).name in dangerous:
                             return False
-                except Exception:  # noqa: BLE001 - defensively reject command on token parsing failure
+                except Exception:
                     logger.warning(
                         "Could not validate token %r; rejecting command",
                         clean_token,

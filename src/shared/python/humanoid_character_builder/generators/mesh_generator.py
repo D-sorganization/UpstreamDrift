@@ -41,18 +41,7 @@ from ._mesh_types import (  # noqa: F401
     MeshGeneratorInterface,
 )
 from ._primitive_generator import PrimitiveMeshGenerator  # noqa: F401
-
-# SMPLX_AVAILABLE is re-exported deliberately, not incidentally:
-# _mesh_smplx.SMPLXMeshGenerator.is_available reads it back through *this*
-# module so that tests patching mesh_generator.SMPLX_AVAILABLE take effect
-# (issue #4528). Dropping it turns is_available into an AttributeError.
-from ._mesh_smplx import (  # noqa: F401
-    SMPLX_AVAILABLE,
-    TRIMESH_AVAILABLE,
-    SMPLXMeshGenerator,
-    _smplx_module,
-    _trimesh_module,
-)
+from ._smplx_generator import SMPLXMeshGenerator  # noqa: F401
 
 logger = logging.getLogger(__name__)
 

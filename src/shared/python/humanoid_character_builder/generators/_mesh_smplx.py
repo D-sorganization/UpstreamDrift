@@ -379,11 +379,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             )
 
             betas_arr = self._convert_params_to_betas(params)
-            # Prefer torch tensor if torch is available; fall back to numpy.
-            # The two branches produce different types on purpose -- the SMPL-X
-            # model accepts either -- so the binding is annotated as such
-            # rather than letting mypy pin it to whichever branch comes first.
-            betas_input: Any
+            # Prefer torch tensor if torch is available; fall back to numpy
             try:
                 import torch  # type: ignore[import-untyped]
 

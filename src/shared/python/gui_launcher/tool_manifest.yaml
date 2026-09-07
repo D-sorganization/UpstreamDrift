@@ -206,6 +206,19 @@ tools:
         - sympy
       settings_app: ODESolver
 
+  - tool_name: optimizer_gui
+    name: Adam Optimizer
+    description: Configure and run Adam-based optimization
+    category: Optimization
+    icon: chart-line
+    pyqt6:
+      module: optimizer_gui.ui.pyqt6.main_window
+      class: OptimizerWindow
+      dependencies:
+        - PyQt6
+        - numpy
+      settings_app: OptimizerGui
+
   - tool_name: pid_generator
     name: P&ID Generator
     description: Generate P&ID drawings from YAML specifications (DXF + SVG output)
@@ -260,6 +273,7 @@ tools:
     web:
       port: 5193
       auto_open_browser: true
+
   - tool_name: rotation_converter
     name: Rotation Converter
     description: >-

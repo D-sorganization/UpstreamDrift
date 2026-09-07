@@ -31,13 +31,68 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-from ._cg_types import (
-    CollisionGeometryResult,
-    ComplexityLevel,
-    PrimitiveFit,
-    SimplificationMethod,
-    VHACDParameters,
-)
+class SimplificationMethod(Enum):
+    """Available mesh simplification methods."""
+
+    AUTO = auto()
+    VHACD = auto()  # Convex decomposition
+    PRIMITIVES = auto()  # Fit geometric primitives
+    DECIMATION = auto()  # Quadric decimation
+    CONVEX_HULL = auto()  # Single convex hull
+    HYBRID = auto()  # Combine methods
+
+
+class ComplexityLevel(Enum):
+    """Target complexity levels for collision geometry."""
+
+    MINIMAL = auto()  # Fastest simulation, lowest accuracy
+    BALANCED = auto()  # Good tradeoff
+    ACCURATE = auto()  # Higher accuracy, slower simulation
+
+
+@dataclass
+class PrimitiveFit:
+    """Result of fitting a primitive to a mesh region."""
+
+    primitive_type: str  # "box", "sphere", "cylinder", "capsule"
+    center: tuple[float, float, float]
+    dimensions: tuple[float, ...]  # Type-specific dimensions
+    rotation: tuple[float, float, float, float]  # Quaternion
+    volume_ratio: float  # Mesh volume / primitive volume
+    error_metric: float  # Hausdorff distance
+
+
+@dataclass
+class CollisionGeometryResult:
+    """Result of collision geometry generation."""
+
+    success: bool
+    method_used: SimplificationMethod
+    components: list[Any]  # Mesh or primitive definitions
+    original_triangles: int
+    final_triangles: int
+    reduction_ratio: float
+    volume_preservation: float
+    hausdorff_distance: float
+    primitive_fits: list[PrimitiveFit] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+
+
+@dataclass
+class VHACDParameters:
+    """Parameters for VHACD convex decomposition."""
+
+    max_hulls: int = 16
+    max_vertices_per_hull: int = 64
+    resolution: int = 100000
+    concavity: float = 0.001
+    plane_downsampling: int = 4
+    hull_downsampling: int = 4
+    alpha: float = 0.05
+    beta: float = 0.05
+    mode: int = 0  # 0: voxel-based, 1: tetrahedra-based
+    min_volume_per_hull: float = 0.0001
 
 
 class CollisionGeometryGenerator:
@@ -166,9 +221,19 @@ class CollisionGeometryGenerator:
 
         # Generate collision geometry
         try:
-            result = self._dispatch_generation(
-                method, mesh, max_hulls, vhacd_params, max_primitives, max_triangles
-            )
+            if method == SimplificationMethod.VHACD:
+                result = self._generate_vhacd(mesh, max_hulls, vhacd_params)
+            elif method == SimplificationMethod.PRIMITIVES:
+                result = self._generate_primitives(mesh, max_primitives)
+            elif method == SimplificationMethod.DECIMATION:
+                result = self._generate_decimated(mesh, max_triangles)
+            elif method == SimplificationMethod.CONVEX_HULL:
+                result = self._generate_convex_hull(mesh)
+            elif method == SimplificationMethod.HYBRID:
+                result = self._generate_hybrid(mesh, max_primitives, max_triangles)
+            else:
+                result = self._generate_decimated(mesh, max_triangles)
+
         except (ValueError, TypeError, RuntimeError, OSError) as e:
             logger.error(f"Collision generation failed: {e}")
             return CollisionGeometryResult(
@@ -203,28 +268,6 @@ class CollisionGeometryGenerator:
             primitive_fits=result.primitive_fits,
             warnings=result.warnings,
         )
-
-    def _dispatch_generation(
-        self,
-        method: SimplificationMethod,
-        mesh: Any,
-        max_hulls: int,
-        vhacd_params: VHACDParameters | None,
-        max_primitives: int,
-        max_triangles: int,
-    ) -> Any:
-        """Dispatch collision generation to specific method implementation."""
-        if method == SimplificationMethod.VHACD:
-            return self._generate_vhacd(mesh, max_hulls, vhacd_params)
-        if method == SimplificationMethod.PRIMITIVES:
-            return self._generate_primitives(mesh, max_primitives)
-        if method == SimplificationMethod.DECIMATION:
-            return self._generate_decimated(mesh, max_triangles)
-        if method == SimplificationMethod.CONVEX_HULL:
-            return self._generate_convex_hull(mesh)
-        if method == SimplificationMethod.HYBRID:
-            return self._generate_hybrid(mesh, max_primitives, max_triangles)
-        return self._generate_decimated(mesh, max_triangles)
 
     def _load_mesh(self, mesh_or_path: Any) -> Any:
         """Load mesh from path or return as-is."""
@@ -394,33 +437,183 @@ class CollisionGeometryGenerator:
         max_primitives: int,
     ) -> CollisionGeometryResult:
         """Generate collision geometry using fitted primitives."""
-        from ._cg_primitive_fitting import generate_primitives
+        if max_primitives is None:
+            raise ValueError("max_primitives must be provided")
+        primitives = []
+        primitive_fits = []
 
-        return generate_primitives(mesh, max_primitives)
+        # Try to fit primitives
+        fits = [
+            self._fit_box(mesh),
+            self._fit_sphere(mesh),
+            self._fit_cylinder(mesh),
+        ]
+
+        # Sort by error metric
+        fits.sort(key=lambda f: f.error_metric)
+
+        # Use best fit if good enough
+        best_fit = fits[0]
+        if best_fit.volume_ratio > 0.7:
+            primitives.append(self._primitive_to_mesh(best_fit))
+            primitive_fits.append(best_fit)
+        else:
+            # Fallback to convex hull
+            primitives.append(mesh.convex_hull)
+
+        return CollisionGeometryResult(
+            success=True,
+            method_used=SimplificationMethod.PRIMITIVES,
+            components=primitives,
+            original_triangles=len(mesh.faces),
+            final_triangles=sum(
+                len(p.faces) if hasattr(p, "faces") else 0 for p in primitives
+            ),
+            reduction_ratio=0.0,
+            volume_preservation=1.0,
+            hausdorff_distance=0.0,
+            primitive_fits=primitive_fits,
+        )
 
     def _fit_box(self, mesh: Any) -> PrimitiveFit:
         """Fit an oriented bounding box to the mesh."""
-        from ._cg_primitive_fitting import fit_box
+        try:
+            obb = mesh.bounding_box_oriented
+            center = tuple(obb.centroid.tolist())
+            extents = tuple(obb.primitive.extents.tolist())
+            transform = obb.primitive.transform
 
-        return fit_box(mesh)
+            # Extract rotation as quaternion
+            from scipy.spatial.transform import Rotation
+
+            rot = Rotation.from_matrix(transform[:3, :3])
+            quat = tuple(rot.as_quat().tolist())
+
+            volume_ratio = mesh.volume / obb.volume
+            # Approximate error as fraction not covered
+            error = 1.0 - volume_ratio
+
+            return PrimitiveFit(
+                primitive_type="box",
+                center=center,
+                dimensions=extents,
+                rotation=quat,
+                volume_ratio=volume_ratio,
+                error_metric=error,
+            )
+        except ImportError as e:
+            logger.warning(f"Box fitting failed: {e}")
+            return PrimitiveFit(
+                primitive_type="box",
+                center=(0, 0, 0),
+                dimensions=(1, 1, 1),
+                rotation=(0, 0, 0, 1),
+                volume_ratio=0.0,
+                error_metric=float("inf"),
+            )
 
     def _fit_sphere(self, mesh: Any) -> PrimitiveFit:
         """Fit a bounding sphere to the mesh."""
-        from ._cg_primitive_fitting import fit_sphere
+        try:
+            # Use mesh centroid and max distance to vertex
+            center = tuple(mesh.centroid.tolist())
+            vertices = mesh.vertices - mesh.centroid
+            radius = float(np.max(np.linalg.norm(vertices, axis=1)))
 
-        return fit_sphere(mesh)
+            sphere_volume = (4 / 3) * np.pi * radius**3
+            volume_ratio = mesh.volume / sphere_volume
+
+            return PrimitiveFit(
+                primitive_type="sphere",
+                center=center,
+                dimensions=(radius,),
+                rotation=(0, 0, 0, 1),
+                volume_ratio=volume_ratio,
+                error_metric=1.0 - volume_ratio,
+            )
+        except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+            logger.warning(f"Sphere fitting failed: {e}")
+            return PrimitiveFit(
+                primitive_type="sphere",
+                center=(0, 0, 0),
+                dimensions=(1,),
+                rotation=(0, 0, 0, 1),
+                volume_ratio=0.0,
+                error_metric=float("inf"),
+            )
 
     def _fit_cylinder(self, mesh: Any) -> PrimitiveFit:
         """Fit a cylinder to the mesh."""
-        from ._cg_primitive_fitting import fit_cylinder
+        try:
+            # Use OBB to determine primary axis
+            obb = mesh.bounding_box_oriented
+            extents = obb.primitive.extents
 
-        return fit_cylinder(mesh)
+            # Longest axis is cylinder axis
+            axis_idx = np.argmax(extents)
+            height = extents[axis_idx]
+
+            # Radius from the other two dimensions
+            other_dims = [extents[i] for i in range(3) if i != axis_idx]
+            radius = max(other_dims) / 2
+
+            cylinder_volume = np.pi * radius**2 * height
+            volume_ratio = mesh.volume / cylinder_volume
+
+            center = tuple(obb.centroid.tolist())
+            transform = obb.primitive.transform
+            from scipy.spatial.transform import Rotation
+
+            rot = Rotation.from_matrix(transform[:3, :3])
+            quat = tuple(rot.as_quat().tolist())
+
+            return PrimitiveFit(
+                primitive_type="cylinder",
+                center=center,
+                dimensions=(radius, height),
+                rotation=quat,
+                volume_ratio=volume_ratio,
+                error_metric=1.0 - volume_ratio,
+            )
+        except ImportError as e:
+            logger.warning(f"Cylinder fitting failed: {e}")
+            return PrimitiveFit(
+                primitive_type="cylinder",
+                center=(0, 0, 0),
+                dimensions=(1, 1),
+                rotation=(0, 0, 0, 1),
+                volume_ratio=0.0,
+                error_metric=float("inf"),
+            )
 
     def _primitive_to_mesh(self, fit: PrimitiveFit) -> Any:
         """Convert primitive fit to mesh."""
-        from ._cg_primitive_fitting import primitive_to_mesh
+        if fit is None:
+            raise ValueError("fit must be provided")
+        import trimesh
 
-        return primitive_to_mesh(fit)
+        if fit.primitive_type == "box":
+            mesh = trimesh.creation.box(extents=fit.dimensions)
+        elif fit.primitive_type == "sphere":
+            mesh = trimesh.creation.icosphere(radius=fit.dimensions[0])
+        elif fit.primitive_type == "cylinder":
+            mesh = trimesh.creation.cylinder(
+                radius=fit.dimensions[0],
+                height=fit.dimensions[1],
+            )
+        else:
+            mesh = trimesh.creation.box(extents=(1, 1, 1))
+
+        # Apply transform
+        from scipy.spatial.transform import Rotation
+
+        rot = Rotation.from_quat(fit.rotation)
+        transform = np.eye(4)
+        transform[:3, :3] = rot.as_matrix()
+        transform[:3, 3] = fit.center
+        mesh.apply_transform(transform)
+
+        return mesh
 
     def _generate_decimated(
         self,

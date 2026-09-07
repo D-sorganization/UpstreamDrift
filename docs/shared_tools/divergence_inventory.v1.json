@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "eab74a901a7c8467e1997049a73e2cfd2df74428",
+  "tools_pin": "3d93bb2c89813e17551814d3be7e895f791e29af",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -11,11 +11,11 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 463,
-    "diverged": 276,
+    "identical": 476,
+    "diverged": 263,
     "ud-only": 1188,
-    "tools-only": 519,
-    "spelling-only": 129
+    "tools-only": 517,
+    "spelling-only": 133
   },
   "packages": {
     "README.md": {
@@ -82,8 +82,8 @@
       "spelling-only": 0
     },
     "ai": {
-      "identical": 47,
-      "diverged": 71,
+      "identical": 46,
+      "diverged": 72,
       "ud-only": 20,
       "tools-only": 0,
       "spelling-only": 56
@@ -369,8 +369,8 @@
       "spelling-only": 0
     },
     "gui_launcher": {
-      "identical": 4,
-      "diverged": 4,
+      "identical": 3,
+      "diverged": 5,
       "ud-only": 3,
       "tools-only": 1,
       "spelling-only": 0
@@ -383,11 +383,11 @@
       "spelling-only": 0
     },
     "humanoid_character_builder": {
-      "identical": 15,
-      "diverged": 25,
+      "identical": 16,
+      "diverged": 24,
       "ud-only": 27,
       "tools-only": 0,
-      "spelling-only": 12
+      "spelling-only": 13
     },
     "import_aliases.py": {
       "identical": 0,
@@ -446,11 +446,11 @@
       "spelling-only": 0
     },
     "model_generation": {
-      "identical": 28,
-      "diverged": 52,
+      "identical": 31,
+      "diverged": 49,
       "ud-only": 18,
       "tools-only": 0,
-      "spelling-only": 19
+      "spelling-only": 22
     },
     "motion_matching": {
       "identical": 0,
@@ -670,10 +670,10 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 235,
-      "diverged": 74,
+      "identical": 246,
+      "diverged": 63,
       "ud-only": 36,
-      "tools-only": 23,
+      "tools-only": 21,
       "spelling-only": 25
     },
     "signal_toolkit": {
@@ -2486,13 +2486,13 @@
     },
     {
       "path": "ai/tools/cli_tools.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "ai",
       "subpackage": "tools",
-      "ud_bytes": 20262,
-      "tools_bytes": 20262,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "ud_bytes": 19743,
+      "tools_bytes": 19862,
+      "byte_delta": -119,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -5586,7 +5586,7 @@
       "package": "codemap",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 5128,
+      "tools_bytes": 4938,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -5634,7 +5634,7 @@
       "package": "codemap",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 2837,
+      "tools_bytes": 2832,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -7854,8 +7854,8 @@
       "package": "gui_launcher",
       "subpackage": "",
       "ud_bytes": 6655,
-      "tools_bytes": 6762,
-      "byte_delta": -107,
+      "tools_bytes": 6744,
+      "byte_delta": -89,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -7898,13 +7898,13 @@
     },
     {
       "path": "gui_launcher/tool_manifest.yaml",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "gui_launcher",
       "subpackage": "",
-      "ud_bytes": 11031,
-      "tools_bytes": 11031,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "ud_bytes": 11368,
+      "tools_bytes": 11367,
+      "byte_delta": 1,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -8297,7 +8297,7 @@
       "classification": "ud-only",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 26108,
+      "ud_bytes": 25845,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8309,9 +8309,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 4544,
+      "ud_bytes": 2640,
       "tools_bytes": 2627,
-      "byte_delta": 1917,
+      "byte_delta": 13,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -8369,12 +8369,12 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 4631,
+      "ud_bytes": 4255,
       "tools_bytes": 4251,
-      "byte_delta": 380,
+      "byte_delta": 4,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "humanoid_character_builder/generators/mesh_generator_factory.py",
@@ -8642,13 +8642,13 @@
     },
     {
       "path": "humanoid_character_builder/mesh/collision_generator.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "humanoid_character_builder",
       "subpackage": "mesh",
-      "ud_bytes": 19423,
+      "ud_bytes": 26190,
       "tools_bytes": 26190,
-      "byte_delta": -6767,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -8898,8 +8898,8 @@
       "package": "import_aliases.py",
       "subpackage": "",
       "ud_bytes": 10943,
-      "tools_bytes": 12520,
-      "byte_delta": -1577,
+      "tools_bytes": 11508,
+      "byte_delta": -565,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9518,13 +9518,13 @@
     },
     {
       "path": "model_generation/api/rest_api.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "model_generation",
       "subpackage": "api",
       "ud_bytes": 1203,
-      "tools_bytes": 631,
-      "byte_delta": 572,
-      "byte_identical": false,
+      "tools_bytes": 1203,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -9557,12 +9557,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 13001,
+      "ud_bytes": 8773,
       "tools_bytes": 8761,
-      "byte_delta": 4240,
+      "byte_delta": 12,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/api/rest_api_fastapi.py",
@@ -9578,13 +9578,13 @@
     },
     {
       "path": "model_generation/api/rest_api_flask.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "model_generation",
       "subpackage": "api",
       "ud_bytes": 2585,
-      "tools_bytes": 2655,
-      "byte_delta": -70,
-      "byte_identical": false,
+      "tools_bytes": 2585,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -9869,12 +9869,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 29632,
+      "ud_bytes": 22423,
       "tools_bytes": 22419,
-      "byte_delta": 7213,
+      "byte_delta": 4,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/core/__init__.py",
@@ -10025,21 +10025,21 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 2838,
+      "ud_bytes": 1824,
       "tools_bytes": 1816,
-      "byte_delta": 1022,
+      "byte_delta": 8,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": false
+      "spelling_only": true
     },
     {
       "path": "model_generation/editor/frankenstein_editor.py",
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 22074,
+      "ud_bytes": 21958,
       "tools_bytes": 21744,
-      "byte_delta": 330,
+      "byte_delta": 214,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10289,9 +10289,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 6318,
+      "ud_bytes": 5596,
       "tools_bytes": 5714,
-      "byte_delta": 604,
+      "byte_delta": -118,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10370,13 +10370,13 @@
     },
     {
       "path": "model_generation/library/cache.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 12936,
+      "ud_bytes": 11192,
       "tools_bytes": 11192,
-      "byte_delta": 1744,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -10397,9 +10397,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 30932,
+      "ud_bytes": 30121,
       "tools_bytes": 30690,
-      "byte_delta": 242,
+      "byte_delta": -569,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10409,9 +10409,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 22012,
+      "ud_bytes": 17021,
       "tools_bytes": 17044,
-      "byte_delta": 4968,
+      "byte_delta": -23,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -17861,7 +17861,7 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 10008,
+      "ud_bytes": 10305,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17933,7 +17933,7 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 9224,
+      "ud_bytes": 9521,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17945,7 +17945,7 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 3683,
+      "ud_bytes": 3560,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -17981,7 +17981,7 @@
       "classification": "ud-only",
       "package": "pose_estimation",
       "subpackage": "",
-      "ud_bytes": 1805,
+      "ud_bytes": 872,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -19854,8 +19854,8 @@
       "package": "sidekick",
       "subpackage": "calculators",
       "ud_bytes": 43504,
-      "tools_bytes": 44487,
-      "byte_delta": -983,
+      "tools_bytes": 44492,
+      "byte_delta": -988,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -20042,13 +20042,13 @@
     },
     {
       "path": "sidekick/lab/bio/c3d_reader.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": 34123,
       "tools_bytes": 34123,
       "byte_delta": 0,
-      "byte_identical": false,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20070,7 +20070,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 2409,
+      "tools_bytes": 3108,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -20082,7 +20082,7 @@
       "package": "sidekick",
       "subpackage": "lab",
       "ud_bytes": null,
-      "tools_bytes": 1543,
+      "tools_bytes": 1134,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -20095,18 +20095,6 @@
       "subpackage": "lab",
       "ud_bytes": null,
       "tools_bytes": 2085,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/lab/mocap/acquisition.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "lab",
-      "ud_bytes": null,
-      "tools_bytes": 13404,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -20438,13 +20426,13 @@
     },
     {
       "path": "sidekick/process_calculators/financial_calculator.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 14620,
-      "tools_bytes": 14931,
-      "byte_delta": -311,
-      "byte_identical": false,
+      "tools_bytes": 14620,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20462,13 +20450,13 @@
     },
     {
       "path": "sidekick/process_calculators/flare_calculator.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 10136,
-      "tools_bytes": 10599,
-      "byte_delta": -463,
-      "byte_identical": false,
+      "tools_bytes": 10136,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20702,25 +20690,25 @@
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 7190,
-      "tools_bytes": 7094,
-      "byte_delta": 96,
-      "byte_identical": false,
+      "tools_bytes": 7190,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 37197,
-      "tools_bytes": 37235,
-      "byte_delta": -38,
-      "byte_identical": false,
+      "tools_bytes": 37197,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20742,33 +20730,33 @@
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 11999,
-      "tools_bytes": 12004,
-      "byte_delta": -5,
+      "tools_bytes": 12010,
+      "byte_delta": -11,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_units.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 1825,
-      "tools_bytes": 1965,
-      "byte_delta": -140,
-      "byte_identical": false,
+      "tools_bytes": 1825,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_validation.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 8321,
-      "tools_bytes": 8318,
-      "byte_delta": 3,
-      "byte_identical": false,
+      "tools_bytes": 8321,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -20870,13 +20858,13 @@
     },
     {
       "path": "sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
       "ud_bytes": 31301,
-      "tools_bytes": 31724,
-      "byte_delta": -423,
-      "byte_identical": false,
+      "tools_bytes": 31301,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -21842,13 +21830,13 @@
     },
     {
       "path": "sidekick/tests/calculators/thermo/test_steam_engine.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "tests",
       "ud_bytes": 5673,
-      "tools_bytes": 5671,
-      "byte_delta": 2,
-      "byte_identical": false,
+      "tools_bytes": 5673,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -22053,18 +22041,6 @@
       "tools_bytes": 6318,
       "byte_delta": 0,
       "byte_identical": true,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "sidekick/tests/process_calculators/test_pressure_drop_api_public_names.py",
-      "classification": "tools-only",
-      "package": "sidekick",
-      "subpackage": "tests",
-      "ud_bytes": null,
-      "tools_bytes": 13871,
-      "byte_delta": null,
-      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -22830,8 +22806,8 @@
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 31010,
-      "tools_bytes": 31522,
-      "byte_delta": -512,
+      "tools_bytes": 30991,
+      "byte_delta": 19,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -22998,8 +22974,8 @@
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 17447,
-      "tools_bytes": 17751,
-      "byte_delta": -304,
+      "tools_bytes": 17745,
+      "byte_delta": -298,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -23234,13 +23210,13 @@
     },
     {
       "path": "sidekick/ui/tools_sidebar/notes_tab.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 7426,
-      "tools_bytes": 8730,
-      "byte_delta": -1304,
-      "byte_identical": false,
+      "tools_bytes": 7426,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -23618,13 +23594,13 @@
     },
     {
       "path": "sidekick/ui/widgets/unit_aware_input.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "ui",
       "ud_bytes": 8587,
-      "tools_bytes": 8708,
-      "byte_delta": -121,
-      "byte_identical": false,
+      "tools_bytes": 8587,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -28698,7 +28674,7 @@
       "package": "tests",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 13413,
+      "tools_bytes": 13597,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -28710,7 +28686,7 @@
       "package": "tests",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 2944,
+      "tools_bytes": 2943,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -28722,7 +28698,7 @@
       "package": "tests",
       "subpackage": "",
       "ud_bytes": null,
-      "tools_bytes": 6209,
+      "tools_bytes": 6237,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31056,6 +31032,19 @@
       }
     },
     {
+      "path": "ai/tools/cli_tools.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-08-25",
+        "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+      }
+    },
+    {
       "path": "ai/tools/codemap_tools.py",
       "ud": {
         "author": "Dieter Olson",
@@ -31583,9 +31572,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-05",
-        "commit": "74ef85b8263a74270bb6432a8128c76c9d10d635"
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-08-16",
+        "commit": "392d9683bafb9abf69e6dd9b5574dffe82c49fe6"
       }
     },
     {
@@ -31599,6 +31588,19 @@
         "author": "Dieter Olson",
         "date": "2026-08-25",
         "commit": "14924f137bf8eaed96984615d8a7aaa93b5e2e3f"
+      }
+    },
+    {
+      "path": "gui_launcher/tool_manifest.yaml",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-04",
+        "commit": "942c2dd23716ec3af9387aa141f517cc5af8dcac"
+      },
+      "tools": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-08-16",
+        "commit": "392d9683bafb9abf69e6dd9b5574dffe82c49fe6"
       }
     },
     {
@@ -31721,9 +31723,9 @@
     {
       "path": "humanoid_character_builder/generators/_mesh_types.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "aff8559d4e59472af402a0b3e2823438a4444e89"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -31760,9 +31762,9 @@
     {
       "path": "humanoid_character_builder/generators/mesh_generator.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "aff8559d4e59472af402a0b3e2823438a4444e89"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -31846,19 +31848,6 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "humanoid_character_builder/mesh/collision_generator.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-07",
-        "commit": "e7df26e2b206ce7798169e9d345506c1ffa6e47b"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
       }
     },
     {
@@ -31947,9 +31936,9 @@
         "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "f8b94bfe9cbca193d1c513bef59b5bdd996c4c6a"
+        "author": "Dieter Olson",
+        "date": "2026-08-28",
+        "commit": "ee659979623ac1d95c7939d6b8c84cff25f75ef1"
       }
     },
     {
@@ -31992,19 +31981,6 @@
       }
     },
     {
-      "path": "model_generation/api/rest_api.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "a02874e82894f43342d8b3134922e1efb4a4afd6"
-      }
-    },
-    {
       "path": "model_generation/api/rest_api_assets.py",
       "ud": {
         "author": "Dieter Olson",
@@ -32020,9 +31996,9 @@
     {
       "path": "model_generation/api/rest_api_core.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "8b12c3cfba32cecc5eed0fe549439c6687ff50a2"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -32041,19 +32017,6 @@
         "author": "Dieter Olson",
         "date": "2026-08-20",
         "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
-      }
-    },
-    {
-      "path": "model_generation/api/rest_api_flask.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "a02874e82894f43342d8b3134922e1efb4a4afd6"
       }
     },
     {
@@ -32254,9 +32217,9 @@
     {
       "path": "model_generation/converters/urdf_parser.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32371,9 +32334,9 @@
     {
       "path": "model_generation/editor/editor_types.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "04f5ab0558fce1801c6c16e6fbfd4f00d492ec22"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -32385,8 +32348,8 @@
       "path": "model_generation/editor/frankenstein_editor.py",
       "ud": {
         "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "04f5ab0558fce1801c6c16e6fbfd4f00d492ec22"
+        "date": "2026-09-06",
+        "commit": "a28c7a6b066b6a9b1bc1178c81bb26d22738c535"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -32501,22 +32464,9 @@
     {
       "path": "model_generation/library/_rate_limiter.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
-      },
-      "tools": {
         "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
-      }
-    },
-    {
-      "path": "model_generation/library/cache.py",
-      "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "8b12c3cfba32cecc5eed0fe549439c6687ff50a2"
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32540,9 +32490,9 @@
     {
       "path": "model_generation/library/model_library.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "8b12c3cfba32cecc5eed0fe549439c6687ff50a2"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32553,9 +32503,9 @@
     {
       "path": "model_generation/library/repository.py",
       "ud": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-07",
-        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32741,8 +32691,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "21126ef38925863afb30ea71370c91be45ca2f6d"
+        "date": "2026-09-02",
+        "commit": "6a3b686914ca096071044a6b94fac755bc6af837"
       }
     },
     {
@@ -32795,19 +32745,6 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "sidekick/lab/bio/c3d_reader.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "6da2cd6e1662f860f9d9c6bbd69b8cacfb8bc0ec"
       }
     },
     {
@@ -32928,32 +32865,6 @@
       }
     },
     {
-      "path": "sidekick/process_calculators/financial_calculator.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "32b0513e89aec767725515e76911b4edb8f9ae69"
-      }
-    },
-    {
-      "path": "sidekick/process_calculators/flare_calculator.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "32b0513e89aec767725515e76911b4edb8f9ae69"
-      }
-    },
-    {
       "path": "sidekick/process_calculators/optimization.py",
       "ud": {
         "author": "Dieter Olson",
@@ -33006,32 +32917,6 @@
       }
     },
     {
-      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
-      }
-    },
-    {
-      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
-      }
-    },
-    {
       "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_results.py",
       "ud": {
         "author": "Dieter Olson",
@@ -33040,34 +32925,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
-      }
-    },
-    {
-      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_units.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
-      }
-    },
-    {
-      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_validation.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "afc789058309e9ca68a10f1d9e476ceac6a3d45d"
+        "date": "2026-05-22",
+        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
       }
     },
     {
@@ -33081,19 +32940,6 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-05",
-        "commit": "37ef8c31d27c2d4961daa029c34ae8059a5bef10"
       }
     },
     {
@@ -33305,19 +33151,6 @@
       }
     },
     {
-      "path": "sidekick/tests/calculators/thermo/test_steam_engine.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "21126ef38925863afb30ea71370c91be45ca2f6d"
-      }
-    },
-    {
       "path": "sidekick/tests/process_calculators/test_analysis_utils.py",
       "ud": {
         "author": "Dieter Olson",
@@ -33430,8 +33263,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "32b0513e89aec767725515e76911b4edb8f9ae69"
+        "date": "2026-09-02",
+        "commit": "f4475a3584fa5618d5fbfdb2390f061b685ee61d"
       }
     },
     {
@@ -33456,8 +33289,8 @@
       },
       "tools": {
         "author": "Dieter Olson",
-        "date": "2026-09-04",
-        "commit": "de6ec7bdeee5883065b3ff5decb5461946bd1f88"
+        "date": "2026-09-02",
+        "commit": "9b347bd6caaa497e60bf5f53aead841147999798"
       }
     },
     {
@@ -33484,19 +33317,6 @@
         "author": "Dieter Olson",
         "date": "2026-05-22",
         "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
-      }
-    },
-    {
-      "path": "sidekick/ui/tools_sidebar/notes_tab.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "d-sorgclaudeagent[bot]",
-        "date": "2026-09-05",
-        "commit": "37ef8c31d27c2d4961daa029c34ae8059a5bef10"
       }
     },
     {
@@ -33601,19 +33421,6 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "sidekick/ui/widgets/unit_aware_input.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-06",
-        "commit": "90dd7a1fe6d5ab6e02bda2f6dc8f4e6a30fe78fd"
       }
     },
     {

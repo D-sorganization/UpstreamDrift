@@ -58,8 +58,6 @@ class SessionReconstruction(BaseModel):
     rms_px: float
     unobservable_points: int
     swing_summary_file: str | None = None
-    fps: float | None = None
-    excluded_joints: tuple[str, ...] = ()
 
 
 def start_cameras_from(path: Path) -> list[PinholeCamera]:
@@ -99,7 +97,6 @@ def reconstruct_session(
     scale_anchor: tuple[str, float],
     acceleration_sigma_px: float = DEFAULT_ACCELERATION_SIGMA_PX,
     min_confidence: float = 0.05,
-    exclude_joints: Sequence[str] = (),
 ) -> SessionReconstruction:
     """Run layout -> clean -> fit on ``<session>/observations`` and write results.
 
@@ -112,8 +109,6 @@ def reconstruct_session(
     reports, ``reconstruction.json`` and the summary.
     """
     require(acceleration_sigma_px > 0, "acceleration_sigma_px must be positive")
-    unknown = [j for j in exclude_joints if j not in JOINT_NAMES]
-    require(not unknown, "exclude_joints must name fit joints", unknown)
     require(
         (start_cameras is None) != (intrinsics is None),
         "give start cameras or intrinsics, not both",
@@ -137,8 +132,6 @@ def reconstruct_session(
         if tuple(payload["detector_layout"]["keypoint_names"]) != JOINT_NAMES:
             payload = to_reconstruct_layout(payload)
         cleaned, report = clean_view(payload, options, min_confidence=min_confidence)
-        if exclude_joints:
-            cleaned = _exclude(cleaned, exclude_joints)
         (obs_dir / f"{view_id}.json").write_text(
             json.dumps(cleaned, indent=1), encoding="utf-8"
         )
@@ -184,29 +177,11 @@ def reconstruct_session(
         rms_px=record.rms_px,
         unobservable_points=record.unobservable_points,
         swing_summary_file=str(swing_file),
-        fps=fps,
-        excluded_joints=tuple(exclude_joints),
     )
     (out_dir / "session_reconstruction.json").write_text(
         summary.model_dump_json(indent=2), encoding="utf-8"
     )
     return summary
-
-
-def _exclude(payload: dict[str, Any], names: Sequence[str]) -> dict[str, Any]:
-    """The cleaned view with the named joints' confidence set to 0 (#9662).
-
-    The fit treats confidence 0 as unobserved; the rigid-segment and
-    symmetry priors still place the joint, so nothing downstream changes shape.
-    """
-    idx = [JOINT_NAMES.index(n) for n in names]
-    rows = []
-    for row in payload["frames"]:
-        conf = list(row["confidence"])
-        for i in idx:
-            conf[i] = 0.0
-        rows.append({**row, "confidence": conf})
-    return {**payload, "frames": rows}
 
 
 def _report_dict(report: CleanReport) -> dict[str, Any]:

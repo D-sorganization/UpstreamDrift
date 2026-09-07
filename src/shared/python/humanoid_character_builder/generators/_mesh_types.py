@@ -12,8 +12,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-
 from src.shared.python.humanoid_character_builder.core.body_parameters import (
     BodyParameters,
 )
@@ -35,10 +33,6 @@ class GeneratedMeshResult:
     # Whether generation was successful
     success: bool
 
-    # Canonical status string ("success", "failure", "partial").
-    # See issue #4522 for the unified BuildResult contract.
-    solver_status: str = "success"
-
     # Path to generated mesh files (segment name -> path)
     mesh_paths: dict[str, Path] = field(default_factory=dict)
 
@@ -56,16 +50,6 @@ class GeneratedMeshResult:
 
     # Additional metadata
     metadata: dict[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        """Derive ``solver_status`` from ``success`` when it was not set.
-
-        Callers written before the #4522 contract only set ``success``; without
-        this they would report ``solver_status="success"`` on a failed build.
-        An explicitly-passed status is left alone, so "partial" survives.
-        """
-        if not self.success and self.solver_status == "success":
-            self.solver_status = "failure"
 
 
 class MeshGeneratorInterface(ABC):
@@ -112,38 +96,3 @@ class MeshGeneratorInterface(ABC):
     def get_supported_segments(self) -> list[str]:
         """Return list of segment names this backend can generate."""
         ...
-
-
-def segment_mesh_by_range(
-    vertices: np.ndarray,
-    faces: np.ndarray,
-    vertex_start: int,
-    vertex_end: int,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Extract a mesh segment by vertex index range.
-
-    A face is kept only when *all* of its vertices fall inside the range, so a
-    triangle straddling a segment boundary belongs to neither segment rather
-    than to both. Kept faces are re-indexed against the extracted vertices, so
-    the returned pair is a self-contained mesh.
-
-    Args:
-        vertices: All mesh vertices, shape (N, 3).
-        faces: All mesh faces, shape (M, 3), 0-indexed vertex refs.
-        vertex_start: Inclusive start of vertex range.
-        vertex_end: Exclusive end of vertex range.
-
-    Returns:
-        (segment_vertices, segment_faces) where faces are re-indexed.
-    """
-    in_range = (faces >= vertex_start) & (faces < vertex_end)
-    face_mask = in_range.all(axis=1)
-    seg_faces_global = faces[face_mask]
-
-    if len(seg_faces_global) == 0:
-        return np.zeros((0, 3)), np.zeros((0, 3), dtype=np.int64)
-
-    unique_verts, inverse = np.unique(seg_faces_global, return_inverse=True)
-    seg_vertices = vertices[unique_verts]
-    seg_faces = inverse.reshape(-1, 3)
-    return seg_vertices, seg_faces
