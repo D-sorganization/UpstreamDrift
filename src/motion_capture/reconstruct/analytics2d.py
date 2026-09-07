@@ -20,11 +20,11 @@ from typing import Any
 
 import numpy as np
 import numpy.typing as npt
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.shared.python.core.contracts import require
 
-from .analytics import SwingEvents, SwingSeries, detect_events
+from .analytics import SwingEvents, SwingSeries, angle_stats, detect_events
 from .temporal import SmootherOptions, smooth
 
 Array = npt.NDArray[np.float64]
@@ -59,6 +59,7 @@ class Swing2DSummary(BaseModel):
     max_shoulder_tilt_deg: float
     max_hip_tilt_deg: float
     events: SwingEvents
+    angles_deg: dict[str, dict[str, float]] = Field(default_factory=dict)
 
 
 def _joint_track(
@@ -188,6 +189,37 @@ def _robust_max(values: Array) -> float:
     return float(np.percentile(finite, 95)) if finite.size else float("nan")
 
 
+def _flexion_2d(prox: Array, joint: Array, dist: Array) -> Array:
+    a, b = prox - joint, dist - joint
+    cos = np.einsum("ij,ij->i", a, b) / np.maximum(
+        np.linalg.norm(a, axis=1) * np.linalg.norm(b, axis=1), 1e-12
+    )
+    return 180.0 - np.degrees(np.arccos(np.clip(cos, -1.0, 1.0)))
+
+
+def joint_angles_2d(
+    payload: dict[str, Any], *, min_confidence: float = 0.5
+) -> dict[str, Array]:
+    """Image-plane elbow and knee flexion per frame (Sports2D-style, #9682).
+
+    Projected angles: exact only when the limb lies in the image plane, so
+    they are named ``*_image`` and reported per frame, NaN when unobserved.
+    """
+
+    def track(name: str) -> Array:
+        return _masked(*_joint_track(payload, name, min_confidence=min_confidence))
+
+    out: dict[str, Array] = {}
+    for side in ("left", "right"):
+        out[f"{side}_elbow_flexion_image"] = _flexion_2d(
+            track(f"{side}_shoulder"), track(f"{side}_elbow"), track(f"{side}_wrist")
+        )
+        out[f"{side}_knee_flexion_image"] = _flexion_2d(
+            track(f"{side}_hip"), track(f"{side}_knee"), track(f"{side}_ankle")
+        )
+    return out
+
+
 def summarize_view_2d(
     payload: dict[str, Any], *, min_confidence: float = 0.5
 ) -> Swing2DSummary:
@@ -206,6 +238,9 @@ def summarize_view_2d(
         max_shoulder_tilt_deg=_robust_max(series.shoulder_turn_deg),
         max_hip_tilt_deg=_robust_max(series.pelvis_turn_deg),
         events=events,
+        angles_deg=angle_stats(
+            joint_angles_2d(payload, min_confidence=min_confidence), events
+        ),
     )
 
 

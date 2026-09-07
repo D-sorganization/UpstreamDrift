@@ -59,6 +59,73 @@ class Chessboard:
         )
 
 
+@dataclass(frozen=True)
+class CharucoBoard:
+    """ChArUco board: ``(columns, rows)`` squares, square and marker size in metres.
+
+    Partial views count: every detected chessboard corner carries its id, so
+    frames at the edge of the field still contribute (#9679).
+    """
+
+    columns: int
+    rows: int
+    square_m: float
+    marker_m: float
+    dictionary: str = "DICT_4X4_50"
+
+    def __post_init__(self) -> None:
+        require(self.columns >= 3 and self.rows >= 3, "board needs >= 3x3 squares")
+        require(self.square_m > 0, "square size must be positive")
+        require(0 < self.marker_m < self.square_m, "marker must fit inside a square")
+
+    def opencv_board(self) -> Any:
+        import cv2
+
+        dictionary = cv2.aruco.getPredefinedDictionary(
+            getattr(cv2.aruco, self.dictionary)
+        )
+        return cv2.aruco.CharucoBoard(
+            (self.columns, self.rows), self.square_m, self.marker_m, dictionary
+        )
+
+    def image(self, width_px: int) -> npt.NDArray[np.uint8]:
+        """A printable board image ``width_px`` wide (grey, white margin)."""
+        require(width_px >= 200, "board image width", width_px)
+        height = int(round(width_px * self.rows / self.columns))
+        img = self.opencv_board().generateImage((width_px, height), marginSize=20)
+        return np.asarray(img, dtype=np.uint8)
+
+
+Board = Chessboard | CharucoBoard
+
+
+def parse_board_spec(text: str, square_m: float | None = None) -> Board:
+    """``9x6`` (chessboard, needs ``square_m``) or ``charuco:7x5:0.04:0.03[:DICT]``."""
+    parts = text.strip().lower().split(":")
+    if parts[0] == "charuco":
+        require(len(parts) >= 4, "charuco:COLSxROWS:SQUARE_M:MARKER_M[:DICT]", text)
+        cols, _, rows = parts[1].partition("x")
+        dictionary = parts[4].upper() if len(parts) > 4 else "DICT_4X4_50"
+        return CharucoBoard(
+            int(cols), int(rows), float(parts[2]), float(parts[3]), dictionary
+        )
+    cols, sep, rows = parts[0].partition("x")
+    require(bool(sep and cols.isdigit() and rows.isdigit()), "board like 9x6", text)
+    require(square_m is not None and square_m > 0, "chessboard needs --square")
+    assert square_m is not None
+    return Chessboard(columns=int(cols), rows=int(rows), square_m=square_m)
+
+
+def board_spec(board: Board) -> dict[str, Any]:
+    out: dict[str, Any] = {"kind": type(board).__name__, "columns": board.columns}
+    out["rows"] = board.rows
+    out["square_m"] = board.square_m
+    if isinstance(board, CharucoBoard):
+        out["marker_m"] = board.marker_m
+        out["dictionary"] = board.dictionary
+    return out
+
+
 class IntrinsicsRecord(BaseModel):
     """What one calibration produced, with its evidence."""
 
@@ -100,10 +167,33 @@ def find_corners(image_bgr: Array, board: Chessboard) -> Array | None:
     return np.asarray(refined, dtype=np.float64).reshape(-1, 2)
 
 
+def find_board(image_bgr: Array, board: Board) -> tuple[Array, Array] | None:
+    """``(object_points (N,3) m, image_points (N,2) px)`` or None when not found.
+
+    A chessboard needs all its corners; a ChArUco board contributes whatever
+    corners were identified (at least six, so a pose is well determined).
+    """
+    if isinstance(board, Chessboard):
+        corners = find_corners(image_bgr, board)
+        return None if corners is None else (board.object_points, corners)
+    import cv2
+
+    detector = cv2.aruco.CharucoDetector(board.opencv_board())
+    gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+    ch_corners, ids, _, _ = detector.detectBoard(gray)
+    if ch_corners is None or ids is None or len(ids) < 6:
+        return None
+    obj, img = board.opencv_board().matchImagePoints(ch_corners, ids)
+    return (
+        np.asarray(obj, dtype=np.float64).reshape(-1, 3),
+        np.asarray(img, dtype=np.float64).reshape(-1, 2),
+    )
+
+
 def calibrate(
     camera_id: str,
-    corner_sets: Sequence[Array],
-    board: Chessboard,
+    corner_sets: Sequence[Array | tuple[Array, Array]],
+    board: Board,
     image_size_px: tuple[int, int],
     *,
     frames_without_board: int = 0,
@@ -119,11 +209,18 @@ def calibrate(
         "too few frames with the board",
         len(corner_sets),
     )
-    n = board.columns * board.rows
+    obj: list[Any] = []
+    img: list[Any] = []
     for c in corner_sets:
-        require(c.shape == (n, 2), "corner set shape", c.shape)
-    obj = [board.object_points.astype(np.float32) for _ in corner_sets]
-    img = [np.asarray(c, dtype=np.float32).reshape(-1, 1, 2) for c in corner_sets]
+        if isinstance(c, tuple):
+            points, pixels = c
+        else:
+            require(isinstance(board, Chessboard), "bare corners need a chessboard")
+            assert isinstance(board, Chessboard)
+            points, pixels = board.object_points, c
+        require(pixels.shape == (points.shape[0], 2), "corner set shape", pixels.shape)
+        obj.append(np.asarray(points, dtype=np.float32).reshape(-1, 1, 3))
+        img.append(np.asarray(pixels, dtype=np.float32).reshape(-1, 1, 2))
     # Initial K/dist are outputs here (no CALIB_USE_INTRINSIC_GUESS flag).
     rms, k, dist, _, _ = cv2.calibrateCamera(
         obj, img, image_size_px, np.zeros((3, 3)), np.zeros(5)
@@ -136,11 +233,7 @@ def calibrate(
         rms_px=float(rms),
         frames_used=len(corner_sets),
         frames_without_board=frames_without_board,
-        board={
-            "columns": board.columns,
-            "rows": board.rows,
-            "square_m": board.square_m,
-        },
+        board=board_spec(board),
     )
 
 
@@ -165,15 +258,15 @@ def frames_from_video(path: Path, *, every: int = 10) -> Iterator[Any]:
 
 
 def calibrate_video(
-    camera_id: str, path: Path, board: Chessboard, *, every: int = 10
+    camera_id: str, path: Path, board: Board, *, every: int = 10
 ) -> IntrinsicsRecord:
     """Find the board in sampled frames of a recording and calibrate."""
-    corners: list[Array] = []
+    corners: list[Array | tuple[Array, Array]] = []
     missed = 0
     size: tuple[int, int] | None = None
     for frame in frames_from_video(path, every=every):
         size = (int(frame.shape[1]), int(frame.shape[0]))
-        found = find_corners(frame, board)
+        found = find_board(frame, board)
         if found is None:
             missed += 1
         else:
