@@ -33,6 +33,7 @@ from src.shared.python.model_generation.core.types import (
     Origin,
 )
 
+from src.shared.python.contracts import require
 from .editor_clipboard import ClipboardMixin
 from .editor_modifications import ModificationMixin
 from .editor_types import (
@@ -481,6 +482,8 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
 
         Same as paste() but requires attach_to parameter.
         """
+        require(bool(target_model_id), "target_model_id must be a non-empty string")
+        require(bool(attach_to), "attach_to must be a non-empty string")
         return self.paste(
             target_model_id,
             attach_to=attach_to,
