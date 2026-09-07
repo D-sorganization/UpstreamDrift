@@ -17,18 +17,24 @@ Configuration (``config.typed_settings.Settings``):
 
 from __future__ import annotations
 
-import hashlib
-import tempfile
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
-
-import requests
 
 from src.shared.python.config.typed_settings import Settings
 from src.shared.python.core.contracts import require
 from src.shared.python.core.error_utils import ModelError
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.pose_estimation.model_files import (
+    default_cache_dir as default_cache_dir,
+)
+from src.shared.python.pose_estimation.model_files import (
+    fetch_verified,
+    https_opener,
+)
+from src.shared.python.pose_estimation.model_files import (
+    sha256_of as sha256_of,
+)
 
 logger = get_logger(__name__)
 
@@ -88,20 +94,6 @@ def model_spec(variant: str) -> PoseModelSpec:
         ) from None
 
 
-def default_cache_dir() -> Path:
-    """``~/.cache/upstreamdrift/models`` — outside the repository, per user."""
-    return Path.home() / ".cache" / "upstreamdrift" / "models"
-
-
-def sha256_of(path: Path) -> str:
-    require(path.is_file(), "path must be an existing file", str(path))
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def verify_pose_model(path: Path, variant: str) -> bool:
     """True when ``path`` matches the pinned digest for ``variant``."""
     return path.is_file() and sha256_of(path) == model_spec(variant).sha256
@@ -142,15 +134,7 @@ def resolve_pose_model(
 
 Opener = Callable[[str], Iterable[bytes]]
 
-
-def _default_opener(url: str) -> Iterable[bytes]:
-    """Stream a pinned Google-storage URL over HTTPS; refuses any other origin."""
-    require(
-        url.startswith(_ALLOWED_ORIGIN), "model URL must be on the pinned origin", url
-    )
-    response = requests.get(url, timeout=60, stream=True)
-    response.raise_for_status()
-    return response.iter_content(chunk_size=_CHUNK_BYTES)
+_default_opener = https_opener((_ALLOWED_ORIGIN,))
 
 
 def download_pose_model(
@@ -167,26 +151,13 @@ def download_pose_model(
     """
     spec = model_spec(variant)
     target_dir = dest_dir or default_cache_dir()
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target = target_dir / spec.filename
-    if verify_pose_model(target, variant):
-        logger.info("pose model %s already present at %s", variant, target)
-        return target
-    logger.info("downloading pose model %s from %s", variant, spec.url)
-    with tempfile.NamedTemporaryFile(dir=target_dir, delete=False) as tmp:
-        tmp_path = Path(tmp.name)
-        for chunk in opener(spec.url):
-            tmp.write(chunk)
-    actual = sha256_of(tmp_path)
-    if actual != spec.sha256:
-        tmp_path.unlink(missing_ok=True)
-        raise ModelError(
-            spec.filename,
-            "download",
-            details=f"failed verification: sha256 {actual} != {spec.sha256}",
-        )
-    tmp_path.replace(target)
-    return target
+    return fetch_verified(
+        spec.url,
+        target_dir / spec.filename,
+        sha256=spec.sha256,
+        size_bytes=spec.size_bytes,
+        opener=opener,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

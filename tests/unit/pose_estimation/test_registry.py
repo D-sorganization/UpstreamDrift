@@ -52,8 +52,12 @@ def fake_estimator_entry():
 
 
 def test_builtin_estimators_registered() -> None:
-    assert implemented_estimator_types() == {"mediapipe", "openpose"}
-    assert [info.name for info in list_estimators()] == ["mediapipe", "openpose"]
+    assert implemented_estimator_types() == {"mediapipe", "openpose", "openpose_dnn"}
+    assert [info.name for info in list_estimators()] == [
+        "mediapipe",
+        "openpose",
+        "openpose_dnn",
+    ]
 
 
 def test_unknown_estimator_lists_valid_names() -> None:

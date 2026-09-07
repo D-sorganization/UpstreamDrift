@@ -185,6 +185,38 @@ _OPENPOSE_SKELETON: tuple[dict[str, Any], ...] = (
 )
 
 
+_BODY25_PARENTS: tuple[tuple[str, str | None], ...] = (
+    ("nose", None),
+    ("neck", "nose"),
+    ("right_shoulder", "neck"),
+    ("right_elbow", "right_shoulder"),
+    ("right_wrist", "right_elbow"),
+    ("left_shoulder", "neck"),
+    ("left_elbow", "left_shoulder"),
+    ("left_wrist", "left_elbow"),
+    ("mid_hip", "neck"),
+    ("right_hip", "mid_hip"),
+    ("right_knee", "right_hip"),
+    ("right_ankle", "right_knee"),
+    ("left_hip", "mid_hip"),
+    ("left_knee", "left_hip"),
+    ("left_ankle", "left_knee"),
+    ("right_eye", "nose"),
+    ("left_eye", "nose"),
+    ("right_ear", "right_eye"),
+    ("left_ear", "left_eye"),
+    ("left_big_toe", "left_ankle"),
+    ("left_small_toe", "left_big_toe"),
+    ("left_heel", "left_ankle"),
+    ("right_big_toe", "right_ankle"),
+    ("right_small_toe", "right_big_toe"),
+    ("right_heel", "right_ankle"),
+)
+_OPENPOSE_DNN_SKELETON: tuple[dict[str, Any], ...] = tuple(
+    {"name": name, "parent": parent} for name, parent in _BODY25_PARENTS
+)
+
+
 def _make_mediapipe(**options: Any) -> PoseEstimator:
     from src.shared.python.pose_estimation.mediapipe_estimator import (
         MediaPipeEstimator,
@@ -204,6 +236,17 @@ def _make_openpose(**options: Any) -> PoseEstimator:
     )
 
     return OpenPoseEstimator()
+
+
+def _make_openpose_dnn(**options: Any) -> PoseEstimator:
+    from src.shared.python.pose_estimation.openpose_dnn_estimator import (
+        OpenPoseDnnEstimator,
+    )
+
+    return OpenPoseDnnEstimator(
+        input_height=int(options.get("input_height", 368)),
+        min_peak=float(options.get("min_peak", 0.05)),
+    )
 
 
 register_estimator(
@@ -230,5 +273,19 @@ register_estimator(
         install_hint="OpenPose Python bindings are not installed on the server",
         skeleton=_OPENPOSE_SKELETON,
         factory=_make_openpose,
+    )
+)
+register_estimator(
+    EstimatorInfo(
+        name="openpose_dnn",
+        display_name="OpenPose BODY_25 (OpenCV DNN, CPU)",
+        description="OpenPose BODY_25 Caffe network run through cv2.dnn",
+        probe_module="cv2",
+        install_hint=(
+            "OpenCV is not installed; fetch the BODY_25 model with "
+            "python3 -m src.shared.python.pose_estimation.openpose_models"
+        ),
+        skeleton=_OPENPOSE_DNN_SKELETON,
+        factory=_make_openpose_dnn,
     )
 )

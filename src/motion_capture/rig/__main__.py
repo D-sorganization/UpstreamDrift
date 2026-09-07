@@ -16,6 +16,10 @@ Commands:
 - ``proxy --session DIR [--encoder E] [--crf N]``: write browser-playable H.264
   ``.mp4`` proxies beside each recording and ``proxies.json``. Exit 0 when
   every usable recording has a proxy.
+- ``compare --session DIR --estimators a,b [--max-frames N]``: ingest the bundle
+  with each named estimator and write ``comparison_<view>.json`` / ``.md``
+  (coverage, confidence, jitter, cross-detector agreement). Exit 0 when every
+  estimator produced every view.
 - ``ingest --session DIR [--out DIR] [--estimator NAME] [--max-frames N]``: run the
   registered pose estimator over every recording and write per-view 2-D
   observations with provenance and the session's timing block. Exit 0 when
@@ -143,6 +147,11 @@ def _parser() -> argparse.ArgumentParser:
     )
     ing.add_argument("--estimator", default="mediapipe")
     ing.add_argument("--max-frames", type=int, default=None)
+    cmp = sub.add_parser("compare", help="run two estimators on one bundle")
+    cmp.add_argument("--session", type=Path, required=True)
+    cmp.add_argument("--estimators", default="mediapipe,openpose_dnn")
+    cmp.add_argument("--max-frames", type=int, default=None)
+    cmp.add_argument("--min-confidence", type=float, default=0.5)
     return parser
 
 
@@ -323,12 +332,48 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     return 0 if produced == len(index.views) else (1 if produced else 2)
 
 
+def cmd_compare(args: argparse.Namespace) -> int:
+    from .compare import compare_view, load_series
+    from .ingest import ingest_bundle, registry_estimator_factory
+
+    names = [n.strip() for n in args.estimators.split(",") if n.strip()]
+    if len(names) not in (1, 2):
+        raise SystemExit("--estimators takes one or two names")
+    per_view: dict[str, dict[str, Path]] = {}
+    complete = True
+    for name in names:
+        out_dir = args.session / f"observations_{name}"
+        index = ingest_bundle(
+            args.session,
+            out_dir,
+            registry_estimator_factory(name),
+            max_frames=args.max_frames,
+        )
+        for view in index.views:
+            if view.status != "available" or not view.file:
+                complete = False
+                continue
+            per_view.setdefault(view.view, {})[name] = out_dir / view.file
+    for view_name, files in per_view.items():
+        series = {n: load_series(p) for n, p in files.items()}
+        report = compare_view(view_name, series, min_confidence=args.min_confidence)
+        (args.session / f"comparison_{view_name}.json").write_text(
+            report.model_dump_json(indent=2), encoding="utf-8"
+        )
+        (args.session / f"comparison_{view_name}.md").write_text(
+            report.markdown(), encoding="utf-8"
+        )
+        logger.info("comparison for %s:\n%s", view, report.markdown())
+    return 0 if complete else 1
+
+
 _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "plan-check": cmd_plan_check,
     "capture": cmd_capture,
     "record": cmd_record,
     "session-check": cmd_session_check,
     "proxy": cmd_proxy,
+    "compare": cmd_compare,
     "ingest": cmd_ingest,
 }
 
