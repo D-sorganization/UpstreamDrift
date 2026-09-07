@@ -1,0 +1,10 @@
+{
+  "schema_version": "rig-plan/1.0.0",
+  "name": "lab-three-view-sonnet",
+  "cameras": [
+    { "view": "cam_a", "serial": "2605160001" },
+    { "view": "cam_b", "serial": "2601240001" },
+    { "view": "cam_c", "port_path": "path_D-D35A8F7-0-0000" }
+  ],
+  "notes": "All three ELP AR0234 on the Sonnet eGPU, root ports 4/5/6 of root hub 9&1d291187 (validated 2026-09-06, rig_report_20260906_143510). TS4 free."
+}

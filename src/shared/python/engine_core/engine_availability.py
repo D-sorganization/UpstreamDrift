@@ -157,16 +157,19 @@ def _import_probe_target(import_name: str) -> None:  # noqa: C901
                 "Incorrect pinocchio package (likely nose plugin). Please install pinocchio from conda-forge."
             )
     elif import_name == "mediapipe":
-        # mediapipe>=0.10 removed the legacy mp.solutions API.
-        # We probe for mp.solutions.pose to accurately report whether
-        # the version installed is compatible with our estimator code.
-        mp = importlib.import_module("mediapipe")
-        if not hasattr(mp, "solutions") or not hasattr(mp.solutions, "pose"):
+        # MediaPipeEstimator drives the Tasks API (mediapipe>=0.10, #9592).
+        # Distinguish a legacy-only install from a missing one so the reason
+        # is actionable; the model file is a separate runtime check that
+        # load_model() reports through ModelError.
+        importlib.import_module("mediapipe")
+        try:
+            importlib.import_module("mediapipe.tasks.python.vision")
+        except ImportError as exc:
             raise ImportError(
-                "mediapipe is installed but mp.solutions.pose is not available. "
-                "mediapipe>=0.10 removed the legacy solutions API. "
-                "Pin mediapipe<0.10 or update MediaPipeEstimator to use the new Tasks API."
-            )
+                "mediapipe is installed but lacks the Tasks API "
+                "(mediapipe.tasks.python.vision); upgrade to mediapipe>=0.10. "
+                "MediaPipeEstimator no longer uses the legacy mp.solutions API."
+            ) from exc
     else:
         module = importlib.import_module(import_name)
         if type(module).__module__ == "unittest.mock":
