@@ -4245,6 +4245,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-06 | #9636 | Retargeted the test that guards the mypy exclusion budget's re-attestation dates. The assertion derives the bound from the budget's own schedule, and repository-file reads are anchored to the repo root. |
 | 2026-09-09 | #9610 | Reconciled the ground-reaction bibliography against original sources in grf_source_reconciliation.json, mapping GRF, CoP, free-moment, and segment-power topics to verified publications. |
 | 2026-09-09 | #9889 | Unify comparison preview/export through the coaching compositor; apply motion opacity and coverage-aware expert homographies; retain decoders, preserve odd source pixels and verify complete staged output/input identity before publication. |
 | 2026-09-09 | #9890 | Add instructor placement, independent expert event pairing, notes, undo/reset and guarded stale-evidence review; keep responsive comparison workflow and capability diagrams aligned. |
