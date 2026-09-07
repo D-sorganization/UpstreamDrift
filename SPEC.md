@@ -27,6 +27,40 @@ Additionally:
   survived separator replacement and resolved to the cache directory's parent.
 - `ModelLibrary.download_model` names the rejected scheme when a `source_url`
   is not HTTPS, instead of reporting it as a non-absolute URL.
+## Restore Xacro, ROS and GitHub-Auth External Integration (#9620)
+
+Restores functionality removed by the 14-issue squash `b8d95ad25`, which deleted
+implementations rather than relocating them:
+
+- `URDFParser` regains `_is_xacro`, `_has_xacro_namespace` and
+  `_preprocess_xacro`, invoked from a new `_read_source` helper. A `.xacro`
+  source is expanded through the `xacro` CLI before parsing; expansion failure
+  falls back to parsing the raw text, since a file may declare the namespace
+  without using any directives.
+- `URDFParser._resolve_mesh_path` resolves `package://` URIs through
+  `ROS_PACKAGE_PATH`, `CMAKE_PREFIX_PATH` (catkin layout, under `src/`) and
+  `COLCON_PREFIX_PATH` after searching directories near the URDF.
+  `_validate_mesh_filename` still runs first, so traversal segments and foreign
+  URI schemes are rejected before any lookup. `_split_search_path` splits these
+  variables on both `:` and `;` while rejoining Windows drive letters.
+- `GitHubRepository` regains `_build_api_request`, `_api_request_with_retry`,
+  `_single_api_request` and `_parse_link_header`: `Authorization` headers from
+  `GITHUB_TOKEN`, exponential backoff on 5xx, no retry on 4xx, and `Link`
+  header pagination. Requests route through the existing `_urlopen_https` host
+  allowlist, and `_scan_directory` consumes them.
+- `CacheEntry` regains `version` through `to_dict`/`from_dict`; `ModelCache.put`
+  always computes a SHA-256 checksum and records a version, and `ModelCache.get`
+  validates integrity by delegating to `verify()`, returning `None` for a
+  corrupted entry.
+- `URDFParser.parse` regains the opt-in Rust fast path (`UPSTREAM_URDF_USE_RUST`)
+  via a new `_try_rust_fast_path` helper; `_urdf_rust_facade` had survived the
+  squash with no remaining call site.
+- `make_request_with_backoff` in
+  `src/shared/python/model_generation/library/_rate_limiter.py` is annotated
+  `http.client.HTTPResponse`; the previous `urllib.request.Response` does not
+  exist.
+
+`tests/unit/tools/model_generation/` moves from 74 failing to 38 failing.
 
 
 ## Enforce Vendored-Fallback Hard Failure in CI (#9655)
@@ -3920,10 +3954,12 @@ blocks Python package publication on the built-wheel smoke matrix.
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
 | 2026-09-07 | #9676 | Restored the model_generation REST API request pre-flight deleted by the squash `b8d95ad25` -- `MODEL_GEN_API_KEY` authentication with `secrets.compare_digest`, per-client-IP `MODEL_GEN_RATE_LIMIT` sliding-window rate limiting, and `MODEL_GEN_CORS_ORIGINS` CORS headers, all three of which had been inert. The deletion was not the #1953 facade split: `_add_security_headers` lived beside them and did survive into `rest_api_routes.py`. Both checks run before route matching so 401 cannot be distinguished from 404 to enumerate routes, and CORS is attached in `_secure_response` so error responses carry it too. Also fixed a path traversal in `ModelCache.get_cache_path`, where a bare `".."` survived separator flattening and resolved to the cache directory's parent, and made `ModelLibrary` name a rejected URL scheme rather than reporting it as non-absolute. `tests/unit/tools/model_generation/`: 74 failing -> 66 failing. (#9674) |
+| 2026-09-07 | #9673 | Restored xacro preprocessing, ROS `package://` resolution and GitHub API authentication/retry/pagination deleted by the 14-issue squash `b8d95ad25`, plus `CacheEntry.version` with checksum validation on retrieval and the opt-in Rust URDF fast path whose only call site the same commit removed. Each restore is folded into the hardening that landed since rather than reverted onto it: `_validate_mesh_filename` still runs before any `package://` lookup, GitHub requests still route through the `_urlopen_https` host allowlist, and `ModelCache.get` delegates to the existing `verify()` instead of duplicating the comparison. Deviating from a pure restore, `_split_search_path` rejoins Windows drive letters that the original `.split(":")` severed. `tests/unit/tools/model_generation/`: 74 failing -> 38 failing. (#9620) |
 | 2026-09-07 | n/a | Optimized vector magnitude checks in swing flight pipeline gui using math.hypot (spec-exempt: micro-optimization) |
 | 2026-09-07 | #9631 | Bumped the release version 2.1.2 -> 2.1.3 across every surface `scripts/check_version_consistency.py` audits, plus this Identity table and SECURITY.md's footer. This is the fix-forward release for #9631: the pushed `v2.1.2` tag's `release.yml` run built a wheel, but both `smoke-python-wheel` jobs failed because `SharedImportAliasFinder` rewrote `src.shared.python.config` into the pinned Tools tree, whose unrelated `config` lacks `get_database_pool_pre_ping`, so `import src.api.local_server` and `upstream-drift --help` both failed and `create-release`/`publish-pypi` were skipped -- no wheel, sdist, SBOM, checksums, PyPI distribution or GitHub release exists for 2.1.2. Fixed upstream in D-sorganization/Tools#5049 and carried here by the pin bump to `132fc7331e`. Per `docs/operations/release-runbook.md` "Failed Release Recovery -- Fix Forward, Never Move a Tag", `v2.1.2` is retained where it is and superseded by 2.1.3; CHANGELOG entries staged for 2.1.2 carry forward under `[2.1.3] - 2026-09-07` with a retained-and-superseded note. No tag is created by this change -- tagging is the release operator's signed step. |
 | 2026-09-07 | #9631 | Bumped the `vendor/ud-tools` pin to Tools `132fc7331e`, which carries Tools#5048's fix to `_external_src_package_is_available()`, and converged this repository's `import_aliases` child copy on it. That predicate's `repo_root` test describes a repository layout; in the flattened wheel `_TOOLS_SRC_ROOT` was the install root and `repo_root` its parent, so every installed package -- our own `src` included -- read as internal and `SharedImportAliasFinder` rewrote every `src.shared.python.<root>` into the Tools tree. Our `config` is a 33-symbol package unrelated to Tools' 5-symbol one, so `src/api/database.py`'s import of `get_database_pool_pre_ping` resolved into Tools' copy, the v2.1.2 wheel could not `import src.api.local_server`, `upstream-drift --help` exited non-zero, and the release published no artifacts. Verified in a wheel-shaped layout assembled from the new pin: `config` resolves here with the symbol present, the retired `logging_pkg` still resolves from the Tools tree, and Tools' own `shared.python.config` still serves `get_env`. `Cargo.toml`'s `tools-core` rev bumped to match; `check_tools_pins.py` reports both pins consistent. |
 | 2026-09-07 | #9631 | The retired-child-copy fallback in `src/__init__.py` now serves a retired cluster from either Tools tree -- the pinned `vendor/ud-tools` checkout or an installed Tools distribution -- rather than the vendored one alone. Tools#5048 corrects a predicate that made `SharedImportAliasFinder` rewrite every `src.shared.python.<root>` to `shared.python.<root>` in a flattened install; that blanket rewrite was wrong (it also captured clusters this repository owns, which is why the v2.1.2 wheel could not import `get_database_pool_pre_ping` from our 33-symbol `config`, #9631) but it happened to cover retired clusters too. Removing it leaves this finder responsible for them, and Tools' downstream-consumer contracts install the distribution into a checkout with no submodule, where the vendored gate never registered the finder at all and `src.shared.python.logging_pkg` became unresolvable. `_cluster_is_still_owned()` still keeps the fallback away from clusters this repository owns, verified with the vendored tree hidden: the retired cluster resolves to the installed distribution while `config` stays ours. |
+| 2026-09-07 | #9669 | Guided markerless mocap workflow (#9658): Capture Rig step model with readiness checks; `rig import` (bundles from files, single or multi-camera), `ingest --option/--out` per estimator, `reliability` joint grades, `analyze` 2-D events/tempo, `reconstruct --exclude-joints`, `export` TRC + canonical JSON; generated `docs/motion_capture/user_guide.md` with freshness test. |
 | 2026-09-07 | #9649 | Capture Rig launcher tile (`src/tools/capture_rig`): camera controls, record/proxy/ingest/calibrate/reconstruct over the rig CLI as a child process, frame-accurate playback with registry-driven pose overlay, swing-summary table; rig CLI `--exposure/--gain/--auto-exposure`; BODY_25 keeps native mid_hip/neck in the reconstruct layout (#9619). |
 | 2026-09-07 | #9646 | `reconstruct.intrinsics` + `rig calibrate-intrinsics`: chessboard intrinsic calibration per view into `intrinsics.json` with K, distortion, RMS and frame evidence; < 8 usable frames refused, RMS > 1 px reported below standard (C2 #9622 of #9619). |
 | 2026-09-07 | #9643 | Acceptance program gains the synthetic algorithm thresholds the harness asserts in CI; camera rig runbook gains the ingest and reconstruct steps (#9619). |

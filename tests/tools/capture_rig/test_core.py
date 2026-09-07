@@ -243,3 +243,14 @@ def test_video_reader_seeks_to_exact_frames(tmp_path: Path) -> None:
         assert reader.read(12) is None
     assert clamp_index(-3, 12) == 0 and clamp_index(40, 12) == 11
     assert clamp_index(4, 0) == 0
+
+
+def test_child_environment_puts_src_first_on_pythonpath() -> None:
+    import os
+
+    env = commands.child_environment({"PYTHONPATH": "x", "HOME": "h"})
+    parts = env["PYTHONPATH"].split(os.pathsep)
+    assert parts[0] == str(commands.repo_root() / "src") and parts[1] == "x"
+    assert env["HOME"] == "h"
+    again = commands.child_environment(env)
+    assert again["PYTHONPATH"] == env["PYTHONPATH"]  # idempotent

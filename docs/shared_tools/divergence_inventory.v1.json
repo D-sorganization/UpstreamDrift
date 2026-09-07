@@ -15,7 +15,7 @@
     "diverged": 277,
     "ud-only": 1188,
     "tools-only": 518,
-    "spelling-only": 131
+    "spelling-only": 130
   },
   "packages": {
     "README.md": {
@@ -450,7 +450,7 @@
       "diverged": 52,
       "ud-only": 18,
       "tools-only": 0,
-      "spelling-only": 20
+      "spelling-only": 19
     },
     "motion_matching": {
       "identical": 0,
@@ -9869,12 +9869,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "converters",
-      "ud_bytes": 22423,
+      "ud_bytes": 29632,
       "tools_bytes": 22419,
-      "byte_delta": 4,
+      "byte_delta": 7213,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/core/__init__.py",
@@ -10373,9 +10373,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 11979,
+      "ud_bytes": 12936,
       "tools_bytes": 11192,
-      "byte_delta": 787,
+      "byte_delta": 1744,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10409,9 +10409,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 17561,
+      "ud_bytes": 22012,
       "tools_bytes": 17044,
-      "byte_delta": 517,
+      "byte_delta": 4968,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -32504,7 +32504,7 @@
       "ud": {
         "author": "Dieter Olson",
         "date": "2026-09-07",
-        "commit": "d2d40406164a13e9bed4da0400a3342a5bf9d15c"
+        "commit": "993e498e520125f6729b343142efd6d65df2b223"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32543,7 +32543,7 @@
       "ud": {
         "author": "Dieter Olson",
         "date": "2026-09-07",
-        "commit": "d2d40406164a13e9bed4da0400a3342a5bf9d15c"
+        "commit": "993e498e520125f6729b343142efd6d65df2b223"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32556,7 +32556,7 @@
       "ud": {
         "author": "Dieter Olson",
         "date": "2026-09-07",
-        "commit": "d2d40406164a13e9bed4da0400a3342a5bf9d15c"
+        "commit": "993e498e520125f6729b343142efd6d65df2b223"
       },
       "tools": {
         "author": "Dieter Olson",
