@@ -1,5 +1,26 @@
 # SPEC.md — Repository Specification Document
 
+## Restore the Launcher-Owned Sidekick Action Bridge (#9675)
+
+`AIAssistantPanel` (`src/shared/python/ai/gui/assistant_panel.py`) regains the
+Sidekick action bridge from #7209, removed by the squash `b8d95ad25`:
+
+- `set_action_service` attaches a `SidekickActionService`, wires the panel's
+  main-thread dispatcher into it and builds a `SidekickAgentPlanner`. Passing
+  `None` detaches both and restores plain-chat behaviour.
+- `handle_sidekick_tool_calls` plans tool calls into a `ChatActionEnvelope` of
+  confirmation chips. Planning does not execute: a model-proposed action still
+  requires user confirmation.
+- `invoke_sidekick_action` dispatches through the service.
+- `_sidekick_tool_declarations` exports the planner's actions in the active
+  provider's tool format, and `_build_tool_declarations` appends them to the
+  registry-derived declarations.
+- `_populate_cli_provider_entries` appends discovered CLI providers to a
+  provider combo behind a separator and an `— CLI Agents —` header.
+- `_refresh_prompt_memory` sets `sidekick_system_prompt` in the conversation
+  metadata while a service is attached and removes it when detached.
+
+
 ## Restore REST API Authentication, Rate Limiting and CORS (#9674)
 
 Restores the `model_generation` REST API request pre-flight deleted by the
@@ -3953,6 +3974,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| 2026-09-07 | #9688 | Restored the launcher-owned Sidekick action bridge on `AIAssistantPanel` (#7209), removed by `b8d95ad25`: `set_action_service`, `handle_sidekick_tool_calls`, `invoke_sidekick_action`, `_sidekick_tool_declarations` with the `_build_tool_declarations` line that consumes it, `_populate_cli_provider_entries`, and the Sidekick branch of `_refresh_prompt_memory`. Every module the bridge depends on survived the squash, so only the panel's connection to them was cut. The `_refresh_prompt_memory` case is behaviour deleted from inside a surviving function, which the symbol-level audit in #9675 explicitly cannot detect and which its own caveat predicted. `tests/unit/sidekick/` + `tests/unit/launcher/cli_providers/`: 36 failing -> 29, 7 newly passing and 0 newly failing compared as failure sets. (#9675) |
 | 2026-09-07 | #9676 | Restored the model_generation REST API request pre-flight deleted by the squash `b8d95ad25` -- `MODEL_GEN_API_KEY` authentication with `secrets.compare_digest`, per-client-IP `MODEL_GEN_RATE_LIMIT` sliding-window rate limiting, and `MODEL_GEN_CORS_ORIGINS` CORS headers, all three of which had been inert. The deletion was not the #1953 facade split: `_add_security_headers` lived beside them and did survive into `rest_api_routes.py`. Both checks run before route matching so 401 cannot be distinguished from 404 to enumerate routes, and CORS is attached in `_secure_response` so error responses carry it too. Also fixed a path traversal in `ModelCache.get_cache_path`, where a bare `".."` survived separator flattening and resolved to the cache directory's parent, and made `ModelLibrary` name a rejected URL scheme rather than reporting it as non-absolute. `tests/unit/tools/model_generation/`: 74 failing -> 66 failing. (#9674) |
 | 2026-09-07 | #9673 | Restored xacro preprocessing, ROS `package://` resolution and GitHub API authentication/retry/pagination deleted by the 14-issue squash `b8d95ad25`, plus `CacheEntry.version` with checksum validation on retrieval and the opt-in Rust URDF fast path whose only call site the same commit removed. Each restore is folded into the hardening that landed since rather than reverted onto it: `_validate_mesh_filename` still runs before any `package://` lookup, GitHub requests still route through the `_urlopen_https` host allowlist, and `ModelCache.get` delegates to the existing `verify()` instead of duplicating the comparison. Deviating from a pure restore, `_split_search_path` rejoins Windows drive letters that the original `.split(":")` severed. `tests/unit/tools/model_generation/`: 74 failing -> 38 failing. (#9620) |
 | 2026-09-07 | n/a | Optimized vector magnitude checks in swing flight pipeline gui using math.hypot (spec-exempt: micro-optimization) |
