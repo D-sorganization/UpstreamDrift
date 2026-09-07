@@ -36,6 +36,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.theme.style_constants import Styles
+from src.shared.python.pose_estimation.video_files import video_dialog_filter
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +198,7 @@ class OpenPoseGUI(QMainWindow):
     def load_video(self) -> None:
         """Open file dialog to select a video file."""
         file_name, _ = QFileDialog.getOpenFileName(
-            self, "Select Video", "", "Video Files (*.mp4 *.avi *.mov)"
+            self, "Select Video", "", video_dialog_filter()
         )
         if file_name:
             self._video_path = file_name
