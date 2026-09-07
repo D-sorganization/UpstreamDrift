@@ -4,50 +4,66 @@
 and runs with ``--strict-config``. CI lanes that install only ``pytest`` (the
 hash-locked articulated-authority lane, the rolling MuJoCo/Pinocchio lane) must
 still be able to collect tests, so the root ``conftest.py`` registers those keys
-when their plugin is absent. ``-p no:<plugin>`` reproduces the plugin-less
-environment inside a venv that has the plugins installed.
+when their plugin is inactive.
+
+The mechanism is exercised with ``pytester`` in an isolated temporary rootdir
+that carries a copy of the real root conftest and the same three ini keys under
+``--strict-config``. ``-p no:<plugin>`` reproduces the plugin-less environment
+inside a venv that has the plugins installed, without collecting this
+repository's heavy test tree.
 """
 
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+pytest_plugins = ["pytester"]
 pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFTEST = ROOT / "conftest.py"
 
+_PYPROJECT = """
+[tool.pytest.ini_options]
+addopts = "--strict-config -p no:cacheprovider"
+asyncio_mode = "auto"
+timeout = 60
+timeout_method = "thread"
+"""
 
-def _run_pytest(*extra: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "pytest",
-            "-p",
-            "no:cacheprovider",
-            *extra,
-            "--collect-only",
-            "-q",
-            str(Path(__file__)),
-        ],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        timeout=180,
-        check=False,
-    )
+_TRIVIAL_TEST = """
+def test_ok():
+    assert True
+"""
 
 
-def test_collection_survives_without_asyncio_and_timeout_plugins() -> None:
-    result = _run_pytest("-p", "no:asyncio", "-p", "no:timeout")
-    combined = result.stdout + result.stderr
+def _isolated_repo(pytester: pytest.Pytester) -> None:
+    pytester.makeconftest(CONFTEST.read_text(encoding="utf-8"))
+    pytester.makefile(".toml", pyproject=_PYPROJECT)
+    pytester.makepyfile(test_trivial=_TRIVIAL_TEST)
+
+
+def test_collection_survives_without_asyncio_and_timeout_plugins(
+    pytester: pytest.Pytester,
+) -> None:
+    _isolated_repo(pytester)
+    result = pytester.runpytest_inprocess("-p", "no:asyncio", "-p", "no:timeout", "-q")
+    combined = "\n".join(result.outlines + result.errlines)
     assert "Unknown config option" not in combined, combined
-    assert result.returncode == 0, combined
+    assert result.ret == 0, combined
+    result.assert_outcomes(passed=1)
+
+
+def test_collection_unchanged_with_plugins_active(pytester: pytest.Pytester) -> None:
+    _isolated_repo(pytester)
+    result = pytester.runpytest_inprocess("-q")
+    combined = "\n".join(result.outlines + result.errlines)
+    assert "Unknown config option" not in combined, combined
+    assert result.ret == 0, combined
+    result.assert_outcomes(passed=1)
 
 
 class _FakePluginManager:
@@ -84,10 +100,3 @@ def test_shim_registers_only_keys_of_inactive_plugins(
     module = _load_root_conftest()
     keys = module._missing_plugin_ini_keys(_FakePluginManager(active))
     assert {name for name, _, _ in keys} == expected
-
-
-def test_collection_unchanged_with_plugins_active() -> None:
-    result = _run_pytest()
-    combined = result.stdout + result.stderr
-    assert "Unknown config option" not in combined, combined
-    assert result.returncode == 0, combined
