@@ -13,6 +13,10 @@ Commands:
   (``plan.json``, ``recordings.json``, ``session_manifest.json``). Same exit
   codes as ``capture``. ``--dry-run`` records nothing and exercises the bundle.
 - ``session-check --session DIR``: validate a bundle on disk. Exit 0 when sound.
+- ``ingest --session DIR [--out DIR] [--estimator NAME] [--max-frames N]``: run the
+  registered pose estimator over every recording and write per-view 2-D
+  observations with provenance and the session's timing block. Exit 0 when
+  every view produced observations, 1 when some did, 2 when none did.
 """
 
 from __future__ import annotations
@@ -27,6 +31,7 @@ from pathlib import Path
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .bundle import build_index, check_bundle, write_bundle
+from .ingest import ingest_bundle, registry_estimator_factory
 from .probe import probe_recording
 from .plan import RigPlan, check_plan
 from .probe import RecordingProbe
@@ -93,6 +98,13 @@ def _parser() -> argparse.ArgumentParser:
     )
     chk = sub.add_parser("session-check", help="validate a session bundle on disk")
     chk.add_argument("--session", type=Path, required=True)
+    ing = sub.add_parser("ingest", help="pose-estimate every recording in a bundle")
+    ing.add_argument("--session", type=Path, required=True)
+    ing.add_argument(
+        "--out", type=Path, default=None, help="default: <session>/observations"
+    )
+    ing.add_argument("--estimator", default="mediapipe")
+    ing.add_argument("--max-frames", type=int, default=None)
     return parser
 
 
@@ -229,11 +241,40 @@ def cmd_session_check(args: argparse.Namespace) -> int:
     return 0 if check.ok else 1
 
 
+def cmd_ingest(args: argparse.Namespace) -> int:
+    out_dir = args.out or (args.session / "observations")
+    index = ingest_bundle(
+        args.session,
+        out_dir,
+        registry_estimator_factory(args.estimator),
+        max_frames=args.max_frames,
+    )
+    for view in index.views:
+        logger.info(
+            "%s: %s frames_with_pose=%s/%s%s",
+            view.view,
+            view.status,
+            view.frames_with_pose,
+            view.frames_total,
+            f" - {view.reason}" if view.reason else "",
+        )
+    produced = sum(1 for v in index.views if v.status == "available")
+    logger.info(
+        "ingest %s: %d/%d views -> %s",
+        args.session,
+        produced,
+        len(index.views),
+        out_dir,
+    )
+    return 0 if produced == len(index.views) else (1 if produced else 2)
+
+
 _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "plan-check": cmd_plan_check,
     "capture": cmd_capture,
     "record": cmd_record,
     "session-check": cmd_session_check,
+    "ingest": cmd_ingest,
 }
 
 

@@ -122,6 +122,34 @@ the recordings imply. Exit 0 when sound. Later stages (ingest, alignment,
 export) read bundles, so this is the gate between "the cameras ran" and "this
 session can be trusted".
 
+## Ingest
+
+```bash
+python3 -m motion_capture.rig ingest --session sessions/<date>-record
+```
+
+Runs the registered pose estimator (`mediapipe` by default — the Tasks-API
+`MediaPipeEstimator`, issue #9602) over every successful recording in a bundle
+and writes `observations/<view>.json`: one `KeypointObservation` per frame in
+UpstreamDrift's existing observation records (pixel coordinates, per-keypoint
+confidence, `time_s` from the recording's frame index and rate), the
+`DetectorLayout` naming the keypoint order, provenance (estimator, model path
+and variant, mediapipe version, camera identity, requested mode) and the
+session's `timing` block copied verbatim. `observations.json` indexes the
+views; a view whose recording failed is `unavailable` with the reason rather
+than absent. Single-camera depth stays model-conditioned and is not written;
+`CanonicalObservations` (which needs camera calibrations) is assembled by the
+calibration stage, not here.
+
+When the session was captured with `--timing` (issue #9603), each row also
+carries `time_ref_s`, `time_ref_uncertainty_s` and `time_ref_source`: the same
+instant expressed in the reference view's arrival clock through the strobe
+offset, with the quadrature uncertainty. The per-view `time_s` is never
+rewritten. `timing_report.json` restates each view's offset, uncertainty and
+rate deviation and adds the skew it is expected to accumulate over its
+recording, which is what tells the reconstruction stage whether one offset per
+session is sufficient.
+
 ## Extending the Rig
 
 - **A new camera type** implements the `FrameSource` protocol in `sources.py`:
