@@ -62,6 +62,53 @@ point and adds its frames to the pool that constrains the shared parameters,
 so camera placement and bone lengths sharpen over time instead of being
 re-estimated from scratch.
 
+### The Joint Fit, as Built
+
+`reconstruct/geometry.py` triangulates one point from any number of
+calibrated views (weighted DLT), reports the reprojection residual per view
+and a first-order covariance, and assigns blame to a wrong view by leaving
+each view out in turn — a wrong view contaminates the joint solution, so its
+own residual is not reliably the largest. Two views cannot assign blame: an
+error along the epipolar line is absorbed by depth, which is the reason the
+acceptance program requires a third useful view.
+
+`reconstruct/bundle.py` is the joint least squares itself: camera rotation
+and position for every camera but the first (the gauge), every joint in
+every frame, and one length per segment shared by all frames, with rigid
+segments, an anthropometric prior, left/right symmetry and **one measured
+length on the subject as the scale anchor**. With one camera fixed, a global
+scale about its centre leaves every reprojection unchanged, so scale must
+come from the subject; a soft anchor gets traded away by surviving outliers,
+which is why the anchor is treated as known. Robustness is iteratively
+reweighted least squares on the reprojection and segment terms only (a
+library-wide robust loss would also flatten the anchor). After convergence
+each offending point is judged by the triangulation rule, points left with a
+single view are declared unobservable and placed by the segments alone, and
+the cameras and lengths are refitted without the rejected observations. The
+Jacobian is analytic and sparse; 40 frames of three views fit in about two
+seconds.
+
+On the synthetic harness (1 px noise, 2 % occlusion, cameras started 3
+degrees and 15 cm off, a subject 6 % taller than the prior): camera rotation
+within 0.5 degrees and position within 3 cm, every bone length within 2 %,
+joints within about 1.4 cm median. With 3 % gross outliers: injected outliers
+flagged with recall 0.9 and precision 0.85 or better, the same camera and
+length accuracy, and the handful of points every view got wrong reported as
+unobservable rather than invented.
+
+```bash
+python3 -m motion_capture.reconstruct synth --out sessions/synthetic --frames 120
+python3 -m motion_capture.reconstruct fit --bundle sessions/synthetic --anchor neck=0.53
+```
+
+`fit` reads `observations/<view>.json` (synthetic or from `rig ingest`),
+starts from the cameras in `truth.json` or from `--cameras records.json`
+(the previous take's solution), and writes `reconstruction.json`: refined
+camera records, learned bone lengths, per-view residual statistics, every
+rejected observation with its residual, the count of unobservable points,
+and — when truth is present — the metrics. `joints_3d_m.npy` holds the
+fitted trajectory for the IK stage.
+
 ### Outliers Are Rejected, Not Averaged
 
 The cost uses robust kernels (Huber for the first pass, Geman-McClure once the
