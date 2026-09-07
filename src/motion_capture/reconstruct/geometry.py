@@ -131,7 +131,7 @@ def triangulate(
     usable = [i for i in range(len(cams)) if conf[i] > 0 and np.all(np.isfinite(px[i]))]
     rejected: list[str] = [ids[i] for i in range(len(cams)) if i not in usable]
     residuals: dict[str, float] = {}
-    point = np.full(3, np.nan)
+    point: Array = np.full(3, np.nan)
 
     def solve(subset: list[int]) -> tuple[Array, Array]:
         sub = [cams[i] for i in subset]

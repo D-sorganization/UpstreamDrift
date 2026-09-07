@@ -143,14 +143,14 @@ class _Problem:
         self.prior = np.array([prior[name] for _, _, name in self.segments])
         self.n_cam, self.n_t, self.n_k = obs.confidence.shape
         self.mask: Mask = np.isfinite(obs.pixels).all(axis=3) & (obs.confidence > 0)
-        self.weights = np.sqrt(np.clip(obs.confidence, 0.0, 1.0)) * self.mask
+        self.weights: Array = np.sqrt(np.clip(obs.confidence, 0.0, 1.0)) * self.mask
         self.obs_index = np.argwhere(self.mask)  # rows of (c, t, k)
         self.sym = [
             (self.seg_index[a], self.seg_index[b])
             for a, b in SYMMETRIC_PAIRS
             if a in self.seg_index and b in self.seg_index
         ]
-        self.seg_weights = np.ones((self.n_t, len(self.segments)))
+        self.seg_weights: Array = np.ones((self.n_t, len(self.segments)))
         self.anchor: tuple[int, float] | None = None
         if options.scale_anchor is not None:
             name, value = options.scale_anchor
