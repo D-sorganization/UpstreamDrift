@@ -141,6 +141,15 @@ than absent. Single-camera depth stays model-conditioned and is not written;
 `CanonicalObservations` (which needs camera calibrations) is assembled by the
 calibration stage, not here.
 
+When the session was captured with `--timing` (issue #9603), each row also
+carries `time_ref_s`, `time_ref_uncertainty_s` and `time_ref_source`: the same
+instant expressed in the reference view's arrival clock through the strobe
+offset, with the quadrature uncertainty. The per-view `time_s` is never
+rewritten. `timing_report.json` restates each view's offset, uncertainty and
+rate deviation and adds the skew it is expected to accumulate over its
+recording, which is what tells the reconstruction stage whether one offset per
+session is sufficient.
+
 ## Extending the Rig
 
 - **A new camera type** implements the `FrameSource` protocol in `sources.py`:

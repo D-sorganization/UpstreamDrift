@@ -6,9 +6,10 @@ existing records (:class:`~pose_estimation.observations.KeypointObservation`,
 :class:`~pose_estimation.observations.DetectorLayout`). Every frame's time is
 the frame index over the recording's rate — a per-view clock; the session's
 ``timing`` block, copied into the index, is the evidence that relates those
-clocks. Nothing here calls single-camera depth observed, and
-``CanonicalObservations`` — which requires camera calibrations — is left to the
-calibration stage rather than assembled from invented intrinsics.
+clocks, and :mod:`.alignment` adds the reference-clock expression beside each
+row when that evidence exists. Nothing here calls single-camera depth observed,
+and ``CanonicalObservations`` — which requires camera calibrations — is left to
+the calibration stage rather than assembled from invented intrinsics.
 """
 
 from __future__ import annotations
@@ -28,7 +29,13 @@ from src.shared.python.pose_estimation.observations import (
     KeypointObservation,
 )
 
-from .bundle import RecordingEntry, load_bundle
+from .alignment import (
+    TIMING_REPORT_FILE,
+    annotate_rows,
+    build_timing_report,
+    view_timing,
+)
+from .bundle import RecordingEntry, RecordingsIndex, load_bundle
 
 logger = get_logger(__name__)
 
@@ -162,6 +169,7 @@ class IngestIndex(BaseModel):
     plan_name: str
     views: tuple[ViewIngestStatus, ...]
     timing: dict[str, Any] = Field(default_factory=dict)
+    timing_report: str | None = None
     tools_schema: dict[str, Any] = Field(default_factory=dict)
     provenance: dict[str, Any] = Field(default_factory=dict)
 
@@ -243,41 +251,37 @@ def ingest_view(
     )
 
 
-def ingest_bundle(
-    bundle_dir: Path,
-    out_dir: Path,
-    estimator_factory: EstimatorFactory,
-    *,
-    max_frames: int | None = None,
-) -> IngestIndex:
-    """Ingest every recording of a bundle; write per-view files and the index.
+def _with_reference_clock(
+    observations: ViewObservations, timing: dict[str, Any]
+) -> ViewObservations:
+    """Add reference-clock fields beside ``time_s`` when this view has an offset."""
+    entry = view_timing(timing, observations.view)
+    if not entry or entry.get("status") != "available":
+        return observations
+    rows = annotate_rows(
+        list(observations.frames),
+        int(entry["offset_ns"]),
+        int(entry["uncertainty_ns"]),
+        str(timing.get("method", "flash_event")),
+    )
+    provenance = {**observations.provenance, "timing_applied": timing.get("method")}
+    return observations.model_copy(update={"frames": rows, "provenance": provenance})
 
-    Views whose recording failed are recorded as ``unavailable`` with the
-    bundle's reason rather than dropped. Postcondition: one status per plan view.
-    """
-    plan, index, manifest = load_bundle(bundle_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    estimator = estimator_factory()
-    statuses: list[ViewIngestStatus] = []
-    try:
-        for entry in index.recordings:
-            statuses.append(
-                _ingest_entry(entry, bundle_dir, out_dir, estimator, max_frames)
-            )
-    finally:
-        estimator.close()
-    result = IngestIndex(
-        plan_name=plan.name,
-        views=tuple(statuses),
-        timing=dict(manifest.timing),
-        tools_schema=dict(manifest.tools_schema),
-        provenance=estimator.provenance,
+
+def _write_timing_report(
+    timing: dict[str, Any], index: RecordingsIndex, out_dir: Path
+) -> str | None:
+    """Write ``timing_report.json`` when the session carried strobe evidence."""
+    if not timing:
+        return None
+    durations = {
+        e.view: e.duration_s for e in index.recordings if e.duration_s is not None
+    }
+    report = build_timing_report(timing, durations)
+    (out_dir / TIMING_REPORT_FILE).write_text(
+        report.model_dump_json(indent=2), encoding="utf-8"
     )
-    (out_dir / INGEST_INDEX_FILE).write_text(
-        result.model_dump_json(indent=2), encoding="utf-8"
-    )
-    logger.info("ingest %s -> %s", bundle_dir, out_dir)
-    return result
+    return TIMING_REPORT_FILE
 
 
 def _ingest_entry(
@@ -286,6 +290,7 @@ def _ingest_entry(
     out_dir: Path,
     estimator: FrameEstimator,
     max_frames: int | None,
+    timing: dict[str, Any],
 ) -> ViewIngestStatus:
     if not entry.ok:
         reason = (
@@ -297,8 +302,9 @@ def _ingest_entry(
             status="unavailable",
             reason=reason,
         )
-    observations = ingest_view(
-        entry, bundle_dir / entry.file, estimator, max_frames=max_frames
+    observations = _with_reference_clock(
+        ingest_view(entry, bundle_dir / entry.file, estimator, max_frames=max_frames),
+        timing,
     )
     target = out_dir / f"{entry.view}.json"
     target.write_text(observations.model_dump_json(indent=2), encoding="utf-8")
@@ -310,3 +316,44 @@ def _ingest_entry(
         frames_total=observations.frames_total,
         frames_with_pose=observations.frames_with_pose,
     )
+
+
+def ingest_bundle(
+    bundle_dir: Path,
+    out_dir: Path,
+    estimator_factory: EstimatorFactory,
+    *,
+    max_frames: int | None = None,
+) -> IngestIndex:
+    """Ingest every recording of a bundle; write per-view files and the index.
+
+    Views whose recording failed are recorded as ``unavailable`` with the
+    bundle's reason rather than dropped. When the manifest carries a ``timing``
+    block, rows gain reference-clock fields and ``timing_report.json`` is
+    written. Postcondition: one status per plan view.
+    """
+    plan, index, manifest = load_bundle(bundle_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    estimator = estimator_factory()
+    statuses: list[ViewIngestStatus] = []
+    timing = dict(manifest.timing)
+    try:
+        for entry in index.recordings:
+            statuses.append(
+                _ingest_entry(entry, bundle_dir, out_dir, estimator, max_frames, timing)
+            )
+    finally:
+        estimator.close()
+    result = IngestIndex(
+        plan_name=plan.name,
+        views=tuple(statuses),
+        timing=timing,
+        timing_report=_write_timing_report(timing, index, out_dir),
+        tools_schema=dict(manifest.tools_schema),
+        provenance=estimator.provenance,
+    )
+    (out_dir / INGEST_INDEX_FILE).write_text(
+        result.model_dump_json(indent=2), encoding="utf-8"
+    )
+    logger.info("ingest %s -> %s", bundle_dir, out_dir)
+    return result
