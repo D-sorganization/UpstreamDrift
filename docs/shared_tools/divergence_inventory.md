@@ -346,7 +346,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/cli/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/format_utils.py` | -5 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/converters/mjcf_converter.py` | +1 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/converters/mjcf_converter.py` | +1694 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
