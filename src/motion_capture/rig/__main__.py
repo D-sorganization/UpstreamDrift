@@ -16,6 +16,10 @@ Commands:
 - ``proxy --session DIR [--encoder E] [--crf N]``: write browser-playable H.264
   ``.mp4`` proxies beside each recording and ``proxies.json``. Exit 0 when
   every usable recording has a proxy.
+- ``reconstruct --session DIR --cameras records.json --anchor SEGMENT=METRES``:
+  map, clean and jointly fit the ingested views into 3-D joints, camera
+  placement and bone lengths under ``<session>/reconstruct/``. Exit 0 when
+  the fit ran.
 - ``compare --session DIR --estimators a,b [--max-frames N]``: ingest the bundle
   with each named estimator and write ``comparison_<view>.json`` / ``.md``
   (coverage, confidence, jitter, cross-detector agreement). Exit 0 when every
@@ -152,6 +156,21 @@ def _parser() -> argparse.ArgumentParser:
     cmp.add_argument("--estimators", default="mediapipe,openpose_dnn")
     cmp.add_argument("--max-frames", type=int, default=None)
     cmp.add_argument("--min-confidence", type=float, default=0.5)
+    rec3 = sub.add_parser("reconstruct", help="clean and jointly fit ingested views")
+    rec3.add_argument("--session", type=Path, required=True)
+    rec3.add_argument(
+        "--cameras",
+        type=Path,
+        required=True,
+        help="camera records or a reconstruction.json to start from",
+    )
+    rec3.add_argument("--anchor", required=True, metavar="SEGMENT=METRES")
+    rec3.add_argument(
+        "--accel-sigma-px",
+        type=float,
+        default=20_000.0,
+        help="acceleration prior in px/s^2",
+    )
     return parser
 
 
@@ -367,6 +386,30 @@ def cmd_compare(args: argparse.Namespace) -> int:
     return 0 if complete else 1
 
 
+def cmd_reconstruct(args: argparse.Namespace) -> int:
+    from src.motion_capture.reconstruct.__main__ import _parse_anchor
+    from src.motion_capture.reconstruct.pipeline import (
+        reconstruct_session,
+        start_cameras_from,
+    )
+
+    summary = reconstruct_session(
+        args.session,
+        start_cameras=start_cameras_from(args.cameras),
+        scale_anchor=_parse_anchor(args.anchor),
+        acceleration_sigma_px=args.accel_sigma_px,
+    )
+    logger.info(
+        "reconstructed %s: rms %.2f px, rejections %s, %d unobservable points -> %s",
+        args.session,
+        summary.rms_px,
+        summary.cleaned_rejections,
+        summary.unobservable_points,
+        summary.reconstruction_file,
+    )
+    return 0
+
+
 _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "plan-check": cmd_plan_check,
     "capture": cmd_capture,
@@ -374,6 +417,7 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "session-check": cmd_session_check,
     "proxy": cmd_proxy,
     "compare": cmd_compare,
+    "reconstruct": cmd_reconstruct,
     "ingest": cmd_ingest,
 }
 

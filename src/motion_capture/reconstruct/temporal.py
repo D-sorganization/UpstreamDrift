@@ -51,6 +51,11 @@ class SmootherOptions:
     acceleration_sigma: float  # units / s^2, prior spread of acceleration
     measurement_sigma: float | None = None  # units; estimated when None
     huber_delta: float = 2.5  # residual (in sigma_z units) where Huber bends
+    # Outliers are judged under a prior this many times tighter (in sigma_a)
+    # than the final fit's: with a loose prior a one-frame jump is simply
+    # followed and its residual looks innocent; the tight prior makes it stand
+    # out, the final fit then uses the physical prior without the point.
+    detection_tightening: float = 10.0
     gate_sigma: float = 5.0  # rejection gate in sigma_z units
     iterations: int = 6
     min_weight: float = 1e-3
@@ -66,6 +71,7 @@ class SmootherOptions:
         require(self.huber_delta > 0, "huber_delta must be positive", self.huber_delta)
         require(self.gate_sigma > 0, "gate_sigma must be positive", self.gate_sigma)
         require(self.iterations >= 1, "iterations must be at least 1", self.iterations)
+        require(self.detection_tightening >= 1, "detection_tightening must be >= 1")
         require(
             0 < self.min_weight < 1, "min_weight must be in (0, 1)", self.min_weight
         )
@@ -140,7 +146,11 @@ def noise_estimate(z: Array) -> float:
     finite = z[np.isfinite(z)]
     if finite.size < 4:
         return 1.0
-    return robust_scale(np.diff(finite, n=2)) / np.sqrt(6.0)
+    estimate = robust_scale(np.diff(finite, n=2)) / np.sqrt(6.0)
+    # A noise-free signal would give a scale near zero and weights near
+    # infinity; floor at one part per million of the signal's range.
+    span = float(np.ptp(finite)) if finite.size else 0.0
+    return max(estimate, 1e-6 * span, 1e-9)
 
 
 def _huber_weight(u: Array, delta: float) -> Array:
@@ -174,8 +184,9 @@ def _fit_channel(
     floor = options.min_weight * observed / sigma**2
     w = base.copy()
     x = np.zeros_like(z)
+    detect_prior = prior * options.detection_tightening**2
     for _ in range(options.iterations):
-        x, _ = _solve(z, np.maximum(w, floor), prior)
+        x, _ = _solve(z, np.maximum(w, floor), detect_prior)
         u = np.where(observed, (z - x) / sigma, 0.0)
         w = base * _huber_weight(u, options.huber_delta)
     gate = options.gate_sigma * sigma
@@ -188,7 +199,7 @@ def _fit_channel(
     # about two gates blend into the noise; both are reported by the metrics
     # rather than hidden by a looser gate.
     for _ in range(3):
-        x, _ = _solve(z, np.maximum(w, floor * ~reject), prior)
+        x, _ = _solve(z, np.maximum(w, floor * ~reject), detect_prior)
         residual = np.where(observed, z - x, np.nan)
         newly = observed & ~reject & (np.abs(residual) > gate)
         if not newly.any():
@@ -197,7 +208,7 @@ def _fit_channel(
         w[reject] = 0.0
     # Re-admit points that only looked wrong because of a neighbour that is
     # now gone: judged against the fit without them, they are inside the gate.
-    x, _ = _solve(z, np.maximum(w, floor * ~reject), prior)
+    x, _ = _solve(z, np.maximum(w, floor * ~reject), detect_prior)
     residual = np.where(observed, z - x, np.nan)
     readmit = reject & (np.abs(residual) <= gate)
     if readmit.any():
