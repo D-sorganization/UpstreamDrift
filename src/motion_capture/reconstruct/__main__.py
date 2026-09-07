@@ -1,4 +1,9 @@
-"""``python3 -m motion_capture.reconstruct synth``: write a synthetic bundle.
+"""``python3 -m motion_capture.reconstruct``: synthetic bundles and the joint fit.
+
+- ``synth --out DIR``: write a synthetic three-view bundle with truth.
+- ``fit --bundle DIR --anchor SEGMENT=METRES [--cameras records.json]``: run
+  the joint camera/joint/bone-length fit and write ``reconstruction.json``
+  (metrics against ``truth.json`` when present). Exit 0 when the fit ran.
 
 The bundle has the shape ``motion_capture.rig ingest`` produces (per-view
 ``observations/<view>.json``) plus ``truth.json``, so any reconstruction
@@ -17,6 +22,7 @@ import numpy as np
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .cameras import PinholeCamera, intrinsics_from_fov, look_at
+from .fit import cameras_from_records, fit_bundle
 from .synthetic import RenderOptions, SyntheticScene, write_synthetic_bundle
 
 logger = get_logger(__name__)
@@ -53,6 +59,20 @@ def _parser() -> argparse.ArgumentParser:
     synth.add_argument("--occlusion", type=float, default=0.05)
     synth.add_argument("--outliers", type=float, default=0.02)
     synth.add_argument("--seed", type=int, default=0)
+    fit = sub.add_parser("fit", help="joint camera + skeleton fit on a bundle")
+    fit.add_argument("--bundle", type=Path, required=True)
+    fit.add_argument(
+        "--anchor",
+        required=True,
+        metavar="SEGMENT=METRES",
+        help="one measured segment length that fixes the scale, e.g. neck=0.53",
+    )
+    fit.add_argument(
+        "--cameras",
+        type=Path,
+        default=None,
+        help="JSON list of CameraCalibration records to start from (default: truth.json)",
+    )
     return parser
 
 
@@ -79,10 +99,52 @@ def cmd_synth(args: argparse.Namespace) -> int:
     return 0
 
 
+def _parse_anchor(text: str) -> tuple[str, float]:
+    name, sep, value = text.partition("=")
+    if not sep or not name.strip():
+        raise SystemExit("--anchor must look like SEGMENT=METRES, e.g. neck=0.53")
+    try:
+        metres = float(value)
+    except ValueError as exc:
+        raise SystemExit(f"--anchor length is not a number: {value!r}") from exc
+    if metres <= 0:
+        raise SystemExit("--anchor length must be positive")
+    return name.strip(), metres
+
+
+def cmd_fit(args: argparse.Namespace) -> int:
+    import json
+
+    start = None
+    if args.cameras is not None:
+        records = json.loads(args.cameras.read_text(encoding="utf-8"))
+        start = cameras_from_records(records)
+    record = fit_bundle(
+        args.bundle, scale_anchor=_parse_anchor(args.anchor), start_cameras=start
+    )
+    logger.info(
+        "fit %s: rms %.2f px (start %.2f), %d rejected, %d unobservable points",
+        args.bundle,
+        record.rms_px,
+        record.initial_rms_px,
+        len(record.rejected),
+        record.unobservable_points,
+    )
+    for view in record.views:
+        logger.info(
+            "  %s: %d obs, %d rejected, rms %s px",
+            view.view,
+            view.observations,
+            view.rejected,
+            view.rms_px and round(view.rms_px, 2),
+        )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     args = _parser().parse_args(argv)
-    return {"synth": cmd_synth}[args.command](args)
+    return {"synth": cmd_synth, "fit": cmd_fit}[args.command](args)
 
 
 if __name__ == "__main__":
