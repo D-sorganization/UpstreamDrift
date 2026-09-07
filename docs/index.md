@@ -74,7 +74,7 @@ separated from current guidance.
 - [`design/`](design/) - 2 pages
 - [`golf-model/`](golf-model/INPUT_POSE_INVESTIGATION.md) - 1 page
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
-- [`motion_capture/`](motion_capture/) - 5 pages
+- [`motion_capture/`](motion_capture/) - 6 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
 - [`plans/`](plans/README.md) - 17 pages
 - [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
