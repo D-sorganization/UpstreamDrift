@@ -15,7 +15,7 @@
     "diverged": 277,
     "ud-only": 1188,
     "tools-only": 518,
-    "spelling-only": 130
+    "spelling-only": 129
   },
   "packages": {
     "README.md": {
@@ -450,7 +450,7 @@
       "diverged": 52,
       "ud-only": 18,
       "tools-only": 0,
-      "spelling-only": 20
+      "spelling-only": 19
     },
     "motion_matching": {
       "identical": 0,
@@ -9557,12 +9557,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 8773,
+      "ud_bytes": 13001,
       "tools_bytes": 8761,
-      "byte_delta": 12,
+      "byte_delta": 4240,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/api/rest_api_fastapi.py",
@@ -10373,9 +10373,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 12149,
+      "ud_bytes": 12936,
       "tools_bytes": 11192,
-      "byte_delta": 957,
+      "byte_delta": 1744,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -10397,9 +10397,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "library",
-      "ud_bytes": 30121,
+      "ud_bytes": 30932,
       "tools_bytes": 30690,
-      "byte_delta": -569,
+      "byte_delta": 242,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -31723,8 +31723,8 @@
       "path": "humanoid_character_builder/generators/_mesh_types.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-07",
+        "commit": "05fc3e447e56149105c415c6b02dfd680155420c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -31762,8 +31762,8 @@
       "path": "humanoid_character_builder/generators/mesh_generator.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-07",
+        "commit": "05fc3e447e56149105c415c6b02dfd680155420c"
       },
       "tools": {
         "author": "Dieter Olson",
