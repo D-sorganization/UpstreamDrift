@@ -634,13 +634,15 @@ class ModelLibrary:
             import urllib.parse
             import urllib.request
 
-            # Validate API URL is HTTPS
+            # Validate the API URL is HTTPS *and* points at GitHub. The
+            # subdirectory branch below already pins the host; pinning it here
+            # too means neither path depends on `owner`/`repo` being benign.
             parsed = urllib.parse.urlparse(api_url)
-            if parsed.scheme != "https" or not parsed.netloc:
+            if parsed.scheme != "https" or parsed.netloc != "api.github.com":
                 logger.error(f"Invalid API URL: {api_url}")
                 return models
 
-            with urllib.request.urlopen(api_url) as response:  # nosec B310
+            with urllib.request.urlopen(api_url) as response:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
                 contents = json.loads(response.read().decode())
 
             # Look for URDF and MJCF files
@@ -666,53 +668,65 @@ class ModelLibrary:
                             )
                             break
                 elif item["type"] == "dir":
-                    # Check subdirectory for model files
-                    subdir_url = item["url"]
-                    try:
-                        # Validate subdirectory URL is HTTPS from GitHub API
-                        subdir_parsed = urllib.parse.urlparse(subdir_url)
-                        if (
-                            subdir_parsed.scheme != "https"
-                            or subdir_parsed.netloc != "api.github.com"
-                        ):
-                            logger.warning(
-                                f"Skipping untrusted subdirectory URL: {subdir_url}"
-                            )
-                            continue
-
-                        with urllib.request.urlopen(subdir_url) as sub_response:  # nosec B310
-                            sub_contents = json.loads(sub_response.read().decode())
-                        for sub_item in sub_contents:
-                            if sub_item["type"] != "file":
-                                continue
-                            sub_name = sub_item["name"]
-                            for ext, fmt in model_extensions.items():
-                                if sub_name.endswith(ext):
-                                    model_id = f"{repo_name}/{item['name']}"
-                                    models.append(
-                                        ModelEntry(
-                                            id=model_id,
-                                            name=item["name"],
-                                            description=f"From {owner}/{repo}",
-                                            model_format=fmt,
-                                            source=RepositorySource.GITHUB,
-                                            source_url=sub_item["download_url"],
-                                            source_path=f"{owner}/{repo}/{subpath}/{item['name']}",
-                                            is_cached=False,
-                                            is_read_only=True,
-                                        )
-                                    )
-                                    break
-                            else:
-                                continue
-                            break
-                    except (PermissionError, OSError):
-                        pass
+                    entry = self._fetch_github_subdir_model(
+                        item, repo_name, owner, repo, subpath, model_extensions
+                    )
+                    if entry is not None:
+                        models.append(entry)
 
         except (PermissionError, OSError) as e:
             logger.warning(f"Failed to fetch from GitHub: {e}")
 
         return models
+
+    def _fetch_github_subdir_model(
+        self,
+        item: dict[str, Any],
+        repo_name: str,
+        owner: str,
+        repo: str,
+        subpath: str,
+        model_extensions: dict[str, ModelFormat],
+    ) -> ModelEntry | None:
+        """Return the first model file found directly inside a subdirectory.
+
+        A directory contributes at most one entry, named for the directory
+        rather than the file, which is why this stops at the first match.
+        """
+        import urllib.parse
+        import urllib.request
+
+        subdir_url = item["url"]
+        # The URL comes from the API response body, not from our own f-string,
+        # so it is attacker-influenced if the repository is: pin it to GitHub.
+        subdir_parsed = urllib.parse.urlparse(subdir_url)
+        if subdir_parsed.scheme != "https" or subdir_parsed.netloc != "api.github.com":
+            logger.warning(f"Skipping untrusted subdirectory URL: {subdir_url}")
+            return None
+
+        try:
+            with urllib.request.urlopen(subdir_url) as sub_response:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+                sub_contents = json.loads(sub_response.read().decode())
+        except (PermissionError, OSError):
+            return None
+
+        for sub_item in sub_contents:
+            if sub_item["type"] != "file":
+                continue
+            for ext, fmt in model_extensions.items():
+                if sub_item["name"].endswith(ext):
+                    return ModelEntry(
+                        id=f"{repo_name}/{item['name']}",
+                        name=item["name"],
+                        description=f"From {owner}/{repo}",
+                        model_format=fmt,
+                        source=RepositorySource.GITHUB,
+                        source_url=sub_item["download_url"],
+                        source_path=f"{owner}/{repo}/{subpath}/{item['name']}",
+                        is_cached=False,
+                        is_read_only=True,
+                    )
+        return None
 
     def _fetch_url_models(
         self,
@@ -771,7 +785,7 @@ class ModelLibrary:
             urdf_filename = entry.source_url.split("/")[-1]
             local_path = cache_dir / urdf_filename
 
-            urllib.request.urlretrieve(entry.source_url, local_path)  # nosec B310
+            urllib.request.urlretrieve(entry.source_url, local_path)  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
 
             entry.urdf_path = local_path
             entry.is_cached = True
