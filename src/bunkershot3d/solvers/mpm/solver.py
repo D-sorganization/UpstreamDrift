@@ -264,7 +264,10 @@ class MPMRun:
         the magnitude is not, so it is reported separately rather than
         inferred by a caller from a history it has to scan itself.
         """
-        magnitude = np.linalg.norm(self.contact_force_history_n_per_m(), axis=1)
+        forces = self.contact_force_history_n_per_m()
+        magnitude = np.sqrt(
+            np.einsum("ij,ij->i", forces, forces)
+        )  # ⚡ Bolt: np.einsum avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=1)
         return float(self.steps[int(np.argmax(magnitude))].time_s)
 
     def averaged_force_n_per_m(self, window_s: float) -> NDArray[np.float64]:

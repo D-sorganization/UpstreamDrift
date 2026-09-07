@@ -292,7 +292,9 @@ class SandFieldFrame:
     @property
     def speed_m_s(self) -> NDArray[np.float64]:
         """``(n,)`` velocity magnitudes."""
-        return np.linalg.norm(self.velocity_m_s, axis=1)
+        return np.sqrt(
+            np.einsum("ij,ij->i", self.velocity_m_s, self.velocity_m_s)
+        )  # ⚡ Bolt: np.einsum avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=1)
 
 
 @dataclass(frozen=True)
@@ -478,7 +480,9 @@ class SandFieldSeries:
         million of a cell's sand, so the largest numbers in this array
         are round-off rather than flow.
         """
-        return np.linalg.norm(self.velocity_m_s, axis=2)
+        return np.sqrt(
+            np.einsum("ijk,ijk->ij", self.velocity_m_s, self.velocity_m_s)
+        )  # ⚡ Bolt: np.einsum avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=2)
 
     def occupied(self) -> NDArray[np.bool_]:
         """``(T, N)`` mask of the samples holding reportable sand."""

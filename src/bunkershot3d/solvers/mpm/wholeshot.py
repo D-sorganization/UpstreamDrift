@@ -222,7 +222,9 @@ class F1ShotResult:
         the step was taken **from**, and the run's diagnostic is stamped
         at the end of that step.
         """
-        magnitude = np.linalg.norm(self.shot.forces_n, axis=1)
+        magnitude = np.sqrt(
+            np.einsum("ij,ij->i", self.shot.forces_n, self.shot.forces_n)
+        )  # ⚡ Bolt: np.einsum avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=1)
         return float(self.shot.times_s[int(np.argmax(magnitude))])
 
     def summary(self) -> str:
