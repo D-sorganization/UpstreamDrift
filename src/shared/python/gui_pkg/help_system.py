@@ -53,7 +53,11 @@ from src.shared.python import SUITE_ROOT
 # Get paths
 DOCS_DIR = SUITE_ROOT / "docs"
 HELP_DIR = DOCS_DIR / "help"
-USER_MANUAL_PATH = DOCS_DIR / "user_guide" / "user_manual.md"
+# The substantive manual is ``upstream_drift_user_manual.md``; the older
+# ``user_manual.md`` is a 124-line index kept as a fallback. F1 pointed at the
+# index, which is what made in-app Help look empty (issue #8843).
+USER_MANUAL_PATH = DOCS_DIR / "user_guide" / "upstream_drift_user_manual.md"
+USER_MANUAL_FALLBACK_PATH = DOCS_DIR / "user_guide" / "user_manual.md"
 
 
 def get_user_manual_content() -> str:
@@ -62,12 +66,18 @@ def get_user_manual_content() -> str:
     Returns:
         The content of USER_MANUAL.md, or an error message if not found.
     """
-    if USER_MANUAL_PATH.exists():
+    for candidate in (USER_MANUAL_PATH, USER_MANUAL_FALLBACK_PATH):
+        if not candidate.exists():
+            continue
         try:
-            return USER_MANUAL_PATH.read_text(encoding="utf-8")
+            return candidate.read_text(encoding="utf-8")
         except (RuntimeError, ValueError, OSError) as e:
-            return f"# Error Loading Manual\n\nFailed to load USER_MANUAL.md: {e}"
-    return "# User Manual Not Found\n\nThe USER_MANUAL.md file could not be found."
+            return f"# Error Loading Manual\n\nFailed to load {candidate.name}: {e}"
+    return (
+        "# User Manual Not Found\n\nNeither "
+        f"`{USER_MANUAL_PATH.name}` nor `{USER_MANUAL_FALLBACK_PATH.name}` "
+        "was found under `docs/user_guide/`."
+    )
 
 
 def get_help_topic_content(topic: str) -> str:
@@ -85,7 +95,10 @@ def get_help_topic_content(topic: str) -> str:
         try:
             content = topic_file.read_text(encoding="utf-8")
             # Add link back to main manual
-            content += "\n\n---\n\n*See also: [Full User Manual](../USER_MANUAL.md)*"
+            content += (
+                "\n\n---\n\n*See also: "
+                "[Full User Manual](../user_guide/upstream_drift_user_manual.md)*"
+            )
             return content
         except (RuntimeError, ValueError, OSError) as e:
             return f"# Error Loading Topic\n\nFailed to load {topic}.md: {e}"

@@ -1209,7 +1209,14 @@ class TestCIEnvironmentCompatibility:
         )
 
     def test_ci_standard_pr_tests_fail_on_deleted_test_files(self) -> None:
-        """Deleted tests must not disappear from PR-scoped selection."""
+        """Deleted tests must not disappear from PR-scoped selection.
+
+        The guard still refuses an unreviewed deletion; since #9412 the review
+        is recorded in ``scripts/config/reviewed_test_deletions.json`` and
+        enforced by ``scripts/ci/check_reviewed_test_deletions.py`` (which
+        exits non-zero for any deletion without an entry), instead of the
+        workflow failing unconditionally with no way to record the review.
+        """
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
             encoding="utf-8"
         )
@@ -1221,14 +1228,24 @@ class TestCIEnvironmentCompatibility:
 
         assert "mapfile -t deleted_tests" in pr_block
         assert "--diff-filter=D" in pr_block
-        assert "Deleted Python test files require review" in pr_block
-        assert (
-            "exit 1"
-            in pr_block[
-                pr_block.index("mapfile -t deleted_tests") : pr_block.index(
-                    "mapfile -t changed_core_targets"
-                )
-            ]
+
+        guard_block = pr_block[
+            pr_block.index("mapfile -t deleted_tests") : pr_block.index(
+                "mapfile -t changed_core_targets"
+            )
+        ]
+        assert 'if [ "${#deleted_tests[@]}" -gt 0 ]; then' in guard_block
+        assert "scripts/ci/check_reviewed_test_deletions.py" in guard_block
+        assert '--deleted-files "$RUNNER_TEMP/core_deleted_tests.txt"' in guard_block
+        # The gate must be fatal: no `|| true`, no `continue-on-error` escape.
+        assert "|| true" not in guard_block
+
+        checker = REPO_ROOT / "scripts" / "ci" / "check_reviewed_test_deletions.py"
+        manifest = REPO_ROOT / "scripts" / "config" / "reviewed_test_deletions.json"
+        assert checker.is_file()
+        assert manifest.is_file()
+        assert "Deleted Python test files require review" in checker.read_text(
+            encoding="utf-8"
         )
 
     def test_ci_standard_test_only_prs_stop_after_changed_tests_pass(self) -> None:

@@ -22,6 +22,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.ui.tile_help import help_relpath_for
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .startup import ASSETS_DIR, REPOS_ROOT
@@ -230,6 +231,13 @@ class ContextHelpDock(QDockWidget):
         """
         if model_id is None:
             raise ValueError("model_id must be provided")
+
+        registry_page = help_relpath_for(model_id)
+        if registry_page:
+            # The tile registry (models.yaml `help:`) is authoritative; the
+            # rule table below is only a legacy fallback for ids that predate
+            # it (issue #9413 / #8843).
+            return [REPOS_ROOT / registry_page]
 
         lowered = model_id.lower()
         docs = REPOS_ROOT / "docs"

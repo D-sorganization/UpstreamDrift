@@ -908,6 +908,12 @@ jobs:
       - name: SPEC Drift Check
         run: python3 scripts/check_spec_paths.py
 
+      # Single tile registry (issue #9412; RM #1507): launcher_manifest.json,
+      # the feature_parity.json tile bindings and the README tile table are
+      # generated from src/config/models.yaml. Needs only PyYAML.
+      - name: Registry Artifact Drift Check (issue #9412)
+        run: python3 -m scripts.registry.generate_registry_artifacts --check
+
       - name: Agent Docs Consistency Check
         run: python3 scripts/check_agent_docs_consistency.py
 
@@ -1877,9 +1883,15 @@ jobs:
               --diff-filter=D "$diff_base" HEAD -- 'tests/**/*.py'
             mapfile -t deleted_tests < "$RUNNER_TEMP/core_deleted_tests.txt"
             if [ "${#deleted_tests[@]}" -gt 0 ]; then
-              echo "::error::Deleted Python test files require review before CI can proceed."
+              # A deleted test still requires review (#7368); what changed is
+              # that the review is now recordable. Each deletion must carry an
+              # entry in scripts/config/reviewed_test_deletions.json naming the
+              # replacement test (verified to exist) and the tracking issue.
+              # The record lands in the same diff as the deletion, so approving
+              # one approves the other. Unrecorded deletions still exit 1 here.
               printf '  %s\n' "${deleted_tests[@]}"
-              exit 1
+              python3 scripts/ci/check_reviewed_test_deletions.py \
+                --deleted-files "$RUNNER_TEMP/core_deleted_tests.txt"
             fi
 
             diff_into "$RUNNER_TEMP/core_changed_targets.txt" \

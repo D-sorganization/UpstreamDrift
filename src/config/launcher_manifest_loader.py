@@ -1,8 +1,11 @@
-"""Launcher Manifest Loader — Single source of truth for launcher tiles.
+"""Launcher Manifest Loader — typed access to the single tile registry.
 
-This module loads the shared launcher manifest (launcher_manifest.json) and
-provides typed access for both PyQt and API consumers. The Tauri/React
-frontend can also read this manifest via the API endpoint.
+``LauncherManifest.load()`` builds the web/API tile surface directly from
+``src/config/models.yaml`` (native ``models`` + ``web_catalog``; see
+:mod:`src.config.tile_registry`, issue #9412). ``launcher_manifest.json`` is a
+generated projection of that registry kept for external consumers and is not
+read at runtime; passing an explicit ``path`` still loads a JSON overlay
+document (used by tests and external model packs).
 
 Design by Contract:
     Preconditions:
@@ -149,7 +152,7 @@ def _legacy_launcher_metadata(model: ModelConfig) -> LauncherPresentationMetadat
 
 
 def _provider_status(
-    model: ModelConfig,
+    model: Any,
     status: str,
     repo_root: Path,
     *,
@@ -239,6 +242,24 @@ def _with_native_pyqt6_semantics(
         path=model.path,
         engine_type=model.engine_type,
     )
+
+
+def _tile_from_record(
+    record: Any, model: ModelConfig | None, *, repo_root: Path = REPO_ROOT
+) -> LauncherTile:
+    """Adapt a ``TileRecord`` from the single registry into a launcher tile.
+
+    Native entries (present in ``ModelRegistry``) keep the exact PyQt6
+    semantics via :func:`_with_native_pyqt6_semantics`; web-catalog entries
+    only get provider availability applied (no engine runtime probe).
+    """
+    tile = LauncherTile.from_dict(record.to_manifest_dict())
+    if model is not None and model.launcher is not None:
+        return _with_native_pyqt6_semantics(tile, model, repo_root=repo_root)
+    status, status_detail = _provider_status(
+        record, record.status, repo_root, check_runtime=False
+    )
+    return replace(tile, status=status, status_detail=status_detail)
 
 
 @dataclass(frozen=True)
@@ -594,7 +615,18 @@ class LauncherManifest:
             FileNotFoundError: If manifest file doesn't exist
             ValueError: If manifest format is invalid
         """
-        manifest_path = path or MANIFEST_PATH
+        if path is None:
+            # Default: build straight from the single registry (issue
+            # #9412). launcher_manifest.json is a generated projection of
+            # models.yaml and is never read at runtime.
+            return cls._load_from_registry(
+                registry_path=registry_path or REGISTRY_PATH,
+                include_provider_tiles=include_provider_tiles,
+            )
+
+        # Explicit overlay file: legacy JSON + registry augmentation, kept
+        # for callers/tests that supply their own manifest documents.
+        manifest_path = path
 
         # DBC Precondition
         if not manifest_path.exists():
@@ -655,6 +687,54 @@ class LauncherManifest:
         )
 
         return manifest
+
+    @classmethod
+    def _load_from_registry(
+        cls, *, registry_path: Path, include_provider_tiles: bool
+    ) -> LauncherManifest:
+        """Build the manifest from ``models.yaml`` (native + web catalog)."""
+        from src.config.tile_registry import (
+            MANIFEST_DESCRIPTION,
+            MANIFEST_VERSION,
+            load_tile_registry,
+        )
+
+        registry_path = Path(registry_path)
+        tile_registry = load_tile_registry(registry_path)
+        repo_root = registry_path.resolve().parents[2]
+        model_registry = ModelRegistry(config_path=registry_path)
+        native_models = {model.id: model for model in model_registry.get_all_models()}
+        tiles = [
+            _tile_from_record(record, native_models.get(record.id), repo_root=repo_root)
+            for record in tile_registry.tiles
+        ]
+        if include_provider_tiles:
+            # Sibling-repo / env-discovered provider models (hybrid discovery)
+            # still surface as tiles, exactly as before.
+            tiles.extend(
+                cls._load_provider_tiles(
+                    registry=model_registry,
+                    existing_ids={tile.id for tile in tiles},
+                    repo_root=repo_root,
+                )
+            )
+        sorted_tiles: tuple[LauncherTile, ...] = tuple(
+            sorted(tiles, key=lambda t: (t.order, t.id))
+        )
+        ids = [t.id for t in sorted_tiles]
+        duplicates = {tid for tid in ids if ids.count(tid) > 1}
+        if duplicates:
+            raise ValueError(f"Duplicate tile IDs in registry: {duplicates}")
+        logger.info(
+            "Loaded %d tiles from the tile registry %s",
+            len(sorted_tiles),
+            registry_path,
+        )
+        return cls(
+            version=MANIFEST_VERSION,
+            tiles=sorted_tiles,
+            description=MANIFEST_DESCRIPTION,
+        )
 
     @staticmethod
     def _load_provider_tiles(

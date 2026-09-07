@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "description": "Machine-readable feature-parity registry (PyQt6 = canonical model; Tauri/React web app must match). Statuses: parity | gap (requires open issue) | exempt (requires reason). Entries with pending_decision=true await the desktop-only exemption decision in issue #7460 (G12). See docs/development/feature_parity_matrix.md (generated) and epic #7462.",
+  "description": "Machine-readable feature-parity registry (PyQt6 = canonical model; Tauri/React web app must match). Statuses: parity | gap (requires open issue) | exempt (requires reason) | api_only (API/WebSocket endpoint with no shell surface; requires reason, issue #8861). Entries with pending_decision=true await the desktop-only exemption decision in issue #7460 (G12). The 'tiles' arrays are GENERATED from src/config/models.yaml feature_id bindings by scripts/registry/generate_registry_artifacts.py (issue #9412). See docs/development/feature_parity_matrix.md (generated) and epic #7462.",
   "features": {
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
@@ -9,7 +9,7 @@
       "web": "ui/src/pages/Dashboard.tsx",
       "status": "parity",
       "tiles": [],
-      "notes": "src/config/models.yaml is the canonical registry for both shells: the PyQt launcher reads it via ModelRegistry, and the web/API surface reads the same registry through LauncherManifest.load(), which overlays web metadata from launcher_manifest.json. tests/config/test_launcher_registry_parity.py enforces the ID parity."
+      "notes": "src/config/models.yaml is the single tile registry for both shells (issue #9412): the PyQt launcher reads it via ModelRegistry (filtered to tiles declaring the pyqt surface), and the web/API surface builds LauncherManifest.load() from the same file (models + web_catalog). launcher_manifest.json is a generated projection. tests/config/test_tile_registry.py enforces that both launchers see the registry's tile set."
     },
     "engines.load_and_simulate": {
       "title": "Engine load/probe + basic simulation loop",
@@ -18,12 +18,12 @@
       "web": "ui/src/pages/Simulation.tsx",
       "status": "parity",
       "tiles": [
-        "mujoco_unified",
         "drake_golf",
-        "pinocchio_golf",
-        "opensim_golf",
+        "mujoco_unified",
         "myosim_suite",
-        "pendulum_simulator"
+        "opensim_golf",
+        "pendulum_simulator",
+        "pinocchio_golf"
       ]
     },
     "simulation.realtime_ws_stream": {
@@ -31,8 +31,11 @@
       "pyqt": "src/launchers/launcher_simulation.py",
       "api": "src/api/routes/simulation_ws.py",
       "web": "ui/src/pages/Simulation.tsx",
-      "status": "parity",
-      "tiles": ["realtime_ws"]
+      "status": "api_only",
+      "tiles": [
+        "realtime_ws"
+      ],
+      "reason": "WebSocket endpoint consumed by both shells; no dedicated tile surface in either (issue #8861)."
     },
     "chat.transport": {
       "title": "AI chat transport (message send/stream)",
@@ -40,16 +43,22 @@
       "api": "src/api/routes/chat_ws.py",
       "web": "ui/src/pages/Chat.tsx",
       "status": "parity",
-      "tiles": ["chat_assistant"]
+      "tiles": [
+        "chat_assistant",
+        "sidekick"
+      ]
     },
     "platform.aip_protocol": {
       "title": "AI Protocol (AIP) structured method dispatch",
       "pyqt": null,
       "api": "src/api/routes/aip.py",
       "web": null,
-      "status": "parity",
-      "tiles": ["aip"],
-      "notes": "API-backed protocol; both shells are thin consumers."
+      "status": "api_only",
+      "tiles": [
+        "aip"
+      ],
+      "notes": "API-backed protocol; both shells are thin consumers.",
+      "reason": "REST protocol consumed by both shells; no dedicated tile surface in either (issue #8861)."
     },
     "tools.putting_green": {
       "title": "Putting green simulation",
@@ -57,7 +66,10 @@
       "api": "src/api/routes/putting_green.py",
       "web": "ui/src/pages/PuttingGreen.tsx",
       "status": "parity",
-      "tiles": ["putting_green"]
+      "tiles": [
+        "putting_green",
+        "putting_green_gui"
+      ]
     },
     "tools.terrain_engine": {
       "title": "Terrain and topography configuration",
@@ -65,7 +77,9 @@
       "api": "src/api/routes/terrain.py",
       "web": "ui/src/pages/Terrain.tsx",
       "status": "parity",
-      "tiles": ["terrain_engine"],
+      "tiles": [
+        "terrain_engine"
+      ],
       "notes": "Web-first tool; the desktop launcher opens the web route."
     },
     "tools.dataset_generator": {
@@ -74,7 +88,9 @@
       "api": "src/api/routes/dataset.py",
       "web": "ui/src/pages/DatasetGenerator.tsx",
       "status": "parity",
-      "tiles": ["dataset_generator"],
+      "tiles": [
+        "dataset_generator"
+      ],
       "notes": "Web-first tool; the desktop launcher opens the web route."
     },
     "canonical_core.workspaces": {
@@ -83,7 +99,10 @@
       "api": null,
       "web": "ui/src/pages/CanonicalCoreShell.tsx",
       "status": "parity",
-      "tiles": ["canonical_core_estimation", "canonical_core_comparison"]
+      "tiles": [
+        "canonical_core_comparison",
+        "canonical_core_estimation"
+      ]
     },
     "analysis.static_plots": {
       "title": "Static analysis plots (20+ plot types)",
@@ -101,7 +120,9 @@
       "web": null,
       "status": "gap",
       "issue": 7450,
-      "tiles": ["simulation_backends"]
+      "tiles": [
+        "simulation_backends"
+      ]
     },
     "export.recordings_downloads": {
       "title": "Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings)",
@@ -119,7 +140,10 @@
       "web": "ui/src/components/simulation/SimulationControls.tsx",
       "status": "gap",
       "issue": 7452,
-      "tiles": ["force_overlays", "actuator_controls"]
+      "tiles": [
+        "actuator_controls",
+        "force_overlays"
+      ]
     },
     "chat.live_context": {
       "title": "Live app/engine context in chat",
@@ -138,9 +162,9 @@
       "status": "parity",
       "tiles": [
         "motion_capture",
+        "motion_pipeline",
         "motion_target_preview",
-        "starting_pose_matcher",
-        "motion_pipeline"
+        "starting_pose_matcher"
       ],
       "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406)."
     },
@@ -150,7 +174,10 @@
       "api": "src/api/routes/cross_engine.py",
       "web": "ui/src/pages/CrossEngineDashboard.tsx",
       "status": "parity",
-      "tiles": ["cross_engine_dashboard", "perturbation_analysis"]
+      "tiles": [
+        "cross_engine_dashboard",
+        "perturbation_analysis"
+      ]
     },
     "simulation.shot_tracer": {
       "title": "Shot Tracer / ball-flight visualization",
@@ -158,7 +185,9 @@
       "api": "src/api/routes/ball_flight.py",
       "web": "ui/src/pages/BallFlight.tsx",
       "status": "parity",
-      "tiles": ["shot_tracer"],
+      "tiles": [
+        "shot_tracer"
+      ],
       "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 gave both surfaces cross-family trajectory-record import, each overlaying imported swing_sim.ball_flight_trajectory/1 records from either flight-model family and labeling them by model_family/model_name: the web BallFlight page via H3 (#9352, POST /tools/ball-flight/import), and the PyQt6 Shot Tracer via H2 (#9351, the vendored flight_interchange reader)."
     },
     "simulation.swing_objective_lab": {
@@ -167,7 +196,9 @@
       "api": "src/api/routes/swing_objectives.py",
       "web": "ui/src/pages/SwingObjectiveLab.tsx",
       "status": "parity",
-      "tiles": ["swing_objective_lab"],
+      "tiles": [
+        "swing_objective_lab"
+      ],
       "notes": "Parity implementation via #9128: canonical API route /api/tools/swing-objectives/compare and React surface ui/src/pages/SwingObjectiveLab.tsx; scientific equivalence remains evidence-gated."
     },
     "settings.preferences": {
@@ -215,13 +246,26 @@
       "status": "gap",
       "issue": 7461,
       "tiles": [
-        "video_analyzer",
-        "video_processor",
+        "ball_flight_simulator",
+        "c3d_viewer",
+        "config_setup_wizard",
         "data_processor",
-        "tools_calculator_hub",
+        "golf_environment",
+        "library_tool",
+        "mediapipe_analysis",
+        "movement_optimizer",
+        "openpose_analysis",
         "pid_generator",
+        "pinn_hybrid",
+        "pinn_pure_rigid",
+        "pose_subscriber_demo",
+        "robotics_module",
+        "swing_flight_pipeline",
+        "tools_calculator_hub",
+        "training_controller",
         "unreal_integration",
-        "robotics_module"
+        "video_analyzer",
+        "video_processor"
       ],
       "notes": "External/docs-backed tiles whose web reachability is not yet contract-checked."
     },
@@ -232,7 +276,9 @@
       "web": "ui/src/pages/ModelExplorer.tsx",
       "status": "gap",
       "issue": 7448,
-      "tiles": ["model_explorer"],
+      "tiles": [
+        "model_explorer"
+      ],
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
     "tools.character_builder": {
@@ -242,7 +288,9 @@
       "web": "ui/src/pages/CharacterBuilder.tsx",
       "status": "gap",
       "issue": 7448,
-      "tiles": ["character_builder"],
+      "tiles": [
+        "character_builder"
+      ],
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
     "tools.data_explorer": {
@@ -252,7 +300,9 @@
       "web": "ui/src/pages/DataExplorer.tsx",
       "status": "gap",
       "issue": 7448,
-      "tiles": ["data_explorer"],
+      "tiles": [
+        "data_explorer"
+      ],
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
     "tools.rate_of_closure": {
@@ -262,7 +312,9 @@
       "web": "ui/src/pages/ImpactExplorer.tsx",
       "status": "parity",
       "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
-      "tiles": ["rate_of_closure"]
+      "tiles": [
+        "rate_of_closure"
+      ]
     },
     "tools.launch_monitor_analytics": {
       "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
@@ -271,7 +323,9 @@
       "web": null,
       "status": "gap",
       "issue": 8364,
-      "tiles": ["launch_monitor_analytics"],
+      "tiles": [
+        "launch_monitor_analytics"
+      ],
       "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. React/Vite parity in the authoritative Tools Rate of Closure app is tracked cross-repository in Tools #4205 under epic #8364."
     },
     "tools.bunkershot3d_workbench": {
@@ -281,7 +335,9 @@
       "web": null,
       "status": "gap",
       "issue": 8607,
-      "tiles": ["bunkershot3d"],
+      "tiles": [
+        "bunkershot3d"
+      ],
       "notes": "Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -> a notebook script, bunker_shot -> the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; no API route or web page exists yet. The visualization suite (epic #8699) keeps that split: shot3d.py and traces.py compute, render3d.py and render_traces.py draw headlessly through matplotlib, and viewport_widgets.py only wires them to a canvas. A React port would consume shot3d.viewport_payload, which is the backend-neutral ADR-0027 ViewportOverlayPayload and carries the envelope status and fidelity tier in its metadata so any renderer can stamp its own frames. The F1 sand cut (#8710, #8711) keeps the same split and adds one constraint a port must honour: the field carries its fidelity tier and validity status as data covered by a SHA-256 over the provenance and the arrays together, so any client that renders a field must read the standing out of the file rather than out of its filename, and must refuse a field whose digest does not match."
     },
     "analysis.analysis_tools_api": {
@@ -291,7 +347,9 @@
       "web": "ui/src/pages/AnalysisTools.tsx",
       "status": "gap",
       "issue": 7448,
-      "tiles": ["analysis_tools_api"],
+      "tiles": [
+        "analysis_tools_api"
+      ],
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
     "sidekick.terminal_repl_jupyter_skills": {
@@ -341,7 +399,9 @@
       "status": "exempt",
       "reason": "Requires a local MATLAB installation; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["matlab_suite"]
+      "tiles": [
+        "matlab_suite"
+      ]
     },
     "tools.pose_editing": {
       "title": "Pose Studio interactive pose editing",
@@ -351,7 +411,9 @@
       "status": "exempt",
       "reason": "Interactive 3D pose editing; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["pose_studio"]
+      "tiles": [
+        "pose_studio"
+      ]
     },
     "docs.document_library": {
       "title": "Document library / project map viewer",
@@ -361,7 +423,9 @@
       "status": "exempt",
       "reason": "Desktop documentation browser; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["project_map"]
+      "tiles": [
+        "project_map"
+      ]
     },
     "engines.dashboards": {
       "title": "Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio)",
@@ -371,7 +435,12 @@
       "status": "exempt",
       "reason": "Experimental desktop dashboards; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["drake_dashboard", "mujoco_dashboard", "pinocchio_dashboard"]
+      "tiles": [
+        "drake_dashboard",
+        "jaxsim_dashboard",
+        "mujoco_dashboard",
+        "pinocchio_dashboard"
+      ]
     },
     "biomech.exercise_injury_dashboards": {
       "title": "Exercise + injury-risk biomechanics dashboards",
@@ -381,7 +450,12 @@
       "status": "exempt",
       "reason": "Desktop biomechanics dashboards; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["biomech_exercise", "injury_analysis"]
+      "tiles": [
+        "biomech_exercise",
+        "biomech_gait",
+        "biomech_sit_to_stand",
+        "injury_analysis"
+      ]
     },
     "simulation.golf_suite_batch": {
       "title": "Golf Simulation Suite (parameter sweeps, batch runs)",
@@ -391,7 +465,9 @@
       "status": "exempt",
       "reason": "Desktop batch-simulation GUI; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["golf_simulation_suite"]
+      "tiles": [
+        "golf_simulation_suite"
+      ]
     },
     "optimization.swing_optimizer": {
       "title": "Swing Optimizer (trajectory optimization GUI)",
@@ -401,7 +477,23 @@
       "status": "exempt",
       "reason": "Desktop optimization GUI; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["swing_optimizer"]
+      "tiles": [
+        "swing_optimizer"
+      ]
+    },
+    "launcher.model_repositories": {
+      "title": "Model repository folder shortcuts",
+      "pyqt": "src/launchers/launcher_model_handlers.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Desktop-only folder shortcuts into the vendored model repositories; the web app browses models through Model Explorer.",
+      "tiles": [
+        "drake_models_shared",
+        "mujoco_models_shared",
+        "opensim_models_shared",
+        "pinocchio_models_shared"
+      ]
     }
   }
 }

@@ -197,7 +197,6 @@ repository, which made them effectively unreachable.
 | `testing/`              | @quality-team         | stable    | Testing strategy, validation guidance, and quality assurance references.                                                            |
 | `troubleshooting/`      | @support-team         | stable    | Troubleshooting guides for installation, runtime, and development issues.                                                           |
 | `tutorials/`            | @developer-experience | stable    | Step-by-step learning paths and task walkthroughs for users.                                                                        |
-| `ui/`                   | @ui-team              | draft     | Launcher/UI feature parity matrix and frontend-facing notes.                                                                        |
 | `user_guide/`           | @docs-team            | stable    | User-facing guides for common workflows and product capabilities.                                                                   |
 | `ux/`                   | @ui-team              | draft     | UX infrastructure for epic #5968: field metadata registry, copy style, walkthrough specs, and contributor guidance.                 |
 | `validation/`           | @quality-team         | stable    | Cross-engine validation artifacts, differential reports, and machine-readable evidence snapshots.                                   |

@@ -208,6 +208,85 @@ make check     # Run linters and tests
 make format    # Apply Ruff formatting
 ```
 
+## Launcher Tiles
+
+<!-- BEGIN GENERATED: launcher tiles (scripts/registry/generate_registry_artifacts.py) -->
+
+68 visible tiles from `src/config/models.yaml` (maturity: 41 ready, 6 beta, 21 experimental, 3 hidden). Regenerate with `python -m scripts.registry.generate_registry_artifacts`.
+
+| Tile | Category | Maturity | Surfaces | Web | Help |
+| --- | --- | --- | --- | --- | --- |
+| Model Explorer (`model_explorer`) | tool | ready | pyqt, web | route `/tools/model-explorer` | [help](docs/help/model_explorer.md) |
+| MuJoCo (`mujoco_unified`) | physics_engine | ready | pyqt, web | native-window | [help](docs/help/mujoco_unified.md) |
+| Drake (`drake_golf`) | physics_engine | ready | pyqt, web | native-window | [help](docs/help/drake_golf.md) |
+| Pinocchio (`pinocchio_golf`) | physics_engine | ready | pyqt, web | native-window | [help](docs/help/pinocchio_golf.md) |
+| OpenSim (`opensim_golf`) | physics_engine | ready | pyqt, web | native-window | [help](docs/help/opensim_golf.md) |
+| MyoSuite (`myosim_suite`) | physics_engine | ready | pyqt, web | native-window | [help](docs/help/myosim_suite.md) |
+| Rate of Closure Impact Explorer (`rate_of_closure`) | simulation | ready | pyqt, web | route `/tools/impact-explorer` | [help](docs/help/rate_of_closure.md) |
+| Putting Green (`putting_green`) | simulation | ready | pyqt, web | route `/tools/putting-green` | [help](docs/help/putting_green.md) |
+| Simscape (`matlab_suite`) | physics_engine | ready | pyqt, web | native-window | [help](docs/help/matlab_suite.md) |
+| Motion-Match Preview (`motion_target_preview`) | motion_matching | ready | pyqt, web | native-window | [help](docs/help/motion_target_preview.md) |
+| Motion Capture (`motion_capture`) | motion_capture | beta | pyqt, web | route `/tools/motion-capture` | [help](docs/help/motion_capture.md) |
+| Video Analyzer (`video_analyzer`) | motion_capture | experimental | pyqt, web | route `/tools/video-analyzer` | [help](docs/help/motion_capture.md) |
+| Video Processor (`video_processor`) | motion_capture | ready | pyqt, web | native-window | [help](docs/help/video_processor.md) |
+| Data Explorer (`data_explorer`) | tool | ready | pyqt, web | route `/tools/data-explorer` | [help](docs/help/data_explorer.md) |
+| Data Processor (`data_processor`) | tool | ready | pyqt, web | native-window | [help](docs/help/data_processor.md) |
+| Project Map (`project_map`) | documentation | ready | pyqt, web | unavailable | [help](docs/help/project_map.md) |
+| Cross-Engine Dashboard (`cross_engine_dashboard`) | simulation | ready | pyqt, web | native-window | [help](docs/help/cross_engine_dashboard.md) |
+| Exercise Dashboard (`biomech_exercise`) | biomechanics | ready | pyqt, web | native-window | [help](docs/help/biomech_exercise.md) |
+| Shot Tracer (`shot_tracer`) | simulation | ready | pyqt, web | route `/ball-flight` | [help](docs/help/shot_tracer.md) |
+| Pose Studio (`pose_studio`) | motion_matching | beta | pyqt, web | native-window | [help](docs/help/pose_studio.md) |
+| Simulator (`golf_simulation_suite`) | simulation | ready | pyqt, web | native-window | [help](docs/help/golf_simulation_suite.md) |
+| Swing Optimizer (`swing_optimizer`) | simulation | experimental | pyqt, web | native-window | [help](docs/help/simulation_controls.md) |
+| Injury Risk Analysis (`injury_analysis`) | biomechanics | experimental | pyqt, web | native-window | — |
+| Terrain Engine (`terrain_engine`) | simulation | ready | pyqt, web | route `/tools/terrain` | [help](docs/help/terrain_engine.md) |
+| Dataset Generator (`dataset_generator`) | tool | ready | web | route `/tools/dataset` | [help](docs/help/dataset_generator.md) |
+| BunkerShot3D Designer Workbench (`bunkershot3d`) | simulation | experimental | pyqt, web | native-window | [help](docs/help/simulation_controls.md) |
+| Pendulum Simulator (`pendulum_simulator`) | simulation | ready | pyqt, web | native-window | [help](docs/help/pendulum_simulator.md) |
+| AI Assistant (`chat_assistant`) | tool | ready | web | route `/chat` | [help](docs/help/chat_assistant.md) |
+| Character Builder (`character_builder`) | tool | ready | web | route `/tools/character-builder` | [help](docs/help/character_builder.md) |
+| Drake Dashboard (`drake_dashboard`) | physics_engine | experimental | pyqt, web | native-window | [help](docs/help/engine_selection.md) |
+| MuJoCo Dashboard (`mujoco_dashboard`) | physics_engine | experimental | pyqt, web | native-window | [help](docs/help/engine_selection.md) |
+| Pinocchio Dashboard (`pinocchio_dashboard`) | physics_engine | experimental | pyqt, web | native-window | [help](docs/help/engine_selection.md) |
+| Canonical-Core Estimation (`canonical_core_estimation`) | biomechanics | experimental | pyqt, web | route `/tools/canonical-core/estimation` | — |
+| Canonical-Core Comparison (`canonical_core_comparison`) | biomechanics | experimental | pyqt, web | route `/tools/canonical-core/comparison` | — |
+| Analysis Tools (`analysis_tools_api`) | analysis | ready | web | route `/tools/analysis` | [help](docs/help/analysis_tools_api.md) |
+| Motion Pipeline (`motion_pipeline`) | motion_matching | experimental | web | unavailable | — |
+| Perturbation Analysis (`perturbation_analysis`) | analysis | experimental | web | unavailable | [help](docs/help/analysis_tools.md) |
+| Force Overlays (`force_overlays`) | tool | experimental | web | unavailable | — |
+| Realtime WebSocket (`realtime_ws`) | tool | experimental | web | unavailable | — |
+| AI Protocol (AIP) (`aip`) | tool | experimental | web | unavailable | — |
+| Actuator Controls (`actuator_controls`) | tool | experimental | web | unavailable | — |
+| Unreal Integration (`unreal_integration`) | tool | experimental | web | unavailable | — |
+| Robotics Module (`robotics_module`) | tool | experimental | web | unavailable | — |
+| Tools Calculator Suite (`tools_calculator_hub`) | tool | beta | web | native-window | [help](docs/help/tools_calculator_hub.md) |
+| P&ID Generator (`pid_generator`) | tool | experimental | web | unavailable | — |
+| Simulation Backends (`simulation_backends`) | simulation | ready | pyqt, web | native-window | [help](docs/help/simulation_backends.md) |
+| MuJoCo Models (`mujoco_models_shared`) | simulation | ready | pyqt, web | native-window | [help](docs/help/mujoco_models_shared.md) |
+| Launch Monitor Analytics (`launch_monitor_analytics`) | tool | ready | pyqt, web | native-window | [help](docs/help/launch_monitor_analytics.md) |
+| Drake Models (`drake_models_shared`) | simulation | ready | pyqt, web | native-window | [help](docs/help/drake_models_shared.md) |
+| Pinocchio Models (`pinocchio_models_shared`) | simulation | ready | pyqt, web | native-window | [help](docs/help/pinocchio_models_shared.md) |
+| OpenSim Models (`opensim_models_shared`) | simulation | ready | pyqt, web | native-window | [help](docs/help/opensim_models_shared.md) |
+| Golf Environment (`golf_environment`) | simulation | ready | pyqt, web | native-window | [help](docs/help/golf_environment.md) |
+| Swing → Flight Pipeline (`swing_flight_pipeline`) | simulation | ready | pyqt, web | native-window | [help](docs/help/swing_flight_pipeline.md) |
+| Ball Flight Simulator (`ball_flight_simulator`) | simulation | ready | pyqt, web | native-window | [help](docs/help/ball_flight_simulator.md) |
+| C3D Viewer (`c3d_viewer`) | motion_capture | ready | pyqt, web | native-window | [help](docs/help/c3d_viewer.md) |
+| OpenPose (`openpose_analysis`) | motion_capture | ready | pyqt, web | native-window | [help](docs/help/openpose_analysis.md) |
+| MediaPipe (`mediapipe_analysis`) | motion_capture | ready | pyqt, web | native-window | [help](docs/help/mediapipe_analysis.md) |
+| Sidekick (`sidekick`) | tool | beta | pyqt, web | native-window | [help](docs/help/sidekick.md) |
+| Training Controller (`training_controller`) | tool | beta | pyqt, web | native-window | [help](docs/help/training_controller.md) |
+| Setup Wizard (`config_setup_wizard`) | tool | beta | pyqt, web | native-window | [help](docs/help/config_setup_wizard.md) |
+| Pose Subscriber (demo) (`pose_subscriber_demo`) | motion_matching | experimental | pyqt, web | native-window | — |
+| Library (`library_tool`) | documentation | ready | pyqt, web | native-window | [help](docs/help/library_tool.md) |
+| Gait Model (`biomech_gait`) | biomechanics | ready | pyqt, web | native-window | [help](docs/help/biomech_gait.md) |
+| Sit-to-Stand Model (`biomech_sit_to_stand`) | biomechanics | ready | pyqt, web | native-window | [help](docs/help/biomech_sit_to_stand.md) |
+| Movement Optimizer (`movement_optimizer`) | biomechanics | ready | pyqt, web | native-window | [help](docs/help/movement_optimizer.md) |
+| Pure Rigid Body (`pinn_pure_rigid`) | biomechanics | experimental | pyqt, web | native-window | — |
+| PINN Hybrid (`pinn_hybrid`) | biomechanics | experimental | pyqt, web | native-window | — |
+| Swing Objective Lab (`swing_objective_lab`) | simulation | ready | pyqt, web | route `/tools/swing-objective-lab` | [help](docs/help/swing_objective_lab.md) |
+
+<!-- END GENERATED: launcher tiles -->
+
 ## Engine Support
 
 Support level determines what is validated in continuous integration, not what

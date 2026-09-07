@@ -580,8 +580,14 @@ class TestManifestConsistency:
         with open(manifest_path, encoding="utf-8") as f:
             manifest = json.load(f)
 
+        # ``matlab_suite`` is dispatched by the ``model.type == "matlab_suite"``
+        # branch in launcher_simulation.launch_simulation, not by a handler
+        # (same exemption as tests/config/launcher_manifest/test_category_completeness.py).
+        special_cased = {"matlab_suite"}
         unhandled = []
         for tile in manifest["tiles"]:
+            if tile["type"] in special_cased:
+                continue
             handler = registry.get_handler(tile["type"])
             if handler is None:
                 unhandled.append(f"{tile['id']} (type={tile['type']})")

@@ -31,6 +31,7 @@ _STATUS_BADGES = {
     "parity": "✅ parity",
     "gap": "🔴 gap",
     "exempt": "⚪ exempt",
+    "api_only": "🔌 api_only",
 }
 
 
@@ -62,7 +63,7 @@ def render_matrix(registry: FeatureParityRegistry) -> str:
     """
     counts = {
         status: len(registry.by_status(status))
-        for status in ("parity", "gap", "exempt")
+        for status in ("parity", "gap", "exempt", "api_only")
     }
     lines = [
         "# Feature Parity Matrix (PyQt6 ↔ Tauri/React)",
@@ -76,7 +77,7 @@ def render_matrix(registry: FeatureParityRegistry) -> str:
         "(epic #7462, registry mechanism #7445).",
         "",
         f"**Summary:** {counts['parity']} parity · {counts['gap']} gap ·"
-        f" {counts['exempt']} exempt"
+        f" {counts['exempt']} exempt · {counts['api_only']} api_only"
         f" ({sum(1 for e in registry.exemptions if e.pending_decision)}"
         " pending decision in #7460).",
         "",

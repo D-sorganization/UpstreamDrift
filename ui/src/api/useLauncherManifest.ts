@@ -2,7 +2,7 @@
  * Launcher Manifest Hook — Fetches tile definitions from the shared manifest API.
  *
  * This hook reads from `/api/launcher/manifest` which is served by the Python
- * backend and derived from `launcher_manifest.json` — the single source of truth
+ * backend and derived from `src/config/models.yaml` — the single tile registry (#9412)
  * for both PyQt and Tauri launchers.
  *
  * Design by Contract:

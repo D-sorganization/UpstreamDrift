@@ -14,7 +14,7 @@ by ``launch_upstream_drift.py``:
   a real construct-without-exec window test.
 * Registry parity and ready-tile target resolution are real regression
   gates for #8853 / #8854, asserting against the settled contracts
-  (``WEB_CATALOG_ONLY_TILES`` allowlist, shared ``resolve_tile_target``).
+  (``models.yaml`` ``web_catalog`` entries, shared ``resolve_tile_target``).
 
 Run with: ``pytest tests/launch_modes -m launch_qa``.
 See docs/testing/launch_qa.md.
@@ -282,9 +282,9 @@ def test_engine_mujoco_constructs_headless(qapp: Any) -> None:
 def test_web_and_pyqt_tile_registries_agree(web_client: Any) -> None:
     """Regression gate for #8853: both launch surfaces serve one tile set.
 
-    The settled contract (tests/config/test_launcher_registry_parity.py):
+    The settled contract (tests/config/test_tile_registry.py, #9412):
     every visible desktop tile reaches the web surface, and the only web
-    extras are the justified ``WEB_CATALOG_ONLY_TILES``. Hidden desktop
+    extras are the justified ``web_catalog`` entries of models.yaml (#9412). Hidden desktop
     alias tiles are deliberately absent from the web manifest (#8863).
     """
     from src.config.launcher_manifest_loader import LauncherManifest
@@ -292,7 +292,7 @@ def test_web_and_pyqt_tile_registries_agree(web_client: Any) -> None:
         REPOS_ROOT,
         _lazy_load_model_registry,
     )
-    from tests.config.test_launcher_registry_parity import WEB_CATALOG_ONLY_TILES
+    from src.config.tile_registry import load_tile_registry
 
     response = web_client.get("/api/launcher/manifest")
     assert response.status_code == 200
@@ -308,9 +308,10 @@ def test_web_and_pyqt_tile_registries_agree(web_client: Any) -> None:
         f"desktop tiles structurally excluded from the web surface: "
         f"{sorted(structurally_excluded)}"
     )
-    undeclared_extras = web_ids - pyqt_ids - set(WEB_CATALOG_ONLY_TILES)
+    web_only = {t.id for t in load_tile_registry().web_catalog_tiles()}
+    undeclared_extras = web_ids - pyqt_ids - web_only
     assert not undeclared_extras, (
-        f"web-only tiles missing a WEB_CATALOG_ONLY_TILES justification: "
+        f"web-only tiles missing a models.yaml web_catalog entry: "
         f"{sorted(undeclared_extras)}"
     )
 

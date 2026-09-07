@@ -49,7 +49,7 @@ def test_model_registry_explicit_local_only_ignores_hybrid_environment(
     )
 
     assert registry.discovery_mode == "local-only"
-    assert len(registry.get_all_models()) == 56
+    assert len(registry.get_all_models()) == 57
 
 
 def test_catalog_reconciles_current_registries_without_schema_count_constants(
@@ -61,19 +61,19 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
     catalog = _catalog_module().build_catalog(REPO_ROOT, require_clean=False)
 
     assert catalog["summary"] == {
-        "raw_launcher_records": 49,
-        "local_model_records": 56,
-        "program_records": 70,
-        "feature_records": 41,
-        "feature_surface_paths": 82,
+        "raw_launcher_records": 71,
+        "local_model_records": 57,
+        "program_records": 71,
+        "feature_records": 42,
+        "feature_surface_paths": 83,
         "workflow_records": 15,
         "executable_workflow_records": 14,
     }
-    assert len({record["id"] for record in catalog["programs"]}) == 70
-    assert len({record["id"] for record in catalog["features"]}) == 41
+    assert len({record["id"] for record in catalog["programs"]}) == 71
+    assert len({record["id"] for record in catalog["features"]}) == 42
 
     schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
-    for current_count in (49, 56, 70, 41, 82):
+    for current_count in (71, 57, 42, 83):
         assert f'"const": {current_count}' not in schema_text
         assert f'"minItems": {current_count}' not in schema_text
         assert f'"maxItems": {current_count}' not in schema_text

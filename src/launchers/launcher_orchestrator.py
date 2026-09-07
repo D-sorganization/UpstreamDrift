@@ -72,6 +72,7 @@ class LauncherOrchestrator:
 
         all_models = self.registry.get_all_models()
         logger.info("Registry returned %s models", len(all_models))
+        all_models = self._restrict_to_desktop_surface(all_models)
 
         for model in all_models:
             self.available_models[model.id] = model
@@ -83,6 +84,36 @@ class LauncherOrchestrator:
             "Built available_models with %s entries",
             len(self.available_models),
         )
+
+    @staticmethod
+    def _restrict_to_desktop_surface(models: list[Any]) -> list[Any]:
+        """Keep only tiles declared for the ``pyqt`` surface (issue #9412).
+
+        ``src/config/models.yaml`` is the single registry for both launchers;
+        its ``surfaces`` field decides where a tile appears. The same pass
+        registers every desktop tile with the shared ``GUIRegistry`` so the
+        Tools-owned registry is derived from the registry file, not
+        maintained by hand. Failures degrade to the unfiltered list rather
+        than an empty launcher.
+        """
+        try:
+            from src.config.registry_adapters import (
+                filter_desktop_models,
+                populate_gui_registry,
+            )
+            from src.config.tile_registry import load_tile_registry
+
+            tile_registry = load_tile_registry()
+            kept = filter_desktop_models(models, tile_registry)
+            populate_gui_registry(tile_registry)
+        except Exception as exc:  # noqa: BLE001 - launcher must still start
+            logger.warning("Tile registry surface filter unavailable: %s", exc)
+            return models
+        if len(kept) != len(models):
+            logger.info(
+                "Desktop surface shows %s of %s registry models", len(kept), len(models)
+            )
+        return kept
 
     def get_model(self, model_id: str) -> Any | None:
         """Retrieve a model or application by ID."""

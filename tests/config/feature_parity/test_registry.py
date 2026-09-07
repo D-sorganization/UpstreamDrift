@@ -63,7 +63,9 @@ class TestRegistryLoads:
         self, registry: FeatureParityRegistry
     ) -> None:
         for entry in registry.entries:
-            assert entry.status in {"parity", "gap", "exempt"}, entry.feature_id
+            assert entry.status in {"parity", "gap", "exempt", "api_only"}, (
+                entry.feature_id
+            )
 
 
 # =============================================================================

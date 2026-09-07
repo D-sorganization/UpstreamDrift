@@ -39,6 +39,8 @@ logger = get_logger(__name__)
 class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
     """Professional golf swing analysis application with comprehensive features."""
 
+    HELP_TILE_ID = "mujoco_unified"
+
     SIMPLIFIED_ACTUATOR_THRESHOLD: typing.Final[int] = 60
 
     def __init__(self) -> None:

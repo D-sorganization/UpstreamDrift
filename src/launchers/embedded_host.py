@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.ui.tile_help import attach_tile_help
 from src.shared.python.launcher_embed import (
     EmbeddableTool,
     InMemoryLauncherContext,
@@ -319,6 +320,30 @@ class EmbeddedHostWidget(QWidget):
     # Tab API
     # ------------------------------------------------------------------
 
+    def _build_tool_widget(self, tool_id: str) -> tuple[Any, QWidget]:
+        """Resolve ``tool_id`` and build its widget, help affordance included.
+
+        The tab path and the dock path both need exactly this sequence, and
+        the DRY gate rightly rejects it written twice (issue #9413).
+
+        Args:
+            tool_id: Registry tile id of the tool to open.
+
+        Returns:
+            The resolved tool and its freshly built main widget, with the
+            tile's F1 help already attached.
+
+        Raises:
+            ValueError: If the tool's ``create_main_widget`` returns ``None``.
+        """
+        tool = _resolve_tool(tool_id)
+        _safe_set_launcher_context(tool, self._launcher_context)
+        widget = tool.create_main_widget(self)
+        if widget is None:
+            raise ValueError(f"tool {tool_id!r} create_main_widget returned None")
+        attach_tile_help(widget, tool_id)
+        return tool, widget
+
     def open_tab(self, tool_id: str) -> int:
         """Open ``tool_id`` as a tab and return the tab index.
 
@@ -351,11 +376,7 @@ class EmbeddedHostWidget(QWidget):
         if stashed is not None:
             return self._resurface_backgrounded(stashed)
 
-        tool = _resolve_tool(tool_id)
-        _safe_set_launcher_context(tool, self._launcher_context)
-        widget = tool.create_main_widget(self)
-        if widget is None:
-            raise ValueError(f"tool {tool_id!r} create_main_widget returned None")
+        tool, widget = self._build_tool_widget(tool_id)
 
         index = self._tab_widget.addTab(widget, tool.tool_id)
         self._tab_widget.setCurrentIndex(index)
@@ -747,11 +768,7 @@ class EmbeddedHostWidget(QWidget):
             existing.dock.raise_()
             return
 
-        tool = _resolve_tool(tool_id)
-        _safe_set_launcher_context(tool, self._launcher_context)
-        widget = tool.create_main_widget(self)
-        if widget is None:
-            raise ValueError(f"tool {tool_id!r} create_main_widget returned None")
+        tool, widget = self._build_tool_widget(tool_id)
 
         dock = QDockWidget(tool.tool_id, self._host_window)
         dock.setObjectName(f"embedded_dock::{tool.tool_id}")

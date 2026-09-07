@@ -117,6 +117,7 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
 ):
     """Main GUI Window for Drake Golf Simulation."""
 
+    HELP_TILE_ID = "drake_golf"
     WINDOW_TITLE = "Drake Golf Swing Analysis"
     WINDOW_WIDTH = 1000
     WINDOW_HEIGHT = 800

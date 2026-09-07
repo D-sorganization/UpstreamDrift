@@ -132,7 +132,13 @@ def test_cache_invalidated_by_watched_file_mtime(
     assert load_count == 1
 
     stamp = time.time() + 10
+    # launcher_manifest.json is a generated projection (#9412); touching it
+    # must NOT invalidate the cache - only the single registry is an input.
     os.utime(fake_manifest, (stamp, stamp))
+    manifest_cache.get_cached_manifest(loader=counting_loader)
+    assert load_count == 1
+
+    os.utime(fake_registry, (stamp, stamp))
     manifest_cache.get_cached_manifest(loader=counting_loader)
     assert load_count == 2
 

@@ -31,6 +31,7 @@ from src.launchers.launcher_model_sources import (
     get_model_source_root,
     resolve_model_artifact_path,
 )
+from src.shared.python.ui.tile_help import attach_tile_help
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import (
@@ -509,6 +510,77 @@ except (RuntimeError, TypeError, AttributeError) as e:
         self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
         return False
 
+    def _try_dockable_launch(self, model: Any, handler: Any) -> bool:
+        """Launch ``model`` through its handler's dockable UI, if it has one.
+
+        Extracted verbatim from :meth:`_execute_local_launch`, which exceeded
+        the 100-line function budget the moment it was touched (issue #9413).
+        Behaviour is unchanged apart from the help wiring noted below.
+
+        Args:
+            model: The launcher model being started.
+            handler: The registered handler for ``model.type``.
+
+        Returns:
+            ``True`` when a dockable UI was created and surfaced, so the
+            caller must not fall through to the process launch. ``False``
+            when the handler has no dockable UI, returned none, or raised.
+        """
+        dockable_factory = getattr(type(handler), "get_dockable_ui", None)
+        if not callable(dockable_factory):
+            return False
+
+        try:
+            ui_widget = handler.get_dockable_ui(model, REPOS_ROOT)
+        except Exception as e:  # noqa: BLE001
+            logger.error("Failed to load dockable UI for %s: %s", model.name, e)
+            return False
+        if not ui_widget:
+            return False
+
+        # Per-tile help (F1 + Help menu) for handler-provided dockable UIs.
+        attach_tile_help(ui_widget, getattr(model, "id", None))
+
+        if hasattr(self, "sidekick_sidebar") and hasattr(
+            ui_widget, "set_sidekick_session"
+        ):
+            # The sidebar widget might have a direct session attribute or IS
+            # the session.
+            session = getattr(self.sidekick_sidebar, "session", self.sidekick_sidebar)
+            try:
+                ui_widget.set_sidekick_session(session)
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to inject Sidekick session: %s", e)
+
+        available = getattr(ui_widget, "is_tool_available", True)
+
+        # Always dock as tab first; pop-out can be triggered post-launch from
+        # DraggableTabWidget.
+        if hasattr(self, "dock_widget_as_tab"):
+            self.dock_widget_as_tab(ui_widget, model.name)
+            self.show_toast(
+                f"{model.name} Docked" if available else f"Failed to load {model.name}",
+                "success" if available else "error",
+            )
+        elif hasattr(self, "popout_widget"):
+            self.popout_widget(ui_widget, model.name)
+            self.show_toast(
+                (
+                    f"{model.name} Popped Out"
+                    if available
+                    else f"Failed to load {model.name}"
+                ),
+                "success" if available else "error",
+            )
+
+        if available:
+            self.lbl_status.setText(f"* {model.name} Running")
+            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+        else:
+            self.lbl_status.setText("* Launch Error")
+            self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
+        return True
+
     def _execute_local_launch(self, model: Any) -> None:
         try:
             abs_model_path = resolve_model_artifact_path(model, REPOS_ROOT)
@@ -518,49 +590,8 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         handler = self.model_handler_registry.get_handler(model.type)
         if handler:
-            # Unified Architecture: Check if handler supports docking
-            dockable_factory = getattr(type(handler), "get_dockable_ui", None)
-            if callable(dockable_factory):
-                try:
-                    ui_widget = handler.get_dockable_ui(model, REPOS_ROOT)
-                    if ui_widget:
-                        if hasattr(self, "sidekick_sidebar") and hasattr(
-                            ui_widget, "set_sidekick_session"
-                        ):
-                            # The sidebar widget might have a direct session attribute or IS the session.
-                            session = getattr(
-                                self.sidekick_sidebar, "session", self.sidekick_sidebar
-                            )
-                            try:
-                                ui_widget.set_sidekick_session(session)
-                            except Exception as e:  # noqa: BLE001
-                                logger.warning(
-                                    "Failed to inject Sidekick session: %s", e
-                                )
-
-                        # Always dock as tab first; pop-out can be triggered post-launch from DraggableTabWidget
-                        if hasattr(self, "dock_widget_as_tab"):
-                            self.dock_widget_as_tab(ui_widget, model.name)
-                            if getattr(ui_widget, "is_tool_available", True):
-                                self.show_toast(f"{model.name} Docked", "success")
-                            else:
-                                self.show_toast(f"Failed to load {model.name}", "error")
-                        elif hasattr(self, "popout_widget"):
-                            self.popout_widget(ui_widget, model.name)
-                            if getattr(ui_widget, "is_tool_available", True):
-                                self.show_toast(f"{model.name} Popped Out", "success")
-                            else:
-                                self.show_toast(f"Failed to load {model.name}", "error")
-
-                        if getattr(ui_widget, "is_tool_available", True):
-                            self.lbl_status.setText(f"* {model.name} Running")
-                            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
-                        else:
-                            self.lbl_status.setText("* Launch Error")
-                            self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
-                        return
-                except Exception as e:  # noqa: BLE001
-                    logger.error("Failed to load dockable UI for %s: %s", model.name, e)
+            if self._try_dockable_launch(model, handler):
+                return
 
             try:
                 success = handler.launch(model, REPOS_ROOT, self.process_manager)
@@ -908,6 +939,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
                 ui_widget = tool.create_main_widget(self.launcher)
                 if ui_widget:
+                    attach_tile_help(ui_widget, getattr(tool, "tool_id", None))
                     ui_widget.destroyed.connect(tool.cleanup)
                     self.dock_widget_as_tab(ui_widget, "Model Explorer")
                     self.show_toast("Model Explorer loaded as tab.", "success")
@@ -966,6 +998,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
                 ui_widget = tool.create_main_widget(self.launcher)
                 if ui_widget:
+                    attach_tile_help(ui_widget, getattr(tool, "tool_id", None))
                     ui_widget.destroyed.connect(tool.cleanup)
                     self.dock_widget_as_tab(ui_widget, "Training")
                     self.show_toast("Training Controller loaded as tab.", "success")
@@ -1001,6 +1034,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
                 ui_widget = tool.create_main_widget(self.launcher)
                 if ui_widget:
+                    attach_tile_help(ui_widget, getattr(tool, "tool_id", None))
                     ui_widget.destroyed.connect(tool.cleanup)
                     self.dock_widget_as_tab(ui_widget, "C3D Viewer")
                     self.show_toast("C3D Viewer loaded as tab.", "success")

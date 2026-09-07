@@ -60,8 +60,7 @@ peak_time, peak_ke = analyzer.find_peak_kinetic()
 
 ## Phase Diagrams
 
-### What are Phase Diagrams?
-
+### What Are Phase Diagrams?
 Phase diagrams plot position vs. velocity for each degree of freedom, revealing:
 
 - Dynamic stability
@@ -195,8 +194,7 @@ impact = analyzer.get_impact_forces()
 
 ## Jacobian Analysis
 
-### What is the Jacobian?
-
+### What Is the Jacobian?
 The Jacobian matrix relates joint velocities to end-effector (clubhead) velocities:
 
 ```

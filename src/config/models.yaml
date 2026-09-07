@@ -7,6 +7,40 @@ models:
     name: "MuJoCo"
     description: "Biomechanical golf swing analysis (humanoid + simulation)"
     type: "custom_humanoid"
+    order: 2
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/mujoco_unified.md"
+    feature_id: "engines.load_and_simulate"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "rigid_body"
+      - "contact"
+      - "tendons"
+      - "actuators"
+      - "mass_matrix"
+      - "jacobian"
+      - "force_vectors"
+      - "torque_vectors"
+      - "contact_forces"
+      - "wrench"
+      - "screw_theory"
+      - "video_export"
+      - "dataset_export"
+      - "biomechanics"
+      - "spatial_algebra"
+      - "actuator_controls"
+      - "force_overlays"
+      - "control_schemes"
+      - "realtime"
+      - "realtime_ws"
+      - "unreal_streaming"
+      - "biomechanics_library"
+      - "data_io"
+      - "plot_engine"
+      - "recorder"
+      - "advanced_analysis"
     path: "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py"
     engine_type: "mujoco"
     python_paths:
@@ -23,6 +57,32 @@ models:
     name: "Drake"
     description: "Drake robotics with MeshCat visualisation"
     type: "drake"
+    order: 3
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/drake_golf.md"
+    feature_id: "engines.load_and_simulate"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "rigid_body"
+      - "optimization"
+      - "contact"
+      - "mass_matrix"
+      - "jacobian"
+      - "actuator_controls"
+      - "force_overlays"
+      - "control_schemes"
+      - "realtime"
+      - "realtime_ws"
+      - "unreal_streaming"
+      - "screw_theory"
+      - "spatial_algebra"
+      - "biomechanics_library"
+      - "data_io"
+      - "plot_engine"
+      - "recorder"
+      - "advanced_analysis"
     path: "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
     engine_type: "drake"
     launcher:
@@ -35,6 +95,28 @@ models:
     name: "Pinocchio"
     description: "Rigid-body dynamics with analytical derivatives"
     type: "pinocchio"
+    order: 4
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/pinocchio_golf.md"
+    feature_id: "engines.load_and_simulate"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "rigid_body"
+      - "inverse_kinematics"
+      - "mass_matrix"
+      - "jacobian"
+      - "actuator_controls"
+      - "force_overlays"
+      - "control_schemes"
+      - "realtime_ws"
+      - "unreal_streaming"
+      - "biomechanics_library"
+      - "data_io"
+      - "plot_engine"
+      - "recorder"
+      - "advanced_analysis"
     path: "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
     engine_type: "pinocchio"
     launcher:
@@ -47,6 +129,21 @@ models:
     name: "OpenSim"
     description: "Musculoskeletal modelling for biomechanics"
     type: "opensim"
+    order: 5
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/opensim_golf.md"
+    feature_id: "engines.load_and_simulate"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "musculoskeletal"
+      - "inverse_kinematics"
+      - "muscle_analysis"
+      - "mass_matrix"
+      - "jacobian"
+      - "biomechanics"
+      - "actuator_controls"
     path: "src/engines/physics_engines/opensim/python/opensim_gui.py"
     engine_type: "opensim"
     launcher:
@@ -59,6 +156,19 @@ models:
     name: "MyoSuite"
     description: "Muscle-actuated simulation environment"
     type: "myosim"
+    order: 6
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/myosim_suite.md"
+    feature_id: "engines.load_and_simulate"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "musculoskeletal"
+      - "muscle_control"
+      - "neural_activation"
+      - "mass_matrix"
+      - "jacobian"
     path: "src/engines/physics_engines/myosuite/python/gui.py"
     engine_type: "myosuite"
     launcher:
@@ -71,6 +181,17 @@ models:
     name: "Simscape"
     description: "MATLAB / Simscape models, dataset generators, and tooling"
     type: "matlab_suite"
+    order: 9
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/matlab_suite.md"
+    feature_id: "tools.matlab_suite"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "simscape_2d"
+      - "simscape_3d"
+      - "analysis_tools"
     path: "virtual/matlab_suite"
     engine_type: "matlab"
     launcher:
@@ -86,6 +207,17 @@ models:
     name: "Simulator"
     description: "Complete golf simulation with ball flight physics and putting green"
     type: "golf_simulation"
+    order: 21
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/golf_simulation_suite.md"
+    feature_id: "simulation.golf_suite_batch"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "full_simulation"
+      - "parameter_sweep"
+      - "batch_runs"
     path: "src/tools/golf_simulation_suite/__main__.py"
     engine_type: "golf_simulation"
     launcher:
@@ -98,6 +230,18 @@ models:
     name: "Putting Green"
     description: "Realistic putting green with ball-rolling physics"
     type: "putting_green"
+    order: 8
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/putting_green.md"
+    feature_id: "tools.putting_green"
+    web:
+      mode: "route"
+      route: "/tools/putting-green"
+    capabilities:
+      - "surface_modeling"
+      - "ball_physics"
+      - "terrain"
     path: "src/tools/putting_green_gui/gui.py"
     engine_type: "putting_green"
     launcher:
@@ -112,6 +256,13 @@ models:
     name: "MuJoCo Models"
     description: "MuJoCo simulation models repository folder"
     type: "shared_repo"
+    order: 47
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/mujoco_models_shared.md"
+    feature_id: "launcher.model_repositories"
+    web:
+      mode: "native-window"
     path: "MuJoCo_Models"
     capabilities:
       - "model_repository"
@@ -125,6 +276,13 @@ models:
     name: "Drake Models"
     description: "Drake simulation models repository folder"
     type: "shared_repo"
+    order: 49
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/drake_models_shared.md"
+    feature_id: "launcher.model_repositories"
+    web:
+      mode: "native-window"
     path: "Drake_Models"
     capabilities:
       - "model_repository"
@@ -138,6 +296,13 @@ models:
     name: "Pinocchio Models"
     description: "Pinocchio simulation models repository folder"
     type: "shared_repo"
+    order: 50
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/pinocchio_models_shared.md"
+    feature_id: "launcher.model_repositories"
+    web:
+      mode: "native-window"
     path: "Pinocchio_Models"
     capabilities:
       - "model_repository"
@@ -151,6 +316,13 @@ models:
     name: "OpenSim Models"
     description: "OpenSim simulation models repository folder"
     type: "shared_repo"
+    order: 51
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/opensim_models_shared.md"
+    feature_id: "launcher.model_repositories"
+    web:
+      mode: "native-window"
     path: "OpenSim_Models"
     capabilities:
       - "model_repository"
@@ -168,6 +340,20 @@ models:
     name: "BunkerShot3D Designer Workbench"
     description: "Wedge sole design against the F0 dynamic-RFT bunker model"
     type: "special_app"
+    order: 26
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: "docs/help/simulation_controls.md"
+    feature_id: "tools.bunkershot3d_workbench"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "wedge_sole_design"
+      - "sand_simulation"
+      - "playability_window"
+      - "bounce_utilisation"
+      - "ab_comparison"
+      - "validity_envelope"
     path: "src/tools/bunker_shot_gui/gui.py"
     launcher:
       category: "simulation"
@@ -179,6 +365,19 @@ models:
     name: "Pendulum Simulator"
     description: "Interactive proximal–distal companion for double, triple, and 8-DOF golfer dynamics"
     type: "special_app"
+    order: 27
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/pendulum_simulator.md"
+    feature_id: "engines.load_and_simulate"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "educational"
+      - "pendulum"
+      - "proximal_distal"
+      - "counterfactuals"
+      - "force_vectors"
     path: "src/double_pendulum_golf/__main__.py"
     provider: "tools"
     source_root: "../Tools/src/pendulum_simulator"
@@ -196,6 +395,20 @@ models:
     name: "Swing Objective Lab"
     description: "Compare downswings optimized for clubhead speed against centrifugal, Coriolis, energy, and impulse transfer"
     type: "special_app"
+    order: 101
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/swing_objective_lab.md"
+    feature_id: "simulation.swing_objective_lab"
+    web:
+      mode: "route"
+      route: "/tools/swing-objective-lab"
+    capabilities:
+      - "pendulum"
+      - "trajectory_optimization"
+      - "objective_comparison"
+      - "proximal_distal"
+      - "counterfactuals"
     path: "src/double_pendulum_golf/swing_objectives/__main__.py"
     provider: "tools"
     source_root: "../Tools/src/pendulum_simulator"
@@ -212,6 +425,17 @@ models:
     name: "Shot Tracer"
     description: "Multi-model golf ball trajectory comparison (Waterloo, MacDonald, Nathan)"
     type: "special_app"
+    order: 19
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/shot_tracer.md"
+    feature_id: "simulation.shot_tracer"
+    web:
+      mode: "route"
+      route: "/ball-flight"
+    capabilities:
+      - "trajectory_visualization"
+      - "multi_model_comparison"
     path: "src/launchers/_shot_tracer_gui.py"
     launcher:
       category: "simulation"
@@ -223,6 +447,19 @@ models:
     name: "Cross-Engine Dashboard"
     description: "Perturbation robustness comparison across physics engines"
     type: "special_app"
+    order: 17
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/cross_engine_dashboard.md"
+    feature_id: "analysis.cross_engine_robustness"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "cross_validation"
+      - "perturbation"
+      - "robustness_scoring"
+      - "comparison"
+      - "cross_engine_robustness"
     path: "src/launchers/cross_engine_dashboard.py"
     launcher:
       category: "simulation"
@@ -237,6 +474,19 @@ models:
     name: "Terrain Engine"
     description: "Topography presets and surface queries for terrain-aware ball physics"
     type: "special_app"
+    order: 24
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/terrain_engine.md"
+    feature_id: "tools.terrain_engine"
+    web:
+      mode: "route"
+      route: "/tools/terrain"
+    capabilities:
+      - "surface_modeling"
+      - "ball_physics"
+      - "topography"
+      - "terrain_query"
     path: "src/tools/terrain_engine/gui.py"
     launcher:
       category: "simulation"
@@ -248,6 +498,13 @@ models:
     name: "Golf Environment"
     description: "3D Driving Range and Golf Course Hole visualization"
     type: "special_app"
+    order: 52
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/golf_environment.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/tools/golf_environment/gui.py"
     capabilities:
       - "driving_range"
@@ -266,6 +523,13 @@ models:
     name: "Swing → Flight Pipeline"
     description: "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline"
     type: "special_app"
+    order: 53
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/swing_flight_pipeline.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/tools/swing_flight_pipeline/gui.py"
     capabilities:
       - "swing_dynamics"
@@ -281,6 +545,13 @@ models:
     name: "Ball Flight Simulator"
     description: "Aerodynamic ball flight simulator with drag, Magnus, and wind models"
     type: "special_app"
+    order: 54
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/ball_flight_simulator.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/tools/ball_flight_gui/gui.py"
     capabilities:
       - "ball_flight"
@@ -297,6 +568,13 @@ models:
     name: "Putting Green"
     description: "Legacy alias for the canonical putting_green launcher tile."
     type: "special_app"
+    order: 102
+    maturity: "hidden"
+    surfaces: [pyqt, web]
+    help: "docs/help/simulation_controls.md"
+    feature_id: "tools.putting_green"
+    web:
+      mode: "native-window"
     path: "src/tools/putting_green_gui/gui.py"
     hidden: true
     hidden_reason: "Legacy alias retained so saved layouts continue to resolve; use putting_green for new launcher entries."
@@ -318,6 +596,19 @@ models:
     name: "Motion-Match Preview"
     description: "Preview multi-source motion-capture targets on a shared timegrid"
     type: "special_app"
+    order: 10
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/motion_target_preview.md"
+    feature_id: "mocap.breadth"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "c3d"
+      - "mocap"
+      - "club"
+      - "body"
+      - "preview"
     path: "src/tools/starting_pose_matcher/__main__.py"
     tags: ["c3d", "mocap", "club", "body", "preview"]
     launcher:
@@ -330,6 +621,18 @@ models:
     name: "Pose Studio"
     description: "Cross-engine interactive pose editor"
     type: "special_app"
+    order: 20
+    maturity: "beta"
+    surfaces: [pyqt, web]
+    help: "docs/help/pose_studio.md"
+    feature_id: "tools.pose_editing"
+    web:
+      mode: "native-window"
+    web_logo: "pose_studio.svg"
+    capabilities:
+      - "pose_editing"
+      - "retargeting"
+      - "joint_manipulation"
     path: "src/tools/pose_studio/__main__.py"
     launcher:
       category: "motion_matching"
@@ -340,6 +643,19 @@ models:
     name: "Starting-Pose Matcher (legacy)"
     description: "Legacy alias for motion_target_preview. Hidden by default."
     type: "special_app"
+    order: 100
+    maturity: "hidden"
+    surfaces: [pyqt, web]
+    help: null
+    feature_id: "mocap.breadth"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "c3d"
+      - "mocap"
+      - "club"
+      - "body"
+      - "preview"
     path: "src/tools/starting_pose_matcher/__main__.py"
     hidden: true
     hidden_reason: "Legacy alias retained for one release so saved layouts continue to resolve; use motion_target_preview for new launcher entries."
@@ -357,6 +673,13 @@ models:
     name: "C3D Viewer"
     description: "Visualise and analyse optical mocap data (.c3d)"
     type: "special_app"
+    order: 55
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/c3d_viewer.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
     capabilities:
       - "c3d"
@@ -372,6 +695,20 @@ models:
     name: "Video Analyzer"
     description: "Video-based motion analysis with pose tracking"
     type: "special_app"
+    order: 12
+    maturity: "experimental"
+    maturity_reason: "#8883: the tile opens a GUI placeholder until the sibling video_analyzer package is wired"
+    surfaces: [pyqt, web]
+    help: "docs/help/motion_capture.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "route"
+      route: "/tools/video-analyzer"
+    capabilities:
+      - "video_processing"
+      - "pose_estimation"
+      - "motion_tracking"
+      - "frame_analysis"
     path: "src/video_analyzer/launch_video_analyzer.py"
     provider: "tools"
     working_dir: "."
@@ -388,6 +725,19 @@ models:
     name: "Video Processor"
     description: "Shared media processor for video conversion, frame extraction, and analysis"
     type: "special_app"
+    order: 13
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/video_processor.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
+    web_route: "/tools/video-processor"
+    capabilities:
+      - "video_processing"
+      - "format_conversion"
+      - "frame_extraction"
+      - "media_analysis"
     path: "src/media_processing/video_processor/apps/web/launch_platform.py"
     provider: "tools"
     working_dir: "src/media_processing/video_processor/apps/web"
@@ -404,6 +754,13 @@ models:
     name: "OpenPose"
     description: "High-accuracy body pose estimation (Academic License)"
     type: "special_app"
+    order: 56
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/openpose_analysis.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/shared/python/pose_estimation/openpose_gui.py"
     capabilities:
       - "pose_estimation"
@@ -418,6 +775,13 @@ models:
     name: "MediaPipe"
     description: "Fast pose estimation via Google MediaPipe (Apache 2.0)"
     type: "special_app"
+    order: 57
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/mediapipe_analysis.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/shared/python/pose_estimation/mediapipe_gui.py"
     capabilities:
       - "pose_estimation"
@@ -436,6 +800,18 @@ models:
     name: "Model Explorer"
     description: "Explore models and generate URDFs"
     type: "special_app"
+    order: 1
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/model_explorer.md"
+    feature_id: "tools.model_explorer"
+    web:
+      mode: "route"
+      route: "/tools/model-explorer"
+    capabilities:
+      - "model_browsing"
+      - "urdf_generation"
+      - "open_in_engine"
     path: "src/tools/model_explorer/main_window.py"
     launcher:
       category: "tool"
@@ -447,6 +823,19 @@ models:
     name: "Data Explorer"
     description: "Import, filter, and visualise simulation datasets"
     type: "special_app"
+    order: 14
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/data_explorer.md"
+    feature_id: "tools.data_explorer"
+    web:
+      mode: "route"
+      route: "/tools/data-explorer"
+    capabilities:
+      - "data_import"
+      - "filtering"
+      - "visualization"
+      - "export"
     path: "src/data_explorer/data_explorer_app.py"
     provider: "tools"
     working_dir: "."
@@ -464,6 +853,22 @@ models:
     name: "Data Processor"
     description: "Shared signal processing and time-series data analysis tool"
     type: "special_app"
+    order: 15
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/data_processor.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
+    web_route: "/tools/data-processor"
+    capabilities:
+      - "data_import"
+      - "signal_processing"
+      - "time_series"
+      - "filtering"
+      - "statistics"
+      - "export"
+      - "process_calculators"
     path: "src/data_processing/data_processor/launch_pyqt6.py"
     provider: "tools"
     working_dir: "."
@@ -482,6 +887,13 @@ models:
     name: "Launch Monitor Analytics"
     description: "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends"
     type: "special_app"
+    order: 48
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/launch_monitor_analytics.md"
+    feature_id: "tools.launch_monitor_analytics"
+    web:
+      mode: "native-window"
     path: "src/tools/launch_monitor_analytics/__main__.py"
     capabilities:
       - "launch_monitor_import"
@@ -502,6 +914,14 @@ models:
     name: "Rate of Closure Impact Explorer"
     description: "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)"
     type: "special_app"
+    order: 7
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/rate_of_closure.md"
+    feature_id: "tools.rate_of_closure"
+    web:
+      mode: "route"
+      route: "/tools/impact-explorer"
     path: "src/rate_of_closure/launch_pyqt6.py"
     provider: "tools"
     working_dir: "."
@@ -509,14 +929,14 @@ models:
       - "src"
       - "src/shared/python"
     capabilities:
-      [
-        "rate_of_closure",
-        "impact_analysis",
-        "clubhead_kinematics",
-        "attack_angle",
-        "face_rotation",
-        "3d_visualization",
-      ]
+      - "rate_of_closure"
+      - "impact_analysis"
+      - "clubhead_kinematics"
+      - "attack_angle"
+      - "face_rotation"
+      - "3d_visualization"
+      - "putting_simulation"
+      - "launch_monitor_analytics"
     launcher:
       category: "simulation"
       logo: "rate_of_closure.svg"
@@ -527,6 +947,13 @@ models:
     name: "Sidekick"
     description: "AI assistant chat panel — embed as a dock or tab"
     type: "special_app"
+    order: 58
+    maturity: "beta"
+    surfaces: [pyqt, web]
+    help: "docs/help/sidekick.md"
+    feature_id: "chat.transport"
+    web:
+      mode: "native-window"
     path: "src/tools/sidekick/_embed_adapter.py"
     capabilities:
       - "ai_assistant"
@@ -542,6 +969,13 @@ models:
     name: "Training Controller"
     description: "Schedule, monitor, and manage model-training jobs across engines."
     type: "special_app"
+    order: 59
+    maturity: "beta"
+    surfaces: [pyqt, web]
+    help: "docs/help/training_controller.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/tools/training_controller/__main__.py"
     capabilities:
       - "training_jobs"
@@ -557,6 +991,13 @@ models:
     name: "Setup Wizard"
     description: "Validate canonical-core units, model dimensions, and calibration before a run."
     type: "special_app"
+    order: 60
+    maturity: "beta"
+    surfaces: [pyqt, web]
+    help: "docs/help/config_setup_wizard.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/tools/config_setup_wizard/_embed_adapter.py"
     capabilities:
       - "configuration"
@@ -576,6 +1017,13 @@ models:
     name: "Pose Subscriber (demo)"
     description: "Live mirror of Pose Studio's canonical pose via the realtime IPC layer"
     type: "special_app"
+    order: 61
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: null
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "src/tools/pose_subscriber_demo/__main__.py"
     capabilities:
       - "realtime"
@@ -591,6 +1039,19 @@ models:
     name: "Project Map"
     description: "Map of every feature and module in the suite"
     type: "document"
+    order: 16
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/project_map.md"
+    feature_id: "docs.document_library"
+    web:
+      mode: "unavailable"
+      reason: "Documentation file; no dedicated web page yet"
+    web_logo: "golf_logo.svg"
+    capabilities:
+      - "documentation"
+      - "feature_discovery"
+      - "project_overview"
     path: "docs/architecture/PROJECT_MAP.md"
     launcher:
       category: "documentation"
@@ -601,6 +1062,13 @@ models:
     name: "Library"
     description: "Research library for managing publications, LaTeX references, and documents"
     type: "special_app"
+    order: 62
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/library_tool.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     path: "virtual/library"
     capabilities:
       - "research_library"
@@ -622,6 +1090,13 @@ models:
     name: "Gait Model"
     description: "Standardized human gait model across engines"
     type: "biomech_exercise"
+    order: 63
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/biomech_gait.md"
+    feature_id: "biomech.exercise_injury_dashboards"
+    web:
+      mode: "native-window"
     exercise: "gait"
     capabilities:
       - "biomechanics"
@@ -637,6 +1112,13 @@ models:
     name: "Sit-to-Stand Model"
     description: "Standardized sit-to-stand motion model"
     type: "biomech_exercise"
+    order: 64
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/biomech_sit_to_stand.md"
+    feature_id: "biomech.exercise_injury_dashboards"
+    web:
+      mode: "native-window"
     exercise: "sit_to_stand"
     capabilities:
       - "biomechanics"
@@ -652,6 +1134,13 @@ models:
     name: "Movement Optimizer"
     description: "Cross-engine trajectory optimization"
     type: "special_app"
+    order: 65
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/movement_optimizer.md"
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     # Sibling checkout next to UpstreamDrift; resolved by
     # ModelSourcePathPolicy.resolve_source_root (issue #7984).
     source_root: "Movement_Optimizer"
@@ -675,6 +1164,15 @@ models:
     name: "Canonical-Core Estimation"
     description: "CC-19 estimation services in the unified workspace"
     type: "special_app"
+    order: 33
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: null
+    feature_id: "canonical_core.workspaces"
+    web:
+      mode: "route"
+      route: "/tools/canonical-core/estimation"
+    shell_surfaces: ["pyqt6", "react"]
     path: "src/tools/canonical_core/estimation.py"
     capabilities:
       - "canonical_core"
@@ -692,6 +1190,15 @@ models:
     name: "Canonical-Core Comparison"
     description: "CC-27 comparison services in the unified workspace"
     type: "special_app"
+    order: 34
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: null
+    feature_id: "canonical_core.workspaces"
+    web:
+      mode: "route"
+      route: "/tools/canonical-core/comparison"
+    shell_surfaces: ["pyqt6", "react"]
     path: "src/tools/canonical_core/comparison.py"
     capabilities:
       - "canonical_core"
@@ -716,6 +1223,13 @@ models:
     name: "Simulation Backends"
     description: "Compare ODE, MuJoCo (CPU) and MuJoCo Warp (GPU) backends with rollouts, sweeps, and HDF5 export"
     type: "special_app"
+    order: 46
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/simulation_backends.md"
+    feature_id: "analysis.counterfactuals"
+    web:
+      mode: "native-window"
     path: "src/tools/simulation_backends_launcher/__main__.py"
     capabilities:
       - "backend_selection"
@@ -723,6 +1237,7 @@ models:
       - "parameter_sweep"
       - "cross_validation"
       - "hdf5_export"
+      - "ztcf_zvcf"
     launcher:
       category: "simulation"
       logo: "golf_logo.svg"
@@ -733,11 +1248,27 @@ models:
     name: "Motion Capture"
     description: "FreeMoCap sidecar: markerless motion capture recording and processing"
     type: "special_app"
+    order: 11
+    maturity: "beta"
+    surfaces: [pyqt, web]
+    help: "docs/help/motion_capture.md"
+    feature_id: "mocap.breadth"
+    web:
+      mode: "route"
+      route: "/tools/motion-capture"
     path: "src/tools/freemocap_sidecar/run_freemocap.py"
     capabilities:
       - "markerless_mocap"
       - "freemocap"
       - "recording"
+      - "c3d_viewer"
+      - "openpose"
+      - "mediapipe"
+      - "pose_estimation"
+      - "retargeting"
+      - "id_solving"
+      - "signal_processing"
+      - "scaling"
     launcher:
       category: "motion_capture"
       logo: "c3d_icon.svg"
@@ -748,11 +1279,19 @@ models:
     name: "Exercise Dashboard"
     description: "Biomechanics exercise workflows with injury risk and joint stress analysis"
     type: "special_app"
+    order: 18
+    maturity: "ready"
+    surfaces: [pyqt, web]
+    help: "docs/help/biomech_exercise.md"
+    feature_id: "biomech.exercise_injury_dashboards"
+    web:
+      mode: "native-window"
     path: "src/launchers/exercise_dashboard.py"
     capabilities:
       - "injury_risk"
       - "joint_stress"
       - "exercise_presets"
+      - "swing_modification"
     launcher:
       category: "biomechanics"
       logo: "exercise_dashboard.svg"
@@ -763,6 +1302,17 @@ models:
     name: "Swing Optimizer"
     description: "Trajectory optimization with constraint solving and cost functions"
     type: "special_app"
+    order: 22
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: "docs/help/simulation_controls.md"
+    feature_id: "optimization.swing_optimizer"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "trajectory_optimization"
+      - "constraint_solving"
+      - "cost_functions"
     path: "src/shared/python/optimization/swing_optimizer.py"
     launcher:
       category: "simulation"
@@ -774,6 +1324,18 @@ models:
     name: "Injury Risk Analysis"
     description: "Joint stress, spinal load, and swing modification analysis for injury prevention"
     type: "special_app"
+    order: 23
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: null
+    feature_id: "biomech.exercise_injury_dashboards"
+    web:
+      mode: "native-window"
+    capabilities:
+      - "injury_risk"
+      - "joint_stress"
+      - "spinal_load"
+      - "swing_modification"
     path: "src/shared/python/injury/injury_risk.py"
     launcher:
       category: "biomechanics"
@@ -785,12 +1347,22 @@ models:
     name: "Drake Dashboard"
     description: "Interactive Drake simulation dashboard"
     type: "special_app"
+    order: 30
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: "docs/help/engine_selection.md"
+    feature_id: "engines.dashboards"
+    web:
+      mode: "native-window"
+    web_route: "/tools/drake-dashboard"
     path: "src/launchers/drake_dashboard.py"
     engine_type: "drake"
     capabilities:
       - "rigid_body"
       - "dashboard"
       - "recorder"
+      - "optimization"
+      - "advanced_analysis"
     launcher:
       category: "physics_engine"
       logo: "drake.svg"
@@ -801,12 +1373,22 @@ models:
     name: "MuJoCo Dashboard"
     description: "Interactive MuJoCo simulation dashboard"
     type: "special_app"
+    order: 31
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: "docs/help/engine_selection.md"
+    feature_id: "engines.dashboards"
+    web:
+      mode: "native-window"
+    web_route: "/tools/mujoco-dashboard"
     path: "src/launchers/mujoco_dashboard.py"
     engine_type: "mujoco"
     capabilities:
       - "rigid_body"
       - "dashboard"
       - "recorder"
+      - "contact"
+      - "advanced_analysis"
     launcher:
       category: "physics_engine"
       logo: "mujoco_humanoid.svg"
@@ -817,12 +1399,22 @@ models:
     name: "Pinocchio Dashboard"
     description: "Interactive Pinocchio simulation dashboard"
     type: "special_app"
+    order: 32
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: "docs/help/engine_selection.md"
+    feature_id: "engines.dashboards"
+    web:
+      mode: "native-window"
+    web_route: "/tools/pinocchio-dashboard"
     path: "src/launchers/pinocchio_dashboard.py"
     engine_type: "pinocchio"
     capabilities:
       - "rigid_body"
       - "dashboard"
       - "recorder"
+      - "inverse_kinematics"
+      - "advanced_analysis"
     launcher:
       category: "physics_engine"
       logo: "pinocchio.svg"
@@ -837,6 +1429,13 @@ models:
     name: "Pure Rigid Body"
     description: "Pinocchio inverse dynamics only — no ML"
     type: "physics_informed"
+    order: 66
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: null
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     mode: "pure_rigid"
     capabilities:
       - "physics_informed"
@@ -850,6 +1449,13 @@ models:
     name: "PINN Hybrid"
     description: "Rigid body + JAX residual torque MLP"
     type: "physics_informed"
+    order: 67
+    maturity: "experimental"
+    surfaces: [pyqt, web]
+    help: null
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "native-window"
     mode: "pinn_hybrid"
     capabilities:
       - "physics_informed"
@@ -859,3 +1465,448 @@ models:
       category: "biomechanics"
       logo: "pinocchio.svg"
       status: "experimental"
+
+  # JaxSim (issue #8870): the engine type, loader, probe, ADR-0024/0025 and a
+  # CI guard exist, but src/launchers/jaxsim_dashboard.py only renders
+  # read-only capability indicators and never imports JaxSim. The tile is
+  # registered so the registry is complete, and hidden so nobody clicks a
+  # panel that runs nothing. Unhide when the dashboard is functional.
+  - id: "jaxsim_dashboard"
+    name: "JaxSim Dashboard"
+    description: "Differentiable-physics capability indicators (JaxSim)"
+    type: "special_app"
+    order: 103
+    maturity: "hidden"
+    surfaces: [pyqt, web]
+    help: "docs/help/engine_selection.md"
+    feature_id: "engines.dashboards"
+    web:
+      mode: "unavailable"
+      reason: "JaxSim dashboard is read-only capability indicators; no launchable surface yet (#8870)"
+    path: "src/launchers/jaxsim_dashboard.py"
+    engine_type: "jaxsim"
+    hidden: true
+    hidden_reason: "JaxSim is half-integrated (#8870): no engine tier, no pose adapter, no cross-engine entry; the dashboard runs nothing yet."
+    hidden_owner: "@launcher"
+    capabilities:
+      - "jaxsim"
+      - "differentiable_physics"
+      - "capability_indicators"
+    launcher:
+      category: "physics_engine"
+      logo: "pinocchio.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+# =============================================================================
+# WEB CATALOG (issue #9412) - tiles that exist only on the web/API surface.
+# ModelRegistry (the PyQt launcher) ignores this list; src.config.tile_registry
+# merges it with `models:` so both launchers read ONE file. Every entry must
+# say why it has no desktop counterpart (surface_reason).
+# =============================================================================
+web_catalog:
+
+  - id: "chat_assistant"
+    name: "AI Assistant"
+    description: "Chat-based AI assistant with calculator, workspace, and data explorer integration"
+    type: "special_app"
+    path: ""
+    order: 28
+    maturity: "ready"
+    surfaces: [web]
+    surface_reason: "web chat page (/chat); the desktop equivalent is the sidekick dock"
+    help: "docs/help/chat_assistant.md"
+    feature_id: "chat.transport"
+    web:
+      mode: "route"
+      route: "/chat"
+    capabilities:
+      - "ai_methods"
+      - "calculator"
+      - "workspace"
+      - "data_explorer"
+    launcher:
+      category: "tool"
+      logo: "golf_logo.svg"
+      status: "gui_ready"
+      default_launch: "tab"
+
+  - id: "dataset_generator"
+    name: "Dataset Generator"
+    description: "Generate and import swing datasets with configurable strategies and export"
+    type: "special_app"
+    path: ""
+    order: 25
+    maturity: "ready"
+    surfaces: [web]
+    surface_reason: "web page (/tools/dataset); the native path is the MATLAB chooser"
+    help: "docs/help/dataset_generator.md"
+    feature_id: "tools.dataset_generator"
+    web:
+      mode: "route"
+      route: "/tools/dataset"
+    capabilities:
+      - "dataset_generation"
+      - "swing_import"
+      - "parameter_sweep"
+      - "export"
+    launcher:
+      category: "tool"
+      logo: "data_explorer.svg"
+      status: "gui_ready"
+      default_launch: "tab"
+
+  - id: "character_builder"
+    name: "Character Builder"
+    description: "Build and customize humanoid URDF models with anthropometric scaling"
+    type: "special_app"
+    path: "src/shared/python/model_generation/cli/main.py"
+    order: 29
+    maturity: "ready"
+    surfaces: [web]
+    surface_reason: "web page (/tools/character-builder); the native side is a CLI"
+    help: "docs/help/character_builder.md"
+    feature_id: "tools.character_builder"
+    web:
+      mode: "route"
+      route: "/tools/character-builder"
+    capabilities:
+      - "urdf_generation"
+      - "anthropometry"
+      - "mesh_generation"
+      - "collision_geometry"
+    launcher:
+      category: "tool"
+      logo: "urdf_icon.svg"
+      status: "gui_ready"
+      default_launch: "tab"
+
+  - id: "analysis_tools_api"
+    name: "Analysis Tools"
+    description: "REST API access to 6 analysis endpoints (swing metrics, biomechanics)"
+    type: "special_app"
+    path: "src/api/routes/analysis_tools.py"
+    order: 35
+    maturity: "ready"
+    surfaces: [web]
+    surface_reason: "web page (/tools/analysis) over REST endpoints"
+    help: "docs/help/analysis_tools_api.md"
+    feature_id: "analysis.analysis_tools_api"
+    web:
+      mode: "route"
+      route: "/tools/analysis"
+    web_route: "/api/analysis"
+    capabilities:
+      - "swing_metrics"
+      - "biomechanics"
+      - "api"
+    launcher:
+      category: "analysis"
+      logo: "data_explorer.svg"
+      status: "ready"
+      default_launch: "tab"
+
+  - id: "motion_pipeline"
+    name: "Motion Pipeline"
+    description: "Full markerless mocap to forward-dynamics pipeline (video in, motion out)"
+    type: "special_app"
+    path: "src/shared/python/motion_pipeline/api.py"
+    order: 36
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "REST pipeline service; no desktop tile"
+    help: null
+    feature_id: "mocap.breadth"
+    web:
+      mode: "unavailable"
+      reason: "REST API service; no dedicated web page yet"
+    web_route: "/tools/motion-pipeline"
+    capabilities:
+      - "markerless_mocap"
+      - "forward_dynamics"
+      - "pipeline"
+    launcher:
+      category: "motion_matching"
+      logo: "c3d_icon.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "perturbation_analysis"
+    name: "Perturbation Analysis"
+    description: "Cross-engine robustness analysis via perturbation testing"
+    type: "api_backed"
+    path: ""
+    order: 37
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "API-backed catalog entry; no launchable surface (#8861)"
+    help: "docs/help/analysis_tools.md"
+    feature_id: "analysis.cross_engine_robustness"
+    web:
+      mode: "unavailable"
+      reason: "REST API endpoint only; no dedicated web page yet"
+    web_route: "/api/perturbation"
+    capabilities:
+      - "perturbation"
+      - "robustness"
+      - "cross_engine"
+    launcher:
+      category: "analysis"
+      logo: "data_explorer.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "force_overlays"
+    name: "Force Overlays"
+    description: "Physics visualization: joint forces and torques overlaid on 3D model"
+    type: "api_backed"
+    path: ""
+    order: 38
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "API-backed catalog entry; no launchable surface (#8861)"
+    help: null
+    feature_id: "simulation.controls_wiring"
+    web:
+      mode: "unavailable"
+      reason: "REST API endpoint only; no dedicated web page yet"
+    web_route: "/api/force-overlays"
+    capabilities:
+      - "force_visualization"
+      - "joint_torques"
+      - "3d_overlay"
+    launcher:
+      category: "tool"
+      logo: "mujoco_humanoid.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "realtime_ws"
+    name: "Realtime WebSocket"
+    description: "Live simulation data stream via WebSocket pub-sub"
+    type: "api_backed"
+    path: ""
+    order: 39
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "WebSocket endpoint catalog entry; no launchable surface (#8861)"
+    help: null
+    feature_id: "simulation.realtime_ws_stream"
+    web:
+      mode: "unavailable"
+      reason: "WebSocket endpoint only; no dedicated web page yet"
+    web_route: "/ws/realtime"
+    capabilities:
+      - "websocket"
+      - "realtime"
+      - "pubsub"
+    launcher:
+      category: "tool"
+      logo: "data_explorer.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "aip"
+    name: "AI Protocol (AIP)"
+    description: "AI-native simulation control protocol with structured method dispatch"
+    type: "api_backed"
+    path: ""
+    order: 40
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "API-backed catalog entry; no launchable surface (#8861)"
+    help: null
+    feature_id: "platform.aip_protocol"
+    web:
+      mode: "unavailable"
+      reason: "REST API endpoint only; no dedicated web page yet"
+    web_route: "/api/aip"
+    capabilities:
+      - "ai_methods"
+      - "protocol"
+      - "dispatch"
+    launcher:
+      category: "tool"
+      logo: "golf_logo.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "actuator_controls"
+    name: "Actuator Controls"
+    description: "Live actuator parameter tuning and control scheme editor"
+    type: "api_backed"
+    path: ""
+    order: 41
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "API-backed catalog entry; no launchable surface (#8861)"
+    help: null
+    feature_id: "simulation.controls_wiring"
+    web:
+      mode: "unavailable"
+      reason: "REST API endpoint only; no dedicated web page yet"
+    web_route: "/api/actuator-controls"
+    capabilities:
+      - "actuator_tuning"
+      - "control_schemes"
+      - "realtime"
+    launcher:
+      category: "tool"
+      logo: "mujoco_humanoid.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "unreal_integration"
+    name: "Unreal Integration"
+    description: "Unreal Engine streaming and VR visualization for golf swing simulation"
+    type: "special_app"
+    path: "src/unreal_integration/__init__.py"
+    order: 42
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "integration library catalog entry; no launchable surface"
+    help: null
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "unavailable"
+      reason: "Python integration library; no dedicated web page yet"
+    web_route: "/docs/unreal-integration"
+    capabilities:
+      - "streaming"
+      - "vr"
+      - "visualization"
+    launcher:
+      category: "tool"
+      logo: "golf_logo.svg"
+      status: "external"
+      default_launch: "tab"
+
+  - id: "robotics_module"
+    name: "Robotics Module"
+    description: "Locomotion planning, contact mechanics, and robot control for humanoid models"
+    type: "special_app"
+    path: "src/robotics/__init__.py"
+    order: 43
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "python module catalog entry; no launchable surface"
+    help: null
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "unavailable"
+      reason: "Python module; no dedicated web page yet"
+    web_route: "/docs/robotics"
+    capabilities:
+      - "locomotion"
+      - "contact"
+      - "planning"
+    launcher:
+      category: "tool"
+      logo: "drake.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+  - id: "tools_calculator_hub"
+    name: "Tools Calculator Suite"
+    description: "Engineering process calculators from the Tools repo (50+ calculators)"
+    type: "special_app"
+    path: "src/data_processing/data_processor/launch_pyqt6.py"
+    order: 44
+    maturity: "beta"
+    surfaces: [web]
+    surface_reason: "alias surface over the Tools data processor"
+    help: "docs/help/tools_calculator_hub.md"
+    feature_id: "launcher.tile_web_reachability"
+    provider: "tools"
+    working_dir: "."
+    python_paths:
+      - "src"
+      - "src/shared/python"
+      - "src/data_processing/data_processor/python"
+    web:
+      mode: "native-window"
+    web_route: "/tools/calculators"
+    capabilities:
+      - "process_calculators"
+      - "engineering"
+      - "analysis"
+    launcher:
+      category: "tool"
+      logo: "data_explorer.svg"
+      status: "external"
+      default_launch: "tab"
+
+  - id: "pid_generator"
+    name: "P&ID Generator"
+    description: "Programmatic P&ID Generator from the Tools repo - create ISA-5.1 piping diagrams"
+    type: "special_app"
+    path: "src/shared/python/programmatic_pid/cli.py"
+    order: 45
+    maturity: "experimental"
+    surfaces: [web]
+    surface_reason: "Tools-ported CLI (generate-pid); no GUI yet"
+    help: null
+    feature_id: "launcher.tile_web_reachability"
+    web:
+      mode: "unavailable"
+      reason: "CLI tool (generate-pid); no GUI or web page yet"
+    web_route: "/docs/pid-generator"
+    capabilities:
+      - "pid_generation"
+      - "isa_5_1"
+      - "diagrams"
+    launcher:
+      category: "tool"
+      logo: "data_explorer.svg"
+      status: "experimental"
+      default_launch: "tab"
+
+# =============================================================================
+# EXCLUDED PACKAGES (issue #8863) - src/tools packages that deliberately have
+# no launcher tile. Validated by tests/config/test_registry_exclusions.py.
+# =============================================================================
+excluded_packages:
+  - package: "contraction"
+    reason: >-
+      Headless research CLI (python -m src.tools.contraction) for
+      contraction/Floquet analysis of trajectory data; no GUI surface,
+      consumed by analysts from the terminal, not launcher users.
+  - package: "drift_control"
+    reason: >-
+      Headless research CLI (python -m src.tools.drift_control) computing
+      drift-to-control force ratios from NPZ trajectories; terminal-only
+      analysis workflow with no dockable or windowed UI.
+  - package: "sg_optimizer"
+    reason: >-
+      Phase 1 ships the headless CLI only; the PyQt6 tile is deliberately
+      deferred to Phase 3 of the Strokes Gained Optimizer epic, at which point
+      this exclusion is replaced by a models.yaml tile.
+    issue: "#6272"
+  - package: "hmr2_sidecar"
+    reason: >-
+      License-isolation subprocess sidecar for the CC-BY-NC 4D-Humans/HMR 2.0
+      pipeline; invoked by the motion pipeline via HMR2_COMMAND, never
+      launched directly by users.
+  - package: "launch_monitor_model"
+    reason: >-
+      Headless model layer behind the launch_monitor_analytics tile and the
+      launch-monitor API routes; a library package with no window, dock, or
+      entry point of its own. Sited beside the workbench (ADR-0048 "Stage 2
+      Blocker (G2)", Option 1) so that shared.python.launch_monitor resolves
+      unambiguously to the vendored canonical layer.
+    issue: "#9348"
+  - package: "matlab_utilities"
+    reason: >-
+      Script grab-bag supporting the MATLAB/Simscape suite; the user-facing
+      surface is the matlab_suite tile (virtual/matlab_suite), which
+      dispatches to the Simscape chooser dialog.
+  - package: "offline_validation"
+    reason: >-
+      Offline gradient-oracle validation helpers intentionally outside the
+      runtime launch surface (requires a separately pinned nimblephysics
+      environment); used by validation jobs, not end users.
+  - package: "video_analyzer"
+    reason: >-
+      Library package (adapter + analysis API) backing the Tools-provided
+      video_analyzer tile; the launchable app resolves inside the
+      vendor/ud-tools gitlink (provider: tools), not this package.
