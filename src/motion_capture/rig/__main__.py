@@ -155,8 +155,8 @@ def _located_plan(plan: RigPlan) -> dict[str, CameraLocation]:
             f"plan not realizable: missing={list(check.missing)} "
             f"conflicts={list(check.conflicts)}"
         )
-    by_identity = {c.identity: c for c in cams}
-    return {b.view: by_identity[b.identity] for b in plan.cameras}
+    by_instance = {c.camera: c for c in cams}
+    return {view: by_instance[inst] for view, inst in check.matched.items()}
 
 
 def _real_sources(plan: RigPlan) -> dict[str, FrameSource]:
