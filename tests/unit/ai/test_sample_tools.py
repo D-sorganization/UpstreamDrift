@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.ai.sample_tools import (
     register_golf_suite_tools,
 )
@@ -313,6 +315,7 @@ class TestToolsForProvider:
             assert "input_schema" in tool
 
 
+@pytest.mark.unit
 class TestShellToolSecurity:
     """Security tests for ShellTool command injection prevention."""
 
