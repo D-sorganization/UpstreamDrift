@@ -15,7 +15,7 @@
     "diverged": 277,
     "ud-only": 1188,
     "tools-only": 519,
-    "spelling-only": 128
+    "spelling-only": 127
   },
   "packages": {
     "README.md": {
@@ -450,7 +450,7 @@
       "diverged": 53,
       "ud-only": 18,
       "tools-only": 0,
-      "spelling-only": 18
+      "spelling-only": 17
     },
     "motion_matching": {
       "identical": 0,
@@ -9689,12 +9689,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 25110,
+      "ud_bytes": 25483,
       "tools_bytes": 25102,
-      "byte_delta": 8,
+      "byte_delta": 381,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/canonical_model.py",
@@ -9941,9 +9941,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "core",
-      "ud_bytes": 24109,
+      "ud_bytes": 24420,
       "tools_bytes": 23768,
-      "byte_delta": 341,
+      "byte_delta": 652,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -32202,9 +32202,9 @@
     {
       "path": "model_generation/converters/mjcf_converter.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-07",
+        "commit": "40308a0cf103ceb9a8b81b0fa62d4f5a34b24b83"
       },
       "tools": {
         "author": "Dieter Olson",
