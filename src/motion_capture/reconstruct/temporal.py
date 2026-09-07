@@ -114,7 +114,8 @@ class SmoothResult:
 def second_difference(n: int) -> sparse.csr_matrix:
     """``(n-2, n)`` operator whose rows are ``x[t-1] - 2 x[t] + x[t+1]``."""
     require(n >= 3, "need at least 3 samples for a second difference", n)
-    data = np.array([np.ones(n - 2), -2 * np.ones(n - 2), np.ones(n - 2)])
+    # dia_matrix indexes data by column, so each diagonal needs n entries.
+    data = np.array([np.ones(n), -2 * np.ones(n), np.ones(n)])
     matrix = sparse.dia_matrix((data, np.array([0, 1, 2])), shape=(n - 2, n))
     return sparse.csr_matrix(matrix)
 
