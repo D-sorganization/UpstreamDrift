@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Optimize Multidimensional Array Norm Calculations in BunkerShot3D (#9529)
+
+Replaces `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` across `bunkershot3d` modules (`elements.py`, `mpm/body.py`, `mpm/solver.py`, `mpm/wholeshot.py`, `shot.py`, `vandv/conservation.py`), and uses `np.sqrt(np.max(np.einsum(...)))` for peak force magnitude in `ShotResult`. (spec-exempt: micro-optimization)
+
+## Optimize SandFieldSeries Velocity Magnitude Calculation
+
+Replaces `np.linalg.norm(self.velocity_m_s, axis=1)` and `np.linalg.norm(self.velocity_m_s, axis=2)` with `np.sqrt(np.einsum(..., ...))` in `bunkershot3d/fields/schema.py` to optimize calculation of velocity magnitudes. (spec-exempt: micro-optimization)
+
 ## Optimize Demonstration Dataset Mean Duration (#9645)
 
 Optimizes `DemonstrationDataset.get_stats()` by replacing `np.mean()` with built-in `sum() / len()` when computing `mean_duration` from a Python list of demonstration durations, avoiding temporary NumPy array allocations while safely guarding empty demonstration collections.
