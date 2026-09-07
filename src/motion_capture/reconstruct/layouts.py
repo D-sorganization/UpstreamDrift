@@ -35,7 +35,7 @@ def to_reconstruct_layout(payload: Mapping[str, Any]) -> dict[str, Any]:
     source = list(payload["detector_layout"]["keypoint_names"])
     index = {name: i for i, name in enumerate(source)}
     needed = [n for n in JOINT_NAMES if n not in DERIVED] + [
-        p for pair in DERIVED.values() for p in pair
+        p for name, pair in DERIVED.items() if name not in index for p in pair
     ]
     missing = sorted({n for n in needed if n not in index})
     require(not missing, "source layout lacks joints", missing)
@@ -46,7 +46,10 @@ def to_reconstruct_layout(payload: Mapping[str, Any]) -> dict[str, Any]:
         out_px = np.zeros((len(JOINT_NAMES), 2))
         out_conf = np.zeros(len(JOINT_NAMES))
         for j, name in enumerate(JOINT_NAMES):
-            if name in DERIVED:
+            if name in index:  # BODY_25 reports mid_hip and neck itself
+                out_px[j] = px[index[name]]
+                out_conf[j] = conf[index[name]]
+            elif name in DERIVED:
                 a, b = (index[p] for p in DERIVED[name])
                 c = float(min(conf[a], conf[b]))
                 out_conf[j] = c
@@ -67,6 +70,6 @@ def to_reconstruct_layout(payload: Mapping[str, Any]) -> dict[str, Any]:
     out["provenance"] = {
         **dict(payload.get("provenance", {})),
         "source_layout": payload["detector_layout"].get("name"),
-        "derived_joints": {k: list(v) for k, v in DERIVED.items()},
+        "derived_joints": {k: list(v) for k, v in DERIVED.items() if k not in index},
     }
     return out

@@ -276,6 +276,29 @@ this host's GPU; fetch its files with
 metric is accuracy; without 3-D ground truth the honest statements are
 coverage, self-consistency and agreement (#9628).
 
+## Integration Options (2026-09-07)
+
+Everything below the detector is detector-agnostic: `rig ingest` runs any
+estimator in `pose_estimation.registry`, and `reconstruct.layouts` maps the
+detector's named keypoints onto the 15-joint fit (BODY_25 keeps its own
+`mid_hip` and `neck`; MediaPipe's are derived from hips and shoulders).
+
+| Route                                               | State                                     | Notes                                                |
+| --------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------- |
+| MediaPipe (`mediapipe`)                             | primary, in use                           | Apache-2.0, GPU-free, 33 landmarks                   |
+| OpenPose BODY_25 via OpenCV DNN (`openpose_dnn`)    | second opinion, in use                    | CPU ~1 s/frame; comparison only (#9628)              |
+| OpenPose native (`openpose`)                        | registered, not buildable on the lab host | needs `pyopenpose`                                   |
+| RTMPose / MoveNet                                   | not implemented                           | #9648: ONNX/TFLite behind the same registry contract |
+| HMR2 sidecar                                        | implemented, monocular SMPL               | CC-BY-NC; subprocess only                            |
+| FreeMoCap sidecar                                   | implemented, multi-camera                 | AGPL; subprocess only; its own triangulation         |
+| Pose2Sim / OpenCap / DeepLabCut / AlphaPose / HRNet | file adapters only                        | `motion_pipeline.sources` reads their outputs        |
+
+Desktop: the **Capture Rig** tile (`src/tools/capture_rig`) drives the rig
+commands, plays back any view with the pose overlay and shows the swing
+summary. It is the only video player in the repository today: the Video
+Analyzer tile's GUI is a placeholder over the Tools-provided app, and the
+MediaPipe/OpenPose tiles are batch runners with a text log.
+
 ## Ownership
 
 ADR-0041 gives Tools authority over calibration and reconstruction records

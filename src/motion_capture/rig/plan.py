@@ -147,17 +147,21 @@ class RigPlan(BaseModel):
         *,
         mode: CaptureMode | None = None,
         views: Iterable[str] | None = None,
+        controls: CameraControls | None = None,
     ) -> RigPlan:
         """A derived plan for a quick change of condition without a new file.
 
         ``mode`` replaces every selected view's capture mode; ``views`` keeps
-        only those views, in plan order. The name records the overrides so the
-        session bundle shows what actually ran. Precondition: every requested
-        view exists and at least one is selected. Postcondition: ``self`` is
+        only those views, in plan order; ``controls`` replaces every selected
+        view's UVC controls. The name records the overrides so the session
+        bundle shows what actually ran. Precondition: every requested view
+        exists and at least one is selected. Postcondition: ``self`` is
         unchanged.
         """
         selected = tuple(self.cameras)
         name = self.name
+        if controls is not None and not controls.as_overrides():
+            controls = None  # all defaults: nothing to override
         if views is not None:
             wanted = tuple(views)
             known = {c.view for c in self.cameras}
@@ -171,7 +175,14 @@ class RigPlan(BaseModel):
         if mode is not None:
             selected = tuple(c.model_copy(update={"mode": mode}) for c in selected)
             name += f"+{mode.width}x{mode.height}@{mode.fps}"
-        if mode is None and views is None:
+        if controls is not None:
+            selected = tuple(
+                c.model_copy(update={"controls": controls}) for c in selected
+            )
+            name += "+" + ",".join(
+                f"{k}={v:g}" for k, v in sorted(controls.as_overrides().items())
+            )
+        if mode is None and views is None and controls is None:
             return self
         return self.model_copy(update={"cameras": selected, "name": name})
 

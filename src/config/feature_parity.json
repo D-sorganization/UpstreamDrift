@@ -353,6 +353,16 @@
       "pending_decision": true,
       "tiles": ["pose_studio"]
     },
+    "tools.capture_rig": {
+      "title": "Capture Rig camera controller, recorder and overlay player",
+      "pyqt": "src/tools/capture_rig/__main__.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": ["capture_rig"]
+    },
     "docs.document_library": {
       "title": "Document library / project map viewer",
       "pyqt": "src/launchers/library_widget.py",
