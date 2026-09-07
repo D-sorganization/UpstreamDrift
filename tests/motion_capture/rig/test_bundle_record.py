@@ -50,7 +50,13 @@ def _short(path: Path) -> RecordingProbe:
     )
 
 
-def _results(bundle: Path, *, second_bytes: int = 4096, second_rc: int | None = 0):
+def _results(
+    bundle: Path,
+    *,
+    second_bytes: int = 4096,
+    second_rc: int | None = 0,
+    second_note: str = "",
+):
     a = bundle / "face_on_2605160001.mkv"
     b = bundle / "down_line_2601240001.mkv"
     bundle.mkdir(parents=True, exist_ok=True)
@@ -58,7 +64,7 @@ def _results(bundle: Path, *, second_bytes: int = 4096, second_rc: int | None = 
     b.write_bytes(b"y" * second_bytes)
     return [
         RecordingResult("2605160001", a, 0, 8192),
-        RecordingResult("2601240001", b, second_rc, second_bytes),
+        RecordingResult("2601240001", b, second_rc, second_bytes, second_note),
     ]
 
 
@@ -292,3 +298,45 @@ def test_record_all_warms_up_then_signals_every_recorder_before_reaping(
     assert slept == [12.0]
     assert all(rec.signalled for rec in made)
     assert [r.identity for r in results] == ["2605160001", "2601240001"]
+
+
+def test_failed_recorder_keeps_ffmpeg_last_words_as_the_reason(tmp_path: Path) -> None:
+    plan = _plan()
+    results = _results(
+        tmp_path,
+        second_bytes=0,
+        second_rc=-5,
+        second_note="Could not run graph (I/O error)",
+    )
+    index = build_index(plan, results, 10.0, tmp_path, prober=_full)
+    entry = next(e for e in index.recordings if e.view == "down_line")
+    assert entry.recorder_note == "Could not run graph (I/O error)"
+    manifest = write_bundle(
+        tmp_path, plan, index, started_utc="2026-09-06T20:00:00+00:00"
+    )
+    assert manifest.outcome is CaptureOutcome.BLOCKED
+    assert any("exited -5: Could not run graph" in r for r in manifest.reasons)
+    ok_entry = next(e for e in index.recordings if e.view == "face_on")
+    assert ok_entry.recorder_note is None
+
+
+def test_zero_decoded_frames_is_no_stream_not_degraded(tmp_path: Path) -> None:
+    """rc=0 with a header-only file (1600x1200@120 on the real rig) must block."""
+    plan = _plan()
+    results = _results(tmp_path, second_bytes=512, second_rc=0, second_note="I/O error")
+
+    def probe(path: Path) -> RecordingProbe:
+        if path.name.startswith("down_line"):
+            return RecordingProbe(
+                frames=0, duration_s=0.0, width=None, height=None, nominal_fps=None
+            )
+        return _full(path)
+
+    index = build_index(plan, results, 10.0, tmp_path, prober=probe)
+    stats = recording_stats(next(e for e in index.recordings if e.view == "down_line"))
+    assert stats.state == "no_stream"
+    assert stats.reason == "no frames decoded: I/O error"
+    manifest = write_bundle(
+        tmp_path, plan, index, started_utc="2026-09-06T20:00:00+00:00"
+    )
+    assert manifest.outcome is CaptureOutcome.BLOCKED
