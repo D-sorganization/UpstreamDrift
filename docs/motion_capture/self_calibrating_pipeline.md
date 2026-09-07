@@ -75,6 +75,16 @@ joint, residual). Nothing is imputed; a joint with no surviving observation in
 a frame is estimated from the dynamics prior and reported with its uncertainty
 (#9625).
 
+### Ball as the Shared Anchor
+
+`reconstruct/ball.py` (#9621) finds bright, pale, near-circular blobs of a
+plausible radius and ranks them; it returns candidates with scores, an
+optional operator hint steers the choice, and `ball_at_rest` requires a
+stable run of frames before it reports a position. On the real down-the-line
+frame the spare balls on the mat are found once the value gate matches the
+bay lighting; the addressed ball is hidden under the club head at that
+instant, so the rest phase before takeaway is where the anchor is read.
+
 ### Dynamics Prior
 
 After the geometric fit, joint trajectories are re-estimated in joint space
