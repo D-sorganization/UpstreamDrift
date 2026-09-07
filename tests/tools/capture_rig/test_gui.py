@@ -23,9 +23,22 @@ from tests.tools.capture_rig.test_core import _bundle, _observations
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
 
 
+_APP: QApplication | None = None  # keep the application alive for the module
+
+
 def _app() -> QApplication:
+    """The one QApplication, held at module level.
+
+    A QApplication that is only returned and dropped is garbage-collected
+    with its C++ object; the next QWidget then aborts the process with no
+    Python traceback (fail-fast on Windows, SIGABRT on Linux).
+    """
+    global _APP
     app = QApplication.instance()
-    return app if app is not None else QApplication(sys.argv[:1])
+    if app is None:
+        app = QApplication(sys.argv[:1])
+    _APP = app  # type: ignore[assignment]
+    return _APP  # type: ignore[return-value]
 
 
 def test_panels_build_commands_from_their_inputs(tmp_path: Path) -> None:
@@ -159,3 +172,29 @@ def test_dockable_ui_and_adapter() -> None:
     assert isinstance(child, CaptureRigWidget)
     adapter.cleanup()
     assert not adapter.is_dirty()
+
+
+def test_clip_and_compare_commands_follow_the_playback_selection(
+    tmp_path: Path,
+) -> None:
+    _app()
+    root = _bundle(tmp_path)
+    _observations(root)
+    widget = CaptureRigWidget()
+    widget.capture.session_edit.setText(str(root))
+    assert widget.refresh_session() is not None
+    widget.process.clip_speed_spin.setValue(0.5)
+    clip = widget.command_for("clip")
+    assert clip[3] == "clip" and clip[clip.index("--view") + 1] == "cam_a"
+    assert clip[clip.index("--speed") + 1] == "0.5"
+    assert clip[clip.index("--set") + 1] == "observations"
+    with pytest.raises(ValueError, match="compare against"):
+        widget.command_for("compare_takes")
+    widget.process.other_session_edit.setText(str(tmp_path / "other"))
+    widget.process.align_combo.setCurrentText("peak")
+    cmp_ = widget.command_for("compare_takes")
+    assert (
+        cmp_[3] == "compare-takes" and cmp_[cmp_.index("--other-view") + 1] == "cam_a"
+    )
+    assert cmp_[cmp_.index("--align") + 1] == "peak"
+    widget.playback.close_media()

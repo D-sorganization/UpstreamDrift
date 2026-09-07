@@ -207,6 +207,42 @@ def analyze_command(session: Path, *, observations: str = "observations") -> lis
     return python_module_command(args)
 
 
+def clip_command(
+    session: Path,
+    view: str,
+    out: Path,
+    *,
+    start: str = "address-30",
+    end: str = "finish+30",
+    speed: float = 0.25,
+    observation_set: str | None = None,
+) -> list[str]:
+    require(view.strip() != "", "view must be named")
+    require(0.0 < speed <= 1.0, "speed must be in (0, 1]", speed)
+    args = ["clip", "--session", str(session), "--view", view, "--from", start]
+    args += ["--to", end, "--speed", f"{speed:g}", "--out", str(out)]
+    if observation_set:
+        args += ["--set", observation_set]
+    return python_module_command(args)
+
+
+def compare_takes_command(
+    session: Path,
+    view: str,
+    other_session: Path,
+    other_view: str,
+    out: Path,
+    *,
+    align: str = "top",
+    speed: float = 0.5,
+) -> list[str]:
+    require(align in ("address", "top", "peak", "finish"), "align event", align)
+    args = ["compare-takes", "--session", str(session), "--view", view]
+    args += ["--other-session", str(other_session), "--other-view", other_view]
+    args += ["--align", align, "--speed", f"{speed:g}", "--out", str(out)]
+    return python_module_command(args)
+
+
 def export_command(session: Path) -> list[str]:
     return python_module_command(["export", "--session", str(session)])
 
@@ -243,7 +279,9 @@ def calibrate_command(
 ) -> list[str]:
     require(square_m > 0, "square size must be positive", square_m)
     args = ["calibrate-intrinsics", "--session", str(session), "--board", board]
-    args += ["--square", f"{square_m:g}", "--every", str(every)]
+    if not board.lower().startswith("charuco:"):
+        args += ["--square", f"{square_m:g}"]
+    args += ["--every", str(every)]
     return python_module_command(args)
 
 

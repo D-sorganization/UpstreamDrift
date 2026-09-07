@@ -130,6 +130,34 @@ def _load_plan(args: argparse.Namespace) -> RigPlan:
     )
 
 
+def _add_coaching_parsers(sub: Any) -> None:
+    """Printable boards, annotated clips and take comparison (#9679-#9681)."""
+    brd = sub.add_parser("board", help="write a printable ChArUco board image")
+    brd.add_argument("--board", default="charuco:7x5:0.04:0.03")
+    brd.add_argument("--width", type=int, default=2100, help="pixels (A4 @ 254 dpi)")
+    brd.add_argument("--out", type=Path, required=True)
+    clp = sub.add_parser("clip", help="trimmed clip with overlay and slow motion")
+    clp.add_argument("--session", type=Path, required=True)
+    clp.add_argument("--view", required=True)
+    clp.add_argument(
+        "--from", dest="start", default="address-30", metavar="EVENT|FRAME"
+    )
+    clp.add_argument("--to", dest="end", default="finish+30", metavar="EVENT|FRAME")
+    clp.add_argument("--speed", type=float, default=0.25, help="1 = real time")
+    clp.add_argument("--set", default=None, help="observation set for the overlay")
+    clp.add_argument("--out", type=Path, required=True)
+    cmt = sub.add_parser("compare-takes", help="two takes side by side on an event")
+    cmt.add_argument("--session", type=Path, required=True)
+    cmt.add_argument("--view", required=True)
+    cmt.add_argument("--other-session", type=Path, required=True)
+    cmt.add_argument("--other-view", required=True)
+    cmt.add_argument(
+        "--align", default="top", choices=("address", "top", "peak", "finish")
+    )
+    cmt.add_argument("--speed", type=float, default=0.5)
+    cmt.add_argument("--out", type=Path, required=True)
+
+
 def _add_offline_parsers(sub: Any) -> None:
     """Commands that work on a session bundle rather than on cameras."""
     ing = sub.add_parser("ingest", help="pose-estimate every recording in a bundle")
@@ -188,6 +216,7 @@ def _add_offline_parsers(sub: Any) -> None:
         help="one per view; a single --view is a single-camera session",
     )
     imp.add_argument("--name", default=None, help="plan name (default import:<out>)")
+    _add_coaching_parsers(sub)
     ana = sub.add_parser("analyze", help="2-D events and tempo per ingested view")
     ana.add_argument("--session", type=Path, required=True)
     ana.add_argument("--observations", default="observations", help="set directory")
@@ -202,9 +231,11 @@ def _add_offline_parsers(sub: Any) -> None:
     cal = sub.add_parser("calibrate-intrinsics", help="chessboard intrinsics per view")
     cal.add_argument("--session", type=Path, required=True)
     cal.add_argument(
-        "--board", default="9x6", help="inner corners COLSxROWS, asymmetric"
+        "--board",
+        default="9x6",
+        help="chessboard COLSxROWS (inner corners) or charuco:COLSxROWS:SQ_M:MK_M",
     )
-    cal.add_argument("--square", type=float, required=True, help="square size, metres")
+    cal.add_argument("--square", type=float, default=None, help="chessboard square, m")
     cal.add_argument("--every", type=int, default=10, help="sample every Nth frame")
     cal.add_argument(
         "--out", type=Path, default=None, help="default: <session>/intrinsics.json"
@@ -432,6 +463,67 @@ def cmd_import(args: argparse.Namespace) -> int:
     return 0 if manifest.outcome.value != "blocked" else 1
 
 
+def cmd_board(args: argparse.Namespace) -> int:
+    import cv2
+
+    from src.motion_capture.reconstruct.intrinsics import CharucoBoard, parse_board_spec
+
+    board = parse_board_spec(args.board)
+    if not isinstance(board, CharucoBoard):
+        raise SystemExit("board images are generated for charuco:... boards only")
+    out_dir = args.out.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(args.out), board.image(args.width))
+    logger.info(
+        "board %s -> %s (print at 100 %%; measure a square)", args.board, args.out
+    )
+    return 0
+
+
+def cmd_clip(args: argparse.Namespace) -> int:
+    # The tool package owns playback and overlays; imported lazily (Qt-free modules).
+    from src.tools.capture_rig.clips import clip_from_session
+
+    result = clip_from_session(
+        args.session,
+        args.view,
+        start=args.start,
+        end=args.end,
+        out=args.out,
+        speed=args.speed,
+        observation_set=args.set,
+    )
+    logger.info(
+        "clip %s: frames %d-%d -> %s",
+        args.view,
+        result["first"],
+        result["last"],
+        args.out,
+    )
+    return 0
+
+
+def cmd_compare_takes(args: argparse.Namespace) -> int:
+    from src.tools.capture_rig.clips import compare_from_sessions
+
+    result = compare_from_sessions(
+        args.session,
+        args.view,
+        args.other_session,
+        args.other_view,
+        out=args.out,
+        align=args.align,
+        speed=args.speed,
+    )
+    logger.info(
+        "compare-takes aligned on %s: %d frames -> %s",
+        args.align,
+        result["frames"],
+        args.out,
+    )
+    return 0
+
+
 def cmd_analyze(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.analytics2d import analyze_session_2d
 
@@ -566,17 +658,14 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
 
 def cmd_calibrate_intrinsics(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.intrinsics import (
-        Chessboard,
         calibrate_video,
+        parse_board_spec,
         write_intrinsics,
     )
 
     from .bundle import load_bundle
 
-    cols, sep, rows = args.board.lower().partition("x")
-    if not sep or not cols.isdigit() or not rows.isdigit():
-        raise SystemExit("--board must look like 9x6")
-    board = Chessboard(columns=int(cols), rows=int(rows), square_m=args.square)
+    board = parse_board_spec(args.board, args.square)
     _plan, index, _manifest = load_bundle(args.session)
     records = []
     for entry in index.recordings:
@@ -613,6 +702,9 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "import": cmd_import,
     "export": cmd_export,
     "analyze": cmd_analyze,
+    "board": cmd_board,
+    "clip": cmd_clip,
+    "compare-takes": cmd_compare_takes,
     "reliability": cmd_reliability,
 }
 

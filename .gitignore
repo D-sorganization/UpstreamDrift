@@ -277,3 +277,6 @@ test_event_filter.py
 # machine-local core.excludesFile.
 .claude/settings.local.json
 **/.claude/settings.local.json
+
+# WSL GUI test lane (scripts/dev/wsl_qt_tests.sh)
+.wsl-venv/

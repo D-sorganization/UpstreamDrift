@@ -182,8 +182,9 @@ ANALYZE_2D = Step(
     requirements=("One ingested view.",),
     instructions=(
         "Press *Analyze 2-D*. Results are in subject box heights, not metres.",
+        "*Export clip* writes the swing (address to finish, slow motion, overlay, frame clock) as a video; *Compare takes* puts another session's view beside this one aligned on the top of the backswing, with metric deltas.",
     ),
-    actions=("analyze",),
+    actions=("analyze", "clip", "compare_takes"),
     done=lambda m: bool(m.analysis_2d),
     ready=lambda m: _ready_if(m.ingested, "ingest first"),
     applies=lambda m: not _multi(m),
@@ -196,8 +197,9 @@ EXPORT = Step(
     requirements=("A reconstruction.",),
     instructions=(
         "Press *Export*. reconstruction.trc loads in the motion pipeline and the model-matching tools as a marker file.",
+        "*Export clip* and *Compare takes* produce annotated, slowed videos of this take, alone or beside another session, for coaching.",
     ),
-    actions=("export",),
+    actions=("export", "clip", "compare_takes"),
     done=lambda m: m.export is not None,
     ready=lambda m: _ready_if(m.reconstruction is not None, "reconstruct first"),
     applies=_multi,

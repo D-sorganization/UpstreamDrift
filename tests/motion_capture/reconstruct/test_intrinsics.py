@@ -169,3 +169,44 @@ def test_rig_calibrate_intrinsics_command(tmp_path: Path) -> None:
     assert code == 0
     payload = json.loads((tmp_path / "intrinsics.json").read_text(encoding="utf-8"))
     assert payload[0]["camera_id"] == "cam_b" and payload[0]["rms_px"] < 1.0
+
+
+def test_charuco_board_spec_image_and_partial_detection(tmp_path: Path) -> None:
+    from src.motion_capture.reconstruct.intrinsics import (
+        CharucoBoard,
+        find_board,
+        parse_board_spec,
+    )
+
+    board = parse_board_spec("charuco:7x5:0.04:0.03")
+    assert isinstance(board, CharucoBoard) and board.dictionary == "DICT_4X4_50"
+    assert isinstance(parse_board_spec("9x6", 0.025), Chessboard)
+    with pytest.raises(Exception, match="needs --square"):
+        parse_board_spec("9x6")
+    with pytest.raises(Exception, match="fit inside"):
+        CharucoBoard(7, 5, 0.04, 0.05)
+    image = board.image(700)
+    assert image.shape == (500, 700) and image.dtype == np.uint8
+    bgr = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    full = find_board(bgr, board)
+    assert full is not None and full[0].shape[0] == full[1].shape[0] == 24
+    # Half the board hidden: the visible corners still come back, with ids.
+    partial = bgr.copy()
+    partial[:, 380:] = 255
+    found = find_board(partial, board)
+    assert found is not None and 6 <= found[0].shape[0] < 24
+    assert find_board(np.full_like(bgr, 128), board) is None
+    # Calibration accepts (object, image) point pairs from several warps.
+    rng = np.random.default_rng(2)
+    sets = []
+    for _ in range(12):
+        src = np.float32([[0, 0], [700, 0], [700, 500], [0, 500]])
+        dst = src + rng.uniform(-60, 60, src.shape).astype(np.float32)
+        h = cv2.getPerspectiveTransform(src, dst)
+        warped = cv2.warpPerspective(bgr, h, (760, 560), borderValue=(255, 255, 255))
+        pair = find_board(warped, board)
+        if pair is not None:
+            sets.append(pair)
+    assert len(sets) >= MIN_FRAMES
+    record = calibrate("cam", sets, board, (760, 560))
+    assert record.board["kind"] == "CharucoBoard" and record.frames_used == len(sets)

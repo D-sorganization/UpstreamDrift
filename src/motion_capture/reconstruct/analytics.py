@@ -27,7 +27,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import numpy.typing as npt
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.shared.python.core.contracts import require
 
@@ -70,6 +70,7 @@ class SwingSummary(BaseModel):
     max_pelvis_turn_deg: float
     peak_x_factor_deg: float
     events: SwingEvents
+    angles_deg: dict[str, dict[str, float]] = Field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -99,6 +100,84 @@ def line_turn_deg(left: Array, right: Array) -> Array:
     ground = d - np.outer(d @ UP, UP)
     angle = np.arctan2(ground[:, 0], ground[:, 2])  # about +y, from +z toward +x
     return np.degrees(np.unwrap(angle - angle[0]))
+
+
+def _angle_between(a: Array, b: Array) -> Array:
+    """Per-frame angle in degrees between vector series ``a`` and ``b`` ``(T, 3)``."""
+    na = np.linalg.norm(a, axis=1)
+    nb = np.linalg.norm(b, axis=1)
+    cos = np.einsum("ij,ij->i", a, b) / np.maximum(na * nb, 1e-12)
+    return np.degrees(np.arccos(np.clip(cos, -1.0, 1.0)))
+
+
+def flexion_deg(proximal: Array, joint: Array, distal: Array) -> Array:
+    """Flexion at ``joint``: 0 when the limb is straight, larger when bent."""
+    return 180.0 - _angle_between(proximal - joint, distal - joint)
+
+
+def joint_angles(
+    joints_3d_m: Array, joint_names: Sequence[str] = JOINT_NAMES
+) -> dict[str, Array]:
+    """Per-frame joint angles from the 15-joint fit (#9682), degrees.
+
+    ``left/right_elbow_flexion``, ``left/right_knee_flexion``,
+    ``trunk_forward_tilt`` (hip->neck against the vertical with the hip-line
+    component removed), ``trunk_side_bend`` (hip->neck along the hip line)
+    and ``lead_arm_shoulder_deg`` (left shoulder->wrist against the shoulder
+    line; the lead arm of a right-handed golfer). Postcondition: one value
+    per frame per series; NaN joints give NaN angles.
+    """
+    j = np.asarray(joints_3d_m, dtype=float)
+    require(j.ndim == 3 and j.shape[2] == 3, "need (T, K, 3)")
+    ix = {n: _index(joint_names, n) for n in joint_names}
+    out: dict[str, Array] = {}
+    for side in ("left", "right"):
+        out[f"{side}_elbow_flexion"] = flexion_deg(
+            j[:, ix[f"{side}_shoulder"]],
+            j[:, ix[f"{side}_elbow"]],
+            j[:, ix[f"{side}_wrist"]],
+        )
+        out[f"{side}_knee_flexion"] = flexion_deg(
+            j[:, ix[f"{side}_hip"]], j[:, ix[f"{side}_knee"]], j[:, ix[f"{side}_ankle"]]
+        )
+    trunk = j[:, ix["neck"]] - j[:, ix["mid_hip"]]
+    hip_line = j[:, ix["right_hip"]] - j[:, ix["left_hip"]]
+    hip_line = hip_line / np.maximum(np.linalg.norm(hip_line, axis=1), 1e-12)[:, None]
+    along = np.einsum("ij,ij->i", trunk, hip_line)
+    lateral = trunk - along[:, None] * hip_line
+    out["trunk_forward_tilt"] = _angle_between(
+        lateral, np.broadcast_to(UP, lateral.shape)
+    )
+    out["trunk_side_bend"] = np.degrees(
+        np.arctan2(along, np.maximum(np.linalg.norm(lateral, axis=1), 1e-12))
+    )
+    shoulder_line = j[:, ix["right_shoulder"]] - j[:, ix["left_shoulder"]]
+    lead_arm = j[:, ix["left_wrist"]] - j[:, ix["left_shoulder"]]
+    out["lead_arm_shoulder_deg"] = _angle_between(lead_arm, shoulder_line)
+    return out
+
+
+def angle_stats(
+    angles: dict[str, Array], events: SwingEvents
+) -> dict[str, dict[str, float]]:
+    """At-event values and range per angle series; NaN where unobserved."""
+    frames = {
+        "address": events.address_frame,
+        "top": events.top_frame,
+        "peak": events.peak_speed_frame,
+        "finish": events.finish_frame,
+    }
+    out: dict[str, dict[str, float]] = {}
+    for name, series in angles.items():
+        row = {
+            k: float(series[f]) if 0 <= f < series.size else float("nan")
+            for k, f in frames.items()
+        }
+        finite = series[np.isfinite(series)]
+        row["min"] = float(finite.min()) if finite.size else float("nan")
+        row["max"] = float(finite.max()) if finite.size else float("nan")
+        out[name] = row
+    return out
 
 
 def swing_series(
@@ -210,5 +289,6 @@ def summarize_swing(
         max_pelvis_turn_deg=float(np.max(np.abs(series.pelvis_turn_deg))),
         peak_x_factor_deg=float(np.max(np.abs(series.x_factor_deg))),
         events=events,
+        angles_deg=angle_stats(joint_angles(joints_3d_m, joint_names), events),
     )
     return summary, series
