@@ -26,6 +26,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from .analytics import summarize_swing
 from .cameras import PinholeCamera
 from .clean import CleanReport, clean_view
+from .bundle import observations_from_views
 from .fit import (
     RECONSTRUCTION_FILE,
     Reconstruction,
@@ -33,6 +34,7 @@ from .fit import (
     fit_bundle,
     load_views,
 )
+from .initialize import initialize_cameras, subject_frame
 from .layouts import to_reconstruct_layout
 from .skeleton import JOINT_NAMES
 from .temporal import SmootherOptions
@@ -67,23 +69,56 @@ def start_cameras_from(path: Path) -> list[PinholeCamera]:
     return cameras_from_records(records)
 
 
+def intrinsics_from(path: Path) -> list[tuple[str, Any, tuple[int, int]]]:
+    """``(camera_id, K, image_size)`` per entry of a JSON list (extrinsics ignored)."""
+    require(path.is_file(), "intrinsics file must exist", str(path))
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    records = payload["cameras"] if isinstance(payload, dict) else payload
+    out = []
+    for r in records:
+        matrix = r["intrinsics"]["matrix"] if "intrinsics" in r else r["matrix"]
+        size = r["image_size_px"]
+        out.append(
+            (
+                str(r["camera_id"]),
+                np.asarray(matrix, dtype=float),
+                (int(size[0]), int(size[1])),
+            )
+        )
+    require(len(out) >= 2, "need intrinsics for at least two cameras")
+    return out
+
+
 def reconstruct_session(
     session_dir: Path,
     *,
-    start_cameras: Sequence[PinholeCamera],
+    start_cameras: Sequence[PinholeCamera] | None = None,
+    intrinsics: Sequence[tuple[str, Any, tuple[int, int]]] | None = None,
     scale_anchor: tuple[str, float],
     acceleration_sigma_px: float = DEFAULT_ACCELERATION_SIGMA_PX,
     min_confidence: float = 0.05,
 ) -> SessionReconstruction:
     """Run layout -> clean -> fit on ``<session>/observations`` and write results.
 
-    Preconditions: at least two views whose ids match the start cameras; a
-    positive acceleration prior. Postcondition: ``reconstruct/`` holds the
-    cleaned views, their clean reports, ``reconstruction.json`` and the summary.
+    Start from ``start_cameras`` (a previous take) or, for the first take of a
+    new setup, from ``intrinsics`` alone: placement is then initialised from
+    the golfer's joints and the anchor length (see :mod:`.initialize`).
+    Preconditions: at least two views whose ids match; exactly one of
+    ``start_cameras``/``intrinsics``; a positive acceleration prior.
+    Postcondition: ``reconstruct/`` holds the cleaned views, their clean
+    reports, ``reconstruction.json`` and the summary.
     """
     require(acceleration_sigma_px > 0, "acceleration_sigma_px must be positive")
+    require(
+        (start_cameras is None) != (intrinsics is None),
+        "give start cameras or intrinsics, not both",
+    )
     views = load_views(session_dir)
-    ids = [c.camera_id for c in start_cameras]
+    ids = (
+        [c.camera_id for c in start_cameras]
+        if start_cameras
+        else [i[0] for i in intrinsics or []]
+    )
     missing = [i for i in ids if i not in views]
     require(not missing, "start cameras without observations", missing)
     out_dir = session_dir / RECONSTRUCT_DIR
@@ -106,6 +141,26 @@ def reconstruct_session(
     (out_dir / CLEAN_REPORT_FILE).write_text(
         json.dumps(reports, indent=1), encoding="utf-8"
     )
+    if start_cameras is None:
+        assert intrinsics is not None
+        cleaned_views = load_views(out_dir)
+        obs = observations_from_views(cleaned_views, ids)
+        init = initialize_cameras(
+            obs,
+            [i[1] for i in intrinsics],
+            [i[2] for i in intrinsics],
+            anchor=scale_anchor,
+        )
+        require(
+            init.ok,
+            "camera initialisation lacks inliers",
+            [p.inliers for p in init.pairs],
+        )
+        start_cameras = subject_frame(init.cameras, obs)
+        logger.info(
+            "initialised placement from joints: %s",
+            [(p.camera_id, p.inliers) for p in init.pairs],
+        )
     record: Reconstruction = fit_bundle(
         out_dir, scale_anchor=scale_anchor, start_cameras=start_cameras
     )

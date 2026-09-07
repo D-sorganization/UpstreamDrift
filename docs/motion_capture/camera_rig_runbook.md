@@ -114,7 +114,20 @@ python3 -m motion_capture.rig record --plan docs/motion_capture/plans/lab_three_
 
 # 4. Validate the bundle before handing it on.
 python3 -m motion_capture.rig session-check --session sessions/<date>-record
+
+# 5. Detect the golfer in every view (MediaPipe by default).
+python3 -m motion_capture.rig ingest --session sessions/<date>-record
+
+# 6. First take of a setup: initialise placement from the golfer, then fit.
+python3 -m motion_capture.rig reconstruct --session sessions/<date>-record   --intrinsics docs/motion_capture/plans/intrinsics.json --anchor neck=0.53
+# Later takes: start from the previous solution instead.
+python3 -m motion_capture.rig reconstruct --session sessions/<date>-record   --cameras sessions/<previous>/reconstruct/reconstruction.json --anchor neck=0.53
 ```
+
+Step 6 writes `reconstruct/reconstruction.json` (camera placement, learned
+bone lengths, every rejected observation), `joints_3d_m.npy` and
+`swing_summary.json` (turns, X-factor, hand speed, tempo). The anchor is one
+segment measured once on the golfer with a tape; `neck` is hip-to-neck.
 
 Read the outcome, not the exit code alone: `supported` means every view met at
 least 90 % of the requested duration and rate; `degraded` names which view fell
