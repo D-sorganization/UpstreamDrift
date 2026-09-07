@@ -61,7 +61,7 @@ def _ready_if(cond: bool, why: str) -> tuple[bool, str]:
 
 SETUP = Step(
     key="setup",
-    title="Set up cameras and plan",
+    title="Set up Cameras and Plan",
     purpose="Bind each camera to a named view so takes are repeatable.",
     requirements=(
         "One camera per USB 2.0 root port (30 ft powered cables are fine: one camera per cable).",
@@ -81,7 +81,7 @@ SETUP = Step(
 
 INTRINSICS = Step(
     key="intrinsics",
-    title="Calibrate each camera once",
+    title="Calibrate Each Camera Once",
     purpose="Lens focal length and distortion per camera; the only precise setup step.",
     requirements=(
         "A printed chessboard with 9x6 inner corners (10x7 squares), flat, one square measured to the millimetre.",
@@ -103,7 +103,7 @@ INTRINSICS = Step(
 
 CAPTURE = Step(
     key="capture",
-    title="Record or import the swing take",
+    title="Record or Import the Swing Take",
     purpose="The footage every later step works from.",
     requirements=(
         "Whole body in every camera for the whole swing; ball in view.",
@@ -124,7 +124,7 @@ CAPTURE = Step(
 
 DETECT = Step(
     key="detect",
-    title="Detect the pose in every view",
+    title="Detect the Pose in Every View",
     purpose="2-D joints per frame from MediaPipe or OpenPose; re-run with other settings any time.",
     requirements=(
         "A recorded or imported session.",
@@ -142,7 +142,7 @@ DETECT = Step(
 
 REVIEW = Step(
     key="review",
-    title="Review joint reliability",
+    title="Review Joint Reliability",
     purpose="Know which joints to trust before fitting.",
     requirements=("At least one observation set.",),
     instructions=(
@@ -177,7 +177,7 @@ RECONSTRUCT = Step(
 
 ANALYZE_2D = Step(
     key="analyze_2d",
-    title="Analyse the single view",
+    title="Analyse the Single View",
     purpose="Events, tempo and normalised hand speed from one camera.",
     requirements=("One ingested view.",),
     instructions=(
@@ -191,7 +191,7 @@ ANALYZE_2D = Step(
 
 EXPORT = Step(
     key="export",
-    title="Export to the motion pipeline",
+    title="Export to the Motion Pipeline",
     purpose="TRC and canonical JSON for scaling, IK and model matching.",
     requirements=("A reconstruction.",),
     instructions=(

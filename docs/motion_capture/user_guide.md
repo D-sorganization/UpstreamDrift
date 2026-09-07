@@ -44,7 +44,7 @@ unobserved and lets the rigid-segment priors place them.
 
 ## Steps
 
-### 1. Set up cameras and plan
+### 1. Set up Cameras and Plan
 
 Bind each camera to a named view so takes are repeatable.
 
@@ -63,7 +63,7 @@ Bind each camera to a named view so takes are repeatable.
 
 Tile actions: plan_check, import.
 
-### 2. Calibrate each camera once
+### 2. Calibrate Each Camera Once
 
 Lens focal length and distortion per camera; the only precise setup step.
 
@@ -81,7 +81,7 @@ Lens focal length and distortion per camera; the only precise setup step.
 
 Tile actions: record, calibrate.
 
-### 3. Record or import the swing take
+### 3. Record or Import the Swing Take
 
 The footage every later step works from.
 
@@ -101,7 +101,7 @@ The footage every later step works from.
 
 Tile actions: record, import, proxy.
 
-### 4. Detect the pose in every view
+### 4. Detect the Pose in Every View
 
 2-D joints per frame from MediaPipe or OpenPose; re-run with other settings any time.
 
@@ -118,7 +118,7 @@ Tile actions: record, import, proxy.
 
 Tile actions: ingest, compare.
 
-### 5. Review joint reliability
+### 5. Review Joint Reliability
 
 Know which joints to trust before fitting.
 
@@ -150,7 +150,7 @@ Camera placement learned from the golfer, rigid skeleton, outliers rejected.
 
 Tile actions: reconstruct.
 
-### 7. Analyse the single view
+### 7. Analyse the Single View
 
 Events, tempo and normalised hand speed from one camera.
 
@@ -164,7 +164,7 @@ Events, tempo and normalised hand speed from one camera.
 
 Tile actions: analyze.
 
-### 8. Export to the motion pipeline
+### 8. Export to the Motion Pipeline
 
 TRC and canonical JSON for scaling, IK and model matching.
 

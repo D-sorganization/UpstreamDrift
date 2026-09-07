@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PyQt6.QtCore import QProcess, Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import QProcess, QProcessEnvironment, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -34,6 +34,7 @@ from PyQt6.QtWidgets import (
     QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
+    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -77,6 +78,7 @@ STATUS_GLYPH = {
     workflow.Status.SKIPPED: "–",
 }
 ALWAYS_ENABLED = frozenset({"stop", "load"})
+BUTTONS_PER_ROW = 5
 
 
 def _optional_float(text: str) -> float | None:
@@ -99,6 +101,10 @@ class RigProcessRunner(QWidget):
         super().__init__(parent)
         self._process = QProcess(self)
         self._process.setWorkingDirectory(str(commands.repo_root()))
+        env = QProcessEnvironment()
+        for key, value in commands.child_environment().items():
+            env.insert(key, value)
+        self._process.setProcessEnvironment(env)
         self._process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self._process.readyReadStandardOutput.connect(self._drain)
         self._process.finished.connect(self._on_finished)
@@ -691,10 +697,10 @@ class CaptureRigWidget(QWidget):
         left.addWidget(self.workflow)
         left.addWidget(inputs)
         buttons = QWidget()
-        grid = QHBoxLayout(buttons)
+        grid = QGridLayout(buttons)
         grid.setContentsMargins(0, 0, 0, 0)
-        for button in self.buttons.values():
-            grid.addWidget(button)
+        for i, button in enumerate(self.buttons.values()):
+            grid.addWidget(button, i // BUTTONS_PER_ROW, i % BUTTONS_PER_ROW)
         middle = QWidget()
         mid_layout = QVBoxLayout(middle)
         mid_layout.addWidget(buttons)
@@ -708,6 +714,7 @@ class CaptureRigWidget(QWidget):
         splitter.addWidget(middle)
         splitter.addWidget(right)
         splitter.setStretchFactor(2, 2)
+        splitter.setSizes([420, 520, 660])
         layout = QVBoxLayout(self)
         layout.addWidget(self.session_label)
         layout.addWidget(splitter, 1)
@@ -809,6 +816,7 @@ class CaptureRigWidget(QWidget):
             + (f" · problems: {'; '.join(media.problems)}" if media.problems else "")
         )
         self.playback.load(media)
+        self.results.setCurrentIndex(1 if len(media.views) == 1 else 0)
         self.swing_table.fill(media.swing_summary)
         self.analysis_table.fill(media.analysis_2d)
         self.reliability_table.fill(
