@@ -212,6 +212,7 @@ class TestUnifiedLoaderFileLoading:
         assert r.model is not None
         assert len(r.model.links) == 2
 
+    @pytest.mark.unit
     def test_load_file_xacro_is_preprocessed_not_just_routed(
         self, tmp_path: Path
     ) -> None:
