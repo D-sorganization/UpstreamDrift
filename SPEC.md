@@ -1,5 +1,23 @@
 # SPEC.md — Repository Specification Document
 
+## Rewire the Rust MJCF Fast Path (#9675)
+
+`MJCFConverter.mjcf_to_urdf` consults `_mjcf_rust_facade` again through a new
+`_rust_structural_precheck` helper. The squash `b8d95ad25` removed the only
+production call site, leaving the opt-in `UPSTREAM_URDF_USE_RUST` path for
+MJCF unreachable while the facade's own parity tests continued to pass.
+
+The Rust parser validates document structure only; the pure-Python converter
+still owns MJCF-to-URDF flattening, and a Rust failure is logged rather than
+raised.
+
+`tests/unit/tools/model_generation/test_rust_fast_path_wiring.py` asserts that
+both `_urdf_rust_facade` and `_mjcf_rust_facade` are reachable from their
+converters. It stubs the facades rather than requiring the `upstream_urdf`
+wheel, so unlike `tests/unit/urdf/test_rust_facade_parity.py` it does not skip
+where the wheel is absent.
+
+
 ## Restore Xacro, ROS and GitHub-Auth External Integration (#9620)
 
 Restores functionality removed by the 14-issue squash `b8d95ad25`, which deleted
@@ -3926,6 +3944,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| 2026-09-07 | #9687 | Rewired `MJCFConverter.mjcf_to_urdf` to the Rust structural pre-check via a named `_rust_structural_precheck` helper. `b8d95ad25` had removed the only production call site of `_mjcf_rust_facade`, exactly as it did for `_urdf_rust_facade` (restored in #9673), so the opt-in `UPSTREAM_URDF_USE_RUST` path was unreachable for MJCF; nothing went red because each facade keeps its own parity tests, so both modules were imported and passing while never being invoked by the converters they accelerate. Added `test_rust_fast_path_wiring.py`, which asserts wiring rather than parity and stubs the facades so it does not skip where the Rust wheel is absent, unlike the `importorskip`-guarded parity suite. Verified non-vacuous by reverting the rewiring. (#9675) |
 | 2026-09-07 | #9673 | Restored xacro preprocessing, ROS `package://` resolution and GitHub API authentication/retry/pagination deleted by the 14-issue squash `b8d95ad25`, plus `CacheEntry.version` with checksum validation on retrieval and the opt-in Rust URDF fast path whose only call site the same commit removed. Each restore is folded into the hardening that landed since rather than reverted onto it: `_validate_mesh_filename` still runs before any `package://` lookup, GitHub requests still route through the `_urlopen_https` host allowlist, and `ModelCache.get` delegates to the existing `verify()` instead of duplicating the comparison. Deviating from a pure restore, `_split_search_path` rejoins Windows drive letters that the original `.split(":")` severed. `tests/unit/tools/model_generation/`: 74 failing -> 38 failing. (#9620) |
 | 2026-09-07 | n/a | Optimized vector magnitude checks in swing flight pipeline gui using math.hypot (spec-exempt: micro-optimization) |
 | 2026-09-07 | #9631 | Bumped the release version 2.1.2 -> 2.1.3 across every surface `scripts/check_version_consistency.py` audits, plus this Identity table and SECURITY.md's footer. This is the fix-forward release for #9631: the pushed `v2.1.2` tag's `release.yml` run built a wheel, but both `smoke-python-wheel` jobs failed because `SharedImportAliasFinder` rewrote `src.shared.python.config` into the pinned Tools tree, whose unrelated `config` lacks `get_database_pool_pre_ping`, so `import src.api.local_server` and `upstream-drift --help` both failed and `create-release`/`publish-pypi` were skipped -- no wheel, sdist, SBOM, checksums, PyPI distribution or GitHub release exists for 2.1.2. Fixed upstream in D-sorganization/Tools#5049 and carried here by the pin bump to `132fc7331e`. Per `docs/operations/release-runbook.md` "Failed Release Recovery -- Fix Forward, Never Move a Tag", `v2.1.2` is retained where it is and superseded by 2.1.3; CHANGELOG entries staged for 2.1.2 carry forward under `[2.1.3] - 2026-09-07` with a retained-and-superseded note. No tag is created by this change -- tagging is the release operator's signed step. |
