@@ -178,53 +178,11 @@ class URDFParser:
         Returns:
             ParsedModel with parsed contents
         """
-        # Determine if source is file or string
-        source_path = None
-        if isinstance(source, Path) or (
-            isinstance(source, str) and not source.strip().startswith("<")
-        ):
-            source_path = Path(source)
-            if not source_path.exists():
-                raise FileNotFoundError(f"URDF file not found: {source_path}")
-            raw_text = source_path.read_text()
-            if self._is_xacro(source_path) or self._has_xacro_namespace(raw_text):
-                processed = self._preprocess_xacro(source_path)
-                if processed is not None:
-                    xml_string = processed
-                else:
-                    logger.warning(
-                        f"Could not preprocess xacro file {source_path}, "
-                        "attempting to parse as plain XML"
-                    )
-                    xml_string = raw_text
-            else:
-                xml_string = raw_text
-        else:
-            xml_string = source
+        xml_string, source_path = self._read_source(source)
 
-        # Rust-backed fast path. Opt-in via UPSTREAM_URDF_USE_RUST=1; routed
-        # through the typed AST defined in rust_core/upstream-urdf/. The facade
-        # hands back a ParsedModel field-compatible with the pure-Python branch
-        # below. Epic #4520 (UpstreamDrift #5215).
-        try:
-            from model_generation.converters import _urdf_rust_facade as _rust_facade
-        except ImportError:  # pragma: no cover - layout safety net
-            _rust_facade = None  # type: ignore[assignment]
-        if _rust_facade is not None and _rust_facade.should_use_rust():
-            try:
-                ast = _rust_facade.parse_urdf_to_dict(xml_string)
-                return _rust_facade.parsed_model_from_rust_ast(
-                    ast,
-                    source_path=source_path,
-                    original_xml=xml_string,
-                    read_only=read_only,
-                )
-            except Exception as exc:  # pragma: no cover - fallback path
-                logger.warning(
-                    "upstream_urdf Rust parser failed (%s); "
-                    "falling back to pure Python",
-                    exc,
-                )
+        fast = self._try_rust_fast_path(xml_string, source_path, read_only)
+        if fast is not None:
+            return fast
 
         # Parse XML
         try:
@@ -273,6 +231,65 @@ class URDFParser:
             warnings=warnings,
             read_only=read_only,
         )
+
+    def _read_source(self, source: str | Path) -> tuple[str, Path | None]:
+        """Return ``(xml, source_path)`` for a path or a raw XML string.
+
+        A xacro source is expanded here so everything downstream sees plain
+        URDF. Expansion failure is not fatal: a file may declare the namespace
+        without using any directives, in which case the raw text still parses.
+        """
+        if isinstance(source, Path) or (
+            isinstance(source, str) and not source.strip().startswith("<")
+        ):
+            source_path = Path(source)
+            if not source_path.exists():
+                raise FileNotFoundError(f"URDF file not found: {source_path}")
+            raw_text = source_path.read_text()
+            if not (self._is_xacro(source_path) or self._has_xacro_namespace(raw_text)):
+                return raw_text, source_path
+            processed = self._preprocess_xacro(source_path)
+            if processed is not None:
+                return processed, source_path
+            logger.warning(
+                f"Could not preprocess xacro file {source_path}, "
+                "attempting to parse as plain XML"
+            )
+            return raw_text, source_path
+        return source, None
+
+    def _try_rust_fast_path(
+        self,
+        xml_string: str,
+        source_path: Path | None,
+        read_only: bool,
+    ) -> ParsedModel | None:
+        """Parse via the Rust backend, or return ``None`` to use pure Python.
+
+        Opt-in through ``UPSTREAM_URDF_USE_RUST=1`` and routed via the typed
+        AST in ``rust_core/upstream-urdf/``; the facade returns a ParsedModel
+        field-compatible with the Python branch. Epic #4520 (#5215).
+        """
+        try:
+            from model_generation.converters import _urdf_rust_facade as _rust_facade
+        except ImportError:  # pragma: no cover - layout safety net
+            return None
+        if not _rust_facade.should_use_rust():
+            return None
+        try:
+            ast = _rust_facade.parse_urdf_to_dict(xml_string)
+            return _rust_facade.parsed_model_from_rust_ast(
+                ast,
+                source_path=source_path,
+                original_xml=xml_string,
+                read_only=read_only,
+            )
+        except Exception as exc:  # pragma: no cover - fallback path
+            logger.warning(
+                "upstream_urdf Rust parser failed (%s); falling back to pure Python",
+                exc,
+            )
+            return None
 
     def parse_string(self, xml_string: str, read_only: bool = False) -> ParsedModel:
         """Parse URDF from XML string."""
