@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import json
 from collections.abc import Sequence
+
+import numpy as np
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +23,7 @@ from pydantic import BaseModel, ConfigDict
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+from .analytics import summarize_swing
 from .cameras import PinholeCamera
 from .clean import CleanReport, clean_view
 from .fit import (
@@ -52,6 +55,7 @@ class SessionReconstruction(BaseModel):
     reconstruction_file: str
     rms_px: float
     unobservable_points: int
+    swing_summary_file: str | None = None
 
 
 def start_cameras_from(path: Path) -> list[PinholeCamera]:
@@ -105,6 +109,11 @@ def reconstruct_session(
     record: Reconstruction = fit_bundle(
         out_dir, scale_anchor=scale_anchor, start_cameras=start_cameras
     )
+    fps = float(views[ids[0]]["fps"])
+    joints = np.load(out_dir / "joints_3d_m.npy")
+    swing, _series = summarize_swing(joints, fps)
+    swing_file = out_dir / "swing_summary.json"
+    swing_file.write_text(swing.model_dump_json(indent=2), encoding="utf-8")
     summary = SessionReconstruction(
         session=str(session_dir),
         views=tuple(ids),
@@ -112,6 +121,7 @@ def reconstruct_session(
         reconstruction_file=str(out_dir / RECONSTRUCTION_FILE),
         rms_px=record.rms_px,
         unobservable_points=record.unobservable_points,
+        swing_summary_file=str(swing_file),
     )
     (out_dir / "session_reconstruction.json").write_text(
         summary.model_dump_json(indent=2), encoding="utf-8"
