@@ -361,7 +361,9 @@ class ShellTool(CLIToolBase):
                 if clean_token in dangerous:
                     return False
 
-                if clean_token in dangerous_args or any(clean_token.startswith(arg + "=") for arg in dangerous_args):
+                if clean_token in dangerous_args or any(
+                    clean_token.startswith(arg + "=") for arg in dangerous_args
+                ):
                     return False
 
                 try:
