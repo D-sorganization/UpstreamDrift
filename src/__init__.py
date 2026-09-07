@@ -78,23 +78,22 @@ def _install_parent_shared_aliases() -> bool:
 
 
 def _register_vendored_tools_fallback() -> bool:
-    """Append the pinned Tools tree so a retired child copy resolves upstream.
+    """Report whether the pinned Tools tree is present to fall back to.
+
+    Deliberately does NOT add the tree to ``sys.path``. Doing so exposes every
+    top-level Tools package -- ``sidekick``, ``chat``, ``contracts`` -- as
+    importable, which silently changed availability probes elsewhere:
+    ``sidekick.lab.mocap`` began resolving and ``probe_tools_schema()`` flipped
+    from "unavailable" to "ready" in a repository that had never declared that
+    dependency reachable. The finder below answers the shared namespace on its
+    own, so the fallback stays scoped to what it is meant to serve.
 
     Returns:
-        True when the vendored tree was found and is on ``sys.path``.
-
-    Postcondition:
-        Appends at most one entry and never reorders ``sys.path``, so a module
-        that resolves before this call resolves identically after it.
+        True when the vendored shared tree exists on disk. False in a wheel
+        install, where build_hooks.py copies the pinned tree into the package
+        and there is nothing to fall back to.
     """
-    if not (_VENDORED_TOOLS_SRC / "shared" / "python").is_dir():
-        # Absent in a wheel install: build_hooks.py copies the pinned tree into
-        # the package itself, so there is nothing to fall back to.
-        return False
-    location = str(_VENDORED_TOOLS_SRC)
-    if location not in sys.path:
-        sys.path.append(location)
-    return True
+    return (_VENDORED_TOOLS_SRC / "shared" / "python").is_dir()
 
 
 class _VendoredToolsFallbackFinder(MetaPathFinder):
