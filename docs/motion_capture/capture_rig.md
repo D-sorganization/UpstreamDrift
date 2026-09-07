@@ -113,6 +113,22 @@ until the pinned release documents its builders; that export is #9422's
 responsibility, and inventing it here would be exactly the duplicate authority
 ADR-0041 forbids.
 
+## Time Sync
+
+Three cameras on three USB root ports stamp frames in the host's monotonic
+clock at _arrival_. ADR-0041 forbids promoting arrival time to exposure time,
+so `sync.py` never rewrites a frame's timestamp. With `capture --timing` (issue
+#9591) the session records each frame's mean brightness, finds the first frame
+in which a shared strobe becomes visible per camera, and writes a `timing`
+block to the manifest: per view, the offset of its arrival clock from the
+reference view's, the uncertainty (both cameras' frame intervals combined in
+quadrature, because a flash that lands anywhere inside one interval is first
+seen in the next frame), the measured frame interval, and its deviation from
+the nominal rate in parts per million. A view whose strobe is not found, or a
+session whose reference view has none, is reported `unavailable` with the
+reason; nothing is interpolated. The record is evidence for the reconstruction
+stage to apply or reject, never a correction applied to frames.
+
 ## Diagnostic Script
 
 `scripts/diagnose_mocap_camera_rig.py` is a thin CLI over this package for

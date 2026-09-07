@@ -17,6 +17,7 @@ from src.motion_capture.rig.session import (
     CameraStats,
     CaptureOutcome,
     CaptureSession,
+    CaptureTuning,
     SessionManifest,
     classify,
 )
@@ -123,7 +124,9 @@ def test_session_requires_sources_for_exactly_the_plan_views() -> None:
 def test_session_supported_when_every_camera_meets_rate(tmp_path: Path) -> None:
     plan = _plan("a", "b", "c")
     sources = {v: SyntheticFrameSource(f"serial-{v}") for v in ("a", "b", "c")}
-    manifest = CaptureSession(plan, sources, duration_s=5, max_frames=120).run()
+    manifest = CaptureSession(
+        plan, sources, duration_s=5, tuning=CaptureTuning(max_frames=120)
+    ).run()
     assert manifest.outcome is CaptureOutcome.SUPPORTED
     assert manifest.reasons == ()
     assert [c.view for c in manifest.cameras] == ["a", "b", "c"]
@@ -145,7 +148,9 @@ def test_session_degraded_when_a_camera_runs_slow() -> None:
         "a": SyntheticFrameSource("serial-a"),
         "b": SyntheticFrameSource("serial-b", fps=40),  # 40 < 0.9 * 60
     }
-    manifest = CaptureSession(plan, sources, duration_s=5, max_frames=60).run()
+    manifest = CaptureSession(
+        plan, sources, duration_s=5, tuning=CaptureTuning(max_frames=60)
+    ).run()
     assert manifest.outcome is CaptureOutcome.DEGRADED
     slow = next(c for c in manifest.cameras if c.view == "b")
     assert slow.state == "degraded"
@@ -159,7 +164,10 @@ def test_session_blocked_when_a_camera_loses_its_reservation() -> None:
         "b": SyntheticFrameSource("serial-b", fail_after=0),  # never delivers
     }
     session = CaptureSession(
-        plan, sources, duration_s=2, max_frames=30, stall_reads=5, max_reopens=1
+        plan,
+        sources,
+        duration_s=2,
+        tuning=CaptureTuning(max_frames=30, stall_reads=5, max_reopens=1),
     )
     manifest = session.run()
     assert manifest.outcome is CaptureOutcome.BLOCKED
