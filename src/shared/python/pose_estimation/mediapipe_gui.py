@@ -36,7 +36,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.theme.style_constants import Styles
-from src.shared.python.pose_estimation.video_files import video_dialog_filter
+from src.shared.python.pose_estimation.video_files import load_video_into
 
 logger = logging.getLogger(__name__)
 
@@ -210,14 +210,7 @@ class MediaPipeGUI(QMainWindow):
 
     def load_video(self) -> None:
         """Open file dialog to select a video file."""
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Select Video", "", video_dialog_filter()
-        )
-        if file_name:
-            self._video_path = file_name
-            self.lbl_file.setText(file_name)
-            self.btn_run.setEnabled(True)
-            self.log(f"Loaded video: {file_name}")
+        load_video_into(self)
 
     def run_analysis(self) -> None:
         """Start the MediaPipe analysis in a background thread."""
