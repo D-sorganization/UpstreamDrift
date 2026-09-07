@@ -96,6 +96,32 @@ def _register_vendored_tools_fallback() -> bool:
     return (_VENDORED_TOOLS_SRC / "shared" / "python").is_dir()
 
 
+_UD_SHARED_PYTHON = Path(__file__).resolve().parent / "shared" / "python"
+
+
+def _cluster_is_still_owned(tail: str) -> bool:
+    """Report whether UpstreamDrift still owns the top-level cluster in *tail*.
+
+    The fallback exists to serve clusters that have been **wholly retired**, so
+    a deleted child copy resolves upstream instead of raising. It must not fill
+    a gap *inside* a cluster UpstreamDrift still owns: doing so silently builds
+    a hybrid package, half UpstreamDrift and half Tools.
+
+    That is not hypothetical. ``sidekick`` is UpstreamDrift-owned and has no
+    ``lab/mocap``; the pinned tree does. Without this guard the finder served
+    ``sidekick.lab.mocap`` from the pinned tree, which flipped
+    ``probe_tools_schema()`` from ``unavailable`` to ``ready`` and broke two
+    ``motion_capture/rig`` tests that assert the module is absent. The absence
+    of a submodule inside an owned package is meaningful, not a gap to patch.
+    """
+    cluster = tail.split(".", 1)[0]
+    if not cluster:
+        return False
+    return (_UD_SHARED_PYTHON / cluster).is_dir() or (
+        _UD_SHARED_PYTHON / f"{cluster}.py"
+    ).is_file()
+
+
 class _VendoredToolsFallbackFinder(MetaPathFinder):
     """Resolve retired child copies from the pinned Tools tree, and only those.
 
@@ -124,7 +150,10 @@ class _VendoredToolsFallbackFinder(MetaPathFinder):
         for prefix in self._PREFIXES:
             if not fullname.startswith(prefix):
                 continue
-            relative = fullname[len(prefix) :].replace(".", "/")
+            tail = fullname[len(prefix) :]
+            if _cluster_is_still_owned(tail):
+                return None
+            relative = tail.replace(".", "/")
             base = _VENDORED_TOOLS_SRC / "shared" / "python" / relative
             package_init = base / "__init__.py"
             if package_init.is_file():
