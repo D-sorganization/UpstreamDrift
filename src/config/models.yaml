@@ -336,6 +336,21 @@ models:
       logo: "assets/data_explorer_modern.png"
       status: "beta"
 
+  - id: "capture_rig"
+    name: "Capture Rig"
+    description: "Multi-camera capture, pose ingest and reconstruction with an overlay player"
+    type: "special_app"
+    path: "src/tools/capture_rig/__main__.py"
+    capabilities:
+      - "video_capture"
+      - "camera_control"
+      - "pose_estimation"
+      - "video_processing"
+    launcher:
+      category: "motion_capture"
+      logo: "assets/capture_rig.svg"
+      status: "beta"
+
   - id: "starting_pose_matcher"
     name: "Starting-Pose Matcher (legacy)"
     description: "Legacy alias for motion_target_preview. Hidden by default."

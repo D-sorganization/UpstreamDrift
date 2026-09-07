@@ -51,7 +51,7 @@ from pathlib import Path
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .bundle import build_index, check_bundle, write_bundle
-from .plan import RigPlan, check_plan, parse_mode
+from .plan import CameraControls, RigPlan, check_plan, parse_mode
 from .probe import RecordingProbe, probe_recording
 from .proxy import DEFAULT_CRF, DEFAULT_ENCODER, ENCODERS, make_proxies
 from .recorder import (
@@ -98,6 +98,16 @@ def _add_plan_args(parser: argparse.ArgumentParser) -> None:
         metavar="a,b",
         help="comma-separated subset of plan views to use (plan order)",
     )
+    parser.add_argument(
+        "--exposure", type=float, default=None, help="UVC exposure for every view"
+    )
+    parser.add_argument("--gain", type=float, default=None, help="UVC gain")
+    parser.add_argument(
+        "--auto-exposure",
+        choices=("on", "off"),
+        default=None,
+        help="UVC auto-exposure for every selected view",
+    )
 
 
 def _load_plan(args: argparse.Namespace) -> RigPlan:
@@ -106,7 +116,17 @@ def _load_plan(args: argparse.Namespace) -> RigPlan:
     views = None
     if getattr(args, "views", None):
         views = tuple(v.strip() for v in args.views.split(",") if v.strip())
-    return plan.with_overrides(mode=getattr(args, "mode", None), views=views)
+    auto = getattr(args, "auto_exposure", None)
+    controls = CameraControls(
+        exposure=getattr(args, "exposure", None),
+        gain=getattr(args, "gain", None),
+        auto_exposure=None if auto is None else auto == "on",
+    )
+    return plan.with_overrides(
+        mode=getattr(args, "mode", None),
+        views=views,
+        controls=controls if controls.as_overrides() else None,
+    )
 
 
 def _parser() -> argparse.ArgumentParser:
