@@ -66,7 +66,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
-| `humanoid_character_builder` | 16 | 24 | 13 | 27 | 0 | 40 |
+| `humanoid_character_builder` | 15 | 25 | 13 | 27 | 0 | 40 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -75,7 +75,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_generation` | 28 | 52 | 21 | 18 | 0 | 80 |
+| `model_generation` | 28 | 52 | 20 | 18 | 0 | 80 |
 | `motion_matching` | 0 | 0 | 0 | 90 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **463** | **276** | **132** | **1188** | **518** | **739** |
+| **Total** | **462** | **277** | **131** | **1188** | **518** | **739** |
 
 ## Diverged Files by Package
 
@@ -288,7 +288,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher/registry.py` | -75 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `gui_launcher/tools_sidebar_integration.py` | +10123 |  | Dieter Olson 2026-05-29 | Dieter Olson 2026-09-05 |
 
-### Package `humanoid_character_builder` (24 Diverged Files)
+### Package `humanoid_character_builder` (25 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -310,6 +310,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/interfaces/__init__.py` | +74 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/interfaces/api.py` | +28 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/mesh/primitive_inertia.py` | +90 |  | Dieter Olson 2026-08-03 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/presets/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -359,8 +360,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/editor/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/editor/editor_clipboard.py` | +227 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
 | `model_generation/editor/editor_modifications.py` | +1803 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
-| `model_generation/editor/editor_types.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/editor/frankenstein_editor.py` | +214 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
+| `model_generation/editor/editor_types.py` | +1022 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/editor/frankenstein_editor.py` | +330 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
 | `model_generation/editor/text_editor_diff_mixin.py` | +591 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
 | `model_generation/explorer/__init__.py` | -35 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/explorer/model_explorer.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
