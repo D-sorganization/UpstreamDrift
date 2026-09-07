@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 from src.shared.python.model_generation.core.types import Joint, Link, Material
 
 from .editor_types import ComponentType
+from src.shared.python.contracts import require
 
 if TYPE_CHECKING:
     from shared.python.model_generation.converters.urdf_parser import ParsedModel
@@ -52,8 +53,8 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
-        if model_id is None:
-            raise ValueError("model_id must be provided")
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(link_name), "link_name must be a non-empty string")
         model = self._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
@@ -98,8 +99,8 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
-        if model_id is None:
-            raise ValueError("model_id must be provided")
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(root_link), "root_link must be a non-empty string")
         model = self._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
@@ -111,11 +112,11 @@ class ClipboardMixin:
             return False
 
         # Copy all links in subtree
-        links = []
+        links: list[Link] = []
         for name in subtree_names:
-            link = model.get_link(name)
-            if link:
-                links.append(Link.from_dict(link.to_dict()))
+            source_link = model.get_link(name)
+            if source_link:
+                links.append(Link.from_dict(source_link.to_dict()))
 
         # Copy all joints within subtree
         joints: list[Joint] = []
@@ -130,10 +131,10 @@ class ClipboardMixin:
 
         # Collect materials
         materials: dict[str, Material] = {}
-        for link in links:
-            if link.visual_material:
-                materials[link.visual_material.name] = Material.from_dict(
-                    link.visual_material.to_dict()
+        for copied_link in links:
+            if copied_link.visual_material:
+                materials[copied_link.visual_material.name] = Material.from_dict(
+                    copied_link.visual_material.to_dict()
                 )
 
         self._clipboard = [(ComponentType.SUBTREE, links, joints, materials)]

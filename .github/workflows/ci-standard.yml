@@ -878,6 +878,13 @@ jobs:
         with:
           python-version: "3.11"
 
+      # The Tutorial Import Check resolves canonical modules with find_spec.
+      # Since #9406 began retiring UpstreamDrift child copies, some of those
+      # names are served by the pinned Tools layer, which a submodule-less
+      # checkout does not provide -- the same reason twelve other jobs in this
+      # file already run this action.
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
       - name: Install workflow parser dependency
         run: python3 -m pip install --disable-pip-version-check pyyaml==6.0.2
 

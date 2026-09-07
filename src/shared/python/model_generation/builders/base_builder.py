@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.contracts import InvariantError
 from src.shared.python.model_generation.core.contracts import precondition
 from src.shared.python.model_generation.core.types import Joint, Link
 from src.shared.python.model_generation.core.validation import ValidationResult
@@ -155,6 +156,51 @@ class BaseURDFBuilder(ABC):
     def get_joint_names(self) -> list[str]:
         """Get all joint names."""
         return [joint.name for joint in self._joints]
+
+    def _check_invariants(self) -> None:
+        """Assert the structural invariants of the model under construction.
+
+        A URDF model is a tree of links connected by joints, so two things must
+        hold at all times: every joint endpoint names a link that exists, and
+        names are unique within their kind. Neither is enforced by ``add_link``
+        or ``add_joint`` individually -- a joint may legitimately be added
+        before its child link -- so this is checked as a whole-model invariant
+        rather than as a precondition.
+
+        Callers use it after a batch of mutations and before export, where a
+        dangling reference would otherwise surface as malformed XML far from
+        the edit that caused it.
+
+        Raises:
+            InvariantError: If a joint references an unknown link, or if two
+                links or two joints share a name.
+        """
+        link_names = [link.name for link in self._links]
+        duplicate_links = {name for name in link_names if link_names.count(name) > 1}
+        if duplicate_links:
+            raise InvariantError(
+                f"Duplicate link names: {', '.join(sorted(duplicate_links))}"
+            )
+
+        joint_names = [joint.name for joint in self._joints]
+        duplicate_joints = {name for name in joint_names if joint_names.count(name) > 1}
+        if duplicate_joints:
+            raise InvariantError(
+                f"Duplicate joint names: {', '.join(sorted(duplicate_joints))}"
+            )
+
+        known = set(link_names)
+        for joint in self._joints:
+            if joint.parent not in known:
+                raise InvariantError(
+                    f"Joint '{joint.name}' references unknown parent "
+                    f"link '{joint.parent}'"
+                )
+            if joint.child not in known:
+                raise InvariantError(
+                    f"Joint '{joint.name}' references unknown child "
+                    f"link '{joint.child}'"
+                )
 
     @precondition(lambda link: link is not None, "Link cannot be None")
     @precondition(lambda link: link.name, "Link must have a name")
