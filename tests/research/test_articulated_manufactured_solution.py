@@ -236,10 +236,7 @@ def test_manufactured_solution_record_is_byte_deterministic(
     assert current_record["model"] == committed_record["model"]
     for key, value in committed_record["design"].items():
         assert current_record["design"][key] == value
-    assert (
-        current_record["source_sha256"].keys()
-        == committed_record["source_sha256"].keys()
-    )
+    assert set(current_record["source_sha256"].keys()) == set(committed_record["source_sha256"].keys())
     for path, expected in committed_record["source_sha256"].items():
         if path != "tests/research/test_articulated_manufactured_solution.py":
             assert current_record["source_sha256"][path] == expected

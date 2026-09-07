@@ -20,10 +20,6 @@ Commands:
   map, clean and jointly fit the ingested views into 3-D joints, camera
   placement and bone lengths under ``<session>/reconstruct/``. Exit 0 when
   the fit ran.
-- ``calibrate-intrinsics --session DIR --board 9x6 --square 0.025 [--every N]``:
-  find a printed chessboard in every recording of a bundle and write
-  ``intrinsics.json`` (K, distortion, RMS, frames used) keyed by view. Exit 0
-  when every view calibrated within the RMS bound.
 - ``compare --session DIR --estimators a,b [--max-frames N]``: ingest the bundle
   with each named estimator and write ``comparison_<view>.json`` / ``.md``
   (coverage, confidence, jitter, cross-detector agreement). Exit 0 when every
@@ -180,16 +176,6 @@ def _parser() -> argparse.ArgumentParser:
         type=float,
         default=20_000.0,
         help="acceleration prior in px/s^2",
-    )
-    cal = sub.add_parser("calibrate-intrinsics", help="chessboard intrinsics per view")
-    cal.add_argument("--session", type=Path, required=True)
-    cal.add_argument(
-        "--board", default="9x6", help="inner corners COLSxROWS, asymmetric"
-    )
-    cal.add_argument("--square", type=float, required=True, help="square size, metres")
-    cal.add_argument("--every", type=int, default=10, help="sample every Nth frame")
-    cal.add_argument(
-        "--out", type=Path, default=None, help="default: <session>/intrinsics.json"
     )
     return parser
 
@@ -434,42 +420,6 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_calibrate_intrinsics(args: argparse.Namespace) -> int:
-    from src.motion_capture.reconstruct.intrinsics import (
-        Chessboard,
-        calibrate_video,
-        write_intrinsics,
-    )
-
-    from .bundle import load_bundle
-
-    cols, sep, rows = args.board.lower().partition("x")
-    if not sep or not cols.isdigit() or not rows.isdigit():
-        raise SystemExit("--board must look like 9x6")
-    board = Chessboard(columns=int(cols), rows=int(rows), square_m=args.square)
-    _plan, index, _manifest = load_bundle(args.session)
-    records = []
-    for entry in index.recordings:
-        if not entry.ok:
-            logger.warning("%s: recording unusable, skipped", entry.view)
-            continue
-        record = calibrate_video(
-            entry.view, args.session / entry.file, board, every=args.every
-        )
-        logger.info(
-            "%s: rms %.3f px from %d frames (%d without board) %s",
-            entry.view,
-            record.rms_px,
-            record.frames_used,
-            record.frames_without_board,
-            "ok" if record.ok else "BELOW STANDARD",
-        )
-        records.append(record)
-    out = write_intrinsics(records, args.out or (args.session / "intrinsics.json"))
-    logger.info("intrinsics -> %s", out)
-    return 0 if records and all(r.ok for r in records) else 1
-
-
 _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "plan-check": cmd_plan_check,
     "capture": cmd_capture,
@@ -478,7 +428,6 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "proxy": cmd_proxy,
     "compare": cmd_compare,
     "reconstruct": cmd_reconstruct,
-    "calibrate-intrinsics": cmd_calibrate_intrinsics,
     "ingest": cmd_ingest,
 }
 

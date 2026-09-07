@@ -4,10 +4,6 @@
 
 Replaces `np.linalg.norm(self.velocity_m_s, axis=1)` and `np.linalg.norm(self.velocity_m_s, axis=2)` with `np.sqrt(np.einsum(..., ...))` in `bunkershot3d/fields/schema.py` to optimize calculation of velocity magnitudes. (spec-exempt: micro-optimization)
 
-## Optimize Demonstration Dataset Mean Duration (#9645)
-
-Optimizes `DemonstrationDataset.get_stats()` by replacing `np.mean()` with built-in `sum() / len()` when computing `mean_duration` from a Python list of demonstration durations, avoiding temporary NumPy array allocations while safely guarding empty demonstration collections.
-
 ## Guard Optional Excel Export Tests (#9579)
 
 Guards `TestExportExcel` in `movement_optimizer/tests/test_export.py` with `pytest.importorskip("openpyxl")` so test suites pass when optional dependencies (`openpyxl`) are absent in minimal or optional test runners.
@@ -3880,7 +3876,6 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
-| 2026-09-07 | #9646 | `reconstruct.intrinsics` + `rig calibrate-intrinsics`: chessboard intrinsic calibration per view into `intrinsics.json` with K, distortion, RMS and frame evidence; < 8 usable frames refused, RMS > 1 px reported below standard (C2 #9622 of #9619). |
 | 2026-09-07 | #9643 | Acceptance program gains the synthetic algorithm thresholds the harness asserts in CI; camera rig runbook gains the ingest and reconstruct steps (#9619). |
 | 2026-09-07 | #9642 | `reconstruct.initialize`: camera placement from the golfer's joints alone (essential-matrix RANSAC per pair, anchor-segment scale, subject-defined world frame, pairs under 40 inliers refused); `rig reconstruct --intrinsics` for a first take, `--cameras` for later takes (C3 #9623 of #9619). |
 | 2026-09-07 | #9640 | Added `motion_capture.rig reconstruct` (layout mapping, per-view cleaning with listed rejections, joint fit from a previous take's cameras, `reconstruction.json` + `swing_summary.json`) and `reconstruct.analytics` (pelvis/shoulder turn, X-factor, hand speed with uncertainty, events, tempo); smoother judges outliers under a tightened prior (C7 #9627, C6 #9626 of #9619). |
