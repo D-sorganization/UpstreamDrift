@@ -20,7 +20,7 @@ from pathlib import Path
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .plan import RigPlan, check_plan
-from .session import CaptureOutcome, CaptureSession
+from .session import CaptureOutcome, CaptureSession, CaptureTuning
 from .sources import FrameSource, OpenCvMsmfSource, SyntheticFrameSource
 from .tools_bridge import probe_tools_schema
 from .topology import attach_capture_indices, dshow_order, query_topology
@@ -47,6 +47,11 @@ def _parser() -> argparse.ArgumentParser:
     cap.add_argument("--settle", type=float, default=2.0, help="seconds between opens")
     cap.add_argument(
         "--synthetic", action="store_true", help="use deterministic synthetic sources"
+    )
+    cap.add_argument(
+        "--timing",
+        action="store_true",
+        help="record per-frame brightness and align cameras on a shared strobe",
     )
     return parser
 
@@ -100,7 +105,8 @@ def cmd_capture(args: argparse.Namespace) -> int:
     else:
         sources = _real_sources(plan)
         settle = args.settle
-    session = CaptureSession(plan, sources, duration_s=args.duration, settle_s=settle)
+    tuning = CaptureTuning(settle_s=settle, collect_timing=args.timing)
+    session = CaptureSession(plan, sources, duration_s=args.duration, tuning=tuning)
     manifest = session.run()
     manifest = manifest.model_copy(
         update={"tools_schema": probe_tools_schema().to_dict()}
