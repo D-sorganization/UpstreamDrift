@@ -365,8 +365,8 @@
       "bytes": 51032
     },
     "docs/research/proximal_distal_energy_transfer/MOMENTUM_TRANSFER_QUESTION_PROGRAM.md": {
-      "sha256": "1bcfe0b348cd2af9a6d429ba7c346dfe557a81257e1f26cd36076d4f90d95c94",
-      "bytes": 27454
+      "sha256": "ef4acf66fb2e455a24f61511bb903e5718964e6ad53a8cdb385587c5253c9018",
+      "bytes": 33386
     },
     "docs/research/proximal_distal_energy_transfer/NONLINEAR_CONTROLLER_COMPARISON_REGISTRATION.md": {
       "sha256": "e1601a7329c88a936519ceaec81e887635322517c41de21c11360455942209cf",
@@ -941,28 +941,28 @@
       "bytes": 9363
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_geometry_atlas.json": {
-      "sha256": "aa25eb95150283846ccf99be31de0343df39353b7862ae7cad1711e13ed1451b",
-      "bytes": 3400
+      "sha256": "8b6ef983b16e94712db694f11d7d01f3468eb5ec557109b5e41c690bc338cb67",
+      "bytes": 5941
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_geometry_atlas.npz": {
-      "sha256": "d77deae627edd9443abc8ae5230992cf37b0dcc5fc73b3c51065f9e3c16f1cfe",
-      "bytes": 86709
+      "sha256": "f341f7db0cb029423a33aa63a5544af26c7407da9c63f62fbdb69406fb9dbf32",
+      "bytes": 88867
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_experiment_registry.json": {
-      "sha256": "f8153ab261e5181dd3ddf663429bfb71f40b191e3c610ce989a1e1d01870bffa",
-      "bytes": 18267
+      "sha256": "03410619f085c7ce0e6516dd4e863b8693f4c85eeb98f56199c0e96e39f5819f",
+      "bytes": 18613
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_human_registration.json": {
       "sha256": "1f084fefeb0dbc4062a03e18229ce5a6336e39b5cb43c4d04934277b70065970",
       "bytes": 6255
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_question_registry.json": {
-      "sha256": "ad4d78e04c752def2ab2e054f7357f8772767fa27e4bab402ed5b487e3011066",
-      "bytes": 20510
+      "sha256": "58a2960e8c5a3f1e65b5c1c80e7ed3eda7e5e39e55b644033b73d73f043f7abf",
+      "bytes": 21393
     },
     "docs/research/proximal_distal_energy_transfer/data/momentum_transfer_readiness_audit.json": {
-      "sha256": "5442940996f0a3ec9c179974fe8c2716f1b0fca6f2070ec1e4d8a2933269450c",
-      "bytes": 15056
+      "sha256": "3cccb44b6ce1040974144a49776e59b08ec18edf4babbe599a6fe3467e190e37",
+      "bytes": 15939
     },
     "docs/research/proximal_distal_energy_transfer/data/moving_base_flexible_study.json": {
       "sha256": "f9b4d4bc197e5279da298fe389c03c9358bf6bf17afa923274247c11b5fa7a26",
@@ -1701,7 +1701,7 @@
       "bytes": 110704
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_momentum_geometry_atlas.pdf": {
-      "sha256": "741d7c9d9ff1476d9b17bd9481ba4b17f2221dfdb1f7b866ebf8e417f5f150b1",
+      "sha256": "2f331491bf98b304517aed55072065fa833c47fa890cbf32d39c3ce7f1d0619c",
       "bytes": 62627
     },
     "docs/research/proximal_distal_energy_transfer/figures/fig_observer_recovery.pdf": {
@@ -2585,8 +2585,8 @@
       "bytes": 23827
     },
     "scripts/research/proximal_distal_energy/momentum_geometry_atlas.py": {
-      "sha256": "ff67f0fd9ede922bb152734d5717fe6457043873a033b7ebc28a533274c85fdb",
-      "bytes": 2542
+      "sha256": "dc0b02014241feaf090073c93d49fe200bd3412a89ca2dab41ae60b07cd43427",
+      "bytes": 4291
     },
     "scripts/research/proximal_distal_energy/momentum_question_readiness.py": {
       "sha256": "327c72311bcb503d674f5cc261ff6806e8413b79bce0cc87512c383ad7d7f398",
@@ -2957,8 +2957,8 @@
       "bytes": 19514
     },
     "scripts/research/proximal_distal_energy/run_momentum_geometry_atlas.py": {
-      "sha256": "a09b1f693682f0e229a94feb410adc367c7212ba90a10f00106f117bde6c1622",
-      "bytes": 11026
+      "sha256": "7d992c654881f3588c4c61174354a8eea280a8f10eed66e8db4dc3571d4fe4f5",
+      "bytes": 18443
     },
     "scripts/research/proximal_distal_energy/run_moving_base_flexible_study.py": {
       "sha256": "df549928a5ade0aec1fa957e59b6c319e44c46681cb1958d064c463021d7d970",

@@ -11,6 +11,7 @@ import pytest
 
 from scripts.research.proximal_distal_energy.momentum_geometry_atlas import (
     bilateral_force_couple,
+    distributed_contact_couple,
     force_velocity_projection,
     relative_link_gates,
 )
@@ -88,7 +89,11 @@ def test_generated_atlas_is_complete_frame_invariant_and_model_bounded() -> None
         "fixed_hub_planar",
         "moving_base_two_hand",
         "spatial_forward_contact",
+        "subject_scaled_articulated_contact",
+        "distributed_club",
+        "held_out_measurement",
         "subject_scaled",
+        "governed_human",
     }
     assert np.all(np.isfinite(arrays["couple_normalized_nm"]))
     source = ROOT / "scripts/research/proximal_distal_energy/momentum_geometry_atlas.py"
@@ -100,6 +105,122 @@ def test_generated_atlas_is_complete_frame_invariant_and_model_bounded() -> None
         for path in (source, runner)
     }
     assert record["source_sha256"] == expected
+
+
+def test_distributed_stations_reduce_to_the_ideal_bilateral_couple() -> None:
+    axis = np.array([1.0, 0.0, 0.0])
+    transverse = np.array([0.0, 50.0, 0.0])
+    stations = np.array([-0.015, 0.0, 0.015])
+    offsets = np.concatenate((0.12 + stations, -0.12 + stations))
+    forces = np.vstack(
+        (np.tile(transverse / 3.0, (3, 1)), np.tile(-transverse / 3.0, (3, 1)))
+    )
+
+    distributed = distributed_contact_couple(offsets, axis, forces)
+
+    assert distributed == pytest.approx(
+        bilateral_force_couple(0.24, axis, transverse), abs=1e-13
+    )
+
+
+def test_distributed_couple_nulls_and_reverses_with_declared_geometry() -> None:
+    axis = np.array([1.0, 0.0, 0.0])
+    transverse = np.array([0.0, 25.0, 0.0])
+    offsets = np.array([0.12, -0.12])
+    opposed = np.vstack((transverse, -transverse))
+    common_mode = np.vstack((transverse, transverse))
+    axial = np.vstack((np.array([30.0, 0.0, 0.0]), np.array([-30.0, 0.0, 0.0])))
+
+    baseline = distributed_contact_couple(offsets, axis, opposed)
+
+    assert np.linalg.norm(
+        distributed_contact_couple(offsets, axis, common_mode)
+    ) == pytest.approx(0.0, abs=1e-15)
+    assert np.linalg.norm(
+        distributed_contact_couple(np.zeros(2), axis, opposed)
+    ) == pytest.approx(0.0, abs=1e-15)
+    assert np.linalg.norm(
+        distributed_contact_couple(offsets, axis, axial)
+    ) == pytest.approx(0.0, abs=1e-15)
+    assert distributed_contact_couple(-offsets, axis, opposed) == pytest.approx(
+        -baseline
+    )
+
+
+def test_distributed_contact_couple_rejects_malformed_inputs() -> None:
+    axis = np.array([1.0, 0.0, 0.0])
+    forces = np.array([[0.0, 1.0, 0.0], [0.0, -1.0, 0.0]])
+
+    with pytest.raises(ValueError, match="offsets must be"):
+        distributed_contact_couple(np.array([0.1]), axis, forces)
+    with pytest.raises(ValueError, match="separation axis must have shape"):
+        distributed_contact_couple(np.array([0.1, -0.1]), np.array([1.0, 0.0]), forces)
+    with pytest.raises(ValueError, match="must be finite"):
+        distributed_contact_couple(np.array([0.1, np.nan]), axis, forces)
+    with pytest.raises(ValueError, match="nonzero length"):
+        distributed_contact_couple(np.array([0.1, -0.1]), np.zeros(3), forces)
+
+
+def test_atlas_covers_the_subject_scaled_distributed_and_measurement_tiers() -> None:
+    record, arrays = _evidence()
+    controls = record["cross_tier_controls"]
+
+    subject_scaled = controls["subject_scaled_articulated_contact"]
+    assert subject_scaled["closed_configuration_count"] == 234
+    assert subject_scaled["closed_maximum_contact_error_m"] < 1e-6
+    assert subject_scaled["prescribed_maximum_contact_error_m"] > 0.1
+    assert subject_scaled["couple_per_span_invariance_residual"] < 1e-12
+
+    distributed = controls["distributed_club"]
+    assert distributed["coincident_station_couple_residual_nm"] == 0.0
+    assert distributed["reversed_station_couple_sign_residual_nm"] == 0.0
+    assert distributed["grip_trajectory_count"] == 576
+    assert distributed["shaft_trajectory_count"] == 384
+
+    measurement = controls["held_out_measurement"]
+    assert measurement["net_wrench_only_qualification"] == "fails_by_structure"
+    assert measurement["net_wrench_only_normalized_net_wrench_rmse"] < 1e-12
+    assert measurement["net_wrench_only_allocation_rmse_n"] > 1.0
+
+    assert record["negative_controls"]["maximum_station_count_couple_deviation_nm"] < (
+        1e-12
+    )
+    assert arrays["distributed_couple_normalized_nm"].shape == (
+        arrays["station_count_per_hand"].size,
+        arrays["signed_grip_separation_m"].size,
+    )
+    assert (
+        np.max(
+            np.abs(
+                arrays["distributed_couple_normalized_nm"]
+                - arrays["point_pair_couple_normalized_nm"]
+            )
+        )
+        < 1e-12
+    )
+
+
+def test_atlas_does_not_promote_linked_tiers_into_human_or_calibrated_claims() -> None:
+    record, _ = _evidence()
+
+    assert (
+        record["claim_status"]["station_spread_changes_couple_at_fixed_first_moment"]
+        == "rejected"
+    )
+    assert (
+        record["claim_status"]["net_wrench_identifies_bilateral_contact_geometry"]
+        == "rejected"
+    )
+    assert (
+        record["claim_status"]["calibrated_subject_scaled_contact_geometry"]
+        == "untested"
+    )
+    assert record["tier_coverage"]["governed_human"].startswith("open_")
+    assert record["tier_coverage"]["subject_scaled"].startswith("open_")
+    assert any(
+        "synthetic sensor qualification" in item for item in record["limitations"]
+    )
+    assert any("not calibrated anatomy" in item for item in record["limitations"])
 
 
 pytestmark = pytest.mark.scientific
