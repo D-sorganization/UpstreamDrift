@@ -5,6 +5,12 @@ view, a ``recordings.json`` index describing each file, and the session
 manifest with its outcome. Later stages (ingest, alignment, export) read the
 bundle rather than the live cameras, so the bundle is the unit that travels,
 is validated, and is archived.
+
+Every successful recording is decode-probed when the index is built: frames,
+duration and achieved rate are recorded, and a recording that covers less than
+``MIN_COVERAGE`` of the requested duration or rate is ``degraded``. The rig's
+first bring-up recordings were 20 % short while every exit code was zero;
+that is the failure this exists to name.
 """
 
 from __future__ import annotations
@@ -18,15 +24,17 @@ from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .plan import CaptureMode, RigPlan
+from .probe import Prober, RecordingProbe, probe_recording
 from .recorder import RecordingResult
 from .session import CameraStats, CaptureOutcome, SessionManifest, classify
 
 logger = get_logger(__name__)
 
-BUNDLE_SCHEMA_VERSION = "capture-session-bundle/1.0.0"
+BUNDLE_SCHEMA_VERSION = "capture-session-bundle/1.1.0"
 PLAN_FILE = "plan.json"
 RECORDINGS_FILE = "recordings.json"
 MANIFEST_FILE = "session_manifest.json"
+MIN_COVERAGE = 0.9
 
 
 class RecordingEntry(BaseModel):
@@ -40,10 +48,34 @@ class RecordingEntry(BaseModel):
     bytes: int
     returncode: int | None
     requested_mode: CaptureMode
+    requested_duration_s: float
+    frames: int | None = None
+    duration_s: float | None = None
+    width: int | None = None
+    height: int | None = None
 
     @property
     def ok(self) -> bool:
         return self.returncode == 0 and self.bytes > 0
+
+    @property
+    def achieved_fps(self) -> float | None:
+        if not self.frames or not self.duration_s:
+            return None
+        return self.frames / self.duration_s
+
+    def coverage_reason(self) -> str | None:
+        """Why this recording is short, or ``None`` when it meets the floors."""
+        if self.duration_s is None or self.frames is None:
+            return None  # not probed: cannot judge, do not invent
+        floor_s = MIN_COVERAGE * self.requested_duration_s
+        if self.duration_s < floor_s:
+            return f"{self.duration_s:.2f} s recorded < {floor_s:.2f} s"
+        fps = self.achieved_fps
+        floor_fps = MIN_COVERAGE * self.requested_mode.fps
+        if fps is not None and fps < floor_fps:
+            return f"{fps:.1f} fps < {floor_fps:.1f} fps"
+        return None
 
 
 class RecordingsIndex(BaseModel):
@@ -75,29 +107,46 @@ def recording_stats(entry: RecordingEntry) -> CameraStats:
     failed recording is ``no_stream`` so the session outcome becomes ``blocked``
     rather than a quietly shorter dataset.
     """
-    if entry.ok:
-        state, reason = "ok", None
-    elif entry.returncode not in (0, None):
-        state, reason = "no_stream", f"recorder exited {entry.returncode}"
+    if not entry.ok:
+        reason: str | None = (
+            f"recorder exited {entry.returncode}"
+            if entry.returncode not in (0, None)
+            else "recording is empty"
+        )
+        state = "no_stream"
+    elif (short := entry.coverage_reason()) is not None:
+        state, reason = "degraded", short
     else:
-        state, reason = "no_stream", "recording is empty"
+        state, reason = "ok", None
     return CameraStats(
         view=entry.view,
         identity=entry.identity,
         requested_mode=entry.requested_mode,
         effective_mode=entry.requested_mode if entry.ok else None,
-        frames=0,
+        frames=entry.frames or 0,
+        achieved_fps=entry.achieved_fps or 0.0,
         state=state,
         reason=reason,
     )
 
 
+def _probe_if_ok(result: RecordingResult, prober: Prober) -> RecordingProbe | None:
+    """Probe only files a recorder actually wrote; failures carry no frame data."""
+    return prober(result.path) if result.ok else None
+
+
 def build_index(
-    plan: RigPlan, results: list[RecordingResult], duration_s: float, bundle_dir: Path
+    plan: RigPlan,
+    results: list[RecordingResult],
+    duration_s: float,
+    bundle_dir: Path,
+    *,
+    prober: Prober = probe_recording,
 ) -> RecordingsIndex:
     """Describe ``results`` relative to ``bundle_dir``; one entry per plan view.
 
-    Precondition: ``results`` carry exactly the plan's identities.
+    Precondition: ``results`` carry exactly the plan's identities. Successful
+    recordings are decode-probed through ``prober`` (injectable for tests).
     """
     require(duration_s > 0, "duration_s must be positive", duration_s)
     by_identity = {r.identity: r for r in results}
@@ -109,6 +158,7 @@ def build_index(
     entries = []
     for binding in plan.cameras:
         result = by_identity[binding.identity]
+        probe = _probe_if_ok(result, prober)
         entries.append(
             RecordingEntry(
                 view=binding.view,
@@ -119,6 +169,11 @@ def build_index(
                 bytes=result.bytes_written,
                 returncode=result.returncode,
                 requested_mode=binding.mode,
+                requested_duration_s=duration_s,
+                frames=probe.frames if probe else None,
+                duration_s=probe.duration_s if probe else None,
+                width=probe.width if probe else None,
+                height=probe.height if probe else None,
             )
         )
     return RecordingsIndex(duration_s=duration_s, recordings=tuple(entries))

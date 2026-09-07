@@ -27,8 +27,11 @@ from pathlib import Path
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .bundle import build_index, check_bundle, write_bundle
+from .probe import probe_recording
 from .plan import RigPlan, check_plan
+from .probe import RecordingProbe
 from .recorder import (
+    DEFAULT_WARMUP_S,
     FfmpegStreamCopyRecorder,
     NullRecorder,
     Recorder,
@@ -77,6 +80,12 @@ def _parser() -> argparse.ArgumentParser:
     rec.add_argument("--plan", type=Path, required=True)
     rec.add_argument("--duration", type=float, default=10.0)
     rec.add_argument("--out", type=Path, default=Path.cwd() / "session")
+    rec.add_argument(
+        "--warmup",
+        type=float,
+        default=DEFAULT_WARMUP_S,
+        help="seconds for the devices to open before the duration clock starts",
+    )
     rec.add_argument(
         "--dry-run",
         action="store_true",
@@ -168,6 +177,13 @@ def cmd_capture(args: argparse.Namespace) -> int:
     return _EXIT_BY_OUTCOME[manifest.outcome]
 
 
+def _dry_run_probe(path: Path) -> RecordingProbe:
+    """Dry runs write no video; report a probe that reflects that honestly."""
+    return RecordingProbe(
+        frames=0, duration_s=0.0, width=None, height=None, nominal_fps=None
+    )
+
+
 def cmd_record(args: argparse.Namespace) -> int:
     plan = RigPlan.load(args.plan)
     started = datetime.now(UTC).isoformat(timespec="seconds")
@@ -178,8 +194,11 @@ def cmd_record(args: argparse.Namespace) -> int:
     else:
         refs = _device_refs(plan)
         factory = FfmpegStreamCopyRecorder
-    results = record_all(plan, refs, args.duration, args.out, factory)
-    index = build_index(plan, results, args.duration, args.out)
+    results = record_all(
+        plan, refs, args.duration, args.out, factory, warmup_s=args.warmup
+    )
+    prober = _dry_run_probe if args.dry_run else probe_recording
+    index = build_index(plan, results, args.duration, args.out, prober=prober)
     manifest = write_bundle(
         args.out,
         plan,
@@ -189,12 +208,14 @@ def cmd_record(args: argparse.Namespace) -> int:
     )
     for entry in index.recordings:
         logger.info(
-            "%s (%s): %s %d bytes rc=%s",
+            "%s (%s): %s %d bytes rc=%s frames=%s duration=%s",
             entry.view,
             entry.identity,
             entry.file,
             entry.bytes,
             entry.returncode,
+            entry.frames,
+            entry.duration_s,
         )
     logger.info("outcome=%s bundle=%s", manifest.outcome.value, args.out)
     return _EXIT_BY_OUTCOME[manifest.outcome]
