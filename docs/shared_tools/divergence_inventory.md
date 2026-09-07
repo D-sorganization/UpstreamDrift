@@ -75,7 +75,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_generation` | 29 | 51 | 22 | 18 | 0 | 80 |
+| `model_generation` | 28 | 52 | 21 | 18 | 0 | 80 |
 | `motion_matching` | 0 | 0 | 0 | 90 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **464** | **275** | **133** | **1188** | **518** | **739** |
+| **Total** | **463** | **276** | **132** | **1188** | **518** | **739** |
 
 ## Diverged Files by Package
 
@@ -323,7 +323,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 |---|---:|:---:|---|---|
 | `import_aliases.py` | -1577 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-07 |
 
-### Package `model_generation` (51 Diverged Files)
+### Package `model_generation` (52 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
@@ -350,7 +350,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/converters/urdf_parser.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/converters/urdf_parser.py` | +6485 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/physics_validation.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -369,10 +369,11 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/inertia/calculator.py` | +27 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/library/__init__.py` | +20 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/_rate_limiter.py` | -118 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/library/_rate_limiter.py` | -98 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/cache.py` | +957 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/github_importer.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/library/model_library.py` | -569 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/repository.py` | -23 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/library/repository.py` | +4451 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/mesh/__init__.py` | +64 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/tests/test_contracts.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
