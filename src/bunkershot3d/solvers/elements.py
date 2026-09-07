@@ -153,7 +153,9 @@ class SurfaceElements:
         first, second, third = mesh.triangle_corners()
         centroids = (first + second + third) / 3.0
         area_vectors = mesh.face_area_vectors()
-        areas = np.linalg.norm(area_vectors, axis=1)
+        areas = np.sqrt(
+            np.einsum("ij,ij->i", area_vectors, area_vectors)
+        )  # ⚡ Bolt: np.einsum avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=1)
         keep = areas > _MIN_ELEMENT_AREA_M2
         safe = np.where(keep[:, None], areas[:, None], 1.0)
         normals = area_vectors / safe

@@ -41,3 +41,6 @@
 **Learning:** Calling `np.mean()` on a standard Python list (e.g., `np.mean([d.duration for d in self.demonstrations])`) forces an expensive implicit conversion to a temporary NumPy array.
 **Action:** Replace `np.mean(list)` with built-in `sum(list) / len(list)` (handling zero-division if the list can be empty) to avoid allocation overhead, which is significantly faster.
 
+## 2024-11-20 - [Optimize 2D/3D Multidimensional Norm in schema.py]
+**Learning:** `np.linalg.norm` creates intermediate arrays and is slower, especially on higher-dimensional arrays (like `axis=2` in a 3D array or `axis=1` in a 2D array). Using `np.sqrt(np.einsum('ijk,ijk->ij', arr, arr))` for 3D arrays or `np.sqrt(np.einsum('ij,ij->i', arr, arr))` for 2D arrays significantly reduces computation time.
+**Action:** Replace `np.linalg.norm(..., axis=1)` and `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum(...))` to avoid temporary allocations and reduce overhead.

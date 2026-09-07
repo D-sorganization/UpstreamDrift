@@ -262,7 +262,9 @@ class ShotResult:
         """Largest resultant force magnitude over the trace."""
         if self.n_steps == 0:
             return 0.0
-        return float(np.linalg.norm(self.forces_n, axis=1).max())
+        return float(
+            np.sqrt(np.einsum("ij,ij->i", self.forces_n, self.forces_n).max())
+        )  # ⚡ Bolt: np.einsum avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=1)
 
     @property
     def impulse_n_s(self) -> NDArray[np.float64]:

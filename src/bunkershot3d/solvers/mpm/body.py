@@ -353,7 +353,10 @@ class RigidSection:
     @property
     def max_speed_m_s(self) -> float:
         """Fastest material point on the body, vertices included."""
-        return float(np.linalg.norm(self.velocity_at(self.vertices_m), axis=1).max())
+        vel = self.velocity_at(self.vertices_m)
+        return float(
+            np.sqrt(np.einsum("ij,ij->i", vel, vel).max())
+        )  # ⚡ Bolt: np.einsum avoids temporary allocations and is significantly faster than np.linalg.norm(..., axis=1)
 
     def bounds_m(self) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """``(lower, upper)`` axis-aligned bounds of the section."""
