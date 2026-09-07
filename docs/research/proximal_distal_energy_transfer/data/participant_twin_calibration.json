@@ -1,0 +1,550 @@
+{
+  "schema_version": "participant-twin-calibration/v1",
+  "analysis_type": "synthetic_hierarchical_participant_twin_calibration",
+  "cohort_id": "participant-twin-synthetic-benchmark-v1",
+  "channels": [
+    {
+      "name": "kinematic",
+      "features": [
+        "peak_hand_speed_mps",
+        "peak_club_angular_rate_radps",
+        "peak_wrist_angle_rad",
+        "downswing_duration_s"
+      ],
+      "noise_fraction": 0.02,
+      "optional": false
+    },
+    {
+      "name": "bilateral_wrench",
+      "features": [
+        "lead_hand_axial_peak_n",
+        "trail_hand_axial_peak_n",
+        "common_normal_peak_n",
+        "differential_tangential_peak_n"
+      ],
+      "noise_fraction": 0.05,
+      "optional": false
+    },
+    {
+      "name": "shaft",
+      "features": [
+        "lead_deflection_peak_m",
+        "toe_down_deflection_peak_m"
+      ],
+      "noise_fraction": 0.06,
+      "optional": false
+    },
+    {
+      "name": "impact",
+      "features": [
+        "impact_duration_s",
+        "peak_impact_force_n"
+      ],
+      "noise_fraction": 0.04,
+      "optional": false
+    },
+    {
+      "name": "launch",
+      "features": [
+        "ball_speed_mps",
+        "launch_angle_deg",
+        "spin_rate_rpm"
+      ],
+      "noise_fraction": 0.03,
+      "optional": false
+    },
+    {
+      "name": "activation",
+      "features": [
+        "forearm_activation_index",
+        "trunk_activation_index"
+      ],
+      "noise_fraction": 0.08,
+      "optional": true
+    }
+  ],
+  "feature_names": [
+    "kinematic.peak_hand_speed_mps",
+    "kinematic.peak_club_angular_rate_radps",
+    "kinematic.peak_wrist_angle_rad",
+    "kinematic.downswing_duration_s",
+    "bilateral_wrench.lead_hand_axial_peak_n",
+    "bilateral_wrench.trail_hand_axial_peak_n",
+    "bilateral_wrench.common_normal_peak_n",
+    "bilateral_wrench.differential_tangential_peak_n",
+    "shaft.lead_deflection_peak_m",
+    "shaft.toe_down_deflection_peak_m",
+    "impact.impact_duration_s",
+    "impact.peak_impact_force_n",
+    "launch.ball_speed_mps",
+    "launch.launch_angle_deg",
+    "launch.spin_rate_rpm",
+    "activation.forearm_activation_index",
+    "activation.trunk_activation_index"
+  ],
+  "design_digest": "2f53f6791b610f9485497ae72eb6f36d79a7ec28fb3315af67eb24f04c7fd236",
+  "twin_parameters": [
+    "segment_inertia_scale",
+    "grip_stiffness_scale",
+    "shaft_stiffness_scale",
+    "wrist_release_timing_offset",
+    "impact_efficiency",
+    "activation_gain",
+    "grip_compliance_alias"
+  ],
+  "prior": {
+    "twin_parameter_sd": [
+      0.08,
+      0.15,
+      0.12,
+      0.09,
+      0.05,
+      0.2,
+      0.15
+    ],
+    "population_sd_fraction": 0.6,
+    "discrepancy_sd": 0.06
+  },
+  "identifiability_screen": {
+    "structural_rank": 6,
+    "parameter_count": 7,
+    "aliased_directions": [
+      [
+        "grip_stiffness_scale",
+        "grip_compliance_alias"
+      ]
+    ],
+    "structurally_identifiable": [
+      "segment_inertia_scale",
+      "shaft_stiffness_scale",
+      "wrist_release_timing_offset",
+      "impact_efficiency",
+      "activation_gain"
+    ],
+    "predicted_contraction": {
+      "segment_inertia_scale": 0.80001289,
+      "grip_stiffness_scale": 0.493253751,
+      "shaft_stiffness_scale": 0.846117236,
+      "wrist_release_timing_offset": 0.790349546,
+      "impact_efficiency": 0.106139848,
+      "activation_gain": 0.800982798,
+      "grip_compliance_alias": 0.097670825
+    },
+    "practically_identifiable": [
+      "segment_inertia_scale",
+      "grip_stiffness_scale",
+      "shaft_stiffness_scale",
+      "wrist_release_timing_offset",
+      "activation_gain"
+    ],
+    "estimable_parameters": [
+      "segment_inertia_scale",
+      "shaft_stiffness_scale",
+      "wrist_release_timing_offset",
+      "activation_gain"
+    ],
+    "declared_alias": [
+      "grip_stiffness_scale",
+      "grip_compliance_alias"
+    ]
+  },
+  "prior_predictive_check": {
+    "normalized_rmse": 0.12762001,
+    "interval_coverage_90": 0.980392157,
+    "observation_count": 24,
+    "status": "passed"
+  },
+  "posterior_predictive_check": {
+    "normalized_rmse": 0.04453837,
+    "interval_coverage_90": 0.919117647,
+    "observation_count": 24,
+    "status": "passed"
+  },
+  "posterior_contraction": {
+    "population_mean": {
+      "segment_inertia_scale": 0.748087617,
+      "grip_stiffness_scale": 0.47947667,
+      "shaft_stiffness_scale": 0.76813503,
+      "wrist_release_timing_offset": 0.740846933,
+      "impact_efficiency": 0.254516514,
+      "activation_gain": 0.726668528,
+      "grip_compliance_alias": 0.095712361
+    },
+    "participant_twin": {
+      "segment_inertia_scale": 0.783745455,
+      "grip_stiffness_scale": 0.50426979,
+      "shaft_stiffness_scale": 0.854219141,
+      "wrist_release_timing_offset": 0.793946403,
+      "impact_efficiency": 0.217185571,
+      "activation_gain": 0.762235135,
+      "grip_compliance_alias": 0.099201959
+    },
+    "discrepancy_term": [
+      0.943930288,
+      0.908794765,
+      0.843588687,
+      0.897735761,
+      0.933991691,
+      0.569636372
+    ],
+    "reporting_boundary": "contraction measures what the design and prior constrain; it is not evidence of out-of-sample predictive skill"
+  },
+  "held_out_evaluation": {
+    "trajectory_held_out": {
+      "calibrated_twin": {
+        "normalized_rmse": 0.047154058,
+        "interval_coverage_90": 0.904411765,
+        "observation_count": 24
+      },
+      "population_baseline": {
+        "normalized_rmse": 0.113024223,
+        "interval_coverage_90": 0.865196078,
+        "observation_count": 24
+      },
+      "uncalibrated_baseline": {
+        "normalized_rmse": 0.13131815,
+        "interval_coverage_90": 0.977941176,
+        "observation_count": 24
+      }
+    },
+    "participant_held_out": {
+      "calibrated_twin": {
+        "normalized_rmse": 0.044898538,
+        "interval_coverage_90": 0.901960784,
+        "observation_count": 12
+      },
+      "population_baseline": {
+        "normalized_rmse": 0.14533768,
+        "interval_coverage_90": 0.784313725,
+        "observation_count": 12
+      },
+      "uncalibrated_baseline": {
+        "normalized_rmse": 0.146677628,
+        "interval_coverage_90": 0.995098039,
+        "observation_count": 12
+      }
+    },
+    "participant_held_out_normalized_rmse": {
+      "pt-19c8e3e9cb7f9905": 0.054103058,
+      "pt-1f697304766a1407": 0.043855764,
+      "pt-782b40556133cdce": 0.041814586,
+      "pt-ec55835708e3659a": 0.038269916
+    },
+    "protocol": {
+      "trajectory_held_out": "training participants; the twin sees only calibration-role trajectories of the same participant",
+      "participant_held_out": "participants excluded from the population fit; the twin sees only that participant's calibration-role trajectories"
+    }
+  },
+  "parameter_recovery": {
+    "estimable_parameters": [
+      "segment_inertia_scale",
+      "shaft_stiffness_scale",
+      "wrist_release_timing_offset",
+      "activation_gain"
+    ],
+    "withheld_parameters": [
+      "grip_stiffness_scale",
+      "impact_efficiency",
+      "grip_compliance_alias"
+    ],
+    "absolute_error_rms": {
+      "segment_inertia_scale": 0.024388855,
+      "shaft_stiffness_scale": 0.009927458,
+      "wrist_release_timing_offset": 0.018697735,
+      "activation_gain": 0.035327091
+    },
+    "reporting_boundary": "parameters excluded by the pre-fit identifiability screen are never reported as recovered, even though the prior keeps the posterior proper"
+  },
+  "transport_audit": {
+    "strata": {
+      "anthropometry_band": {
+        "band_a": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.047958822,
+          "transport_status": "represented_small_cell"
+        },
+        "band_b": {
+          "training_participants": 4,
+          "evaluated_participants": 0,
+          "normalized_rmse": null,
+          "transport_status": "represented"
+        },
+        "band_c": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.04106284,
+          "transport_status": "represented_small_cell"
+        }
+      },
+      "skill_band": {
+        "competitive_amateur": {
+          "training_participants": 4,
+          "evaluated_participants": 0,
+          "normalized_rmse": null,
+          "transport_status": "represented"
+        },
+        "elite": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.04106284,
+          "transport_status": "represented_small_cell"
+        },
+        "recreational": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.047958822,
+          "transport_status": "represented_small_cell"
+        }
+      },
+      "sex": {
+        "female": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.047958822,
+          "transport_status": "represented_small_cell"
+        },
+        "male": {
+          "training_participants": 4,
+          "evaluated_participants": 0,
+          "normalized_rmse": null,
+          "transport_status": "represented"
+        },
+        "other_or_undisclosed": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.04106284,
+          "transport_status": "represented_small_cell"
+        }
+      },
+      "age_band": {
+        "18_29": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.047958822,
+          "transport_status": "represented_small_cell"
+        },
+        "30_44": {
+          "training_participants": 4,
+          "evaluated_participants": 0,
+          "normalized_rmse": null,
+          "transport_status": "represented"
+        },
+        "45_59": {
+          "training_participants": 2,
+          "evaluated_participants": 1,
+          "normalized_rmse": 0.038269916,
+          "transport_status": "represented_small_cell"
+        },
+        "60_plus": {
+          "training_participants": 0,
+          "evaluated_participants": 1,
+          "normalized_rmse": 0.043855764,
+          "transport_status": "nontransportable_unrepresented_in_training"
+        }
+      },
+      "handedness": {
+        "left": {
+          "training_participants": 2,
+          "evaluated_participants": 1,
+          "normalized_rmse": 0.054103058,
+          "transport_status": "represented_small_cell"
+        },
+        "right": {
+          "training_participants": 6,
+          "evaluated_participants": 3,
+          "normalized_rmse": 0.041313422,
+          "transport_status": "represented"
+        }
+      },
+      "injury_history": {
+        "none_reported": {
+          "training_participants": 3,
+          "evaluated_participants": 4,
+          "normalized_rmse": 0.044510831,
+          "transport_status": "represented"
+        },
+        "prior_lumbar": {
+          "training_participants": 2,
+          "evaluated_participants": 0,
+          "normalized_rmse": null,
+          "transport_status": "represented_small_cell"
+        },
+        "prior_upper_limb": {
+          "training_participants": 3,
+          "evaluated_participants": 0,
+          "normalized_rmse": null,
+          "transport_status": "represented"
+        }
+      },
+      "impairment": {
+        "limited_shoulder_range": {
+          "training_participants": 0,
+          "evaluated_participants": 1,
+          "normalized_rmse": 0.054103058,
+          "transport_status": "nontransportable_unrepresented_in_training"
+        },
+        "none_reported": {
+          "training_participants": 8,
+          "evaluated_participants": 3,
+          "normalized_rmse": 0.041313422,
+          "transport_status": "represented"
+        }
+      },
+      "club_class": {
+        "driver": {
+          "training_participants": 6,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.04106284,
+          "transport_status": "represented"
+        },
+        "iron": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.047958822,
+          "transport_status": "represented_small_cell"
+        }
+      },
+      "task": {
+        "full_swing_driver": {
+          "training_participants": 6,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.04106284,
+          "transport_status": "represented"
+        },
+        "full_swing_iron": {
+          "training_participants": 2,
+          "evaluated_participants": 2,
+          "normalized_rmse": 0.047958822,
+          "transport_status": "represented_small_cell"
+        }
+      }
+    },
+    "nontransportable_cells": [
+      "age_band=60_plus",
+      "impairment=limited_shoulder_range"
+    ],
+    "retention_policy": "nontransportable and small-cell results are retained, never dropped, and never averaged into a transportable claim"
+  },
+  "public_facade": {
+    "cohort_id": "participant-twin-synthetic-benchmark-v1",
+    "data_class": "synthetic_benchmark",
+    "participant_count": 12,
+    "trajectory_count": 72,
+    "participant_held_out_count": 4,
+    "stratum_counts": {
+      "anthropometry_band": {
+        "band_a": 4,
+        "band_b": 4,
+        "band_c": 4
+      },
+      "skill_band": {
+        "competitive_amateur": 4,
+        "elite": 4,
+        "recreational": 4
+      },
+      "sex": {
+        "female": 4,
+        "male": 4,
+        "other_or_undisclosed": 4
+      },
+      "age_band": {
+        "18_29": 4,
+        "30_44": 4,
+        "45_59": 3,
+        "60_plus": "suppressed_small_cell"
+      },
+      "handedness": {
+        "left": 3,
+        "right": 9
+      },
+      "injury_history": {
+        "none_reported": 7,
+        "prior_lumbar": "suppressed_small_cell",
+        "prior_upper_limb": 3
+      },
+      "impairment": {
+        "limited_shoulder_range": "suppressed_small_cell",
+        "none_reported": 11
+      },
+      "club_class": {
+        "driver": 8,
+        "iron": 4
+      },
+      "task": {
+        "full_swing_driver": 8,
+        "full_swing_iron": 4
+      }
+    },
+    "governance": {
+      "data_class": "synthetic_benchmark",
+      "ethics_reference": "not_applicable_synthetic_benchmark",
+      "consent_and_reuse_basis": "not_applicable_synthetic_benchmark",
+      "private_data_authority": "not_applicable_synthetic_benchmark",
+      "calibration_records": "not_applicable_synthetic_benchmark",
+      "time_synchronization_records": "not_applicable_synthetic_benchmark",
+      "analysis_release_authorization": "not_applicable_synthetic_benchmark",
+      "identity_policy": "pseudonym_only_no_identity_inference",
+      "pseudonym_derivation": "synthetic_salted_digest_no_real_identity"
+    },
+    "human_calibration_authority": "blocked_no_governed_participant_data",
+    "personalized_recommendation_authority": "prohibited",
+    "inference_boundary": "This cohort is a synthetic benchmark. It cannot establish any human, anatomical, equipment, injury, or coaching conclusion, and it cannot substitute for the governed participant data required by UpstreamDrift issues 8450 and 8556."
+  },
+  "calibration_access_ledger": {
+    "calibration_outcomes_read": 36,
+    "held_out_outcomes_read": 0
+  },
+  "evaluation_ledger": {
+    "gates": {
+      "private_governed_authority_contract": "blocked_no_governed_participant_data",
+      "public_facade_contract": "satisfied",
+      "calibration_never_reads_held_out_outcomes": "satisfied",
+      "identifiability_screened_before_fitting": "satisfied_and_non_identifiable_directions_retained",
+      "prior_predictive_check": "passed",
+      "posterior_predictive_check": "passed",
+      "explicit_discrepancy_term": "declared_and_estimated",
+      "contraction_and_prediction_reported_separately": "satisfied",
+      "participant_held_out_beats_population_baseline": "satisfied",
+      "trajectory_held_out_beats_uncalibrated_baseline": "satisfied",
+      "null_and_nontransportable_results_retained": "satisfied_with_retained_nontransportable_cells",
+      "no_personalized_recommendation_emitted": "satisfied"
+    },
+    "promotion_decision": "synthetic_benchmark_qualified",
+    "human_promotion": "blocked_no_governed_participant_data",
+    "boundaries": {
+      "human_digital_twin": "untested",
+      "population_ensemble_transport": "declared_strata_only",
+      "anatomical_or_muscle_strategy": "not_identified",
+      "equipment_effect": "not_identified",
+      "coaching_inference": "unsupported",
+      "identity_inference": "prohibited_by_provenance_contract"
+    }
+  },
+  "inference_boundary": "This cohort is a synthetic benchmark. It cannot establish any human, anatomical, equipment, injury, or coaching conclusion, and it cannot substitute for the governed participant data required by UpstreamDrift issues 8450 and 8556.",
+  "discrepancy_ablation": {
+    "with_discrepancy_term": {
+      "posterior_predictive_coverage_90": 0.919117647,
+      "posterior_predictive_normalized_rmse": 0.04453837,
+      "participant_held_out_normalized_rmse": 0.044898538,
+      "parameter_absolute_error_rms": {
+        "segment_inertia_scale": 0.024388855,
+        "shaft_stiffness_scale": 0.009927458,
+        "wrist_release_timing_offset": 0.018697735,
+        "activation_gain": 0.035327091
+      }
+    },
+    "without_discrepancy_term": {
+      "posterior_predictive_coverage_90": 0.862745098,
+      "posterior_predictive_normalized_rmse": 0.051044522,
+      "participant_held_out_normalized_rmse": 0.048657639,
+      "parameter_absolute_error_rms": {
+        "segment_inertia_scale": 0.109626658,
+        "shaft_stiffness_scale": 0.04647345,
+        "wrist_release_timing_offset": 0.068432114,
+        "activation_gain": 0.037433879
+      }
+    },
+    "finding": "omitting the declared discrepancy term shifts systematic channel error into the twin parameters and inflates their error against the generating values"
+  }
+}
