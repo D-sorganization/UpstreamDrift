@@ -35,9 +35,17 @@ if [ ! -x "$VENV/bin/python" ]; then
   echo "creating $VENV (python $PY_VERSION)"
   uv venv --python "$PY_VERSION" "$VENV"
 fi
-# Install the project with its Qt/test extras; idempotent, uv resolves fast.
-uv pip install --python "$VENV/bin/python" -q -e ".[dev]" 2>/dev/null \
-  || uv pip install --python "$VENV/bin/python" -q -e . pytest pytest-qt PyQt6 opencv-python-headless numpy scipy pydantic
+# Install the project, then the GUI/test stack explicitly: no extra of this
+# project pins PyQt6, and the test conftest replaces an unimportable Qt with
+# mocks, which would turn every GUI test into a confusing MagicMock failure.
+uv pip install --python "$VENV/bin/python" -q -e ".[dev]" 2>/dev/null   || uv pip install --python "$VENV/bin/python" -q -e .
+uv pip install --python "$VENV/bin/python" -q   PyQt6 pytest pytest-qt pytest-xdist pytest-timeout opencv-python-headless imageio-ffmpeg
+if ! QT_QPA_PLATFORM=offscreen "$VENV/bin/python" -c "from PyQt6.QtWidgets import QApplication" 2>/tmp/wsl_qt_import.log; then
+  echo "PyQt6 does not import in $VENV; the Qt system libraries are probably missing:" >&2
+  echo "  sudo apt-get install -y libgl1 libegl1 libxkbcommon0 libdbus-1-3 libfontconfig1 libglib2.0-0 libxcb-cursor0" >&2
+  tail -n 3 /tmp/wsl_qt_import.log >&2
+  exit 2
+fi
 
 export QT_QPA_PLATFORM=offscreen
 export PYTHONPATH="$ROOT/src${PYTHONPATH:+:$PYTHONPATH}"

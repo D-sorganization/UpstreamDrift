@@ -466,7 +466,8 @@ def cmd_board(args: argparse.Namespace) -> int:
     board = parse_board_spec(args.board)
     if not isinstance(board, CharucoBoard):
         raise SystemExit("board images are generated for charuco:... boards only")
-    args.out.parent.mkdir(parents=True, exist_ok=True)
+    out_dir = args.out.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.out), board.image(args.width))
     logger.info(
         "board %s -> %s (print at 100 %%; measure a square)", args.board, args.out
