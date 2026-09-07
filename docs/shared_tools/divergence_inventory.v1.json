@@ -15,7 +15,7 @@
     "diverged": 277,
     "ud-only": 1188,
     "tools-only": 518,
-    "spelling-only": 130
+    "spelling-only": 129
   },
   "packages": {
     "README.md": {
@@ -387,7 +387,7 @@
       "diverged": 25,
       "ud-only": 27,
       "tools-only": 0,
-      "spelling-only": 13
+      "spelling-only": 12
     },
     "import_aliases.py": {
       "identical": 0,
@@ -8297,7 +8297,7 @@
       "classification": "ud-only",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 25845,
+      "ud_bytes": 26108,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8309,9 +8309,9 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 2640,
+      "ud_bytes": 4544,
       "tools_bytes": 2627,
-      "byte_delta": 13,
+      "byte_delta": 1917,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -8369,12 +8369,12 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "generators",
-      "ud_bytes": 4255,
+      "ud_bytes": 4631,
       "tools_bytes": 4251,
-      "byte_delta": 4,
+      "byte_delta": 380,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "humanoid_character_builder/generators/mesh_generator_factory.py",
@@ -31723,8 +31723,8 @@
       "path": "humanoid_character_builder/generators/_mesh_types.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-07",
+        "commit": "05fc3e447e56149105c415c6b02dfd680155420c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -31762,8 +31762,8 @@
       "path": "humanoid_character_builder/generators/mesh_generator.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "date": "2026-09-07",
+        "commit": "05fc3e447e56149105c415c6b02dfd680155420c"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32022,8 +32022,8 @@
       "path": "model_generation/api/rest_api_core.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-09-07",
-        "commit": "d2d40406164a13e9bed4da0400a3342a5bf9d15c"
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32255,9 +32255,9 @@
     {
       "path": "model_generation/converters/urdf_parser.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-07",
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32502,9 +32502,9 @@
     {
       "path": "model_generation/library/_rate_limiter.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "993e498e520125f6729b343142efd6d65df2b223"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32515,9 +32515,9 @@
     {
       "path": "model_generation/library/cache.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "d2d40406164a13e9bed4da0400a3342a5bf9d15c"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32542,8 +32542,8 @@
       "path": "model_generation/library/model_library.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-09-07",
-        "commit": "993e498e520125f6729b343142efd6d65df2b223"
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32554,9 +32554,9 @@
     {
       "path": "model_generation/library/repository.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "993e498e520125f6729b343142efd6d65df2b223"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
