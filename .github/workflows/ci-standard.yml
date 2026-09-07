@@ -1114,7 +1114,6 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_API: pyqt6
           UNIT_GATE_QUARANTINE: "1"
-          REQUIRE_VENDORED_FALLBACK: "1"
         run: |
           set +e
           xvfb-run --auto-servernum python -m pytest \

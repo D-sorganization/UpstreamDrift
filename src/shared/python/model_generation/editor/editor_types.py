@@ -11,12 +11,7 @@ from enum import Enum
 from typing import Any
 
 from src.shared.python.model_generation.converters.urdf_parser import ParsedModel
-from src.shared.python.model_generation.core.types import (
-    Joint,
-    JointType,
-    Link,
-    Origin,
-)
+from src.shared.python.model_generation.core.types import Joint, Link
 
 
 class ComponentType(Enum):
@@ -26,33 +21,6 @@ class ComponentType(Enum):
     SUBTREE = "subtree"
     JOINT = "joint"
     MATERIAL = "material"
-
-
-@dataclass(frozen=True)
-class AttachmentSpec:
-    """How a pasted subtree is joined to its target link.
-
-    The three fields always travel together: they are meaningless unless
-    ``attach_to`` names a link, and they are consumed at a single point in
-    :meth:`FrankensteinEditor._paste_links_and_joints`. Bundling them keeps
-    that method inside the 8-parameter architecture budget (#9617) and gives
-    the "paste at the root" case a name -- :meth:`detached` -- rather than
-    three separate defaults spelled out at the call site.
-    """
-
-    attach_to: str | None = None
-    origin: Origin | None = None
-    joint_type: JointType = JointType.FIXED
-
-    @classmethod
-    def detached(cls) -> AttachmentSpec:
-        """Paste without joining to an existing link."""
-        return cls()
-
-    @property
-    def is_attached(self) -> bool:
-        """Whether a joint to an existing link should be created."""
-        return bool(self.attach_to)
 
 
 @dataclass
@@ -94,7 +62,6 @@ class EditorState:
 
 
 __all__ = [
-    "AttachmentSpec",
     "ComponentType",
     "ComponentReference",
     "PendingOperation",

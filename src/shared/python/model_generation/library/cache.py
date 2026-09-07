@@ -12,7 +12,6 @@ import json
 import logging
 import shutil
 import time
-import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -32,7 +31,6 @@ class CacheEntry:
     last_accessed: float = field(default_factory=time.time)
     size_bytes: int = 0
     is_complete: bool = True
-    version: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
@@ -45,7 +43,6 @@ class CacheEntry:
             "last_accessed": self.last_accessed,
             "size_bytes": self.size_bytes,
             "is_complete": self.is_complete,
-            "version": self.version,
         }
 
     @classmethod
@@ -60,7 +57,6 @@ class CacheEntry:
             last_accessed=data.get("last_accessed", time.time()),
             size_bytes=data.get("size_bytes", 0),
             is_complete=data.get("is_complete", True),
-            version=data.get("version"),
         )
 
 
@@ -154,16 +150,6 @@ class ModelCache:
             raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         if entry and entry.local_path.exists():
-            # Reuse verify() rather than re-implementing the comparison, so
-            # get() and verify() can never disagree about what "valid" means.
-            if not self.verify(model_id):
-                logger.warning(
-                    "Cache integrity check failed for %s; treating as a miss "
-                    "so the caller re-fetches rather than loading a corrupt "
-                    "model.",
-                    model_id,
-                )
-                return None
             entry.last_accessed = time.time()
             self._save_index()
             return entry
@@ -174,21 +160,16 @@ class ModelCache:
         model_id: str,
         local_path: Path,
         source_url: str | None = None,
-        version: str | None = None,
+        compute_checksum: bool = True,
     ) -> CacheEntry:
         """
         Add a model to the cache.
-
-        A SHA-256 checksum is always computed: it is what lets ``get`` reject
-        a corrupted entry, so making it optional would let a caller create
-        entries that can never be integrity-checked.
 
         Args:
             model_id: Model identifier
             local_path: Path to cached files
             source_url: Original source URL
-            version: Version metadata; defaults to a UTC-free timestamp stamp
-                so every entry carries something comparable.
+            compute_checksum: If True, compute file checksum
 
         Returns:
             Created CacheEntry
@@ -198,9 +179,9 @@ class ModelCache:
             raise ValueError("model_id must be provided")
         self._maybe_cleanup()
 
-        # Always compute the checksum; integrity checking depends on it.
+        # Compute checksum if requested
         checksum = None
-        if local_path.is_file():
+        if compute_checksum and local_path.is_file():
             checksum = self._compute_checksum(local_path)
 
         # Calculate size
@@ -212,7 +193,6 @@ class ModelCache:
             local_path=local_path,
             checksum=checksum,
             size_bytes=size,
-            version=version or time.strftime("%Y%m%d.%H%M%S"),
         )
 
         self._entries[model_id] = entry
@@ -284,28 +264,10 @@ class ModelCache:
         return current_checksum == entry.checksum
 
     def get_cache_path(self, model_id: str) -> Path:
-        """Get the cache path for a model (may not exist yet).
-
-        Flattening separators is not sufficient on its own: a ``model_id`` of
-        exactly ``".."`` survives it unchanged and resolves to the cache
-        directory's parent. Traversal segments are rejected rather than
-        rewritten, so a caller that meant something else is told, instead of
-        silently getting a different path.
-
-        Percent-encoding is decoded first, since these ids reach us from URLs
-        and repository listings where ``..%2f..`` is the same request as
-        ``../..``.
-        """
+        """Get the cache path for a model (may not exist yet)."""
         if model_id is None:
             raise ValueError("model_id must be provided")
-
-        decoded = urllib.parse.unquote(model_id).replace("\\", "/")
-        if any(segment == ".." for segment in decoded.split("/")):
-            raise ValueError(
-                f"Model id {model_id!r} contains path traversal and was rejected"
-            )
-
-        safe_id = decoded.replace("/", "_")
+        safe_id = model_id.replace("/", "_").replace("\\", "_")
         return self.config.cache_dir / safe_id
 
     def get_total_size(self) -> int:

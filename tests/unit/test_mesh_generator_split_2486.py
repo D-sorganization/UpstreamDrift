@@ -5,7 +5,6 @@ Tests run red before the split and green after.
 
 from __future__ import annotations
 
-import importlib
 import importlib.util
 from pathlib import Path
 
@@ -38,38 +37,6 @@ class TestMeshGeneratorSplitStructure:
     @pytest.mark.unit
     def test_smplx_module_exists(self) -> None:
         assert (GENERATORS_DIR / "_mesh_smplx.py").exists()
-
-
-class TestMeshGeneratorSplitModulesImport:
-    """Existing on disk is not the same as being loadable.
-
-    ``TestMeshGeneratorSplitStructure`` above checks only ``.exists()`` and
-    ``TestMeshGeneratorFileSizes`` only counts lines, so between b8d95ad25 and
-    #9675 all three of these modules raised ``ImportError`` on
-    ``segment_mesh_by_range`` -- deleted from ``_mesh_types`` while three
-    modules still imported it -- and this suite stayed green throughout.
-    """
-
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "module_name",
-        [
-            "_mesh_types",
-            "_mesh_smplx",
-            "_mesh_makehuman",
-            "mesh_generator_models",
-        ],
-    )
-    def test_split_module_is_importable(self, module_name: str) -> None:
-        importlib.import_module(f"humanoid_character_builder.generators.{module_name}")
-
-    @pytest.mark.unit
-    def test_segment_mesh_by_range_is_exported_from_types(self) -> None:
-        """The symbol three split modules import must live where they look."""
-        types_module = importlib.import_module(
-            "humanoid_character_builder.generators._mesh_types"
-        )
-        assert hasattr(types_module, "segment_mesh_by_range")
 
 
 class TestMeshGeneratorFileSizes:

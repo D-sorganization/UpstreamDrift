@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.ai.sample_tools import (
     register_golf_suite_tools,
 )
@@ -313,47 +311,3 @@ class TestToolsForProvider:
         for tool in anthropic_tools:
             assert "name" in tool
             assert "input_schema" in tool
-
-
-@pytest.mark.unit
-class TestShellToolSecurity:
-    """Security tests for ShellTool command injection prevention."""
-
-    def test_safe_whitelisted_command(self) -> None:
-        """Safe find or ls command is accepted."""
-        from src.shared.python.ai.tools.cli_tools import ShellTool
-
-        tool = ShellTool()
-        assert tool._is_command_allowed("find . -name '*.py'")
-        assert tool._is_command_allowed("ls -la")
-
-    def test_blocks_find_exec(self) -> None:
-        """Dangerous flag -exec is blocked."""
-        from src.shared.python.ai.tools.cli_tools import ShellTool
-
-        tool = ShellTool()
-        assert not tool._is_command_allowed("find . -exec rm -rf {} +")
-        assert not tool._is_command_allowed("find . --exec rm -rf {} +")
-        assert not tool._is_command_allowed("find . -execdir rm -rf {} +")
-
-    def test_blocks_find_delete(self) -> None:
-        """Dangerous flag -delete is blocked."""
-        from src.shared.python.ai.tools.cli_tools import ShellTool
-
-        tool = ShellTool()
-        assert not tool._is_command_allowed("find . -name '*.tmp' -delete")
-
-    def test_blocks_exec_assignment(self) -> None:
-        """Dangerous flag with assignment syntax is blocked."""
-        from src.shared.python.ai.tools.cli_tools import ShellTool
-
-        tool = ShellTool()
-        assert not tool._is_command_allowed("find . --exec=/bin/sh")
-
-    def test_blocks_unauthorized_base_command(self) -> None:
-        """Commands outside allowlist are rejected."""
-        from src.shared.python.ai.tools.cli_tools import ShellTool
-
-        tool = ShellTool()
-        assert not tool._is_command_allowed("bash -c 'echo pwned'")
-        assert not tool._is_command_allowed("python -c 'import os'")

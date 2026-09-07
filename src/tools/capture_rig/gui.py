@@ -1,18 +1,14 @@
-"""Capture Rig: guided capture, detection, review and reconstruction in one tile.
+"""Capture Rig: camera controller, recorder and pose-overlay player in one tile.
 
-Panels over one session directory, driven by the workflow step model
-(:mod:`.workflow`):
+Three panels over one session directory:
 
-* **Workflow** — the steps with their status (done / ready / blocked with
-  the reason / skipped for this session), the current step's requirements
-  and instructions, and only the applicable actions enabled.
-* **Capture** — plan file, capture mode, view subset, UVC controls, duration,
-  or an import of existing files; single or multi-camera alike.
-* **Process** — estimator with its settings, comparison, reliability, joint
-  exclusion, intrinsics and the joint reconstruction, 2-D analysis for a
-  single view, export to the motion pipeline.
-* **Review** — frame-accurate playback of any view and any observation set
-  with the pose drawn on it, and the results as a table.
+* **Capture** — plan file, capture mode, view subset, UVC controls, duration;
+  runs ``plan-check`` and ``record`` through the rig CLI as a child process
+  so the bundle written is exactly what the terminal would write.
+* **Process** — proxies, ingest with any registered estimator (MediaPipe,
+  OpenPose, BODY_25 DNN), chessboard intrinsics and the joint reconstruction.
+* **Review** — frame-accurate playback of any view with the ingested pose
+  drawn on it, and the swing summary as a table.
 
 Every command is built by :mod:`.commands`; every file is found by
 :mod:`.session`. This module only arranges widgets and forwards clicks.
@@ -26,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PyQt6.QtCore import QProcess, QProcessEnvironment, Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import QProcess, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -34,13 +30,10 @@ from PyQt6.QtWidgets import (
     QDoubleSpinBox,
     QFileDialog,
     QFormLayout,
-    QGridLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QListWidget,
-    QListWidgetItem,
     QMainWindow,
     QPlainTextEdit,
     QPushButton,
@@ -49,8 +42,6 @@ from PyQt6.QtWidgets import (
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
-    QTabWidget,
-    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
@@ -59,9 +50,8 @@ from src.motion_capture.reconstruct.skeleton import PARENTS
 from src.motion_capture.rig.plan import CameraControls, CaptureMode
 from src.shared.python.core.contracts import require
 
-from . import commands, workflow
-from .commands import ESTIMATOR_OPTIONS, MODE_PRESETS, OptionSpec, PlanSelection
-from .commands import mode_text
+from . import commands
+from .commands import MODE_PRESETS, PlanSelection, mode_text
 from .overlay import PoseTrack, draw_pose
 from .player import VideoReader, clamp_index
 from .session import SessionMedia, ViewMedia, flatten_numbers, load_session
@@ -71,24 +61,12 @@ logger = logging.getLogger(__name__)
 TOOL_ID = "capture_rig"
 PLAN_DEFAULT = "plan default"
 AUTO_EXPOSURE_CHOICES = ("camera default", "on", "off")
-STATUS_GLYPH = {
-    workflow.Status.DONE: "✓",
-    workflow.Status.READY: "▶",
-    workflow.Status.BLOCKED: "○",
-    workflow.Status.SKIPPED: "–",
-}
-ALWAYS_ENABLED = frozenset({"stop", "load"})
-BUTTONS_PER_ROW = 5
 
 
 def _optional_float(text: str) -> float | None:
     """A float from a line edit, or ``None`` when it is blank."""
     text = text.strip()
     return float(text) if text else None
-
-
-def _csv(text: str) -> tuple[str, ...]:
-    return tuple(v.strip() for v in text.split(",") if v.strip())
 
 
 class RigProcessRunner(QWidget):
@@ -101,10 +79,6 @@ class RigProcessRunner(QWidget):
         super().__init__(parent)
         self._process = QProcess(self)
         self._process.setWorkingDirectory(str(commands.repo_root()))
-        env = QProcessEnvironment()
-        for key, value in commands.child_environment().items():
-            env.insert(key, value)
-        self._process.setProcessEnvironment(env)
         self._process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self._process.readyReadStandardOutput.connect(self._drain)
         self._process.finished.connect(self._on_finished)
@@ -133,57 +107,6 @@ class RigProcessRunner(QWidget):
         self.finished.emit(int(code))
 
 
-class WorkflowPanel(QGroupBox):
-    """The guided steps: status list plus the selected step's guidance."""
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__("Workflow", parent)
-        self.steps = QListWidget()
-        self.steps.currentRowChanged.connect(self._show)
-        self.guidance = QTextBrowser()
-        self.guidance.setOpenExternalLinks(False)
-        self._states: tuple[workflow.StepState, ...] = ()
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.steps, 1)
-        layout.addWidget(self.guidance, 2)
-
-    def refresh(self, states: tuple[workflow.StepState, ...]) -> None:
-        """Repaint the list; select the current step."""
-        self._states = states
-        self.steps.blockSignals(True)
-        self.steps.clear()
-        for state in states:
-            text = f"{STATUS_GLYPH[state.status]}  {state.step.title}"
-            if state.reason:
-                text += f"  ({state.reason})"
-            self.steps.addItem(QListWidgetItem(text))
-        self.steps.blockSignals(False)
-        current = workflow.current(states)
-        row = states.index(current) if current is not None else 0
-        self.steps.setCurrentRow(row)
-        self._show(row)
-
-    def _show(self, row: int) -> None:
-        if not (0 <= row < len(self._states)):
-            self.guidance.clear()
-            return
-        state = self._states[row]
-        step = state.step
-        html = [f"<h3>{step.title}</h3><p>{step.purpose}</p>"]
-        html.append(f"<p><b>Status:</b> {state.status.value}")
-        if state.reason:
-            html.append(f" &mdash; {state.reason}")
-        html.append("</p><p><b>You need</b></p><ul>")
-        html.extend(f"<li>{r}</li>" for r in step.requirements)
-        html.append("</ul><p><b>Do</b></p><ol>")
-        html.extend(f"<li>{s}</li>" for s in step.instructions)
-        html.append("</ol>")
-        self.guidance.setHtml("".join(html))
-
-    def statuses(self) -> dict[str, workflow.Status]:
-        return {s.step.key: s.status for s in self._states}
-
-
 class CapturePanel(QGroupBox):
     """Plan, mode, views, UVC controls and duration for the camera commands."""
 
@@ -207,7 +130,6 @@ class CapturePanel(QGroupBox):
         self.auto_exposure_combo = QComboBox()
         self.auto_exposure_combo.addItems(AUTO_EXPOSURE_CHOICES)
         self.dry_run_check = QCheckBox("dry run (write the bundle, record nothing)")
-        self.pending_import: list[tuple[str, Path]] = []
         form = QFormLayout(self)
         form.addRow("Plan file", self._with_browse(self.plan_edit, self._pick_plan))
         form.addRow(
@@ -242,14 +164,6 @@ class CapturePanel(QGroupBox):
         if path:
             self.session_edit.setText(path)
 
-    def choose_import_files(self) -> list[tuple[str, Path]]:
-        """Ask for video files; views are named after the file stems."""
-        paths, _ = QFileDialog.getOpenFileNames(
-            self, "Videos to import", "", "Video (*.mp4 *.mkv *.avi *.mov)"
-        )
-        self.pending_import = [(Path(p).stem, Path(p)) for p in paths]
-        return self.pending_import
-
     def controls(self) -> CameraControls:
         auto = self.auto_exposure_combo.currentText()
         return CameraControls(
@@ -262,10 +176,11 @@ class CapturePanel(QGroupBox):
         """Precondition: a plan path has been entered."""
         require(self.plan_edit.text().strip() != "", "choose a plan file first")
         mode: CaptureMode | None = self.mode_combo.currentData()
+        views = tuple(v.strip() for v in self.views_edit.text().split(",") if v.strip())
         return PlanSelection(
             plan=Path(self.plan_edit.text().strip()),
             mode=mode,
-            views=_csv(self.views_edit.text()),
+            views=views,
             controls=self.controls(),
         )
 
@@ -280,69 +195,8 @@ class CapturePanel(QGroupBox):
         return self.dry_run_check.isChecked()
 
 
-class EstimatorSettings(QWidget):
-    """One form per estimator built from :data:`ESTIMATOR_OPTIONS`."""
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._fields: dict[str, dict[str, QWidget]] = {}
-        self._forms: dict[str, QWidget] = {}
-        self._layout = QVBoxLayout(self)
-        self._layout.setContentsMargins(0, 0, 0, 0)
-        for name, specs in ESTIMATOR_OPTIONS.items():
-            form_widget = QWidget()
-            form = QFormLayout(form_widget)
-            form.setContentsMargins(0, 0, 0, 0)
-            self._fields[name] = {}
-            for spec in specs:
-                field = self._field(spec)
-                self._fields[name][spec.name] = field
-                form.addRow(f"{spec.name} ({spec.help})", field)
-            form_widget.hide()
-            self._forms[name] = form_widget
-            self._layout.addWidget(form_widget)
-
-    @staticmethod
-    def _field(spec: OptionSpec) -> QWidget:
-        if spec.kind == "bool":
-            box = QCheckBox()
-            box.setChecked(bool(spec.default))
-            return box
-        if spec.kind == "int":
-            spin = QSpinBox()
-            spin.setRange(int(spec.minimum or 0), int(spec.maximum or 10_000))
-            spin.setValue(int(spec.default))
-            return spin
-        if spec.kind == "float":
-            dspin = QDoubleSpinBox()
-            dspin.setDecimals(3)
-            dspin.setSingleStep(0.05)
-            dspin.setRange(float(spec.minimum or 0.0), float(spec.maximum or 1e6))
-            dspin.setValue(float(spec.default))
-            return dspin
-        return QLineEdit(str(spec.default))
-
-    def show_for(self, estimator: str) -> None:
-        for name, form in self._forms.items():
-            form.setVisible(name == estimator)
-
-    def values(self, estimator: str) -> dict[str, float | int | bool | str]:
-        """The current settings for ``estimator`` (empty for one without a form)."""
-        out: dict[str, float | int | bool | str] = {}
-        for key, field in self._fields.get(estimator, {}).items():
-            if isinstance(field, QCheckBox):
-                out[key] = field.isChecked()
-            elif isinstance(field, QSpinBox):
-                out[key] = int(field.value())
-            elif isinstance(field, QDoubleSpinBox):
-                out[key] = float(field.value())
-            elif isinstance(field, QLineEdit):
-                out[key] = field.text().strip()
-        return out
-
-
 class ProcessPanel(QGroupBox):
-    """Estimator, settings, joints, anchor and calibration inputs."""
+    """Estimator, anchor and calibration inputs for the offline commands."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Process", parent)
@@ -355,14 +209,9 @@ class ProcessPanel(QGroupBox):
                 self.estimator_combo.setItemData(
                     index, choice.hint, Qt.ItemDataRole.ToolTipRole
                 )
-        self.settings = EstimatorSettings()
-        self.estimator_combo.currentIndexChanged.connect(self._on_estimator)
-        self.separate_set_check = QCheckBox("write to observations_<estimator>")
         self.max_frames_spin = QSpinBox()
         self.max_frames_spin.setRange(0, 1_000_000)
         self.max_frames_spin.setSpecialValueText("all")
-        self.exclude_edit = QLineEdit()
-        self.exclude_edit.setPlaceholderText("joints to leave out of the fit")
         self.anchor_combo = QComboBox()
         for child, parent_joint in PARENTS.items():
             if parent_joint is not None:
@@ -383,41 +232,19 @@ class ProcessPanel(QGroupBox):
         self.square_spin.setValue(0.025)
         form = QFormLayout(self)
         form.addRow("Estimator", self.estimator_combo)
-        form.addRow(self.settings)
-        form.addRow(self.separate_set_check)
         form.addRow("Max frames", self.max_frames_spin)
-        form.addRow("Exclude joints", self.exclude_edit)
         form.addRow("Anchor segment", self.anchor_combo)
         form.addRow("Anchor length (m)", self.anchor_spin)
         form.addRow("Start cameras from", self.start_edit)
         form.addRow("Board (inner corners)", self.board_edit)
         form.addRow("Square (m)", self.square_spin)
-        self._on_estimator(self.estimator_combo.currentIndex())
-
-    def _on_estimator(self, _index: int) -> None:
-        self.settings.show_for(self.estimator())
 
     def estimator(self) -> str:
         return str(self.estimator_combo.currentData())
 
-    def options(self) -> dict[str, float | int | bool | str]:
-        return self.settings.values(self.estimator())
-
-    def ingest_out(self, session: Path) -> Path | None:
-        if self.separate_set_check.isChecked():
-            return session / f"observations_{self.estimator()}"
-        return None
-
     def max_frames(self) -> int | None:
         value = int(self.max_frames_spin.value())
         return value or None
-
-    def exclude_joints(self) -> tuple[str, ...]:
-        return _csv(self.exclude_edit.text())
-
-    def suggest_exclusions(self, joints: Sequence[str]) -> None:
-        if not self.exclude_edit.text().strip():
-            self.exclude_edit.setText(",".join(joints))
 
     def anchor(self) -> tuple[str, float]:
         return str(self.anchor_combo.currentData()), float(self.anchor_spin.value())
@@ -431,16 +258,12 @@ class ProcessPanel(QGroupBox):
             return None, path
         return path, None
 
-    def suggest_start(self, intrinsics: Path | None) -> None:
-        if intrinsics is not None and not self.start_edit.text().strip():
-            self.start_edit.setText(str(intrinsics))
-
     def board(self) -> tuple[str, float]:
         return self.board_edit.text().strip(), float(self.square_spin.value())
 
 
 class PlaybackPanel(QWidget):
-    """One view and one observation set at a time, frame-accurate, with overlay."""
+    """One view at a time, frame-accurate, with the pose drawn on it."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -451,8 +274,6 @@ class PlaybackPanel(QWidget):
         self._timer.timeout.connect(self.step)
         self.view_combo = QComboBox()
         self.view_combo.currentIndexChanged.connect(self._on_view_changed)
-        self.set_combo = QComboBox()
-        self.set_combo.currentIndexChanged.connect(self._on_set_changed)
         self.overlay_check = QCheckBox("pose overlay")
         self.overlay_check.setChecked(True)
         self.overlay_check.toggled.connect(lambda _: self.show_frame(self._index))
@@ -474,8 +295,6 @@ class PlaybackPanel(QWidget):
         top = QHBoxLayout()
         top.addWidget(QLabel("View"))
         top.addWidget(self.view_combo, 1)
-        top.addWidget(QLabel("Set"))
-        top.addWidget(self.set_combo, 1)
         top.addWidget(self.overlay_check)
         top.addWidget(QLabel("min conf"))
         top.addWidget(self.confidence_spin)
@@ -508,35 +327,17 @@ class PlaybackPanel(QWidget):
         else:
             self.image.setText("no playable recording in this session")
 
-    def _current_view(self) -> ViewMedia | None:
-        return self.view_combo.currentData()
-
     def _on_view_changed(self, index: int) -> None:
         view: ViewMedia | None = self.view_combo.itemData(index)
         if view is None or view.playable is None:
             return
         self.close_media()
         self._reader = VideoReader(view.playable)
-        self.set_combo.blockSignals(True)
-        self.set_combo.clear()
-        for name, path in (view.observation_sets or {}).items():
-            self.set_combo.addItem(name, path)
-        if not self.set_combo.count() and view.observations is not None:
-            self.set_combo.addItem("observations", view.observations)
-        self.set_combo.blockSignals(False)
-        self._load_track()
+        self._track = PoseTrack.load(view.observations) if view.observations else None
         self.slider.setRange(0, max(self._reader.frame_count - 1, 0))
         rate = self._reader.fps or view.fps or 30.0
         self._timer.setInterval(max(int(1000.0 / rate), 1))
         self.show_frame(0)
-
-    def _on_set_changed(self, _index: int) -> None:
-        self._load_track()
-        self.show_frame(self._index)
-
-    def _load_track(self) -> None:
-        path: Path | None = self.set_combo.currentData()
-        self._track = PoseTrack.load(path) if path is not None else None
 
     def close_media(self) -> None:
         self._timer.stop()
@@ -603,7 +404,7 @@ class PlaybackPanel(QWidget):
 
 
 class ResultsTable(QTableWidget):
-    """Any result payload as ``key | value`` rows."""
+    """The swing summary as ``key | value`` rows."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(0, 2, parent)
@@ -620,54 +421,15 @@ class ResultsTable(QTableWidget):
             self.setItem(r, 1, QTableWidgetItem(value))
 
 
-def _reliability_rows(payload: dict[str, Any]) -> dict[str, Any]:
-    """``{joint: "grade score"}`` from a reliability report."""
-    out: dict[str, Any] = {}
-    for joint in payload.get("joints", []):
-        score = joint.get("score")
-        grade = "unknown" if score is None else _grade(score)
-        out[joint["joint"]] = f"{grade} ({score:.2f})" if score is not None else grade
-    if payload.get("recommended_exclusions"):
-        out["recommended_exclusions"] = ",".join(payload["recommended_exclusions"])
-    return out
-
-
-def _grade(score: float) -> str:
-    return "reliable" if score >= 0.75 else ("usable" if score >= 0.5 else "weak")
-
-
 class CaptureRigWidget(QWidget):
     """The whole tool; embeddable in the launcher or shown in its own window."""
 
-    _ACTIONS: tuple[tuple[str, str], ...] = (
-        ("plan_check", "Plan check"),
-        ("record", "Record"),
-        ("import", "Import videos"),
-        ("proxy", "Proxies"),
-        ("ingest", "Ingest"),
-        ("compare", "Compare"),
-        ("reliability", "Reliability"),
-        ("calibrate", "Calibrate intrinsics"),
-        ("reconstruct", "Reconstruct"),
-        ("analyze", "Analyze 2-D"),
-        ("export", "Export"),
-        ("stop", "Stop"),
-        ("load", "Load session"),
-    )
-
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.workflow = WorkflowPanel()
         self.capture = CapturePanel()
         self.process = ProcessPanel()
         self.playback = PlaybackPanel()
-        self.results = QTabWidget()
-        self.swing_table = ResultsTable()
-        self.analysis_table = ResultsTable()
-        self.reliability_table = ResultsTable()
-        self.results.addTab(self.swing_table, "Swing (3-D)")
-        self.results.addTab(self.analysis_table, "Analysis (2-D)")
-        self.results.addTab(self.reliability_table, "Reliability")
+        self.results = ResultsTable()
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(5000)
@@ -677,10 +439,19 @@ class CaptureRigWidget(QWidget):
         self.session_label = QLabel("no session loaded")
         self.buttons = self._buttons()
         self._layout()
-        self.media: SessionMedia | None = None
-        self._apply_workflow(None)
 
     # -- layout -------------------------------------------------------------
+    _ACTIONS: tuple[tuple[str, str], ...] = (
+        ("plan_check", "Plan check"),
+        ("record", "Record"),
+        ("proxy", "Proxies"),
+        ("ingest", "Ingest"),
+        ("calibrate", "Calibrate intrinsics"),
+        ("reconstruct", "Reconstruct"),
+        ("stop", "Stop"),
+        ("load", "Load session"),
+    )
+
     def _buttons(self) -> dict[str, QPushButton]:
         out = {}
         for action, label in self._ACTIONS:
@@ -690,31 +461,23 @@ class CaptureRigWidget(QWidget):
         return out
 
     def _layout(self) -> None:
-        inputs = QTabWidget()
-        inputs.addTab(self.capture, "Capture")
-        inputs.addTab(self.process, "Process")
-        left = QSplitter(Qt.Orientation.Vertical)
-        left.addWidget(self.workflow)
-        left.addWidget(inputs)
-        buttons = QWidget()
-        grid = QGridLayout(buttons)
-        grid.setContentsMargins(0, 0, 0, 0)
-        for i, button in enumerate(self.buttons.values()):
-            grid.addWidget(button, i // BUTTONS_PER_ROW, i % BUTTONS_PER_ROW)
-        middle = QWidget()
-        mid_layout = QVBoxLayout(middle)
-        mid_layout.addWidget(buttons)
-        mid_layout.addWidget(self.log, 1)
+        left = QWidget()
+        left_layout = QVBoxLayout(left)
+        left_layout.addWidget(self.capture)
+        left_layout.addWidget(self.process)
+        row = QHBoxLayout()
+        for button in self.buttons.values():
+            row.addWidget(button)
+        left_layout.addLayout(row)
+        left_layout.addWidget(self.log, 1)
         right = QSplitter(Qt.Orientation.Vertical)
         right.addWidget(self.playback)
         right.addWidget(self.results)
         right.setStretchFactor(0, 3)
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(left)
-        splitter.addWidget(middle)
         splitter.addWidget(right)
-        splitter.setStretchFactor(2, 2)
-        splitter.setSizes([420, 520, 660])
+        splitter.setStretchFactor(1, 2)
         layout = QVBoxLayout(self)
         layout.addWidget(self.session_label)
         layout.addWidget(splitter, 1)
@@ -723,53 +486,37 @@ class CaptureRigWidget(QWidget):
     def command_for(self, action: str) -> list[str]:
         """The argv an action would run; raises on missing inputs."""
         session = self.capture.session_dir()
-        builder = {
-            "plan_check": lambda: commands.plan_check_command(self.capture.selection()),
-            "record": lambda: commands.record_command(
+        if action == "plan_check":
+            return commands.plan_check_command(self.capture.selection())
+        if action == "record":
+            return commands.record_command(
                 self.capture.selection(),
                 session,
                 duration_s=self.capture.duration_s(),
                 dry_run=self.capture.dry_run(),
-            ),
-            "import": lambda: commands.import_command(
-                session, self.capture.pending_import
-            ),
-            "proxy": lambda: commands.proxy_command(session),
-            "ingest": lambda: commands.ingest_command(
+            )
+        if action == "proxy":
+            return commands.proxy_command(session)
+        if action == "ingest":
+            return commands.ingest_command(
                 session,
                 estimator=self.process.estimator(),
                 max_frames=self.process.max_frames(),
-                options=self.process.options(),
-                out=self.process.ingest_out(session),
-            ),
-            "compare": lambda: commands.compare_command(
-                session, max_frames=self.process.max_frames()
-            ),
-            "reliability": lambda: commands.reliability_command(session),
-            "calibrate": lambda: self._calibrate(session),
-            "reconstruct": lambda: self._reconstruct(session),
-            "analyze": lambda: commands.analyze_command(session),
-            "export": lambda: commands.export_command(session),
-        }
-        if action not in builder:
-            raise ValueError(f"unknown action {action!r}")
-        return builder[action]()
-
-    def _calibrate(self, session: Path) -> list[str]:
-        board, square = self.process.board()
-        return commands.calibrate_command(session, board=board, square_m=square)
-
-    def _reconstruct(self, session: Path) -> list[str]:
-        segment, metres = self.process.anchor()
-        cameras, intrinsics = self.process.start_file()
-        return commands.reconstruct_command(
-            session,
-            anchor_segment=segment,
-            anchor_m=metres,
-            cameras=cameras,
-            intrinsics=intrinsics,
-            exclude_joints=self.process.exclude_joints(),
-        )
+            )
+        if action == "calibrate":
+            board, square = self.process.board()
+            return commands.calibrate_command(session, board=board, square_m=square)
+        if action == "reconstruct":
+            segment, metres = self.process.anchor()
+            cameras, intrinsics = self.process.start_file()
+            return commands.reconstruct_command(
+                session,
+                anchor_segment=segment,
+                anchor_m=metres,
+                cameras=cameras,
+                intrinsics=intrinsics,
+            )
+        raise ValueError(f"unknown action {action!r}")
 
     def trigger(self, action: str) -> None:
         if action == "stop":
@@ -778,8 +525,6 @@ class CaptureRigWidget(QWidget):
         if action == "load":
             self.refresh_session()
             return
-        if action == "import" and not self.capture.pending_import:
-            self.capture.choose_import_files()
         if self.runner.busy:
             self._append_log("a command is still running; press Stop first\n")
             return
@@ -792,7 +537,6 @@ class CaptureRigWidget(QWidget):
 
     def _on_command_finished(self, code: int) -> None:
         if code == 0:
-            self.capture.pending_import = []
             self.refresh_session()
 
     def _append_log(self, text: str) -> None:
@@ -801,44 +545,20 @@ class CaptureRigWidget(QWidget):
 
     # -- session ------------------------------------------------------------
     def refresh_session(self) -> SessionMedia | None:
-        """Re-read the session folder and refresh every panel."""
+        """Re-read the session folder and refresh playback and results."""
         try:
             media = load_session(self.capture.session_dir())
         except (ValueError, TypeError, OSError) as exc:
             self.session_label.setText(f"session not loadable: {exc}")
-            self._apply_workflow(None)
             return None
-        self.media = media
-        kind = "single-camera" if len(media.views) == 1 else "multi-camera"
         self.session_label.setText(
-            f"{media.root} · plan {media.plan_name} · {len(media.views)} views ({kind})"
+            f"{media.root} · plan {media.plan_name} · {len(media.views)} views"
             + (" · ingested" if media.ingested else "")
             + (f" · problems: {'; '.join(media.problems)}" if media.problems else "")
         )
         self.playback.load(media)
-        self.results.setCurrentIndex(1 if len(media.views) == 1 else 0)
-        self.swing_table.fill(media.swing_summary)
-        self.analysis_table.fill(media.analysis_2d)
-        self.reliability_table.fill(
-            _reliability_rows(media.reliability) if media.reliability else None
-        )
-        if media.reliability:
-            self.process.suggest_exclusions(
-                media.reliability.get("recommended_exclusions", [])
-            )
-        self.process.suggest_start(media.intrinsics)
-        self._apply_workflow(media)
+        self.results.fill(media.swing_summary)
         return media
-
-    def _apply_workflow(self, media: SessionMedia | None) -> None:
-        states = workflow.evaluate(media)
-        self.workflow.refresh(states)
-        enabled = workflow.enabled_actions(states) | ALWAYS_ENABLED
-        for action, button in self.buttons.items():
-            button.setEnabled(action in enabled)
-
-    def enabled_actions(self) -> frozenset[str]:
-        return frozenset(a for a, b in self.buttons.items() if b.isEnabled())
 
     @property
     def busy(self) -> bool:
@@ -861,7 +581,7 @@ class CaptureRigWindow(QMainWindow):
         self.setWindowTitle("Capture Rig")
         self.widget = CaptureRigWidget(self)
         self.setCentralWidget(self.widget)
-        self.resize(1600, 900)
+        self.resize(1400, 850)
 
 
 def get_dockable_ui() -> CaptureRigWindow:

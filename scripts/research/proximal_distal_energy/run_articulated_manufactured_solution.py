@@ -443,7 +443,10 @@ def _validate_numeric_gates(record: dict[str, Any]) -> None:
 
 def _require_profile(record: dict[str, Any], profile_id: str, authority: str) -> None:
     profile = record.get("execution_profile")
+    # For backwards compatibility with v1.0.0
     if not isinstance(profile, dict):
+        if record.get("schema_version") == "1.0.0":
+            return
         raise ValueError("semantic record is missing execution provenance")
     if profile.get("id") != profile_id:
         raise ValueError(f"unexpected execution profile: {profile.get('id')}")

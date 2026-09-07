@@ -14,10 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from src.motion_capture.rig.bundle import RecordingEntry, load_bundle
-
-INGEST_INDEX_FILE = (
-    "observations.json"  # rig.ingest.INGEST_INDEX_FILE; not imported (pose stack)
-)
+from src.motion_capture.rig.ingest import INGEST_INDEX_FILE
 from src.motion_capture.rig.proxy import PROXIES_FILE, ProxiesIndex
 from src.shared.python.core.contracts import require
 
@@ -37,7 +34,6 @@ class ViewMedia:
     proxy: Path | None
     observations: Path | None
     fps: float | None
-    observation_sets: dict[str, Path] | None = None  # {set dir name: view file}
 
     @property
     def playable(self) -> Path | None:
@@ -53,11 +49,6 @@ class SessionMedia:
     swing_summary: dict[str, Any] | None
     reconstruction: dict[str, Any] | None
     problems: tuple[str, ...]
-    intrinsics: Path | None = None
-    reliability: dict[str, Any] | None = None
-    analysis_2d: dict[str, dict[str, Any]] | None = None
-    export: Path | None = None
-    observation_sets: tuple[str, ...] = ()
 
     @property
     def ingested(self) -> bool:
@@ -96,39 +87,6 @@ def _observations(root: Path) -> dict[str, Path]:
     return out
 
 
-def _observation_sets(root: Path) -> dict[str, dict[str, Path]]:
-    """``{set name: {view: file}}`` for every ``observations*`` directory."""
-    out: dict[str, dict[str, Path]] = {}
-    for d in sorted(root.glob("observations*")):
-        index = _read_json(d / INGEST_INDEX_FILE) if d.is_dir() else None
-        if index is None:
-            continue
-        views = {
-            row["view"]: d / row["file"]
-            for row in index.get("views", [])
-            if row.get("status") == "available" and row.get("file")
-        }
-        if views:
-            out[d.name] = views
-    return out
-
-
-def _analysis_2d(root: Path) -> dict[str, dict[str, Any]] | None:
-    d = root / "analysis_2d"
-    if not d.is_dir():
-        return None
-    out = {}
-    for path in sorted(d.glob("*.json")):
-        payload = _read_json(path)
-        if payload is not None:
-            out[path.stem] = payload
-    return out or None
-
-
-def _existing(path: Path) -> Path | None:
-    return path if path.is_file() else None
-
-
 def _rate(entry: RecordingEntry) -> float | None:
     return entry.achieved_fps or float(entry.requested_mode.fps)
 
@@ -138,7 +96,6 @@ def load_session(root: Path) -> SessionMedia:
     require(root.is_dir(), "session must be a directory", str(root))
     plan, index, _ = load_bundle(root)
     proxies, observations = _proxies(root), _observations(root)
-    sets = _observation_sets(root)
     problems: list[str] = []
     views = []
     for entry in index.recordings:
@@ -152,12 +109,6 @@ def load_session(root: Path) -> SessionMedia:
                 proxy=proxies.get(entry.view),
                 observations=observations.get(entry.view),
                 fps=_rate(entry) if entry.ok else None,
-                observation_sets={
-                    name: files[entry.view]
-                    for name, files in sets.items()
-                    if entry.view in files
-                }
-                or None,
             )
         )
     recon = root / RECONSTRUCT_DIR
@@ -168,11 +119,6 @@ def load_session(root: Path) -> SessionMedia:
         swing_summary=_read_json(recon / SWING_SUMMARY_FILE),
         reconstruction=_read_json(recon / SESSION_RECONSTRUCTION_FILE),
         problems=tuple(problems),
-        intrinsics=_existing(root / "intrinsics.json"),
-        reliability=_read_json(root / "reliability.json"),
-        analysis_2d=_analysis_2d(root),
-        export=_existing(recon / "reconstruction.trc"),
-        observation_sets=tuple(sets),
     )
 
 

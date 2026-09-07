@@ -8,9 +8,8 @@ session bundle on disk is the same either way (#9619).
 
 from __future__ import annotations
 
-import os
 import sys
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -68,21 +67,6 @@ class PlanSelection:
         return out
 
 
-def child_environment(base: Mapping[str, str] | None = None) -> dict[str, str]:
-    """The child's environment: ``<repo>/src`` first on ``PYTHONPATH``.
-
-    The pose stack imports ``bunkershot3d`` and friends by their bare names,
-    which resolve only with ``src`` on the path (the test suite adds it the
-    same way). Postcondition: every other variable of ``base`` is kept.
-    """
-    env = dict(os.environ if base is None else base)
-    src = str(repo_root() / "src")
-    existing = env.get("PYTHONPATH", "")
-    parts = [p for p in existing.split(os.pathsep) if p and p != src]
-    env["PYTHONPATH"] = os.pathsep.join([src, *parts])
-    return env
-
-
 def python_module_command(args: Sequence[str]) -> list[str]:
     """``[python, -m, src.motion_capture.rig, *args]``; run from :func:`repo_root`."""
     return [sys.executable, "-m", RIG_MODULE, *args]
@@ -118,97 +102,15 @@ def proxy_command(session: Path, *, encoder: str | None = None) -> list[str]:
     return python_module_command(args)
 
 
-@dataclass(frozen=True)
-class OptionSpec:
-    """One estimator setting the tool exposes: name, kind, default, help."""
-
-    name: str
-    kind: str  # "float" | "int" | "bool" | "str"
-    default: float | int | bool | str
-    help: str
-    minimum: float | None = None
-    maximum: float | None = None
-
-
-#: Settings per estimator, mirrored from the estimator constructors (#9661).
-ESTIMATOR_OPTIONS: dict[str, tuple[OptionSpec, ...]] = {
-    "mediapipe": (
-        OptionSpec("min_detection_confidence", "float", 0.5, "pose found", 0.0, 1.0),
-        OptionSpec("min_tracking_confidence", "float", 0.5, "pose kept", 0.0, 1.0),
-        OptionSpec("model_variant", "str", "full", "lite | full | heavy"),
-        OptionSpec("enable_temporal_smoothing", "bool", True, "MediaPipe smoothing"),
-    ),
-    "openpose_dnn": (
-        OptionSpec("input_height", "int", 368, "network input rows", 64, 1024),
-        OptionSpec("min_peak", "float", 0.1, "heat-map peak threshold", 0.0, 0.99),
-    ),
-}
-
-
-def option_args(options: dict[str, float | int | bool | str]) -> list[str]:
-    """``--option k=v`` pairs; bools as true/false."""
-    out: list[str] = []
-    for key, value in options.items():
-        text = str(value).lower() if isinstance(value, bool) else f"{value}"
-        out += ["--option", f"{key}={text}"]
-    return out
-
-
 def ingest_command(
-    session: Path,
-    *,
-    estimator: str = "mediapipe",
-    max_frames: int | None = None,
-    options: dict[str, float | int | bool | str] | None = None,
-    out: Path | None = None,
+    session: Path, *, estimator: str = "mediapipe", max_frames: int | None = None
 ) -> list[str]:
-    """``out`` defaults to ``observations`` (the set reconstruct reads)."""
     require(estimator.strip() != "", "estimator must be named")
     args = ["ingest", "--session", str(session), "--estimator", estimator]
     if max_frames is not None:
         require(max_frames > 0, "max_frames must be positive", max_frames)
         args += ["--max-frames", str(max_frames)]
-    args += option_args(options or {})
-    if out is not None:
-        args += ["--out", str(out)]
     return python_module_command(args)
-
-
-def compare_command(
-    session: Path,
-    *,
-    estimators: tuple[str, str] = ("mediapipe", "openpose_dnn"),
-    max_frames: int | None = None,
-) -> list[str]:
-    args = ["compare", "--session", str(session), "--estimators", ",".join(estimators)]
-    if max_frames is not None:
-        args += ["--max-frames", str(max_frames)]
-    return python_module_command(args)
-
-
-def import_command(
-    out: Path, views: Sequence[tuple[str, Path]], *, name: str | None = None
-) -> list[str]:
-    require(len(views) >= 1, "import needs at least one view")
-    args = ["import", "--out", str(out)]
-    for view, path in views:
-        args += ["--view", f"{view}={path}"]
-    if name:
-        args += ["--name", name]
-    return python_module_command(args)
-
-
-def reliability_command(session: Path) -> list[str]:
-    return python_module_command(["reliability", "--session", str(session)])
-
-
-def analyze_command(session: Path, *, observations: str = "observations") -> list[str]:
-    args = ["analyze", "--session", str(session), "--observations", observations]
-    return python_module_command(args)
-
-
-def export_command(session: Path) -> list[str]:
-    return python_module_command(["export", "--session", str(session)])
 
 
 def reconstruct_command(
@@ -218,7 +120,6 @@ def reconstruct_command(
     anchor_m: float,
     cameras: Path | None = None,
     intrinsics: Path | None = None,
-    exclude_joints: Sequence[str] = (),
 ) -> list[str]:
     """Exactly one of ``cameras`` (later take) or ``intrinsics`` (first take)."""
     require(anchor_segment.strip() != "", "anchor segment must be named")
@@ -233,8 +134,6 @@ def reconstruct_command(
         args += ["--cameras", str(cameras)]
     else:
         args += ["--intrinsics", str(intrinsics)]
-    if exclude_joints:
-        args += ["--exclude-joints", ",".join(exclude_joints)]
     return python_module_command(args)
 
 

@@ -141,41 +141,25 @@ def swing_series(
     )
 
 
-def detect_events(
-    series: SwingSeries,
-    fps: float,
-    *,
-    quiet_fraction: float = 0.05,
-    quiet_s: float = 0.15,
-    max_downswing_s: float = 0.5,
-) -> SwingEvents:
+def detect_events(series: SwingSeries, fps: float) -> SwingEvents:
     """Address, top, peak speed and finish from the hand-speed profile.
 
-    Peak speed is the global maximum. Address is the end of the last stretch
-    of at least ``quiet_s`` seconds before the peak with speed under
-    ``quiet_fraction`` of it. The top of the backswing is the slowest frame
-    between the address and the peak, looking back at most
-    ``max_downswing_s`` (a downswing is shorter than that, the backswing is
-    not, so the search cannot land on the address itself). Finish is the
-    first frame after the peak under the quiet threshold. Thresholds rather
-    than local minima: at 100+ fps a real profile has a minimum every few
-    frames. Every event is a frame index; nothing is interpolated.
+    Peak speed is the global maximum; the top of the backswing is the last
+    speed minimum before it; address is the last frame before the top where
+    speed fell under a tenth of the peak; finish is the first frame after the
+    peak where it does. Every event is a frame index; nothing is interpolated.
     """
     require(fps > 0, "fps must be positive", fps)
-    speed = np.asarray(series.hand_speed_mps, dtype=float)
+    speed = series.hand_speed_mps
     peak = int(np.argmax(speed))
-    quiet = quiet_fraction * speed[peak]
-    window = max(int(round(quiet_s * fps)), 1)
-    address = 0
-    run = 0
-    for t in range(peak - 1, -1, -1):
-        run = run + 1 if speed[t] < quiet else 0
-        if run >= window:
-            address = t + window - 1
+    quiet = 0.1 * speed[peak]
+    top = peak
+    for t in range(peak - 1, 0, -1):
+        if speed[t] <= speed[t - 1] and speed[t] <= speed[t + 1]:
+            top = t
             break
-    lookback = max(int(round(max_downswing_s * fps)), 2)
-    start = max(address + 1, peak - lookback)
-    top = start + int(np.argmin(speed[start:peak])) if start < peak else address
+    before = np.flatnonzero(speed[:top] < quiet)
+    address = int(before[-1]) if before.size else 0
     after = np.flatnonzero(speed[peak:] < quiet)
     finish = int(peak + after[0]) if after.size else int(speed.size - 1)
     backswing = (top - address) / fps

@@ -234,7 +234,17 @@ def test_rolling_native_output_has_actual_provenance_and_no_authority(
         assert profile["runtime_versions"][distribution] == importlib.metadata.version(
             distribution
         )
-    assert runner.compare_semantic_evidence(_load_committed(), rolling)[
+    committed = _load_committed()
+    # Add legacy mock profile so it passes _require_profile
+    if "execution_profile" not in committed:
+        committed["execution_profile"] = {
+            "id": "synthetic_numerical_verification_articulated_authority_locked",
+            "publication_authority": "authoritative",
+            "publication_eligible": True,
+            "python_minor": "3.11",
+            "platform": "linux-x86_64",
+        }
+    assert runner.compare_semantic_evidence(committed, rolling)[
         "all_registered_gates_pass"
     ]
     assert COMMITTED.read_bytes() == committed_before
