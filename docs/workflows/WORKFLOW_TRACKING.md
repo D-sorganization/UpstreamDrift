@@ -60,3 +60,15 @@ Update this document whenever a new workflow is added or the status of an existi
   regression is `tests/unit/repo_hygiene/test_no_non_delegating_import_hook.py`.
 - `nightly-cross-engine.yml` is the repo's dedicated cross-engine lane and is
   the right place to expand stricter native-engine validation over time.
+- `release.yml` job `companion-protected-main` always runs on pushes to
+  `main` (no path filter) and publishes the attested artifact
+  `upstreamdrift-companion-<sha>` (30-day retention) plus
+  `upstreamdrift-companion-evidence-<sha>`. Payloads: `manifest.json`
+  (stable consumer name, byte-identical to `upstreamdrift-companion.v1.json`),
+  `capabilities.json`, `screenshots.json` (metadata-only, `pending`), the
+  three matching schemas, the acquisition schema, the compatibility policy,
+  and a `.sha256` sidecar per file. Tag pushes attach the same set to the
+  draft release. The job sets `PYTHONPATH` to the workspace and pins
+  `jsonschema`/`pyyaml` so the import-free builder runs on any runner
+  (RM #1507, #9416). `ci-standard.yml` runs
+  `scripts.companion_publication check` on code PRs.

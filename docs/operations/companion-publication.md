@@ -44,16 +44,78 @@ calculation manifest. It accepts only an official GitHub Actions `push` in
 either `refs/heads/main` or an exact `vX.Y.Z` tag. The catalog layer separately
 requires a clean tree, committed local-only inputs, and an exact Tools gitlink.
 
-The payload bundle contains exactly these files:
+The payload bundle contains exactly these files (nine base payloads, each
+with a detached `.sha256` sidecar; `PAYLOAD_ASSET_NAMES` in
+`scripts/companion_publication.py` is the single list):
 
-- `upstreamdrift-companion.v1.json` and its `.sha256`;
-- `upstreamdrift-companion-v1.schema.json` and its `.sha256`;
-- `upstreamdrift-companion-acquisition-v1.schema.json` and its `.sha256`; and
-- `upstreamdrift-companion-compatibility-v1.json` and its `.sha256`.
+- `upstreamdrift-companion.v1.json` — the versioned manifest name;
+- `manifest.json` — the stable consumer entry point, byte-identical to the
+  versioned file (see below);
+- `capabilities.json` — capability ids per program and per engine, derived
+  from the same committed inputs;
+- `screenshots.json` — screenshot *metadata* only: one `pending` record per
+  visible program with null asset fields and an explicit reason until the
+  governed capture workflow (#9191) exists; nothing is fabricated;
+- `upstreamdrift-companion-v1.schema.json`,
+  `upstreamdrift-companion-capabilities-v1.schema.json`, and
+  `upstreamdrift-companion-screenshots-v1.schema.json` — the strict schemas
+  for the three documents above;
+- `upstreamdrift-companion-acquisition-v1.schema.json`; and
+- `upstreamdrift-companion-compatibility-v1.json`.
 
 Missing, renamed, extra, malformed, stale, or digest-mismatched files fail the
-bundle verifier. The manifest's embedded source commit must match the exact CI
-commit, and its schema/generator versions must match the policy.
+bundle verifier. The verifier also requires `manifest.json` to equal
+`upstreamdrift-companion.v1.json` byte for byte, validates
+`capabilities.json` and `screenshots.json` against their shipped schemas,
+and requires the embedded `source.commit` to agree across all three JSON
+documents and to match the exact CI commit. The manifest's schema/generator
+versions must match the policy.
+
+The builder (`scripts/companion_catalog.py`) reads `src/config/models.yaml`
+with a standalone `yaml.safe_load` reader and imports nothing from `src.*`, so
+the publication job needs only `jsonschema` and `pyyaml` (#9416). Registry
+keys the catalog does not export are ignored so registry additions cannot
+break publication.
+
+### Consumer Entry Point (AffineDrift)
+
+Consumers read `manifest.json`. The contract version is carried inside the
+document by `schema_version` (`"1.0.0"`) and `manifest_id`
+(`"upstreamdrift-companion"`) — the "manifest_v1" contract — not by the file
+name. `upstreamdrift-companion.v1.json` is the same bytes under the versioned
+name and remains available for tooling that pins by name. `capabilities.json`
+and `screenshots.json` carry their own `manifest_id` values
+(`upstreamdrift-companion-capabilities`, `upstreamdrift-companion-screenshots`)
+and the same `source.commit`.
+
+Every push to protected `main` publishes the artifact
+`upstreamdrift-companion-<40-hex-sha>` (30-day retention, attested) plus
+`upstreamdrift-companion-evidence-<sha>`. To fetch the newest one:
+
+```text
+gh run list -R D-sorganization/UpstreamDrift --workflow "Release and Companion Publication" --branch main
+gh run download <run-id> -R D-sorganization/UpstreamDrift -n upstreamdrift-companion-<sha> -D <dir>
+```
+
+Tagged releases attach the same file set as release assets:
+
+```text
+gh release download <tag> -R D-sorganization/UpstreamDrift -p 'manifest.json'
+```
+
+### Local and Pull-Request Check
+
+```text
+python3 -m scripts.companion_publication --repo-root . check [--allow-dirty]
+```
+
+builds the manifest, capability catalog, and screenshot metadata in memory,
+validates all three against their schemas and the compatibility policy, and
+writes nothing. It requires a clean tree unless `--allow-dirty` is given and
+needs no CI authority; it exits 0 on success and 2 on any refusal. The
+`companion-workflows` job in `ci-standard.yml` runs it on every code pull
+request so a registry edit that breaks publication fails before it reaches
+`main`.
 
 ## Protected-Main Artifact
 

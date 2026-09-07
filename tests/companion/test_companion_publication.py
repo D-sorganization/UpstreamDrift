@@ -443,12 +443,7 @@ def _build_test_bundle(publication, tmp_path: Path) -> Path:
         (FIXTURE_ROOT / "current-v1.0.0.json").read_text(encoding="utf-8")
     )
     manifest["source"]["commit"] = COMMIT
-    payloads = {
-        publication.MANIFEST_NAME: publication.canonical_json(manifest),
-        publication.MANIFEST_SCHEMA_NAME: MANIFEST_SCHEMA.read_bytes(),
-        publication.ACQUISITION_SCHEMA_NAME: ACQUISITION_SCHEMA.read_bytes(),
-        publication.COMPATIBILITY_POLICY_NAME: POLICY_PATH.read_bytes(),
-    }
+    payloads = _payload_bytes(publication, manifest)
     for name, payload in payloads.items():
         (bundle / name).write_bytes(payload)
         (bundle / f"{name}.sha256").write_text(
@@ -458,6 +453,244 @@ def _build_test_bundle(publication, tmp_path: Path) -> Path:
         )
     publication.verify_bundle(bundle)
     return bundle
+
+
+def _payload_bytes(publication, manifest: dict) -> dict[str, bytes]:
+    """Derive every base payload from one manifest via the pure helpers."""
+    from scripts import companion_catalog
+
+    manifest_bytes = publication.canonical_json(manifest)
+    capabilities = companion_catalog._capabilities_payload(manifest, {})
+    screenshots = companion_catalog._screenshots_payload(manifest)
+    return {
+        publication.MANIFEST_NAME: manifest_bytes,
+        publication.CONSUMER_MANIFEST_NAME: manifest_bytes,
+        publication.CAPABILITIES_NAME: publication.canonical_json(capabilities),
+        publication.SCREENSHOTS_NAME: publication.canonical_json(screenshots),
+        publication.MANIFEST_SCHEMA_NAME: MANIFEST_SCHEMA.read_bytes(),
+        publication.CAPABILITIES_SCHEMA_NAME: (
+            REPO_ROOT / publication.CAPABILITIES_SCHEMA_PATH
+        ).read_bytes(),
+        publication.SCREENSHOTS_SCHEMA_NAME: (
+            REPO_ROOT / publication.SCREENSHOTS_SCHEMA_PATH
+        ).read_bytes(),
+        publication.ACQUISITION_SCHEMA_NAME: ACQUISITION_SCHEMA.read_bytes(),
+        publication.COMPATIBILITY_POLICY_NAME: POLICY_PATH.read_bytes(),
+    }
+
+
+def _write_sidecar(bundle: Path, name: str, payload: bytes) -> None:
+    (bundle / name).write_bytes(payload)
+    (bundle / f"{name}.sha256").write_text(
+        f"{hashlib.sha256(payload).hexdigest()}  {name}\n",
+        encoding="ascii",
+        newline="\n",
+    )
+
+
+# --- #9416: consumer payloads, byte-identical manifest.json, check command ---
+
+
+def test_payload_asset_names_derive_from_single_base_list() -> None:
+    publication = _module()
+
+    assert publication._BASE_ASSET_NAMES == (
+        "upstreamdrift-companion.v1.json",
+        "manifest.json",
+        "capabilities.json",
+        "screenshots.json",
+        "upstreamdrift-companion-v1.schema.json",
+        "upstreamdrift-companion-capabilities-v1.schema.json",
+        "upstreamdrift-companion-screenshots-v1.schema.json",
+        "upstreamdrift-companion-acquisition-v1.schema.json",
+        "upstreamdrift-companion-compatibility-v1.json",
+    )
+    assert len(publication.PAYLOAD_ASSET_NAMES) == 18
+    assert all(
+        f"{name}.sha256" in publication.PAYLOAD_ASSET_NAMES
+        for name in publication._BASE_ASSET_NAMES
+    )
+    schema = _acquisition_schema()
+    assert schema["properties"]["payloads"]["minItems"] == 18
+    assert schema["properties"]["payloads"]["maxItems"] == 18
+
+
+def test_bundle_manifest_json_is_byte_identical_to_versioned_manifest(
+    tmp_path: Path,
+) -> None:
+    publication = _module()
+    bundle = _build_test_bundle(publication, tmp_path)
+    assert (bundle / "manifest.json").read_bytes() == (
+        bundle / "upstreamdrift-companion.v1.json"
+    ).read_bytes()
+
+    drifted = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+    drifted["publication"]["blockers"].append("drifted consumer copy")
+    _write_sidecar(bundle, "manifest.json", publication.canonical_json(drifted))
+
+    with pytest.raises(
+        publication.PublicationContractError, match="not byte-identical"
+    ):
+        publication.verify_bundle(bundle)
+
+
+def test_bundle_refuses_cross_payload_commit_mismatch(tmp_path: Path) -> None:
+    publication = _module()
+    bundle = _build_test_bundle(publication, tmp_path)
+    capabilities = json.loads(
+        (bundle / "capabilities.json").read_text(encoding="utf-8")
+    )
+    capabilities["source"]["commit"] = "2" * 40
+    _write_sidecar(
+        bundle, "capabilities.json", publication.canonical_json(capabilities)
+    )
+
+    with pytest.raises(publication.PublicationContractError, match="embedded commit"):
+        publication.verify_bundle(bundle)
+
+
+def test_bundle_refuses_capabilities_for_unknown_programs(tmp_path: Path) -> None:
+    publication = _module()
+    bundle = _build_test_bundle(publication, tmp_path)
+    capabilities = json.loads(
+        (bundle / "capabilities.json").read_text(encoding="utf-8")
+    )
+    capabilities["programs"].append(
+        {
+            "id": "ghost",
+            "engine_id": None,
+            "support_tier": "not_applicable",
+            "maturity": "unclassified",
+            "availability_state": "conditional",
+            "capability_ids": [],
+        }
+    )
+    _write_sidecar(
+        bundle, "capabilities.json", publication.canonical_json(capabilities)
+    )
+
+    with pytest.raises(publication.PublicationContractError, match="programs"):
+        publication.verify_bundle(bundle)
+
+
+def test_real_bundle_ships_consumer_payloads(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    publication = _module()
+    head = publication.git_head_commit(REPO_ROOT)
+    env = _ci_env(authority="protected-main")
+    env["GITHUB_SHA"] = head
+    monkeypatch.setenv("GITHUB_SHA", head)
+
+    inventory = publication.build_bundle(
+        REPO_ROOT,
+        output_dir=tmp_path / "bundle",
+        authority="protected-main",
+        env=env,
+        require_clean=False,
+    )
+
+    assert set(inventory) == set(publication.PAYLOAD_ASSET_NAMES)
+    bundle = tmp_path / "bundle"
+    screenshots = json.loads((bundle / "screenshots.json").read_text("utf-8"))
+    capabilities = json.loads((bundle / "capabilities.json").read_text("utf-8"))
+    assert screenshots["source"]["commit"] == head
+    assert capabilities["source"]["commit"] == head
+    assert screenshots["records"]
+    assert all(r["status"] == "pending" for r in screenshots["records"])
+    assert capabilities["capabilities"]
+    payloads, _ = publication._payload_inventory(bundle)
+    embedded = {p["name"]: p["embedded_commit"] for p in payloads}
+    assert embedded["manifest.json"] == head
+    assert embedded["capabilities.json"] == head
+    assert embedded["screenshots.json"] == head
+    assert embedded["upstreamdrift-companion-v1.schema.json"] is None
+
+
+def test_check_command_validates_in_memory_and_writes_nothing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    publication = _module()
+    before = (
+        sorted(
+            p for p in (REPO_ROOT / "dist").rglob("*") if "companion" in p.as_posix()
+        )
+        if (REPO_ROOT / "dist").is_dir()
+        else []
+    )
+
+    code = publication.main(["--repo-root", str(REPO_ROOT), "check", "--allow-dirty"])
+
+    captured = capsys.readouterr()
+    assert code == 0, captured.err
+    head = publication.git_head_commit(REPO_ROOT)
+    assert captured.out.startswith(f"companion check ok: commit={head} ")
+    assert "screenshots=" in captured.out and "pending=" in captured.out
+    after = (
+        sorted(
+            p for p in (REPO_ROOT / "dist").rglob("*") if "companion" in p.as_posix()
+        )
+        if (REPO_ROOT / "dist").is_dir()
+        else []
+    )
+    assert after == before
+    assert not list(tmp_path.iterdir())
+
+
+def test_check_command_refuses_dirty_tree_without_allow_dirty(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    publication = _module()
+    monkeypatch.delenv("GITHUB_SHA", raising=False)
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True, shell=False)
+    (tmp_path / "dirty.txt").write_text("x\n", encoding="utf-8")
+
+    code = publication.main(["--repo-root", str(tmp_path), "check"])
+
+    assert code == 2
+    assert "companion publication refused" in capsys.readouterr().err
+
+
+def test_ci_standard_runs_check_before_workflow_execution() -> None:
+    yaml = pytest.importorskip("yaml")
+    workflow = yaml.safe_load(
+        (REPO_ROOT / ".github/workflows/ci-standard.yml").read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"]["companion-workflows"]["steps"]
+    names = [step.get("name") for step in steps]
+    check_index = names.index(
+        "Check companion manifest builds from a clean checkout (#9416)"
+    )
+    assert (
+        "scripts.companion_publication --repo-root . check"
+        in (steps[check_index]["run"])
+    )
+    assert check_index < names.index("Execute governed companion workflow authority")
+
+
+def test_release_companion_jobs_pin_pythonpath_and_dependencies() -> None:
+    yaml = pytest.importorskip("yaml")
+    workflow = yaml.safe_load(
+        (REPO_ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    )
+    jobs = workflow["jobs"]
+    workspace = "${{ github.workspace }}"
+    for job_id in ("companion-protected-main", "record-companion-release"):
+        job = jobs[job_id]
+        assert job["env"]["PYTHONPATH"] == workspace, job_id
+        install = next(
+            step["run"]
+            for step in job["steps"]
+            if step.get("name") == "Install companion publication dependencies"
+        )
+        assert "jsonschema==" in install and "pyyaml==" in install
+    build_steps = [
+        step
+        for step in jobs["build"]["steps"]
+        if "scripts.companion_publication" in step.get("run", "")
+    ]
+    assert build_steps
+    assert all(step["env"]["PYTHONPATH"] == workspace for step in build_steps)
 
 
 def _release_metadata(publication, bundle: Path) -> dict[str, object]:

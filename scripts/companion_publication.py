@@ -36,17 +36,42 @@ ACQUISITION_SCHEMA_ID = (
 ACQUISITION_CONTRACT_VERSION = "1.0.0"
 DEFAULT_OUTPUT_DIR = Path("dist/companion")
 MANIFEST_NAME = "upstreamdrift-companion.v1.json"
+# Stable consumer entry point (AffineDrift #4123 reads ``manifest.json``). It
+# is byte-identical to the versioned MANIFEST_NAME; the contract version is
+# carried inside the document by ``schema_version`` + ``manifest_id``.
+CONSUMER_MANIFEST_NAME = "manifest.json"
+CAPABILITIES_NAME = "capabilities.json"
+SCREENSHOTS_NAME = "screenshots.json"
 MANIFEST_SCHEMA_NAME = "upstreamdrift-companion-v1.schema.json"
+CAPABILITIES_SCHEMA_NAME = "upstreamdrift-companion-capabilities-v1.schema.json"
+SCREENSHOTS_SCHEMA_NAME = "upstreamdrift-companion-screenshots-v1.schema.json"
 ACQUISITION_SCHEMA_NAME = "upstreamdrift-companion-acquisition-v1.schema.json"
 COMPATIBILITY_POLICY_NAME = "upstreamdrift-companion-compatibility-v1.json"
 MANIFEST_SCHEMA_PATH = Path("docs/api/contracts") / MANIFEST_SCHEMA_NAME
+CAPABILITIES_SCHEMA_PATH = Path("docs/api/contracts") / CAPABILITIES_SCHEMA_NAME
+SCREENSHOTS_SCHEMA_PATH = Path("docs/api/contracts") / SCREENSHOTS_SCHEMA_NAME
 ACQUISITION_SCHEMA_PATH = Path("docs/api/contracts") / ACQUISITION_SCHEMA_NAME
 COMPATIBILITY_POLICY_PATH = Path("docs/api/contracts") / COMPATIBILITY_POLICY_NAME
+# Single source of truth for the bundle file set. ``verify_bundle``, the
+# acquisition inventories, the release-asset checks, and the workflow globs
+# all derive from this tuple; add new payloads here only.
 _BASE_ASSET_NAMES = (
     MANIFEST_NAME,
+    CONSUMER_MANIFEST_NAME,
+    CAPABILITIES_NAME,
+    SCREENSHOTS_NAME,
     MANIFEST_SCHEMA_NAME,
+    CAPABILITIES_SCHEMA_NAME,
+    SCREENSHOTS_SCHEMA_NAME,
     ACQUISITION_SCHEMA_NAME,
     COMPATIBILITY_POLICY_NAME,
+)
+# Payloads that embed ``source.commit`` and must agree with each other.
+_COMMIT_BEARING_NAMES = (
+    MANIFEST_NAME,
+    CONSUMER_MANIFEST_NAME,
+    CAPABILITIES_NAME,
+    SCREENSHOTS_NAME,
 )
 PAYLOAD_ASSET_NAMES = tuple(
     name for base in _BASE_ASSET_NAMES for name in (base, f"{base}.sha256")
@@ -334,34 +359,118 @@ def build_bundle(
             "publication output directory contains stale or unexpected files: "
             + ", ".join(unexpected)
         )
-    manifest_path = destination / MANIFEST_NAME
-    companion_catalog.write_catalog(
-        root, output=manifest_path, require_clean=require_clean
-    )
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    manifest_schema = _schema(root, MANIFEST_SCHEMA_PATH)
-    jsonschema.Draft202012Validator(manifest_schema).validate(manifest)
-    if manifest["source"]["commit"] != commit:
+    payloads = check_payload_set(root, require_clean=require_clean)
+    if payloads.catalog["source"]["commit"] != commit:
         raise PublicationContractError("manifest embedded commit does not match HEAD")
-    policy = load_compatibility_policy(root)
-    validate_compatibility_policy(root, policy)
-    acquisition_schema = _schema(root, ACQUISITION_SCHEMA_PATH)
+    manifest_bytes = companion_catalog.render_catalog(payloads.catalog)
+    _write_payload(destination, MANIFEST_NAME, manifest_bytes)
+    _write_payload(destination, CONSUMER_MANIFEST_NAME, manifest_bytes)
     _write_payload(
-        destination, MANIFEST_SCHEMA_NAME, (root / MANIFEST_SCHEMA_PATH).read_bytes()
+        destination,
+        CAPABILITIES_NAME,
+        companion_catalog.render_json(payloads.capabilities),
     )
     _write_payload(
         destination,
-        ACQUISITION_SCHEMA_NAME,
-        (root / ACQUISITION_SCHEMA_PATH).read_bytes(),
+        SCREENSHOTS_NAME,
+        companion_catalog.render_json(payloads.screenshots),
     )
-    _write_payload(
-        destination,
-        COMPATIBILITY_POLICY_NAME,
-        (root / COMPATIBILITY_POLICY_PATH).read_bytes(),
-    )
+    for name, relative in _SHIPPED_CONTRACT_FILES:
+        _write_payload(destination, name, (root / relative).read_bytes())
     # Check the acquisition schema again through the exact packaged bytes.
-    jsonschema.Draft202012Validator.check_schema(acquisition_schema)
+    jsonschema.Draft202012Validator.check_schema(
+        json.loads((destination / ACQUISITION_SCHEMA_NAME).read_text("utf-8"))
+    )
     return verify_bundle(destination)
+
+
+_SHIPPED_CONTRACT_FILES = (
+    (MANIFEST_SCHEMA_NAME, MANIFEST_SCHEMA_PATH),
+    (CAPABILITIES_SCHEMA_NAME, CAPABILITIES_SCHEMA_PATH),
+    (SCREENSHOTS_SCHEMA_NAME, SCREENSHOTS_SCHEMA_PATH),
+    (ACQUISITION_SCHEMA_NAME, ACQUISITION_SCHEMA_PATH),
+    (COMPATIBILITY_POLICY_NAME, COMPATIBILITY_POLICY_PATH),
+)
+
+
+def _check_cross_references(
+    catalog: Mapping[str, Any],
+    capabilities: Mapping[str, Any],
+    screenshots: Mapping[str, Any],
+) -> None:
+    """Fail closed when the three payloads disagree about commit or programs."""
+    commit = catalog["source"]["commit"]
+    for label, document in (
+        (CAPABILITIES_NAME, capabilities),
+        (SCREENSHOTS_NAME, screenshots),
+    ):
+        if document["source"]["commit"] != commit:
+            raise PublicationContractError(
+                f"{label} embedded commit does not match the manifest"
+            )
+    program_ids = {program["id"] for program in catalog["programs"]}
+    capability_program_ids = {program["id"] for program in capabilities["programs"]}
+    if capability_program_ids != program_ids:
+        raise PublicationContractError(
+            "capabilities.json programs do not match the manifest programs"
+        )
+    referenced = {
+        program_id
+        for record in capabilities["capabilities"]
+        for program_id in record["program_ids"]
+    }
+    if not referenced <= program_ids:
+        raise PublicationContractError(
+            "capabilities.json references programs absent from the manifest"
+        )
+    visible = {
+        program["id"] for program in catalog["programs"] if not program["hidden"]
+    }
+    screenshot_program_ids = {record["program_id"] for record in screenshots["records"]}
+    if not screenshot_program_ids <= visible:
+        raise PublicationContractError(
+            "screenshots.json references hidden or unknown programs"
+        )
+
+
+def check_payload_set(
+    repo_root: Path, *, require_clean: bool = True
+) -> companion_catalog.CompanionPayloadSet:
+    """Build all consumer payloads in memory and validate them; write nothing.
+
+    This is the ``check`` subcommand's whole job and the first half of
+    ``build_bundle``. It needs no CI authority.
+    """
+    root = repo_root.resolve()
+    payloads = companion_catalog.build_payload_set(root, require_clean=require_clean)
+    for document, relative in (
+        (payloads.catalog, MANIFEST_SCHEMA_PATH),
+        (payloads.capabilities, CAPABILITIES_SCHEMA_PATH),
+        (payloads.screenshots, SCREENSHOTS_SCHEMA_PATH),
+    ):
+        jsonschema.Draft202012Validator(_schema(root, relative)).validate(document)
+    _check_cross_references(
+        payloads.catalog, payloads.capabilities, payloads.screenshots
+    )
+    validate_compatibility_policy(root, load_compatibility_policy(root))
+    _schema(root, ACQUISITION_SCHEMA_PATH)
+    return payloads
+
+
+def check_summary(payloads: companion_catalog.CompanionPayloadSet) -> str:
+    """One-line human summary for the ``check`` subcommand."""
+    summary = payloads.catalog["summary"]
+    records = payloads.screenshots["records"]
+    pending = sum(record["status"] == "pending" for record in records)
+    return (
+        "companion check ok: "
+        f"commit={payloads.catalog['source']['commit']} "
+        f"programs={summary['program_records']} "
+        f"features={summary['feature_records']} "
+        f"workflows={summary['workflow_records']} "
+        f"capabilities={len(payloads.capabilities['capabilities'])} "
+        f"screenshots={len(records)} (pending={pending})"
+    )
 
 
 def _parse_sidecar(path: Path, expected_name: str) -> str:
@@ -392,11 +501,24 @@ def verify_bundle(bundle_dir: Path) -> dict[str, dict[str, int | str]]:
         digest = _sha256(payload)
         if _parse_sidecar(root / f"{name}.sha256", name) != digest:
             raise PublicationContractError(f"digest mismatch for {name}")
+    if (root / MANIFEST_NAME).read_bytes() != (
+        root / CONSUMER_MANIFEST_NAME
+    ).read_bytes():
+        raise PublicationContractError(
+            f"{CONSUMER_MANIFEST_NAME} is not byte-identical to {MANIFEST_NAME}"
+        )
     manifest = json.loads((root / MANIFEST_NAME).read_text(encoding="utf-8"))
-    manifest_schema = json.loads(
-        (root / MANIFEST_SCHEMA_NAME).read_text(encoding="utf-8")
-    )
-    jsonschema.Draft202012Validator(manifest_schema).validate(manifest)
+    capabilities = json.loads((root / CAPABILITIES_NAME).read_text(encoding="utf-8"))
+    screenshots = json.loads((root / SCREENSHOTS_NAME).read_text(encoding="utf-8"))
+    for document, schema_name in (
+        (manifest, MANIFEST_SCHEMA_NAME),
+        (capabilities, CAPABILITIES_SCHEMA_NAME),
+        (screenshots, SCREENSHOTS_SCHEMA_NAME),
+    ):
+        schema = json.loads((root / schema_name).read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator.check_schema(schema)
+        jsonschema.Draft202012Validator(schema).validate(document)
+    _check_cross_references(manifest, capabilities, screenshots)
     jsonschema.Draft202012Validator.check_schema(
         json.loads((root / ACQUISITION_SCHEMA_NAME).read_text(encoding="utf-8"))
     )
@@ -453,7 +575,7 @@ def _payload_inventory(bundle_dir: Path) -> tuple[list[dict[str, Any]], dict[str
             "name": name,
             "size": inventory[name]["size"],
             "sha256": inventory[name]["sha256"],
-            "embedded_commit": commit if name == MANIFEST_NAME else None,
+            "embedded_commit": commit if name in _COMMIT_BEARING_NAMES else None,
         }
         for name in PAYLOAD_ASSET_NAMES
     ]
@@ -765,6 +887,18 @@ def _parser() -> argparse.ArgumentParser:
     build.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     verify = subparsers.add_parser("verify-bundle")
     verify.add_argument("--bundle-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    check = subparsers.add_parser(
+        "check",
+        help=(
+            "build manifest, capabilities and screenshots in memory and validate "
+            "them against their schemas; writes nothing and needs no CI authority"
+        ),
+    )
+    check.add_argument(
+        "--allow-dirty",
+        action="store_true",
+        help="skip the clean-tree precondition (local development only)",
+    )
     actions = subparsers.add_parser("record-actions")
     actions.add_argument("--bundle-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     actions.add_argument("--artifact-name", required=True)
@@ -801,6 +935,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif args.command == "verify-bundle":
             inventory = verify_bundle(args.bundle_dir)
             sys.stdout.write(f"verified {len(inventory)} companion payload files\n")
+        elif args.command == "check":
+            payloads = check_payload_set(
+                args.repo_root, require_clean=not args.allow_dirty
+            )
+            sys.stdout.write(check_summary(payloads) + "\n")
         elif args.command == "record-actions":
             record = build_actions_acquisition(
                 args.bundle_dir,

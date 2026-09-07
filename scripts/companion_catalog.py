@@ -16,15 +16,33 @@ import subprocess
 import sys
 import tomllib
 from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
+import yaml
+
 from scripts import companion_workflows
-from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
+
+# This module must stay importable with only ``jsonschema`` and ``pyyaml``
+# installed: the release workflow's companion job pip-installs exactly those
+# two packages, and importing anything under ``src.*`` drags the runtime
+# package tree (numpy, Qt-adjacent helpers) into a publication job (#9416).
 
 SCHEMA_ID = "https://upstreamdrift.dev/schemas/upstreamdrift-companion-v1.schema.json"
 SCHEMA_VERSION = "1.0.0"
 GENERATOR_VERSION = "1.1.0"
+CAPABILITIES_SCHEMA_ID = (
+    "https://upstreamdrift.dev/schemas/"
+    "upstreamdrift-companion-capabilities-v1.schema.json"
+)
+CAPABILITIES_MANIFEST_ID = "upstreamdrift-companion-capabilities"
+SCREENSHOTS_SCHEMA_ID = (
+    "https://upstreamdrift.dev/schemas/"
+    "upstreamdrift-companion-screenshots-v1.schema.json"
+)
+SCREENSHOTS_MANIFEST_ID = "upstreamdrift-companion-screenshots"
+SCREENSHOT_PENDING_REASON = "No governed capture exists at this commit (#9191)."
 DEFAULT_OUTPUT = Path("dist/companion/upstreamdrift-companion.v1.json")
 INPUT_PATHS = (
     Path("pyproject.toml"),
@@ -62,6 +80,220 @@ _STABLE_LEGACY_STATUSES = frozenset(
 
 class CatalogAuthorityError(RuntimeError):
     """Raised when an export cannot prove authoritative, immutable inputs."""
+
+
+# ---------------------------------------------------------------------------
+# Standalone, import-free reader for ``src/config/models.yaml``.
+#
+# The runtime registry (``src/shared/python/config/model_registry.py``) is the
+# launcher's authority for *runtime* semantics. The catalog only needs the ten
+# presentation facts consumed by ``_model_payload`` below, so it re-reads the
+# YAML with ``yaml.safe_load`` and replicates the handful of legacy
+# normalisations that change those facts. Discovery is explicitly local-only:
+# no provider manifests, no sibling repositories, no environment variables.
+# ---------------------------------------------------------------------------
+
+# Duplicated from ``src/shared/python/config/model_registry.py``
+# (``_METADATA_ONLY_TYPES``): entries of these built-in types are launched via
+# an engine/mode rather than a concrete file, so the registry synthesises a
+# ``virtual/<type>/<id>`` path when ``path`` is absent (#6882). Importing the
+# registry would pull numpy into the publication job (#9416), so the tuple is
+# copied here; keep the two in sync.
+_METADATA_ONLY_TYPES = ("biomech_exercise", "physics_informed")
+
+# Duplicated from ``src/shared/python/config/model_pack_manifest.py``
+# (``_CAPABILITY_ALIASES``) for the same import-isolation reason; the runtime
+# registry folds these spellings into one capability id and the consumer
+# catalog must report the same ids the launcher does.
+_CAPABILITY_ALIASES = {
+    "inverse-kinematics": "ik",
+    "inverse_kinematics": "ik",
+    "inverse kinematics": "ik",
+    "forward-dynamics": "dynamics",
+    "forward_dynamics": "dynamics",
+    "forward dynamics": "dynamics",
+    "balance-control": "balance",
+    "balance_control": "balance",
+    "balance control": "balance",
+}
+_LAUNCHER_CATEGORIES = frozenset(
+    {
+        "physics_engine",
+        "simulation",
+        "motion_matching",
+        "motion_capture",
+        "tool",
+        "documentation",
+        "biomechanics",
+        "external",
+    }
+)
+_REQUIRED_MODEL_FIELDS = ("id", "name", "description", "type", "path")
+
+
+@dataclass(frozen=True)
+class LocalLauncherRecord:
+    """Launcher presentation facts the catalog reads from a models.yaml entry."""
+
+    category: str
+    status: str
+
+
+@dataclass(frozen=True)
+class LocalModelRecord:
+    """The models.yaml facts consumed by the catalog; nothing else is read."""
+
+    id: str
+    name: str
+    description: str
+    type: str
+    path: str
+    engine_type: str | None
+    provider: str | None
+    hidden: bool
+    capabilities: tuple[str, ...]
+    launcher: LocalLauncherRecord | None
+
+
+def _optional_string(raw: Mapping[str, Any], key: str, *, entry: str) -> str | None:
+    value = raw.get(key)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise CatalogAuthorityError(
+            f"models.yaml entry {entry!r}: {key} must be a non-empty string"
+        )
+    return value.strip()
+
+
+def normalize_capability_ids(values: object) -> tuple[str, ...]:
+    """Fold capability spellings the way the runtime registry does."""
+    if values is None:
+        return ()
+    if not isinstance(values, list | tuple):
+        raise CatalogAuthorityError("capabilities must be a list of strings")
+    normalized: list[str] = []
+    for value in values:
+        if not isinstance(value, str):
+            raise CatalogAuthorityError("capabilities must be a list of strings")
+        item = value.strip().lower()
+        item = _CAPABILITY_ALIASES.get(item, item)
+        if item and item not in normalized:
+            normalized.append(item)
+    return tuple(normalized)
+
+
+def _launcher_record(raw: object, *, entry: str) -> LocalLauncherRecord | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, Mapping):
+        raise CatalogAuthorityError(
+            f"models.yaml entry {entry!r}: launcher must be a mapping"
+        )
+    values: dict[str, str] = {}
+    for key in ("category", "logo", "status"):
+        if key not in raw:
+            raise CatalogAuthorityError(
+                f"models.yaml entry {entry!r}: launcher is missing {key}"
+            )
+        text = str(raw[key]).strip()
+        if not text:
+            raise CatalogAuthorityError(
+                f"models.yaml entry {entry!r}: launcher {key} must be non-empty"
+            )
+        values[key] = text
+    if values["category"] not in _LAUNCHER_CATEGORIES:
+        raise CatalogAuthorityError(
+            f"models.yaml entry {entry!r}: unknown launcher category "
+            f"{values['category']!r}"
+        )
+    return LocalLauncherRecord(category=values["category"], status=values["status"])
+
+
+def _local_model_record(raw: object, *, index: int) -> LocalModelRecord:
+    """Mirror ``_normalize_legacy_model_entry`` + ``ModelPackEntry.from_dict``.
+
+    Only the validations that affect the exported facts are replicated. Keys
+    the catalog does not consume are ignored on purpose so this builder
+    tolerates registry additions.
+    """
+    # TODO(#9412): the one-tile-registry PR adds optional top-level keys
+    # (``maturity``, ``surfaces``, ``help``, ``feature_id``, ``web``) to
+    # models.yaml entries. They are intentionally not read here; once that PR
+    # lands, decide whether the catalog should export any of them.
+    if not isinstance(raw, Mapping):
+        raise CatalogAuthorityError(
+            f"models.yaml entry [{index}]: legacy model entries must be mappings"
+        )
+    data = dict(raw)
+    entry = str(data.get("id", f"entry[{index}]"))
+    description = data.get("description")
+    if isinstance(description, str) and description.strip() == "":
+        fallback = data.get("name")
+        if isinstance(fallback, str) and fallback.strip():
+            data["description"] = fallback.strip()
+    entry_type = data.get("type")
+    entry_id = data.get("id")
+    has_path = isinstance(data.get("path"), str) and bool(data["path"].strip())
+    if (
+        not has_path
+        and entry_type in _METADATA_ONLY_TYPES
+        and isinstance(entry_id, str)
+        and entry_id.strip()
+    ):
+        data["path"] = f"virtual/{entry_type}/{entry_id.strip()}"
+    missing = [field for field in _REQUIRED_MODEL_FIELDS if field not in data]
+    if missing:
+        raise CatalogAuthorityError(
+            f"models.yaml entry {entry!r}: missing required fields {missing}"
+        )
+    for field in _REQUIRED_MODEL_FIELDS:
+        value = data[field]
+        if not isinstance(value, str) or not value.strip():
+            raise CatalogAuthorityError(
+                f"models.yaml entry {entry!r}: {field} must be a non-empty string"
+            )
+    hidden = data.get("hidden", False)
+    if not isinstance(hidden, bool):
+        raise CatalogAuthorityError(
+            f"models.yaml entry {entry!r}: hidden must be a boolean"
+        )
+    return LocalModelRecord(
+        id=data["id"].strip(),
+        name=data["name"].strip(),
+        description=data["description"].strip(),
+        type=data["type"].strip(),
+        path=data["path"].strip(),
+        engine_type=_optional_string(data, "engine_type", entry=entry),
+        provider=_optional_string(data, "provider", entry=entry),
+        hidden=hidden,
+        capabilities=normalize_capability_ids(data.get("capabilities")),
+        launcher=_launcher_record(data.get("launcher"), entry=entry),
+    )
+
+
+def read_local_models(payload: bytes) -> list[LocalModelRecord]:
+    """Parse committed models.yaml bytes with local-only discovery.
+
+    Postconditions:
+        Later duplicate ids overwrite earlier ones (the registry's
+        ``overwrite_existing=True`` legacy policy) and first-seen order is
+        preserved, exactly like ``ModelRegistry.get_all_models``.
+    """
+    try:
+        document = yaml.safe_load(payload.decode("utf-8"))
+    except (UnicodeDecodeError, yaml.YAMLError) as exc:
+        raise CatalogAuthorityError(f"models.yaml is not valid YAML: {exc}") from exc
+    if not isinstance(document, Mapping) or "models" not in document:
+        raise CatalogAuthorityError("models.yaml root must be a mapping with 'models'")
+    models_raw = document["models"]
+    if not isinstance(models_raw, list):
+        raise CatalogAuthorityError("models.yaml 'models' must be a list")
+    records: dict[str, LocalModelRecord] = {}
+    for index, raw in enumerate(models_raw):
+        record = _local_model_record(raw, index=index)
+        records[record.id] = record
+    return list(records.values())
 
 
 def validate_repo_relative(value: Path) -> PurePosixPath:
@@ -230,7 +462,7 @@ def _source_record(registry: str, path: str) -> dict[str, str]:
     return {"registry": registry, "path": path}
 
 
-def _model_payload(model: ModelConfig) -> dict[str, Any]:
+def _model_payload(model: LocalModelRecord) -> dict[str, Any]:
     launcher = model.launcher
     status = launcher.status if launcher is not None else "unclassified"
     return {
@@ -276,7 +508,7 @@ def _launcher_payload(tile: Mapping[str, Any]) -> dict[str, Any]:
 
 def _merge_programs(
     launcher_tiles: Sequence[Mapping[str, Any]],
-    models: Sequence[ModelConfig],
+    models: Sequence[LocalModelRecord],
     feature_ids_by_program: Mapping[str, list[str]],
 ) -> list[dict[str, Any]]:
     records: dict[str, dict[str, Any]] = {}
@@ -500,6 +732,145 @@ def _catalog_payload(
     }
 
 
+def _capability_ids_by_program(
+    launcher_tiles: Sequence[Mapping[str, Any]],
+    models: Sequence[LocalModelRecord],
+) -> dict[str, list[str]]:
+    """Union the launcher-manifest and models.yaml capability lists per program."""
+    by_program: dict[str, set[str]] = {}
+    for tile in launcher_tiles:
+        by_program.setdefault(str(tile["id"]), set()).update(
+            normalize_capability_ids(tile.get("capabilities"))
+        )
+    for model in models:
+        by_program.setdefault(model.id, set()).update(model.capabilities)
+    return {program_id: sorted(ids) for program_id, ids in sorted(by_program.items())}
+
+
+def _capabilities_payload(
+    catalog: Mapping[str, Any],
+    capability_ids_by_program: Mapping[str, Sequence[str]],
+) -> dict[str, Any]:
+    """Derive the consumer capability catalog from an already built manifest.
+
+    Pure: no I/O, no git. Every program id in the result exists in
+    ``catalog["programs"]``; capability ids are sorted and unique.
+    """
+    program_ids = {program["id"] for program in catalog["programs"]}
+    dangling = sorted(set(capability_ids_by_program) - program_ids)
+    if dangling:
+        raise CatalogAuthorityError(
+            f"capability records reference unknown programs: {dangling}"
+        )
+    programs: list[dict[str, Any]] = []
+    programs_by_capability: dict[str, list[str]] = {}
+    capability_ids_by_engine: dict[str, set[str]] = {
+        engine["id"]: set() for engine in catalog["engines"]
+    }
+    for program in catalog["programs"]:
+        capability_ids = sorted(set(capability_ids_by_program.get(program["id"], ())))
+        for capability_id in capability_ids:
+            programs_by_capability.setdefault(capability_id, []).append(program["id"])
+        engine_id = program["engine_id"]
+        if engine_id in capability_ids_by_engine:
+            capability_ids_by_engine[engine_id].update(capability_ids)
+        programs.append(
+            {
+                "id": program["id"],
+                "engine_id": engine_id,
+                "support_tier": program["support_tier"],
+                "maturity": program["maturity"],
+                "availability_state": program["availability"]["state"],
+                "capability_ids": capability_ids,
+            }
+        )
+    return {
+        "$schema": CAPABILITIES_SCHEMA_ID,
+        "schema_version": SCHEMA_VERSION,
+        "manifest_id": CAPABILITIES_MANIFEST_ID,
+        "source": {
+            "repository": catalog["source"]["repository"],
+            "commit": catalog["source"]["commit"],
+        },
+        "engines": [
+            {
+                "id": engine["id"],
+                "name": engine["name"],
+                "support_tier": engine["support_tier"],
+                "capability_ids": sorted(capability_ids_by_engine[engine["id"]]),
+            }
+            for engine in catalog["engines"]
+        ],
+        "capabilities": [
+            {"id": capability_id, "program_ids": sorted(program_ids)}
+            for capability_id, program_ids in sorted(programs_by_capability.items())
+        ],
+        "programs": programs,
+    }
+
+
+def _screenshots_payload(catalog: Mapping[str, Any]) -> dict[str, Any]:
+    """Emit metadata-only screenshot records; nothing is fabricated.
+
+    Every non-hidden program gets one ``pending`` record with null asset
+    fields and an explicit reason. Captured records require the governed
+    capture workflow tracked by #9191, which does not exist at this commit.
+    """
+    records = [
+        {
+            "id": f"{program['id']}-primary",
+            "program_id": program["id"],
+            "status": "pending",
+            "path": None,
+            "sha256": None,
+            "width": None,
+            "height": None,
+            "viewport": None,
+            "theme": None,
+            "capture_workflow_id": None,
+            "capture_step_id": None,
+            "alt_text": None,
+            "caption": None,
+            "visible_limitations": [],
+            "artifact_class": "illustrative",
+            "reason": SCREENSHOT_PENDING_REASON,
+        }
+        for program in catalog["programs"]
+        if not program["hidden"]
+    ]
+    return {
+        "$schema": SCREENSHOTS_SCHEMA_ID,
+        "schema_version": SCHEMA_VERSION,
+        "manifest_id": SCREENSHOTS_MANIFEST_ID,
+        "source": {
+            "repository": catalog["source"]["repository"],
+            "commit": catalog["source"]["commit"],
+        },
+        "records": records,
+    }
+
+
+@dataclass(frozen=True)
+class CompanionPayloadSet:
+    """The three consumer-facing JSON documents built from one input read."""
+
+    catalog: dict[str, Any]
+    capabilities: dict[str, Any]
+    screenshots: dict[str, Any]
+
+
+def build_payload_set(
+    repo_root: Path, *, require_clean: bool = True
+) -> CompanionPayloadSet:
+    """Build the manifest plus its derived capability and screenshot payloads."""
+    catalog, capability_ids_by_program = _build(repo_root, require_clean=require_clean)
+    return CompanionPayloadSet(
+        catalog=catalog,
+        capabilities=_capabilities_payload(catalog, capability_ids_by_program),
+        screenshots=_screenshots_payload(catalog),
+    )
+
+
 _REQUIRES_PYTHON_RE = re.compile(
     r">=(?P<floor_major>\d+)\.(?P<floor>\d+),<(?P<ceiling_major>\d+)\.(?P<ceiling>\d+)"
 )
@@ -543,6 +914,12 @@ def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, A
     Postconditions:
         Discovery is explicitly local-only and all collections are ID-sorted.
     """
+    return _build(repo_root, require_clean=require_clean)[0]
+
+
+def _build(
+    repo_root: Path, *, require_clean: bool
+) -> tuple[dict[str, Any], dict[str, list[str]]]:
     root = repo_root.resolve()
     _git_commit(root)
     if require_clean and (dirty := _dirty_paths(root)):
@@ -560,12 +937,7 @@ def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, A
     parity = json.loads(
         payloads[Path("src/config/feature_parity.json")].decode("utf-8")
     )
-    registry = ModelRegistry(
-        config_path=root / "src/config/models.yaml",
-        strict=True,
-        discovery_mode="local-only",
-    )
-    models = registry.get_all_models()
+    models = read_local_models(payloads[Path("src/config/models.yaml")])
     features, feature_ids_by_program, surface_count = _features(parity["features"])
     programs = _merge_programs(launcher["tiles"], models, feature_ids_by_program)
     source_commit = _git_commit(root)
@@ -593,7 +965,7 @@ def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, A
             workflow["availability"]["state"] == "available" for workflow in workflows
         ),
     }
-    return _catalog_payload(
+    catalog = _catalog_payload(
         launcher=launcher,
         parity=parity,
         payloads=payloads,
@@ -606,6 +978,7 @@ def build_catalog(repo_root: Path, *, require_clean: bool = True) -> dict[str, A
         },
         summary=summary,
     )
+    return catalog, _capability_ids_by_program(launcher["tiles"], models)
 
 
 def render_catalog(catalog: Mapping[str, Any]) -> bytes:
@@ -613,6 +986,10 @@ def render_catalog(catalog: Mapping[str, Any]) -> bytes:
     return (
         json.dumps(catalog, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     ).encode("utf-8")
+
+
+# The derived payloads use the same canonical serialisation as the manifest.
+render_json = render_catalog
 
 
 def write_catalog(

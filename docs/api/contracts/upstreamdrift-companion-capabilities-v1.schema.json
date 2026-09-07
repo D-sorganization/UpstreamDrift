@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/upstreamdrift-companion-capabilities-v1.schema.json",
+  "title": "UpstreamDrift companion capability catalog v1",
+  "description": "Capability ids per program and per engine, derived from the same committed inputs as upstreamdrift-companion.v1.json. Inclusion is a software fact only; it grants no scientific qualification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "manifest_id",
+    "source",
+    "engines",
+    "capabilities",
+    "programs"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://upstreamdrift.dev/schemas/upstreamdrift-companion-capabilities-v1.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "manifest_id": {
+      "const": "upstreamdrift-companion-capabilities"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "engines": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/engine"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/capability"
+      }
+    },
+    "programs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/program"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "identifierList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": {
+          "const": "https://github.com/D-sorganization/UpstreamDrift"
+        },
+        "commit": {
+          "$ref": "#/$defs/commit"
+        }
+      }
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "support_tier", "capability_ids"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "support_tier": {
+          "enum": ["supported", "extended", "experimental"]
+        },
+        "capability_ids": {
+          "$ref": "#/$defs/identifierList"
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "program_ids"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "program_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        }
+      }
+    },
+    "program": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "engine_id",
+        "support_tier",
+        "maturity",
+        "availability_state",
+        "capability_ids"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "engine_id": {
+          "type": ["string", "null"]
+        },
+        "support_tier": {
+          "enum": ["supported", "extended", "experimental", "not_applicable"]
+        },
+        "maturity": {
+          "enum": ["stable", "beta", "experimental", "deprecated", "unclassified"]
+        },
+        "availability_state": {
+          "enum": ["available", "conditional", "unavailable"]
+        },
+        "capability_ids": {
+          "$ref": "#/$defs/identifierList"
+        }
+      }
+    }
+  }
+}
