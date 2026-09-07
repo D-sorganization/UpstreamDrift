@@ -38,7 +38,7 @@ class ModelFileSpec:
     filename: str
     url: str
     size_bytes: int
-    sha256: str | None  # None until pinned after a verified download
+    sha256: str | None  # pinned 2026-09-07 from a verified download
 
 
 BODY25_FILES: dict[str, ModelFileSpec] = {
@@ -46,13 +46,13 @@ BODY25_FILES: dict[str, ModelFileSpec] = {
         filename="openpose_body25_pose_deploy.prototxt",
         url=ALLOWED_ORIGINS[0] + "master/models/pose/body_25/pose_deploy.prototxt",
         size_bytes=42_330,
-        sha256=None,
+        sha256="44d6ed3a5268d8d41ca59b3a040491277d876975c3234d82cf7ec0539b4b1f61",
     ),
     "weights": ModelFileSpec(
         filename="openpose_body25_pose_iter_584000.caffemodel",
         url=ALLOWED_ORIGINS[1] + "models/pose/body_25/pose_iter_584000.caffemodel",
         size_bytes=104_715_850,
-        sha256=None,
+        sha256="44e3d7ebd8c8b62d4366d67127f1b562611a9e8fd0f4f3cdeeb4bb4a6ed12be6",
     ),
 }
 

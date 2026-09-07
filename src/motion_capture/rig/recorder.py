@@ -35,6 +35,8 @@ logger = get_logger(__name__)
 # KSCATEGORY_VIDEO_CAMERA — the DirectShow "alternative name" suffix.
 _DSHOW_CATEGORY = "{65e8773d-8f56-11d0-a3b9-00a0c9223196}"
 STDERR_TAIL_CHARS = 600
+STREAMING_BYTES = 4096  # more than a container header: frames are flowing
+WARMUP_POLL_S = 0.25
 DEFAULT_WARMUP_S = 2.0
 
 
@@ -56,6 +58,10 @@ class RecordingResult:
 
 class Recorder(Protocol):
     """Start / signal / stop lifecycle of one camera recording."""
+
+    def bytes_written(self) -> int:
+        """Bytes on disk so far (0 until the device delivers frames)."""
+        ...
 
     def start(
         self, identity: str, device_ref: str, mode: CaptureMode, path: Path
@@ -114,6 +120,9 @@ def ffmpeg_stream_copy_args(
 
 class NullRecorder:
     """Records nothing; useful for dry runs and tests."""
+
+    def bytes_written(self) -> int:
+        return 0
 
     def __init__(self) -> None:
         self._identity: str | None = None
@@ -208,6 +217,10 @@ class FfmpegStreamCopyRecorder:
             return "ffmpeg did not exit within stop_timeout"
         return (err or "")[-STDERR_TAIL_CHARS:].strip()
 
+    def bytes_written(self) -> int:
+        path = self._path
+        return path.stat().st_size if path is not None and path.exists() else 0
+
     def stop(self) -> RecordingResult:
         if self._stack is None or self._identity is None or self._path is None:
             raise StateError("stop() before start()")
@@ -223,6 +236,20 @@ class FfmpegStreamCopyRecorder:
         return result
 
 
+def _wait_for_streams(
+    recorders: list[Recorder], max_wait_s: float, sleep: Callable[[float], None]
+) -> float:
+    """Sleep in ``WARMUP_POLL_S`` steps until all stream or ``max_wait_s`` passes."""
+    waited = 0.0
+    while waited < max_wait_s:
+        if all(r.bytes_written() > STREAMING_BYTES for r in recorders):
+            return waited
+        step = min(WARMUP_POLL_S, max_wait_s - waited)
+        sleep(step)
+        waited += step
+    return waited
+
+
 def record_all(
     plan: RigPlan,
     device_refs: Mapping[str, str],
@@ -235,9 +262,12 @@ def record_all(
 ) -> list[RecordingResult]:
     """Record every planned view together for ``duration_s`` seconds.
 
-    Starts every recorder, waits ``warmup_s`` for the devices to open, runs the
-    duration clock, then signals every recorder before reaping any — so all
-    views stop within milliseconds of each other rather than in sequence.
+    Starts every recorder, waits until every one has written more than a
+    container header (``STREAMING_BYTES``) or ``warmup_s`` has elapsed —
+    whichever comes first — then runs the duration clock, then signals every
+    recorder before reaping any, so all views stop within milliseconds of
+    each other. Devices that never deliver are not waited on past
+    ``warmup_s``; the bundle reports them as short or empty.
     Precondition: ``device_refs`` maps every plan view to a DirectShow device ref.
     """
     require(duration_s > 0, "duration_s must be positive", duration_s)
@@ -255,7 +285,9 @@ def record_all(
             out_dir / f"{binding.view}_{binding.identity}.mkv",
         )
         active.append(rec)
-    sleep(warmup_s + duration_s)
+    waited = _wait_for_streams(active, warmup_s, sleep)
+    logger.info("all %d recorders streaming after %.2f s", len(active), waited)
+    sleep(duration_s)
     for rec in active:
         rec.signal_stop()
     return [rec.stop() for rec in active]
