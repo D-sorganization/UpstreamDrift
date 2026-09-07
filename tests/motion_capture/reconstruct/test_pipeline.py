@@ -51,6 +51,9 @@ def test_reconstruct_session_writes_every_stage(tmp_path: Path) -> None:
     record = json.loads((out / "reconstruction.json").read_text(encoding="utf-8"))
     assert record["metrics"] == {}  # no truth: no accuracy claims
     assert np.load(out / "joints_3d_m.npy").shape == (24, 15, 3)
+    swing = json.loads((out / "swing_summary.json").read_text(encoding="utf-8"))
+    assert swing["frames"] == 24 and swing["peak_hand_speed_mps"] > 0
+    assert summary.swing_summary_file is not None
 
 
 def test_rig_reconstruct_command(tmp_path: Path) -> None:
