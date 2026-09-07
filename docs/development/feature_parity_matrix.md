@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 18 parity · 11 gap · 12 exempt (11 pending decision in #7460).
+**Summary:** 18 parity · 11 gap · 13 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `simulation.shot_tracer`<br>Shot Tracer / ball-flight visualization | ✅ parity | `src/launchers/_shot_tracer_gui.py` | `src/api/routes/ball_flight.py` | `ui/src/pages/BallFlight.tsx` | — |
 | `simulation.swing_objective_lab`<br>Swing Objective Lab — mechanism-vs-outcome downswing comparison | ✅ parity | `src/launchers/adapters/swing_objective_lab_embed.py` | `src/api/routes/swing_objectives.py` | `ui/src/pages/SwingObjectiveLab.tsx` | — |
 | `tools.bunkershot3d_workbench`<br>BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict) | 🔴 gap | `src/tools/bunker_shot_gui/gui.py` | — | — | #8607 |
+| `tools.capture_rig`<br>Capture Rig camera controller, recorder and overlay player | ⚪ exempt | `src/tools/capture_rig/__main__.py` | — | — | Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.character_builder`<br>Character Builder (humanoid URDF generation) | 🔴 gap | `src/shared/python/model_generation/cli/main.py` | `src/api/routes/character_builder.py` | `ui/src/pages/CharacterBuilder.tsx` | #7448 |
 | `tools.data_explorer`<br>Data Explorer (import/filter/visualize datasets) | 🔴 gap | — | `src/api/routes/data_explorer.py` | `ui/src/pages/DataExplorer.tsx` | #7448 |
 | `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |
@@ -66,6 +67,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `bunkershot3d` | `tools.bunkershot3d_workbench` |
 | `canonical_core_comparison` | `canonical_core.workspaces` |
 | `canonical_core_estimation` | `canonical_core.workspaces` |
+| `capture_rig` | `tools.capture_rig` |
 | `character_builder` | `tools.character_builder` |
 | `chat_assistant` | `chat.transport` |
 | `cross_engine_dashboard` | `analysis.cross_engine_robustness` |

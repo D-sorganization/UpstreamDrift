@@ -470,6 +470,26 @@
       }
     },
     {
+      "id": "capture_rig",
+      "name": "Capture Rig",
+      "description": "Multi-camera capture, pose ingest and reconstruction with an overlay player",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/capture_rig/__main__.py",
+      "logo": "capture_rig.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "video_capture",
+        "camera_control",
+        "pose_estimation",
+        "video_processing"
+      ],
+      "order": 102,
+      "web": {
+        "mode": "native-window"
+      }
+    },
+    {
       "id": "golf_simulation_suite",
       "name": "Golf Simulation Suite",
       "description": "Comprehensive golf simulation suite with parameter sweeps and batch runs",
