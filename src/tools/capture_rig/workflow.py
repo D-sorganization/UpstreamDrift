@@ -110,7 +110,7 @@ CAPTURE = Step(
         "Start at address and hold still about one second (the first frames define up and the origin).",
         "Multi-camera: at least two cameras, three preferred, at least 30 degrees apart, same mode.",
         "Single camera: face-on or down-the-line; gives 2-D events and tempo, no 3-D.",
-        "10 s takes at 60-120 fps; a tape-measured segment on the golfer (hip-to-neck by default) for scale.",
+        "10 s takes at 60-120 fps; tape-measured segments on the golfer: shank (lateral knee line to ankle bone) and forearm (elbow crease to wrist bone) first, then upper arm and thigh; one reading covers both sides.",
     ),
     instructions=(
         "Set the duration, press *Record*, walk to address during the warm-up, swing, hold the finish.",
@@ -161,10 +161,10 @@ RECONSTRUCT = Step(
     requirements=(
         "Two or more ingested views.",
         "First take of a placement: intrinsics.json from the calibration step; later takes: the previous reconstruction.json.",
-        "The anchor segment and its tape-measured length in metres.",
+        "At least one tape-measured segment in metres (the first sets the scale); every additional one replaces a 5 cm anthropometric prior with a 3 mm measurement, so measure as many as you can: shank, forearm, upper_arm, thigh, shoulder_width, hip_width.",
     ),
     instructions=(
-        "Pick the start file (intrinsics or previous reconstruction), the anchor and length, optionally joints to exclude.",
+        "Pick the start file (intrinsics or previous reconstruction), enter the measured segments (shank=0.42, forearm=0.26, ...), optionally joints to exclude.",
         "Press *Reconstruct*. The summary shows RMS, rejections and the swing metrics.",
     ),
     actions=("reconstruct",),

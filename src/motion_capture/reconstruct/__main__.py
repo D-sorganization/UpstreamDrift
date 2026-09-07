@@ -63,9 +63,11 @@ def _parser() -> argparse.ArgumentParser:
     fit.add_argument("--bundle", type=Path, required=True)
     fit.add_argument(
         "--anchor",
+        action="append",
         required=True,
         metavar="SEGMENT=METRES",
-        help="one measured segment length that fixes the scale, e.g. neck=0.53",
+        help="tape-measured segment, repeatable (shank=0.42 forearm=0.26 ...); "
+        "everyday names apply to both sides; the first sets the scale",
     )
     fit.add_argument(
         "--cameras",
@@ -119,8 +121,17 @@ def cmd_fit(args: argparse.Namespace) -> int:
     if args.cameras is not None:
         records = json.loads(args.cameras.read_text(encoding="utf-8"))
         start = cameras_from_records(records)
+    from .measurements import expand_measurements, gauge
+
+    try:
+        measured = expand_measurements(args.anchor)
+    except ValueError as exc:  # includes contract violations: a usage error
+        raise SystemExit(f"--anchor: {exc}") from exc
     record = fit_bundle(
-        args.bundle, scale_anchor=_parse_anchor(args.anchor), start_cameras=start
+        args.bundle,
+        scale_anchor=gauge(measured),
+        start_cameras=start,
+        measured_lengths_m=measured,
     )
     logger.info(
         "fit %s: rms %.2f px (start %.2f), %d rejected, %d unobservable points",
