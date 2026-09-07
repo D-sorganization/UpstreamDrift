@@ -25,6 +25,7 @@ from src.shared.python.pose_estimation.observations import CameraCalibration
 
 from .bundle import BundleOptions, BundleResult, bundle_adjust, observations_from_views
 from .cameras import PinholeCamera
+from .layouts import to_reconstruct_layout
 from .metrics import bone_length_errors, camera_pose_error, joint_position_errors
 from .skeleton import DEFAULT_LENGTHS_M, JOINT_NAMES
 from .synthetic import SyntheticTruth, load_truth
@@ -149,6 +150,16 @@ def fit_bundle(
         start_cameras = cameras_from_records(truth.cameras)
     ids = [c.camera_id for c in start_cameras]
     require(all(i in views for i in ids), "start cameras must match the views", ids)
+    # Detector layouts (MediaPipe 33, BODY_25) are mapped onto the 15-joint
+    # reconstruct skeleton; midpoints carry the minimum parent confidence.
+    views = {
+        k: (
+            v
+            if tuple(v["detector_layout"]["keypoint_names"]) == JOINT_NAMES
+            else to_reconstruct_layout(v)
+        )
+        for k, v in views.items()
+    }
     obs = observations_from_views(views, ids)
     names = tuple(views[ids[0]]["detector_layout"]["keypoint_names"])
     require(names == JOINT_NAMES, "fit expects the 15-joint reconstruct layout", names)
