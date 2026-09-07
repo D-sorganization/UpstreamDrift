@@ -74,7 +74,7 @@ separated from current guidance.
 - [`design/`](design/) - 2 pages
 - [`golf-model/`](golf-model/INPUT_POSE_INVESTIGATION.md) - 1 page
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
-- [`motion_capture/`](motion_capture/) - 3 pages
+- [`motion_capture/`](motion_capture/) - 5 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
 - [`plans/`](plans/README.md) - 17 pages
 - [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
@@ -185,7 +185,7 @@ repository, which made them effectively unreachable.
 | `review_archive/`       | @quality-team         | archived  | Older review records retained in place; see the consolidation decisions below.                                                      |
 | `reviews/`              | @quality-team         | stable    | Current review records, remediation notes, and quality findings.                                                                    |
 | `sg_optimizer/`         | @physics-team         | draft     | Strokes Gained Optimizer spec, data sources, and documentation.                                                                     |
-| `shared_tools/`         | @platform-team        | stable    | UpstreamDrift <-> Tools seam: divergence inventory, per-package rulings, drift-gate docs (UD #9406).                          |
+| `shared_tools/`         | @platform-team        | stable    | UpstreamDrift <-> Tools seam: divergence inventory, per-package rulings, drift-gate docs (UD #9406).                                |
 | `sidekick/`             | @platform-team        | stable    | Sidekick shared-utilities docs, launcher sidebar, chat/provider integration, tools library, and integration guides.                 |
 | `simulation_backends/`  | @physics-team         | stable    | Backend-agnostic golf-model simulation layer (ODE / MuJoCo CPU / MuJoCo Warp GPU): user guide, launcher tile, and cross-validation. |
 | `specs/`                | @architecture-team    | stable    | Specifications that expand or support the root `SPEC.md` contract.                                                                  |
