@@ -112,11 +112,11 @@ class ClipboardMixin:
             return False
 
         # Copy all links in subtree
-        links = []
+        links: list[Link] = []
         for name in subtree_names:
-            link = model.get_link(name)
-            if link:
-                links.append(Link.from_dict(link.to_dict()))
+            source_link = model.get_link(name)
+            if source_link:
+                links.append(Link.from_dict(source_link.to_dict()))
 
         # Copy all joints within subtree
         joints: list[Joint] = []
@@ -131,10 +131,10 @@ class ClipboardMixin:
 
         # Collect materials
         materials: dict[str, Material] = {}
-        for link in links:
-            if link.visual_material:
-                materials[link.visual_material.name] = Material.from_dict(
-                    link.visual_material.to_dict()
+        for copied_link in links:
+            if copied_link.visual_material:
+                materials[copied_link.visual_material.name] = Material.from_dict(
+                    copied_link.visual_material.to_dict()
                 )
 
         self._clipboard = [(ComponentType.SUBTREE, links, joints, materials)]

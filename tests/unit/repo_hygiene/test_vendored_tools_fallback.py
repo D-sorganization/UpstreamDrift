@@ -81,14 +81,20 @@ def test_a_retired_child_copy_resolves_to_the_pinned_tree() -> None:
 
 
 @_requires_vendor
-def test_the_fallback_finder_is_consulted_last() -> None:
+def test_the_fallback_finder_is_consulted_after_the_standard_path_finder() -> None:
     """The finder is appended to ``sys.meta_path``, never inserted.
 
-    Being last is the whole safety argument: it is only reached once the normal
-    machinery has failed to find a module, so it cannot pre-empt a child copy
+    Ordering is the whole safety argument: the fallback must only be reached
+    once the normal machinery has failed, so it cannot pre-empt a child copy
     that still exists.
+
+    The invariant is "after :class:`importlib.machinery.PathFinder`", not
+    "last". Asserting last passes locally and fails under pytest, which appends
+    its own assertion-rewriting finder after this package is imported -- so
+    that stricter form tests the harness rather than the property that matters.
     """
     import sys
+    from importlib.machinery import PathFinder
 
     assert ud_src._VENDORED_TOOLS_FALLBACK_FINDER_INSTALLED is True
 
@@ -97,10 +103,16 @@ def test_the_fallback_finder_is_consulted_last() -> None:
         for index, finder in enumerate(sys.meta_path)
         if isinstance(finder, ud_src._VendoredToolsFallbackFinder)
     ]
-
     assert len(positions) == 1, "the fallback finder must be installed exactly once"
-    assert positions[0] == len(sys.meta_path) - 1, (
-        "the fallback finder must be last on sys.meta_path"
+
+    path_finder_positions = [
+        index for index, finder in enumerate(sys.meta_path) if finder is PathFinder
+    ]
+    assert path_finder_positions, "fixture assumption: PathFinder is on sys.meta_path"
+
+    assert positions[0] > path_finder_positions[-1], (
+        "the fallback finder must sit after PathFinder so a child copy that "
+        "still exists is always found first"
     )
 
 
