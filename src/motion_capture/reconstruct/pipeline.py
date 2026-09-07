@@ -27,6 +27,7 @@ from .analytics import summarize_swing
 from .cameras import PinholeCamera
 from .clean import CleanReport, clean_view
 from .bundle import observations_from_views
+from .measurements import expand_measurements, gauge
 from .fit import (
     RECONSTRUCTION_FILE,
     Reconstruction,
@@ -58,6 +59,7 @@ class SessionReconstruction(BaseModel):
     rms_px: float
     unobservable_points: int
     swing_summary_file: str | None = None
+    measured_lengths_m: dict[str, float] = {}
     fps: float | None = None
     excluded_joints: tuple[str, ...] = ()
 
@@ -96,7 +98,8 @@ def reconstruct_session(
     *,
     start_cameras: Sequence[PinholeCamera] | None = None,
     intrinsics: Sequence[tuple[str, Any, tuple[int, int]]] | None = None,
-    scale_anchor: tuple[str, float],
+    scale_anchor: tuple[str, float] | None = None,
+    measurements: Sequence[str] = (),
     acceleration_sigma_px: float = DEFAULT_ACCELERATION_SIGMA_PX,
     min_confidence: float = 0.05,
     exclude_joints: Sequence[str] = (),
@@ -112,6 +115,11 @@ def reconstruct_session(
     reports, ``reconstruction.json`` and the summary.
     """
     require(acceleration_sigma_px > 0, "acceleration_sigma_px must be positive")
+    measured = expand_measurements(measurements)
+    if scale_anchor is None:
+        scale_anchor = gauge(measured)  # the first measurement sets the scale
+    elif scale_anchor[0] not in measured:
+        measured = {scale_anchor[0]: scale_anchor[1], **measured}
     unknown = [j for j in exclude_joints if j not in JOINT_NAMES]
     require(not unknown, "exclude_joints must name fit joints", unknown)
     require(
@@ -169,7 +177,10 @@ def reconstruct_session(
             [(p.camera_id, p.inliers) for p in init.pairs],
         )
     record: Reconstruction = fit_bundle(
-        out_dir, scale_anchor=scale_anchor, start_cameras=start_cameras
+        out_dir,
+        scale_anchor=scale_anchor,
+        start_cameras=start_cameras,
+        measured_lengths_m=measured,
     )
     fps = float(views[ids[0]]["fps"])
     joints = np.load(out_dir / "joints_3d_m.npy")
@@ -184,6 +195,7 @@ def reconstruct_session(
         rms_px=record.rms_px,
         unobservable_points=record.unobservable_points,
         swing_summary_file=str(swing_file),
+        measured_lengths_m=dict(measured),
         fps=fps,
         excluded_joints=tuple(exclude_joints),
     )

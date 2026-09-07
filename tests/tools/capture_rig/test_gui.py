@@ -76,8 +76,16 @@ def test_panels_build_commands_from_their_inputs(tmp_path: Path) -> None:
     assert widget.process.options()["enable_temporal_smoothing"] is True
     widget.process.start_edit.setText(str(tmp_path / "intrinsics.json"))
     widget.process.exclude_edit.setText("nose, left_ankle")
+    with pytest.raises(ValueError, match="at least one measured"):
+        widget.command_for("reconstruct")
+    widget.process.measurements_edit.setText("shank=0.42, forearm=0.26")
     rc = widget.command_for("reconstruct")
-    assert "--intrinsics" in rc and rc[rc.index("--anchor") + 1] == "neck=0.53"
+    assert "--intrinsics" in rc and rc.count("--anchor") == 2
+    assert rc[rc.index("--anchor") + 1] == "shank=0.42"
+    widget.process.measurements_edit.setText("femur=0.4")
+    with pytest.raises(ValueError, match="unknown segment"):
+        widget.command_for("reconstruct")
+    widget.process.measurements_edit.setText("shank=0.42")
     assert rc[rc.index("--exclude-joints") + 1] == "nose,left_ankle"
     widget.process.start_edit.setText(str(tmp_path / "reconstruction.json"))
     assert "--cameras" in widget.command_for("reconstruct")

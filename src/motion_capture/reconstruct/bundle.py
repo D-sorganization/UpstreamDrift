@@ -61,6 +61,11 @@ class BundleOptions:
     # the anchor away (2.7 sigma at 1 mm on the synthetic harness) and scale
     # drifts; 0.4 % of scale is already 1.7 cm at 4 m.
     sigma_anchor_m: float = 0.0002
+    # Every other tape-measured segment (child joint -> metres, #9707): a
+    # 3 mm tape reading replaces the 5 cm anthropometric prior for that
+    # segment. The gauge segment is excluded here; it is the anchor above.
+    measured_lengths_m: Mapping[str, float] = field(default_factory=dict)
+    sigma_measured_m: float = 0.003
     huber_delta: float = 3.0  # in sigma_px units
     gate_px: float = 6.0  # rejection gate after convergence
     max_iterations: int = 100  # solver iterations (each costs several evaluations)
@@ -70,6 +75,9 @@ class BundleOptions:
             require(getattr(self, name) > 0, f"{name} must be positive")
         require(self.huber_delta > 0 and self.gate_px > 0, "delta and gate positive")
         require(self.sigma_anchor_m > 0, "sigma_anchor_m must be positive")
+        require(self.sigma_measured_m > 0, "sigma_measured_m must be positive")
+        for name, value in self.measured_lengths_m.items():
+            require(value > 0, "measured length must be positive", name)
         if self.scale_anchor is not None:
             require(self.scale_anchor[1] > 0, "scale anchor length must be positive")
         require(self.max_iterations >= 1, "max_iterations must be at least 1")
@@ -156,6 +164,12 @@ class _Problem:
             name, value = options.scale_anchor
             require(name in self.seg_index, "scale anchor must name a segment", name)
             self.anchor = (self.seg_index[name], float(value))
+        self.measured: list[tuple[int, float]] = []
+        for name, value in options.measured_lengths_m.items():
+            require(name in self.seg_index, "measured length must name a segment", name)
+            if self.anchor is not None and self.seg_index[name] == self.anchor[0]:
+                continue  # the gauge is already hard-anchored
+            self.measured.append((self.seg_index[name], float(value)))
         self.x0 = self.pack(
             cams, joints0, np.array([lengths0[name] for _, _, name in self.segments])
         )
@@ -213,6 +227,8 @@ class _Problem:
         if self.anchor is not None:
             s, value = self.anchor
             out.append(np.atleast_1d((lengths[s] - value) / o.sigma_anchor_m))
+        for s, value in self.measured:
+            out.append(np.atleast_1d((lengths[s] - value) / o.sigma_measured_m))
         return np.concatenate(out)
 
     def _camera_columns(self, c: int) -> tuple[int, int]:
@@ -317,6 +333,11 @@ class _Problem:
             rows.append(row)
             cols.append(self._length_column(self.anchor[0]))
             vals.append(1.0 / o.sigma_anchor_m)
+            row += 1
+        for s, _value in self.measured:
+            rows.append(row)
+            cols.append(self._length_column(s))
+            vals.append(1.0 / o.sigma_measured_m)
             row += 1
         n_params = self._length_column(len(self.segments))
         return csr_matrix((vals, (rows, cols)), shape=(row, n_params))

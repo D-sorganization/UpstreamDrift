@@ -55,7 +55,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.motion_capture.reconstruct.skeleton import PARENTS
+from src.motion_capture.reconstruct.measurements import TAPE_GUIDE, parse_measurement
 from src.motion_capture.rig.plan import CameraControls, CaptureMode
 from src.shared.python.core.contracts import require
 
@@ -363,15 +363,13 @@ class ProcessPanel(QGroupBox):
         self.max_frames_spin.setSpecialValueText("all")
         self.exclude_edit = QLineEdit()
         self.exclude_edit.setPlaceholderText("joints to leave out of the fit")
-        self.anchor_combo = QComboBox()
-        for child, parent_joint in PARENTS.items():
-            if parent_joint is not None:
-                self.anchor_combo.addItem(f"{child} ← {parent_joint}", child)
-        self.anchor_combo.setCurrentIndex(self.anchor_combo.findData("neck"))
-        self.anchor_spin = QDoubleSpinBox()
-        self.anchor_spin.setRange(0.05, 2.0)
-        self.anchor_spin.setDecimals(3)
-        self.anchor_spin.setValue(0.53)
+        self.measurements_edit = QLineEdit()
+        self.measurements_edit.setPlaceholderText(
+            "shank=0.42, forearm=0.26, ...  (first sets the scale; both sides)"
+        )
+        self.measurements_edit.setToolTip(
+            "\n".join(f"{name}: {how}" for name, how in TAPE_GUIDE.items())
+        )
         self.start_edit = QLineEdit()
         self.start_edit.setPlaceholderText(
             "intrinsics.json (first take) or reconstruction.json"
@@ -387,8 +385,7 @@ class ProcessPanel(QGroupBox):
         form.addRow(self.separate_set_check)
         form.addRow("Max frames", self.max_frames_spin)
         form.addRow("Exclude joints", self.exclude_edit)
-        form.addRow("Anchor segment", self.anchor_combo)
-        form.addRow("Anchor length (m)", self.anchor_spin)
+        form.addRow("Measured segments (m)", self.measurements_edit)
         form.addRow("Start cameras from", self.start_edit)
         form.addRow("Board (inner corners)", self.board_edit)
         form.addRow("Square (m)", self.square_spin)
@@ -433,8 +430,13 @@ class ProcessPanel(QGroupBox):
         if not self.exclude_edit.text().strip():
             self.exclude_edit.setText(",".join(joints))
 
-    def anchor(self) -> tuple[str, float]:
-        return str(self.anchor_combo.currentData()), float(self.anchor_spin.value())
+    def measurements(self) -> tuple[str, ...]:
+        """``NAME=METRES`` entries, validated through the measurement parser."""
+        items = _csv(self.measurements_edit.text())
+        require(bool(items), "enter at least one measured segment, e.g. shank=0.42")
+        for item in items:
+            parse_measurement(item)  # raises on an unknown name or bad length
+        return items
 
     def start_file(self) -> tuple[Path | None, Path | None]:
         """``(cameras, intrinsics)``: a ``reconstruction.json`` counts as cameras."""
@@ -800,12 +802,10 @@ class CaptureRigWidget(QWidget):
         return commands.calibrate_command(session, board=board, square_m=square)
 
     def _reconstruct(self, session: Path) -> list[str]:
-        segment, metres = self.process.anchor()
         cameras, intrinsics = self.process.start_file()
         return commands.reconstruct_command(
             session,
-            anchor_segment=segment,
-            anchor_m=metres,
+            measurements=self.process.measurements(),
             cameras=cameras,
             intrinsics=intrinsics,
             exclude_joints=self.process.exclude_joints(),
