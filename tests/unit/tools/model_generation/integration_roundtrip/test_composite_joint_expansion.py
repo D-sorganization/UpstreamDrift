@@ -53,7 +53,7 @@ class TestCompositeJointExpansion:
         )
 
         result = builder.build()
-        assert result.solver_status == "success"
+        assert result.success
         assert result.urdf_xml is not None
 
         parser = URDFParser(resolve_meshes=False)
@@ -108,7 +108,7 @@ class TestCompositeJointExpansion:
         )
 
         result = builder.build()
-        assert result.solver_status == "success"
+        assert result.success
         assert result.urdf_xml is not None
 
         parser = URDFParser(resolve_meshes=False)

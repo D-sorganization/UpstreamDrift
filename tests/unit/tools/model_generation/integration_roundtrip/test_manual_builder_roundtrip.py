@@ -32,9 +32,7 @@ class TestManualBuilderRoundtrip:
     def _roundtrip(self, builder: ManualBuilder) -> tuple[ManualBuilder, ParsedModel]:
         """Build URDF and parse it back. Returns (builder, parsed_model)."""
         result = builder.build()
-        assert result.solver_status == "success", (
-            f"Build failed: {result.error_message}"
-        )
+        assert result.success, f"Build failed: {result.error_message}"
         assert result.urdf_xml is not None
 
         parser = URDFParser(resolve_meshes=False)

@@ -158,9 +158,7 @@ class TestURDFXMLWellFormedness:
         builder.add_link(link)
         result = builder.build()
 
-        assert result.solver_status == "success", (
-            f"Build failed: {result.error_message}"
-        )
+        assert result.success, f"Build failed: {result.error_message}"
         assert result.urdf_xml is not None
 
         # Must be parseable XML
@@ -198,7 +196,7 @@ class TestURDFXMLWellFormedness:
         builder.add_link(link)
         result = builder.build()
 
-        assert result.solver_status == "success"
+        assert result.success
         assert result.urdf_xml is not None
         root = DefusedET.fromstring(result.urdf_xml)
         assert root.tag == "robot"
@@ -223,7 +221,7 @@ class TestURDFXMLWellFormedness:
         builder.add_link(link)
         result = builder.build()
 
-        assert result.solver_status == "success"
+        assert result.success
         assert result.urdf_xml is not None
         root = DefusedET.fromstring(result.urdf_xml)
         assert root.tag == "robot"
@@ -268,9 +266,7 @@ class TestLinkJointHierarchyConsistency:
         builder.add_joint(joint)
         result = builder.build()
 
-        assert result.solver_status == "success", (
-            f"Build failed: {result.error_message}"
-        )
+        assert result.success, f"Build failed: {result.error_message}"
         assert result.urdf_xml is not None
 
         root = DefusedET.fromstring(result.urdf_xml)
@@ -319,7 +315,7 @@ class TestLinkJointHierarchyConsistency:
             builder.add_joint(joint)
 
         result = builder.build()
-        assert result.solver_status == "success"
+        assert result.success
         assert len(result.links) == n_children + 1
         assert len(result.joints) == n_children
 

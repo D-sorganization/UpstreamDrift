@@ -11,18 +11,18 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 520,
-    "diverged": 292,
+    "identical": 476,
+    "diverged": 263,
     "ud-only": 1184,
-    "tools-only": 444,
-    "spelling-only": 153
+    "tools-only": 517,
+    "spelling-only": 133
   },
   "packages": {
     "README.md": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "README_PACKAGE.md": {
@@ -166,10 +166,10 @@
       "spelling-only": 10
     },
     "chat_contracts": {
-      "identical": 4,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 4,
       "spelling-only": 0
     },
     "cli_utils.py": {
@@ -187,17 +187,17 @@
       "spelling-only": 0
     },
     "codemap": {
-      "identical": 8,
-      "diverged": 6,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 14,
       "spelling-only": 0
     },
     "compatibility.py": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "config": {
@@ -237,10 +237,10 @@
     },
     "cors.py": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 1
+      "tools-only": 1,
+      "spelling-only": 0
     },
     "dashboard": {
       "identical": 0,
@@ -285,10 +285,10 @@
       "spelling-only": 0
     },
     "deprecation.py": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "diagnostics": {
@@ -341,10 +341,10 @@
       "spelling-only": 0
     },
     "file_watcher": {
-      "identical": 2,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 2,
       "spelling-only": 0
     },
     "golf_club": {
@@ -432,10 +432,10 @@
       "spelling-only": 0
     },
     "logging_pkg": {
-      "identical": 3,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 3,
       "spelling-only": 0
     },
     "math_utils": {
@@ -450,7 +450,7 @@
       "diverged": 49,
       "ud-only": 18,
       "tools-only": 0,
-      "spelling-only": 27
+      "spelling-only": 22
     },
     "motion_matching": {
       "identical": 0,
@@ -523,10 +523,10 @@
       "spelling-only": 0
     },
     "plot_engine": {
-      "identical": 10,
-      "diverged": 3,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 1,
+      "tools-only": 14,
       "spelling-only": 0
     },
     "plot_labels.py": {
@@ -579,11 +579,11 @@
       "spelling-only": 0
     },
     "programmatic_pid": {
-      "identical": 10,
-      "diverged": 14,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 10
+      "tools-only": 24,
+      "spelling-only": 0
     },
     "putting_dynamics": {
       "identical": 0,
@@ -622,23 +622,23 @@
     },
     "rotation_transforms": {
       "identical": 0,
-      "diverged": 3,
-      "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 3
-    },
-    "safe_eval.py": {
-      "identical": 1,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 3,
+      "spelling-only": 0
+    },
+    "safe_eval.py": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "safe_pandas_eval.py": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 1,
       "spelling-only": 0
     },
     "screw_theory": {
@@ -649,10 +649,10 @@
       "spelling-only": 0
     },
     "scripting": {
-      "identical": 2,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 2,
       "spelling-only": 0
     },
     "security": {
@@ -712,10 +712,10 @@
       "spelling-only": 0
     },
     "tests": {
-      "identical": 1,
+      "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 5,
+      "tools-only": 6,
       "spelling-only": 0
     },
     "theme": {
@@ -762,10 +762,10 @@
     },
     "upstream_drift_tools": {
       "identical": 0,
-      "diverged": 1,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
-      "spelling-only": 1
+      "tools-only": 1,
+      "spelling-only": 0
     },
     "ux": {
       "identical": 0,
@@ -806,13 +806,13 @@
   "files": [
     {
       "path": "README.md",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "README.md",
       "subpackage": "",
-      "ud_bytes": 4629,
+      "ud_bytes": null,
       "tools_bytes": 4629,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -5378,49 +5378,49 @@
     },
     {
       "path": "chat_contracts/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat_contracts",
       "subpackage": "",
-      "ud_bytes": 781,
+      "ud_bytes": null,
       "tools_bytes": 781,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat_contracts/conversation.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat_contracts",
       "subpackage": "",
-      "ud_bytes": 980,
+      "ud_bytes": null,
       "tools_bytes": 980,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat_contracts/credentials.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat_contracts",
       "subpackage": "",
-      "ud_bytes": 5021,
+      "ud_bytes": null,
       "tools_bytes": 5021,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "chat_contracts/models.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "chat_contracts",
       "subpackage": "",
-      "ud_bytes": 4642,
+      "ud_bytes": null,
       "tools_bytes": 4642,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -5498,180 +5498,180 @@
     },
     {
       "path": "codemap/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 762,
+      "ud_bytes": null,
       "tools_bytes": 762,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_js.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 5430,
+      "ud_bytes": null,
       "tools_bytes": 5430,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_markdown.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 1516,
+      "ud_bytes": null,
       "tools_bytes": 1516,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_python.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4440,
+      "ud_bytes": null,
       "tools_bytes": 4447,
-      "byte_delta": -7,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_lang_rust.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 3220,
+      "ud_bytes": null,
       "tools_bytes": 3220,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/_ts_common.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 3544,
+      "ud_bytes": null,
       "tools_bytes": 3693,
-      "byte_delta": -149,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/api.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 10316,
+      "ud_bytes": null,
       "tools_bytes": 10522,
-      "byte_delta": -206,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/cli.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4938,
+      "ud_bytes": null,
       "tools_bytes": 4938,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/db.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 6245,
+      "ud_bytes": null,
       "tools_bytes": 6245,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/embeddings.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 912,
+      "ud_bytes": null,
       "tools_bytes": 912,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/indexer.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 10033,
+      "ud_bytes": null,
       "tools_bytes": 10768,
-      "byte_delta": -735,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/mcp_server.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 2830,
+      "ud_bytes": null,
       "tools_bytes": 2832,
-      "byte_delta": -2,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/parsers.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 2533,
+      "ud_bytes": null,
       "tools_bytes": 2533,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "codemap/watcher.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "codemap",
       "subpackage": "",
-      "ud_bytes": 4851,
+      "ud_bytes": null,
       "tools_bytes": 4941,
-      "byte_delta": -90,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "compatibility.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "compatibility.py",
       "subpackage": "",
-      "ud_bytes": 536,
+      "ud_bytes": null,
       "tools_bytes": 612,
-      "byte_delta": -76,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -6146,15 +6146,15 @@
     },
     {
       "path": "cors.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "cors.py",
       "subpackage": "",
-      "ud_bytes": 4336,
+      "ud_bytes": null,
       "tools_bytes": 4332,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "dashboard/__init__.py",
@@ -6746,13 +6746,13 @@
     },
     {
       "path": "deprecation.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "deprecation.py",
       "subpackage": "",
-      "ud_bytes": 2359,
+      "ud_bytes": null,
       "tools_bytes": 2359,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -7262,25 +7262,25 @@
     },
     {
       "path": "file_watcher/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "file_watcher",
       "subpackage": "",
-      "ud_bytes": 1775,
+      "ud_bytes": null,
       "tools_bytes": 1775,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "file_watcher/_fallback.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "file_watcher",
       "subpackage": "",
-      "ud_bytes": 8179,
+      "ud_bytes": null,
       "tools_bytes": 8179,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -9386,37 +9386,37 @@
     },
     {
       "path": "logging_pkg/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "logging_pkg",
       "subpackage": "",
-      "ud_bytes": 714,
+      "ud_bytes": null,
       "tools_bytes": 714,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "logging_pkg/logger_utils.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "logging_pkg",
       "subpackage": "",
-      "ud_bytes": 1476,
+      "ud_bytes": null,
       "tools_bytes": 1476,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "logging_pkg/logging_config.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "logging_pkg",
       "subpackage": "",
-      "ud_bytes": 6295,
+      "ud_bytes": null,
       "tools_bytes": 6295,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -9449,12 +9449,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "",
-      "ud_bytes": 2101,
+      "ud_bytes": 2149,
       "tools_bytes": 2089,
-      "byte_delta": 12,
+      "byte_delta": 60,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/_convenience.py",
@@ -9653,12 +9653,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "builders",
-      "ud_bytes": 7324,
+      "ud_bytes": 9372,
       "tools_bytes": 7312,
-      "byte_delta": 12,
+      "byte_delta": 2060,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/builders/manual_builder.py",
@@ -10001,24 +10001,24 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6099,
+      "ud_bytes": 6261,
       "tools_bytes": 6095,
-      "byte_delta": 4,
+      "byte_delta": 166,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/editor_modifications.py",
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 22380,
+      "ud_bytes": 24874,
       "tools_bytes": 22376,
-      "byte_delta": 4,
+      "byte_delta": 2498,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/editor_types.py",
@@ -10037,12 +10037,12 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 21752,
+      "ud_bytes": 21958,
       "tools_bytes": 21744,
-      "byte_delta": 8,
+      "byte_delta": 214,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/editor/text_editor.py",
@@ -10061,9 +10061,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "editor",
-      "ud_bytes": 6689,
+      "ud_bytes": 7355,
       "tools_bytes": 6764,
-      "byte_delta": -75,
+      "byte_delta": 591,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -16742,121 +16742,121 @@
     },
     {
       "path": "plot_engine/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 1212,
+      "ud_bytes": null,
       "tools_bytes": 1212,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/contour.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 2538,
+      "ud_bytes": null,
       "tools_bytes": 2538,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/matplotlib_renderer.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 17977,
+      "ud_bytes": null,
       "tools_bytes": 18042,
-      "byte_delta": -65,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/plotly_converter.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 13094,
+      "ud_bytes": null,
       "tools_bytes": 13094,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/protocols.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 1868,
+      "ud_bytes": null,
       "tools_bytes": 1868,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/pyqt6_widget.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 4886,
+      "ud_bytes": null,
       "tools_bytes": 6779,
-      "byte_delta": -1893,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/specs.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 3898,
+      "ud_bytes": null,
       "tools_bytes": 3898,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 40,
+      "ud_bytes": null,
       "tools_bytes": 40,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_matplotlib_renderer.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 15762,
+      "ud_bytes": null,
       "tools_bytes": 15762,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_plotly_converter.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 16539,
+      "ud_bytes": null,
       "tools_bytes": 16539,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -16874,36 +16874,36 @@
     },
     {
       "path": "plot_engine/tests/test_specs.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 13326,
+      "ud_bytes": null,
       "tools_bytes": 13326,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/tests/test_trendline.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "tests",
-      "ud_bytes": 8621,
+      "ud_bytes": null,
       "tools_bytes": 8621,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "plot_engine/trendline.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "plot_engine",
       "subpackage": "",
-      "ud_bytes": 6447,
+      "ud_bytes": null,
       "tools_bytes": 6322,
-      "byte_delta": 125,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -18242,288 +18242,288 @@
     },
     {
       "path": "programmatic_pid/AGENT_INSTRUCTIONS.md",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 11539,
+      "ud_bytes": null,
       "tools_bytes": 11539,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2865,
+      "ud_bytes": null,
       "tools_bytes": 2813,
-      "byte_delta": 52,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/cli.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 25845,
+      "ud_bytes": null,
       "tools_bytes": 25805,
-      "byte_delta": 40,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/controls.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 6160,
+      "ud_bytes": null,
       "tools_bytes": 6148,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/document.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 9536,
+      "ud_bytes": null,
       "tools_bytes": 9499,
-      "byte_delta": 37,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/equipment.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 15222,
+      "ud_bytes": null,
       "tools_bytes": 15218,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/generator.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2842,
+      "ud_bytes": null,
       "tools_bytes": 2790,
-      "byte_delta": 52,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/geometry.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 4180,
+      "ud_bytes": null,
       "tools_bytes": 4176,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/instruments.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 1941,
+      "ud_bytes": null,
       "tools_bytes": 1933,
-      "byte_delta": 8,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/layout.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 8686,
+      "ud_bytes": null,
       "tools_bytes": 8674,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/profiles.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 3528,
+      "ud_bytes": null,
       "tools_bytes": 3528,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/py.typed",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 0,
+      "ud_bytes": null,
       "tools_bytes": 0,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/rendering.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 10633,
+      "ud_bytes": null,
       "tools_bytes": 10637,
-      "byte_delta": -4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/spec_loader.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 10159,
+      "ud_bytes": null,
       "tools_bytes": 10143,
-      "byte_delta": 16,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/streams.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 5360,
+      "ud_bytes": null,
       "tools_bytes": 5348,
-      "byte_delta": 12,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 36,
+      "ud_bytes": null,
       "tools_bytes": 36,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_edge_cases.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 5416,
+      "ud_bytes": null,
       "tools_bytes": 5416,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_geometry.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 6054,
+      "ud_bytes": null,
       "tools_bytes": 6054,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_pipeline_e2e.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 10919,
+      "ud_bytes": null,
       "tools_bytes": 10919,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_types.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 4343,
+      "ud_bytes": null,
       "tools_bytes": 4343,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/tests/test_validation.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "tests",
-      "ud_bytes": 7631,
+      "ud_bytes": null,
       "tools_bytes": 7631,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/title_block.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 7550,
+      "ud_bytes": null,
       "tools_bytes": 7521,
-      "byte_delta": 29,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/types.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 2922,
+      "ud_bytes": null,
       "tools_bytes": 2922,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "programmatic_pid/validation.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "programmatic_pid",
       "subpackage": "",
-      "ud_bytes": 6644,
+      "ud_bytes": null,
       "tools_bytes": 6623,
-      "byte_delta": 21,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -18806,61 +18806,61 @@
     },
     {
       "path": "rotation_transforms/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 802,
+      "ud_bytes": null,
       "tools_bytes": 794,
-      "byte_delta": 8,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "rotation_transforms/reference_frame_operations.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 7070,
+      "ud_bytes": null,
       "tools_bytes": 7066,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "rotation_transforms/rotation.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "rotation_transforms",
       "subpackage": "",
-      "ud_bytes": 6132,
+      "ud_bytes": null,
       "tools_bytes": 6128,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "safe_eval.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "safe_eval.py",
       "subpackage": "",
-      "ud_bytes": 15127,
+      "ud_bytes": null,
       "tools_bytes": 15127,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "safe_pandas_eval.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "safe_pandas_eval.py",
       "subpackage": "",
-      "ud_bytes": 3964,
+      "ud_bytes": null,
       "tools_bytes": 3964,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -18914,25 +18914,25 @@
     },
     {
       "path": "scripting/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "scripting",
       "subpackage": "",
-      "ud_bytes": 26,
+      "ud_bytes": null,
       "tools_bytes": 26,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "scripting/scripting_env.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "scripting",
       "subpackage": "",
-      "ud_bytes": 28878,
+      "ud_bytes": null,
       "tools_bytes": 28878,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -28610,13 +28610,13 @@
     },
     {
       "path": "tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "tests",
       "subpackage": "",
-      "ud_bytes": 36,
+      "ud_bytes": null,
       "tools_bytes": 36,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -29738,15 +29738,15 @@
     },
     {
       "path": "upstream_drift_tools/__init__.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "upstream_drift_tools",
       "subpackage": "",
-      "ud_bytes": 853,
+      "ud_bytes": null,
       "tools_bytes": 849,
-      "byte_delta": 4,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "ux/__init__.py",
@@ -30085,5 +30085,3425 @@
       "spelling_only": false
     }
   ],
-  "authorship": []
+  "authorship": [
+    {
+      "path": "__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/_settings_model.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/access_policy.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/anthropic_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/base.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/bitnet_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/claude_code_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/cli_provider_setup.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/cline_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/codex_cli_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/factory.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/gemini_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/gemini_cli_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/github_cli_provider.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/ollama_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/openai_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/adapters/rust_adapter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/auth/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/auth/authentication.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/config.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/education.py",
+      "ud": {
+        "author": "d-sorgcodexagent[bot]",
+        "date": "2026-08-13",
+        "commit": "1d6af73d450be359b3459b466472fa7ef922fa37"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_adapter_lifecycle.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_api_keys.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_indexing.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_input_area.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_message_display.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_panel_header.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_panel_tools.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_provider_config_registry.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_provider_config_widgets.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_provider_registry_data.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_providers_tab.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/_rag_tab.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/assistant_panel.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "b68d59642c9f18b3cd1a2185c867b617f624a555"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/assistant_widgets.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/history_sidebar.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/session_manager.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/gui/settings_dialog.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/integrations/affine.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/integrations/github_mcp/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/integrations/github_mcp/discovery.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/integrations/github_mcp/integration.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/integrations/github_mcp/server_config.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/integrations/linear.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/integrations/notion.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/integrations/obsidian.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/client.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/config_loader.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/config_writer.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/gui.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/pool.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/presets.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/widgets/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/widgets/integrations_health_dashboard_widget.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/mcp/widgets/mcp_servers_prefs_widget.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/memory_manager.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/peer_review/coordinator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/peer_review/gui.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/rag/context_provider.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/rag/indexer_worker.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/rag/simple_rag.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/sample_tools.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-04",
+        "commit": "b88ce9af526537dc8cd7c9061c7cf43bda677e81"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/system_prompts.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-04",
+        "commit": "b88ce9af526537dc8cd7c9061c7cf43bda677e81"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/thread_condensation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/tool_registry.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/tools/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/tools/agent_control.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/tools/cli_tools.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/tools/codemap_tools.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/tools/file_ops.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "ai/tools/sidekick_analytics.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-04",
+        "commit": "b88ce9af526537dc8cd7c9061c7cf43bda677e81"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/api/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/app.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/contracts/pressure_drop_v2.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/health.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/routers/flow_rate.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/routers/ode_solver.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/routers/pressure_drop.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/routers/pressure_drop_v2.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/routers/rotation_converter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/routers/symbolic_solver.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-18",
+        "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/routers/thermal_profile.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/tests/test_calc_backend.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/tests/test_calc_backend_gaps.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "calc_backend/tests/test_symbolic_solver.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-18",
+        "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/_chat_dock_widget_qt.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-12",
+        "commit": "e3ea36a8bb2115081d1f7caa8f8aa7544afa74c4"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/chat_dock_widget.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/condensation/condenser.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/condensation/strategy.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/credentials.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/export/copy_clipboard.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/export/html_exporter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/export/markdown_exporter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/export/secret_redactor.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/export/text_exporter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/models.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/quick_bar.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/service_base.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/skills_manager.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/tests/test_chat_drift.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "chat/tests/test_workspace_bridge.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "config/__init__.py",
+      "ud": {
+        "author": "codex-scheduled-tasks[bot]",
+        "date": "2026-06-13",
+        "commit": "b4ddf7b30a4fc64eb4c83781c2005c0eefb6e0fa"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "config/environment.py",
+      "ud": {
+        "author": "codex-scheduled-tasks[bot]",
+        "date": "2026-05-26",
+        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "contracts.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "data_processing/processor.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "data_processor_io/rust_engine.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-07",
+        "commit": "0782853295e005af68818617e4725eb980890f43"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "gui_launcher/launcher.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "gui_launcher/launcher_web.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "gui_launcher/registry.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "gui_launcher/tool_manifest.yaml",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-04",
+        "commit": "942c2dd23716ec3af9387aa141f517cc5af8dcac"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "gui_launcher/tools_sidebar_integration.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-05-29",
+        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/contracts.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/core/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/core/anthropometry.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/core/body_parameters.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-09",
+        "commit": "fd45b2bb68a5006bc70158e2a4b3948e72cb19eb"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/core/model.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-18",
+        "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/_makehuman_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/_mesh_types.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/_primitive_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/_smplx_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-09",
+        "commit": "fd45b2bb68a5006bc70158e2a4b3948e72cb19eb"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/mesh_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/mesh_generator_primitive.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/mesh_generator_smplx.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/generators/urdf_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/interfaces/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/interfaces/api.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/mesh/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/mesh/inertia_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/mesh/primitive_inertia.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-03",
+        "commit": "ef1c6ec70db25efaf8bcb021d4390d95224a6fbf"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/presets/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/presets/loader.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/tests/test_urdf_contracts_integration.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "humanoid_character_builder/validation/physics_validator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "import_aliases.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-06",
+        "commit": "c0b1a96de98ef4adbfa212c65ffbef93652c4bc1"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-06",
+        "commit": "14e3eed3b4138b2ed354d3469150dc297fe4364a"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/_convenience.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/api/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_assets.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_core.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_fastapi.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_generation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_routes.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/api/rest_api_support.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/builders/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/builders/base_builder.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-06",
+        "commit": "613cf5b2ef8861f5ad5105a9313ccabfea396167"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/builders/manual_builder.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/builders/parametric_builder.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/builders/urdf_writer.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/cli/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/converters/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/converters/format_utils.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/converters/mjcf_converter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/converters/simscape/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/converters/simscape/mdl_parser.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/converters/simscape/simscape_converter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/converters/urdf_parser.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/core/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/core/contracts.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/core/physics_validation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/core/types.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/core/validation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/editor/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/editor/editor_clipboard.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-06",
+        "commit": "613cf5b2ef8861f5ad5105a9313ccabfea396167"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/editor/editor_modifications.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-06",
+        "commit": "14e3eed3b4138b2ed354d3469150dc297fe4364a"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/editor/editor_types.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/editor/frankenstein_editor.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-06",
+        "commit": "613cf5b2ef8861f5ad5105a9313ccabfea396167"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/editor/text_editor_diff_mixin.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-09-06",
+        "commit": "8fa6fefa8a4a3e9357011a32e17c30fcd66f19ee"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/explorer/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/explorer/model_explorer.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/export/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/humanoid/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/inertia/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/inertia/calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/library/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/library/_rate_limiter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/library/github_importer.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/library/model_library.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/library/repository.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/library/unified_loader.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/mesh/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/tests/test_contracts.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/tests/test_github_importer.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "model_generation/tests/test_physics_validation.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "plotting/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "plotting/export.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-08-29",
+        "commit": "8817e6c2833f8aa0a5c119abbd57cfde6a9d525d"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "plotting/identity.py",
+      "ud": {
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-08-29",
+        "commit": "8817e6c2833f8aa0a5c119abbd57cfde6a9d525d"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "reporting/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "reporting/generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/__main__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/agent/action_service.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/calculators/electrical/glass_interface.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/calculators/thermo/steam_engine.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/calculators/thermo/thermo_properties.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/data_io.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/data_processing/core.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-18",
+        "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/data_processing/io.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/latex_renderer.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/notes_store.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/notes_tab.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/acid_gas_dewpoint_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/analysis_utils.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/baghouse_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/constants.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/electrode_advancement_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/optimization.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/_legacy.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/engine/_flow_calculations.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/engine/_friction_factors.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/pressure_drop_results.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/pressure_drop_calculator/utils/flow_rate_converter.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-05-20",
+        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/psa_package/psa_gui.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/psa_package/psa_webapp.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/psa_package/ui/main_window.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/psa_package/ui/sensitivity_plot.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/scrubber_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/syngas_water_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/process_calculators/wgs_reactor_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/selected_tab_panel.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/standalone/onboarding.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/standalone/preferences.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/standalone/runner.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/standalone/session_store.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/standalone/window.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tab_context_menu.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tests/calculators/conversion/test_conversion_accuracy_3384_3388_3389.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tests/process_calculators/test_analysis_utils.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tests/process_calculators/test_multi_param_analysis.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tests/process_calculators/test_syngas_water_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tests/test_analysis_utils.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tests/test_baghouse_calculator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tests/test_calculator_state_mixin.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/tests/test_launcher_factory.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/catppuccin_theme.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/mixins/calculator_state_mixin.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/calculator_plotting.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/chat_tab.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/jupyter_tab/notebook_session.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/jupyter_tab/widget.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/os_terminal.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/sidebar.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/state_profile_actions.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/theme_settings.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/tools_sidebar/visibility_persistence.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/base_calculator_widget.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/data_processor_widget.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-18",
+        "commit": "95c92509a4e13fdfea6d5f56f020a4d7556ccbeb"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/mixins/data_processor_ops.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/ui/widgets/unit_converter_widget.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/utils/json_io.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "sidekick/utils/state_manager.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "signal_toolkit/__init__.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "signal_toolkit/calculus.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "signal_toolkit/fitting.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-18",
+        "commit": "74e0b8657cd4e03a850af026a0ccf41d645af084"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "signal_toolkit/io.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "signal_toolkit/polynomial_generator.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "signal_toolkit/widget_processing.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    },
+    {
+      "path": "theme/zoom.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-04",
+        "commit": "3d93bb2c89813e17551814d3be7e895f791e29af"
+      }
+    }
+  ]
 }

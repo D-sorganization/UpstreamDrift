@@ -20,6 +20,7 @@ from src.shared.python.model_generation.core.types import (  # noqa: E402
     Link,
     Origin,
 )
+from src.shared.python.contracts import require  # noqa: E402
 
 if TYPE_CHECKING:
     from shared.python.model_generation.converters.urdf_parser import ParsedModel
@@ -57,6 +58,31 @@ class ModificationMixin:
         self, base_name: str, existing_names: set[str]
     ) -> str: ...  # type: ignore[empty-body]
 
+    def _get_writable_model(self, model_id: str) -> ParsedModel | None:
+        """Return the model if it exists and may be modified, else ``None``.
+
+        Every mutating operation on this mixin opened with the same three
+        lines -- look the model up, log and bail if it is missing, log and bail
+        if it is read-only. Duplicating that made it easy to omit the read-only
+        check, which fails silently by mutating a model the caller declared
+        immutable.
+
+        Args:
+            model_id: Identifier of the model to modify.
+
+        Returns:
+            The model, or ``None`` when it is unknown or read-only. Callers
+            return their own failure value; the reason is logged here.
+        """
+        model = self._models.get(model_id)
+        if not model:
+            logger.error(f"Model '{model_id}' not found")
+            return None
+        if model.read_only:
+            logger.error(f"Model '{model_id}' is read-only")
+            return None
+        return model
+
     # ============================================================
     # Direct Modifications
     # ============================================================
@@ -78,6 +104,8 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(link_name), "link_name must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
@@ -143,6 +171,8 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(root_link), "root_link must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
@@ -196,6 +226,9 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(old_name), "old_name must be a non-empty string")
+        require(bool(new_name), "new_name must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
         if not new_name or not new_name.strip():
@@ -260,6 +293,9 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(old_name), "old_name must be a non-empty string")
+        require(bool(new_name), "new_name must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
         if not new_name or not new_name.strip():
@@ -311,8 +347,8 @@ class ModificationMixin:
         Returns:
             True if modified
         """
-        if model_id is None:
-            raise ValueError("model_id must be provided")
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(joint_name), "joint_name must be a non-empty string")
         model = self._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
@@ -392,6 +428,9 @@ class ModificationMixin:
         Returns:
             True if attached
         """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(parent_link), "parent_link must be a non-empty string")
+        require(bool(child_link), "child_link must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
@@ -454,6 +493,8 @@ class ModificationMixin:
         Returns:
             True if detached
         """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(link_name), "link_name must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
@@ -501,6 +542,8 @@ class ModificationMixin:
         Returns:
             True if applied
         """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(prefix), "prefix must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
@@ -650,6 +693,8 @@ class ModificationMixin:
         Returns:
             List of created link names
         """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(root_link), "root_link must be a non-empty string")
         _VALID_AXES = {"x", "y", "z"}
         if mirror_axis not in _VALID_AXES:
             raise ValueError(

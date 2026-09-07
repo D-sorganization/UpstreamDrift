@@ -176,7 +176,7 @@ class TestSimscapeConverter:
         converter = SimscapeToURDFConverter()
         result = converter.convert_string(SIMPLE_MDL, format="mdl")
 
-        if result.solver_status == "success" and result.urdf_string:
+        if result.success and result.urdf_string:
             assert "<robot" in result.urdf_string
             assert "</robot>" in result.urdf_string
 

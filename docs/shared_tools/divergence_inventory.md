@@ -14,7 +14,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Package | Identical | Diverged | of which spelling-only | UD-only | Tools-only | Overlap |
 |---|---:|---:|---:|---:|---:|---:|
-| `README.md` | 1 | 0 | 0 | 0 | 0 | 1 |
+| `README.md` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `README_PACKAGE.md` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `__init__.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `_contracts_decorators.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -35,24 +35,24 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `canonical_core` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `capabilities.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `chat` | 40 | 17 | 10 | 1 | 0 | 57 |
-| `chat_contracts` | 4 | 0 | 0 | 0 | 0 | 4 |
+| `chat_contracts` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `cli_utils.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `club_data` | 0 | 0 | 0 | 5 | 0 | 0 |
-| `codemap` | 8 | 6 | 0 | 0 | 0 | 14 |
-| `compatibility.py` | 0 | 1 | 0 | 0 | 0 | 1 |
+| `codemap` | 0 | 0 | 0 | 0 | 14 | 0 |
+| `compatibility.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `config` | 0 | 2 | 0 | 13 | 0 | 2 |
 | `contracts.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `control_features_registry.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `control_interface.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `core` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `cors.py` | 0 | 1 | 1 | 0 | 0 | 1 |
+| `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `dashboard` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `data_io` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `data_processing` | 3 | 1 | 0 | 1 | 0 | 4 |
 | `data_processor` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `data_processor_io` | 2 | 1 | 0 | 0 | 0 | 3 |
 | `dataset_tools` | 0 | 0 | 0 | 3 | 0 | 0 |
-| `deprecation.py` | 1 | 0 | 0 | 0 | 0 | 1 |
+| `deprecation.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `diagnostics` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `docker_config.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `engine_core` | 0 | 0 | 0 | 21 | 0 | 0 |
@@ -60,7 +60,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `estimation` | 0 | 0 | 0 | 8 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
-| `file_watcher` | 2 | 0 | 0 | 0 | 0 | 2 |
+| `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `golf_club` | 0 | 0 | 0 | 0 | 38 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -73,9 +73,9 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `launch_monitor` | 0 | 0 | 0 | 0 | 29 | 0 |
 | `launcher_embed` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `launcher_factory.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `logging_pkg` | 3 | 0 | 0 | 0 | 0 | 3 |
+| `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_generation` | 31 | 49 | 27 | 18 | 0 | 80 |
+| `model_generation` | 31 | 49 | 22 | 18 | 0 | 80 |
 | `motion_matching` | 0 | 0 | 0 | 90 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
@@ -86,7 +86,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `physics` | 0 | 0 | 0 | 70 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
-| `plot_engine` | 10 | 3 | 0 | 0 | 1 | 13 |
+| `plot_engine` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `plot_labels.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `plot_style` | 0 | 0 | 0 | 34 | 0 | 0 |
 | `plot_theme` | 6 | 0 | 0 | 1 | 0 | 6 |
@@ -94,17 +94,17 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `pose_editor` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `pose_estimation` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `pose_interchange` | 0 | 0 | 0 | 25 | 0 | 0 |
-| `programmatic_pid` | 10 | 14 | 10 | 0 | 0 | 24 |
+| `programmatic_pid` | 0 | 0 | 0 | 0 | 24 | 0 |
 | `putting_dynamics` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `pyproject.toml` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `qt_utils` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `realtime` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `reporting` | 0 | 2 | 0 | 5 | 0 | 2 |
-| `rotation_transforms` | 0 | 3 | 3 | 0 | 0 | 3 |
-| `safe_eval.py` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `safe_pandas_eval.py` | 1 | 0 | 0 | 0 | 0 | 1 |
+| `rotation_transforms` | 0 | 0 | 0 | 0 | 3 | 0 |
+| `safe_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
+| `safe_pandas_eval.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `screw_theory` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `scripting` | 2 | 0 | 0 | 0 | 0 | 2 |
+| `scripting` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `sidekick` | 246 | 63 | 25 | 36 | 21 | 309 |
@@ -113,20 +113,20 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `swing_sim` | 0 | 0 | 0 | 0 | 348 | 0 |
-| `tests` | 1 | 0 | 0 | 0 | 5 | 1 |
+| `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `theme` | 21 | 1 | 0 | 4 | 0 | 22 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `training` | 0 | 0 | 0 | 26 | 0 | 0 |
 | `trusted_git.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ui` | 4 | 0 | 0 | 27 | 0 | 4 |
 | `upstream_drift` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `upstream_drift_tools` | 0 | 1 | 1 | 0 | 0 | 1 |
+| `upstream_drift_tools` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `ux` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **520** | **292** | **153** | **1184** | **444** | **812** |
+| **Total** | **476** | **263** | **133** | **1184** | **517** | **739** |
 
 ## Diverged Files by Package
 
@@ -134,411 +134,347 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `__init__.py` | +190 |  | ? | ? |
+| `__init__.py` | +190 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `ai` (72 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `ai/_settings_model.py` | +16 | yes | ? | ? |
-| `ai/access_policy.py` | +8 | yes | ? | ? |
-| `ai/adapters/__init__.py` | +36 | yes | ? | ? |
-| `ai/adapters/anthropic_adapter.py` | -356 |  | ? | ? |
-| `ai/adapters/base.py` | +16 | yes | ? | ? |
-| `ai/adapters/bitnet_adapter.py` | -2079 |  | ? | ? |
-| `ai/adapters/claude_code_adapter.py` | +16 | yes | ? | ? |
-| `ai/adapters/cli_provider_setup.py` | +4 | yes | ? | ? |
-| `ai/adapters/cline_adapter.py` | -42 |  | ? | ? |
-| `ai/adapters/codex_cli_adapter.py` | +16 | yes | ? | ? |
-| `ai/adapters/factory.py` | +8 | yes | ? | ? |
-| `ai/adapters/gemini_adapter.py` | -1125 |  | ? | ? |
-| `ai/adapters/gemini_cli_adapter.py` | +16 | yes | ? | ? |
-| `ai/adapters/github_cli_provider.py` | +16 | yes | ? | ? |
-| `ai/adapters/ollama_adapter.py` | -1852 |  | ? | ? |
-| `ai/adapters/openai_adapter.py` | -356 |  | ? | ? |
-| `ai/adapters/rust_adapter.py` | +12 | yes | ? | ? |
-| `ai/auth/__init__.py` | +4 | yes | ? | ? |
-| `ai/auth/authentication.py` | +47 |  | ? | ? |
-| `ai/config.py` | +8 | yes | ? | ? |
-| `ai/education.py` | -65 |  | ? | ? |
-| `ai/gui/_adapter_lifecycle.py` | +12 | yes | ? | ? |
-| `ai/gui/_api_keys.py` | +12 | yes | ? | ? |
-| `ai/gui/_indexing.py` | +12 | yes | ? | ? |
-| `ai/gui/_input_area.py` | +8 | yes | ? | ? |
-| `ai/gui/_message_display.py` | +8 | yes | ? | ? |
-| `ai/gui/_panel_header.py` | +8 | yes | ? | ? |
-| `ai/gui/_panel_tools.py` | +4 | yes | ? | ? |
-| `ai/gui/_provider_config_registry.py` | +8 | yes | ? | ? |
-| `ai/gui/_provider_config_widgets.py` | +16 | yes | ? | ? |
-| `ai/gui/_provider_registry_data.py` | +4 | yes | ? | ? |
-| `ai/gui/_providers_tab.py` | +8 | yes | ? | ? |
-| `ai/gui/_rag_tab.py` | +8 | yes | ? | ? |
-| `ai/gui/assistant_panel.py` | +84 | yes | ? | ? |
-| `ai/gui/assistant_widgets.py` | +16 | yes | ? | ? |
-| `ai/gui/history_sidebar.py` | +4 | yes | ? | ? |
-| `ai/gui/session_manager.py` | -207 |  | ? | ? |
-| `ai/gui/settings_dialog.py` | +48 | yes | ? | ? |
-| `ai/integrations/affine.py` | +4 | yes | ? | ? |
-| `ai/integrations/github_mcp/__init__.py` | +16 | yes | ? | ? |
-| `ai/integrations/github_mcp/discovery.py` | +4 | yes | ? | ? |
-| `ai/integrations/github_mcp/integration.py` | +8 | yes | ? | ? |
-| `ai/integrations/github_mcp/server_config.py` | +4 | yes | ? | ? |
-| `ai/integrations/linear.py` | +4 | yes | ? | ? |
-| `ai/integrations/notion.py` | +4 | yes | ? | ? |
-| `ai/integrations/obsidian.py` | -20 |  | ? | ? |
-| `ai/mcp/__init__.py` | +24 | yes | ? | ? |
-| `ai/mcp/client.py` | +4 | yes | ? | ? |
-| `ai/mcp/config_loader.py` | +4 | yes | ? | ? |
-| `ai/mcp/config_writer.py` | +4 | yes | ? | ? |
-| `ai/mcp/gui.py` | +8 | yes | ? | ? |
-| `ai/mcp/pool.py` | -305 |  | ? | ? |
-| `ai/mcp/presets.py` | +4 | yes | ? | ? |
-| `ai/mcp/widgets/__init__.py` | +12 | yes | ? | ? |
-| `ai/mcp/widgets/integrations_health_dashboard_widget.py` | +4 | yes | ? | ? |
-| `ai/mcp/widgets/mcp_servers_prefs_widget.py` | +8 | yes | ? | ? |
-| `ai/memory_manager.py` | +8 | yes | ? | ? |
-| `ai/peer_review/coordinator.py` | -15 |  | ? | ? |
-| `ai/peer_review/gui.py` | +8 | yes | ? | ? |
-| `ai/rag/context_provider.py` | +4 | yes | ? | ? |
-| `ai/rag/indexer_worker.py` | +8 | yes | ? | ? |
-| `ai/rag/simple_rag.py` | +4 | yes | ? | ? |
-| `ai/sample_tools.py` | +36 | yes | ? | ? |
-| `ai/system_prompts.py` | +4 | yes | ? | ? |
-| `ai/thread_condensation.py` | -22 |  | ? | ? |
-| `ai/tool_registry.py` | +12 | yes | ? | ? |
-| `ai/tools/__init__.py` | -283 |  | ? | ? |
-| `ai/tools/agent_control.py` | -130 |  | ? | ? |
-| `ai/tools/cli_tools.py` | -119 |  | ? | ? |
-| `ai/tools/codemap_tools.py` | +4 | yes | ? | ? |
-| `ai/tools/file_ops.py` | +4 | yes | ? | ? |
-| `ai/tools/sidekick_analytics.py` | +293 | yes | ? | ? |
+| `ai/_settings_model.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/access_policy.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/__init__.py` | +36 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/anthropic_adapter.py` | -356 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/base.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/bitnet_adapter.py` | -2079 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/claude_code_adapter.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/cli_provider_setup.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/cline_adapter.py` | -42 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/codex_cli_adapter.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/factory.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/gemini_adapter.py` | -1125 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/gemini_cli_adapter.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/github_cli_provider.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/ollama_adapter.py` | -1852 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/openai_adapter.py` | -356 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/adapters/rust_adapter.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/auth/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/auth/authentication.py` | +47 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/config.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/education.py` | -65 |  | d-sorgcodexagent[bot] 2026-08-13 | Dieter Olson 2026-09-04 |
+| `ai/gui/_adapter_lifecycle.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_api_keys.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_indexing.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_input_area.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_message_display.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_panel_header.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_panel_tools.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_provider_config_registry.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_provider_config_widgets.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_provider_registry_data.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_providers_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/_rag_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/assistant_panel.py` | +84 | yes | Dieter Olson 2026-09-04 | Dieter Olson 2026-09-04 |
+| `ai/gui/assistant_widgets.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/history_sidebar.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/session_manager.py` | -207 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/gui/settings_dialog.py` | +48 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/integrations/affine.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/integrations/github_mcp/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/integrations/github_mcp/discovery.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/integrations/github_mcp/integration.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/integrations/github_mcp/server_config.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/integrations/linear.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/integrations/notion.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/integrations/obsidian.py` | -20 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/__init__.py` | +24 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/client.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/config_loader.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/config_writer.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/gui.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/pool.py` | -305 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/presets.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/widgets/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/widgets/integrations_health_dashboard_widget.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/mcp/widgets/mcp_servers_prefs_widget.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/memory_manager.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/peer_review/coordinator.py` | -15 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/peer_review/gui.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/rag/context_provider.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/rag/indexer_worker.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/rag/simple_rag.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/sample_tools.py` | +36 | yes | d-sorgclaudeagent[bot] 2026-09-04 | Dieter Olson 2026-09-04 |
+| `ai/system_prompts.py` | +4 | yes | d-sorgclaudeagent[bot] 2026-09-04 | Dieter Olson 2026-09-04 |
+| `ai/thread_condensation.py` | -22 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/tool_registry.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/tools/__init__.py` | -283 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/tools/agent_control.py` | -130 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/tools/cli_tools.py` | -119 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/tools/codemap_tools.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/tools/file_ops.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `ai/tools/sidekick_analytics.py` | +293 | yes | d-sorgclaudeagent[bot] 2026-09-04 | Dieter Olson 2026-09-04 |
 
 ### Package `calc_backend` (14 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `calc_backend/api/__init__.py` | +4 | yes | ? | ? |
-| `calc_backend/app.py` | -1395 |  | ? | ? |
-| `calc_backend/contracts/pressure_drop_v2.py` | -6 |  | ? | ? |
-| `calc_backend/health.py` | -188 |  | ? | ? |
-| `calc_backend/routers/flow_rate.py` | +4 | yes | ? | ? |
-| `calc_backend/routers/ode_solver.py` | +4 | yes | ? | ? |
-| `calc_backend/routers/pressure_drop.py` | +244 |  | ? | ? |
-| `calc_backend/routers/pressure_drop_v2.py` | +12 | yes | ? | ? |
-| `calc_backend/routers/rotation_converter.py` | +8 | yes | ? | ? |
-| `calc_backend/routers/symbolic_solver.py` | +290 |  | ? | ? |
-| `calc_backend/routers/thermal_profile.py` | -374 |  | ? | ? |
-| `calc_backend/tests/test_calc_backend.py` | +86 |  | ? | ? |
-| `calc_backend/tests/test_calc_backend_gaps.py` | +256 |  | ? | ? |
-| `calc_backend/tests/test_symbolic_solver.py` | +12378 |  | ? | ? |
+| `calc_backend/api/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/app.py` | -1395 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/contracts/pressure_drop_v2.py` | -6 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/health.py` | -188 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/routers/flow_rate.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/routers/ode_solver.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/routers/pressure_drop.py` | +244 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/routers/pressure_drop_v2.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/routers/rotation_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/routers/symbolic_solver.py` | +290 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-09-04 |
+| `calc_backend/routers/thermal_profile.py` | -374 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/tests/test_calc_backend.py` | +86 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/tests/test_calc_backend_gaps.py` | +256 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `calc_backend/tests/test_symbolic_solver.py` | +12378 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-09-04 |
 
 ### Package `chat` (17 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `chat/__init__.py` | -82 |  | ? | ? |
-| `chat/_chat_dock_widget_qt.py` | -16665 |  | ? | ? |
-| `chat/chat_dock_widget.py` | -194 |  | ? | ? |
-| `chat/condensation/condenser.py` | +4 | yes | ? | ? |
-| `chat/condensation/strategy.py` | +4 | yes | ? | ? |
-| `chat/credentials.py` | +4 | yes | ? | ? |
-| `chat/export/copy_clipboard.py` | +4 | yes | ? | ? |
-| `chat/export/html_exporter.py` | +4 | yes | ? | ? |
-| `chat/export/markdown_exporter.py` | +4 | yes | ? | ? |
-| `chat/export/secret_redactor.py` | +4 | yes | ? | ? |
-| `chat/export/text_exporter.py` | +4 | yes | ? | ? |
-| `chat/models.py` | +4 | yes | ? | ? |
-| `chat/quick_bar.py` | -131 |  | ? | ? |
-| `chat/service_base.py` | +4 | yes | ? | ? |
-| `chat/skills_manager.py` | -59 |  | ? | ? |
-| `chat/tests/test_chat_drift.py` | +0 |  | ? | ? |
-| `chat/tests/test_workspace_bridge.py` | -290 |  | ? | ? |
-
-### Package `codemap` (6 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `codemap/_lang_python.py` | -7 |  | ? | ? |
-| `codemap/_ts_common.py` | -149 |  | ? | ? |
-| `codemap/api.py` | -206 |  | ? | ? |
-| `codemap/indexer.py` | -735 |  | ? | ? |
-| `codemap/mcp_server.py` | -2 |  | ? | ? |
-| `codemap/watcher.py` | -90 |  | ? | ? |
-
-### Package `compatibility.py` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `compatibility.py` | -76 |  | ? | ? |
+| `chat/__init__.py` | -82 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/_chat_dock_widget_qt.py` | -16665 |  | Dieter Olson 2026-08-12 | Dieter Olson 2026-09-04 |
+| `chat/chat_dock_widget.py` | -194 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/condensation/condenser.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/condensation/strategy.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/credentials.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/export/copy_clipboard.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/export/html_exporter.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/export/markdown_exporter.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/export/secret_redactor.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/export/text_exporter.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/models.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/quick_bar.py` | -131 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/service_base.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/skills_manager.py` | -59 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/tests/test_chat_drift.py` | +0 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `chat/tests/test_workspace_bridge.py` | -290 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `config` (2 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `config/__init__.py` | +4998 |  | ? | ? |
-| `config/environment.py` | +13621 |  | ? | ? |
+| `config/__init__.py` | +4998 |  | codex-scheduled-tasks[bot] 2026-06-13 | Dieter Olson 2026-09-04 |
+| `config/environment.py` | +13621 |  | codex-scheduled-tasks[bot] 2026-05-26 | Dieter Olson 2026-09-04 |
 
 ### Package `contracts.py` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `contracts.py` | -709 |  | ? | ? |
-
-### Package `cors.py` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `cors.py` | +4 | yes | ? | ? |
+| `contracts.py` | -709 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `data_processing` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `data_processing/processor.py` | +21 |  | ? | ? |
+| `data_processing/processor.py` | +21 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `data_processor_io` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `data_processor_io/rust_engine.py` | -80 |  | ? | ? |
+| `data_processor_io/rust_engine.py` | -80 |  | Dieter Olson 2026-08-07 | Dieter Olson 2026-09-04 |
 
 ### Package `gui_launcher` (5 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `gui_launcher/launcher.py` | -159 |  | ? | ? |
-| `gui_launcher/launcher_web.py` | -89 |  | ? | ? |
-| `gui_launcher/registry.py` | -75 |  | ? | ? |
-| `gui_launcher/tool_manifest.yaml` | +1 |  | ? | ? |
-| `gui_launcher/tools_sidebar_integration.py` | +10123 |  | ? | ? |
+| `gui_launcher/launcher.py` | -159 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `gui_launcher/launcher_web.py` | -89 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `gui_launcher/registry.py` | -75 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `gui_launcher/tool_manifest.yaml` | +1 |  | Dieter Olson 2026-08-04 | Dieter Olson 2026-09-04 |
+| `gui_launcher/tools_sidebar_integration.py` | +10123 |  | Dieter Olson 2026-05-29 | Dieter Olson 2026-09-04 |
 
 ### Package `humanoid_character_builder` (24 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `humanoid_character_builder/__init__.py` | +28 | yes | ? | ? |
-| `humanoid_character_builder/contracts.py` | +8 | yes | ? | ? |
-| `humanoid_character_builder/core/__init__.py` | +12 | yes | ? | ? |
-| `humanoid_character_builder/core/anthropometry.py` | +4 | yes | ? | ? |
-| `humanoid_character_builder/core/body_parameters.py` | +1288 |  | ? | ? |
-| `humanoid_character_builder/core/model.py` | +478 |  | ? | ? |
-| `humanoid_character_builder/generators/__init__.py` | +8 | yes | ? | ? |
-| `humanoid_character_builder/generators/_makehuman_generator.py` | +13 |  | ? | ? |
-| `humanoid_character_builder/generators/_mesh_types.py` | +13 |  | ? | ? |
-| `humanoid_character_builder/generators/_primitive_generator.py` | +13 |  | ? | ? |
-| `humanoid_character_builder/generators/_smplx_generator.py` | +328 |  | ? | ? |
-| `humanoid_character_builder/generators/mesh_generator.py` | +4 | yes | ? | ? |
-| `humanoid_character_builder/generators/mesh_generator_primitive.py` | +4 | yes | ? | ? |
-| `humanoid_character_builder/generators/mesh_generator_smplx.py` | +4 | yes | ? | ? |
-| `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | ? | ? |
-| `humanoid_character_builder/interfaces/__init__.py` | +74 |  | ? | ? |
-| `humanoid_character_builder/interfaces/api.py` | +28 | yes | ? | ? |
-| `humanoid_character_builder/mesh/__init__.py` | +16 | yes | ? | ? |
-| `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | ? | ? |
-| `humanoid_character_builder/mesh/primitive_inertia.py` | +90 |  | ? | ? |
-| `humanoid_character_builder/presets/__init__.py` | +4 | yes | ? | ? |
-| `humanoid_character_builder/presets/loader.py` | +4 | yes | ? | ? |
-| `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | ? | ? |
-| `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | ? | ? |
+| `humanoid_character_builder/__init__.py` | +28 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/core/anthropometry.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/core/body_parameters.py` | +1288 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/core/model.py` | +478 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/_makehuman_generator.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/_mesh_types.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/_primitive_generator.py` | +13 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/_smplx_generator.py` | +328 |  | Dieter Olson 2026-08-09 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/mesh_generator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/mesh_generator_primitive.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/mesh_generator_smplx.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/generators/urdf_generator.py` | -442 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/interfaces/__init__.py` | +74 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/interfaces/api.py` | +28 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/mesh/primitive_inertia.py` | +90 |  | Dieter Olson 2026-08-03 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/presets/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/presets/loader.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `import_aliases.py` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `import_aliases.py` | -565 |  | ? | ? |
+| `import_aliases.py` | -565 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
 
 ### Package `model_generation` (49 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `model_generation/__init__.py` | +12 | yes | ? | ? |
-| `model_generation/_convenience.py` | +4 | yes | ? | ? |
-| `model_generation/api/__init__.py` | +4 | yes | ? | ? |
-| `model_generation/api/rest_api_assets.py` | -52 |  | ? | ? |
-| `model_generation/api/rest_api_core.py` | +12 | yes | ? | ? |
-| `model_generation/api/rest_api_fastapi.py` | -25 |  | ? | ? |
-| `model_generation/api/rest_api_generation.py` | +8 | yes | ? | ? |
-| `model_generation/api/rest_api_routes.py` | -977 |  | ? | ? |
-| `model_generation/api/rest_api_support.py` | -30 |  | ? | ? |
-| `model_generation/builders/__init__.py` | +25 |  | ? | ? |
-| `model_generation/builders/base_builder.py` | +12 | yes | ? | ? |
-| `model_generation/builders/manual_builder.py` | +16 | yes | ? | ? |
-| `model_generation/builders/parametric_builder.py` | +10 |  | ? | ? |
-| `model_generation/builders/urdf_writer.py` | +8 | yes | ? | ? |
-| `model_generation/cli/__init__.py` | +4 | yes | ? | ? |
-| `model_generation/converters/__init__.py` | +12 | yes | ? | ? |
-| `model_generation/converters/format_utils.py` | -5 |  | ? | ? |
-| `model_generation/converters/mjcf_converter.py` | +1 |  | ? | ? |
-| `model_generation/converters/simscape/__init__.py` | +8 | yes | ? | ? |
-| `model_generation/converters/simscape/mdl_parser.py` | -32 |  | ? | ? |
-| `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | ? | ? |
-| `model_generation/converters/urdf_parser.py` | +4 | yes | ? | ? |
-| `model_generation/core/__init__.py` | +12 | yes | ? | ? |
-| `model_generation/core/contracts.py` | +8 | yes | ? | ? |
-| `model_generation/core/physics_validation.py` | +4 | yes | ? | ? |
-| `model_generation/core/types.py` | +4 | yes | ? | ? |
-| `model_generation/core/validation.py` | +21 |  | ? | ? |
-| `model_generation/editor/__init__.py` | +12 | yes | ? | ? |
-| `model_generation/editor/editor_clipboard.py` | +4 | yes | ? | ? |
-| `model_generation/editor/editor_modifications.py` | +4 | yes | ? | ? |
-| `model_generation/editor/editor_types.py` | +8 | yes | ? | ? |
-| `model_generation/editor/frankenstein_editor.py` | +8 | yes | ? | ? |
-| `model_generation/editor/text_editor_diff_mixin.py` | -75 |  | ? | ? |
-| `model_generation/explorer/__init__.py` | -35 |  | ? | ? |
-| `model_generation/explorer/model_explorer.py` | +12 | yes | ? | ? |
-| `model_generation/export/__init__.py` | +4 | yes | ? | ? |
-| `model_generation/humanoid/__init__.py` | +54 |  | ? | ? |
-| `model_generation/inertia/__init__.py` | +12 | yes | ? | ? |
-| `model_generation/inertia/calculator.py` | +27 |  | ? | ? |
-| `model_generation/library/__init__.py` | +20 | yes | ? | ? |
-| `model_generation/library/_rate_limiter.py` | -118 |  | ? | ? |
-| `model_generation/library/github_importer.py` | +8 | yes | ? | ? |
-| `model_generation/library/model_library.py` | -569 |  | ? | ? |
-| `model_generation/library/repository.py` | -23 |  | ? | ? |
-| `model_generation/library/unified_loader.py` | +25 |  | ? | ? |
-| `model_generation/mesh/__init__.py` | +64 |  | ? | ? |
-| `model_generation/tests/test_contracts.py` | +18 |  | ? | ? |
-| `model_generation/tests/test_github_importer.py` | +18 |  | ? | ? |
-| `model_generation/tests/test_physics_validation.py` | +18 |  | ? | ? |
-
-### Package `plot_engine` (3 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `plot_engine/matplotlib_renderer.py` | -65 |  | ? | ? |
-| `plot_engine/pyqt6_widget.py` | -1893 |  | ? | ? |
-| `plot_engine/trendline.py` | +125 |  | ? | ? |
+| `model_generation/__init__.py` | +60 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+| `model_generation/_convenience.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/api/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/api/rest_api_assets.py` | -52 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/api/rest_api_core.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/api/rest_api_fastapi.py` | -25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/api/rest_api_generation.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/api/rest_api_routes.py` | -977 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/api/rest_api_support.py` | -30 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/builders/__init__.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/builders/base_builder.py` | +2060 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+| `model_generation/builders/manual_builder.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/builders/parametric_builder.py` | +10 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/builders/urdf_writer.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/cli/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/converters/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/converters/format_utils.py` | -5 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/converters/mjcf_converter.py` | +1 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/converters/urdf_parser.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/core/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/core/physics_validation.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/core/types.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/core/validation.py` | +21 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/editor_clipboard.py` | +166 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/editor_modifications.py` | +2498 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/editor_types.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/frankenstein_editor.py` | +214 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+| `model_generation/editor/text_editor_diff_mixin.py` | +591 |  | Dieter Olson 2026-09-06 | Dieter Olson 2026-09-04 |
+| `model_generation/explorer/__init__.py` | -35 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/explorer/model_explorer.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/export/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/humanoid/__init__.py` | +54 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/inertia/calculator.py` | +27 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/library/__init__.py` | +20 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/library/_rate_limiter.py` | -118 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/library/github_importer.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/library/model_library.py` | -569 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/library/repository.py` | -23 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/mesh/__init__.py` | +64 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/tests/test_contracts.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/tests/test_github_importer.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `model_generation/tests/test_physics_validation.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `plotting` (3 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `plotting/__init__.py` | +712 |  | ? | ? |
-| `plotting/export.py` | +1736 |  | ? | ? |
-| `plotting/identity.py` | +120 |  | ? | ? |
-
-### Package `programmatic_pid` (14 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `programmatic_pid/__init__.py` | +52 | yes | ? | ? |
-| `programmatic_pid/cli.py` | +40 | yes | ? | ? |
-| `programmatic_pid/controls.py` | +12 | yes | ? | ? |
-| `programmatic_pid/document.py` | +37 |  | ? | ? |
-| `programmatic_pid/equipment.py` | +4 | yes | ? | ? |
-| `programmatic_pid/generator.py` | +52 | yes | ? | ? |
-| `programmatic_pid/geometry.py` | +4 | yes | ? | ? |
-| `programmatic_pid/instruments.py` | +8 | yes | ? | ? |
-| `programmatic_pid/layout.py` | +12 | yes | ? | ? |
-| `programmatic_pid/rendering.py` | -4 |  | ? | ? |
-| `programmatic_pid/spec_loader.py` | +16 | yes | ? | ? |
-| `programmatic_pid/streams.py` | +12 | yes | ? | ? |
-| `programmatic_pid/title_block.py` | +29 |  | ? | ? |
-| `programmatic_pid/validation.py` | +21 |  | ? | ? |
+| `plotting/__init__.py` | +712 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `plotting/export.py` | +1736 |  | d-sorgclaudeagent[bot] 2026-08-29 | Dieter Olson 2026-09-04 |
+| `plotting/identity.py` | +120 |  | d-sorgclaudeagent[bot] 2026-08-29 | Dieter Olson 2026-09-04 |
 
 ### Package `reporting` (2 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `reporting/__init__.py` | +387 |  | ? | ? |
-| `reporting/generator.py` | -58 |  | ? | ? |
-
-### Package `rotation_transforms` (3 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `rotation_transforms/__init__.py` | +8 | yes | ? | ? |
-| `rotation_transforms/reference_frame_operations.py` | +4 | yes | ? | ? |
-| `rotation_transforms/rotation.py` | +4 | yes | ? | ? |
+| `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `sidekick` (63 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `sidekick/__main__.py` | +32 |  | ? | ? |
-| `sidekick/agent/action_service.py` | +4 | yes | ? | ? |
-| `sidekick/calculators/electrical/glass_interface.py` | +4 | yes | ? | ? |
-| `sidekick/calculators/thermo/steam_engine.py` | -988 |  | ? | ? |
-| `sidekick/calculators/thermo/thermo_properties.py` | +4 | yes | ? | ? |
-| `sidekick/data_io.py` | +4 | yes | ? | ? |
-| `sidekick/data_processing/core.py` | -119 |  | ? | ? |
-| `sidekick/data_processing/io.py` | +4 | yes | ? | ? |
-| `sidekick/latex_renderer.py` | -79 |  | ? | ? |
-| `sidekick/notes_store.py` | +8 | yes | ? | ? |
-| `sidekick/notes_tab.py` | +4 | yes | ? | ? |
-| `sidekick/process_calculators/__init__.py` | -10 |  | ? | ? |
-| `sidekick/process_calculators/acid_gas_dewpoint_calculator.py` | +8 | yes | ? | ? |
-| `sidekick/process_calculators/analysis_utils.py` | -2515 |  | ? | ? |
-| `sidekick/process_calculators/baghouse_calculator.py` | +4 | yes | ? | ? |
-| `sidekick/process_calculators/constants.py` | +28 | yes | ? | ? |
-| `sidekick/process_calculators/electrode_advancement_calculator.py` | +4 | yes | ? | ? |
-| `sidekick/process_calculators/optimization.py` | -463 |  | ? | ? |
-| `sidekick/process_calculators/pressure_drop_calculator/_legacy.py` | +4 | yes | ? | ? |
-| `sidekick/process_calculators/pressure_drop_calculator/engine/_flow_calculations.py` | -27 |  | ? | ? |
-| `sidekick/process_calculators/pressure_drop_calculator/engine/_friction_factors.py` | -836 |  | ? | ? |
-| `sidekick/process_calculators/pressure_drop_calculator/pressure_drop_results.py` | -11 |  | ? | ? |
-| `sidekick/process_calculators/pressure_drop_calculator/utils/flow_rate_converter.py` | +4 | yes | ? | ? |
-| `sidekick/process_calculators/psa_package/psa_analysis.ipynb` | +2 |  | ? | ? |
-| `sidekick/process_calculators/psa_package/psa_gui.py` | -48 |  | ? | ? |
-| `sidekick/process_calculators/psa_package/psa_webapp.py` | -24 |  | ? | ? |
-| `sidekick/process_calculators/psa_package/ui/main_window.py` | +4 | yes | ? | ? |
-| `sidekick/process_calculators/psa_package/ui/sensitivity_plot.py` | -30 |  | ? | ? |
-| `sidekick/process_calculators/scrubber_calculator.py` | +4 | yes | ? | ? |
-| `sidekick/process_calculators/syngas_water_calculator.py` | -1017 |  | ? | ? |
-| `sidekick/process_calculators/wgs_reactor_calculator.py` | +4 | yes | ? | ? |
-| `sidekick/selected_tab_panel.py` | +4 | yes | ? | ? |
-| `sidekick/standalone/onboarding.py` | +19 |  | ? | ? |
-| `sidekick/standalone/preferences.py` | +1466 |  | ? | ? |
-| `sidekick/standalone/runner.py` | +42 |  | ? | ? |
-| `sidekick/standalone/session_store.py` | +10 |  | ? | ? |
-| `sidekick/standalone/window.py` | -45 |  | ? | ? |
-| `sidekick/tab_context_menu.py` | +4 | yes | ? | ? |
-| `sidekick/tests/calculators/conversion/test_conversion_accuracy_3384_3388_3389.py` | +2 |  | ? | ? |
-| `sidekick/tests/process_calculators/test_analysis_utils.py` | -22 |  | ? | ? |
-| `sidekick/tests/process_calculators/test_multi_param_analysis.py` | -15 |  | ? | ? |
-| `sidekick/tests/process_calculators/test_syngas_water_calculator.py` | +36 |  | ? | ? |
-| `sidekick/tests/test_analysis_utils.py` | -1159 |  | ? | ? |
-| `sidekick/tests/test_baghouse_calculator.py` | +4 | yes | ? | ? |
-| `sidekick/tests/test_calculator_state_mixin.py` | -2 |  | ? | ? |
-| `sidekick/tests/test_launcher_factory.py` | +522 |  | ? | ? |
-| `sidekick/ui/catppuccin_theme.py` | +8 | yes | ? | ? |
-| `sidekick/ui/mixins/calculator_state_mixin.py` | +19 |  | ? | ? |
-| `sidekick/ui/tools_sidebar/calculator_plotting.py` | +8 | yes | ? | ? |
-| `sidekick/ui/tools_sidebar/chat_tab.py` | -298 |  | ? | ? |
-| `sidekick/ui/tools_sidebar/jupyter_tab/notebook_session.py` | +4 | yes | ? | ? |
-| `sidekick/ui/tools_sidebar/jupyter_tab/widget.py` | -10 |  | ? | ? |
-| `sidekick/ui/tools_sidebar/os_terminal.py` | -86 |  | ? | ? |
-| `sidekick/ui/tools_sidebar/sidebar.py` | +4 | yes | ? | ? |
-| `sidekick/ui/tools_sidebar/state_profile_actions.py` | +36 |  | ? | ? |
-| `sidekick/ui/tools_sidebar/theme_settings.py` | +4 | yes | ? | ? |
-| `sidekick/ui/tools_sidebar/visibility_persistence.py` | -25 |  | ? | ? |
-| `sidekick/ui/widgets/base_calculator_widget.py` | +4 | yes | ? | ? |
-| `sidekick/ui/widgets/data_processor_widget.py` | +12 |  | ? | ? |
-| `sidekick/ui/widgets/mixins/data_processor_ops.py` | +2 |  | ? | ? |
-| `sidekick/ui/widgets/unit_converter_widget.py` | -2 |  | ? | ? |
-| `sidekick/utils/json_io.py` | -1 |  | ? | ? |
-| `sidekick/utils/state_manager.py` | -14 |  | ? | ? |
+| `sidekick/__main__.py` | +32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/agent/action_service.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/calculators/electrical/glass_interface.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/calculators/thermo/steam_engine.py` | -988 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/calculators/thermo/thermo_properties.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/data_io.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/data_processing/core.py` | -119 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-09-04 |
+| `sidekick/data_processing/io.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/latex_renderer.py` | -79 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/notes_store.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/notes_tab.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/__init__.py` | -10 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/acid_gas_dewpoint_calculator.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/analysis_utils.py` | -2515 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/baghouse_calculator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/constants.py` | +28 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/electrode_advancement_calculator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/optimization.py` | -463 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/pressure_drop_calculator/_legacy.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/pressure_drop_calculator/engine/_flow_calculations.py` | -27 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/pressure_drop_calculator/engine/_friction_factors.py` | -836 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/pressure_drop_calculator/pressure_drop_results.py` | -11 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/pressure_drop_calculator/utils/flow_rate_converter.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/psa_package/psa_analysis.ipynb` | +2 |  | Dieter Olson 2026-05-20 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/psa_package/psa_gui.py` | -48 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/psa_package/psa_webapp.py` | -24 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/psa_package/ui/main_window.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/psa_package/ui/sensitivity_plot.py` | -30 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/scrubber_calculator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/syngas_water_calculator.py` | -1017 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/process_calculators/wgs_reactor_calculator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/selected_tab_panel.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/standalone/onboarding.py` | +19 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/standalone/preferences.py` | +1466 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/standalone/runner.py` | +42 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/standalone/session_store.py` | +10 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/standalone/window.py` | -45 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tab_context_menu.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tests/calculators/conversion/test_conversion_accuracy_3384_3388_3389.py` | +2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tests/process_calculators/test_analysis_utils.py` | -22 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tests/process_calculators/test_multi_param_analysis.py` | -15 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tests/process_calculators/test_syngas_water_calculator.py` | +36 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tests/test_analysis_utils.py` | -1159 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tests/test_baghouse_calculator.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tests/test_calculator_state_mixin.py` | -2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/tests/test_launcher_factory.py` | +522 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/catppuccin_theme.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/mixins/calculator_state_mixin.py` | +19 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/calculator_plotting.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/chat_tab.py` | -298 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/jupyter_tab/notebook_session.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/jupyter_tab/widget.py` | -10 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/os_terminal.py` | -86 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/sidebar.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/state_profile_actions.py` | +36 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/theme_settings.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/tools_sidebar/visibility_persistence.py` | -25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/widgets/base_calculator_widget.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/widgets/data_processor_widget.py` | +12 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/widgets/mixins/data_processor_ops.py` | +2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/ui/widgets/unit_converter_widget.py` | -2 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/utils/json_io.py` | -1 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `sidekick/utils/state_manager.py` | -14 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `signal_toolkit` (6 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `signal_toolkit/__init__.py` | +4 | yes | ? | ? |
-| `signal_toolkit/calculus.py` | +52 |  | ? | ? |
-| `signal_toolkit/fitting.py` | +935 |  | ? | ? |
-| `signal_toolkit/io.py` | -18 |  | ? | ? |
-| `signal_toolkit/polynomial_generator.py` | -143 |  | ? | ? |
-| `signal_toolkit/widget_processing.py` | +4 | yes | ? | ? |
+| `signal_toolkit/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `signal_toolkit/calculus.py` | +52 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `signal_toolkit/fitting.py` | +935 |  | Dieter Olson 2026-08-18 | Dieter Olson 2026-09-04 |
+| `signal_toolkit/io.py` | -18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `signal_toolkit/polynomial_generator.py` | -143 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
+| `signal_toolkit/widget_processing.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 
 ### Package `theme` (1 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `theme/zoom.py` | -71 |  | ? | ? |
-
-### Package `upstream_drift_tools` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `upstream_drift_tools/__init__.py` | +4 | yes | ? | ? |
+| `theme/zoom.py` | -71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-04 |
 

@@ -11,11 +11,26 @@ import re  # noqa: E402
 from typing import TYPE_CHECKING  # noqa: E402
 
 if TYPE_CHECKING:
-    from .text_editor import DiffResult
+    from .text_editor import DiffResult, EditorVersion
 
 
 class TextEditorDiffMixin:
-    """Mixin providing diff computation for URDFTextEditor."""
+    """Mixin providing diff computation for URDFTextEditor.
+
+    Expects the host class to provide:
+    - self._content: str -- the buffer as currently edited
+    - self._original_content: str -- the buffer as first loaded
+    - self._history: list[EditorVersion] -- previous versions, oldest first
+    """
+
+    # Declared for the type checker: a mixin never defines these itself, and
+    # without the declarations every access is an attr-defined error the moment
+    # this file enters the changed-file mypy set. The sibling mixins in this
+    # package (ModificationMixin, ClipboardMixin) already declare theirs the
+    # same way.
+    _content: str
+    _original_content: str
+    _history: list[EditorVersion]
 
     def get_diff_from_original(self) -> DiffResult:
         """Get diff between current content and original.

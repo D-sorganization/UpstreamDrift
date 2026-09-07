@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 from src.shared.python.model_generation.core.types import Joint, Link, Material
 
 from .editor_types import ComponentType
+from src.shared.python.contracts import require
 
 if TYPE_CHECKING:
     from shared.python.model_generation.converters.urdf_parser import ParsedModel
@@ -52,8 +53,8 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
-        if model_id is None:
-            raise ValueError("model_id must be provided")
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(link_name), "link_name must be a non-empty string")
         model = self._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
@@ -98,8 +99,8 @@ class ClipboardMixin:
         Returns:
             True if copied
         """
-        if model_id is None:
-            raise ValueError("model_id must be provided")
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(root_link), "root_link must be a non-empty string")
         model = self._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
