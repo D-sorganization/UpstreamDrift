@@ -1,12 +1,16 @@
 # Running the PyQt6 GUI Tests on Linux From a Windows Checkout
 
-Issue #9684. CI runs the GUI suite (`pytest -m ui`) on Linux and it passes.
-On some Windows development hosts the same tests die the moment a PyQt6
-list view or rich-text widget is created under pytest: exit code
-`0xC0000409` (fail-fast), no traceback, no output, even with `-s`,
-`--noconftest`, plugins disabled or `faulthandler` on. Inline Python on the
-same host creates the same widgets fine. Bisecting Windows for that is not a
-good use of time; running the tests the way CI runs them is.
+Issue #9684. CI runs the GUI suite (`pytest -m ui`) on Linux; this lane runs
+it the same way from a Windows checkout, so a Windows-only symptom can be
+told apart from a real defect in minutes.
+
+The case that motivated it: PyQt6 GUI tests that died the moment a widget
+was created, with exit code `0xC0000409` on Windows and no traceback. The
+Linux lane turned that into a `SIGABRT` with a Python stack, which pointed
+at the real cause in the test itself: the helper created the `QApplication`
+and returned it without keeping a reference, so Python collected it together
+with its C++ object and the next `QWidget` aborted the process. GUI tests
+must hold the application at module level (see `tests/tools/capture_rig/test_gui.py`).
 
 ## One Command
 
@@ -42,5 +46,5 @@ script says which one is missing and exits with code 2.
   than a native Linux clone; the GUI suite is small and this does not matter.
 - `.wsl-venv/` is created beside `.venv/` and never touched by the Windows
   interpreter.
-- If a GUI test fails only on Windows and passes here and in CI, treat it as
-  the host problem described above, not as a test defect.
+- A GUI test that aborts with no traceback on Windows usually aborts here
+  with one; read the stack before suspecting the host.
