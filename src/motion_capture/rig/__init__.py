@@ -13,12 +13,20 @@ Modules:
 - :mod:`.sources` — frame sources (OpenCV/MSMF, deterministic synthetic)
 - :mod:`.recorder` — compressed-stream recorders (ffmpeg DirectShow copy)
 - :mod:`.session` — barrier-started multi-camera capture with typed outcomes
+- :mod:`.sync` — strobe-based alignment of the cameras' arrival clocks
 - :mod:`.tools_bridge` — fail-closed export to the Tools mocap schema
 """
 
 from .plan import CameraBinding, CameraControls, CaptureMode, PlanCheck, RigPlan
-from .session import CameraStats, CaptureOutcome, CaptureSession, SessionManifest
+from .session import (
+    CameraStats,
+    CaptureOutcome,
+    CaptureSession,
+    CaptureTuning,
+    SessionManifest,
+)
 from .sources import Frame, FrameSource, SyntheticFrameSource
+from .sync import TimingRecord, ViewTiming, align_views
 from .topology import (
     PERIODIC_BUDGET_BYTES,
     RESERVE_BYTES,
@@ -38,13 +46,17 @@ __all__ = [
     "CaptureMode",
     "CaptureOutcome",
     "CaptureSession",
+    "CaptureTuning",
     "Frame",
     "FrameSource",
     "PlanCheck",
     "RigPlan",
     "SessionManifest",
     "SyntheticFrameSource",
+    "TimingRecord",
+    "ViewTiming",
     "derive_camera",
     "parse_dshow_listing",
     "predict_streaming",
+    "align_views",
 ]

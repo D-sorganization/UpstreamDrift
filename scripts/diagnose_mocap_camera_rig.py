@@ -25,7 +25,11 @@ from src.motion_capture.rig.plan import (  # noqa: E402
     CaptureMode,
     RigPlan,
 )
-from src.motion_capture.rig.session import CaptureSession, SessionManifest  # noqa: E402
+from src.motion_capture.rig.session import (  # noqa: E402
+    CaptureSession,
+    CaptureTuning,
+    SessionManifest,
+)
 from src.motion_capture.rig.sources import OpenCvMsmfSource  # noqa: E402
 from src.motion_capture.rig.topology import (  # noqa: E402
     PERIODIC_BUDGET_BYTES,
@@ -99,7 +103,10 @@ def _run_solo(plan: RigPlan, cams: list[CameraLocation], seconds: float) -> None
         single = RigPlan(name="solo", cameras=(binding,))
         cam = next(c for c in cams if c.identity == binding.identity)
         manifest = CaptureSession(
-            single, _sources([cam]), duration_s=seconds, max_reopens=0
+            single,
+            _sources([cam]),
+            duration_s=seconds,
+            tuning=CaptureTuning(max_reopens=0),
         ).run()
         stats = manifest.cameras[0]
         size = stats.effective_mode and (
@@ -121,7 +128,10 @@ def _run_concurrent(
         f"{args.width}x{args.height}@{args.fps} MJPG, {args.concurrent_seconds:.0f}s =="
     )
     manifest = CaptureSession(
-        plan, _sources(cams), duration_s=args.concurrent_seconds, max_reopens=0
+        plan,
+        _sources(cams),
+        duration_s=args.concurrent_seconds,
+        tuning=CaptureTuning(max_reopens=0),
     ).run()
     by_identity = {c.identity: c for c in cams}
     for stats in manifest.cameras:
