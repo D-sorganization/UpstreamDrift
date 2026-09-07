@@ -350,7 +350,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/converters/urdf_parser.py` | +6485 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/converters/urdf_parser.py` | +7008 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/physics_validation.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
