@@ -213,7 +213,9 @@ register_estimator(
         description="Real-time pose estimation using Google MediaPipe",
         probe_module="mediapipe",
         install_hint=(
-            "MediaPipe is not installed on the server (pip install mediapipe)"
+            "MediaPipe (>=0.10, Tasks API) is not installed on the server "
+            "(pip install mediapipe); fetch the pose model with "
+            "python3 -m src.shared.python.pose_estimation.mediapipe_models"
         ),
         skeleton=_MEDIAPIPE_SKELETON,
         factory=_make_mediapipe,

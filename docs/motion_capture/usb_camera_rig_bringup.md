@@ -182,7 +182,6 @@ visual sync event is still required before calibration.
    otherwise a per-session flash event.
 2. Measure the three-stream CPU budget on a quiet host (expected about 1.5
    cores for NV12 and about 6 cores for BGR).
-3. `MediaPipeEstimator` is unavailable in this environment: mediapipe 0.10.35
-   removed `mp.solutions`, and `engine_availability.py` fails closed with a
-   message that says "not installed". Migration to the Tasks API is separate
-   work.
+3. `MediaPipeEstimator` runs on the MediaPipe Tasks API since #9592; it needs a
+   verified `.task` model file (`python3 -m
+src.shared.python.pose_estimation.mediapipe_models --variant full`).
