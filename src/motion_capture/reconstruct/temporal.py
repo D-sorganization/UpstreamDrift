@@ -115,7 +115,8 @@ def second_difference(n: int) -> sparse.csr_matrix:
     """``(n-2, n)`` operator whose rows are ``x[t-1] - 2 x[t] + x[t+1]``."""
     require(n >= 3, "need at least 3 samples for a second difference", n)
     data = np.array([np.ones(n - 2), -2 * np.ones(n - 2), np.ones(n - 2)])
-    return sparse.diags(data, offsets=[0, 1, 2], shape=(n - 2, n), format="csr")
+    matrix = sparse.dia_matrix((data, np.array([0, 1, 2])), shape=(n - 2, n))
+    return sparse.csr_matrix(matrix)
 
 
 def robust_scale(values: Array) -> float:
@@ -149,7 +150,8 @@ def _huber_weight(u: Array, delta: float) -> Array:
 def _solve(z: Array, w: Array, prior: sparse.csc_matrix) -> tuple[Array, Array]:
     """Minimise ``sum w (x - z)^2 + x' P x``; return the fit and its posterior std."""
     n = z.size
-    a = (sparse.diags(w, 0, format="csc") + prior).tocsc()
+    diagonal = sparse.dia_matrix((w[None, :], np.array([0])), shape=(n, n))
+    a = sparse.csc_matrix(diagonal + prior)
     lu = splu(a)
     x = lu.solve(w * np.where(np.isfinite(z), z, 0.0))
     if n <= _EXACT_COV_MAX_N:
