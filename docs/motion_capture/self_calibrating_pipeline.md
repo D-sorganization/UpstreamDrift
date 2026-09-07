@@ -109,6 +109,20 @@ rejected observation with its residual, the count of unobservable points,
 and — when truth is present — the metrics. `joints_3d_m.npy` holds the
 fitted trajectory for the IK stage.
 
+On a real take the chain is one command:
+
+```bash
+python3 -m motion_capture.rig reconstruct --session sessions/<take>   --cameras sessions/<previous-take>/reconstruct/reconstruction.json --anchor neck=0.53
+```
+
+It maps the ingested views onto the reconstruct skeleton, cleans each view
+with the dynamics prior (`reconstruct/clean_report.json` lists every
+rejection), and runs the joint fit from the previous take's cameras — which
+is how placement is learned across takes — writing
+`reconstruct/reconstruction.json`, `joints_3d_m.npy` and a summary. The first
+take of a new placement starts from a rough camera file; later takes start
+from the last solution.
+
 ### Outliers Are Rejected, Not Averaged
 
 The cost uses robust kernels (Huber for the first pass, Geman-McClure once the
@@ -202,6 +216,25 @@ records in both directions, so a fitter tested here runs unchanged on a
 calibrated real rig. `metrics.py` scores camera pose (degrees, metres),
 relative bone-length error, joint-position error with missing counts, and
 outlier-flag precision/recall; the thresholds live in the acceptance document.
+
+## What the Golfer Gets Back
+
+`reconstruct/analytics.py` turns the fitted joints into the numbers a coach
+reads first, each with the frame it happened in: pelvis and shoulder turn
+about the vertical relative to address (unwrapped, so a full backswing does
+not fold at 180 degrees), their difference (the X-factor), hand speed from
+the robust smoother with its uncertainty (the club is not tracked yet, so
+hands are the proxy), the swing events the speed profile implies (address,
+top, peak speed, finish) and the tempo ratio. `rig reconstruct` writes them
+as `reconstruct/swing_summary.json`. On the synthetic swing the turn angles
+match the motion's known rotations within half a degree, and a one-frame
+30 cm jump of the wrists changes the peak hand speed by less than 5 %
+because the smoother rejects it and says so.
+
+The existing `shared.python.analysis` package (phases, tempo, X-factor
+stretch, reports) consumes joint-angle and club-speed series from
+simulations; these series are the mocap-side input to it, not a second
+implementation of it.
 
 ## Detector Comparison
 
