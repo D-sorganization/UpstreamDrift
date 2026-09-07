@@ -84,3 +84,40 @@ def test_contracts(tmp_path: Path) -> None:
         )
     with pytest.raises(Exception, match="must exist"):
         start_cameras_from(tmp_path / "nope.json")
+
+
+def test_first_take_initialises_placement_from_intrinsics_only(tmp_path: Path) -> None:
+    session, cameras = _session(tmp_path)
+    records = json.loads(cameras.read_text(encoding="utf-8"))
+    intrinsics = session / "intrinsics.json"
+    intrinsics.write_text(
+        json.dumps(
+            [
+                {
+                    "camera_id": r["camera_id"],
+                    "matrix": r["intrinsics"]["matrix"],
+                    "image_size_px": r["image_size_px"],
+                }
+                for r in records
+            ]
+        ),
+        encoding="utf-8",
+    )
+    code = rig_cli.main(
+        [
+            "reconstruct",
+            "--session",
+            str(session),
+            "--intrinsics",
+            str(intrinsics),
+            "--anchor",
+            "neck=0.5",
+        ]
+    )
+    assert code == 0
+    record = json.loads(
+        (session / RECONSTRUCT_DIR / "reconstruction.json").read_text(encoding="utf-8")
+    )
+    assert record["rms_px"] < 3.0 and len(record["cameras"]) == 3
+    with pytest.raises(SystemExit, match="exactly one"):
+        rig_cli.main(["reconstruct", "--session", str(session), "--anchor", "neck=0.5"])
