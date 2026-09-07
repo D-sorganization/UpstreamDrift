@@ -161,8 +161,14 @@ def _parser() -> argparse.ArgumentParser:
     rec3.add_argument(
         "--cameras",
         type=Path,
-        required=True,
-        help="camera records or a reconstruction.json to start from",
+        default=None,
+        help="camera records or a reconstruction.json to start from (later takes)",
+    )
+    rec3.add_argument(
+        "--intrinsics",
+        type=Path,
+        default=None,
+        help="intrinsics-only records for a first take: placement from the joints",
     )
     rec3.add_argument("--anchor", required=True, metavar="SEGMENT=METRES")
     rec3.add_argument(
@@ -389,13 +395,17 @@ def cmd_compare(args: argparse.Namespace) -> int:
 def cmd_reconstruct(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.__main__ import _parse_anchor
     from src.motion_capture.reconstruct.pipeline import (
+        intrinsics_from,
         reconstruct_session,
         start_cameras_from,
     )
 
+    if (args.cameras is None) == (args.intrinsics is None):
+        raise SystemExit("give exactly one of --cameras or --intrinsics")
     summary = reconstruct_session(
         args.session,
-        start_cameras=start_cameras_from(args.cameras),
+        start_cameras=start_cameras_from(args.cameras) if args.cameras else None,
+        intrinsics=intrinsics_from(args.intrinsics) if args.intrinsics else None,
         scale_anchor=_parse_anchor(args.anchor),
         acceleration_sigma_px=args.accel_sigma_px,
     )
