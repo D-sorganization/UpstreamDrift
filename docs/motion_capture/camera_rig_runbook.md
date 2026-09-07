@@ -20,7 +20,10 @@ described in [Camera Rig Capture](capture_rig.md).
    ports; the CalDigit TS4 carries at most one camera and is better left for
    networking and displays.
 3. Never chain the TS4 behind the Sonnet. Each dock goes to its own
-   Thunderbolt port on the laptop.
+   Thunderbolt port on the laptop. (On 2026-09-06 a camera two hub tiers
+   deep behind a TS4 on the Sonnet did stream at 60 fps beside the other
+   two; the rule stays because the earlier TS4 hub failure was real, and
+   the topology walk reports `hub_depth` so the case is visible.)
 4. Do not add a hub between a dock and a camera; the 30 ft powered cable
    already spends two of the five allowed hub tiers.
 5. After any cabling change, confirm the Sonnet routers are present (a
@@ -40,12 +43,61 @@ another jack; `plan-check` reports it as missing, and the fix is to update the
 plan, never to guess. Start a new condition by copying the plan and changing
 what differs (resolution, rate, exposure, gain, view names).
 
+## Choosing a Mode
+
+The ELP AR0234 advertises these MJPEG modes over DirectShow (`ffmpeg -f dshow
+-list_options true -i video="Global Shutter Camera"`, 2026-09-06):
+
+| Size      | Advertised max fps | Measured, one camera                                           | Compressed rate (dark lab) |
+| --------- | ------------------ | -------------------------------------------------------------- | -------------------------- |
+| 1920x1200 | 120                | 119.9 fps (555 frames / 4.63 s)                                | 36 MB/s                    |
+| 1920x1200 | 60 (plan default)  | 59.8 fps (278 / 4.65 s)                                        | 18 MB/s                    |
+| 1920x1080 | 120                | not measured                                                   |                            |
+| 1600x1200 | 120                | opened, **zero frames** (I/O error)                            |                            |
+| 1280x960  | 120                | not measured                                                   |                            |
+| 1280x720  | 200                | 200 fps advertised; opened once, failed once — not yet trusted |                            |
+| 1280x720  | 120                | 120.4 fps (620 / 5.15 s)                                       | 16 MB/s                    |
+| 640x480   | 200                | 200.0 fps (718 / 3.59 s)                                       | 10 MB/s                    |
+
+Frames and durations come from the decode probe in `recordings.json`. The
+compressed rate is scene dependent: the same 1920x1200 @ 60 mode produced
+4.8 MB/s per camera in the lit lab earlier in the day and 18 MB/s of noisy
+MJPEG with the lights off, so size your disk for the dark case.
+
+Any mode can be requested without editing the plan:
+
+```bash
+# one condition, every view
+python3 -m motion_capture.rig record --plan P --mode 1280x720@120 --duration 10 --out S
+# a subset of views (plan order), e.g. to bring one camera up alone
+python3 -m motion_capture.rig record --plan P --views cam_b --duration 3 --out S
+```
+
+The derived plan is written to the bundle with its name suffixed by the
+overrides (`lab-three-view-sonnet+cam_b+1280x720@120`), so a session always
+records what actually ran. Per-view modes and exposure/gain still live in the
+plan file.
+
+**Three cameras together.** With all three on distinct root ports the rig
+delivers the requested rate on every view: 1920x1200 @ 60 gave 60.2 / 60.0 /
+60.1 fps (157 / 156 / 155 frames in 2.6 s) in the same run that the single
+camera gave 59.8 fps, i.e. no measurable loss from running three. The loss is
+in _bandwidth per root port_, not per camera: one camera per USB 2.0 root port
+is the ceiling regardless of resolution. Lower resolutions do not let two
+cameras share a port (the firmware reserves the same isochronous budget for
+every mode); they buy frame rate and smaller files, not more cameras per port.
+
+A recorder that opens the device but decodes zero frames (1600x1200 @ 120) is
+reported `blocked` with ffmpeg's last words in `recorder_note`, never
+`degraded`; `recorder_wall_s` gives the host-clock seconds each recorder ran
+so throughput can be checked against the file size.
+
 ## Procedure
 
 Run from the repository root. Each step exits 0 on success.
 
 ```bash
-# 1. Is the plan realizable on this host as wired? (enumerates cameras, ~60 s)
+# 1. Is the plan realizable on this host as wired? (enumerates cameras, ~20 s)
 python3 -m motion_capture.rig plan-check --plan docs/motion_capture/plans/lab_three_view_sonnet.json
 
 # 2. Optional: observe frame rates and strobe alignment without recording.
@@ -92,6 +144,44 @@ three views cover the same interval within about 50 ms and each carries about
 
 `plan-check` on the same wiring matched all three views with no root-port
 conflicts; `session-check` on the second bundle reported no problems.
+
+## Stability Across Sessions
+
+Six back-to-back three-camera `record` runs on 2026-09-06 (4 s each, TS4
+chained on the Sonnet with cam_c two hub tiers deep, against rule 3):
+
+| Run | Mode           | Result                                                     |
+| --- | -------------- | ---------------------------------------------------------- |
+| 1   | 1920x1200 @ 60 | supported: 59.8 / 60.0 / 60.1 fps                          |
+| 2   | 1920x1200 @ 60 | supported: 59.8 / 60.1 / 60.0 fps                          |
+| 3-5 | 60 and 120     | `plan-check` aborted: cam_b not enumerated                 |
+| 6   | 640x480 @ 200  | blocked: cam_a 200.5 fps; cam_b, cam_c `I/O error` at open |
+
+One camera's `LastArrivalDate` moved to 20:50:23, so a unit dropped off the bus
+and re-enumerated during the series. Solo opens of every camera succeed. The
+rig therefore meets the rate on every view when the cameras open, but is not
+yet shown to open reliably session after session; #9613 tracks the
+soak test that decides whether the TS4 chain, Sonnet USB power, or the
+DirectShow open race is responsible. Until it closes, check `plan-check` and
+the bundle outcome before every take rather than trusting the previous one.
+
+## Proxies for Playback
+
+The recordings are MJPEG in Matroska, which OpenCV and ffmpeg read but browsers
+do not. The React Video Analyzer (`ui/src/pages/VideoAnalyzer.tsx`) and the
+Tools web Video Processor both play through an HTML `<video>` element, so make
+H.264 proxies first:
+
+```bash
+python3 -m motion_capture.rig proxy --session sessions/<date>-record   # libx264
+python3 -m motion_capture.rig proxy --session S --encoder h264_nvenc    # GPU
+```
+
+Each `<view>_<identity>.mp4` lands beside its recording and `proxies.json`
+records the encoder and ffmpeg's exit per view. Proxies are for viewing only:
+ingest reads the original MJPEG, and a failed transcode is listed with its
+reason rather than dropped. The PyQt6 MediaPipe/OpenPose GUIs can decode the
+`.mkv` directly once their file filter admits it (#9611).
 
 ## What This Does Not Show
 

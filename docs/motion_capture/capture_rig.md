@@ -49,7 +49,9 @@ versions rather than guessing.
 python3 -m motion_capture.rig plan-check --plan plans/three-view-driver.json
 ```
 
-Walks every camera's hub chain through Windows PnP, matches the plan by
+Walks every camera's hub chain through Windows PnP (one enumeration plus one
+bulk property query per hub tier, about 20 s for three cameras), matches the
+plan by
 identity, and reports missing cameras, cameras that share a USB 2.0 root port
 (only one of them can stream), and enumerated cameras the plan does not claim.
 Exit 0 means the plan is realizable on this host as wired.
@@ -109,6 +111,14 @@ view whose recorder failed or wrote nothing makes the session `blocked`, never
 a quietly shorter dataset. `--dry-run` writes the bundle without touching a
 camera and is what the tests exercise.
 
+`--mode WxH@FPS[:FOURCC]` applies one capture mode to every selected view and
+`--views a,b` restricts the run to a subset of the plan (plan order); both
+derive a new plan whose name records the overrides, and both are accepted by
+`plan-check`, `capture` and `record`. `recordings.json` also carries
+`recorder_note` (ffmpeg's last stderr lines, kept when a recorder failed or
+delivered nothing) and `recorder_wall_s` (host seconds the recorder ran). A
+recorder that exits 0 but decodes zero frames makes the session `blocked`.
+
 ## Session Check
 
 ```bash
@@ -121,6 +131,16 @@ entry's file exists with the indexed size, and the manifest outcome is the one
 the recordings imply. Exit 0 when sound. Later stages (ingest, alignment,
 export) read bundles, so this is the gate between "the cameras ran" and "this
 session can be trusted".
+
+## Proxies
+
+```bash
+python3 -m motion_capture.rig proxy --session sessions/<date>-record [--encoder libx264|h264_nvenc|h264_mf] [--crf 18]
+```
+
+Writes a browser-playable H.264/yuv420p `.mp4` beside every usable recording
+and `proxies.json` (encoder, exit code, bytes, reason). Proxies exist for the
+web players; ingest and session-check never read them.
 
 ## Ingest
 
