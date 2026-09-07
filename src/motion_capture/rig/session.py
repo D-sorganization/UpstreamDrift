@@ -106,6 +106,11 @@ class _Worker:
         self.worst_gap_ns = 0
         self.error: str | None = None
 
+    @property
+    def nominal_fps(self) -> int:
+        """Requested frame rate; delegates so callers need not reach through."""
+        return self.binding.mode.fps
+
     def open(self) -> bool:
         try:
             self.effective = self.source.open(self.binding.mode, self.binding.controls)
@@ -152,7 +157,7 @@ class _Worker:
         fps = 0.0
         if self.first_ns is not None and self.last_ns is not None and self.frames > 1:
             fps = (self.frames - 1) / ((self.last_ns - self.first_ns) / 1e9)
-        target = self.binding.mode.fps
+        target = self.nominal_fps
         if self.effective is None:
             state, reason = "open_failed", self.error
         elif self.frames == 0:
