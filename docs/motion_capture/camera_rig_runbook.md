@@ -115,10 +115,6 @@ python3 -m motion_capture.rig record --plan docs/motion_capture/plans/lab_three_
 # 4. Validate the bundle before handing it on.
 python3 -m motion_capture.rig session-check --session sessions/<date>-record
 
-# 4b. Once per camera: record the printed 9x6 chessboard moving through the view
-#     (any short take), then calibrate; intrinsics.json is reused on every take.
-python3 -m motion_capture.rig calibrate-intrinsics --session sessions/<board-take> --board 9x6 --square 0.025
-
 # 5. Detect the golfer in every view (MediaPipe by default).
 python3 -m motion_capture.rig ingest --session sessions/<date>-record
 
