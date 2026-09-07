@@ -757,7 +757,15 @@ class ModelLibrary:
 
             # Download URDF - validate HTTPS URL
             parsed = urllib.parse.urlparse(entry.source_url)
-            if parsed.scheme != "https" or not parsed.netloc:
+            # Name the actual defect. "must be absolute HTTPS" reads as a
+            # formatting complaint for `file:///etc/passwd`, when what was
+            # rejected is the scheme.
+            if parsed.scheme != "https":
+                raise ValueError(
+                    f"URL scheme {parsed.scheme!r} is not allowed; "
+                    f"only https is permitted: {entry.source_url}"
+                )
+            if not parsed.netloc:
                 raise ValueError(f"URL must be absolute HTTPS: {entry.source_url}")
 
             urdf_filename = entry.source_url.split("/")[-1]
