@@ -217,6 +217,25 @@ calibrated real rig. `metrics.py` scores camera pose (degrees, metres),
 relative bone-length error, joint-position error with missing counts, and
 outlier-flag precision/recall; the thresholds live in the acceptance document.
 
+## What the Golfer Gets Back
+
+`reconstruct/analytics.py` turns the fitted joints into the numbers a coach
+reads first, each with the frame it happened in: pelvis and shoulder turn
+about the vertical relative to address (unwrapped, so a full backswing does
+not fold at 180 degrees), their difference (the X-factor), hand speed from
+the robust smoother with its uncertainty (the club is not tracked yet, so
+hands are the proxy), the swing events the speed profile implies (address,
+top, peak speed, finish) and the tempo ratio. `rig reconstruct` writes them
+as `reconstruct/swing_summary.json`. On the synthetic swing the turn angles
+match the motion's known rotations within half a degree, and a one-frame
+30 cm jump of the wrists changes the peak hand speed by less than 5 %
+because the smoother rejects it and says so.
+
+The existing `shared.python.analysis` package (phases, tempo, X-factor
+stretch, reports) consumes joint-angle and club-speed series from
+simulations; these series are the mocap-side input to it, not a second
+implementation of it.
+
 ## Detector Comparison
 
 `python3 -m motion_capture.rig compare --session S --estimators mediapipe,openpose_dnn`
