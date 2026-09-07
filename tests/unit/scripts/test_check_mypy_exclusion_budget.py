@@ -8,6 +8,11 @@ import pytest
 import yaml
 from scripts import check_mypy_exclusion_budget as checker
 
+# The autouse ``_prevent_repo_root_io`` fixture chdirs every test into
+# ``tmp_path`` (#7935), so repository files must be addressed absolutely.
+REPO_ROOT = Path(__file__).resolve().parents[3]
+BUDGET_PATH = REPO_ROOT / "scripts" / "config" / "mypy_exclusion_budget.json"
+
 
 def _write(path: Path, text: str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -358,7 +363,11 @@ def test_coverage_gate_validation_requires_production_packages() -> None:
 
 def test_ci_standard_runs_mypy_exclusion_budget() -> None:
     """The ratchet is only useful when the main CI gate runs it."""
-    workflow = yaml.safe_load(Path(".github/workflows/ci-standard.yml").read_text())
+    workflow = yaml.safe_load(
+        (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
+            encoding="utf-8"
+        )
+    )
     code_quality_steps = workflow["jobs"]["code-quality"]["steps"]
     quality_gate_needs = workflow["jobs"]["quality-gate"]["needs"]
 
@@ -380,9 +389,7 @@ def test_ci_standard_runs_mypy_exclusion_budget() -> None:
 
 def test_real_budget_has_next_reduction_before_current_expiry() -> None:
     """The type-debt ratchet needs a concrete near-term shrink milestone."""
-    budget_entries, schedule = checker.load_budget(
-        Path("scripts/config/mypy_exclusion_budget.json")
-    )
+    budget_entries, schedule = checker.load_budget(BUDGET_PATH)
     today = date(2026, 5, 3)
     current_cap = checker.active_cap(schedule, today)
     earliest_expiry = min(entry.expires_on for entry in budget_entries)
@@ -399,10 +406,15 @@ def test_real_budget_has_next_reduction_before_current_expiry() -> None:
 
 def test_real_budget_defines_production_coverage_gates() -> None:
     """Production-critical packages need explicit coverage expectations."""
-    budget_data = json.loads(
-        Path("scripts/config/mypy_exclusion_budget.json").read_text(encoding="utf-8")
-    )
+    budget_data = json.loads(BUDGET_PATH.read_text(encoding="utf-8"))
     gates = {gate["name"]: gate for gate in budget_data.get("coverage_gates", [])}
+    schedule_dates = sorted(
+        date.fromisoformat(step["effective_on"]) for step in budget_data["schedule"]
+    )
+    today = date.today()
+    next_cap_reduction = next(
+        (step for step in schedule_dates if step > today), schedule_dates[-1]
+    )
 
     assert set(gates) >= {
         "api-routes",
@@ -415,4 +427,7 @@ def test_real_budget_defines_production_coverage_gates() -> None:
     for gate in gates.values():
         assert gate["min_coverage"] >= 30.0
         assert gate["ratchet_to"] > gate["min_coverage"]
-        assert date.fromisoformat(gate["ratchet_on"]) <= date(2026, 8, 1)
+        # Re-attestation stays pinned to the next scheduled exclusion-cap
+        # reduction, so renewing a date cannot outrun the ratchet it tracks
+        # (#8731).
+        assert date.fromisoformat(gate["ratchet_on"]) <= next_cap_reduction
