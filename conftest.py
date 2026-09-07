@@ -94,3 +94,43 @@ def _arm_hang_forensics(config) -> None:
 def pytest_configure(config) -> None:
     if _os.environ.get("UNIT_GATE_QUARANTINE") == "1":
         _arm_hang_forensics(config)
+
+
+# ---------------------------------------------------------------------------
+# Plugin-owned ini keys under ``--strict-config``.
+#
+# ``pyproject.toml`` declares ``asyncio_mode`` (pytest-asyncio) and
+# ``timeout`` / ``timeout_method`` (pytest-timeout). Several CI lanes run
+# pytest from purpose-built venvs that install only ``pytest`` itself — the
+# hash-locked articulated-authority lane and the rolling MuJoCo/Pinocchio lane
+# in ci-optional-stack.yml. Without the plugins those keys are unknown, and
+# ``--strict-config`` turns the "Unknown config option" warning into exit
+# code 4 before a single test is collected. Registering the keys here only
+# when their owning plugin is absent keeps the shared configuration valid
+# everywhere; when a plugin is installed it registers its own options and
+# this shim stays out of the way.
+# ---------------------------------------------------------------------------
+# Keyed by the plugin's registered (entry-point) name, which is also what
+# ``-p no:<name>`` blocks. Entry-point plugins register before initial
+# conftests load, so the plugin manager already knows whether each is active.
+_PLUGIN_INI_KEYS: dict[str, tuple[tuple[str, str, str], ...]] = {
+    "asyncio": (("asyncio_mode", "string", "pytest-asyncio mode (plugin not active)"),),
+    "timeout": (
+        ("timeout", "string", "pytest-timeout seconds (plugin not active)"),
+        ("timeout_method", "string", "pytest-timeout method (plugin not active)"),
+    ),
+}
+
+
+def _missing_plugin_ini_keys(pluginmanager) -> tuple[tuple[str, str, str], ...]:
+    """Return ini keys whose owning plugin is neither installed nor active."""
+    keys: list[tuple[str, str, str]] = []
+    for plugin, plugin_keys in _PLUGIN_INI_KEYS.items():
+        if not pluginmanager.has_plugin(plugin):
+            keys.extend(plugin_keys)
+    return tuple(keys)
+
+
+def pytest_addoption(parser, pluginmanager) -> None:
+    for name, kind, help_text in _missing_plugin_ini_keys(pluginmanager):
+        parser.addini(name, help_text, type=kind)
