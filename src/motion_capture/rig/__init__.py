@@ -14,6 +14,8 @@ Modules:
 - :mod:`.recorder` — compressed-stream recorders (ffmpeg DirectShow copy)
 - :mod:`.session` — barrier-started multi-camera capture with typed outcomes
 - :mod:`.bundle` — session bundles: plan, recordings index, manifest, validation
+- :mod:`.ingest` — recordings to per-view 2-D observations with provenance
+- :mod:`.alignment` — strobe offsets applied to observations as evidence
 - :mod:`.sync` — strobe-based alignment of the cameras' arrival clocks
 - :mod:`.tools_bridge` — fail-closed export to the Tools mocap schema
 """

@@ -247,22 +247,23 @@ class MediaPipeEstimator(PoseEstimator):
             )
         landmarks = poses[0]
         keypoints_3d: dict[str, np.ndarray] = {}
+        confidences: dict[str, float] = {}
         for idx, landmark in enumerate(landmarks):
             name = self.LANDMARK_MAP.get(idx, f"landmark_{idx}")
             keypoints_3d[name] = np.array([landmark.x, landmark.y, landmark.z])
+            confidences[name] = float(getattr(landmark, "visibility", 0.0) or 0.0)
 
         if self.enable_temporal_smoothing:
             keypoints_3d = self._apply_temporal_smoothing(keypoints_3d)
 
-        visibilities = [
-            float(getattr(lm, "visibility", 0.0) or 0.0) for lm in landmarks
-        ]
-        confidence = sum(visibilities) / len(visibilities) if visibilities else 0.0
+        values = list(confidences.values())
+        confidence = sum(values) / len(values) if values else 0.0
         return PoseEstimationResult(
             joint_angles=self._keypoints_to_joint_angles(keypoints_3d),
             confidence=confidence,
             timestamp=time.time(),
             raw_keypoints=keypoints_3d,
+            raw_confidences=confidences,
         )
 
     def estimate_from_video(self, video_path: Path) -> list[PoseEstimationResult]:

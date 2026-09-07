@@ -226,6 +226,22 @@ def _load_json(
         return None
 
 
+def load_bundle(bundle_dir: Path) -> tuple[RigPlan, RecordingsIndex, SessionManifest]:
+    """Load a bundle's three documents; raises ``ValueError`` naming what is wrong."""
+    require(bundle_dir.is_dir(), "bundle_dir must be a directory", str(bundle_dir))
+    problems: list[str] = []
+    plan = _load_json(bundle_dir / PLAN_FILE, RigPlan, problems)
+    index = _load_json(bundle_dir / RECORDINGS_FILE, RecordingsIndex, problems)
+    manifest = _load_json(bundle_dir / MANIFEST_FILE, SessionManifest, problems)
+    if problems or not (
+        isinstance(plan, RigPlan)
+        and isinstance(index, RecordingsIndex)
+        and isinstance(manifest, SessionManifest)
+    ):
+        raise ValueError(f"bundle {bundle_dir} is not loadable: {'; '.join(problems)}")
+    return plan, index, manifest
+
+
 def check_bundle(bundle_dir: Path) -> BundleCheck:
     """Validate a bundle on disk without opening any video.
 
