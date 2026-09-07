@@ -32,6 +32,7 @@ class CacheEntry:
     last_accessed: float = field(default_factory=time.time)
     size_bytes: int = 0
     is_complete: bool = True
+    version: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
@@ -44,6 +45,7 @@ class CacheEntry:
             "last_accessed": self.last_accessed,
             "size_bytes": self.size_bytes,
             "is_complete": self.is_complete,
+            "version": self.version,
         }
 
     @classmethod
@@ -58,6 +60,7 @@ class CacheEntry:
             last_accessed=data.get("last_accessed", time.time()),
             size_bytes=data.get("size_bytes", 0),
             is_complete=data.get("is_complete", True),
+            version=data.get("version"),
         )
 
 
@@ -151,6 +154,16 @@ class ModelCache:
             raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         if entry and entry.local_path.exists():
+            # Reuse verify() rather than re-implementing the comparison, so
+            # get() and verify() can never disagree about what "valid" means.
+            if not self.verify(model_id):
+                logger.warning(
+                    "Cache integrity check failed for %s; treating as a miss "
+                    "so the caller re-fetches rather than loading a corrupt "
+                    "model.",
+                    model_id,
+                )
+                return None
             entry.last_accessed = time.time()
             self._save_index()
             return entry
@@ -161,16 +174,21 @@ class ModelCache:
         model_id: str,
         local_path: Path,
         source_url: str | None = None,
-        compute_checksum: bool = True,
+        version: str | None = None,
     ) -> CacheEntry:
         """
         Add a model to the cache.
+
+        A SHA-256 checksum is always computed: it is what lets ``get`` reject
+        a corrupted entry, so making it optional would let a caller create
+        entries that can never be integrity-checked.
 
         Args:
             model_id: Model identifier
             local_path: Path to cached files
             source_url: Original source URL
-            compute_checksum: If True, compute file checksum
+            version: Version metadata; defaults to a UTC-free timestamp stamp
+                so every entry carries something comparable.
 
         Returns:
             Created CacheEntry
@@ -180,9 +198,9 @@ class ModelCache:
             raise ValueError("model_id must be provided")
         self._maybe_cleanup()
 
-        # Compute checksum if requested
+        # Always compute the checksum; integrity checking depends on it.
         checksum = None
-        if compute_checksum and local_path.is_file():
+        if local_path.is_file():
             checksum = self._compute_checksum(local_path)
 
         # Calculate size
@@ -194,6 +212,7 @@ class ModelCache:
             local_path=local_path,
             checksum=checksum,
             size_bytes=size,
+            version=version or time.strftime("%Y%m%d.%H%M%S"),
         )
 
         self._entries[model_id] = entry
