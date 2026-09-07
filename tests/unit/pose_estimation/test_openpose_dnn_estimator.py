@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 
 import numpy as np
@@ -34,8 +35,14 @@ class _FakeNet:
         return maps
 
 
-def _files(tmp_path: Path) -> Path:
-    for spec in openpose_models.BODY25_FILES.values():
+def _files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Right-sized placeholder files, with the digest pins lifted for the test."""
+    unpinned = {
+        k: dataclasses.replace(v, sha256=None)
+        for k, v in openpose_models.BODY25_FILES.items()
+    }
+    monkeypatch.setattr(openpose_models, "BODY25_FILES", unpinned)
+    for spec in unpinned.values():
         (tmp_path / spec.filename).write_bytes(b"\0" * spec.size_bytes)
     return tmp_path
 
@@ -50,8 +57,10 @@ def test_peaks_map_heatmap_maxima_to_normalized_coordinates() -> None:
     assert len(confidences) == 25
 
 
-def test_estimate_requires_load_and_returns_contract(tmp_path: Path) -> None:
-    cache = _files(tmp_path)
+def test_estimate_requires_load_and_returns_contract(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cache = _files(tmp_path, monkeypatch)
     net = _FakeNet()
     est = OpenPoseDnnEstimator(net_factory=lambda p, w: net)
     with pytest.raises(Exception, match="load_model"):

@@ -104,8 +104,10 @@ def rotation_from_axis_angle(axis: Array, angle_rad: float) -> Array:
     a = np.asarray(axis, dtype=float).reshape(3)
     norm = float(np.linalg.norm(a))
     require(norm > 1e-9, "axis must be non-zero")
-    a = a / norm
-    k = np.array([[0, -a[2], a[1]], [a[2], 0, -a[0]], [-a[1], a[0], 0]])
+    unit = a / norm
+    k = np.array(
+        [[0, -unit[2], unit[1]], [unit[2], 0, -unit[0]], [-unit[1], unit[0], 0]]
+    )
     return np.eye(3) + np.sin(angle_rad) * k + (1 - np.cos(angle_rad)) * (k @ k)
 
 
