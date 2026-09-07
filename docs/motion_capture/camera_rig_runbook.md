@@ -205,6 +205,35 @@ ingest reads the original MJPEG, and a failed transcode is listed with its
 reason rather than dropped. The PyQt6 MediaPipe/OpenPose GUIs can decode the
 `.mkv` directly once their file filter admits it (#9611).
 
+## Import, Analyse, Reliability, Export
+
+Commands added for the guided workflow (#9658); the Capture Rig tile runs
+the same ones, and `docs/motion_capture/user_guide.md` (generated from the
+tile's step model) walks through them in order.
+
+```bash
+python3 -m src.motion_capture.rig import --out S --view face_on=clip.mp4 [--view dtl=clip2.mp4]
+python3 -m src.motion_capture.rig ingest --session S --estimator openpose_dnn --option input_height=368 --out S/observations_openpose_dnn
+python3 -m src.motion_capture.rig reliability --session S
+python3 -m src.motion_capture.rig analyze --session S            # single view: 2-D events and tempo
+python3 -m src.motion_capture.rig reconstruct --session S --intrinsics S/intrinsics.json --anchor neck=0.53 --exclude-joints nose
+python3 -m src.motion_capture.rig export --session S             # reconstruct/reconstruction.trc + reconstruction_export.json
+```
+
+- `import` builds a bundle around existing files (one file is a valid
+  single-camera session); nothing is copied and each file's probe becomes
+  the recorded capture mode.
+- `ingest --option KEY=VALUE` passes typed settings to the estimator and
+  records them in the observations' provenance; `--out` keeps one set per
+  detector so re-runs never overwrite another detector's output.
+- `reliability` grades every shared joint from all observation sets and the
+  clean report (`reliability.json` + `.md`) and lists recommended exclusions.
+- `analyze` writes `analysis_2d/<view>.json`: address / top / peak / finish,
+  tempo and normalised hand speed in subject box heights.
+- `reconstruct --exclude-joints` treats the named joints as unobserved;
+  `export` writes the fitted joints as a TRC marker file the motion pipeline
+  and model-matching tools read directly.
+
 ## Capture Rig Tool (Desktop)
 
 The launcher tile **Capture Rig** (`python3 -m src.tools.capture_rig`) is the
