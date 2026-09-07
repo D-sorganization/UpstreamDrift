@@ -160,8 +160,11 @@ uncontrolled recording establishes a grip mechanism.
 - Completed: relevant implementation/test inventory, source ownership, state
   contract, study/validation design and linked implementation issues.
 - This slice changes documentation only; no engine solver or vendor pin changes.
-- Validation: document title-case and SPEC checks pass; no engine tests run
-  because this slice is documentation only. PR #9706 is open for normal protected review.
+- Validation: document title-case and SPEC checks pass. The merge-sync push
+  requires the standard DbC/core/utils subset; initial collection hung in the
+  import loader because the isolated vendor directory was empty. Initialized
+  the existing eab74a901a Tools pin and reran; no vendor pin change.
+  PR #9706 is open for normal protected review.
 - Preserve #8557/#9153 protected records and frozen ControlTower/WSL recovery
   restrictions in the root handoff. Do not import old checkpoints as new data.
 - Next implementation is #9703 after its provider dependency is reviewed and
