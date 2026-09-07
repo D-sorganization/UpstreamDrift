@@ -12,6 +12,9 @@ from __future__ import annotations  # noqa: E402, F404
 
 import logging  # noqa: E402
 from collections.abc import Callable  # noqa: E402
+
+import numpy as np  # noqa: E402
+from scipy.spatial.transform import Rotation  # noqa: E402
 from typing import TYPE_CHECKING, Any  # noqa: E402
 
 from src.shared.python.model_generation.core.types import (  # noqa: E402
@@ -171,12 +174,24 @@ class ModificationMixin:
                     child_joint.parent = parent_name
                     # Adjust origin if we have parent joint info
                     if parent_joint:
-                        # Combine transforms (simplified - just add positions)
-                        px, py, pz = parent_joint.origin.xyz
-                        cx, cy, cz = child_joint.origin.xyz
+                        # Compose the SE(3) transforms rather than adding
+                        # positions. Adding alone is only correct when the
+                        # parent joint has no rotation; otherwise the child is
+                        # placed as if the parent frame were axis-aligned, and
+                        # its own orientation is silently dropped. Fixed once
+                        # and reverted by the squash b8d95ad25.
+                        p_rot = Rotation.from_euler("xyz", parent_joint.origin.rpy)
+                        p_pos = np.array(parent_joint.origin.xyz)
+                        c_pos = np.array(child_joint.origin.xyz)
+                        c_rpy = np.array(child_joint.origin.rpy)
+
+                        new_pos = p_pos + p_rot.apply(c_pos)
+                        c_rot = Rotation.from_euler("xyz", c_rpy)
+                        new_rpy = (p_rot * c_rot).as_euler("xyz")
+
                         child_joint.origin = Origin(
-                            xyz=(px + cx, py + cy, pz + cz),
-                            rpy=child_joint.origin.rpy,
+                            xyz=tuple(new_pos.tolist()),
+                            rpy=tuple(new_rpy.tolist()),
                         )
         elif not reparent_children:
             # Delete children recursively
