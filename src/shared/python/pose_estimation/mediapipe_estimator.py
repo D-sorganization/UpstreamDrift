@@ -1,14 +1,16 @@
-"""MediaPipe-based pose estimation implementation.
+"""MediaPipe pose estimation on the MediaPipe Tasks API.
 
-This module provides a production-ready wrapper around MediaPipe Pose,
-implementing the standardized PoseEstimator interface with enhanced features:
-- Real-time processing capability
-- Temporal smoothing with Kalman filtering
-- Multi-person detection support
-- Confidence-based filtering
+mediapipe >= 0.10 removed the legacy ``mp.solutions`` API. This module drives
+``mediapipe.tasks.python.vision.PoseLandmarker`` in VIDEO mode, which needs a
+monotonically increasing timestamp per frame and a ``.task`` model file on
+disk. Model resolution and verification live in :mod:`.mediapipe_models`; the
+library never downloads at ``load_model`` time.
 
-Refactored to use shared engine availability module (DRY principle).
+Preserved from the legacy implementation: the 33-landmark naming, the golf
+joint mapping, Kalman temporal smoothing, and the joint-angle output.
 """
+
+from __future__ import annotations
 
 import time
 from pathlib import Path
@@ -20,9 +22,16 @@ except ImportError:
     cv2 = None  # type: ignore[assignment]
 import numpy as np
 
-from src.shared.python.core.contracts import StateError
+from src.shared.python.core.contracts import StateError, require
 from src.shared.python.engine_core.engine_availability import MEDIAPIPE_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.pose_estimation.interface import (
+    PoseEstimationResult,
+    PoseEstimator,
+)
+from src.shared.python.pose_estimation.joint_angle_utils import compute_joint_angles
+from src.shared.python.pose_estimation.mediapipe_models import resolve_pose_model
+from src.shared.python.signal_toolkit.signal_processing import KalmanFilter
 
 # Import mediapipe if available
 if MEDIAPIPE_AVAILABLE:
@@ -30,21 +39,22 @@ if MEDIAPIPE_AVAILABLE:
 else:
     mp = None
 
-from src.shared.python.pose_estimation.interface import (
-    PoseEstimationResult,
-    PoseEstimator,
-)
-from src.shared.python.pose_estimation.joint_angle_utils import compute_joint_angles
-from src.shared.python.signal_toolkit.signal_processing import KalmanFilter
-
 logger = get_logger(__name__)
 
 
-class MediaPipeEstimator(PoseEstimator):
-    """MediaPipe-based implementation of PoseEstimator.
+def _tasks_api() -> tuple[Any, Any]:
+    """Return ``(vision, BaseOptions)`` from the MediaPipe Tasks API (lazy)."""
+    from mediapipe.tasks.python import BaseOptions, vision
 
-    Provides faster, more robust pose estimation compared to OpenPose,
-    with built-in temporal smoothing and confidence filtering.
+    return vision, BaseOptions
+
+
+class MediaPipeEstimator(PoseEstimator):
+    """MediaPipe PoseLandmarker behind the :class:`PoseEstimator` interface.
+
+    Postconditions: ``estimate_from_image`` returns landmarks in normalized
+    image coordinates (x, y in [0, 1], z relative) keyed by
+    :attr:`LANDMARK_MAP`; ``confidence`` is the mean landmark visibility.
     """
 
     # MediaPipe Pose landmark mapping (33 landmarks)
@@ -105,21 +115,41 @@ class MediaPipeEstimator(PoseEstimator):
         min_detection_confidence: float = 0.5,
         min_tracking_confidence: float = 0.5,
         enable_temporal_smoothing: bool = True,
+        *,
+        model_variant: str | None = None,
+        nominal_fps: float = 30.0,
     ) -> None:
-        """Initialize the MediaPipe estimator.
+        """Configure the estimator; no model is loaded until :meth:`load_model`.
 
         Args:
-            min_detection_confidence: Minimum confidence for pose detection
-            min_tracking_confidence: Minimum confidence for pose tracking
-            enable_temporal_smoothing: Whether to apply Kalman filtering
+            min_detection_confidence: Minimum confidence for pose detection.
+            min_tracking_confidence: Minimum confidence for pose tracking.
+            enable_temporal_smoothing: Whether to apply Kalman filtering.
+            model_variant: ``lite`` / ``full`` / ``heavy``; ``None`` defers to
+                ``MEDIAPIPE_POSE_MODEL_VARIANT`` (default ``full``).
+            nominal_fps: Frame rate assumed when callers pass no timestamp.
         """
-        if min_detection_confidence is None:
-            raise ValueError("min_detection_confidence must be provided")
+        require(
+            0.0 <= min_detection_confidence <= 1.0,
+            "min_detection_confidence must be in [0, 1]",
+            min_detection_confidence,
+        )
+        require(
+            0.0 <= min_tracking_confidence <= 1.0,
+            "min_tracking_confidence must be in [0, 1]",
+            min_tracking_confidence,
+        )
+        require(nominal_fps > 0, "nominal_fps must be positive", nominal_fps)
         self.pose_detector: Any | None = None
         self.min_detection_confidence = min_detection_confidence
         self.min_tracking_confidence = min_tracking_confidence
         self.enable_temporal_smoothing = enable_temporal_smoothing
+        self.model_variant = model_variant
+        self.nominal_fps = nominal_fps
+        self.model_path: Path | None = None
         self._is_loaded = False
+        self._frame_index = 0
+        self._last_timestamp_ms = -1
 
         # Temporal smoothing state
         self.previous_landmarks: dict[str, np.ndarray] | None = None
@@ -127,229 +157,182 @@ class MediaPipeEstimator(PoseEstimator):
 
         if not MEDIAPIPE_AVAILABLE:
             logger.warning(
-                "MediaPipe library not found. MediaPipeEstimator will not function."
+                "MediaPipe Tasks API not available. MediaPipeEstimator will not function."
             )
 
     def load_model(self, model_path: Path | None = None) -> None:
-        """Initialize the MediaPipe Pose model.
+        """Create the PoseLandmarker from a verified ``.task`` model file.
 
         Args:
-            model_path: Not used for MediaPipe (uses built-in models)
+            model_path: Explicit model file; ``None`` resolves through
+                ``MEDIAPIPE_POSE_MODEL_PATH`` / the per-user cache.
+
+        Raises:
+            ImportError: mediapipe (Tasks API) or OpenCV is not installed.
+            ModelError: no model file is present (message carries the fix).
         """
         if not MEDIAPIPE_AVAILABLE:
-            raise ImportError("MediaPipe module is not installed.")
-
+            raise ImportError(
+                "mediapipe with the Tasks API (>=0.10) is not installed: pip install mediapipe"
+            )
         if cv2 is None:
             raise ImportError("OpenCV (cv2) is not installed.")
-
+        vision, base_options = _tasks_api()
+        path = resolve_pose_model(model_path, self.model_variant)
+        options = vision.PoseLandmarkerOptions(
+            base_options=base_options(model_asset_path=str(path)),
+            running_mode=vision.RunningMode.VIDEO,
+            num_poses=1,
+            min_pose_detection_confidence=self.min_detection_confidence,
+            min_tracking_confidence=self.min_tracking_confidence,
+        )
         try:
-            mp_pose = mp.solutions.pose
-            self.pose_detector = mp_pose.Pose(
-                static_image_mode=False,
-                model_complexity=2,  # Use highest accuracy model
-                enable_segmentation=False,
-                min_detection_confidence=self.min_detection_confidence,
-                min_tracking_confidence=self.min_tracking_confidence,
-            )
-            self._is_loaded = True
-            logger.info("MediaPipe Pose model loaded successfully")
-
-        except (RuntimeError, TypeError, ValueError) as e:
-            logger.error(f"Failed to load MediaPipe Pose model: {e}")
+            self.pose_detector = vision.PoseLandmarker.create_from_options(options)
+        except (RuntimeError, TypeError, ValueError):
+            logger.exception("Failed to create MediaPipe PoseLandmarker from %s", path)
             raise
+        self.model_path = path
+        self._is_loaded = True
+        self._frame_index = 0
+        self._last_timestamp_ms = -1
+        logger.info("MediaPipe PoseLandmarker loaded from %s", path)
 
-    def estimate_from_image(self, image: np.ndarray) -> PoseEstimationResult:
-        """Estimate pose from a single image frame.
+    def close(self) -> None:
+        """Release the landmarker; safe to call twice."""
+        if self.pose_detector is not None:
+            self.pose_detector.close()
+            self.pose_detector = None
+        self._is_loaded = False
+
+    def _next_timestamp_ms(self, provided: int | None) -> int:
+        """VIDEO mode needs strictly increasing timestamps; derive or validate one."""
+        if provided is None:
+            timestamp = int(round(self._frame_index * 1000.0 / self.nominal_fps))
+            self._frame_index += 1
+        else:
+            timestamp = int(provided)
+        if timestamp <= self._last_timestamp_ms:
+            timestamp = self._last_timestamp_ms + 1
+        self._last_timestamp_ms = timestamp
+        return timestamp
+
+    def estimate_from_image(
+        self, image: np.ndarray, timestamp_ms: int | None = None
+    ) -> PoseEstimationResult:
+        """Estimate pose from one BGR frame.
 
         Args:
-            image: Input image (H, W, C) in BGR format
-
-        Returns:
-            PoseEstimationResult containing joint angles and keypoints
+            image: Input image (H, W, 3) in BGR format.
+            timestamp_ms: Frame time for VIDEO-mode tracking; derived from
+                ``nominal_fps`` when omitted.
         """
-        if not self._is_loaded:
+        if not self._is_loaded or self.pose_detector is None:
             raise StateError("Model not loaded. Call load_model() first.")
+        require(
+            image.ndim == 3 and image.shape[2] == 3, "image must be HxWx3", image.shape
+        )
 
-        # Convert BGR to RGB for MediaPipe
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        # Process the image
-        if self.pose_detector is not None:
-            results = self.pose_detector.process(rgb_image)
-        else:
-            raise StateError("MediaPipe pose detector not initialized")
-
-        if results.pose_landmarks is None:
-            # No pose detected
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
+        result = self.pose_detector.detect_for_video(
+            mp_image, self._next_timestamp_ms(timestamp_ms)
+        )
+        poses = result.pose_landmarks
+        if not poses:
             return PoseEstimationResult(
                 joint_angles={}, confidence=0.0, timestamp=time.time(), raw_keypoints={}
             )
-
-        # Extract landmarks
-        landmarks = results.pose_landmarks.landmark
-        keypoints_3d: dict[str, np.ndarray[Any, Any]] = {}
-        keypoints_2d: dict[str, np.ndarray[Any, Any]] = {}
-
+        landmarks = poses[0]
+        keypoints_3d: dict[str, np.ndarray] = {}
         for idx, landmark in enumerate(landmarks):
-            landmark_name = self.LANDMARK_MAP.get(idx, f"landmark_{idx}")
-            keypoints_3d[landmark_name] = np.array([landmark.x, landmark.y, landmark.z])
-            keypoints_2d[landmark_name] = np.array(
-                [
-                    landmark.x * image.shape[1],  # Convert to pixel coordinates
-                    landmark.y * image.shape[0],
-                ]
-            )
+            name = self.LANDMARK_MAP.get(idx, f"landmark_{idx}")
+            keypoints_3d[name] = np.array([landmark.x, landmark.y, landmark.z])
 
-        # Apply temporal smoothing if enabled
         if self.enable_temporal_smoothing:
-            smoothed_keypoints = self._apply_temporal_smoothing(keypoints_3d)
-            if smoothed_keypoints is not None:
-                keypoints_3d = smoothed_keypoints
+            keypoints_3d = self._apply_temporal_smoothing(keypoints_3d)
 
-        # Convert keypoints to joint angles
-        joint_angles = self._keypoints_to_joint_angles(keypoints_3d)
-
-        # Calculate overall confidence
-        # ⚡ Bolt: Built-in sum() is ~7x faster than np.mean() for Python lists
-        visibilities = [landmark.visibility for landmark in landmarks]
+        visibilities = [
+            float(getattr(lm, "visibility", 0.0) or 0.0) for lm in landmarks
+        ]
         confidence = sum(visibilities) / len(visibilities) if visibilities else 0.0
-
         return PoseEstimationResult(
-            joint_angles=joint_angles,
+            joint_angles=self._keypoints_to_joint_angles(keypoints_3d),
             confidence=confidence,
             timestamp=time.time(),
-            raw_keypoints=keypoints_3d,  # Use 3D keypoints
+            raw_keypoints=keypoints_3d,
         )
 
     def estimate_from_video(self, video_path: Path) -> list[PoseEstimationResult]:
-        """Process an entire video file with temporal consistency.
-
-        Args:
-            video_path: Path to video file
-
-        Returns:
-            List of results for each frame with temporal smoothing
-        """
+        """Process an entire video file with temporal consistency."""
         if not self._is_loaded:
             raise StateError("Model not loaded. Call load_model() first.")
-
-        # Reset temporal smoothing state to prevent contamination from
-        # previous video files (stale Kalman filter state)
         self.reset_temporal_state()
 
-        results = []
         cap = cv2.VideoCapture(str(video_path))
-
         if not cap.isOpened():
             raise FileNotFoundError(f"Could not open video file: {video_path}")
-
-        fps = cap.get(cv2.CAP_PROP_FPS)
+        fps = cap.get(cv2.CAP_PROP_FPS) or self.nominal_fps
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        logger.info("Processing video: %d frames at %.2f FPS", frame_count, fps)
 
-        logger.info(f"Processing video: {frame_count} frames at {fps} FPS")
-
+        results: list[PoseEstimationResult] = []
         frame_idx = 0
         while True:
             ret, frame = cap.read()
             if not ret:
                 break
-
-            # Calculate timestamp
-            timestamp = frame_idx / fps
-
-            # Estimate pose for this frame
-            result = self.estimate_from_image(frame)
-            result.timestamp = timestamp
-
+            timestamp_s = frame_idx / fps
+            result = self.estimate_from_image(frame, int(round(timestamp_s * 1000)))
+            result.timestamp = timestamp_s
             results.append(result)
             frame_idx += 1
-
             if frame_idx % 100 == 0:
-                logger.info(f"Processed {frame_idx}/{frame_count} frames")
-
+                logger.info("Processed %d/%d frames", frame_idx, frame_count)
         cap.release()
-        logger.info(f"Video processing complete: {len(results)} frames processed")
-
+        logger.info("Video processing complete: %d frames processed", len(results))
         return results
 
     def _apply_temporal_smoothing(
         self, keypoints_3d: dict[str, np.ndarray]
     ) -> dict[str, np.ndarray]:
-        """Apply Kalman filtering for temporal consistency.
-
-        Args:
-            keypoints_3d: Raw keypoints from current frame
-
-        Returns:
-            Smoothed keypoints
-        """
-        if keypoints_3d is None:
-            raise ValueError("keypoints_3d must be provided")
+        """Apply a constant-velocity Kalman filter per landmark."""
+        require(keypoints_3d is not None, "keypoints_3d must be provided")
         smoothed = {}
-
         for landmark_name, current_pos in keypoints_3d.items():
-            # Initialize filter if not exists
             if landmark_name not in self.kalman_filters:
-                # Constant Velocity Model
-                # State: [x, y, z, vx, vy, vz]
-                dt = 1.0  # Normalized time step (assuming constant frame rate)
-                F = np.eye(6)
-                F[0, 3] = dt
-                F[1, 4] = dt
-                F[2, 5] = dt
-
-                H = np.zeros((3, 6))
-                H[0, 0] = 1.0
-                H[1, 1] = 1.0
-                H[2, 2] = 1.0
-
-                # Process noise (uncertainty in model)
-                # Assume constant velocity is mostly true, but allow some deviation
-                Q = np.eye(6) * 1e-4
-
-                # Measurement noise (uncertainty in MediaPipe)
-                # MediaPipe is reasonably accurate but can jitter
-                R = np.eye(3) * 1e-3
-
-                # Initial state
-                x = np.zeros(6)
-                x[:3] = current_pos
-
-                self.kalman_filters[landmark_name] = KalmanFilter(
-                    dim_x=6, dim_z=3, F=F, H=H, Q=Q, R=R, x=x
-                )
-
-            # Predict and Update
+                self.kalman_filters[landmark_name] = self._new_filter(current_pos)
             kf = self.kalman_filters[landmark_name]
             kf.predict()
             kf.update(current_pos)
-
-            # Store smoothed position
             smoothed[landmark_name] = kf.x[:3]
-
         return smoothed
+
+    @staticmethod
+    def _new_filter(initial_pos: np.ndarray) -> KalmanFilter:
+        # State [x, y, z, vx, vy, vz]; constant velocity with unit normalized dt.
+        F = np.eye(6)
+        F[0, 3] = F[1, 4] = F[2, 5] = 1.0
+        H = np.zeros((3, 6))
+        H[0, 0] = H[1, 1] = H[2, 2] = 1.0
+        x = np.zeros(6)
+        x[:3] = initial_pos
+        return KalmanFilter(
+            dim_x=6, dim_z=3, F=F, H=H, Q=np.eye(6) * 1e-4, R=np.eye(3) * 1e-3, x=x
+        )
 
     def _keypoints_to_joint_angles(
         self, keypoints_3d: dict[str, np.ndarray]
     ) -> dict[str, float]:
-        """Convert 3D keypoints to joint angles for biomechanical analysis.
-
-        Computes elbow, shoulder, hip, and knee flexion angles plus
-        trunk rotation (X-factor) using shared utility.
-
-        Args:
-            keypoints_3d: 3D keypoint positions keyed by MediaPipe names.
-
-        Returns:
-            Dictionary of joint angles in radians.
-        """
+        """Convert 3D keypoints to joint angles (radians) via the shared utility."""
         try:
             return compute_joint_angles(keypoints_3d)
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.warning(f"Error calculating joint angles: {e}")
+        except (RuntimeError, ValueError, OSError):
+            logger.warning("Error calculating joint angles", exc_info=True)
             return {}
 
     def reset_temporal_state(self) -> None:
-        """Reset temporal smoothing state (call between videos)."""
+        """Reset smoothing and VIDEO-mode timestamps (call between videos)."""
         self.previous_landmarks = None
         self.kalman_filters.clear()
+        self._frame_index = 0
+        self._last_timestamp_ms = -1
