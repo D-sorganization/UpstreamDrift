@@ -21,7 +21,9 @@ from typing import TYPE_CHECKING, cast
 import defusedxml.ElementTree as DefusedET
 
 if TYPE_CHECKING:
-    import xml.etree.ElementTree as ET
+    # Type-only: never imported at runtime, and every parse in this module
+    # goes through DefusedET. No XXE surface exists to defuse.
+    import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from src.shared.python.model_generation.core.types import (
     Geometry,
     GeometryType,

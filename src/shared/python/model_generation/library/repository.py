@@ -53,12 +53,17 @@ def _urlopen_https(
 ) -> Any:
     """Open a request after validating it targets an HTTPS URL."""
     _require_https_url(request.full_url)
-    return urllib.request.urlopen(request, timeout=timeout)  # nosec B310
+    # _require_https_url above rejects any scheme but https and any host
+    # outside _ALLOWED_GITHUB_HOSTS -- exactly the attacker-controlled-URL
+    # case this rule warns about.
+    return urllib.request.urlopen(request, timeout=timeout)  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
 
 
 def _urlretrieve_https(url: str, filename: str | Path) -> tuple[str, Any]:
     """Retrieve an HTTPS URL to a local file."""
-    return urllib.request.urlretrieve(  # nosec B310
+    # _require_https_url gates the URL inline, so a non-https scheme or a
+    # host off the allowlist raises before urlretrieve is reached.
+    return urllib.request.urlretrieve(  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         _require_https_url(url),
         filename,
     )

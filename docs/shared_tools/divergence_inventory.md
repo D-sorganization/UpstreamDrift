@@ -310,7 +310,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/interfaces/__init__.py` | +74 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/interfaces/api.py` | +28 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/mesh/__init__.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/mesh/primitive_inertia.py` | +90 |  | Dieter Olson 2026-08-03 | Dieter Olson 2026-09-05 |
 | `humanoid_character_builder/presets/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -351,7 +351,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/converters/urdf_parser.py` | +7008 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/converters/urdf_parser.py` | +7213 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/physics_validation.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -360,8 +360,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/editor/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/editor/editor_clipboard.py` | +227 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
 | `model_generation/editor/editor_modifications.py` | +1803 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
-| `model_generation/editor/editor_types.py` | +1022 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/editor/frankenstein_editor.py` | +330 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
+| `model_generation/editor/editor_types.py` | +1022 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/editor/frankenstein_editor.py` | +330 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/editor/text_editor_diff_mixin.py` | +591 |  | d-sorgclaudeagent[bot] 2026-09-06 | Dieter Olson 2026-09-05 |
 | `model_generation/explorer/__init__.py` | -35 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/explorer/model_explorer.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -370,11 +370,11 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/inertia/calculator.py` | +27 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/library/__init__.py` | +20 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/_rate_limiter.py` | -98 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/_rate_limiter.py` | +604 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/cache.py` | +957 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/github_importer.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/library/model_library.py` | -569 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/repository.py` | +4451 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/repository.py` | +4968 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/mesh/__init__.py` | +64 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/tests/test_contracts.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
