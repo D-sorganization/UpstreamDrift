@@ -1,5 +1,9 @@
 # SPEC.md — Repository Specification Document
 
+## Optimize Demonstration Dataset Mean Duration (#9645)
+
+Optimizes `DemonstrationDataset.get_stats()` by replacing `np.mean()` with built-in `sum() / len()` when computing `mean_duration` from a Python list of demonstration durations, avoiding temporary NumPy array allocations while safely guarding empty demonstration collections.
+
 ## Guard Optional Excel Export Tests (#9579)
 
 Guards `TestExportExcel` in `movement_optimizer/tests/test_export.py` with `pytest.importorskip("openpyxl")` so test suites pass when optional dependencies (`openpyxl`) are absent in minimal or optional test runners.
