@@ -74,6 +74,8 @@ class ModificationMixin:
             The model, or ``None`` when it is unknown or read-only. Callers
             return their own failure value; the reason is logged here.
         """
+        if model_id is None:
+            raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
         if not model:
             logger.error(f"Model '{model_id}' not found")
@@ -82,6 +84,43 @@ class ModificationMixin:
             logger.error(f"Model '{model_id}' is read-only")
             return None
         return model
+
+    def _resolve_rename_target(
+        self, model_id: str, old_name: str, new_name: str
+    ) -> tuple[ParsedModel | None, bool]:
+        """Resolve the shared preamble of :meth:`rename_link` / :meth:`rename_joint`.
+
+        The ``model_id`` check is deliberately unconditional. ``require`` is
+        gated on ``DBC_LEVEL`` and compiles out when contracts are disabled, so
+        it states an invariant for development but cannot be the only guard on
+        a public entry point.
+
+        Args:
+            model_id: Target model.
+            old_name: Current name.
+            new_name: Replacement name.
+
+        Returns:
+            ``(model, early_result)``. When ``model`` is ``None`` the caller
+            must return ``early_result`` immediately -- ``False`` for a blank
+            ``new_name`` or an unusable model, ``True`` for a rename to the
+            name the component already has, which is a no-op rather than a
+            failure.
+
+        Raises:
+            ValueError: If ``model_id`` is ``None``.
+        """
+        require(bool(model_id), "model_id must be a non-empty string")
+        require(bool(old_name), "old_name must be a non-empty string")
+        require(bool(new_name), "new_name must be a non-empty string")
+        if model_id is None:
+            raise ValueError("model_id must be provided")
+        if not new_name or not new_name.strip():
+            logger.error("new_name must be a non-empty string")
+            return None, False
+        if old_name == new_name:
+            return None, True
+        return self._get_writable_model(model_id), False
 
     # ============================================================
     # Direct Modifications
@@ -106,15 +145,8 @@ class ModificationMixin:
         """
         require(bool(model_id), "model_id must be a non-empty string")
         require(bool(link_name), "link_name must be a non-empty string")
-        if model_id is None:
-            raise ValueError("model_id must be provided")
-        model = self._models.get(model_id)
-        if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
+        model = self._get_writable_model(model_id)
+        if model is None:
             return False
 
         link = model.get_link(link_name)
@@ -175,13 +207,8 @@ class ModificationMixin:
         require(bool(root_link), "root_link must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
-        model = self._models.get(model_id)
-        if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
+        model = self._get_writable_model(model_id)
+        if model is None:
             return False
 
         subtree = model.get_subtree(root_link)
@@ -226,26 +253,9 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
-        require(bool(model_id), "model_id must be a non-empty string")
-        require(bool(old_name), "old_name must be a non-empty string")
-        require(bool(new_name), "new_name must be a non-empty string")
-        if model_id is None:
-            raise ValueError("model_id must be provided")
-        if not new_name or not new_name.strip():
-            logger.error("new_name must be a non-empty string")
-            return False
-
-        if old_name == new_name:
-            return True  # No-op
-
-        model = self._models.get(model_id)
-        if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
-            return False
+        model, early_result = self._resolve_rename_target(model_id, old_name, new_name)
+        if model is None:
+            return early_result
 
         # Check for conflicts
         if model.get_link(new_name):
@@ -293,26 +303,9 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
-        require(bool(model_id), "model_id must be a non-empty string")
-        require(bool(old_name), "old_name must be a non-empty string")
-        require(bool(new_name), "new_name must be a non-empty string")
-        if model_id is None:
-            raise ValueError("model_id must be provided")
-        if not new_name or not new_name.strip():
-            logger.error("new_name must be a non-empty string")
-            return False
-
-        if old_name == new_name:
-            return True  # No-op
-
-        model = self._models.get(model_id)
-        if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
-            return False
+        model, early_result = self._resolve_rename_target(model_id, old_name, new_name)
+        if model is None:
+            return early_result
 
         # Check for conflicts
         if model.get_joint(new_name):
@@ -349,13 +342,8 @@ class ModificationMixin:
         """
         require(bool(model_id), "model_id must be a non-empty string")
         require(bool(joint_name), "joint_name must be a non-empty string")
-        model = self._models.get(model_id)
-        if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
+        model = self._get_writable_model(model_id)
+        if model is None:
             return False
 
         joint = model.get_joint(joint_name)
@@ -433,13 +421,8 @@ class ModificationMixin:
         require(bool(child_link), "child_link must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
-        model = self._models.get(model_id)
-        if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
+        model = self._get_writable_model(model_id)
+        if model is None:
             return False
 
         # Verify links exist
@@ -495,15 +478,8 @@ class ModificationMixin:
         """
         require(bool(model_id), "model_id must be a non-empty string")
         require(bool(link_name), "link_name must be a non-empty string")
-        if model_id is None:
-            raise ValueError("model_id must be provided")
-        model = self._models.get(model_id)
-        if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
+        model = self._get_writable_model(model_id)
+        if model is None:
             return False
 
         joint = self.get_connecting_joint(model_id, link_name)
@@ -546,13 +522,8 @@ class ModificationMixin:
         require(bool(prefix), "prefix must be a non-empty string")
         if model_id is None:
             raise ValueError("model_id must be provided")
-        model = self._models.get(model_id)
-        if not model:
-            logger.error(f"Model '{model_id}' not found")
-            return False
-
-        if model.read_only:
-            logger.error(f"Model '{model_id}' is read-only")
+        model = self._get_writable_model(model_id)
+        if model is None:
             return False
 
         self._save_state()
