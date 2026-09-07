@@ -93,6 +93,35 @@ units distinct. Windows grants one process exclusive access to a camera, so a
 session either observes through frame sources or records through recorders,
 not both on the same camera.
 
+## Recording a Session
+
+```bash
+python3 -m motion_capture.rig record --plan plans/three-view-driver.json   --duration 10 --out sessions/2026-09-06T14-record
+```
+
+Enumerates the cameras, checks the plan, resolves each planned camera's
+DirectShow device path, and stream-copies its compressed MJPEG to
+`<out>/<view>_<identity>.mkv` for the requested duration (issue #9600). The
+result is a **session bundle**: `plan.json` (the plan as recorded),
+`recordings.json` (per view: file, bytes, recorder exit code, requested mode)
+and `session_manifest.json`, whose outcome reuses the capture vocabulary — a
+view whose recorder failed or wrote nothing makes the session `blocked`, never
+a quietly shorter dataset. `--dry-run` writes the bundle without touching a
+camera and is what the tests exercise.
+
+## Session Check
+
+```bash
+python3 -m motion_capture.rig session-check --session sessions/2026-09-06T14-record
+```
+
+Validates a bundle without opening any video: the three JSON files parse
+against their schemas, every plan view has a recording entry, every successful
+entry's file exists with the indexed size, and the manifest outcome is the one
+the recordings imply. Exit 0 when sound. Later stages (ingest, alignment,
+export) read bundles, so this is the gate between "the cameras ran" and "this
+session can be trusted".
+
 ## Extending the Rig
 
 - **A new camera type** implements the `FrameSource` protocol in `sources.py`:
