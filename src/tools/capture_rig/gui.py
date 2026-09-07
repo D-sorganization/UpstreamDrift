@@ -392,6 +392,20 @@ class ProcessPanel(QGroupBox):
         form.addRow("Start cameras from", self.start_edit)
         form.addRow("Board (inner corners)", self.board_edit)
         form.addRow("Square (m)", self.square_spin)
+        self.clip_speed_spin = QDoubleSpinBox()
+        self.clip_speed_spin.setRange(0.05, 1.0)
+        self.clip_speed_spin.setSingleStep(0.05)
+        self.clip_speed_spin.setValue(0.25)
+        self.other_session_edit = QLineEdit()
+        self.other_session_edit.setPlaceholderText("session folder to compare against")
+        self.other_view_edit = QLineEdit()
+        self.other_view_edit.setPlaceholderText("its view (default: same name)")
+        self.align_combo = QComboBox()
+        self.align_combo.addItems(["top", "address", "peak", "finish"])
+        form.addRow("Clip speed (1 = real time)", self.clip_speed_spin)
+        form.addRow("Compare with session", self.other_session_edit)
+        form.addRow("Compare view", self.other_view_edit)
+        form.addRow("Align on", self.align_combo)
         self._on_estimator(self.estimator_combo.currentIndex())
 
     def _on_estimator(self, _index: int) -> None:
@@ -437,6 +451,20 @@ class ProcessPanel(QGroupBox):
 
     def board(self) -> tuple[str, float]:
         return self.board_edit.text().strip(), float(self.square_spin.value())
+
+    def clip_speed(self) -> float:
+        return float(self.clip_speed_spin.value())
+
+    def other_session(self) -> Path:
+        text = self.other_session_edit.text().strip()
+        require(text != "", "name the session folder to compare against")
+        return Path(text)
+
+    def other_view(self) -> str | None:
+        return self.other_view_edit.text().strip() or None
+
+    def align_event(self) -> str:
+        return self.align_combo.currentText()
 
 
 class PlaybackPanel(QWidget):
@@ -510,6 +538,14 @@ class PlaybackPanel(QWidget):
 
     def _current_view(self) -> ViewMedia | None:
         return self.view_combo.currentData()
+
+    def current_view_name(self) -> str | None:
+        view = self._current_view()
+        return None if view is None else view.view
+
+    def current_set_name(self) -> str | None:
+        text = self.set_combo.currentText()
+        return text or None
 
     def _on_view_changed(self, index: int) -> None:
         view: ViewMedia | None = self.view_combo.itemData(index)
@@ -651,6 +687,8 @@ class CaptureRigWidget(QWidget):
         ("reconstruct", "Reconstruct"),
         ("analyze", "Analyze 2-D"),
         ("export", "Export"),
+        ("clip", "Export clip"),
+        ("compare_takes", "Compare takes"),
         ("stop", "Stop"),
         ("load", "Load session"),
     )
@@ -750,6 +788,8 @@ class CaptureRigWidget(QWidget):
             "reconstruct": lambda: self._reconstruct(session),
             "analyze": lambda: commands.analyze_command(session),
             "export": lambda: commands.export_command(session),
+            "clip": lambda: self._clip(session),
+            "compare_takes": lambda: self._compare_takes(session),
         }
         if action not in builder:
             raise ValueError(f"unknown action {action!r}")
@@ -769,6 +809,31 @@ class CaptureRigWidget(QWidget):
             cameras=cameras,
             intrinsics=intrinsics,
             exclude_joints=self.process.exclude_joints(),
+        )
+
+    def _clip(self, session: Path) -> list[str]:
+        view = self.playback.current_view_name()
+        require(view is not None, "load a session and pick a view first")
+        assert view is not None
+        set_name = self.playback.current_set_name()
+        out = session / f"clip_{view}_{set_name or 'raw'}.mp4"
+        return commands.clip_command(
+            session,
+            view,
+            out,
+            speed=self.process.clip_speed(),
+            observation_set=set_name,
+        )
+
+    def _compare_takes(self, session: Path) -> list[str]:
+        view = self.playback.current_view_name()
+        require(view is not None, "load a session and pick a view first")
+        assert view is not None
+        other = self.process.other_session()
+        other_view = self.process.other_view() or view
+        out = session / f"compare_{view}_vs_{other.name}_{other_view}.mp4"
+        return commands.compare_takes_command(
+            session, view, other, other_view, out, align=self.process.align_event()
         )
 
     def trigger(self, action: str) -> None:
