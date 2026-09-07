@@ -17,7 +17,10 @@ from typing import TYPE_CHECKING, Any
 import defusedxml.ElementTree as DefusedET
 
 if TYPE_CHECKING:
-    import xml.etree.ElementTree as ET
+    # Type-only: never imported at runtime, and the single parse in this
+    # module (DefusedET.fromstring) is already defused. Matches the
+    # suppression on urdf_parser.py and anthropometrics/engine_adapters.
+    import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from src.shared.python.model_generation.converters.urdf_parser import (
     ParsedModel,
     URDFParser,
