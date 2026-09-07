@@ -481,7 +481,9 @@ jobs:
             -v --tb=short \
             -k "same_environment_two_process or killswitch" \
             2>&1 | tee "$RUNNER_TEMP/articulated-authority-tests.txt"
-          passed=$(grep -c "PASSED" "$RUNNER_TEMP/articulated-authority-tests.txt" || true)
+          # pyproject addopts include -q, so per-test PASSED lines never print;
+          # read the summary line ("N passed") instead (#9594).
+          passed=$(grep -oE "[0-9]+ passed" "$RUNNER_TEMP/articulated-authority-tests.txt" | awk '{s+=$1} END {print s+0}')
           if [[ "$passed" -eq 0 ]]; then
             echo "::error::Authority native contracts executed zero passing tests."
             exit 1
@@ -528,35 +530,41 @@ jobs:
     env:
       PYTHONPATH: .:src
       MUJOCO_GL: egl
+      PYTHONNOUSERSITE: "1"
+      PIP_CONFIG_FILE: /dev/null
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.12"
+      - name: Create Isolated Rolling Runtime
+        run: python -m venv "$RUNNER_TEMP/articulated-manufactured-rolling-venv"
       - name: Install Rolling Native Compatibility Runtime
         run: |
-          python -m pip install \
+          "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" -m pip install \
             "defusedxml>=0.7,<1" "pydantic>=2.12,<3" "PyYAML>=6.0,<7" \
             "numpy>=2.2,<3" "scipy>=1.13,<2" \
             "mujoco>=3.6,<4" "pin>=2.6,<5" "pytest>=8,<10"
-          python -m pip check
+          "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" -m pip check
       - name: Run Non-Vacuous Rolling and Killswitch Contracts
         run: |
           set -o pipefail
-          python -m pytest \
+          "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" -m pytest \
             tests/research/test_articulated_manufactured_solution.py \
             tests/research/test_articulated_manufactured_hybrid_authority_red.py \
             -v --tb=short \
             -k "rolling_native_output or killswitch" \
             2>&1 | tee "$RUNNER_TEMP/articulated-rolling-tests.txt"
-          passed=$(grep -c "PASSED" "$RUNNER_TEMP/articulated-rolling-tests.txt" || true)
+          # Summary-line count; see the authority lane (#9594).
+          passed=$(grep -oE "[0-9]+ passed" "$RUNNER_TEMP/articulated-rolling-tests.txt" | awk '{s+=$1} END {print s+0}')
           if [[ "$passed" -eq 0 ]]; then
             echo "::error::Rolling native contracts executed zero passing tests."
             exit 1
           fi
       - name: Compare Non-Authoritative Rolling Semantics
         run: |
-          python -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
+          "$RUNNER_TEMP/articulated-manufactured-rolling-venv/bin/python" \
+            -m scripts.research.proximal_distal_energy.run_articulated_manufactured_solution \
             --profile rolling \
             --output "$RUNNER_TEMP/articulated-non-authoritative-rolling.json" \
             --compare-committed
