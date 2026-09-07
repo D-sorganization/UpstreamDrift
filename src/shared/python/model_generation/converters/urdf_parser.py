@@ -11,6 +11,9 @@ from __future__ import annotations
 
 import logging
 import math
+import os
+import re
+import subprocess  # nosec B404 - xacro CLI invoked with a fixed argv, shell=False
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, cast
@@ -183,9 +186,45 @@ class URDFParser:
             source_path = Path(source)
             if not source_path.exists():
                 raise FileNotFoundError(f"URDF file not found: {source_path}")
-            xml_string = source_path.read_text()
+            raw_text = source_path.read_text()
+            if self._is_xacro(source_path) or self._has_xacro_namespace(raw_text):
+                processed = self._preprocess_xacro(source_path)
+                if processed is not None:
+                    xml_string = processed
+                else:
+                    logger.warning(
+                        f"Could not preprocess xacro file {source_path}, "
+                        "attempting to parse as plain XML"
+                    )
+                    xml_string = raw_text
+            else:
+                xml_string = raw_text
         else:
             xml_string = source
+
+        # Rust-backed fast path. Opt-in via UPSTREAM_URDF_USE_RUST=1; routed
+        # through the typed AST defined in rust_core/upstream-urdf/. The facade
+        # hands back a ParsedModel field-compatible with the pure-Python branch
+        # below. Epic #4520 (UpstreamDrift #5215).
+        try:
+            from model_generation.converters import _urdf_rust_facade as _rust_facade
+        except ImportError:  # pragma: no cover - layout safety net
+            _rust_facade = None  # type: ignore[assignment]
+        if _rust_facade is not None and _rust_facade.should_use_rust():
+            try:
+                ast = _rust_facade.parse_urdf_to_dict(xml_string)
+                return _rust_facade.parsed_model_from_rust_ast(
+                    ast,
+                    source_path=source_path,
+                    original_xml=xml_string,
+                    read_only=read_only,
+                )
+            except Exception as exc:  # pragma: no cover - fallback path
+                logger.warning(
+                    "upstream_urdf Rust parser failed (%s); "
+                    "falling back to pure Python",
+                    exc,
+                )
 
         # Parse XML
         try:
@@ -238,6 +277,54 @@ class URDFParser:
     def parse_string(self, xml_string: str, read_only: bool = False) -> ParsedModel:
         """Parse URDF from XML string."""
         return self.parse(xml_string, read_only=read_only)
+
+    def _is_xacro(self, path: Path) -> bool:
+        """Whether a path names a xacro file, by extension.
+
+        ``.suffixes`` rather than ``.suffix`` so the common ``robot.urdf.xacro``
+        double extension is recognised as well as a bare ``robot.xacro``.
+        """
+        if path is None:
+            raise ValueError("path must be provided")
+        return ".xacro" in path.suffixes
+
+    def _has_xacro_namespace(self, xml_string: str) -> bool:
+        """Whether XML content declares or uses the xacro namespace.
+
+        A file may need preprocessing without carrying a ``.xacro`` extension,
+        so content is checked as well as the name.
+        """
+        return "xmlns:xacro" in xml_string or "xacro:" in xml_string
+
+    def _preprocess_xacro(self, path: Path) -> str | None:
+        """Expand a xacro file with the ``xacro`` CLI.
+
+        Returns:
+            The expanded XML, or ``None`` when xacro is unavailable, fails, or
+            times out. ``None`` is a signal to fall back to parsing the raw
+            text, not an error: a file that merely declares the namespace
+            without using any xacro directives still parses as plain URDF.
+        """
+        try:
+            result = subprocess.run(  # nosec B603 B607 - fixed argv, shell=False
+                ["xacro", str(path)],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+            if result.returncode == 0:
+                return result.stdout
+            logger.warning(
+                f"xacro processing failed (exit {result.returncode}): {result.stderr}"
+            )
+            return None
+        except FileNotFoundError:
+            logger.warning("xacro CLI tool not found. Install with: pip install xacro")
+            return None
+        except subprocess.TimeoutExpired:
+            logger.warning(f"xacro processing timed out for {path}")
+            return None
 
     def _parse_link(
         self,
@@ -556,16 +643,29 @@ class URDFParser:
         return Material(name=name, color=color, texture=texture)
 
     def _resolve_mesh_path(self, filename: str, base_path: Path) -> Path | None:
-        """Resolve mesh file path while rejecting unsafe references."""
+        """Resolve a mesh reference while rejecting unsafe ones.
+
+        ``package://`` URIs are searched in the order a ROS user expects:
+        directories next to the URDF first (so a self-contained model bundle
+        wins), then ``ROS_PACKAGE_PATH``, then catkin (``CMAKE_PREFIX_PATH``,
+        under ``src/``) and colcon (``COLCON_PREFIX_PATH``) workspaces.
+
+        ``filename`` is validated before any lookup, so traversal segments and
+        foreign URI schemes are rejected rather than searched for.
+        """
         filename = self._validate_mesh_filename(filename)
         if filename.startswith("package://"):
-            # Strip package:// prefix
-            package_path = filename[10:]
-            # Try to find in common locations
-            for search_dir in [base_path.parent, base_path.parent.parent]:
-                candidate = search_dir / package_path
-                if candidate.exists():
-                    return candidate
+            package_path = filename[len("package://") :]
+
+            resolved = self._resolve_package_uri(package_path, base_path)
+            if resolved is not None:
+                return resolved
+
+            logger.warning(
+                f"Could not resolve package URI: {filename}. Searched "
+                f"ROS_PACKAGE_PATH, CMAKE_PREFIX_PATH, COLCON_PREFIX_PATH "
+                f"and directories near {base_path}"
+            )
             return None
 
         # Handle relative paths
@@ -575,6 +675,56 @@ class URDFParser:
                 return candidate
 
         return Path(filename) if Path(filename).exists() else None
+
+    def _resolve_package_uri(self, package_path: str, base_path: Path) -> Path | None:
+        """Return the first existing location for a validated package path."""
+        for search_dir in (base_path.parent, base_path.parent.parent):
+            candidate = search_dir / package_path
+            if candidate.exists():
+                return candidate
+
+        for root in self._split_search_path(os.environ.get("ROS_PACKAGE_PATH", "")):
+            candidate = Path(root) / package_path
+            if candidate.exists():
+                return candidate
+
+        # catkin workspaces expose packages under <workspace>/src.
+        for root in self._split_search_path(os.environ.get("CMAKE_PREFIX_PATH", "")):
+            candidate = Path(root) / "src" / package_path
+            if candidate.exists():
+                return candidate
+
+        for root in self._split_search_path(os.environ.get("COLCON_PREFIX_PATH", "")):
+            candidate = Path(root) / package_path
+            if candidate.exists():
+                return candidate
+
+        return None
+
+    @staticmethod
+    def _split_search_path(value: str) -> list[str]:
+        """Split a PATH-style variable, tolerating Windows drive letters.
+
+        ROS publishes these variables colon-separated on every platform, so
+        splitting on ``os.pathsep`` alone drops entries on Windows. Splitting
+        on ``":"`` alone would instead sever ``C:/ws`` into ``C`` and ``/ws``,
+        so a lone drive letter is rejoined with the fragment after it.
+        """
+        if not value:
+            return []
+        fragments = re.split(r"[;:]", value)
+        parts: list[str] = []
+        index = 0
+        while index < len(fragments):
+            piece = fragments[index]
+            following = fragments[index + 1] if index + 1 < len(fragments) else ""
+            if len(piece) == 1 and piece.isalpha() and following[:1] in ("/", "\\"):
+                parts.append(f"{piece}:{following}")
+                index += 2
+                continue
+            parts.append(piece)
+            index += 1
+        return [part.strip() for part in parts if part.strip()]
 
     @staticmethod
     def _validate_mesh_filename(filename: str) -> str:
