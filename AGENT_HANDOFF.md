@@ -119,7 +119,8 @@ contract, recovery constraints, and next commands are in
 ## Active AffineDrift and External Program Boundaries
 
 - Markerless Mocap Program (#9063): Tools #4706 owns capture/contract schemas;
-  UpstreamDrift #9069 owns app orchestration; makes no physical-lab qualification claim.
+  UpstreamDrift #9069 (folded into #9422) owns app orchestration; makes no physical-lab qualification claim.
+  Rig bring-up evidence: `docs/motion_capture/usb_camera_rig_bringup.md` (#9586); consumer slices #9589–#9592.
 - Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`; publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
 - Governed companion workflows (#9190) define the 15-record registry, public executor, and CI execution evidence across 10 success and 4 failure fixtures.
 - #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes; #9174 remains open.
