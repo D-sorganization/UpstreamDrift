@@ -72,3 +72,42 @@ def test_missing_source_joints_are_reported() -> None:
     ]
     with pytest.raises(Exception, match="lacks joints"):
         to_reconstruct_layout(src)
+
+
+def test_body25_uses_its_own_mid_hip_and_neck() -> None:
+    from src.shared.python.pose_estimation.openpose_dnn_estimator import (
+        OpenPoseDnnEstimator,
+    )
+
+    names = [
+        OpenPoseDnnEstimator.LANDMARK_MAP[i]
+        for i in sorted(OpenPoseDnnEstimator.LANDMARK_MAP)
+    ]
+    rng = np.random.default_rng(1)
+    px = rng.uniform(0, 1000, (len(names), 2))
+    conf = np.full(len(names), 0.7)
+    payload = {
+        "view": "v",
+        "fps": 30.0,
+        "frames_total": 1,
+        "detector_layout": {"name": "openpose_body25", "keypoint_names": names},
+        "frames": [
+            {
+                "camera_id": "x",
+                "time_s": 0.0,
+                "keypoints_px": px.tolist(),
+                "confidence": conf.tolist(),
+            }
+        ],
+    }
+    out = to_reconstruct_layout(payload)
+    row = out["frames"][0]
+    assert (
+        row["keypoints_px"][JOINT_NAMES.index("mid_hip")]
+        == px[names.index("mid_hip")].tolist()
+    )
+    assert (
+        row["keypoints_px"][JOINT_NAMES.index("neck")]
+        == px[names.index("neck")].tolist()
+    )
+    assert out["provenance"]["derived_joints"] == {}
