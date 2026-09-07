@@ -21,6 +21,7 @@ from src.shared.python.core.contracts import require
 from .topology import CameraLocation, conflicting_identities
 
 PLAN_SCHEMA_VERSION = "rig-plan/1.0.0"
+UNSERIALIZED_IDENTITY = "unserialized"
 _MODE_RE = re.compile(r"^\s*(\d+)[xX](\d+)@(\d+)(?::([A-Za-z0-9]{4}))?\s*$")
 
 
@@ -90,18 +91,31 @@ class CameraBinding(BaseModel):
     view: str = Field(min_length=1)
     serial: str | None = None
     port_path: str | None = None
+    # The one unit on the rig that exposes no USB serial. It is resolved by
+    # elimination at plan-check time, so it keeps its view name when moved to
+    # another jack (a port_path would not); ambiguous when two such units exist.
+    unserialized: bool = False
     mode: CaptureMode = Field(default_factory=CaptureMode)
     controls: CameraControls = Field(default_factory=CameraControls)
 
     @model_validator(mode="after")
     def _needs_identity(self) -> CameraBinding:
-        if not (self.serial or self.port_path):
-            raise ValueError(f"view {self.view!r} needs a serial or a port_path")
+        explicit = self.serial or self.port_path
+        if not (explicit or self.unserialized):
+            raise ValueError(
+                f"view {self.view!r} needs a serial, a port_path or unserialized"
+            )
+        if explicit and self.unserialized:
+            raise ValueError(
+                f"view {self.view!r}: give a serial/port_path or unserialized, not both"
+            )
         return self
 
     @property
     def identity(self) -> str:
-        """Serial when present, else the port-path identity."""
+        """Serial, else the port-path identity, else the unserialized marker."""
+        if self.unserialized:
+            return UNSERIALIZED_IDENTITY
         return self.serial or str(self.port_path)
 
 
@@ -193,6 +207,26 @@ class PlanCheck(BaseModel):
         return not self.missing and not self.conflicts
 
 
+def _resolve_unserialized(
+    plan: RigPlan,
+    located: list[CameraLocation],
+    matched: dict[str, str],
+    missing: list[str],
+    resolved: dict[str, str],
+) -> None:
+    """Bind ``unserialized`` views by elimination; never guess between two."""
+    wanting = [b.view for b in plan.cameras if b.unserialized]
+    if not wanting:
+        return
+    taken = set(matched.values())
+    candidates = [c for c in located if c.serial is None and c.camera not in taken]
+    if len(wanting) == 1 and len(candidates) == 1:
+        matched[wanting[0]] = candidates[0].camera
+        resolved[wanting[0]] = candidates[0].identity
+        return
+    missing.extend(wanting)
+
+
 def check_plan(plan: RigPlan, cams: Iterable[CameraLocation]) -> PlanCheck:
     """Match plan bindings to enumerated cameras and flag bus conflicts.
 
@@ -202,17 +236,25 @@ def check_plan(plan: RigPlan, cams: Iterable[CameraLocation]) -> PlanCheck:
     by_identity = {c.identity: c for c in located}
     matched: dict[str, str] = {}
     missing: list[str] = []
+    resolved: dict[str, str] = {}  # view -> camera identity actually used
     for binding in plan.cameras:
+        if binding.unserialized:
+            continue
         cam = by_identity.get(binding.identity)
         if cam is None:
             missing.append(binding.view)
         else:
             matched[binding.view] = cam.camera
-    planned = {b.identity for b in plan.cameras}
+            resolved[binding.view] = cam.identity
+    _resolve_unserialized(plan, located, matched, missing, resolved)
+    missing.sort(key=[b.view for b in plan.cameras].index)
+    planned = set(resolved.values())
     conflicted = set(
         conflicting_identities([c for c in located if c.identity in planned])
     )
-    conflicts = tuple(b.view for b in plan.cameras if b.identity in conflicted)
+    conflicts = tuple(
+        b.view for b in plan.cameras if resolved.get(b.view) in conflicted
+    )
     unplanned = tuple(sorted(i for i in by_identity if i not in planned))
     return PlanCheck(
         matched=matched,
