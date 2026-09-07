@@ -56,21 +56,27 @@
         "fixed_hub_planar",
         "moving_base_planar",
         "two_hand_compliant_club",
-        "spatial_articulated"
+        "spatial_articulated",
+        "subject_scaled_articulated_closed_contact",
+        "distributed_grip_passive_shaft",
+        "synthetic_held_out_measurement"
       ],
       "interventions": [
         "relative_link_angle_sweep",
         "force_direction_sweep",
         "grip_separation_sweep",
         "swing_plane_orientation_sweep",
-        "moment_arm_reversal"
+        "moment_arm_reversal",
+        "contact_station_count_refinement"
       ],
       "controls": [
         "zero_moment_arm",
         "coincident_grips",
         "reversed_moment_arm",
         "orthogonal_force_velocity",
-        "proper_frame_transform"
+        "proper_frame_transform",
+        "common_mode_station_distribution",
+        "net_wrench_only_inversion"
       ],
       "outcomes": [
         "force_velocity_projection",
@@ -92,7 +98,7 @@
         "bilateral_wrenches",
         "club_deflection"
       ],
-      "execution_status": "analytical_planar_moving_base_and_two_engine_spatial_controls_complete_subject_scaled_and_human_open"
+      "execution_status": "analytical_planar_moving_base_two_engine_spatial_subject_scaled_closed_contact_distributed_club_and_synthetic_held_out_measurement_tiers_linked_calibrated_anatomy_device_and_human_open"
     },
     {
       "id": "MT-E03",
