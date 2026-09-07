@@ -12,6 +12,7 @@ import json
 import logging
 import shutil
 import time
+import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -264,10 +265,28 @@ class ModelCache:
         return current_checksum == entry.checksum
 
     def get_cache_path(self, model_id: str) -> Path:
-        """Get the cache path for a model (may not exist yet)."""
+        """Get the cache path for a model (may not exist yet).
+
+        Flattening separators is not sufficient on its own: a ``model_id`` of
+        exactly ``".."`` survives it unchanged and resolves to the cache
+        directory's parent. Traversal segments are rejected rather than
+        rewritten, so a caller that meant something else is told, instead of
+        silently getting a different path.
+
+        Percent-encoding is decoded first, since these ids reach us from URLs
+        and repository listings where ``..%2f..`` is the same request as
+        ``../..``.
+        """
         if model_id is None:
             raise ValueError("model_id must be provided")
-        safe_id = model_id.replace("/", "_").replace("\\", "_")
+
+        decoded = urllib.parse.unquote(model_id).replace("\\", "/")
+        if any(segment == ".." for segment in decoded.split("/")):
+            raise ValueError(
+                f"Model id {model_id!r} contains path traversal and was rejected"
+            )
+
+        safe_id = decoded.replace("/", "_")
         return self.config.cache_dir / safe_id
 
     def get_total_size(self) -> int:
