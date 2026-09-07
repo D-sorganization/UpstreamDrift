@@ -53,6 +53,8 @@ class RecordingEntry(BaseModel):
     duration_s: float | None = None
     width: int | None = None
     height: int | None = None
+    recorder_note: str | None = None  # ffmpeg's last words, kept for failures
+    recorder_wall_s: float | None = None  # host seconds the recorder ran
 
     @property
     def ok(self) -> bool:
@@ -113,7 +115,15 @@ def recording_stats(entry: RecordingEntry) -> CameraStats:
             if entry.returncode not in (0, None)
             else "recording is empty"
         )
+        if entry.recorder_note:
+            reason = f"{reason}: {entry.recorder_note}"
         state = "no_stream"
+    elif entry.frames == 0:
+        # ffmpeg exited 0 and wrote a container header but decoded no frames:
+        # the device opened and never delivered (typically a mode the bus cannot
+        # carry). That is a missing stream, not a short one.
+        note = f": {entry.recorder_note}" if entry.recorder_note else ""
+        state, reason = "no_stream", f"no frames decoded{note}"
     elif (short := entry.coverage_reason()) is not None:
         state, reason = "degraded", short
     else:
@@ -174,6 +184,8 @@ def build_index(
                 duration_s=probe.duration_s if probe else None,
                 width=probe.width if probe else None,
                 height=probe.height if probe else None,
+                recorder_note=result.stderr_tail or None,
+                recorder_wall_s=result.wall_s,
             )
         )
     return RecordingsIndex(duration_s=duration_s, recordings=tuple(entries))

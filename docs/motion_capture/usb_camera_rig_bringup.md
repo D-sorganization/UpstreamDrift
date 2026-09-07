@@ -182,6 +182,12 @@ visual sync event is still required before calibration.
    otherwise a per-session flash event.
 2. Measure the three-stream CPU budget on a quiet host (expected about 1.5
    cores for NV12 and about 6 cores for BGR).
-3. `MediaPipeEstimator` runs on the MediaPipe Tasks API since #9592; it needs a
+3. The single-camera throughput measured on 2026-09-06 (36 MB/s at 1920x1200 @
+   120, 555 frames in 4.63 s) exceeds the 24.5 MB/s ceiling that a
+   3 x 1020 B/microframe isochronous alt-setting implies. Either the firmware
+   negotiates a larger alt-setting for that mode or the stream is bulk; the
+   one-camera-per-root-port rule is still what the hardware does, but its
+   stated mechanism needs a descriptor dump under load before it is relied on.
+4. `MediaPipeEstimator` runs on the MediaPipe Tasks API since #9592; it needs a
    verified `.task` model file (`python3 -m
 src.shared.python.pose_estimation.mediapipe_models --variant full`).
