@@ -19,7 +19,7 @@ import json
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -28,7 +28,7 @@ from pydantic import BaseModel, ConfigDict
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 logger = get_logger(__name__)
 
 MIN_FRAMES = 8

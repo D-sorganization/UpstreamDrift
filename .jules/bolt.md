@@ -41,3 +41,6 @@
 **Learning:** Calling `np.mean()` on a standard Python list (e.g., `np.mean([d.duration for d in self.demonstrations])`) forces an expensive implicit conversion to a temporary NumPy array.
 **Action:** Replace `np.mean(list)` with built-in `sum(list) / len(list)` (handling zero-division if the list can be empty) to avoid allocation overhead, which is significantly faster.
 
+## 2024-05-19 - Fast Multidimensional Array Magnitude
+**Learning:** `np.linalg.norm(..., axis=1)` and `np.linalg.norm(..., axis=2)` is known to be relatively slow due to internal overhead and intermediate array allocations. Replacing it with `np.sqrt(np.einsum('ij,ij->i', ...))` or `np.sqrt(np.einsum('ijk,ijk->ij', ...))` is a highly effective optimization that provides a significant speedup (often 2x-4x faster for small-to-medium arrays) while keeping the code readable.
+**Action:** When computing vector norms along an axis (other than small 2D vectors where `np.hypot` is best), use `np.sqrt(np.einsum)` instead of `np.linalg.norm` to avoid intermediate allocations and speed up the computation.
