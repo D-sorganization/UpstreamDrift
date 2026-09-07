@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "132fc7331e1fdf20c9b33589826829355ae9cb35",
+  "tools_pin": "eab74a901a7c8467e1997049a73e2cfd2df74428",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -2489,9 +2489,9 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "tools",
-      "ud_bytes": 19743,
+      "ud_bytes": 20262,
       "tools_bytes": 19862,
-      "byte_delta": -119,
+      "byte_delta": 400,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -31722,9 +31722,9 @@
     {
       "path": "humanoid_character_builder/generators/_mesh_types.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-07",
+        "commit": "aff8559d4e59472af402a0b3e2823438a4444e89"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -31761,9 +31761,9 @@
     {
       "path": "humanoid_character_builder/generators/mesh_generator.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-07",
+        "commit": "aff8559d4e59472af402a0b3e2823438a4444e89"
       },
       "tools": {
         "author": "Dieter Olson",
