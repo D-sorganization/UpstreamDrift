@@ -163,7 +163,8 @@ python3 -m motion_capture.rig reconstruct --session S --cameras cameras.json --a
 
 Cleans the ingested views with the dynamics prior and jointly fits camera
 placement, 3-D joints and bone lengths, starting from the given camera records
-(a previous `reconstruction.json` works). See
+(a previous `reconstruction.json` works) or, with `--intrinsics` on a first
+take, from a placement initialised from the golfer's joints. See
 [Self-Calibrating Markerless Pipeline](self_calibrating_pipeline.md).
 
 ## Ingest
