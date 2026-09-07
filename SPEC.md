@@ -1,5 +1,9 @@
 # SPEC.md — Repository Specification Document
 
+## Fix Command Injection Vulnerability in CLI Tools
+
+Secured the `ShellTool` in `src/shared/python/ai/tools/cli_tools.py` against command injection by explicitly blocking dangerous command flags like `-exec` and `-delete` that could execute arbitrary commands through whitelisted base tools. (spec-exempt: security fix)
+
 ## Repair the Mesh-Generator Split (#9675)
 
 Restores four members deleted by the squash `b8d95ad25`, which left three
@@ -84,7 +88,6 @@ implementations rather than relocating them:
   exist.
 
 `tests/unit/tools/model_generation/` moves from 74 failing to 38 failing.
-
 
 ## Enforce Vendored-Fallback Hard Failure in CI (#9655)
 
