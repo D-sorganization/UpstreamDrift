@@ -109,7 +109,8 @@ class _Worker:
     @property
     def nominal_fps(self) -> int:
         """Requested frame rate; delegates so callers need not reach through."""
-        return self.binding.mode.fps
+        mode = self.binding.mode
+        return mode.fps
 
     def open(self) -> bool:
         try:
