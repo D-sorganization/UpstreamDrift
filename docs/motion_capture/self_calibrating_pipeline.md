@@ -96,6 +96,19 @@ flagged with recall 0.9 and precision 0.85 or better, the same camera and
 length accuracy, and the handful of points every view got wrong reported as
 unobservable rather than invented.
 
+```bash
+python3 -m motion_capture.reconstruct synth --out sessions/synthetic --frames 120
+python3 -m motion_capture.reconstruct fit --bundle sessions/synthetic --anchor neck=0.53
+```
+
+`fit` reads `observations/<view>.json` (synthetic or from `rig ingest`),
+starts from the cameras in `truth.json` or from `--cameras records.json`
+(the previous take's solution), and writes `reconstruction.json`: refined
+camera records, learned bone lengths, per-view residual statistics, every
+rejected observation with its residual, the count of unobservable points,
+and — when truth is present — the metrics. `joints_3d_m.npy` holds the
+fitted trajectory for the IK stage.
+
 ### Outliers Are Rejected, Not Averaged
 
 The cost uses robust kernels (Huber for the first pass, Geman-McClure once the
