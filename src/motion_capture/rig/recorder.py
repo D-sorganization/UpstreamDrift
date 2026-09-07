@@ -34,6 +34,7 @@ logger = get_logger(__name__)
 
 # KSCATEGORY_VIDEO_CAMERA — the DirectShow "alternative name" suffix.
 _DSHOW_CATEGORY = "{65e8773d-8f56-11d0-a3b9-00a0c9223196}"
+STDERR_TAIL_CHARS = 600
 DEFAULT_WARMUP_S = 2.0
 
 
@@ -45,6 +46,8 @@ class RecordingResult:
     path: Path
     returncode: int | None
     bytes_written: int
+    stderr_tail: str = ""  # last lines ffmpeg printed; the reason when it failed
+    wall_s: float | None = None  # start() to stop() on the host clock
 
     @property
     def ok(self) -> bool:
@@ -177,6 +180,7 @@ class FfmpegStreamCopyRecorder:
         )
         self._stack, self._identity, self._path = stack, identity, path
         self._signalled = False
+        self._started = time.perf_counter()
         logger.info("recording %s -> %s", identity, path)
 
     def signal_stop(self) -> None:
@@ -191,14 +195,29 @@ class FfmpegStreamCopyRecorder:
         except (OSError, ValueError):
             logger.warning("ffmpeg stdin already closed for %s", self._identity)
 
+    def _drain_stderr(self) -> str:
+        """Collect ffmpeg's stderr while waiting for it to exit (bounded)."""
+        import subprocess
+
+        proc = self._proc
+        if proc is None:
+            return ""
+        try:
+            _out, err = proc.communicate(timeout=self._stop_timeout)
+        except subprocess.TimeoutExpired:
+            return "ffmpeg did not exit within stop_timeout"
+        return (err or "")[-STDERR_TAIL_CHARS:].strip()
+
     def stop(self) -> RecordingResult:
         if self._stack is None or self._identity is None or self._path is None:
             raise StateError("stop() before start()")
         self.signal_stop()
+        tail = self._drain_stderr()
         self._stack.close()  # waits up to stop_timeout, then terminates
         size = self._path.stat().st_size if self._path.exists() else 0
+        wall = time.perf_counter() - self._started
         result = RecordingResult(
-            self._identity, self._path, self._proc.returncode, size
+            self._identity, self._path, self._proc.returncode, size, tail, wall
         )
         self._stack = self._proc = self._identity = self._path = None
         return result

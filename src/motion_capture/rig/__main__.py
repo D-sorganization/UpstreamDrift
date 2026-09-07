@@ -13,10 +13,18 @@ Commands:
   (``plan.json``, ``recordings.json``, ``session_manifest.json``). Same exit
   codes as ``capture``. ``--dry-run`` records nothing and exercises the bundle.
 - ``session-check --session DIR``: validate a bundle on disk. Exit 0 when sound.
+- ``proxy --session DIR [--encoder E] [--crf N]``: write browser-playable H.264
+  ``.mp4`` proxies beside each recording and ``proxies.json``. Exit 0 when
+  every usable recording has a proxy.
 - ``ingest --session DIR [--out DIR] [--estimator NAME] [--max-frames N]``: run the
   registered pose estimator over every recording and write per-view 2-D
   observations with provenance and the session's timing block. Exit 0 when
   every view produced observations, 1 when some did, 2 when none did.
+
+``plan-check``, ``capture`` and ``record`` accept ``--mode WxH@FPS[:FOURCC]``
+(one capture mode for every selected view) and ``--views a,b`` (a subset of
+the plan, in plan order) so a condition can change without editing the plan
+file; the derived plan name records the overrides in the bundle.
 """
 
 from __future__ import annotations
@@ -31,10 +39,9 @@ from pathlib import Path
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .bundle import build_index, check_bundle, write_bundle
-from .ingest import ingest_bundle, registry_estimator_factory
-from .probe import probe_recording
-from .plan import RigPlan, check_plan
-from .probe import RecordingProbe
+from .plan import RigPlan, check_plan, parse_mode
+from .probe import RecordingProbe, probe_recording
+from .proxy import DEFAULT_CRF, DEFAULT_ENCODER, ENCODERS, make_proxies
 from .recorder import (
     DEFAULT_WARMUP_S,
     FfmpegStreamCopyRecorder,
@@ -63,13 +70,40 @@ _EXIT_BY_OUTCOME = {
 }
 
 
+def _add_plan_args(parser: argparse.ArgumentParser) -> None:
+    """``--plan`` plus the two operator overrides shared by the camera commands."""
+    parser.add_argument("--plan", type=Path, required=True)
+    parser.add_argument(
+        "--mode",
+        type=parse_mode,
+        default=None,
+        metavar="WxH@FPS[:FOURCC]",
+        help="capture mode for every selected view, e.g. 1280x720@120",
+    )
+    parser.add_argument(
+        "--views",
+        default=None,
+        metavar="a,b",
+        help="comma-separated subset of plan views to use (plan order)",
+    )
+
+
+def _load_plan(args: argparse.Namespace) -> RigPlan:
+    """The plan file with ``--mode``/``--views`` applied."""
+    plan = RigPlan.load(args.plan)
+    views = None
+    if getattr(args, "views", None):
+        views = tuple(v.strip() for v in args.views.split(",") if v.strip())
+    return plan.with_overrides(mode=getattr(args, "mode", None), views=views)
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="motion_capture.rig", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     check = sub.add_parser("plan-check", help="match a plan against enumerated cameras")
-    check.add_argument("--plan", type=Path, required=True)
+    _add_plan_args(check)
     cap = sub.add_parser("capture", help="capture every planned camera together")
-    cap.add_argument("--plan", type=Path, required=True)
+    _add_plan_args(cap)
     cap.add_argument("--duration", type=float, default=8.0)
     cap.add_argument("--out", type=Path, default=Path.cwd() / "capture")
     cap.add_argument("--settle", type=float, default=2.0, help="seconds between opens")
@@ -82,7 +116,7 @@ def _parser() -> argparse.ArgumentParser:
         help="record per-frame brightness and align cameras on a shared strobe",
     )
     rec = sub.add_parser("record", help="stream-copy every planned camera to disk")
-    rec.add_argument("--plan", type=Path, required=True)
+    _add_plan_args(rec)
     rec.add_argument("--duration", type=float, default=10.0)
     rec.add_argument("--out", type=Path, default=Path.cwd() / "session")
     rec.add_argument(
@@ -98,6 +132,10 @@ def _parser() -> argparse.ArgumentParser:
     )
     chk = sub.add_parser("session-check", help="validate a session bundle on disk")
     chk.add_argument("--session", type=Path, required=True)
+    prx = sub.add_parser("proxy", help="write H.264 mp4 proxies beside the recordings")
+    prx.add_argument("--session", type=Path, required=True)
+    prx.add_argument("--encoder", choices=ENCODERS, default=DEFAULT_ENCODER)
+    prx.add_argument("--crf", type=int, default=DEFAULT_CRF, help="libx264 only")
     ing = sub.add_parser("ingest", help="pose-estimate every recording in a bundle")
     ing.add_argument("--session", type=Path, required=True)
     ing.add_argument(
@@ -137,7 +175,7 @@ def _device_refs(plan: RigPlan) -> dict[str, str]:
 
 
 def cmd_plan_check(args: argparse.Namespace) -> int:
-    plan = RigPlan.load(args.plan)
+    plan = _load_plan(args)
     cams = attach_capture_indices(query_topology(), dshow_order())
     if not cams:
         logger.error("no cameras enumerated")
@@ -157,7 +195,7 @@ def cmd_plan_check(args: argparse.Namespace) -> int:
 
 
 def cmd_capture(args: argparse.Namespace) -> int:
-    plan = RigPlan.load(args.plan)
+    plan = _load_plan(args)
     if args.synthetic:
         sources: dict[str, FrameSource] = {
             c.view: SyntheticFrameSource(c.identity, realtime=True)
@@ -197,7 +235,7 @@ def _dry_run_probe(path: Path) -> RecordingProbe:
 
 
 def cmd_record(args: argparse.Namespace) -> int:
-    plan = RigPlan.load(args.plan)
+    plan = _load_plan(args)
     started = datetime.now(UTC).isoformat(timespec="seconds")
     factory: Callable[[], Recorder]
     if args.dry_run:
@@ -241,7 +279,23 @@ def cmd_session_check(args: argparse.Namespace) -> int:
     return 0 if check.ok else 1
 
 
+def cmd_proxy(args: argparse.Namespace) -> int:
+    index = make_proxies(args.session, encoder=args.encoder, crf=args.crf)
+    for entry in index.proxies:
+        logger.info(
+            "%s: %s%s",
+            entry.view,
+            entry.file or "no proxy",
+            f" - {entry.reason}" if entry.reason else "",
+        )
+    return 0 if index.ok else 1
+
+
 def cmd_ingest(args: argparse.Namespace) -> int:
+    # Imported here: the pose stack (MediaPipe, simulation backends) takes
+    # seconds to import and no other command needs it.
+    from .ingest import ingest_bundle, registry_estimator_factory
+
     out_dir = args.out or (args.session / "observations")
     index = ingest_bundle(
         args.session,
@@ -274,6 +328,7 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "capture": cmd_capture,
     "record": cmd_record,
     "session-check": cmd_session_check,
+    "proxy": cmd_proxy,
     "ingest": cmd_ingest,
 }
 
