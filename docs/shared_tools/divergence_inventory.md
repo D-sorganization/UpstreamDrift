@@ -23,7 +23,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `_contracts_level.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `_contracts_primitives.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `_contracts_validators.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `ai` | 46 | 72 | 56 | 20 | 0 | 118 |
+| `ai` | 46 | 72 | 55 | 20 | 0 | 118 |
 | `analysis` | 0 | 0 | 0 | 18 | 0 | 0 |
 | `anthropometrics` | 0 | 0 | 0 | 38 | 0 | 0 |
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **462** | **277** | **130** | **1188** | **518** | **739** |
+| **Total** | **462** | **277** | **129** | **1188** | **518** | **739** |
 
 ## Diverged Files by Package
 
@@ -173,7 +173,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ai/gui/_provider_registry_data.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `ai/gui/_providers_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `ai/gui/_rag_tab.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `ai/gui/assistant_panel.py` | +84 | yes | Dieter Olson 2026-09-04 | Dieter Olson 2026-09-05 |
+| `ai/gui/assistant_panel.py` | +6986 |  | Dieter Olson 2026-09-04 | Dieter Olson 2026-09-05 |
 | `ai/gui/assistant_widgets.py` | +16 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `ai/gui/history_sidebar.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `ai/gui/session_manager.py` | -207 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -333,7 +333,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/api/__init__.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/api/rest_api.py` | +572 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-06 |
 | `model_generation/api/rest_api_assets.py` | -52 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/api/rest_api_core.py` | +4240 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/api/rest_api_core.py` | +4240 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/api/rest_api_fastapi.py` | -25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/api/rest_api_flask.py` | -70 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-06 |
 | `model_generation/api/rest_api_generation.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -351,7 +351,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/converters/simscape/__init__.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/mdl_parser.py` | -32 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/converters/simscape/simscape_converter.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/converters/urdf_parser.py` | +7213 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
+| `model_generation/converters/urdf_parser.py` | +7213 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/core/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/contracts.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/core/physics_validation.py` | +4 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
@@ -370,11 +370,11 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `model_generation/inertia/__init__.py` | +12 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/inertia/calculator.py` | +27 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/library/__init__.py` | +20 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/_rate_limiter.py` | +604 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
-| `model_generation/library/cache.py` | +1744 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/_rate_limiter.py` | +604 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/cache.py` | +1744 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/github_importer.py` | +8 | yes | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
-| `model_generation/library/model_library.py` | +242 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
-| `model_generation/library/repository.py` | +4968 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/model_library.py` | +242 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
+| `model_generation/library/repository.py` | +4968 |  | d-sorgclaudeagent[bot] 2026-09-07 | Dieter Olson 2026-09-05 |
 | `model_generation/library/unified_loader.py` | +25 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/mesh/__init__.py` | +64 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `model_generation/tests/test_contracts.py` | +18 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
