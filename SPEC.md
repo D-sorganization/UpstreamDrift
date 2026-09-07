@@ -1,5 +1,41 @@
 # SPEC.md — Repository Specification Document
 
+## Restore Xacro, ROS and GitHub-Auth External Integration (#9620)
+
+Restores functionality removed by the 14-issue squash `b8d95ad25`, which deleted
+implementations rather than relocating them:
+
+- `URDFParser` regains `_is_xacro`, `_has_xacro_namespace` and
+  `_preprocess_xacro`, invoked from a new `_read_source` helper. A `.xacro`
+  source is expanded through the `xacro` CLI before parsing; expansion failure
+  falls back to parsing the raw text, since a file may declare the namespace
+  without using any directives.
+- `URDFParser._resolve_mesh_path` resolves `package://` URIs through
+  `ROS_PACKAGE_PATH`, `CMAKE_PREFIX_PATH` (catkin layout, under `src/`) and
+  `COLCON_PREFIX_PATH` after searching directories near the URDF.
+  `_validate_mesh_filename` still runs first, so traversal segments and foreign
+  URI schemes are rejected before any lookup. `_split_search_path` splits these
+  variables on both `:` and `;` while rejoining Windows drive letters.
+- `GitHubRepository` regains `_build_api_request`, `_api_request_with_retry`,
+  `_single_api_request` and `_parse_link_header`: `Authorization` headers from
+  `GITHUB_TOKEN`, exponential backoff on 5xx, no retry on 4xx, and `Link`
+  header pagination. Requests route through the existing `_urlopen_https` host
+  allowlist, and `_scan_directory` consumes them.
+- `CacheEntry` regains `version` through `to_dict`/`from_dict`; `ModelCache.put`
+  always computes a SHA-256 checksum and records a version, and `ModelCache.get`
+  validates integrity by delegating to `verify()`, returning `None` for a
+  corrupted entry.
+- `URDFParser.parse` regains the opt-in Rust fast path (`UPSTREAM_URDF_USE_RUST`)
+  via a new `_try_rust_fast_path` helper; `_urdf_rust_facade` had survived the
+  squash with no remaining call site.
+- `make_request_with_backoff` in
+  `src/shared/python/model_generation/library/_rate_limiter.py` is annotated
+  `http.client.HTTPResponse`; the previous `urllib.request.Response` does not
+  exist.
+
+`tests/unit/tools/model_generation/` moves from 74 failing to 38 failing.
+
+
 ## Enforce Vendored-Fallback Hard Failure in CI (#9655)
 
 Enforces hard failure for vendored-fallback tests (`tests/unit/repo_hygiene/test_vendored_tools_fallback.py`) under CI when `vendor/ud-tools/src/shared/python` is missing:
@@ -3890,6 +3926,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| 2026-09-07 | #9673 | Restored xacro preprocessing, ROS `package://` resolution and GitHub API authentication/retry/pagination deleted by the 14-issue squash `b8d95ad25`, plus `CacheEntry.version` with checksum validation on retrieval and the opt-in Rust URDF fast path whose only call site the same commit removed. Each restore is folded into the hardening that landed since rather than reverted onto it: `_validate_mesh_filename` still runs before any `package://` lookup, GitHub requests still route through the `_urlopen_https` host allowlist, and `ModelCache.get` delegates to the existing `verify()` instead of duplicating the comparison. Deviating from a pure restore, `_split_search_path` rejoins Windows drive letters that the original `.split(":")` severed. `tests/unit/tools/model_generation/`: 74 failing -> 38 failing. (#9620) |
 | 2026-09-07 | n/a | Optimized vector magnitude checks in swing flight pipeline gui using math.hypot (spec-exempt: micro-optimization) |
 | 2026-09-07 | #9631 | Bumped the release version 2.1.2 -> 2.1.3 across every surface `scripts/check_version_consistency.py` audits, plus this Identity table and SECURITY.md's footer. This is the fix-forward release for #9631: the pushed `v2.1.2` tag's `release.yml` run built a wheel, but both `smoke-python-wheel` jobs failed because `SharedImportAliasFinder` rewrote `src.shared.python.config` into the pinned Tools tree, whose unrelated `config` lacks `get_database_pool_pre_ping`, so `import src.api.local_server` and `upstream-drift --help` both failed and `create-release`/`publish-pypi` were skipped -- no wheel, sdist, SBOM, checksums, PyPI distribution or GitHub release exists for 2.1.2. Fixed upstream in D-sorganization/Tools#5049 and carried here by the pin bump to `132fc7331e`. Per `docs/operations/release-runbook.md` "Failed Release Recovery -- Fix Forward, Never Move a Tag", `v2.1.2` is retained where it is and superseded by 2.1.3; CHANGELOG entries staged for 2.1.2 carry forward under `[2.1.3] - 2026-09-07` with a retained-and-superseded note. No tag is created by this change -- tagging is the release operator's signed step. |
 | 2026-09-07 | #9631 | Bumped the `vendor/ud-tools` pin to Tools `132fc7331e`, which carries Tools#5048's fix to `_external_src_package_is_available()`, and converged this repository's `import_aliases` child copy on it. That predicate's `repo_root` test describes a repository layout; in the flattened wheel `_TOOLS_SRC_ROOT` was the install root and `repo_root` its parent, so every installed package -- our own `src` included -- read as internal and `SharedImportAliasFinder` rewrote every `src.shared.python.<root>` into the Tools tree. Our `config` is a 33-symbol package unrelated to Tools' 5-symbol one, so `src/api/database.py`'s import of `get_database_pool_pre_ping` resolved into Tools' copy, the v2.1.2 wheel could not `import src.api.local_server`, `upstream-drift --help` exited non-zero, and the release published no artifacts. Verified in a wheel-shaped layout assembled from the new pin: `config` resolves here with the symbol present, the retired `logging_pkg` still resolves from the Tools tree, and Tools' own `shared.python.config` still serves `get_env`. `Cargo.toml`'s `tools-core` rev bumped to match; `check_tools_pins.py` reports both pins consistent. |
