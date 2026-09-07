@@ -27,6 +27,8 @@ class PoseEstimationResult:
     confidence: float  # 0.0 to 1.0
     timestamp: float
     raw_keypoints: dict[str, np.ndarray] | None = None  # Optional raw 2D/3D points
+    # Optional per-keypoint confidence in [0, 1], keyed like raw_keypoints.
+    raw_confidences: dict[str, float] | None = None
 
 
 class PoseEstimator(ABC):
