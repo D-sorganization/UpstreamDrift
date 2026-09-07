@@ -208,7 +208,7 @@ class TestPresetConsistency:
         mock_builder = MagicMock()
         mock_builder_cls.return_value = mock_builder
         mock_result = MagicMock()
-        mock_result.solver_status = "success"
+        mock_result.success = True
         mock_result.urdf_xml = "<robot/>"
         mock_builder.build.return_value = mock_result
 
@@ -229,7 +229,7 @@ class TestPresetConsistency:
         mock_builder = MagicMock()
         mock_builder_cls.return_value = mock_builder
         mock_result = MagicMock()
-        mock_result.solver_status = "success"
+        mock_result.success = True
         mock_result.urdf_xml = None
         mock_builder.build.return_value = mock_result
 

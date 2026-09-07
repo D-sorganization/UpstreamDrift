@@ -36,8 +36,8 @@
   "rulings": {
     "README.md": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical copy of Tools' package README."
+      "status": "cleaned",
+      "rationale": "Identical copy of Tools' package README. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "__init__.py": {
       "ruling": "deferred",
@@ -75,18 +75,18 @@
     },
     "chat_contracts": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "4 identical files; added to UD by #8322 while the shadow guard was disabled."
+      "status": "cleaned",
+      "rationale": "4 identical files; added to UD by #8322 while the shadow guard was disabled. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "codemap": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "All 6 diverged files are newer in Tools (2026-08-24/25) than UD's 2026-08-01 copy."
+      "status": "cleaned",
+      "rationale": "All 6 diverged files are newer in Tools (2026-08-24/25) than UD's 2026-08-01 copy. UD copy retired 2026-09-06: canonical was ahead in all six diverged files and UD held no unique content -- its differing lines were older forms of the same lines. Canonical narrows two blind `except Exception` to `except ImportError`, adds justified noqa annotations, and replaces bare `\"git\"` subprocess argv with `resolve_trusted_git_executable()` plus a graceful fallback, closing a PATH-hijack weakness UD still carried."
     },
     "compatibility.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Single compatibility shim owned by Tools (issue #7249 path in the child-copy contract)."
+      "status": "cleaned",
+      "rationale": "Single compatibility shim owned by Tools (issue #7249 path in the child-copy contract). UD copy retired 2026-09-06: the only difference was that canonical splits the TYPE_CHECKING branch so type checkers see explicit UTC/StrEnum imports, which is runtime-equivalent on this repo's 3.11 floor; the canonical 3.10 backport branch is inert here."
     },
     "config": {
       "ruling": "deferred",
@@ -101,8 +101,8 @@
     },
     "cors.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Spelling-only divergence."
+      "status": "cleaned",
+      "rationale": "Spelling-only divergence. UD copy retired 2026-09-06: every tracked file differed from the pinned tree only by the `src.shared.python` import spelling, which the seam absorbs, so the fallback returns equivalent bytes."
     },
     "data_processing": {
       "ruling": "tools-canonical",
@@ -116,13 +116,13 @@
     },
     "deprecation.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical. UD copy retired 2026-09-05; src.shared.python.deprecation now resolves to the pinned Tools tree via the vendored-fallback path registered in src/__init__.py."
     },
     "file_watcher": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (2 files)."
+      "status": "cleaned",
+      "rationale": "Identical (2 files). UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "golf_club": {
       "ruling": "tools-canonical",
@@ -144,7 +144,7 @@
     "import_aliases.py": {
       "ruling": "tools-canonical",
       "status": "pending-cleanup",
-      "rationale": "Tools' finder (2026-08-28) is a superset: aliases plot_engine/plot_theme/plotting/contracts and declines .tests. names; UD's copy is the #8322 snapshot."
+      "rationale": "Tools owns the module. Retirement was attempted on 2026-09-06 and REVERTED: adopting canonical's finder changed alias resolution for clusters UpstreamDrift still owns, so `src.shared.python.ai.*` began resolving to the pinned tree and `test_gemini_adapter_capabilities` -- passing on main, not quarantined -- failed. Checking plot_theme/plot_engine resolution was not sufficient evidence. This module can only be retired after the clusters canonical's wider root set captures (ai, contracts) are themselves retired."
     },
     "launch_monitor": {
       "ruling": "tools-canonical",
@@ -153,8 +153,8 @@
     },
     "logging_pkg": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (3 files)."
+      "status": "cleaned",
+      "rationale": "Identical (3 files). UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "model_generation": {
       "ruling": "ud-canonical",
@@ -169,8 +169,8 @@
     },
     "plot_engine": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "All 3 diverged files newer in Tools (pyqt6_widget.py 2026-08-28, trendline.py 2026-08-25)."
+      "status": "cleaned",
+      "rationale": "All 3 diverged files newer in Tools (pyqt6_widget.py 2026-08-28, trendline.py 2026-08-25). UD copy retired 2026-09-06: canonical was ahead and UD held nothing unique. `pyqt6_widget.py` gains export identity metadata and CSV export (56 added lines against 8 UD-only, all of which were superseded forms of the same lines); `matplotlib_renderer.py` is an equivalent early-return refactor that narrows types; `trendline.py` differs only in where the float cast sits. Verified UD's still-owned plotting/export.py and plotting/identity.py provide the names canonical imports."
     },
     "plot_theme": {
       "ruling": "tools-canonical",
@@ -185,8 +185,8 @@
     },
     "programmatic_pid": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "10 of 14 diverged files are spelling-only; the rest are Tools-newer docstring/CLI edits (2026-08-20)."
+      "status": "cleaned",
+      "rationale": "10 of 14 diverged files are spelling-only; the rest are Tools-newer docstring/CLI edits (2026-08-20). UD copy retired 2026-09-06: 10 of the 14 differing files were import-spelling only, and the remaining four differed purely cosmetically -- three in import line-wrapping and one in `chunks or [...]` vs `chunks if chunks else [...]`, which are semantically identical. No behavioural divergence existed."
     },
     "reporting": {
       "ruling": "deferred",
@@ -196,23 +196,23 @@
     },
     "rotation_transforms": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "All 3 diverged files are spelling-only."
+      "status": "cleaned",
+      "rationale": "All 3 diverged files are spelling-only. UD copy retired 2026-09-06: every tracked file differed from the pinned tree only by the `src.shared.python` import spelling, which the seam absorbs, so the fallback returns equivalent bytes."
     },
     "safe_eval.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "safe_pandas_eval.py": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical."
+      "status": "cleaned",
+      "rationale": "Identical. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "scripting": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Identical (2 files)."
+      "status": "cleaned",
+      "rationale": "Identical (2 files). UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "sidekick": {
       "ruling": "split",
@@ -239,8 +239,8 @@
     },
     "tests": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Tools' shared-tree test package; UD carries only an identical __init__.py."
+      "status": "cleaned",
+      "rationale": "Tools' shared-tree test package; UD carries only an identical __init__.py. UD copy retired 2026-09-05: every tracked file was byte-identical to the pinned Tools tree, so the vendored fallback returns the same bytes that were deleted."
     },
     "theme": {
       "ruling": "split",
@@ -259,8 +259,8 @@
     },
     "upstream_drift_tools": {
       "ruling": "tools-canonical",
-      "status": "pending-cleanup",
-      "rationale": "Deprecated alias shim for sidekick; spelling-only divergence."
+      "status": "cleaned",
+      "rationale": "Deprecated alias shim for sidekick; spelling-only divergence. UD copy retired 2026-09-06: every tracked file differed from the pinned tree only by the `src.shared.python` import spelling, which the seam absorbs, so the fallback returns equivalent bytes."
     }
   }
 }
