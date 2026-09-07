@@ -65,19 +65,29 @@ class FrameEstimator(Protocol):
     def close(self) -> None: ...
 
 
-class MediaPipeFrameEstimator:
-    """Adapter over the registered ``mediapipe`` estimator (Tasks API)."""
+class RegisteredFrameEstimator:
+    """Adapter over any registered estimator that names its landmarks.
 
-    def __init__(self, **options: Any) -> None:
+    The estimator class must expose ``LANDMARK_MAP`` (index -> name); an
+    optional ``LAYOUT_NAME`` names the detector layout, else
+    ``<estimator>_<count>`` is used.
+    """
+
+    def __init__(self, name: str = "mediapipe", **options: Any) -> None:
         from src.shared.python.pose_estimation.registry import create_estimator
 
-        self._estimator = create_estimator("mediapipe", **options)
+        self.name = name
+        self._estimator = create_estimator(name, **options)
         self._estimator.load_model()
-        names = getattr(type(self._estimator), "LANDMARK_MAP", None)
+        cls = type(self._estimator)
+        names = getattr(cls, "LANDMARK_MAP", None)
         if not isinstance(names, dict) or not names:
-            raise ValueError("estimator exposes no LANDMARK_MAP; cannot name keypoints")
+            raise ValueError(
+                f"estimator {name!r} exposes no LANDMARK_MAP; cannot name keypoints"
+            )
         ordered = [str(names[i]) for i in sorted(names)]
-        self._layout = DetectorLayout(name="mediapipe_pose_33", keypoint_names=ordered)
+        layout_name = getattr(cls, "LAYOUT_NAME", f"{name}_{len(ordered)}")
+        self._layout = DetectorLayout(name=layout_name, keypoint_names=ordered)
 
     @property
     def layout(self) -> DetectorLayout:
@@ -85,12 +95,17 @@ class MediaPipeFrameEstimator:
 
     @property
     def provenance(self) -> dict[str, Any]:
-        import mediapipe
+        from src.shared.python.pose_estimation.registry import get_estimator_info
 
+        probe = get_estimator_info(self.name).probe_module
+        try:
+            module = __import__(probe)
+        except ImportError:  # pragma: no cover - registry already probed it
+            module = None
         model_path = getattr(self._estimator, "model_path", None)
         return {
-            "estimator": "mediapipe",
-            "mediapipe_version": getattr(mediapipe, "__version__", None),
+            "estimator": self.name,
+            f"{probe}_version": getattr(module, "__version__", None),
             "model_path": str(model_path) if model_path else None,
             "model_variant": getattr(self._estimator, "model_variant", None),
         }
@@ -119,12 +134,16 @@ class MediaPipeFrameEstimator:
 EstimatorFactory = Callable[[], FrameEstimator]
 
 
+MediaPipeFrameEstimator = RegisteredFrameEstimator  # backwards-compatible name
+
+
 def registry_estimator_factory(name: str, **options: Any) -> EstimatorFactory:
-    """Factory for the named registered estimator (only ``mediapipe`` is adapted)."""
-    require(
-        name == "mediapipe", "only the mediapipe estimator is adapted for ingest", name
-    )
-    return lambda: MediaPipeFrameEstimator(**options)
+    """Factory for a registered estimator; unknown names fail before any load."""
+    from src.shared.python.pose_estimation.registry import list_estimators
+
+    known = [info.name for info in list_estimators()]
+    require(name in known, f"unknown estimator; registered: {known}", name)
+    return lambda: RegisteredFrameEstimator(name, **options)
 
 
 class ViewObservations(BaseModel):
