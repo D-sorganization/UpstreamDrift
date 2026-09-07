@@ -18,13 +18,12 @@ Configuration (``config.typed_settings.Settings``):
 from __future__ import annotations
 
 import hashlib
-import shutil
 import tempfile
-import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import BinaryIO
+
+import requests
 
 from src.shared.python.config.typed_settings import Settings
 from src.shared.python.core.contracts import require
@@ -33,10 +32,12 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+_ALLOWED_ORIGIN = "https://storage.googleapis.com/"
 _BASE_URL = (
-    "https://storage.googleapis.com/mediapipe-models/pose_landmarker/"
+    _ALLOWED_ORIGIN + "mediapipe-models/pose_landmarker/"
     "pose_landmarker_{variant}/float16/latest/pose_landmarker_{variant}.task"
 )
+_CHUNK_BYTES = 1 << 20
 
 
 @dataclass(frozen=True)
@@ -139,11 +140,17 @@ def resolve_pose_model(
     )
 
 
-Opener = Callable[[str], BinaryIO]
+Opener = Callable[[str], Iterable[bytes]]
 
 
-def _default_opener(url: str) -> BinaryIO:
-    return urllib.request.urlopen(url, timeout=60)  # noqa: S310 - pinned https URL
+def _default_opener(url: str) -> Iterable[bytes]:
+    """Stream a pinned Google-storage URL over HTTPS; refuses any other origin."""
+    require(
+        url.startswith(_ALLOWED_ORIGIN), "model URL must be on the pinned origin", url
+    )
+    response = requests.get(url, timeout=60, stream=True)
+    response.raise_for_status()
+    return response.iter_content(chunk_size=_CHUNK_BYTES)
 
 
 def download_pose_model(
@@ -168,8 +175,8 @@ def download_pose_model(
     logger.info("downloading pose model %s from %s", variant, spec.url)
     with tempfile.NamedTemporaryFile(dir=target_dir, delete=False) as tmp:
         tmp_path = Path(tmp.name)
-        with opener(spec.url) as response:
-            shutil.copyfileobj(response, tmp)
+        for chunk in opener(spec.url):
+            tmp.write(chunk)
     actual = sha256_of(tmp_path)
     if actual != spec.sha256:
         tmp_path.unlink(missing_ok=True)

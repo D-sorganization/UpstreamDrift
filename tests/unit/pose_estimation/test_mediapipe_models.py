@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import hashlib
-import io
+from collections.abc import Iterable
 from pathlib import Path
 
 import pytest
@@ -82,9 +82,9 @@ def test_download_verifies_and_installs_atomically(
     )
     calls: list[str] = []
 
-    def opener(url: str) -> io.BytesIO:
+    def opener(url: str) -> Iterable[bytes]:
         calls.append(url)
-        return io.BytesIO(good)
+        return [good[:5], good[5:]]
 
     path = models.download_pose_model("lite", tmp_path, opener=opener)
     assert path == tmp_path / "pose_landmarker_lite.task"
@@ -97,9 +97,14 @@ def test_download_verifies_and_installs_atomically(
 
 
 def test_download_rejects_tampered_bytes_and_leaves_nothing(tmp_path: Path) -> None:
-    def opener(url: str) -> io.BytesIO:
-        return io.BytesIO(b"tampered")
+    def opener(url: str) -> Iterable[bytes]:
+        return [b"tampered"]
 
     with pytest.raises(ModelError, match="failed verification"):
         models.download_pose_model("lite", tmp_path, opener=opener)
     assert list(tmp_path.iterdir()) == []
+
+
+def test_default_opener_refuses_foreign_origins() -> None:
+    with pytest.raises(Exception, match="pinned origin"):
+        list(models._default_opener("https://example.com/pose_landmarker_full.task"))
