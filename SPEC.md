@@ -1,5 +1,30 @@
 # SPEC.md — Repository Specification Document
 
+## Repair the Mesh-Generator Split (#9675)
+
+Restores four members deleted by the squash `b8d95ad25`, which left three
+modules in `src/shared/python/humanoid_character_builder/generators/`
+unimportable:
+
+- `segment_mesh_by_range` in `_mesh_types`, imported by `_mesh_smplx`,
+  `_mesh_makehuman` and `mesh_generator_models` and defined in none of them.
+- `GeneratedMeshResult.solver_status` and its `__post_init__`, which derives
+  the status from `success` when a caller sets only `success` (#4522).
+- `SMPLX_AVAILABLE`, `TRIMESH_AVAILABLE`, `_smplx_module` and `_trimesh_module`
+  re-exports from `mesh_generator`. `_mesh_smplx.SMPLXMeshGenerator` reads
+  these back through the facade so that test patches on
+  `mesh_generator.SMPLX_AVAILABLE` take effect (#4528).
+- The facade's `SMPLXMeshGenerator` binding, repointed from `_smplx_generator`
+  to `_mesh_smplx`, which carries `validate_vertex_ranges`,
+  `load_part_segmentation` and `SMPLX_SEGMENT_VERTEX_RANGES`.
+
+`tests/unit/test_mesh_generator_split_2486.py` gains
+`TestMeshGeneratorSplitModulesImport`, asserting that each split module
+imports and that `_mesh_types` exports `segment_mesh_by_range`. The existing
+contract tests check only file existence and line counts, so every one of them
+passed throughout the period when the modules could not be loaded.
+
+
 ## Restore Xacro, ROS and GitHub-Auth External Integration (#9620)
 
 Restores functionality removed by the 14-issue squash `b8d95ad25`, which deleted
@@ -3926,6 +3951,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 ## 12. Change Log
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| 2026-09-07 | #9677 | Repaired the humanoid mesh-generator split that `b8d95ad25` half-reverted: restored `segment_mesh_by_range` to `_mesh_types` (imported by three modules, defined in none, so all three raised ImportError on `origin/main`), `GeneratedMeshResult.solver_status` with the `__post_init__` that derives it from `success` (#4522), and the `SMPLX_AVAILABLE`/`TRIMESH_AVAILABLE`/`_smplx_module`/`_trimesh_module` re-exports that `_mesh_smplx` reads back through the facade so test patches take effect (#4528). Repointed the facade's `SMPLXMeshGenerator` from the reduced `_smplx_generator` to `_mesh_smplx`, which carries `validate_vertex_ranges`, `load_part_segmentation` and `SMPLX_SEGMENT_VERTEX_RANGES`; measured over the humanoid and security suites that is 85 failures -> 51, 34 newly passing and 0 newly failing, compared as failure sets rather than counts. Added import assertions to the #2486 contract suite, which previously checked only file existence and line counts and so stayed green while the modules could not be loaded. (#9675) |
 | 2026-09-07 | #9673 | Restored xacro preprocessing, ROS `package://` resolution and GitHub API authentication/retry/pagination deleted by the 14-issue squash `b8d95ad25`, plus `CacheEntry.version` with checksum validation on retrieval and the opt-in Rust URDF fast path whose only call site the same commit removed. Each restore is folded into the hardening that landed since rather than reverted onto it: `_validate_mesh_filename` still runs before any `package://` lookup, GitHub requests still route through the `_urlopen_https` host allowlist, and `ModelCache.get` delegates to the existing `verify()` instead of duplicating the comparison. Deviating from a pure restore, `_split_search_path` rejoins Windows drive letters that the original `.split(":")` severed. `tests/unit/tools/model_generation/`: 74 failing -> 38 failing. (#9620) |
 | 2026-09-07 | n/a | Optimized vector magnitude checks in swing flight pipeline gui using math.hypot (spec-exempt: micro-optimization) |
 | 2026-09-07 | #9631 | Bumped the release version 2.1.2 -> 2.1.3 across every surface `scripts/check_version_consistency.py` audits, plus this Identity table and SECURITY.md's footer. This is the fix-forward release for #9631: the pushed `v2.1.2` tag's `release.yml` run built a wheel, but both `smoke-python-wheel` jobs failed because `SharedImportAliasFinder` rewrote `src.shared.python.config` into the pinned Tools tree, whose unrelated `config` lacks `get_database_pool_pre_ping`, so `import src.api.local_server` and `upstream-drift --help` both failed and `create-release`/`publish-pypi` were skipped -- no wheel, sdist, SBOM, checksums, PyPI distribution or GitHub release exists for 2.1.2. Fixed upstream in D-sorganization/Tools#5049 and carried here by the pin bump to `132fc7331e`. Per `docs/operations/release-runbook.md` "Failed Release Recovery -- Fix Forward, Never Move a Tag", `v2.1.2` is retained where it is and superseded by 2.1.3; CHANGELOG entries staged for 2.1.2 carry forward under `[2.1.3] - 2026-09-07` with a retained-and-superseded note. No tag is created by this change -- tagging is the release operator's signed step. |
