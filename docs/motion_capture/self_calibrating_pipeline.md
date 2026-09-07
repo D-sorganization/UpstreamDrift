@@ -109,6 +109,20 @@ rejected observation with its residual, the count of unobservable points,
 and — when truth is present — the metrics. `joints_3d_m.npy` holds the
 fitted trajectory for the IK stage.
 
+On a real take the chain is one command:
+
+```bash
+python3 -m motion_capture.rig reconstruct --session sessions/<take>   --cameras sessions/<previous-take>/reconstruct/reconstruction.json --anchor neck=0.53
+```
+
+It maps the ingested views onto the reconstruct skeleton, cleans each view
+with the dynamics prior (`reconstruct/clean_report.json` lists every
+rejection), and runs the joint fit from the previous take's cameras — which
+is how placement is learned across takes — writing
+`reconstruct/reconstruction.json`, `joints_3d_m.npy` and a summary. The first
+take of a new placement starts from a rough camera file; later takes start
+from the last solution.
+
 ### Outliers Are Rejected, Not Averaged
 
 The cost uses robust kernels (Huber for the first pass, Geman-McClure once the

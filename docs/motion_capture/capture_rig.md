@@ -155,6 +155,17 @@ Writes a browser-playable H.264/yuv420p `.mp4` beside every usable recording
 and `proxies.json` (encoder, exit code, bytes, reason). Proxies exist for the
 web players; ingest and session-check never read them.
 
+## Reconstruct
+
+```bash
+python3 -m motion_capture.rig reconstruct --session S --cameras cameras.json --anchor neck=0.53
+```
+
+Cleans the ingested views with the dynamics prior and jointly fits camera
+placement, 3-D joints and bone lengths, starting from the given camera records
+(a previous `reconstruction.json` works). See
+[Self-Calibrating Markerless Pipeline](self_calibrating_pipeline.md).
+
 ## Ingest
 
 ```bash
