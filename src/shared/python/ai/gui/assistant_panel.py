@@ -71,6 +71,12 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from shared.python.ai.adapters.base import BaseAgentAdapter
+    from shared.python.sidekick.agent.action_service import (
+        ActionResult,
+        SidekickActionService,
+    )
+    from shared.python.sidekick.agent.chat_surface import ChatActionEnvelope
+    from shared.python.sidekick.agent.planner import SidekickAgentPlanner, ToolCall
 
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 
@@ -133,6 +139,12 @@ class AIAssistantPanel(QWidget):
         # so it shares the panel's (GUI) thread affinity.
         self._main_thread_dispatcher = MainThreadToolDispatcher(self)
         self._tools_registry.set_main_thread_dispatcher(self._main_thread_dispatcher)
+        # Launcher-owned Sidekick action bridge (#7209). Both stay None until
+        # set_action_service() attaches a service, which preserves the plain
+        # chat behaviour for hosts that never call it.
+        self._sidekick_action_service: SidekickActionService | None = None
+        self._sidekick_planner: SidekickAgentPlanner | None = None
+        self._cli_provider_entries: dict[str, Any] = {}
         self._rag_store = SimpleRAGStore()
         self._memory_manager = MemoryManager()
         self._refresh_prompt_memory()
@@ -282,6 +294,30 @@ class AIAssistantPanel(QWidget):
         register_file_tools(self._tools_registry)
         register_codemap_tools(self._tools_registry)
         register_panel_tools(self._tools_registry, self._rag_store)
+
+    def _populate_cli_provider_entries(self, combo: Any) -> None:
+        """Append discovered CLI providers to a provider combo.
+
+        A separator and a header row precede them so the CLI agents read as a
+        distinct group rather than as more of the API providers above.
+        """
+        if combo is None:
+            raise ValueError("combo must be provided")
+
+        from src.shared.python.ai.cli_providers import registry as registry_mod
+
+        descriptors = registry_mod.discover_cli_providers()
+        if not descriptors:
+            return
+
+        combo.insertSeparator(combo.count())
+        combo.addItem("— CLI Agents —", None)
+
+        entries = {}
+        for descriptor in descriptors:
+            combo.addItem(descriptor.name, descriptor.id)
+            entries[descriptor.name] = descriptor
+        self._cli_provider_entries = entries
 
     # ------------------------------------------------------------------
     # UI assembly
@@ -583,6 +619,20 @@ class AIAssistantPanel(QWidget):
             self._memory_manager.build_prompt_memory()
         )
         self._context.metadata["project_root"] = str(self._project_root)
+        # The Sidekick system prompt is derived from the attached service, so
+        # it is rebuilt here rather than cached: detaching the service must
+        # remove the prompt, or the model keeps being told about actions it
+        # can no longer invoke.
+        if self._sidekick_action_service is None:
+            self._context.metadata.pop("sidekick_system_prompt", None)
+        else:
+            from shared.python.sidekick.agent.planner import (
+                build_sidekick_system_prompt,
+            )
+
+            self._context.metadata["sidekick_system_prompt"] = (
+                build_sidekick_system_prompt(service=self._sidekick_action_service)
+            )
 
     def _on_memory_sync_requested(self) -> None:
         archived_contexts: list[ConversationContext] = []
@@ -752,6 +802,52 @@ class AIAssistantPanel(QWidget):
             rag_enabled=self._rag_enabled,
             max_expertise=self._context.user_expertise.value,
         )
+        declarations.extend(self._sidekick_tool_declarations())
+        return declarations
+
+    def _sidekick_tool_declarations(self) -> list[dict[str, Any]]:
+        """Declare the attached Sidekick planner's actions to the provider.
+
+        Returns an empty list when no action service is attached, so a host
+        that never calls :meth:`set_action_service` sees the registry tools
+        alone and nothing changes for it.
+        """
+        if self._sidekick_planner is None:
+            return []
+
+        provider_format = self._provider_tool_format()
+        declarations: list[dict[str, Any]] = []
+        for exported in self._sidekick_planner.export_for_tool_registry():
+            name = str(exported["name"])
+            description = str(exported["description"])
+            parameters = dict(exported["parameters"])
+            if provider_format == "anthropic":
+                declarations.append(
+                    {
+                        "name": name,
+                        "description": description,
+                        "input_schema": parameters,
+                    }
+                )
+            elif provider_format == "openai":
+                declarations.append(
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": name,
+                            "description": description,
+                            "parameters": parameters,
+                        },
+                    }
+                )
+            else:
+                declarations.append(
+                    {
+                        "name": name,
+                        "description": description,
+                        "parameters": parameters,
+                    }
+                )
         return declarations
 
     # ------------------------------------------------------------------
@@ -768,6 +864,75 @@ class AIAssistantPanel(QWidget):
         """
         self._mcp_pool = pool
         self._refresh_mcp_status()
+
+    def set_action_service(self, service: SidekickActionService | None) -> None:
+        """Attach the launcher-owned Sidekick action service.
+
+        Passing ``None`` detaches it and preserves the legacy plain-chat
+        behaviour, which is what a host that never calls this method gets.
+        """
+        if service is None:
+            if self._sidekick_action_service is not None:
+                self._sidekick_action_service.set_main_thread_dispatcher(None)
+            self._sidekick_action_service = None
+            self._sidekick_planner = None
+            self._refresh_prompt_memory()
+            return
+        from shared.python.sidekick.agent.action_service import SidekickActionService
+        from shared.python.sidekick.agent.planner import SidekickAgentPlanner
+
+        if not isinstance(service, SidekickActionService):
+            raise TypeError(
+                "service must be a SidekickActionService or None, "
+                f"got {type(service).__name__}"
+            )
+        self._sidekick_action_service = service
+        service.set_main_thread_dispatcher(self._main_thread_dispatcher)
+        self._sidekick_planner = SidekickAgentPlanner(service=service)
+        self._refresh_prompt_memory()
+
+    def handle_sidekick_tool_calls(self, calls: list[ToolCall]) -> ChatActionEnvelope:
+        """Plan tool calls and render their confirmation chips.
+
+        Nothing is executed here: planning produces chips the user confirms,
+        so a model-proposed action still needs a human before it runs.
+        """
+        if self._sidekick_action_service is None or self._sidekick_planner is None:
+            raise RuntimeError("no Sidekick action service is attached")
+        from shared.python.sidekick.agent.chat_surface import (
+            ChatActionEnvelope,
+            build_chip,
+            serialize_envelope,
+        )
+
+        steps = self._sidekick_planner.plan_from_tool_calls(calls)
+        envelope = ChatActionEnvelope(
+            steps=steps,
+            chips=tuple(
+                build_chip(step=step, service=self._sidekick_action_service)
+                for step in steps
+            ),
+        )
+        self._add_system_message(f"Sidekick actions: {serialize_envelope(envelope)}")
+        return envelope
+
+    def invoke_sidekick_action(
+        self,
+        action_id: str,
+        params: dict[str, Any] | None = None,
+        *,
+        dry_run: bool = False,
+    ) -> ActionResult:
+        """Invoke a Sidekick action through the canonical service dispatcher."""
+        service = self._sidekick_action_service
+        if service is None or self._sidekick_planner is None:
+            raise RuntimeError("no Sidekick action service is attached")
+        payload = dict(params or {})
+        return service.invoke(
+            action_id,
+            payload,
+            dry_run=dry_run,
+        )
 
     def _refresh_mcp_status(self) -> None:
         """Query the pool for connected-server count and update the indicator."""

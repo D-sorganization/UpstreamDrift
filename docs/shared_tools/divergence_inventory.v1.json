@@ -15,7 +15,7 @@
     "diverged": 277,
     "ud-only": 1188,
     "tools-only": 518,
-    "spelling-only": 130
+    "spelling-only": 129
   },
   "packages": {
     "README.md": {
@@ -86,7 +86,7 @@
       "diverged": 72,
       "ud-only": 20,
       "tools-only": 0,
-      "spelling-only": 56
+      "spelling-only": 55
     },
     "analysis": {
       "identical": 0,
@@ -1613,12 +1613,12 @@
       "classification": "diverged",
       "package": "ai",
       "subpackage": "gui",
-      "ud_bytes": 34225,
+      "ud_bytes": 41127,
       "tools_bytes": 34141,
-      "byte_delta": 84,
+      "byte_delta": 6986,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "ai/gui/assistant_widgets.py",
@@ -32021,9 +32021,9 @@
     {
       "path": "model_generation/api/rest_api_core.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "d2d40406164a13e9bed4da0400a3342a5bf9d15c"
+        "commit": "8b12c3cfba32cecc5eed0fe549439c6687ff50a2"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32255,9 +32255,9 @@
     {
       "path": "model_generation/converters/urdf_parser.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-07",
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32502,9 +32502,9 @@
     {
       "path": "model_generation/library/_rate_limiter.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "993e498e520125f6729b343142efd6d65df2b223"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32515,9 +32515,9 @@
     {
       "path": "model_generation/library/cache.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "d2d40406164a13e9bed4da0400a3342a5bf9d15c"
+        "commit": "8b12c3cfba32cecc5eed0fe549439c6687ff50a2"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32541,9 +32541,9 @@
     {
       "path": "model_generation/library/model_library.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "993e498e520125f6729b343142efd6d65df2b223"
+        "commit": "8b12c3cfba32cecc5eed0fe549439c6687ff50a2"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32554,9 +32554,9 @@
     {
       "path": "model_generation/library/repository.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "993e498e520125f6729b343142efd6d65df2b223"
+        "commit": "920e7979e11c88f41cd6bb2e3d13b58991959a3d"
       },
       "tools": {
         "author": "Dieter Olson",
