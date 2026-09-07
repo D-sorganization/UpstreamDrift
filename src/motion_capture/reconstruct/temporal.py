@@ -175,11 +175,33 @@ def _fit_channel(
         x, _ = _solve(z, np.maximum(w, floor), prior)
         u = np.where(observed, (z - x) / sigma, 0.0)
         w = base * _huber_weight(u, options.huber_delta)
-    residual = np.where(observed, z - x, np.nan)
     gate = options.gate_sigma * sigma
-    reject = observed & (np.abs(residual) > gate)
-    w[reject] = 0.0
+    reject = np.zeros_like(observed)
+    # Reject, refit without the rejected points, and re-judge: a gross point
+    # drags the fit toward itself, so its neighbours can look wrong until it
+    # is gone, and a second gross point can hide behind the first. Known
+    # limits, measured on the synthetic harness: a gross point in the first
+    # or last frames has little prior to contradict it, and offsets below
+    # about two gates blend into the noise; both are reported by the metrics
+    # rather than hidden by a looser gate.
+    for _ in range(3):
+        x, _ = _solve(z, np.maximum(w, floor * ~reject), prior)
+        residual = np.where(observed, z - x, np.nan)
+        newly = observed & ~reject & (np.abs(residual) > gate)
+        if not newly.any():
+            break
+        reject |= newly
+        w[reject] = 0.0
+    # Re-admit points that only looked wrong because of a neighbour that is
+    # now gone: judged against the fit without them, they are inside the gate.
+    x, _ = _solve(z, np.maximum(w, floor * ~reject), prior)
+    residual = np.where(observed, z - x, np.nan)
+    readmit = reject & (np.abs(residual) <= gate)
+    if readmit.any():
+        reject &= ~readmit
+        w[readmit] = base[readmit]
     x, std = _solve(z, np.maximum(w, floor * ~reject), prior)
+    residual = np.where(observed, z - x, np.nan)
     rejections = [(int(t), float(residual[t]), gate) for t in np.flatnonzero(reject)]
     return x, w, std, sigma, rejections
 

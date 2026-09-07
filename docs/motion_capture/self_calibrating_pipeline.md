@@ -85,6 +85,18 @@ frame the spare balls on the mat are found once the value gate matches the
 bay lighting; the addressed ball is hidden under the club head at that
 instant, so the rest phase before takeaway is where the anchor is read.
 
+### Per-View Cleaning
+
+`reconstruct/clean.py` applies the smoother joint by joint to a view's
+observation file: rejected detections keep their coordinates but drop to
+confidence 0, the fitted track and its uncertainty go to separate `fit_px`
+fields, and every rejection is listed with the residual that condemned it.
+On the synthetic harness (1 px noise, 3 % occlusion, 3 % gross outliers of
+up to 120 px) it flags injected outliers with recall 0.94-0.96 and precision
+0.92-0.96 across seeds; the misses are gross points in the first or last
+frames and offsets under about 10 px, which the multi-view gate (C5) is
+expected to catch.
+
 ### Dynamics Prior
 
 After the geometric fit, joint trajectories are re-estimated in joint space
