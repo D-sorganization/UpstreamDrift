@@ -8,8 +8,10 @@ import pytest
 
 from src.tools.capture_rig.session import SessionMedia, ViewMedia
 from src.tools.capture_rig.workflow import (
+    ACTION_HELP,
     STEPS,
     Status,
+    action_hints,
     current,
     enabled_actions,
     evaluate,
@@ -50,11 +52,27 @@ def test_steps_are_ordered_and_named_uniquely() -> None:
         assert step.requirements and step.instructions and step.actions
 
 
-def test_no_session_only_setup_is_ready() -> None:
+def test_no_session_setup_and_capture_are_ready() -> None:
     states = evaluate(None)
-    assert states[0].status is Status.READY
-    assert all(s.status is Status.BLOCKED for s in states[1:])
-    assert enabled_actions(states) == {"plan_check", "import"}
+    by_key = {s.step.key: s for s in states}
+    assert by_key["setup"].status is Status.READY
+    assert by_key["capture"].status is Status.READY  # a fresh folder is the norm
+    assert all(s.status is Status.BLOCKED for s in states if not s.step.starts_fresh)
+    assert enabled_actions(states) == {"plan_check", "import", "record", "proxy"}
+
+
+def test_action_hints_explain_every_grey_button() -> None:
+    states = evaluate(None)
+    hints = action_hints(states, frozenset({"stop", "load", "preview"}))
+    assert set(hints) == set(ACTION_HELP)
+    assert "Disabled" not in hints["record"] and hints["record"].startswith("Record")
+    assert "Disabled" not in hints["preview"]
+    assert "Disabled: step 'Detect" in hints["ingest"]
+    assert "load or record a session first" in hints["ingest"]
+    single = evaluate(_media((_view("face_on", ingested=True),)))
+    hints = action_hints(single)
+    assert "not for this session" in hints["reconstruct"]
+    assert "Disabled" not in hints["analyze"]
 
 
 def test_single_camera_route_skips_3d_steps() -> None:
