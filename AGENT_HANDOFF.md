@@ -197,8 +197,9 @@ unexpected token`, swallowing the finding). Posting now runs
 - `scripts/install_spec_merge_driver.py` and `shared_scripts/spec_changelog.py`
   are re-vendored from Repository_Management#1521's corrected copies and pinned
   byte-identical by `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`;
-  registration wiring into `scripts/setup_hooks.py` follows in the companion
-  wiring PR (`claude/issue-9476-driver-wiring`).
+  `scripts/setup_hooks.py` now calls the installer (issue #9476), so the
+  documented setup registers the `spec-rows` driver, and the installer
+  docstring names this repository's entry point.
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
