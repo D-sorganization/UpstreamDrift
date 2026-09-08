@@ -158,7 +158,6 @@ Never place credentials, tokens, or customer data in a development log.
 - **Last verified:** 2026-09-07 (`SELF`)
 - **Summary:** `SandDelivery` now refuses contradictory exit speed/vector pairs and owns copies of list-supplied exit vectors so post-construction mutation cannot invalidate the frozen record; the `to_post_impact_state` boundary carries explicit `ExitVectorProvenance` labels, and `PostImpactEnvelope` wraps the flight handoff with the validity verdict, F0 tier, per-group frames, the proper `HEAD_FRAME_TO_FLIGHT_TRANSFORM`, a schema version, and a SHA-256 source digest with JSON round trip. Reflection rejection itself was already delivered by PR #9574 and is not redone.
 - **Next step:** Open the protected PR to `main` with `Fixes #9542`, label `agent:claude`, and RED/GREEN evidence in the body.
-
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
 - **State:** in_review
@@ -196,6 +195,21 @@ Never place credentials, tokens, or customer data in a development log.
 - **Next step:** Observe the first post-merge `phantom-guard` run on a PR
   whose base fetch is too shallow for merge-base to confirm rule 3 defers to
   the API list.
+
+### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9612`
+- **PR:** #9720
+- **Paths:** `src/api/routes/video.py`, `tests/unit/api/test_routes_video.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-07 (`SELF`)
+- **Summary:** Video analysis uploads no longer default temp files to `.mp4`;
+  the container suffix is derived from the upload filename against the
+  `SUPPORTED_VIDEO_SUFFIXES` allow-list in one place and unknown or missing
+  extensions fail closed with a 400 before any side effect.
+- **Next step:** Merge the protected PR for `#9612` and confirm CI runs green.
 
 ## Shipped (Last 90 Days)
 
