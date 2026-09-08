@@ -19,6 +19,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 
 
+
 ### DL-#9409 · Always-on quality gate lane and conftest src-pivot guard
 
 - **State:** in_review
@@ -30,6 +31,33 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-08 (`SELF`)
 - **Summary:** CI Standard gains an always-on, ≤10-minute `always-on-unit-lane` (verify_installation import smoke over the shared Tools alias roots, top-level smoke tests, contract tests) that `quality-gate` requires `success` on every PR including docs-only ones; a repo-hygiene guard forbids any conftest from pivoting `sys.modules["src"]` directly (must use `EngineSrcPivot`). Deferred on #9409: main-branch cancel exemption (RM campaign) and nightly cross-engine dedupe (#8725/#9002).
 - **Next step:** Verify the first CI run of the PR executes `always-on-unit-lane` to `success` within its 10-minute budget.
+
+### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9716 (open; `Fixes #9533`)
+- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`,
+  `requirements*.lock`, `environment.yml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`289b3aac2`)
+- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools`
+  and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed
+  them and ~24 CI tests failed on import. Both now resolve through the `dev`
+  extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml`
+  workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR,
+  since Windows/WSL cannot regenerate correctly (#9533).
+- **Next step:** Regenerate the locks via `lock-refresh.yml` so the
+  dependency-consistency freshness gate and the 24 previously failing tests
+  go green.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
 
 ### DL-#9249 · UI: Pin @vitejs/Plugin-React to ^5 Until Vite 8
 
