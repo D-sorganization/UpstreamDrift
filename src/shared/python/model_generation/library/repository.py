@@ -10,8 +10,12 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import re
 import shutil
 import tempfile
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
@@ -49,12 +53,17 @@ def _urlopen_https(
 ) -> Any:
     """Open a request after validating it targets an HTTPS URL."""
     _require_https_url(request.full_url)
-    return urllib.request.urlopen(request, timeout=timeout)  # nosec B310
+    # _require_https_url above rejects any scheme but https and any host
+    # outside _ALLOWED_GITHUB_HOSTS -- exactly the attacker-controlled-URL
+    # case this rule warns about.
+    return urllib.request.urlopen(request, timeout=timeout)  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
 
 
 def _urlretrieve_https(url: str, filename: str | Path) -> tuple[str, Any]:
     """Retrieve an HTTPS URL to a local file."""
-    return urllib.request.urlretrieve(  # nosec B310
+    # _require_https_url gates the URL inline, so a non-https scheme or a
+    # host off the allowlist raises before urlretrieve is reached.
+    return urllib.request.urlretrieve(  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         _require_https_url(url),
         filename,
     )
@@ -155,7 +164,7 @@ class LocalRepository(Repository):
 
     def list_models(self) -> list[RepositoryModel]:
         """List all URDF models in the directory."""
-        models = []
+        models: list[RepositoryModel] = []
 
         if not self._path.exists():
             return models
@@ -257,6 +266,127 @@ class GitHubRepository(Repository):
 
         return models
 
+    def _build_api_request(self, url: str) -> urllib.request.Request:
+        """Build a GitHub API request with headers and optional authentication.
+
+        ``GITHUB_TOKEN`` is read at call time rather than construction time so
+        a token exported after the repository object exists still applies, and
+        so tests can patch the environment around a single call.
+        """
+        if url is None:
+            raise ValueError("url must be provided")
+        req = urllib.request.Request(url)
+        req.add_header("Accept", "application/vnd.github.v3+json")
+
+        token = os.environ.get("GITHUB_TOKEN")
+        if token:
+            req.add_header("Authorization", f"token {token}")
+
+        return req
+
+    def _api_request_with_retry(
+        self,
+        url: str,
+        max_retries: int = 3,
+        timeout: int = 10,
+        paginate: bool = False,
+    ) -> list[Any]:
+        """Make an API request with retry logic and optional pagination.
+
+        Args:
+            url: API endpoint URL.
+            max_retries: Retries attempted on transient failures, so a call
+                makes at most ``max_retries + 1`` requests.
+            timeout: Per-request timeout in seconds.
+            paginate: Follow ``Link: rel="next"`` headers and concatenate.
+
+        Returns:
+            The parsed JSON payload, always as a list. A single JSON object is
+            wrapped so callers can iterate uniformly.
+
+        Raises:
+            urllib.error.HTTPError: On 4xx, immediately and without retry, and
+                on 5xx once retries are exhausted.
+            OSError: On network errors after retries are exhausted.
+        """
+        if url is None:
+            raise ValueError("url must be provided")
+        all_results: list[Any] = []
+        current_url: str | None = url
+
+        while current_url:
+            data, next_url = self._single_api_request(current_url, max_retries, timeout)
+            if isinstance(data, list):
+                all_results.extend(data)
+            else:
+                all_results.append(data)
+
+            current_url = next_url if (paginate and next_url) else None
+
+        return all_results
+
+    def _single_api_request(
+        self, url: str, max_retries: int, timeout: int
+    ) -> tuple[Any, str | None]:
+        """Execute one API request, retrying transient failures.
+
+        Returns:
+            ``(parsed data, next page URL or None)``.
+        """
+        last_error: Exception | None = None
+
+        for attempt in range(max_retries + 1):
+            try:
+                req = self._build_api_request(url)
+                with _urlopen_https(req, timeout=timeout) as response:
+                    data = json.loads(response.read().decode())
+                    return data, self._parse_link_header(response)
+
+            except urllib.error.HTTPError as exc:
+                # Client errors are not transient: retrying a 404 or a 401
+                # cannot change the outcome and only burns rate limit.
+                if 400 <= exc.code < 500:
+                    raise
+                last_error = exc
+                if attempt < max_retries:
+                    wait = 2**attempt
+                    logger.warning(
+                        "GitHub API request failed (HTTP %s), retrying in %ss "
+                        "(attempt %s/%s)",
+                        exc.code,
+                        wait,
+                        attempt + 1,
+                        max_retries,
+                    )
+                    time.sleep(wait)
+
+            except (TimeoutError, OSError) as exc:
+                last_error = exc
+                if attempt < max_retries:
+                    wait = 2**attempt
+                    logger.warning(
+                        "GitHub API request failed (%s), retrying in %ss "
+                        "(attempt %s/%s)",
+                        type(exc).__name__,
+                        wait,
+                        attempt + 1,
+                        max_retries,
+                    )
+                    time.sleep(wait)
+
+        if last_error is not None:
+            raise last_error
+        raise OSError(f"API request failed after {max_retries + 1} attempts")
+
+    @staticmethod
+    def _parse_link_header(response: Any) -> str | None:
+        """Return the ``rel="next"`` URL from a GitHub ``Link`` header."""
+        link_header = response.headers.get("Link")
+        if not link_header:
+            return None
+        match = re.search(r'<([^>]+)>;\s*rel="next"', link_header)
+        return match.group(1) if match else None
+
     def _scan_directory(self, path: str, depth: int = 0) -> list[RepositoryModel]:
         """Recursively scan directory for URDF files."""
         if path is None:
@@ -268,11 +398,7 @@ class GitHubRepository(Repository):
         api_url = f"{self.API_BASE}/repos/{self._owner}/{self._repo}/contents/{path}"
 
         try:
-            req = urllib.request.Request(api_url)
-            req.add_header("Accept", "application/vnd.github.v3+json")
-
-            with _urlopen_https(req, timeout=10) as response:
-                contents = json.loads(response.read().decode())
+            contents = self._api_request_with_retry(api_url, paginate=True)
 
             for item in contents:
                 if item["type"] == "file" and item["name"].endswith(".urdf"):

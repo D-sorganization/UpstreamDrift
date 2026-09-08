@@ -15,7 +15,7 @@
   "normalization": "unit tip translation with nodal rotations in radians",
   "source_sha256": {
     "scripts/research/proximal_distal_energy/generate_articulated_shaft_structural_basis.py": "0ccf6f8f02fde877a9a4330cdd034afc1518c39f9c5d55a2b70fccd9c7858d2e",
-    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "1405dc8214cfdf4931ec71e9c1608d284cd44c0fa42d5d42d3c1e338f212481e",
+    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "39281a354eb911d01f1d6d11ac7ddafae98d1c0828b42f9df873f3a7c7e84f24",
     "src/shared/python/physics/flexible_shaft.py": "d25cb7fd2408a0be0b8cd3a85469a3f8db7445665a963fd535ebeb8c2ed1f1fd"
   }
 }

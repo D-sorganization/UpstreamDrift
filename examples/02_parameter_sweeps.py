@@ -7,6 +7,19 @@ This example demonstrates how to:
 3. Export detailed analysis results
 """
 
+import sys
+from pathlib import Path
+
+# Allow running from repo root without installing the package
+_project_root = Path(__file__).resolve().parents[1]
+for _p in (
+    _project_root,
+    _project_root / "src",
+    _project_root / "src" / "shared" / "python",
+):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
 import numpy as np
 from src.shared.python.data_io.output_manager import OutputManager
 from src.shared.python.data_io.path_utils import get_repo_root

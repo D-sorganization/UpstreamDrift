@@ -5,6 +5,7 @@ with modular physics engine selection and proper dependency management.
 """
 
 import argparse
+import importlib
 import json
 import logging
 import os
@@ -127,6 +128,30 @@ def install_dependencies() -> bool:
     return True
 
 
+def _module_available(module_name: str) -> bool:
+    """Report whether ``module_name`` can actually be imported.
+
+    This is the single seam tests patch when they need to simulate a missing
+    engine. It exists so that no test has to replace ``builtins.__import__``:
+    a global import hook that raises for names it does not recognise also
+    intercepts pytest's own lazy imports and aborts the whole session with
+    ``INTERNALERROR``, destroying the failure summary for every other test in
+    the run (UD #9474).
+
+    The probe imports rather than calling :func:`importlib.util.find_spec`
+    because physics-engine packages ship native extensions that can be present
+    on disk yet fail to load; the installer only cares about engines that
+    genuinely work.
+    """
+    if not module_name:
+        raise ValueError("module_name must be a non-empty module name")
+    try:
+        importlib.import_module(module_name)
+    except ImportError:
+        return False
+    return True
+
+
 def detect_physics_engines() -> list[str]:
     """Detect which physics engines are available."""
 
@@ -138,15 +163,11 @@ def detect_physics_engines() -> list[str]:
         "opensim": "opensim",
     }
 
-    available = []
-    for engine_name, module_name in engines.items():
-        try:
-            __import__(module_name)
-            available.append(engine_name)
-        except ImportError:
-            pass
-
-    return available
+    return [
+        engine_name
+        for engine_name, module_name in engines.items()
+        if _module_available(module_name)
+    ]
 
 
 def build_executable(

@@ -140,7 +140,7 @@ class TestTool:
             ],
         )
         result = tool.execute({"a": 2, "b": 3})
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result == 5
 
     def test_execute_failure(self) -> None:
@@ -155,7 +155,7 @@ class TestTool:
             handler=failing_tool,
         )
         result = tool.execute({})
-        assert result.solver_status != "success"
+        assert result.success is False
         assert "Intentional error" in result.error  # type: ignore[operator]
 
 
@@ -257,7 +257,7 @@ class TestToolRegistry:
             return x * y
 
         result = registry.execute("multiply", {"x": 3, "y": 4})
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result == 12
 
     def test_execute_not_found(self) -> None:

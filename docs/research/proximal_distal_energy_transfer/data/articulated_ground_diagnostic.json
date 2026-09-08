@@ -1113,7 +1113,7 @@
   "calibration_status": "synthetic_reference_not_human_or_force_plate_calibrated",
   "source_sha256": {
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "8277410c523b941364f8451ca84d2d9dc384024630d0ad85e316a928ab712206",
+    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "305e1542d0dfa95fe86cc9f7b2fe86d90f44be86db71c45053eaa61789ee0c57",
     "scripts/research/proximal_distal_energy/articulated_ground.py": "251f5f3845554257bbd63e53002284d43b0915ec5c70015d8147a0b5a50a66ac",
     "scripts/research/proximal_distal_energy/articulated_ground_forward.py": "b9fc1c75980dccce93abfe1b1ce78144c6bcf59fe1e12dbe88a44edb78b66116",
     "scripts/research/proximal_distal_energy/articulated_ground_diagnostic.py": "da7f4d344cb2e8885b63ded4492aac3b93a0a6c0cfe5fcf97b804793994dbd53",

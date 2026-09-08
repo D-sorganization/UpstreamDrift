@@ -56,6 +56,33 @@ Arbitrary placement is supported by learning and versioning the
 `T_world_from_camera` transforms. Moving a camera invalidates or degrades the
 prior layout until change detection and recalibration pass.
 
+## Synthetic Algorithm Thresholds
+
+The Algorithm level is gated in CI on the synthetic harness
+(`motion_capture.reconstruct`, #9629): a rigid 15-joint skeleton on a
+swing-like motion rendered through three cameras at 1920x1200 with 1 px
+noise, 2 % occlusion and, where stated, gross outliers of up to 120 px. Every
+threshold below is asserted by a unit test; the numbers in parentheses are
+what the implementation measured on 2026-09-07.
+
+| Quantity                                    | Threshold                                                | Test                 |
+| ------------------------------------------- | -------------------------------------------------------- | -------------------- |
+| Camera rotation from a 3 deg / 15 cm start  | < 0.5 deg (0.07)                                         | `test_bundle.py`     |
+| Camera position from the same start         | < 3 cm (0.4-2.0)                                         | `test_bundle.py`     |
+| Bone lengths, subject 6 % taller than prior | < 2 % (1.1)                                              | `test_bundle.py`     |
+| Joint position, median                      | < 2 cm (1.4)                                             | `test_bundle.py`     |
+| Gross outliers flagged, 3 % injected        | recall >= 0.9, precision >= 0.85                         | `test_bundle.py`     |
+| Per-view cleaning, 3 % injected             | recall >= 0.9, precision >= 0.85 (0.94-0.96 / 0.92-0.96) | `test_clean.py`      |
+| One-frame spike, smoother                   | rejected; peak within 2 %                                | `test_temporal.py`   |
+| Joint-only initialisation, then fit         | axes < 0.5 deg, baselines < 2 %                          | `test_initialize.py` |
+| Triangulation, three views, one wrong       | wrong view named                                         | `test_geometry.py`   |
+| Turn angles from fitted joints              | within 0.6 deg of the motion                             | `test_analytics.py`  |
+
+Two views cannot assign blame (an error along the epipolar line is absorbed
+by depth); the harness states this and it is why a third useful view is
+required above. Scale is not observable from images with one camera fixed:
+one measured length on the subject is treated as known.
+
 ## Physical Lab Hold Points
 
 The following block physical-lab qualification:

@@ -55,28 +55,13 @@ shadows:
   chat:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  codemap:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  compatibility.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   config:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   contracts.py:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  cors.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   data_processing:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  deprecation.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  file_watcher:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   gui_launcher:
@@ -85,37 +70,16 @@ shadows:
   humanoid_character_builder:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  logging_pkg:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   model_generation:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   notes:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  plot_engine:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   plot_theme:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
-  programmatic_pid:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
   reporting:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  rotation_transforms:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  safe_eval.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  safe_pandas_eval.py:
-    tracking_issue: 5623
-    sunset_date: "2026-12-31"
-  scripting:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
   sidekick:
@@ -136,16 +100,10 @@ shadows:
   # the same commit that emptied this ledger. They are recorded here so the
   # ratchet has a truthful starting point, NOT because they are approved.
   # They are the first entries that should be paid down.
-  chat_contracts:
-    tracking_issue: 8322
-    sunset_date: "2026-12-31"
   data_processor_io:
     tracking_issue: 8322
     sunset_date: "2026-12-31"
   import_aliases.py:
-    tracking_issue: 8322
-    sunset_date: "2026-12-31"
-  upstream_drift_tools:
     tracking_issue: 8322
     sunset_date: "2026-12-31"
 

@@ -212,7 +212,7 @@ class TestInputValidation:
                 "model_generation.builders.parametric_builder.ParametricBuilder"
             ) as MockBuilder:
                 mock_result = MagicMock()
-                mock_result.solver_status = "success"
+                mock_result.success = True
                 mock_result.urdf_xml = "<robot/>"
                 mock_result.links = []
                 mock_result.joints = []

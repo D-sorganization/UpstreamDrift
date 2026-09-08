@@ -102,6 +102,9 @@ models:
     engine_type: "putting_green"
     launcher:
       category: "simulation"
+      categories:
+        - "simulation"
+        - "tool"
       logo: "assets/putting_green_modern.png"
       status: "ready"
 
@@ -223,6 +226,9 @@ models:
     path: "src/launchers/cross_engine_dashboard.py"
     launcher:
       category: "simulation"
+      categories:
+        - "simulation"
+        - "tool"
       logo: "cross_engine.svg"
       status: "ready"
       default_launch: "tab"
@@ -328,6 +334,21 @@ models:
     launcher:
       category: "motion_matching"
       logo: "assets/data_explorer_modern.png"
+      status: "beta"
+
+  - id: "capture_rig"
+    name: "Capture Rig"
+    description: "Multi-camera capture, pose ingest and reconstruction with an overlay player"
+    type: "special_app"
+    path: "src/tools/capture_rig/__main__.py"
+    capabilities:
+      - "video_capture"
+      - "camera_control"
+      - "pose_estimation"
+      - "video_processing"
+    launcher:
+      category: "motion_capture"
+      logo: "assets/capture_rig.svg"
       status: "beta"
 
   - id: "starting_pose_matcher"
@@ -602,6 +623,9 @@ models:
       - "documents"
     launcher:
       category: "documentation"
+      categories:
+        - "documentation"
+        - "tool"
       logo: "assets/project_map.png"
       status: "ready"
 
@@ -655,6 +679,9 @@ models:
       - "biomechanics"
     launcher:
       category: "biomechanics"
+      categories:
+        - "biomechanics"
+        - "tool"
       logo: "project_map.svg"
       status: "ready"
       default_launch: "tab"

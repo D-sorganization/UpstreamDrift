@@ -576,8 +576,41 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         return bool(self.control_system.num_actuators == self.model.nu)
 
     def set_running(self, running: bool) -> None:
-        """Enable or disable the simulation stepping loop."""
+        """Enable or disable the simulation stepping loop.
+
+        Note this only flips the stepping flag; the Qt timer keeps firing so
+        that rendering and interaction still work while paused. To release
+        the timer entirely, use :meth:`stop_simulation`.
+        """
         self.running = running
+
+    def stop_simulation(self) -> None:
+        """Stop stepping *and* release the Qt timer this widget owns.
+
+        The widget creates its ``QTimer`` in ``__init__`` and is therefore
+        responsible for stopping it. Idempotent, and safe to call from
+        teardown paths that may run more than once.
+
+        Postcondition: ``self.running is False`` and ``self.timer`` is
+        inactive.
+        """
+        self.running = False
+        timer = getattr(self, "timer", None)
+        if timer is not None:
+            timer.stop()
+
+    def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        """Release the simulation timer when the widget is closed.
+
+        ``QWidget.close()`` only hides a widget; it does not destroy it. Until
+        UD #9474 this class had no ``closeEvent``, so a closed sim widget kept
+        firing ``_on_timer`` at 60 fps for the remaining life of the
+        process-wide ``QApplication`` -- stepping MuJoCo and rendering frames
+        during entirely unrelated later tests. One of those stray frames
+        reached ``get_cv2()`` and aborted the interpreter.
+        """
+        self.stop_simulation()
+        super().closeEvent(event)
 
     def set_camera(self, camera_name: str) -> None:
         """Set the active camera view."""

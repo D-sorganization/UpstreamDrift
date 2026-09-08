@@ -24,9 +24,9 @@ from pydantic import BaseModel, Field
 from src.api.middleware.upload_limits import write_upload_file_to_path
 from src.shared.python.core.contracts import precondition
 from src.shared.python.pose_estimation.registry import (
+    capture_source_estimators,
     estimator_availability,
     get_estimator_info,
-    list_estimators,
 )
 
 logger = logging.getLogger(__name__)
@@ -172,7 +172,8 @@ async def list_capture_sources() -> list[CaptureSource]:
     """
     sources = []
     listing = [
-        (info.name, info.display_name, info.description) for info in list_estimators()
+        (info.name, info.display_name, info.description)
+        for info in capture_source_estimators()
     ]
     listing.append(
         ("c3d", "C3D File Import", "Import motion capture data from C3D files")
@@ -211,7 +212,9 @@ async def get_skeleton_template(source_type: str) -> list[JointData]:
         # honest — clients must not assume a MediaPipe-shaped joint set.
         skeleton = []
     else:
-        valid = ", ".join(sorted([info.name for info in list_estimators()] + ["c3d"]))
+        valid = ", ".join(
+            sorted([info.name for info in capture_source_estimators()] + ["c3d"])
+        )
         raise HTTPException(
             status_code=400,
             detail=f"Unknown source type: {source_type}. Use one of: {valid}",
