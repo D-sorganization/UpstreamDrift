@@ -50,3 +50,11 @@ updates:
       - "automated"
     commit-message:
       prefix: "chore(ui-deps)"
+    # @vitejs/plugin-react 6.x requires Vite 8 (peerDependencies vite
+    # ^8.0.0; Vite 7 exports no ./internal entrypoint), so a lone major
+    # bump cannot merge against ui's vite ^7.3.2 — see issue #9249.
+    # Drop this ignore when the ui toolchain upgrades to Vite 8.
+    ignore:
+      - dependency-name: "@vitejs/plugin-react"
+        update-types:
+          - "version-update:semver-major"
