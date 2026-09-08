@@ -1,7 +1,7 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 02:55 PDT
-Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-08 07:55 UTC
 
 ## Impact Dynamics and Acoustics: #9700
 
@@ -17,6 +17,7 @@ evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual progra
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
 recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
+
 ## Import Bootstrap Fail-Fast: #9733
 
 - Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
@@ -93,6 +94,11 @@ import landed with RED/GREEN evidence; dev-log entry `DL-#8943` in
 `origin/main`, marked `test_launch_monitor_analytics_imports_without_pandas`
 with `pytest.mark.unit` for the suite-marker ratchet, added the PR-keyed
 SPEC.md change-log row `#9727`; docs-governance checks pass locally.
+Final CI repair round (PR #9727): merged `origin/main` and synced
+`requirements-dev.lock`/`environment.yml` for main's openpyxl/imageio
+dev-extra addition (#9716), clearing the shared `dependency-consistency` red
+on the merge ref. No material handoff change — lock sync only; behavior and
+continuation state unchanged.
 
 ## Protected Authority
 
@@ -187,6 +193,7 @@ SPEC.md change-log row `#9727`; docs-governance checks pass locally.
   byte-identical by `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`;
   registration wiring into `scripts/setup_hooks.py` follows in the companion
   wiring PR (`claude/issue-9476-driver-wiring`).
+
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
