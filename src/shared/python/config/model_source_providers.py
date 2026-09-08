@@ -29,22 +29,6 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 
 
-TOOLS_PATH_SCHEME = "tools://"
-"""Provenance scheme for entry points provided by the pinned Tools tree.
-
-A registry path written ``tools://src/<tool>/launch.py`` resolves against
-the ``vendor/ud-tools`` vendor root, never the repository root (issue
-#9478): a Tools path can no longer masquerade as a repo-relative one.
-"""
-
-
-def strip_tools_scheme(path: str | None) -> str | None:
-    """Return *path* with the :data:`TOOLS_PATH_SCHEME` prefix removed."""
-    if isinstance(path, str) and path.startswith(TOOLS_PATH_SCHEME):
-        return path[len(TOOLS_PATH_SCHEME) :]
-    return path
-
-
 def _get_optional_string_attr(model: Any, attr_name: str) -> str | None:
     """Return a stripped string attribute when the model explicitly provides one."""
     value = getattr(model, attr_name, None)
@@ -250,13 +234,6 @@ class LocalRepoModelSourceProvider:
         fallback_relative: str | Path | None = None,
     ) -> ResolvedModelSource:
         source_root = path_policy.default_root
-        declared = _get_optional_string_attr(model, "path")
-        if declared is not None and declared.startswith(TOOLS_PATH_SCHEME):
-            raise ProviderUnavailableError(
-                f"model {model.id!r}: 'tools://' path declared without "
-                "provider: tools (a vendor path must not resolve as repo-local)"
-            )
-
         return ResolvedModelSource(
             provider_id=self.provider_id,
             source_root=source_root,
@@ -320,7 +297,7 @@ class ToolsVendorModelSourceProvider:
                 source_root=source_root,
                 artifact_path=strict_policy.resolve_path(
                     source_root,
-                    strip_tools_scheme(_get_optional_string_attr(model, "path")),
+                    _get_optional_string_attr(model, "path"),
                     field_name="path",
                 ),
                 working_directory=strict_policy.resolve_optional_path(
@@ -357,13 +334,6 @@ class SiblingRepoModelSourceProvider:
         source_root = path_policy.resolve_source_root(
             _get_optional_string_attr(model, "source_root")
         )
-        declared = _get_optional_string_attr(model, "path")
-        if declared is not None and declared.startswith(TOOLS_PATH_SCHEME):
-            raise ProviderUnavailableError(
-                f"model {model.id!r}: 'tools://' path declared for a sibling "
-                "source_root (a vendor path must not resolve as sibling-local)"
-            )
-
         return ResolvedModelSource(
             provider_id=self.provider_id,
             source_root=source_root,

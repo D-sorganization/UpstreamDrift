@@ -6,23 +6,11 @@
  * Renders engine checkboxes + perturbation config, submits a
  * POST /api/v1/analysis/cross-engine request, polls for completion,
  * then shows a Recharts BarChart of robustness scores and a metrics table.
- *
- * Config fields are validated before submission and the poll loop is
- * bounded by a deadline plus a user-facing cancel (issue #8891).
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { getApiBase } from '@/api/backend';
-import type { ConfigText, PerturbationConfig } from './crossEngineConfig';
-import {
-  CONFIG_FIELDS,
-  DEFAULT_CONFIG_TEXT,
-  POLL_DEADLINE_MS,
-  POLL_INTERVAL_MS,
-  parseConfigText,
-  validateConfigText,
-} from './crossEngineConfig';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,7 +42,13 @@ export interface CrossEngineResult {
   };
 }
 
-export type { ConfigKey, ConfigText, PerturbationConfig } from './crossEngineConfig';
+export interface PerturbationConfig {
+  t_end: number;
+  dt: number;
+  noise_amplitude: number;
+  n_trials: number;
+  seed: number;
+}
 
 /** Available engine names — mirrors ENGINE_NAMES in the Python service. */
 const ENGINE_NAMES = ['pendulum_stub', 'mujoco', 'drake', 'pinocchio'] as const;
@@ -120,17 +114,17 @@ export function CrossEngineDashboardPage() {
   const [selectedEngines, setSelectedEngines] = useState<Set<EngineName>>(
     new Set(['pendulum_stub']),
   );
-  const [configText, setConfigText] = useState<ConfigText>(DEFAULT_CONFIG_TEXT);
+  const [config, setConfig] = useState<PerturbationConfig>({
+    t_end: 1.0,
+    dt: 0.01,
+    noise_amplitude: 0.05,
+    n_trials: 10,
+    seed: 42,
+  });
   const [status, setStatus] = useState<CrossEngineTaskStatus>('idle');
   const [result, setResult] = useState<CrossEngineResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pollStartRef = useRef<number>(0);
-
-  const fieldErrors = validateConfigText(configText);
-  const hasErrors = Object.keys(fieldErrors).length > 0;
-  const isBusy = status === 'running' || status === 'starting';
 
   const stopPolling = useCallback(() => {
     if (pollRef.current !== null) {
@@ -155,30 +149,13 @@ export function CrossEngineDashboardPage() {
 
   const handleRun = useCallback(async () => {
     if (selectedEngines.size === 0) return;
-    // Re-validate here so a stale render can never submit a bad config.
-    if (Object.keys(validateConfigText(configText)).length > 0) return;
     setStatus('starting');
     setResult(null);
     setError(null);
-    setNotice(null);
     try {
-      const taskId = await startStudy(
-        [...selectedEngines] as EngineName[],
-        parseConfigText(configText),
-      );
+      const taskId = await startStudy([...selectedEngines] as EngineName[], config);
       setStatus('running');
-      pollStartRef.current = Date.now();
       pollRef.current = setInterval(async () => {
-        if (Date.now() - pollStartRef.current >= POLL_DEADLINE_MS) {
-          stopPolling();
-          setError(
-            `Gave up waiting for the study after ${Math.round(POLL_DEADLINE_MS / 60000)} ` +
-              'minutes. The backend may have restarted or dropped the task — check the ' +
-              'server logs, then run the comparison again.',
-          );
-          setStatus('failed');
-          return;
-        }
         try {
           const data = await pollStatus(taskId);
           if (data.status === 'completed' && data.result) {
@@ -195,21 +172,12 @@ export function CrossEngineDashboardPage() {
           setError(String(pollErr));
           setStatus('failed');
         }
-      }, POLL_INTERVAL_MS);
+      }, 1000);
     } catch (startErr) {
       setError(String(startErr));
       setStatus('failed');
     }
-  }, [selectedEngines, configText, stopPolling]);
-
-  const handleCancel = useCallback(() => {
-    stopPolling();
-    setStatus('idle');
-    setNotice(
-      'Study cancelled — stopped waiting for results. Any work already ' +
-        'queued on the backend finishes on its own.',
-    );
-  }, [stopPolling]);
+  }, [selectedEngines, config, stopPolling]);
 
   const chartData = result ? buildRobustnessChartData(result) : [];
 
@@ -247,7 +215,15 @@ export function CrossEngineDashboardPage() {
 
         {/* Config */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {CONFIG_FIELDS.map(({ key, label, min, step }) => (
+          {(
+            [
+              { key: 't_end', label: 'Duration (s)', min: 0.1, step: 0.1 },
+              { key: 'dt', label: 'Timestep (s)', min: 0.001, step: 0.001 },
+              { key: 'noise_amplitude', label: 'Noise amplitude', min: 0, step: 0.01 },
+              { key: 'n_trials', label: 'Trials', min: 1, step: 1 },
+              { key: 'seed', label: 'Seed', min: 0, step: 1 },
+            ] as const
+          ).map(({ key, label, min, step }) => (
             <div key={key} className="flex flex-col gap-1">
               <label htmlFor={`cfg-${key}`} className="text-xs text-gray-400">
                 {label}
@@ -257,31 +233,21 @@ export function CrossEngineDashboardPage() {
                 type="number"
                 min={min}
                 step={step}
-                value={configText[key]}
-                aria-invalid={fieldErrors[key] !== undefined}
-                aria-describedby={fieldErrors[key] !== undefined ? `cfg-${key}-error` : undefined}
-                onChange={(e) => {
-                  const { value } = e.target;
-                  setConfigText((c) => ({ ...c, [key]: value }));
-                }}
-                className={`bg-gray-700 border rounded px-2 py-1 text-sm text-gray-100 w-full ${
-                  fieldErrors[key] !== undefined ? 'border-red-500' : 'border-gray-600'
-                }`}
+                value={config[key]}
+                onChange={(e) =>
+                  setConfig((c) => ({ ...c, [key]: parseFloat(e.target.value) || 0 }))
+                }
+                className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm text-gray-100 w-full"
               />
-              {fieldErrors[key] !== undefined && (
-                <span id={`cfg-${key}-error`} role="alert" className="text-xs text-red-400">
-                  {fieldErrors[key]}
-                </span>
-              )}
             </div>
           ))}
         </div>
 
-        {/* Run / cancel buttons */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Run button */}
+        <div>
           <button
             onClick={handleRun}
-            disabled={selectedEngines.size === 0 || hasErrors || isBusy}
+            disabled={selectedEngines.size === 0 || status === 'running' || status === 'starting'}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded transition-colors"
             aria-busy={status === 'running'}
           >
@@ -291,34 +257,11 @@ export function CrossEngineDashboardPage() {
                 ? 'Running…'
                 : 'Run comparison'}
           </button>
-          {isBusy && (
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 border border-gray-600 text-gray-100 text-sm font-medium rounded transition-colors"
-            >
-              Cancel study
-            </button>
-          )}
           {selectedEngines.size === 0 && (
-            <span className="text-xs text-yellow-400">Select at least one engine.</span>
-          )}
-          {hasErrors && (
-            <span className="text-xs text-yellow-400">
-              Fix the highlighted configuration fields before running.
-            </span>
+            <span className="ml-3 text-xs text-yellow-400">Select at least one engine.</span>
           )}
         </div>
       </div>
-
-      {/* Notice banner */}
-      {notice && (
-        <div
-          className="bg-gray-800 border border-gray-600 rounded p-3 text-sm text-gray-300"
-          role="status"
-        >
-          {notice}
-        </div>
-      )}
 
       {/* Error banner */}
       {error && (

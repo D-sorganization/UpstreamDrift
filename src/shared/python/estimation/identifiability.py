@@ -1,32 +1,18 @@
-"""Identifiability probes for synthetic estimation targets.
-
-Besides the exploratory :func:`probe_identifiability`, this module owns the
-pre-solve **gate** (#9758) that every MAP / multi-trial solve with free shared
-parameters passes through: :func:`gate_shared_parameters` builds the
-residual-vs-parameter Jacobian at the initial guess, runs the SVD, and warns
-about, locks, or refuses parameters that align with null directions.
-"""
+"""Identifiability probes for synthetic estimation targets."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, TypeAlias
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import check_finite, require
-from src.shared.python.logging_pkg.logging_config import get_logger
-
-if TYPE_CHECKING:
-    from src.shared.python.estimation.map_estimator import SharedParameterBlock
-
-logger = get_logger(__name__)
 
 FloatArray: TypeAlias = npt.NDArray[np.float64]
 ObservationModel = Callable[[FloatArray], FloatArray]
-GatePolicy = Literal["off", "warn", "lock", "raise"]
 
 
 @dataclass(frozen=True)
@@ -182,161 +168,3 @@ def _rank_tolerance(
         return 0.0
     scale = max(jacobian.shape) * np.finfo(np.float64).eps
     return float(scale * singular_values[0])
-
-
-# ---------------------------------------------------------------------------
-# Pre-solve identifiability gate (#9758)
-# ---------------------------------------------------------------------------
-
-
-class UnidentifiableParametersError(RuntimeError):
-    """Raised under gate policy ``"raise"`` when free parameters are unobservable."""
-
-
-@dataclass(frozen=True)
-class IdentifiabilityGateOptions:
-    """How the MAP solvers react to weakly identifiable shared parameters.
-
-    ``policy``:
-        ``"off"`` skips the probe; ``"warn"`` (default) logs the flagged
-        parameters and solves anyway; ``"lock"`` locks them at their initial
-        values before solving; ``"raise"`` refuses the solve.
-    ``relative_tolerance``:
-        A singular value below ``relative_tolerance * sigma_max`` counts as a
-        null direction. ``1e-6`` separates "numerically zero" from merely
-        ill-conditioned columns.
-    ``alignment``:
-        A parameter is flagged when the absolute component of any null
-        direction along it exceeds this value.
-    ``step``:
-        Finite-difference step for the probe Jacobian.
-    """
-
-    policy: GatePolicy = "warn"
-    relative_tolerance: float = 1e-6
-    alignment: float = 0.5
-    step: float = 1e-6
-
-    def __post_init__(self) -> None:
-        require(self.policy in ("off", "warn", "lock", "raise"), "unknown policy")
-        require(
-            0.0 <= self.relative_tolerance < 1.0, "relative_tolerance must be in [0, 1)"
-        )
-        require(0.0 < self.alignment <= 1.0, "alignment must be in (0, 1]")
-        require(self.step > 0.0, "step must be positive")
-
-
-@dataclass(frozen=True)
-class IdentifiabilityGateReport:
-    """Outcome of the pre-solve gate for one solve."""
-
-    policy: GatePolicy
-    report: IdentifiabilityReport
-    flagged_parameters: tuple[str, ...]
-    locked_parameters: tuple[str, ...]
-
-    @property
-    def free_parameter_names(self) -> tuple[str, ...]:
-        return self.report.parameter_names
-
-    @property
-    def rank(self) -> int:
-        return self.report.rank
-
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "policy": self.policy,
-            "flagged_parameters": list(self.flagged_parameters),
-            "locked_parameters": list(self.locked_parameters),
-            "rank": self.rank,
-            "n_free": len(self.free_parameter_names),
-            "condition_number": self.report.condition_number,
-            "singular_values": self.report.singular_values.tolist(),
-        }
-
-
-def gate_shared_parameters(
-    residual_of_free: Callable[[FloatArray], FloatArray],
-    block: SharedParameterBlock,
-    options: IdentifiabilityGateOptions | None = None,
-) -> IdentifiabilityGateReport:
-    """Probe the free parameters of ``block`` through ``residual_of_free``.
-
-    Args:
-        residual_of_free: Maps a vector of the block's *free* parameter
-            values (trajectory held at the initial guess) to the data
-            residual. Must return finite values at the initial guess.
-        block: Shared parameter block whose ``free_specs`` are probed.
-        options: Gate policy and thresholds; defaults to ``warn``.
-
-    Returns:
-        The gate report. Under policy ``"lock"`` the caller is expected to
-        lock ``locked_parameters``; under ``"raise"`` this function raises
-        :class:`UnidentifiableParametersError` instead of returning.
-
-    Precondition: ``block.free_size > 0`` and ``options.policy != "off"``.
-    """
-    options = options or IdentifiabilityGateOptions()
-    require(options.policy != "off", "gate called with policy 'off'")
-    names = block.free_parameter_names
-    require(len(names) > 0, "block has no free parameters to gate")
-    initial = block.free_initial_vector()
-    spec = ParameterSpec(names)
-    jacobian = finite_difference_jacobian(residual_of_free, initial, step=options.step)
-    _, singular_values, vt = np.linalg.svd(jacobian, full_matrices=False)
-    sigma_max = float(singular_values[0]) if singular_values.size else 0.0
-    tolerance = options.relative_tolerance * sigma_max
-    rank = int((singular_values > tolerance).sum()) if sigma_max > 0.0 else 0
-    report = IdentifiabilityReport(
-        parameter_names=spec.names,
-        jacobian=jacobian,
-        singular_values=singular_values,
-        right_singular_vectors=vt.T,
-        rank=rank,
-        tolerance=tolerance,
-    )
-    flagged = _flag_null_aligned(report, names, options.alignment)
-    if sigma_max == 0.0:
-        flagged = tuple(names)
-
-    if flagged:
-        message = (
-            "shared parameters %s are not identifiable from the residual at the "
-            "initial guess (rank %d of %d free); policy=%s"
-        )
-        if options.policy == "raise":
-            raise UnidentifiableParametersError(
-                message % (list(flagged), rank, len(names), options.policy)
-            )
-        logger.warning(message, list(flagged), rank, len(names), options.policy)
-    locked = flagged if options.policy == "lock" else ()
-    return IdentifiabilityGateReport(
-        policy=options.policy,
-        report=report,
-        flagged_parameters=flagged,
-        locked_parameters=locked,
-    )
-
-
-def _flag_null_aligned(
-    report: IdentifiabilityReport, names: tuple[str, ...], alignment: float
-) -> tuple[str, ...]:
-    flagged: list[str] = []
-    # Every singular vector beyond the rank spans a null direction, including
-    # the ones ``full_matrices=False`` would drop for wide Jacobians.
-    n = len(names)
-    null_vectors = [
-        report.right_singular_vectors[:, index]
-        for index, sigma in enumerate(report.singular_values)
-        if sigma <= report.tolerance
-    ]
-    if report.singular_values.size < n:
-        basis = report.right_singular_vectors
-        complement = np.eye(n) - basis @ basis.T
-        extra, _, _ = np.linalg.svd(complement)
-        null_vectors.extend(extra[:, : n - report.singular_values.size].T)
-    for vector in null_vectors:
-        for index, name in enumerate(names):
-            if abs(float(vector[index])) > alignment and name not in flagged:
-                flagged.append(name)
-    return tuple(flagged)

@@ -54,9 +54,6 @@ class FitOptions:
     max_velocity_rad_s: float | None = None  # reported, not clipped
     max_iterations: int = 60
     fit_lengths: tuple[str, ...] = ()
-    # Image-space fits (fit2d): pixel noise and the single-view root depth.
-    sigma_px: float = 4.0
-    root_depth_m: float = 3.5
 
     def __post_init__(self) -> None:
         for name in (
@@ -68,8 +65,6 @@ class FitOptions:
             "sigma_rest_rad",
             "huber_delta",
             "gate",
-            "sigma_px",
-            "root_depth_m",
         ):
             require(getattr(self, name) > 0, f"{name} must be positive")
         require(self.max_iterations >= 1, "max_iterations must be >= 1")
@@ -97,9 +92,6 @@ class ModelFit:
     velocity_violations: int
     iterations: int
     dof_names: tuple[str, ...] = field(default_factory=tuple)
-    # Image-space fits (fit2d): per-view pixel residuals and their RMS.
-    residual_px: Array | None = None  # (T, V, L), NaN where unobserved
-    rms_px: float | None = None
 
 
 class _Problem:
@@ -112,25 +104,13 @@ class _Problem:
         options: FitOptions,
         lengths: Mapping[str, float],
     ) -> None:
-        self._init_common(model, observed.shape[0], fps, options, lengths)
-        self.l = observed.shape[1]
+        self.model, self.o, self.fps = model, options, fps
+        self.t, self.l = observed.shape[:2]
+        self.n = model.n_dof
         self.obs = np.nan_to_num(observed)
         self.mask = np.isfinite(observed).all(axis=2) & (weights > 0)
         self.base_w = np.sqrt(np.clip(weights, 0, 1)) * self.mask
         self.w = self.base_w.copy()
-
-    def _init_common(
-        self,
-        model: ArticulatedModel,
-        frames: int,
-        fps: float,
-        options: FitOptions,
-        lengths: Mapping[str, float],
-    ) -> None:
-        """State shared by every observation model (3-D points, 2-D pixels)."""
-        self.model, self.o, self.fps = model, options, fps
-        self.t = frames
-        self.n = model.n_dof
         self.lengths = dict(lengths)
         self.length_names = tuple(options.fit_lengths)
         self.lo, self.hi = model.limits()
@@ -152,17 +132,9 @@ class _Problem:
 
     def residuals(self, x: Array) -> Array:
         q, lengths = self.unpack(x)
-        return np.concatenate(
-            [self.landmark_residuals(q, lengths), *self._prior_residuals(q, lengths)]
-        )
-
-    def landmark_residuals(self, q: Array, lengths: Mapping[str, float]) -> Array:
-        """Flat, weighted, dimensionless landmark residuals (the data term)."""
         lm = self.model.landmarks(q, lengths)
-        return ((lm - self.obs) * self.w[:, :, None] / self.o.sigma_landmark_m).ravel()
-
-    def _prior_residuals(self, q: Array, lengths: Mapping[str, float]) -> list[Array]:
-        parts: list[Array] = []
+        r_lm = ((lm - self.obs) * self.w[:, :, None] / self.o.sigma_landmark_m).ravel()
+        parts = [r_lm]
         if self.t >= 3:
             acc = (q[:-2] - 2 * q[1:-1] + q[2:]) * self.fps**2 / self.sigma_acc
             parts.append(acc.ravel())
@@ -175,7 +147,7 @@ class _Problem:
                     (lengths[name] - self.lengths[name]) / self.o.sigma_length_m
                 )
             )
-        return parts
+        return np.concatenate(parts)
 
     def jacobian(self, x: Array) -> csr_matrix:
         q, lengths = self.unpack(x)
@@ -256,37 +228,6 @@ class _Problem:
         d = np.linalg.norm(self.model.landmarks(q, lengths) - self.obs, axis=2)
         return np.where(self.mask, d, np.nan)
 
-    # -- hooks the robust stages, the gate and the report go through ---------
-    def residual_sigma(self, x: Array) -> Array:
-        """Unweighted residual per observation in sigma units, NaN unobserved."""
-        return self.landmark_residual_m(x) / self.o.sigma_landmark_m
-
-    def reweight(self, huber: Array) -> None:
-        self.w = self.base_w * np.sqrt(huber)
-
-    def reject(self, index: tuple[int, ...]) -> RejectedLandmark:
-        """Zero one observation's weight; returns its record."""
-        self.base_w[index] = 0.0
-        self.mask[index] = False
-        self.w = self.base_w.copy()
-        return RejectedLandmark(
-            int(index[0]), self.model.landmark_names[index[-1]], 0.0
-        )
-
-    def report(self, q: Array, lengths: Mapping[str, float]) -> dict[str, Any]:
-        """Per-landmark residuals and weights in the ``(T, L)`` layout."""
-        residual = self.landmark_residual_m(self.pack(q, lengths))
-        finite = residual[np.isfinite(residual)]
-        return {
-            "residual_m": residual,
-            "weights": self.base_w**2,
-            "rms_m": float(np.sqrt(np.mean(finite**2)))
-            if finite.size
-            else float("nan"),
-            "residual_px": None,
-            "rms_px": None,
-        }
-
 
 def _huber_weight(u: Array, delta: float) -> Array:
     a = np.abs(u)
@@ -311,8 +252,8 @@ def _robust(problem: _Problem, x: Array, options: FitOptions) -> tuple[Array, in
     total = 0
     for delta in (None, 20 * options.huber_delta, options.huber_delta):
         if delta is not None:
-            u = np.nan_to_num(problem.residual_sigma(x))
-            problem.reweight(_huber_weight(u, delta))
+            u = np.nan_to_num(problem.landmark_residual_m(x) / options.sigma_landmark_m)
+            problem.w = problem.base_w * np.sqrt(_huber_weight(u, delta))
         x, n = _solve(problem, x, options)
         total += n
     return x, total
@@ -321,7 +262,7 @@ def _robust(problem: _Problem, x: Array, options: FitOptions) -> tuple[Array, in
 def _reject(
     problem: _Problem, x: Array, options: FitOptions, model: ArticulatedModel
 ) -> list[RejectedLandmark]:
-    u = np.nan_to_num(problem.residual_sigma(x))
+    u = np.nan_to_num(problem.landmark_residual_m(x) / options.sigma_landmark_m)
     bad = (u > options.gate) & problem.mask
     if bad.sum() * 2 > problem.mask.sum():
         # Most observations beyond the gate means the model cannot represent
@@ -334,10 +275,11 @@ def _reject(
         )
         return []
     out = []
-    for index in np.argwhere(bad):
-        key = tuple(int(i) for i in index)
-        record = problem.reject(key)
-        out.append(RejectedLandmark(record.frame, record.landmark, float(u[key])))
+    for t, k in np.argwhere(bad):
+        out.append(RejectedLandmark(int(t), model.landmark_names[k], float(u[t, k])))
+        problem.base_w[t, k] = 0.0
+        problem.mask[t, k] = False
+    problem.w = problem.base_w.copy()
     return out
 
 
@@ -375,24 +317,13 @@ def fit_trajectory(
     if q0 is None:
         root = np.nan_to_num(obs[:, 0])
         q_start[:, :3] = root  # first landmark is the root joint by convention
-    return solve_problem(problem, q_start, lengths, fps, o)
-
-
-def solve_problem(
-    problem: _Problem,
-    q_start: Array,
-    lengths: Mapping[str, float],
-    fps: float,
-    o: FitOptions,
-) -> ModelFit:
-    """Robust stages, gate, refit and report for any observation model."""
     x, n1 = _robust(problem, problem.pack(q_start, lengths), o)
-    rejected = _reject(problem, x, o, problem.model)
+    rejected = _reject(problem, x, o, model)
     n2 = 0
     if rejected:
         x, n2 = _solve(problem, x, o)
     q, fitted_lengths = problem.unpack(x)
-    return _report(problem.model, problem, q, fitted_lengths, fps, o, rejected, n1 + n2)
+    return _report(model, problem, q, fitted_lengths, fps, o, rejected, n1 + n2)
 
 
 def _report(
@@ -406,7 +337,9 @@ def _report(
     iterations: int,
 ) -> ModelFit:
     lm = model.landmarks(q, lengths)
-    summary = problem.report(q, lengths)
+    residual = problem.landmark_residual_m(problem.pack(q, lengths))
+    finite = residual[np.isfinite(residual)]
+    rms = float(np.sqrt(np.mean(finite**2))) if finite.size else float("nan")
     vel = np.diff(q, axis=0) * fps if q.shape[0] > 1 else np.zeros((0, q.shape[1]))
     peak = {
         name: float(np.max(np.abs(vel[:, i]))) if vel.size else 0.0
@@ -420,16 +353,14 @@ def _report(
         q=q,
         lengths_m=lengths,
         landmarks_m=lm,
-        residual_m=summary["residual_m"],
-        weights=summary["weights"],
+        residual_m=residual,
+        weights=problem.base_w**2,
         rejected=tuple(rejected),
-        rms_m=summary["rms_m"],
+        rms_m=rms,
         peak_velocity_rad_s=peak,
         velocity_violations=violations,
         iterations=iterations,
         dof_names=tuple(model.dof_names),
-        residual_px=summary["residual_px"],
-        rms_px=summary["rms_px"],
     )
 
 
@@ -453,5 +384,4 @@ def fit_to_dict(fit: ModelFit, fps: float) -> dict[str, Any]:
         "peak_velocity_rad_s": fit.peak_velocity_rad_s,
         "velocity_violations": fit.velocity_violations,
         "iterations": fit.iterations,
-        "rms_px": fit.rms_px,
     }

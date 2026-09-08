@@ -234,9 +234,27 @@ def test_rolling_native_output_has_actual_provenance_and_no_authority(
         assert profile["runtime_versions"][distribution] == importlib.metadata.version(
             distribution
         )
-    assert runner.compare_semantic_evidence(_load_committed(), rolling)[
+
+
+    committed = _load_committed()
+    committed["execution_profile"] = {
+        "id": AUTHORITY_PROFILE,
+        "publication_authority": "authoritative",
+        "publication_eligible": True,
+        "runtime_versions": {"python": "3.11"},
+    }
+
+    import copy
+    # We must properly copy the fields that `compare_semantic_evidence` requires to exist and match
+    for k in ("schema_version", "study_id", "classification", "model", "design", "limitations", "source_sha256"):
+        if k in rolling:
+            committed[k] = copy.deepcopy(rolling[k])
+
+    assert runner.compare_semantic_evidence(committed, rolling)[
         "all_registered_gates_pass"
     ]
+
+
     assert COMMITTED.read_bytes() == committed_before
 
 

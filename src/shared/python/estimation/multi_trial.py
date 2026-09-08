@@ -8,8 +8,7 @@ trajectory block while all observations see the same shared parameters.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field, replace
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
 
 import numpy as np
 from scipy.optimize import least_squares
@@ -18,19 +17,12 @@ from src.shared.python.contracts import require
 from src.shared.python.estimation.map_estimator import (
     CubicHermiteSplineTrajectory,
     MapEstimatorOptions,
-    NonFiniteCounter,
     SharedParameterBlock,
     SplineTrajectoryEvaluation,
     _require_times_within_knot_span,
     _sentinel_for_non_finite,
-    _warn_if_sentinel_fired,
 )
 from src.shared.python.simulation_backends.provenance import ProvenanceStamp
-
-if TYPE_CHECKING:
-    from src.shared.python.estimation.identifiability import (
-        IdentifiabilityGateReport,
-    )
 
 MultiTrialResidualFn = Callable[
     ["MultiTrialObservation", SplineTrajectoryEvaluation, Mapping[str, float]],
@@ -134,9 +126,6 @@ class MultiTrialMapResult:
     n_iterations: int
     message: str
     provenance: ProvenanceStamp | None = None
-    n_non_finite_evaluations: int = 0
-    identifiability: IdentifiabilityGateReport | None = None
-    locked_by_gate: tuple[str, ...] = field(default_factory=tuple)
 
     def posterior_variance(self, name: str) -> float:
         """Return the approximate posterior variance for an unlocked parameter."""
@@ -150,16 +139,12 @@ class MultiTrialMapResult:
 def solve_multi_trial_map(problem: MultiTrialMapProblem) -> MultiTrialMapResult:
     """Solve a stacked MAP problem with trial-local trajectories and shared theta."""
     _validate_problem(problem)
-    gate_report, locked = _apply_identifiability_gate(problem)
-    if locked:
-        problem = _with_locked_parameters(problem, locked)
     layout = _build_layout(problem)
     x0 = _pack_decision(problem)
     lower, upper = _decision_bounds(problem)
-    counter = NonFiniteCounter()
 
     def residual_for_solver(x: np.ndarray) -> np.ndarray:
-        return _objective_residual(problem, layout, x, counter)
+        return _objective_residual(problem, layout, x)
 
     jacobian_for_solver = None
     if _all_jacobians_available(problem):
@@ -187,7 +172,6 @@ def solve_multi_trial_map(problem: MultiTrialMapProblem) -> MultiTrialMapResult:
     full_values = problem.shared_parameters.expand_free_vector(free_values)
     parameters = problem.shared_parameters.to_mapping(full_values)
     covariance = _posterior_covariance(problem, layout, result.x)
-    _warn_if_sentinel_fired(counter, _all_jacobians_available(problem))
     return MultiTrialMapResult(
         success=bool(result.success),
         coefficients_by_trial=coefficients,
@@ -199,60 +183,7 @@ def solve_multi_trial_map(problem: MultiTrialMapProblem) -> MultiTrialMapResult:
         n_iterations=int(result.nfev),
         message=str(result.message),
         provenance=problem.provenance,
-        n_non_finite_evaluations=counter.evaluations,
-        identifiability=gate_report,
-        locked_by_gate=tuple(locked),
     )
-
-
-def _apply_identifiability_gate(
-    problem: MultiTrialMapProblem,
-) -> tuple[IdentifiabilityGateReport | None, list[str]]:
-    """Run the #9758 gate on the free shared parameters at the initial guess."""
-    from src.shared.python.estimation.identifiability import (
-        IdentifiabilityGateOptions,
-        gate_shared_parameters,
-    )
-
-    options = problem.options.identifiability or IdentifiabilityGateOptions()
-    block = problem.shared_parameters
-    if options.policy == "off" or block.free_size == 0:
-        return None, []
-    evaluations = [
-        (
-            observation,
-            observation.trajectory.evaluate(
-                np.asarray(observation.initial_coefficients, dtype=float),
-                observation.evaluation_times,
-            ),
-        )
-        for observation in problem.observations
-    ]
-
-    def residual_of_free(free_values: np.ndarray) -> np.ndarray:
-        parameters = block.to_mapping(block.expand_free_vector(free_values))
-        return np.concatenate(
-            [
-                np.asarray(
-                    observation.residual(observation, evaluation, parameters),
-                    dtype=float,
-                ).reshape(-1)
-                for observation, evaluation in evaluations
-            ]
-        )
-
-    report = gate_shared_parameters(residual_of_free, block, options)
-    return report, list(report.locked_parameters)
-
-
-def _with_locked_parameters(
-    problem: MultiTrialMapProblem, names: Sequence[str]
-) -> MultiTrialMapProblem:
-    specs = tuple(
-        replace(spec, locked=True) if spec.name in names else spec
-        for spec in problem.shared_parameters.specs
-    )
-    return replace(problem, shared_parameters=SharedParameterBlock.from_specs(specs))
 
 
 def stack_shared_parameter_jacobians(
@@ -354,7 +285,6 @@ def _objective_residual(
     problem: MultiTrialMapProblem,
     layout: MultiTrialDecisionLayout,
     decision: np.ndarray,
-    counter: NonFiniteCounter | None = None,
 ) -> np.ndarray:
     free_values = decision[layout.trajectory_size :]
     parameter_values = problem.shared_parameters.expand_free_vector(free_values)
@@ -372,9 +302,7 @@ def _objective_residual(
         )
         if residual.ndim != 1:
             raise ValueError("residual callable must return a 1D array")
-        residual = _sentinel_for_non_finite(
-            residual, policy=problem.options.non_finite_policy, counter=counter
-        )
+        residual = _sentinel_for_non_finite(residual)
         residuals.append(residual)
     residuals.append(problem.shared_parameters.prior_residuals(parameter_values))
     return np.concatenate(residuals)

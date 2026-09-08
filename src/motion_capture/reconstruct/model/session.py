@@ -11,7 +11,7 @@ constraints. Outputs go to ``<session>/model/``.
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -20,8 +20,6 @@ import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import require
-
-from ...provenance import write_stamped
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..skeleton import JOINT_NAMES
@@ -104,18 +102,6 @@ def initial_state(model: ArticulatedModel, observed: Array) -> Array:
     return q
 
 
-def load_joints(path: Path) -> np.ndarray:
-    """``reconstruct/joints_3d_m.npy`` with unobservable rows as NaN.
-
-    The reconstruction writes all-zero rows for (frame, joint) pairs no two
-    cameras saw (sparse manual sets leave whole frames like that, #9802);
-    to the model fit those are unobserved, not points at the origin.
-    """
-    joints = np.asarray(np.load(path), dtype=float)
-    joints[np.abs(joints).sum(axis=2) == 0] = np.nan
-    return joints
-
-
 def fit_session_model(
     session_dir: Path,
     spec: ModelSpec,
@@ -123,14 +109,11 @@ def fit_session_model(
     *,
     options: FitOptions | None = None,
     out_subdir: str | None = None,
-    session_root: Path | None = None,
 ) -> tuple[ModelFit, Path]:
     """Fit ``spec`` to the session's reconstruction; write ``<session>/model/``.
 
     ``out_subdir`` places the outputs in ``model/<out_subdir>/`` instead (used
-    when several models are fitted to one take). ``session_dir`` may be a
-    variant root; ``session_root`` (default ``session_dir``) is the base the
-    provenance paths are relative to.
+    when several models are fitted to one take).
 
     Precondition: ``reconstruct_session`` has run (joints and summary exist).
     Postcondition: joint angles, fit report and fitted landmarks are on disk.
@@ -143,7 +126,7 @@ def fit_session_model(
     summary = json.loads(summary_file.read_text(encoding="utf-8"))
     fps = float(summary.get("fps") or 0.0)
     require(fps > 0, "session reconstruction does not state the fps")
-    joints = load_joints(joints_file)
+    joints = np.load(joints_file)
     model = ArticulatedModel(spec)
     observed = landmark_map.observed(model, joints)
     lengths = landmark_map.lengths(summary.get("measured_lengths_m") or {}, spec)
@@ -155,64 +138,6 @@ def fit_session_model(
         lengths_m=lengths,
         options=options,
     )
-    base = session_root or session_dir
-    parameters = {
-        "model": spec.name,
-        "source": {"kind": "triangulate"},
-        **options_dict(options),
-    }
-    out_dir = write_fit(
-        session_dir,
-        out_subdir,
-        fit,
-        fps,
-        spec,
-        landmark_map,
-        model,
-        Stamp([joints_file, summary_file], parameters, [summary_file], base),
-    )
-    logger.info(
-        "model fit %s: rms %.1f mm, %d rejected, %d velocity violations",
-        spec.name,
-        1000 * fit.rms_m,
-        len(fit.rejected),
-        fit.velocity_violations,
-    )
-    return fit, out_dir
-
-
-def options_dict(options: FitOptions | None) -> dict[str, Any]:
-    """The fit options as JSON-ready provenance parameters."""
-    return {
-        k: (list(v) if isinstance(v, tuple) else v)
-        for k, v in vars(options or FitOptions()).items()
-    }
-
-
-@dataclass(frozen=True)
-class Stamp:
-    """Provenance arguments a fit writer passes through to ``write_stamped``."""
-
-    inputs: Sequence[Path]
-    parameters: Mapping[str, Any]
-    derived_from: Sequence[Path]
-    base: Path
-
-
-def write_fit(
-    session_dir: Path,
-    out_subdir: str | None,
-    fit: ModelFit,
-    fps: float,
-    spec: ModelSpec,
-    landmark_map: LandmarkMap,
-    model: ArticulatedModel,
-    stamp: Stamp,
-) -> Path:
-    """``model/[out_subdir/]``: joint angles, fitted landmarks, report, all stamped.
-
-    Postcondition: the three files exist and share the same provenance inputs.
-    """
     out_dir = session_dir / MODEL_DIR
     if out_subdir:
         out_dir = out_dir / out_subdir
@@ -223,28 +148,19 @@ def write_fit(
         k: list(v) if isinstance(v, tuple) else v
         for k, v in landmark_map.to_reconstruct.items()
     }
-    stamp_kw: dict[str, Any] = {
-        "module": __name__,
-        "inputs": list(stamp.inputs),
-        "parameters": dict(stamp.parameters),
-        "derived_from": list(stamp.derived_from),
-        "base": stamp.base,
-    }
-    write_stamped(
-        out_dir / JOINT_ANGLES_FILE,
-        payload,
-        schema_version=str(payload["schema_version"]),
-        **stamp_kw,
-    )
+    (out_dir / JOINT_ANGLES_FILE).write_text(json.dumps(payload), encoding="utf-8")
     np.save(out_dir / LANDMARKS_FILE, fit.landmarks_m)
-    report = _report(fit, model)
-    write_stamped(
-        out_dir / FIT_REPORT_FILE,
-        report,
-        schema_version=str(report["schema_version"]),
-        **stamp_kw,
+    (out_dir / FIT_REPORT_FILE).write_text(
+        json.dumps(_report(fit, model), indent=2), encoding="utf-8"
     )
-    return out_dir
+    logger.info(
+        "model fit %s: rms %.1f mm, %d rejected, %d velocity violations",
+        spec.name,
+        1000 * fit.rms_m,
+        len(fit.rejected),
+        fit.velocity_violations,
+    )
+    return fit, out_dir
 
 
 def _report(fit: ModelFit, model: ArticulatedModel) -> dict[str, Any]:
@@ -267,5 +183,4 @@ def _report(fit: ModelFit, model: ArticulatedModel) -> dict[str, Any]:
         "velocity_violations": fit.velocity_violations,
         "lengths_m": fit.lengths_m,
         "iterations": fit.iterations,
-        "rms_px": fit.rms_px,
     }
