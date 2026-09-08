@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -33,7 +33,7 @@ from .analytics import (
 )
 from .temporal import SmootherOptions, smooth
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 
 HAND_ACCELERATION_SIGMA_BH = 400.0  # box heights / s^2, the 3-D prior scaled
 HAND_POSITION_SIGMA_BH = 0.005
