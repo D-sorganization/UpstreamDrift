@@ -26,12 +26,14 @@ from PyQt6.QtWidgets import (
     QLabel,
     QProgressBar,
     QPushButton,
+    QVBoxLayout,
     QWidget,
 )
 
 from src.shared.python.core.contracts import require
 from src.shared.python.theme.layout_metrics import LayoutMetrics
-from src.shared.python.theme.style_constants import Styles
+
+from . import styling
 
 DURATION_PRESETS_S: tuple[float, ...] = (5.0, 10.0, 15.0, 30.0)
 COUNTDOWN_CHOICES_S: tuple[float, ...] = (0.0, 3.0, 5.0, 10.0)
@@ -151,7 +153,7 @@ class RecordBar(QWidget):
         self.clock = RecordingClock()
         self._badge = ""
         self.record_button = QPushButton("●  Record")
-        self.record_button.setMinimumHeight(40)
+        self.record_button.setMinimumHeight(LayoutMetrics.TRANSPORT_BUTTON_HEIGHT)
         self.record_button.setToolTip(
             "Start a take of the chosen duration (after the countdown, if any). "
             "While recording this button stops the take early."
@@ -179,12 +181,12 @@ class RecordBar(QWidget):
             "walk to address"
         )
         self.indicator = QLabel("")
-        self.indicator.setMinimumWidth(180)
+        self.indicator.setMinimumWidth(LayoutMetrics.READOUT_MIN_WIDTH)
         self.indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.progress = QProgressBar()
         self.progress.setRange(0, 1000)
         self.progress.setTextVisible(False)
-        self.progress.setMaximumHeight(8)
+        self.progress.setMaximumHeight(LayoutMetrics.PROGRESS_BAR_HEIGHT)
         self._timer = QTimer(self)
         self._timer.setInterval(TICK_MS)
         self._timer.timeout.connect(self.tick)
@@ -200,8 +202,6 @@ class RecordBar(QWidget):
             row.addWidget(button)
         row.addWidget(self.duration_spin)
         row.addWidget(self.countdown_combo)
-        from PyQt6.QtWidgets import QVBoxLayout
-
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, LayoutMetrics.SPACING_SM, 0, 0)
         layout.setSpacing(LayoutMetrics.SPACING_SM)
@@ -271,6 +271,10 @@ class RecordBar(QWidget):
         self._render()
 
     # -- rendering ------------------------------------------------------------------
+    def restyle(self) -> None:
+        """Button and readout colours follow a theme change."""
+        self._render()
+
     def _render(self) -> None:
         phase = self.clock.phase
         recording = phase is Phase.RECORDING
@@ -279,9 +283,7 @@ class RecordBar(QWidget):
             if recording
             else ("Cancel" if phase is Phase.COUNTDOWN else "●  Record")
         )
-        self.record_button.setStyleSheet(
-            Styles.BTN_STOP if recording else Styles.BTN_RUN
-        )
+        self.record_button.setStyleSheet(styling.record_button_style(recording))
         for widget in (
             self.duration_spin,
             self.countdown_combo,
@@ -293,13 +295,13 @@ class RecordBar(QWidget):
         if recording:
             dot = "●" if blink_on else "○"
             text = f"{dot} REC {clock_text(self.clock.elapsed)} / {clock_text(self.clock.duration_s)}"
-            self.indicator.setStyleSheet(Styles.STATUS_ERROR_BOLD)
         elif phase is Phase.COUNTDOWN:
             text = self.clock.badge()
-            self.indicator.setStyleSheet(Styles.STATUS_WARNING)
         else:
             text = "ready"
-            self.indicator.setStyleSheet("")
+        self.indicator.setStyleSheet(
+            styling.readout_style(recording, phase is Phase.COUNTDOWN)
+        )
         self.indicator.setText(text)
         badge = self.clock.badge()
         if badge != self._badge:

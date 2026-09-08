@@ -26,3 +26,18 @@ class LayoutMetrics:
 
     SIDEBAR_MIN_WIDTH = 240
     """Minimum width of the launcher navigation sidebar (px)."""
+
+    RADIUS_SM = 6
+    """Corner radius of chips, badges and toolbar frames (px)."""
+
+    ICON_BUTTON_WIDTH = 32
+    """Width of a square icon-only button such as a file browser "…" (px)."""
+
+    TRANSPORT_BUTTON_HEIGHT = 40
+    """Height of a primary transport control (Record / Stop) (px)."""
+
+    PROGRESS_BAR_HEIGHT = 8
+    """Height of a slim, text-free progress bar (px)."""
+
+    READOUT_MIN_WIDTH = 180
+    """Minimum width of a clock-style readout so it does not jitter (px)."""
