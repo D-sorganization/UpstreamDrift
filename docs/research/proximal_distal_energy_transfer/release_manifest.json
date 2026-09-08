@@ -637,8 +637,8 @@
       "bytes": 11261
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "4fbb40ac2302e8111a19fc97903bc1877ab2cb07ced7258b8f78994ca4d627d8",
-      "bytes": 3562
+      "sha256": "355157bd57d0c2eb19652d3bd109c8074cc6ba83dc949abda478551a470d390c",
+      "bytes": 6486
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json": {
       "sha256": "0fc851cb6c4b8067c2a8c484a6d1bf1d88e47e1841f3772ecbe4ae2f166ed0b0",
@@ -709,8 +709,8 @@
       "bytes": 936200
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json": {
-      "sha256": "5ea18b05a4910435f792e9dd53a362836641ebbfcefc02980f33324abfe4cfef",
-      "bytes": 1645414
+      "sha256": "5ad5c1b15c90eb4a61864cac283bf786a0bb37662ab0fcb4ab33e66e4b65ee94",
+      "bytes": 1651315
     },
     "docs/research/proximal_distal_energy_transfer/data/claim_candidate_inventory.json": {
       "sha256": "eabd8d99625ea901b7e1c2604ea7385e428e2a8c7f3c1a7d7d082f636b6156b7",
@@ -1017,8 +1017,8 @@
       "bytes": 9392
     },
     "docs/research/proximal_distal_energy_transfer/data/release_claim_review.json": {
-      "sha256": "1a90e6691550bc5fdebccaa5f594c63570acbd661c0115c15c6b0a81fd7fb24f",
-      "bytes": 215309
+      "sha256": "540b5c31a70c4d37457c2552f8c1f7b3cbdac450c68645def5ce11c8f37f52c2",
+      "bytes": 216481
     },
     "docs/research/proximal_distal_energy_transfer/data/representative_traces.npz": {
       "sha256": "441647489d6ce7230480dcc3b7c7985f60d119d7ef7666d1a3480fa1691a385c",
@@ -2669,8 +2669,8 @@
       "bytes": 10394
     },
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": {
-      "sha256": "4df04ab2009af947b72276b345eafd2dd627d3ca35254051f071333e4a142d05",
-      "bytes": 9807
+      "sha256": "712d0b475f05359e5dc81175ef89a45407f7962cd3e5c91e93c2082abf74fa36",
+      "bytes": 10906
     },
     "scripts/research/proximal_distal_energy/register_articulated_native_constraint_discrepancy_claims.py": {
       "sha256": "005e49130c338c86556b59ef0b694df829a6f4852fbb3ab81dbe0d53be4bcc2e",

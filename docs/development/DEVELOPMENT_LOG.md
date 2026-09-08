@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (116 strict native contracts and three distinct rolling contracts pass)
 - **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
-- **Next step:** Finish strict native checks, normal hooks and protected PR delivery; manufactured controls do not replace physical validation.
+- **Next step:** Canonical release/claim manifests and all 253 PDF pages validate; finish normal push hooks and protected PR delivery; manufactured controls do not replace physical validation.
 
 ### DL-#9482 · Launcher Tile Logo Families and Registry Gate
 

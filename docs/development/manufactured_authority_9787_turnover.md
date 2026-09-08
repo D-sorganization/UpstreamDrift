@@ -86,10 +86,18 @@ three selected rolling/corruption contracts pass (14 deselected, 41.26 s). Its
 actual CLI candidate passes generated-record and committed semantic comparison.
 Five existing import-alias deprecation warnings remain.
 
-Next: refresh the canonical release and claim-integrity manifests, inspect every
-existing PDF page through the computational release validator, and finish normal
-hooks and protected CI. The PDF and scientific prose are unchanged because all
-registered numerical values remain identical.
+Source checkpoint `e2dc7e1f7` passes all normal commit hooks. The release validator
+first refused stale claim-review metadata. Running the canonical release-review
+and release-bundle writers refreshes the review, release manifest, checksums and
+claim-integrity manifest. Full computational release validation then passes:
+all 253 existing PDF pages render, navigation and metadata checks pass, and the
+numeric/claim evidence is current. The inherited untagged PDF, Type 3 fonts and
+unembedded fonts remain explicit archival gaps; no archival approval is claimed.
+The PDF and scientific prose are byte-unchanged. Next: normal push hooks and
+protected PR/CI delivery. Tools #5097 is synchronized at `76b982b73`; its separate
+Python 3.12 inventory worker crashed without an assertion traceback. GitHub
+refuses a retry until the still-running workflow finishes. No retry has executed
+and no passing result is inferred.
 The full impact, contact, acoustics and empirical program remains open. These
 manufactured controls qualify numerical operators, not human measurements,
 physiological mechanisms or sound quality.
