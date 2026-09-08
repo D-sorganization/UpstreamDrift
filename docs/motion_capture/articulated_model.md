@@ -93,6 +93,45 @@ Synthetic chains in `tests/motion_capture/reconstruct/model/`:
 Real-data evidence needs the three-view take; single-camera sessions skip
 this step.
 
+## Any Model, the Same Fit
+
+`reconstruct/model/registry.py` names the fittable models; each carries its
+spec, the map from its landmarks to the reconstruct joints (a landmark may be
+the mean of several joints: the pendulums' _hands_ are both wrists) and the
+lengths the fit may learn. Registered today:
+
+| name               | DOF | what it is                                                             | learnable lengths                   |
+| ------------------ | --- | ---------------------------------------------------------------------- | ----------------------------------- |
+| `golfer` (default) | 35  | the scapula golfer above                                               | strut, torso halves, hip half, head |
+| `double_pendulum`  | 6   | pivot at the shoulders (plane + arm angle), one rigid arm to the hands | arm                                 |
+| `triple_pendulum`  | 7   | pivot, upper-arm angle, elbow hinge, forearm to the hands              | upper arm, forearm                  |
+
+`rig fit-model --model NAME [--fit-lengths]` runs the same continuous fit on
+any of them, so every model's constraints are enforced and its dimensions
+learned from the take. `rig compare-models` fits several and ranks them in
+`model/comparison.md` by a DOF-penalised score (log RMS plus DOF per
+observed coordinate), with RMS, rejections and peak joint speeds beside it.
+Register another model with `register_model`; the fit, the comparison, the
+kinetics and the tile pick it up without further code.
+
+## Kinetics (#9714, first slice)
+
+`rig kinetics --model NAME --body-mass KG` computes, for the fitted
+trajectory of any registered model, the generalised torques
+`tau = M(q) qdd + C(q, qd) qd + G(q)` with the inertia matrix from point
+masses at the segment centres (de Leva mass fractions), Coriolis terms from
+the motion of `M`, and gravity, all from the model's own forward kinematics.
+A forward replay integrates those torques back from the fitted initial state
+and reports its drift from the fitted angles; that drift is the acceptance
+number for "kinematics and kinetics agree". Output: `model/kinetics.json`
+(torques per DOF, peak torques, replay error per DOF, assumptions stated;
+Simscape names attached for the golfer).
+
+What this is not yet: rod inertia is not modelled, the replay is linearised
+about the fitted configuration rather than a free multi-second integration,
+and the Simscape axis conventions still need validation before the torques
+can drive `GolfSwing3D_Kinetic` directly.
+
 ## Toward Kinetics (#9714)
 
 The joint-angle series in the Simscape vocabulary is the input the MATLAB

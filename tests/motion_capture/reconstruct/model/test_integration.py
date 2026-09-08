@@ -122,4 +122,66 @@ def test_fit_model_command_and_tile_action(tmp_path: Path) -> None:
     widget = CaptureRigWidget()
     widget.capture.session_edit.setText(str(tmp_path))
     assert widget.command_for("fit_model")[3] == "fit-model"
-    assert widget.results.tabText(widget.results.count() - 1) == "Model fit"
+    assert widget.results.tabText(widget.results.count() - 1) == "Kinetics"
+    assert widget.process.model_name() == "golfer"
+
+
+def test_rig_compare_models_and_kinetics_commands(tmp_path: Path) -> None:
+    root = _golfer_session(tmp_path)
+    assert (
+        rig_cli.main(
+            [
+                "compare-models",
+                "--session",
+                str(root),
+                "--models",
+                "golfer,double_pendulum",
+            ]
+        )
+        == 0
+    )
+    comparison = json.loads((root / "model" / "comparison.json").read_text("utf-8"))
+    assert {s["model"] for s in comparison["ranking"]} == {"golfer", "double_pendulum"}
+    assert rig_cli.main(["fit-model", "--session", str(root), "--model", "golfer"]) == 0
+    assert (
+        rig_cli.main(
+            [
+                "kinetics",
+                "--session",
+                str(root),
+                "--model",
+                "golfer",
+                "--body-mass",
+                "80",
+            ]
+        )
+        == 0
+    )
+    kinetics = json.loads((root / "model" / "kinetics.json").read_text("utf-8"))
+    assert kinetics["model"] == "golfer-scapula/1.0" and len(kinetics["tau"]) == 30
+    assert "LScapStartPositionX" in kinetics["simscape_names"].values()
+    with pytest.raises(SystemExit, match="fit-model"):
+        rig_cli.main(
+            [
+                "kinetics",
+                "--session",
+                str(root),
+                "--model",
+                "triple_pendulum",
+                "--body-mass",
+                "80",
+            ]
+        )
+    assert (
+        commands.compare_models_command(root, models=("golfer",), fit_lengths=True)[-1]
+        == "--fit-lengths"
+    )
+    kc = commands.kinetics_command(root, model="golfer", body_mass_kg=75)
+    assert kc[kc.index("--body-mass") + 1] == "75"
+    with pytest.raises(Exception, match="positive"):
+        commands.kinetics_command(root, model="golfer", body_mass_kg=0)
+    fm = commands.fit_model_command(root, model="triple_pendulum", fit_lengths=True)
+    assert (
+        fm[fm.index("--model") + 1] == "triple_pendulum" and fm[-1] == "--fit-lengths"
+    )
+    assert dict(commands.model_choices())["golfer"].startswith("Scapula-capable")

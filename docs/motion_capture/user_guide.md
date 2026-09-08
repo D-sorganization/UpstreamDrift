@@ -167,7 +167,23 @@ Joint angles of a realistic model (spine, torso, scapula struts, arms, legs) thr
 
 Tile actions: fit_model.
 
-### 8. Analyse the Single View
+### 8. Kinetics and Model Comparison
+
+Torques that produce the fitted motion, a replay check, and a ranking of every registered model on this take.
+
+**You need**
+
+- A fitted model (joint_angles.json).
+- The golfer's body mass in kilograms for the segment masses.
+
+**Do**
+
+1. Press *Kinetics*: inverse dynamics on the fitted joint angles (point masses at segment centres, de Leva fractions) and a forward replay whose drift from the fitted angles is the acceptance number; model/kinetics.json holds the torques.
+2. Press *Compare models* to fit the scapula golfer, the double and the triple pendulum to the same take and rank them by a DOF-penalised score in model/comparison.md.
+
+Tile actions: kinetics, compare_models.
+
+### 9. Analyse the Single View
 
 Events, tempo and normalised hand speed from one camera.
 
@@ -182,7 +198,7 @@ Events, tempo and normalised hand speed from one camera.
 
 Tile actions: analyze, clip, compare_takes.
 
-### 9. Export to the Motion Pipeline
+### 10. Export to the Motion Pipeline
 
 TRC and canonical JSON for scaling, IK and model matching.
 

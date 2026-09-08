@@ -158,6 +158,42 @@ def _add_coaching_parsers(sub: Any) -> None:
     cmt.add_argument("--out", type=Path, required=True)
 
 
+def _add_model_parsers(sub: Any) -> None:
+    """Articulated-model fit, comparison and kinetics (#9709)."""
+    fm = sub.add_parser(
+        "fit-model", help="articulated golfer (scapula) fit, continuous"
+    )
+    fm.add_argument("--session", type=Path, required=True)
+    fm.add_argument(
+        "--sigma-accel",
+        type=float,
+        default=300.0,
+        help="acceleration prior on every joint angle, rad/s^2 (smaller = stiffer)",
+    )
+    fm.add_argument(
+        "--max-velocity",
+        type=float,
+        default=25.0,
+        help="report joint-angle speeds above this, rad/s",
+    )
+    fm.add_argument("--sigma-landmark", type=float, default=0.01, help="metres")
+    fm.add_argument("--model", default="golfer", help="registered model name")
+    fm.add_argument(
+        "--fit-lengths",
+        action="store_true",
+        help="learn the model's learnable segment lengths from the data",
+    )
+    cmm = sub.add_parser("compare-models", help="fit several models, rank them")
+    cmm.add_argument("--session", type=Path, required=True)
+    cmm.add_argument("--models", default=None, help="comma list; default: all")
+    cmm.add_argument("--fit-lengths", action="store_true")
+    cmm.add_argument("--sigma-accel", type=float, default=300.0)
+    kin = sub.add_parser("kinetics", help="inverse dynamics + replay check of a fit")
+    kin.add_argument("--session", type=Path, required=True)
+    kin.add_argument("--model", default="golfer", help="registered model name")
+    kin.add_argument("--body-mass", type=float, required=True, help="kg")
+
+
 def _add_offline_parsers(sub: Any) -> None:
     """Commands that work on a session bundle rather than on cameras."""
     ing = sub.add_parser("ingest", help="pose-estimate every recording in a bundle")
@@ -225,23 +261,7 @@ def _add_offline_parsers(sub: Any) -> None:
     )
     imp.add_argument("--name", default=None, help="plan name (default import:<out>)")
     _add_coaching_parsers(sub)
-    fm = sub.add_parser(
-        "fit-model", help="articulated golfer (scapula) fit, continuous"
-    )
-    fm.add_argument("--session", type=Path, required=True)
-    fm.add_argument(
-        "--sigma-accel",
-        type=float,
-        default=300.0,
-        help="acceleration prior on every joint angle, rad/s^2 (smaller = stiffer)",
-    )
-    fm.add_argument(
-        "--max-velocity",
-        type=float,
-        default=25.0,
-        help="report joint-angle speeds above this, rad/s",
-    )
-    fm.add_argument("--sigma-landmark", type=float, default=0.01, help="metres")
+    _add_model_parsers(sub)
     ana = sub.add_parser("analyze", help="2-D events and tempo per ingested view")
     ana.add_argument("--session", type=Path, required=True)
     ana.add_argument("--observations", default="observations", help="set directory")
@@ -551,21 +571,21 @@ def cmd_compare_takes(args: argparse.Namespace) -> int:
 
 def cmd_fit_model(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.model import FitOptions
-    from src.motion_capture.reconstruct.model.golfer import (
-        GOLFER_LANDMARK_MAP,
-        GOLFER_SPEC,
-    )
+    from src.motion_capture.reconstruct.model.registry import get_model
     from src.motion_capture.reconstruct.model.session import fit_session_model
 
+    registered = get_model(args.model)
     fit, out_dir = fit_session_model(
         args.session,
-        GOLFER_SPEC,
-        GOLFER_LANDMARK_MAP,
+        registered.spec,
+        registered.landmark_map,
         options=FitOptions(
             sigma_landmark_m=args.sigma_landmark,
             sigma_accel_rad_s2=args.sigma_accel,
             max_velocity_rad_s=args.max_velocity,
+            fit_lengths=registered.learnable_lengths if args.fit_lengths else (),
         ),
+        out_subdir=None if args.model == "golfer" else args.model,
     )
     logger.info(
         "fit-model %s: rms %.1f mm, %d rejected, %d velocity violations -> %s",
@@ -576,6 +596,59 @@ def cmd_fit_model(args: argparse.Namespace) -> int:
         out_dir,
     )
     return 0 if fit.velocity_violations == 0 else 1
+
+
+def cmd_compare_models(args: argparse.Namespace) -> int:
+    from src.motion_capture.reconstruct.model import FitOptions
+    from src.motion_capture.reconstruct.model.compare import compare_models
+
+    names = [n.strip() for n in args.models.split(",")] if args.models else None
+    report = compare_models(
+        args.session,
+        names,
+        options=FitOptions(sigma_accel_rad_s2=args.sigma_accel),
+        fit_lengths=args.fit_lengths,
+    )
+    logger.info("compare-models:\n%s", report.markdown())
+    return 0
+
+
+def cmd_kinetics(args: argparse.Namespace) -> int:
+    import json
+
+    import numpy as np
+
+    from src.motion_capture.reconstruct.model.dynamics import kinetics_report
+    from src.motion_capture.reconstruct.model.golfer import SIMSCAPE_NAMES
+    from src.motion_capture.reconstruct.model.kinematics import ArticulatedModel
+    from src.motion_capture.reconstruct.model.registry import get_model
+
+    registered = get_model(args.model)
+    model_dir = args.session / "model"
+    if args.model != "golfer":
+        model_dir = model_dir / args.model
+    angles_file = model_dir / "joint_angles.json"
+    if not angles_file.is_file():
+        raise SystemExit(f"run fit-model --model {args.model} first: {angles_file}")
+    payload = json.loads(angles_file.read_text(encoding="utf-8"))
+    model = ArticulatedModel(registered.spec)
+    report = kinetics_report(
+        model,
+        np.asarray(payload["q"], dtype=float),
+        float(payload["fps"]),
+        body_mass_kg=args.body_mass,
+        names=SIMSCAPE_NAMES if args.model == "golfer" else None,
+    )
+    out = model_dir / "kinetics.json"
+    out.write_text(json.dumps(report), encoding="utf-8")
+    logger.info(
+        "kinetics %s: replay max |error| %.4f rad (worst %s) -> %s",
+        args.model,
+        report["replay_max_abs_error"],
+        report["replay_worst_dof"],
+        out,
+    )
+    return 0
 
 
 def cmd_analyze(args: argparse.Namespace) -> int:
@@ -767,6 +840,8 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "export": cmd_export,
     "analyze": cmd_analyze,
     "fit-model": cmd_fit_model,
+    "compare-models": cmd_compare_models,
+    "kinetics": cmd_kinetics,
     "board": cmd_board,
     "clip": cmd_clip,
     "compare-takes": cmd_compare_takes,
