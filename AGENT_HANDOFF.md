@@ -168,6 +168,17 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - TDD evidence: the missing module produced the expected RED import failure;
   after implementation, four registration tests pass serially.
 
+## Spec Check Reminder Fail-Safe Extraction (#9499)
+
+- The `Verify SPEC.md freshness` job no longer carries its comment-posting
+  logic as an inline `actions/github-script` heredoc (an unescaped backtick
+  from the RM #1520 wording once aborted it with `SyntaxError: Invalid or
+unexpected token`, swallowing the finding). Posting now runs
+  `scripts/post_spec_reminder.py`, which prints the full diagnostic into the
+  job log and exits 0 on any posting failure; the `always()`-guarded
+  "Fail if spec is stale" step owns the non-zero exit.
+- Contracts pinned by `tests/ci/test_spec_check_workflow.py`.
+
 ## Immediate Order
 
 1. Verify the latest turnover-correction PR recorded on #9153 is protected on
