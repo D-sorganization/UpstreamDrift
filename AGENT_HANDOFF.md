@@ -89,7 +89,10 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 API performance (#8943, branch `claude/issue-8943-api-cache`): plot-data
 orchestrator/plot caching, URDF mtime-keyed parse cache, and deferred pandas
 import landed with RED/GREEN evidence; dev-log entry `DL-#8943` in
-`docs/development/DEVELOPMENT_LOG.md`.
+`docs/development/DEVELOPMENT_LOG.md`. CI repair (PR #9727): rebased on
+`origin/main`, marked `test_launch_monitor_analytics_imports_without_pandas`
+with `pytest.mark.unit` for the suite-marker ratchet, added the PR-keyed
+SPEC.md change-log row `#9727`; docs-governance checks pass locally.
 
 ## Protected Authority
 
