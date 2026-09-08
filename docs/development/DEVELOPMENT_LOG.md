@@ -17,6 +17,49 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+
+
+### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9716 (open; `Fixes #9533`)
+- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`,
+  `requirements*.lock`, `environment.yml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`289b3aac2`)
+- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools`
+  and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed
+  them and ~24 CI tests failed on import. Both now resolve through the `dev`
+  extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml`
+  workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR,
+  since Windows/WSL cannot regenerate correctly (#9533).
+- **Next step:** Regenerate the locks via `lock-refresh.yml` so the
+  dependency-consistency freshness gate and the 24 previously failing tests
+  go green.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
+### DL-#9249 · UI: Pin @vitejs/Plugin-React to ^5 Until Vite 8
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9718 (open; `Fixes #9249`)
+- **Paths:** `.github/dependabot.yml`, `ui/README.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`7cdbb0a3d`)
+- **Summary:** Dependabot ignores `@vitejs/plugin-react` major updates
+  because 6.x needs Vite 8 (Vite 7 exports no `./internal`); the pairing
+  constraint is documented in `ui/README.md`.
+- **Next step:** Merge the guard PR; revisit the paired vite@8 +
+  plugin-react@6 upgrade once `vitest`/`@react-three/*` are Vite-8 ready.
+
 ### DL-#9470 · Launch-Monitor Analysis Handlers Onto the Async_Action Worker
 
 - **State:** in_review
