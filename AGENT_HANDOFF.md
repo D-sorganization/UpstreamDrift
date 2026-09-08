@@ -124,6 +124,7 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 
 ## Impact Explorer Web Route Producer: #9484
 
+- PR: #9724 (open against `main`, `Fixes #9484`).
 - The `rate_of_closure` tile declares `web.mode: route` for
   `/tools/impact-explorer`; `src/api/local_server.py` mounts
   `vendor/ud-tools/src/rate_of_closure/web/dist` when it exists. CI Standard's
