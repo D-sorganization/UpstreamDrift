@@ -1,5 +1,28 @@
 # SPEC.md — Repository Specification Document
 
+## Consolidate the Model-Generation REST API on a Single Implementation (#9699)
+
+`ModelGenerationAPI` existed twice with an identical 18-route surface:
+`rest_api_core.ModelGenerationAPI`, composed from
+`GenerationConversionRoutesMixin` and `AssetLibraryEditorRoutesMixin` and
+exported by the `rest_api` shim and `model_generation.api`; and a complete
+pre-split copy in `rest_api_routes.py` that the Flask and FastAPI adapters
+imported. A third, unreferenced pair of handler mixins lived in
+`generation_handlers.py` and `library_handlers.py`.
+
+`rest_api_core.ModelGenerationAPI` is now the only implementation:
+
+- `rest_api_flask.FlaskAdapter` and `rest_api_fastapi.FastAPIAdapter` import it.
+- `rest_api_routes.py`, `generation_handlers.py` and `library_handlers.py` are
+  deleted (1,815 lines).
+- Conversion and parse handlers catch `xml.etree.ElementTree.ParseError`, which
+  subclasses `SyntaxError` rather than `ValueError`, so malformed XML returns
+  422 instead of escaping to a 500.
+- `library_get_model` and `library_add_model` read `ModelEntry.id`; they read a
+  non-existent `model_id` attribute and raised `AttributeError` on every call.
+- `MAX_MESH_UPLOAD_BYTES` is 50 MiB, the limit the adapters enforced.
+
+
 ## Restore Reverted Capsule-Inertia and SE(3) Reparenting Fixes (#9474)
 
 Two correctness fixes reverted by the squash `b8d95ad25` are restored, each
@@ -4025,6 +4048,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
 | 2026-09-07 | #9735 | Qualify provider contract setup in a fresh canonical context, retain downstream module identity, and verify module origin against the configured Tools checkout; runtime import behavior is unchanged. |
+| 2026-09-07 | #9740 | Consolidated the model_generation REST API on `rest_api_core.ModelGenerationAPI`, deleting the duplicate `rest_api_routes` implementation the Flask/FastAPI adapters used and the unreferenced `generation_handlers`/`library_handlers` mixins -- 1,815 lines. The duplication was hiding two live defects: `ET.ParseError` subclasses `SyntaxError`, so malformed XML escaped the `(ValueError, KeyError, OSError)` clause and returned 500 instead of 422; and `library_get_model`/`library_add_model` read `ModelEntry.model_id`, a field that does not exist, raising `AttributeError` on every call -- unreached only because the adapters ran the other copy. `MAX_MESH_UPLOAD_BYTES` unified at 50 MiB, the value the adapters enforced, so no upload that worked before is now rejected. Two tests asserting a 501 "not implemented" stub that no implementation still has were rewritten to assert the 404 body names the requested id, which is what they were using the 501 to prove. (#9699) |
 | 2026-09-07 | #9701 | Inventory impact, shaft, acoustics and research infrastructure; define provider-owned state transfer, counterfactual studies and validation gates for epic #9700. |
 | 2026-09-07 | #9697 | Restored two correctness fixes reverted by the squash `b8d95ad25`, each with a TDD module still in the tree asserting them. The capsule-inertia parallel-axis term carried a spurious `0.5` factor -- two hemispheres of mass `m_sphere/2` at `hemisphere_offset` contribute `m_sphere * offset**2`, not half that -- understating the perpendicular moment by 28% for the tested capsule (0.1356 against a first-principles 0.1897) in both `inertia/primitives.capsule_inertia` and `core/types.Inertia.from_capsule`, so every capsule link had a wrong inertia tensor. And `delete_link` reparented children by adding positions and keeping the child's `rpy`, which is correct only for an unrotated parent joint; it now composes the SE(3) transforms. `test_capsule_inertia_fix.py` 21 passed and `test_se3_transform_fix.py` 7 passed, both fully red before. `tests/unit/tools/model_generation/`: 74 failing at the start of this burndown, 6 now. (#9474) |
 | 2026-09-07 | #9698 | Restored the capsule-downgrade warning that `b8d95ad25` stripped from both URDF export paths (`builders/urdf_writer.URDFWriter._write_geometry` and `core/types.Geometry.to_urdf_string`) while leaving the approximation itself in place, so a capsule became a cylinder silently -- the end caps are not exported, and nothing downstream could tell. `core/types.py` also regained the module logger the same commit removed once nothing in the file logged any more. `test_code_quality_fixes.py`: 19 passed, including `test_non_capsule_no_warning`, which pins that the warning is specific to capsules. (#9474) |

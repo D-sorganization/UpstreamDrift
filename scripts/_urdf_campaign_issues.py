@@ -1179,8 +1179,9 @@ ISSUES.append(
         ["audit", "api", "model-generation", "tests", "priority:medium"],
         """## What to audit
 
-`src/shared/python/model_generation/api/rest_api.py` and
-`api/generation_handlers.py`.
+`src/shared/python/model_generation/api/rest_api.py` (the public shim) and
+`api/rest_api_core.py` with its route mixins `rest_api_generation.py` and
+`api/rest_api_assets.py`.
 
 ## Deliverables
 
