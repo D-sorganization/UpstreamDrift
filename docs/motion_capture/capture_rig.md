@@ -131,6 +131,21 @@ stamp in two scopes: user (`<AppConfigLocation>/UpstreamDrift/capture_rig/layout
 and session (`<session>/layouts/`, so a layout travels with a take); built-in
 presets appear read-only in `list()`.
 
+### Layout Editor
+
+`tools/capture_rig/layout_editor.LayoutEditor` (#9812) is the interactive
+front end of the layout model: grid spinners (up to 4x4) and a preset menu
+(built-ins plus the layouts in the user and session scopes of `LayoutStore`),
+a composed thumbnail of the whole layout drawn through the same `compose()`
+the preview and export use, and per-tile controls: source, rotate, flip,
+crop (switch _Crop_ on and drag a rectangle over the tile), fit, label and
+span (+/- row and column). Click a tile to select it; drag it onto another
+cell to move it (the two swap). _Save as..._, _Load_ and _Delete_ go through
+the store; _Undo_/_Redo_ keep the last 20 edits. The widget emits
+`layout_changed(LayoutSpec)` once per edit; frames for the thumbnails come
+from an injected `frame_provider(SourceRef)`; every control's tooltip says
+what it does and, when grey, why.
+
 ### Composite Video Export
 
 `rig multipicture --session S --layout NAME|PATH --out X.mp4` writes several
@@ -146,19 +161,39 @@ manifest's strobe `timing` block; a shorter source holds its last frame.
 is a playback-rate change (every frame kept, fps scaled: 0.5 halves the fps).
 `X.json` beside the video records the layout, sources (file, fps, offset),
 frame range, speed and the standard provenance block. `compare-takes` stitches
-through the same compositor. The tile's _Export multiview_ button lands with
-#9813/#9814.
+through the same compositor. The tile's _Export multiview_ button exports
+through the live pane's chosen layout (#9813).
+
 ## Live Preview
 
 _Preview cameras_ opens every planned view through the same camera binding
-the recorder uses (`src/motion_capture/rig/binding.py`) and shows the streams
-side by side above the player, one worker thread per camera, refreshed at up
-to 15 Hz. The plan path is prefilled with the lab plan and the session folder
+the recorder uses (`src/motion_capture/rig/binding.py`) and composites the
+latest frame of every view into one canvas above the player (#9813), one
+worker thread per camera, refreshed at up to 15 Hz. The plan path is prefilled with the lab plan and the session folder
 with a fresh `sessions/<timestamp>-take`, so _Record_ works out of the box:
 pressing it releases the cameras (ffmpeg needs the devices), runs the
 recorder, loads the take into the player and resumes the preview. A plan that
 cannot be realised on this machine is reported on the preview's status line
 rather than raised.
+
+### Multiview Live and Playback
+
+Both viewing panes are drawn through a `LayoutSpec` (#9813, #9814). The
+picker above each canvas lists the built-in presets and every saved layout;
+_Edit..._ opens the layout editor beside it, with live thumbnails, and each
+edit applies as you make it. A view that the layout does not show is still
+captured, and the same view may appear twice (full plus a cropped detail).
+The chosen layout name is saved with the pane arrangement, so both come back
+on the next start.
+
+Playback composites several of the session's sources at once: `recorded`
+tiles show the raw recording (or its proxy) and `overlay` tiles the same
+footage with the detector's pose and the ticked variants' models drawn on it,
+so raw and overlay of one view can sit side by side. Frame *k* is the same
+instant in every tile — when the manifest carries a strobe-alignment block
+each reader is shifted by its whole-frame offset. Scrubbing, play/pause,
+speed, single-frame stepping and _Export PNG..._ (the canvas exactly as shown)
+sit under the canvas.
 
 ### Panes, Layouts and Recording Controls
 

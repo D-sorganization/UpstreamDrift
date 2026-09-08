@@ -125,28 +125,38 @@ def _layout_file(path: Path) -> LayoutSpec:
     return LayoutSpec.from_dict(payload)
 
 
-def frame_offsets(session: Path, fps_by_view: Mapping[str, float]) -> dict[str, int]:
-    """Per-view frame offsets from the manifest's strobe ``timing`` block.
+def offsets_from_timing(
+    timing: Mapping[str, Any], fps_by_view: Mapping[str, float]
+) -> dict[str, int]:
+    """Whole-frame shift per view from a manifest ``timing`` block.
 
     A view whose arrival clock stamps ``offset_ns`` later than the reference
-    shows the same instant ``offset_ns * fps`` frames later, so its frame
-    for output index ``k`` is ``k + offset``. Views without an available
-    offset (or a zero one) are absent from the result.
+    shows the same instant ``offset_ns * fps`` frames later, so its frame for
+    output index ``k`` is ``k + offset``. A view with no usable offset (none
+    given, an unavailable one, or a non-positive rate) gets ``0``.
+    Postcondition: one key for every view in ``fps_by_view``, so callers
+    never branch on a missing view. The composite export (#9815) and the
+    playback pane (#9814) both align through this one function.
     """
-    _, _, manifest = load_bundle(session)
-    timing = dict(manifest.timing)
     out: dict[str, int] = {}
     for view, fps in fps_by_view.items():
-        entry = view_timing(timing, view)
-        if not entry or entry.get("status") != "available":
+        entry = view_timing(timing, view) if timing else None
+        offset_ns = None if entry is None else entry.get("offset_ns")
+        available = (
+            entry is not None and entry.get("status", "available") == "available"
+        )
+        if offset_ns is None or not available or fps <= 0:
+            out[view] = 0
             continue
-        offset_ns = entry.get("offset_ns")
-        if offset_ns is None:
-            continue
-        frames = int(round(int(offset_ns) / NS_PER_S * fps))
-        if frames:
-            out[view] = frames
+        out[view] = int(round(int(offset_ns) / NS_PER_S * fps))
     return out
+
+
+def frame_offsets(session: Path, fps_by_view: Mapping[str, float]) -> dict[str, int]:
+    """The session's non-zero per-view frame offsets (see :func:`offsets_from_timing`)."""
+    _, _, manifest = load_bundle(session)
+    shifts = offsets_from_timing(dict(manifest.timing), fps_by_view)
+    return {view: n for view, n in shifts.items() if n}
 
 
 # ---------------------------------------------------------------- sources

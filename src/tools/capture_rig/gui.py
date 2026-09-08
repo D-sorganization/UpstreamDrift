@@ -27,7 +27,7 @@ Every command is built by :mod:`.commands`; every file is found by
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -73,7 +73,8 @@ from .commands import (
     mode_text,
 )
 from .header import HeaderBar, StatusStrip
-from .layout import LayoutBar, LayoutStore, PaneHost
+from . import multiview
+from .layout import LayoutBar, LayoutStore, PaneExtras, PaneHost
 from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .playback import PlaybackPanel as PlaybackPanel  # re-export (moved, #9816)
 from .preview import PreviewPanel
@@ -653,7 +654,12 @@ class CaptureRigWidget(QWidget):
                 "results": ("Results", self.results, right),
             },
         )
-        self.layout_bar = LayoutBar(self.panes, self.layout_store, controls)
+        self.layout_bar = LayoutBar(
+            self.panes,
+            self.layout_store,
+            controls,
+            extras=PaneExtras(read=self.pane_extras, apply=self.apply_pane_extras),
+        )
         self.header = HeaderBar(self.layout_bar)
         self.session_label: QLabel = self.header.session
         self.status_strip: StatusStrip = self.header.status
@@ -664,6 +670,21 @@ class CaptureRigWidget(QWidget):
         layout.setSpacing(LayoutMetrics.SPACING_SM)
         layout.addWidget(self.header)
         layout.addWidget(self.panes, 1)
+
+    def pane_extras(self) -> dict[str, str]:
+        """The multiview layout each pane is drawn through (#9813/#9814).
+
+        Saved with the dock arrangement, so both come back on restart.
+        """
+        return {
+            "preview_layout": self.preview.layout_name(),
+            "playback_layout": self.playback.layout_name(),
+        }
+
+    def apply_pane_extras(self, extras: Mapping[str, str]) -> None:
+        """Put a saved arrangement's multiview layouts back on the panes."""
+        self.preview.set_layout_name(extras.get("preview_layout", ""))
+        self.playback.set_layout_name(extras.get("playback_layout", ""))
 
     def restyle(self, _theme: str = "") -> None:
         """Re-read every style from the theme (connected to ``themeChanged``)."""
@@ -795,7 +816,7 @@ class CaptureRigWidget(QWidget):
 
     def _multipicture(self, session: Path) -> list[str]:
         """Composite video of the current layout: one file from several views."""
-        name = DEFAULT_EXPORT_LAYOUT  # the layout picker arrives with #9813
+        name = self.export_layout_name()
         set_name = self.playback.current_set_name()
         out = session / f"multiview_{name}_{set_name or 'raw'}.mp4"
         return commands.multipicture_command(
@@ -806,6 +827,16 @@ class CaptureRigWidget(QWidget):
                 observation_set=set_name, speed=self.process.clip_speed()
             ),
         )
+
+    def export_layout_name(self) -> str:
+        """The layout the composite export uses: the live pane's choice.
+
+        An unsaved edit has no name the CLI could resolve, so the default
+        stands in until the operator saves the layout (#9813).
+        """
+        name = self.preview.layout_name()
+        editable = name and name != multiview.EDITED
+        return name if editable else DEFAULT_EXPORT_LAYOUT
 
     def _compare_takes(self, session: Path) -> list[str]:
         view = self.playback.current_view_name()

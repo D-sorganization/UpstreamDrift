@@ -59,9 +59,14 @@ class VariantOverlayBox(QWidget):
         for name, check in self._checks.items():
             check.setChecked(name in names)
 
-    def tracks_for(self, view: str) -> tuple[Track, ...]:
-        """Projected tracks of the selected variants on ``view`` (cached)."""
-        names = self.selected()
+    def tracks_for(self, view: str, names: tuple[str, ...] = ()) -> tuple[Track, ...]:
+        """Projected tracks on ``view`` (cached), for ``names`` or the ticks.
+
+        ``names`` lets a layout tile name its own variants (#9814); empty
+        falls back to whatever the operator has checked here, which is what
+        the single-view player has always drawn.
+        """
+        names = names or self.selected()
         if self._session is None or not names:
             return ()
         key = (view, names)
