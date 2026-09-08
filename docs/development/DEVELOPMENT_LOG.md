@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (116 strict native contracts and three distinct rolling contracts pass)
 - **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
-- **Next step:** Source push hooks and updated-main 116 native contracts pass; release/claim manifests and all 253 PDF pages validate. PR #9804 publishes `d1563dffa` with every normal hook passing; await protected CI and coordinate #9726 source regeneration; manufactured controls do not replace physical validation.
+- **Next step:** The latest CI stale-summary failure is repaired through canonical JSON/CSV/QMD/PDF regeneration; five summary tests pass, claim outcomes are unchanged, and all 14 text-different PDF pages are visually inspected. Updated-main 116 native contracts pass; release/claim manifests and all 253 PDF pages validate. PR #9804 publishes `d1563dffa` with every normal hook passing; await protected CI and coordinate #9726 source regeneration; manufactured controls do not replace physical validation.
 
 ### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
 
