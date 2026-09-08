@@ -152,13 +152,13 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **Owner:** claude
 - **Issue:** `#9476`
 - **Branch:** `claude/issue-9476-spec-merge-driver`
-- **PR:** not created
+- **PR:** #9734 (open, in_review)
 - **Paths:** `scripts/install_spec_merge_driver.py`,
   `shared_scripts/spec_changelog.py`,
   `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`, `SPEC.md`,
   `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08
+- **Last verified:** 2026-09-08 (`3fd347b72`)
 - **Summary:** The vendored installer still stamped the withdrawn
   merge-abort claim into `$GIT_COMMON_DIR/info/attributes` and both vendored
   copies had no drift detection. Re-vendored both files byte-identical from
