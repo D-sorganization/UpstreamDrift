@@ -1079,8 +1079,10 @@ class CaptureRigWidget(QWidget):
         states = workflow.evaluate(media)
         self.workflow.refresh(states)
         enabled = workflow.enabled_actions(states) | ALWAYS_ENABLED
+        hints = workflow.action_hints(states, ALWAYS_ENABLED)
         for action, button in self.buttons.items():
             button.setEnabled(action in enabled)
+            button.setToolTip(hints.get(action, ""))
 
     def enabled_actions(self) -> frozenset[str]:
         return frozenset(a for a, b in self.buttons.items() if b.isEnabled())

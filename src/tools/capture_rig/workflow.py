@@ -38,6 +38,7 @@ class Step:
     done: Callable[[SessionMedia], bool]
     ready: Callable[[SessionMedia], tuple[bool, str]]
     applies: Callable[[SessionMedia], bool] = lambda m: True
+    starts_fresh: bool = False  # ready before any session exists on disk
 
 
 @dataclass(frozen=True)
@@ -77,6 +78,7 @@ SETUP = Step(
     actions=("plan_check", "import"),
     done=lambda m: bool(m.views),
     ready=lambda m: (True, ""),
+    starts_fresh=True,
 )
 
 INTRINSICS = Step(
@@ -121,6 +123,7 @@ CAPTURE = Step(
     actions=("record", "import", "proxy"),
     done=_has_recordings,
     ready=lambda m: (True, ""),
+    starts_fresh=True,
 )
 
 DETECT = Step(
@@ -287,14 +290,8 @@ def evaluate(media: SessionMedia | None) -> tuple[StepState, ...]:
     out = []
     for step in STEPS:
         if media is None:
-            status = Status.READY if step.key == "setup" else Status.BLOCKED
-            out.append(
-                StepState(
-                    step,
-                    status,
-                    "" if status is Status.READY else "load or record a session",
-                )
-            )
+            status = Status.READY if step.starts_fresh else Status.BLOCKED
+            out.append(StepState(step, status, "" if step.starts_fresh else NO_SESSION))
             continue
         if not step.applies(media):
             out.append(StepState(step, Status.SKIPPED, "not for this session"))
@@ -322,3 +319,76 @@ def enabled_actions(states: tuple[StepState, ...]) -> frozenset[str]:
         if s.status in (Status.READY, Status.DONE):
             out.update(s.step.actions)
     return frozenset(out)
+
+
+def action_hints(
+    states: tuple[StepState, ...], always: frozenset[str] = frozenset()
+) -> dict[str, str]:
+    """Tooltip text per action: what it does and, when disabled, why.
+
+    Precondition: every action of every step has an entry in
+    :data:`ACTION_HELP` (the GUI's button list is checked against it in
+    tests). Postcondition: every key of ``ACTION_HELP`` is present; an
+    action that is neither enabled nor in ``always`` carries a
+    ``Disabled:`` line naming the first step that withholds it and its
+    reason, so the operator sees what to do instead of a grey button.
+    """
+    enabled = enabled_actions(states) | always
+    hints: dict[str, str] = {}
+    for action, help_text in ACTION_HELP.items():
+        hints[action] = help_text
+        if action in enabled:
+            continue
+        holder = next((s for s in states if action in s.step.actions), None)
+        if holder is None:
+            continue
+        reason = holder.reason or holder.status.value
+        hints[action] = (
+            f"{help_text}\n\nDisabled: step '{holder.step.title}' is "
+            f"{holder.status.value} ({reason})."
+        )
+    return hints
+
+
+NO_SESSION = "load or record a session first"
+
+ACTION_HELP: dict[str, str] = {
+    "plan_check": (
+        "Bind every planned view to a connected camera (USB topology + "
+        "DirectShow) and report conflicts."
+    ),
+    "preview": (
+        "Show every planned view live at reduced rate; toggles off to release "
+        "the cameras."
+    ),
+    "record": (
+        "Record all planned cameras for the set duration into the session "
+        "folder (the preview releases the cameras first and resumes afterwards)."
+    ),
+    "import": "Build a session from existing video files, one per view.",
+    "proxy": (
+        "Write small H.264 proxies of large MJPEG recordings for smooth playback."
+    ),
+    "ingest": "Run the pose detector on every view and write per-frame keypoints.",
+    "compare": "Compare two detectors' keypoints on the same views.",
+    "reliability": "Score each view's detections and suggest exclusions.",
+    "calibrate": (
+        "Solve lens intrinsics from a chessboard take (needs board size and "
+        "square length)."
+    ),
+    "reconstruct": (
+        "Triangulate 3-D joints from the ingested views using the intrinsics."
+    ),
+    "fit_model": "Fit the articulated golfer model to the reconstructed joints.",
+    "kinetics": "Compute joint torques and powers from the fitted model.",
+    "compare_models": "Compare two model fits (variants) side by side.",
+    "analyze": "Single-camera 2-D analysis: swing events and tempo.",
+    "export": "Export the reconstruction and model for downstream tools.",
+    "clip": "Export a slow-motion clip with the overlay around an event.",
+    "compare_takes": "Compare two takes side by side with deltas.",
+    "annotate": (
+        "Click keypoints frame by frame, or edit the detector's points on the overlay."
+    ),
+    "stop": "Kill the running rig command.",
+    "load": "Load the session folder named in the Capture panel.",
+}
