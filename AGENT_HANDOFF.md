@@ -164,7 +164,7 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - The `Verify SPEC.md freshness` job no longer carries its comment-posting
   logic as an inline `actions/github-script` heredoc (an unescaped backtick
   from the RM #1520 wording once aborted it with `SyntaxError: Invalid or
-  unexpected token`, swallowing the finding). Posting now runs
+unexpected token`, swallowing the finding). Posting now runs
   `scripts/post_spec_reminder.py`, which prints the full diagnostic into the
   job log and exits 0 on any posting failure; the `always()`-guarded
   "Fail if spec is stale" step owns the non-zero exit.
