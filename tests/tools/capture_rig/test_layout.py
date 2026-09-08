@@ -14,7 +14,6 @@ pytest.importorskip("PyQt6")
 
 from PyQt6.QtCore import QSettings, Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QScrollArea, QWidget
-
 from src.motion_capture.rig.plan import RigPlan
 from src.motion_capture.rig.sources import SyntheticFrameSource
 from src.tools.capture_rig import gui

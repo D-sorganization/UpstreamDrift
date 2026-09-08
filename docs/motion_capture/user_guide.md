@@ -95,8 +95,8 @@ The footage every later step works from.
 
 **Do**
 
-1. Press *Preview cameras* to see every planned view live (the plan and a fresh sessions/ folder are prefilled); frame the mat, then press *Record*: the preview releases the cameras for the recorder and resumes when the take is written.
-2. Set the duration, press *Record*, walk to address during the warm-up, swing, hold the finish.
+1. The live view opens with the tile (or press *Preview cameras*); the plan and a fresh sessions/ folder are prefilled. Frame the mat, pick a take length (5/10/15/30 s or custom) and a countdown.
+2. Press *Record*: the countdown runs, the recorder takes over the cameras and the tiles keep showing them with a red REC readout; walk to address, swing, hold the finish. *Stop* ends the take early.
 3. Or *Import videos* to build a session from files (one or many).
 4. Run *Proxies* for smooth playback of large MJPEG recordings.
 

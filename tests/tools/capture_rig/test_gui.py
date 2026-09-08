@@ -14,7 +14,6 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PyQt6")
 pytest.importorskip("cv2")
 from PyQt6.QtWidgets import QApplication
-
 from src.tools.capture_rig import commands
 from src.tools.capture_rig.gui import CaptureRigWidget, get_dockable_ui
 from src.tools.capture_rig.workflow import ACTION_HELP, Status
@@ -50,7 +49,7 @@ def test_panels_build_commands_from_their_inputs(tmp_path: Path) -> None:
     widget.capture.views_edit.setText("cam_b, cam_c")
     widget.capture.exposure_edit.setText("-7")
     widget.capture.auto_exposure_combo.setCurrentText("off")
-    widget.capture.duration_spin.setValue(30)
+    widget.record_bar.set_duration(30)
     widget.capture.dry_run_check.setChecked(True)
     rec = widget.command_for("record")
     assert rec[3] == "record" and rec[-1] == "--dry-run"

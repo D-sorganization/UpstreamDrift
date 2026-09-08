@@ -120,6 +120,33 @@ recorder, loads the take into the player and resumes the preview. A plan that
 cannot be realised on this machine is reported on the preview's status line
 rather than raised.
 
+### Panes, Layouts and Recording Controls
+
+The viewing panes (**Live preview**, **Playback**, **Results**) are dock
+widgets: drag a title bar to move a pane to another edge, tear it off to float
+it (onto a second monitor if you like), tab two panes together, or close one.
+Every pane scrolls when its content is larger than the space it has, so the
+window never grows past the screen. **Layout** (top right) saves the current
+arrangement under a name, loads or deletes a saved one, and **Reset layout**
+returns to the default with every pane shown. The last arrangement is restored
+on the next start.
+
+The live view opens with the tile. Under the tiles sits a transport strip:
+
+- **Record / Stop**: one button; during the countdown it reads _Cancel_.
+- **Take length**: 5 / 10 / 15 / 30 s presets or a custom spinner.
+- **Countdown**: none, 3, 5 or 10 s between pressing Record and the recorder
+  starting, so you can walk to address.
+- **REC readout**: a blinking red indicator with elapsed / total time and a
+  progress bar; the same `● REC 00:04 / 00:10` badge is stamped on every tile.
+
+A camera cannot be opened twice, so during a take the recorder itself keeps the
+view alive: with `--live-preview DIR` each ffmpeg process also decodes its stream at quarter
+resolution and rewrites `DIR/<view>.jpg` eight times a second (atomically), and the
+tile shows those snapshots until the take is written, then returns to the
+direct preview. **Stop** ends a take early through `--stop-file PATH`: the
+recorder polls for the file, stops every camera together and removes it.
+
 ## Recording a Session
 
 ```bash

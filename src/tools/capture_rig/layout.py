@@ -85,7 +85,7 @@ class LayoutStore:
         raw = self._settings.value(f"layouts/{name}/state")
         if raw is None:
             return None
-        state = bytes(raw) if isinstance(raw, QByteArray | bytes) else b""
+        state = raw.data() if isinstance(raw, QByteArray) else bytes(raw)
         sizes = self._settings.value(f"layouts/{name}/sizes", []) or []
         return state, [int(s) for s in sizes]
 
@@ -131,7 +131,7 @@ class PaneHost(QMainWindow):
 
     def state(self) -> bytes:
         """The dock arrangement (positions, sizes, floating, visibility)."""
-        return bytes(self.saveState())
+        return self.saveState().data()
 
     def restore(self, state: bytes) -> bool:
         """Apply a saved arrangement; ``False`` when it does not parse."""
