@@ -274,6 +274,27 @@ use `left_...`/`right_...` only when the sides really differ.
 The tile's _Measured segments_ field takes the same `name=metres` list and
 shows these landmarks as a tooltip.
 
+## Articulated Model Fit
+
+```bash
+python3 -m src.motion_capture.rig fit-model --session S [--sigma-accel 300] [--max-velocity 25]
+python3 -m src.motion_capture.rig fit-model --session S --model triple_pendulum --fit-lengths
+python3 -m src.motion_capture.rig compare-models --session S [--models golfer,double_pendulum,triple_pendulum]
+python3 -m src.motion_capture.rig kinetics --session S --model golfer --body-mass 80
+python3 -m src.motion_capture.rig export --session S      # now also model/joint_angles_simscape.csv
+```
+
+After a reconstruction, `fit-model` solves the joint angles of the
+scapula-capable golfer (spine, axial torso, scapula struts from the hub,
+gimbal shoulders, elbows, pronation, wrists, plus legs and head for the
+detectors) through every frame at once with an acceleration prior on each
+angle, soft joint limits and robust rejection: a point the model cannot reach
+by continuous motion is listed in `model/fit_report.json`, never followed.
+`--sigma-accel` is the continuity strength in rad/s² (smaller = stiffer);
+`--max-velocity` flags joint speeds above it. Design and evidence:
+`docs/motion_capture/articulated_model.md`. The tile runs it as _Fit model_
+and shows the report in the _Model fit_ tab.
+
 ## Capture Rig Tool (Desktop)
 
 The launcher tile **Capture Rig** (`python3 -m src.tools.capture_rig`) is the
