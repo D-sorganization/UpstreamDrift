@@ -1,5 +1,7 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+Updated: 2026-09-07 (UD #9492 decomposition in flight on its own branch)
+
 ## Impact Dynamics and Acoustics: #9700
 
 - Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
@@ -30,6 +32,9 @@ contract, recovery constraints, and next commands are in
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
+`_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
+`architecture_budget.json` exceptions are removed, behavior pinned by tests.
 
 ## Pre-Commit on Windows — Resolved (#9494)
 
