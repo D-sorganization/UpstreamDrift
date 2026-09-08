@@ -49,6 +49,25 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   dependency-consistency freshness gate and the 24 previously failing tests
   go green.
 
+### DL-#9091 · Phantom-Guard Rule-3 False Positive on Shallow Base Fetch
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9717 (open; `Fixes #9091`)
+- **Paths:** `.github/workflows/anti-phantom-merge.yml`, `scripts/ci/check_phantom_guard_paths.py`, `tests/scripts/test_check_phantom_guard_paths.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** The phantom-guard rule-3 closes-issue path-membership check
+  produced a false positive when a shallow base fetch defeated `git merge-base`;
+  the check is now extracted into `scripts/ci/check_phantom_guard_paths.py`,
+  which resolves changed files from local git diff first and falls back to the
+  GitHub API changed-file list (`PR_CHANGED_FILES` / `gh pr view --json files`)
+  when merge-base fails, failing closed with a diagnostic when neither source
+  is available. Workflow rule-3 block invokes the script; rules 1/2/4 unchanged.
+- **Next step:** Observe the first post-merge `phantom-guard` run on a PR
+  whose base fetch is too shallow for merge-base to confirm rule 3 defers to
+  the API list.
+
 ## Shipped (Last 90 Days)
 
 Entries stay here for 90 days after merge, then move to the archive.
