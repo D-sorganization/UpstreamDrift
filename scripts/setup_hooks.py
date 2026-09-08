@@ -7,17 +7,22 @@ This script:
 2. Installs pre-commit hooks
 3. Installs pre-push hooks
 4. Verifies the installation
+5. Registers the ``spec-rows`` merge driver for SPEC.md change-log rows
 
 Usage:
     python scripts/setup_hooks.py
 """
 
+import importlib.util
 import logging
 import subprocess
 import sys
 from pathlib import Path
+from types import ModuleType
 
 logger = logging.getLogger(__name__)
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
@@ -86,6 +91,45 @@ def install_push_hooks() -> None:
             hook_dst.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
         )
     logger.info("  pre-push hook installed (uses python -m pytest)")
+
+
+def _load_install_spec_merge_driver() -> ModuleType:
+    """Import the vendored ``install_spec_merge_driver`` module by path.
+
+    ``scripts/`` is not a package, so the installer is loaded from its file,
+    the same way ``scripts/ci/check_spec_changelog_duplicates.py`` loads the
+    shared ``spec_changelog`` contract.
+    """
+    module_path = REPO_ROOT / "scripts" / "install_spec_merge_driver.py"
+    spec = importlib.util.spec_from_file_location(
+        "ud_install_spec_merge_driver", module_path
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def install_spec_merge_driver() -> None:
+    """Register the ``spec-rows`` merge driver for this clone (issue #9476).
+
+    Delegates to the vendored installer, which writes both halves to one
+    place: the ``merge.spec-rows.*`` git config and the
+    ``SPEC.md merge=spec-rows`` line in ``$GIT_COMMON_DIR/info/attributes``.
+    Idempotent; the driver command is worktree-relative.
+    """
+    logger.info("\n[spec-rows] Registering the spec-rows merge driver...")
+    installer = _load_install_spec_merge_driver()
+    result = installer.install(REPO_ROOT)
+    if result != 0:
+        logger.error(
+            "  spec-rows merge driver registration FAILED (exit %s); SPEC.md "
+            "change-log rows will resolve as ordinary conflicts until "
+            "scripts/install_spec_merge_driver.py succeeds.",
+            result,
+        )
+    else:
+        logger.info("  spec-rows merge driver registered")
 
 
 def install_dev_dependencies() -> None:
@@ -165,6 +209,7 @@ def main() -> None:
         install_hooks()
         install_push_hooks()
         install_dev_dependencies()
+        install_spec_merge_driver()
         verify_installation()
         log_summary()
         logger.info("\n[SUCCESS] All hooks installed successfully!")
