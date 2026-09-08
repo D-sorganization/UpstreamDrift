@@ -28,6 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-08 (15 provider tests pass against both pinned and candidate Tools; four strict pair refusals)
 - **Summary:** Reproduced the candidate's exact old-hash failure before accepting the two reviewed source/hash pairs. Tolerances, immutable provider origin and the current vendor pin remain strict.
 - **Next step:** Complete normal protected delivery, then verify the Tools downstream consumer lane against merged UpstreamDrift.
+
 ### DL-#9482 · Launcher Tile Logo Families and Registry Gate
 
 - **State:** in_review
@@ -209,9 +210,7 @@ Never place credentials, tokens, or customer data in a development log.
 
 - **State:** in_review
 - **Owner:** W4_9484 (agent claude)
-  <<<<<<< HEAD
-- # **Issue:** #9484
-  > > > > > > > 0adb7c284 (docs(spec): record PR #9724 change-log row and PR reference (#9484))
+- **Issue:** #9484
 - **PR:** #9724 (open)
 - **Paths:** `.github/workflows/ci-standard.yml`, `scripts/check_declared_route_producers.py`, `tests/scripts/test_declared_route_producers.py`, `docs/workflows/WORKFLOW_TRACKING.md`
 - **Branch:** `claude/issue-9484-impact-web-build`
