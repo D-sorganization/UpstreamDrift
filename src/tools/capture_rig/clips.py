@@ -15,6 +15,7 @@ the output fps is ``fps * speed``.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -209,6 +210,32 @@ def _resize_to_height(
     return np.asarray(cv2.resize(frame, (width, height)), dtype=np.uint8)
 
 
+def _take_producer(
+    reader: VideoReader,
+    start: int,
+    track: PoseTrack | None,
+    *,
+    ratio: float,
+    height: int,
+    label: str,
+    min_confidence: float,
+) -> Callable[[int], npt.NDArray[np.uint8] | None]:
+    """Output index ``k`` -> this take's annotated frame ``start + k * ratio``.
+
+    Indices before the take starts show its first frame (held), as the
+    compositor holds a source that returns ``None``.
+    """
+
+    def at(k: int) -> npt.NDArray[np.uint8] | None:
+        index = max(start + int(round(k * ratio)), 0)
+        frame = _rendered(
+            reader, index, track, min_confidence=min_confidence, label=label
+        )
+        return None if frame is None else _resize_to_height(frame, height)
+
+    return at
+
+
 def compare_takes(
     left: tuple[ViewMedia, dict[str, int]],
     right: tuple[ViewMedia, dict[str, int]],
@@ -223,9 +250,14 @@ def compare_takes(
     """Side-by-side video of two views aligned so ``align`` happens on the same frame.
 
     Each side runs at its own fps; the output uses the left take's rate. A
-    side that runs out of frames holds its last frame. Precondition: both
-    takes have the ``align`` event.
+    side that runs out of frames holds its last frame. The stitching is the
+    layout compositor's (``mosaic.write_composite`` through a 1x2
+    ``LayoutSpec``), so this is the same picture the multiview export makes.
+    Precondition: both takes have the ``align`` event.
     """
+    from .layout_model import Cell, LayoutSpec, SourceRef, Tile
+    from .mosaic import write_composite
+
     (view_l, ev_l), (view_r, ev_r) = left, right
     require(align in ev_l and align in ev_r, "both takes need the event", align)
     require(
@@ -240,43 +272,51 @@ def compare_takes(
         start_l = ev_l[align] - int(round(before_s * fps_l))
         start_r = ev_r[align] - int(round(before_s * fps_r))
         height = min(rl.height, rr.height)
-        first_l = _rendered(
-            rl, max(start_l, 0), track_l, min_confidence=min_confidence, label="A"
+        require(
+            rl.read(max(start_l, 0)) is not None
+            and rr.read(max(start_r, 0)) is not None,
+            "takes must decode",
         )
-        first_r = _rendered(
-            rr, max(start_r, 0), track_r, min_confidence=min_confidence, label="B"
+        widths = [int(round(r.width * height / r.height)) for r in (rl, rr)]
+        spec = LayoutSpec(
+            name="compare_takes",
+            rows=1,
+            cols=2,
+            tiles=(
+                Tile(SourceRef("recorded", "A"), Cell(0, 0), show_label=False),
+                Tile(SourceRef("recorded", "B"), Cell(0, 1), show_label=False),
+            ),
+            canvas=(sum(widths), height),
         )
-        require(first_l is not None and first_r is not None, "takes must decode")
-        assert first_l is not None and first_r is not None
-        hold_l, hold_r = (
-            _resize_to_height(first_l, height),
-            _resize_to_height(first_r, height),
+        producers = {
+            "recorded:A": _take_producer(
+                rl,
+                start_l,
+                track_l,
+                ratio=1.0,
+                height=height,
+                label="A",
+                min_confidence=min_confidence,
+            ),
+            "recorded:B": _take_producer(
+                rr,
+                start_r,
+                track_r,
+                ratio=fps_r / fps_l,
+                height=height,
+                label="B",
+                min_confidence=min_confidence,
+            ),
+        }
+        written = write_composite(
+            producers,
+            spec,
+            out,
+            fps=max(fps_l * speed, MIN_OUT_FPS),
+            size=spec.canvas,
+            first=0,
+            last=n - 1,
         )
-        size = (hold_l.shape[1] + hold_r.shape[1], height)
-        writer = _writer(out, max(fps_l * speed, MIN_OUT_FPS), size)
-        written = 0
-        try:
-            for k in range(n):
-                il = start_l + k
-                ir = start_r + int(round(k * fps_r / fps_l))
-                fl = (
-                    _rendered(rl, il, track_l, min_confidence=min_confidence, label="A")
-                    if il >= 0
-                    else None
-                )
-                fr = (
-                    _rendered(rr, ir, track_r, min_confidence=min_confidence, label="B")
-                    if ir >= 0
-                    else None
-                )
-                if fl is not None:
-                    hold_l = _resize_to_height(fl, height)
-                if fr is not None:
-                    hold_r = _resize_to_height(fr, height)
-                writer.write(np.hstack([hold_l, hold_r]))
-                written += 1
-        finally:
-            writer.release()
     return {
         "file": str(out),
         "align": align,

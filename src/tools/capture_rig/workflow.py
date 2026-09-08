@@ -206,8 +206,9 @@ ANALYZE_2D = Step(
     instructions=(
         "Press *Analyze 2-D*. Results are in subject box heights, not metres.",
         "*Export clip* writes the swing (address to finish, slow motion, overlay, frame clock) as a video; *Compare takes* puts another session's view beside this one aligned on the top of the backswing, with metric deltas.",
+        "*Export multiview* stitches the raw footage and its overlay through a layout (preset, saved or JSON file) into one composite video with a provenance sidecar.",
     ),
-    actions=("analyze", "clip", "compare_takes"),
+    actions=("analyze", "clip", "compare_takes", "multipicture"),
     done=lambda m: bool(m.analysis_2d),
     ready=lambda m: _ready_if(m.ingested, "ingest first"),
     applies=lambda m: not _multi(m),
@@ -259,12 +260,38 @@ EXPORT = Step(
     instructions=(
         "Press *Export*. reconstruction.trc loads in the motion pipeline and the model-matching tools as a marker file.",
         "*Export clip* and *Compare takes* produce annotated, slowed videos of this take, alone or beside another session, for coaching.",
+        "*Export multiview* writes every view (and the model overlay of any of them) side by side through a layout as one composite video, synchronised by frame with the session's alignment offsets.",
     ),
-    actions=("export", "clip", "compare_takes"),
+    actions=("export", "clip", "compare_takes", "multipicture"),
     done=lambda m: m.export is not None,
     ready=lambda m: _ready_if(m.reconstruction is not None, "reconstruct first"),
     applies=_multi,
 )
+
+#: One line of help per tile action key; every ``Step.actions`` entry has one
+#: (the GUI's buttons are checked against this list).
+ACTION_HELP: dict[str, str] = {
+    "plan_check": "Match the plan's views against the enumerated cameras.",
+    "import": "Build a session from existing video files.",
+    "record": "Stream-copy every planned camera to disk for the set duration.",
+    "calibrate": "Chessboard intrinsics per view from a board recording.",
+    "proxy": "Write H.264 proxies beside large MJPEG recordings for playback.",
+    "ingest": "Run the chosen pose estimator on every view.",
+    "compare": "Run two estimators and compare their observations per joint.",
+    "annotate": "Click or correct joints frame by frame in the player.",
+    "reliability": "Grade every joint from coverage, confidence and jitter.",
+    "reconstruct": "Learn the camera placement and triangulate the skeleton.",
+    "analyze": "2-D events, tempo and hand speed from a single view.",
+    "clip": "Trimmed, slowed clip of one view with the pose overlay.",
+    "compare_takes": "Two takes side by side aligned on a swing event.",
+    "multipicture": "Composite multiview video of raw and overlay streams through a layout.",
+    "fit_model": "Fit the articulated golfer model through the reconstruction.",
+    "kinetics": "Inverse dynamics of the fitted motion plus a replay check.",
+    "compare_models": "Fit every registered model to this take and rank them.",
+    "export": "TRC and canonical JSON for the motion pipeline.",
+    "stop": "Stop the running rig command.",
+    "load": "Load a session folder into the tile.",
+}
 
 STEPS: tuple[Step, ...] = (
     SETUP,

@@ -339,6 +339,42 @@ def overlay_command(
     return python_module_command(args)
 
 
+def multipicture_command(
+    session: Path,
+    layout: str,
+    out: Path,
+    *,
+    variants: Sequence[str] = (),
+    observation_set: str | None = None,
+    start: int | None = None,
+    stop: int | None = None,
+    speed: float = 1.0,
+    size: tuple[int, int] | None = None,
+) -> list[str]:
+    """``rig multipicture``: composite video through a layout (#9815).
+
+    ``layout`` is a preset name, a saved layout name or a JSON path.
+    Preconditions: a named layout, positive speed, positive size when given.
+    """
+    require(layout.strip() != "", "layout must be named")
+    require(speed > 0, "speed must be positive", speed)
+    args = ["multipicture", "--session", str(session), "--layout", layout]
+    args += ["--out", str(out)]
+    if variants:
+        args += ["--variants", *variants]
+    if observation_set:
+        args += ["--set", observation_set]
+    if start is not None:
+        args += ["--from", str(start)]
+    if stop is not None:
+        args += ["--to", str(stop)]
+    args += ["--speed", f"{speed:g}"]
+    if size is not None:
+        require(size[0] > 0 and size[1] > 0, "size must be positive", size)
+        args += ["--size", f"{size[0]}x{size[1]}"]
+    return python_module_command(args)
+
+
 def compare_variants_command(session: Path, *, reference: str = "") -> list[str]:
     return python_module_command(
         ["compare-variants", "--session", str(session), "--reference", reference]

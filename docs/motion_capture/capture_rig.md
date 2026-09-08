@@ -131,6 +131,24 @@ stamp in two scopes: user (`<AppConfigLocation>/UpstreamDrift/capture_rig/layout
 and session (`<session>/layouts/`, so a layout travels with a take); built-in
 presets appear read-only in `list()`.
 
+### Composite Video Export
+
+`rig multipicture --session S --layout NAME|PATH --out X.mp4` writes several
+streams as one video through a layout (`tools/capture_rig/mosaic.py`, #9815).
+`--layout` is a built-in preset (filled with the session's playable views in
+plan order), a layout saved in the session then the user scope of
+`LayoutStore`, or a path to a `rig-layout/1.0.0` JSON file. `recorded` tiles
+show the view's playable file; `overlay` tiles draw the observation set
+(`--set`, default `observations`) and the 3-D tracks of `--variants` on it.
+Sources are synchronised by frame index plus the per-view offsets of the
+manifest's strobe `timing` block; a shorter source holds its last frame.
+`--from/--to` bound the frame range, `--size WxH` sets the canvas, `--speed`
+is a playback-rate change (every frame kept, fps scaled: 0.5 halves the fps).
+`X.json` beside the video records the layout, sources (file, fps, offset),
+frame range, speed and the standard provenance block. `compare-takes` stitches
+through the same compositor. The tile's _Export multiview_ button lands with
+#9813/#9814.
+
 ## Recording a Session
 
 ```bash
