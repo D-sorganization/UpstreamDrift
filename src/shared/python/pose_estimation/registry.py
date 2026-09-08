@@ -225,6 +225,28 @@ _BODY25_PARENTS: tuple[tuple[str, str | None], ...] = (
 _OPENPOSE_DNN_SKELETON: tuple[dict[str, Any], ...] = tuple(
     {"name": name, "parent": parent} for name, parent in _BODY25_PARENTS
 )
+_COCO17_PARENTS: tuple[tuple[str, str | None], ...] = (
+    ("nose", None),
+    ("left_eye", "nose"),
+    ("right_eye", "nose"),
+    ("left_ear", "left_eye"),
+    ("right_ear", "right_eye"),
+    ("left_shoulder", "nose"),
+    ("right_shoulder", "nose"),
+    ("left_elbow", "left_shoulder"),
+    ("right_elbow", "right_shoulder"),
+    ("left_wrist", "left_elbow"),
+    ("right_wrist", "right_elbow"),
+    ("left_hip", "left_shoulder"),
+    ("right_hip", "right_shoulder"),
+    ("left_knee", "left_hip"),
+    ("right_knee", "right_hip"),
+    ("left_ankle", "left_knee"),
+    ("right_ankle", "right_knee"),
+)
+_RTMPOSE_COCO17_SKELETON: tuple[dict[str, Any], ...] = tuple(
+    {"name": name, "parent": parent} for name, parent in _COCO17_PARENTS
+)
 
 
 def _make_mediapipe(**options: Any) -> PoseEstimator:
@@ -257,6 +279,20 @@ def _make_openpose_dnn(**options: Any) -> PoseEstimator:
         input_height=int(options.get("input_height", 368)),
         min_peak=float(options.get("min_peak", 0.05)),
     )
+
+
+def _make_rtmpose_onnx(**options: Any) -> PoseEstimator:
+    from src.shared.python.pose_estimation.rtmpose_onnx_estimator import (
+        RtmposeOnnxEstimator,
+    )
+
+    kwargs: dict[str, Any] = {
+        "keypoint_set": str(options.get("keypoint_set", "coco17")),
+        "min_score": float(options.get("min_score", 0.3)),
+    }
+    if "session_factory" in options:
+        kwargs["session_factory"] = options["session_factory"]
+    return RtmposeOnnxEstimator(**kwargs)
 
 
 register_estimator(
@@ -298,5 +334,24 @@ register_estimator(
         skeleton=_OPENPOSE_DNN_SKELETON,
         factory=_make_openpose_dnn,
         capture_source=False,  # offline comparison detector (#9628), CPU-only
+    )
+)
+
+
+register_estimator(
+    EstimatorInfo(
+        name="rtmpose_onnx",
+        display_name="RTMPose (ONNX Runtime, CPU)",
+        description="RTMPose SimCC body pose via onnxruntime (COCO-17/Halpe-26)",
+        probe_module="onnxruntime",
+        install_hint=(
+            "onnxruntime is not installed; install it with "
+            "`pip install onnxruntime` (extra `pose-onnx`); fetch the pinned "
+            "RTMPose model with "
+            "python3 -m src.shared.python.pose_estimation.rtmpose_models"
+        ),
+        skeleton=_RTMPOSE_COCO17_SKELETON,
+        factory=_make_rtmpose_onnx,
+        capture_source=False,  # #9648: not qualified until real takes
     )
 )
