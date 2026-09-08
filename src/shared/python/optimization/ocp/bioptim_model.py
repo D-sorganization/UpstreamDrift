@@ -24,6 +24,11 @@ from src.shared.python.optimization.ocp.symbolic_model import SymbolicSwingModel
 
 __all__ = ["make_swing_bio_model"]  # SwingBioModel is provided lazily via __getattr__
 
+_NO_CONTACTS = (
+    "the seven-DOF swing rig is a fixed-base chain with no contact points; "
+    "with_contact=True is not a valid request for this model"
+)
+
 _CLASS_CACHE: dict[str, type] = {}
 
 
@@ -179,8 +184,11 @@ def _build_class() -> type:
 
         def markers_velocities(self, reference_index: Any = None) -> Any:
             if reference_index is not None:
-                raise NotImplementedError(
-                    "marker velocities in a segment frame are not supported"
+                # Genuinely unimplemented: the symbolic model expresses marker
+                # velocities in the world frame only. Scope is set by the epic.
+                raise NotImplementedError(  # tracked: #9762
+                    "marker velocities in a segment frame are not supported; "
+                    "omit reference_index to get them in the world frame"
                 )
             return self.symbolic.markers_velocities
 
@@ -198,14 +206,18 @@ def _build_class() -> type:
 
         # -- dynamics used by penalties ---------------------------------------
 
+        # ``with_contact`` is part of bioptim's model protocol, but the swing
+        # rig is a fixed-base chain with no contact points at all, so asking
+        # for contact dynamics is an invalid argument rather than a feature
+        # this adapter has yet to implement.
         def forward_dynamics(self, with_contact: bool = False) -> Any:
             if with_contact:
-                raise NotImplementedError("the swing chain has no contacts")
+                raise ValueError(_NO_CONTACTS)
             return self.symbolic.forward_dynamics
 
         def inverse_dynamics(self, with_contact: bool = False) -> Any:
             if with_contact:
-                raise NotImplementedError("the swing chain has no contacts")
+                raise ValueError(_NO_CONTACTS)
             return self.symbolic.rnea
 
         def tau_max(self) -> Any:
