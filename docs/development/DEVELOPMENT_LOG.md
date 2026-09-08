@@ -17,6 +17,46 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+
+### DL-#9648 · RTMPose ONNX Pose Estimator Behind the Registry
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9648
+- **Branch:** `claude/issue-9648-pose-backends`
+- **PR:** #9739 (open; `Fixes #9648`)
+- **Paths:** `src/shared/python/pose_estimation/rtmpose_onnx_estimator.py`, `src/shared/python/pose_estimation/rtmpose_models.py`, `src/shared/python/pose_estimation/registry.py`, `src/motion_capture/rig/ingest.py`, `src/motion_capture/reconstruct/layouts.py`, `pyproject.toml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`197e0a942`)
+- **Summary:** Registers `rtmpose_onnx` (SimCC decode via onnxruntime, COCO-17/Halpe-26, whole-frame letterbox) with `capture_source=False`; adds the optional `pose-onnx` extra; pins the official OpenMMLab ONNX model URLs/sizes with digests PENDING OWNER APPROVAL; teaches `RegisteredFrameEstimator` to honour instance-level `LANDMARK_MAP`/`LAYOUT_NAME`; extends `layouts.py` with the Halpe-26 `hip`→`mid_hip` alias.
+- **Next step:** owner approves and verifies the pinned RTMPose model download (run the `rtmpose_models` command once, pin both SHA-256 digests), then qualify `rig compare` against MediaPipe on take 2.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
+## Field Reference
+
+| Field           | Required                   | Notes                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------- |
+| `State`         | Always                     | One of the six states above                                    |
+| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
+| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
+| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
+| `PR`            | Always                     | Number and state, or `not created`                             |
+| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
+| `Started`       | Always                     | Drives cycle time                                              |
+| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
+| `Summary`       | Always                     | One or two sentences                                           |
+| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
+| `Parked`        | When `parked`              | Date plus reason                                               |
+
+Never place credentials, tokens, or customer data in a development log.
+
 ### DL-#9542 · Bunker Exit State Consistency, Provenance, and Result Envelope
 
 - **State:** in_review
@@ -49,18 +89,24 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   dependency-consistency freshness gate and the 24 previously failing tests
   go green.
 
-### DL-#9648 · RTMPose ONNX Pose Estimator Behind the Registry
+### DL-#9091 · Phantom-Guard Rule-3 False Positive on Shallow Base Fetch
 
 - **State:** in_review
 - **Owner:** claude
-- **Issue:** #9648
-- **Branch:** `claude/issue-9648-pose-backends`
-- **PR:** #9739 (open; `Fixes #9648`)
-- **Paths:** `src/shared/python/pose_estimation/rtmpose_onnx_estimator.py`, `src/shared/python/pose_estimation/rtmpose_models.py`, `src/shared/python/pose_estimation/registry.py`, `src/motion_capture/rig/ingest.py`, `src/motion_capture/reconstruct/layouts.py`, `pyproject.toml`
+- **PR:** #9717 (open; `Fixes #9091`)
+- **Paths:** `.github/workflows/anti-phantom-merge.yml`, `scripts/ci/check_phantom_guard_paths.py`, `tests/scripts/test_check_phantom_guard_paths.py`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`197e0a942`)
-- **Summary:** Registers `rtmpose_onnx` (SimCC decode via onnxruntime, COCO-17/Halpe-26, whole-frame letterbox) with `capture_source=False`; adds the optional `pose-onnx` extra; pins the official OpenMMLab ONNX model URLs/sizes with digests PENDING OWNER APPROVAL; teaches `RegisteredFrameEstimator` to honour instance-level `LANDMARK_MAP`/`LAYOUT_NAME`; extends `layouts.py` with the Halpe-26 `hip`→`mid_hip` alias.
-- **Next step:** owner approves and verifies the pinned RTMPose model download (run the `rtmpose_models` command once, pin both SHA-256 digests), then qualify `rig compare` against MediaPipe on take 2.
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** The phantom-guard rule-3 closes-issue path-membership check
+  produced a false positive when a shallow base fetch defeated `git merge-base`;
+  the check is now extracted into `scripts/ci/check_phantom_guard_paths.py`,
+  which resolves changed files from local git diff first and falls back to the
+  GitHub API changed-file list (`PR_CHANGED_FILES` / `gh pr view --json files`)
+  when merge-base fails, failing closed with a diagnostic when neither source
+  is available. Workflow rule-3 block invokes the script; rules 1/2/4 unchanged.
+- **Next step:** Observe the first post-merge `phantom-guard` run on a PR
+  whose base fetch is too shallow for merge-base to confirm rule 3 defers to
+  the API list.
 
 ## Shipped (Last 90 Days)
 
@@ -286,4 +332,3 @@ Entries stay here for 90 days after merge, then move to the archive.
 ## Archive
 
 Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
-
