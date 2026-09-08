@@ -18,6 +18,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ## Active
 
 
+
 ### DL-#9482 · Launcher Tile Logo Families and Registry Gate
 
 - **State:** in_review
@@ -38,6 +39,46 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   plus a focused pytest gate that fails any logo shared outside one family or
   shared without a documented declaration.
 - **Next step:** Address review feedback on PR #9725 and merge when approved.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
+## Field Reference
+
+| Field           | Required                   | Notes                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------- |
+| `State`         | Always                     | One of the six states above                                    |
+| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
+| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
+| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
+| `PR`            | Always                     | Number and state, or `not created`                             |
+| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
+| `Started`       | Always                     | Drives cycle time                                              |
+| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
+| `Summary`       | Always                     | One or two sentences                                           |
+| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
+| `Parked`        | When `parked`              | Date plus reason                                               |
+
+Never place credentials, tokens, or customer data in a development log.
+
+### DL-#9499 · Spec Check Reminder Fail-Safe Extraction
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9499`
+- **PR:** #9719 (open; `Fixes #9499`)
+- **Paths:** `.github/workflows/spec-check.yml`, `scripts/post_spec_reminder.py`, `tests/ci/test_spec_check_workflow.py`
+- **Summary:** The `Verify SPEC.md freshness` job posts its SPEC reminder
+  through a fail-safe script instead of an inline `github-script` heredoc, so a
+  reporting failure prints the diagnostic into the job log while the
+  `always()`-guarded staleness step still fails the run.
+- **Next step:** Merge the PR filed from `claude/issue-9499-spec-freshness`
+  after required checks pass.
 
 ## Shipped (Last 90 Days)
 
