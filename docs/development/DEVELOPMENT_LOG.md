@@ -17,8 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9787 · Manufactured Authority Runtime and Provenance
 
-
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9787
+- **PR:** not created
+- **Branch:** fix/9787-manufactured-authority
+- **Paths:** `scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.*`, `scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py`, manufactured research/CI contracts, native CI workflow, canonical evidence and turnover.
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (116 strict native contracts and three distinct rolling contracts pass)
+- **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
+- **Next step:** Finish strict native checks, normal hooks and protected PR delivery; manufactured controls do not replace physical validation.
 
 ### DL-#9482 · Launcher Tile Logo Families and Registry Gate
 

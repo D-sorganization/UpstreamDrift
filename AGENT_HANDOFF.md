@@ -5,18 +5,19 @@ Updated: 2026-09-08 03:10 UTC
 
 ## Impact Dynamics and Acoustics: #9700
 
-- Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
-- Tools #5077 and #5082 remain open. Distributed shaft, flexible contact, acoustics, studies and empirical gates remain active.
-- #9735 / PR #9745 (open; provider CI passes, main sync in progress): `fix/9735-impact-provider-imports`, base `dbc6727aa`; fixes test bootstrap/origin checks, with no production import changes.
-- No-vendor provider contracts: 13 passed; ownership-eviction mutation detected; installed-wheel CLI bootstrap passed. Pinned-vendor/CLI/fallback checks: 72 passed.
-- Current compatibility record: `docs/development/impact_provider_import_turnover.md`; overall design: `docs/development/impact_acoustics_program.md`.
-- Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.
+- Theory AffineDrift #4258/#4282 and integration plan #9706 merged. Tools T1 #5077 merged; T2 #5082 remains open.
+- Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
+- Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
+- Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 passes its consumer lane; #9787 addresses three research companion failures.
+- #9787: native ABI lock, actual deterministic provenance and preserved claim review. Current evidence/commands: `docs/development/manufactured_authority_9787_turnover.md`.
+- Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
 evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
 recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
+
 ## Import Bootstrap Fail-Fast: #9733
 
 - Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
@@ -33,7 +34,7 @@ design-manual program.
 Detailed takeover context (merge-versus-quarantine boundary, exact smoke contract, recovery constraints, next commands): `docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
-  `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+`docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
 UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 `_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
 `architecture_budget.json` exceptions are removed, behavior pinned by tests.
@@ -200,6 +201,7 @@ unexpected token`, swallowing the finding). Posting now runs
   `scripts/setup_hooks.py` now calls the installer (issue #9476), so the
   documented setup registers the `spec-rows` driver, and the installer
   docstring names this repository's entry point.
+
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
