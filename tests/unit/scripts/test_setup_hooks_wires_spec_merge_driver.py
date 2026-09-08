@@ -78,6 +78,6 @@ def test_install_spec_merge_driver_reports_install_failure(
 
     module.install_spec_merge_driver()
 
-    assert any(
-        "spec-rows" in record.message.lower() for record in caplog.records
-    ), "the failed registration must be reported to the operator"
+    assert any("spec-rows" in record.message.lower() for record in caplog.records), (
+        "the failed registration must be reported to the operator"
+    )
