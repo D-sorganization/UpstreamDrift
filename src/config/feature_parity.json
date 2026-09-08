@@ -355,6 +355,7 @@
     },
     "tools.capture_rig": {
       "title": "Capture Rig camera controller, recorder, overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer, manual point annotation/editing and multiview layout model with named layout presets",
+      "title": "Capture Rig camera controller with live preview, movable panes and saved layouts, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
       "web": null,
