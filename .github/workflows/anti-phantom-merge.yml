@@ -213,46 +213,14 @@ jobs:
           fi
 
           # -------- Rule 3 — closes-issue path mismatch --------
-          # Extract issue numbers from Closes/Fixes/Resolves
-          ISSUES=$(echo "$PR_BODY" | grep -Eoi '(Closes|Fixes|Resolves)[[:space:]]+#[0-9]+' | grep -Eo '[0-9]+' | sort -u || true)
-          if [ -n "$ISSUES" ]; then
-            for n in $ISSUES; do
-              echo "Checking referenced issue #$n"
-              ISSUE_BODY=$(gh issue view "$n" --repo "$REPO" --json body --jq '.body' 2>/dev/null || echo "")
-              if [ -z "$ISSUE_BODY" ]; then
-                echo "  (issue #$n inaccessible or empty — skipping)"
-                continue
-              fi
-              ISSUE_PATHS=$(echo "$ISSUE_BODY" | grep -Eo '(src|tests|rust_core|api)/[A-Za-z0-9_/.-]+' | sort -u || true)
-              if [ -z "$ISSUE_PATHS" ]; then
-                echo "  (issue #$n has no path references — skipping)"
-                continue
-              fi
-              echo "  Issue paths:"
-              echo "$ISSUE_PATHS" | sed 's/^/    /'
-              MATCH=""
-              for p in $ISSUE_PATHS; do
-                if echo "$CHANGED_FILES" | grep -qF "$p"; then
-                  MATCH="$p"
-                  break
-                fi
-                # Also try directory-prefix match if the issue lists a file but the PR touches the dir
-                dir=$(dirname "$p")
-                if [ "$dir" != "." ] && [ "$dir" != "/" ] && echo "$CHANGED_FILES" | grep -q "^$dir/"; then
-                  MATCH="$dir"
-                  break
-                fi
-              done
-              if [ -z "$MATCH" ]; then
-                paths_summary=$(printf '%s\n' "$ISSUE_PATHS" | sed -n '1,5s/^/    /p')
-                fail "3 (closes-issue path mismatch)" "PR closes issue #$n, but the diff touches **none** of the paths referenced in that issue's body:
-          \`\`\`
-          $paths_summary
-          \`\`\`
-          If the PR is intentionally addressing a different part of the issue, remove the \`Closes #$n\` keyword from the PR body."
-              fi
-            done
-          fi
+          # Extracted to scripts/ci/check_phantom_guard_paths.py (UD #9091;
+          # governed change: Repository_Management#1505 / #1507). The script
+          # consults the GitHub API changed-file list when the shallow base
+          # fetch defeats git merge-base, instead of false-positiving on the
+          # resulting empty local `git diff`. Diagnostics go to stderr; the
+          # PR-comment report goes to stdout and is forwarded to fail().
+          RULE3_OUTPUT=$(python3 scripts/ci/check_phantom_guard_paths.py) || \
+            fail "3 (closes-issue path mismatch)" "$RULE3_OUTPUT"
 
           # -------- Rule 4 — bot-only commits --------
           COMMITS=$(git log --format='%H|%an|%s' "$MERGE_BASE..$HEAD_SHA" || true)
