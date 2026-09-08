@@ -17,6 +17,21 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9612`
+- **PR:** #9720
+- **Paths:** `src/api/routes/video.py`, `tests/unit/api/test_routes_video.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-07 (`SELF`)
+- **Summary:** Video analysis uploads no longer default temp files to `.mp4`;
+  the container suffix is derived from the upload filename against the
+  `SUPPORTED_VIDEO_SUFFIXES` allow-list in one place and unknown or missing
+  extensions fail closed with a 400 before any side effect.
+- **Next step:** Merge the protected PR for `#9612` and confirm CI runs green.
+
 ### DL-#9762 · `bioptim` Optimal-Control Backend and the Swing-Dynamics Fixes
 
 - **State:** in_review
@@ -208,6 +223,7 @@ Never place credentials, tokens, or customer data in a development log.
 - **Last verified:** 2026-09-07 (`SELF`)
 - **Summary:** `SandDelivery` now refuses contradictory exit speed/vector pairs and owns copies of list-supplied exit vectors so post-construction mutation cannot invalidate the frozen record; the `to_post_impact_state` boundary carries explicit `ExitVectorProvenance` labels, and `PostImpactEnvelope` wraps the flight handoff with the validity verdict, F0 tier, per-group frames, the proper `HEAD_FRAME_TO_FLIGHT_TRANSFORM`, a schema version, and a SHA-256 source digest with JSON round trip. Reflection rejection itself was already delivered by PR #9574 and is not redone.
 - **Next step:** Open the protected PR to `main` with `Fixes #9542`, label `agent:claude`, and RED/GREEN evidence in the body.
+
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
 - **State:** in_review
@@ -248,20 +264,18 @@ Never place credentials, tokens, or customer data in a development log.
   whose base fetch is too shallow for merge-base to confirm rule 3 defers to
   the API list.
 
-### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
+### DL-#9484 · Impact Explorer Web Route Has a CI Bundle Producer
 
 - **State:** in_review
-- **Owner:** claude
-- **Issue:** `#9612`
-- **PR:** #9720
-- **Paths:** `src/api/routes/video.py`, `tests/unit/api/test_routes_video.py`
-- **Started:** 2026-09-07
-- **Last verified:** 2026-09-07 (`SELF`)
-- **Summary:** Video analysis uploads no longer default temp files to `.mp4`;
-  the container suffix is derived from the upload filename against the
-  `SUPPORTED_VIDEO_SUFFIXES` allow-list in one place and unknown or missing
-  extensions fail closed with a 400 before any side effect.
-- **Next step:** Merge the protected PR for `#9612` and confirm CI runs green.
+- **Owner:** W4_9484 (agent claude)
+- **Issue:** #9484
+- **PR:** #9724 (open)
+- **Paths:** `.github/workflows/ci-standard.yml`, `scripts/check_declared_route_producers.py`, `tests/scripts/test_declared_route_producers.py`, `docs/workflows/WORKFLOW_TRACKING.md`
+- **Branch:** `claude/issue-9484-impact-web-build`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** The `rate_of_closure` tile declared `web.mode: route` for `/tools/impact-explorer` but no pipeline built `vendor/ud-tools/src/rate_of_closure/web/dist`, so a clean checkout served the honest fallback. CI Standard now builds the bundle from the pinned Tools tree with `npm run build -- --base=/impact-explorer-app/`, and `scripts/check_declared_route_producers.py` fails any declared route that no pipeline produces. Shipping the bundle inside the wheel/image remains an open maintainer decision (#9417).
+- **Next step:** Merge PR for #9484, then decide the bundle distribution channel (wheel/image vs fetched Tools release artifact, #9417).
 
 ## Shipped (Last 90 Days)
 
