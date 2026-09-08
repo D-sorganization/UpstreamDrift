@@ -1,7 +1,15 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 02:55 PDT
-Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-08 07:55 UTC
+
+## PR #9723 CI Repair (Round 5)
+
+- Branch now carries the `origin/main` merge (including #9722); this round
+  only syncs `requirements-dev.lock`/`environment.yml` for main's
+  openpyxl/imageio dev-extra addition (#9716), clearing the shared
+  `dependency-consistency` red on the merge ref. No material handoff change —
+  lock sync only; behavior and continuation state unchanged.
 
 ## Impact Dynamics and Acoustics: #9700
 
@@ -17,6 +25,7 @@ evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual progra
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
 recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
+
 ## Import Bootstrap Fail-Fast: #9733
 
 - Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
@@ -33,7 +42,7 @@ design-manual program.
 Detailed takeover context (merge-versus-quarantine boundary, exact smoke contract, recovery constraints, next commands): `docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
-  `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+`docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
 UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 `_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
 `architecture_budget.json` exceptions are removed, behavior pinned by tests.
@@ -188,6 +197,7 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   byte-identical by `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`;
   registration wiring into `scripts/setup_hooks.py` follows in the companion
   wiring PR (`claude/issue-9476-driver-wiring`).
+
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
