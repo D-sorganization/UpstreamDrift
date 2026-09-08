@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-## Consolidate the model_generation REST API on a Single Implementation (#9699)
+## Consolidate the Model-Generation REST API on a Single Implementation (#9699)
 
 `ModelGenerationAPI` existed twice with an identical 18-route surface:
 `rest_api_core.ModelGenerationAPI`, composed from
