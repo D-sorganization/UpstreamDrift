@@ -41,3 +41,22 @@ def find_project_root() -> Path:
         if (parent / "pyproject.toml").exists():
             return parent
     return Path.cwd()
+
+
+def urdf_file_key(path: Path) -> tuple[str, int, int]:
+    """Build an ``lru_cache`` key capturing a file's current identity.
+
+    Key is ``(resolved_path, st_mtime_ns, st_size)`` so cached parse results
+    are invalidated whenever the file is modified or replaced (same idiom as
+    ``src/api/versioning.py``). Callers must treat the key as opaque.
+
+    Args:
+        path: File path to key.
+
+    Returns:
+        Cache key tuple safe to pass to ``functools.lru_cache``-decorated
+        helpers.
+    """
+    resolved = path.resolve()
+    info = resolved.stat()
+    return (str(resolved), info.st_mtime_ns, info.st_size)
