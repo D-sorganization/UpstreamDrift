@@ -18,10 +18,14 @@ The topology follows the MATLAB 3-D golf model
 model the kinetics will later be matched on:
 
 ```
-World -[Hip 6-DOF]- Pelvis -[Spine universal]- Spine -[Torso revolute, axial]- Hub
+World -[Hip 6-DOF]- Pelvis -[Torso revolute, axial]- lower trunk -[Spine universal]- upper trunk = Hub
 Hub -[Scapula universal, centred at the hub]- strut (HubtoSLength 0.254 m)
     -[Shoulder gimbal 3-DOF]- Upper arm -[Elbow]- Forearm -[Pronation]- -[Wrist universal]- Hand
 ```
+
+(The guide's prose lists the spine universal before the torso revolute; the
+model's own logs show the torso revolute sits at the hip and the spine
+universal above the lower trunk, see the validation section below.)
 
 Sources: `matlab/MATLAB_GOLF_MODEL_GUIDE.md` lines 52-66 (chain and the three
 joint sub-models), `matlab/src/functions/model/readJointStateTargets_GolfSwing3D.m`
@@ -45,10 +49,12 @@ knees (hinge) and ankles (landmark only), and a head segment, and marks them
 as additions. 27 of the model's 35 DOFs carry the Simscape start-position
 names (`LScapStartPositionX`, `TorsoStartPosition`, ...).
 
-**Axis conventions.** Simscape's world is z-up; ours is y-up (x toward the
-target, z to the golfer's right). Spine Rx Ry becomes our x and z, Torso Rz
-(axial) becomes our y. Names are mapped; signs and orders are not yet
-validated against `GolfSwing3D_Kinetic`, and every export says so (#9714).
+**Axis conventions.** Since `golfer-scapula/2.0` every body frame of the
+Python model is the corresponding Simscape sensor frame: each joint carries
+the constant pre/post rotations, primitive axes and signs identified from
+the MATLAB model's own logs, so the 27 shared DOFs are the Simscape
+start-position angles up to a recorded sign and the export is a table
+lookup, not a conversion. See "Simscape Axis Validation" below (#9714).
 
 ## The Fit
 
@@ -67,7 +73,10 @@ The continuity term is the filter the user asked for. A landmark that the
 model can only reach by a discontinuous change of some angle is out-voted
 by the continuity of every other frame; its residual exceeds the gate (5 σ)
 after convergence, it is rejected and listed, and the fit is repeated without
-it. The weak rest term fixes the one direction a point landmark cannot see,
+it. The gate never removes more than half of the observations: when most of
+them are beyond it the model cannot represent the motion (a rigid pendulum
+on a bent-arm golfer), and the honest RMS must say so rather than a fit to
+nothing. The weak rest term fixes the one direction a point landmark cannot see,
 rotation about the segment's own axis, so a redundant angle settles rather
 than wandering (a wander would look like motion).
 
@@ -127,15 +136,41 @@ number for "kinematics and kinetics agree". Output: `model/kinetics.json`
 (torques per DOF, peak torques, replay error per DOF, assumptions stated;
 Simscape names attached for the golfer).
 
-What this is not yet: rod inertia is not modelled, the replay is linearised
-about the fitted configuration rather than a free multi-second integration,
-and the Simscape axis conventions still need validation before the torques
-can drive `GolfSwing3D_Kinetic` directly.
+What this is not yet: rod inertia is not modelled and the replay is
+linearised about the fitted configuration rather than a free multi-second
+integration. The axis conventions are validated (next section), so the
+exported angles can drive `GolfSwing3D_Kinetic` as start positions; driving
+it with the torques still needs the free integration.
 
-## Toward Kinetics (#9714)
+## Simscape Axis Validation (#9714)
 
-The joint-angle series in the Simscape vocabulary is the input the MATLAB
-model's kinetic drive needs: inverse dynamics on the fitted kinematics gives
-torques consistent with the motion, and a forward replay that reproduces the
-fitted angles within tolerance closes the loop. That step, and the axis
-validation it requires, is the next child of the epic.
+`src/motion_capture/reconstruct/model/simscape.py` identifies, for every
+joint the MATLAB model logs, which logged angle rotates about which axis
+with which sign and which constant frames sit either side, by fitting
+`R_parentᵀ R_child = A · R_axes(±angles) · B` over every axis order, sign
+pattern and column order on the 18 dataset-generator trials (620 frames).
+Result and method: `evidence/simscape_axes.md` and `.json`. Every joint is
+explained to ≤ 2.7e-4 rad, which is the logs' own precision.
+
+What the logs settled:
+
+- the torso revolute is at the hip and shares the hip's third axis; the
+  spine universal is between the two trunk sensors (`TorsoLogs` is the
+  lower trunk, `SpineLogs` the upper);
+- the hub is a rigid point of the upper trunk at (0, -0.0508, -0.2438) m in
+  its frame, 0.061 m + 0.249 m above the lower-trunk origin, and both
+  scapula joints are centred on it;
+- the strut is 0.254 m along the scapula frame's ∓z, the upper arm 0.3047 m
+  along the shoulder frame's +x, and the forearm sensor sits 0.1778 m past
+  the elbow on its +z (so the elbow is on that axis, 0.3047 m from the
+  shoulder);
+- no wrist angles are logged; the wrist universal is named only.
+
+`golfer-scapula/2.0` encodes all of this: joints now take `pre_rotvec` /
+`post_rotvec` constant frames (`kinematics.Joint`), the model exposes body
+frames (`frames()` / `forward_frames()`), and `SIMSCAPE_NAMES` maps each DOF
+to its Simscape variable and sign. The replay test drives the model with
+the logged angles and lands every body frame on its sensor to ≤ 1.7e-3 rad
+and the joint positions to ≤ 0.6 mm. The remaining assumption is the
+Simscape world orientation (z up, x toward the target, y to the golfer's
+right), which only affects the root's hip angles and translation.
