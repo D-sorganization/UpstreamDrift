@@ -17,6 +17,34 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+
+### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9716 (open; `Fixes #9533`)
+- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`,
+  `requirements*.lock`, `environment.yml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`289b3aac2`)
+- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools`
+  and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed
+  them and ~24 CI tests failed on import. Both now resolve through the `dev`
+  extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml`
+  workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR,
+  since Windows/WSL cannot regenerate correctly (#9533).
+- **Next step:** Regenerate the locks via `lock-refresh.yml` so the
+  dependency-consistency freshness gate and the 24 previously failing tests
+  go green.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
 ### DL-#9470 · Launch-Monitor Analysis Handlers Onto the Async_Action Worker
 
 - **State:** in_review
@@ -67,7 +95,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   Windows reported every pre-commit invocation failing (hook virtualenvs
   targeting Python 3.11, absent from the workstation). Investigation found no
   interpreter pin left in `.pre-commit-config.yaml` (`default_language_version:
-  python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
+python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
   commit-stage hook plus pre-push `mypy`/`bandit` passes after a from-scratch
   environment build. Option (a) of the issue is therefore satisfied; CLAUDE.md
   now documents the resolved environment and states that the `--no-verify`
@@ -75,24 +103,24 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Record CI on PR #9744; on merge, confirm the protected-main
   sync lands the resolved hook environment note.
 
-### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
+### DL-#9733 · Fail Fast on the Uninitialized Vendored Tools Fallback
 
 - **State:** in_review
 - **Owner:** claude
-- **PR:** #9716 (open; `Fixes #9533`)
-- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`,
-  `requirements*.lock`, `environment.yml`
+- **Issue:** #9733
+- **Branch:** `claude/issue-9733-fail-fast`
+- **PR:** #9743 (open; `Fixes #9733`)
+- **Paths:** `src/__init__.py`, `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`289b3aac2`)
-- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools`
-  and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed
-  them and ~24 CI tests failed on import. Both now resolve through the `dev`
-  extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml`
-  workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR,
-  since Windows/WSL cannot regenerate correctly (#9533).
-- **Next step:** Regenerate the locks via `lock-refresh.yml` so the
-  dependency-consistency freshness gate and the 24 previously failing tests
-  go green.
+- **Last verified:** 2026-09-08 (`160f9b759`)
+- **Summary:** When `vendor/ud-tools` is uninitialized, `src/__init__.py`'s
+  fallback registration mistook UpstreamDrift's own aliased `shared.python` copy
+  for an installed Tools distribution, installed `_VendoredToolsFallbackFinder`,
+  and livelocked pytest collection in meta-path `find_spec` recursion. The
+  registration probe now raises an actionable ImportError naming the remediation
+  command before any finder is installed; the initialized path is unchanged.
+- **Next step:** Record CI on PR #9743; on green, protected squash merge
+  closes #9733.
 
 ## Shipped (Last 90 Days)
 
@@ -101,4 +129,3 @@ Entries stay here for 90 days after merge, then move to the archive.
 ## Archive
 
 Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
-
