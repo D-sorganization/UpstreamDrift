@@ -418,24 +418,21 @@ def _parser() -> argparse.ArgumentParser:
 
 def _located_plan(plan: RigPlan) -> dict[str, CameraLocation]:
     """Enumerate cameras and map each plan view to its location; exit when unrealizable."""
-    cams = attach_capture_indices(query_topology(), dshow_order())
-    check = check_plan(plan, cams)
-    if not check.ok:
-        raise SystemExit(
-            f"plan not realizable: missing={list(check.missing)} "
-            f"conflicts={list(check.conflicts)}"
-        )
-    by_instance = {c.camera: c for c in cams}
-    return {view: by_instance[inst] for view, inst in check.matched.items()}
+    from .binding import locate_plan
+
+    try:
+        return locate_plan(plan)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def _real_sources(plan: RigPlan) -> dict[str, FrameSource]:
-    sources: dict[str, FrameSource] = {}
-    for view, cam in _located_plan(plan).items():
-        if cam.index is None:
-            raise SystemExit(f"camera {cam.identity} has no capture index")
-        sources[view] = OpenCvMsmfSource(cam.identity, cam.index)
-    return sources
+    from .binding import real_sources
+
+    try:
+        return dict(real_sources(plan))
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def _device_refs(plan: RigPlan) -> dict[str, str]:

@@ -108,6 +108,18 @@ units distinct. Windows grants one process exclusive access to a camera, so a
 session either observes through frame sources or records through recorders,
 not both on the same camera.
 
+## Live Preview
+
+_Preview cameras_ opens every planned view through the same camera binding
+the recorder uses (`src/motion_capture/rig/binding.py`) and shows the streams
+side by side above the player, one worker thread per camera, refreshed at up
+to 15 Hz. The plan path is prefilled with the lab plan and the session folder
+with a fresh `sessions/<timestamp>-take`, so _Record_ works out of the box:
+pressing it releases the cameras (ffmpeg needs the devices), runs the
+recorder, loads the take into the player and resumes the preview. A plan that
+cannot be realised on this machine is reported on the preview's status line
+rather than raised.
+
 ## Recording a Session
 
 ```bash
