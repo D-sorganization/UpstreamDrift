@@ -1,7 +1,7 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 02:55 PDT
-Updated: 2026-09-08 03:10 UTC (adds the #9648 RTMPose ONNX estimator section; CI repair for PR #9739)
+Updated: 2026-09-08 03:10 UTC
 
 ## Impact Dynamics and Acoustics: #9700
 
@@ -168,24 +168,16 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - TDD evidence: the missing module produced the expected RED import failure;
   after implementation, four registration tests pass serially.
 
-## Markerless Pose Estimator Backends: #9648
+## Spec Check Reminder Fail-Safe Extraction (#9499)
 
-- `rtmpose_onnx` (RTMPose, Apache-2.0; SimCC decode via `onnxruntime`) is
-  registered with `capture_source=False`. The optional dependency ships as the
-  `pose-onnx` extra and is imported only inside the estimator's session
-  factory; absence degrades to an availability hint.
-- The RTMPose ONNX model pins in
-  `src/shared/python/pose_estimation/rtmpose_models.py` are **PENDING OWNER
-  APPROVAL**: official OpenMMLab URLs and byte sizes, SHA-256 digests
-  unverified (no weights fetched or committed). Blockers: owner-verified
-  digest pinning, then a `rig compare` table against MediaPipe on take 2.
-- MoveNet remains a follow-up candidate only (TensorFlow stack absent).
-- CI repair (PR #9739): the per-frame video loop and detector-result
-  assembly shared with `OpenPoseDnnEstimator` moved into
-  `pose_estimation.interface` (`estimate_video_frames`, `detection_result`)
-  to satisfy the DRY duplication gate, and
-  `docs/shared_tools/divergence_inventory.v1.json` was regenerated for the
-  two new UD-only `pose_estimation` files.
+- The `Verify SPEC.md freshness` job no longer carries its comment-posting
+  logic as an inline `actions/github-script` heredoc (an unescaped backtick
+  from the RM #1520 wording once aborted it with `SyntaxError: Invalid or
+unexpected token`, swallowing the finding). Posting now runs
+  `scripts/post_spec_reminder.py`, which prints the full diagnostic into the
+  job log and exits 0 on any posting failure; the `always()`-guarded
+  "Fail if spec is stale" step owns the non-zero exit.
+- Contracts pinned by `tests/ci/test_spec_check_workflow.py`.
 
 ## Immediate Order
 
