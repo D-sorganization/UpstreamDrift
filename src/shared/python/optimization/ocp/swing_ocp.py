@@ -220,11 +220,13 @@ def build_max_speed_ocp(
     if objective == "track_speed" and target_speed <= 0.0:
         raise ValueError("target_speed must be positive")
 
+    mayer = bioptim.ObjectiveFcn.Mayer
+    lagrange = bioptim.ObjectiveFcn.Lagrange
     objectives = bioptim.ObjectiveList()
     if objective == "track_speed":
         objectives.add(
             clubhead_speed_error_objective,
-            custom_type=bioptim.ObjectiveFcn.Mayer,
+            custom_type=mayer,
             node=bioptim.Node.END,
             quadratic=True,
             weight=float(w_speed) / _SPEED_SCALE**2,
@@ -234,21 +236,21 @@ def build_max_speed_ocp(
     else:
         objectives.add(
             clubhead_velocity_objective,
-            custom_type=bioptim.ObjectiveFcn.Mayer,
+            custom_type=mayer,
             node=bioptim.Node.END,
             quadratic=True,
             weight=-float(w_speed) / _SPEED_SCALE**2,
             model=model,
         )
     objectives.add(
-        bioptim.ObjectiveFcn.Lagrange.MINIMIZE_CONTROL,
+        lagrange.MINIMIZE_CONTROL,
         key="tau",
         weight=float(w_energy) / _EFFORT_SCALE + _EFFORT_REGULARISER,
     )
     if w_injury:
         objectives.add(
             smooth_injury_risk_objective,
-            custom_type=bioptim.ObjectiveFcn.Lagrange,
+            custom_type=lagrange,
             node=bioptim.Node.ALL_SHOOTING,
             quadratic=False,
             weight=float(w_injury) / _INJURY_SCALE / final_time,

@@ -111,13 +111,14 @@ def _build_class() -> type:
             tau = get(nlp.controls["tau"], controls)
             qddot = self.symbolic.forward_dynamics(q, qdot, tau, parameters)
             defects = None
-            if isinstance(nlp.dynamics_type.ode_solver, bioptim.OdeSolver.COLLOCATION):
+            ode_solver = nlp.dynamics_type.ode_solver
+            if isinstance(ode_solver, bioptim.OdeSolver.COLLOCATION):
                 # Direct collocation needs implicit defects: the polynomial
                 # slopes must match the dynamics at every collocation point.
                 slope_q = nlp.states_dot["q"].cx
                 slope_qdot = nlp.states_dot["qdot"].cx
                 if (
-                    nlp.dynamics_type.ode_solver.defects_type
+                    ode_solver.defects_type
                     == bioptim.DefectType.TAU_EQUALS_INVERSE_DYNAMICS
                 ):
                     tau_id = self.symbolic.rnea(q, qdot, slope_qdot, parameters)

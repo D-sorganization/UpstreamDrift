@@ -9,7 +9,6 @@ about, locks, or refuses parameters that align with null directions.
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, TypeAlias
@@ -18,11 +17,12 @@ import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import check_finite, require
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
     from src.shared.python.estimation.map_estimator import SharedParameterBlock
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 FloatArray: TypeAlias = npt.NDArray[np.float64]
 ObservationModel = Callable[[FloatArray], FloatArray]
