@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, fields, replace
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -35,9 +35,9 @@ DEFAULT_CANVAS = (1280, 720)
 LABEL_PAD_PX = 6
 LABEL_FONT_SCALE = 0.5
 
-BGR = tuple[int, int, int]
-Frame = npt.NDArray[np.uint8]
-Rect = tuple[int, int, int, int]
+BGR: TypeAlias = tuple[int, int, int]
+Frame: TypeAlias = npt.NDArray[np.uint8]
+Rect: TypeAlias = tuple[int, int, int, int]
 
 
 def _check(condition: bool, name: str, detail: str, value: Any = None) -> None:
