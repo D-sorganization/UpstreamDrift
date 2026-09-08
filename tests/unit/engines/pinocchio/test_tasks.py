@@ -13,18 +13,24 @@ import pytest
 @pytest.fixture
 def mock_pinocchio_env() -> Generator[None, None, None]:
     """Mock pinocchio and pink dependencies."""
+    module_under_test = "src.engines.physics_engines.pinocchio.python.dtack.ik.tasks"
     mock_mods = {
         "pink": MagicMock(),
         "pink.tasks": MagicMock(),
         "pinocchio": MagicMock(),
     }
-    with patch.dict(sys.modules, mock_mods):
-        # Clean up module under test to ensure it imports mocks
-        if "src.engines.physics_engines.pinocchio.python.dtack.ik.tasks" in sys.modules:
-            del sys.modules[
-                "src.engines.physics_engines.pinocchio.python.dtack.ik.tasks"
-            ]
-        yield
+    # Clean up module under test to ensure it imports mocks.  Snapshot the
+    # previous entry so teardown restores the pre-fixture namespace
+    # (#9387: fixtures must not leave a mocked import cached).
+    saved_tasks_module = sys.modules.pop(module_under_test, None)
+    try:
+        with patch.dict(sys.modules, mock_mods):
+            yield
+    finally:
+        if saved_tasks_module is not None:
+            sys.modules[module_under_test] = saved_tasks_module
+        else:
+            sys.modules.pop(module_under_test, None)
 
 
 def test_create_joint_coupling_task(mock_pinocchio_env) -> None:
