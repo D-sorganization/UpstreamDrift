@@ -236,3 +236,7 @@ delivery prerequisite for the main merge, not an impact-model extension.
 All 21 focused camera, triangulation and articulated-kinematics/fit tests pass
 (19.03 s, five existing alias warnings). Native scientific sources and their
 record remain unchanged by these type declarations.
+
+The complete repair is published in PR #9804 at `befa329d1` through every
+normal push hook, including actual mypy, Bandit and unit tests. The checkout
+is tracked-clean. Current-head protected CI is pending; no merge is assumed.
