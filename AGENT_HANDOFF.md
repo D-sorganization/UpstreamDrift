@@ -1,7 +1,7 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 02:55 PDT
-Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-08 03:10 UTC (adds the #9648 RTMPose ONNX estimator section)
 
 ## Impact Dynamics and Acoustics: #9700
 
@@ -167,6 +167,20 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   coaching interpretations are prohibited.
 - TDD evidence: the missing module produced the expected RED import failure;
   after implementation, four registration tests pass serially.
+
+
+## Markerless Pose Estimator Backends: #9648
+
+- `rtmpose_onnx` (RTMPose, Apache-2.0; SimCC decode via `onnxruntime`) is
+  registered with `capture_source=False`. The optional dependency ships as the
+  `pose-onnx` extra and is imported only inside the estimator's session
+  factory; absence degrades to an availability hint.
+- The RTMPose ONNX model pins in
+  `src/shared/python/pose_estimation/rtmpose_models.py` are **PENDING OWNER
+  APPROVAL**: official OpenMMLab URLs and byte sizes, SHA-256 digests
+  unverified (no weights fetched or committed). Blockers: owner-verified
+  digest pinning, then a `rig compare` table against MediaPipe on take 2.
+- MoveNet remains a follow-up candidate only (TensorFlow stack absent).
 
 ## Immediate Order
 

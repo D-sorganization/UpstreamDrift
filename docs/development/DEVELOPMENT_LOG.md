@@ -49,6 +49,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   dependency-consistency freshness gate and the 24 previously failing tests
   go green.
 
+### DL-#9648 · RTMPose ONNX Pose Estimator Behind the Registry
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9648
+- **Branch:** `claude/issue-9648-pose-backends`
+- **PR:** #9739 (open; `Fixes #9648`)
+- **Paths:** `src/shared/python/pose_estimation/rtmpose_onnx_estimator.py`, `src/shared/python/pose_estimation/rtmpose_models.py`, `src/shared/python/pose_estimation/registry.py`, `src/motion_capture/rig/ingest.py`, `src/motion_capture/reconstruct/layouts.py`, `pyproject.toml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`197e0a942`)
+- **Summary:** Registers `rtmpose_onnx` (SimCC decode via onnxruntime, COCO-17/Halpe-26, whole-frame letterbox) with `capture_source=False`; adds the optional `pose-onnx` extra; pins the official OpenMMLab ONNX model URLs/sizes with digests PENDING OWNER APPROVAL; teaches `RegisteredFrameEstimator` to honour instance-level `LANDMARK_MAP`/`LAYOUT_NAME`; extends `layouts.py` with the Halpe-26 `hip`→`mid_hip` alias.
+- **Next step:** owner approves and verifies the pinned RTMPose model download (run the `rtmpose_models` command once, pin both SHA-256 digests), then qualify `rig compare` against MediaPipe on take 2.
+
 ## Shipped (Last 90 Days)
 
 Entries stay here for 90 days after merge, then move to the archive.
@@ -229,3 +242,4 @@ Entries stay here for 90 days after merge, then move to the archive.
 ## Archive
 
 Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
