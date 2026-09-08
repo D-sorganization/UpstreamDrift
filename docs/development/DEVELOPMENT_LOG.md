@@ -152,7 +152,7 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** `#9476`
-- **Branch:** `claude/issue-9476-spec-merge-driver`
+- **Branch:** `claude/issue-9476-driver-wiring`
 - **PR:** #9734 (open, in_review)
 - **Paths:** `scripts/install_spec_merge_driver.py`,
   `shared_scripts/spec_changelog.py`,
@@ -169,10 +169,12 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
   refute it, plus true statements about the half-configured state), and added
   `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py` pinning SHA-256
   digests against the upstream reference so future divergence fails loudly.
-  Registration wiring into `scripts/setup_hooks.py` is the companion PR the
-  issue requests as a separate behaviour change.
-- **Next step:** Land the re-vendor PR, then open the wiring PR on
-  `claude/issue-9476-driver-wiring`.
+  The behaviour change the issue requests followed on this branch:
+  `scripts/setup_hooks.py` (the documented local-automation entry point)
+  now calls the vendored installer, so the documented setup registers the
+  `spec-rows` driver, and the installer docstring names this repository's
+  entry point instead of Repository_Management's.
+- **Next step:** Land PR #9734, then the wiring PR.
 
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
