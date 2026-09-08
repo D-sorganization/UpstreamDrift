@@ -16,6 +16,9 @@ from typing import Any, Literal
 
 import numpy as np
 
+from scripts.research.proximal_distal_energy.articulated_native_runtime import (
+    ensure_cmeel_native_library_path,
+)
 from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine import (
     require_robotics_pinocchio,
 )
@@ -84,6 +87,7 @@ SOURCE_PATHS = (
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
     "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
     "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+    "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
     "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
@@ -721,6 +725,14 @@ def main() -> None:
     parser.add_argument("--compare-committed", action="store_true")
     parser.add_argument("--validate-generated", action="store_true")
     arguments = parser.parse_args()
+    if arguments.profile == "authority":
+        # The hash-locked cmeel runtime needs cmeel.prefix/lib on the loader
+        # path before ``import pinocchio`` (line 232); the loader reads
+        # LD_LIBRARY_PATH only at process start, so re-exec if required
+        # (#9607). The rolling lane resolves compatible wheels without it.
+        ensure_cmeel_native_library_path(
+            module_name=__spec__.name if __spec__ is not None else None
+        )
     if arguments.compare_committed and arguments.output.resolve() == OUTPUT.resolve():
         parser.error("--compare-committed requires a temporary --output path")
     output = write_record(arguments.output, profile=arguments.profile)
