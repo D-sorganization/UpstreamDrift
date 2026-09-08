@@ -399,6 +399,19 @@ class ProcessPanel(QGroupBox):
         self.other_view_edit.setPlaceholderText("its view (default: same name)")
         self.align_combo = QComboBox()
         self.align_combo.addItems(["top", "address", "peak", "finish"])
+        self.model_combo = QComboBox()
+        for name, description in commands.model_choices():
+            self.model_combo.addItem(name, name)
+            self.model_combo.setItemData(
+                self.model_combo.count() - 1, description, Qt.ItemDataRole.ToolTipRole
+            )
+        self.fit_lengths_check = QCheckBox("learn the model's segment lengths")
+        self.body_mass_spin = QDoubleSpinBox()
+        self.body_mass_spin.setRange(20.0, 250.0)
+        self.body_mass_spin.setValue(80.0)
+        form.addRow("Model", self.model_combo)
+        form.addRow(self.fit_lengths_check)
+        form.addRow("Body mass (kg)", self.body_mass_spin)
         form.addRow("Clip speed (1 = real time)", self.clip_speed_spin)
         form.addRow("Compare with session", self.other_session_edit)
         form.addRow("Compare view", self.other_view_edit)
@@ -456,6 +469,15 @@ class ProcessPanel(QGroupBox):
 
     def clip_speed(self) -> float:
         return float(self.clip_speed_spin.value())
+
+    def model_name(self) -> str:
+        return str(self.model_combo.currentData())
+
+    def fit_lengths(self) -> bool:
+        return self.fit_lengths_check.isChecked()
+
+    def body_mass(self) -> float:
+        return float(self.body_mass_spin.value())
 
     def other_session(self) -> Path:
         text = self.other_session_edit.text().strip()
@@ -670,6 +692,23 @@ def _reliability_rows(payload: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _kinetics_rows(media: SessionMedia) -> dict[str, Any] | None:
+    """Replay check plus the model ranking, flattened for the results table."""
+    out: dict[str, Any] = {}
+    if media.kinetics:
+        out["replay"] = {
+            k: v
+            for k, v in media.kinetics.items()
+            if k in ("replay_max_abs_error", "replay_worst_dof", "body_mass_kg")
+        }
+    if media.model_comparison:
+        out["ranking"] = {
+            f"{i + 1}. {s['model']}": f"rms {s['rms_mm']:.1f} mm, score {s['score']:.3f}"
+            for i, s in enumerate(media.model_comparison.get("ranking", []))
+        }
+    return out or None
+
+
 def _grade(score: float) -> str:
     return "reliable" if score >= 0.75 else ("usable" if score >= 0.5 else "weak")
 
@@ -687,6 +726,9 @@ class CaptureRigWidget(QWidget):
         ("reliability", "Reliability"),
         ("calibrate", "Calibrate intrinsics"),
         ("reconstruct", "Reconstruct"),
+        ("fit_model", "Fit model"),
+        ("kinetics", "Kinetics"),
+        ("compare_models", "Compare models"),
         ("analyze", "Analyze 2-D"),
         ("export", "Export"),
         ("clip", "Export clip"),
@@ -707,7 +749,11 @@ class CaptureRigWidget(QWidget):
         self.reliability_table = ResultsTable()
         self.results.addTab(self.swing_table, "Swing (3-D)")
         self.results.addTab(self.analysis_table, "Analysis (2-D)")
+        self.model_table = ResultsTable()
         self.results.addTab(self.reliability_table, "Reliability")
+        self.kinetics_table = ResultsTable()
+        self.results.addTab(self.model_table, "Model fit")
+        self.results.addTab(self.kinetics_table, "Kinetics")
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(5000)
@@ -789,6 +835,19 @@ class CaptureRigWidget(QWidget):
             "calibrate": lambda: self._calibrate(session),
             "reconstruct": lambda: self._reconstruct(session),
             "analyze": lambda: commands.analyze_command(session),
+            "fit_model": lambda: commands.fit_model_command(
+                session,
+                model=self.process.model_name(),
+                fit_lengths=self.process.fit_lengths(),
+            ),
+            "kinetics": lambda: commands.kinetics_command(
+                session,
+                model=self.process.model_name(),
+                body_mass_kg=self.process.body_mass(),
+            ),
+            "compare_models": lambda: commands.compare_models_command(
+                session, fit_lengths=self.process.fit_lengths()
+            ),
             "export": lambda: commands.export_command(session),
             "clip": lambda: self._clip(session),
             "compare_takes": lambda: self._compare_takes(session),
@@ -884,6 +943,8 @@ class CaptureRigWidget(QWidget):
         self.results.setCurrentIndex(1 if len(media.views) == 1 else 0)
         self.swing_table.fill(media.swing_summary)
         self.analysis_table.fill(media.analysis_2d)
+        self.model_table.fill(media.model_fit)
+        self.kinetics_table.fill(_kinetics_rows(media))
         self.reliability_table.fill(
             _reliability_rows(media.reliability) if media.reliability else None
         )
