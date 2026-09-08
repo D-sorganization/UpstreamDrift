@@ -115,8 +115,8 @@ CAPTURE = Step(
         "10 s takes at 60-120 fps; tape-measured segments on the golfer: shank (lateral knee line to ankle bone) and forearm (elbow crease to wrist bone) first, then upper arm and thigh; one reading covers both sides.",
     ),
     instructions=(
-        "Press *Preview cameras* to see every planned view live (the plan and a fresh sessions/ folder are prefilled); frame the mat, then press *Record*: the preview releases the cameras for the recorder and resumes when the take is written.",
-        "Set the duration, press *Record*, walk to address during the warm-up, swing, hold the finish.",
+        "The live view opens with the tile (or press *Preview cameras*); the plan and a fresh sessions/ folder are prefilled. Frame the mat, pick a take length (5/10/15/30 s or custom) and a countdown.",
+        "Press *Record*: the countdown runs, the recorder takes over the cameras and the tiles keep showing them with a red REC readout; walk to address, swing, hold the finish. *Stop* ends the take early.",
         "Or *Import videos* to build a session from files (one or many).",
         "Run *Proxies* for smooth playback of large MJPEG recordings.",
     ),
@@ -362,8 +362,9 @@ ACTION_HELP: dict[str, str] = {
         "the cameras."
     ),
     "record": (
-        "Record all planned cameras for the set duration into the session "
-        "folder (the preview releases the cameras first and resumes afterwards)."
+        "Record a take of the chosen length after the optional countdown; the "
+        "live view keeps running from the recorder and the REC readout shows "
+        "elapsed time. Press again to stop early."
     ),
     "import": "Build a session from existing video files, one per view.",
     "proxy": (

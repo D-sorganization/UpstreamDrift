@@ -28,11 +28,8 @@ from typing import Any
 import numpy as np
 from PyQt6.QtCore import (
     QSettings,
-    QProcess,
-    QProcessEnvironment,
     Qt,
     QTimer,
-    pyqtSignal,
 )
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import (
@@ -67,17 +64,24 @@ from src.motion_capture.rig.plan import CameraControls, CaptureMode
 from src.shared.python.core.contracts import require
 
 from . import commands, workflow
-from .commands import ESTIMATOR_OPTIONS, MODE_PRESETS, OptionSpec, PlanSelection
-from .commands import mode_text
 from .annotate_widget import AnnotateDialog, BaseSet
+from .commands import (
+    ESTIMATOR_OPTIONS,
+    MODE_PRESETS,
+    OptionSpec,
+    PlanSelection,
+    mode_text,
+)
+from .layout import LayoutBar, LayoutStore, PaneHost
 from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .overlay import PoseTrack, draw_pose
 from .overlay_box import VariantOverlayBox
 from .overlay_render import render_frame
-from .layout import LayoutBar, LayoutStore, PaneHost
-from .preview import PreviewPanel
-from .provenance_tab import ProvenanceTab, SourcedTable
 from .player import VideoReader, clamp_index
+from .preview import PreviewPanel
+from .process_runner import RigProcessRunner
+from .provenance_tab import ProvenanceTab, SourcedTable
+from .record_bar import RecordBar
 from .session import SessionMedia, ViewMedia, flatten_numbers, load_session
 
 logger = logging.getLogger(__name__)
@@ -104,48 +108,6 @@ def _optional_float(text: str) -> float | None:
 
 def _csv(text: str) -> tuple[str, ...]:
     return tuple(v.strip() for v in text.split(",") if v.strip())
-
-
-class RigProcessRunner(QWidget):
-    """Runs one rig command at a time as a child process, streaming its output."""
-
-    output = pyqtSignal(str)
-    finished = pyqtSignal(int)
-
-    def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._process = QProcess(self)
-        self._process.setWorkingDirectory(str(commands.repo_root()))
-        env = QProcessEnvironment()
-        for key, value in commands.child_environment().items():
-            env.insert(key, value)
-        self._process.setProcessEnvironment(env)
-        self._process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
-        self._process.readyReadStandardOutput.connect(self._drain)
-        self._process.finished.connect(self._on_finished)
-
-    @property
-    def busy(self) -> bool:
-        return self._process.state() != QProcess.ProcessState.NotRunning
-
-    def run(self, argv: Sequence[str]) -> None:
-        """Start ``argv``. Precondition: nothing is running."""
-        require(not self.busy, "a rig command is already running")
-        require(len(argv) >= 1, "argv must name a program")
-        self.output.emit("$ " + " ".join(argv) + "\n")
-        self._process.start(argv[0], list(argv[1:]))
-
-    def stop(self) -> None:
-        if self.busy:
-            self._process.kill()
-
-    def _drain(self) -> None:
-        data = bytes(self._process.readAllStandardOutput().data())
-        self.output.emit(data.decode("utf-8", errors="replace"))
-
-    def _on_finished(self, code: int, _status: Any) -> None:
-        self.output.emit(f"[exit {code}]\n")
-        self.finished.emit(int(code))
 
 
 class WorkflowPanel(QGroupBox):
@@ -199,6 +161,16 @@ class WorkflowPanel(QGroupBox):
         return {s.step.key: s.status for s in self._states}
 
 
+def live_dir(session: Path) -> Path:
+    """Where the recorder drops live snapshots for the tile during a take."""
+    return session / ".live"
+
+
+def stop_file(session: Path) -> Path:
+    """The file whose appearance ends a take early."""
+    return session / ".stop"
+
+
 def default_plan_path() -> Path | None:
     """The lab plan shipped in docs when it exists, so Record works out of the box."""
     candidate = commands.repo_root() / LAB_PLAN
@@ -214,7 +186,7 @@ def default_session_dir() -> Path:
 
 
 class CapturePanel(QGroupBox):
-    """Plan, mode, views, UVC controls and duration for the camera commands."""
+    """Plan, mode, views and UVC controls for the camera commands."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Capture", parent)
@@ -226,9 +198,6 @@ class CapturePanel(QGroupBox):
             self.mode_combo.addItem(mode_text(mode), mode)
         self.views_edit = QLineEdit()
         self.views_edit.setPlaceholderText("all plan views, or e.g. cam_b,cam_c")
-        self.duration_spin = QDoubleSpinBox()
-        self.duration_spin.setRange(0.5, 600.0)
-        self.duration_spin.setValue(10.0)
         self.exposure_edit = QLineEdit()
         self.exposure_edit.setPlaceholderText("camera default")
         self.gain_edit = QLineEdit()
@@ -244,7 +213,6 @@ class CapturePanel(QGroupBox):
         )
         form.addRow("Mode", self.mode_combo)
         form.addRow("Views", self.views_edit)
-        form.addRow("Duration (s)", self.duration_spin)
         form.addRow("Exposure", self.exposure_edit)
         form.addRow("Gain", self.gain_edit)
         form.addRow("Auto-exposure", self.auto_exposure_combo)
@@ -301,9 +269,6 @@ class CapturePanel(QGroupBox):
     def session_dir(self) -> Path:
         require(self.session_edit.text().strip() != "", "choose a session folder")
         return Path(self.session_edit.text().strip())
-
-    def duration_s(self) -> float:
-        return float(self.duration_spin.value())
 
     def dry_run(self) -> bool:
         return self.dry_run_check.isChecked()
@@ -789,6 +754,10 @@ class CaptureRigWidget(QWidget):
         self.preview = PreviewPanel()
         self.preview.state_changed.connect(self._on_preview_state)
         self._resume_preview = False
+        self.record_bar = RecordBar()
+        self.record_bar.start_requested.connect(self.start_take)
+        self.record_bar.stop_requested.connect(self.stop_take)
+        self.record_bar.badge_changed.connect(self.preview.set_badge)
         self.playback = PlaybackPanel()
         self.results = QTabWidget()
         self.swing_table = SourcedTable()
@@ -858,7 +827,7 @@ class CaptureRigWidget(QWidget):
         self.panes = PaneHost(
             controls,
             {
-                "preview": ("Live preview", self.preview, right),
+                "preview": ("Live preview", self._live_pane(), right),
                 "playback": ("Playback", self.playback, right),
                 "results": ("Results", self.results, right),
             },
@@ -871,6 +840,15 @@ class CaptureRigWidget(QWidget):
         layout.addLayout(header)
         layout.addWidget(self.panes, 1)
 
+    def _live_pane(self) -> QWidget:
+        """Preview tiles with the transport controls underneath, like a camera app."""
+        pane = QWidget()
+        column = QVBoxLayout(pane)
+        column.setContentsMargins(0, 0, 0, 0)
+        column.addWidget(self.preview, 1)
+        column.addWidget(self.record_bar)
+        return pane
+
     # -- commands -----------------------------------------------------------
     def command_for(self, action: str) -> list[str]:
         """The argv an action would run; raises on missing inputs."""
@@ -880,8 +858,11 @@ class CaptureRigWidget(QWidget):
             "record": lambda: commands.record_command(
                 self.capture.selection(),
                 session,
-                duration_s=self.capture.duration_s(),
+                duration_s=self.record_bar.duration_s(),
                 dry_run=self.capture.dry_run(),
+                live_preview=live_dir(session),
+                stop_file=stop_file(session),
+                cameras=self.preview.camera_ids() or None,
             ),
             "import": lambda: commands.import_command(
                 session, self.capture.pending_import
@@ -1001,9 +982,8 @@ class CaptureRigWidget(QWidget):
             self.toggle_preview()
             return
         if action == "record":
-            # ffmpeg needs the devices: release them, resume after the take.
-            self._resume_preview = self.preview.active
-            self.preview.stop()
+            self.record_bar.toggle()  # countdown → start_take, or stop the take
+            return
         if action == "annotate":
             dialog = self.annotate_dialog()
             if dialog is None:
@@ -1028,9 +1008,46 @@ class CaptureRigWidget(QWidget):
         if code == 0:
             self.capture.pending_import = []
             self.refresh_session()
+        self.preview.stop_watching()
+        self.record_bar.recording_finished()
         if self._resume_preview:
             self._resume_preview = False
             self.toggle_preview(on=True)
+
+    # -- recording ------------------------------------------------------------
+    def start_take(self) -> None:
+        """Launch the recorder; the preview switches to the recorder's snapshots.
+
+        The cameras belong to ffmpeg during a take, so the direct preview is
+        released first and resumed when the take is written.
+        """
+        if self.runner.busy:
+            self._append_log("a command is still running; press Stop first\n")
+            self.record_bar.recording_finished()
+            return
+        try:
+            argv = self.command_for("record")
+            session = self.capture.session_dir()
+        except (ValueError, TypeError) as exc:
+            self._append_log(f"cannot record: {exc}\n")
+            self.record_bar.recording_finished()
+            return
+        views = self.preview.views() or tuple(self.capture.selection().views)
+        self._resume_preview = self.preview.active or not views
+        self.preview.stop()
+        live_dir(session).mkdir(parents=True, exist_ok=True)
+        stop_file(session).unlink(missing_ok=True)
+        if views:
+            self.preview.watch_snapshots(live_dir(session), views)
+        self.runner.run(argv)
+        self.record_bar.recording_started()
+
+    def stop_take(self) -> None:
+        """End the running take early (the recorder sees the stop file)."""
+        try:
+            stop_file(self.capture.session_dir()).write_text("stop", encoding="utf-8")
+        except (ValueError, OSError) as exc:
+            self._append_log(f"cannot stop the take: {exc}\n")
 
     def toggle_preview(self, on: bool | None = None) -> None:
         """Start (or stop) the live preview of the Capture panel's plan."""
@@ -1122,12 +1139,27 @@ class CaptureRigWidget(QWidget):
 
 
 class CaptureRigWindow(QMainWindow):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    """The tile in its own window (``python -m src.tools.capture_rig``).
+
+    ``autostart_preview`` opens the planned cameras as soon as the window
+    shows, so the operator sees the bay without pressing anything.
+    """
+
+    def __init__(
+        self, parent: QWidget | None = None, *, autostart_preview: bool = False
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Capture Rig")
         self.widget = CaptureRigWidget(self)
         self.setCentralWidget(self.widget)
         self.resize(1600, 900)
+        self._autostart_preview = autostart_preview
+
+    def showEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        super().showEvent(event)
+        if self._autostart_preview:
+            self._autostart_preview = False
+            self.widget.toggle_preview(on=True)
 
 
 def get_dockable_ui() -> CaptureRigWindow:

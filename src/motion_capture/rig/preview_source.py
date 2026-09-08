@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import subprocess
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from contextlib import ExitStack
 from typing import Any
 
@@ -92,6 +92,7 @@ class FfmpegPreviewSource:
     ) -> None:
         require(bool(identity), "identity must be non-empty")
         self._identity = identity
+        self.camera_instance_id = camera_instance_id
         self._device_ref = dshow_device_ref(camera_instance_id)
         self._ffmpeg = ffmpeg_exe
         self._width, self._fps = width, fps
@@ -182,6 +183,22 @@ class FfmpegPreviewSource:
             proc.terminate()  # a raw-video pipe has no graceful quit key
         if stack is not None:
             stack.close()
+
+
+def preview_sources_from_ids(
+    plan: Any, camera_ids: Mapping[str, str], **kwargs: Any
+) -> dict[str, FfmpegPreviewSource]:
+    """Preview sources for already-bound cameras: no enumeration (seconds, not 30 s).
+
+    Precondition: ``camera_ids`` names a DirectShow instance id for every
+    plan view.
+    """
+    missing = [c.view for c in plan.cameras if c.view not in camera_ids]
+    require(not missing, "camera_ids must cover every plan view", missing)
+    return {
+        c.view: FfmpegPreviewSource(c.identity, camera_ids[c.view], **kwargs)
+        for c in plan.cameras
+    }
 
 
 def ffmpeg_preview_sources(
