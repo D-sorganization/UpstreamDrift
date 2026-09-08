@@ -2,14 +2,29 @@
 
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
+
+## PR Backlog Catch-Up Sweep: 2026-09-08 (agent `claude`, session UpstreamPRs)
+
+Disposition of the 38-PR open backlog (REST-verified states at sweep start):
+
+- **Merged (18):** #9513, #9715, #9716, #9717, #9718, #9719, #9721, #9722, #9728, #9734, #9736, #9738, #9739, #9741, #9742, #9743, #9744, #9745. Every branch was brought current with `main` (REST update-branch, never force-push) and its AGENT_HANDOFF/SPEC/DEVELOPMENT_LOG conflicts resolved (union for SPEC rows, main-wins for handoff stamps, DL entries re-added into the Active table).
+- **Closed as redundant (3):** #9433 (duplicate of #9723 for #9409), #9437 (superseded by the merged #9412 registry work, `1b53a9bf5`), #9737 (superseded by merged #9740 for #9699). Explanatory comments posted on each.
+- **Armed for auto-merge (9):** #9434, #9465, #9471, #9720, #9723, #9724, #9725, #9726, #9729. Branches are conflict-free and current; auto-merge (merge/squash per repo allowance) merges each as `quality-gate` passes under strict up-to-date. No action needed; they drain serially.
+- **Blocked (2):**
+  - **#9440** — the `split` ruling deletes UD `theme/__init__.py`+`palette.py`, but main landed UD-only palette/typography extensions (#8972/#9037, `ThemePalette`/`get_current_colors`, ~217 lines) that the pinned Tools tree (`eab74a901a`) does not contain; 10+ launchers/API modules consume them. Next steps: land #8972/#9037 in D-sorganization/Tools tools-canonical side, bump the `vendor/ud-tools` pin, re-merge main, regenerate `docs/shared_tools/divergence_inventory{.md,.v1.json}` via `scripts/shared_tools/divergence_inventory.py`, then re-run `tests/unit/shared_python/test_seam_redirect.py` + quality-gate.
+  - **#9442** — stacked on #9440's base branch (retarget to `main` only after #9440 lands); its own CI failures overlap open #9607 / PR #9726 (pinocchio authority lock drift) and a self-hosted authority-runner artifact path. Do not merge in isolation.
+- **Skipped drafts (4):** #9610, #9618, #9633, #9636 (conductor research drafts, not trivially completable).
+
+No issue was closed in this sweep (redundant-PR closures do not close issues). Fleet-wide handoff/lease state at sweep start: `C:/tmp/backlog/UpstreamDrift.md`.
 
 ## Impact Dynamics and Acoustics: #9700
 
 - Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
-- Tools #5077 and #5082 remain open. Distributed shaft, flexible contact, acoustics, studies and empirical gates remain active.
-- #9735 / PR #9745 (open; provider CI passes, main sync in progress): `fix/9735-impact-provider-imports`, base `dbc6727aa`; fixes test bootstrap/origin checks, with no production import changes.
+- Tools #5077 merged at `f72544613`; #5082 remains open. T3 section inertia is published at `22cfc8df9`; rotating loaded dynamics, contact, acoustics and empirical gates remain active.
+- #9735 / PR #9745 merged at `1b48707d5`. Follow-up #9783 accepts exact reviewed renderer source/hash pairs; the existing vendor pin and strict pixel tolerances stay intact.
 - No-vendor provider contracts: 13 passed; ownership-eviction mutation detected; installed-wheel CLI bootstrap passed. Pinned-vendor/CLI/fallback checks: 72 passed.
-- Current compatibility record: `docs/development/impact_provider_import_turnover.md`; overall design: `docs/development/impact_acoustics_program.md`.
+- Current renderer compatibility: `docs/development/renderer_reference_9783_turnover.md`; import history: `docs/development/impact_provider_import_turnover.md`; design: `docs/development/impact_acoustics_program.md`.
 - Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
@@ -17,6 +32,7 @@ evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual progra
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
 recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
+
 ## Import Bootstrap Fail-Fast: #9733
 
 - Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
@@ -33,7 +49,7 @@ design-manual program.
 Detailed takeover context (merge-versus-quarantine boundary, exact smoke contract, recovery constraints, next commands): `docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
-  `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+`docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
 UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 `_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
 `architecture_budget.json` exceptions are removed, behavior pinned by tests.
@@ -207,6 +223,7 @@ unexpected token`, swallowing the finding). Posting now runs
   `scripts/setup_hooks.py` now calls the installer (issue #9476), so the
   documented setup registers the `spec-rows` driver, and the installer
   docstring names this repository's entry point.
+
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
