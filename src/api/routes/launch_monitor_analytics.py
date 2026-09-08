@@ -7,7 +7,6 @@ from contextlib import asynccontextmanager
 from functools import lru_cache
 from typing import Any
 
-import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
@@ -312,6 +311,8 @@ async def player_covariation_contract_v1() -> dict[str, object]:
 async def analyze(payload: AnalyzePayload) -> dict[str, object]:
     """Analyze caller-supplied records without filesystem or URL access."""
 
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
     frame = pd.DataFrame.from_records(payload.records)
     result = analyze_variables(frame, payload.analysis.to_domain())
     return {"contract_version": CONTRACT_VERSION, "result": result.to_dict()}
@@ -325,6 +326,8 @@ async def analyze(payload: AnalyzePayload) -> dict[str, object]:
 @handle_api_errors
 async def analyze_v2(payload: AnalyzePayloadV2) -> LaunchMonitorAnalysisResultV2:
     """Analyze inline records with the evidence-bearing v2 contract."""
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
 
     frame = pd.DataFrame.from_records(payload.records)
     result = analyze_variables_v2(
@@ -347,6 +350,8 @@ async def analyze_player_covariation(
 ) -> PlayerCovariationResultV1:
     """Analyze one variable pair across explicitly identified players."""
 
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
     return analyze_player_covariation_v1(
         pd.DataFrame.from_records(payload.records),
         payload.request,
@@ -364,6 +369,8 @@ async def scan_player_covariation(
     payload: PlayerCovariationScanPayloadV1,
 ) -> PlayerCovariationScanResultV1:
     """Rank a bounded exploratory set of variable pairs."""
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
 
     return scan_player_covariation_v1(
         pd.DataFrame.from_records(payload.records),
@@ -383,6 +390,8 @@ async def analyze_longitudinal_sessions_v1(
 ) -> LongitudinalSessionResultV1:
     """Estimate descriptive direction after session-level aggregation."""
 
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
+
     return analyze_longitudinal_sessions(
         pd.DataFrame.from_records(payload.records),
         payload.request,
@@ -400,6 +409,8 @@ async def analyze_strokes_gained_v1(
     payload: StrokesGainedPayloadV1,
 ) -> StrokesGainedAnalysisResultV1:
     """Score explicit course states against a hash-verified benchmark."""
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
 
     return analyze_source_backed_strokes_gained(
         pd.DataFrame.from_records(payload.records),
@@ -419,6 +430,8 @@ async def analyze_outcome_proxy_v1(
     payload: OutcomeProxyPayloadV1,
 ) -> OutcomeProxyResultV1:
     """Compute a proximity proxy whose contract forbids an SG claim."""
+
+    import pandas as pd  # deferred import: pandas must not load at API boot (issue #8943)
 
     return analyze_outcome_proxy(
         pd.DataFrame.from_records(payload.records), payload.request
