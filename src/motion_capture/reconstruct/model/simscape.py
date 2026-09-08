@@ -73,6 +73,7 @@ JOINTS: dict[str, tuple[str, str, tuple[tuple[str, ...], ...]]] = {
 BODIES = ("Spine", "Torso", "LScap", "RScap", "LS", "RS", "LF", "RF")
 AXES = "xyz"
 CONVERGED_RAD = 1e-4  # residual below which a hypothesis is accepted outright
+MAX_SEEDS = 25  # identity + the 24 axis-aligned rotations
 
 
 @dataclass(frozen=True)
@@ -178,17 +179,19 @@ def _als(
 
 
 def _solve_frames(
-    r_rel: Array, r_joint: Array, iterations: int = 20
+    r_rel: Array, r_joint: Array, iterations: int = 20, seeds: int = MAX_SEEDS
 ) -> tuple[Array, Array, float]:
     """``A``, ``B`` constant with ``r_rel ~ A r_joint B``; returns residual in radians.
 
     Alternating Procrustes is not convex in ``(A, B)``; it is restarted from
-    the identity and from the 24 axis-aligned rotations as post-frame seeds
-    and the best is kept. The sign of the residual decides, not the seed.
+    the identity and from up to 24 axis-aligned rotations as post-frame seeds
+    (``seeds`` in total) and the best is kept. The sign of the residual
+    decides, not the seed. Precondition: ``1 <= seeds <= MAX_SEEDS``.
     """
-    seeds = [np.eye(3), *_axis_aligned_rotations()]
+    require(1 <= seeds <= MAX_SEEDS, "seeds out of range", seeds)
+    seed_list = [np.eye(3), *_axis_aligned_rotations()][:seeds]
     best: tuple[Array, Array, float] | None = None
-    for seed in seeds:
+    for seed in seed_list:
         result = _als(r_rel, r_joint, seed, iterations)
         if best is None or result[2] < best[2]:
             best = result
@@ -233,8 +236,14 @@ class JointConvention:
         )
 
 
-def identify_joint(frames: Frames, joint: str) -> JointConvention:
-    """Best signed axis order for ``joint``; precondition: a known joint name."""
+def identify_joint(
+    frames: Frames, joint: str, *, seeds: int = MAX_SEEDS
+) -> JointConvention:
+    """Best signed axis order for ``joint``; precondition: a known joint name.
+
+    ``seeds`` bounds the Procrustes restarts per hypothesis (the full 25 for
+    real logs; a handful suffices for exact synthetic data).
+    """
     require(joint in JOINTS, "unknown joint", joint)
     parent, child, candidates = JOINTS[joint]
     # Two readings of the sensor: the child's rotation relative to the parent
@@ -259,7 +268,7 @@ def identify_joint(frames: Frames, joint: str) -> JointConvention:
             for order in _axis_orders(k):
                 for signs in itertools.product((1, -1), repeat=k):
                     r_joint = _primitive(angles, order, signs)
-                    a, b, res = _solve_frames(r_rel, r_joint)
+                    a, b, res = _solve_frames(r_rel, r_joint, seeds=seeds)
                     if best is None or res < best[0]:
                         best = (res, "".join(order), signs, a, b, reference, cols)
     assert best is not None
