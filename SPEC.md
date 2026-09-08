@@ -1,5 +1,13 @@
 # SPEC.md — Repository Specification Document
 
+## Video Upload Suffix Derivation From Filename Allow-List (#9612)
+
+Video analysis endpoints (`/analyze/video` sync and `/analyze/video/async`) derive
+the temp-file container suffix from the upload's original filename against
+`SUPPORTED_VIDEO_SUFFIXES` (`{.mp4, .mov, .mkv, .avi, .webm}`). Unknown or
+missing extensions fail closed with HTTP 400 before creating temporary files
+or reading payload bytes.
+
 ## Consolidate the Model-Generation REST API on a Single Implementation (#9699)
 
 `ModelGenerationAPI` existed twice with an identical 18-route surface:
