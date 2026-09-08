@@ -171,6 +171,14 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 4. #9483: the stale 15-tile nav-gap audit `reports/feature_navigation_gaps/` is deleted (findings dispositioned in the deleting PR); live tile truth is the `src/config/models.yaml` registry plus the generated launcher manifest (#9412/#9437/#9478).
 5. Regenerate `requirements*.lock`/`environment.yml` via dispatch-only `lock-refresh.yml`
    for #9533 (DL-#9533, PR #9716) once it merges; the locks were left untouched there.
+
+## Spec Merge-Driver Vendoring (#9476)
+
+- `scripts/install_spec_merge_driver.py` and `shared_scripts/spec_changelog.py`
+  are re-vendored from Repository_Management#1521's corrected copies and pinned
+  byte-identical by `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`;
+  registration wiring into `scripts/setup_hooks.py` follows in the companion
+  wiring PR (`claude/issue-9476-driver-wiring`).
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
