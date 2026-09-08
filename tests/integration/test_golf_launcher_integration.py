@@ -250,14 +250,22 @@ models:
             )
 
         # Mock AIAssistantPanel before importing to prevent Qt crashes
-        # Clear modules first so patches take effect
-        sys.modules.pop("src.launchers.upstream_drift_launcher", None)
-        sys.modules.pop("src.launchers.upstream_drift_launcher", None)
-        sys.modules.pop("src.launchers.ui_components", None)
-        sys.modules.pop("src.shared.python.ai.gui.assistant_panel", None)
-        sys.modules.pop("src.shared.python.ai.gui", None)
-        sys.modules.pop("shared.python.ai.gui", None)
-        sys.modules.pop("shared.python.ai.gui.assistant_panel", None)
+        # Clear modules first so patches take effect.  Snapshot the
+        # entries first so teardown restores the pre-fixture namespace
+        # (#9387: fixtures must not leak dropped modules).
+        dropped_modules = [
+            "src.launchers.upstream_drift_launcher",
+            "src.launchers.ui_components",
+            "src.shared.python.ai.gui.assistant_panel",
+            "src.shared.python.ai.gui",
+            "shared.python.ai.gui",
+            "shared.python.ai.gui.assistant_panel",
+        ]
+        saved_modules = {
+            name: sys.modules[name] for name in dropped_modules if name in sys.modules
+        }
+        for name in dropped_modules:
+            sys.modules.pop(name, None)
 
         mock_ai_panel = MagicMock()
         mock_ai_panel.settings_requested = MagicMock()
@@ -346,6 +354,14 @@ models:
             console_patcher.stop()
             ai_panel_patcher.stop()
             context_help_patcher.stop()
+            # Restore the pre-fixture sys.modules state for the dropped
+            # launcher modules (#9387): re-bind previously cached modules
+            # and remove replacements imported inside the fixture.
+            for name, module in saved_modules.items():
+                sys.modules[name] = module
+            for name in dropped_modules:
+                if name not in saved_modules:
+                    sys.modules.pop(name, None)
 
 
 def test_launcher_handles_missing_file_on_launch(launcher_env) -> None:
