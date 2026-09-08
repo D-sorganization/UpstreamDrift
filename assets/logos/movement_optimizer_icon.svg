@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Movement Optimizer">
+  <rect width="64" height="64" rx="12" fill="#1e1e2e"/>
+  <!-- barbell bar -->
+  <rect x="8" y="30" width="48" height="4" rx="2" fill="#cdd6f4"/>
+  <!-- plates -->
+  <rect x="12" y="22" width="6" height="20" rx="2" fill="#89b4fa"/>
+  <rect x="46" y="22" width="6" height="20" rx="2" fill="#89b4fa"/>
+  <!-- 3-link sagittal chain (shank, thigh, trunk) -->
+  <polyline points="20,52 28,40 40,38 44,20" fill="none" stroke="#a6e3a1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="20" cy="52" r="3" fill="#f9e2af"/>
+  <circle cx="28" cy="40" r="3" fill="#f9e2af"/>
+  <circle cx="40" cy="38" r="3" fill="#f9e2af"/>
+  <circle cx="44" cy="20" r="3" fill="#f38ba8"/>
+</svg>
