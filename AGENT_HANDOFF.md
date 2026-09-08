@@ -219,6 +219,23 @@ scripts.shared_tools.divergence_inventory --write` re-records the 16 new
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
 
+## Impact Explorer Web Route Producer: #9484
+
+- PR: #9724 (open against `main`, `Fixes #9484`).
+- The `rate_of_closure` tile declares `web.mode: route` for
+  `/tools/impact-explorer`; `src/api/local_server.py` mounts
+  `vendor/ud-tools/src/rate_of_closure/web/dist` when it exists. CI Standard's
+  `impact-explorer-web-build` job now builds that bundle from the pinned Tools
+  tree (`npm ci`, then `npm run build -- --base=/impact-explorer-app/`) and
+  `scripts/check_declared_route_producers.py` fails any launcher route that no
+  pipeline produces (unit tests in `tests/scripts/test_declared_route_producers.py`).
+- Open decision (maintainer, #9417): whether the built bundle ships inside the
+  wheel/image or is fetched as a Tools release artifact; this work deliberately
+  does not re-architect distribution. The vendored build authority is Tools'
+  `.github/workflows/rate-of-closure-web-distribution.yml` (node 22, `npm ci`
+  in `src/rate_of_closure/web`); the base path comes from the route fallback
+  in `ui/src/pages/ImpactExplorer.tsx`.
+
 ## Active Hybrid Authority Repair: #9236
 
 - The candidate adds a study-scoped, hash-locked CPython 3.11.15 manylinux
