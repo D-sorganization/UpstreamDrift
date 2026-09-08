@@ -155,4 +155,8 @@ with the incoming ADR's formatting. The index now uses its canonical inline-code
 functions in the new CLI-policy test module. Its module-level unit marker fixes
 the ratchet; all five cases pass. Existing marker debt is not rebaselined.
 Scientific sources, thresholds, generated native bytes and claim meanings are
-unchanged. Re-run the complete documented governance lane before the next push.
+unchanged. The complete documented governance lane passes locally, including
+26 contract tests, catalog/size checks and all eight changed-document title
+checks. The suite-marker ratchet passes without rebaselining. Canonical release
+validation passes at `02bc34f53`, retaining all 253 PDF pages and the same native
+record. Current-head native CI remains queued; no remote result is inferred.
