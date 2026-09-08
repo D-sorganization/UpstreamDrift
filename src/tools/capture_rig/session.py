@@ -9,7 +9,7 @@ stay ignorant of the bundle layout (Law of Demeter).
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -80,6 +80,10 @@ class SessionMedia:
     model_comparison: dict[str, Any] | None = None
     kinetics: dict[str, Any] | None = None
     variants: tuple[VariantMedia, ...] = ()
+    #: The manifest's strobe-alignment block (``rig.sync``); empty when the
+    #: take was recorded without ``--timing``. Playback turns it into
+    #: whole-frame offsets so frame k of every view is the same instant.
+    timing: dict[str, Any] = field(default_factory=dict)
 
     @property
     def ingested(self) -> bool:
@@ -165,7 +169,7 @@ def _rate(entry: RecordingEntry) -> float | None:
 def load_session(root: Path) -> SessionMedia:
     """Everything the tool can show for a bundle; raises ``ValueError`` if not a bundle."""
     require(root.is_dir(), "session must be a directory", str(root))
-    plan, index, _ = load_bundle(root)
+    plan, index, manifest = load_bundle(root)
     proxies, observations = _proxies(root), _observations(root)
     sets = _observation_sets(root)
     problems: list[str] = []
@@ -206,6 +210,7 @@ def load_session(root: Path) -> SessionMedia:
         model_comparison=_read_json(root / "model" / "comparison.json"),
         kinetics=_kinetics_summary(_read_json(root / "model" / "kinetics.json")),
         variants=_variants(root),
+        timing=dict(manifest.timing),
     )
 
 

@@ -3,7 +3,11 @@
 Binding the plan to devices (USB topology + DirectShow listing, about 30 s)
 runs in :class:`BinderThread`; then one :class:`CameraWorker` per view reads
 frames from a rig :class:`FrameSource` and hands the latest image to the
-panel, which shows the views side by side. :meth:`PreviewPanel.stop`
+panel, which composites the latest frame of every view into **one** canvas
+through the chosen :class:`~.layout_model.LayoutSpec` (#9813) — the same
+compositor playback and the video export draw with. A view that is captured
+but absent from the layout keeps being captured, and the same view may
+appear twice (full and a cropped detail, say). :meth:`PreviewPanel.stop`
 releases every camera, which the tile calls before a recording starts
 (ffmpeg needs the devices) and reverses when it ends.
 
@@ -22,14 +26,8 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 from PyQt6.QtCore import Qt, QThread, QTimer, pyqtSignal
-from PyQt6.QtGui import QColor, QImage, QPainter, QPixmap
-from PyQt6.QtWidgets import (
-    QGridLayout,
-    QLabel,
-    QSizePolicy,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt6.QtGui import QColor, QPainter, QPixmap
+from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 from src.motion_capture.rig.plan import CaptureMode, RigPlan
 from src.motion_capture.rig.sources import FrameSource
@@ -41,12 +39,23 @@ from src.shared.python.theme.typography import Sizes, Weights, get_qfont
 
 from . import styling
 from .commands import PlanSelection
+from .layout_model import LayoutSpec, SourceRef
+from .layout_presets import LayoutStore as PresetStore
+from .multiview import (
+    CanvasLabel,
+    ChooserOptions,
+    LayoutChooser,
+    compose_pixmap,
+    live_sources,
+    theme_palette,
+)
 
 SourceFactory = Callable[[RigPlan], Mapping[str, FrameSource]]
 FastFactory = Callable[[RigPlan, Mapping[str, str]], Mapping[str, FrameSource]]
 DISPLAY_INTERVAL_S = 1 / 15  # UI refresh cap; the camera keeps its own rate
-TILE_MIN = (96, 60)  # a soft floor; tiles otherwise follow the pane size
 SNAPSHOT_POLL_MS = 100
+DEFAULT_LIVE_LAYOUT = "side_by_side"
+NOTE_SEPARATOR = "\n"
 BADGE_INSET = LayoutMetrics.SPACING_SM + 2  # from the tile's top-left corner
 
 
@@ -104,18 +113,6 @@ def read_snapshot(path: Path) -> npt.NDArray[np.uint8] | None:
         return None
     image = cv2.imdecode(data, cv2.IMREAD_COLOR)
     return None if image is None else image.astype(np.uint8, copy=False)
-
-
-def bgr_to_pixmap(frame_bgr: npt.NDArray[np.uint8], width: int, height: int) -> QPixmap:
-    rgb = np.ascontiguousarray(frame_bgr[:, :, ::-1])
-    h, w = rgb.shape[:2]
-    image = QImage(rgb.tobytes(), w, h, 3 * w, QImage.Format.Format_RGB888)
-    return QPixmap.fromImage(image).scaled(
-        max(width, 1),
-        max(height, 1),
-        Qt.AspectRatioMode.KeepAspectRatio,
-        Qt.TransformationMode.FastTransformation,
-    )
 
 
 class BinderThread(QThread):
@@ -181,7 +178,15 @@ class CameraWorker(QThread):
 
 
 class PreviewPanel(QWidget):
-    """Tiles of live camera frames for the planned views."""
+    """One composited canvas of the live views, drawn through a layout.
+
+    The camera workers, the recorder-snapshot mode and the REC badge are
+    unchanged from the tiled preview; only the *rendering* differs: the
+    latest frame of every view is composited by
+    :func:`~.layout_model.compose` into a single canvas that follows the pane
+    size. ``layout_store`` is injectable so tests never touch the operator's
+    saved layouts.
+    """
 
     state_changed = pyqtSignal(bool)  # active
 
@@ -191,18 +196,21 @@ class PreviewPanel(QWidget):
         *,
         source_factory: SourceFactory = default_sources,
         fast_factory: FastFactory = sources_from_ids,
+        layout_store: PresetStore | None = None,
     ) -> None:
         super().__init__(parent)
         self._factory = source_factory
         self._fast_factory = fast_factory
-        self._generation = 0  # bumped whenever the tiles are rebuilt
+        self._generation = 0  # bumped whenever the view set is rebuilt
         self._fast_attempt = False
         self._binder: BinderThread | None = None
         self._plan: RigPlan | None = None
         self._workers: dict[str, CameraWorker] = {}
-        self._tiles: dict[str, QLabel] = {}
+        self._views: tuple[str, ...] = ()
+        self._notes: dict[str, str] = {}
         self._frames: dict[str, int] = {}
         self._last: dict[str, npt.NDArray[np.uint8]] = {}
+        self._canvas: npt.NDArray[np.uint8] | None = None
         self._badge = ""
         self._camera_ids: dict[str, str] = {}
         self._selection: PlanSelection | None = None
@@ -212,14 +220,21 @@ class PreviewPanel(QWidget):
         self._snapshot_timer.setInterval(SNAPSHOT_POLL_MS)
         self._snapshot_timer.timeout.connect(self.poll_snapshots)
         self.status = QLabel("preview off")
-        self.grid_box = QWidget()
-        self.grid = QGridLayout(self.grid_box)
-        self.grid.setContentsMargins(0, 0, 0, 0)
-        self.grid.setSpacing(LayoutMetrics.SPACING_SM)
+        self.canvas = CanvasLabel("preview off")
+        self.chooser = LayoutChooser(
+            options=ChooserOptions(
+                store=layout_store,
+                default=DEFAULT_LIVE_LAYOUT,
+                editor_title="Edit live layout",
+            )
+        )
+        self.chooser.set_frame_provider(self.frame_for)
+        self.chooser.layout_changed.connect(lambda _spec: self._redraw())
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(LayoutMetrics.SPACING_SM)
-        layout.addWidget(self.grid_box, 1)
+        layout.addWidget(self.chooser)
+        layout.addWidget(self.canvas, 1)
         layout.addWidget(self.status)
 
     # -- state ------------------------------------------------------------------
@@ -229,7 +244,28 @@ class PreviewPanel(QWidget):
         return bool(self._workers) or self._binder is not None
 
     def views(self) -> tuple[str, ...]:
-        return tuple(self._tiles)
+        """Every view being captured, whether or not the layout shows it."""
+        return self._views
+
+    def layout_name(self) -> str:
+        """The chosen layout's name (what the tile persists across restarts)."""
+        return self.chooser.layout_name()
+
+    def set_layout_name(self, name: str) -> bool:
+        """Choose the layout called ``name``; ``False`` when there is none."""
+        return self.chooser.set_layout_name(name)
+
+    def layout_spec(self) -> LayoutSpec:
+        """The layout the canvas is composited through."""
+        return self.chooser.spec()
+
+    def frame_for(self, source: SourceRef) -> npt.NDArray[np.uint8] | None:
+        """The latest frame of ``source``'s view, for a thumbnail or a tile."""
+        return self._last.get(source.view)
+
+    def canvas_frame(self) -> npt.NDArray[np.uint8] | None:
+        """The last composited canvas (BGR), or ``None`` before the first frame."""
+        return self._canvas
 
     def frames_seen(self, view: str) -> int:
         return self._frames.get(view, 0)
@@ -271,18 +307,16 @@ class PreviewPanel(QWidget):
             views=selection.views or None,
             controls=selection.controls if selection.controls.as_overrides() else None,
         )
-        self._build_tiles(tuple(c.view for c in self._plan.cameras))
+        self._set_views(tuple(c.view for c in self._plan.cameras))
         ids = self._camera_ids
-        self._fast_attempt = bool(ids) and all(v in ids for v in self._tiles)
+        self._fast_attempt = bool(ids) and all(v in ids for v in self._views)
         if self._fast_attempt:
             factory: SourceFactory = self._fast_binder(dict(ids))
-            for view, tile in self._tiles.items():
-                tile.setText(f"{view}: opening camera…")
+            self._note_all("opening camera…")
             self.status.setText("opening the cameras bound earlier…")
         else:
             factory = self._factory
-            for view, tile in self._tiles.items():
-                tile.setText(f"{view}: binding camera…")
+            self._note_all("binding camera…")
             self.status.setText("binding cameras (USB topology + DirectShow listing)…")
         self._binder = BinderThread(factory, self._plan)
         self._binder.bound.connect(self._on_bound)
@@ -309,30 +343,39 @@ class PreviewPanel(QWidget):
         for worker in workers:
             worker.wait(5000)
         self._workers = {}
-        for view, tile in self._tiles.items():
-            tile.setText(f"{view}: preview off")
+        self._note_all("preview off")
         if workers or binder is not None:
             self.status.setText("preview off (cameras released)")
             self.state_changed.emit(False)
 
-    def _build_tiles(self, views: tuple[str, ...]) -> None:
-        for tile in self._tiles.values():
-            self.grid.removeWidget(tile)
-            tile.deleteLater()
-        self._tiles = {}
+    def _set_views(self, views: tuple[str, ...]) -> None:
+        """Capture ``views`` from now on and offer them to the layout picker.
+
+        Postcondition: the layout's sources are these views, so a built-in
+        preset refills itself; a saved layout keeps whatever it names, and a
+        view it does not show is captured all the same.
+        """
+        self._views = tuple(views)
         self._frames = {}
         self._last = {}
+        self._canvas = None
         self._generation += 1
-        for column, view in enumerate(views):
-            tile = QLabel(view)
-            tile.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            tile.setMinimumSize(*TILE_MIN)
-            # Ignored: the pixmap never dictates the tile's size, the pane does.
-            tile.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
-            tile.setStyleSheet(styling.tile_style())
-            self.grid.addWidget(tile, 0, column)
-            self.grid.setColumnStretch(column, 1)
-            self._tiles[view] = tile
+        self.chooser.set_sources(live_sources(self._views))
+        self._note_all("")
+        self._redraw()
+
+    def _note_all(self, text: str) -> None:
+        """Say the same thing about every view on the canvas placeholder."""
+        self._notes = dict.fromkeys(self._views, text)
+        self._show_notes()
+
+    def _show_notes(self) -> None:
+        """Put the per-view notes on the canvas while no frame has arrived."""
+        if self._last:
+            return
+        lines = [f"{v}: {n}" for v, n in self._notes.items() if n]
+        self.canvas.setPixmap(QPixmap())
+        self.canvas.setText(NOTE_SEPARATOR.join(lines) or "preview off")
 
     # -- slots --------------------------------------------------------------------
     def _on_bound(self, sources: object) -> None:
@@ -346,7 +389,7 @@ class PreviewPanel(QWidget):
             if (instance := getattr(source, "camera_instance_id", None))
         }
         for view, source in sources.items():
-            if view not in self._tiles:
+            if view not in self._views:
                 continue
             mode = next(c.mode for c in plan.cameras if c.view == view)
             worker = CameraWorker(view, source, mode, self._generation)
@@ -354,8 +397,9 @@ class PreviewPanel(QWidget):
             worker.failed.connect(self._on_failed)
             worker.opened.connect(self._on_opened)
             self._workers[view] = worker
-            self._tiles[view].setText(f"{view}: opening…")
+            self._notes[view] = "opening…"
             worker.start()
+        self._show_notes()
         self.status.setText("preview starting…")
         if not self._workers:
             self.state_changed.emit(False)
@@ -368,21 +412,19 @@ class PreviewPanel(QWidget):
             self.start(self._selection)
             return
         self.status.setText(f"preview unavailable: {message}")
-        for view, tile in self._tiles.items():
-            tile.setText(f"{view}: not bound")
+        self._note_all("not bound")
         self.state_changed.emit(False)
 
     def _on_frame(
         self, view: str, image: object, generation: int | None = None
     ) -> None:
-        tile = self._tiles.get(view)
-        if tile is None or not isinstance(image, np.ndarray):
+        if view not in self._views or not isinstance(image, np.ndarray):
             return
         if generation is not None and generation != self._generation:
             return  # a worker that was stopped, still flushing its last frame
         self._frames[view] = self._frames.get(view, 0) + 1
         self._last[view] = image
-        self._draw(view)
+        self._draw()
         if self._frames[view] == 1:
             live = ", ".join(v for v, n in self._frames.items() if n)
             prefix = (
@@ -395,22 +437,32 @@ class PreviewPanel(QWidget):
         self._redraw()
 
     def _redraw(self) -> None:
-        for view in self._last:
-            self._draw(view)
+        self._draw()
 
     def restyle(self) -> None:
-        """Tiles and badge follow a theme change."""
-        style = styling.tile_style()
-        for tile in self._tiles.values():
-            tile.setStyleSheet(style)
+        """Canvas, compositor palette and badge follow a theme change."""
+        self.canvas.restyle()
         self._redraw()
 
-    def _draw(self, view: str) -> None:
-        tile, image = self._tiles.get(view), self._last.get(view)
-        if tile is None or image is None:
+    def _draw(self) -> None:
+        """Composite the latest frame of every view into the one canvas.
+
+        Postcondition: with no frame yet the canvas shows the per-view notes
+        instead; otherwise it holds the composited image with the badge (when
+        set) stamped on it, and :meth:`canvas_frame` returns those pixels.
+        """
+        if not self._last:
+            self._show_notes()
             return
-        pixmap = bgr_to_pixmap(image, tile.width(), tile.height())
-        tile.setPixmap(stamp_badge(pixmap, self._badge))
+        frames = {
+            SourceRef(kind="live", view=view).key: image
+            for view, image in self._last.items()
+        }
+        canvas, pixmap = compose_pixmap(
+            frames, self.chooser.spec(), self.canvas.canvas_size(), theme_palette()
+        )
+        self._canvas = canvas
+        self.canvas.setPixmap(stamp_badge(pixmap, self._badge))
 
     # -- recorder snapshots (the cameras belong to ffmpeg during a take) ------
     def watch_snapshots(self, directory: Path, views: tuple[str, ...]) -> None:
@@ -420,9 +472,8 @@ class PreviewPanel(QWidget):
         the panel is not *active* (it holds no camera).
         """
         require(directory.is_dir(), "snapshot directory must exist", str(directory))
-        self._build_tiles(views)
-        for view, tile in self._tiles.items():
-            tile.setText(f"{view}: waiting for the recorder…")
+        self._set_views(views)
+        self._note_all("waiting for the recorder…")
         self._snapshot_dir = directory
         self._snapshot_stamps = {}
         self.status.setText("recording: live view from the recorder")
@@ -440,7 +491,7 @@ class PreviewPanel(QWidget):
         directory = self._snapshot_dir
         if directory is None:
             return
-        for view in self._tiles:
+        for view in self._views:
             path = directory / f"{view}.jpg"
             try:
                 stamp = path.stat().st_mtime_ns
@@ -455,11 +506,15 @@ class PreviewPanel(QWidget):
             self._on_frame(view, image)
 
     def _on_opened(self, view: str, mode_text: str) -> None:
-        self._tiles[view].setToolTip(f"{view} {mode_text}")
+        self._notes[view] = mode_text
+        self.canvas.setToolTip(
+            "; ".join(f"{v} {n}" for v, n in self._notes.items() if n)
+        )
 
     def _on_failed(self, view: str, message: str) -> None:
-        if view in self._tiles:
-            self._tiles[view].setText(f"{view}: {message}")
+        if view in self._views:
+            self._notes[view] = message
+            self._show_notes()
         self.status.setText(f"{view} failed: {message}")
         self._workers.pop(view, None)
         if not self._workers:
