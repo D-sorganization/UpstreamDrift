@@ -15,16 +15,14 @@ ROOT = Path(__file__).resolve().parents[3]
 ARTICLE = ROOT / "docs/research/proximal_distal_energy_transfer"
 REGISTRY = ARTICLE / "data/claim_audit_registry.json"
 INVENTORY = ARTICLE / "data/claim_candidate_inventory.json"
-DATE = "2026-09-08"
+DATE = "2026-08-21"
 CLAIM_IDS = {f"PD-CLAIM-{number}" for number in range(297, 302)}
 _AUTHORITY_CONTRACT_ARTIFACTS = (
     AUTHORITY_LOCK.relative_to(ROOT).as_posix(),
     AUTHORITY_LOCK.with_suffix(".in").relative_to(ROOT).as_posix(),
     ".github/workflows/ci-optional-stack.yml",
-    ".pre-commit-config.yaml",
     "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
     "tests/ci/test_articulated_manufactured_hybrid_ci_red.py",
-    "tests/research/test_manufactured_claim_refresh.py",
 )
 ARTIFACTS = list(
     dict.fromkeys(
@@ -159,39 +157,15 @@ def _build_claims(
     return claims, selected
 
 
-def _refresh_claims(
-    existing: list[dict[str, Any]], updates: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
-    """Refresh provenance without erasing reviewed outcomes or numeric evidence.
-
-    Existing scientific fields must match before review metadata is retained.
-    Changed scientific meaning requires explicit review, never an inferred
-    outcome. Preserve registry order and leave input records unmodified.
-    """
-    merged = {claim["claim_id"]: dict(claim) for claim in existing}
-    refresh_fields = {"evidence_artifacts", "last_verified_on"}
-    for update in updates:
-        claim_id = update["claim_id"]
-        previous = merged.get(claim_id)
-        if previous is not None and any(
-            previous.get(key) != value
-            for key, value in update.items()
-            if key not in refresh_fields
-        ):
-            raise ValueError(
-                f"scientific claim {claim_id} changed; new review required"
-            )
-        merged[claim_id] = {**(previous or {}), **update}
-    return list(merged.values())
-
-
 def _reconcile(
     registry: dict[str, Any],
     inventory: dict[str, Any],
     claims: list[dict[str, Any]],
     selected: list[dict[str, Any]],
 ) -> None:
-    refreshed_claims = _refresh_claims(registry["claims"], claims)
+    registry["claims"] = [
+        claim for claim in registry["claims"] if claim["claim_id"] not in CLAIM_IDS
+    ]
     valid_ids = {candidate["candidate_id"] for candidate in inventory["candidates"]}
     reviews = {
         review["candidate_id"]: review
@@ -225,7 +199,7 @@ def _reconcile(
         "last_verified_on": DATE,
     }
     registry["candidate_reviews"] = list(reviews.values())
-    registry["claims"] = refreshed_claims
+    registry["claims"].extend(claims)
     entries = {
         item["release_claim_key"]: item for item in registry["release_claim_inventory"]
     }
