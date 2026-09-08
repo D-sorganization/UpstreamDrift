@@ -26,9 +26,48 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** fix/9787-manufactured-authority
 - **Paths:** `scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.*`, `scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py`, manufactured research/CI contracts, native CI workflow, canonical evidence and turnover.
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (116 strict native contracts and three distinct rolling contracts pass)
+- **Last verified:** 2026-09-08 (122 combined native/provenance/bootstrap contracts and three distinct rolling contracts pass)
 - **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
-- **Next step:** The latest CI stale-summary failure is repaired through canonical JSON/CSV/QMD/PDF regeneration; five summary tests pass, claim outcomes are unchanged, and all 14 text-different PDF pages are visually inspected. Updated-main 116 native contracts pass; release/claim manifests and all 253 PDF pages validate. PR #9804 publishes `d1563dffa` with every normal hook passing; await protected CI and coordinate #9726 source regeneration; manufactured controls do not replace physical validation.
+- **Next step:** Main `563e7aaa9` and bootstrap #9726 are integrated; actual native evidence is regenerated with only source hashes changed. Combined-suite environment contamination is repaired. Claim outcomes and inspected 253-page PDF are unchanged; publish through normal hooks and await protected CI.
+
+### DL-#9478 · Launcher Registry Truth: `tools://` Provenance Scheme and Ready/Beta Maturity Gate
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9478
+- **Branch:** `claude/issue-9478-registry-truth`
+- **PR:** #9729 (open)
+- **Paths:** `src/config/models.yaml`, `src/config/launcher_manifest.json`,
+  `src/shared/python/config/tile_target_resolution.py`,
+  `tests/config/test_tile_paths_resolve.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-08 (Windows, Python 3.13.3, pytest 9.0.3)
+- **Summary:** `provider: tools` entries in `src/config/models.yaml` and
+  `src/config/launcher_manifest.json` now declare vendor provenance in the path
+  itself (`tools://src/<tool>/...`). `ToolsVendorModelSourceProvider` strips the
+  scheme at launch time; the local-repo and sibling providers reject it, so a
+  vendor path can no longer masquerade as a repo-relative one. The registry gate
+  (`tests/config/test_tile_paths_resolve.py`) gained a `ready`/`beta` maturity
+  gate (`ready_maturity_gate` in
+  `src/shared/python/config/tile_target_resolution.py`): a tile claiming
+  launchability whose entry point does not resolve fails the gate, except a
+  pinned-vendor target in a checkout that has not materialised the
+  `vendor/ud-tools` gitlink (skip with a reason, never faked as success);
+  the three vendor-materialised registry tests now carry a
+  `requires_vendor_gitlink` skipif so a submodule-less CI checkout (the
+  `unit-test-gate` job checks out no submodule) skips them through the
+  repo's #9501 seam-skip convention instead of failing on the authority's
+  fail-closed reason.
+  Maturity corrections: the four `*_models_shared` sibling-folder tiles and
+  `movement_optimizer` downgraded `ready` → `experimental` with sibling-folder
+  caveats; `motion_capture` downgraded `beta` → `experimental` (argparse CLI,
+  exits on a usage error as a tile); `myosim_suite`, `biomech_gait`,
+  `biomech_sit_to_stand`, `chat_assistant`, and `tools_calculator_hub`
+  descriptions now state what the tiles actually do. Focused verification:
+  `python -m pytest tests/config/test_tile_paths_resolve.py` — 85 passed,
+  5 skips, 0 failures.
+- **Next step:** build the dedicated calculator surface for
+  `tools_calculator_hub` (it still opens the shared Data Processor window).
 
 ### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
 
@@ -236,6 +275,19 @@ Never place credentials, tokens, or customer data in a development log.
 - **Last verified:** 2026-09-07 (`SELF`)
 - **Summary:** `SandDelivery` now refuses contradictory exit speed/vector pairs and owns copies of list-supplied exit vectors so post-construction mutation cannot invalidate the frozen record; the `to_post_impact_state` boundary carries explicit `ExitVectorProvenance` labels, and `PostImpactEnvelope` wraps the flight handoff with the validity verdict, F0 tier, per-group frames, the proper `HEAD_FRAME_TO_FLIGHT_TRANSFORM`, a schema version, and a SHA-256 source digest with JSON round trip. Reflection rejection itself was already delivered by PR #9574 and is not redone.
 - **Next step:** Open the protected PR to `main` with `Fixes #9542`, label `agent:claude`, and RED/GREEN evidence in the body.
+
+### DL-#9607 · Authority Runtime Native Library Bootstrap for Cmeel Pinocchio Wheels
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9607
+- **PR:** #9726 (open; `Fixes #9607`)
+- **Branch:** `claude/issue-9607-pinocchio-abi`
+- **Paths:** `scripts/research/proximal_distal_energy/articulated_native_runtime.py`, `scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py`, `tests/research/test_articulated_native_runtime.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** Resolves the authority lane's `liburdfdom_sensor.so.4.0` import failure by resolving `cmeel.prefix/lib` from the live venv, verifying the locked sonames with an explicit DbC diagnostic, and re-execing the authority profile with `LD_LIBRARY_PATH` prepended before `import pinocchio`.
+- **Next step:** Verify the `articulated-manufactured-authority` job in `ci-optional-stack.yml` imports pinocchio, then regenerate the committed publication authority record from a byte-identical locked Linux run.
 
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
