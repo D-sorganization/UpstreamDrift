@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #9762 (epic); prerequisites #9755, #9756, #9757, #9758, #9759, #9760, #9761
 - **Branch:** `claude/fixes-epic-implementation-x2bu36`
-- **PR:** not created
+- **PR:** [#9768](https://github.com/D-sorganization/UpstreamDrift/pull/9768) (open)
 - **Paths:** `src/shared/python/optimization/ocp/`,
   `src/shared/python/optimization/casadi_backend.py`,
   `src/shared/python/optimization/model_provider.py`,
@@ -55,8 +55,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   target-speed objective), and the six-marker set cannot observe the full
   seven-DOF chain (hip and trunk rotation are an exact null direction), so every
   tracking solve reports what it could not see.
-- **Next step:** Open the pull request for
-  `claude/fixes-epic-implementation-x2bu36` and record CI.
+- **Next step:** Record CI on PR #9768; phases 4 and 5 of the epic remain.
 
 ### DL-#9494 · Resolve the CLAUDE.md `--no-verify` Contradiction by Fixing the Windows Hook Environment
 
