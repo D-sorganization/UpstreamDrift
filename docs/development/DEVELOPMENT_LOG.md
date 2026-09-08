@@ -30,6 +30,21 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
 - **Next step:** Source push hooks and updated-main 116 native contracts pass; release/claim manifests and all 253 PDF pages validate. PR #9804 publishes `d1563dffa` with every normal hook passing; await protected CI and coordinate #9726 source regeneration; manufactured controls do not replace physical validation.
 
+### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9612`
+- **PR:** #9720
+- **Paths:** `src/api/routes/video.py`, `tests/unit/api/test_routes_video.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-07 (`SELF`)
+- **Summary:** Video analysis uploads no longer default temp files to `.mp4`;
+  the container suffix is derived from the upload filename against the
+  `SUPPORTED_VIDEO_SUFFIXES` allow-list in one place and unknown or missing
+  extensions fail closed with a 400 before any side effect.
+- **Next step:** Merge the protected PR for `#9612` and confirm CI runs green.
+
 ### DL-#9762 · `bioptim` Optimal-Control Backend and the Swing-Dynamics Fixes
 
 - **State:** in_review
