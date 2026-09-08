@@ -7,6 +7,12 @@
       "owner": "@dieterolson @D-sorganization/security-reviewers",
       "reason": "Issue #5922 temporary exception while the URDF campaign script is split by workflow domain.",
       "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/tools/launch_monitor_analytics/gui.py",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #9470 temporary exception while launch monitor analysis handlers and GUI widgets are decomposed.",
+      "expires_on": "2026-10-31"
     }
   ]
 }
