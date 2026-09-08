@@ -12,10 +12,12 @@ No module-level mutable state.
 
 from __future__ import annotations
 
+import anyio.to_thread
+import defusedxml.ElementTree as ElementTree
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import defusedxml.ElementTree as ElementTree
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.middleware.error_handler import handle_api_errors
@@ -29,7 +31,7 @@ from ..models.responses import (
     ModelExplorerResponse,
     URDFTreeNode,
 )
-from ._route_utils import find_project_root
+from ._route_utils import find_project_root, urdf_file_key
 
 router = APIRouter()
 
@@ -245,6 +247,28 @@ def _parse_urdf_tree(urdf_content: str, file_path: str) -> ModelExplorerResponse
     )
 
 
+@lru_cache(maxsize=64)
+def _parse_urdf_tree_cached(
+    file_key: tuple[str, int, int], file_path: str
+) -> ModelExplorerResponse:
+    """Read + parse a URDF once per file identity (issue #8943).
+
+    ``file_key`` is ``urdf_file_key()`` output — ``(resolved_path,
+    st_mtime_ns, st_size)`` — so any file modification invalidates the
+    cached parse. File I/O and XML parsing run under
+    ``anyio.to_thread.run_sync`` from the async handlers.
+
+    Args:
+        file_key: Opaque identity key for the URDF file on disk.
+        file_path: Display path recorded in the response.
+
+    Returns:
+        Parsed model explorer tree.
+    """
+    content = Path(file_key[0]).read_text(encoding="utf-8")
+    return _parse_urdf_tree(content, file_path)
+
+
 @precondition(
     lambda model_path: model_path is not None and len(model_path) > 0,
     "Model path must be a non-empty string",
@@ -348,8 +372,10 @@ async def get_model_explorer(
         )
 
     try:
-        content = filepath.read_text(encoding="utf-8")
-        return _parse_urdf_tree(content, model_entry["path"])
+        file_key = urdf_file_key(filepath)
+        return await anyio.to_thread.run_sync(
+            _parse_urdf_tree_cached, file_key, model_entry["path"]
+        )
     except ValueError as exc:
         raise HTTPException(
             status_code=422, detail=f"Failed to parse model: {str(exc)}"
@@ -383,8 +409,10 @@ async def inspect_model(
     if not (request is not None):
         raise ValueError("request must be provided")
     filepath = _resolve_model_path(request.model_path)
-    content = filepath.read_text(encoding="utf-8")
-    return _parse_urdf_tree(content, request.model_path)
+    file_key = urdf_file_key(filepath)
+    return await anyio.to_thread.run_sync(
+        _parse_urdf_tree_cached, file_key, request.model_path
+    )
 
 
 @router.post(
@@ -412,11 +440,12 @@ async def compare_models(
     path_a = _resolve_model_path(request.model_a_path)
     path_b = _resolve_model_path(request.model_b_path)
 
-    content_a = path_a.read_text(encoding="utf-8")
-    content_b = path_b.read_text(encoding="utf-8")
-
-    model_a = _parse_urdf_tree(content_a, request.model_a_path)
-    model_b = _parse_urdf_tree(content_b, request.model_b_path)
+    model_a = await anyio.to_thread.run_sync(
+        _parse_urdf_tree_cached, urdf_file_key(path_a), request.model_a_path
+    )
+    model_b = await anyio.to_thread.run_sync(
+        _parse_urdf_tree_cached, urdf_file_key(path_b), request.model_b_path
+    )
 
     # Find shared and unique joints
     joints_a = {node.name for node in model_a.tree if node.node_type == "joint"}

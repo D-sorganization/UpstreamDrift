@@ -104,3 +104,72 @@ def test_compare_models_success(client: TestClient) -> None:
     assert "unique_to_a" in data
     assert "unique_to_b" in data
     assert isinstance(data["shared_joints"], list)
+
+
+# ----------------------------------------------------------------------
+# URDF parse caching (issue #8943)
+# ----------------------------------------------------------------------
+
+
+def test_parse_urdf_tree_cached_reuses_parse_until_file_changes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Cached parse reuses one parse per file identity; mtime change re-parses."""
+    import os
+
+    urdf_path = (
+        model_explorer._find_project_root()
+        / "tests"
+        / "fixtures"
+        / "models"
+        / "simple_pendulum.urdf"
+    )
+    content = urdf_path.read_text(encoding="utf-8")
+
+    calls: list[str] = []
+    real = model_explorer._parse_urdf_tree
+
+    def spy(urdf_content: str, file_path: str) -> object:
+        calls.append(file_path)
+        return real(urdf_content, file_path)
+
+    monkeypatch.setattr(model_explorer, "_parse_urdf_tree", spy)
+
+    target = tmp_path / "probe.urdf"
+    target.write_text(content, encoding="utf-8")
+    from src.api.routes._route_utils import urdf_file_key
+
+    first_key = urdf_file_key(target)
+    first = model_explorer._parse_urdf_tree_cached(first_key, "probe.urdf")
+    second = model_explorer._parse_urdf_tree_cached(first_key, "probe.urdf")
+    assert calls == ["probe.urdf"]
+    assert first.model_name == second.model_name
+
+    # Changing the file's mtime must invalidate the cache entry.
+    stat = target.stat()
+    os.utime(target, ns=(stat.st_atime_ns, stat.st_mtime_ns + 1_000_000))
+    model_explorer._parse_urdf_tree_cached(urdf_file_key(target), "probe.urdf")
+    assert len(calls) == 2
+    model_explorer._parse_urdf_tree_cached.cache_clear()
+
+
+def test_get_model_explorer_parses_once_across_repeated_requests(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
+    """The tree endpoint must not re-read/re-parse the URDF per request."""
+    calls: list[str] = []
+    real = model_explorer._parse_urdf_tree
+
+    def spy(urdf_content: str, file_path: str) -> object:
+        calls.append(file_path)
+        return real(urdf_content, file_path)
+
+    monkeypatch.setattr(model_explorer, "_parse_urdf_tree", spy)
+    model_explorer._parse_urdf_tree_cached.cache_clear()
+
+    first = client.get("/tools/model-explorer/simple_pendulum")
+    assert first.status_code == 200
+    assert len(calls) == 1
+    second = client.get("/tools/model-explorer/simple_pendulum")
+    assert second.status_code == 200
+    assert len(calls) == 1
