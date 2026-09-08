@@ -1,4 +1,4 @@
-# EPIC: bioptim Optimal-Control Backend for UpstreamDrift
+# EPIC: `bioptim` Optimal-Control Backend for UpstreamDrift
 
 **Status:** Proposed — 2026-09-07 · **Tracking issue:** #9762
 **Prerequisite fixes:** #9755 (inertials), #9756 (FD transcription), #9757 (MAP sentinel), #9758 (identifiability gate), #9759 (CI coverage), #9760 (backend registry + ADR), #9761 (upstream bioptim PR)
@@ -9,9 +9,9 @@ custom-model protocol. **Do not** adopt biorbd, bioviz, or bioptim's `PinocchioM
 
 ---
 
-## 0. Executive summary (read this if nothing else)
+## 0. Executive Summary (Read This if Nothing Else)
 
-### What bioptim is
+### What `bioptim` Is
 A CasADi-based optimal-control-problem (OCP) framework from the S2M lab (Université de
 Montréal). Direct multiple shooting and direct collocation, IPOPT / FATROP / ACADOS
 interfaces, a large penalty library (track markers, minimize torque/qddot, COM, phase
@@ -21,7 +21,7 @@ stochastic OCP. MIT licence. Latest tag `Release_3.4.0` (2025-11-25); `master` i
 `3.5.0-dev` with commits through 2026-07-26. ~120 stars, 77 open issues, 5–6 regular
 contributors. Breaking API changes in every recent minor release.
 
-### Why it is worth integrating
+### Why It Is Worth Integrating
 UpstreamDrift already has three swing optimizers and two estimators, and every one of
 them has a gap that bioptim closes for free:
 
@@ -33,7 +33,7 @@ them has a gap that bioptim closes for free:
 | `optimization/crocoddyl_backend.py` | Single-phase DDP; dual-libpinocchio hazard; platform-uneven wheels. | Keep it. DDP is complementary (fast, unconstrained-ish). bioptim is for constrained, multiphase, tracking, and estimation problems. |
 | markerless video → `motion_pipeline.contracts.KeypointSequence` | No optimal-estimation path from keypoints to dynamically consistent (q, qdot, tau). | `ObjectiveFcn.Lagrange.TRACK_MARKERS` + torque-driven dynamics = the standard "optimal estimation" workflow, with a worked upstream example. |
 
-### The blocker, and how it was cleared
+### The Blocker, and How It Was Cleared
 bioptim, biorbd, and CasADi-enabled Pinocchio are **conda-forge only**. UpstreamDrift is
 pip-first (`pyproject.toml` is the single source of truth; `environment.yml` is a pip
 wrapper; Docker installs `pin` from PyPI). Verified today:
@@ -53,7 +53,7 @@ symbolic swing model implementing bioptim's `StateDynamics` protocol.** Pinocchi
 the *numeric validation oracle* (as it already is for `build_symbolic_rnea`), not a
 symbolic dependency.
 
-### Non-goals
+### Non-Goals
 - No biorbd `.bioMod` files, no bioviz, no pyorerun.
 - No muscle-driven dynamics (bioptim muscle models are biorbd-only).
 - No replacement of `swing_optimizer.py` (scipy flagship) or the crocoddyl backend in this
@@ -100,15 +100,15 @@ CI images need `python3-tk` (add to `Dockerfile.heavy_test` and the optional-sta
 
 ---
 
-## 2. Phases and tickets
+## 2. Phases and Tickets
 
 Each ticket lists: **Goal · Files · Steps · Acceptance · Pitfalls · Size**. Tickets within a
 phase are independent unless a `depends:` line says otherwise. Sizes: S ≤ 200 LOC, M ≤ 600,
 L > 600 (incl. tests).
 
-### Phase 0 — Guardrails and spike (must merge before anything else)
+### Phase 0 — Guardrails and Spike (Must Merge Before Anything Else)
 
-#### 0.1 Pin, extra, shim, smoke test  — Size S
+#### 0.1 Pin, Extra, Shim, Smoke Test  — Size S
 - **Goal:** `pip install -e '.[bioptim]'` works on a clean Ubuntu venv; `import bioptim`
   succeeds without conda.
 - **Files:** `pyproject.toml`, `src/shared/python/optimization/ocp/_compat.py`,
@@ -133,19 +133,19 @@ L > 600 (incl. tests).
   bioptim prints IPOPT output — pass `Solver.IPOPT(show_online_optim=False)` and set
   `solver.set_print_level(0)` in tests.
 
-#### 0.2 CI job — Size S
+#### 0.2 CI Job — Size S
 - **Goal:** bioptim tests run in `ci-optional-stack.yml` alongside the crocoddyl probe.
 - **Steps:** new matrix leg `bioptim`; `apt-get install python3-tk`; `pip install -e '.[bioptim]'`;
   `pytest -m requires_bioptim --timeout=600`. Same fail-soft summary pattern as the
   Pinocchio leg (report "unavailable" rather than fail if install itself fails).
 - **Acceptance:** job appears in the step summary; 0.1 smoke test runs in it.
 
-#### 0.3 Import-linter contract — Size S
+#### 0.3 Import-Linter Contract — Size S
 - **Goal:** prevent `bioptim` leaking into the rest of `src/`.
 - **Files:** wherever the repo's existing import-linter / architecture tests live (`tests/architecture/`).
 - **Acceptance:** a test fails if any module outside `optimization/ocp/` imports `bioptim`.
 
-#### 0.4 Upstream PR to pyomeca/bioptim — Size S (external, #9761)
+#### 0.4 Upstream PR to `pyomeca/bioptim` — Size S (External, #9761)
 - **Goal:** make `biorbd_casadi` optional upstream so the shim can be deleted.
 - **Steps:** (a) `holonomic_biomodel.py`: guard the import with `TYPE_CHECKING`; (b)
   `optimal_control_program.py`: `try: import biorbd_casadi ... except ImportError: version = None`;
@@ -155,7 +155,7 @@ L > 600 (incl. tests).
 
 ---
 
-### Phase 1 — Symbolic swing model with real inertials
+### Phase 1 — Symbolic Swing Model With Real Inertials
 
 #### 1.1 `SymbolicSwingModel` — Size M
 - **Goal:** one place that turns `GolferModel` + `ClubModel` into CasADi `Function`s with
@@ -183,7 +183,7 @@ L > 600 (incl. tests).
   - The **old** `casadi_backend.build_symbolic_rnea` test still passes (refactor is behaviour-preserving when given the old placeholder inertials).
 - **Pitfalls:** `ca.solve` on SX works; if you switch to MX for speed, use `ca.solve(M, rhs, "symbolicqr")`. Keep everything SX unless profiling says otherwise — bioptim custom models default to MX; see 1.2 for the conversion.
 
-#### 1.2 `SwingBioModel` — bioptim protocol adapter — Size M, depends: 1.1
+#### 1.2 `SwingBioModel` — `bioptim` Protocol Adapter — Size M, Depends: 1.1
 - **Goal:** implement `bioptim.StateDynamics` so bioptim can drive `SymbolicSwingModel`.
 - **Files:** `ocp/bioptim_model.py`. Template: `bioptim/examples/toy_examples/custom_model/custom_package/my_model.py` and the 3.4.0 migration notes (properties `name`, `name_dofs`, `state_configuration_functions`, `control_configuration_functions`, `algebraic_configuration_functions`, `extra_configuration_functions` are **required** since 3.4.0).
 - **Required surface (minimum):**
@@ -208,9 +208,9 @@ L > 600 (incl. tests).
 
 ---
 
-### Phase 2 — Max-clubhead-speed swing OCP (parity target: `casadi_backend`)
+### Phase 2 — Max-Clubhead-Speed Swing OCP (Parity Target: `casadi_backend`)
 
-#### 2.1 `build_max_speed_ocp` — Size M, depends: 1.2
+#### 2.1 `build_max_speed_ocp` — Size M, Depends: 1.2
 - **Goal:** same problem `casadi_backend.solve_swing_casadi` solves, as a real OCP.
 - **Objective:** Mayer `-‖clubhead_velocity(q_T, v_T)‖²` (custom objective via
   `ObjectiveFcn.Mayer.CUSTOM`) + Lagrange `MINIMIZE_CONTROL("tau", weight=effort_w)` +
@@ -230,15 +230,15 @@ L > 600 (incl. tests).
   - Provenance: attach `ProvenanceStamp` with bioptim SHA + casadi version (bioptim exposes `sol.bioptim_version_used`).
 - **Pitfalls:** scale variables (`VariableScalingList`) — IPOPT stalls if τ is O(100) and q is O(1). Warm-start from the scipy flagship solution via `InitialGuessList(..., InterpolationType.EACH_FRAME)`.
 
-#### 2.2 Benchmark + parity doc — Size S, depends: 2.1
+#### 2.2 Benchmark + Parity Doc — Size S, Depends: 2.1
 - **Files:** `benchmarks/` (existing pytest-benchmark pattern), `docs/estimation/bioptim_parity.md`.
 - **Acceptance:** table of {scipy, casadi_backend, crocoddyl, bioptim-RK4, bioptim-collocation} × {clubhead speed, wall time, iterations, max dynamics defect}. The dynamics-defect column is the whole point: it will show `casadi_backend`'s finite-difference kinematics violate the ODE between nodes.
 
 ---
 
-### Phase 3 — Keypoint tracking OCP (optimal estimation)
+### Phase 3 — Keypoint Tracking OCP (Optimal Estimation)
 
-#### 3.1 `build_tracking_ocp` — Size L, depends: 1.2
+#### 3.1 `build_tracking_ocp` — Size L, Depends: 1.2
 - **Goal:** from a `motion_pipeline.contracts.KeypointSequence` (or `MarkerTrajectory`),
   recover dynamically consistent `(q, qdot, tau)` by tracking markers with torque-driven dynamics.
 - **Inputs:** `KeypointSequence`, `GolferModel`, `ClubModel`, a `dict[keypoint_name -> marker_name]`
@@ -264,9 +264,9 @@ L > 600 (incl. tests).
 
 ---
 
-### Phase 4 — Simultaneous state + parameter estimation
+### Phase 4 — Simultaneous State + Parameter Estimation
 
-#### 4.1 `add_parameter_block` — Size M, depends: 1.1 (parameterised model), 3.1
+#### 4.1 `add_parameter_block` — Size M, Depends: 1.1 (Parameterised Model), 3.1
 - **Goal:** segment lengths / masses as `bioptim.Parameter`s so the tracking OCP estimates them jointly.
 - **Mapping:** `estimation.map_estimator.SharedParameterSpec(name, initial, kind, lower, upper, prior, prior_scale, locked)` → `ParameterList.add(name, function=<setter on SwingBioModel>, size=1, scaling=...)` + `ParameterObjectiveList` quadratic prior `(p - prior)² / prior_scale²`. `locked` → not added (numeric).
 - **Model side:** `SymbolicSwingModel(parameters={...})` builds geometry from the parameter SX; `SwingBioModel.parameters` exposes the stacked SX bioptim threads through `dynamics(..., parameters, ...)`.
@@ -281,9 +281,9 @@ L > 600 (incl. tests).
 
 ---
 
-### Phase 5 — Moving-horizon variant
+### Phase 5 — Moving-Horizon Variant
 
-#### 5.1 `ocp/mhe.py` — Size M, depends: 3.1
+#### 5.1 `ocp/mhe.py` — Size M, Depends: 3.1
 - **Goal:** drop-in alternative to `estimation.moving_horizon.MovingHorizonEstimator` using bioptim's `RecedingHorizonOptimization` / `MovingHorizonEstimator` classes.
 - **Contract:** accept `MovingHorizonOptions` (window_size, step_size, latency_budget_ms) and emit `MovingHorizonResult` so the realtime consumers don't change. Latency check: if a window solve exceeds `latency_budget_ms`, return the previous window's tail and flag `degraded=True` (same semantics as the existing estimator — read it first).
 - **Acceptance:** on the 3.1 synthetic fixture, windowed solution within 2° of the batch tracking solution; median window latency reported in the benchmark.
@@ -291,18 +291,18 @@ L > 600 (incl. tests).
 
 ---
 
-### Phase 6 — Consolidation and documentation
+### Phase 6 — Consolidation and Documentation
 
-#### 6.1 ADR — Size S, depends: 2.2
+#### 6.1 ADR — Size S, Depends: 2.2
 - `docs/adr/00XX-bioptim-ocp-backend.md`: decision, alternatives (own `casadi.Opti` transcription ≈ 300 LOC; conda-forge stack; stay with scipy), consequences, the SHA-pin policy, and the explicit statement that Pinocchio is the numeric oracle and biorbd is out of scope.
 
-#### 6.2 Route `casadi_backend` transcription through `ocp` — Size M, depends: 2.2
+#### 6.2 Route `casadi_backend` Transcription Through `ocp` — Size M, Depends: 2.2
 - Keep `build_symbolic_rnea` (now inertial-correct) as the shared symbolic kernel; make
   `solve_swing_casadi` delegate to `build_max_speed_ocp` when bioptim is available and emit a
   `DeprecationWarning` on the finite-difference path. Remove the FD path one release later.
   **Do not** delete anything in this epic — deprecate only.
 
-#### 6.3 Design-manual + governance — Size S
+#### 6.3 Design-Manual + Governance — Size S
 - Per `CLAUDE.md`: update `manuals/upstreamdrift` QMD calculation registry with the OCP
   formulations (objective, constraints, transcription), update `SPEC.md`/`AGENT_HANDOFF.md`,
   and run `python3 -m scripts.check_design_manual_governance`.
@@ -313,7 +313,7 @@ L > 600 (incl. tests).
 
 ---
 
-## 3. Risks and mitigations
+## 3. Risks and Mitigations
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
@@ -327,7 +327,7 @@ L > 600 (incl. tests).
 
 ---
 
-## 4. Verification commands (copy into PR descriptions)
+## 4. Verification Commands (Copy Into PR Descriptions)
 
 ```bash
 pip install -e '.[dev,pinocchio,bioptim]'
@@ -341,7 +341,7 @@ ruff check . && black --check . && mypy src/shared/python/optimization/ocp
 
 ---
 
-## 5. Evidence log (what was actually verified on 2026-09-07)
+## 5. Evidence Log (What Was Actually Verified On 2026-09-07)
 
 - `pyomeca/bioptim@master` (2026-07-26, `__version__ == "3.5.0"`): `pyproject.toml` declares
   `dependencies = []` and a `conda_only` extra (`biorbd>=1.12`, `pinocchio`, `pyqt`, `pyqtgraph`, `python-graphviz`). Not on PyPI (404 for `bioptim`, `biorbd`, `biorbd_casadi`).

@@ -1,4 +1,4 @@
-# ADR-0050: Optimizer Backend Registry and the bioptim OCP Layer
+# ADR-0050: Optimizer Backend Registry and the `bioptim` OCP Layer
 
 - Status: Accepted
 - Date: 2026-09-08
@@ -87,7 +87,7 @@ Constraints that shaped the decision:
    Jacobians through an unstable forward model; exact AD removes that class of
    bug.
 
-## Amendment 2026-09-08: the finite-difference path is deprecated, not rewired
+## Amendment 2026-09-08: The Finite-Difference Path Is Deprecated, Not Rewired
 
 The epic's Phase 6.2 proposed making `solve_swing_casadi` delegate to the
 bioptim OCP whenever bioptim is importable. That is rejected: the two do not

@@ -20,7 +20,7 @@ Benchmark golfer (`GolferModel()`, `ClubModel()`), anthropometric inertials
 iterations. Measured 2026-09-08 on the session container (Python 3.11,
 casadi 3.6.7, bioptim 3.4.0, pin 4.1.0); wall times are indicative only.
 
-### 12 nodes over 0.6 s (dt = 55 ms)
+### 12 Nodes Over 0.6 s (`dt` = 55 ms)
 
 | Backend | Converged | Clubhead speed [m/s] | Wall [s] | Iterations | Max position defect [rad] | Max velocity defect [rad/s] |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ casadi 3.6.7, bioptim 3.4.0, pin 4.1.0); wall times are indicative only.
 | bioptim RK4 | yes | 49.9 | 38.4 | 97 | **0.26** | 15.2 |
 | bioptim collocation | yes | 45.9 | 8.5 | 113 | **0.22** | 19.9 |
 
-### 8 nodes over 1.0 s (dt = 143 ms)
+### 8 Nodes Over 1.0 s (`dt` = 143 ms)
 
 | Backend | Converged | Clubhead speed [m/s] | Wall [s] | Iterations | Max position defect [rad] | Max velocity defect [rad/s] |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -43,7 +43,7 @@ casadi 3.6.7, bioptim 3.4.0, pin 4.1.0); wall times are indicative only.
 | bioptim RK4 | yes | 49.9 | 89.1 | 337 | 1.77 | 48.6 |
 | bioptim collocation | yes | 49.9 | 4.2 | 64 | 3.33 | 63.3 |
 
-## What the numbers say
+## What the Numbers Say
 
 **The finite-difference path buys its speed by breaking physics.** It reports
 109 m/s of clubhead speed on the finer grid. A tour driver swing is around
@@ -83,7 +83,7 @@ whatever the bounds allow.
 same answer as RK4 multiple shooting in a fifth of the wall time (8.5 s vs
 38.4 s), so `backend_registry`'s `bioptim` entry routes through it.
 
-## Method and caveats
+## Method and Caveats
 
 - **Defect metric.** `casadi_backend.dynamics_defect` re-integrates
   `forward_dynamics` with RK4 at 16 substeps per interval, holding each
@@ -105,7 +105,7 @@ same answer as RK4 multiple shooting in a fifth of the wall time (8.5 s vs
   fill that row.
 - **Wall times are indicative.** Single container, one thread, no warm cache.
 
-## Follow-ups
+## Follow-Ups
 
 - Fill the crocoddyl row on a conda-forge environment.
 - Phase 6.2 deprecates the finite-difference transcription once the OCP path

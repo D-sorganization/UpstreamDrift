@@ -371,6 +371,80 @@ def markers_to_targets(
     )
 
 
+def _tracking_objectives(
+    bioptim: Any, targets: MarkerTargets, weights: TrackingWeights
+) -> Any:
+    """Per-marker tracking terms plus the torque and smoothness regularisers."""
+    lagrange = bioptim.ObjectiveFcn.Lagrange
+    objectives = bioptim.ObjectiveList()
+    # Per-node weight = marker weight x confidence mask so dropped frames
+    # contribute nothing without changing the target array's shape.
+    node_weights = np.where(
+        targets.weights >= weights.min_confidence, targets.weights, 0.0
+    )
+    for column, name in enumerate(targets.marker_names):
+        if not np.any(node_weights[column]):
+            logger.warning("marker %r is never observed; not tracked", name)
+            continue
+        objectives.add(
+            lagrange.TRACK_MARKERS,
+            marker_index=column,
+            target=targets.positions[:, column : column + 1, :],
+            weight=bioptim.ObjectiveWeight(
+                weights.marker * node_weights[column],
+                interpolation=bioptim.InterpolationType.EACH_FRAME,
+            ),
+            node=bioptim.Node.ALL,
+            quadratic=True,
+        )
+    if weights.torque:
+        objectives.add(lagrange.MINIMIZE_CONTROL, key="tau", weight=weights.torque)
+    if weights.qdot_derivative:
+        objectives.add(
+            lagrange.MINIMIZE_STATE,
+            key="qdot",
+            derivative=True,
+            weight=weights.qdot_derivative,
+        )
+    return objectives
+
+
+def _tracking_bounds(bioptim: Any, model: Any, limits: np.ndarray) -> tuple[Any, Any]:
+    """Joint ROM, velocity and torque bounds for the tracking problem."""
+    n = model.nb_q
+    joint_limits = swing_joint_limits(model.golfer)
+    x_bounds = bioptim.BoundsList()
+    x_bounds["q"] = (
+        np.array([joint_limits[j][0] for j in JOINTS]),
+        np.array([joint_limits[j][1] for j in JOINTS]),
+    )
+    x_bounds["qdot"] = np.full(n, -_VELOCITY_BOUND), np.full(n, _VELOCITY_BOUND)
+    u_bounds = bioptim.BoundsList()
+    u_bounds["tau"] = -limits, limits
+    return x_bounds, u_bounds
+
+
+def _tracking_state_init(
+    bioptim: Any, q_guess: np.ndarray | None, targets: MarkerTargets, n: int
+) -> Any:
+    """State warm start, differentiating a pose guess for the velocities."""
+    x_init = bioptim.InitialGuessList()
+    if q_guess is None:
+        x_init["q"] = np.zeros(n)
+        x_init["qdot"] = np.zeros(n)
+        return x_init
+    guess = np.asarray(q_guess, dtype=float)
+    if guess.shape != (n, targets.n_frames):
+        raise ValueError(f"q_guess must have shape {(n, targets.n_frames)}")
+    x_init.add("q", guess, interpolation=bioptim.InterpolationType.EACH_FRAME)
+    x_init.add(
+        "qdot",
+        np.gradient(guess, targets.dt, axis=1),
+        interpolation=bioptim.InterpolationType.EACH_FRAME,
+    )
+    return x_init
+
+
 def build_tracking_ocp(
     targets: MarkerTargets,
     golfer: GolferModel | None = None,
@@ -403,45 +477,7 @@ def build_tracking_ocp(
             f"{model.marker_names}"
         )
     n = model.nb_q
-    n_frames = targets.n_frames
-    n_shooting = n_frames - 1
     limits = model.symbolic.torque_limits()
-
-    lagrange = bioptim.ObjectiveFcn.Lagrange
-    objectives = bioptim.ObjectiveList()
-    # Per-node weight = marker weight x confidence mask so dropped frames
-    # contribute nothing without changing the target array's shape.
-    node_weights = np.where(
-        targets.weights >= weights.min_confidence, targets.weights, 0.0
-    )
-    for column, name in enumerate(targets.marker_names):
-        if not np.any(node_weights[column]):
-            logger.warning("marker %r is never observed; not tracked", name)
-            continue
-        objectives.add(
-            lagrange.TRACK_MARKERS,
-            marker_index=column,
-            target=targets.positions[:, column : column + 1, :],
-            weight=bioptim.ObjectiveWeight(
-                weights.marker * node_weights[column],
-                interpolation=bioptim.InterpolationType.EACH_FRAME,
-            ),
-            node=bioptim.Node.ALL,
-            quadratic=True,
-        )
-    if weights.torque:
-        objectives.add(
-            lagrange.MINIMIZE_CONTROL,
-            key="tau",
-            weight=weights.torque,
-        )
-    if weights.qdot_derivative:
-        objectives.add(
-            lagrange.MINIMIZE_STATE,
-            key="qdot",
-            derivative=True,
-            weight=weights.qdot_derivative,
-        )
 
     dynamics = bioptim.DynamicsOptionsList()
     dynamics.add(
@@ -451,46 +487,22 @@ def build_tracking_ocp(
             phase_dynamics=bioptim.PhaseDynamics.SHARED_DURING_THE_PHASE,
         )
     )
-
-    joint_limits = swing_joint_limits(model.golfer)
-    x_bounds = bioptim.BoundsList()
-    x_bounds["q"] = (
-        np.array([joint_limits[j][0] for j in JOINTS]),
-        np.array([joint_limits[j][1] for j in JOINTS]),
-    )
-    x_bounds["qdot"] = np.full(n, -_VELOCITY_BOUND), np.full(n, _VELOCITY_BOUND)
-    u_bounds = bioptim.BoundsList()
-    u_bounds["tau"] = -limits, limits
-
-    x_init = bioptim.InitialGuessList()
-    if q_guess is not None:
-        q_guess = np.asarray(q_guess, dtype=float)
-        if q_guess.shape != (n, n_frames):
-            raise ValueError(f"q_guess must have shape {(n, n_frames)}")
-        x_init.add("q", q_guess, interpolation=bioptim.InterpolationType.EACH_FRAME)
-        qdot_guess = np.gradient(q_guess, targets.dt, axis=1)
-        x_init.add(
-            "qdot", qdot_guess, interpolation=bioptim.InterpolationType.EACH_FRAME
-        )
-    else:
-        x_init["q"] = np.zeros(n)
-        x_init["qdot"] = np.zeros(n)
+    x_bounds, u_bounds = _tracking_bounds(bioptim, model, limits)
     u_init = bioptim.InitialGuessList()
     u_init["tau"] = np.zeros(n)
-
     u_scaling = bioptim.VariableScalingList()
     u_scaling.add("tau", scaling=limits)
 
     ocp = bioptim.OptimalControlProgram(
         model,
-        n_shooting,
+        targets.n_frames - 1,
         targets.duration,
         dynamics=dynamics,
         x_bounds=x_bounds,
         u_bounds=u_bounds,
-        x_init=x_init,
+        x_init=_tracking_state_init(bioptim, q_guess, targets, n),
         u_init=u_init,
-        objective_functions=objectives,
+        objective_functions=_tracking_objectives(bioptim, targets, weights),
         u_scaling=u_scaling,
         use_sx=False,
         n_threads=n_threads,

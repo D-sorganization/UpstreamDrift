@@ -47,6 +47,7 @@ def test_tracking_objective_converges_and_respects_limits() -> None:
     from src.shared.python.optimization.casadi_backend import dynamics_defect
     from src.shared.python.optimization.ocp.swing_ocp import (
         DEFAULT_TARGET_SPEED,
+        MaxSpeedOcpOptions,
         solve_max_speed_ocp,
     )
 
@@ -57,7 +58,13 @@ def test_tracking_objective_converges_and_respects_limits() -> None:
     x0 = generate_initial_guess(golfer, config, joint_limits)
 
     solution = solve_max_speed_ocp(
-        golfer, club, config, limits, joint_limits, x0, ode="collocation"
+        golfer,
+        club,
+        config,
+        limits,
+        joint_limits,
+        x0,
+        options=MaxSpeedOcpOptions(ode="collocation"),
     )
     assert solution.success, solution.status
     n, nodes = len(JOINTS), config.n_nodes
@@ -94,7 +101,10 @@ def test_tracking_objective_converges_and_respects_limits() -> None:
 def test_rk4_solution_satisfies_the_dynamics_it_transcribed() -> None:
     """The OCP is a transcription: its torques reproduce its own nodes."""
     from src.shared.python.optimization.casadi_backend import dynamics_defect
-    from src.shared.python.optimization.ocp.swing_ocp import solve_max_speed_ocp
+    from src.shared.python.optimization.ocp.swing_ocp import (
+        MaxSpeedOcpOptions,
+        solve_max_speed_ocp,
+    )
 
     golfer, club = GolferModel(), ClubModel()
     config = OptimizationConfig(n_nodes=8, swing_duration=1.0, max_iterations=500)
@@ -107,8 +117,7 @@ def test_rk4_solution_satisfies_the_dynamics_it_transcribed() -> None:
         _torque_limits(golfer),
         joint_limits,
         x0,
-        ode="rk4",
-        n_integration_steps=4,
+        options=MaxSpeedOcpOptions(ode="rk4", n_integration_steps=4),
     )
     assert solution.success, solution.status
     assert solution.result.transcription == "bioptim-rk4"
@@ -135,7 +144,10 @@ def test_maximize_speed_objective_pushes_past_the_target() -> None:
     docstring). What must hold is that it beats the tracking target and
     still respects every bound.
     """
-    from src.shared.python.optimization.ocp.swing_ocp import solve_max_speed_ocp
+    from src.shared.python.optimization.ocp.swing_ocp import (
+        MaxSpeedOcpOptions,
+        solve_max_speed_ocp,
+    )
 
     golfer, club = GolferModel(), ClubModel()
     config = OptimizationConfig(n_nodes=6, swing_duration=1.0, max_iterations=300)
@@ -149,8 +161,7 @@ def test_maximize_speed_objective_pushes_past_the_target() -> None:
         limits,
         joint_limits,
         x0,
-        objective="maximize_speed",
-        ode="collocation",
+        options=MaxSpeedOcpOptions(objective="maximize_speed", ode="collocation"),
     )
     assert solution.clubhead_speed > 40.0
     for j, joint in enumerate(JOINTS):
@@ -174,7 +185,10 @@ def test_swing_optimizer_selects_bioptim_backend() -> None:
 
 
 def test_build_validates_inputs() -> None:
-    from src.shared.python.optimization.ocp.swing_ocp import build_max_speed_ocp
+    from src.shared.python.optimization.ocp.swing_ocp import (
+        MaxSpeedOcpOptions,
+        build_max_speed_ocp,
+    )
 
     golfer, club = GolferModel(), ClubModel()
     config = OptimizationConfig(n_nodes=6)
@@ -188,29 +202,8 @@ def test_build_validates_inputs() -> None:
             np.zeros(3),
         )
     with pytest.raises(ValueError, match="ode"):
-        build_max_speed_ocp(
-            golfer,
-            club,
-            config,
-            _torque_limits(golfer),
-            swing_joint_limits(golfer),
-            ode="euler",  # type: ignore[arg-type]
-        )
+        MaxSpeedOcpOptions(ode="euler")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="objective"):
-        build_max_speed_ocp(
-            golfer,
-            club,
-            config,
-            _torque_limits(golfer),
-            swing_joint_limits(golfer),
-            objective="fastest",  # type: ignore[arg-type]
-        )
+        MaxSpeedOcpOptions(objective="fastest")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="target_speed"):
-        build_max_speed_ocp(
-            golfer,
-            club,
-            config,
-            _torque_limits(golfer),
-            swing_joint_limits(golfer),
-            target_speed=0.0,
-        )
+        MaxSpeedOcpOptions(target_speed=0.0)

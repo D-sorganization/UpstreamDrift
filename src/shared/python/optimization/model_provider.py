@@ -31,7 +31,7 @@ import tempfile
 from importlib import import_module
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, NamedTuple
 
 from src.shared.python.motion_pipeline.contracts import (
     JointDef,
@@ -48,6 +48,8 @@ from src.shared.python.optimization._swing_models import ClubModel, GolferModel
 
 __all__ = [
     "SWING_RIG_ID",
+    "BodyInertialInputs",
+    "ClubInertialInputs",
     "InertialSource",
     "LinkInertial",
     "build_drake_plant",
@@ -144,12 +146,7 @@ def build_swing_rig(
     golfer = golfer or GolferModel()
     club = club or ClubModel()
     limits = swing_joint_limits(golfer)
-    offsets = swing_segment_offsets(
-        height=golfer.height,
-        trunk_length=golfer.trunk_length,
-        arm_length=golfer.arm_length,
-        club_length=club.total_length,
-    )
+    offsets = _offsets_for(golfer, club)
 
     joints: dict[str, JointDef] = {}
     for i, name in enumerate(JOINTS):
@@ -229,26 +226,60 @@ def _combine_point_and_rod_masses(
     return total, (0.0, 0.0, z_com), (ixx, iyy, izz, 0.0, 0.0, 0.0)
 
 
+class BodyInertialInputs(NamedTuple):
+    """Whole-body scalars the segment masses and lengths scale from.
+
+    ``Any`` rather than ``float`` because the same arithmetic runs on
+    CasADi symbols when a parameter is being estimated (Phase 4).
+    """
+
+    mass: Any
+    trunk_mass_ratio: Any
+    arm_mass_ratio: Any
+    height: Any
+
+
+class ClubInertialInputs(NamedTuple):
+    """Club component masses plus the shaft length."""
+
+    grip_mass: Any
+    shaft_mass: Any
+    shaft_length: Any
+    head_mass: Any
+
+
+def _offsets_for(
+    golfer: GolferModel, club: ClubModel
+) -> dict[str, tuple[Any, Any, Any]]:
+    """Segment offsets for a concrete golfer/club pair.
+
+    Both the URDF builder and the inertial builder need exactly these four
+    numbers in exactly this shape, so they share one call rather than
+    repeating it (and risking the two drifting apart).
+    """
+    return swing_segment_offsets(
+        height=golfer.height,
+        trunk_length=golfer.trunk_length,
+        arm_length=golfer.arm_length,
+        club_length=club.total_length,
+    )
+
+
 def swing_segment_inertials(
     *,
     offsets: dict[str, tuple[Any, Any, Any]],
-    mass: Any,
-    trunk_mass_ratio: Any,
-    arm_mass_ratio: Any,
-    height: Any,
-    grip_mass: Any,
-    shaft_mass: Any,
-    shaft_length: Any,
-    head_mass: Any,
+    body: BodyInertialInputs,
+    club: ClubInertialInputs,
 ) -> dict[str, tuple[Any, tuple[Any, Any, Any], tuple[Any, Any, Any, Any, Any, Any]]]:
     """``joint -> (mass, com, (ixx, iyy, izz, ixy, ixz, iyz))`` per link.
 
     Pure arithmetic, usable with floats or CasADi symbols. See
     :func:`swing_link_inertials` for the segment model.
     """
-    trunk_mass = mass * trunk_mass_ratio
-    arm_mass = mass * arm_mass_ratio
-    trunk_radius = _TRUNK_RADIUS_FRACTION * height
+    grip_mass, shaft_mass, shaft_length, head_mass = club
+    trunk_mass = body.mass * body.trunk_mass_ratio
+    arm_mass = body.mass * body.arm_mass_ratio
+    trunk_radius = _TRUNK_RADIUS_FRACTION * body.height
 
     pelvis_len = offsets["trunk_rotation"][2]
     pelvis_mass = _PELVIS_TRUNK_SPLIT * trunk_mass
@@ -323,22 +354,21 @@ def swing_link_inertials(
     """
     golfer = golfer or GolferModel()
     club = club or ClubModel()
-    offsets = swing_segment_offsets(
-        height=golfer.height,
-        trunk_length=golfer.trunk_length,
-        arm_length=golfer.arm_length,
-        club_length=club.total_length,
-    )
+    offsets = _offsets_for(golfer, club)
     raw = swing_segment_inertials(
         offsets=offsets,
-        mass=golfer.mass,
-        trunk_mass_ratio=golfer.trunk_mass_ratio,
-        arm_mass_ratio=golfer.arm_mass_ratio,
-        height=golfer.height,
-        grip_mass=club.grip_mass,
-        shaft_mass=club.shaft_mass,
-        shaft_length=club.shaft_length,
-        head_mass=club.head_mass,
+        body=BodyInertialInputs(
+            mass=golfer.mass,
+            trunk_mass_ratio=golfer.trunk_mass_ratio,
+            arm_mass_ratio=golfer.arm_mass_ratio,
+            height=golfer.height,
+        ),
+        club=ClubInertialInputs(
+            grip_mass=club.grip_mass,
+            shaft_mass=club.shaft_mass,
+            shaft_length=club.shaft_length,
+            head_mass=club.head_mass,
+        ),
     )
     return {
         name: LinkInertial(

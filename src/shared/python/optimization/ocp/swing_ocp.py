@@ -30,7 +30,7 @@ registry with no new plumbing.
 from __future__ import annotations
 
 import time
-from collections.abc import Sequence
+from dataclasses import dataclass, field
 from typing import Any, Literal
 
 import numpy as np
@@ -52,6 +52,7 @@ from src.shared.python.optimization.ocp.result import (
 )
 
 __all__ = [
+    "MaxSpeedOcpOptions",
     "OdeKind",
     "build_max_speed_ocp",
     "solve_max_speed_ocp",
@@ -77,6 +78,58 @@ _EFFORT_SCALE = 1000.0
 _EFFORT_REGULARISER = 1e-4
 _VELOCITY_RISK_LIMIT = 20.0
 _TORQUE_RISK_FRACTION = 0.8
+
+
+@dataclass(frozen=True)
+class MaxSpeedOcpOptions:
+    """How the max-speed swing OCP is transcribed and scored.
+
+    These travel together -- the objective choice, its target, the
+    integrator and the grid all describe one problem statement -- so they
+    are one object rather than eight loose keyword arguments. Validating
+    them in ``__post_init__`` also means a malformed combination fails at
+    the boundary, before any bioptim object is built.
+
+    Attributes:
+        objective: ``"track_speed"`` (default, convex) or
+            ``"maximize_speed"`` (CasADi-backend parity, nonconvex). See
+            the module docstring for why the default is the convex one.
+        target_speed: Terminal clubhead speed [m/s] for ``"track_speed"``.
+        ode: ``"rk4"`` multiple shooting or ``"collocation"`` (degree 3).
+        n_integration_steps: RK4 substeps per shooting interval.
+        n_shooting: Shooting intervals; ``None`` means
+            ``config.n_nodes - 1`` so the grid matches the flagship
+            optimizer's and no resampling is needed.
+        parameters: Symbolic model parameters to expose (Phase 4).
+        n_threads: bioptim worker threads.
+    """
+
+    objective: TerminalObjective = "track_speed"
+    target_speed: float = DEFAULT_TARGET_SPEED
+    ode: OdeKind = "rk4"
+    n_integration_steps: int = 4
+    n_shooting: int | None = None
+    parameters: tuple[str, ...] = field(default_factory=tuple)
+    n_threads: int = 1
+
+    def __post_init__(self) -> None:
+        if self.objective not in ("track_speed", "maximize_speed"):
+            raise ValueError(
+                "objective must be 'track_speed' or 'maximize_speed', "
+                f"got {self.objective!r}"
+            )
+        if self.objective == "track_speed" and self.target_speed <= 0.0:
+            raise ValueError("target_speed must be positive")
+        if self.ode not in ("rk4", "collocation"):
+            raise ValueError(f"ode must be 'rk4' or 'collocation', got {self.ode!r}")
+        if self.n_integration_steps < 1:
+            raise ValueError("n_integration_steps must be positive")
+        if self.n_shooting is not None and self.n_shooting < 1:
+            raise ValueError("n_shooting must be positive")
+        if self.n_threads < 1:
+            raise ValueError("n_threads must be positive")
+        # Accept any sequence at the boundary, store the hashable form.
+        object.__setattr__(self, "parameters", tuple(self.parameters))
 
 
 def _ode_solver(bioptim: Any, kind: OdeKind, n_integration_steps: int) -> Any:
@@ -142,88 +195,50 @@ def _resample(values: np.ndarray, n_out: int) -> np.ndarray:
     return np.vstack([np.interp(dst, src, row) for row in values])
 
 
-def build_max_speed_ocp(
-    golfer: GolferModel,
-    club: ClubModel,
-    config: OptimizationConfig,
-    torque_limits: dict[str, float],
-    joint_limits: dict[str, tuple[float, float]],
-    x0: np.ndarray | None = None,
-    *,
-    objective: TerminalObjective = "track_speed",
-    target_speed: float = DEFAULT_TARGET_SPEED,
-    ode: OdeKind = "rk4",
-    n_integration_steps: int = 4,
-    n_shooting: int | None = None,
-    parameters: Sequence[str] = (),
-    n_threads: int = 1,
-) -> tuple[Any, Any]:
-    """Build the max-clubhead-speed OCP. Returns ``(ocp, model)``.
-
-    Args:
-        golfer, club: The numeric model (anthropometric inertials, #9755).
-        config: Node count, duration and objective weights. ``n_shooting``
-            defaults to ``config.n_nodes - 1`` so the grids coincide.
-        torque_limits, joint_limits: Per-joint bounds as in
-            :func:`casadi_backend.solve_swing_casadi`.
-        x0: Optional warm start in flagship layout; resampled to the
-            shooting grid. Its first node fixes the address pose (start at
-            rest), as the CasADi backend does. ``None`` starts from the
-            neutral pose.
-        objective: ``"track_speed"`` (default, convex) or
-            ``"maximize_speed"`` (CasADi-backend parity, nonconvex). See the
-            module docstring.
-        target_speed: Terminal clubhead speed [m/s] for ``"track_speed"``.
-        ode: ``"rk4"`` multiple shooting or ``"collocation"`` (degree 3).
-        parameters: Symbolic model parameters to expose (Phase 4).
-
-    Raises:
-        BioptimNotAvailableError: When bioptim is not installed.
-        ValueError: On malformed inputs.
-    """
-    bioptim = require_bioptim()
-    n = len(JOINTS)
-    n_nodes = config.n_nodes
-    if n_nodes < 2:
+def _resolve_grid(
+    config: OptimizationConfig, options: MaxSpeedOcpOptions
+) -> tuple[int, float]:
+    """Return ``(n_shooting, final_time)`` for the requested node grid."""
+    if config.n_nodes < 2:
         raise ValueError("config.n_nodes must be at least 2")
-    n_shooting = int(n_shooting or (n_nodes - 1))
-    if n_shooting < 1:
-        raise ValueError("n_shooting must be positive")
     final_time = float(config.swing_duration)
     if final_time <= 0.0:
         raise ValueError("config.swing_duration must be positive")
+    return int(options.n_shooting or (config.n_nodes - 1)), final_time
 
-    model = make_swing_bio_model(golfer, club, parameters=parameters)
-    limits = np.array([float(torque_limits.get(j, 100.0)) for j in JOINTS])
 
+def _initial_guess(
+    x0: np.ndarray | None, n: int, n_nodes: int, n_shooting: int
+) -> tuple[np.ndarray, np.ndarray]:
+    """Split a flagship-layout warm start onto the shooting grid."""
     if x0 is None:
-        q_guess = np.zeros((n, n_shooting + 1))
-        v_guess = np.zeros((n, n_shooting + 1))
-    else:
-        x0 = np.asarray(x0, dtype=float).reshape(-1)
-        if x0.shape[0] != 2 * n * n_nodes:
-            raise ValueError(
-                f"x0 must have length {2 * n * n_nodes}, got {x0.shape[0]}"
-            )
-        q_guess = _resample(x0[: n * n_nodes].reshape(n, n_nodes), n_shooting + 1)
-        v_guess = _resample(x0[n * n_nodes :].reshape(n, n_nodes), n_shooting + 1)
-    address = q_guess[:, 0].copy()
+        zeros = np.zeros((n, n_shooting + 1))
+        return zeros, zeros.copy()
+    flat = np.asarray(x0, dtype=float).reshape(-1)
+    if flat.shape[0] != 2 * n * n_nodes:
+        raise ValueError(f"x0 must have length {2 * n * n_nodes}, got {flat.shape[0]}")
+    q_guess = _resample(flat[: n * n_nodes].reshape(n, n_nodes), n_shooting + 1)
+    v_guess = _resample(flat[n * n_nodes :].reshape(n, n_nodes), n_shooting + 1)
+    return q_guess, v_guess
 
+
+def _build_objectives(
+    bioptim: Any,
+    model: Any,
+    config: OptimizationConfig,
+    limits: np.ndarray,
+    options: MaxSpeedOcpOptions,
+    final_time: float,
+) -> Any:
+    """Assemble the terminal-speed, effort and injury objective terms."""
     w_speed = config.objectives.get(OptimizationObjective.CLUBHEAD_VELOCITY, 1.0)
     w_injury = config.objectives.get(OptimizationObjective.INJURY_RISK, 0.0)
     w_energy = config.objectives.get(OptimizationObjective.ENERGY_EFFICIENCY, 0.0)
 
-    if objective not in ("track_speed", "maximize_speed"):
-        raise ValueError(
-            f"objective must be 'track_speed' or 'maximize_speed', got {objective!r}"
-        )
-    if objective == "track_speed" and target_speed <= 0.0:
-        raise ValueError("target_speed must be positive")
-
     mayer = bioptim.ObjectiveFcn.Mayer
     lagrange = bioptim.ObjectiveFcn.Lagrange
     objectives = bioptim.ObjectiveList()
-    if objective == "track_speed":
+    if options.objective == "track_speed":
         objectives.add(
             clubhead_speed_error_objective,
             custom_type=mayer,
@@ -231,7 +246,7 @@ def build_max_speed_ocp(
             quadratic=True,
             weight=float(w_speed) / _SPEED_SCALE**2,
             model=model,
-            target_speed=float(target_speed),
+            target_speed=float(options.target_speed),
         )
     else:
         objectives.add(
@@ -256,16 +271,18 @@ def build_max_speed_ocp(
             weight=float(w_injury) / _INJURY_SCALE / final_time,
             limits=limits,
         )
+    return objectives
 
-    dynamics = bioptim.DynamicsOptionsList()
-    dynamics.add(
-        bioptim.DynamicsOptions(
-            ode_solver=_ode_solver(bioptim, ode, n_integration_steps),
-            expand_dynamics=True,
-            phase_dynamics=bioptim.PhaseDynamics.SHARED_DURING_THE_PHASE,
-        )
-    )
 
+def _build_bounds(
+    bioptim: Any,
+    golfer: GolferModel,
+    joint_limits: dict[str, tuple[float, float]],
+    limits: np.ndarray,
+    address: np.ndarray,
+) -> tuple[Any, Any]:
+    """Joint/velocity/torque bounds, with the first node held at address."""
+    n = len(JOINTS)
     flex = golfer.flexibility_factor
     q_lower = np.array([joint_limits[j][0] for j in JOINTS]) * flex
     q_upper = np.array([joint_limits[j][1] for j in JOINTS]) * flex
@@ -276,7 +293,14 @@ def build_max_speed_ocp(
     x_bounds["qdot"][:, 0] = 0.0
     u_bounds = bioptim.BoundsList()
     u_bounds["tau"] = -limits, limits
+    return x_bounds, u_bounds
 
+
+def _build_init_and_scaling(
+    bioptim: Any, q_guess: np.ndarray, v_guess: np.ndarray, limits: np.ndarray
+) -> tuple[Any, Any, Any, Any]:
+    """Warm start plus the variable scaling IPOPT needs to make progress."""
+    n = len(JOINTS)
     x_init = bioptim.InitialGuessList()
     x_init.add("q", q_guess, interpolation=bioptim.InterpolationType.EACH_FRAME)
     x_init.add("qdot", v_guess, interpolation=bioptim.InterpolationType.EACH_FRAME)
@@ -289,6 +313,62 @@ def build_max_speed_ocp(
     x_scaling = bioptim.VariableScalingList()
     x_scaling.add("q", scaling=np.ones(n))
     x_scaling.add("qdot", scaling=np.full(n, 10.0))
+    return x_init, u_init, x_scaling, u_scaling
+
+
+def build_max_speed_ocp(
+    golfer: GolferModel,
+    club: ClubModel,
+    config: OptimizationConfig,
+    torque_limits: dict[str, float],
+    joint_limits: dict[str, tuple[float, float]],
+    x0: np.ndarray | None = None,
+    *,
+    options: MaxSpeedOcpOptions | None = None,
+) -> tuple[Any, Any]:
+    """Build the max-clubhead-speed OCP. Returns ``(ocp, model)``.
+
+    Args:
+        golfer, club: The numeric model (anthropometric inertials, #9755).
+        config: Node count, duration and objective weights. ``n_shooting``
+            defaults to ``config.n_nodes - 1`` so the grids coincide.
+        torque_limits, joint_limits: Per-joint bounds as in
+            :func:`casadi_backend.solve_swing_casadi`.
+        x0: Optional warm start in flagship layout; resampled to the
+            shooting grid. Its first node fixes the address pose (start at
+            rest), as the CasADi backend does. ``None`` starts from the
+            neutral pose.
+        options: Transcription and objective choices; see
+            :class:`MaxSpeedOcpOptions`. ``None`` uses its defaults
+            (convex target-speed objective, RK4 multiple shooting).
+
+    Raises:
+        BioptimNotAvailableError: When bioptim is not installed.
+        ValueError: On malformed inputs.
+    """
+    bioptim = require_bioptim()
+    options = options or MaxSpeedOcpOptions()
+    n = len(JOINTS)
+    n_shooting, final_time = _resolve_grid(config, options)
+
+    model = make_swing_bio_model(golfer, club, parameters=options.parameters)
+    limits = np.array([float(torque_limits.get(j, 100.0)) for j in JOINTS])
+    q_guess, v_guess = _initial_guess(x0, n, config.n_nodes, n_shooting)
+
+    dynamics = bioptim.DynamicsOptionsList()
+    dynamics.add(
+        bioptim.DynamicsOptions(
+            ode_solver=_ode_solver(bioptim, options.ode, options.n_integration_steps),
+            expand_dynamics=True,
+            phase_dynamics=bioptim.PhaseDynamics.SHARED_DURING_THE_PHASE,
+        )
+    )
+    x_bounds, u_bounds = _build_bounds(
+        bioptim, golfer, joint_limits, limits, q_guess[:, 0]
+    )
+    x_init, u_init, x_scaling, u_scaling = _build_init_and_scaling(
+        bioptim, q_guess, v_guess, limits
+    )
 
     ocp = bioptim.OptimalControlProgram(
         model,
@@ -299,13 +379,31 @@ def build_max_speed_ocp(
         u_bounds=u_bounds,
         x_init=x_init,
         u_init=u_init,
-        objective_functions=objectives,
+        objective_functions=_build_objectives(
+            bioptim, model, config, limits, options, final_time
+        ),
         x_scaling=x_scaling,
         u_scaling=u_scaling,
         use_sx=False,
-        n_threads=n_threads,
+        n_threads=options.n_threads,
     )
     return ocp, model
+
+
+def _solution_settings(
+    config: OptimizationConfig, options: MaxSpeedOcpOptions, n_shooting: int
+) -> dict[str, Any]:
+    """Provenance record of exactly how this solve was posed."""
+    return {
+        "objective": options.objective,
+        "target_speed": float(options.target_speed),
+        "ode": options.ode,
+        "n_integration_steps": options.n_integration_steps,
+        "n_shooting": n_shooting,
+        "final_time": float(config.swing_duration),
+        "max_iterations": int(config.max_iterations),
+        "objectives": {k.value: float(v) for k, v in config.objectives.items()},
+    }
 
 
 def solve_max_speed_ocp(
@@ -316,26 +414,13 @@ def solve_max_speed_ocp(
     joint_limits: dict[str, tuple[float, float]],
     x0: np.ndarray | None = None,
     *,
-    objective: TerminalObjective = "track_speed",
-    target_speed: float = DEFAULT_TARGET_SPEED,
-    ode: OdeKind = "rk4",
-    n_integration_steps: int = 4,
-    n_threads: int = 1,
+    options: MaxSpeedOcpOptions | None = None,
 ) -> OcpSwingSolution:
     """Build and solve the swing OCP; return arrays plus provenance."""
     bioptim = require_bioptim()
+    options = options or MaxSpeedOcpOptions()
     ocp, model = build_max_speed_ocp(
-        golfer,
-        club,
-        config,
-        torque_limits,
-        joint_limits,
-        x0,
-        objective=objective,
-        target_speed=target_speed,
-        ode=ode,
-        n_integration_steps=n_integration_steps,
-        n_threads=n_threads,
+        golfer, club, config, torque_limits, joint_limits, x0, options=options
     )
     solver = bioptim.Solver.IPOPT(show_online_optim=False)
     solver.set_print_level(0)
@@ -353,7 +438,7 @@ def solve_max_speed_ocp(
     result, q, qdot, tau = solution_to_swing_result(
         sol,
         bioptim,
-        transcription=f"bioptim-{ode}",
+        transcription=f"bioptim-{options.ode}",
         x_fallback=fallback,
         n_nodes=config.n_nodes,
     )
@@ -363,16 +448,6 @@ def solve_max_speed_ocp(
             np.asarray(model.symbolic.clubhead_velocity(q[:, -1], qdot[:, -1], empty))
         )
     )
-    settings = {
-        "objective": objective,
-        "target_speed": float(target_speed),
-        "ode": ode,
-        "n_integration_steps": n_integration_steps,
-        "n_shooting": q.shape[1] - 1,
-        "final_time": float(config.swing_duration),
-        "max_iterations": int(config.max_iterations),
-        "objectives": {k.value: float(v) for k, v in config.objectives.items()},
-    }
     return OcpSwingSolution(
         result=result,
         time=np.linspace(0.0, float(config.swing_duration), q.shape[1]),
@@ -385,7 +460,9 @@ def solve_max_speed_ocp(
         status=int(sol.status),
         iterations=result.iterations,
         wall_time_s=wall,
-        provenance=bioptim_provenance(golfer, club, settings),
+        provenance=bioptim_provenance(
+            golfer, club, _solution_settings(config, options, q.shape[1] - 1)
+        ),
     )
 
 
@@ -411,5 +488,5 @@ def solve_max_speed_swing(
         torque_limits,
         joint_limits,
         x0,
-        ode="collocation",
+        options=MaxSpeedOcpOptions(ode="collocation"),
     ).result

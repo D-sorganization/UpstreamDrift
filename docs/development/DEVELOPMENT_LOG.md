@@ -17,7 +17,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9762 · bioptim Optimal-Control Backend and the Swing-Dynamics Fixes
+### DL-#9762 · `bioptim` Optimal-Control Backend and the Swing-Dynamics Fixes
 
 - **State:** in_review
 - **Owner:** claude
@@ -32,7 +32,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   `src/shared/python/estimation/`, `benchmarks/bioptim_parity.py`,
   `docs/adr/0050-optimizer-backend-registry-and-bioptim.md`,
   `docs/estimation/bioptim_parity.md`, `docs/issues/EPIC_BIOPTIM_OCP_INTEGRATION.md`,
-  `.github/workflows/ci-optional-stack.yml`
+  `.github/workflows/ci-optional-stack.yml`, `scripts/config/architecture_budget.json`
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (`SELF`)
 - **Summary:** Adopts `pyomeca/bioptim` as an opt-in optimal-control layer
@@ -55,8 +55,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   target-speed objective), and the six-marker set cannot observe the full
   seven-DOF chain (hip and trunk rotation are an exact null direction), so every
   tracking solve reports what it could not see.
-- **Next step:** Drive PR #9768 to green, then open the phase-4 parameter-block
-  entry.
+- **Next step:** Confirm the `tests` lanes on PR #9768, then open the phase-4
+  parameter-block entry.
 
 
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock

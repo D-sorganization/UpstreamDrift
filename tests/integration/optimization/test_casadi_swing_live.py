@@ -45,6 +45,7 @@ from src.shared.python.optimization._swing_models import (  # noqa: E402
     OptimizationConfig,
 )
 from src.shared.python.optimization.casadi_backend import (  # noqa: E402
+    CasadiSolveOptions,
     build_clubhead_position,
     build_symbolic_rnea,
     solve_swing_casadi,
@@ -275,8 +276,7 @@ def test_multiple_shooting_satisfies_its_own_dynamics() -> None:
         limits,
         joint_limits,
         x0,
-        transcription="multiple_shooting",
-        n_substeps=8,
+        options=CasadiSolveOptions(transcription="multiple_shooting", n_substeps=8),
     )
     assert result.success, result.message
     assert result.transcription == "multiple_shooting"
@@ -302,12 +302,4 @@ def test_transcription_argument_validated() -> None:
     golfer, club = GolferModel(), ClubModel()
     config = OptimizationConfig(n_nodes=4)
     with pytest.raises(ValueError, match="transcription"):
-        solve_swing_casadi(
-            golfer,
-            club,
-            config,
-            _torque_limits(golfer),
-            swing_joint_limits(golfer),
-            np.zeros(2 * 7 * 4),
-            transcription="collocation",  # type: ignore[arg-type]
-        )
+        CasadiSolveOptions(transcription="collocation")  # type: ignore[arg-type]
