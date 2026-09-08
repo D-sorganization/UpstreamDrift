@@ -2435,6 +2435,7 @@
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
         "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
         "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",

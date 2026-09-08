@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "5ad5c1b15c90eb4a61864cac283bf786a0bb37662ab0fcb4ab33e66e4b65ee94"
+    "sha256": "f58bdc4faa6913a20efe6f9e094a6927c4eb4ee422a9c054fb71e95364bfad34"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -12,8 +12,8 @@
   },
   "summary": {
     "claim_count": 328,
-    "evidence_reference_count": 2576,
-    "local_artifact_count": 431,
+    "evidence_reference_count": 2581,
+    "local_artifact_count": 432,
     "external_url_count": 78
   },
   "claims": {
@@ -2821,6 +2821,7 @@
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
         "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
         "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
@@ -2846,6 +2847,7 @@
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
         "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
         "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
@@ -2871,6 +2873,7 @@
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
         "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
         "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
@@ -2896,6 +2899,7 @@
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
         "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
         "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
@@ -2921,6 +2925,7 @@
         "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
         "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
         "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
@@ -4659,8 +4664,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "355157bd57d0c2eb19652d3bd109c8074cc6ba83dc949abda478551a470d390c",
-      "bytes": 6486,
+      "sha256": "0c0f33951a3b5845a1a3ca05fa3c05d95ce13bbc9c06f552e856f4db48fae509",
+      "bytes": 6631,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -6429,8 +6434,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "682ef3a661b2e4b86251dd7ee986c52759a069e18ea5ce552bdf35e5a17f8a77",
-      "bytes": 162918,
+      "sha256": "9442622eff61ab16f46038700294f04e132318ca692ecefb2daae75030f38f5d",
+      "bytes": 163108,
       "referenced_by": [
         "PD-CLAIM-241"
       ]
@@ -6598,6 +6603,17 @@
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_native_runtime.py": {
+      "sha256": "3431b3fb921d9709dc882e4b82c05386f941d862be6dfdcb567964776f8f4a56",
+      "bytes": 5507,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_shaft.py": {
@@ -7451,8 +7467,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py": {
-      "sha256": "1ef3eda2b0d96562362e85b9939fa431aa502e90db86d82840b24c1fc7b2a692",
-      "bytes": 31356,
+      "sha256": "4a4bca19d482122c631c72313f0c305957a2ac337c0e51c7a54ba543379dd183",
+      "bytes": 32015,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",

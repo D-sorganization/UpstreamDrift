@@ -23,6 +23,10 @@ import numpy.typing as npt
 
 from src.shared.python.core.contracts import require
 
+from ..provenance import write_stamped
+
+EXPORT_SCHEMA_VERSION = "reconstruction-export/1.0.0"
+
 from .skeleton import JOINT_NAMES
 
 Array = npt.NDArray[np.float64]
@@ -96,7 +100,7 @@ def canonical_payload(
             }
         )
     return {
-        "schema_version": "reconstruction-export/1.0.0",
+        "schema_version": EXPORT_SCHEMA_VERSION,
         "units": "m",
         "fps": fps,
         "joint_names": list(names),
@@ -139,9 +143,14 @@ def export_reconstruction(
     write_trc(joints, fps, trc)
     written["trc"] = str(trc)
     out_json = json_path or reconstruct_dir / "reconstruction_export.json"
-    out_json.write_text(
-        json.dumps(canonical_payload(joints, fps, provenance=provenance), indent=1),
-        encoding="utf-8",
+    write_stamped(
+        out_json,
+        canonical_payload(joints, fps, provenance=provenance),
+        schema_version=EXPORT_SCHEMA_VERSION,
+        module=__name__,
+        inputs=[joints_file, summary_file],
+        derived_from=[summary_file],
+        base=reconstruct_dir.parent,
     )
     written["json"] = str(out_json)
     return written

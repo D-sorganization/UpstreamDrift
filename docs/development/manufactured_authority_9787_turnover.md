@@ -192,3 +192,30 @@ and pikepdf; neither authority environment nor shared runners are modified.
 Archival and human-validation limitations remain. After every future registry
 refresh, run the summary writer and its five tests before release qualification;
 if its QMD changes, rebuild and inspect the canonical PDF before bundling it.
+
+## Merged Native Bootstrap and Combined-Suite Repair
+
+Main `563e7aaa9` includes #9726 (`474ea6bf5`), registry #9729 and mocap #9805.
+The merge preserves those source changes and both owners' SPEC/development-log
+rows. The bootstrap adds one governed source and changes the native runner;
+actual pinned-engine execution regenerates the canonical native record to
+SHA-256 `0c0f33951a3b5845a1a3ca05fa3c05d95ce13bbc9c06f552e856f4db48fae509`.
+Only `source_sha256` differs from the prior record: 14 sources now include
+`articulated_native_runtime.py`. All numerical and execution-profile fields
+are unchanged. Compatible wheel pins and the exact Tools gitlink remain.
+
+The combined 122-test run exposes two downstream native failures because the
+incoming bootstrap unit test leaves a fake `LD_LIBRARY_PATH` behind when that
+variable was initially absent. Its mocked `execv` returns into the test process.
+`monkeypatch.delenv(..., raising=False)` registers no restoration for an absent
+key. Setting an empty value through monkeypatch first records the original
+absence, so teardown now removes the helper's fake-library mutation. This is
+a test-isolation fix; production bootstrap behavior is unchanged.
+
+After that minimal correction, all 122 combined native/provenance/bootstrap
+contracts pass (44.20 s). The separate rolling environment passes three
+native/killswitch contracts with 14 deselections and five existing alias
+warnings (14.42 s). Canonical claim registration, summary and release writers
+refresh source evidence and manifests; the 328 claim outcomes, corrected QMD
+table and rebuilt PDF remain unchanged. Keep the current-head protected CI
+gate and all empirical/archival limits; previous native hashes are historical.
