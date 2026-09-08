@@ -16,7 +16,6 @@ angles from fitted skeletons, not from one view.
 
 from __future__ import annotations
 
-import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, ClassVar
@@ -28,6 +27,8 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
+    detection_result,
+    estimate_video_frames,
 )
 from src.shared.python.pose_estimation.openpose_models import resolve_body25
 
@@ -109,26 +110,7 @@ class OpenPoseDnnEstimator(PoseEstimator):
         """Run every frame of a video file; timestamps come from the frame rate."""
         if self._net is None:
             raise StateError("load_model() must be called before estimation")
-        import cv2
-
-        cap = cv2.VideoCapture(str(video_path))
-        if not cap.isOpened():
-            raise FileNotFoundError(f"Could not open video file: {video_path}")
-        fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
-        results: list[PoseEstimationResult] = []
-        try:
-            index = 0
-            while True:
-                ok, frame = cap.read()
-                if not ok:
-                    break
-                results.append(
-                    self.estimate_from_image(frame, int(round(index * 1000.0 / fps)))
-                )
-                index += 1
-        finally:
-            cap.release()
-        return results
+        return estimate_video_frames(video_path, self.estimate_from_image)
 
     def estimate_from_image(
         self, image: np.ndarray, timestamp_ms: int | None = None
@@ -150,16 +132,7 @@ class OpenPoseDnnEstimator(PoseEstimator):
         self._net.setInput(blob)
         heatmaps = np.asarray(self._net.forward())[0]
         keypoints, confidences = self.peaks(heatmaps)
-        detected = [c for c in confidences.values() if c >= self.min_peak]
-        return PoseEstimationResult(
-            joint_angles={},
-            confidence=float(np.mean(detected)) if detected else 0.0,
-            timestamp=(timestamp_ms / 1000.0)
-            if timestamp_ms is not None
-            else time.time(),
-            raw_keypoints=keypoints,
-            raw_confidences=confidences,
-        )
+        return detection_result(keypoints, confidences, self.min_peak, timestamp_ms)
 
     def peaks(
         self, heatmaps: np.ndarray
