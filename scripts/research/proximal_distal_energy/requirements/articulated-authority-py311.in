@@ -1,8 +1,4 @@
 # Direct requirements for the Python 3.11 Linux manufactured-solution authority lane.
-# Pinocchio 3.8.0's Linux parsers require URDF ABI 4 and TinyXML2 ABI 10.
-# Python dependency metadata alone permits newer, binary-incompatible wheels.
-cmeel-tinyxml2==10.0.0
-cmeel-urdfdom==4.0.1
 defusedxml==0.7.1
 mujoco==3.8.0
 numpy==2.3.5
