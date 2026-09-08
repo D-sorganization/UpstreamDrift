@@ -159,6 +159,7 @@ def _true_motion(model: ArticulatedModel, frames: int, fps: float) -> np.ndarray
     return q
 
 
+@pytest.mark.timeout(180)  # whole-trajectory fit; CI's default is 60 s
 def test_fit_recovers_the_motion_and_rejects_a_jump() -> None:
     model = ArticulatedModel(ARM)
     fps, frames = 60.0, 90

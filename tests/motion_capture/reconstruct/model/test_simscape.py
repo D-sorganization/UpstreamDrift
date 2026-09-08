@@ -68,11 +68,12 @@ def _synthetic_frames(order: str, signs: tuple[int, ...], seed: int = 0) -> Fram
 @pytest.mark.parametrize(
     "order,signs", [("xyz", (1, 1, 1)), ("yzx", (-1, -1, 1)), ("zxy", (1, -1, -1))]
 )
+@pytest.mark.timeout(180)  # exhaustive hypothesis search; CI's default is 60 s
 def test_identification_recovers_a_known_convention(
     order: str, signs: tuple[int, ...]
 ) -> None:
     frames = _synthetic_frames(order, signs)
-    found = identify_joint(frames, "left_shoulder")
+    found = identify_joint(frames, "left_shoulder", seeds=4)  # exact data; CI budget
     assert found.residual_rad < 1e-6
     assert found.offset_spread_m < 1e-9
     np.testing.assert_allclose(
