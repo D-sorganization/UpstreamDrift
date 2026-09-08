@@ -140,6 +140,28 @@ DETECT = Step(
     ready=lambda m: _ready_if(_has_recordings(m), "record or import first"),
 )
 
+ANNOTATE = Step(
+    key="annotate",
+    title="Annotate or Correct Points by Hand",
+    purpose="Click joints frame by frame where the detectors fail, or correct their outliers.",
+    requirements=(
+        "A playable recording for the view.",
+        "Optionally an observation set to correct (pick it in the player).",
+    ),
+    instructions=(
+        "Pick the view (and, to correct a detector, its observation set) in the player; press *Annotate / edit points*.",
+        "Follow the banner: click the joint it names, S to skip an occluded joint (or reject a detector point), N for the next frame, B back, J jump, A to accept a detector's frame, Q to finish.",
+        "Run `rig annotations-to-observations` (with `--merge-with SET` for corrections) to get a set the reconstruction and model fit use like any other.",
+    ),
+    actions=("annotate",),
+    # Optional: satisfied by detections or by hand-made annotations.
+    done=lambda m: (
+        m.ingested
+        or any((m.root / "annotations" / f"{v.view}.json").is_file() for v in m.views)
+    ),
+    ready=lambda m: _ready_if(_has_recordings(m), "record or import first"),
+)
+
 REVIEW = Step(
     key="review",
     title="Review Joint Reliability",
@@ -165,7 +187,8 @@ RECONSTRUCT = Step(
     ),
     instructions=(
         "Pick the start file (intrinsics or previous reconstruction), enter the measured segments (shank=0.42, forearm=0.26, ...), optionally joints to exclude.",
-        "Press *Reconstruct*. The summary shows RMS, rejections and the swing metrics.",
+        "In the *Match* tab tick the cameras to use and name the variant (blank = the default match); matches of one take live side by side under variants/ and every output records its provenance.",
+        "Press *Reconstruct*. The summary shows RMS, rejections and the swing metrics; tick variants under *Model overlay* in the player to draw them on any view, including views a match never used.",
     ),
     actions=("reconstruct",),
     done=lambda m: m.reconstruction is not None,
@@ -202,6 +225,7 @@ FIT_MODEL = Step(
         "Press *Fit model*. The fit solves every frame together with an acceleration prior on each joint angle, soft joint limits and robust rejection, so a point the model cannot reach by continuous motion is listed as rejected, not followed.",
         "Read model/fit_report.json: RMS per landmark, rejections, peak joint speeds; scapula angles appear as left/right_scapula.rx (elevation) and .ry (protraction).",
         "*Export* then also writes joint_angles_simscape.csv in the MATLAB model's variable names.",
+        "Image-space matching: choose *image space* in the *Match* tab with one or more views and the variant whose cameras to borrow; the model is fitted to the 2-D keypoints directly (the single-camera path).",
     ),
     actions=("fit_model",),
     done=lambda m: m.model_fit is not None,
@@ -247,6 +271,7 @@ STEPS: tuple[Step, ...] = (
     INTRINSICS,
     CAPTURE,
     DETECT,
+    ANNOTATE,
     REVIEW,
     RECONSTRUCT,
     FIT_MODEL,

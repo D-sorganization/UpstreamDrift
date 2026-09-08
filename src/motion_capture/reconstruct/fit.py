@@ -21,9 +21,18 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.shared.python.core.contracts import require
+
+from ..provenance import write_stamped
 from src.shared.python.pose_estimation.observations import CameraCalibration
 
-from .bundle import BundleOptions, BundleResult, bundle_adjust, observations_from_views
+from .bundle import (
+    BundleOptions,
+    BundleResult,
+    bundle_adjust,
+    compact_frames,
+    expand_result,
+    observations_from_views,
+)
 from .cameras import PinholeCamera
 from .layouts import to_reconstruct_layout
 from .metrics import bone_length_errors, camera_pose_error, joint_position_errors
@@ -66,13 +75,22 @@ class Reconstruction(BaseModel):
 
 def load_views(bundle_dir: Path) -> dict[str, dict[str, Any]]:
     """Every ``observations/<view>.json`` keyed by its ``view``."""
-    obs_dir = bundle_dir / "observations"
-    require(obs_dir.is_dir(), "bundle has no observations directory", str(bundle_dir))
+    return load_views_from(bundle_dir / "observations")
+
+
+def load_views_from(obs_dir: Path, minimum: int = 2) -> dict[str, dict[str, Any]]:
+    """Every ``<view>.json`` of an observation-set directory keyed by ``view``.
+
+    Precondition: the directory exists and holds at least ``minimum`` views
+    (index/report files are skipped).
+    """
+    require(obs_dir.is_dir(), "observation set directory missing", str(obs_dir))
     views: dict[str, dict[str, Any]] = {}
     for path in sorted(obs_dir.glob("*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        views[str(payload["view"])] = payload
-    require(len(views) >= 2, "reconstruction needs at least two views", sorted(views))
+        if isinstance(payload, dict) and "view" in payload and "frames" in payload:
+            views[str(payload["view"])] = payload
+    require(len(views) >= minimum, "not enough views in set", sorted(views))
     return views
 
 
@@ -131,6 +149,7 @@ def _metrics_against(truth: SyntheticTruth, result: BundleResult) -> dict[str, A
 def fit_bundle(
     bundle_dir: Path,
     *,
+    base: Path | None = None,
     scale_anchor: tuple[str, float],
     start_cameras: Sequence[PinholeCamera] | None = None,
     length_prior_m: Mapping[str, float] = DEFAULT_LENGTHS_M,
@@ -173,8 +192,13 @@ def fit_bundle(
             "measured_lengths_m": dict(measured_lengths_m or {}),
         }
     )
-    result = bundle_adjust(
-        start_cameras, obs, length_prior_m=length_prior_m, options=opts
+    compact, keep = compact_frames(obs)
+    result = expand_result(
+        bundle_adjust(
+            start_cameras, compact, length_prior_m=length_prior_m, options=opts
+        ),
+        keep,
+        obs.pixels.shape[1],
     )
     record = Reconstruction(
         joint_names=names,
@@ -198,8 +222,20 @@ def fit_bundle(
         ],
         metrics=_metrics_against(truth, result) if truth is not None else {},
     )
-    (bundle_dir / RECONSTRUCTION_FILE).write_text(
-        record.model_dump_json(indent=2), encoding="utf-8"
+    cleaned = sorted((bundle_dir / "observations").glob("*.json"))
+    write_stamped(
+        bundle_dir / RECONSTRUCTION_FILE,
+        record.model_dump(mode="json"),
+        schema_version=record.schema_version,
+        module=__name__,
+        inputs=cleaned,
+        parameters={
+            "scale_anchor": list(scale_anchor),
+            "measured_lengths_m": dict(measured_lengths_m or {}),
+            "start_cameras": [c.camera_id for c in start_cameras],
+        },
+        derived_from=cleaned,
+        base=base or bundle_dir.parent,
     )
     np.save(bundle_dir / "joints_3d_m.npy", result.joints_3d_m)
     return record
