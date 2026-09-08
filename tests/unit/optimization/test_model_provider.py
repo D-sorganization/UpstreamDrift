@@ -76,3 +76,39 @@ def test_pinocchio_builder_degrades_with_hint() -> None:
             model_provider.build_drake_plant()
         with pytest.raises(RuntimeError, match="mujoco"):
             model_provider.build_mujoco_model()
+
+
+def test_anthropometric_inertials_conserve_mass() -> None:
+    """#9755: dynamic backends must see the golfer's and club's real masses."""
+    from src.shared.python.optimization.model_provider import swing_link_inertials
+
+    golfer, club = GolferModel(mass=80.0), ClubModel(head_mass=0.25)
+    inertials = swing_link_inertials(golfer, club)
+    assert list(inertials) == JOINTS
+    total = sum(link.mass for link in inertials.values())
+    expected = (
+        golfer.mass * (golfer.trunk_mass_ratio + golfer.arm_mass_ratio)
+        + club.total_mass
+    )
+    # One zero-length carrier link keeps a 1e-2 kg conditioning mass.
+    assert total == pytest.approx(expected + 1e-2, abs=1e-9)
+    assert inertials["wrist_rotation"].mass == pytest.approx(club.head_mass)
+    # Every diagonal moment is strictly positive so MuJoCo/Drake accept it.
+    for link in inertials.values():
+        assert all(moment > 0.0 for moment in link.inertia[:3])
+    # Limb COMs sit along the segment (-Z) between joint and child joint.
+    assert inertials["shoulder_vertical"].com[2] < 0.0
+    assert inertials["wrist_cock"].com[2] < 0.0
+
+
+def test_swing_urdf_uses_anthropometric_inertials_by_default() -> None:
+    root = ET.fromstring(swing_urdf())
+    links = {ln.get("name"): ln for ln in root.findall("link")}
+    head = links["wrist_rotation_link"].find("inertial")
+    assert float(head.find("mass").get("value")) == pytest.approx(ClubModel().head_mass)
+    placeholder = ET.fromstring(swing_urdf(inertials="placeholder"))
+    p_links = {ln.get("name"): ln for ln in placeholder.findall("link")}
+    p_head = p_links["wrist_rotation_link"].find("inertial")
+    assert float(p_head.find("mass").get("value")) == 1.0
+    with pytest.raises(ValueError, match="inertials"):
+        swing_urdf(inertials="bogus")  # type: ignore[arg-type]

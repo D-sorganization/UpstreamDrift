@@ -13,12 +13,17 @@ Conventions:
 - The root link is named ``{rig.id}_root``; callers that want a fixed base
   weld it to the world (Drake) or rely on the default fixed base (Pinocchio).
 - Links carry small nonzero mass/inertia so engines that reject zero-inertia
-  moving bodies (Drake) accept the model.
+  moving bodies (Drake) accept the model. Callers that need *physical*
+  inertials (dynamic backends, #9755) pass ``link_inertials`` and the bridge
+  emits the given mass, COM offset and full inertia tensor for the
+  body-carrying link of each named joint.
 - A ``SimpleTransmission`` per DOF gives Drake one actuator per joint.
 """
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from dataclasses import dataclass
 from xml.sax.saxutils import escape
 
 from .contracts import SkeletonRig
@@ -37,6 +42,48 @@ _DEFAULT_EFFORT = 200.0
 _DEFAULT_VELOCITY = 50.0
 
 
+@dataclass(frozen=True)
+class LinkInertial:
+    """Physical inertial properties of one rig link, in the link frame.
+
+    The link frame origin is the joint origin (URDF convention). ``com`` is
+    the centre-of-mass offset from that origin and ``inertia`` is the
+    ``(ixx, iyy, izz, ixy, ixz, iyz)`` tensor **about the COM**, which is
+    exactly what URDF ``<inertial><origin xyz=.../>`` + ``<inertia .../>``
+    encodes and what Pinocchio/Drake/MuJoCo read back.
+
+    Preconditions: ``mass > 0``; ``com`` has three finite entries; the
+    diagonal moments are non-negative.
+    """
+
+    mass: float
+    com: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    inertia: tuple[float, float, float, float, float, float] = (
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+    )
+
+    def __post_init__(self) -> None:
+        if not self.mass > 0.0:
+            raise ValueError("link mass must be positive")
+        if len(self.com) != 3:
+            raise ValueError("com must have three components")
+        if len(self.inertia) != 6:
+            raise ValueError("inertia must be (ixx, iyy, izz, ixy, ixz, iyz)")
+        if any(value < 0.0 for value in self.inertia[:3]):
+            raise ValueError("diagonal inertia moments must be non-negative")
+
+    @property
+    def inertia_matrix(self) -> list[list[float]]:
+        """Return the 3x3 symmetric inertia tensor about the COM."""
+        ixx, iyy, izz, ixy, ixz, iyz = self.inertia
+        return [[ixx, ixy, ixz], [ixy, iyy, iyz], [ixz, iyz, izz]]
+
+
 def _inertial(mass: float, inertia: float) -> str:
     return (
         "<inertial>"
@@ -47,21 +94,49 @@ def _inertial(mass: float, inertia: float) -> str:
     )
 
 
-def rig_to_urdf(rig: SkeletonRig, *, model_name: str | None = None) -> str:
+def _physical_inertial(link: LinkInertial) -> str:
+    cx, cy, cz = link.com
+    ixx, iyy, izz, ixy, ixz, iyz = link.inertia
+    return (
+        "<inertial>"
+        f'<origin xyz="{cx} {cy} {cz}" rpy="0 0 0"/>'
+        f'<mass value="{link.mass}"/>'
+        f'<inertia ixx="{ixx}" ixy="{ixy}" ixz="{ixz}" '
+        f'iyy="{iyy}" iyz="{iyz}" izz="{izz}"/>'
+        "</inertial>"
+    )
+
+
+def rig_to_urdf(
+    rig: SkeletonRig,
+    *,
+    model_name: str | None = None,
+    link_inertials: Mapping[str, LinkInertial] | None = None,
+) -> str:
     """Render ``rig`` as a URDF string.
 
     Args:
         rig: Canonical skeleton rig (validated by its own contracts).
         model_name: Optional URDF robot name; defaults to ``rig.id``.
+        link_inertials: Optional ``joint name -> LinkInertial`` for the
+            body-carrying link of each joint (``{joint}_link``). Joints not
+            listed keep the generic conditioning placeholders; intermediate
+            multi-axis links always keep the dummy inertials. Pass this from
+            dynamic backends so torque limits mean something (#9755).
 
     Returns:
         URDF XML with one revolute joint (+ transmission) per rig DOF.
 
     Raises:
-        ValueError: If the rig has no DOFs (nothing to articulate).
+        ValueError: If the rig has no DOFs (nothing to articulate), or if
+            ``link_inertials`` names a joint the rig does not have.
     """
     if rig.num_dofs < 1:
         raise ValueError("rig must have at least one DOF to build a URDF")
+    inertials: Mapping[str, LinkInertial] = link_inertials or {}
+    unknown = sorted(set(inertials) - set(rig.joints))
+    if unknown:
+        raise ValueError(f"link_inertials names joints not in rig: {unknown}")
 
     name = escape(model_name or rig.id)
     root_link = f"{rig.id}_root"
@@ -97,9 +172,11 @@ def rig_to_urdf(rig: SkeletonRig, *, model_name: str | None = None) -> str:
                 lower, upper = -_DEFAULT_LIMIT, _DEFAULT_LIMIT
             urdf_joint = f"{joint_name}_dof{axis_idx}"
 
-            parts.append(
-                f'<link name="{escape(child_link)}">{_inertial(mass, inertia)}</link>'
-            )
+            if is_last and joint_name in inertials:
+                inertial_xml = _physical_inertial(inertials[joint_name])
+            else:
+                inertial_xml = _inertial(mass, inertia)
+            parts.append(f'<link name="{escape(child_link)}">{inertial_xml}</link>')
             parts.append(
                 f'<joint name="{escape(urdf_joint)}" type="revolute">'
                 f'<parent link="{escape(parent_link)}"/>'

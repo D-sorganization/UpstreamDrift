@@ -158,3 +158,150 @@ def test_x0_shape_validated() -> None:
             swing_joint_limits(golfer),
             np.zeros(5),
         )
+
+
+# --- #9755: anthropometric inertials ----------------------------------------
+
+
+@pytest.mark.skipif(not PIN_AVAILABLE, reason="pinocchio not installed")
+@pytest.mark.parametrize("inertials", ["anthropometric", "placeholder"])
+def test_dynamics_kernels_match_pinocchio(inertials: str) -> None:
+    """RNEA, CRBA-by-RNEA and forward dynamics agree with Pinocchio on the
+    same URDF, for both the physical and the legacy placeholder inertials."""
+    import pinocchio as pin
+
+    from src.shared.python.optimization.casadi_backend import (
+        build_forward_dynamics,
+        build_mass_matrix,
+    )
+    from src.shared.python.optimization.model_provider import (
+        build_pinocchio_model,
+        placeholder_link_inertials,
+    )
+
+    golfer, club = GolferModel(), ClubModel()
+    model = build_pinocchio_model(golfer, club, inertials=inertials)  # type: ignore[arg-type]
+    data = model.createData()
+    link_inertials = (
+        placeholder_link_inertials() if inertials == "placeholder" else None
+    )
+    rnea = build_symbolic_rnea(golfer, club, link_inertials=link_inertials)
+    mass = build_mass_matrix(golfer, club, link_inertials=link_inertials)
+    forward = build_forward_dynamics(golfer, club, link_inertials=link_inertials)
+
+    rng = np.random.default_rng(7)
+    for _ in range(50):
+        q = rng.uniform(-1.0, 1.0, model.nq)
+        v = rng.uniform(-5.0, 5.0, model.nv)
+        a = rng.uniform(-20.0, 20.0, model.nv)
+        tau = rng.uniform(-50.0, 50.0, model.nv)
+        np.testing.assert_allclose(
+            np.asarray(rnea(q, v, a)).ravel(), pin.rnea(model, data, q, v, a), atol=1e-9
+        )
+        crba = pin.crba(model, data, q)
+        crba = np.triu(crba) + np.triu(crba, 1).T
+        np.testing.assert_allclose(np.asarray(mass(q)), crba, atol=1e-9)
+        np.testing.assert_allclose(
+            np.asarray(forward(q, v, tau)).ravel(),
+            pin.aba(model, data, q, v, tau),
+            atol=1e-8,
+        )
+
+
+def test_anthropometric_torques_exceed_placeholder_torques() -> None:
+    """The point of #9755: real masses make gravity torques real."""
+    from src.shared.python.optimization.model_provider import (
+        placeholder_link_inertials,
+    )
+
+    golfer, club = GolferModel(), ClubModel()
+    real = build_symbolic_rnea(golfer, club)
+    fake = build_symbolic_rnea(
+        golfer, club, link_inertials=placeholder_link_inertials()
+    )
+    q = np.array([0.0, 0.0, 0.0, 1.2, 0.3, 0.0, 0.0])
+    zero = np.zeros(7)
+    tau_real = np.abs(np.asarray(real(q, zero, zero)).ravel())
+    tau_fake = np.abs(np.asarray(fake(q, zero, zero)).ravel())
+    # Shoulder gravity torque with a 2 kg arm + club vs a 1 kg placeholder.
+    assert tau_real[3] > tau_fake[3]
+
+
+# --- #9756: dynamics defect and multiple shooting ---------------------------
+
+
+def test_finite_difference_solution_violates_the_ode() -> None:
+    from src.shared.python.optimization.casadi_backend import dynamics_defect
+
+    golfer, club = GolferModel(), ClubModel()
+    config = OptimizationConfig(n_nodes=10, swing_duration=1.0, max_iterations=200)
+    joint_limits = swing_joint_limits(golfer)
+    x0 = generate_initial_guess(golfer, config, joint_limits)
+    result = solve_swing_casadi(
+        golfer, club, config, _torque_limits(golfer), joint_limits, x0
+    )
+    assert result.success and result.torques is None
+    report = dynamics_defect(golfer, club, config, result.x)
+    assert report.torques.shape == (len(JOINTS), config.n_nodes - 1)
+    # The FD path is a kinematic fit: the ODE is violated by O(1) rad.
+    assert report.max_position_defect > 0.1
+    assert set(report.to_dict()) == {
+        "max_position_defect",
+        "max_velocity_defect",
+        "rms_position_defect",
+        "rms_velocity_defect",
+    }
+
+
+@pytest.mark.slow
+def test_multiple_shooting_satisfies_its_own_dynamics() -> None:
+    from src.shared.python.optimization.casadi_backend import dynamics_defect
+
+    golfer, club = GolferModel(), ClubModel()
+    config = OptimizationConfig(n_nodes=6, swing_duration=0.6, max_iterations=800)
+    joint_limits = swing_joint_limits(golfer)
+    x0 = generate_initial_guess(golfer, config, joint_limits)
+    limits = _torque_limits(golfer)
+    result = solve_swing_casadi(
+        golfer,
+        club,
+        config,
+        limits,
+        joint_limits,
+        x0,
+        transcription="multiple_shooting",
+        n_substeps=8,
+    )
+    assert result.success, result.message
+    assert result.transcription == "multiple_shooting"
+    assert result.torques is not None
+    assert result.torques.shape == (len(JOINTS), config.n_nodes - 1)
+    for j, joint in enumerate(JOINTS):
+        assert np.all(np.abs(result.torques[j]) <= limits[joint] + 1e-6)
+    # Re-integrating on the solver's own grid reproduces the nodes.
+    own = dynamics_defect(
+        golfer, club, config, result.x, torques=result.torques, n_substeps=8
+    )
+    assert own.max_defect < 1e-5
+    # A finer reference integrator shows only discretisation error, which is
+    # small next to the finite-difference path's O(1) ODE violation.
+    reference = dynamics_defect(golfer, club, config, result.x, torques=result.torques)
+    fd = solve_swing_casadi(golfer, club, config, limits, joint_limits, x0)
+    fd_reference = dynamics_defect(golfer, club, config, fd.x)
+    assert reference.max_position_defect < 0.5
+    assert reference.max_position_defect < 0.5 * fd_reference.max_position_defect
+
+
+def test_transcription_argument_validated() -> None:
+    golfer, club = GolferModel(), ClubModel()
+    config = OptimizationConfig(n_nodes=4)
+    with pytest.raises(ValueError, match="transcription"):
+        solve_swing_casadi(
+            golfer,
+            club,
+            config,
+            _torque_limits(golfer),
+            swing_joint_limits(golfer),
+            np.zeros(2 * 7 * 4),
+            transcription="collocation",  # type: ignore[arg-type]
+        )
