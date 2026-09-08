@@ -22,6 +22,13 @@ def _available(name: str) -> bool:
 CASADI_AVAILABLE = _available("casadi")
 PIN_AVAILABLE = _available("pinocchio")
 
+# Import the C extension once at module scope: the root conftest snapshots
+# ``pinocchio*`` sys.modules entries before each test and evicts anything
+# added during it, and pinocchio_pywrap_default does not survive a second
+# import in the same process.
+if PIN_AVAILABLE:
+    import pinocchio as pin
+
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.requires_casadi,
@@ -62,8 +69,6 @@ def _torque_limits(golfer: GolferModel) -> dict[str, float]:
 @pytest.mark.skipif(not PIN_AVAILABLE, reason="pinocchio not installed")
 def test_symbolic_rnea_matches_pinocchio_on_bridge_model() -> None:
     """The CasADi RNEA must agree with pin.rnea on the same URDF chain."""
-    import pinocchio as pin
-
     from src.shared.python.optimization.model_provider import (
         build_pinocchio_model,
     )
@@ -168,8 +173,6 @@ def test_x0_shape_validated() -> None:
 def test_dynamics_kernels_match_pinocchio(inertials: str) -> None:
     """RNEA, CRBA-by-RNEA and forward dynamics agree with Pinocchio on the
     same URDF, for both the physical and the legacy placeholder inertials."""
-    import pinocchio as pin
-
     from src.shared.python.optimization.casadi_backend import (
         build_forward_dynamics,
         build_mass_matrix,
@@ -208,23 +211,26 @@ def test_dynamics_kernels_match_pinocchio(inertials: str) -> None:
         )
 
 
-def test_anthropometric_torques_exceed_placeholder_torques() -> None:
-    """The point of #9755: real masses make gravity torques real."""
+def test_anthropometric_torques_follow_the_golfer_and_placeholders_do_not() -> None:
+    """The point of #9755: gravity torques respond to the golfer's mass."""
     from src.shared.python.optimization.model_provider import (
         placeholder_link_inertials,
     )
 
-    golfer, club = GolferModel(), ClubModel()
-    real = build_symbolic_rnea(golfer, club)
-    fake = build_symbolic_rnea(
-        golfer, club, link_inertials=placeholder_link_inertials()
-    )
-    q = np.array([0.0, 0.0, 0.0, 1.2, 0.3, 0.0, 0.0])
+    club = ClubModel()
+    light, heavy = GolferModel(mass=60.0), GolferModel(mass=120.0)
+    q = np.array([0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 0.0])  # arm + club horizontal
     zero = np.zeros(7)
-    tau_real = np.abs(np.asarray(real(q, zero, zero)).ravel())
-    tau_fake = np.abs(np.asarray(fake(q, zero, zero)).ravel())
-    # Shoulder gravity torque with a 2 kg arm + club vs a 1 kg placeholder.
-    assert tau_real[3] > tau_fake[3]
+
+    def shoulder_gravity_torque(golfer: GolferModel, **kwargs: object) -> float:
+        rnea = build_symbolic_rnea(golfer, club, **kwargs)  # type: ignore[arg-type]
+        return abs(float(np.asarray(rnea(q, zero, zero)).ravel()[3]))
+
+    assert shoulder_gravity_torque(heavy) > 1.3 * shoulder_gravity_torque(light)
+    placeholder = placeholder_link_inertials()
+    assert shoulder_gravity_torque(heavy, link_inertials=placeholder) == pytest.approx(
+        shoulder_gravity_torque(light, link_inertials=placeholder)
+    )
 
 
 # --- #9756: dynamics defect and multiple shooting ---------------------------
