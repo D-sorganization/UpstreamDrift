@@ -1,7 +1,15 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 02:55 PDT
-Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-08 07:55 UTC
+
+## PR #9725 CI Repair (Round 5)
+
+- Branch now carries the `origin/main` merge (including #9722); this round
+  only syncs `requirements-dev.lock`/`environment.yml` for main's
+  openpyxl/imageio dev-extra addition (#9716), clearing the shared
+  `dependency-consistency` red on the merge ref. No material handoff change —
+  lock sync only; behavior and continuation state unchanged.
 
 ## Impact Dynamics and Acoustics: #9700
 
