@@ -30,8 +30,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** `SandDelivery` now refuses contradictory exit speed/vector pairs and owns copies of list-supplied exit vectors so post-construction mutation cannot invalidate the frozen record; the `to_post_impact_state` boundary carries explicit `ExitVectorProvenance` labels, and `PostImpactEnvelope` wraps the flight handoff with the validity verdict, F0 tier, per-group frames, the proper `HEAD_FRAME_TO_FLIGHT_TRANSFORM`, a schema version, and a SHA-256 source digest with JSON round trip. Reflection rejection itself was already delivered by PR #9574 and is not redone.
 - **Next step:** Open the protected PR to `main` with `Fixes #9542`, label `agent:claude`, and RED/GREEN evidence in the body.
 
-
-### DL-#9409 · Always-on quality gate lane and conftest src-pivot guard
+### DL-#9409 · Always-On Quality Gate Lane and Conftest Src-Pivot Guard
 
 - **State:** in_review
 - **Owner:** `claude`
