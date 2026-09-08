@@ -17,6 +17,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+
 ### DL-#9249 · UI: Pin @vitejs/Plugin-React to ^5 Until Vite 8
 
 - **State:** in_review
@@ -31,11 +32,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Merge the guard PR; revisit the paired vite@8 +
   plugin-react@6 upgrade once `vitest`/`@react-three/*` are Vite-8 ready.
 
-### DL-#9387 · Unit-Gate Worker Corruption: `src`-Identity Sentinel and Leak Fixes
+### DL-#9470 · Launch-Monitor Analysis Handlers Onto the Async_Action Worker
 
 - **State:** in_review
 - **Owner:** claude
-- **PR:** #9741 (open; `Fixes #9387`)
+- **Issue:** #9470
+- **PR:** #9742
+- **Paths:** `src/tools/launch_monitor_analytics/gui.py`, `src/tools/launch_monitor_analytics/_embed_adapter.py`, `tests/ui/tools/launch_monitor/test_async_actions.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF` on this branch: `tests/ui/tools/launch_monitor` + `tests/tools/test_async_action.py` all passing, PyQt6 6.11.0 offscreen)
+- **Summary:** All seven analysis handlers (`treatment`, `relationship`, `multivariate`, `model`, `comparison`, `dispersion`, `trend`) now run their compute on the #8880 `async_action` worker via one shared `AsyncActionBar`; synchronous `present(compute())` paths kept; embed adapter `cleanup()` cancels and joins the worker. First slice of the #9470 tool checklist; the remaining tools are follow-ups.
+- **Next step:** Merge PR #9472 (the #8880 mechanism) before this branch — it is stacked on `readiness/p2-8880-async-action-worker`.
+
+### DL-#9387 · Unit-Gate Worker Corruption: `src`-Identity Sentinel and Leak Fixes
+
+- **State:** shipped
+- **Owner:** claude
+- **PR:** #9741 (merged; `Fixes #9387`)
 - **Paths:** `tests/unit/repo_hygiene/test_src_identity_sentinel.py`,
   `tests/imports/test_gui_import_boundaries.py`,
   `tests/integration/test_golf_launcher_integration.py`,
@@ -76,6 +89,25 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
   prohibition stands on Windows with no blanket exception.
 - **Next step:** Record CI on PR #9744; on merge, confirm the protected-main
   sync lands the resolved hook environment note.
+
+### DL-#9733 · Fail Fast on the Uninitialized Vendored Tools Fallback
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9733
+- **Branch:** `claude/issue-9733-fail-fast`
+- **PR:** #9743 (open; `Fixes #9733`)
+- **Paths:** `src/__init__.py`, `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`160f9b759`)
+- **Summary:** When `vendor/ud-tools` is uninitialized, `src/__init__.py`'s
+  fallback registration mistook UpstreamDrift's own aliased `shared.python` copy
+  for an installed Tools distribution, installed `_VendoredToolsFallbackFinder`,
+  and livelocked pytest collection in meta-path `find_spec` recursion. The
+  registration probe now raises an actionable ImportError naming the remediation
+  command before any finder is installed; the initialized path is unchanged.
+- **Next step:** Record CI on PR #9743; on green, protected squash merge
+  closes #9733.
 
 ## Shipped (Last 90 Days)
 
