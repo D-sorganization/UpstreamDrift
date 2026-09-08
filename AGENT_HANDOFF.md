@@ -20,12 +20,14 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 
 ## Impact Dynamics and Acoustics: #9700
 
-- Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
-- Tools #5077 merged at `f72544613`; #5082 remains open. T3 section inertia is published at `22cfc8df9`; rotating loaded dynamics, contact, acoustics and empirical gates remain active.
-- #9735 / PR #9745 merged at `1b48707d5`. Follow-up #9783 accepts exact reviewed renderer source/hash pairs; the existing vendor pin and strict pixel tolerances stay intact.
-- No-vendor provider contracts: 13 passed; ownership-eviction mutation detected; installed-wheel CLI bootstrap passed. Pinned-vendor/CLI/fallback checks: 72 passed.
-- Current renderer compatibility: `docs/development/renderer_reference_9783_turnover.md`; import history: `docs/development/impact_provider_import_turnover.md`; design: `docs/development/impact_acoustics_program.md`.
-- Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.
+- Theory AffineDrift #4258/#4282 and integration plan #9706 merged. Tools T1 #5077 merged; T2 #5082 remains open.
+- Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
+- Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
+- Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 merged at `9aa26e4f8`; #9787 repairs its observed research companion failures.
+- #9787 / PR #9804: synchronized with main `563e7aaa9`, including native bootstrap #9726. Actual regenerated native record has SHA `0c0f3395`; only governed source hashes change. All 122 combined authority/provenance/bootstrap tests and three distinct rolling tests pass. Reviewer summary and inspected 253-page PDF are current; incoming mocap aliases are explicitly typed and the actual mypy hook passes. See `docs/development/manufactured_authority_9787_turnover.md`; protected CI remains required.
+- Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
+
+- Import/provider history: `docs/development/impact_provider_import_turnover.md`; reviewed renderer evidence: `docs/development/renderer_reference_9783_turnover.md`; program design: `docs/development/impact_acoustics_program.md`.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
 evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.

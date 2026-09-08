@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9787 · Manufactured Authority Runtime and Provenance
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9787
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9804
+- **Branch:** fix/9787-manufactured-authority
+- **Paths:** `scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.*`, `scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py`, manufactured research/CI contracts, native CI workflow, canonical evidence and turnover.
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (122 combined native/provenance/bootstrap contracts and three distinct rolling contracts pass)
+- **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
+- **Next step:** Main `563e7aaa9` and bootstrap #9726 are integrated; actual native evidence is regenerated with only source hashes changed. Combined-suite environment contamination is repaired. Explicit incoming mocap NumPy aliases fix the actual hook without changing calculations. Claim outcomes and inspected 253-page PDF are unchanged; published at `befa329d1` through every normal hook; await protected CI.
+
 ### DL-#9478 · Launcher Registry Truth: `tools://` Provenance Scheme and Ready/Beta Maturity Gate
 
 - **State:** in_review

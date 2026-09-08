@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -23,7 +24,7 @@ from src.shared.python.core.contracts import require
 
 from .cameras import PinholeCamera
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 MIN_VIEWS = 2
 
 

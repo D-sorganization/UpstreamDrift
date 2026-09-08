@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TypeAlias
 
 import logging
 
@@ -33,7 +33,7 @@ from .kinematics import ArticulatedModel
 
 logger = logging.getLogger(__name__)
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 
 
 @dataclass(frozen=True)
