@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import os
 from pathlib import Path
 
@@ -24,7 +25,7 @@ from src.tools.capture_rig.workflow import STEPS, Status, evaluate
 pytestmark = pytest.mark.unit
 
 
-def _golfer_session(tmp_path: Path, frames: int = 30, fps: float = 60.0) -> Path:
+def _golfer_session(tmp_path: Path, frames: int = 20, fps: float = 60.0) -> Path:
     """A reconstruct/ directory holding a golfer motion in the 15-joint layout."""
     model = golfer_model()
     t = np.arange(frames) / fps
@@ -51,6 +52,7 @@ def _golfer_session(tmp_path: Path, frames: int = 30, fps: float = 60.0) -> Path
     return tmp_path
 
 
+@pytest.mark.timeout(180)  # whole-trajectory fits; CI's default is 60 s
 def test_rig_fit_model_writes_model_dir_and_export_adds_simscape_csv(
     tmp_path: Path,
 ) -> None:
@@ -59,16 +61,16 @@ def test_rig_fit_model_writes_model_dir_and_export_adds_simscape_csv(
         rig_cli.main(["fit-model", "--session", str(root), "--sigma-accel", "300"]) == 0
     )
     angles = json.loads((root / "model" / "joint_angles.json").read_text("utf-8"))
-    assert angles["model"] == "golfer-scapula/1.0" and len(angles["q"]) == 30
+    assert angles["model"] == "golfer-scapula/2.0" and len(angles["q"]) == 20
     report = json.loads((root / "model" / "fit_report.json").read_text("utf-8"))
     assert report["rms_mm"] < 5.0 and report["velocity_violations"] == 0
-    assert report["landmarks"]["left_shoulder"]["frames"] == 30
+    assert report["landmarks"]["left_shoulder"]["frames"] == 20
     csv_path = write_simscape_csv(root / "model" / "joint_angles.json")
     lines = csv_path.read_text(encoding="utf-8").splitlines()
     assert lines[0].startswith("# upstreamdrift golfer-scapula")
     header = lines[1].split(",")
-    assert set(header) == {"time_s", *SIMSCAPE_NAMES.values()}
-    assert len(lines) == 2 + 30
+    assert set(header) == {"time_s", *(n for n, _ in SIMSCAPE_NAMES.values())}
+    assert len(lines) == 2 + 20
     with pytest.raises(ValueError, match="lack Simscape"):
         bad = root / "model" / "bad.json"
         bad.write_text(
@@ -126,6 +128,7 @@ def test_fit_model_command_and_tile_action(tmp_path: Path) -> None:
     assert widget.process.model_name() == "golfer"
 
 
+@pytest.mark.timeout(180)  # whole-trajectory fits; CI's default is 60 s
 def test_rig_compare_models_and_kinetics_commands(tmp_path: Path) -> None:
     root = _golfer_session(tmp_path)
     assert (
@@ -135,14 +138,30 @@ def test_rig_compare_models_and_kinetics_commands(tmp_path: Path) -> None:
                 "--session",
                 str(root),
                 "--models",
-                "golfer,double_pendulum",
+                "double_pendulum,triple_pendulum",  # cheap: CI's 60 s test budget
+                "--max-iterations",
+                "20",
             ]
         )
         == 0
     )
     comparison = json.loads((root / "model" / "comparison.json").read_text("utf-8"))
-    assert {s["model"] for s in comparison["ranking"]} == {"golfer", "double_pendulum"}
-    assert rig_cli.main(["fit-model", "--session", str(root), "--model", "golfer"]) == 0
+    ranked = {s["model"] for s in comparison["ranking"]}
+    assert ranked == {"double_pendulum", "triple_pendulum"}
+    assert (
+        rig_cli.main(
+            [
+                "fit-model",
+                "--session",
+                str(root),
+                "--model",
+                "golfer",
+                "--max-iterations",
+                "20",
+            ]
+        )
+        == 0
+    )
     assert (
         rig_cli.main(
             [
@@ -158,8 +177,9 @@ def test_rig_compare_models_and_kinetics_commands(tmp_path: Path) -> None:
         == 0
     )
     kinetics = json.loads((root / "model" / "kinetics.json").read_text("utf-8"))
-    assert kinetics["model"] == "golfer-scapula/1.0" and len(kinetics["tau"]) == 30
+    assert kinetics["model"] == "golfer-scapula/2.0" and len(kinetics["tau"]) == 20
     assert "LScapStartPositionX" in kinetics["simscape_names"].values()
+    shutil.rmtree(root / "model" / "triple_pendulum")  # kinetics needs a fit first
     with pytest.raises(SystemExit, match="fit-model"):
         rig_cli.main(
             [

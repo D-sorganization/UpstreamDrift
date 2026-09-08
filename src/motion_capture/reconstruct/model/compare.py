@@ -66,10 +66,16 @@ class ModelComparison(BaseModel):
 def dof_penalised_score(rms_m: float, dof: int, frames: int, landmarks: int) -> float:
     """``ln(rms) + dof / (frames * landmarks * 3)``: an AIC-shaped trade-off.
 
-    Precondition: positive rms and counts. The penalty is per observed
-    coordinate, so it fades with more data, as it should.
+    Precondition: positive finite rms and counts (callers floor an exact fit
+    at one micrometre). The penalty is per observed coordinate, so it fades
+    with more data.
     """
-    require(rms_m > 0 and frames > 0 and landmarks > 0 and dof >= 0, "positive counts")
+    require(
+        bool(np.isfinite(rms_m)) and rms_m > 0 and frames > 0 and landmarks > 0,
+        "positive finite rms and positive counts",
+        (rms_m, frames, landmarks),
+    )
+    require(dof >= 0, "positive counts", dof)
     return float(np.log(rms_m) + dof / (frames * landmarks * 3))
 
 
@@ -114,8 +120,15 @@ def compare_models(
                 rejected=len(fit.rejected),
                 peak_velocity_rad_s=float(peak),
                 velocity_violations=fit.velocity_violations,
-                score=dof_penalised_score(
-                    max(fit.rms_m, 1e-6), len(fit.dof_names), fit.q.shape[0], landmarks
+                score=(
+                    dof_penalised_score(
+                        max(fit.rms_m, 1e-6),
+                        len(fit.dof_names),
+                        fit.q.shape[0],
+                        landmarks,
+                    )
+                    if landmarks and np.isfinite(fit.rms_m)
+                    else float("inf")  # nothing fitted: ranks last
                 ),
             )
         )
