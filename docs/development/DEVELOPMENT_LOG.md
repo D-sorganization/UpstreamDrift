@@ -68,8 +68,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   else `category:<category>` — and added `scripts/check_launcher_logo_families.py`
   plus a focused pytest gate that fails any logo shared outside one family or
   shared without a documented declaration.
-- **Next step:** Record CI on PR #9725; on green, protected squash merge
-  closes #9482.
+- **Next step:** Address review feedback on PR #9725 and merge when approved.
 
 ## Shipped (Last 90 Days)
 
