@@ -90,14 +90,19 @@ def fit_model_args(
     session: Path, selection: MatchSelection, *, model: str, fit_lengths: bool
 ) -> list[str]:
     """``rig fit-model`` for the selection: image-space when the source says so."""
+    image_space = (
+        commands.ImageSpaceArgs(
+            selection.views, selection.cameras_from, selection.observation_set
+        )
+        if selection.image_space
+        else None
+    )
     return commands.fit_model_command(
         session,
         model=model,
         fit_lengths=fit_lengths,
         variant=selection.name,
-        from_views=selection.views if selection.image_space else (),
-        cameras_from=selection.cameras_from,
-        observations=selection.observation_set,
+        image_space=image_space,
     )
 
 

@@ -15,6 +15,7 @@ import json
 from collections.abc import Sequence, Mapping
 
 import numpy as np
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -75,6 +76,17 @@ class SessionReconstruction(BaseModel):
     camera_source: str | None = None
 
 
+@dataclass(frozen=True)
+class MatchSpec:
+    """Which observations and cameras a match uses, and where it lives (#9793)."""
+
+    observation_set: str = "observations"
+    views: tuple[str, ...] | None = None
+    variant: str = ""
+    camera_source: str | None = None
+    exclude_joints: tuple[str, ...] = ()
+
+
 def start_cameras_from(path: Path) -> list[PinholeCamera]:
     """Camera records from a JSON list, or the ``cameras`` of a reconstruction."""
     require(path.is_file(), "camera start file must exist", str(path))
@@ -113,18 +125,13 @@ def reconstruct_session(
     measurements: Sequence[str] = (),
     acceleration_sigma_px: float = DEFAULT_ACCELERATION_SIGMA_PX,
     min_confidence: float = 0.05,
-    exclude_joints: Sequence[str] = (),
-    observation_set: str = "observations",
-    views: Sequence[str] | None = None,
-    variant: str = "",
-    camera_source: str | None = None,
+    match: MatchSpec | None = None,
 ) -> SessionReconstruction:
     """Run layout -> clean -> fit on ``<session>/<observation_set>``; write results.
 
-    ``views`` restricts and orders the cameras used (default: every start
-    camera with observations); ``variant`` names the match so its outputs go
-    under ``variants/<variant>/`` (#9793); ``camera_source`` is recorded in
-    the provenance (which file the cameras came from).
+    ``match`` says which observation set and views to use, which variant the
+    outputs belong to, which joints to exclude and where the cameras came
+    from (recorded in the provenance) (#9793).
 
     Start from ``start_cameras`` (a previous take) or, for the first take of a
     new setup, from ``intrinsics`` alone: placement is then initialised from
@@ -140,32 +147,23 @@ def reconstruct_session(
         scale_anchor = gauge(measured)  # the first measurement sets the scale
     elif scale_anchor[0] not in measured:
         measured = {scale_anchor[0]: scale_anchor[1], **measured}
+    match = match or MatchSpec()
+    exclude_joints = match.exclude_joints
     unknown = [j for j in exclude_joints if j not in JOINT_NAMES]
     require(not unknown, "exclude_joints must name fit joints", unknown)
     require(
         (start_cameras is None) != (intrinsics is None),
         "give start cameras or intrinsics, not both",
     )
-    obs_set_dir = session_dir / observation_set
+    obs_set_dir = session_dir / match.observation_set
     all_views = load_views_from(obs_set_dir)
-    ids = (
-        [c.camera_id for c in start_cameras]
-        if start_cameras
-        else [i[0] for i in intrinsics or []]
+    ids, start_cameras, intrinsics = _select_views(
+        match.views, start_cameras, intrinsics
     )
-    if views is not None:
-        unknown = [v for v in views if v not in ids]
-        require(not unknown, "requested views have no camera record", unknown)
-        require(len(views) >= 2, "triangulation needs at least two views", views)
-        ids = list(views)
-        if start_cameras:
-            start_cameras = [c for v in ids for c in start_cameras if c.camera_id == v]
-        elif intrinsics is not None:
-            intrinsics = [i for v in ids for i in intrinsics if i[0] == v]
     missing = [i for i in ids if i not in all_views]
     require(not missing, "start cameras without observations", missing)
     views_used = {v: all_views[v] for v in ids}
-    root = ensure_variant(session_dir, variant)
+    root = ensure_variant(session_dir, match.variant)
     out_dir = root / RECONSTRUCT_DIR
     obs_dir = out_dir / "observations"
     obs_dir.mkdir(parents=True, exist_ok=True)
@@ -199,10 +197,54 @@ def reconstruct_session(
         measured_lengths_m=dict(measured),
         fps=fps,
         excluded_joints=tuple(exclude_joints),
-        observation_set=observation_set,
-        variant=variant,
-        camera_source=camera_source,
+        observation_set=match.observation_set,
+        variant=match.variant,
+        camera_source=match.camera_source,
     )
+    parameters = {
+        "anchors": list(measurements),
+        "scale_anchor": list(scale_anchor),
+        "acceleration_sigma_px": acceleration_sigma_px,
+    }
+    _write_summary(session_dir, out_dir, obs_set_dir, summary, parameters)
+    return summary
+
+
+def _select_views(
+    views: Sequence[str] | None,
+    start_cameras: Sequence[PinholeCamera] | None,
+    intrinsics: Sequence[tuple[str, Any, tuple[int, int]]] | None,
+) -> tuple[list[str], Sequence[PinholeCamera] | None, Any]:
+    """The camera ids to use (in ``views`` order when given) and the matching
+    start cameras / intrinsics. Precondition: ``views`` (if given) names
+    two or more cameras that have records."""
+    ids = (
+        [c.camera_id for c in start_cameras]
+        if start_cameras
+        else [i[0] for i in intrinsics or []]
+    )
+    if views is None:
+        return ids, start_cameras, intrinsics
+    unknown = [v for v in views if v not in ids]
+    require(not unknown, "requested views have no camera record", unknown)
+    require(len(views) >= 2, "triangulation needs at least two views", views)
+    ids = list(views)
+    if start_cameras:
+        start_cameras = [c for v in ids for c in start_cameras if c.camera_id == v]
+    elif intrinsics is not None:
+        intrinsics = [i for v in ids for i in intrinsics if i[0] == v]
+    return ids, start_cameras, intrinsics
+
+
+def _write_summary(
+    session_dir: Path,
+    out_dir: Path,
+    obs_set_dir: Path,
+    summary: SessionReconstruction,
+    parameters: Mapping[str, Any],
+) -> None:
+    """``session_reconstruction.json`` with provenance; register the variant."""
+    ids = list(summary.views)
     source_views = [obs_set_dir / f"{v}.json" for v in ids]
     write_stamped(
         out_dir / "session_reconstruction.json",
@@ -211,28 +253,25 @@ def reconstruct_session(
         module=__name__,
         inputs=[*source_views, out_dir / RECONSTRUCTION_FILE],
         parameters={
-            "views": list(ids),
-            "observation_set": observation_set,
-            "variant": variant,
-            "anchors": list(measurements),
-            "scale_anchor": list(scale_anchor),
-            "excluded_joints": list(exclude_joints),
-            "acceleration_sigma_px": acceleration_sigma_px,
-            "camera_source": camera_source,
+            "views": ids,
+            "observation_set": summary.observation_set,
+            "variant": summary.variant,
+            "excluded_joints": list(summary.excluded_joints),
+            "camera_source": summary.camera_source,
             "source": {"kind": "triangulate"},
+            **dict(parameters),
         },
         derived_from=[out_dir / RECONSTRUCTION_FILE, *source_views],
         base=session_dir,
     )
     register_variant(
         session_dir,
-        variant,
+        summary.variant,
         views=ids,
-        observation_set=observation_set,
-        source={"kind": "triangulate", "camera_source": camera_source},
+        observation_set=summary.observation_set,
+        source={"kind": "triangulate", "camera_source": summary.camera_source},
         module=__name__,
     )
-    return summary
 
 
 def _clean_all(

@@ -62,7 +62,7 @@ from src.shared.python.core.contracts import require
 from . import commands, workflow
 from .commands import ESTIMATOR_OPTIONS, MODE_PRESETS, OptionSpec, PlanSelection
 from .commands import mode_text
-from .annotate_widget import AnnotateDialog
+from .annotate_widget import AnnotateDialog, BaseSet
 from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .overlay import PoseTrack, draw_pose
 from .overlay_box import VariantOverlayBox
@@ -921,13 +921,9 @@ class CaptureRigWidget(QWidget):
             return None
         set_name = self.playback.current_set_name()
         base_file = (view.observation_sets or {}).get(set_name) if set_name else None
+        base = BaseSet(set_name, base_file) if set_name and base_file else None
         return AnnotateDialog(
-            self.media.root,
-            name,
-            view.playable,
-            base_set=set_name if base_file else None,
-            base_file=base_file,
-            parent=self,
+            self.media.root, name, view.playable, base=base, parent=self
         )
 
     def _clip(self, session: Path) -> list[str]:

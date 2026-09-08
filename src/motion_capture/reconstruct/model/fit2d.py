@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +38,29 @@ from .session import LandmarkMap
 Mask = npt.NDArray[np.bool_]
 DEFAULT_SIGMA_PX = 4.0
 DEFAULT_ROOT_DEPTH_M = 3.5
+
+
+@dataclass(frozen=True)
+class ImageSpaceSource:
+    """Which views to fit in image space and where their cameras come from."""
+
+    views: tuple[str, ...]
+    cameras_from: str = ""
+    observation_set: str = "observations"
+    variant: str = ""
+
+    def __post_init__(self) -> None:
+        require(len(self.views) >= 1, "at least one view")
+
+    def as_provenance(self) -> dict[str, Any]:
+        return {
+            "kind": "image_space",
+            "views": list(self.views),
+            "cameras_from": self.cameras_from,
+            "observation_set": self.observation_set,
+        }
+
+
 MIN_DEPTH_M = 0.05
 
 
@@ -267,9 +291,7 @@ def fit_trajectory_2d(
     *,
     lengths_m: Mapping[str, float] | None = None,
     options: FitOptions | None = None,
-    sigma_px: float = DEFAULT_SIGMA_PX,
     q0: Array | None = None,
-    root_depth_m: float = DEFAULT_ROOT_DEPTH_M,
 ) -> ModelFit:
     """Continuous joint-angle trajectory matching the keypoints of ``V`` views.
 
@@ -287,15 +309,15 @@ def fit_trajectory_2d(
     )
     require(conf.shape == kp.shape[:3], "confidence (T, V, L)", conf.shape)
     require(len(cameras) == kp.shape[1], "one camera per view", len(cameras))
-    require(fps > 0 and sigma_px > 0, "positive fps and sigma_px")
+    require(fps > 0, "positive fps")
     require(bool((conf > 0).any()), "at least one confident observation")
     lengths = dict(model.spec.lengths_m if lengths_m is None else lengths_m)
-    problem = _Problem2D(model, kp, conf, cameras, fps, o, lengths, sigma_px)
+    problem = _Problem2D(model, kp, conf, cameras, fps, o, lengths, o.sigma_px)
     if q0 is None:
         q_start = np.zeros((kp.shape[0], model.n_dof))
-        q_start[:, :3] = initial_root_2d(kp, conf, cameras, depth_m=root_depth_m)
+        q_start[:, :3] = initial_root_2d(kp, conf, cameras, depth_m=o.root_depth_m)
     else:
-        q_start = np.asarray(q0, dtype=float)
+        q_start = np.asarray(q0, dtype=float).reshape(kp.shape[0], -1)
         require(q_start.shape == (kp.shape[0], model.n_dof), "q0 shape")
     return solve_problem(problem, q_start, lengths, fps, o)
 
@@ -370,13 +392,9 @@ def fit_session_model_2d(
     session_root: Path,
     spec: Any,
     landmark_map: LandmarkMap,
+    source: ImageSpaceSource,
     *,
-    views: Sequence[str],
-    cameras_from: str,
-    observation_set: str = "observations",
-    variant: str = "",
     options: FitOptions | None = None,
-    sigma_px: float = DEFAULT_SIGMA_PX,
     out_subdir: str | None = None,
 ) -> tuple[ModelFit, Path]:
     """Image-space fit of ``spec`` to ``views``; writes ``variants/<variant>/model/``.
@@ -386,9 +404,12 @@ def fit_session_model_2d(
     Precondition: the views have observation files and cameras.
     """
     from ...variants import ensure_variant, register_variant, variant_dir
-    from .session import options_dict, write_fit
+    from .session import Stamp, options_dict, write_fit
 
-    kp, conf, fps, files = load_view_keypoints(session_root, observation_set, views)
+    views, cameras_from = source.views, source.cameras_from
+    kp, conf, fps, files = load_view_keypoints(
+        session_root, source.observation_set, views
+    )
     cameras, cameras_file = cameras_for_views(session_root, cameras_from, views)
     summary_file = (
         variant_dir(session_root, cameras_from)
@@ -405,25 +426,12 @@ def fit_session_model_2d(
     lm_px, lm_conf = map_landmarks_2d(landmark_map, model, kp, conf, JOINT_NAMES)
     lengths = landmark_map.lengths(measured, spec)
     fit = fit_trajectory_2d(
-        model,
-        lm_px,
-        lm_conf,
-        cameras,
-        fps,
-        lengths_m=lengths,
-        options=options,
-        sigma_px=sigma_px,
+        model, lm_px, lm_conf, cameras, fps, lengths_m=lengths, options=options
     )
-    root = ensure_variant(session_root, variant)
+    root = ensure_variant(session_root, source.variant)
     parameters = {
         "model": spec.name,
-        "source": {
-            "kind": "image_space",
-            "views": list(views),
-            "cameras_from": cameras_from,
-            "observation_set": observation_set,
-        },
-        "sigma_px": sigma_px,
+        "source": source.as_provenance(),
         **options_dict(options),
     }
     out_dir = write_fit(
@@ -434,16 +442,18 @@ def fit_session_model_2d(
         spec,
         landmark_map,
         model,
-        inputs=[*files, cameras_file],
-        parameters=parameters,
-        derived_from=[cameras_file, *files],
-        base=session_root,
+        Stamp(
+            inputs=[*files, cameras_file],
+            parameters=parameters,
+            derived_from=[cameras_file, *files],
+            base=session_root,
+        ),
     )
     register_variant(
         session_root,
-        variant,
+        source.variant,
         views=views,
-        observation_set=observation_set,
+        observation_set=source.observation_set,
         source={"kind": "image_space", "cameras_from": cameras_from},
         module=__name__,
     )

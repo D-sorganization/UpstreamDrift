@@ -248,6 +248,31 @@ def variant_args(variant: str = "") -> list[str]:
     return ["--variant", variant] if variant else []
 
 
+@dataclass(frozen=True)
+class ImageSpaceArgs:
+    """An image-space fit request: the views, whose cameras, which set (#9794).
+
+    ``cameras_from == ""`` is the session's default variant.
+    """
+
+    views: tuple[str, ...]
+    cameras_from: str = ""
+    observations: str = "observations"
+
+    def __post_init__(self) -> None:
+        require(len(self.views) >= 1, "an image-space fit needs a view")
+
+    def args(self) -> list[str]:
+        return [
+            "--from-views",
+            ",".join(self.views),
+            "--cameras-from",
+            self.cameras_from,
+            "--observations",
+            self.observations,
+        ]
+
+
 def fit_model_command(
     session: Path,
     *,
@@ -256,22 +281,18 @@ def fit_model_command(
     max_velocity: float = 25.0,
     fit_lengths: bool = False,
     variant: str = "",
-    from_views: Sequence[str] = (),
-    cameras_from: str = "",
-    observations: str = "observations",
+    image_space: ImageSpaceArgs | None = None,
 ) -> list[str]:
-    """``from_views`` selects the image-space fit; it needs ``cameras_from``."""
+    """``image_space`` selects the image-space fit (1..N views, borrowed cameras)."""
     require(sigma_accel > 0 and max_velocity > 0, "positive priors")
     require(model.strip() != "", "model must be named")
-    # ``cameras_from == ""`` is the session's default variant.
     args = ["fit-model", "--session", str(session), "--model", model]
     args += ["--sigma-accel", f"{sigma_accel:g}", "--max-velocity", f"{max_velocity:g}"]
     if fit_lengths:
         args.append("--fit-lengths")
     args += variant_args(variant)
-    if from_views:
-        args += ["--from-views", ",".join(from_views), "--cameras-from", cameras_from]
-        args += ["--observations", observations]
+    if image_space is not None:
+        args += image_space.args()
     return python_module_command(args)
 
 

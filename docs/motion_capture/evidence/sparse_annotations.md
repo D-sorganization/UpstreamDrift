@@ -1,4 +1,4 @@
-# Sparse Annotations: Fitting From Every K-th Frame (Synthetic Lab Rig)
+# Sparse Annotations: Fitting From Sparse Frames (Synthetic Lab Rig)
 
 Epic #9791, child #9802. The synthetic three-view detections were turned into manual sets that keep every k-th frame (all joints clicked, 1 px noise), then reconstructed and fitted with the golfer through the normal path (`rig reconstruct --observations observations_manual_kK`, `rig fit-model`). Model landmark RMS is against the truth and against the dense (k = 1) fit. Regenerate with `python3 -m scripts.motion_capture.sparse_fit_evidence`.
 

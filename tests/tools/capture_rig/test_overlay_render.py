@@ -21,6 +21,7 @@ from src.motion_capture.rig import __main__ as rig_cli
 from src.motion_capture.variants import register_variant
 from src.tools.capture_rig import commands
 from src.tools.capture_rig.overlay_render import (
+    ClipRange,
     OverlaySpec,
     export_overlay,
     render_frame,
@@ -88,7 +89,7 @@ def test_export_overlay_writes_a_clip_and_a_sidecar(tmp_path: Path) -> None:
     spec = OverlaySpec.build(root, "cam_a", [""])
     assert [t.kind for t in spec.tracks] == ["joints"] and spec.frames == 12
     out = tmp_path / "overlay.mp4"
-    sidecar = export_overlay(root, "cam_a", [""], out, start=2, stop=7)
+    sidecar = export_overlay(root, "cam_a", [""], out, clip=ClipRange(2, 7))
     assert out.is_file() and out.stat().st_size > 0
     assert sidecar["frames"] == 6 and sidecar["tracks"][0]["kind"] == "joints"
     assert sidecar["tracks"][0]["held_out"] is False
@@ -98,7 +99,7 @@ def test_export_overlay_writes_a_clip_and_a_sidecar(tmp_path: Path) -> None:
     with pytest.raises(Exception, match="playable"):
         export_overlay(root, "cam_b", [""], tmp_path / "x.mp4")
     with pytest.raises(Exception, match="speed"):
-        export_overlay(root, "cam_a", [""], tmp_path / "x.mp4", speed=0)
+        export_overlay(root, "cam_a", [""], tmp_path / "x.mp4", clip=ClipRange(speed=0))
 
 
 def test_overlay_cli_and_command_builder(tmp_path: Path) -> None:

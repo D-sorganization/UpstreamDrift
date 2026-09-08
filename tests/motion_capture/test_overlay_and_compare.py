@@ -16,7 +16,10 @@ from src.motion_capture.compare_variants import (
 )
 from src.motion_capture.reconstruct.__main__ import lab_rig
 from src.motion_capture.reconstruct.model import FitOptions
-from src.motion_capture.reconstruct.model.fit2d import fit_session_model_2d
+from src.motion_capture.reconstruct.model.fit2d import (
+    ImageSpaceSource,
+    fit_session_model_2d,
+)
 from src.motion_capture.reconstruct.model.golfer import GOLFER_LANDMARK_MAP, GOLFER_SPEC
 from src.motion_capture.reconstruct.model.session import fit_session_model
 from src.motion_capture.reconstruct.overlay3d import (
@@ -28,6 +31,7 @@ from src.motion_capture.reconstruct.overlay3d import (
     variant_tracks,
 )
 from src.motion_capture.reconstruct.pipeline import (
+    MatchSpec,
     reconstruct_session,
     start_cameras_from,
 )
@@ -107,8 +111,7 @@ def test_variant_tracks_and_comparison_on_the_lab_session(tmp_path: Path) -> Non
         session,
         start_cameras=start_cameras_from(cameras),
         scale_anchor=("neck", 0.5),
-        views=("face_on", "down_line"),
-        variant="pair_fd",
+        match=MatchSpec(views=("face_on", "down_line"), variant="pair_fd"),
     )
     fit_session_model(
         session, GOLFER_SPEC, GOLFER_LANDMARK_MAP, options=FitOptions(max_iterations=8)
@@ -124,9 +127,7 @@ def test_variant_tracks_and_comparison_on_the_lab_session(tmp_path: Path) -> Non
         session,
         GOLFER_SPEC,
         GOLFER_LANDMARK_MAP,
-        views=("overhead",),
-        cameras_from="",
-        variant="cam_over",
+        ImageSpaceSource(("overhead",), "", "observations", "cam_over"),
         options=FitOptions(max_iterations=6),
     )
     # A held-out view of the pair variant still projects (cameras from the pair's own file).
