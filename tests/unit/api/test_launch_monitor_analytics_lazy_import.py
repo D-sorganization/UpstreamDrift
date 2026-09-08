@@ -18,6 +18,7 @@ import pytest
 from fastapi import APIRouter
 
 
+@pytest.mark.unit
 def test_launch_monitor_analytics_imports_without_pandas() -> None:
     """Route module must not require pandas at import time (issue #8943)."""
     module_name = "src.api.routes.launch_monitor_analytics"
