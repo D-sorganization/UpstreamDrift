@@ -19,6 +19,8 @@ in epic #7462.
 
 from __future__ import annotations
 
+import anyio.to_thread
+from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -57,6 +59,43 @@ class PlotTypesResponse(BaseModel):
 def _label_for(plot_type: str) -> str:
     """Dashboard label for a plot type (fallback: title-cased id)."""
     return _PLOT_TYPE_LABELS.get(plot_type, plot_type.replace("_", " ").title())
+
+
+@lru_cache(maxsize=4)
+def _build_orchestrator(
+    recorder: Any, joint_names: tuple[str, ...]
+) -> AnalysisOrchestrator:
+    """Build (and cache) one orchestrator per recorder identity (issue #8943).
+
+    The recorder is immutable after a run completes, so the orchestrator is
+    reused until a new recorder replaces it (cache key misses on identity).
+
+    Args:
+        recorder: Active physics recorder holding the completed session.
+        joint_names: Joint names captured with the session.
+
+    Returns:
+        Orchestrator bound to that recorder.
+    """
+    return AnalysisOrchestrator(recorder, list(joint_names))
+
+
+@lru_cache(maxsize=64)
+def _plot_data_cached(
+    recorder: Any, joint_names: tuple[str, ...], plot_type: str
+) -> dict[str, Any]:
+    """Compute and cache plot data per (recorder, joint names, plot type).
+
+    Args:
+        recorder: Active physics recorder holding the completed session.
+        joint_names: Joint names captured with the session.
+        plot_type: Registered plot-type id.
+
+    Returns:
+        JSON-serializable ``PlotData`` dictionary.
+    """
+    orchestrator = _build_orchestrator(recorder, joint_names)
+    return orchestrator.get_plot_data(plot_type).to_dict()
 
 
 @router.get("/analysis/plot-types", response_model=PlotTypesResponse)
@@ -112,5 +151,9 @@ async def get_plot_data(
             ),
         )
 
-    orchestrator = AnalysisOrchestrator(recorder, service.active_joint_names)
-    return orchestrator.get_plot_data(plot_type).to_dict()
+    return await anyio.to_thread.run_sync(
+        _plot_data_cached,
+        recorder,
+        tuple(service.active_joint_names),
+        plot_type,
+    )

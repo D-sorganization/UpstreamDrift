@@ -11,6 +11,8 @@ No module-level mutable state.
 
 from __future__ import annotations
 
+import anyio.to_thread
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -26,7 +28,7 @@ from ..models.responses import (
     URDFModelResponse,
 )
 from ..utils.path_validation import resolve_contained_path
-from ._route_utils import find_project_root
+from ._route_utils import find_project_root, urdf_file_key
 
 __all__ = ["discover_models", "router"]
 
@@ -425,7 +427,6 @@ def _parse_urdf(urdf_content: str) -> URDFModelResponse:
     Args:
         urdf_content: Raw URDF XML string.
 
-    Returns:
         Parsed model data. ``model_name`` is always populated (defaults to
         ``"unknown"`` when the ``<robot>`` element has no ``name`` attribute).
 
@@ -481,6 +482,24 @@ async def list_models(
         raise HTTPException(
             status_code=500, detail=f"Failed to list models: {str(exc)}"
         ) from exc
+
+
+@lru_cache(maxsize=64)
+def _parse_urdf_cached(file_key: tuple[str, int, int]) -> URDFModelResponse:
+    """Read + parse a URDF once per file identity (issue #8943).
+
+    ``file_key`` is ``urdf_file_key()`` output — ``(resolved_path,
+    st_mtime_ns, st_size)`` — so any file modification invalidates the
+    cached parse.
+
+    Args:
+        file_key: Opaque identity key for the URDF file on disk.
+
+    Returns:
+        Parsed model data.
+    """
+    content = Path(file_key[0]).read_text(encoding="utf-8")
+    return _parse_urdf(content)
 
 
 # Mesh asset types servable via /models/mesh-asset (issue #8406). glTF is the
@@ -659,8 +678,9 @@ async def get_model_urdf(  # noqa: C901
                 status_code=404,
                 detail=f"Model file not found: {model_entry['path']}",
             ) from exc
-        urdf_content = filepath.read_text(encoding="utf-8")
-        result = _parse_urdf(urdf_content)
+        result = await anyio.to_thread.run_sync(
+            _parse_urdf_cached, urdf_file_key(filepath)
+        )
         return result
     except ValueError as exc:
         raise HTTPException(
