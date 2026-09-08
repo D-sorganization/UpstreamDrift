@@ -420,3 +420,130 @@ def test_export_manifest_without_a_prior_data_export_is_still_valid(
     widget.export_manifest(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["data_export"] is None
+
+
+# ----------------------------------------------------------------------
+# #8881 — destructive actions must confirm, and must not clear the dirty
+# flag when the user backs out.
+# ----------------------------------------------------------------------
+
+
+def test_new_project_cancelled_keeps_project_and_dirty_flag(widget) -> None:  # noqa: ANN001
+    """Regression test for #8881.
+
+    "New Project" used to call ``clear_project`` directly, which replaced
+    the project with an empty one *and* set ``_dirty = False`` — silently
+    destroying the work and disarming the launcher's dirty-close guard in
+    the same gesture.
+    """
+    widget.import_file(FIXTURES / "trackman.csv")
+    before = widget.project
+    assert widget.is_dirty()
+
+    calls: list[str] = []
+
+    def _cancel(label: str) -> bool:
+        calls.append(label)
+        return False
+
+    widget._confirm_discard_unsaved = _cancel  # type: ignore[method-assign]
+
+    widget._on_new_project()
+
+    assert calls == ["starting a new project"]
+    assert widget.project is before
+    assert len(widget.analysis_frame) == 2
+    assert widget.is_dirty(), "a cancelled New Project must not disarm the close guard"
+
+
+def test_new_project_discard_clears_the_project(widget) -> None:  # noqa: ANN001
+    widget.import_file(FIXTURES / "trackman.csv")
+    widget._confirm_discard_unsaved = lambda label: True  # type: ignore[method-assign]
+
+    widget._on_new_project()
+
+    assert widget.project.sessions == []
+    assert widget.analysis_frame.empty
+    assert not widget.is_dirty()
+
+
+def test_confirm_discard_unsaved_is_a_noop_when_clean(widget) -> None:  # noqa: ANN001
+    assert not widget.is_dirty()
+    # No QMessageBox patch needed: a clean project must not prompt at all.
+    assert widget._confirm_discard_unsaved("starting a new project") is True
+
+
+def test_confirm_discard_unsaved_save_answer_that_fails_blocks_the_action(
+    widget, monkeypatch
+) -> None:  # noqa: ANN001
+    """A Save answer whose save never completes must NOT proceed."""
+    from PyQt6 import QtWidgets
+
+    widget.import_file(FIXTURES / "trackman.csv")
+    monkeypatch.setattr(
+        QtWidgets.QMessageBox,
+        "question",
+        staticmethod(lambda *args, **kwargs: QtWidgets.QMessageBox.StandardButton.Save),
+    )
+    # Simulate the user cancelling the save file dialog: _dirty stays True.
+    monkeypatch.setattr(widget, "_on_save_project", lambda: None)
+
+    assert widget._confirm_discard_unsaved("starting a new project") is False
+    assert widget.is_dirty()
+
+
+def test_confirm_discard_unsaved_save_answer_that_succeeds_proceeds(
+    widget, monkeypatch, tmp_path
+) -> None:  # noqa: ANN001
+    from PyQt6 import QtWidgets
+
+    widget.import_file(FIXTURES / "trackman.csv")
+    monkeypatch.setattr(
+        QtWidgets.QMessageBox,
+        "question",
+        staticmethod(lambda *args, **kwargs: QtWidgets.QMessageBox.StandardButton.Save),
+    )
+    destination = tmp_path / "guarded.lmproject"
+    monkeypatch.setattr(
+        widget, "_on_save_project", lambda: widget.save_project(destination)
+    )
+
+    assert widget._confirm_discard_unsaved("starting a new project") is True
+    assert destination.exists()
+    assert not widget.is_dirty()
+
+
+def test_remove_selected_sessions_requires_confirmation(widget) -> None:  # noqa: ANN001
+    """Regression test for #8881: multi-select deletion had no prompt."""
+    widget.import_file(FIXTURES / "trackman.csv")
+    widget.import_file(FIXTURES / "garmin.csv")
+    assert len(widget.project.sessions) == 2
+    widget.session_tree.selectAll()
+
+    seen: list[tuple[int, int]] = []
+
+    def _refuse(sessions: int, shots: int) -> bool:
+        seen.append((sessions, shots))
+        return False
+
+    widget._confirm_remove_sessions = _refuse  # type: ignore[method-assign]
+    widget._on_remove_selected_sessions()
+
+    assert len(widget.project.sessions) == 2, "cancelled removal deleted sessions"
+    assert seen and seen[0][0] == 2
+    assert seen[0][1] == len(widget.analysis_frame)
+
+    widget._confirm_remove_sessions = lambda sessions, shots: True  # type: ignore[method-assign]
+    widget._on_remove_selected_sessions()
+    assert widget.project.sessions == []
+
+
+def test_open_project_guards_unsaved_changes(widget, tmp_path) -> None:  # noqa: ANN001
+    widget.import_file(FIXTURES / "trackman.csv")
+    before = widget.project
+    widget._confirm_discard_unsaved = lambda label: False  # type: ignore[method-assign]
+
+    widget._on_open_project()
+
+    assert widget.project is before
+    assert widget.is_dirty()

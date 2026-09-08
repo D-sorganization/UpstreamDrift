@@ -100,43 +100,51 @@ class VideoExporter(QObject):
             logger.info(f"   FPS: {config.fps}")
             logger.info(f"   Quality: {config.quality}")
 
-            # Setup ffmpeg process
-            ffmpeg_process = self._start_ffmpeg_process(config)
+            # Setup ffmpeg process command
+            command = self._build_ffmpeg_command(config)
 
-            # Render and write frames
-            for i, frame_idx in enumerate(frames_to_export):
-                # Get frame data
-                frame_data = self.frame_processor.get_frame_data(frame_idx)
+            with subprocess.Popen(
+                command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            ) as ffmpeg_process:
+                # Render and write frames
+                for i, frame_idx in enumerate(frames_to_export):
+                    # Get frame data
+                    frame_data = self.frame_processor.get_frame_data(frame_idx)
 
-                # Render to buffer
-                frame_buffer = self._render_frame_to_buffer(
-                    frame_data, config.resolution
-                )  # noqa: E501
-
-                # Write to ffmpeg
-                ffmpeg_process.stdin.write(frame_buffer.tobytes())  # type: ignore[union-attr]
-
-                # Update progress
-                self.progress.emit(i + 1, len(frames_to_export))
-
-                if (i + 1) % 10 == 0:
-                    logger.info(
-                        f"   Rendered {i + 1}/{len(frames_to_export)} frames..."
+                    # Render to buffer
+                    frame_buffer = self._render_frame_to_buffer(
+                        frame_data, config.resolution
                     )  # noqa: E501
 
-            # Finalize video
-            ffmpeg_process.stdin.close()  # type: ignore[union-attr]
-            ffmpeg_process.wait()
+                    # Write to ffmpeg
+                    ffmpeg_process.stdin.write(frame_buffer.tobytes())  # type: ignore[union-attr]
 
-            if ffmpeg_process.returncode == 0:
-                logger.info(f"✅ Video exported successfully to {config.output_path}")
-                self.finished.emit(config.output_path)
-            else:
-                error_msg = (
-                    f"ffmpeg failed with return code {ffmpeg_process.returncode}"  # noqa: E501
-                )
-                logger.error(f"❌ {error_msg}")
-                self.error.emit(error_msg)
+                    # Update progress
+                    self.progress.emit(i + 1, len(frames_to_export))
+
+                    if (i + 1) % 10 == 0:
+                        logger.info(
+                            f"   Rendered {i + 1}/{len(frames_to_export)} frames..."
+                        )  # noqa: E501
+
+                # Finalize video
+                ffmpeg_process.stdin.close()  # type: ignore[union-attr]
+                ffmpeg_process.wait()
+
+                if ffmpeg_process.returncode == 0:
+                    logger.info(
+                        f"✅ Video exported successfully to {config.output_path}"
+                    )
+                    self.finished.emit(config.output_path)
+                else:
+                    error_msg = (
+                        f"ffmpeg failed with return code {ffmpeg_process.returncode}"  # noqa: E501
+                    )
+                    logger.error(f"❌ {error_msg}")
+                    self.error.emit(error_msg)
 
         except (PermissionError, OSError) as e:
             error_msg = f"Video export failed: {str(e)}"
@@ -146,8 +154,8 @@ class VideoExporter(QObject):
             traceback.print_exc()
             self.error.emit(error_msg)
 
-    def _start_ffmpeg_process(self, config: VideoExportConfig) -> subprocess.Popen:
-        """Start ffmpeg process with appropriate settings"""
+    def _build_ffmpeg_command(self, config: VideoExportConfig) -> list[str]:
+        """Build ffmpeg process command with appropriate settings"""
 
         if config is None:
             raise ValueError("config must be provided")
@@ -199,12 +207,7 @@ class VideoExporter(QObject):
             f"CRF {settings['crf']}"  # noqa: E501
         )
 
-        return subprocess.Popen(
-            command,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        return command
 
     def _render_frame_to_buffer(
         self, frame_data: Any, resolution: tuple[int, int]

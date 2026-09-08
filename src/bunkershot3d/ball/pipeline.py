@@ -130,15 +130,25 @@ def to_post_impact_state(
     club_loft_rad = math.radians(state.club_loft_deg)
     ball_angular_velocity = np.array(result.ball_angular_velocity, dtype=float)
 
-    club_speed_out = delivery.exit_speed_m_s
-    club_velocity = np.array(
-        [
-            club_speed_out * math.cos(club_loft_rad * 0.3),  # Forward
-            0.0,  # No lateral
-            -club_speed_out * math.sin(club_loft_rad * 0.3),  # Down through sand
-        ],
-        dtype=float,
-    )
+    if delivery.exit_velocity_m_s is not None:
+        club_velocity = np.array(delivery.exit_velocity_m_s, dtype=float)
+    else:
+        club_speed_out = delivery.exit_speed_m_s
+        club_velocity = np.array(
+            [
+                club_speed_out * math.cos(club_loft_rad * 0.3),  # Forward
+                0.0,  # No lateral
+                -club_speed_out * math.sin(club_loft_rad * 0.3),  # Down through sand
+            ],
+            dtype=float,
+        )
+
+    if delivery.exit_angular_velocity_rad_s is not None:
+        clubhead_angular_velocity = np.array(
+            delivery.exit_angular_velocity_rad_s, dtype=float
+        )
+    else:
+        clubhead_angular_velocity = np.zeros(3, dtype=float)
 
     ball_ke = 0.5 * state.ball.mass_kg * result.ball_speed_m_s**2
     ball_rot_ke = (
@@ -149,7 +159,7 @@ def to_post_impact_state(
         ball_velocity=np.array(result.ball_velocity, dtype=float),
         ball_angular_velocity=ball_angular_velocity,
         clubhead_velocity=club_velocity,
-        clubhead_angular_velocity=np.zeros(3, dtype=float),
+        clubhead_angular_velocity=clubhead_angular_velocity,
         contact_duration=delivery.contact_duration_s,
         energy_transfer=float(ball_ke + ball_rot_ke),
         impact_location=np.zeros(2, dtype=float),

@@ -75,12 +75,35 @@ class DesignComparison:
 
     @property
     def best(self) -> str:
-        """Name of the top-ranked design.
+        """Name of the top-ranked design -- an ordering, **not a verdict**.
+
+        This always names somebody, including when the intervals overlap
+        completely, because rank is assigned on the central estimates alone.
+        A caller that prints it unconditionally reports a winner the study may
+        not have separated, which is the overclaim issue #9243 removed from
+        the workbench; use :attr:`winner`, which is ``None`` in that case.
 
         Returns:
             The design with rank ``0``.
         """
         return self.names[int(np.argmin(self.rank))]
+
+    @property
+    def winner(self) -> str | None:
+        """The leader when the study separated it, and ``None`` otherwise.
+
+        The honest counterpart to :attr:`best`. Note that even a non-``None``
+        answer here covers only the *sampling* spread this comparison
+        measured: model-form uncertainty enters through
+        :func:`~bunkershot3d.study.ranking.rank_with_bands`, which takes a
+        whole :class:`~bunkershot3d.vandv.budget.UncertaintyBudget` rather
+        than replicates alone (issue #9243).
+
+        Returns:
+            The leader's name, or ``None`` when any rival's interval overlaps
+            it.
+        """
+        return self.best if self.is_separated() else None
 
     def ordered(self) -> tuple[str, ...]:
         """List design names from best to worst.

@@ -14,7 +14,11 @@ This directory contains OpenSim (`.osim`) model files for use with the Golf Mode
 
 ## Official OpenSim Models (Submodule)
 
-The `opensim-models/` directory contains the **official OpenSim models repository** from Stanford/SimTK.
+The **official OpenSim models repository** from Stanford/SimTK is the git
+submodule at `shared/models/opensim/opensim-models/` (repository root, not
+under `src/`). It is optional and empty until you run
+`git submodule update --init shared/models/opensim/opensim-models`.
+Paths below are relative to that submodule.
 
 ### Recommended Starting Models
 

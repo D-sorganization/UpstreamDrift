@@ -55,6 +55,28 @@ Thumbs.db
 # Data & Outputs
 data/raw/
 output/**/temp/
+# Run artifacts and agent scratch (issue #9415): never commit these again.
+/output/*
+!/output/.gitkeep
+/.scratch/
+.scratch/
+/motion_matching_training/
+motion_matching_training/
+# Cross-engine leaderboard regeneration target (run_cross_engine_leaderboard.py
+# default --results-dir); the committed placeholder was a wrong-cwd artifact
+# removed by #9415.
+/motion_matching/
+motion_matching/
+/reports/*.json
+/reports/**/*.json
+reports/*.json
+reports/**/*.json
+reports/pip_audit.json
+reports/semgrep.json
+# Third-party model repos are git submodules at shared/models/…; the plain-blob
+# copies that used to live under src/shared/models/ were removed in #9415.
+/src/shared/models/opensim/opensim-models/
+/src/shared/models/myosuite/myo_sim/
 logs/
 *.log
 
@@ -248,3 +270,13 @@ test_event_filter.py
 /base.*.provenance.json
 /pytest_report*.txt
 /golf_modeling_suite.db
+
+# Agent-local permission state. Claude Code records each approved tool call
+# verbatim in this file, so it can capture a credential that appeared in a
+# command line. Ignored here rather than relying only on a developer's
+# machine-local core.excludesFile.
+.claude/settings.local.json
+**/.claude/settings.local.json
+
+# WSL GUI test lane (scripts/dev/wsl_qt_tests.sh)
+.wsl-venv/

@@ -33,6 +33,8 @@ from typing import Any
 import pytest
 import yaml
 
+from tests.helpers.seam_guards import require_vendor_path
+
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 # Repo root is three parents up: tests/unit/repo_hygiene/<this file>
@@ -50,13 +52,6 @@ _IGNORED_NAMES = frozenset(
         "README_PACKAGE.md",
         "tests",
     }
-)
-
-_MISSING_VENDOR_HINT = (
-    f"The vendored Tools tree is missing at {_VENDOR_SHARED}. "
-    "Run `git submodule update --init vendor/ud-tools` to materialise it. "
-    "In CI this is a hard failure: the shadow guard must never pass "
-    "vacuously (see UpstreamDrift issue #5623)."
 )
 
 
@@ -79,16 +74,12 @@ def _module_names(root: Path) -> set[str]:
 
 
 def _require_vendor_shared() -> Path:
-    """Return the vendored Tools shared tree, or fail closed in CI.
+    """Return the vendored Tools shared tree, or fail closed.
 
     A guard that silently skips is worse than no guard, because everyone
-    believes it ran. CI must never reach the skip branch.
+    believes it ran (see issue #9501).
     """
-    if _VENDOR_SHARED.is_dir():
-        return _VENDOR_SHARED
-    if os.environ.get("CI"):
-        raise AssertionError(_MISSING_VENDOR_HINT)
-    pytest.skip(_MISSING_VENDOR_HINT)
+    return require_vendor_path(_VENDOR_SHARED)
 
 
 def _load_ledger(path: Path | None = None) -> dict[str, dict[str, Any]]:

@@ -101,17 +101,17 @@ def test_execute() -> None:
 
     # Success
     res = t.execute({"a": 2})
-    assert res.solver_status == "success"
+    assert res.success is True
     assert res.result == 4
 
     # Validation failure
     res_val = t.execute({})
-    assert res_val.solver_status != "success"
+    assert res_val.success is False
     assert "Missing required parameter" in res_val.error
 
     # Exception
     res_exc = t.execute({"a": 0})
-    assert res_exc.solver_status != "success"
+    assert res_exc.success is False
     assert "bad a" in res_exc.error
 
 
@@ -143,7 +143,7 @@ def test_registry_register_and_execute() -> None:
     assert len(reg) == 1
 
     res = reg.execute("add", {"a": 2, "b": 3})
-    assert res.solver_status == "success"
+    assert res.success is True
     assert res.result == 5
 
     with pytest.raises(ToolExecutionError):

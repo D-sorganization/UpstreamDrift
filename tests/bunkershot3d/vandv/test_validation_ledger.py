@@ -416,6 +416,117 @@ class TestASyntheticMeasurementMovesTheScore:
         assert "sample" in shortfall
         assert "uncertainty" in shortfall
 
+    def test_an_unphysical_instrument_value_moves_nothing(self) -> None:
+        spec = MEASUREMENT_SPECS[REPOSE]
+        unphysical = MeasurementRecord(
+            spec_key=REPOSE,
+            basis=MeasurementBasis.INSTRUMENT,
+            source="Laboratory cone repose report 2026-04",
+            instrument="Bench repose apparatus with laser cone flank profiling",
+            conditions="Lifted cylinder repose on played sand at 5% moisture",
+            sample_count=spec.acceptance.min_samples,
+            relative_expanded_uncertainty=(
+                spec.acceptance.max_relative_expanded_uncertainty
+            ),
+            unit=spec.unit,
+            value=-999.0,
+            measured_on="2026-04-12",
+        )
+        assert not spec.is_satisfied_by(unphysical)
+        shortfall = spec.shortfall(unphysical)
+        assert "below the physical lower bound" in shortfall
+        register = MeasurementRegister(records=(unphysical,))
+        assert VALIDATION_LEDGER.satisfied_spec_keys(register) == frozenset()
+        validation = _find(
+            credibility_assessment(register), CredibilityFactor.VALIDATION
+        )
+        assert validation.achieved_level == 0
+
+    def test_an_exceeding_physical_bound_value_is_rejected(self) -> None:
+        spec = MEASUREMENT_SPECS[REPOSE]
+        excessive = MeasurementRecord(
+            spec_key=REPOSE,
+            basis=MeasurementBasis.INSTRUMENT,
+            source="Laboratory cone repose report 2026-04",
+            instrument="Bench repose apparatus with laser cone flank profiling",
+            conditions="Lifted cylinder repose on played sand at 5% moisture",
+            sample_count=spec.acceptance.min_samples,
+            relative_expanded_uncertainty=(
+                spec.acceptance.max_relative_expanded_uncertainty
+            ),
+            unit=spec.unit,
+            value=120.0,
+            measured_on="2026-04-12",
+        )
+        assert not spec.is_satisfied_by(excessive)
+        shortfall = spec.shortfall(excessive)
+        assert "exceeds the physical upper bound" in shortfall
+
+    def test_an_instrument_record_with_dummy_apparatus_is_rejected(self) -> None:
+        spec = MEASUREMENT_SPECS[REPOSE]
+        dummy_inst = MeasurementRecord(
+            spec_key=REPOSE,
+            basis=MeasurementBasis.INSTRUMENT,
+            source="Laboratory cone repose report 2026-04",
+            instrument="none: test dummy",
+            conditions="Lifted cylinder repose on played sand at 5% moisture",
+            sample_count=spec.acceptance.min_samples,
+            relative_expanded_uncertainty=(
+                spec.acceptance.max_relative_expanded_uncertainty
+            ),
+            unit=spec.unit,
+            value=34.0,
+            measured_on="2026-04-12",
+        )
+        assert not spec.is_satisfied_by(dummy_inst)
+        shortfall = spec.shortfall(dummy_inst)
+        assert "lacks genuine apparatus declaration" in shortfall
+
+    def test_an_instrument_record_with_dummy_conditions_is_rejected(self) -> None:
+        spec = MEASUREMENT_SPECS[REPOSE]
+        dummy_cond = MeasurementRecord(
+            spec_key=REPOSE,
+            basis=MeasurementBasis.INSTRUMENT,
+            source="Laboratory cone repose report 2026-04",
+            instrument="Bench repose apparatus with laser cone flank profiling",
+            conditions="none",
+            sample_count=spec.acceptance.min_samples,
+            relative_expanded_uncertainty=(
+                spec.acceptance.max_relative_expanded_uncertainty
+            ),
+            unit=spec.unit,
+            value=34.0,
+            measured_on="2026-04-12",
+        )
+        assert not spec.is_satisfied_by(dummy_cond)
+        shortfall = spec.shortfall(dummy_cond)
+        assert "lacks genuine conditions declaration" in shortfall
+
+    def test_a_genuine_admissible_instrument_record_moves_the_score(self) -> None:
+        spec = MEASUREMENT_SPECS[REPOSE]
+        genuine = MeasurementRecord(
+            spec_key=REPOSE,
+            basis=MeasurementBasis.INSTRUMENT,
+            source="Laboratory cone repose report 2026-04",
+            instrument="Bench repose apparatus with laser cone flank profiling",
+            conditions="Lifted cylinder repose on played sand at 5% moisture",
+            sample_count=spec.acceptance.min_samples,
+            relative_expanded_uncertainty=(
+                spec.acceptance.max_relative_expanded_uncertainty
+            ),
+            unit=spec.unit,
+            value=34.0,
+            measured_on="2026-04-12",
+        )
+        assert spec.is_satisfied_by(genuine)
+        assert spec.shortfall(genuine) == ""
+        register = MeasurementRegister(records=(genuine,))
+        assert VALIDATION_LEDGER.satisfied_spec_keys(register) == frozenset({REPOSE})
+        validation = _find(
+            credibility_assessment(register), CredibilityFactor.VALIDATION
+        )
+        assert validation.achieved_level == 1
+
 
 class TestTheProvenanceFlip:
     """A measurement is only in the model when the model says it is."""
