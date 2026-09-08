@@ -17,13 +17,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9733 · Fail fast on the uninitialized vendored Tools fallback
+### DL-#9733 · Fail Fast on the Uninitialized Vendored Tools Fallback
 
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #9733
 - **Branch:** `claude/issue-9733-fail-fast`
-- **PR:** not created (opened on push)
+- **PR:** #9743
 - **Paths:** `src/__init__.py`, `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py`
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (`dbc6727aa`)
