@@ -4,7 +4,7 @@ Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
 
-## PR Backlog Catch-Up Sweep: 2026-09-08 (agent `claude`, session UpstreamPRs)
+## PR Backlog Catch-Up Sweep: 2026-09-08 (Agent `claude`, Session UpstreamPRs)
 
 Disposition of the 38-PR open backlog (REST-verified states at sweep start):
 
@@ -101,6 +101,81 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   commit-stage hooks pass; pre-push `mypy`/`bandit` pass on scoped files;
   `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
   "Hook bypass policy" documents this resolution.
+
+## `bioptim` Optimal-Control Layer and the Swing-Dynamics Fixes (#9762)
+
+- Branch `claude/fixes-epic-implementation-x2bu36`, PR #9768 (open). Epic doc:
+  `docs/issues/EPIC_BIOPTIM_OCP_INTEGRATION.md`; decision: ADR-0050.
+- Prerequisite issues #9755-#9761 are filed; #9755-#9760 are implemented on
+  this branch, #9761 (upstream PR to pyomeca/bioptim) is external and open.
+- Epic phases 0-3 are implemented and tested; phases 4 (parameter block) and
+  5 (moving-horizon wrapper) are not started. `ocp/tracking_ocp` already
+  accepts a `parameters` list, which is the seam phase 4 builds on.
+- **Do not** import `bioptim` outside `src/shared/python/optimization/ocp/`:
+  `tests/architecture/test_bioptim_isolation.py` fails on it. bioptim is
+  git-pinned to `Release_3.4.0` (SHA `fdafe4d9`) in the `[bioptim]` extra;
+  re-pinning is a ticket that re-runs the phase 0-3 tests.
+- Two findings that constrain how results may be read:
+  maximising terminal clubhead speed is a concave objective and converges in
+  no backend once the dynamics are enforced, so the OCP defaults to a convex
+  target-speed objective; and the six-marker set cannot observe the full
+  seven-DOF chain (`hip_rotation` and `trunk_rotation` are an exact null
+  direction), so tracking results report their own identifiability.
+- Gate commands: `MPLBACKEND=Agg pytest tests/integration/optimization/ocp
+tests/architecture/test_bioptim_isolation.py -m "not slow"`;
+  `pytest tests/unit/optimization tests/unit/estimation`;
+  `MPLBACKEND=Agg PYTHONPATH=src python -m benchmarks.bioptim_parity --nodes 8
+--duration 0.6`. The benchmark needs `PYTHONPATH=src` (pytest's conftest adds
+  it, `python -m` does not) or it dies importing `bunkershot3d`.
+- The ocp tests live in `tests/integration/optimization/ocp/`, NOT under
+  `src/`. `scripts/check_test_layout.py` (the Test Layout Guard inside
+  `repo-structure-gates`) rejects any new `tests` directory under `src/`
+  because root pytest does not collect it -- its `LEGACY_SRC_TEST_DIRS`
+  allowlist is grandfathered debt, so do not add to it. They sit beside
+  `test_casadi_swing_live.py`, the other suite that needs the real optional
+  stack rather than the mocks `tests/unit/conftest.py` installs.
+- The lane that really exercises them is the `bioptim OCP Tests` step in
+  `ci-optional-stack.yml`, which installs the extra and runs only
+  `tests/integration/optimization/ocp` plus the isolation test under
+  `-m "requires_bioptim or integration"`. It is NOT fail-soft. Locally that
+  exact selection is 26 passed in about 150 s; a timeout there is contention,
+  not a hang -- the slowest test on its own is 80 s against a 600 s budget.
+- Run the ocp tests on their own. Co-running them with
+  `tests/unit/optimization` makes `bioptim_available()` return False and
+  silently skips 16 of them, in either collection order and on `main` as well
+  as here -- something in that directory poisons the import. Pre-existing, not
+  this branch's, and worth its own issue: a skip that only appears in a
+  combined run is exactly the kind CI hides.
+- Two gates only reachable once the earlier ones passed, both fixed:
+  `code-quality` fails at its **mypy** step, not ruff, on
+  `crocoddyl_backend.py:316` -- `pin.Motion` is missing from the repo's own
+  `stubs/pinocchio/__init__.pyi`, which `mypy_path = "stubs"` makes
+  authoritative whether or not pinocchio is installed. Reproduce it in an
+  environment WITHOUT pinocchio; a venv that has the real package hides
+  nothing, but it is the stub mypy reads either way. `unit-test-gate` fails
+  `test_divergence_inventory` until `python -m
+scripts.shared_tools.divergence_inventory --write` re-records the 16 new
+  `optimization/ocp/` files; that regeneration also rewrites unrelated
+  authorship rows, which is expected -- the file is generated, not hand-edited.
+- Architecture budget: the nine violations this branch authored were fixed by
+  decomposition -- `CasadiSolveOptions` and `MaxSpeedOcpOptions` group the
+  keyword arguments that pushed `solve_swing_casadi` and `build_max_speed_ocp`
+  over the parameter budget, `_SwingModelSurface` moves the bioptim-independent
+  half of the adapter to module level, and the parity benchmark is one function
+  per backend. `crocoddyl_backend.solve_swing_ddp` is byte-identical to
+  `origin/main` and carries a dated exception instead.
+- CI state on PR #9768: the `hatchling` direct-reference fix (`52a8710`)
+  cleared the eleven jobs that could not build the package at all. The
+  `dependency-consistency` gate is red on `main` too, because #9716 added
+  `openpyxl` and `imageio` to the `dev` extra without regenerating the
+  locks; this branch carries the regenerated `requirements-dev.lock` and
+  `environment.yml` so the gate passes here and no-ops once `main` catches
+  up. Regenerate them only with Python 3.12 (`make sync-deps`) — that is
+  the interpreter the gate runs, and 3.11 produces a different lock.
+- `code-quality` runs `ruff` unpinned, so it floats ahead of the
+  `ruff>=0.15.10` floor in `pyproject.toml`. 0.15.17 reformats a
+  parenthesised lambda body in `benchmarks/bioptim_parity.py` that 0.15.8
+  left alone; the committed form is stable under both.
 
 ## Vendor Pin & Alias Predicate: #9631
 
