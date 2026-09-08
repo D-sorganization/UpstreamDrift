@@ -143,3 +143,78 @@ def test_backend_spec_requires_a_name() -> None:
             available=lambda: True,
             install_hint="",
         )
+
+
+# --- Codex review on PR #9768 ------------------------------------------------
+
+
+def test_backend_torques_reach_the_reported_trajectory() -> None:
+    """A transcription backend's own controls must survive into the metrics.
+
+    Without this the shared result builder falls back to
+    ``vector_to_trajectory``'s lumped ``system_moi * accel * 0.1`` estimate,
+    so torque and injury metrics would describe controls nobody solved for.
+    """
+    from src.shared.python.optimization._swing_kinematics import JOINTS
+    from src.shared.python.optimization.swing_optimizer import SwingOptimizer
+
+    n_nodes = 6
+    solved = np.arange(len(JOINTS) * (n_nodes - 1), dtype=float).reshape(
+        len(JOINTS), n_nodes - 1
+    )
+
+    def fake_solve(golfer, club, config, torque_limits, joint_limits, x0):
+        return CasadiSwingResult(
+            success=True,
+            x=np.asarray(x0, dtype=float),
+            fun=0.0,
+            message="fake",
+            iterations=2,
+            torques=solved,
+            transcription="fake",
+        )
+
+    registry.register_backend(
+        registry.BackendSpec(
+            name="torque-backend",
+            problem_class="tests",
+            description="returns known torques",
+            available=lambda: True,
+            install_hint="n/a",
+            solve=fake_solve,
+        )
+    )
+    try:
+        config = OptimizationConfig(n_nodes=n_nodes, solver="torque-backend")
+        result = SwingOptimizer(GolferModel(), ClubModel(), config).optimize()
+        assert result.success and result.trajectory is not None
+        recovered = result.trajectory.joint_torques
+        for index, joint in enumerate(JOINTS):
+            # One torque per node: the last interval is held through the end.
+            np.testing.assert_allclose(recovered[joint][: n_nodes - 1], solved[index])
+            assert recovered[joint][-1] == solved[index][-1]
+    finally:
+        registry._REGISTRY.pop("torque-backend", None)
+
+
+def test_scipy_backend_name_reaches_a_real_scipy_method() -> None:
+    """``solver="scipy"`` is a registry key, not a SciPy method name."""
+    from src.shared.python.optimization.swing_optimizer import SwingOptimizer
+
+    optimizer = SwingOptimizer(
+        GolferModel(), ClubModel(), OptimizationConfig(n_nodes=5, solver="scipy")
+    )
+    # Previously raised ValueError: Unknown solver scipy.
+    result = optimizer.optimize()
+    assert isinstance(result.success, bool)
+    assert result.trajectory is not None or not result.success
+
+
+def test_legacy_scipy_method_names_are_untouched() -> None:
+    from src.shared.python.optimization.swing_optimizer import SwingOptimizer
+
+    optimizer = SwingOptimizer(
+        GolferModel(), ClubModel(), OptimizationConfig(n_nodes=5, solver="SLSQP")
+    )
+    result = optimizer.optimize()
+    assert isinstance(result.success, bool)

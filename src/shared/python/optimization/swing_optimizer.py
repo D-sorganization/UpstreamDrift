@@ -43,6 +43,7 @@ from src.shared.python.core.contracts import (
 )
 from src.shared.python.optimization._swing_constraints import build_constraints
 from src.shared.python.optimization._swing_kinematics import (
+    JOINTS,
     generate_initial_guess,
     get_bounds,
     trajectory_to_vector,
@@ -66,6 +67,11 @@ from src.shared.python.optimization._swing_objectives import (
     compute_metrics,
     compute_objective,
 )
+
+# The backend registry advertises ``scipy`` as a backend name, but SciPy has
+# no method of that name; map it to the flagship's default. Legacy method
+# strings such as ``"SLSQP"`` pass through unchanged.
+_SCIPY_METHOD_ALIASES = {"scipy": "SLSQP"}
 
 __all__ = [
     "ClubModel",
@@ -279,6 +285,12 @@ class SwingOptimizer(ContractChecker):
             message=outcome.message,
             fun=outcome.fun,
         )
+        # A transcription backend optimizes torques as decision variables.
+        # Without this the shared result builder would fall back to
+        # ``vector_to_trajectory``'s lumped ``system_moi * accel * 0.1``
+        # estimate, and every torque and injury metric would describe
+        # controls that were never solved for.
+        shim.backend_torques = outcome.torques
         return shim, outcome.iterations
 
     def _run_casadi_optimization(self, x0: np.ndarray) -> tuple[Any, int]:
@@ -293,6 +305,7 @@ class SwingOptimizer(ContractChecker):
         """Execute the scipy minimization and return raw result + iterations."""
         if x0 is None:
             raise ValueError("x0 must be provided")
+        method = _SCIPY_METHOD_ALIASES.get(self.config.solver, self.config.solver)
         bounds = get_bounds(self.golfer, self.config, self.joint_limits)
         constraints = build_constraints(
             self.config,
@@ -325,7 +338,7 @@ class SwingOptimizer(ContractChecker):
         result = optimize.minimize(
             objective,
             x0,
-            method=self.config.solver,
+            method=method,
             bounds=bounds,
             constraints=constraints,
             callback=scipy_callback,
@@ -348,6 +361,9 @@ class SwingOptimizer(ContractChecker):
         trajectory = vector_to_trajectory(
             result.x, self.config, self.golfer, self.club, self.system_moi
         )
+        self._install_backend_torques(
+            trajectory, getattr(result, "backend_torques", None)
+        )
         metrics = compute_metrics(trajectory, self.club, self.torque_limits)
 
         return OptimizationResult(
@@ -366,6 +382,31 @@ class SwingOptimizer(ContractChecker):
             iterations=iterations,
             computation_time=computation_time,
         )
+
+    @staticmethod
+    def _install_backend_torques(
+        trajectory: SwingTrajectory, torques: np.ndarray | None
+    ) -> None:
+        """Replace the trajectory's estimated torques with the solved ones.
+
+        Backends that transcribe the dynamics return one torque per interval
+        (``n_joints x (n_nodes - 1)``); the trajectory carries one value per
+        node, so the final interval's torque is held through the last node
+        (zero-order hold, which is how it was applied).
+        """
+        if torques is None:
+            return
+        solved = np.asarray(torques, dtype=float)
+        n_nodes = len(trajectory.time)
+        if solved.ndim != 2 or solved.shape[0] != len(JOINTS):
+            return
+        if solved.shape[1] == n_nodes - 1:
+            solved = np.column_stack([solved, solved[:, -1]])
+        if solved.shape[1] != n_nodes:
+            return
+        trajectory.joint_torques = {
+            joint: solved[index] for index, joint in enumerate(JOINTS)
+        }
 
     @staticmethod
     def _build_failure_result(

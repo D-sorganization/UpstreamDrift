@@ -19,7 +19,6 @@ Frames must be uniformly spaced; resample first when they are not.
 
 from __future__ import annotations
 
-import logging
 import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -33,6 +32,7 @@ from src.shared.python.motion_pipeline.contracts import (
 )
 from src.shared.python.optimization._swing_kinematics import JOINTS
 from src.shared.python.optimization._swing_models import ClubModel, GolferModel
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.optimization.model_provider import swing_joint_limits
 from src.shared.python.optimization.ocp._compat import require_bioptim
 from src.shared.python.optimization.ocp.bioptim_model import make_swing_bio_model
@@ -56,7 +56,7 @@ __all__ = [
     "solve_tracking_ocp",
 ]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 _VELOCITY_BOUND = 40.0
 _UNIFORM_DT_TOLERANCE = 1e-6
@@ -407,6 +407,7 @@ def build_tracking_ocp(
     n_shooting = n_frames - 1
     limits = model.symbolic.torque_limits()
 
+    lagrange = bioptim.ObjectiveFcn.Lagrange
     objectives = bioptim.ObjectiveList()
     # Per-node weight = marker weight x confidence mask so dropped frames
     # contribute nothing without changing the target array's shape.
@@ -418,7 +419,7 @@ def build_tracking_ocp(
             logger.warning("marker %r is never observed; not tracked", name)
             continue
         objectives.add(
-            bioptim.ObjectiveFcn.Lagrange.TRACK_MARKERS,
+            lagrange.TRACK_MARKERS,
             marker_index=column,
             target=targets.positions[:, column : column + 1, :],
             weight=bioptim.ObjectiveWeight(
@@ -430,13 +431,13 @@ def build_tracking_ocp(
         )
     if weights.torque:
         objectives.add(
-            bioptim.ObjectiveFcn.Lagrange.MINIMIZE_CONTROL,
+            lagrange.MINIMIZE_CONTROL,
             key="tau",
             weight=weights.torque,
         )
     if weights.qdot_derivative:
         objectives.add(
-            bioptim.ObjectiveFcn.Lagrange.MINIMIZE_STATE,
+            lagrange.MINIMIZE_STATE,
             key="qdot",
             derivative=True,
             weight=weights.qdot_derivative,

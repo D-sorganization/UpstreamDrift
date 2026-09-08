@@ -9,7 +9,6 @@ internals.
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
@@ -18,6 +17,7 @@ import numpy as np
 from scipy.optimize import least_squares
 
 from src.shared.python.contracts import require
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.simulation_backends.provenance import ProvenanceStamp
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
         IdentifiabilityGateReport,
     )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Large finite value substituted for non-finite residual entries so the
 # trust-region optimizer rejects an infeasible finite-difference step instead of
@@ -260,6 +260,34 @@ class SharedParameterBlock:
             return np.zeros((0, self.size), dtype=float)
         return np.vstack(rows)
 
+    def free_prior_residuals(self, free_vector: np.ndarray) -> np.ndarray:
+        """Prior residuals for the unlocked specs only.
+
+        A locked spec's prior residual is a constant, so it cannot change the
+        argmin; dropping it keeps the residual rows aligned with the free
+        decision columns.
+        """
+        values = np.asarray(free_vector, dtype=float)
+        residuals = []
+        for index, spec in enumerate(self.free_specs):
+            if spec.prior is None or spec.prior_scale is None:
+                continue
+            residuals.append((values[index] - spec.prior) / spec.prior_scale)
+        return np.array(residuals, dtype=float)
+
+    def free_prior_jacobian(self) -> np.ndarray:
+        """Jacobian of :meth:`free_prior_residuals` w.r.t. the free values."""
+        rows = []
+        for index, spec in enumerate(self.free_specs):
+            if spec.prior is None or spec.prior_scale is None:
+                continue
+            row = np.zeros(self.free_size, dtype=float)
+            row[index] = 1.0 / spec.prior_scale
+            rows.append(row)
+        if not rows:
+            return np.zeros((0, self.free_size), dtype=float)
+        return np.vstack(rows)
+
 
 @dataclass(frozen=True)
 class SplineTrajectoryEvaluation:
@@ -435,7 +463,12 @@ class CubicHermiteSplineTrajectory:
 
 @dataclass(frozen=True)
 class MapDecisionLayout:
-    """Column layout of the MAP decision vector."""
+    """Column layout of the MAP decision vector.
+
+    ``parameter_names`` lists the **unlocked** parameters, in decision order;
+    a locked parameter has no column, so :meth:`parameter_column` raises for
+    it (as it does in :mod:`.multi_trial`).
+    """
 
     trajectory_size: int
     parameter_names: tuple[str, ...]
@@ -528,7 +561,7 @@ def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
     lower, upper = _decision_bounds(problem)
     layout = MapDecisionLayout(
         trajectory_size=problem.trajectory.coefficient_size,
-        parameter_names=tuple(spec.name for spec in problem.shared_parameters.specs),
+        parameter_names=problem.shared_parameters.free_parameter_names,
     )
     counter = NonFiniteCounter()
 
@@ -590,8 +623,16 @@ def _apply_identifiability_gate(
     evaluation = problem.trajectory.evaluate(coefficients, problem.evaluation_times)
 
     def residual_of_free(free_values: np.ndarray) -> np.ndarray:
+        # The probe perturbs parameters by finite differences, so it can walk
+        # into the same NaN/Inf regions the sentinel policy exists to
+        # tolerate. Route it through that policy: otherwise the probe's own
+        # finiteness precondition aborts the solve, and even
+        # ``policy="raise"`` would surface the wrong exception type.
         values = block.expand_free_vector(free_values)
-        return np.asarray(problem.residual(evaluation, block.to_mapping(values)))
+        raw = np.asarray(
+            problem.residual(evaluation, block.to_mapping(values)), dtype=float
+        )
+        return _sentinel_for_non_finite(raw, policy=problem.options.non_finite_policy)
 
     report = gate_shared_parameters(residual_of_free, block, options)
     return report, list(report.locked_parameters)
@@ -673,8 +714,15 @@ def _pack_decision(
     coefficients: np.ndarray,
     parameter_block: SharedParameterBlock,
 ) -> np.ndarray:
+    """Trajectory coefficients followed by the **unlocked** parameters.
+
+    Locked specs are not decision variables: they stay at their initial
+    value, exactly as :mod:`.multi_trial` has always treated them. Before
+    this they were packed with the rest and could drift toward a prior even
+    while a caller had asked for them to be held fixed.
+    """
     return np.concatenate(
-        [np.asarray(coefficients, dtype=float), parameter_block.initial_vector()]
+        [np.asarray(coefficients, dtype=float), parameter_block.free_initial_vector()]
     )
 
 
@@ -682,14 +730,16 @@ def _unpack_decision(
     problem: MapEstimatorProblem,
     decision: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
+    """Return ``(coefficients, all-parameter values)`` from a decision vector."""
     x = np.asarray(decision, dtype=float)
     split = problem.trajectory.coefficient_size
-    return x[:split], x[split:]
+    free_values = x[split:]
+    return x[:split], problem.shared_parameters.expand_free_vector(free_values)
 
 
 def _decision_bounds(problem: MapEstimatorProblem) -> tuple[np.ndarray, np.ndarray]:
     trajectory_size = problem.trajectory.coefficient_size
-    param_lower, param_upper = problem.shared_parameters.bounds()
+    param_lower, param_upper = problem.shared_parameters.free_bounds()
     lower = np.concatenate([np.full(trajectory_size, -np.inf), param_lower])
     upper = np.concatenate([np.full(trajectory_size, np.inf), param_upper])
     return lower, upper
@@ -711,7 +761,14 @@ def _objective_residual(
         policy=problem.options.non_finite_policy,
         counter=counter,
     )
-    prior_residual = problem.shared_parameters.prior_residuals(parameter_values)
+    free_values = problem.shared_parameters.free_initial_vector() * 0.0
+    free_index = 0
+    for index, spec in enumerate(problem.shared_parameters.specs):
+        if spec.locked:
+            continue
+        free_values[free_index] = parameter_values[index]
+        free_index += 1
+    prior_residual = problem.shared_parameters.free_prior_residuals(free_values)
     return np.concatenate([data_residual, prior_residual])
 
 
@@ -767,7 +824,7 @@ def _objective_jacobian(
     )
     if data_jacobian.ndim != 2 or data_jacobian.shape[1] != layout.size:
         raise ValueError(f"jacobian callable must return (*, {layout.size})")
-    prior_parameter_jacobian = problem.shared_parameters.prior_jacobian()
+    prior_parameter_jacobian = problem.shared_parameters.free_prior_jacobian()
     if prior_parameter_jacobian.shape[0] == 0:
         return data_jacobian
     prior_jacobian = np.zeros(

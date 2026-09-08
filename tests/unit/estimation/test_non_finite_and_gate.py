@@ -238,3 +238,122 @@ def test_gate_options_contracts() -> None:
         IdentifiabilityGateOptions(policy="maybe")  # type: ignore[arg-type]
     with pytest.raises(ValueError):
         IdentifiabilityGateOptions(alignment=0.0)
+
+
+# --- Codex review on PR #9768 ------------------------------------------------
+
+
+def test_locked_parameters_leave_the_decision_vector() -> None:
+    """A gate-locked parameter must not move, even toward its own prior.
+
+    Before this, ``lock`` only flipped the spec's flag while the single-trial
+    path still packed every spec, so a prior could drag a parameter the
+    result claimed was frozen.
+    """
+    trajectory, times, coefficients = _spline()
+    block = SharedParameterBlock.from_specs(
+        [
+            SharedParameterSpec(name="real", initial=1.0, lower=0.5, upper=1.5),
+            SharedParameterSpec(
+                name="ghost",
+                initial=1.0,
+                lower=0.5,
+                upper=1.5,
+                prior=1.4,
+                prior_scale=0.01,
+            ),
+        ]
+    )
+
+    def residual(evaluation, parameters):
+        # 'ghost' never enters the residual, so only its prior could move it.
+        return evaluation.q[:, 0] - parameters["real"] + 1.0
+
+    result = solve_single_trial_map(
+        MapEstimatorProblem(
+            trajectory=trajectory,
+            evaluation_times=times,
+            initial_coefficients=coefficients,
+            shared_parameters=block,
+            residual=residual,
+            options=MapEstimatorOptions(
+                identifiability=IdentifiabilityGateOptions("lock")
+            ),
+        )
+    )
+    assert result.locked_by_gate == ("ghost",)
+    assert result.parameters["ghost"] == 1.0
+    assert result.parameters["real"] == pytest.approx(1.0, abs=1e-6)
+
+
+def test_layout_columns_cover_only_unlocked_parameters() -> None:
+    """Locked specs have no decision column, as in the multi-trial layout."""
+    trajectory, times, coefficients = _spline()
+    block = SharedParameterBlock.from_specs(
+        [
+            SharedParameterSpec(name="free_one", initial=1.0, lower=0.5, upper=1.5),
+            SharedParameterSpec(name="pinned", initial=2.0, locked=True),
+        ]
+    )
+    seen: dict[str, object] = {}
+
+    def residual(evaluation, parameters):
+        seen["pinned"] = parameters["pinned"]
+        return evaluation.q[:, 0] - parameters["free_one"] + 1.0
+
+    def jacobian(evaluation, _parameters, layout):
+        seen["names"] = layout.parameter_names
+        jac = np.zeros((times.size, layout.size))
+        jac[:, : layout.trajectory_size] = evaluation.q_basis[:, 0, :]
+        jac[:, layout.parameter_column("free_one")] = -1.0
+        with pytest.raises(KeyError):
+            layout.parameter_column("pinned")
+        return jac
+
+    result = solve_single_trial_map(
+        MapEstimatorProblem(
+            trajectory=trajectory,
+            evaluation_times=times,
+            initial_coefficients=coefficients,
+            shared_parameters=block,
+            residual=residual,
+            jacobian=jacobian,
+            options=MapEstimatorOptions(
+                identifiability=IdentifiabilityGateOptions("off")
+            ),
+        )
+    )
+    assert seen["names"] == ("free_one",)
+    # The locked value is still visible to the residual and in the result.
+    assert seen["pinned"] == 2.0
+    assert result.parameters["pinned"] == 2.0
+
+
+def test_gate_probe_honours_the_non_finite_policy() -> None:
+    """The probe perturbs parameters, so it can hit the tolerated NaN regions."""
+    trajectory, times, coefficients = _spline()
+    block = _block("real")
+
+    def nan_residual(evaluation, parameters):
+        out = evaluation.q[:, 0] - parameters["real"] + 1.0
+        if parameters["real"] > 1.0 + 1e-9:
+            out = out * np.nan
+        return out
+
+    def problem(options: MapEstimatorOptions) -> MapEstimatorProblem:
+        return MapEstimatorProblem(
+            trajectory=trajectory,
+            evaluation_times=times,
+            initial_coefficients=coefficients,
+            shared_parameters=block,
+            residual=nan_residual,
+            options=options,
+        )
+
+    # Sentinel policy: the probe survives and the substitution is counted.
+    result = solve_single_trial_map(problem(MapEstimatorOptions()))
+    assert result.n_non_finite_evaluations > 0
+    # Raise policy: the caller's own exception type, not the probe's
+    # finiteness precondition.
+    with pytest.raises(NonFiniteResidualError):
+        solve_single_trial_map(problem(MapEstimatorOptions(non_finite_policy="raise")))
