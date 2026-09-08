@@ -37,6 +37,20 @@ The proxy table lives in `ui/src/config/devProxy.ts` and is covered by
 
 The browser UI expects the API server to be reachable on the same machine, and the WebSocket clients in `ui/src/api/client.ts` connect through `/api/ws/simulate/{engineType}`.
 
+## Vite / plugin-react pairing (issue #9249)
+
+`ui` pins `vite ^7.3.2` and `@vitejs/plugin-react ^5` **as a pair**:
+`@vitejs/plugin-react` 6.x declares `peerDependencies.vite: "^8.0.0"` and
+imports Vite's `./internal` export, which Vite 7 does not publish — so a
+dependabot major bump of `@vitejs/plugin-react` to 6.x cannot merge against
+Vite 7 (`npm run build` fails with
+`ERR_PACKAGE_PATH_NOT_EXPORTED: Package subpath "./internal" is not
+defined`). Major updates of `@vitejs/plugin-react` are therefore ignored in
+`.github/dependabot.yml` until the toolchain is Vite-8-ready: upgrade
+`vite` to 8.x and `@vitejs/plugin-react` to 6.x together, and re-verify
+`vitest` / `@vitest/coverage-v8` (^4.1.x) and `@react-three/*` against
+Vite 8 before dropping the ignore rule.
+
 ## Architecture at a glance
 
 - `ui/src/pages/` - route-level screens such as the dashboard and simulation views.
