@@ -18,6 +18,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ## Active
 
 
+
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
 - **State:** in_review
@@ -44,6 +45,20 @@ Entries stay here for 90 days after merge, then move to the archive.
 ## Archive
 
 Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
+### DL-#9249 · UI: Pin @vitejs/Plugin-React to ^5 Until Vite 8
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9718 (open; `Fixes #9249`)
+- **Paths:** `.github/dependabot.yml`, `ui/README.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`7cdbb0a3d`)
+- **Summary:** Dependabot ignores `@vitejs/plugin-react` major updates
+  because 6.x needs Vite 8 (Vite 7 exports no `./internal`); the pairing
+  constraint is documented in `ui/README.md`.
+- **Next step:** Merge the guard PR; revisit the paired vite@8 +
+  plugin-react@6 upgrade once `vitest`/`@react-three/*` are Vite-8 ready.
 
 ### DL-#9470 · Launch-Monitor Analysis Handlers Onto the Async_Action Worker
 
