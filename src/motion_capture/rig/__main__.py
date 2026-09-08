@@ -160,6 +160,16 @@ def _add_coaching_parsers(sub: Any) -> None:
     )
     cmt.add_argument("--speed", type=float, default=0.5)
     cmt.add_argument("--out", type=Path, required=True)
+    mp = sub.add_parser("multipicture", help="composite multiview video via a layout")
+    mp.add_argument("--session", type=Path, required=True)
+    mp.add_argument("--layout", required=True, help="preset, saved name or JSON path")
+    mp.add_argument("--variants", nargs="*", default=[], help="drawn on overlay tiles")
+    mp.add_argument("--set", default="observations", help="observation set to draw")
+    mp.add_argument("--from", dest="start", type=int, default=0, metavar="FRAME")
+    mp.add_argument("--to", dest="stop", type=int, default=None, metavar="FRAME")
+    mp.add_argument("--speed", type=float, default=1.0, help="1 = real time")
+    mp.add_argument("--size", default=None, metavar="WxH", help="canvas pixels")
+    mp.add_argument("--out", type=Path, required=True)
 
 
 def _add_model_parsers(sub: Any) -> None:
@@ -690,6 +700,39 @@ def cmd_compare_takes(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_multipicture(args: argparse.Namespace) -> int:
+    from src.tools.capture_rig.mosaic import (
+        MosaicOptions,
+        export_from_session,
+        parse_size,
+    )
+    from src.tools.capture_rig.overlay_render import ClipRange
+
+    result = export_from_session(
+        args.session,
+        args.layout,
+        args.out,
+        MosaicOptions(
+            clip=ClipRange(args.start, args.stop, args.speed),
+            variants=tuple(args.variants),
+            observation_set=args.set,
+            size=parse_size(args.size) if args.size else None,
+        ),
+    )
+    logger.info(
+        "multipicture %s: %d frames %d-%d, %dx%d at %.3g fps -> %s",
+        result.layout,
+        result.frames,
+        result.first,
+        result.last,
+        result.size[0],
+        result.size[1],
+        result.fps,
+        result.video,
+    )
+    return 0
+
+
 def cmd_fit_model(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.model import FitOptions
     from src.motion_capture.reconstruct.model.registry import get_model
@@ -1116,6 +1159,7 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "board": cmd_board,
     "clip": cmd_clip,
     "compare-takes": cmd_compare_takes,
+    "multipicture": cmd_multipicture,
     "reliability": cmd_reliability,
 }
 

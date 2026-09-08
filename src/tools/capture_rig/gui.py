@@ -94,6 +94,7 @@ STATUS_GLYPH = {
     workflow.Status.SKIPPED: "–",
 }
 ALWAYS_ENABLED = frozenset({"stop", "load", "preview"})
+DEFAULT_EXPORT_LAYOUT = "three_across"  # a sensible default for the lab rig
 LAB_PLAN = Path("docs/motion_capture/plans/lab_three_view_sonnet.json")
 CONTROLS_SIZES = (420, 520)
 WINDOW_SIZE = (1600, 900)
@@ -556,6 +557,7 @@ class CaptureRigWidget(QWidget):
         ("analyze", "Analyze 2-D"),
         ("export", "Export"),
         ("clip", "Export clip"),
+        ("multipicture", "Export multiview"),
         ("compare_takes", "Compare takes"),
         ("annotate", "Annotate / edit points"),
         ("stop", "Stop"),
@@ -733,6 +735,7 @@ class CaptureRigWidget(QWidget):
                 session, variant=self.match.selection().name
             ),
             "clip": lambda: self._clip(session),
+            "multipicture": lambda: self._multipicture(session),
             "compare_takes": lambda: self._compare_takes(session),
         }
         if action not in builder:
@@ -788,6 +791,20 @@ class CaptureRigWidget(QWidget):
             out,
             speed=self.process.clip_speed(),
             observation_set=set_name,
+        )
+
+    def _multipicture(self, session: Path) -> list[str]:
+        """Composite video of the current layout: one file from several views."""
+        name = DEFAULT_EXPORT_LAYOUT  # the layout picker arrives with #9813
+        set_name = self.playback.current_set_name()
+        out = session / f"multiview_{name}_{set_name or 'raw'}.mp4"
+        return commands.multipicture_command(
+            session,
+            name,
+            out,
+            commands.MultipictureArgs(
+                observation_set=set_name, speed=self.process.clip_speed()
+            ),
         )
 
     def _compare_takes(self, session: Path) -> list[str]:
