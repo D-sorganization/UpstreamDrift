@@ -124,11 +124,11 @@ def ensure_cmeel_native_library_path(module_name: str | None = None) -> None:
         return
     os.environ["LD_LIBRARY_PATH"] = assemble_ld_library_path(lib_dir, current)
     target = ["-m", module_name] if module_name else [sys.argv[0]]
-    # nosemgrep: python.lang.security.audit.dangerous-os-exec-tainted-env-args.dangerous-os-exec-tainted-env-args
     # Deliberate self re-exec (#9607): the interpreter is `sys.executable`, the
     # module target is a caller-supplied constant, and `sys.argv[1:]` is passed
     # through unchanged so the authority runtime resumes identically under the
     # prepended `LD_LIBRARY_PATH`. No new executable or argument surface is
     # introduced; the re-exec is loop-safe (returns once the lib dir is on the
     # loader path).
-    os.execv(sys.executable, [sys.executable, *target, *sys.argv[1:]])
+    # nosemgrep: python.lang.security.audit.dangerous-os-exec-tainted-env-args.dangerous-os-exec-tainted-env-args
+    os.execv(sys.executable, [sys.executable, *target, *sys.argv[1:]])  # nosemgrep
