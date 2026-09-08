@@ -240,3 +240,8 @@ record remain unchanged by these type declarations.
 The complete repair is published in PR #9804 at `befa329d1` through every
 normal push hook, including actual mypy, Bandit and unit tests. The checkout
 is tracked-clean. Current-head protected CI is pending; no merge is assumed.
+
+Main `642806228` adds the always-on unit CI lane and the conftest source-pivot
+guard (#9723). It merges cleanly, preserving both task rows. Canonical release
+validation passes at the resulting merge revision; native sources, the
+14-source native record and the inspected PDF are unchanged.
