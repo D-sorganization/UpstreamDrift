@@ -975,6 +975,12 @@ jobs:
       - name: Prevent Net-New print() Calls
         run: python3 scripts/check_no_print_calls.py
 
+      # Declared-route-producer gate (issue #9484): every launcher tile with
+      # web.mode=route must have a pipeline that produces what its route
+      # serves. Fails while /tools/impact-explorer has no bundle producer.
+      - name: Declared Web Route Producer Check
+        run: python3 scripts/check_declared_route_producers.py
+
       # Placeholder detection is blocking. Issue-linked TODO markers are allowed
       # because they already have a tracked owner and follow-up path.
       - name: Verify No Placeholders
@@ -1305,6 +1311,7 @@ jobs:
         rust-wheel-parity,
         shared-tools-consumer-contracts,
         seam-drift-gate,
+        impact-explorer-web-build,
       ]
     if: always()
     # This job is the ONLY required branch-protection check on `main`, and it
@@ -1340,6 +1347,7 @@ jobs:
           DOCS_CHANGED: ${{ needs.changed-paths.outputs.docs }}
           RUST_WHEEL_PARITY: ${{ needs.rust-wheel-parity.result }}
           SHARED_TOOLS_CONSUMER_CONTRACTS: ${{ needs.shared-tools-consumer-contracts.result }}
+          IMPACT_EXPLORER_WEB_BUILD: ${{ needs.impact-explorer-web-build.result }}
           SEAM_DRIFT_GATE: ${{ needs.seam-drift-gate.result }}
         run: |
           set -uo pipefail
@@ -1354,6 +1362,7 @@ jobs:
           gates="$gates rust-wheel-parity:$RUST_WHEEL_PARITY"
           gates="$gates shared-tools-consumer-contracts:$SHARED_TOOLS_CONSUMER_CONTRACTS"
           gates="$gates seam-drift-gate:$SEAM_DRIFT_GATE"
+          gates="$gates impact-explorer-web-build:$IMPACT_EXPLORER_WEB_BUILD"
 
           {
             echo "## Quality Gate Summary"
@@ -2486,6 +2495,62 @@ jobs:
             --timeout=120 \
             --timeout-method=thread \
             -v --tb=short
+
+  # Impact Explorer web bundle producer (issue #9484): the rate_of_closure
+  # launcher tile declares web.mode=route for /tools/impact-explorer and
+  # src/api/local_server.py mounts vendor/ud-tools/src/rate_of_closure/web/dist
+  # when it exists, but nothing built that bundle, so a clean checkout served
+  # the honest fallback instead of the app. Build the bundle from the pinned
+  # Tools tree with the exact commands the route's fallback documents (Tools'
+  # rate-of-closure-web-distribution.yml build authority: npm ci + a vite
+  # build; base-path authority: ui/src/pages/ImpactExplorer.tsx).
+  # scripts/check_declared_route_producers.py fails if this producer
+  # disappears while the tile still declares the route. Shipping the built
+  # bundle inside the wheel/image remains an open distribution decision
+  # (#9417); this job only proves the pinned tree builds.
+  impact-explorer-web-build:
+    name: impact-explorer-web-build
+    needs: [pick-runner, changed-paths]
+    if: needs.changed-paths.outputs.code == 'true'
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        working-directory: .
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          # Node 22 is the vendored Tools web build authority
+          # (rate-of-closure-web-distribution.yml pins node-version 22).
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: vendor/ud-tools/src/rate_of_closure/web/package-lock.json
+      - name: Build Impact Explorer bundle
+        working-directory: vendor/ud-tools/src/rate_of_closure/web
+        run: |
+          npm ci
+          npm run build -- --base=/impact-explorer-app/
+      - name: Verify bundle is built under the mandated base path
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f vendor/ud-tools/src/rate_of_closure/web/dist/index.html
+          grep -q '/impact-explorer-app/' \
+            vendor/ud-tools/src/rate_of_closure/web/dist/index.html
+          echo "Impact Explorer bundle present and base-pathed to /impact-explorer-app/"
 
   frontend-tests:
     needs: [pick-runner, changed-paths]
