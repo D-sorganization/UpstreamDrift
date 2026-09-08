@@ -120,3 +120,16 @@ record; its PR explicitly leaves those follow-ups. This repair covers those
 observed failures without duplicating the bootstrap. If #9726 lands, its new
 governed runner/source identity requires actual regeneration and canonical
 manifest refresh before authority can pass. Preserve both scopes and claims.
+
+## Main-Merge Hook Policy Prerequisite
+
+The second normal push passed mypy, Bandit and unit tests but was rejected by
+`no-print-in-src`: the incoming bioptim CLI's stdout is explicitly permitted by
+Ruff in main's pyproject, while pygrep did not recognize that same scope.
+Repository_Management #1572 records this mismatch. Five contract cases first
+reproduce the approved-example refusal and retain ordinary-library negative
+controls. The print-hook exclusion now matches only the already declared
+`src/shared/python/optimization/examples/` scope. Ruff policy is unchanged.
+The actual print hook now accepts that CLI by its intended exclusion. Generic
+Prettier's three incoming OCP-document changes are formatting only. No hook is
+bypassed and no scientific solver is changed for this delivery prerequisite.
