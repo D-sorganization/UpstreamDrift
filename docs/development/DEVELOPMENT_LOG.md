@@ -49,6 +49,28 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   dependency-consistency freshness gate and the 24 previously failing tests
   go green.
 
+### DL-#9482 · Launcher Tile Logo Families and Registry Gate
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9482
+- **Branch:** `claude/issue-9482-icon-families`
+- **PR:** #9725 (open; `Fixes #9482`)
+- **Paths:** `src/config/launcher_manifest.json`, `assets/logos/**`,
+  `scripts/check_launcher_logo_families.py`,
+  `tests/config/launcher_manifest/test_logo_families.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-07 (`191351bdf`)
+- **Summary:** Broke the launcher grid's worst logo reuse (data_explorer x9,
+  golf_logo x7) by reassigning 16 tiles to distinct existing SVG assets
+  (including verbatim copies of the Sidekick and movement-optimizer icons into
+  `assets/logos/`), declared a data-derived family rule — `engine:<engine_type>`
+  else `category:<category>` — and added `scripts/check_launcher_logo_families.py`
+  plus a focused pytest gate that fails any logo shared outside one family or
+  shared without a documented declaration.
+- **Next step:** Record CI on PR #9725; on green, protected squash merge
+  closes #9482.
+
 ## Shipped (Last 90 Days)
 
 Entries stay here for 90 days after merge, then move to the archive.

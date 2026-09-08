@@ -86,6 +86,11 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
   "Hook bypass policy" documents this resolution.
 
+Launcher UX (#9482): tile logos are gated by
+`scripts/check_launcher_logo_families.py` (one family per engine/category,
+shared logos declared there); run it after editing tile logos in
+`src/config/launcher_manifest.json`.
+
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
