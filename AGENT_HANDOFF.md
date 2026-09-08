@@ -100,6 +100,15 @@ dev-extra addition (#9716), clearing the shared `dependency-consistency` red
 on the merge ref. No material handoff change — lock sync only; behavior and
 continuation state unchanged.
 
+## Vendor Pin & Alias Predicate: #9631
+
+- `vendor/ud-tools` = Tools `eab74a901a`, carrying the Tools#5049 flattened-install alias fix
+  (`f8b94bfe` is an ancestor); do NOT rewind — that drops Tools #5051-#5057 incl. the Sentinel
+  ShellTool injection fix. Cargo rev, companion `pinned_commit`, `check_tools_pins.py` agree.
+- `tests/unit/repo_hygiene/test_pinned_import_alias_contract.py` pins the flattened-install
+  contract (RED at pre-#9657 pin `3d93bb2c`, GREEN at the current pin). Child copy stays
+  unconverged per #9657. Remaining: re-cut the 2.1.3 release.
+
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
@@ -241,8 +250,10 @@ python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
 ```
 
-Also run claim/evidence integrity, release qualification, PDF inspection, and affected full gates after publication changes. Never
-force-push, bypass branch protection, relax tolerances after inspecting results, or create capacity-only reruns.
+Also run claim/evidence integrity, release qualification, PDF inspection, and
+affected full gates after publication changes. Never force-push, bypass branch
+protection, relax tolerances after inspecting results, or create capacity-only
+reruns. Do not restart the Actions runner or start WSL.
 
 ## UI Dependency Pin: #9249
 

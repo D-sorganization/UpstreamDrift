@@ -205,6 +205,7 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
   command before any finder is installed; the initialized path is unchanged.
 - **Next step:** Record CI on PR #9743; on green, protected squash merge
   closes #9733.
+
 ### DL-#8943 · Cache API CPU Work Off the Event Loop
 
 - **State:** in_review
@@ -227,5 +228,21 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
   its seven handlers so API boot no longer pays the pandas import.
 - **Next step:** Merge the PR and confirm CI route/lazy-import gates pass on
   `main`.
+
+### DL-#9631 · Vendor Pin Carries the Tools#5048 Alias-Predicate Fix
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9631`
+- **Branch:** `claude/issue-9631-vendor-pin`
+- **PR:** #9722 (open; `Fixes #9631`)
+- **Paths:** `vendor/ud-tools`, `tests/unit/repo_hygiene/test_pinned_import_alias_contract.py`
+- **Started:** `2026-09-08`
+- **Last verified:** `2026-09-08` (`e4c47751f`)
+- **Summary:** The `vendor/ud-tools` pin `eab74a901a` already carries the Tools#5049
+  flattened-install fix (`f8b94bfe` is an ancestor), so the v2.1.2 wheel defect is fixed at
+  the pin; this entry lands the repository's own TDD contract test asserting the pinned
+  predicate in both layouts and records that the pin must not be rewound.
+- **Next step:** maintainer re-cuts the 2.1.3 release via tag/workflow dispatch after the PR merges.
 
 ## Shipped (Last 90 Days)
