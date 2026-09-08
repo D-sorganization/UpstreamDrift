@@ -39,7 +39,11 @@ fails any `ready`/`beta` tile whose entry point does not resolve. Maturity
 labels for sibling-folder, argparse-CLI, and dashboard-shell tiles were
 corrected in `src/config/models.yaml`; `chat_assistant`/`tools_calculator_hub`
 descriptions corrected in `src/config/launcher_manifest.json`. Gate:
-`python -m pytest tests/config/test_tile_paths_resolve.py`. Follow-ups: a
+`python -m pytest tests/config/test_tile_paths_resolve.py`. CI repair: the
+three vendor-materialised tests in that gate carry a `requires_vendor_gitlink`
+skipif so a submodule-less `unit-test-gate` checkout skips them (the repo's
+#9501 seam-skip convention) instead of failing; rebased on `origin/main` with
+the dev-log entry migrated to the DL-#9478 table format. Follow-ups: a
 dedicated calculator surface for `tools_calculator_hub`, a GUI tile for
 `motion_capture`, sibling-folder click error reporting, and the #9484
 Impact Explorer web build.
