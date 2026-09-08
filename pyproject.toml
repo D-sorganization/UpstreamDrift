@@ -347,6 +347,14 @@ Repository = "https://github.com/D-sorganization/UpstreamDrift"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.metadata]
+# The `bioptim` extra pins a git SHA of pyomeca/bioptim, which is a PEP 508
+# direct reference. bioptim is conda-forge only -- there is no PyPI release to
+# pin instead (see ADR-0050) -- and hatchling refuses direct references unless
+# this is set, failing metadata generation for `pip install -e .` and so every
+# CI job, not just the ones that want the extra.
+allow-direct-references = true
+
 [tool.hatch.build]
 # Include pre-built UI in the wheel. Canonical Sidekick sources are assembled
 # from the exact Tools gitlink by build_hooks.py; vendor/ itself is not shipped.
