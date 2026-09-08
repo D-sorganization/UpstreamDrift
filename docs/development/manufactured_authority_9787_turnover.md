@@ -145,3 +145,14 @@ video-upload and dashboard changes and both owners' SPEC/development-log rows.
 No scientific source or native record changes; the existing canonical release
 validates at this full revision without regeneration. PR #9804 is synchronized
 through normal hooks; current-head CI remains the delivery gate.
+
+## First Current-Head CI Repairs
+
+At `c047a0f8a`, four CI jobs fail for two governance omissions. Documentation
+jobs 102145976147, 102145842603 and 102145839267 require the ADR index to change
+with the incoming ADR's formatting. The index now uses its canonical inline-code
+`bioptim` title. Repo-structure job 102145975673 detects two unmarked test
+functions in the new CLI-policy test module. Its module-level unit marker fixes
+the ratchet; all five cases pass. Existing marker debt is not rebaselined.
+Scientific sources, thresholds, generated native bytes and claim meanings are
+unchanged. Re-run the complete documented governance lane before the next push.

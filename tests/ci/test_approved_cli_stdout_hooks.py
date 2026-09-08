@@ -9,6 +9,7 @@ import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
+pytestmark = pytest.mark.unit
 
 
 def _print_hook() -> dict[str, str]:
