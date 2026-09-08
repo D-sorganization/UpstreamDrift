@@ -102,6 +102,22 @@ def line_turn_deg(left: Array, right: Array) -> Array:
     return np.degrees(np.unwrap(angle - angle[0]))
 
 
+def _speed_and_uncertainty(
+    velocity: Array, fit_uncertainty: Array, fps: float
+) -> tuple[Array, Array]:
+    """Compute per-frame speed and uncertainty avoiding temporary allocations."""
+    speed = np.sqrt(
+        np.einsum("ij,ij->i", velocity, velocity)
+    )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+    unc = (
+        np.sqrt(2.0)
+        * np.sqrt(np.einsum("ij,ij->i", fit_uncertainty, fit_uncertainty))
+        * fps
+        / 2.0
+    )
+    return speed, unc
+
+
 def _angle_between(a: Array, b: Array) -> Array:
     """Per-frame angle in degrees between vector series ``a`` and ``b`` ``(T, 3)``."""
     na = np.sqrt(
@@ -216,16 +232,7 @@ def swing_series(
     )
     fit = smooth(hands, None, fps, options)
     velocity = np.gradient(fit.values, 1.0 / fps, axis=0)
-    speed = np.sqrt(
-        np.einsum("ij,ij->i", velocity, velocity)
-    )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
-    # uncertainty of a finite-difference speed from the per-frame position std
-    unc = (
-        np.sqrt(2.0)
-        * np.sqrt(np.einsum("ij,ij->i", fit.uncertainty, fit.uncertainty))
-        * fps
-        / 2.0
-    )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+    speed, unc = _speed_and_uncertainty(velocity, fit.uncertainty, fps)
     return SwingSeries(
         time_s=np.arange(j.shape[0]) / fps,
         pelvis_turn_deg=pelvis,

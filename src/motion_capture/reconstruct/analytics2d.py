@@ -24,7 +24,13 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from src.shared.python.core.contracts import require
 
-from .analytics import SwingEvents, SwingSeries, angle_stats, detect_events
+from .analytics import (
+    SwingEvents,
+    SwingSeries,
+    _speed_and_uncertainty,
+    angle_stats,
+    detect_events,
+)
 from .temporal import SmootherOptions, smooth
 
 Array = npt.NDArray[np.float64]
@@ -167,16 +173,8 @@ def series_2d(
     )
     fit = smooth(hands, None, fps, options)  # NaN frames follow the dynamics prior
     velocity = np.gradient(fit.values, 1.0 / fps, axis=0)
-    speed = np.sqrt(
-        np.einsum("ij,ij->i", velocity, velocity)
-    )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
+    speed, unc = _speed_and_uncertainty(velocity, fit.uncertainty, fps)
     speed[~covered] = 0.0  # no event can be declared where no hand was seen
-    unc = (
-        np.sqrt(2.0)
-        * np.sqrt(np.einsum("ij,ij->i", fit.uncertainty, fit.uncertainty))
-        * fps
-        / 2.0
-    )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
     hips = _line_tilt_deg(tracks["left_hip"], tracks["right_hip"])
     shoulders = _line_tilt_deg(tracks["left_shoulder"], tracks["right_shoulder"])
     series = SwingSeries(
