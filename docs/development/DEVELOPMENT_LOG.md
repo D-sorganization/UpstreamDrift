@@ -49,6 +49,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   dependency-consistency freshness gate and the 24 previously failing tests
   go green.
 
+### DL-#9499 · Spec Check Reminder Fail-Safe Extraction
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9499`
+- **PR:** #9719 (open)
+- **Paths:** `.github/workflows/spec-check.yml`, `scripts/post_spec_reminder.py`, `tests/ci/test_spec_check_workflow.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-07 (`SELF`)
+- **Summary:** The `Verify SPEC.md freshness` job posts its SPEC reminder
+  through a fail-safe script instead of an inline `github-script` heredoc, so a
+  reporting failure prints the diagnostic into the job log while the
+  `always()`-guarded staleness step still fails the run.
+- **Next step:** Merge the PR filed from `claude/issue-9499-spec-freshness`
+  after required checks pass.
+
 ## Shipped (Last 90 Days)
 
 Entries stay here for 90 days after merge, then move to the archive.
