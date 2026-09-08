@@ -19,6 +19,54 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 
 
+
+### DL-#9482 · Launcher Tile Logo Families and Registry Gate
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9482
+- **Branch:** `claude/issue-9482-icon-families`
+- **PR:** #9725 (open; `Fixes #9482`)
+- **Paths:** `src/config/launcher_manifest.json`, `assets/logos/**`,
+  `scripts/check_launcher_logo_families.py`,
+  `tests/config/launcher_manifest/test_logo_families.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-07 (`191351bdf`)
+- **Summary:** Broke the launcher grid's worst logo reuse (data_explorer x9,
+  golf_logo x7) by reassigning 16 tiles to distinct existing SVG assets
+  (including verbatim copies of the Sidekick and movement-optimizer icons into
+  `assets/logos/`), declared a data-derived family rule — `engine:<engine_type>`
+  else `category:<category>` — and added `scripts/check_launcher_logo_families.py`
+  plus a focused pytest gate that fails any logo shared outside one family or
+  shared without a documented declaration.
+- **Next step:** Address review feedback on PR #9725 and merge when approved.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
+## Field Reference
+
+| Field           | Required                   | Notes                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------- |
+| `State`         | Always                     | One of the six states above                                    |
+| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
+| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
+| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
+| `PR`            | Always                     | Number and state, or `not created`                             |
+| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
+| `Started`       | Always                     | Drives cycle time                                              |
+| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
+| `Summary`       | Always                     | One or two sentences                                           |
+| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
+| `Parked`        | When `parked`              | Date plus reason                                               |
+
+Never place credentials, tokens, or customer data in a development log.
+
 ### DL-#9648 · RTMPose ONNX Pose Estimator Behind the Registry
 
 - **State:** in_review
