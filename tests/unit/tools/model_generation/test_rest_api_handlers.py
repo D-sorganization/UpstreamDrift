@@ -238,14 +238,43 @@ class TestLibraryHandlers:
         # Empty model_id path segment -> handler reports missing id (400).
         assert resp.status_code in (400, 404)
 
-    def test_remove_not_implemented(self, api: ModelGenerationAPI) -> None:
-        resp = api.handle_request(
-            _request(
-                HTTPMethod.DELETE,
-                "/library/models/some-id",
+    def test_remove_model_succeeds(self, api: ModelGenerationAPI) -> None:
+        """DELETE /library/models/{model_id} removes an existing model.
+
+        The handler previously returned a 501 stub; the implementation is
+        real now (issue #9699), so removing an existing model must report
+        success while removing a missing one reports 404.
+        """
+        import tempfile
+        from pathlib import Path
+
+        from model_generation.library import ModelCategory, ModelLibrary
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix="_remove_me.urdf", delete=False
+        ) as handle:
+            handle.write(SIMPLE_URDF)
+            temp_path = Path(handle.name)
+        try:
+            entry = ModelLibrary().add_local_model(
+                urdf_path=temp_path,
+                name="remove_me",
+                category=ModelCategory.OTHER,
             )
-        )
-        assert resp.status_code == 501
+            assert entry is not None
+
+            resp = api.handle_request(
+                _request(HTTPMethod.DELETE, f"/library/models/{entry.id}")
+            )
+            assert resp.status_code == 200, resp.body
+            assert _json(resp) == {"removed": True, "id": entry.id}
+
+            missing = api.handle_request(
+                _request(HTTPMethod.DELETE, f"/library/models/{entry.id}")
+            )
+            assert missing.status_code == 404
+        finally:
+            temp_path.unlink(missing_ok=True)
 
     def test_diff_missing_content(self, api: ModelGenerationAPI) -> None:
         resp = api.handle_request(

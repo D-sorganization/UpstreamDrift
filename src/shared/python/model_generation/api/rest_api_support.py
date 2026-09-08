@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import tempfile
+import xml.etree.ElementTree as ET
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -74,6 +75,44 @@ def maybe_file_response(
     if download_requested(request):
         return APIResponse.file(content, filename, content_type=content_type)
     return APIResponse.ok(payload)
+
+
+def mjcf_to_urdf_response(
+    request: APIRequest,
+    *,
+    content: str,
+    robot_name: str,
+) -> APIResponse:
+    """Convert MJCF content to URDF and build the handler response.
+
+    Canonical MJCF->URDF conversion path shared by every ``ModelGenerationAPI``
+    copy (issue #9699): the conversion ``try``/``except`` lives here and each
+    handler module delegates to this helper. Malformed XML
+    (``ET.ParseError`` subclasses ``SyntaxError``, not ``ValueError``) is
+    mapped to a 422 response instead of escaping into the generic 500 handler.
+
+    Args:
+        request: Framework-neutral request; its ``download`` query param
+            selects the file-download response.
+        content: Non-empty MJCF source text (caller-validated precondition).
+        robot_name: Name used for the download filename.
+
+    Returns:
+        The file-download or JSON payload response for the conversion.
+    """
+    from shared.python.model_generation.converters.mjcf_converter import MJCFConverter
+
+    try:
+        urdf_string = MJCFConverter().mjcf_to_urdf(content)
+    except (ValueError, KeyError, OSError, ET.ParseError) as error:
+        return APIResponse.error(f"Conversion failed: {error}", 422)
+
+    return maybe_file_response(
+        request,
+        content=urdf_string,
+        filename=f"{robot_name}.urdf",
+        payload={"urdf": urdf_string},
+    )
 
 
 @contextmanager

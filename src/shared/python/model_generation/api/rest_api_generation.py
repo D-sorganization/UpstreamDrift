@@ -120,29 +120,21 @@ class GenerationConversionRoutesMixin:
         )
 
     def convert_mjcf_to_urdf(self, request: APIRequest) -> APIResponse:
-        """Convert MJCF content into URDF."""
-        from shared.python.model_generation.converters.mjcf_converter import (
-            MJCFConverter,
-        )
+        """Convert MJCF content into URDF.
+
+        Thin delegate to the canonical conversion helper in
+        ``rest_api_support`` (issue #9699); extraction and validation stay
+        local to the mixin.
+        """
+        from .rest_api_support import mjcf_to_urdf_response
 
         ensure_request(request)
-        body = request_body(request)
         content = request_content(request)
         if not content:
             return APIResponse.error("Missing MJCF content")
 
-        try:
-            urdf_string = MJCFConverter().mjcf_to_urdf(content)
-        except (ValueError, KeyError, OSError) as error:
-            return APIResponse.error(f"Conversion failed: {error}", 422)
-
-        robot_name = body.get("robot_name", "converted")
-        return maybe_file_response(
-            request,
-            content=urdf_string,
-            filename=f"{robot_name}.urdf",
-            payload={"urdf": urdf_string},
-        )
+        robot_name = request_body(request).get("robot_name", "converted")
+        return mjcf_to_urdf_response(request, content=content, robot_name=robot_name)
 
     def convert_urdf_to_mjcf(self, request: APIRequest) -> APIResponse:
         """Convert URDF content into MJCF."""

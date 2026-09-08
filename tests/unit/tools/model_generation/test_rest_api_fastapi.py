@@ -56,11 +56,13 @@ def test_path_param_route_not_422() -> None:
 def test_path_param_value_is_captured() -> None:
     """The ``{model_id}`` segment is delivered to the handler as a path param.
 
-    The DELETE handler returns 501 ("Remove not implemented") only once it
-    has confirmed a non-empty ``model_id``; without the captured path param
-    it would short-circuit to 400 ("Missing model_id"). The 501 therefore
-    proves the path-param value flowed through the adapter.
+    The DELETE handler reports the requested id back in the 404 body
+    (``{"error": "Model not found: some-model-id"}``) once it has confirmed
+    a non-empty ``model_id``; without the captured path param it would
+    short-circuit to 400 ("Missing model_id"). The 404 body therefore proves
+    the path-param value flowed through the adapter.
     """
     response = _client().delete("/api/v1/library/models/some-model-id")
 
-    assert response.status_code == 501, response.text
+    assert response.status_code == 404, response.text
+    assert "some-model-id" in response.json()["error"]
