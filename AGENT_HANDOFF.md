@@ -1,6 +1,7 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 02:55 PDT
+Updated: 2026-09-08 03:10 UTC
 
 ## Impact Dynamics and Acoustics: #9700
 
@@ -10,6 +11,17 @@ Updated: 2026-09-08 02:55 PDT
 - No-vendor provider contracts: 13 passed; ownership-eviction mutation detected; installed-wheel CLI bootstrap passed. Pinned-vendor/CLI/fallback checks: 72 passed.
 - Current compatibility record: `docs/development/impact_provider_import_turnover.md`; overall design: `docs/development/impact_acoustics_program.md`.
 - Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.
+
+Updated: 2026-09-08 02:55 PDT
+
+## Import Bootstrap Fail-Fast: #9733
+
+- Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
+  uninitialized: `src/__init__.py` now raises an actionable ImportError naming
+  `git submodule update --init vendor/ud-tools` instead of installing the
+  fallback finder into an unbounded `find_spec` recursion. Regression tests:
+  `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py` (probe simulated
+  by monkeypatch; never touches the real submodule).
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -23,7 +35,21 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 `_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
 `architecture_budget.json` exceptions are removed, behavior pinned by tests.
 
-## Unit-Gate `src`-Identity Sentinel: #9387 (In Review)
+## In-Flight Tool Migration: #9470 (Launch-Monitor Async Analytics)
+
+- Branch `claude/issue-9470-async-analytics` migrates the seven launch-monitor
+  analysis handlers onto the #8880 `async_action` worker: one shared
+  `AsyncActionBar` for all trigger buttons, widget-free `_compute_*` halves
+  with cancellation checkpoints, synchronous `present(compute())` paths kept,
+  and the embed adapter `cleanup()` cancelling and joining the worker.
+- The branch is stacked on PR #9472 (the #8880 mechanism, `readiness/p2-8880-async-action-worker`);
+  merge #9472 first, then this PR applies cleanly.
+- Remaining #9470 checklist follow-ups, in pain order: `bunker_shot_gui/gui.py`
+  (`_guarded` wait cursor), `putting_green_gui`, `ball_flight_gui`,
+  `swing_flight_pipeline`, `terrain_engine`, then the audit-only tools.
+- Gate: `python -m pytest -q tests/ui/tools/launch_monitor tests/tools/test_async_action.py`
+
+## Unit-Gate `src`-Identity Sentinel: #9387 (Merged)
 
 - The worker-corruption class from #9099 (a test mutating
   `sys.modules['src']`/`src.*` and corrupting later tests on the same
