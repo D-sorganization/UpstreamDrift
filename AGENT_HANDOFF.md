@@ -94,7 +94,7 @@ Seam (#9406) and failure triage (#9474): see
 3. Execute the six registered cases only after runner code and tests merge.
    Never import or relabel legacy checkpoints as outcomes.
 4. Regenerate `requirements*.lock`/`environment.yml` via dispatch-only `lock-refresh.yml`
-   for #9533 (DL-#9533) once its extras PR merges; the locks were left untouched there.
+   for #9533 (DL-#9533, PR #9716) once it merges; the locks were left untouched there.
 
 ## Scientific Boundaries
 
