@@ -16,6 +16,22 @@ evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual progra
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
 recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
+## Import Bootstrap Fail-Fast: #9733
+
+- Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
+  uninitialized: `src/__init__.py` now raises an actionable ImportError naming
+  `git submodule update --init vendor/ud-tools` instead of installing the
+  fallback finder into an unbounded `find_spec` recursion. Regression tests:
+  `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py` (probe simulated
+  by monkeypatch; never touches the real submodule).
+
+Epic #8557 is canonical; issue state, local files, and checkpoints are not
+completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
+design-manual program.
+
+Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
+contract, recovery constraints, and next commands are in
+`docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
