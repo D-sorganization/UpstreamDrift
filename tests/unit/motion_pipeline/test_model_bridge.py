@@ -97,3 +97,47 @@ def test_zero_dof_rig_rejected() -> None:
 
     with pytest.raises(ValueError, match="at least one DOF"):
         rig_to_urdf(_FakeRig())  # type: ignore[arg-type]
+
+
+def test_link_inertials_emit_origin_mass_and_full_tensor() -> None:
+    from src.shared.python.motion_pipeline.model_bridge import LinkInertial
+
+    rig = _rig()
+    knee = LinkInertial(
+        mass=2.5, com=(0.0, 0.0, -0.2), inertia=(0.03, 0.03, 0.001, 0.0, 0.0, 0.0)
+    )
+    root = ET.fromstring(rig_to_urdf(rig, link_inertials={"knee": knee}))
+    links = {ln.get("name"): ln for ln in root.findall("link")}
+    inertial = links["knee_link"].find("inertial")
+    assert inertial.find("origin").get("xyz") == "0.0 0.0 -0.2"
+    assert float(inertial.find("mass").get("value")) == 2.5
+    assert float(inertial.find("inertia").get("izz")) == pytest.approx(0.001)
+    # Joints without an entry keep the generic conditioning placeholder.
+    hip_mass = links["hip_link"].find("inertial").find("mass").get("value")
+    assert float(hip_mass) == 1.0
+    # Intermediate multi-axis carrier links are never overridden.
+    dof0 = links["hip_dof0_link"].find("inertial").find("mass").get("value")
+    assert float(dof0) == pytest.approx(1e-2)
+
+
+def test_link_inertials_default_output_is_unchanged() -> None:
+    rig = _rig()
+    assert rig_to_urdf(rig) == rig_to_urdf(rig, link_inertials={})
+
+
+def test_link_inertials_unknown_joint_rejected() -> None:
+    from src.shared.python.motion_pipeline.model_bridge import LinkInertial
+
+    with pytest.raises(ValueError, match="not in rig"):
+        rig_to_urdf(_rig(), link_inertials={"ankle": LinkInertial(mass=1.0)})
+
+
+def test_link_inertial_contracts() -> None:
+    from src.shared.python.motion_pipeline.model_bridge import LinkInertial
+
+    with pytest.raises(ValueError, match="mass"):
+        LinkInertial(mass=0.0)
+    with pytest.raises(ValueError, match="non-negative"):
+        LinkInertial(mass=1.0, inertia=(-1.0, 0.0, 0.0, 0.0, 0.0, 0.0))
+    tensor = LinkInertial(mass=1.0, inertia=(1, 2, 3, 4, 5, 6)).inertia_matrix
+    assert tensor == [[1, 4, 5], [4, 2, 6], [5, 6, 3]]
