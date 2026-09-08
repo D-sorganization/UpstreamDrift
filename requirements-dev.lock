@@ -64,6 +64,8 @@ dnspython==2.8.0
     # via email-validator
 email-validator==2.3.0
     # via upstream-drift (pyproject.toml)
+et-xmlfile==2.0.0
+    # via openpyxl
 etils[epath,epy]==1.13.0
     # via mujoco
 execnet==2.1.2
@@ -102,6 +104,10 @@ idna==3.18
     #   email-validator
     #   httpx
     #   requests
+imageio[ffmpeg]==2.37.4
+    # via upstream-drift (pyproject.toml)
+imageio-ffmpeg==0.6.0
+    # via imageio
 importlib-resources==6.5.2
     # via etils
 iniconfig==2.3.0
@@ -153,6 +159,7 @@ numpy==2.2.6
     #   contourpy
     #   ezc3d
     #   h5py
+    #   imageio
     #   matplotlib
     #   mujoco
     #   numpy-typing-compat
@@ -164,6 +171,8 @@ numpy==2.2.6
 numpy-typing-compat==20251206.2.2
     # via optype
 opencv-python-headless==4.13.0.92
+    # via upstream-drift (pyproject.toml)
+openpyxl==3.1.5
     # via upstream-drift (pyproject.toml)
 optype[numpy]==0.17.0
     # via scipy-stubs
@@ -183,6 +192,7 @@ pathspec==1.0.4
 pillow==12.3.0
     # via
     #   bokeh
+    #   imageio
     #   matplotlib
     #   upstream-drift (pyproject.toml)
 platformdirs==4.3.8
@@ -192,6 +202,8 @@ pluggy==1.6.0
     #   pytest
     #   pytest-cov
     #   pytest-qt
+psutil==7.2.2
+    # via imageio
 py-cpuinfo==9.0.0
     # via pytest-benchmark
 pyarrow==24.0.0
