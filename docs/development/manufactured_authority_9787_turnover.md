@@ -160,3 +160,35 @@ unchanged. The complete documented governance lane passes locally, including
 checks. The suite-marker ratchet passes without rebaselining. Canonical release
 validation passes at `02bc34f53`, retaining all 253 PDF pages and the same native
 record. Current-head native CI remains queued; no remote result is inferred.
+
+## Reviewer Summary CI Repair
+
+At `4a4d4526b`, unit job 102150135560 passes 14,109 tests and fails only
+`test_committed_summary_matches_registry`. Four companion summary tests pass
+locally while that stale-artifact test reproduces the failure. The existing
+`claim_adjudication_summary write` command regenerates JSON, CSV and its QMD
+table; all five tests then pass. Claim identities and outcomes stay at 328,
+with 308 supported, five inconclusive and 15 untested. Expanded provenance
+adds the project-document evidence tier to five manufactured claims, changing
+that nonexclusive category count from 113 to 118. No empirical tier is added.
+
+The canonical Quarto article is rebuilt with LuaHBTeX/MiKTeX 25.12 and the
+existing optimizer: 253 pages, 196 URI links, 255 outline entries and 2,012,367
+bytes. PDF SHA-256 is
+`01f9af354b514a4579cd2182e96f0e1d3051713cf09a321a9966b0154967e391`.
+All page text matches the previous PDF after whitespace normalization and
+the single declared 113-to-118 replacement. Fourteen pages have extraction
+differences from that count or line wrapping; all fourteen are visually
+inspected, including the corrected table on PDF page 237. No clipping or
+overlap is observed. The generated TeX also changes two unordered callout
+option lists without changing their values. Generated files are not hand-edited.
+
+The standard release-review and release-bundle writers refresh the evidence
+manifest, release manifest and checksums. Computational publication checks
+render all 253 pages. The manufactured native record remains unchanged at
+`355157bd57d0c2eb19652d3bd109c8074cc6ba83dc949abda478551a470d390c`.
+The isolated `uv run --no-project` publication environment installs PyMuPDF
+and pikepdf; neither authority environment nor shared runners are modified.
+Archival and human-validation limitations remain. After every future registry
+refresh, run the summary writer and its five tests before release qualification;
+if its QMD changes, rebuild and inspect the canonical PDF before bundling it.
