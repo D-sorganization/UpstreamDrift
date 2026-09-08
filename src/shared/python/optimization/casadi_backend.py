@@ -197,11 +197,11 @@ def build_symbolic_rnea(
     q = ca.SX.sym("q", n)
     v = ca.SX.sym("v", n)
     a = ca.SX.sym("a", n)
-    tau = _rnea_expression(ca, q, v, a, offsets, axes, inertials)
+    tau = rnea_expression(ca, q, v, a, offsets, axes, inertials)
     return ca.Function("swing_rnea", [q, v, a], [tau])
 
 
-def _rnea_expression(
+def rnea_expression(
     ca: Any,
     q: Any,
     v: Any,

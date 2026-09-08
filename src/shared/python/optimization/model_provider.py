@@ -99,6 +99,39 @@ def swing_joint_limits(golfer: GolferModel) -> dict[str, tuple[float, float]]:
     }
 
 
+def swing_segment_offsets(
+    *,
+    height: Any,
+    trunk_length: Any,
+    arm_length: Any,
+    club_length: Any,
+) -> dict[str, tuple[Any, Any, Any]]:
+    """Parent-to-joint offsets of the seven-DOF chain, in ``JOINTS`` order.
+
+    Pure arithmetic on the four lengths, so it works with floats *and* with
+    CasADi symbols (the bioptim parameter path, epic #9762 Phase 4). The
+    club length extends the terminal wrist segment so end-of-chain
+    kinematics see the clubhead radius.
+    """
+    pelvis_z = _PELVIS_HEIGHT_FRACTION * height
+    upper_arm = _UPPER_ARM_FRACTION * arm_length
+    forearm = arm_length - upper_arm
+    return {
+        "hip_rotation": (0.0, 0.0, pelvis_z),
+        "trunk_rotation": (0.0, 0.0, trunk_length),
+        "shoulder_horizontal": (0.0, _SHOULDER_OFFSET_FRACTION * height / 2.0, 0.0),
+        "shoulder_vertical": (0.0, 0.0, 0.0),
+        "elbow_flexion": (0.0, 0.0, -upper_arm),
+        "wrist_cock": (0.0, 0.0, -forearm),
+        "wrist_rotation": (0.0, 0.0, -club_length),
+    }
+
+
+def swing_joint_axes() -> dict[str, str]:
+    """Rotation axis letter per swing DOF (copy; the module constant is private)."""
+    return dict(_JOINT_AXES)
+
+
 def build_swing_rig(
     golfer: GolferModel | None = None,
     club: ClubModel | None = None,
@@ -111,28 +144,12 @@ def build_swing_rig(
     golfer = golfer or GolferModel()
     club = club or ClubModel()
     limits = swing_joint_limits(golfer)
-
-    pelvis_z = _PELVIS_HEIGHT_FRACTION * golfer.height
-    shoulder_z = golfer.trunk_length
-    upper_arm = _UPPER_ARM_FRACTION * golfer.arm_length
-    forearm = golfer.arm_length - upper_arm
-
-    # Offsets are from the parent joint, along the chain. The club length
-    # extends the terminal wrist segment so end-of-chain kinematics see the
-    # clubhead radius.
-    offsets: dict[str, list[float]] = {
-        "hip_rotation": [0.0, 0.0, pelvis_z],
-        "trunk_rotation": [0.0, 0.0, shoulder_z],
-        "shoulder_horizontal": [
-            0.0,
-            _SHOULDER_OFFSET_FRACTION * golfer.height / 2.0,
-            0.0,
-        ],
-        "shoulder_vertical": [0.0, 0.0, 0.0],
-        "elbow_flexion": [0.0, 0.0, -upper_arm],
-        "wrist_cock": [0.0, 0.0, -forearm],
-        "wrist_rotation": [0.0, 0.0, -club.total_length],
-    }
+    offsets = swing_segment_offsets(
+        height=golfer.height,
+        trunk_length=golfer.trunk_length,
+        arm_length=golfer.arm_length,
+        club_length=club.total_length,
+    )
 
     joints: dict[str, JointDef] = {}
     for i, name in enumerate(JOINTS):
@@ -143,7 +160,7 @@ def build_swing_rig(
             name=name,
             parent=parent,
             children=children,
-            tpose_offset=offsets[name],
+            tpose_offset=[float(value) for value in offsets[name]],
             axes=[_JOINT_AXES[name]],  # type: ignore[list-item]
             limits=[JointLimit(lower=float(lower), upper=float(upper))],
         )
@@ -192,9 +209,9 @@ def _sphere_inertia(
 
 
 def _combine_point_and_rod_masses(
-    parts: list[tuple[float, float, float]],
-) -> LinkInertial:
-    """Combine collinear parts along -Z into one link inertial.
+    parts: list[tuple[Any, Any, Any]],
+) -> tuple[Any, tuple[Any, Any, Any], tuple[Any, Any, Any, Any, Any, Any]]:
+    """Combine collinear parts along -Z into one ``(mass, com, inertia)``.
 
     Each part is ``(mass, z_center, length)`` where ``length`` is the extent
     of a thin rod centred at ``z_center`` (0 for a point mass). The rod is
@@ -206,12 +223,81 @@ def _combine_point_and_rod_masses(
     for mass, z_center, length in parts:
         rod = _cylinder_inertia(mass, length, _CLUB_SHAFT_RADIUS, axis=2)
         d = z_center - z_com
-        ixx += rod[0] + mass * d**2
-        iyy += rod[1] + mass * d**2
-        izz += rod[2]
-    return LinkInertial(
-        mass=total, com=(0.0, 0.0, z_com), inertia=(ixx, iyy, izz, 0.0, 0.0, 0.0)
+        ixx = ixx + rod[0] + mass * d**2
+        iyy = iyy + rod[1] + mass * d**2
+        izz = izz + rod[2]
+    return total, (0.0, 0.0, z_com), (ixx, iyy, izz, 0.0, 0.0, 0.0)
+
+
+def swing_segment_inertials(
+    *,
+    offsets: dict[str, tuple[Any, Any, Any]],
+    mass: Any,
+    trunk_mass_ratio: Any,
+    arm_mass_ratio: Any,
+    height: Any,
+    grip_mass: Any,
+    shaft_mass: Any,
+    shaft_length: Any,
+    head_mass: Any,
+) -> dict[str, tuple[Any, tuple[Any, Any, Any], tuple[Any, Any, Any, Any, Any, Any]]]:
+    """``joint -> (mass, com, (ixx, iyy, izz, ixy, ixz, iyz))`` per link.
+
+    Pure arithmetic, usable with floats or CasADi symbols. See
+    :func:`swing_link_inertials` for the segment model.
+    """
+    trunk_mass = mass * trunk_mass_ratio
+    arm_mass = mass * arm_mass_ratio
+    trunk_radius = _TRUNK_RADIUS_FRACTION * height
+
+    pelvis_len = offsets["trunk_rotation"][2]
+    pelvis_mass = _PELVIS_TRUNK_SPLIT * trunk_mass
+    thorax_len = offsets["shoulder_horizontal"][1]
+    thorax_mass = (1.0 - _PELVIS_TRUNK_SPLIT) * trunk_mass
+    upper_len = -offsets["elbow_flexion"][2]
+    fore_len = -offsets["wrist_cock"][2]
+    upper_mass = _UPPER_ARM_MASS_FRACTION * arm_mass
+    fore_mass = _FOREARM_MASS_FRACTION * arm_mass
+    hand_mass = _HAND_MASS_FRACTION * arm_mass
+    shaft_parts = [
+        (hand_mass, -0.5 * _HAND_LENGTH, _HAND_LENGTH),
+        (grip_mass, -0.5 * _GRIP_LENGTH, _GRIP_LENGTH),
+        (shaft_mass, -0.5 * shaft_length, shaft_length),
+    ]
+    carrier = (
+        _CARRIER_MASS,
+        (0.0, 0.0, 0.0),
+        (_CARRIER_INERTIA, _CARRIER_INERTIA, _CARRIER_INERTIA, 0.0, 0.0, 0.0),
     )
+    return {
+        "hip_rotation": (
+            pelvis_mass,
+            (0.0, 0.0, 0.5 * pelvis_len),
+            _cylinder_inertia(pelvis_mass, pelvis_len, trunk_radius, 2),
+        ),
+        "trunk_rotation": (
+            thorax_mass,
+            (0.0, 0.5 * thorax_len, 0.0),
+            _cylinder_inertia(thorax_mass, thorax_len, trunk_radius, 1),
+        ),
+        "shoulder_horizontal": carrier,
+        "shoulder_vertical": (
+            upper_mass,
+            (0.0, 0.0, -0.5 * upper_len),
+            _cylinder_inertia(upper_mass, upper_len, _LIMB_RADIUS, 2),
+        ),
+        "elbow_flexion": (
+            fore_mass,
+            (0.0, 0.0, -0.5 * fore_len),
+            _cylinder_inertia(fore_mass, fore_len, _LIMB_RADIUS, 2),
+        ),
+        "wrist_cock": _combine_point_and_rod_masses(shaft_parts),
+        "wrist_rotation": (
+            head_mass,
+            (0.0, 0.0, 0.0),
+            _sphere_inertia(head_mass, _CLUBHEAD_RADIUS),
+        ),
+    }
 
 
 def swing_link_inertials(
@@ -237,61 +323,30 @@ def swing_link_inertials(
     """
     golfer = golfer or GolferModel()
     club = club or ClubModel()
-    rig = build_swing_rig(golfer, club)
-    offset = {name: rig.joints[name].tpose_offset for name in JOINTS}
-
-    trunk_mass = golfer.mass * golfer.trunk_mass_ratio
-    arm_mass = golfer.mass * golfer.arm_mass_ratio
-    trunk_radius = _TRUNK_RADIUS_FRACTION * golfer.height
-
-    pelvis_len = float(offset["trunk_rotation"][2])
-    pelvis_mass = _PELVIS_TRUNK_SPLIT * trunk_mass
-    thorax_len = float(offset["shoulder_horizontal"][1])
-    thorax_mass = (1.0 - _PELVIS_TRUNK_SPLIT) * trunk_mass
-    upper_len = -float(offset["elbow_flexion"][2])
-    fore_len = -float(offset["wrist_cock"][2])
-
-    hand_mass = _HAND_MASS_FRACTION * arm_mass
-    shaft_parts = [
-        (hand_mass, -0.5 * _HAND_LENGTH, _HAND_LENGTH),
-        (club.grip_mass, -0.5 * _GRIP_LENGTH, _GRIP_LENGTH),
-        (club.shaft_mass, -0.5 * club.shaft_length, club.shaft_length),
-    ]
-
+    offsets = swing_segment_offsets(
+        height=golfer.height,
+        trunk_length=golfer.trunk_length,
+        arm_length=golfer.arm_length,
+        club_length=club.total_length,
+    )
+    raw = swing_segment_inertials(
+        offsets=offsets,
+        mass=golfer.mass,
+        trunk_mass_ratio=golfer.trunk_mass_ratio,
+        arm_mass_ratio=golfer.arm_mass_ratio,
+        height=golfer.height,
+        grip_mass=club.grip_mass,
+        shaft_mass=club.shaft_mass,
+        shaft_length=club.shaft_length,
+        head_mass=club.head_mass,
+    )
     return {
-        "hip_rotation": LinkInertial(
-            mass=pelvis_mass,
-            com=(0.0, 0.0, 0.5 * pelvis_len),
-            inertia=_cylinder_inertia(pelvis_mass, pelvis_len, trunk_radius, 2),
-        ),
-        "trunk_rotation": LinkInertial(
-            mass=thorax_mass,
-            com=(0.0, 0.5 * thorax_len, 0.0),
-            inertia=_cylinder_inertia(thorax_mass, thorax_len, trunk_radius, 1),
-        ),
-        "shoulder_horizontal": LinkInertial(
-            mass=_CARRIER_MASS,
-            inertia=(_CARRIER_INERTIA,) * 3 + (0.0,) * 3,
-        ),
-        "shoulder_vertical": LinkInertial(
-            mass=_UPPER_ARM_MASS_FRACTION * arm_mass,
-            com=(0.0, 0.0, -0.5 * upper_len),
-            inertia=_cylinder_inertia(
-                _UPPER_ARM_MASS_FRACTION * arm_mass, upper_len, _LIMB_RADIUS, 2
-            ),
-        ),
-        "elbow_flexion": LinkInertial(
-            mass=_FOREARM_MASS_FRACTION * arm_mass,
-            com=(0.0, 0.0, -0.5 * fore_len),
-            inertia=_cylinder_inertia(
-                _FOREARM_MASS_FRACTION * arm_mass, fore_len, _LIMB_RADIUS, 2
-            ),
-        ),
-        "wrist_cock": _combine_point_and_rod_masses(shaft_parts),
-        "wrist_rotation": LinkInertial(
-            mass=club.head_mass,
-            inertia=_sphere_inertia(club.head_mass, _CLUBHEAD_RADIUS),
-        ),
+        name: LinkInertial(
+            mass=float(mass),
+            com=(float(com[0]), float(com[1]), float(com[2])),
+            inertia=tuple(float(value) for value in inertia),  # type: ignore[arg-type]
+        )
+        for name, (mass, com, inertia) in raw.items()
     }
 
 
