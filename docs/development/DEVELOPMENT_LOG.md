@@ -275,6 +275,19 @@ Never place credentials, tokens, or customer data in a development log.
 - **Summary:** CI Standard gains an always-on, ≤10-minute `always-on-unit-lane` (verify_installation import smoke over the shared Tools alias roots, top-level smoke tests, contract tests) that `quality-gate` requires `success` on every PR including docs-only ones; a repo-hygiene guard forbids any conftest from pivoting `sys.modules["src"]` directly (must use `EngineSrcPivot`). Deferred on #9409: main-branch cancel exemption (RM campaign) and nightly cross-engine dedupe (#8725/#9002).
 - **Next step:** Verify the first CI run of the PR executes `always-on-unit-lane` to `success` within its 10-minute budget.
 
+### DL-#9607 · Authority Runtime Native Library Bootstrap for Cmeel Pinocchio Wheels
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9607
+- **PR:** #9726 (open; `Fixes #9607`)
+- **Branch:** `claude/issue-9607-pinocchio-abi`
+- **Paths:** `scripts/research/proximal_distal_energy/articulated_native_runtime.py`, `scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py`, `tests/research/test_articulated_native_runtime.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** Resolves the authority lane's `liburdfdom_sensor.so.4.0` import failure by resolving `cmeel.prefix/lib` from the live venv, verifying the locked sonames with an explicit DbC diagnostic, and re-execing the authority profile with `LD_LIBRARY_PATH` prepended before `import pinocchio`.
+- **Next step:** Verify the `articulated-manufactured-authority` job in `ci-optional-stack.yml` imports pinocchio, then regenerate the committed publication authority record from a byte-identical locked Linux run.
+
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
 - **State:** in_review
