@@ -10,7 +10,7 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
-from .rest_api_routes import ModelGenerationAPI
+from .rest_api_core import ModelGenerationAPI
 from .rest_api_types import APIRequest, HTTPMethod, Route
 
 logger = logging.getLogger(__name__)

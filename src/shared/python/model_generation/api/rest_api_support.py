@@ -13,7 +13,14 @@ from src.shared.python.model_generation.api.rest_api_contracts import (
     APIResponse,
 )
 
-MAX_MESH_UPLOAD_BYTES = 10 * 1024 * 1024
+# 50 MiB. This module and the now-deleted rest_api_routes monolith were
+# created in the same commit (8bb184cfb) with different limits -- 10 MiB
+# here, 50 MiB there -- so neither is a later correction of the other, and
+# nothing in SPEC.md or the tests pins a value. Unifying on 50 keeps the
+# limit the Flask/FastAPI adapters have been enforcing, so no upload that
+# works today starts failing. Tightening it is a deliberate decision, not a
+# side effect of de-duplication: see #9699.
+MAX_MESH_UPLOAD_BYTES = 50 * 1024 * 1024
 ALLOWED_MESH_SUFFIXES = {".stl", ".obj", ".ply", ".off", ".dae", ".glb", ".gltf"}
 
 
