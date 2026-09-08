@@ -19,9 +19,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ### DL-#9699 · Unify model-generation MJCF conversion handlers; 422 for malformed XML
 
 - **State:** in_review
-- **Owner:** claude
+- **PR:** #9737 (open, `Fixes #9699`)
 - **Issue:** #9699
-- **PR:** not created
 - **Branch:** `claude/issue-9699-mjcf-422`
 - **Paths:** `src/shared/python/model_generation/api/**`,
   `tests/unit/tools/model_generation/**`

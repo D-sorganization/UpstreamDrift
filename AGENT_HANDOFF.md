@@ -45,7 +45,8 @@ Seam (#9406) and failure triage (#9474): see
   copies on `rest_api_support.mjcf_to_urdf_response` (canonical core; tests
   exercise `rest_api_routes.ModelGenerationAPI`, the `rest_api.py` shim path
   through `rest_api_core`/`rest_api_generation` delegates to the same helper)
-  and maps `ET.ParseError` to 422 instead of 500. PR pending.
+  and maps `ET.ParseError` to 422 instead of 500. PR #9737 open against
+  `main` (agent:claude label applied).
 - Local pytest dead-locked repo-wide until `git submodule update --init
   vendor/ud-tools` populated the pinned Tools tree: without it,
   `src/__init__.py`'s vendored fallback finder recurses against the installed
