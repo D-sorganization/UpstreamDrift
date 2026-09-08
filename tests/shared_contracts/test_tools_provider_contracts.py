@@ -360,3 +360,18 @@ def test_provider_origin_refuses_unrelated_tools_named_directory(
     monkeypatch.setenv("TOOLS_REPO_ROOT", str(provider))
     with pytest.raises(AssertionError, match="provider"):
         _assert_from_tools(impostor)
+
+
+@pytest.mark.unit
+def test_explicit_provider_mode_matches_reported_origin(
+    request: pytest.FixtureRequest,
+) -> None:
+    """A vendored-mode gate must verify its pin even with a sibling checkout."""
+    explicit = os.environ.get("TOOLS_REPO_PATH")
+    if explicit:
+        expected = Path(explicit).resolve()
+    elif request.config.getoption("--tools-mode") == "vendored":
+        expected = Path(__file__).resolve().parents[2] / "vendor" / "ud-tools"
+    else:
+        return  # External roots are checked by each executable provider contract.
+    assert Path(os.environ["TOOLS_REPO_ROOT"]).resolve() == expected.resolve()

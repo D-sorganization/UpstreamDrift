@@ -105,3 +105,21 @@ files were edited. The wider vendor/provider/CLI/fallback run passed 72 tests in
 Pinned Ruff 0.15.17 reports all 6,649 files formatted and no lint errors.
 Design-manual governance passes with its existing release block retained.
 PR #9745 is open at implementation commit `163239a6b`; all local commit and push hooks passed. Protected CI is running. Resolve its checks before normal merge, then retry the relevant Tools downstream lane against merged consumer code. T3 work is active in the separate Tools-impact-shaft worktree; the full program remains open.
+
+## CI Mode Qualification
+
+At head `66c2918df`, CI's shared-tools job selected `--tools-mode=vendored` but
+workspace setup exported TOOLS_REPO_ROOT for the separate `_tools_dep` checkout.
+The stronger source assertion exposed seven mismatches; local reproduction with
+a different external provider and the initialized vendor likewise failed seven
+contracts (20.95 s). The shared conftest now honors root conftest's explicit
+TOOLS_REPO_PATH override and vendored mode, reports that selected root, and
+promotes paths after root configuration. It does not accept arbitrary Tools
+trees or change runtime imports. Both actual modes pass the original 13
+contracts: vendored 18.46 s, external with vendor present 16.38 s. An additional
+contract asserts that explicit mode and reported origin agree.
+
+The phantom guard initially matched only the issue's illustrative runtime path.
+Issue #9735 now records the located test/fixture paths and diagnosis, preserving
+its original smallest-responsible-boundary acceptance criteria. No override
+label, tolerance relaxation or production edit was used to bypass that gate.
