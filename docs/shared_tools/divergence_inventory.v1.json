@@ -13,7 +13,7 @@
   "totals": {
     "identical": 462,
     "diverged": 276,
-    "ud-only": 1202,
+    "ud-only": 1196,
     "tools-only": 520,
     "spelling-only": 126
   },
@@ -483,7 +483,7 @@
     "optimization": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 33,
+      "ud-only": 27,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -14706,78 +14706,6 @@
       "package": "optimization",
       "subpackage": "ocp",
       "ud_bytes": 12390,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "optimization/ocp/tests/__init__.py",
-      "classification": "ud-only",
-      "package": "optimization",
-      "subpackage": "ocp",
-      "ud_bytes": 0,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "optimization/ocp/tests/test_bioptim_model.py",
-      "classification": "ud-only",
-      "package": "optimization",
-      "subpackage": "ocp",
-      "ud_bytes": 4495,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "optimization/ocp/tests/test_compat.py",
-      "classification": "ud-only",
-      "package": "optimization",
-      "subpackage": "ocp",
-      "ud_bytes": 2440,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "optimization/ocp/tests/test_swing_ocp.py",
-      "classification": "ud-only",
-      "package": "optimization",
-      "subpackage": "ocp",
-      "ud_bytes": 7473,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "optimization/ocp/tests/test_symbolic_model.py",
-      "classification": "ud-only",
-      "package": "optimization",
-      "subpackage": "ocp",
-      "ud_bytes": 6807,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": false,
-      "spelling_only": false
-    },
-    {
-      "path": "optimization/ocp/tests/test_tracking_ocp.py",
-      "classification": "ud-only",
-      "package": "optimization",
-      "subpackage": "ocp",
-      "ud_bytes": 9523,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

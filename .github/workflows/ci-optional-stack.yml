@@ -439,7 +439,7 @@ jobs:
           set -o pipefail
           xvfb-run --auto-servernum pytest \
             -p no:xvfb \
-            src/shared/python/optimization/ocp/tests \
+            tests/integration/optimization/ocp \
             tests/architecture/test_bioptim_isolation.py \
             -m "requires_bioptim or integration" \
             --timeout=600 \

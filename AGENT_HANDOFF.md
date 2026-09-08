@@ -105,12 +105,25 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   target-speed objective; and the six-marker set cannot observe the full
   seven-DOF chain (`hip_rotation` and `trunk_rotation` are an exact null
   direction), so tracking results report their own identifiability.
-- Gate commands: `MPLBACKEND=Agg pytest src/shared/python/optimization/ocp/tests
+- Gate commands: `MPLBACKEND=Agg pytest tests/integration/optimization/ocp
   tests/architecture/test_bioptim_isolation.py -m "not slow"`;
   `pytest tests/unit/optimization tests/unit/estimation`;
   `MPLBACKEND=Agg PYTHONPATH=src python -m benchmarks.bioptim_parity --nodes 8
   --duration 0.6`. The benchmark needs `PYTHONPATH=src` (pytest's conftest adds
   it, `python -m` does not) or it dies importing `bunkershot3d`.
+- The ocp tests live in `tests/integration/optimization/ocp/`, NOT under
+  `src/`. `scripts/check_test_layout.py` (the Test Layout Guard inside
+  `repo-structure-gates`) rejects any new `tests` directory under `src/`
+  because root pytest does not collect it -- its `LEGACY_SRC_TEST_DIRS`
+  allowlist is grandfathered debt, so do not add to it. They sit beside
+  `test_casadi_swing_live.py`, the other suite that needs the real optional
+  stack rather than the mocks `tests/unit/conftest.py` installs.
+- The lane that really exercises them is the `bioptim OCP Tests` step in
+  `ci-optional-stack.yml`, which installs the extra and runs only
+  `tests/integration/optimization/ocp` plus the isolation test under
+  `-m "requires_bioptim or integration"`. It is NOT fail-soft. Locally that
+  exact selection is 26 passed in about 150 s; a timeout there is contention,
+  not a hang -- the slowest test on its own is 80 s against a 600 s budget.
 - Run the ocp tests on their own. Co-running them with
   `tests/unit/optimization` makes `bioptim_available()` return False and
   silently skips 16 of them, in either collection order and on `main` as well
