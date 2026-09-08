@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.3] - 2026-09-07
+
+Supersedes `v2.1.2`, which published nothing. Its `release.yml` run built a
+wheel but both `smoke-python-wheel` jobs failed: `SharedImportAliasFinder`
+rewrote `src.shared.python.config` into the pinned Tools tree, whose unrelated
+`config` package lacks `get_database_pool_pre_ping`, so
+`import src.api.local_server` and `upstream-drift --help` both failed and
+`create-release` / `publish-pypi` were skipped (#9631). Fixed upstream in
+D-sorganization/Tools#5049 and carried here by the `vendor/ud-tools` pin bump
+to `132fc7331e`.
+
+Per `docs/operations/release-runbook.md` "Failed Release Recovery -- Fix
+Forward, Never Move a Tag", the `v2.1.2` tag is retained where it is with no
+release attached, which is itself the accurate record that nothing shipped
+from it. The entries below were staged for 2.1.2 and carry forward unchanged.
+
 ## [2.1.2] - 2026-09-03
 
 This release carries every entry that was staged for 2.1.1. The `v2.1.1` tag was

@@ -1,5 +1,17 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+## Impact Dynamics and Acoustics: #9700
+
+- Inventory/design slice #9701 is locally verified on `docs/9700-impact-acoustics-program`,
+  based on `40308a0c`; PR #9706; initial implementation `077ae9df9`. Theory: AffineDrift #4253; provider: Tools #5068.
+- The merge-sync pre-push initially hung during import discovery with an empty
+  vendor directory; initialized the existing eab74a901a Tools pin and reran.
+- PR #9706 synced protected main `c2322f02df62057f18c652bdf28de3bab01cd369`; both SPEC row sets retained.
+- Integration plan: `docs/development/impact_acoustics_program.md` (complete).
+- Reuse impact/shaft and moving-base/articulated research infrastructure. Preserve
+  #8557 protected evidence, vendored Tools pin, manufactured-data boundaries and
+  workstation recovery restrictions. No calibrated acoustic solver is established.
+
 Updated: 2026-08-30 10:02 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
@@ -9,6 +21,9 @@ design-manual program.
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
 contract, recovery constraints, and next commands are in
 `docs/development/proximal_distal_program_turnover.md`.
+
+Seam (#9406) and failure triage (#9474): see
+`docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
 
 ## Protected Authority
 
@@ -119,7 +134,8 @@ contract, recovery constraints, and next commands are in
 ## Active AffineDrift and External Program Boundaries
 
 - Markerless Mocap Program (#9063): Tools #4706 owns capture/contract schemas;
-  UpstreamDrift #9069 owns app orchestration; makes no physical-lab qualification claim.
+  UpstreamDrift #9069 (folded into #9422) owns app orchestration; makes no physical-lab qualification claim.
+  Rig bring-up evidence: `docs/motion_capture/usb_camera_rig_bringup.md` (#9586); consumer slices #9589–#9592.
 - Foundation #9180 merged as `1af18489e8755933a0d189aa8edafe787fa94d0f`; publication #9214 merged as `a8073c42edc811522c5d5709744f55c5cbd0fa8e`.
 - Governed companion workflows (#9190) define the 15-record registry, public executor, and CI execution evidence across 10 success and 4 failure fixtures.
 - #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes; #9174 remains open.

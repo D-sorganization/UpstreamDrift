@@ -1,0 +1,135 @@
+{
+  "checkpoint": "MB_ft_h36m_global_lite.bin",
+  "params_M": 16.001549,
+  "torch": "2.14.0+cpu",
+  "synthetic": {
+    "down_line": {
+      "frames": 240,
+      "ms_per_frame": 6.406891666604982,
+      "mpjpe_similarity_mm": 110.7503034219783,
+      "mpjpe_similarity_p95_mm": 193.91466614020058,
+      "mpjpe_rigid_globalscale_mm": 111.5225766901823,
+      "scale_cv": 0.03662054005526507,
+      "bone_length_rel_error_median": {
+        "right_hip->right_knee": 0.010532823475924286,
+        "right_knee->right_ankle": 0.045768211285273266,
+        "left_hip->left_knee": 0.022066593170166023,
+        "left_knee->left_ankle": 0.01780462123098831,
+        "left_shoulder->left_elbow": 0.06689360737800587,
+        "left_elbow->left_wrist": 0.052064206737738525,
+        "right_shoulder->right_elbow": 0.103684326012929,
+        "right_elbow->right_wrist": 0.045652351700342854,
+        "mid_hip->neck": 0.02254951000213623,
+        "left_shoulder->right_shoulder": 0.09938458353281032,
+        "left_hip->right_hip": 0.1676001921296119
+      },
+      "bone_cv_pred": {
+        "right_hip->right_knee": 0.011925202794373035,
+        "right_knee->right_ankle": 0.013294066302478313,
+        "left_hip->left_knee": 0.008773036301136017,
+        "left_knee->left_ankle": 0.0518869087100029,
+        "left_shoulder->left_elbow": 0.05592838674783707,
+        "left_elbow->left_wrist": 0.05186391994357109,
+        "right_shoulder->right_elbow": 0.13826020061969757,
+        "right_elbow->right_wrist": 0.059830132871866226,
+        "mid_hip->neck": 0.009002922102808952,
+        "left_shoulder->right_shoulder": 0.042066968977451324,
+        "left_hip->right_hip": 0.021157052367925644
+      }
+    },
+    "face_on": {
+      "frames": 240,
+      "ms_per_frame": 6.629942916818739,
+      "mpjpe_similarity_mm": 102.53418388008335,
+      "mpjpe_similarity_p95_mm": 143.51020638419777,
+      "mpjpe_rigid_globalscale_mm": 103.35628642477563,
+      "scale_cv": 0.03263822467020042,
+      "bone_length_rel_error_median": {
+        "right_hip->right_knee": 0.009134140881624899,
+        "right_knee->right_ankle": 0.02868913894607911,
+        "left_hip->left_knee": 0.00940290906212541,
+        "left_knee->left_ankle": 0.013845449402218775,
+        "left_shoulder->left_elbow": 0.06691450874010714,
+        "left_elbow->left_wrist": 0.041159164447050756,
+        "right_shoulder->right_elbow": 0.03611976901690164,
+        "right_elbow->right_wrist": 0.061553909228397985,
+        "mid_hip->neck": 0.008970528841018677,
+        "left_shoulder->right_shoulder": 0.4633706286549569,
+        "left_hip->right_hip": 0.3573549017310143
+      },
+      "bone_cv_pred": {
+        "right_hip->right_knee": 0.011327308602631092,
+        "right_knee->right_ankle": 0.017079882323741913,
+        "left_hip->left_knee": 0.005689889192581177,
+        "left_knee->left_ankle": 0.01714826188981533,
+        "left_shoulder->left_elbow": 0.1323314905166626,
+        "left_elbow->left_wrist": 0.0878874734044075,
+        "right_shoulder->right_elbow": 0.04334587976336479,
+        "right_elbow->right_wrist": 0.11516895890235901,
+        "mid_hip->neck": 0.006382680963724852,
+        "left_shoulder->right_shoulder": 0.3027333617210388,
+        "left_hip->right_hip": 0.2003042846918106
+      }
+    },
+    "overhead": {
+      "frames": 240,
+      "ms_per_frame": 6.984422916624074,
+      "mpjpe_similarity_mm": 164.5503155472384,
+      "mpjpe_similarity_p95_mm": 221.78320473759706,
+      "mpjpe_rigid_globalscale_mm": 167.21293160174503,
+      "scale_cv": 0.06640181284582959,
+      "bone_length_rel_error_median": {
+        "right_hip->right_knee": 0.16194267570972443,
+        "right_knee->right_ankle": 0.09071674801054458,
+        "left_hip->left_knee": 0.12116490304470057,
+        "left_knee->left_ankle": 0.1246781178883144,
+        "left_shoulder->left_elbow": 0.03460979461669918,
+        "left_elbow->left_wrist": 0.07414792821957499,
+        "right_shoulder->right_elbow": 0.05898719032605461,
+        "right_elbow->right_wrist": 0.0912688385981781,
+        "mid_hip->neck": 0.06251800060272217,
+        "left_shoulder->right_shoulder": 0.164310060441494,
+        "left_hip->right_hip": 0.036387532949447576
+      },
+      "bone_cv_pred": {
+        "right_hip->right_knee": 0.04570350423455238,
+        "right_knee->right_ankle": 0.05543293431401253,
+        "left_hip->left_knee": 0.02451440505683422,
+        "left_knee->left_ankle": 0.046361684799194336,
+        "left_shoulder->left_elbow": 0.0362689346075058,
+        "left_elbow->left_wrist": 0.10229882597923279,
+        "right_shoulder->right_elbow": 0.06528645008802414,
+        "right_elbow->right_wrist": 0.11432065069675446,
+        "mid_hip->neck": 0.024641379714012146,
+        "left_shoulder->right_shoulder": 0.10134342312812805,
+        "left_hip->right_hip": 0.028863172978162766
+      }
+    }
+  },
+  "real_take": {
+    "frames_in": 720,
+    "frames_covered": 45,
+    "fps_effective": 59.86097639831878,
+    "ms_per_frame": 7.486316666634391,
+    "bone_cv_covered": {
+      "right_hip->right_knee": 0.014109744690358639,
+      "right_knee->right_ankle": 0.0701475739479065,
+      "left_hip->left_knee": 0.00705275684595108,
+      "left_knee->left_ankle": 0.013403824530541897,
+      "left_shoulder->left_elbow": 0.09258680790662766,
+      "left_elbow->left_wrist": 0.27307042479515076,
+      "right_shoulder->right_elbow": 0.1746382713317871,
+      "right_elbow->right_wrist": 0.23999331891536713,
+      "mid_hip->neck": 0.06770119071006775,
+      "left_shoulder->right_shoulder": 0.13691282272338867,
+      "left_hip->right_hip": 0.0438765212893486
+    },
+    "left_right_asymmetry_median": {
+      "left_hip->left_knee vs right_hip->right_knee": 0.09494289010763168,
+      "left_shoulder->left_elbow vs right_shoulder->right_elbow": 0.0928269550204277
+    },
+    "knee_flexion_range_deg": [9.259509086608887, 27.307117462158203],
+    "elbow_flexion_range_deg": [30.91659927368164, 67.61705780029297],
+    "depth_range_normalised": [-0.4208567142486572, 0.3027217388153076]
+  }
+}

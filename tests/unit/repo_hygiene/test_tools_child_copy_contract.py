@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
+import json
 import os
 import re
 from pathlib import Path
@@ -203,6 +204,35 @@ def _base_revision_is_tools_child_copy(base: str, relative: Path) -> bool:
 # already landed in Tools to reach the copy that actually runs.
 _SEAM_IMPORT_PREFIX = re.compile(r"(?m)^(\s*)from src\.shared\.python\.")
 
+# UpstreamDrift#9406: some clusters are ruled `ud-canonical` -- UpstreamDrift
+# authored them and Tools carries the stale copy. The seam rulings say so
+# explicitly ("Upstream first, then delete here"), so an edit under one of those
+# is the *expected* way to make progress, not drift.
+#
+# Without this the guard is inverted for exactly the packages that need work
+# most: `model_generation` and `humanoid_character_builder` are both
+# `ud-canonical` and both appear in the pinned Tools tree, so any fix to them was
+# reported as a forbidden child-copy edit -- while the failing tests those fixes
+# address sit in UpstreamDrift's own suite. Tools-owned clusters are unaffected.
+_SEAM_RULINGS = _REPO_ROOT / "docs" / "shared_tools" / "seam_rulings.v1.json"
+
+
+def _ud_canonical_entries() -> frozenset[str]:
+    """Return the top-level shared entries UpstreamDrift is ruled to own."""
+    if not _SEAM_RULINGS.is_file():
+        return frozenset()
+    rulings = json.loads(_SEAM_RULINGS.read_text(encoding="utf-8")).get("rulings", {})
+    return frozenset(
+        name for name, entry in rulings.items() if entry.get("ruling") == "ud-canonical"
+    )
+
+
+def _is_ud_canonical(relative: Path) -> bool:
+    """Return whether ``relative`` falls under a ud-canonical ruling."""
+    parts = relative.as_posix().split("/")
+    candidate = parts[0] if len(parts) > 1 else relative.as_posix()
+    return candidate in _ud_canonical_entries()
+
 
 def _normalise_seam_imports(text: str) -> str:
     """Rewrite UpstreamDrift's ``src.shared.python`` spelling to canonical."""
@@ -263,6 +293,7 @@ def _direct_tools_edit_offenders(
             or _is_tools_child_copy(_SHARED_ROOT / relative)
         )
         and not _converges_on_canonical(relative)
+        and not _is_ud_canonical(relative)
     ]
 
 
@@ -637,3 +668,38 @@ def test_convergence_exemption_rejects_a_copy_with_no_counterpart(
     )
 
     assert _converges_on_canonical(relative) is False
+
+
+def test_ud_canonical_clusters_may_be_edited_here() -> None:
+    """A cluster UpstreamDrift is ruled to own is not a forbidden child copy.
+
+    `model_generation` and `humanoid_character_builder` are both ruled
+    `ud-canonical` -- "UD authored it ... Upstream first, then delete here" --
+    and both appear in the pinned Tools tree. Before this exemption the guard
+    reported any fix to them as a direct child-copy edit, which left the two
+    largest failing test clusters in the repository unfixable from either side
+    (UpstreamDrift#9406).
+    """
+    ud_canonical = _ud_canonical_entries()
+
+    assert ud_canonical, (
+        "the rulings file should record at least one ud-canonical entry"
+    )
+    assert _is_ud_canonical(Path("model_generation/editor/editor_modifications.py"))
+    assert _is_ud_canonical(Path("humanoid_character_builder/__init__.py"))
+
+
+def test_tools_canonical_clusters_are_still_guarded() -> None:
+    """The exemption is scoped to the ruling; Tools-owned clusters stay frozen."""
+    rulings = json.loads(_SEAM_RULINGS.read_text(encoding="utf-8"))["rulings"]
+    tools_owned = [
+        name
+        for name, entry in rulings.items()
+        if entry.get("ruling") == "tools-canonical"
+    ]
+
+    assert tools_owned, "fixture assumption: some clusters are Tools-owned"
+    for name in tools_owned:
+        assert not _is_ud_canonical(Path(name) / "anything.py"), (
+            f"{name} is tools-canonical and must stay guarded"
+        )

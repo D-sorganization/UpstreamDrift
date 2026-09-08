@@ -265,7 +265,14 @@ class URDFWriter:
         elif geometry.geometry_type == GeometryType.SPHERE:
             lines.append(f'{indent2}<sphere radius="{geometry.dimensions[0]:.6g}"/>')
         elif geometry.geometry_type == GeometryType.CAPSULE:
-            # URDF doesn't have capsule, use cylinder approximation
+            # URDF doesn't have capsule, use cylinder approximation. Warn:
+            # the exported geometry is a different shape from the one the
+            # caller built, and silently changing it loses the end caps
+            # without anything downstream being able to tell.
+            logger.warning(
+                "Capsule geometry approximated as cylinder"
+                " (URDF has no native capsule support)"
+            )
             lines.append(
                 f'{indent2}<cylinder radius="{geometry.dimensions[0]:.6g}" '
                 f'length="{geometry.dimensions[1]:.6g}"/>'

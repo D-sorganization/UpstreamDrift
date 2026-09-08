@@ -20,7 +20,7 @@ members = [
 exclude = ["ui/src-tauri"]
 
 [workspace.package]
-version = "2.1.2"
+version = "2.1.3"
 edition = "2021"
 license = "MIT"
 authors = ["D-sorganization"]
@@ -30,7 +30,7 @@ repository = "https://github.com/D-sorganization/UpstreamDrift"
 # Shared kernel from D-sorganization/Tools repository.
 # Pin the git revision so a clean UpstreamDrift clone can build Rust crates
 # without requiring a sibling Tools checkout or ad hoc CI symlinks.
-tools-core = { git = "https://github.com/D-sorganization/Tools.git", rev = "3d93bb2c89813e17551814d3be7e895f791e29af" }
+tools-core = { git = "https://github.com/D-sorganization/Tools.git", rev = "eab74a901a7c8467e1997049a73e2cfd2df74428" }
 pyo3 = { version = "0.24", features = ["extension-module"] }
 wasm-bindgen = "0.2"
 serde-wasm-bindgen = "0.6"
