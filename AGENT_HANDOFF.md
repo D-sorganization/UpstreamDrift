@@ -34,6 +34,30 @@ Seam (#9406) and failure triage (#9474): see
   `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
   "Hook bypass policy" documents this resolution.
 
+## bioptim Optimal-Control Layer and the Swing-Dynamics Fixes (#9762)
+
+- Branch `claude/fixes-epic-implementation-x2bu36`. Epic doc:
+  `docs/issues/EPIC_BIOPTIM_OCP_INTEGRATION.md`; decision: ADR-0050.
+- Prerequisite issues #9755-#9761 are filed; #9755-#9760 are implemented on
+  this branch, #9761 (upstream PR to pyomeca/bioptim) is external and open.
+- Epic phases 0-3 are implemented and tested; phases 4 (parameter block) and
+  5 (moving-horizon wrapper) are not started. `ocp/tracking_ocp` already
+  accepts a `parameters` list, which is the seam phase 4 builds on.
+- **Do not** import `bioptim` outside `src/shared/python/optimization/ocp/`:
+  `tests/architecture/test_bioptim_isolation.py` fails on it. bioptim is
+  git-pinned to `Release_3.4.0` (SHA `fdafe4d9`) in the `[bioptim]` extra;
+  re-pinning is a ticket that re-runs the phase 0-3 tests.
+- Two findings that constrain how results may be read:
+  maximising terminal clubhead speed is a concave objective and converges in
+  no backend once the dynamics are enforced, so the OCP defaults to a convex
+  target-speed objective; and the six-marker set cannot observe the full
+  seven-DOF chain (`hip_rotation` and `trunk_rotation` are an exact null
+  direction), so tracking results report their own identifiability.
+- Gate commands: `MPLBACKEND=Agg pytest src/shared/python/optimization/ocp/tests
+  tests/architecture/test_bioptim_isolation.py -m "not slow"` (23 pass);
+  `pytest tests/unit/optimization tests/unit/estimation`;
+  `python -m benchmarks.bioptim_parity --nodes 12 --duration 0.6`.
+
 ## Protected Authority
 
 - UpstreamDrift protected `main` is
