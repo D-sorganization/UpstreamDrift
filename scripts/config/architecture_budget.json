@@ -287,6 +287,24 @@
       "issue": 9151,
       "reason": "Issue #9151: the native evidence artifact is hash-bound to this preregistered control evaluator. A context-object decomposition would invalidate the exact successful Ubuntu evidence source digest and requires a fresh native rerun; retain the explicit operator inputs temporarily and remove this exception with the next forward-attribution implementation.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/shared/python/optimization/crocoddyl_backend.py",
+      "symbol": "solve_swing_ddp",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9762,
+      "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/optimization/crocoddyl_backend.py",
+      "symbol": "solve_swing_ddp",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9762,
+      "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
+      "expires_on": "2026-12-31"
     }
   ]
 }
