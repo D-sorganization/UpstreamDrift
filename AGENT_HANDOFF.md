@@ -9,7 +9,7 @@
 - Current compatibility record: `docs/development/impact_provider_import_turnover.md`; overall design: `docs/development/impact_acoustics_program.md`.
 - Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.
 
-Updated: 2026-08-30 10:02 PDT
+Updated: 2026-09-08 02:55 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -21,6 +21,18 @@ contract, recovery constraints, and next commands are in
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+
+## Pre-Commit on Windows — Resolved (#9494)
+
+- The hook environment works on Windows; no `--no-verify` exception exists
+  or is needed. `default_language_version: python: python` resolves to the
+  PATH interpreter (3.13.3 here); the old `python3.11` pin is gone since
+  #1792/#2720. Do not pin a minor version — workstations without it cannot
+  build hook virtualenvs.
+- Verified 2026-09-08 (pre-commit 4.6.2, from-scratch env build): all
+  commit-stage hooks pass; pre-push `mypy`/`bandit` pass on scoped files;
+  `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
+  "Hook bypass policy" documents this resolution.
 
 ## Protected Authority
 
