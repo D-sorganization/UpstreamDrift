@@ -114,7 +114,7 @@ observed coordinate), with RMS, rejections and peak joint speeds beside it.
 Register another model with `register_model`; the fit, the comparison, the
 kinetics and the tile pick it up without further code.
 
-## Kinetics (#9714, first slice)
+## Kinetics (#9714, First Slice)
 
 `rig kinetics --model NAME --body-mass KG` computes, for the fitted
 trajectory of any registered model, the generalised torques

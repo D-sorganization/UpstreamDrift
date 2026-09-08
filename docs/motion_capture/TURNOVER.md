@@ -32,7 +32,7 @@ MATLAB 3-D golf model), `double_pendulum`, `triple_pendulum`. Add a model by
 registering a `ModelSpec` + `LandmarkMap`; nothing else changes. Design and
 evidence: `articulated_model.md`.
 
-## Open Validations (owner-side or next PR)
+## Open Validations (Owner-Side or Next PR)
 
 1. **Real data.** Board recording per camera, tape-measured shank/forearm/
    upper arm/thigh, a three-view take. Everything downstream of ingest has
