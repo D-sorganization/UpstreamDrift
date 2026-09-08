@@ -34,7 +34,7 @@ from src.motion_capture.rig.plan import CameraBinding, CaptureMode, RigPlan
 from src.motion_capture.rig.probe import RecordingProbe
 from src.motion_capture.rig.recorder import RecordingResult
 from src.motion_capture.rig.sources import Frame
-from src.tools.capture_rig import gui, multiview
+from src.tools.capture_rig import gui, mosaic, multiview
 from src.tools.capture_rig.commands import PlanSelection
 from src.tools.capture_rig.layout_model import Cell, LayoutSpec, SourceRef, Tile, preset
 from src.tools.capture_rig.layout_presets import USER, LayoutStore
@@ -547,23 +547,25 @@ def test_export_png_refuses_before_anything_is_played(tmp_path: Path) -> None:
 
 
 # -- shared helpers ----------------------------------------------------------
-def test_frame_offsets_turn_a_timing_block_into_whole_frames() -> None:
+def test_offsets_from_timing_turn_a_block_into_whole_frames() -> None:
+    """Playback and the composite export align through this one function."""
     timing = {
         "reference_view": "cam_a",
         "views": [
-            {"view": "cam_a", "offset_ns": 0},
-            {"view": "cam_b", "offset_ns": 100_000_000},  # 0.1 s later
-            {"view": "cam_c", "offset_ns": None},
+            {"view": "cam_a", "status": "available", "offset_ns": 0},
+            {"view": "cam_b", "status": "available", "offset_ns": 100_000_000},
+            {"view": "cam_c", "status": "unavailable", "offset_ns": 100_000_000},
+            {"view": "cam_e", "offset_ns": None},
         ],
     }
     rates = {"cam_a": 30.0, "cam_b": 30.0, "cam_c": 30.0, "cam_d": 30.0}
-    assert multiview.frame_offsets(timing, rates) == {
+    assert mosaic.offsets_from_timing(timing, rates) == {
         "cam_a": 0,
-        "cam_b": 3,
-        "cam_c": 0,
+        "cam_b": 3,  # 0.1 s later at 30 fps
+        "cam_c": 0,  # measured but not usable
         "cam_d": 0,  # a view the block does not mention
     }
-    assert multiview.frame_offsets({}, rates) == dict.fromkeys(rates, 0)
+    assert mosaic.offsets_from_timing({}, rates) == dict.fromkeys(rates, 0)
 
 
 def test_theme_palette_survives_a_palette_value_that_is_not_hex() -> None:

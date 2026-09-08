@@ -73,6 +73,7 @@ from .commands import (
     mode_text,
 )
 from .header import HeaderBar, StatusStrip
+from . import multiview
 from .layout import LayoutBar, LayoutStore, PaneExtras, PaneHost
 from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .playback import PlaybackPanel as PlaybackPanel  # re-export (moved, #9816)
@@ -94,6 +95,7 @@ STATUS_GLYPH = {
     workflow.Status.SKIPPED: "–",
 }
 ALWAYS_ENABLED = frozenset({"stop", "load", "preview"})
+DEFAULT_EXPORT_LAYOUT = "three_across"  # a sensible default for the lab rig
 LAB_PLAN = Path("docs/motion_capture/plans/lab_three_view_sonnet.json")
 CONTROLS_SIZES = (420, 520)
 WINDOW_SIZE = (1600, 900)
@@ -556,6 +558,7 @@ class CaptureRigWidget(QWidget):
         ("analyze", "Analyze 2-D"),
         ("export", "Export"),
         ("clip", "Export clip"),
+        ("multipicture", "Export multiview"),
         ("compare_takes", "Compare takes"),
         ("annotate", "Annotate / edit points"),
         ("stop", "Stop"),
@@ -753,6 +756,7 @@ class CaptureRigWidget(QWidget):
                 session, variant=self.match.selection().name
             ),
             "clip": lambda: self._clip(session),
+            "multipicture": lambda: self._multipicture(session),
             "compare_takes": lambda: self._compare_takes(session),
         }
         if action not in builder:
@@ -809,6 +813,30 @@ class CaptureRigWidget(QWidget):
             speed=self.process.clip_speed(),
             observation_set=set_name,
         )
+
+    def _multipicture(self, session: Path) -> list[str]:
+        """Composite video of the current layout: one file from several views."""
+        name = self.export_layout_name()
+        set_name = self.playback.current_set_name()
+        out = session / f"multiview_{name}_{set_name or 'raw'}.mp4"
+        return commands.multipicture_command(
+            session,
+            name,
+            out,
+            commands.MultipictureArgs(
+                observation_set=set_name, speed=self.process.clip_speed()
+            ),
+        )
+
+    def export_layout_name(self) -> str:
+        """The layout the composite export uses: the live pane's choice.
+
+        An unsaved edit has no name the CLI could resolve, so the default
+        stands in until the operator saves the layout (#9813).
+        """
+        name = self.preview.layout_name()
+        editable = name and name != multiview.EDITED
+        return name if editable else DEFAULT_EXPORT_LAYOUT
 
     def _compare_takes(self, session: Path) -> list[str]:
         view = self.playback.current_view_name()
