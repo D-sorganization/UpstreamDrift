@@ -210,8 +210,9 @@ ANALYZE_2D = Step(
     instructions=(
         "Press *Analyze 2-D*. Results are in subject box heights, not metres.",
         "*Export clip* writes the swing (address to finish, slow motion, overlay, frame clock) as a video; *Compare takes* puts another session's view beside this one aligned on the top of the backswing, with metric deltas.",
+        "*Export multiview* stitches the raw footage and its overlay through a layout (preset, saved or JSON file) into one composite video with a provenance sidecar.",
     ),
-    actions=("analyze", "clip", "compare_takes"),
+    actions=("analyze", "clip", "compare_takes", "multipicture"),
     done=lambda m: bool(m.analysis_2d),
     ready=lambda m: _ready_if(m.ingested, "ingest first"),
     applies=lambda m: not _multi(m),
@@ -263,12 +264,16 @@ EXPORT = Step(
     instructions=(
         "Press *Export*. reconstruction.trc loads in the motion pipeline and the model-matching tools as a marker file.",
         "*Export clip* and *Compare takes* produce annotated, slowed videos of this take, alone or beside another session, for coaching.",
+        "*Export multiview* writes every view (and the model overlay of any of them) side by side through a layout as one composite video, synchronised by frame with the session's alignment offsets.",
     ),
-    actions=("export", "clip", "compare_takes"),
+    actions=("export", "clip", "compare_takes", "multipicture"),
     done=lambda m: m.export is not None,
     ready=lambda m: _ready_if(m.reconstruction is not None, "reconstruct first"),
     applies=_multi,
 )
+
+#: One line of help per tile action key; every ``Step.actions`` entry has one
+#: (the GUI's buttons are checked against this list).
 
 STEPS: tuple[Step, ...] = (
     SETUP,
@@ -387,6 +392,7 @@ ACTION_HELP: dict[str, str] = {
     "export": "Export the reconstruction and model for downstream tools.",
     "clip": "Export a slow-motion clip with the overlay around an event.",
     "compare_takes": "Compare two takes side by side with deltas.",
+    "multipicture": "Composite multiview video of raw and overlay streams through a layout.",
     "annotate": (
         "Click keypoints frame by frame, or edit the detector's points on the overlay."
     ),

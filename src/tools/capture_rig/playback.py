@@ -10,7 +10,7 @@ beside it "overlay" of that very view.
 
 Frame *k* means the same instant in every tile: when the session manifest
 carries a strobe-alignment block each view's reader is offset by
-:func:`~.multiview.frame_offsets`. Readers are opened once per view and kept
+:func:`~.mosaic.offsets_from_timing`. Readers are opened once per view and kept
 open, so switching layout re-composites without re-opening any file.
 
 Scrubbing, play/pause, speed, frame stepping and the observation-set choice
@@ -42,12 +42,12 @@ from src.shared.python.theme.layout_metrics import LayoutMetrics
 
 from .layout_model import LayoutSpec, SourceRef
 from .layout_presets import LayoutStore
+from .mosaic import offsets_from_timing
 from .multiview import (
     CanvasLabel,
     ChooserOptions,
     LayoutChooser,
     compose_pixmap,
-    frame_offsets,
     theme_palette,
     write_png,
 )
@@ -246,7 +246,7 @@ class PlaybackPanel(QWidget):
             if view.playable is not None:
                 self.view_combo.addItem(view.view, view)
         self.view_combo.blockSignals(False)
-        self._offsets = frame_offsets(media.timing, self._rates(media))
+        self._offsets = offsets_from_timing(media.timing, self._rates(media))
         self.chooser.set_sources(self._sources(media))
         if self.view_combo.count():
             self._on_view_changed(0)

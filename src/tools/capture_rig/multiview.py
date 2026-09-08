@@ -14,8 +14,9 @@ implementation:
   saved in a :class:`~.layout_presets.LayoutStore`, and an **Edit layout...**
   button that opens :class:`~.layout_editor.LayoutEditor` on the current
   spec with live thumbnails;
-* :func:`frame_offsets` reads the session's strobe alignment so playback can
-  put frame *k* of every view on the same canvas.
+Frame alignment is not re-implemented here: playback shifts its readers with
+:func:`mosaic.offsets_from_timing`, the very function the composite video
+export aligns with.
 
 Nothing here opens a camera or a file: frames arrive as a mapping keyed by
 :attr:`~.layout_model.SourceRef.key`, exactly what :func:`compose` expects.
@@ -160,30 +161,6 @@ def write_png(canvas: npt.NDArray[np.uint8], path: Path) -> Path:
 def live_sources(views: Sequence[str]) -> tuple[SourceRef, ...]:
     """One live source per view, in the given order."""
     return tuple(SourceRef(kind="live", view=view) for view in views)
-
-
-def frame_offsets(
-    timing: Mapping[str, Any], fps: Mapping[str, float]
-) -> dict[str, int]:
-    """Whole-frame shifts per view from a manifest ``timing`` block.
-
-    A view whose arrival clock is ``offset_ns`` *later* than the reference
-    view is that many nanoseconds ahead in its own file, so frame ``k`` of
-    the reference lines up with frame ``k + round(offset * fps)`` of that
-    view. Views without usable timing get ``0``. Postcondition: a key for
-    every view in ``fps``; no key ever missing, so callers never branch.
-    """
-    from src.motion_capture.rig.alignment import NS_PER_S, view_timing
-
-    out: dict[str, int] = {}
-    for view, rate in fps.items():
-        entry = view_timing(timing, view) if timing else None
-        offset = None if entry is None else entry.get("offset_ns")
-        if offset is None or rate <= 0:
-            out[view] = 0
-            continue
-        out[view] = int(round(float(offset) / NS_PER_S * rate))
-    return out
 
 
 class CanvasLabel(QLabel):
