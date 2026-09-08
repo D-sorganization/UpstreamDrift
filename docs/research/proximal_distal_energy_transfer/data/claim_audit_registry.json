@@ -245,7 +245,7 @@
     {
       "release_claim_key": "articulated_manufactured_solution",
       "published_status": "independent_numerical_controls_qualified",
-      "audit_state": "reviewed_as_synthetic_operator_and_integrator_evidence"
+      "audit_state": "reviewed_as_independent_synthetic_numerical_control"
     },
     {
       "release_claim_key": "native_constraint_formulation_discrepancy",

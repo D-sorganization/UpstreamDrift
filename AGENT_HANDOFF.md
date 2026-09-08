@@ -9,7 +9,7 @@ Updated: 2026-09-08 03:10 UTC
 - Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
 - Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
 - Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 passes its consumer lane; #9787 addresses three research companion failures.
-- #9787: native ABI lock, actual deterministic provenance and preserved claim review. Current evidence/commands: `docs/development/manufactured_authority_9787_turnover.md`.
+- #9787: 116 strict authority tests and three distinct rolling tests pass; 253 PDF pages pass computational inspection. Native ABI/provenance and preserved claim review evidence: `docs/development/manufactured_authority_9787_turnover.md`.
 - Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
