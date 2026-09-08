@@ -6,13 +6,21 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
+
 
 def _is_truthy(value: str | None) -> bool:
     return (value or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
-def _candidate_tools_roots() -> list[Path]:
+def _candidate_tools_roots(mode: str = "local") -> list[Path]:
     repo_root = Path(__file__).resolve().parents[2]
+    # Match root conftest's explicit override and command-line mode. A sibling
+    # checkout named by workspace setup must not relabel a vendored-mode run.
+    explicit = os.environ.get("TOOLS_REPO_PATH")
+    if explicit or mode == "vendored":
+        selected = Path(explicit) if explicit else repo_root / "vendor" / "ud-tools"
+        return [selected.resolve()] if selected.exists() else []
     candidates = [
         (
             Path(os.environ["TOOLS_REPO_ROOT"])
@@ -42,9 +50,10 @@ def _tools_python_paths(tools_root: Path) -> list[Path]:
     ]
 
 
-def pytest_configure() -> None:
+@pytest.hookimpl(trylast=True)
+def pytest_configure(config: pytest.Config) -> None:
     require_real_tools = _is_truthy(os.environ.get("REQUIRE_REAL_TOOLS_REPO"))
-    tools_roots = _candidate_tools_roots()
+    tools_roots = _candidate_tools_roots(config.getoption("--tools-mode"))
 
     if require_real_tools and not tools_roots:
         raise RuntimeError(
@@ -55,7 +64,7 @@ def pytest_configure() -> None:
     if not tools_roots:
         return
 
-    os.environ.setdefault("TOOLS_REPO_ROOT", str(tools_roots[0]))
+    os.environ["TOOLS_REPO_ROOT"] = str(tools_roots[0])
 
     for path in reversed(_tools_python_paths(tools_roots[0])):
         path_str = str(path)

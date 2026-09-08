@@ -35,6 +35,28 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   command before any finder is installed; the initialized path is unchanged.
 - **Next step:** Open the PR against `main` with `Fixes #9733` and record CI.
 
+### DL-#9494 · Resolve the CLAUDE.md `--no-verify` Contradiction by Fixing the Windows Hook Environment
+
+- **State:** shipped
+- **Owner:** claude
+- **Issue:** #9494
+- **Branch:** `claude/issue-9494-precommit-env`
+- **PR:** #9744
+- **Paths:** `CLAUDE.md`, `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`, `SPEC.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`dbc6727aa`)
+- **Summary:** CLAUDE.md forbade `git commit --no-verify` while agents on
+  Windows reported every pre-commit invocation failing (hook virtualenvs
+  targeting Python 3.11, absent from the workstation). Investigation found no
+  interpreter pin left in `.pre-commit-config.yaml` (`default_language_version:
+python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
+  commit-stage hook plus pre-push `mypy`/`bandit` passes after a from-scratch
+  environment build. Option (a) of the issue is therefore satisfied; CLAUDE.md
+  now documents the resolved environment and states that the `--no-verify`
+  prohibition stands on Windows with no blanket exception.
+- **Next step:** Record CI on PR #9744; on merge, confirm the protected-main
+  sync lands the resolved hook environment note.
+
 ## Shipped (Last 90 Days)
 
 Entries stay here for 90 days after merge, then move to the archive.
