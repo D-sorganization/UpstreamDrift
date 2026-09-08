@@ -200,10 +200,10 @@ def _solve_frames(
 
 def _axis_aligned_rotations() -> list[Array]:
     """The 24 proper rotations that permute and sign-flip the axes."""
-    out = []
+    out: list[Array] = []
     for perm in itertools.permutations(range(3)):
         for signs in itertools.product((1, -1), repeat=3):
-            m = np.zeros((3, 3))
+            m: Array = np.zeros((3, 3))
             for row, (col, s) in enumerate(zip(perm, signs, strict=True)):
                 m[row, col] = s
             if np.linalg.det(m) > 0:
