@@ -80,9 +80,9 @@ def _mixed_tree() -> ModelSpec:
                 joint=Joint(
                     "spherical",
                     (
-                        DOF(X_AXIS, -0.3, 0.3),
-                        DOF(Z_AXIS, -0.3, 0.3),
-                        DOF((0.0, 1.0, 0.0), -0.3, 0.3),
+                        DOF(X_AXIS, -0.5, 0.5),
+                        DOF(Z_AXIS, -0.5, 0.5),
+                        DOF((0.0, 1.0, 0.0), -0.5, 0.5),
                     ),
                 ),
                 offset=(0.2, 0.0, 0.1),
@@ -113,6 +113,10 @@ def test_planar_fk_matches_analytic_two_link_pose() -> None:
 def test_fk_is_vectorised_over_frames() -> None:
     spec = _mixed_tree()
     q = np.linspace(-0.9, 0.9, 7 * spec.n_dof).reshape(7, spec.n_dof)
+    rng = np.random.default_rng(3)
+    lower = np.array([d.lower for s in spec.order for d in spec.segments[s].joint.dofs])
+    upper = np.array([d.upper for s in spec.order for d in spec.segments[s].joint.dofs])
+    q = rng.uniform(lower + 0.05, upper - 0.05, size=(7, spec.n_dof))
     batched = forward_kinematics(spec, q)
     for t in range(7):
         single = forward_kinematics(spec, q[t : t + 1])
@@ -122,22 +126,20 @@ def test_fk_is_vectorised_over_frames() -> None:
 def test_spherical_joint_composes_euler_rotation_in_declared_order() -> None:
     spec = _mixed_tree()
     a, b, c = 0.21, -0.34, 0.15
-    q = np.array([[0.0, 0.0, 0.0, 0.0, 0.0, a, b, c]])  # root and mid at home
+    q = np.array([[0.0, 0.0, 0.0, a, b, c]])  # root and mid at home
     result = forward_kinematics(spec, q)
 
     def rot(axis: np.ndarray, angle: float) -> np.ndarray:
         k = np.asarray(axis, dtype=float)
-        cross = np.array(
-            [[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]]
-        )
+        cross = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
         return (
-            np.eye(3)
-            + np.sin(angle) * cross
-            + (1.0 - np.cos(angle)) * (cross @ cross)
+            np.eye(3) + np.sin(angle) * cross + (1.0 - np.cos(angle)) * (cross @ cross)
         )
 
     composed = (
-        rot(np.array(X_AXIS), a) @ rot(np.array(Z_AXIS), b) @ rot(np.array([0.0, 1.0, 0.0]), c)
+        rot(np.array(X_AXIS), a)
+        @ rot(np.array(Z_AXIS), b)
+        @ rot(np.array([0.0, 1.0, 0.0]), c)
     )
     offset = np.array([0.4, 0.0, 0.0])
     leaf_origin = np.array([0.3, 0.1, 0.0]) + np.array([0.2, 0.0, 0.1])
@@ -279,4 +281,4 @@ def test_fk_reports_landmark_and_segment_series_with_shapes() -> None:
     assert result.landmarks.shape == (3, 2, 3)
     assert result.positions.shape == (3, 3, 3)
     assert result.orientations.shape == (3, 3, 3, 3)
-    np.testing.assert_allclose(result.orientations[:, 0], np.eye(3)[None, :, :])
+    np.testing.assert_allclose(result.orientations[:, 0], np.tile(np.eye(3), (3, 1, 1)))

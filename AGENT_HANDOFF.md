@@ -141,6 +141,16 @@ Seam (#9406) and failure triage (#9474): see
 - #9222 has exact tree `c468c0db`, but its protected-main run was cancelled with no jobs or artifacts. #9192 remains open pending post-#9236 exact bytes; #9174 remains open.
 - ADR-0043 and schema v1 are one-way UpstreamDrift software-fact authority for AffineDrift #4010. #9064 remains design-manual authority and #9070 remains typed calculation-manifest authority.
 
+## Markerless Mocap Articulated Model Fit: #9709
+
+- #9711 landed the articulated forward-kinematics engine at
+  `src/motion_capture/reconstruct/model/kinematics.py`: typed 1-3 DOF
+  joints (fixed-axis rotations with inclusive limits), FK vectorised over
+  frames to landmarks, analytic `dLandmarks/dq`, DbC-validated specs.
+  Tests: `tests/motion_capture/reconstruct/model/test_kinematics.py` (15).
+- Next: #9710 MATLAB-derived model spec, then #9712 continuous fit,
+  #9730 registry, #9731 compare-models, #9732 turnover docs.
+
 ## Validation
 
 Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` and
