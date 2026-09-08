@@ -864,6 +864,7 @@ class TestCIEnvironmentCompatibility:
             "rust-wheel-parity",
             "shared-tools-consumer-contracts",
             "seam-drift-gate",
+            "impact-explorer-web-build",
         }
         assert job["if"] == "always()"
         aggregate_step = next(
