@@ -51,6 +51,7 @@ def test_group_actions_places_each_action_once_at_its_last_step() -> None:
         "export",
         "clip",
         "compare_takes",
+        "multipicture",
     }
     assert set(by_title["Session"]) == set(ALWAYS_ENABLED)
     titles = [t for t, _ in groups]
