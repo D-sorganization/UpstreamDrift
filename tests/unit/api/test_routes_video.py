@@ -135,12 +135,14 @@ def test_analyze_video_async_rejects_fake_video_payload(client: TestClient) -> N
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize("suffix", [".mp4", ".mov", ".mkv", ".avi", ".webm"])
 def test_validate_video_upload_derives_supported_suffix(suffix: str) -> None:
     upload = _make_upload(f"clip{suffix}", _MKV_EBML_BYTES, "video/x-matroska")
     assert asyncio.run(_validate_video_upload(upload)) == suffix
 
 
+@pytest.mark.unit
 def test_validate_video_upload_rejects_unsupported_extension() -> None:
     upload = _make_upload("clip.txt", _MP4_FTYP_BYTES)
     with pytest.raises(HTTPException) as exc_info:
@@ -149,6 +151,7 @@ def test_validate_video_upload_rejects_unsupported_extension() -> None:
     assert "extension" in exc_info.value.detail
 
 
+@pytest.mark.unit
 def test_validate_video_upload_rejects_missing_filename() -> None:
     upload = _make_upload(None, _MP4_FTYP_BYTES)
     with pytest.raises(HTTPException) as exc_info:
@@ -156,6 +159,7 @@ def test_validate_video_upload_rejects_missing_filename() -> None:
     assert exc_info.value.status_code == 400
 
 
+@pytest.mark.unit
 def test_analyze_video_rejects_unsupported_extension(client: TestClient) -> None:
     response = client.post(
         "/analyze/video",
@@ -166,6 +170,7 @@ def test_analyze_video_rejects_unsupported_extension(client: TestClient) -> None
     assert "extension" in response.json()["detail"]
 
 
+@pytest.mark.unit
 def test_analyze_video_async_rejects_unsupported_extension(client: TestClient) -> None:
     response = client.post(
         "/analyze/video/async",
