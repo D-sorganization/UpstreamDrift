@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -45,9 +46,19 @@ class Joint:
     axes: str = "xyz"
     limits_rad: tuple[tuple[float, float], ...] = ()
     landmark: bool = True
+    #: Constant frames around the moving primitives: the child frame is
+    #: ``parent . R(pre) . R_axes(q) . R(post)``. They let a joint carry a
+    #: source model's fixed transforms (Simscape's rigid frames, #9714) so
+    #: its angles are ours without conversion. Rotation vectors, radians.
+    pre_rotvec: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    post_rotvec: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
     def __post_init__(self) -> None:
         require(self.name.strip() != "", "joint needs a name")
+        require(
+            len(self.pre_rotvec) == 3 and len(self.post_rotvec) == 3,
+            "pre/post rotation vectors need three components",
+        )
         require(all(a in AXES for a in self.axes), "axes must be x, y or z", self.axes)
         require(len(set(self.axes)) == len(self.axes), "axes must be distinct")
         d = np.asarray(self.direction, dtype=float)
@@ -66,6 +77,10 @@ class Joint:
 
     def limits(self) -> tuple[tuple[float, float], ...]:
         return self.limits_rad or tuple(FULL_RANGE for _ in self.axes)
+
+    def constant_frames(self) -> tuple[Array, Array]:
+        """``(R(pre), R(post))`` as 3x3 matrices."""
+        return _rotvec_matrix(self.pre_rotvec), _rotvec_matrix(self.post_rotvec)
 
 
 @dataclass(frozen=True)
@@ -92,6 +107,17 @@ class ModelSpec:
             seen.add(j.name)
 
 
+def _rotvec_matrix(rotvec: Sequence[float]) -> Array:
+    """Rodrigues: rotation matrix of a rotation vector (identity for zero)."""
+    v = np.asarray(rotvec, dtype=float)
+    angle = float(np.linalg.norm(v))
+    if angle < 1e-12:
+        return np.eye(3)
+    k = v / angle
+    kx = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
+    return np.eye(3) + np.sin(angle) * kx + (1 - np.cos(angle)) * kx @ kx
+
+
 def _axis_rotations(angles: Array, axes: str) -> Array:
     """``(T, 3, 3)`` intrinsic rotation for ``angles`` ``(T, len(axes))``."""
     t = angles.shape[0]
@@ -106,6 +132,35 @@ def _axis_rotations(angles: Array, axes: str) -> Array:
         r[:, m, j], r[:, m, m] = s, c
         out = np.einsum("tij,tjk->tik", out, r)
     return out
+
+
+def decompose_primitives(
+    rotations: Array, axes: str, signs: Sequence[int] | None = None
+) -> tuple[Array, Array]:
+    """Angles ``(T, k)`` of the intrinsic primitives ``axes`` that best give
+    ``rotations`` ``(T, 3, 3)``, and the unrepresentable remainder ``(T,)``.
+
+    Fewer than three primitives are completed with the remaining axes and
+    the extra angles are reported as the remainder (radians), so a caller
+    exporting a hinge from a general rotation can see what was dropped.
+    ``signs`` (+1/-1 per primitive) flips the reported angle, for source
+    models whose positive sense differs (#9714). Precondition: distinct axes.
+    """
+    from scipy.spatial.transform import Rotation
+
+    require(0 < len(axes) <= 3 and len(set(axes)) == len(axes), "distinct axes")
+    full = list(axes)
+    for a in AXES:
+        if len(full) == 3:
+            break
+        if a != full[-1] and a not in full:
+            full.append(a)
+    k = len(axes)
+    sequence: Any = "".join(full).upper()
+    euler = Rotation.from_matrix(np.asarray(rotations, dtype=float)).as_euler(sequence)
+    s = np.ones(k) if signs is None else np.asarray(signs, dtype=float)
+    remainder = np.abs(euler[:, k:]).max(axis=1) if k < 3 else np.zeros(len(euler))
+    return euler[:, :k] * s, remainder
 
 
 class ArticulatedModel:
@@ -127,6 +182,7 @@ class ArticulatedModel:
             j.name for j in self.joints if j.landmark
         )
         self._landmark_rows = [self.index[n] for n in self.landmark_names]
+        self._constant = [j.constant_frames() for j in self.joints]
 
     @property
     def n_joints(self) -> int:
@@ -152,6 +208,16 @@ class ArticulatedModel:
         Precondition: ``q`` has ``n_dof`` columns. Postcondition: every
         segment has exactly its length in every frame.
         """
+        return self.forward_frames(q, lengths)[0]
+
+    def frames(self, q: Array, lengths: Mapping[str, float] | None = None) -> Array:
+        """Body orientations ``(T, J, 3, 3)``, world from body, per joint."""
+        return self.forward_frames(q, lengths)[1]
+
+    def forward_frames(
+        self, q: Array, lengths: Mapping[str, float] | None = None
+    ) -> tuple[Array, Array]:
+        """``(positions (T, J, 3), frames (T, J, 3, 3))`` in one pass."""
         q = np.asarray(q, dtype=float)
         require(q.ndim == 2 and q.shape[1] == self.n_dof, "q must be (T, n_dof)")
         lengths = dict(self.spec.lengths_m if lengths is None else lengths)
@@ -160,11 +226,13 @@ class ArticulatedModel:
         frames = np.zeros((t, self.n_joints, 3, 3))
         for i, j in enumerate(self.joints):
             a, b = self._slices[i]
-            local = (
+            pre, post = self._constant[i]
+            moving = (
                 _axis_rotations(q[:, a:b], j.axes)
                 if b > a
                 else np.broadcast_to(np.eye(3), (t, 3, 3))
             )
+            local = np.einsum("ij,tjk,kl->til", pre, moving, post)
             if j.parent is None:
                 positions[:, i] = q[:, :3]
                 frames[:, i] = local
@@ -178,7 +246,7 @@ class ArticulatedModel:
                     "tij,j->ti", frames[:, p], offset
                 )
             frames[:, i] = np.einsum("tij,tjk->tik", frames[:, p], local)
-        return positions
+        return positions, frames
 
     def landmarks(self, q: Array, lengths: Mapping[str, float] | None = None) -> Array:
         """Observable joint positions ``(T, L, 3)`` in :attr:`landmark_names` order."""
