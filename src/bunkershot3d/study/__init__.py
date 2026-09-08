@@ -62,6 +62,11 @@ from .optimisation import (
     expected_improvement,
     propose_location,
 )
+from .ranking import (
+    BandedRanking,
+    RankingVerdict,
+    rank_with_bands,
+)
 from .rng import SeedRecord, as_generator, new_seed_record
 from .sensitivity import (
     SaltelliDesign,
@@ -75,6 +80,7 @@ from .surrogate import GaussianProcess, GPHyperparameters
 __all__ = [
     "AcquisitionSettings",
     "AnalyticIndices",
+    "BandedRanking",
     "BayesOptResult",
     "DesignComparison",
     "DesignParameter",
@@ -84,6 +90,7 @@ __all__ = [
     "GaussianProcess",
     "MorrisDesign",
     "MorrisResult",
+    "RankingVerdict",
     "SaltelliDesign",
     "SeedRecord",
     "SobolIndices",
@@ -102,6 +109,7 @@ __all__ = [
     "morris_statistics",
     "new_seed_record",
     "propose_location",
+    "rank_with_bands",
     "saltelli_design",
     "sobol_analysis",
     "sobol_g",

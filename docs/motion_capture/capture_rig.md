@@ -1,0 +1,239 @@
+# Camera Rig Capture
+
+Version: 1.0.0
+
+Issues: #9590 (child of #9422); Tools #4706
+
+`motion_capture.rig` is UpstreamDrift's orchestration layer for a multi-camera
+USB rig: it declares an experimental condition as a _rig plan_, checks that
+plan against the live USB topology, captures every planned camera together,
+and reports what each camera actually delivered. It owns no camera or capture
+contract; those belong to Tools `sidekick.lab.mocap` under
+[ADR-0041](../adr/0041-markerless-mocap-consumer-authority.md) and are
+consumed through `tools_bridge` when the pinned Tools release ships them.
+
+The constraints it encodes were measured in the
+[USB camera rig bring-up](usb_camera_rig_bringup.md).
+
+## Rig Plan
+
+A plan binds named views to camera _identities_ and capture settings. Identity
+is the USB serial, or the port-path fallback for units that expose none; it is
+never an OpenCV index, which reshuffles on replug and would silently swap views.
+
+```json
+{
+  "schema_version": "rig-plan/1.0.0",
+  "name": "three-view-driver",
+  "cameras": [
+    { "view": "face_on", "serial": "2605160001" },
+    { "view": "down_line", "serial": "2601240001", "mode": { "fps": 60 } },
+    {
+      "view": "overhead",
+      "unserialized": true,
+      "controls": { "exposure": -6, "auto_exposure": false }
+    }
+  ],
+  "notes": "Sonnet root ports 4/5/6; TS4 free."
+}
+```
+
+### Naming the Cameras
+
+The durable name of a camera is the **view** it is bound to; the binding is
+what follows the unit around. Two of the three ELP units expose a USB serial
+(`2605160001`, `2601240001`): Windows keys their device instance on it, so a
+serial binding recognises the unit on any jack of any dock. The third unit
+reports no serial. Bind it with `"unserialized": true`: `plan-check` resolves
+it by elimination (the one enumerated ELP without a serial), so it also keeps
+its view when moved. If a second serial-less unit ever appears the binding is
+reported ambiguous rather than guessed, and a `port_path` binding is the
+fallback for that case. Label the camera bodies with their serial (or "no
+serial") and the view name from the plan, and the label and the software agree.
+
+Changing an experimental condition means saving a new plan file, not editing
+code: resolution, frame rate, exposure and gain are per camera, and the plan
+travels with the session it produced. `RigPlan.load` rejects other schema
+versions rather than guessing.
+
+## Plan Check
+
+```bash
+python3 -m motion_capture.rig plan-check --plan plans/three-view-driver.json
+```
+
+Walks every camera's hub chain through Windows PnP (one enumeration plus one
+bulk property query per hub tier, about 20 s for three cameras), matches the
+plan by
+identity, and reports missing cameras, cameras that share a USB 2.0 root port
+(only one of them can stream), and enumerated cameras the plan does not claim.
+Exit 0 means the plan is realizable on this host as wired.
+
+## Capture Session
+
+```bash
+python3 -m motion_capture.rig capture --plan plans/three-view-driver.json \
+  --duration 8 --out sessions/2026-09-06T14
+```
+
+Opens each camera in plan order (pausing between opens, because Media
+Foundation tears down asynchronously), starts them behind one barrier so their
+isochronous reservations compete for real, and measures per camera: achieved
+frames per second, failed reads, worst inter-frame gap, and reopens. Every
+frame is stamped in the `host_monotonic_ns` clock domain; arrival time is not
+exposure time, and the manifest's `timing` block is where the sync stage will
+record how they relate.
+
+The manifest names one outcome using the acceptance-program vocabulary:
+
+| Outcome       | Meaning                                                             | Exit |
+| ------------- | ------------------------------------------------------------------- | ---- |
+| `supported`   | every camera reached at least 90 % of its requested rate            | 0    |
+| `degraded`    | every camera streamed, at least one below 90 %                      | 1    |
+| `blocked`     | at least one camera opened but delivered nothing, or failed to open | 1    |
+| `unavailable` | no camera delivered frames                                          | 2    |
+
+A camera that stops delivering is reopened once (a lost reservation is
+permanent on the old handle); if it still delivers nothing, the reason is
+recorded and the outcome is `blocked`, never a silently shorter session.
+
+## Recording
+
+Decoding MJPEG to BGR costs about two cores per 1920x1200 at 60 fps stream;
+copying the compressed stream to disk costs almost nothing. `recorder.py`
+wraps `ffmpeg -f dshow ... -c:v copy` through `core.process_safety.managed_popen`
+and addresses each camera by its DirectShow device path
+(`recorder.dshow_device_ref`), which is what keeps three identically named
+units distinct. Windows grants one process exclusive access to a camera, so a
+session either observes through frame sources or records through recorders,
+not both on the same camera.
+
+## Recording a Session
+
+```bash
+python3 -m motion_capture.rig record --plan plans/three-view-driver.json   --duration 10 --out sessions/2026-09-06T14-record
+```
+
+Enumerates the cameras, checks the plan, resolves each planned camera's
+DirectShow device path, and stream-copies its compressed MJPEG to
+`<out>/<view>_<identity>.mkv` for the requested duration (issue #9600). The
+result is a **session bundle**: `plan.json` (the plan as recorded),
+`recordings.json` (per view: file, bytes, recorder exit code, requested mode)
+and `session_manifest.json`, whose outcome reuses the capture vocabulary — a
+view whose recorder failed or wrote nothing makes the session `blocked`, never
+a quietly shorter dataset. `--dry-run` writes the bundle without touching a
+camera and is what the tests exercise.
+
+`--mode WxH@FPS[:FOURCC]` applies one capture mode to every selected view and
+`--views a,b` restricts the run to a subset of the plan (plan order); both
+derive a new plan whose name records the overrides, and both are accepted by
+`plan-check`, `capture` and `record`. `recordings.json` also carries
+`recorder_note` (ffmpeg's last stderr lines, kept when a recorder failed or
+delivered nothing) and `recorder_wall_s` (host seconds the recorder ran). A
+recorder that exits 0 but decodes zero frames makes the session `blocked`.
+
+## Session Check
+
+```bash
+python3 -m motion_capture.rig session-check --session sessions/2026-09-06T14-record
+```
+
+Validates a bundle without opening any video: the three JSON files parse
+against their schemas, every plan view has a recording entry, every successful
+entry's file exists with the indexed size, and the manifest outcome is the one
+the recordings imply. Exit 0 when sound. Later stages (ingest, alignment,
+export) read bundles, so this is the gate between "the cameras ran" and "this
+session can be trusted".
+
+## Proxies
+
+```bash
+python3 -m motion_capture.rig proxy --session sessions/<date>-record [--encoder libx264|h264_nvenc|h264_mf] [--crf 18]
+```
+
+Writes a browser-playable H.264/yuv420p `.mp4` beside every usable recording
+and `proxies.json` (encoder, exit code, bytes, reason). Proxies exist for the
+web players; ingest and session-check never read them.
+
+## Reconstruct
+
+```bash
+python3 -m motion_capture.rig reconstruct --session S --cameras cameras.json --anchor neck=0.53
+```
+
+Cleans the ingested views with the dynamics prior and jointly fits camera
+placement, 3-D joints and bone lengths, starting from the given camera records
+(a previous `reconstruction.json` works) or, with `--intrinsics` on a first
+take, from a placement initialised from the golfer's joints. See
+[Self-Calibrating Markerless Pipeline](self_calibrating_pipeline.md).
+
+## Ingest
+
+```bash
+python3 -m motion_capture.rig ingest --session sessions/<date>-record
+```
+
+Runs the registered pose estimator (`mediapipe` by default — the Tasks-API
+`MediaPipeEstimator`, issue #9602) over every successful recording in a bundle
+and writes `observations/<view>.json`: one `KeypointObservation` per frame in
+UpstreamDrift's existing observation records (pixel coordinates, per-keypoint
+confidence, `time_s` from the recording's frame index and rate), the
+`DetectorLayout` naming the keypoint order, provenance (estimator, model path
+and variant, mediapipe version, camera identity, requested mode) and the
+session's `timing` block copied verbatim. `observations.json` indexes the
+views; a view whose recording failed is `unavailable` with the reason rather
+than absent. Single-camera depth stays model-conditioned and is not written;
+`CanonicalObservations` (which needs camera calibrations) is assembled by the
+calibration stage, not here.
+
+When the session was captured with `--timing` (issue #9603), each row also
+carries `time_ref_s`, `time_ref_uncertainty_s` and `time_ref_source`: the same
+instant expressed in the reference view's arrival clock through the strobe
+offset, with the quadrature uncertainty. The per-view `time_s` is never
+rewritten. `timing_report.json` restates each view's offset, uncertainty and
+rate deviation and adds the skew it is expected to accumulate over its
+recording, which is what tells the reconstruction stage whether one offset per
+session is sufficient.
+
+## Extending the Rig
+
+- **A new camera type** implements the `FrameSource` protocol in `sources.py`:
+  `open(mode, controls)` negotiates and must prove frames arrive, `read()`
+  never blocks forever, `close()` is idempotent. `SyntheticFrameSource` shows
+  the minimum, including fault injection for tests.
+- **A new recording path** implements `Recorder` (`start` / `stop`).
+- **A new condition** is a plan file. Nothing in the package hard-codes the
+  camera count, the resolution, or the views.
+
+## Tools Schema Bridge
+
+`tools_bridge.probe_tools_schema()` reports `unavailable` while the pinned
+vendor tree lacks `sidekick.lab.mocap`, `incompatible` when it is present but
+missing expected submodules, and `ready` otherwise. The result is written into
+every manifest under `tools_schema`. No mapping to Tools records is attempted
+until the pinned release documents its builders; that export is #9422's
+responsibility, and inventing it here would be exactly the duplicate authority
+ADR-0041 forbids.
+
+## Time Sync
+
+Three cameras on three USB root ports stamp frames in the host's monotonic
+clock at _arrival_. ADR-0041 forbids promoting arrival time to exposure time,
+so `sync.py` never rewrites a frame's timestamp. With `capture --timing` (issue
+#9591) the session records each frame's mean brightness, finds the first frame
+in which a shared strobe becomes visible per camera, and writes a `timing`
+block to the manifest: per view, the offset of its arrival clock from the
+reference view's, the uncertainty (both cameras' frame intervals combined in
+quadrature, because a flash that lands anywhere inside one interval is first
+seen in the next frame), the measured frame interval, and its deviation from
+the nominal rate in parts per million. A view whose strobe is not found, or a
+session whose reference view has none, is reported `unavailable` with the
+reason; nothing is interpolated. The record is evidence for the reconstruction
+stage to apply or reject, never a correction applied to frames.
+
+## Diagnostic Script
+
+`scripts/diagnose_mocap_camera_rig.py` is a thin CLI over this package for
+bring-up: it builds a one-view-per-camera plan from the enumerated topology,
+runs a solo session per camera and one concurrent session, and compares the
+measured streaming count against the topology prediction.

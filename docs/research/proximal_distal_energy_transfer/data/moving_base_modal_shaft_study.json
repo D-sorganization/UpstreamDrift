@@ -336,8 +336,8 @@
   "source_sha256": {
     "scripts/research/proximal_distal_energy/moving_base_flexible_club.py": "c3f7b033f01ef890a384443e6a723c963afa5be5f244ef14c1a17344150b755e",
     "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py": "260adaad2d43b2ce288c8344bb4e432272ff872fc719fe333c5cdcad571680e2",
-    "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py": "86214e1c20af89989e80177d1dc985e0d092a6b3e954cb096449389bfba2eef6",
-    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "1405dc8214cfdf4931ec71e9c1608d284cd44c0fa42d5d42d3c1e338f212481e",
+    "scripts/research/proximal_distal_energy/run_moving_base_modal_shaft_study.py": "2129630f05bb4587eabcd4aebbf402f491fc853ecbe584c42dcd0605aa3ca70b",
+    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "39281a354eb911d01f1d6d11ac7ddafae98d1c0828b42f9df873f3a7c7e84f24",
     "src/shared/python/physics/flexible_shaft.py": "d25cb7fd2408a0be0b8cd3a85469a3f8db7445665a963fd535ebeb8c2ed1f1fd"
   },
   "study_id": "forward-moving-base-distributed-modal-shaft-v1",

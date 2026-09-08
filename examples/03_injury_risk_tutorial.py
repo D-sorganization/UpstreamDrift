@@ -12,6 +12,19 @@ We will:
 4. Generate a comprehensive report
 """
 
+import sys
+from pathlib import Path
+
+# Allow running from repo root without installing the package
+_project_root = Path(__file__).resolve().parents[1]
+for _p in (
+    _project_root,
+    _project_root / "src",
+    _project_root / "src" / "shared" / "python",
+):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
 # Setup logger for tutorial
 from src.shared.python.injury.injury_risk import (
     InjuryRiskScorer,

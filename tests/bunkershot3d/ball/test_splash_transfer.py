@@ -85,6 +85,9 @@ def delivery(
     speed_m_s: float = 25.0,
     bed_relative_density: float = 0.5,
     verdict: ValidityVerdict | None = None,
+    exit_velocity_m_s: tuple[float, float, float] | None = None,
+    exit_angular_velocity_rad_s: tuple[float, float, float] | None = None,
+    exit_orientation: tuple[tuple[float, float, float], ...] | None = None,
 ) -> SandDelivery:
     """Return a measured strike, as the solver and metrics layer report one.
 
@@ -104,6 +107,9 @@ def delivery(
             sitting at either bound.
         verdict: The solver's verdict, defaulting to one formed at
             ``speed_m_s`` on the three standard scales.
+        exit_velocity_m_s: Optional actual exit velocity.
+        exit_angular_velocity_rad_s: Optional exit angular velocity.
+        exit_orientation: Optional exit orientation.
 
     Returns:
         The delivery.
@@ -117,6 +123,9 @@ def delivery(
         exit_speed_m_s=0.6 * speed_m_s,
         bed_relative_density=bed_relative_density,
         verdict=solver_verdict(speed_m_s) if verdict is None else verdict,
+        exit_velocity_m_s=exit_velocity_m_s,
+        exit_angular_velocity_rad_s=exit_angular_velocity_rad_s,
+        exit_orientation=exit_orientation,
     )
 
 

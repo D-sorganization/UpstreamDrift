@@ -115,6 +115,8 @@ import enum
 import math
 from dataclasses import dataclass, field
 
+import numpy as np
+
 from src.shared.python.core.contracts import require
 
 from ..sand.provenance import PropertyProvenance, ProvenanceBasis, SandProvenance
@@ -483,6 +485,9 @@ class SandDelivery:
     verdict: ValidityVerdict
     displaced_mass_bounds_kg: tuple[float, float] | None = None
     displaced_mass_reason: str | None = None
+    exit_velocity_m_s: tuple[float, float, float] | None = None
+    exit_angular_velocity_rad_s: tuple[float, float, float] | None = None
+    exit_orientation: tuple[tuple[float, float, float], ...] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a strike that was not measured, or that cannot have happened.
@@ -523,8 +528,41 @@ class SandDelivery:
                 "a finite fraction in [0, 1] -- the lie sets how much of the "
                 "delivered momentum reaches the ball (issue #8704)",
             )
+        self._require_exit_kinematics()
         self._require_bounds()
         self._require_admissible_ejecta()
+
+    def _require_exit_kinematics(self) -> None:
+        """Validate optional exit kinematic vectors if provided."""
+        if self.exit_velocity_m_s is not None:
+            if len(self.exit_velocity_m_s) != 3 or not all(
+                isinstance(v, (int, float)) and math.isfinite(v)
+                for v in self.exit_velocity_m_s
+            ):
+                raise ValueError(
+                    "exit_velocity_m_s must be a finite 3-element sequence of floats, "
+                    f"got {self.exit_velocity_m_s!r}"
+                )
+        if self.exit_angular_velocity_rad_s is not None:
+            if len(self.exit_angular_velocity_rad_s) != 3 or not all(
+                isinstance(w, (int, float)) and math.isfinite(w)
+                for w in self.exit_angular_velocity_rad_s
+            ):
+                raise ValueError(
+                    "exit_angular_velocity_rad_s must be a finite 3-element sequence of floats, "
+                    f"got {self.exit_angular_velocity_rad_s!r}"
+                )
+        if self.exit_orientation is not None:
+            mat = np.array(self.exit_orientation, dtype=float)
+            if mat.shape != (3, 3) or not np.all(np.isfinite(mat)):
+                raise ValueError("exit_orientation must be a finite (3, 3) matrix")
+            if not np.allclose(mat @ mat.T, np.eye(3), atol=1e-6):
+                raise ValueError("exit_orientation is not an orthogonal matrix")
+            det = float(np.linalg.det(mat))
+            if not math.isclose(det, 1.0, abs_tol=1e-5):
+                raise ValueError(
+                    f"exit_orientation admits reflection (det = {det:.4g}); must be a proper rotation (det = +1)"
+                )
 
     def _require_bounds(self) -> None:
         """Refuse an interval that does not bracket the value drawn from it.
