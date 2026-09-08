@@ -354,12 +354,12 @@
       "tiles": ["pose_studio"]
     },
     "tools.capture_rig": {
-      "title": "Capture Rig camera controller with live preview, movable panes and saved layouts, themed header with status strip and workflow-grouped actions, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing",
+      "title": "Capture Rig camera controller with live preview, movable panes and saved layouts, themed header with status strip and workflow-grouped actions, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
       "web": null,
       "status": "exempt",
-      "reason": "Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) run on the same local session trees; desktop-only candidate pending #7460.",
+      "reason": "Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) and the multiview layout model/presets (#9810, #9811) run on the same local session trees; desktop-only candidate pending #7460.",
       "pending_decision": true,
       "tiles": ["capture_rig"]
     },
