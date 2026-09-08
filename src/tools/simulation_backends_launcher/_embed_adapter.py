@@ -74,10 +74,14 @@ class _EmbedAdapter:
         return self._widget
 
     def cleanup(self) -> None:
-        """Release the embedded widget reference.
+        """Cancel any running action, then release the widget reference.
 
-        Idempotent: safe to call multiple times during shutdown.
+        Idempotent: safe to call multiple times during shutdown. Closing the
+        tab while a sweep runs used to leak the worker thread (#8880).
         """
+        widget = self._widget
+        if widget is not None:
+            widget.cleanup()
         self._widget = None
 
     def is_dirty(self) -> bool:

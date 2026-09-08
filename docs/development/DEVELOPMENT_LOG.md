@@ -17,11 +17,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9387 · Unit-Gate Worker Corruption: `src`-Identity Sentinel and Leak Fixes
+### DL-#9470 · Launch-Monitor Analysis Handlers Onto the Async_Action Worker
 
 - **State:** in_review
 - **Owner:** claude
-- **PR:** #9741 (open; `Fixes #9387`)
+- **Issue:** #9470
+- **PR:** #9742
+- **Paths:** `src/tools/launch_monitor_analytics/gui.py`, `src/tools/launch_monitor_analytics/_embed_adapter.py`, `tests/ui/tools/launch_monitor/test_async_actions.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF` on this branch: `tests/ui/tools/launch_monitor` + `tests/tools/test_async_action.py` all passing, PyQt6 6.11.0 offscreen)
+- **Summary:** All seven analysis handlers (`treatment`, `relationship`, `multivariate`, `model`, `comparison`, `dispersion`, `trend`) now run their compute on the #8880 `async_action` worker via one shared `AsyncActionBar`; synchronous `present(compute())` paths kept; embed adapter `cleanup()` cancels and joins the worker. First slice of the #9470 tool checklist; the remaining tools are follow-ups.
+- **Next step:** Merge PR #9472 (the #8880 mechanism) before this branch — it is stacked on `readiness/p2-8880-async-action-worker`.
+
+### DL-#9387 · Unit-Gate Worker Corruption: `src`-Identity Sentinel and Leak Fixes
+
+- **State:** shipped
+- **Owner:** claude
+- **PR:** #9741 (merged; `Fixes #9387`)
 - **Paths:** `tests/unit/repo_hygiene/test_src_identity_sentinel.py`,
   `tests/imports/test_gui_import_boundaries.py`,
   `tests/integration/test_golf_launcher_integration.py`,
