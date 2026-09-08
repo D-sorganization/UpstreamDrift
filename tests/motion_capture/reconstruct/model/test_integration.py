@@ -124,7 +124,7 @@ def test_fit_model_command_and_tile_action(tmp_path: Path) -> None:
     widget = CaptureRigWidget()
     widget.capture.session_edit.setText(str(tmp_path))
     assert widget.command_for("fit_model")[3] == "fit-model"
-    assert widget.results.tabText(widget.results.count() - 1) == "Provenance"
+    assert widget.results.tabText(widget.results.count() - 1) == "Kinetics"
     assert widget.process.model_name() == "golfer"
 
 

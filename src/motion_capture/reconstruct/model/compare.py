@@ -19,8 +19,6 @@ import numpy as np
 from pydantic import BaseModel, ConfigDict
 
 from src.shared.python.core.contracts import require
-
-from ...provenance import write_stamped
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .fit import FitOptions
@@ -139,21 +137,7 @@ def compare_models(
     report = ModelComparison(session=str(session_dir), ranking=ranking)
     out_dir = session_dir / MODEL_DIR
     out_dir.mkdir(exist_ok=True)
-    angles = [
-        session_dir / MODEL_DIR / name / "joint_angles.json"
-        for name in names
-        if (session_dir / MODEL_DIR / name / "joint_angles.json").is_file()
-    ]
-    write_stamped(
-        out_dir / COMPARISON_FILE,
-        report.model_dump(mode="json"),
-        schema_version=report.schema_version,
-        module=__name__,
-        inputs=angles,
-        parameters={"models": list(names), "fit_lengths": fit_lengths},
-        derived_from=angles,
-        base=session_dir,
-    )
+    (out_dir / COMPARISON_FILE).write_text(report.model_dump_json(indent=2), "utf-8")
     (out_dir / "comparison.md").write_text(report.markdown(), encoding="utf-8")
     return report
 

@@ -62,19 +62,6 @@ class SE3:
     def Identity() -> SE3: ...
     def __init__(self, rotation: np.ndarray, translation: np.ndarray) -> None: ...
 
-class Motion:
-    """Spatial motion vector (linear, angular).
-
-    Constructed directly by the Crocoddyl backend's terminal frame-velocity
-    cost, and what ``getFrameVelocity`` returns; ``Model.gravity`` is one too.
-    """
-
-    linear: np.ndarray
-    angular: np.ndarray
-    @staticmethod
-    def Zero() -> Motion: ...
-    def __init__(self, linear: np.ndarray, angular: np.ndarray) -> None: ...
-
 class ReferenceFrame:
     LOCAL: ReferenceFrame
     LOCAL_WORLD_ALIGNED: ReferenceFrame

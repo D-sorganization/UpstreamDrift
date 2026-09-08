@@ -166,21 +166,6 @@ optimal-control = ["casadi>=3.6.0,<4.0.0"]
 # binary stack in a subprocess and degrades with conda-forge guidance —
 # prefer `conda install -c conda-forge crocoddyl pinocchio`.
 crocoddyl = ["crocoddyl>=2.0.0,<4.0.0"]
-# bioptim optimal-control layer (epic #9762). bioptim is conda-forge only,
-# so it is pinned to a release SHA of the upstream git repository (never a
-# branch: every recent minor release changed the API). Release_3.4.0 has no
-# casadi.MX_eye usages, so it works with the casadi 3.6-3.8 wheels that
-# bundle IPOPT+MUMPS; PyPI casadi is all the solver stack it needs. biorbd
-# is deliberately NOT a dependency -- src/shared/python/optimization/ocp/
-# drives bioptim through its custom-model protocol and shims the two
-# biorbd_casadi touch points (#9761). Debian/Ubuntu CI images need
-# `apt-get install python3-tk` because bioptim/gui/plot.py imports tkinter.
-bioptim = [
-    "upstream-drift[optimal-control]",
-    "bioptim @ git+https://github.com/pyomeca/bioptim.git@fdafe4d9e50edb3f92a14f1980b08c3f81434545",
-    "matplotlib>=3.8",
-    "packaging>=23.0",
-]
 
 # Strokes-gained optimizer — GeoJSON I/O requires pyproj for UTM projection.
 sg-optimizer = ["pyproj>=3.6.0"]
@@ -362,14 +347,6 @@ Repository = "https://github.com/D-sorganization/UpstreamDrift"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.metadata]
-# The `bioptim` extra pins a git SHA of pyomeca/bioptim, which is a PEP 508
-# direct reference. bioptim is conda-forge only -- there is no PyPI release to
-# pin instead (see ADR-0050) -- and hatchling refuses direct references unless
-# this is set, failing metadata generation for `pip install -e .` and so every
-# CI job, not just the ones that want the extra.
-allow-direct-references = true
-
 [tool.hatch.build]
 # Include pre-built UI in the wheel. Canonical Sidekick sources are assembled
 # from the exact Tools gitlink by build_hooks.py; vendor/ itself is not shipped.
@@ -495,10 +472,6 @@ max-complexity = 10
 "shared_scripts/**" = ["T201"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
-# Benchmark CLIs report their tables on stdout, like scripts/** above.
-"benchmarks/**" = ["T201"]
-# Runnable API examples report their results on stdout, like examples/** above.
-"src/shared/python/optimization/examples/**" = ["T201"]
 # Runnable docs examples are CLI-style scripts: stdout is how they report results.
 "docs/examples/**" = ["T201"]
 "tests/unit/test_calc_backend_protocols.py" = ["I"]
@@ -731,7 +704,6 @@ markers = [
     "requires_pyvista: tests that require the optional pyvista viz3d stack (skipped when `import pyvista` fails)",
     "requires_casadi: tests that require the optional casadi stack (skipped when `import casadi` fails)",
     "requires_crocoddyl: tests that require the optional crocoddyl stack (skipped when `import crocoddyl` fails)",
-    "requires_bioptim: tests that require the optional bioptim stack (skipped when `import bioptim` fails; epic #9762)",
     "requires_sdformat: tests that require gz/ign/sdf sdformat CLI tooling (skipped when executables are absent)",
     "requires_matlab_engine: tests that require matlab.engine importable (Option 4 bridge)",
     "requires_torch: tests that require PyTorch importable (skipped via importorskip when missing)",

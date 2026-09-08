@@ -118,24 +118,7 @@ Tile actions: record, import, proxy.
 
 Tile actions: ingest, compare.
 
-### 5. Annotate or Correct Points by Hand
-
-Click joints frame by frame where the detectors fail, or correct their outliers.
-
-**You need**
-
-- A playable recording for the view.
-- Optionally an observation set to correct (pick it in the player).
-
-**Do**
-
-1. Pick the view (and, to correct a detector, its observation set) in the player; press *Annotate / edit points*.
-2. Follow the banner: click the joint it names, S to skip an occluded joint (or reject a detector point), N for the next frame, B back, J jump, A to accept a detector's frame, Q to finish.
-3. Run `rig annotations-to-observations` (with `--merge-with SET` for corrections) to get a set the reconstruction and model fit use like any other.
-
-Tile actions: annotate.
-
-### 6. Review Joint Reliability
+### 5. Review Joint Reliability
 
 Know which joints to trust before fitting.
 
@@ -150,7 +133,7 @@ Know which joints to trust before fitting.
 
 Tile actions: reliability.
 
-### 7. Reconstruct in 3-D
+### 6. Reconstruct in 3-D
 
 Camera placement learned from the golfer, rigid skeleton, outliers rejected.
 
@@ -163,12 +146,11 @@ Camera placement learned from the golfer, rigid skeleton, outliers rejected.
 **Do**
 
 1. Pick the start file (intrinsics or previous reconstruction), enter the measured segments (shank=0.42, forearm=0.26, ...), optionally joints to exclude.
-2. In the *Match* tab tick the cameras to use and name the variant (blank = the default match); matches of one take live side by side under variants/ and every output records its provenance.
-3. Press *Reconstruct*. The summary shows RMS, rejections and the swing metrics; tick variants under *Model overlay* in the player to draw them on any view, including views a match never used.
+2. Press *Reconstruct*. The summary shows RMS, rejections and the swing metrics.
 
 Tile actions: reconstruct.
 
-### 8. Fit the Articulated Golfer
+### 7. Fit the Articulated Golfer
 
 Joint angles of a realistic model (spine, torso, scapula struts, arms, legs) through the reconstructed joints, with continuous motion enforced.
 
@@ -182,11 +164,10 @@ Joint angles of a realistic model (spine, torso, scapula struts, arms, legs) thr
 1. Press *Fit model*. The fit solves every frame together with an acceleration prior on each joint angle, soft joint limits and robust rejection, so a point the model cannot reach by continuous motion is listed as rejected, not followed.
 2. Read model/fit_report.json: RMS per landmark, rejections, peak joint speeds; scapula angles appear as left/right_scapula.rx (elevation) and .ry (protraction).
 3. *Export* then also writes joint_angles_simscape.csv in the MATLAB model's variable names.
-4. Image-space matching: choose *image space* in the *Match* tab with one or more views and the variant whose cameras to borrow; the model is fitted to the 2-D keypoints directly (the single-camera path).
 
 Tile actions: fit_model.
 
-### 9. Kinetics and Model Comparison
+### 8. Kinetics and Model Comparison
 
 Torques that produce the fitted motion, a replay check, and a ranking of every registered model on this take.
 
@@ -202,7 +183,7 @@ Torques that produce the fitted motion, a replay check, and a ranking of every r
 
 Tile actions: kinetics, compare_models.
 
-### 10. Analyse the Single View
+### 9. Analyse the Single View
 
 Events, tempo and normalised hand speed from one camera.
 
@@ -217,7 +198,7 @@ Events, tempo and normalised hand speed from one camera.
 
 Tile actions: analyze, clip, compare_takes.
 
-### 11. Export to the Motion Pipeline
+### 10. Export to the Motion Pipeline
 
 TRC and canonical JSON for scaling, IK and model matching.
 

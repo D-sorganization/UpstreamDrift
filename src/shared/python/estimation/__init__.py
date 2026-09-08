@@ -3,23 +3,17 @@
 from __future__ import annotations
 
 from src.shared.python.estimation.identifiability import (
-    IdentifiabilityGateOptions,
-    IdentifiabilityGateReport,
     IdentifiabilityReport,
     ParameterSpec,
-    UnidentifiableParametersError,
     finite_difference_jacobian as identifiability_finite_difference_jacobian,
-    gate_shared_parameters,
     probe_identifiability,
     sweep_parameter,
 )
 from src.shared.python.estimation.map_estimator import (
-    NON_FINITE_RESIDUAL_SENTINEL,
     CubicHermiteSplineTrajectory,
     MapEstimatorOptions,
     MapEstimatorProblem,
     MapEstimatorResult,
-    NonFiniteResidualError,
     SharedParameterBlock,
     SharedParameterSpec,
     SplineTrajectoryEvaluation,
@@ -66,12 +60,9 @@ from src.shared.python.estimation.synthetic_ground_truth import (
 )
 
 __all__ = [
-    "NON_FINITE_RESIDUAL_SENTINEL",
     "CubicHermiteSplineTrajectory",
     "ForwardModel",
     "GroundTruthRigResult",
-    "IdentifiabilityGateOptions",
-    "IdentifiabilityGateReport",
     "IdentifiabilityReport",
     "MapEstimatorOptions",
     "MapEstimatorProblem",
@@ -85,7 +76,6 @@ __all__ = [
     "MultiTrialMapResult",
     "MultiTrialObservation",
     "NoiseModel",
-    "NonFiniteResidualError",
     "ObservationPolicy",
     "ParameterSpec",
     "ProjectionRecord",
@@ -97,12 +87,10 @@ __all__ = [
     "SplineTrajectoryEvaluation",
     "SyntheticCamera",
     "SyntheticObservationRig",
-    "UnidentifiableParametersError",
     "anthropometric_prior_residual",
     "autodiff_jacobian",
     "dynamics_residual",
     "finite_difference_jacobian",
-    "gate_shared_parameters",
     "identifiability_finite_difference_jacobian",
     "probe_identifiability",
     "project_pinhole",

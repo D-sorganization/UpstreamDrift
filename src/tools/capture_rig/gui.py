@@ -62,12 +62,7 @@ from src.shared.python.core.contracts import require
 from . import commands, workflow
 from .commands import ESTIMATOR_OPTIONS, MODE_PRESETS, OptionSpec, PlanSelection
 from .commands import mode_text
-from .annotate_widget import AnnotateDialog, BaseSet
-from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .overlay import PoseTrack, draw_pose
-from .overlay_box import VariantOverlayBox
-from .overlay_render import render_frame
-from .provenance_tab import ProvenanceTab, SourcedTable
 from .player import VideoReader, clamp_index
 from .session import SessionMedia, ViewMedia, flatten_numbers, load_session
 
@@ -522,8 +517,6 @@ class PlaybackPanel(QWidget):
         )
         self.play_button = QPushButton("Play")
         self.play_button.clicked.connect(self.toggle_play)
-        self.variants = VariantOverlayBox()
-        self.variants.changed.connect(lambda: self.show_frame(self._index))
         self.image = QLabel("no session loaded")
         self.image.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.image.setMinimumSize(320, 200)
@@ -541,7 +534,6 @@ class PlaybackPanel(QWidget):
         top.addWidget(self.play_button)
         layout = QVBoxLayout(self)
         layout.addLayout(top)
-        layout.addWidget(self.variants)
         layout.addWidget(self.image, 1)
         layout.addWidget(self.slider)
         layout.addWidget(self.status)
@@ -557,7 +549,6 @@ class PlaybackPanel(QWidget):
     def load(self, media: SessionMedia) -> None:
         """Offer every playable view; select the first."""
         self.close_media()
-        self.variants.load(media)
         self.view_combo.blockSignals(True)
         self.view_combo.clear()
         for view in media.views:
@@ -651,18 +642,13 @@ class PlaybackPanel(QWidget):
                 self._track.edges if self._track else (),
                 min_confidence=float(self.confidence_spin.value()),
             )
-        view_name = self.current_view_name()
-        tracks = self.variants.tracks_for(view_name) if view_name else ()
-        if tracks:
-            frame = render_frame(frame, tracks, self._index)
         self._blit(frame)
         self.slider.blockSignals(True)
         self.slider.setValue(self._index)
         self.slider.blockSignals(False)
         detected = "pose" if pose is not None else "no pose"
         total = self._reader.frame_count
-        extra = f" · {self.variants.error}" if self.variants.error else ""
-        self.status.setText(f"frame {self._index + 1}/{total} · {detected}{extra}")
+        self.status.setText(f"frame {self._index + 1}/{total} · {detected}")
 
     def _blit(self, frame_bgr: np.ndarray) -> None:
         rgb = np.ascontiguousarray(frame_bgr[:, :, ::-1])
@@ -747,7 +733,6 @@ class CaptureRigWidget(QWidget):
         ("export", "Export"),
         ("clip", "Export clip"),
         ("compare_takes", "Compare takes"),
-        ("annotate", "Annotate / edit points"),
         ("stop", "Stop"),
         ("load", "Load session"),
     )
@@ -757,29 +742,18 @@ class CaptureRigWidget(QWidget):
         self.workflow = WorkflowPanel()
         self.capture = CapturePanel()
         self.process = ProcessPanel()
-        self.match = MatchPanel()
         self.playback = PlaybackPanel()
         self.results = QTabWidget()
-        self.swing_table = SourcedTable()
-        self.analysis_table = SourcedTable()
-        self.reliability_table = SourcedTable()
+        self.swing_table = ResultsTable()
+        self.analysis_table = ResultsTable()
+        self.reliability_table = ResultsTable()
         self.results.addTab(self.swing_table, "Swing (3-D)")
         self.results.addTab(self.analysis_table, "Analysis (2-D)")
-        self.model_table = SourcedTable()
+        self.model_table = ResultsTable()
         self.results.addTab(self.reliability_table, "Reliability")
-        self.kinetics_table = SourcedTable()
+        self.kinetics_table = ResultsTable()
         self.results.addTab(self.model_table, "Model fit")
         self.results.addTab(self.kinetics_table, "Kinetics")
-        self.provenance = ProvenanceTab()
-        self.results.addTab(self.provenance, "Provenance")
-        for table in (
-            self.swing_table,
-            self.analysis_table,
-            self.reliability_table,
-            self.model_table,
-            self.kinetics_table,
-        ):
-            table.source_selected.connect(self._show_provenance)
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(5000)
@@ -805,7 +779,6 @@ class CaptureRigWidget(QWidget):
         inputs = QTabWidget()
         inputs.addTab(self.capture, "Capture")
         inputs.addTab(self.process, "Process")
-        inputs.addTab(self.match, "Match")
         left = QSplitter(Qt.Orientation.Vertical)
         left.addWidget(self.workflow)
         left.addWidget(inputs)
@@ -862,9 +835,8 @@ class CaptureRigWidget(QWidget):
             "calibrate": lambda: self._calibrate(session),
             "reconstruct": lambda: self._reconstruct(session),
             "analyze": lambda: commands.analyze_command(session),
-            "fit_model": lambda: fit_model_args(
+            "fit_model": lambda: commands.fit_model_command(
                 session,
-                self.match.selection(),
                 model=self.process.model_name(),
                 fit_lengths=self.process.fit_lengths(),
             ),
@@ -872,16 +844,11 @@ class CaptureRigWidget(QWidget):
                 session,
                 model=self.process.model_name(),
                 body_mass_kg=self.process.body_mass(),
-                variant=self.match.selection().name,
             ),
             "compare_models": lambda: commands.compare_models_command(
-                session,
-                fit_lengths=self.process.fit_lengths(),
-                variant=self.match.selection().name,
+                session, fit_lengths=self.process.fit_lengths()
             ),
-            "export": lambda: commands.export_command(
-                session, variant=self.match.selection().name
-            ),
+            "export": lambda: commands.export_command(session),
             "clip": lambda: self._clip(session),
             "compare_takes": lambda: self._compare_takes(session),
         }
@@ -895,35 +862,12 @@ class CaptureRigWidget(QWidget):
 
     def _reconstruct(self, session: Path) -> list[str]:
         cameras, intrinsics = self.process.start_file()
-        return reconstruct_args(
+        return commands.reconstruct_command(
             session,
-            self.match.selection(),
             measurements=self.process.measurements(),
             cameras=cameras,
             intrinsics=intrinsics,
             exclude_joints=self.process.exclude_joints(),
-        )
-
-    def _show_provenance(self, source: object) -> None:
-        if self.media is not None and isinstance(source, Path):
-            self.provenance.show_path(self.media.root, source)
-            self.results.setCurrentWidget(self.provenance)
-
-    def annotate_dialog(self) -> AnnotateDialog | None:
-        """The Annotate/edit dialog for the player's view and set (not shown)."""
-        if self.media is None:
-            return None
-        name = self.playback.current_view_name()
-        if name is None:
-            return None
-        view = self.media.view(name)
-        if view.playable is None:
-            return None
-        set_name = self.playback.current_set_name()
-        base_file = (view.observation_sets or {}).get(set_name) if set_name else None
-        base = BaseSet(set_name, base_file) if set_name and base_file else None
-        return AnnotateDialog(
-            self.media.root, name, view.playable, base=base, parent=self
         )
 
     def _clip(self, session: Path) -> list[str]:
@@ -956,14 +900,6 @@ class CaptureRigWidget(QWidget):
             self.runner.stop()
             return
         if action == "load":
-            self.refresh_session()
-            return
-        if action == "annotate":
-            dialog = self.annotate_dialog()
-            if dialog is None:
-                self._append_log("load a session and pick a playable view first\n")
-                return
-            dialog.exec()
             self.refresh_session()
             return
         if action == "import" and not self.capture.pending_import:
@@ -1004,22 +940,13 @@ class CaptureRigWidget(QWidget):
             + (f" · problems: {'; '.join(media.problems)}" if media.problems else "")
         )
         self.playback.load(media)
-        self.match.load(media)
         self.results.setCurrentIndex(1 if len(media.views) == 1 else 0)
-        recon = media.root / "reconstruct"
-        self.swing_table.fill(
-            media.swing_summary, recon / "session_reconstruction.json"
-        )
+        self.swing_table.fill(media.swing_summary)
         self.analysis_table.fill(media.analysis_2d)
-        self.model_table.fill(
-            media.model_fit, media.root / "model" / "joint_angles.json"
-        )
-        self.kinetics_table.fill(
-            _kinetics_rows(media), media.root / "model" / "kinetics.json"
-        )
+        self.model_table.fill(media.model_fit)
+        self.kinetics_table.fill(_kinetics_rows(media))
         self.reliability_table.fill(
-            _reliability_rows(media.reliability) if media.reliability else None,
-            media.root / "reliability.json",
+            _reliability_rows(media.reliability) if media.reliability else None
         )
         if media.reliability:
             self.process.suggest_exclusions(

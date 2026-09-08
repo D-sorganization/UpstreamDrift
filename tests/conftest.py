@@ -1347,9 +1347,7 @@ def pytest_runtest_makereport(
             "tools checkout unavailable",
         )
     )
-    if is_seam_reason and not item.nodeid.startswith(
-        ("tests/launchers/", "tests/config/test_tile_paths_resolve.py")
-    ):
+    if is_seam_reason and not item.nodeid.startswith("tests/launchers/"):
         if not hasattr(item.config, "_ud_seam_test_skips"):
             item.config._ud_seam_test_skips = []
         item.config._ud_seam_test_skips.append((item.nodeid, reason))

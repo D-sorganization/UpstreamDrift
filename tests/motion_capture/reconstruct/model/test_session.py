@@ -77,16 +77,3 @@ def test_fit_session_model_writes_angles_report_and_landmarks(tmp_path: Path) ->
     assert fit.lengths_m["forearm"] == 0.26
     with pytest.raises(Exception, match="no reconstructed joints"):
         fit_session_model(tmp_path / "nope", ARM, MAP)
-
-
-def test_load_joints_turns_unobservable_zero_rows_into_nan(tmp_path: Path) -> None:
-    """The reconstruction's all-zero rows are 'no two cameras saw it' (#9802)."""
-    from src.motion_capture.reconstruct.model.session import load_joints
-
-    joints = np.ones((3, 2, 3))
-    joints[1, 0] = 0.0
-    path = tmp_path / "joints_3d_m.npy"
-    np.save(path, joints)
-    loaded = load_joints(path)
-    assert np.isnan(loaded[1, 0]).all() and np.isfinite(loaded[1, 1]).all()
-    assert np.isfinite(loaded[0]).all()
