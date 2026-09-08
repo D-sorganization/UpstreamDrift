@@ -17,6 +17,7 @@ evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual progra
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
 recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
+
 ## Import Bootstrap Fail-Fast: #9733
 
 - Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
@@ -90,6 +91,15 @@ Launcher UX (#9482): tile logos are gated by
 `scripts/check_launcher_logo_families.py` (one family per engine/category,
 shared logos declared there); run it after editing tile logos in
 `src/config/launcher_manifest.json`.
+
+## Vendor Pin & Alias Predicate: #9631
+
+- `vendor/ud-tools` = Tools `eab74a901a`, carrying the Tools#5049 flattened-install alias fix
+  (`f8b94bfe` is an ancestor); do NOT rewind — that drops Tools #5051-#5057 incl. the Sentinel
+  ShellTool injection fix. Cargo rev, companion `pinned_commit`, `check_tools_pins.py` agree.
+- `tests/unit/repo_hygiene/test_pinned_import_alias_contract.py` pins the flattened-install
+  contract (RED at pre-#9657 pin `3d93bb2c`, GREEN at the current pin). Child copy stays
+  unconverged per #9657. Remaining: re-cut the 2.1.3 release.
 
 ## Protected Authority
 
@@ -184,6 +194,7 @@ shared logos declared there); run it after editing tile logos in
   byte-identical by `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`;
   registration wiring into `scripts/setup_hooks.py` follows in the companion
   wiring PR (`claude/issue-9476-driver-wiring`).
+
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
@@ -231,8 +242,10 @@ python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
 ```
 
-Also run claim/evidence integrity, release qualification, PDF inspection, and affected full gates after publication changes. Never
-force-push, bypass branch protection, relax tolerances after inspecting results, or create capacity-only reruns.
+Also run claim/evidence integrity, release qualification, PDF inspection, and
+affected full gates after publication changes. Never force-push, bypass branch
+protection, relax tolerances after inspecting results, or create capacity-only
+reruns. Do not restart the Actions runner or start WSL.
 
 ## UI Dependency Pin: #9249
 
