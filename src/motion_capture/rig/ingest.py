@@ -68,9 +68,10 @@ class FrameEstimator(Protocol):
 class RegisteredFrameEstimator:
     """Adapter over any registered estimator that names its landmarks.
 
-    The estimator class must expose ``LANDMARK_MAP`` (index -> name); an
-    optional ``LAYOUT_NAME`` names the detector layout, else
-    ``<estimator>_<count>`` is used.
+    The estimator instance or its class must expose ``LANDMARK_MAP``
+    (index -> name; the instance wins, so variants can pick their landmark
+    set at construction, #9648); an optional ``LAYOUT_NAME`` names the
+    detector layout, else ``<estimator>_<count>`` is used.
     """
 
     def __init__(self, name: str = "mediapipe", **options: Any) -> None:
@@ -80,14 +81,16 @@ class RegisteredFrameEstimator:
         self._options = dict(options)
         self._estimator = create_estimator(name, **options)
         self._estimator.load_model()
-        cls = type(self._estimator)
-        names = getattr(cls, "LANDMARK_MAP", None)
+        # Instance attributes win: variant estimators (e.g. rtmpose_onnx
+        # with keypoint_set="halpe26", #9648) pick their landmark set at
+        # construction, while class attributes remain the fallback.
+        names = getattr(self._estimator, "LANDMARK_MAP", None)
         if not isinstance(names, dict) or not names:
             raise ValueError(
                 f"estimator {name!r} exposes no LANDMARK_MAP; cannot name keypoints"
             )
         ordered = [str(names[i]) for i in sorted(names)]
-        layout_name = getattr(cls, "LAYOUT_NAME", f"{name}_{len(ordered)}")
+        layout_name = getattr(self._estimator, "LAYOUT_NAME", f"{name}_{len(ordered)}")
         self._layout = DetectorLayout(name=layout_name, keypoint_names=ordered)
 
     @property
