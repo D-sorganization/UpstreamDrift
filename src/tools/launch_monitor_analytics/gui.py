@@ -6,7 +6,8 @@ import hashlib
 import json
 import sys
 import uuid
-from dataclasses import asdict
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
@@ -16,14 +17,22 @@ import pandas as pd
 from matplotlib.dates import date2num
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from src.tools.async_action import AsyncActionBar, WorkerContext
 from src.tools.launch_monitor_model import (
     CorrelationResult,
+    DispersionResult,
     FilterRule,
     ImportedSession,
     ImportManifest,
     ImportOptions,
     LaunchMonitorProject,
+    MonitorComparisonResult,
+    PCAResult,
+    PredictiveModelResult,
+    TemporalTrendResult,
     TreatmentConfig,
+    TreatmentResult,
+    VIFResult,
     analyze_dispersion,
     analyze_trend,
     apply_treatment,
@@ -54,6 +63,77 @@ from src.tools.launch_monitor_analytics.widgets import (
 logger = get_logger(__name__)
 
 __all__ = ["LaunchMonitorAnalyticsWindow", "MainWidget", "PlotCanvas", "main"]
+
+
+#: Points sampled around each 95% dispersion ellipse (smooth, cheap curve).
+_ELLIPSE_POINTS = 200
+
+
+@dataclass(frozen=True, slots=True)
+class _RelationshipParams:
+    """Widget-derived inputs for one relationship analysis (GUI-thread read)."""
+
+    metrics: tuple[str, ...]
+    controls: tuple[str, ...]
+    method: str
+    edge_threshold: float
+
+
+@dataclass(frozen=True, slots=True)
+class _ModelParams:
+    """Widget-derived inputs for one predictive-model fit (GUI-thread read)."""
+
+    target: str
+    features: tuple[str, ...]
+    model: str
+    random_seed: int
+    group_column: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _ComparisonParams:
+    """Widget-derived inputs for one monitor comparison (GUI-thread read)."""
+
+    metric: str
+    match_column: str | None
+    reference_monitor: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _DispersionParams:
+    """Widget-derived inputs for one dispersion analysis (GUI-thread read)."""
+
+    forward: str
+    lateral: str
+    group_column: str
+
+
+@dataclass(frozen=True, slots=True)
+class _TrendParams:
+    """Widget-derived inputs for one longitudinal trend (GUI-thread read)."""
+
+    metric: str
+    time_column: str
+    rolling_window: int
+
+
+@dataclass(frozen=True, slots=True)
+class _DispersionPlotData:
+    """Plain per-group plot geometry for one dispersion group (worker-safe)."""
+
+    name: str
+    forward_values: np.ndarray
+    lateral_values: np.ndarray
+    ellipse_forward: np.ndarray
+    ellipse_lateral: np.ndarray
+
+
+@dataclass(frozen=True, slots=True)
+class _DispersionData:
+    """Table rows plus plot geometry for a completed dispersion analysis."""
+
+    rows: list[dict[str, object]]
+    series: tuple[_DispersionPlotData, ...]
 
 
 class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
@@ -102,6 +182,19 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
         self.tabs.addTab(self._build_dispersion_tab(), "Dispersion")
         self.tabs.addTab(self._build_trends_tab(), "Trends")
         self.tabs.addTab(self._build_reports_tab(), "Reports")
+        # One shared bar for all seven analysis buttons: it disables every
+        # trigger for the duration of any run, so a second click cannot queue
+        # a second analysis on top of the first (#9470).
+        self.action_bar = AsyncActionBar()
+        self.action_bar.set_trigger_buttons(
+            self.run_treatment_button,
+            self.run_relationship_button,
+            self.run_multivariate_button,
+            self.run_model_button,
+            self.run_comparison_button,
+            self.run_dispersion_button,
+            self.run_trend_button,
+        )
         self.status_label = QtWidgets.QLabel(
             "Ready. Import one or more launch-monitor exports."
         )
@@ -112,6 +205,7 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
         layout.addWidget(subtitle)
         layout.addWidget(self.scientific_boundary)
         layout.addWidget(self.tabs, 1)
+        layout.addWidget(self.action_bar)
         layout.addWidget(self.status_label)
 
     def _build_sessions_tab(self) -> QtWidgets.QWidget:
@@ -411,15 +505,18 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
         self.save_project_button.clicked.connect(self._on_save_project)
         self.remove_session_button.clicked.connect(self._on_remove_selected_sessions)
         self.clear_project_button.clicked.connect(self._on_new_project)
-        self.run_treatment_button.clicked.connect(self._run_treatment_ui)
+        self.run_treatment_button.clicked.connect(self._run_treatment_async)
         self.add_filter_button.clicked.connect(self._add_filter_row)
         self.remove_filter_button.clicked.connect(self._remove_filter_rows)
-        self.run_relationship_button.clicked.connect(self._run_relationship_ui)
-        self.run_multivariate_button.clicked.connect(self._run_multivariate_ui)
-        self.run_model_button.clicked.connect(self._run_model_ui)
-        self.run_comparison_button.clicked.connect(self._run_comparison_ui)
-        self.run_dispersion_button.clicked.connect(self._run_dispersion_ui)
-        self.run_trend_button.clicked.connect(self._run_trend_ui)
+        self.run_relationship_button.clicked.connect(self._run_relationship_async)
+        self.run_multivariate_button.clicked.connect(self._run_multivariate_async)
+        self.run_model_button.clicked.connect(self._run_model_async)
+        self.run_comparison_button.clicked.connect(self._run_comparison_async)
+        self.run_dispersion_button.clicked.connect(self._run_dispersion_async)
+        self.run_trend_button.clicked.connect(self._run_trend_async)
+        # Analysis buttons run their compute off the GUI thread on the shared
+        # action bar (#9470); the _run_*_ui methods stay as the synchronous
+        # present(compute()) path.
         self.export_data_button.clicked.connect(self._on_export_data)
         self.export_manifest_button.clicked.connect(self._on_export_manifest)
 
@@ -667,22 +764,98 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             "are retained in the project."
         )
 
-    def run_relationship_analysis(self) -> CorrelationResult:
-        metrics = _selected_text(self.relationship_metrics)
-        if len(metrics) < 2:
-            raise ValueError("Select at least two relationship metrics")
-        controls = tuple(
-            item
-            for item in _selected_text(self.relationship_controls)
-            if item not in metrics
+    # ---- shared action-bar plumbing (#9470) -----------------------------
+
+    def _start_action(
+        self,
+        name: str,
+        work: Callable[[WorkerContext], Any],
+        present: Callable[[Any], None],
+        error_title: str,
+    ) -> None:
+        """Start one analysis on the shared action bar (#9470).
+
+        ``work`` runs on the worker thread and must not touch widgets;
+        ``present`` and the failure dialog run on the GUI thread through the
+        bar's queued signal connections.
+        """
+        self.action_bar.start(
+            name,
+            work,
+            on_finished=present,
+            on_failed=lambda message: self._show_error_message(error_title, message),
         )
-        result = compute_correlations(
-            self.analysis_frame,
+
+    def cleanup(self) -> None:
+        """Cancel and join any running action (launcher tab close, #9470)."""
+        self.action_bar.shutdown()
+
+    # ---- relationship analysis ------------------------------------------
+
+    def run_relationship_analysis(self) -> CorrelationResult:
+        """Run the relationship analysis synchronously and return its result.
+
+        The synchronous path (``present(compute())``); the button runs
+        :meth:`_run_relationship_async` on the shared action bar.
+        """
+        result = self._compute_relationship(self._read_relationship_params())
+        self._present_relationship(result)
+        return result
+
+    def _read_relationship_params(self) -> _RelationshipParams:
+        """Read the relationship controls on the GUI thread.
+
+        The worker must not touch widgets, so every value is captured here
+        before the work callable is built (#9470).
+        """
+        metrics = _selected_text(self.relationship_metrics)
+        return _RelationshipParams(
             metrics=metrics,
+            controls=tuple(
+                item
+                for item in _selected_text(self.relationship_controls)
+                if item not in metrics
+            ),
             method=self.relationship_method.currentText(),
-            controls=controls,
             edge_threshold=float(self.edge_threshold_spin.value()),
         )
+
+    def _compute_relationship(
+        self,
+        params: _RelationshipParams,
+        ctx: WorkerContext | None = None,
+    ) -> CorrelationResult:
+        """Compute the correlation matrix as plain data (#9470).
+
+        Args:
+            params: Widget-derived inputs read on the GUI thread.
+            ctx: Cancellation/progress seam; ``None`` keeps the synchronous
+                path identical to the pre-migration behaviour.
+
+        Returns:
+            The correlation result, safe to hand to the GUI thread.
+
+        Raises:
+            ValueError: If fewer than two relationship metrics are selected.
+        """
+        if len(params.metrics) < 2:
+            raise ValueError("Select at least two relationship metrics")
+        if ctx is not None:
+            ctx.report(
+                None,
+                "correlating metrics; cancel takes effect when the step ends",
+            )
+        return compute_correlations(
+            self.analysis_frame,
+            metrics=params.metrics,
+            method=params.method,
+            controls=params.controls,
+            edge_threshold=params.edge_threshold,
+        )
+
+    def _present_relationship(self, result: CorrelationResult) -> None:
+        """Render the correlation matrix. GUI-thread only (#9470)."""
+        metrics = list(result.coefficients.index)
         self.relationship_table.set_frame(
             result.coefficients.reset_index(names="metric")
         )
@@ -699,33 +872,66 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             f"Mapped {len(result.edges)} screened dependency edges across "
             f"{len(metrics)} metrics. Interpret as association, not causation."
         )
-        return result
 
-    def _run_treatment_ui(self) -> None:
+    def _run_relationship_ui(self) -> None:
+        """Synchronous relationship analysis (kept pre-migration path)."""
         try:
-            required = tuple(
-                item.strip()
-                for item in self.required_metrics_edit.text().split(",")
-                if item.strip()
-            )
-            outliers = tuple(
-                item.strip()
-                for item in self.outlier_metrics_edit.text().split(",")
-                if item.strip()
-            )
-            result = apply_treatment(
-                self.project.combined_shots(),
-                TreatmentConfig(
-                    required_metrics=required,
-                    outlier_metrics=outliers,
-                    robust_z_threshold=float(self.outlier_threshold_spin.value()),
-                    exclude_flagged=self.exclude_flagged_check.isChecked(),
-                    filters=self._filter_rules(),
-                ),
-            )
+            self.run_relationship_analysis()
         except ValueError as exc:
-            self._show_error("Data Treatment Failed", exc)
-            return
+            self._show_error("Relationship Analysis Failed", exc)
+
+    def _run_relationship_async(self) -> None:
+        """Run the relationship analysis off the GUI thread (#9470)."""
+        params = self._read_relationship_params()
+        self._start_action(
+            "Relationship analysis",
+            lambda ctx: self._compute_relationship(params, ctx),
+            self._present_relationship,
+            "Relationship Analysis Failed",
+        )
+
+    # ---- data treatment ---------------------------------------------------
+
+    def _read_treatment_config(self) -> TreatmentConfig:
+        """Read the treatment controls on the GUI thread (#9470)."""
+        required = tuple(
+            item.strip()
+            for item in self.required_metrics_edit.text().split(",")
+            if item.strip()
+        )
+        outliers = tuple(
+            item.strip()
+            for item in self.outlier_metrics_edit.text().split(",")
+            if item.strip()
+        )
+        return TreatmentConfig(
+            required_metrics=required,
+            outlier_metrics=outliers,
+            robust_z_threshold=float(self.outlier_threshold_spin.value()),
+            exclude_flagged=self.exclude_flagged_check.isChecked(),
+            filters=self._filter_rules(),
+        )
+
+    def _compute_treatment(
+        self,
+        config: TreatmentConfig,
+        ctx: WorkerContext | None = None,
+    ) -> TreatmentResult:
+        """Apply the treatment to the combined shots as plain data (#9470).
+
+        ``apply_treatment`` is one opaque call with no loop boundary, so the
+        worker keeps the window painting but Cancel only takes effect when
+        the current step ends; the progress line says so.
+        """
+        if ctx is not None:
+            ctx.report(
+                None,
+                "screening shots; cancel takes effect when the step ends",
+            )
+        return apply_treatment(self.project.combined_shots(), config)
+
+    def _present_treatment(self, result: TreatmentResult) -> None:
+        """Apply treated data to the workspace. GUI-thread only (#9470)."""
         self.analysis_frame = result.data
         self.project.record_actions(result.audit_log)
         self.flags_table.set_frame(result.flags)
@@ -739,20 +945,53 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             f"{len(result.data)} shots in the analysis view. Raw sessions are unchanged."
         )
 
-    def _run_relationship_ui(self) -> None:
+    def _run_treatment_ui(self) -> None:
+        """Synchronous data treatment (kept pre-migration path)."""
         try:
-            self.run_relationship_analysis()
+            config = self._read_treatment_config()
+            result = self._compute_treatment(config)
         except ValueError as exc:
-            self._show_error("Relationship Analysis Failed", exc)
-
-    def _run_multivariate_ui(self) -> None:
-        metrics = _selected_text(self.relationship_metrics)
-        try:
-            pca = compute_pca(self.analysis_frame, metrics=metrics)
-            vif = compute_vif(self.analysis_frame, metrics=metrics)
-        except ValueError as exc:
-            self._show_error("Multivariate Analysis Failed", exc)
+            self._show_error("Data Treatment Failed", exc)
             return
+        self._present_treatment(result)
+
+    def _run_treatment_async(self) -> None:
+        """Run the data treatment off the GUI thread (#9470)."""
+        try:
+            config = self._read_treatment_config()
+        except ValueError as exc:
+            self._show_error("Data Treatment Failed", exc)
+            return
+        self._start_action(
+            "Data treatment",
+            lambda ctx: self._compute_treatment(config, ctx),
+            self._present_treatment,
+            "Data Treatment Failed",
+        )
+
+    # ---- multivariate (PCA/VIF) -------------------------------------------
+
+    def _compute_multivariate(
+        self,
+        metrics: tuple[str, ...],
+        ctx: WorkerContext | None = None,
+    ) -> tuple[PCAResult, VIFResult]:
+        """Compute PCA and VIF as plain data (#9470).
+
+        The PCA and VIF stages are separate checkpoints: cancelling between
+        them skips the remaining stage.
+        """
+        if ctx is not None:
+            ctx.report(None, "running principal components")
+        pca = compute_pca(self.analysis_frame, metrics=metrics)
+        if ctx is not None:
+            ctx.raise_if_cancelled()
+            ctx.report(0.5, "computing variance inflation factors")
+        vif = compute_vif(self.analysis_frame, metrics=metrics)
+        return pca, vif
+
+    def _present_multivariate(self, pca: PCAResult, vif: VIFResult) -> None:
+        """Render PCA loadings and variance ratios. GUI-thread only (#9470)."""
         table = pca.loadings.copy()
         table.insert(0, "VIF", vif.values)
         self.relationship_table.set_frame(table.reset_index(names="metric"))
@@ -772,20 +1011,66 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             f"VIF >= 5: {warning}."
         )
 
-    def _run_model_ui(self) -> None:
-        group = self.model_group.currentText()
+    def _run_multivariate_ui(self) -> None:
+        """Synchronous PCA/VIF analysis (kept pre-migration path)."""
         try:
-            result = fit_predictive_model(
-                self.analysis_frame,
-                target=self.model_target.currentText(),
-                features=_selected_text(self.model_features),
-                model=self.model_type.currentText(),
-                random_seed=int(self.model_seed.value()),
-                group_column=None if group == "(random split)" else group,
+            pca, vif = self._compute_multivariate(
+                _selected_text(self.relationship_metrics)
             )
-        except (ValueError, ImportError) as exc:
-            self._show_error("Predictive Model Failed", exc)
+        except ValueError as exc:
+            self._show_error("Multivariate Analysis Failed", exc)
             return
+        self._present_multivariate(pca, vif)
+
+    def _run_multivariate_async(self) -> None:
+        """Run the PCA/VIF analysis off the GUI thread (#9470)."""
+        metrics = _selected_text(self.relationship_metrics)
+        self._start_action(
+            "Multivariate analysis",
+            lambda ctx: self._compute_multivariate(metrics, ctx),
+            self._present_multivariate,
+            "Multivariate Analysis Failed",
+        )
+
+    # ---- predictive model -------------------------------------------------
+
+    def _read_model_params(self) -> _ModelParams:
+        """Read the model controls on the GUI thread (#9470)."""
+        group = self.model_group.currentText()
+        return _ModelParams(
+            target=self.model_target.currentText(),
+            features=_selected_text(self.model_features),
+            model=self.model_type.currentText(),
+            random_seed=int(self.model_seed.value()),
+            group_column=None if group == "(random split)" else group,
+        )
+
+    def _compute_model(
+        self,
+        params: _ModelParams,
+        ctx: WorkerContext | None = None,
+    ) -> PredictiveModelResult:
+        """Fit the predictive model as plain data (#9470).
+
+        One opaque scikit-learn call, so there is no loop boundary to check;
+        Cancel takes effect when the fit returns (noted in the progress line).
+        """
+        if ctx is not None:
+            ctx.report(
+                None,
+                "fitting held-out model; cancel takes effect when the fit ends",
+            )
+        return fit_predictive_model(
+            self.analysis_frame,
+            target=params.target,
+            features=params.features,
+            model=params.model,
+            random_seed=params.random_seed,
+            group_column=params.group_column,
+        )
+
+    def _present_model(self, result: PredictiveModelResult) -> None:
+        """Render the model report and prediction scatter. GUI thread only."""
         self.model_report.setPlainText(
             json.dumps(
                 {
@@ -824,18 +1109,59 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             f"RMSE={result.metrics['rmse']:.3g}."
         )
 
-    def _run_comparison_ui(self) -> None:
-        match = self.comparison_match.currentText()
+    def _run_model_ui(self) -> None:
+        """Synchronous predictive-model fit (kept pre-migration path)."""
         try:
-            result = compare_monitors(
-                self.analysis_frame,
-                metric=self.comparison_metric.currentText(),
-                match_column=None if match == "(unmatched)" else match,
-                reference_monitor=self.comparison_reference.currentText() or None,
-            )
-        except ValueError as exc:
-            self._show_error("Monitor Comparison Failed", exc)
+            result = self._compute_model(self._read_model_params())
+        except (ValueError, ImportError) as exc:
+            self._show_error("Predictive Model Failed", exc)
             return
+        self._present_model(result)
+
+    def _run_model_async(self) -> None:
+        """Run the predictive-model fit off the GUI thread (#9470)."""
+        params = self._read_model_params()
+        self._start_action(
+            "Predictive model",
+            lambda ctx: self._compute_model(params, ctx),
+            self._present_model,
+            "Predictive Model Failed",
+        )
+
+    # ---- monitor comparison -------------------------------------------------
+
+    def _read_comparison_params(self) -> _ComparisonParams:
+        """Read the comparison controls on the GUI thread (#9470)."""
+        match = self.comparison_match.currentText()
+        return _ComparisonParams(
+            metric=self.comparison_metric.currentText(),
+            match_column=None if match == "(unmatched)" else match,
+            reference_monitor=self.comparison_reference.currentText() or None,
+        )
+
+    def _compute_comparison(
+        self,
+        params: _ComparisonParams,
+        ctx: WorkerContext | None = None,
+    ) -> MonitorComparisonResult:
+        """Compare monitors as plain data (#9470).
+
+        One opaque call; Cancel takes effect when the comparison returns.
+        """
+        if ctx is not None:
+            ctx.report(
+                None,
+                "comparing monitors; cancel takes effect when the step ends",
+            )
+        return compare_monitors(
+            self.analysis_frame,
+            metric=params.metric,
+            match_column=params.match_column,
+            reference_monitor=params.reference_monitor,
+        )
+
+    def _present_comparison(self, result: MonitorComparisonResult) -> None:
+        """Render the comparison table and error bars. GUI-thread only."""
         self.comparison_table.set_frame(
             pd.DataFrame(asdict(item) for item in result.pairwise)
         )
@@ -854,75 +1180,178 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
             warning or "Matched monitor agreement analysis complete."
         )
 
-    def _run_dispersion_ui(self) -> None:
-        forward = self.dispersion_forward.currentText()
-        lateral = self.dispersion_lateral.currentText()
-        group_column = self.dispersion_group.currentText()
-        groups: list[tuple[object, pd.DataFrame]] = [("All Shots", self.analysis_frame)]
-        if group_column != "(all shots)" and group_column in self.analysis_frame:
+    def _run_comparison_ui(self) -> None:
+        """Synchronous monitor comparison (kept pre-migration path)."""
+        try:
+            result = self._compute_comparison(self._read_comparison_params())
+        except ValueError as exc:
+            self._show_error("Monitor Comparison Failed", exc)
+            return
+        self._present_comparison(result)
+
+    def _run_comparison_async(self) -> None:
+        """Run the monitor comparison off the GUI thread (#9470)."""
+        params = self._read_comparison_params()
+        self._start_action(
+            "Monitor comparison",
+            lambda ctx: self._compute_comparison(params, ctx),
+            self._present_comparison,
+            "Monitor Comparison Failed",
+        )
+
+    # ---- dispersion ---------------------------------------------------------
+
+    def _read_dispersion_params(self) -> _DispersionParams:
+        """Read the dispersion controls on the GUI thread (#9470)."""
+        return _DispersionParams(
+            forward=self.dispersion_forward.currentText(),
+            lateral=self.dispersion_lateral.currentText(),
+            group_column=self.dispersion_group.currentText(),
+        )
+
+    def _compute_dispersion(
+        self,
+        frame: pd.DataFrame,
+        params: _DispersionParams,
+        ctx: WorkerContext | None = None,
+    ) -> _DispersionData:
+        """Compute per-group dispersion as plain data (#9470).
+
+        Loops once per group; every group boundary is a cancellation
+        checkpoint and a progress report. Plot geometry is returned as
+        plain arrays so the worker never touches widgets.
+        """
+        groups: list[tuple[object, pd.DataFrame]] = [("All Shots", frame)]
+        if params.group_column != "(all shots)" and params.group_column in frame:
             groups = [
                 (name, group)
-                for name, group in self.analysis_frame.groupby(
-                    group_column, dropna=False
-                )
+                for name, group in frame.groupby(params.group_column, dropna=False)
             ]
+        total = len(groups)
         rows: list[dict[str, object]] = []
+        series: list[_DispersionPlotData] = []
+        for index, (name, group) in enumerate(groups):
+            if ctx is not None:
+                ctx.raise_if_cancelled()
+                ctx.report(index / total, f"dispersion group {index + 1}/{total}")
+            result = analyze_dispersion(
+                group, forward=params.forward, lateral=params.lateral
+            )
+            rows.append({"group": str(name), **asdict(result)})
+            series.append(self._dispersion_plot_data(str(name), group, params, result))
+        return _DispersionData(rows=rows, series=tuple(series))
+
+    @staticmethod
+    def _dispersion_plot_data(
+        name: str,
+        group: pd.DataFrame,
+        params: _DispersionParams,
+        result: DispersionResult,
+    ) -> _DispersionPlotData:
+        """Extract plain per-group plot geometry (worker-safe, no widgets)."""
+        angle = np.linspace(0.0, 2.0 * np.pi, _ELLIPSE_POINTS)
+        ellipse = np.column_stack(
+            [
+                result.ellipse_major / 2 * np.cos(angle),
+                result.ellipse_minor / 2 * np.sin(angle),
+            ]
+        )
+        rotation = np.array(
+            [
+                [np.cos(result.ellipse_angle_rad), -np.sin(result.ellipse_angle_rad)],
+                [np.sin(result.ellipse_angle_rad), np.cos(result.ellipse_angle_rad)],
+            ]
+        )
+        rotated = ellipse @ rotation.T
+        return _DispersionPlotData(
+            name=name,
+            forward_values=group[params.forward].to_numpy(dtype=float),
+            lateral_values=group[params.lateral].to_numpy(dtype=float),
+            ellipse_forward=rotated[:, 0] + result.mean_forward,
+            ellipse_lateral=rotated[:, 1] + result.mean_lateral,
+        )
+
+    def _present_dispersion(
+        self,
+        data: _DispersionData,
+        params: _DispersionParams,
+    ) -> None:
+        """Render dispersion rows, ellipses, and labels. GUI-thread only."""
+        self.dispersion_table.set_frame(pd.DataFrame(data.rows))
         axes = self.dispersion_plot.reset_axes()
+        for item in data.series:
+            axes.scatter(
+                item.forward_values,
+                item.lateral_values,
+                alpha=0.55,
+                label=item.name,
+            )
+            axes.plot(item.ellipse_forward, item.ellipse_lateral)
+        axes.set_xlabel(params.forward)
+        axes.set_ylabel(params.lateral)
+        axes.set_title(self._title_with_project("95% Dispersion Ellipses"))
+        axes.grid(True, alpha=0.25)
+        if len(data.series) > 1:
+            axes.legend(fontsize="small")
+        self.dispersion_plot.draw_idle()
+        self.status_label.setText(
+            f"Dispersion complete for {len(data.series)} group(s)."
+        )
+
+    def _run_dispersion_ui(self) -> None:
+        """Synchronous dispersion analysis (kept pre-migration path)."""
+        params = self._read_dispersion_params()
         try:
-            for name, group in groups:
-                result = analyze_dispersion(group, forward=forward, lateral=lateral)
-                rows.append({"group": str(name), **asdict(result)})
-                axes.scatter(
-                    group[forward], group[lateral], alpha=0.55, label=str(name)
-                )
-                angle = np.linspace(0, 2 * np.pi, 200)
-                ellipse = np.column_stack(
-                    [
-                        result.ellipse_major / 2 * np.cos(angle),
-                        result.ellipse_minor / 2 * np.sin(angle),
-                    ]
-                )
-                rotation = np.array(
-                    [
-                        [
-                            np.cos(result.ellipse_angle_rad),
-                            -np.sin(result.ellipse_angle_rad),
-                        ],
-                        [
-                            np.sin(result.ellipse_angle_rad),
-                            np.cos(result.ellipse_angle_rad),
-                        ],
-                    ]
-                )
-                rotated = ellipse @ rotation.T
-                axes.plot(
-                    rotated[:, 0] + result.mean_forward,
-                    rotated[:, 1] + result.mean_lateral,
-                )
+            data = self._compute_dispersion(self.analysis_frame, params)
         except ValueError as exc:
             self._show_error("Dispersion Analysis Failed", exc)
             return
-        self.dispersion_table.set_frame(pd.DataFrame(rows))
-        axes.set_xlabel(forward)
-        axes.set_ylabel(lateral)
-        axes.set_title(self._title_with_project("95% Dispersion Ellipses"))
-        axes.grid(True, alpha=0.25)
-        if len(groups) > 1:
-            axes.legend(fontsize="small")
-        self.dispersion_plot.draw_idle()
-        self.status_label.setText(f"Dispersion complete for {len(groups)} group(s).")
+        self._present_dispersion(data, params)
 
-    def _run_trend_ui(self) -> None:
-        try:
-            result = analyze_trend(
-                self.analysis_frame,
-                metric=self.trend_metric.currentText(),
-                time_column=self.trend_time.currentText(),
-                rolling_window=int(self.trend_window.value()),
+    def _run_dispersion_async(self) -> None:
+        """Run the dispersion analysis off the GUI thread (#9470)."""
+        params = self._read_dispersion_params()
+        frame = self.analysis_frame
+        self._start_action(
+            "Dispersion analysis",
+            lambda ctx: self._compute_dispersion(frame, params, ctx),
+            lambda data: self._present_dispersion(data, params),
+            "Dispersion Analysis Failed",
+        )
+
+    # ---- longitudinal trend ---------------------------------------------------
+
+    def _read_trend_params(self) -> _TrendParams:
+        """Read the trend controls on the GUI thread (#9470)."""
+        return _TrendParams(
+            metric=self.trend_metric.currentText(),
+            time_column=self.trend_time.currentText(),
+            rolling_window=int(self.trend_window.value()),
+        )
+
+    def _compute_trend(
+        self,
+        params: _TrendParams,
+        ctx: WorkerContext | None = None,
+    ) -> TemporalTrendResult:
+        """Analyze the longitudinal trend as plain data (#9470).
+
+        One opaque call; Cancel takes effect when the analysis returns.
+        """
+        if ctx is not None:
+            ctx.report(
+                None,
+                "analysing trend; cancel takes effect when the step ends",
             )
-        except ValueError as exc:
-            self._show_error("Trend Analysis Failed", exc)
-            return
+        return analyze_trend(
+            self.analysis_frame,
+            metric=params.metric,
+            time_column=params.time_column,
+            rolling_window=params.rolling_window,
+        )
+
+    def _present_trend(self, result: TemporalTrendResult) -> None:
+        """Render the trend table, rolling series, and change points."""
         candidates = pd.DataFrame(asdict(item) for item in result.change_candidates)
         self.trend_table.set_frame(candidates)
         axes = self.trend_plot.reset_axes()
@@ -955,6 +1384,25 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
         self.status_label.setText(
             f"Trend slope={result.slope_per_day:.4g}/day; "
             f"{len(result.change_candidates)} candidate change point(s)."
+        )
+
+    def _run_trend_ui(self) -> None:
+        """Synchronous trend analysis (kept pre-migration path)."""
+        try:
+            result = self._compute_trend(self._read_trend_params())
+        except ValueError as exc:
+            self._show_error("Trend Analysis Failed", exc)
+            return
+        self._present_trend(result)
+
+    def _run_trend_async(self) -> None:
+        """Run the trend analysis off the GUI thread (#9470)."""
+        params = self._read_trend_params()
+        self._start_action(
+            "Trend analysis",
+            lambda ctx: self._compute_trend(params, ctx),
+            self._present_trend,
+            "Trend Analysis Failed",
         )
 
     def _on_import_files(self) -> None:
@@ -1089,7 +1537,13 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
         except OSError as exc:
             self._show_error("Could Not Export Manifest", exc)
 
+    def _show_error_message(self, title: str, message: str) -> None:
+        """Surface an analysis failure in the log and the status line."""
+        logger.warning("%s: %s", title, message)
+        self.status_label.setText(f"{title}: {message}")
+
     def _show_error(self, title: str, exc: Exception) -> None:
+        """Surface a synchronous failure with a modal warning."""
         logger.warning("%s: %s", title, exc)
         self.status_label.setText(f"{title}: {exc}")
         QtWidgets.QMessageBox.warning(self, title, str(exc))
