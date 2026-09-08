@@ -111,3 +111,96 @@ def test_body25_uses_its_own_mid_hip_and_neck() -> None:
         == px[names.index("neck")].tolist()
     )
     assert out["provenance"]["derived_joints"] == {}
+
+
+def _payload(names: list[str], px: list[list[float]], conf: list[float]) -> dict:
+    return {
+        "view": "v",
+        "fps": 30.0,
+        "frames_total": 1,
+        "detector_layout": {"name": "test_layout", "keypoint_names": names},
+        "frames": [
+            {
+                "camera_id": "x",
+                "time_s": 0.0,
+                "keypoints_px": px,
+                "confidence": conf,
+            }
+        ],
+    }
+
+
+def test_coco17_derives_mid_hip_and_neck_from_shoulders_and_hips() -> None:
+    from src.shared.python.pose_estimation.rtmpose_onnx_estimator import (
+        RtmposeOnnxEstimator,
+    )
+
+    names = [
+        RtmposeOnnxEstimator.LANDMARK_MAP[i]
+        for i in sorted(RtmposeOnnxEstimator.LANDMARK_MAP)
+    ]
+    px = [[10.0, 10.0]] * len(names)
+    px[names.index("left_hip")] = [100.0, 200.0]
+    px[names.index("right_hip")] = [300.0, 200.0]
+    px[names.index("left_shoulder")] = [150.0, 100.0]
+    px[names.index("right_shoulder")] = [250.0, 100.0]
+    conf = [0.9] * len(names)
+    payload = _payload(names, px, conf)
+
+    out = to_reconstruct_layout(payload)
+    row = out["frames"][0]
+    # Hand-computed midpoints: hips -> (200, 200), shoulders -> (200, 100).
+    assert row["keypoints_px"][JOINT_NAMES.index("mid_hip")] == [200.0, 200.0]
+    assert row["keypoints_px"][JOINT_NAMES.index("neck")] == [200.0, 100.0]
+    assert row["confidence"][JOINT_NAMES.index("mid_hip")] == pytest.approx(0.9)
+    assert out["provenance"]["derived_joints"] == {
+        "mid_hip": ["left_hip", "right_hip"],
+        "neck": ["left_shoulder", "right_shoulder"],
+    }
+
+
+def test_coco17_unobserved_hip_leaves_mid_hip_unobserved() -> None:
+    from src.shared.python.pose_estimation.rtmpose_onnx_estimator import (
+        RtmposeOnnxEstimator,
+    )
+
+    names = [
+        RtmposeOnnxEstimator.LANDMARK_MAP[i]
+        for i in sorted(RtmposeOnnxEstimator.LANDMARK_MAP)
+    ]
+    px = [[10.0, 10.0]] * len(names)
+    px[names.index("left_hip")] = [100.0, 200.0]
+    px[names.index("right_hip")] = [300.0, 200.0]
+    px[names.index("left_shoulder")] = [150.0, 100.0]
+    px[names.index("right_shoulder")] = [250.0, 100.0]
+    conf = [0.9] * len(names)
+    conf[names.index("right_hip")] = 0.0  # one hip unobserved this frame
+    payload = _payload(names, px, conf)
+
+    row = to_reconstruct_layout(payload)["frames"][0]
+    mid_hip = JOINT_NAMES.index("mid_hip")
+    assert row["confidence"][mid_hip] == 0.0
+    assert row["keypoints_px"][mid_hip] == [0.0, 0.0]  # never half-invented
+
+
+def test_halpe26_uses_its_own_hip_and_neck_keypoints() -> None:
+    from src.shared.python.pose_estimation.rtmpose_onnx_estimator import (
+        RtmposeOnnxEstimator,
+    )
+
+    estimator = RtmposeOnnxEstimator(keypoint_set="halpe26")
+    names = [estimator.LANDMARK_MAP[i] for i in sorted(estimator.LANDMARK_MAP)]
+    px = [[10.0, 10.0]] * len(names)
+    px[names.index("hip")] = [210.0, 205.0]
+    px[names.index("neck")] = [205.0, 95.0]
+    px[names.index("left_hip")] = [100.0, 200.0]
+    px[names.index("right_hip")] = [300.0, 200.0]
+    conf = [0.8] * len(names)
+    payload = _payload(names, px, conf)
+
+    out = to_reconstruct_layout(payload)
+    row = out["frames"][0]
+    # Halpe reports its own hip (mid-hip) and neck: no midpoint derivation.
+    assert row["keypoints_px"][JOINT_NAMES.index("mid_hip")] == [210.0, 205.0]
+    assert row["keypoints_px"][JOINT_NAMES.index("neck")] == [205.0, 95.0]
+    assert out["provenance"]["derived_joints"] == {}
