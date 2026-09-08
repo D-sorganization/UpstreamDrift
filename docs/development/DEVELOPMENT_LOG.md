@@ -146,7 +146,8 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
   prohibition stands on Windows with no blanket exception.
 - **Next step:** Record CI on PR #9744; on merge, confirm the protected-main
   sync lands the resolved hook environment note.
-### DL-#9476 · Re-vendor the corrected spec merge driver and pin drift
+
+### DL-#9476 · Re-Vendor the Corrected Spec Merge Driver and Pin Drift
 
 - **State:** in_review
 - **Owner:** claude
@@ -173,7 +174,7 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **Next step:** Land the re-vendor PR, then open the wiring PR on
   `claude/issue-9476-driver-wiring`.
 
-### DL-#9533 · Test-only extras reachable from the dev lock
+### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
 - **State:** in_review
 - **Owner:** claude
@@ -212,4 +213,3 @@ Entries stay here for 90 days after merge, then move to the archive.
 ## Archive
 
 Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
-
