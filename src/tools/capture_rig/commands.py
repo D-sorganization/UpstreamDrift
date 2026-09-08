@@ -243,6 +243,15 @@ def compare_takes_command(
     return python_module_command(args)
 
 
+def fit_model_command(
+    session: Path, *, sigma_accel: float = 300.0, max_velocity: float = 25.0
+) -> list[str]:
+    require(sigma_accel > 0 and max_velocity > 0, "positive priors")
+    args = ["fit-model", "--session", str(session), "--sigma-accel", f"{sigma_accel:g}"]
+    args += ["--max-velocity", f"{max_velocity:g}"]
+    return python_module_command(args)
+
+
 def export_command(session: Path) -> list[str]:
     return python_module_command(["export", "--session", str(session)])
 

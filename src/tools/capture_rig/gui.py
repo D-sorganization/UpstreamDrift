@@ -687,6 +687,7 @@ class CaptureRigWidget(QWidget):
         ("reliability", "Reliability"),
         ("calibrate", "Calibrate intrinsics"),
         ("reconstruct", "Reconstruct"),
+        ("fit_model", "Fit model"),
         ("analyze", "Analyze 2-D"),
         ("export", "Export"),
         ("clip", "Export clip"),
@@ -707,7 +708,9 @@ class CaptureRigWidget(QWidget):
         self.reliability_table = ResultsTable()
         self.results.addTab(self.swing_table, "Swing (3-D)")
         self.results.addTab(self.analysis_table, "Analysis (2-D)")
+        self.model_table = ResultsTable()
         self.results.addTab(self.reliability_table, "Reliability")
+        self.results.addTab(self.model_table, "Model fit")
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(5000)
@@ -789,6 +792,7 @@ class CaptureRigWidget(QWidget):
             "calibrate": lambda: self._calibrate(session),
             "reconstruct": lambda: self._reconstruct(session),
             "analyze": lambda: commands.analyze_command(session),
+            "fit_model": lambda: commands.fit_model_command(session),
             "export": lambda: commands.export_command(session),
             "clip": lambda: self._clip(session),
             "compare_takes": lambda: self._compare_takes(session),
@@ -884,6 +888,7 @@ class CaptureRigWidget(QWidget):
         self.results.setCurrentIndex(1 if len(media.views) == 1 else 0)
         self.swing_table.fill(media.swing_summary)
         self.analysis_table.fill(media.analysis_2d)
+        self.model_table.fill(media.model_fit)
         self.reliability_table.fill(
             _reliability_rows(media.reliability) if media.reliability else None
         )

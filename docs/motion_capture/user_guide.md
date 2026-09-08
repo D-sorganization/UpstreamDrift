@@ -150,7 +150,24 @@ Camera placement learned from the golfer, rigid skeleton, outliers rejected.
 
 Tile actions: reconstruct.
 
-### 7. Analyse the Single View
+### 7. Fit the Articulated Golfer
+
+Joint angles of a realistic model (spine, torso, scapula struts, arms, legs) through the reconstructed joints, with continuous motion enforced.
+
+**You need**
+
+- A reconstruction (joints_3d_m.npy).
+- Tape-measured segments help: measured lengths replace the model defaults.
+
+**Do**
+
+1. Press *Fit model*. The fit solves every frame together with an acceleration prior on each joint angle, soft joint limits and robust rejection, so a point the model cannot reach by continuous motion is listed as rejected, not followed.
+2. Read model/fit_report.json: RMS per landmark, rejections, peak joint speeds; scapula angles appear as left/right_scapula.rx (elevation) and .ry (protraction).
+3. *Export* then also writes joint_angles_simscape.csv in the MATLAB model's variable names.
+
+Tile actions: fit_model.
+
+### 8. Analyse the Single View
 
 Events, tempo and normalised hand speed from one camera.
 
@@ -165,7 +182,7 @@ Events, tempo and normalised hand speed from one camera.
 
 Tile actions: analyze, clip, compare_takes.
 
-### 8. Export to the Motion Pipeline
+### 9. Export to the Motion Pipeline
 
 TRC and canonical JSON for scaling, IK and model matching.
 
