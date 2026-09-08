@@ -193,7 +193,15 @@ def _add_offline_parsers(sub: Any) -> None:
         default=None,
         help="intrinsics-only records for a first take: placement from the joints",
     )
-    rec3.add_argument("--anchor", required=True, metavar="SEGMENT=METRES")
+    rec3.add_argument(
+        "--anchor",
+        action="append",
+        required=True,
+        metavar="SEGMENT=METRES",
+        help="tape-measured segment, repeatable; everyday names (shank, forearm, "
+        "upper_arm, thigh, shoulder_width, hip_width, torso) constrain both sides; "
+        "the first one sets the scale",
+    )
     rec3.add_argument(
         "--exclude-joints",
         default="",
@@ -626,7 +634,6 @@ def cmd_compare(args: argparse.Namespace) -> int:
 
 
 def cmd_reconstruct(args: argparse.Namespace) -> int:
-    from src.motion_capture.reconstruct.__main__ import _parse_anchor
     from src.motion_capture.reconstruct.pipeline import (
         intrinsics_from,
         reconstruct_session,
@@ -635,11 +642,17 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
 
     if (args.cameras is None) == (args.intrinsics is None):
         raise SystemExit("give exactly one of --cameras or --intrinsics")
+    from src.motion_capture.reconstruct.measurements import expand_measurements
+
+    try:
+        expand_measurements(args.anchor)  # usage errors before any heavy work
+    except ValueError as exc:
+        raise SystemExit(f"--anchor: {exc}") from exc
     summary = reconstruct_session(
         args.session,
         start_cameras=start_cameras_from(args.cameras) if args.cameras else None,
         intrinsics=intrinsics_from(args.intrinsics) if args.intrinsics else None,
-        scale_anchor=_parse_anchor(args.anchor),
+        measurements=tuple(args.anchor),
         acceleration_sigma_px=args.accel_sigma_px,
         exclude_joints=tuple(
             j.strip() for j in args.exclude_joints.split(",") if j.strip()
