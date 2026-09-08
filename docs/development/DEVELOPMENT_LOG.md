@@ -160,6 +160,46 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **Next step:** Record CI on PR #9744; on merge, confirm the protected-main
   sync lands the resolved hook environment note.
 
+### DL-#9476 · Re-Vendor the Corrected Spec Merge Driver and Pin Drift
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9476`
+- **Branch:** `claude/issue-9476-spec-merge-driver`
+- **PR:** #9734 (open, in_review)
+- **Paths:** `scripts/install_spec_merge_driver.py`,
+  `shared_scripts/spec_changelog.py`,
+  `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`, `SPEC.md`,
+  `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`3fd347b72`)
+- **Summary:** The vendored installer still stamped the withdrawn
+  merge-abort claim into `$GIT_COMMON_DIR/info/attributes` and both vendored
+  copies had no drift detection. Re-vendored both files byte-identical from
+  Repository_Management#1521's corrected copies (verified: the false
+  `ATTRIBUTE_BLOCK` text is gone; the repo-wide scan's only surviving match
+  in UD-owned files is the correction narrative quoting the wrong claim to
+  refute it, plus true statements about the half-configured state), and added
+  `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py` pinning SHA-256
+  digests against the upstream reference so future divergence fails loudly.
+  Registration wiring into `scripts/setup_hooks.py` is the companion PR the
+  issue requests as a separate behaviour change.
+- **Next step:** Land the re-vendor PR, then open the wiring PR on
+  `claude/issue-9476-driver-wiring`.
+
+### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9533`
+- **Branch:** `claude/issue-9533-test-extras`
+- **PR:** #9716 (open, in_review)
+- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`, `requirements*.lock`, `environment.yml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`289b3aa`)
+- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools` and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed them and ~24 CI tests failed on import. Both now resolve through the `dev` extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml` workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR, since Windows/WSL cannot regenerate correctly (#9533).
+- **Next step:** Dispatch `.github/workflows/lock-refresh.yml` from `main` once this PR merges, then confirm the `ci-standard.yml` dependency-consistency freshness gate and the 24 previously failing tests go green.
+
 ### DL-#9733 · Fail Fast on the Uninitialized Vendored Tools Fallback
 
 - **State:** in_review
