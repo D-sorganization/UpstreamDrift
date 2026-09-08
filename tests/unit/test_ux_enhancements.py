@@ -141,9 +141,18 @@ def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
         "src.shared.python.secure_subprocess": MagicMock(),
     }
 
-    with patch.dict(sys.modules, mock_modules):
-        if "src.launchers.upstream_drift_launcher" in sys.modules:
-            del sys.modules["src.launchers.upstream_drift_launcher"]
-        import src.launchers.upstream_drift_launcher
+    saved_launcher = sys.modules.pop("src.launchers.upstream_drift_launcher", None)
+    try:
+        with patch.dict(sys.modules, mock_modules):
+            # Re-import the launcher under the mocked Qt modules.  The
+            # previous entry is snapshotted above and restored in the
+            # fixture teardown so this fixture can never leave a mocked
+            # import cached in sys.modules (#9387).
+            import src.launchers.upstream_drift_launcher
 
-        yield src.launchers.upstream_drift_launcher
+            yield src.launchers.upstream_drift_launcher
+    finally:
+        if saved_launcher is not None:
+            sys.modules["src.launchers.upstream_drift_launcher"] = saved_launcher
+        else:
+            sys.modules.pop("src.launchers.upstream_drift_launcher", None)
