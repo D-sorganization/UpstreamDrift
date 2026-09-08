@@ -169,6 +169,21 @@ arrangement under a name, loads or deletes a saved one, and **Reset layout**
 returns to the default with every pane shown. The last arrangement is restored
 on the next start.
 
+### Appearance
+
+The tile follows the application theme (#9816). Its header is one toolbar:
+the session line on the left, then a status strip of three chips (cameras
+bound, recorder state with the live REC readout, and the outcome of the last
+take) and the **Layout** bar on the right. The action buttons are grouped by
+workflow step, each row labelled with the step it belongs to, so the grid
+reads in the same order as the Workflow panel. Every colour and style comes
+from `src/tools/capture_rig/styling.py`, which composes them from the active
+palette and the fleet `Styles` constants: nothing in the tile names a colour,
+spacing comes from `LayoutMetrics`, and switching theme (standalone window or
+embedded in the launcher alike) restyles the header, chips, preview tiles and
+the recording badge immediately. `tests/tools/capture_rig/test_theme_compliance.py`
+fails the build on a literal colour or an ad-hoc stylesheet string in the package.
+
 The live view opens with the tile. Under the tiles sits a transport strip:
 
 - **Record / Stop**: one button; during the countdown it reads _Cancel_.
