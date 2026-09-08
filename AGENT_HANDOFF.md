@@ -31,7 +31,22 @@ Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
 design-manual program.
 
-Detailed takeover context (merge-versus-quarantine boundary, exact smoke contract, recovery constraints, next commands): `docs/development/proximal_distal_program_turnover.md`.
+Registry truth (#9478, branch `claude/issue-9478-registry-truth`):
+`provider: tools` registry paths now carry the `tools://` scheme (stripped by
+`ToolsVendorModelSourceProvider`, rejected by local/sibling providers), and
+`ready_maturity_gate` in `src/shared/python/config/tile_target_resolution.py`
+fails any `ready`/`beta` tile whose entry point does not resolve. Maturity
+labels for sibling-folder, argparse-CLI, and dashboard-shell tiles were
+corrected in `src/config/models.yaml`; `chat_assistant`/`tools_calculator_hub`
+descriptions corrected in `src/config/launcher_manifest.json`. Gate:
+`python -m pytest tests/config/test_tile_paths_resolve.py`. Follow-ups: a
+dedicated calculator surface for `tools_calculator_hub`, a GUI tile for
+`motion_capture`, sibling-folder click error reporting, and the #9484
+Impact Explorer web build.
+
+Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
+contract, recovery constraints, and next commands are in
+`docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
