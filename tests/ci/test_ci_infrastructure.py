@@ -1835,6 +1835,32 @@ class TestPyprojectTomlConsistency:
             assert package not in dev_deps
             assert f"{package}==" in lock
 
+    def test_dev_extra_reaches_test_only_packages(self) -> None:
+        """openpyxl and imageio must resolve through the dev extra (#9533).
+
+        requirements-dev.lock is compiled with ``--extra=dev --extra=gui-test``
+        and no CI test lane installs the ``gui-tools`` or ``pose`` extras, so
+        packages declared only there are never installed anywhere in CI.
+        """
+        data = self._load_pyproject()
+
+        def _dist_name(requirement: str) -> str:
+            return (
+                requirement.split("[", 1)[0].split(">", 1)[0].split("=", 1)[0].lower()
+            )
+
+        dev_deps = {
+            _dist_name(requirement)
+            for requirement in data["project"]["optional-dependencies"]["dev"]
+        }
+
+        for package in ("imageio", "openpyxl"):
+            assert package in dev_deps, (
+                f"{package} must be reachable from the dev extra: "
+                "requirements-dev.lock (--extra=dev --extra=gui-test) is the only "
+                "dependency source installed by the CI test lanes (#9533)."
+            )
+
     def test_pytest_collects_in_tree_tests_by_default(self) -> None:
         """Default pytest config must include intentional colocated src tests."""
         data = self._load_pyproject()

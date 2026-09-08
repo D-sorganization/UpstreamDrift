@@ -17,7 +17,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-
 ### DL-#9542 · Bunker Exit State Consistency, Provenance, and Result Envelope
 
 - **State:** in_review
@@ -30,6 +29,25 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-07 (`SELF`)
 - **Summary:** `SandDelivery` now refuses contradictory exit speed/vector pairs and owns copies of list-supplied exit vectors so post-construction mutation cannot invalidate the frozen record; the `to_post_impact_state` boundary carries explicit `ExitVectorProvenance` labels, and `PostImpactEnvelope` wraps the flight handoff with the validity verdict, F0 tier, per-group frames, the proper `HEAD_FRAME_TO_FLIGHT_TRANSFORM`, a schema version, and a SHA-256 source digest with JSON round trip. Reflection rejection itself was already delivered by PR #9574 and is not redone.
 - **Next step:** Open the protected PR to `main` with `Fixes #9542`, label `agent:claude`, and RED/GREEN evidence in the body.
+
+### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9716 (open; `Fixes #9533`)
+- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`,
+  `requirements*.lock`, `environment.yml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`289b3aac2`)
+- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools`
+  and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed
+  them and ~24 CI tests failed on import. Both now resolve through the `dev`
+  extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml`
+  workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR,
+  since Windows/WSL cannot regenerate correctly (#9533).
+- **Next step:** Regenerate the locks via `lock-refresh.yml` so the
+  dependency-consistency freshness gate and the 24 previously failing tests
+  go green.
 
 ## Shipped (Last 90 Days)
 
@@ -56,6 +74,20 @@ Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
 | `Parked`        | When `parked`              | Date plus reason                                               |
 
 Never place credentials, tokens, or customer data in a development log.
+
+### DL-#9249 · UI: Pin @vitejs/Plugin-React to ^5 Until Vite 8
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9718 (open; `Fixes #9249`)
+- **Paths:** `.github/dependabot.yml`, `ui/README.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`7cdbb0a3d`)
+- **Summary:** Dependabot ignores `@vitejs/plugin-react` major updates
+  because 6.x needs Vite 8 (Vite 7 exports no `./internal`); the pairing
+  constraint is documented in `ui/README.md`.
+- **Next step:** Merge the guard PR; revisit the paired vite@8 +
+  plugin-react@6 upgrade once `vitest`/`@react-three/*` are Vite-8 ready.
 
 ### DL-#9470 · Launch-Monitor Analysis Handlers Onto the Async_Action Worker
 
