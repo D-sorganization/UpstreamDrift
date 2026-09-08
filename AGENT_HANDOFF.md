@@ -23,6 +23,9 @@ contract, recovery constraints, and next commands are in
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
+`_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
+`architecture_budget.json` exceptions are removed, behavior pinned by tests.
 
 ## In-Flight Tool Migration: #9470 (Launch-Monitor Async Analytics)
 
