@@ -1,0 +1,143 @@
+name: Lock Refresh
+
+# Regenerates requirements.lock, requirements-dev.lock, and environment.yml in
+# the matching environment (Linux, Python 3.12) and opens a PR with the result.
+#
+# Why this workflow exists: the lockfiles must be regenerated in the exact
+# environment CI validates (ubuntu + Python 3.12). Windows skews platform
+# markers and WSL ships Python 3.14 while the lock header records 3.12, so no
+# local regeneration on the dev fleet is trustworthy (#9533). Dispatch-only:
+# a maintainer or coordinator triggers it when pyproject.toml dependency
+# declarations change.
+#
+# The regeneration command is the same `make sync-deps` that the
+# ci-standard dependency-consistency job runs before its freshness gate
+# (ci-standard.yml:1564) — the commands live in the Makefile, so both stay in
+# sync.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: lock-refresh-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh-locks:
+    name: Refresh pip lockfiles
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 30
+    steps:
+      - name: Clean corrupt git objects
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            if find .git/objects -type f -empty | grep -q .; then
+              echo "Found empty/corrupt git objects, purging .git..."
+              rm -rf .git
+            elif ! git fsck --quick >/dev/null 2>&1; then
+              echo "git fsck failed, purging .git..."
+              rm -rf .git
+            fi
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            echo "Running inside Docker container. Redirecting tool cache to private temp directory..."
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          else
+            echo "Running directly on host. Sharing tool cache."
+          fi
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Purge pip cache
+        run: python -m pip cache purge || true
+
+      - name: Create Dependency Virtual Environment
+        run: |
+          python -m venv "$RUNNER_TEMP/lock-refresh-venv"
+          echo "$RUNNER_TEMP/lock-refresh-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/lock-refresh-venv" >> "$GITHUB_ENV"
+          python -m pip install --upgrade pip
+
+      - name: Regenerate dependency artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          make sync-deps
+
+      - name: Fail if regeneration drifted pyproject.toml
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet -- pyproject.toml; then
+            echo "::error::make sync-deps modified pyproject.toml; unexpected source drift."
+            git diff -- pyproject.toml
+            exit 1
+          fi
+
+      - name: Detect lock drift
+        id: drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- requirements.lock requirements-dev.lock environment.yml; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: No lock drift to publish
+        if: steps.drift.outputs.drift == 'false'
+        shell: bash
+        run: echo "::notice::Regenerated lockfiles match the committed ones; nothing to publish."
+
+      - name: Open PR with regenerated locks
+        if: steps.drift.outputs.drift == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: lock-refresh/run-${{ github.run_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add requirements.lock requirements-dev.lock environment.yml
+          if git diff --cached --quiet; then
+            echo "::notice::No staged lock changes; nothing to publish."
+            exit 0
+          fi
+          git commit -m "chore(deps): regenerate lockfiles from pyproject.toml"
+          git push -u origin "$BRANCH"
+          cat > "$RUNNER_TEMP/pr-body.md" <<EOF
+          Regenerated \`requirements.lock\`, \`requirements-dev.lock\`, and
+          \`environment.yml\` with \`make sync-deps\` on ubuntu + Python 3.12 —
+          the exact environment the \`ci-standard.yml\` dependency-consistency
+          freshness gate validates. Windows and WSL on the dev fleet cannot
+          regenerate these correctly (#9533).
+
+          Run: $RUN_URL
+
+          This is lock plumbing only; no dependency pin was hand-edited.
+          Ref: #9533
+          EOF
+          gh pr create --base main --head "$BRANCH" \
+            --title "chore(deps): regenerate lockfiles (Linux, Python 3.12)" \
+            --body-file "$RUNNER_TEMP/pr-body.md"
