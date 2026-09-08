@@ -1,14 +1,12 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 10:02 PDT
+Updated: 2026-09-08 00:30 PDT
 
-Epic #8557 is canonical; issue state, local files, and checkpoints are not
-completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
-design-manual program.
+Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
+evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
 
-Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
-contract, recovery constraints, and next commands are in
-`docs/development/proximal_distal_program_turnover.md`.
+Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
+recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
@@ -95,6 +93,8 @@ Seam (#9406) and failure triage (#9474): see
    case enumeration, atomic resume, typed failures, and no outcome promotion.
 3. Execute the six registered cases only after runner code and tests merge.
    Never import or relabel legacy checkpoints as outcomes.
+4. Regenerate `requirements*.lock`/`environment.yml` via dispatch-only `lock-refresh.yml`
+   for #9533 (DL-#9533) once its extras PR merges; the locks were left untouched there.
 
 ## Scientific Boundaries
 
