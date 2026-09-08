@@ -19,15 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9825
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9826
 - **Branch:** fix/9825-preserve-reviewed-claims
 - **Paths:** manufactured claim registration, integration/native contracts, governed research evidence, canonical publication and claim_preservation_9825_turnover.md.
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (128 strict native contracts, five summary tests, 6,764-file Ruff/format and computational publication qualification pass)
 - **Summary:** Actual reconciliation now preserves reviewed evidence/order and refuses changed science; six real-path failures become 11 passes. Current pinned engines regenerate deterministic provenance with unchanged numerical results; two expected-failure exemptions are removed. All 328 outcomes remain unchanged; the generated census/PDF is refreshed and reviewed.
-- **Next step:** Complete normal commit/push, ready PR and protected CI/review. Physical and archival qualifications remain separate.
+- **Next step:** Source f0bbc4d50 is published through all normal hooks; PR #9826 is ready and protected CI is running. Monitor current-head checks and review. Physical and archival qualifications remain separate.
 
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 
