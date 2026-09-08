@@ -98,8 +98,8 @@ def test_model_surface_matches_bioptim_expectations() -> None:
 
     model = make_swing_bio_model()
     assert model.name_dofs[0] == "hip_rotation" and model.nb_q == 7 == model.nb_tau
-    assert model.nb_root == 0 and model.nb_markers == 6
-    assert model.marker_index("clubhead") == 5
+    assert model.nb_root == 0
+    assert model.marker_index("clubhead") == 5 and model.nb_markers == 7
     empty = np.zeros(0)
     tau_max, tau_min = model.tau_max()(np.zeros(7), np.zeros(7), empty)
     np.testing.assert_allclose(
