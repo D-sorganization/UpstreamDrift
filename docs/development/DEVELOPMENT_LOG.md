@@ -17,6 +17,21 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9612`
+- **PR:** #9720
+- **Paths:** `src/api/routes/video.py`, `tests/unit/api/test_routes_video.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-07 (`SELF`)
+- **Summary:** Video analysis uploads no longer default temp files to `.mp4`;
+  the container suffix is derived from the upload filename against the
+  `SUPPORTED_VIDEO_SUFFIXES` allow-list in one place and unknown or missing
+  extensions fail closed with a 400 before any side effect.
+- **Next step:** Merge the protected PR for `#9612` and confirm CI runs green.
+
 ### DL-#9762 · `bioptim` Optimal-Control Backend and the Swing-Dynamics Fixes
 
 - **State:** in_review
