@@ -297,6 +297,30 @@ Open an issue in `Repository_Management`. If you must bypass once to land an urg
 
 Branch protection requires the CI `quality-gate` check on every PR. That check runs the same lint, format, type, and security gates as the hooks. `--no-verify` only delays feedback — it cannot land code that would have failed the hook.
 
+### Windows Hook Environment — Resolved (#9494)
+
+The pre-commit environment runs on Windows; the `--no-verify` prohibition
+stands there with no blanket exception. `.pre-commit-config.yaml` sets
+`default_language_version: python: python`, which resolves to the interpreter
+on `PATH` (Python 3.13.3 on the current workstation), and no hook pins an
+older version — the historical `python3.11` pin was removed by #1792/#2720.
+Pinning a specific minor version here would recreate the original failure
+(a workstation without that exact interpreter cannot build the hook
+virtualenvs), so the top-level resolution stays deliberately unpinned.
+
+Verified 2026-09-08 on Windows with pre-commit 4.6.2 after a from-scratch
+environment build: every commit-stage hook passes (`ruff`, `ruff format`,
+formatter-guidance-consistency, the pygrep hooks, document title
+capitalization, design-manual governance, prettier), and the pre-push
+`mypy` and `bandit` gates pass on their scoped files. The pre-push
+`pytest-unit` hook runs the bounded unit subset and is slow locally
+(exceeded an 8-minute local time-box); the full suite is CI's job.
+
+If a hook still fails on Windows for an environmental reason, follow
+“When the hook is legitimately broken” above — file/consult the tracking
+issue and record the hook error. Do not reintroduce a Windows-wide
+`--no-verify` rule.
+
 For the canonical hook contract, see [`Repository_Management/docs/FLEET_HOOK_STANDARDS.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/FLEET_HOOK_STANDARDS.md).
 
 ## Where to edit
