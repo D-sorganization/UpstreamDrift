@@ -36,7 +36,7 @@ Seam (#9406) and failure triage (#9474): see
 
 ## bioptim Optimal-Control Layer and the Swing-Dynamics Fixes (#9762)
 
-- Branch `claude/fixes-epic-implementation-x2bu36`. Epic doc:
+- Branch `claude/fixes-epic-implementation-x2bu36`, PR #9768 (open). Epic doc:
   `docs/issues/EPIC_BIOPTIM_OCP_INTEGRATION.md`; decision: ADR-0050.
 - Prerequisite issues #9755-#9761 are filed; #9755-#9760 are implemented on
   this branch, #9761 (upstream PR to pyomeca/bioptim) is external and open.
