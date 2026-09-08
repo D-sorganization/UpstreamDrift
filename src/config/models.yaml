@@ -57,7 +57,7 @@ models:
 
   - id: "myosim_suite"
     name: "MyoSuite"
-    description: "Muscle-actuated simulation environment"
+    description: "MyoSuite engine dashboard: engine availability and environment status (driving a simulation requires the optional myosuite package — #9478)"
     type: "myosim"
     path: "src/engines/physics_engines/myosuite/python/gui.py"
     engine_type: "myosuite"
@@ -110,7 +110,7 @@ models:
 
   - id: "mujoco_models_shared"
     name: "MuJoCo Models"
-    description: "MuJoCo simulation models repository folder"
+    description: "MuJoCo simulation models repository folder (opens only when the MuJoCo_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
     type: "shared_repo"
     path: "MuJoCo_Models"
     capabilities:
@@ -119,11 +119,11 @@ models:
     launcher:
       category: "simulation"
       logo: "assets/mujoco.png"
-      status: "ready"
+      status: "experimental"
 
   - id: "drake_models_shared"
     name: "Drake Models"
-    description: "Drake simulation models repository folder"
+    description: "Drake simulation models repository folder (opens only when the Drake_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
     type: "shared_repo"
     path: "Drake_Models"
     capabilities:
@@ -132,11 +132,11 @@ models:
     launcher:
       category: "simulation"
       logo: "assets/drake.png"
-      status: "ready"
+      status: "experimental"
 
   - id: "pinocchio_models_shared"
     name: "Pinocchio Models"
-    description: "Pinocchio simulation models repository folder"
+    description: "Pinocchio simulation models repository folder (opens only when the Pinocchio_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
     type: "shared_repo"
     path: "Pinocchio_Models"
     capabilities:
@@ -145,11 +145,11 @@ models:
     launcher:
       category: "simulation"
       logo: "assets/pinocchio.png"
-      status: "ready"
+      status: "experimental"
 
   - id: "opensim_models_shared"
     name: "OpenSim Models"
-    description: "OpenSim simulation models repository folder"
+    description: "OpenSim simulation models repository folder (opens only when the OpenSim_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)"
     type: "shared_repo"
     path: "OpenSim_Models"
     capabilities:
@@ -158,7 +158,7 @@ models:
     launcher:
       category: "simulation"
       logo: "assets/opensim.png"
-      status: "ready"
+      status: "experimental"
 
   # One tile, one entry point (issue #8618). This used to be two: a
   # "bunkershot3d" tile pointing at a notebook script and a "bunker_shot" tile
@@ -179,7 +179,7 @@ models:
     name: "Pendulum Simulator"
     description: "Interactive proximal–distal companion for double, triple, and 8-DOF golfer dynamics"
     type: "special_app"
-    path: "src/double_pendulum_golf/__main__.py"
+    path: "tools://src/double_pendulum_golf/__main__.py"
     provider: "tools"
     source_root: "../Tools/src/pendulum_simulator"
     working_dir: "."
@@ -196,7 +196,7 @@ models:
     name: "Swing Objective Lab"
     description: "Compare downswings optimized for clubhead speed against centrifugal, Coriolis, energy, and impulse transfer"
     type: "special_app"
-    path: "src/double_pendulum_golf/swing_objectives/__main__.py"
+    path: "tools://src/double_pendulum_golf/swing_objectives/__main__.py"
     provider: "tools"
     source_root: "../Tools/src/pendulum_simulator"
     working_dir: "."
@@ -387,7 +387,7 @@ models:
     name: "Video Analyzer"
     description: "Video-based motion analysis with pose tracking"
     type: "special_app"
-    path: "src/video_analyzer/launch_video_analyzer.py"
+    path: "tools://src/video_analyzer/launch_video_analyzer.py"
     provider: "tools"
     working_dir: "."
     python_paths:
@@ -403,9 +403,9 @@ models:
     name: "Video Processor"
     description: "Shared media processor for video conversion, frame extraction, and analysis"
     type: "special_app"
-    path: "src/media_processing/video_processor/apps/web/launch_platform.py"
-    provider: "tools"
+    path: "tools://src/media_processing/video_processor/apps/web/launch_platform.py"
     working_dir: "src/media_processing/video_processor/apps/web"
+    provider: "tools"
     python_paths:
       - "src"
       - "src/shared/python"
@@ -462,9 +462,9 @@ models:
     name: "Data Explorer"
     description: "Import, filter, and visualise simulation datasets"
     type: "special_app"
-    path: "src/data_explorer/data_explorer_app.py"
-    provider: "tools"
+    path: "tools://src/data_explorer/data_explorer_app.py"
     working_dir: "."
+    provider: "tools"
     python_paths:
       - "src"
       - "src/shared/python"
@@ -479,9 +479,9 @@ models:
     name: "Data Processor"
     description: "Shared signal processing and time-series data analysis tool"
     type: "special_app"
-    path: "src/data_processing/data_processor/launch_pyqt6.py"
-    provider: "tools"
+    path: "tools://src/data_processing/data_processor/launch_pyqt6.py"
     working_dir: "."
+    provider: "tools"
     python_paths:
       - "src"
       - "src/shared/python"
@@ -517,9 +517,9 @@ models:
     name: "Rate of Closure Impact Explorer"
     description: "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)"
     type: "special_app"
-    path: "src/rate_of_closure/launch_pyqt6.py"
-    provider: "tools"
+    path: "tools://src/rate_of_closure/launch_pyqt6.py"
     working_dir: "."
+    provider: "tools"
     python_paths:
       - "src"
       - "src/shared/python"
@@ -635,7 +635,7 @@ models:
 
   - id: "biomech_gait"
     name: "Gait Model"
-    description: "Standardized human gait model across engines"
+    description: "Exercise preset that forwards the gait filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)"
     type: "biomech_exercise"
     exercise: "gait"
     capabilities:
@@ -650,7 +650,7 @@ models:
 
   - id: "biomech_sit_to_stand"
     name: "Sit-to-Stand Model"
-    description: "Standardized sit-to-stand motion model"
+    description: "Exercise preset that forwards the sit-to-stand filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)"
     type: "biomech_exercise"
     exercise: "sit_to_stand"
     capabilities:
@@ -665,7 +665,7 @@ models:
 
   - id: "movement_optimizer"
     name: "Movement Optimizer"
-    description: "Cross-engine trajectory optimization"
+    description: "Cross-engine trajectory optimization (requires the Movement_Optimizer sibling checkout beside this repository; prefer the vendored tools_movement_optimizer tile — #9478)"
     type: "special_app"
     # Sibling checkout next to UpstreamDrift; resolved by
     # ModelSourcePathPolicy.resolve_source_root (issue #7984).
@@ -683,7 +683,7 @@ models:
         - "biomechanics"
         - "tool"
       logo: "project_map.svg"
-      status: "ready"
+      status: "experimental"
       default_launch: "tab"
 
   - id: "canonical_core_estimation"
@@ -746,7 +746,7 @@ models:
 
   - id: "motion_capture"
     name: "Motion Capture"
-    description: "FreeMoCap sidecar: markerless motion capture recording and processing"
+    description: "FreeMoCap sidecar: markerless motion capture recording and processing (command-line interface requiring --input; it is not yet a launchable GUI tile — #9478)"
     type: "special_app"
     path: "src/tools/freemocap_sidecar/run_freemocap.py"
     capabilities:
@@ -756,7 +756,7 @@ models:
     launcher:
       category: "motion_capture"
       logo: "c3d_icon.svg"
-      status: "beta"
+      status: "experimental"
       default_launch: "tab"
 
   - id: "biomech_exercise"
