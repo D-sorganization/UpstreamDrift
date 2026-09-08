@@ -54,10 +54,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** `#9499`
-- **PR:** #9719 (open)
+- **PR:** #9719 (open; `Fixes #9499`)
 - **Paths:** `.github/workflows/spec-check.yml`, `scripts/post_spec_reminder.py`, `tests/ci/test_spec_check_workflow.py`
-- **Started:** 2026-09-07
-- **Last verified:** 2026-09-07 (`SELF`)
 - **Summary:** The `Verify SPEC.md freshness` job posts its SPEC reminder
   through a fail-safe script instead of an inline `github-script` heredoc, so a
   reporting failure prints the diagnostic into the job log while the
