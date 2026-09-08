@@ -117,6 +117,17 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   as here -- something in that directory poisons the import. Pre-existing, not
   this branch's, and worth its own issue: a skip that only appears in a
   combined run is exactly the kind CI hides.
+- Two gates only reachable once the earlier ones passed, both fixed:
+  `code-quality` fails at its **mypy** step, not ruff, on
+  `crocoddyl_backend.py:316` -- `pin.Motion` is missing from the repo's own
+  `stubs/pinocchio/__init__.pyi`, which `mypy_path = "stubs"` makes
+  authoritative whether or not pinocchio is installed. Reproduce it in an
+  environment WITHOUT pinocchio; a venv that has the real package hides
+  nothing, but it is the stub mypy reads either way. `unit-test-gate` fails
+  `test_divergence_inventory` until `python -m
+  scripts.shared_tools.divergence_inventory --write` re-records the 16 new
+  `optimization/ocp/` files; that regeneration also rewrites unrelated
+  authorship rows, which is expected -- the file is generated, not hand-edited.
 - Architecture budget: the nine violations this branch authored were fixed by
   decomposition -- `CasadiSolveOptions` and `MaxSpeedOcpOptions` group the
   keyword arguments that pushed `solve_swing_casadi` and `build_max_speed_ocp`
