@@ -99,33 +99,37 @@ def draw_pose(
     edges: Sequence[Edge] = (),
     *,
     min_confidence: float = 0.5,
+    point_colour: tuple[int, int, int] = POINT_COLOUR,
+    edge_colour: tuple[int, int, int] = EDGE_COLOUR,
+    thickness: int | None = None,
 ) -> npt.NDArray[np.uint8]:
     """A copy of the frame with confident joints and bones drawn on it.
 
     Joints below ``min_confidence`` are drawn small and red rather than
-    hidden, so a coach sees where the detector was unsure. Precondition:
+    hidden, so a coach sees where the detector was unsure. Colours are
+    parameters so several tracks can share a frame (#9795). Precondition:
     one confidence per keypoint.
     """
     import cv2
 
     require(keypoints_px.shape[0] == confidence.shape[0], "one confidence per joint")
     out = image_bgr.copy()
-    scale = max(1, int(round(min(out.shape[:2]) / 400)))
+    scale = thickness or max(1, int(round(min(out.shape[:2]) / 400)))
     ok = confidence >= min_confidence
     for a, b in edges:
-        if ok[a] and ok[b]:
+        if ok[a] and ok[b] and np.isfinite(keypoints_px[[a, b]]).all():
             pa, pb = keypoints_px[a], keypoints_px[b]
             cv2.line(
                 out,
                 (int(pa[0]), int(pa[1])),
                 (int(pb[0]), int(pb[1])),
-                EDGE_COLOUR,
+                edge_colour,
                 scale,
             )
     for i, (x, y) in enumerate(keypoints_px):
         if not np.isfinite([x, y]).all():
             continue
-        colour = POINT_COLOUR if ok[i] else LOW_COLOUR
+        colour = point_colour if ok[i] else LOW_COLOUR
         radius = 3 * scale if ok[i] else 2 * scale
         cv2.circle(out, (int(x), int(y)), radius, colour, -1)
     return out

@@ -29,6 +29,7 @@ from src.shared.python.pose_estimation.observations import (
     KeypointObservation,
 )
 
+from ..provenance import write_stamped
 from .alignment import (
     TIMING_REPORT_FILE,
     annotate_rows,
@@ -345,7 +346,15 @@ def _ingest_entry(
         timing,
     )
     target = out_dir / f"{entry.view}.json"
-    target.write_text(observations.model_dump_json(indent=2), encoding="utf-8")
+    write_stamped(
+        target,
+        observations.model_dump(mode="json"),
+        schema_version=VIEW_OBSERVATIONS_SCHEMA_VERSION,
+        module=__name__,
+        inputs=[bundle_dir / entry.file],
+        parameters={"view": entry.view},
+        base=bundle_dir,
+    )
     return ViewIngestStatus(
         view=entry.view,
         identity=entry.identity,
@@ -390,8 +399,17 @@ def ingest_bundle(
         tools_schema=dict(manifest.tools_schema),
         provenance=estimator.provenance,
     )
-    (out_dir / INGEST_INDEX_FILE).write_text(
-        result.model_dump_json(indent=2), encoding="utf-8"
+    written = [
+        out_dir / s.file for s in statuses if s.file and (out_dir / s.file).is_file()
+    ]
+    write_stamped(
+        out_dir / INGEST_INDEX_FILE,
+        result.model_dump(mode="json"),
+        schema_version=VIEW_OBSERVATIONS_SCHEMA_VERSION,
+        module=__name__,
+        inputs=written,
+        derived_from=written,
+        base=bundle_dir,
     )
     logger.info("ingest %s -> %s", bundle_dir, out_dir)
     return result

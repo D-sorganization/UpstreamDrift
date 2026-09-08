@@ -195,6 +195,29 @@ rate deviation and adds the skew it is expected to accumulate over its
 recording, which is what tells the reconstruction stage whether one offset per
 session is sufficient.
 
+## Match Tab, Overlays and Provenance
+
+The _Match_ tab names a variant, ticks the cameras to use and picks the
+observation set and the source (triangulate, or image space with the
+cameras of another variant). _Reconstruct_, _Fit model_, _Kinetics_,
+_Compare models_ and _Export_ all act on that variant. In the player, the
+_Model overlay_ checkboxes draw any registered variants' joints and model on
+the current view (views a variant never used are labelled held out); `rig
+overlay` writes the same as a clip. Clicking a row in any results table
+opens the _Provenance_ tab with the file's lineage down to the recordings
+and the detector plug-in (`rig lineage`).
+
+## Annotate and Edit Points
+
+_Annotate / edit points_ opens a dialog on the player's view. The banner
+names the frame and joint to click; `S` skips an occluded joint, `B` goes
+back, `N` moves to the next frame, `J` jumps, `Q` finishes and saves
+`annotations/<view>.json`. With an observation set selected in the player
+the same dialog edits that set: the detector's points are drawn, a click
+replaces one, `S` rejects it, `A` accepts the frame as detected. `rig
+annotations-to-observations` (with `--merge-with SET` for corrections)
+turns the file into an observation set the pipeline uses like any other.
+
 ## Extending the Rig
 
 - **A new camera type** implements the `FrameSource` protocol in `sources.py`:
