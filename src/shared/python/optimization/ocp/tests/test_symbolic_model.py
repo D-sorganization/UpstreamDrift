@@ -25,6 +25,7 @@ pytestmark = [
 ]
 
 if PIN:
+    # pinocchio's members live in a C extension mypy cannot introspect.
     import pinocchio as pin
 
 from src.shared.python.optimization._swing_kinematics import JOINTS  # noqa: E402
@@ -69,7 +70,7 @@ def test_dynamics_kernels_match_pinocchio(model: SymbolicSwingModel) -> None:
         )
         np.testing.assert_allclose(
             np.asarray(model.nonlinear_effects(q, v, _EMPTY)).ravel(),
-            pin.nonLinearEffects(pin_model, data, q, v),
+            pin.nonLinearEffects(pin_model, data, q, v),  # type: ignore[attr-defined]
             atol=1e-9,
         )
         np.testing.assert_allclose(
@@ -103,7 +104,7 @@ def test_markers_and_com_match_pinocchio_placements(model: SymbolicSwingModel) -
         np.testing.assert_allclose(
             markers[:, model.marker_index("shoulder")], expected[:, 2]
         )
-        com = pin.centerOfMass(pin_model, data, q, v)
+        com = pin.centerOfMass(pin_model, data, q, v)  # type: ignore[attr-defined]
         np.testing.assert_allclose(
             np.asarray(model.center_of_mass(q, _EMPTY)).ravel(), com, atol=1e-9
         )
@@ -113,7 +114,8 @@ def test_markers_and_com_match_pinocchio_placements(model: SymbolicSwingModel) -
             atol=1e-9,
         )
         np.testing.assert_allclose(
-            float(model.total_mass(_EMPTY)), pin.computeTotalMass(pin_model)
+            float(model.total_mass(_EMPTY)),
+            pin.computeTotalMass(pin_model),  # type: ignore[attr-defined]
         )
 
 

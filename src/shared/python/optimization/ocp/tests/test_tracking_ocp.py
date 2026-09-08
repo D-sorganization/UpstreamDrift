@@ -42,7 +42,7 @@ _EMPTY = np.zeros(0)
 
 def _ground_truth(
     n_frames: int = 9, duration: float = 0.4
-) -> tuple[np.ndarray, np.ndarray, SymbolicSwingModel]:
+) -> tuple[np.ndarray, np.ndarray, SymbolicSwingModel, np.ndarray]:
     """A smooth, physically plausible joint trajectory and its markers."""
     model = SymbolicSwingModel(GolferModel(), ClubModel())
     times = np.linspace(0.0, duration, n_frames)
@@ -52,7 +52,7 @@ def _ground_truth(
     markers = np.stack(
         [np.asarray(model.markers(q[:, k], _EMPTY)) for k in range(n_frames)], axis=2
     )
-    return times, q, model, markers  # type: ignore[return-value]
+    return times, q, model, markers
 
 
 def _sequence(
