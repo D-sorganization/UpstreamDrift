@@ -22,7 +22,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 from PyQt6.QtCore import Qt, QThread, QTimer, pyqtSignal
-from PyQt6.QtGui import QColor, QFont, QImage, QPainter, QPixmap
+from PyQt6.QtGui import QColor, QImage, QPainter, QPixmap
 from PyQt6.QtWidgets import (
     QGridLayout,
     QLabel,
@@ -35,8 +35,11 @@ from src.motion_capture.rig.plan import CaptureMode, RigPlan
 from src.motion_capture.rig.sources import FrameSource
 from src.shared.python.core.contracts import require
 from src.shared.python.core.process_safety import narrow_catch
+from src.shared.python.theme.layout_metrics import LayoutMetrics
 from src.shared.python.theme.palette import get_current_colors
+from src.shared.python.theme.typography import Sizes, Weights, get_qfont
 
+from . import styling
 from .commands import PlanSelection
 
 SourceFactory = Callable[[RigPlan], Mapping[str, FrameSource]]
@@ -44,7 +47,7 @@ FastFactory = Callable[[RigPlan, Mapping[str, str]], Mapping[str, FrameSource]]
 DISPLAY_INTERVAL_S = 1 / 15  # UI refresh cap; the camera keeps its own rate
 TILE_MIN = (96, 60)  # a soft floor; tiles otherwise follow the pane size
 SNAPSHOT_POLL_MS = 100
-BADGE_COLOR = "#d32f2f"  # recording red is a signal colour, not a theme token
+BADGE_INSET = LayoutMetrics.SPACING_SM + 2  # from the tile's top-left corner
 
 
 def default_sources(plan: RigPlan) -> Mapping[str, FrameSource]:
@@ -63,30 +66,28 @@ def sources_from_ids(
     return preview_sources_from_ids(plan, camera_ids)
 
 
-def tile_style() -> str:
-    """Preview tile colours from the active theme (no literal colours here)."""
-    colors = get_current_colors()
-    return f"background: {colors['bg']}; color: {colors['text_secondary']};"
-
-
 def stamp_badge(pixmap: QPixmap, text: str) -> QPixmap:
-    """``text`` in a red pill at the top-left of ``pixmap`` (no-op when empty)."""
+    """``text`` in a recording-red pill at the top-left of ``pixmap``.
+
+    No-op when ``text`` is empty or the pixmap null. The pill takes the
+    fleet's signal red and a text colour from the palette that reads on it.
+    """
     if not text or pixmap.isNull():
         return pixmap
+    colors = get_current_colors()
+    pill = styling.signal_colors(colors).record
     painter = QPainter(pixmap)
-    font = QFont()
-    font.setBold(True)
-    font.setPointSize(max(9, pixmap.height() // 22))
-    painter.setFont(font)
+    painter.setFont(get_qfont(max(Sizes.SM, pixmap.height() // 22), Weights.BOLD))
     metrics = painter.fontMetrics()
-    pad = 6
+    pad = LayoutMetrics.SPACING_SM
     width = metrics.horizontalAdvance(text) + 2 * pad
     height = metrics.height() + pad
+    radius = LayoutMetrics.RADIUS_SM
     painter.setPen(Qt.PenStyle.NoPen)
-    painter.setBrush(QColor(BADGE_COLOR))
-    painter.drawRoundedRect(8, 8, width, height, 6, 6)
-    painter.setPen(QColor("white"))
-    painter.drawText(8 + pad, 8 + pad // 2 + metrics.ascent(), text)
+    painter.setBrush(QColor(pill))
+    painter.drawRoundedRect(BADGE_INSET, BADGE_INSET, width, height, radius, radius)
+    painter.setPen(QColor(styling.contrast_text(pill, colors)))
+    painter.drawText(BADGE_INSET + pad, BADGE_INSET + pad // 2 + metrics.ascent(), text)
     painter.end()
     return pixmap
 
@@ -214,8 +215,10 @@ class PreviewPanel(QWidget):
         self.grid_box = QWidget()
         self.grid = QGridLayout(self.grid_box)
         self.grid.setContentsMargins(0, 0, 0, 0)
+        self.grid.setSpacing(LayoutMetrics.SPACING_SM)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(LayoutMetrics.SPACING_SM)
         layout.addWidget(self.grid_box, 1)
         layout.addWidget(self.status)
 
@@ -326,7 +329,7 @@ class PreviewPanel(QWidget):
             tile.setMinimumSize(*TILE_MIN)
             # Ignored: the pixmap never dictates the tile's size, the pane does.
             tile.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
-            tile.setStyleSheet(tile_style())
+            tile.setStyleSheet(styling.tile_style())
             self.grid.addWidget(tile, 0, column)
             self.grid.setColumnStretch(column, 1)
             self._tiles[view] = tile
@@ -394,6 +397,13 @@ class PreviewPanel(QWidget):
     def _redraw(self) -> None:
         for view in self._last:
             self._draw(view)
+
+    def restyle(self) -> None:
+        """Tiles and badge follow a theme change."""
+        style = styling.tile_style()
+        for tile in self._tiles.values():
+            tile.setStyleSheet(style)
+        self._redraw()
 
     def _draw(self, view: str) -> None:
         tile, image = self._tiles.get(view), self._last.get(view)
