@@ -214,8 +214,9 @@ Events, tempo and normalised hand speed from one camera.
 
 1. Press *Analyze 2-D*. Results are in subject box heights, not metres.
 2. *Export clip* writes the swing (address to finish, slow motion, overlay, frame clock) as a video; *Compare takes* puts another session's view beside this one aligned on the top of the backswing, with metric deltas.
+3. *Export multiview* stitches the raw footage and its overlay through a layout (preset, saved or JSON file) into one composite video with a provenance sidecar.
 
-Tile actions: analyze, clip, compare_takes.
+Tile actions: analyze, clip, compare_takes, multipicture.
 
 ### 11. Export to the Motion Pipeline
 
@@ -229,8 +230,9 @@ TRC and canonical JSON for scaling, IK and model matching.
 
 1. Press *Export*. reconstruction.trc loads in the motion pipeline and the model-matching tools as a marker file.
 2. *Export clip* and *Compare takes* produce annotated, slowed videos of this take, alone or beside another session, for coaching.
+3. *Export multiview* writes every view (and the model overlay of any of them) side by side through a layout as one composite video, synchronised by frame with the session's alignment offsets.
 
-Tile actions: export, clip, compare_takes.
+Tile actions: export, clip, compare_takes, multipicture.
 
 ## After Export
 
