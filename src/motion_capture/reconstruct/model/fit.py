@@ -20,6 +20,8 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
+import logging
+
 import numpy as np
 import numpy.typing as npt
 from scipy.optimize import least_squares
@@ -28,6 +30,8 @@ from scipy.sparse import csr_matrix, vstack
 from src.shared.python.core.contracts import require
 
 from .kinematics import ArticulatedModel
+
+logger = logging.getLogger(__name__)
 
 Array = npt.NDArray[np.float64]
 
@@ -260,6 +264,16 @@ def _reject(
 ) -> list[RejectedLandmark]:
     u = np.nan_to_num(problem.landmark_residual_m(x) / options.sigma_landmark_m)
     bad = (u > options.gate) & problem.mask
+    if bad.sum() * 2 > problem.mask.sum():
+        # Most observations beyond the gate means the model cannot represent
+        # the motion, not that the data has outliers: keep everything so the
+        # reported RMS says so (a pendulum on a bent-arm golfer, #9714).
+        logger.warning(
+            "gate would reject %d of %d observations; keeping all",
+            int(bad.sum()),
+            int(problem.mask.sum()),
+        )
+        return []
     out = []
     for t, k in np.argwhere(bad):
         out.append(RejectedLandmark(int(t), model.landmark_names[k], float(u[t, k])))

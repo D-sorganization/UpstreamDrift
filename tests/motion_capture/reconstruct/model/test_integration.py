@@ -59,7 +59,7 @@ def test_rig_fit_model_writes_model_dir_and_export_adds_simscape_csv(
         rig_cli.main(["fit-model", "--session", str(root), "--sigma-accel", "300"]) == 0
     )
     angles = json.loads((root / "model" / "joint_angles.json").read_text("utf-8"))
-    assert angles["model"] == "golfer-scapula/1.0" and len(angles["q"]) == 30
+    assert angles["model"] == "golfer-scapula/2.0" and len(angles["q"]) == 30
     report = json.loads((root / "model" / "fit_report.json").read_text("utf-8"))
     assert report["rms_mm"] < 5.0 and report["velocity_violations"] == 0
     assert report["landmarks"]["left_shoulder"]["frames"] == 30
@@ -67,7 +67,7 @@ def test_rig_fit_model_writes_model_dir_and_export_adds_simscape_csv(
     lines = csv_path.read_text(encoding="utf-8").splitlines()
     assert lines[0].startswith("# upstreamdrift golfer-scapula")
     header = lines[1].split(",")
-    assert set(header) == {"time_s", *SIMSCAPE_NAMES.values()}
+    assert set(header) == {"time_s", *(n for n, _ in SIMSCAPE_NAMES.values())}
     assert len(lines) == 2 + 30
     with pytest.raises(ValueError, match="lack Simscape"):
         bad = root / "model" / "bad.json"
@@ -158,7 +158,7 @@ def test_rig_compare_models_and_kinetics_commands(tmp_path: Path) -> None:
         == 0
     )
     kinetics = json.loads((root / "model" / "kinetics.json").read_text("utf-8"))
-    assert kinetics["model"] == "golfer-scapula/1.0" and len(kinetics["tau"]) == 30
+    assert kinetics["model"] == "golfer-scapula/2.0" and len(kinetics["tau"]) == 30
     assert "LScapStartPositionX" in kinetics["simscape_names"].values()
     with pytest.raises(SystemExit, match="fit-model"):
         rig_cli.main(

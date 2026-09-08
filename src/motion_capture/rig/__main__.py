@@ -619,7 +619,7 @@ def cmd_kinetics(args: argparse.Namespace) -> int:
     import numpy as np
 
     from src.motion_capture.reconstruct.model.dynamics import kinetics_report
-    from src.motion_capture.reconstruct.model.golfer import SIMSCAPE_NAMES
+    from src.motion_capture.reconstruct.model.golfer import simscape_variable_names
     from src.motion_capture.reconstruct.model.kinematics import ArticulatedModel
     from src.motion_capture.reconstruct.model.registry import get_model
 
@@ -637,7 +637,7 @@ def cmd_kinetics(args: argparse.Namespace) -> int:
         np.asarray(payload["q"], dtype=float),
         float(payload["fps"]),
         body_mass_kg=args.body_mass,
-        names=SIMSCAPE_NAMES if args.model == "golfer" else None,
+        names=simscape_variable_names() if args.model == "golfer" else None,
     )
     out = model_dir / "kinetics.json"
     out.write_text(json.dumps(report), encoding="utf-8")
