@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-09-07 (UD #9492 decomposition in flight on its own branch)
+Updated: 2026-09-08 03:10 UTC
 
 ## Impact Dynamics and Acoustics: #9700
 
@@ -36,7 +36,21 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 `_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
 `architecture_budget.json` exceptions are removed, behavior pinned by tests.
 
-## Unit-Gate `src`-Identity Sentinel: #9387 (In Review)
+## In-Flight Tool Migration: #9470 (Launch-Monitor Async Analytics)
+
+- Branch `claude/issue-9470-async-analytics` migrates the seven launch-monitor
+  analysis handlers onto the #8880 `async_action` worker: one shared
+  `AsyncActionBar` for all trigger buttons, widget-free `_compute_*` halves
+  with cancellation checkpoints, synchronous `present(compute())` paths kept,
+  and the embed adapter `cleanup()` cancelling and joining the worker.
+- The branch is stacked on PR #9472 (the #8880 mechanism, `readiness/p2-8880-async-action-worker`);
+  merge #9472 first, then this PR applies cleanly.
+- Remaining #9470 checklist follow-ups, in pain order: `bunker_shot_gui/gui.py`
+  (`_guarded` wait cursor), `putting_green_gui`, `ball_flight_gui`,
+  `swing_flight_pipeline`, `terrain_engine`, then the audit-only tools.
+- Gate: `python -m pytest -q tests/ui/tools/launch_monitor tests/tools/test_async_action.py`
+
+## Unit-Gate `src`-Identity Sentinel: #9387 (Merged)
 
 - The worker-corruption class from #9099 (a test mutating
   `sys.modules['src']`/`src.*` and corrupting later tests on the same
