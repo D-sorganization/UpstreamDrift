@@ -326,14 +326,58 @@ def test_rate_of_closure_provider_exposes_governed_analysis_policy() -> None:
             for entry in manifest["baselines"]
             if entry["surface"] == "pyqt" and entry["tab_id"] == "variation"
         )
-        assert variation["sha256"] == (
-            "650267b346dab8651b6163d83046ed46cbe604c83c71908cca2b1168e84a78cd"
+        _assert_reviewed_renderer_reference(
+            manifest["source_artifact_commit"], variation["sha256"]
         )
         assert variation["tolerance"] == {
             "changed_channel_threshold": 1,
             "max_mean_channel_delta_microunits": 200,
             "max_changed_pixel_fraction_microunits": 250,
         }
+
+
+def _assert_reviewed_renderer_reference(source: str, image_hash: str) -> None:
+    """Pin exact reviewed identities while old and candidate providers coexist.
+
+    Tools #4844 / PR #5090 records repeat capture and individual image review
+    for the second source. Protected merge remains its approval event; accepting
+    its identity here does not approve an arbitrary provider or bump our pin.
+    """
+    reviewed = {
+        "be71b03676eda7bbfa40c880ded3a3bb7112b868": (
+            "650267b346dab8651b6163d83046ed46cbe604c83c71908cca2b1168e84a78cd"
+        ),
+        "df4101f2825b3b2d255dad1d6f8746818fc82812": (
+            "22f6640e896e9ea5c740e9db7e3d3201cdf7264f2cf1cff33966b539354f1d40"
+        ),
+    }
+    assert source in reviewed and image_hash == reviewed[source], (
+        "provider must use an exact reviewed renderer reference source/hash pair"
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "source, image_hash",
+    [
+        (
+            "be71b03676eda7bbfa40c880ded3a3bb7112b868",
+            "22f6640e896e9ea5c740e9db7e3d3201cdf7264f2cf1cff33966b539354f1d40",
+        ),
+        (
+            "df4101f2825b3b2d255dad1d6f8746818fc82812",
+            "650267b346dab8651b6163d83046ed46cbe604c83c71908cca2b1168e84a78cd",
+        ),
+        ("0" * 40, "650267b346dab8651b6163d83046ed46cbe604c83c71908cca2b1168e84a78cd"),
+        ("be71b03676eda7bbfa40c880ded3a3bb7112b868", "0" * 64),
+    ],
+)
+def test_renderer_reference_rejects_unreviewed_identity_pairs(
+    source: str, image_hash: str
+) -> None:
+    """Two known hashes do not authorize swapping their reviewed source commits."""
+    with pytest.raises(AssertionError, match="reviewed renderer reference"):
+        _assert_reviewed_renderer_reference(source, image_hash)
 
 
 @pytest.mark.unit
