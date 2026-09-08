@@ -209,6 +209,24 @@ FIT_MODEL = Step(
     applies=_multi,
 )
 
+KINETICS = Step(
+    key="kinetics",
+    title="Kinetics and Model Comparison",
+    purpose="Torques that produce the fitted motion, a replay check, and a ranking of every registered model on this take.",
+    requirements=(
+        "A fitted model (joint_angles.json).",
+        "The golfer's body mass in kilograms for the segment masses.",
+    ),
+    instructions=(
+        "Press *Kinetics*: inverse dynamics on the fitted joint angles (point masses at segment centres, de Leva fractions) and a forward replay whose drift from the fitted angles is the acceptance number; model/kinetics.json holds the torques.",
+        "Press *Compare models* to fit the scapula golfer, the double and the triple pendulum to the same take and rank them by a DOF-penalised score in model/comparison.md.",
+    ),
+    actions=("kinetics", "compare_models"),
+    done=lambda m: m.kinetics is not None,
+    ready=lambda m: _ready_if(m.model_fit is not None, "fit the model first"),
+    applies=_multi,
+)
+
 EXPORT = Step(
     key="export",
     title="Export to the Motion Pipeline",
@@ -232,6 +250,7 @@ STEPS: tuple[Step, ...] = (
     REVIEW,
     RECONSTRUCT,
     FIT_MODEL,
+    KINETICS,
     ANALYZE_2D,
     EXPORT,
 )

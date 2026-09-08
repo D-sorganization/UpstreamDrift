@@ -244,12 +244,45 @@ def compare_takes_command(
 
 
 def fit_model_command(
-    session: Path, *, sigma_accel: float = 300.0, max_velocity: float = 25.0
+    session: Path,
+    *,
+    model: str = "golfer",
+    sigma_accel: float = 300.0,
+    max_velocity: float = 25.0,
+    fit_lengths: bool = False,
 ) -> list[str]:
     require(sigma_accel > 0 and max_velocity > 0, "positive priors")
-    args = ["fit-model", "--session", str(session), "--sigma-accel", f"{sigma_accel:g}"]
-    args += ["--max-velocity", f"{max_velocity:g}"]
+    require(model.strip() != "", "model must be named")
+    args = ["fit-model", "--session", str(session), "--model", model]
+    args += ["--sigma-accel", f"{sigma_accel:g}", "--max-velocity", f"{max_velocity:g}"]
+    if fit_lengths:
+        args.append("--fit-lengths")
     return python_module_command(args)
+
+
+def compare_models_command(
+    session: Path, *, models: Sequence[str] = (), fit_lengths: bool = False
+) -> list[str]:
+    args = ["compare-models", "--session", str(session)]
+    if models:
+        args += ["--models", ",".join(models)]
+    if fit_lengths:
+        args.append("--fit-lengths")
+    return python_module_command(args)
+
+
+def kinetics_command(session: Path, *, model: str, body_mass_kg: float) -> list[str]:
+    require(body_mass_kg > 0, "body mass must be positive kg", body_mass_kg)
+    args = ["kinetics", "--session", str(session), "--model", model]
+    args += ["--body-mass", f"{body_mass_kg:g}"]
+    return python_module_command(args)
+
+
+def model_choices() -> tuple[tuple[str, str], ...]:
+    """``(name, description)`` for every registered fittable model."""
+    from src.motion_capture.reconstruct.model.registry import descriptions
+
+    return tuple(descriptions().items())
 
 
 def export_command(session: Path) -> list[str]:

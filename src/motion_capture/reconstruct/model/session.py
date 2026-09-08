@@ -39,12 +39,23 @@ LANDMARKS_FILE = "landmarks_fit.npy"
 class LandmarkMap:
     """``model landmark -> reconstruct joint`` plus which lengths the tape fixed."""
 
-    to_reconstruct: Mapping[str, str]
+    to_reconstruct: Mapping[str, str | tuple[str, ...]]
     length_from_segment: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        unknown = [j for j in self.to_reconstruct.values() if j not in JOINT_NAMES]
+        unknown = [
+            j
+            for value in self.to_reconstruct.values()
+            for j in ((value,) if isinstance(value, str) else value)
+            if j not in JOINT_NAMES
+        ]
         require(not unknown, "map targets must be reconstruct joints", unknown)
+
+    @staticmethod
+    def _source(joints_m: Array, value: str | tuple[str, ...]) -> Array:
+        """One reconstruct joint, or the mean of several (hands = both wrists)."""
+        names = (value,) if isinstance(value, str) else value
+        return joints_m[:, [JOINT_NAMES.index(n) for n in names]].mean(axis=1)
 
     def observed(self, model: ArticulatedModel, joints_m: Array) -> Array:
         """``(T, L, 3)`` landmarks in model order; NaN where the model has no source."""
@@ -57,7 +68,7 @@ class LandmarkMap:
         for k, name in enumerate(model.landmark_names):
             source = self.to_reconstruct.get(name)
             if source is not None:
-                out[:, k] = joints_m[:, JOINT_NAMES.index(source)]
+                out[:, k] = self._source(joints_m, source)
         return out
 
     def lengths(
@@ -97,8 +108,12 @@ def fit_session_model(
     landmark_map: LandmarkMap,
     *,
     options: FitOptions | None = None,
+    out_subdir: str | None = None,
 ) -> tuple[ModelFit, Path]:
     """Fit ``spec`` to the session's reconstruction; write ``<session>/model/``.
+
+    ``out_subdir`` places the outputs in ``model/<out_subdir>/`` instead (used
+    when several models are fitted to one take).
 
     Precondition: ``reconstruct_session`` has run (joints and summary exist).
     Postcondition: joint angles, fit report and fitted landmarks are on disk.
@@ -124,10 +139,15 @@ def fit_session_model(
         options=options,
     )
     out_dir = session_dir / MODEL_DIR
-    out_dir.mkdir(exist_ok=True)
+    if out_subdir:
+        out_dir = out_dir / out_subdir
+    out_dir.mkdir(parents=True, exist_ok=True)
     payload = fit_to_dict(fit, fps)
     payload["model"] = spec.name
-    payload["landmark_map"] = dict(landmark_map.to_reconstruct)
+    payload["landmark_map"] = {
+        k: list(v) if isinstance(v, tuple) else v
+        for k, v in landmark_map.to_reconstruct.items()
+    }
     (out_dir / JOINT_ANGLES_FILE).write_text(json.dumps(payload), encoding="utf-8")
     np.save(out_dir / LANDMARKS_FILE, fit.landmarks_m)
     (out_dir / FIT_REPORT_FILE).write_text(

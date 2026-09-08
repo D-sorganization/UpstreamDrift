@@ -278,6 +278,9 @@ shows these landmarks as a tooltip.
 
 ```bash
 python3 -m src.motion_capture.rig fit-model --session S [--sigma-accel 300] [--max-velocity 25]
+python3 -m src.motion_capture.rig fit-model --session S --model triple_pendulum --fit-lengths
+python3 -m src.motion_capture.rig compare-models --session S [--models golfer,double_pendulum,triple_pendulum]
+python3 -m src.motion_capture.rig kinetics --session S --model golfer --body-mass 80
 python3 -m src.motion_capture.rig export --session S      # now also model/joint_angles_simscape.csv
 ```
 

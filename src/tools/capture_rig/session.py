@@ -59,6 +59,8 @@ class SessionMedia:
     export: Path | None = None
     observation_sets: tuple[str, ...] = ()
     model_fit: dict[str, Any] | None = None
+    model_comparison: dict[str, Any] | None = None
+    kinetics: dict[str, Any] | None = None
 
     @property
     def ingested(self) -> bool:
@@ -126,6 +128,13 @@ def _analysis_2d(root: Path) -> dict[str, dict[str, Any]] | None:
     return out or None
 
 
+def _kinetics_summary(payload: dict[str, Any] | None) -> dict[str, Any] | None:
+    """The kinetics record without its per-frame torque table (for the tile)."""
+    if payload is None:
+        return None
+    return {k: v for k, v in payload.items() if k not in ("tau", "dof_names")}
+
+
 def _existing(path: Path) -> Path | None:
     return path if path.is_file() else None
 
@@ -175,6 +184,8 @@ def load_session(root: Path) -> SessionMedia:
         export=_existing(recon / "reconstruction.trc"),
         observation_sets=tuple(sets),
         model_fit=_read_json(root / "model" / "fit_report.json"),
+        model_comparison=_read_json(root / "model" / "comparison.json"),
+        kinetics=_kinetics_summary(_read_json(root / "model" / "kinetics.json")),
     )
 
 
