@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 10:02 PDT
+Updated: 2026-09-08 03:10 UTC
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -12,6 +12,20 @@ contract, recovery constraints, and next commands are in
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+
+## In-Flight Tool Migration: #9470 (launch-monitor async analytics)
+
+- Branch `claude/issue-9470-async-analytics` migrates the seven launch-monitor
+  analysis handlers onto the #8880 `async_action` worker: one shared
+  `AsyncActionBar` for all trigger buttons, widget-free `_compute_*` halves
+  with cancellation checkpoints, synchronous `present(compute())` paths kept,
+  and the embed adapter `cleanup()` cancelling and joining the worker.
+- The branch is stacked on PR #9472 (the #8880 mechanism, `readiness/p2-8880-async-action-worker`);
+  merge #9472 first, then this PR applies cleanly.
+- Remaining #9470 checklist follow-ups, in pain order: `bunker_shot_gui/gui.py`
+  (`_guarded` wait cursor), `putting_green_gui`, `ball_flight_gui`,
+  `swing_flight_pipeline`, `terrain_engine`, then the audit-only tools.
+- Gate: `python -m pytest -q tests/ui/tools/launch_monitor tests/tools/test_async_action.py`
 
 ## Protected Authority
 
