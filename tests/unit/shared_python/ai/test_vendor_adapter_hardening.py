@@ -9,11 +9,12 @@ loses them fails here (see docs/audits/consolidation_hardening_audit_2026-09.md)
 
 from __future__ import annotations
 
-import os
 import re
 from pathlib import Path
 
 import pytest
+
+from tests.helpers.seam_guards import require_vendor_path
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
@@ -27,10 +28,7 @@ _STRIP_GUARD = re.compile(r"(current_message|effective_message|message)\.strip\(
 
 def _adapter_source(name: str) -> str:
     path = _ADAPTERS / f"{name}_adapter.py"
-    if not path.is_file():
-        if os.environ.get("CI"):
-            raise AssertionError(f"{path} missing in CI (vendor/ud-tools not fetched?)")
-        pytest.skip("vendor/ud-tools not materialised")
+    require_vendor_path(path)
     return path.read_text(encoding="utf-8")
 
 

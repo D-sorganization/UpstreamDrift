@@ -207,13 +207,15 @@ class AcceptanceCriterion:
     statement: str
     min_samples: int
     max_relative_expanded_uncertainty: float
+    value_min: float | None = None
+    value_max: float | None = None
 
     def __post_init__(self) -> None:
         """Validate the criterion.
 
         Raises:
             VerificationError: If the statement is too short to be one, or
-                either gate is out of range.
+                either gate or bound is out of range.
         """
         if len(self.statement.strip()) < _MIN_STATEMENT_CHARS:
             raise VerificationError(
@@ -229,6 +231,22 @@ class AcceptanceCriterion:
             raise VerificationError(
                 "max_relative_expanded_uncertainty must be a fraction in "
                 f"(0, 1), got {bound!r}"
+            )
+        if self.value_min is not None and not math.isfinite(self.value_min):
+            raise VerificationError(
+                f"value_min must be finite when specified, got {self.value_min!r}"
+            )
+        if self.value_max is not None and not math.isfinite(self.value_max):
+            raise VerificationError(
+                f"value_max must be finite when specified, got {self.value_max!r}"
+            )
+        if (
+            self.value_min is not None
+            and self.value_max is not None
+            and self.value_min > self.value_max
+        ):
+            raise VerificationError(
+                f"value_min ({self.value_min}) cannot exceed value_max ({self.value_max})"
             )
 
     def is_met_by(self, record: MeasurementRecord) -> bool:
@@ -252,6 +270,17 @@ class AcceptanceCriterion:
                 f"{self.max_relative_expanded_uncertainty:.3g} this criterion "
                 "allows"
             )
+        if record.value is not None:
+            if self.value_min is not None and record.value < self.value_min:
+                problems.append(
+                    f"measured value {record.value} is below the physical lower "
+                    f"bound of {self.value_min}"
+                )
+            if self.value_max is not None and record.value > self.value_max:
+                problems.append(
+                    f"measured value {record.value} exceeds the physical upper "
+                    f"bound of {self.value_max}"
+                )
         return "; ".join(problems)
 
     def summary(self) -> str:
@@ -306,11 +335,42 @@ class MeasurementSpec:
                     "measurement nobody can go and make is not a roadmap"
                 )
 
+    def shortfall(self, record: MeasurementRecord) -> str:
+        """Say what stops ``record`` satisfying this spec, or return an empty string."""
+        problems: list[str] = []
+        if record.spec_key != self.key:
+            problems.append(
+                f"spec key mismatch: offered against '{record.spec_key}', "
+                f"expected '{self.key}'"
+            )
+        if record.unit != self.unit:
+            problems.append(
+                f"unit mismatch: record unit '{record.unit}' against "
+                f"required '{self.unit}'"
+            )
+        if not record.is_synthetic:
+            # A real instrument measurement must name a genuine instrument and conditions,
+            # not a placeholder or 'none' marker.
+            inst = record.instrument.strip()
+            if not inst or inst.lower().startswith("none"):
+                problems.append(
+                    "instrument record lacks genuine apparatus declaration "
+                    f"('{record.instrument}')"
+                )
+            cond = record.conditions.strip()
+            if not cond or cond.lower().startswith("none"):
+                problems.append(
+                    "instrument record lacks genuine conditions declaration "
+                    f"('{record.conditions}')"
+                )
+        criterion_shortfall = self.acceptance.shortfall(record)
+        if criterion_shortfall:
+            problems.append(criterion_shortfall)
+        return "; ".join(problems)
+
     def is_satisfied_by(self, record: MeasurementRecord) -> bool:
         """True when ``record`` is offered against this spec and clears it."""
-        if record.spec_key != self.key or record.unit != self.unit:
-            return False
-        return self.acceptance.is_met_by(record)
+        return not self.shortfall(record)
 
     def best_record(self, register: MeasurementRegister) -> MeasurementRecord | None:
         """Return the satisfying record with the smallest uncertainty.

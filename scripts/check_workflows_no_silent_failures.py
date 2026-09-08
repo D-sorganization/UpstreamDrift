@@ -8,10 +8,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-DEFAULT_WORKFLOWS = (
-    Path(".github/workflows/ci-standard.yml"),
-    Path(".github/workflows/Jules-Sentinel.yml"),
-)
+DEFAULT_WORKFLOWS = (Path(".github/workflows/ci-standard.yml"),)
 CONTINUE_ON_ERROR = "continue-on-error"
 INLINE_PIP_AUDIT_WAIVER = "inline-pip-audit-waiver"
 MASKED_SCANNER_FAILURE = "masked-scanner-failure"

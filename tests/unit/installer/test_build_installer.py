@@ -86,14 +86,41 @@ def test_install_dependencies_fail(mock_run) -> None:
 
 
 def test_detect_physics_engines(monkeypatch) -> None:
-    def mock_import(name, *args, **kwargs) -> Any:
-        if name in ("mujoco", "pinocchio"):
-            return MagicMock()
-        raise ImportError
+    # Patch the narrow seam, never ``builtins.__import__``: a global import
+    # hook that raises for unrecognised names also breaks pytest's own lazy
+    # imports and aborts the entire session with INTERNALERROR (UD #9474).
+    installed = {"mujoco", "pinocchio"}
+    monkeypatch.setattr(bi, "_module_available", lambda name: name in installed)
 
-    monkeypatch.setattr("builtins.__import__", mock_import)
     engines = bi.detect_physics_engines()
     assert engines == ["mujoco", "pinocchio"]
+
+
+def test_detect_physics_engines_maps_drake_to_pydrake(monkeypatch) -> None:
+    """The engine name and its import name differ; the seam sees the module."""
+    probed: list[str] = []
+
+    def record(name: str) -> bool:
+        probed.append(name)
+        return name == "pydrake"
+
+    monkeypatch.setattr(bi, "_module_available", record)
+
+    assert bi.detect_physics_engines() == ["drake"]
+    assert probed == ["mujoco", "pydrake", "pinocchio", "myosuite", "opensim"]
+
+
+def test_module_available_rejects_empty_module_name() -> None:
+    with pytest.raises(ValueError):
+        bi._module_available("")
+
+
+def test_module_available_reports_missing_module() -> None:
+    assert bi._module_available("upstreamdrift_definitely_not_installed") is False
+
+
+def test_module_available_reports_present_module() -> None:
+    assert bi._module_available("json") is True
 
 
 @patch("subprocess.run")

@@ -127,7 +127,7 @@ maturin develop                                   # build Rust extensions locall
 
 5. No TODO/FIXME unless tied to a tracked GitHub issue
 6. pytest with `-n auto`, 60s timeout, and the coverage threshold defined by `fail_under` in `pyproject.toml [tool.coverage.report]`
-7. No `print()` in `src/` — use logging. **Exceptions**: CLI entry-points that intentionally write to stdout must be added to `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml` with a `T201` exemption and a comment explaining why stdout is intentional. Current exceptions: `src/shared/python/codemap/cli.py`, `src/shared/python/codemap/watcher.py`, and `src/shared/python/codemap/mcp_server.py` (stdout is the wire protocol); and `src/shared/python/programmatic_pid/cli.py` (generate-pid CLI tool). Canonical Sidekick CLI exceptions belong in Tools, not in copied UpstreamDrift paths. `scripts/`, `tests/`, and `examples/` are also excepted.
+7. No `print()` in `src/` — use logging. **Exceptions**: CLI entry-points that intentionally write to stdout must be added to `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml` with a `T201` exemption and a comment explaining why stdout is intentional. Current exception: `src/shared/python/humanoid_character_builder/__main__.py`. The codemap CLI, watcher and MCP server (stdout is the wire protocol) and the generate-pid CLI were UpstreamDrift child copies and are retired (#9406); they now resolve from the pinned Tools tree, so their exemptions belong in Tools. Canonical Sidekick CLI exceptions belong in Tools too, not in copied UpstreamDrift paths. `scripts/`, `tests/`, and `examples/` are also excepted.
 
 ## Test Markers
 

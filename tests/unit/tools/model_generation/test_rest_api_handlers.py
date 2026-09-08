@@ -19,7 +19,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from model_generation.api.rest_api_routes import ModelGenerationAPI
+from model_generation.api.rest_api import ModelGenerationAPI
 from model_generation.api.rest_api_types import APIRequest, APIResponse, HTTPMethod
 
 SIMPLE_URDF = """<?xml version="1.0"?>
@@ -238,14 +238,25 @@ class TestLibraryHandlers:
         # Empty model_id path segment -> handler reports missing id (400).
         assert resp.status_code in (400, 404)
 
-    def test_remove_not_implemented(self, api: ModelGenerationAPI) -> None:
+    @pytest.mark.unit
+    def test_remove_reports_a_missing_model(self, api: ModelGenerationAPI) -> None:
+        """Removing an unknown model is a 404, not a 501.
+
+        This asserted 501 until #9699. `library_remove_model` really does
+        remove models -- `rest_api_assets.py` says so in as many words -- so
+        the stub the assertion described no longer exists in any
+        implementation. The 404 body names the id, which is the part worth
+        pinning: it shows the request reached the handler with its argument
+        rather than failing earlier.
+        """
         resp = api.handle_request(
             _request(
                 HTTPMethod.DELETE,
                 "/library/models/some-id",
             )
         )
-        assert resp.status_code == 501
+        assert resp.status_code == 404
+        assert "some-id" in _json(resp)["error"]
 
     def test_diff_missing_content(self, api: ModelGenerationAPI) -> None:
         resp = api.handle_request(

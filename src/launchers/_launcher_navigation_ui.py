@@ -118,9 +118,9 @@ class LauncherNavigationUIMixin:
         btn_settings, btn_console = self._build_sidebar_utility_buttons()
         btn_library = self._register_sidebar_buttons(filter_buttons)
         ordered_buttons = [
-            *(button for button, _button_id in filter_buttons[:8]),
+            *(button for button, _button_id in filter_buttons[:6]),
             btn_library,
-            *(button for button, _button_id in filter_buttons[8:]),
+            *(button for button, _button_id in filter_buttons[6:]),
         ]
         self._populate_sidebar_layout(
             layout,
@@ -191,12 +191,6 @@ class LauncherNavigationUIMixin:
                 "Filter tiles to show biomechanics and motion analysis tools",
             ),
             ("Simulation", "sports_golf", None),
-            (
-                "Motion Match",
-                "directions_run",
-                "Filter tiles to show motion matching tools",
-            ),
-            ("MoCap", "videocam", "Filter tiles to show motion capture tools"),
             ("Tools", "build", None),
             (
                 "Documentation",
@@ -259,7 +253,7 @@ class LauncherNavigationUIMixin:
         btn_library.setAccessibleDescription(
             "Filter tiles to show documentation and library tools"
         )
-        self.sidebar_group.addButton(btn_library, 10)
+        self.sidebar_group.addButton(btn_library, 8)
         self.btn_library_sidebar = btn_library
         self.btn_training_sidebar = None
         return btn_library
@@ -320,13 +314,11 @@ class LauncherNavigationUIMixin:
         1  Engines
         2  Biomechanics
         3  Simulation
-        4  Motion Match
-        5  MoCap
-        6  Tools
-        7  Documentation
-        8  Favorites
-        9  History
-        10 Library
+        4  Tools
+        5  Documentation
+        6  Favorites
+        7  History
+        8  Documentation (Library)
         """
         _CATEGORY_MAP: dict[int, str] = {
             0: "All",
@@ -334,12 +326,10 @@ class LauncherNavigationUIMixin:
             2: "Biomechanics",
             3: "Simulation",
             4: "Tools",
-            5: "Tools",
-            6: "Tools",
-            7: "Documentation",
-            8: "Favorites",
-            9: "History",
-            10: "Documentation",
+            5: "Documentation",
+            6: "Favorites",
+            7: "History",
+            8: "Documentation",
         }
         self.layout_manager.current_category_filter = _CATEGORY_MAP.get(
             button_id, "All"

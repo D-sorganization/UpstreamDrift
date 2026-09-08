@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -211,6 +211,43 @@ class TestUnifiedLoaderFileLoading:
         assert r.source_format is ModelFormat.URDF
         assert r.model is not None
         assert len(r.model.links) == 2
+
+    @pytest.mark.unit
+    def test_load_file_xacro_is_preprocessed_not_just_routed(
+        self, tmp_path: Path
+    ) -> None:
+        """``_EXTENSION_MAP`` claims ``.xacro`` support; prove the claim holds.
+
+        The map has always routed ``.xacro`` to :class:`ModelFormat.URDF`, but
+        between ``b8d95ad25`` and #9620 the parser it routes to had no xacro
+        preprocessing, so a real xacro file reached a plain XML parser and came
+        back as ``unnamed_robot`` with no links. Routing a format the parser
+        cannot handle is worse than declining it, because the failure is
+        silent. This pins the end-to-end path rather than the map entry.
+        """
+        xacro_file = tmp_path / "robot.urdf.xacro"
+        xacro_file.write_text(
+            '<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="raw"/>',
+            encoding="utf-8",
+        )
+        expanded = (
+            '<?xml version="1.0"?>'
+            '<robot name="expanded_robot">'
+            '<link name="base_link"/>'
+            "</robot>"
+        )
+
+        loader = UnifiedModelLoader(prefs_dir=tmp_path)
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = Mock(returncode=0, stdout=expanded, stderr="")
+            result = loader.load_file(xacro_file)
+
+        assert mock_run.called, "the xacro CLI was never invoked"
+        assert result.success is True
+        assert result.source_format is ModelFormat.URDF
+        assert result.model is not None
+        assert result.model.name == "expanded_robot"
+        assert [link.name for link in result.model.links] == ["base_link"]
 
     def test_load_file_none_raises(self, tmp_path: Path) -> None:
         loader = UnifiedModelLoader(prefs_dir=tmp_path)

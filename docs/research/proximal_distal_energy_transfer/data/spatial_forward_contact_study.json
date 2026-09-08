@@ -232,7 +232,7 @@
   "schema_version": "spatial-forward-contact-evidence-v1",
   "source_sha256": {
     "scripts/research/proximal_distal_energy/make_spatial_forward_contact_figures.py": "539e55876f77303241bad32b78783adbd32f4ac80bbf7dd869a6e0ebf0de32aa",
-    "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py": "aa2c8602c07cd500b9abd41d3925c6f74c8183858f90d39c42db2a4083f84e3b",
+    "scripts/research/proximal_distal_energy/run_spatial_forward_contact_study.py": "b86400e58a9c5be66e58e2c1a8590585897eb17cd2ffba8bf3c4d7743288a7a2",
     "scripts/research/proximal_distal_energy/spatial_forward_contract.py": "04bb646557de3516d106806e50d7ace90f2ac9243a5a1a57b83a4d6381af071c",
     "scripts/research/proximal_distal_energy/spatial_forward_engines.py": "4c85f6868cfcbaa43d6a4a3dd6e0a19738bbeb72b8b48b93684d58997c0471da",
     "scripts/research/proximal_distal_energy/spatial_forward_study.py": "768e220729e15eb3e0bb00c37670a38faeab0fbebea0b54e8a5ff55c0e46a76d"

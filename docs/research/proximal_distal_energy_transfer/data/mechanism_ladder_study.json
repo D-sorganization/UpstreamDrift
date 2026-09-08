@@ -2,10 +2,10 @@
   "schema_version": "mechanism-ladder-study-v2",
   "study_id": "common-observable-model-ladder",
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json": "7f3abf953ee824697e0a5d43a0c355462c189de808f69ce3bc49d69ba9050c6a",
+    "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_study.json": "1dda690b58dc0093941fb27bb58453ccb27d5ccbe1823e240746f3891ea4473e",
     "docs/research/proximal_distal_energy_transfer/data/shaft_contribution_traces.npz": "800ea1eef9820bc61763c582cd7540e852e39f27ac18c84123da50b0f720a8b6",
-    "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json": "4ac63c5768d464702b55b1e0c0654208c952df4c94470b91fef3c065b18e4413",
-    "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json": "c5a4f0bc3cca34bdea1e48a48cdc44a91d406484452fa22b9c4e43c669a635f7",
+    "docs/research/proximal_distal_energy_transfer/data/spatial_full_body_study.json": "00c60943e953331f6da2c74304975e6c9cfb7e184de8fed72312e9155480d66c",
+    "docs/research/proximal_distal_energy_transfer/data/spatial_forward_contact_study.json": "28f1bd152a43c33829329a7017c65d0822171a2e4bf562c597036c25ffafe157",
     "scripts/research/proximal_distal_energy/mechanism_ladder.py": "fe096a8c039c0327f44a4e202b88bb52deb63c171c6d6e5b9b29d1c744e0f84e",
     "scripts/research/proximal_distal_energy/run_mechanism_ladder_study.py": "00d97228a34d439b79c9653952260f3bb9b0a241572671d1fe1c130dccf56457",
     "scripts/research/proximal_distal_energy/flexible_shaft_study.py": "6f1d895f086cd3a74d18f001640eb90e39791dacb7750816f0dd1214c6bd27fc",
