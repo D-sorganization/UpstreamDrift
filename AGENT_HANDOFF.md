@@ -1,5 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
 
 ## Impact Dynamics and Acoustics: #9700
@@ -11,8 +12,11 @@ Updated: 2026-09-08 03:10 UTC
 - Current compatibility record: `docs/development/impact_provider_import_turnover.md`; overall design: `docs/development/impact_acoustics_program.md`.
 - Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.
 
-Updated: 2026-09-08 02:55 PDT
+Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
+evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
 
+Detailed takeover context, the merge-versus-quarantine boundary, exact smoke contract,
+recovery constraints, and next commands are in `docs/development/proximal_distal_program_turnover.md`.
 ## Import Bootstrap Fail-Fast: #9733
 
 - Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
@@ -26,9 +30,7 @@ Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
 design-manual program.
 
-Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
-contract, recovery constraints, and next commands are in
-`docs/development/proximal_distal_program_turnover.md`.
+Detailed takeover context (merge-versus-quarantine boundary, exact smoke contract, recovery constraints, next commands): `docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
@@ -167,7 +169,8 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 3. Execute the six registered cases only after runner code and tests merge.
    Never import or relabel legacy checkpoints as outcomes.
 4. #9483: the stale 15-tile nav-gap audit `reports/feature_navigation_gaps/` is deleted (findings dispositioned in the deleting PR); live tile truth is the `src/config/models.yaml` registry plus the generated launcher manifest (#9412/#9437/#9478).
-
+5. Regenerate `requirements*.lock`/`environment.yml` via dispatch-only `lock-refresh.yml`
+   for #9533 (DL-#9533, PR #9716) once it merges; the locks were left untouched there.
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
@@ -215,7 +218,9 @@ python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
 ```
 
-Also run claim/evidence integrity, release qualification, PDF inspection, and
-affected full gates after publication changes. Never force-push, bypass branch
-protection, relax tolerances after inspecting results, or create capacity-only
-reruns.
+Also run claim/evidence integrity, release qualification, PDF inspection, and affected full gates after publication changes. Never
+force-push, bypass branch protection, relax tolerances after inspecting results, or create capacity-only reruns.
+
+## UI Dependency Pin: #9249
+
+- Dependabot now ignores `@vitejs/plugin-react` major updates (`.github/dependabot.yml`): 6.x needs Vite 8 (`peerDependencies.vite: "^8.0.0"`; Vite 7 exports no `./internal`), so a lone bump cannot merge. Stay on plugin-react ^5 with vite ^7.3.2 until a paired Vite-8 upgrade; pairing note lives in `ui/README.md`. Branch `claude/issue-9249-ui-pin`.
