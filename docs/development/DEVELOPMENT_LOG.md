@@ -58,6 +58,135 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Confirm the `tests` lanes on PR #9768, then open the phase-4
   parameter-block entry.
 
+
+
+
+### DL-#9482 · Launcher Tile Logo Families and Registry Gate
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9482
+- **Branch:** `claude/issue-9482-icon-families`
+- **PR:** #9725 (open; `Fixes #9482`)
+- **Paths:** `src/config/launcher_manifest.json`, `assets/logos/**`,
+  `scripts/check_launcher_logo_families.py`,
+  `tests/config/launcher_manifest/test_logo_families.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-07 (`191351bdf`)
+- **Summary:** Broke the launcher grid's worst logo reuse (data_explorer x9,
+  golf_logo x7) by reassigning 16 tiles to distinct existing SVG assets
+  (including verbatim copies of the Sidekick and movement-optimizer icons into
+  `assets/logos/`), declared a data-derived family rule — `engine:<engine_type>`
+  else `category:<category>` — and added `scripts/check_launcher_logo_families.py`
+  plus a focused pytest gate that fails any logo shared outside one family or
+  shared without a documented declaration.
+- **Next step:** Address review feedback on PR #9725 and merge when approved.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
+## Field Reference
+
+| Field           | Required                   | Notes                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------- |
+| `State`         | Always                     | One of the six states above                                    |
+| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
+| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
+| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
+| `PR`            | Always                     | Number and state, or `not created`                             |
+| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
+| `Started`       | Always                     | Drives cycle time                                              |
+| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
+| `Summary`       | Always                     | One or two sentences                                           |
+| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
+| `Parked`        | When `parked`              | Date plus reason                                               |
+
+Never place credentials, tokens, or customer data in a development log.
+
+### DL-#9648 · RTMPose ONNX Pose Estimator Behind the Registry
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9648
+- **Branch:** `claude/issue-9648-pose-backends`
+- **PR:** #9739 (open; `Fixes #9648`)
+- **Paths:** `src/shared/python/pose_estimation/rtmpose_onnx_estimator.py`, `src/shared/python/pose_estimation/rtmpose_models.py`, `src/shared/python/pose_estimation/registry.py`, `src/motion_capture/rig/ingest.py`, `src/motion_capture/reconstruct/layouts.py`, `pyproject.toml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`197e0a942`)
+- **Summary:** Registers `rtmpose_onnx` (SimCC decode via onnxruntime, COCO-17/Halpe-26, whole-frame letterbox) with `capture_source=False`; adds the optional `pose-onnx` extra; pins the official OpenMMLab ONNX model URLs/sizes with digests PENDING OWNER APPROVAL; teaches `RegisteredFrameEstimator` to honour instance-level `LANDMARK_MAP`/`LAYOUT_NAME`; extends `layouts.py` with the Halpe-26 `hip`→`mid_hip` alias.
+- **Next step:** owner approves and verifies the pinned RTMPose model download (run the `rtmpose_models` command once, pin both SHA-256 digests), then qualify `rig compare` against MediaPipe on take 2.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
+## Field Reference
+
+| Field           | Required                   | Notes                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------- |
+| `State`         | Always                     | One of the six states above                                    |
+| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
+| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
+| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
+| `PR`            | Always                     | Number and state, or `not created`                             |
+| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
+| `Started`       | Always                     | Drives cycle time                                              |
+| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
+| `Summary`       | Always                     | One or two sentences                                           |
+| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
+| `Parked`        | When `parked`              | Date plus reason                                               |
+
+Never place credentials, tokens, or customer data in a development log.
+
+### DL-#9499 · Spec Check Reminder Fail-Safe Extraction
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9499`
+- **PR:** #9719 (open; `Fixes #9499`)
+- **Paths:** `.github/workflows/spec-check.yml`, `scripts/post_spec_reminder.py`, `tests/ci/test_spec_check_workflow.py`
+- **Summary:** The `Verify SPEC.md freshness` job posts its SPEC reminder
+  through a fail-safe script instead of an inline `github-script` heredoc, so a
+  reporting failure prints the diagnostic into the job log while the
+  `always()`-guarded staleness step still fails the run.
+- **Next step:** Merge the PR filed from `claude/issue-9499-spec-freshness`
+  after required checks pass.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
+
+## Field Reference
+
+| Field           | Required                   | Notes                                                          |
+| --------------- | -------------------------- | -------------------------------------------------------------- |
+| `State`         | Always                     | One of the six states above                                    |
+| `Owner`         | Always                     | Agent id from the fleet roster, or `unassigned`                |
+| `Issue`         | While live                 | Governing GitHub issue; enforces the entry/issue join          |
+| `Branch`        | `in_progress`, `in_review` | Enforces the entry/branch join                                 |
+| `PR`            | Always                     | Number and state, or `not created`                             |
+| `Paths`         | Always                     | Globs; drives silent-entry detection                           |
+| `Started`       | Always                     | Drives cycle time                                              |
+| `Last verified` | Always                     | Date plus SHA — the liveness signal                            |
+| `Summary`       | Always                     | One or two sentences                                           |
+| `Next step`     | While live                 | Exactly one action; if it needs two sentences, split the entry |
+| `Parked`        | When `parked`              | Date plus reason                                               |
+
+Never place credentials, tokens, or customer data in a development log.
+
 ### DL-#9542 · Bunker Exit State Consistency, Provenance, and Result Envelope
 
 - **State:** in_review
@@ -91,6 +220,25 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   the `dependency-consistency` gate uses), because that gate is red on
   `main` and blocks every open PR until the locks catch up; `lock-refresh.yml`
   stays the standing mechanism for the next drift.
+
+### DL-#9091 · Phantom-Guard Rule-3 False Positive on Shallow Base Fetch
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9717 (open; `Fixes #9091`)
+- **Paths:** `.github/workflows/anti-phantom-merge.yml`, `scripts/ci/check_phantom_guard_paths.py`, `tests/scripts/test_check_phantom_guard_paths.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** The phantom-guard rule-3 closes-issue path-membership check
+  produced a false positive when a shallow base fetch defeated `git merge-base`;
+  the check is now extracted into `scripts/ci/check_phantom_guard_paths.py`,
+  which resolves changed files from local git diff first and falls back to the
+  GitHub API changed-file list (`PR_CHANGED_FILES` / `gh pr view --json files`)
+  when merge-base fails, failing closed with a diagnostic when neither source
+  is available. Workflow rule-3 block invokes the script; rules 1/2/4 unchanged.
+- **Next step:** Observe the first post-merge `phantom-guard` run on a PR
+  whose base fetch is too shallow for merge-base to confirm rule 3 defers to
+  the API list.
 
 ## Shipped (Last 90 Days)
 
@@ -195,6 +343,50 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** `#9476`
+- **Branch:** `claude/issue-9476-driver-wiring`
+- **PR:** #9736 (open, in_review; re-vendor leg #9734)
+- **Paths:** `scripts/install_spec_merge_driver.py`,
+  `shared_scripts/spec_changelog.py`,
+  `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`,
+  `scripts/setup_hooks.py`,
+  `tests/unit/scripts/test_setup_hooks_wires_spec_merge_driver.py`, `SPEC.md`,
+  `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`875cd501e`)
+- **Summary:** The vendored installer still stamped the withdrawn
+  merge-abort claim into `$GIT_COMMON_DIR/info/attributes` and both vendored
+  copies had no drift detection. Re-vendored both files byte-identical from
+  Repository_Management#1521's corrected copies (verified: the false
+  `ATTRIBUTE_BLOCK` text is gone; the repo-wide scan's only surviving match
+  in UD-owned files is the correction narrative quoting the wrong claim to
+  refute it, plus true statements about the half-configured state), and added
+  `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py` pinning SHA-256
+  digests against the upstream reference so future divergence fails loudly.
+  The behaviour change the issue requests followed on this branch:
+  `scripts/setup_hooks.py` (the documented local-automation entry point)
+  now calls the vendored installer, so the documented setup registers the
+  `spec-rows` driver, and the installer docstring names this repository's
+  entry point instead of Repository_Management's.
+- **Next step:** Land PR #9734, then the wiring PR.
+
+### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9533`
+- **Branch:** `claude/issue-9533-test-extras`
+- **PR:** #9716 (open, in_review)
+- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`, `requirements*.lock`, `environment.yml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`289b3aa`)
+- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools` and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed them and ~24 CI tests failed on import. Both now resolve through the `dev` extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml` workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR, since Windows/WSL cannot regenerate correctly (#9533).
+- **Next step:** Dispatch `.github/workflows/lock-refresh.yml` from `main` once this PR merges, then confirm the `ci-standard.yml` dependency-consistency freshness gate and the 24 previously failing tests go green.
+
+### DL-#9476 · Re-Vendor the Corrected Spec Merge Driver and Pin Drift
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9476`
 - **Branch:** `claude/issue-9476-spec-merge-driver`
 - **PR:** #9734 (open, in_review)
 - **Paths:** `scripts/install_spec_merge_driver.py`,
@@ -249,6 +441,29 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **Next step:** Record CI on PR #9743; on green, protected squash merge
   closes #9733.
 
+### DL-#8943 · Cache API CPU Work Off the Event Loop
+
+- **State:** in_review
+- **Owner:** W3_8943 (agent `claude`)
+- **Issue:** #8943
+- **Branch:** `claude/issue-8943-api-cache`
+- **PR:** #9727 (open)
+- **Paths:** `src/api/routes/analysis_plots.py`, `src/api/routes/model_explorer.py`,
+  `src/api/routes/models.py`, `src/api/routes/launch_monitor_analytics.py`,
+  `src/api/routes/_route_utils.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** `GET /analysis/plot-data/{plot_type}` now builds the
+  `AnalysisOrchestrator` once per recorder identity (LRU invalidated when the
+  recorder is replaced) and serves per-plot-type results from an LRU, computed
+  under `anyio.to_thread.run_sync`. Model-explorer and models URDF handlers read
+  and parse through `functools.lru_cache` helpers keyed by
+  `(resolved_path, st_mtime_ns, st_size)` (shared `urdf_file_key` helper), also
+  run in a worker thread. `launch_monitor_analytics` defers `import pandas` into
+  its seven handlers so API boot no longer pays the pandas import.
+- **Next step:** Merge the PR and confirm CI route/lazy-import gates pass on
+  `main`.
+
 ### DL-#9631 · Vendor Pin Carries the Tools#5048 Alias-Predicate Fix
 
 - **State:** in_review
@@ -266,9 +481,3 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **Next step:** maintainer re-cuts the 2.1.3 release via tag/workflow dispatch after the PR merges.
 
 ## Shipped (Last 90 Days)
-
-Entries stay here for 90 days after merge, then move to the archive.
-
-## Archive
-
-Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
