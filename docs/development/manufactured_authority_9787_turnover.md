@@ -139,3 +139,9 @@ actual no-print, mypy, Bandit and unit gates after the main merge. All 253 PDF
 pages pass computational validation again, and the native record retains
 SHA-256 `355157bd57d0c2eb19652d3bd109c8074cc6ba83dc949abda478551a470d390c`.
 Protected current-head CI and review remain required; no green merge is assumed.
+
+Main advanced again to `4f705f508`. Merge `dc5145541` preserves the incoming
+video-upload and dashboard changes and both owners' SPEC/development-log rows.
+No scientific source or native record changes; the existing canonical release
+validates at this full revision without regeneration. PR #9804 is synchronized
+through normal hooks; current-head CI remains the delivery gate.
