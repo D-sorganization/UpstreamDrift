@@ -120,7 +120,7 @@ class TestToolResult:
             result={"data": "value"},
             execution_time=0.5,
         )
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result == {"data": "value"}
         assert result.error is None
 
@@ -131,7 +131,7 @@ class TestToolResult:
             success=False,
             error="Something went wrong",
         )
-        assert result.solver_status != "success"
+        assert result.success is False
         assert result.error == "Something went wrong"
 
 

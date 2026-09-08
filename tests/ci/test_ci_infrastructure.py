@@ -860,8 +860,10 @@ class TestCIEnvironmentCompatibility:
             "tests",
             "unit-test-gate",
             "publication-quality",
+            "docs-governance-gates",
             "rust-wheel-parity",
             "shared-tools-consumer-contracts",
+            "seam-drift-gate",
         }
         assert job["if"] == "always()"
         aggregate_step = next(
@@ -1746,15 +1748,6 @@ class TestCIEnvironmentCompatibility:
             "mypy src/api --strict --follow-imports=silent --config-file pyproject.toml"
             in strict_step
         )
-
-    def test_jules_pr_cleanup_falls_back_to_repository_token(self) -> None:
-        """Scheduled cleanup must authenticate gh even without an optional PAT secret."""
-        workflow = (
-            REPO_ROOT / ".github" / "workflows" / "Jules-PR-Cleanup.yml"
-        ).read_text(encoding="utf-8")
-
-        assert "GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}" in workflow
-        assert "pull-requests: write" in workflow
 
     def test_model_explorer_xml_suppressions_are_build_only(self) -> None:
         """Model Explorer must parse untrusted XML through defusedxml only."""

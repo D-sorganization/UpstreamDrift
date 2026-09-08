@@ -13,6 +13,7 @@ from typing import Any
 import pytest
 
 from src.shared.python.pose_estimation.registry import (
+    capture_source_estimators,
     EstimatorInfo,
     create_estimator,
     estimator_availability,
@@ -52,8 +53,12 @@ def fake_estimator_entry():
 
 
 def test_builtin_estimators_registered() -> None:
-    assert implemented_estimator_types() == {"mediapipe", "openpose"}
-    assert [info.name for info in list_estimators()] == ["mediapipe", "openpose"]
+    assert implemented_estimator_types() == {"mediapipe", "openpose", "openpose_dnn"}
+    assert [info.name for info in list_estimators()] == [
+        "mediapipe",
+        "openpose",
+        "openpose_dnn",
+    ]
 
 
 def test_unknown_estimator_lists_valid_names() -> None:
@@ -127,3 +132,8 @@ def test_api_layer_derives_from_registry(fake_estimator_entry) -> None:
     )
 
     assert "fake_estimator" in recompute()
+
+
+def test_offline_comparison_estimator_is_not_a_capture_source() -> None:
+    assert get_estimator_info("openpose_dnn").capture_source is False
+    assert [i.name for i in capture_source_estimators()] == ["mediapipe", "openpose"]

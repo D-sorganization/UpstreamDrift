@@ -130,15 +130,15 @@
   "source_sha256": {
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "0d9f4d7d9e479b5c611294662d73d92c11f197bd85e91ee1af7c98c7785d5df2",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "1d25ac5dbbb27d2bf67240c3cab18aa7c0a988f68cbb24fcf305bb5b2b37cca2",
-    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "3422db8884ecdba7938f7100253b0d261c4cd51a5d1c052ac65ae57586d16d63",
+    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "305e1542d0dfa95fe86cc9f7b2fe86d90f44be86db71c45053eaa61789ee0c57",
+    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "373c5288e4021cfb8674882f833157576af0621d3656a4f08e0cadc5208283f7",
     "scripts/research/proximal_distal_energy/articulated_distributed_atlas.py": "8c52c72b7cb0a68d2971f60319784205edaba9fdfc3bda82a75f8f7cab0dae7e",
     "scripts/research/proximal_distal_energy/articulated_slack_contact.py": "79ad8644029ff8d447eae2e697a5ed7deceb173c000e5ef2b4f53be6c791ad69",
     "scripts/research/proximal_distal_energy/articulated_forward_integration.py": "85e03a999fb27599eff2e83a17104ad765bcac392ec145a07457564bca43e85b",
     "scripts/research/proximal_distal_energy/articulated_forward_contract.py": "c2f2a89bbb90da5e41488e4763327afe126f6be6be70da73c41c74adca52349a",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
-    "tests/research/test_articulated_distributed_grip.py": "f79a5a74e399352581f1e6f81a4642cd09aaed8ed21e02635ef87c7a12b18d69",
-    "tests/research/test_articulated_distributed_forward.py": "2e0c6e9749afd61ae88a297d94f5e101152ecba268ea8ce42051ee2cfcb4c008",
+    "tests/research/test_articulated_distributed_grip.py": "33d180f900d03620bb86cab93646fab49b7d4f55594f53163c3952552bcb73bc",
+    "tests/research/test_articulated_distributed_forward.py": "927f5ee9b74854443c44b6afe56e8c9bf56ba44eaa6e5a6fdad0f0f5e0236fc0",
     "tests/research/test_articulated_distributed_friction.py": "7b91050578a415483e2380210f80fd2559b399664b1e282d8531a088d501f4d7",
     "tests/research/test_articulated_distributed_atlas.py": "905224975f691ce01884b09f03cb7d720fa5935f82135ca00d1f60c7eedb80ef"
   }

@@ -14,7 +14,11 @@ This directory contains MyoSuite environments and MyoSim models for muscle-drive
 
 ## Official MyoSim Models (Submodule)
 
-The `myo_sim/` directory contains the **official MyoSim musculoskeletal models** from MyoHub.
+The **official MyoSim musculoskeletal models** from MyoHub are the git
+submodule at `shared/models/myosuite/myo_sim/` (repository root, not under
+`src/`). It is optional and empty until you run
+`git submodule update --init shared/models/myosuite/myo_sim`.
+Paths below are relative to that submodule.
 
 ### Available Body Regions
 
@@ -44,7 +48,7 @@ data = mujoco.MjData(model)
 # Simulate
 for _ in range(1000):
     mujoco.mj_step(model, data)
-    print(f"Joint angle: {data.qpos[0]:.3f}")
+    logging.info(f"Joint angle: {data.qpos[0]:.3f}")
 ```
 
 ---
@@ -132,9 +136,9 @@ result = validator.compare_states(
 )
 
 if result.passed:
-    print("✅ Engines agree within tolerance")
+    logging.info("✅ Engines agree within tolerance")
 else:
-    print(f"⚠️ Deviation: {result.severity}")
+    logging.warning(f"⚠️ Deviation: {result.severity}")
 ```
 
 ---
