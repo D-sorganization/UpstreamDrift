@@ -17,8 +17,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9783 · Reviewed Renderer Provider Compatibility
 
-
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9783
+- **Branch:** `fix/9783-reviewed-renderer-reference`
+- **Paths:** `tests/shared_contracts/test_tools_provider_contracts.py`, `docs/development/renderer_reference_9783_turnover.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (15 provider tests pass against both pinned and candidate Tools; four strict pair refusals)
+- **Summary:** Reproduced the candidate's exact old-hash failure before accepting the two reviewed source/hash pairs. Tolerances, immutable provider origin and the current vendor pin remain strict.
+- **Next step:** Complete normal protected delivery, then verify the Tools downstream consumer lane against merged UpstreamDrift.
 
 ### DL-#9482 · Launcher Tile Logo Families and Registry Gate
 

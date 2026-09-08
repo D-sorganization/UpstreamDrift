@@ -51,7 +51,10 @@ _PREEXISTING_SRC_PIVOT_CONFTESTS: frozenset[str] = frozenset()
 
 def _iter_conftest_sources() -> Iterator[tuple[Path, ast.Module]]:
     for path in sorted(_REPO_ROOT.rglob("conftest.py")):
-        if _SKIPPED_DIRS.intersection(path.relative_to(_REPO_ROOT).parts):
+        parts = path.relative_to(_REPO_ROOT).parts
+        if any(part.startswith(".") for part in parts[:-1]):
+            continue
+        if _SKIPPED_DIRS.intersection(parts):
             continue
         try:
             tree = ast.parse(path.read_text(encoding="utf-8"))
