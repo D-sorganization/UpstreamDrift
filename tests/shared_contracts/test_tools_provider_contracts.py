@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import importlib
 import json
+import os
 import sys
 from collections.abc import Iterator
 from hashlib import sha256
@@ -10,10 +11,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
-
-def _normalized_path(value: str) -> str:
-    return value.replace("\\", "/").lower()
 
 
 @contextlib.contextmanager
@@ -70,27 +67,26 @@ def _fresh_provider_import(name: str) -> Iterator[None]:
 
 
 def _assert_from_tools(path: Path) -> None:
-    normalized = _normalized_path(str(path))
-    assert any(
-        marker in normalized
-        for marker in (
-            "/_tools_dep/",
-            "/vendor/ud-tools/",
-            "/repositories/tools/",
-            "/repositories/tools-worktrees/",
-            "/tools/",
-        )
-    ), f"Expected Tools-backed provider path, got: {path}"
+    """Verify source ownership against the provider selected by conftest."""
+    provider = Path(os.environ["TOOLS_REPO_ROOT"]).resolve()
+    assert path.resolve().is_relative_to(provider), (
+        f"Expected module from configured Tools provider {provider}, got: {path}"
+    )
 
 
 @pytest.mark.unit
 def test_fresh_provider_import_preserves_downstream_modules() -> None:
     """Refreshing one Tools provider must not evict UpstreamDrift packages."""
     module_name = "src.shared.python.perturbation.tools_variation_adapter"
-    module = importlib.import_module(module_name)
-
+    # Root conftest may cache the local shared package before provider paths
+    # are promoted. Prepare this real consumer under the same fresh-provider
+    # conditions as the other contracts, then test a second refresh.
     with _fresh_provider_import("swing_sim"):
-        assert sys.modules[module_name] is module
+        module = importlib.import_module(module_name)
+        consumer_root = Path(__file__).resolve().parents[2] / "src"
+        assert Path(module.__file__).resolve().is_relative_to(consumer_root)
+        with _fresh_provider_import("swing_sim"):
+            assert sys.modules[module_name] is module
 
 
 def test_signal_toolkit_imports_resolve_from_tools_provider() -> None:
@@ -338,3 +334,44 @@ def test_rate_of_closure_provider_exposes_governed_analysis_policy() -> None:
             "max_mean_channel_delta_microunits": 200,
             "max_changed_pixel_fraction_microunits": 250,
         }
+
+
+@pytest.mark.unit
+def test_provider_origin_accepts_configured_checkout_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    provider = tmp_path / "qualified-provider"
+    provider.mkdir()
+    module = provider / "module.py"
+    module.write_text("", encoding="utf-8")
+    monkeypatch.setenv("TOOLS_REPO_ROOT", str(provider))
+    _assert_from_tools(module)
+
+
+@pytest.mark.unit
+def test_provider_origin_refuses_unrelated_tools_named_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    provider = tmp_path / "qualified-provider"
+    provider.mkdir()
+    impostor = tmp_path / "Tools" / "module.py"
+    impostor.parent.mkdir()
+    impostor.write_text("", encoding="utf-8")
+    monkeypatch.setenv("TOOLS_REPO_ROOT", str(provider))
+    with pytest.raises(AssertionError, match="provider"):
+        _assert_from_tools(impostor)
+
+
+@pytest.mark.unit
+def test_explicit_provider_mode_matches_reported_origin(
+    request: pytest.FixtureRequest,
+) -> None:
+    """A vendored-mode gate must verify its pin even with a sibling checkout."""
+    explicit = os.environ.get("TOOLS_REPO_PATH")
+    if explicit:
+        expected = Path(explicit).resolve()
+    elif request.config.getoption("--tools-mode") == "vendored":
+        expected = Path(__file__).resolve().parents[2] / "vendor" / "ud-tools"
+    else:
+        return  # External roots are checked by each executable provider contract.
+    assert Path(os.environ["TOOLS_REPO_ROOT"]).resolve() == expected.resolve()
