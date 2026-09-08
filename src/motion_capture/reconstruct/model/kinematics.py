@@ -18,14 +18,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import require
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 AXES = "xyz"
 FULL_RANGE = (-np.pi, np.pi)
 

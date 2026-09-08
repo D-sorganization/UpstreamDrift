@@ -14,14 +14,14 @@ import json
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import require
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 Edge = tuple[int, int]
 
 POINT_COLOUR = (0, 220, 255)  # BGR

@@ -46,13 +46,13 @@ Constraints that shaped the decision:
 
 2. **Problem classes.**
 
-   | Backend                    | Owns                                                        | Status                          |
-   | -------------------------- | ----------------------------------------------------------- | ------------------------------- |
-   | `scipy`                    | quick / legacy smooth NLP on the node grid                  | kept                            |
-   | `casadi`                   | legacy kinematic fit with a torque check                    | **deprecated** (Phase 6.2)      |
-   | `casadi-multiple-shooting` | single-phase torque-driven OCP with no bioptim installed    | fallback for the bioptim path   |
-   | `crocoddyl`                | fast DDP / FDDP, loosely constrained                        | kept, complementary             |
-   | `bioptim`                  | constrained, multiphase, tracking and estimation OCPs       | new (epic #9762)                |
+   | Backend                    | Owns                                                     | Status                        |
+   | -------------------------- | -------------------------------------------------------- | ----------------------------- |
+   | `scipy`                    | quick / legacy smooth NLP on the node grid               | kept                          |
+   | `casadi`                   | legacy kinematic fit with a torque check                 | **deprecated** (Phase 6.2)    |
+   | `casadi-multiple-shooting` | single-phase torque-driven OCP with no bioptim installed | fallback for the bioptim path |
+   | `crocoddyl`                | fast DDP / FDDP, loosely constrained                     | kept, complementary           |
+   | `bioptim`                  | constrained, multiphase, tracking and estimation OCPs    | new (epic #9762)              |
 
 3. **bioptim is driven through its custom-model protocol only.** UpstreamDrift's
    own CasADi symbolic model (`ocp/symbolic_model.SymbolicSwingModel`, built on
@@ -91,12 +91,12 @@ Constraints that shaped the decision:
 
 The epic's Phase 6.2 proposed making `solve_swing_casadi` delegate to the
 bioptim OCP whenever bioptim is importable. That is rejected: the two do not
-solve the same problem. The finite-difference path *maximises* terminal
+solve the same problem. The finite-difference path _maximises_ terminal
 clubhead speed, which with the dynamics genuinely enforced is a concave
 objective whose optimum sits on the velocity bound and which no interior-point
 solver certifies (measured in `docs/estimation/bioptim_parity.md`; the CasADi
 multiple-shooting path fails the same way). The OCP path therefore defaults to
-a convex *target*-speed objective. Silently swapping one for the other would
+a convex _target_-speed objective. Silently swapping one for the other would
 change every existing caller's answer.
 
 Instead: `transcription="finite_difference"` emits a `DeprecationWarning`

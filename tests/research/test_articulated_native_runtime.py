@@ -110,7 +110,9 @@ def test_ensure_cmeel_native_library_path_reexecs_once(
     monkeypatch.setattr(
         runtime, "_candidate_site_packages", lambda: [tmp_path / "site-packages"]
     )
-    monkeypatch.delenv("LD_LIBRARY_PATH", raising=False)
+    # Register restoration even when initially absent: the mocked re-exec
+    # returns, so the helper's environment mutation survives in this process.
+    monkeypatch.setenv("LD_LIBRARY_PATH", "")
     executed: list[list[str]] = []
     monkeypatch.setattr(runtime.os, "execv", lambda exe, argv: executed.append(argv))
 
