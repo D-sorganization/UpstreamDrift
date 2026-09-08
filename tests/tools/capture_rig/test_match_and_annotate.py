@@ -20,7 +20,12 @@ from PyQt6.QtWidgets import QApplication
 from src.motion_capture.annotate import AnnotationSet
 from src.motion_capture.reconstruct.skeleton import JOINT_NAMES
 from src.tools.capture_rig import gui
-from src.tools.capture_rig.annotate_widget import AnnotateDialog, ImageCanvas
+from src.tools.capture_rig.annotate_widget import (
+    AnnotateDialog,
+    AnnotateSettings,
+    BaseSet,
+    ImageCanvas,
+)
 from src.tools.capture_rig.match_panel import (
     IMAGE_SPACE,
     MatchSelection,
@@ -159,7 +164,10 @@ def test_annotate_dialog_records_clicks_skips_and_saves(tmp_path: Path) -> None:
     video = load_session(root).view("cam_a").playable
     assert video is not None
     dialog = AnnotateDialog(
-        root, "cam_a", video, joints=("nose", "left_wrist"), stride=5, annotator="t"
+        root,
+        "cam_a",
+        video,
+        settings=AnnotateSettings(("nose", "left_wrist"), stride=5, annotator="t"),
     )
     prompt = dialog.guide.prompt()
     assert prompt is not None and (prompt.frame, prompt.joint) == (0, "nose")
@@ -188,7 +196,11 @@ def test_annotate_dialog_edit_mode_corrects_detector_points(tmp_path: Path) -> N
     video = load_session(root).view("cam_a").playable
     assert video is not None
     dialog = AnnotateDialog(
-        root, "cam_a", video, joints=("nose",), base_set="observations", base_file=base
+        root,
+        "cam_a",
+        video,
+        settings=AnnotateSettings(("nose",)),
+        base=BaseSet("observations", base),
     )
     assert dialog.base is not None and "detector 0.90" in dialog.banner.text()
     assert "click to correct" in dialog.banner.text()

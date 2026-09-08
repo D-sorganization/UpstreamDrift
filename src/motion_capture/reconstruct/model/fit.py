@@ -54,6 +54,9 @@ class FitOptions:
     max_velocity_rad_s: float | None = None  # reported, not clipped
     max_iterations: int = 60
     fit_lengths: tuple[str, ...] = ()
+    # Image-space fits (fit2d): pixel noise and the single-view root depth.
+    sigma_px: float = 4.0
+    root_depth_m: float = 3.5
 
     def __post_init__(self) -> None:
         for name in (
@@ -65,6 +68,8 @@ class FitOptions:
             "sigma_rest_rad",
             "huber_delta",
             "gate",
+            "sigma_px",
+            "root_depth_m",
         ):
             require(getattr(self, name) > 0, f"{name} must be positive")
         require(self.max_iterations >= 1, "max_iterations must be >= 1")

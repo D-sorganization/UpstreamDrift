@@ -16,6 +16,7 @@ from src.motion_capture.reconstruct.model import FitOptions
 from src.motion_capture.reconstruct.model.golfer import GOLFER_LANDMARK_MAP, GOLFER_SPEC
 from src.motion_capture.reconstruct.model.session import fit_session_model
 from src.motion_capture.reconstruct.pipeline import (
+    MatchSpec,
     reconstruct_session,
     start_cameras_from,
 )
@@ -61,8 +62,7 @@ def test_every_fifth_frame_fits_within_twice_the_dense_error(tmp_path: Path) -> 
             session,
             start_cameras=start_cameras_from(cameras),
             scale_anchor=("neck", 0.5),
-            observation_set=out_set,
-            variant=variant,
+            match=MatchSpec(observation_set=out_set, variant=variant),
         )
         root = variant_dir(session, variant)
         fit, _ = fit_session_model(

@@ -167,24 +167,37 @@ def _observed_arrays(observed: PoseTrack, frames: int) -> tuple[Any, Any]:
     return kp, conf
 
 
+@dataclass(frozen=True)
+class ClipRange:
+    """Frames to render and the playback speed factor."""
+
+    start: int = 0
+    stop: int | None = None
+    speed: float = 1.0
+
+    def __post_init__(self) -> None:
+        require(self.speed > 0, "speed must be positive", self.speed)
+        require(self.start >= 0, "start must be >= 0", self.start)
+
+
 def export_overlay(
     session: Path,
     view: str,
     variants: Sequence[str],
     out: Path,
     *,
-    start: int = 0,
-    stop: int | None = None,
-    speed: float = 1.0,
+    clip: ClipRange | None = None,
     observation_set: str = "observations",
     legend: bool = True,
 ) -> dict[str, Any]:
     """Write ``out`` (mp4) and ``out.with_suffix(".json")``; returns the sidecar.
 
-    Preconditions: the view has a playable recording; ``speed`` positive;
-    ``start <= stop``. Postcondition: the sidecar lists every track drawn.
+    Preconditions: the view has a playable recording; ``clip.start`` inside
+    the recording and ``<= stop``. Postcondition: the sidecar lists every
+    track drawn.
     """
-    require(speed > 0, "speed must be positive", speed)
+    clip = clip or ClipRange()
+    start, stop, speed = clip.start, clip.stop, clip.speed
     media = load_session(session)
     playable = media.view(view).playable
     require(playable is not None, "view has no playable recording", view)

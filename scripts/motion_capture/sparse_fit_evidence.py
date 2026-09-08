@@ -29,6 +29,7 @@ from src.motion_capture.reconstruct.model import FitOptions
 from src.motion_capture.reconstruct.model.golfer import GOLFER_LANDMARK_MAP, GOLFER_SPEC
 from src.motion_capture.reconstruct.model.session import fit_session_model
 from src.motion_capture.reconstruct.pipeline import (
+    MatchSpec,
     reconstruct_session,
     start_cameras_from,
 )
@@ -117,8 +118,7 @@ def run(session: Path, cameras: Path) -> dict[str, Any]:
             session,
             start_cameras=start_cameras_from(cameras),
             scale_anchor=("neck", 0.5),
-            observation_set=out_set,
-            variant=variant,
+            match=MatchSpec(observation_set=out_set, variant=variant),
         )
         root = variant_dir(session, variant)
         fit, _ = fit_session_model(
@@ -178,7 +178,7 @@ def write(payload: dict[str, Any], out_dir: Path) -> None:
         json.dumps(payload, indent=2), encoding="utf-8"
     )
     text = (
-        "# Sparse Annotations: Fitting From Every K-th Frame (Synthetic Lab Rig)\n\n"
+        "# Sparse Annotations: Fitting From Sparse Frames (Synthetic Lab Rig)\n\n"
         "Epic #9791, child #9802. The synthetic three-view detections were turned into "
         "manual sets that keep every k-th frame (all joints clicked, 1 px noise), then "
         "reconstructed and fitted with the golfer through the normal path "

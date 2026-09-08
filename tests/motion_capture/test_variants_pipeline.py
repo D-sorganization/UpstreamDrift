@@ -9,9 +9,13 @@ import numpy as np
 import pytest
 
 from src.motion_capture.reconstruct.model import FitOptions
-from src.motion_capture.reconstruct.model.fit2d import fit_session_model_2d
+from src.motion_capture.reconstruct.model.fit2d import (
+    ImageSpaceSource,
+    fit_session_model_2d,
+)
 from src.motion_capture.reconstruct.model.golfer import GOLFER_LANDMARK_MAP, GOLFER_SPEC
 from src.motion_capture.reconstruct.pipeline import (
+    MatchSpec,
     reconstruct_session,
     start_cameras_from,
 )
@@ -33,7 +37,7 @@ def test_variants_provenance_and_image_space_fit(tmp_path: Path) -> None:
         session,
         start_cameras=start_cameras_from(cameras),
         scale_anchor=("neck", 0.5),
-        camera_source=f"cameras:{cameras.name}",
+        match=MatchSpec(camera_source=f"cameras:{cameras.name}"),
     )
     summary = _read(session / "reconstruct" / "session_reconstruction.json")
     assert summary["schema_version"] == "session-reconstruction/1.0.0"
@@ -50,8 +54,7 @@ def test_variants_provenance_and_image_space_fit(tmp_path: Path) -> None:
         session,
         start_cameras=start_cameras_from(cameras),
         scale_anchor=("neck", 0.5),
-        views=("face_on", "down_line"),
-        variant="pair_fd",
+        match=MatchSpec(views=("face_on", "down_line"), variant="pair_fd"),
     )
     root = variant_dir(session, "pair_fd")
     assert pair.views == ("face_on", "down_line")
@@ -70,16 +73,14 @@ def test_variants_provenance_and_image_space_fit(tmp_path: Path) -> None:
             session,
             start_cameras=start_cameras_from(cameras),
             scale_anchor=("neck", 0.5),
-            views=("face_on", "nope"),
-            variant="bad",
+            match=MatchSpec(views=("face_on", "nope"), variant="bad"),
         )
     with pytest.raises(Exception, match="at least two"):
         reconstruct_session(
             session,
             start_cameras=start_cameras_from(cameras),
             scale_anchor=("neck", 0.5),
-            views=("face_on",),
-            variant="bad",
+            match=MatchSpec(views=("face_on",), variant="bad"),
         )
 
     # Triangulated model fit and export on the pair variant through the CLI.
@@ -119,9 +120,7 @@ def test_variants_provenance_and_image_space_fit(tmp_path: Path) -> None:
         session,
         GOLFER_SPEC,
         GOLFER_LANDMARK_MAP,
-        views=("face_on",),
-        cameras_from="",
-        variant="cam_face",
+        ImageSpaceSource(("face_on",), "", "observations", "cam_face"),
         options=FitOptions(max_iterations=12),
     )
     assert fit.rms_px is not None and np.isfinite(fit.rms_px)

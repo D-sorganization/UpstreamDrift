@@ -14,6 +14,7 @@ while a skip rejects it; the corrections are saved as a sparse layer that
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -137,6 +138,24 @@ class ImageCanvas(QLabel):
         super().resizeEvent(event)  # type: ignore[arg-type]
 
 
+@dataclass(frozen=True)
+class AnnotateSettings:
+    """Which joints to ask for, over which frames, at which stride, by whom."""
+
+    joints: Sequence[str] = JOINT_NAMES
+    frame_range: tuple[int, int] | None = None
+    stride: int = 1
+    annotator: str = "unknown"
+
+
+@dataclass(frozen=True)
+class BaseSet:
+    """An observation set to correct: its name and the view's file (#9803)."""
+
+    name: str
+    file: Path
+
+
 class AnnotateDialog(QDialog):
     """Frame-by-frame, joint-by-joint clicking over one view."""
 
@@ -146,15 +165,13 @@ class AnnotateDialog(QDialog):
         view: str,
         video: Path,
         *,
-        joints: Sequence[str] = JOINT_NAMES,
-        frame_range: tuple[int, int] | None = None,
-        stride: int = 1,
-        base_set: str | None = None,
-        base_file: Path | None = None,
-        annotator: str = "unknown",
+        settings: AnnotateSettings | None = None,
+        base: BaseSet | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
+        settings = settings or AnnotateSettings()
+        base_set = base.name if base else None
         self.session, self.view = session, view
         self.reader = VideoReader(video)
         self.path = annotation_path(session, view)
@@ -166,20 +183,20 @@ class AnnotateDialog(QDialog):
                 self.reader.width,
                 self.reader.height,
                 self.reader.fps or 30.0,
-                annotator=annotator,
+                annotator=settings.annotator,
                 base_set=base_set,
             )
         )
         if base_set and self.store.base_set is None:
             self.store.base_set = base_set
-        self.base: PoseTrack | None = PoseTrack.load(base_file) if base_file else None
+        self.base: PoseTrack | None = PoseTrack.load(base.file) if base else None
         last = max(self.reader.frame_count - 1, 0)
-        first, stop = frame_range or (0, last)
+        first, stop = settings.frame_range or (0, last)
         self.guide = Guide(
             self.store,
-            tuple(joints),
+            tuple(settings.joints),
             (first, min(stop, last)),
-            stride,
+            settings.stride,
             only_missing=self.base is None,
         )
         self.dirty = False
@@ -343,7 +360,8 @@ class AnnotateDialog(QDialog):
         if self.base is None or joint not in self.base.names:
             return None
         pose = self.base.at(frame)
-        return None if pose is None else float(pose[1][self.base.names.index(joint)])
+        names = self.base.names
+        return None if pose is None else float(pose[1][names.index(joint)])
 
     def _decorated(
         self, image: npt.NDArray[np.uint8], frame: int, prompt: object

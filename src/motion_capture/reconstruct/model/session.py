@@ -169,10 +169,7 @@ def fit_session_model(
         spec,
         landmark_map,
         model,
-        inputs=[joints_file, summary_file],
-        parameters=parameters,
-        derived_from=[summary_file],
-        base=base,
+        Stamp([joints_file, summary_file], parameters, [summary_file], base),
     )
     logger.info(
         "model fit %s: rms %.1f mm, %d rejected, %d velocity violations",
@@ -192,6 +189,16 @@ def options_dict(options: FitOptions | None) -> dict[str, Any]:
     }
 
 
+@dataclass(frozen=True)
+class Stamp:
+    """Provenance arguments a fit writer passes through to ``write_stamped``."""
+
+    inputs: Sequence[Path]
+    parameters: Mapping[str, Any]
+    derived_from: Sequence[Path]
+    base: Path
+
+
 def write_fit(
     session_dir: Path,
     out_subdir: str | None,
@@ -200,11 +207,7 @@ def write_fit(
     spec: ModelSpec,
     landmark_map: LandmarkMap,
     model: ArticulatedModel,
-    *,
-    inputs: Sequence[Path],
-    parameters: Mapping[str, Any],
-    derived_from: Sequence[Path],
-    base: Path,
+    stamp: Stamp,
 ) -> Path:
     """``model/[out_subdir/]``: joint angles, fitted landmarks, report, all stamped.
 
@@ -222,10 +225,10 @@ def write_fit(
     }
     stamp_kw: dict[str, Any] = {
         "module": __name__,
-        "inputs": list(inputs),
-        "parameters": dict(parameters),
-        "derived_from": list(derived_from),
-        "base": base,
+        "inputs": list(stamp.inputs),
+        "parameters": dict(stamp.parameters),
+        "derived_from": list(stamp.derived_from),
+        "base": stamp.base,
     }
     write_stamped(
         out_dir / JOINT_ANGLES_FILE,

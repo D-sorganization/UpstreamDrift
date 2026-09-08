@@ -20,10 +20,14 @@ from pathlib import Path
 from src.motion_capture.compare_variants import compare_variants, markdown
 from src.motion_capture.reconstruct import __main__ as recon_cli
 from src.motion_capture.reconstruct.model import FitOptions
-from src.motion_capture.reconstruct.model.fit2d import fit_session_model_2d
+from src.motion_capture.reconstruct.model.fit2d import (
+    ImageSpaceSource,
+    fit_session_model_2d,
+)
 from src.motion_capture.reconstruct.model.golfer import GOLFER_LANDMARK_MAP, GOLFER_SPEC
 from src.motion_capture.reconstruct.model.session import fit_session_model
 from src.motion_capture.reconstruct.pipeline import (
+    MatchSpec,
     reconstruct_session,
     start_cameras_from,
 )
@@ -75,8 +79,7 @@ def run(session: Path, cameras: Path) -> dict:
             session,
             start_cameras=start_cameras_from(cameras),
             scale_anchor=("neck", 0.5),
-            views=(a, b),
-            variant=name,
+            match=MatchSpec(views=(a, b), variant=name),
         )
         fit_session_model(
             variant_dir(session, name),
@@ -90,9 +93,7 @@ def run(session: Path, cameras: Path) -> dict:
             session,
             GOLFER_SPEC,
             GOLFER_LANDMARK_MAP,
-            views=(view,),
-            cameras_from="",
-            variant=f"single_{view}",
+            ImageSpaceSource((view,), "", "observations", f"single_{view}"),
             options=options,
         )
     return compare_variants(session)

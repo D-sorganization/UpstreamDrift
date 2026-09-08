@@ -672,18 +672,19 @@ def cmd_fit_model(args: argparse.Namespace) -> int:
     from_views = [v.strip() for v in args.from_views.split(",") if v.strip()]
     if from_views:
         # --cameras-from "" is the session's default variant.
-        from src.motion_capture.reconstruct.model.fit2d import fit_session_model_2d
+        from src.motion_capture.reconstruct.model.fit2d import (
+            ImageSpaceSource,
+            fit_session_model_2d,
+        )
 
         fit, out_dir = fit_session_model_2d(
             args.session,
             registered.spec,
             registered.landmark_map,
-            views=from_views,
-            cameras_from=args.cameras_from,
-            observation_set=args.observations,
-            variant=args.variant,
-            options=options,
-            sigma_px=args.sigma_px,
+            ImageSpaceSource(
+                tuple(from_views), args.cameras_from, args.observations, args.variant
+            ),
+            options=FitOptions(**{**vars(options), "sigma_px": args.sigma_px}),
             out_subdir=out_subdir,
         )
     else:
@@ -772,16 +773,14 @@ def cmd_kinetics(args: argparse.Namespace) -> int:
 
 
 def cmd_overlay(args: argparse.Namespace) -> int:
-    from src.tools.capture_rig.overlay_render import export_overlay
+    from src.tools.capture_rig.overlay_render import ClipRange, export_overlay
 
     sidecar = export_overlay(
         args.session,
         args.view,
         tuple(args.variant) or ("",),
         args.out,
-        start=args.start,
-        stop=args.stop,
-        speed=args.speed,
+        clip=ClipRange(args.start, args.stop, args.speed),
         observation_set=args.observations,
         legend=not args.no_legend,
     )
@@ -980,6 +979,7 @@ def cmd_compare(args: argparse.Namespace) -> int:
 
 def cmd_reconstruct(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.pipeline import (
+        MatchSpec,
         intrinsics_from,
         reconstruct_session,
         start_cameras_from,
@@ -1000,16 +1000,18 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
         intrinsics=intrinsics_from(args.intrinsics) if args.intrinsics else None,
         measurements=tuple(args.anchor),
         acceleration_sigma_px=args.accel_sigma_px,
-        exclude_joints=tuple(
-            j.strip() for j in args.exclude_joints.split(",") if j.strip()
-        ),
-        observation_set=args.observations,
-        views=wanted or None,
-        variant=args.variant,
-        camera_source=(
-            f"cameras:{args.cameras}"
-            if args.cameras
-            else f"intrinsics:{args.intrinsics}"
+        match=MatchSpec(
+            observation_set=args.observations,
+            views=tuple(wanted) or None,
+            variant=args.variant,
+            camera_source=(
+                f"cameras:{args.cameras}"
+                if args.cameras
+                else f"intrinsics:{args.intrinsics}"
+            ),
+            exclude_joints=tuple(
+                j.strip() for j in args.exclude_joints.split(",") if j.strip()
+            ),
         ),
     )
     logger.info(
