@@ -42,8 +42,17 @@ version surfaces are enforced and kept in step by
 ## Release
 
 1. Merge the release PR to `main`.
-2. Create and push a signed tag from a trusted workstation:
-   `git tag -s vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z`.
+2. Create and push an annotated tag from a trusted workstation:
+
+   ```console
+   git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
+   ```
+
+   Annotated (`-a`), not lightweight: the tag then carries a tagger identity
+   and date, which the rollback step below and any later audit rely on.
+
+   See [Tag signing](#tag-signing) for why this is `-a` and not `-s`, and for
+   what would have to change to make signing the documented default.
 3. Run schema migrations against the production database before starting the new server version:
    `python3 scripts/db_migrate.py upgrade head`.
 4. Confirm `.github/workflows/release.yml` starts from the exact tag commit and
@@ -82,8 +91,8 @@ for different observers. Instead cut the next patch version. The failed tag is
 left in place with no release attached, which is itself the accurate record
 that nothing shipped from it.
 
-Recovery steps (human release operator with signing keys; this development
-environment must not create or push tags):
+Recovery steps (human release operator; this development environment must not
+create or push tags):
 
 1. Merge the fix that makes the release workflow able to build.
 2. Confirm `main` is green and that the workflow change is present on the
@@ -106,8 +115,12 @@ environment must not create or push tags):
 6. Merge the version-bump PR, then tag the merge commit and push:
 
    ```console
-   git tag -s v2.1.2 -m "v2.1.2" && git push origin v2.1.2
+   git tag -a v2.1.2 -m "v2.1.2" <merge-commit-sha> && git push origin v2.1.2
    ```
+
+   Name the commit explicitly. `main` may have advanced past the version bump
+   by the time you tag, and a bare `git tag` would then capture more than the
+   `CHANGELOG.md` entry for this version describes.
 
 7. Watch the run and confirm the `build` job's UI steps, then that
    `smoke-python-wheel`, `publish-pypi`, `create-release`, and
@@ -162,11 +175,67 @@ The following changes must trigger a `SPEC.md` update:
 
 See `SPEC.md` §1 (Identity) and §6 (Component Locations) for required updates.
 
+## Tag Signing
+
+Release tags in this repository are **annotated but not signed**, and nothing
+in the pipeline verifies a tag signature. This section records that plainly so
+the procedure above is followed rather than worked around.
+
+Every release tag as of `v2.1.2`:
+
+| Tag | Form | Signature |
+|---|---|---|
+| `v2.1.0` | lightweight | cannot carry one |
+| `v2.1.1` | annotated | `verified=false`, `reason=unsigned` |
+| `v2.1.2` | lightweight | cannot carry one |
+
+`.github/workflows/release.yml` contains no signature-verification step, and no
+branch or tag ruleset requires signed tags. A signature would therefore be
+recorded but unchecked.
+
+This runbook previously prescribed `git tag -s`. No release has ever been cut
+that way, and on an operator workstation without a configured signing key the
+command simply fails:
+
+```
+error: gpg failed to sign the data:
+gpg: skipped "...": No secret key
+```
+
+which stops the release at the tag step with the version bump already merged.
+Documenting `-a` matches what is actually done and what actually works.
+
+### Adopting signed tags
+
+Signing is worth having — it binds a release name to an identity rather than to
+whoever holds push rights. Doing it properly means all of:
+
+1. A signing key for the release operator (GPG, or SSH via
+   `gpg.format=ssh` and `user.signingkey`), with the public half registered on
+   the GitHub account so tags show as **Verified**.
+2. `git config --global tag.gpgSign true` on the release workstation, so the
+   form cannot be forgotten under time pressure.
+3. A verification step in `release.yml` — `git verify-tag "$GITHUB_REF_NAME"`
+   before the build job — so an unsigned tag fails the release rather than
+   publishing quietly.
+4. This section and the commands above updated back to `-s` in the same change.
+
+Until step 3 exists, prescribing `-s` documents an intention rather than a
+control. Track adoption in its own issue rather than changing the command here
+alone: a `-s` in the runbook with no verification in CI is exactly the gap that
+made this section necessary.
+
 ## Operational Limits
 
 This development environment must not create or push release tags and must not
-publish to PyPI. Those actions require a human release operator with signing
-keys, repository release permissions, and PyPI project authority.
+publish to PyPI. Those actions require a human release operator with
+repository release permissions and PyPI project authority, working from a
+trusted workstation.
+
+The constraint is authority and provenance, not key custody: see
+[Tag signing](#tag-signing). Release tags are not currently signed, so
+"operator has a signing key" is not what separates them from this
+environment.
 
 The `main` push path in `release.yml` is not a software release. It publishes a
 30-day Actions artifact and acquisition-evidence artifact for the exact
