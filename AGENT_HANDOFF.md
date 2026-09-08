@@ -95,6 +95,13 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   contract (RED at pre-#9657 pin `3d93bb2c`, GREEN at the current pin). Child copy stays
   unconverged per #9657. Remaining: re-cut the 2.1.3 release.
 
+## In-Flight Issue Work
+
+- `claude/issue-9612-video-suffix` (PR pending): `src/api/routes/video.py`
+  derives the upload temp-file suffix from the filename against
+  `SUPPORTED_VIDEO_SUFFIXES` and fails closed with 400 on unknown/missing
+  extensions; state tracked in `docs/development/DEVELOPMENT_LOG.md` (DL-#9612).
+
 ## Protected Authority
 
 - UpstreamDrift protected `main` is

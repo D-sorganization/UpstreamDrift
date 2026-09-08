@@ -38,6 +38,9 @@ router = APIRouter()
 logger = get_module_logger(__name__)
 VIDEO_UPLOAD_MAX_BYTES = 100 * 1024 * 1024
 VIDEO_SIGNATURE_READ_BYTES = 32
+# Containers the pose pipeline can open via cv2.VideoCapture and that the
+# byte-signature check (see _looks_like_supported_video_bytes) recognizes.
+SUPPORTED_VIDEO_SUFFIXES = frozenset({".mp4", ".mov", ".mkv", ".avi", ".webm"})
 
 
 def _load_video_pipeline_classes() -> tuple[type, type]:
@@ -87,10 +90,46 @@ def _looks_like_supported_video_bytes(header: bytes) -> bool:
     return len(header) >= 12 and header.startswith(b"RIFF") and header[8:12] == b"AVI "
 
 
-async def _validate_video_upload(file: UploadFile) -> None:
-    """Reject uploads whose metadata or leading bytes do not look like video."""
+def _video_upload_suffix(filename: str | None) -> str:
+    """Derive the upload suffix from the original filename against the allow-list.
+
+    Args:
+        filename: Original upload filename, or ``None`` when absent.
+
+    Returns:
+        The lowercased filename suffix, guaranteed to be a member of
+        ``SUPPORTED_VIDEO_SUFFIXES``.
+
+    Raises:
+        HTTPException: 400 when the filename is missing or its extension is not
+            in the supported allow-list (fail closed, no ``.mp4`` default).
+    """
+    suffix = Path(filename).suffix.lower() if filename else ""
+    if suffix not in SUPPORTED_VIDEO_SUFFIXES:
+        allowed = ", ".join(sorted(SUPPORTED_VIDEO_SUFFIXES))
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported video file extension '{suffix or 'none'}'. "
+                f"Allowed extensions: {allowed}"
+            ),
+        )
+    return suffix
+
+
+async def _validate_video_upload(file: UploadFile) -> str:
+    """Reject uploads whose metadata or leading bytes do not look like video.
+
+    Args:
+        file: Uploaded video file.
+
+    Returns:
+        The validated container suffix derived from the upload filename.
+    """
     if not file.content_type or not file.content_type.startswith("video/"):
         raise HTTPException(status_code=400, detail="File must be a video")
+
+    video_suffix = _video_upload_suffix(file.filename)
 
     if file.size and file.size > VIDEO_UPLOAD_MAX_BYTES:
         raise HTTPException(
@@ -105,6 +144,8 @@ async def _validate_video_upload(file: UploadFile) -> None:
             status_code=400,
             detail="Uploaded file content does not match a supported video format.",
         )
+
+    return video_suffix
 
 
 # fmt: off
@@ -155,11 +196,11 @@ async def analyze_video(
             detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
         )
 
-    await _validate_video_upload(file)
+    video_suffix = await _validate_video_upload(file)
 
     temp_path: Path | None = None
     try:
-        temp_fd, temp_file_name = tempfile.mkstemp(suffix=".mp4")
+        temp_fd, temp_file_name = tempfile.mkstemp(suffix=video_suffix)
         os.close(temp_fd)
         temp_path = Path(temp_file_name)
         await write_upload_file_to_path(
@@ -265,7 +306,7 @@ async def analyze_video_async(
             detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
         )
 
-    await _validate_video_upload(file)
+    video_suffix = await _validate_video_upload(file)
 
     task_id = str(uuid.uuid4())
 
@@ -277,7 +318,7 @@ async def analyze_video_async(
     os.makedirs(artifact_dir, exist_ok=True)
 
     temp_fd, temp_file_name = tempfile.mkstemp(
-        suffix=".mp4",
+        suffix=video_suffix,
         dir=artifact_dir,
     )
     os.close(temp_fd)
