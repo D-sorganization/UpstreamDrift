@@ -133,3 +133,9 @@ controls. The print-hook exclusion now matches only the already declared
 The actual print hook now accepts that CLI by its intended exclusion. Generic
 Prettier's three incoming OCP-document changes are formatting only. No hook is
 bypassed and no scientific solver is changed for this delivery prerequisite.
+
+PR #9804 publishes `d1563dffa` with every normal push hook passing, including
+actual no-print, mypy, Bandit and unit gates after the main merge. All 253 PDF
+pages pass computational validation again, and the native record retains
+SHA-256 `355157bd57d0c2eb19652d3bd109c8074cc6ba83dc949abda478551a470d390c`.
+Protected current-head CI and review remain required; no green merge is assumed.
