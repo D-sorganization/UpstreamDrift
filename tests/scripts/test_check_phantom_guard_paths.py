@@ -9,6 +9,8 @@ import pytest
 
 from scripts.ci import check_phantom_guard_paths as mod
 
+pytestmark = pytest.mark.unit
+
 
 PR_BODY = "Fixes #9091 and Resolves #700, closes #800."
 
@@ -30,9 +32,13 @@ def _init_repo(tmp_path: Path) -> tuple[str, str, Path]:
     def git(*args: str) -> None:
         subprocess.run(
             [
-                "git", "-C", str(repo),
-                "-c", "user.email=t@example.com",
-                "-c", "user.name=t",
+                "git",
+                "-C",
+                str(repo),
+                "-c",
+                "user.email=t@example.com",
+                "-c",
+                "user.name=t",
                 *args,
             ],
             check=True,
@@ -128,15 +134,15 @@ def test_git_changed_files_survives_empty_diff(tmp_path: Path) -> None:
 # ----- changed-file source resolution (UD #9091 fallback chain) -----
 
 
-def test_resolve_prefers_git_diff(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_resolve_prefers_git_diff(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     base, head, _repo = _init_repo(tmp_path)
 
     def api_loader() -> list[str] | None:
         raise AssertionError("API must not be consulted when git succeeds")
 
-    monkeypatch.setattr(
-        mod, "_git_changed_files", lambda b, h, r: ["src/b.py"]
-    )
+    monkeypatch.setattr(mod, "_git_changed_files", lambda b, h, r: ["src/b.py"])
     files, source = mod._resolve_changed_files(base, head, "", api_loader)
     assert files == ["src/b.py"]
     assert source == "git"
@@ -229,11 +235,16 @@ def test_main_shallow_fetch_failure_uses_api_list(
         lambda n, r: "target src/dashboard/main.py",
     )
     argv = [
-        "--base-sha", "1111111111111111111111111111111111111111",
-        "--head-sha", "2222222222222222222222222222222222222222",
-        "--pr-number", "9091",
-        "--repo", "D-sorganization/UpstreamDrift",
-        "--pr-body", "Fixes #9091",
+        "--base-sha",
+        "1111111111111111111111111111111111111111",
+        "--head-sha",
+        "2222222222222222222222222222222222222222",
+        "--pr-number",
+        "9091",
+        "--repo",
+        "D-sorganization/UpstreamDrift",
+        "--pr-body",
+        "Fixes #9091",
     ]
     assert mod.main(argv) == 0
 
@@ -250,11 +261,16 @@ def test_main_api_list_without_referenced_paths_fails(
         lambda n, r: "target src/dashboard/main.py",
     )
     argv = [
-        "--base-sha", "1" * 40,
-        "--head-sha", "2" * 40,
-        "--pr-number", "9091",
-        "--repo", "D-sorganization/UpstreamDrift",
-        "--pr-body", "Fixes #9091",
+        "--base-sha",
+        "1" * 40,
+        "--head-sha",
+        "2" * 40,
+        "--pr-number",
+        "9091",
+        "--repo",
+        "D-sorganization/UpstreamDrift",
+        "--pr-body",
+        "Fixes #9091",
     ]
     assert mod.main(argv) == 1
     assert "none of the paths" in capsys.readouterr().out
@@ -267,11 +283,16 @@ def test_main_missing_both_sources_fails_with_diagnostic(
     monkeypatch.setattr(mod, "_merge_base", lambda b, h, r: None)
     monkeypatch.setattr(mod, "_api_changed_files", lambda n, r: None)
     argv = [
-        "--base-sha", "1" * 40,
-        "--head-sha", "2" * 40,
-        "--pr-number", "9091",
-        "--repo", "D-sorganization/UpstreamDrift",
-        "--pr-body", "Fixes #9091",
+        "--base-sha",
+        "1" * 40,
+        "--head-sha",
+        "2" * 40,
+        "--pr-number",
+        "9091",
+        "--repo",
+        "D-sorganization/UpstreamDrift",
+        "--pr-body",
+        "Fixes #9091",
     ]
     assert mod.main(argv) == 1
     out = capsys.readouterr().out
@@ -290,10 +311,15 @@ def test_main_merge_base_success_uses_local_diff(
         lambda n, r: "target src/dashboard/main.py",
     )
     argv = [
-        "--base-sha", "1" * 40,
-        "--head-sha", "2" * 40,
-        "--pr-number", "9091",
-        "--repo", "D-sorganization/UpstreamDrift",
-        "--pr-body", "Fixes #9091",
+        "--base-sha",
+        "1" * 40,
+        "--head-sha",
+        "2" * 40,
+        "--pr-number",
+        "9091",
+        "--repo",
+        "D-sorganization/UpstreamDrift",
+        "--pr-body",
+        "Fixes #9091",
     ]
     assert mod.main(argv) == 0
