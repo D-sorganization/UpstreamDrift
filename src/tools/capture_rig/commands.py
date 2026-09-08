@@ -99,11 +99,22 @@ def record_command(
     duration_s: float = 10.0,
     warmup_s: float | None = None,
     dry_run: bool = False,
+    live_preview: Path | None = None,
+    stop_file: Path | None = None,
+    cameras: Mapping[str, str] | None = None,
 ) -> list[str]:
-    """Precondition: a positive duration."""
+    """Precondition: a positive duration. ``live_preview``/``stop_file`` pass
+    the recorder's live snapshot directory and early-stop file through.
+    """
     require(duration_s > 0, "duration must be positive", duration_s)
     args = ["record", *selection.args(), "--duration", f"{duration_s:g}", "--out"]
     args.append(str(out))
+    if live_preview is not None:
+        args += ["--live-preview", str(live_preview)]
+    if stop_file is not None:
+        args += ["--stop-file", str(stop_file)]
+    for view, instance in (cameras or {}).items():
+        args += ["--camera", f"{view}={instance}"]
     if warmup_s is not None:
         args += ["--warmup", f"{warmup_s:g}"]
     if dry_run:
@@ -339,17 +350,23 @@ def overlay_command(
     return python_module_command(args)
 
 
+@dataclass(frozen=True)
+class MultipictureArgs:
+    """Optional arguments of ``rig multipicture`` (parameter budget)."""
+
+    variants: Sequence[str] = ()
+    observation_set: str | None = None
+    start: int | None = None
+    stop: int | None = None
+    speed: float = 1.0
+    size: tuple[int, int] | None = None
+
+
 def multipicture_command(
     session: Path,
     layout: str,
     out: Path,
-    *,
-    variants: Sequence[str] = (),
-    observation_set: str | None = None,
-    start: int | None = None,
-    stop: int | None = None,
-    speed: float = 1.0,
-    size: tuple[int, int] | None = None,
+    args_spec: MultipictureArgs | None = None,
 ) -> list[str]:
     """``rig multipicture``: composite video through a layout (#9815).
 
@@ -357,6 +374,9 @@ def multipicture_command(
     Preconditions: a named layout, positive speed, positive size when given.
     """
     require(layout.strip() != "", "layout must be named")
+    spec = args_spec or MultipictureArgs()
+    variants, observation_set = spec.variants, spec.observation_set
+    start, stop, speed, size = spec.start, spec.stop, spec.speed, spec.size
     require(speed > 0, "speed must be positive", speed)
     args = ["multipicture", "--session", str(session), "--layout", layout]
     args += ["--out", str(out)]

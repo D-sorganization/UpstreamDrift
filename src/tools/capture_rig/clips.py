@@ -24,6 +24,7 @@ import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import require
+
 from .overlay import PoseTrack, draw_pose
 from .player import VideoReader, clamp_index
 from .session import SessionMedia, ViewMedia, flatten_numbers, load_session
