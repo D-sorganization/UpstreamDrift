@@ -1028,7 +1028,7 @@ class MainWidget(DestructiveActionGuards, QtWidgets.QWidget):
         self._start_action(
             "Multivariate analysis",
             lambda ctx: self._compute_multivariate(metrics, ctx),
-            self._present_multivariate,
+            lambda result: self._present_multivariate(*result),
             "Multivariate Analysis Failed",
         )
 
