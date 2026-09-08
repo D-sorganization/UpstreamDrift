@@ -2,7 +2,7 @@
 
 Issue #9732. Keep this current with every PR that touches
 `src/motion_capture/`, `src/tools/capture_rig/` or the pose estimators. Last
-update: 2026-09-08 (PR for epic #9709: articulated model, registry, kinetics).
+update: 2026-09-08 (Simscape axis validation, #9714: `golfer-scapula/2.0`).
 
 ## Stage Map
 
@@ -19,7 +19,7 @@ update: 2026-09-08 (PR for epic #9709: articulated model, registry, kinetics).
 | Kinetics             | `rig kinetics --model NAME --body-mass KG`   | `model/joint_angles.json`           | `model/kinetics.json`                                                           | gravity statics exact; replay drift < 0.05 rad on a swung pendulum     |
 | 2-D analysis (1 cam) | `rig analyze`                                | observations                        | `analysis_2d/<view>.json`                                                       | take 2: address 981 → top 1061 → peak 1075                             |
 | Clips and comparison | `rig clip`, `rig compare-takes`              | recordings + observations + events  | mp4 + json                                                                      | take 2 clip                                                            |
-| Export               | `rig export`                                 | reconstruct, model                  | `reconstruction.trc`, `reconstruction_export.json`, `joint_angles_simscape.csv` | TRC round-trips through `TRCAdapter`                                   |
+| Export               | `rig export`                                 | reconstruct, model                  | `reconstruction.trc`, `reconstruction_export.json`, `joint_angles_simscape.csv` | TRC round-trips through `TRCAdapter`; Simscape axes validated (#9714)  |
 
 The Capture Rig tile (`python3 -m src.tools.capture_rig`) runs every command
 as a child process and shows the guided workflow; the user guide is generated
@@ -27,8 +27,9 @@ from the same step model (`scripts/generate_mocap_user_guide.py`).
 
 ## Models
 
-`reconstruct/model/registry.py`: `golfer` (default, scapula struts after the
-MATLAB 3-D golf model), `double_pendulum`, `triple_pendulum`. Add a model by
+`reconstruct/model/registry.py`: `golfer` (default, `golfer-scapula/2.0`:
+body frames are the Simscape sensor frames, scapula struts after the MATLAB
+3-D golf model), `double_pendulum`, `triple_pendulum`. Add a model by
 registering a `ModelSpec` + `LandmarkMap`; nothing else changes. Design and
 evidence: `articulated_model.md`.
 
@@ -37,13 +38,16 @@ evidence: `articulated_model.md`.
 1. **Real data.** Board recording per camera, tape-measured shank/forearm/
    upper arm/thigh, a three-view take. Everything downstream of ingest has
    only synthetic and single-camera evidence.
-2. **Simscape axis conventions.** Names are mapped; signs and orders of
-   `SpineStartPosition*`, `TorsoStartPosition`, `LScap*`, `LS*`, `LW*` must be
-   checked against `GolfSwing3D_Kinetic` before the CSV or torques drive it
-   (#9714).
+2. **Simscape axis conventions: done** (`evidence/simscape_axes.md`). Every
+   logged joint identified to ≤ 2.7e-4 rad and encoded in
+   `golfer-scapula/2.0`; replaying the logs through the Python model lands
+   on the sensors to ≤ 1.7e-3 rad. Still open: the wrist universal (not
+   logged) and the Simscape world orientation (affects only the root).
+   Owner-side check: load one exported `joint_angles_simscape.csv` row as
+   start positions in `GolfSwing3D_Kinetic` and compare the pose.
 3. **Kinetics fidelity.** Point-mass segments, no rod inertia, linearised
    replay. A free forward integration in an engine (MuJoCo/Drake via the
-   existing URDF builders) is the next step once the axes are validated.
+   existing URDF builders) is the next step.
 4. **Pendulum club link.** The detectors do not observe the club; the
    pendulums end at the hands. A clubhead detector (or the ball line) would
    add the last link.
