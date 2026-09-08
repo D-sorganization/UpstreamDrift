@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #9494
 - **Branch:** `claude/issue-9494-precommit-env`
-- **PR:** not created (opened on push)
+- **PR:** #9744
 - **Paths:** `CLAUDE.md`, `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`, `SPEC.md`
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (`dbc6727aa`)
@@ -36,8 +36,8 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
   environment build. Option (a) of the issue is therefore satisfied; CLAUDE.md
   now documents the resolved environment and states that the `--no-verify`
   prohibition stands on Windows with no blanket exception.
-- **Next step:** Open the PR against `main` with `Fixes #9494`, record the
-  RED/GREEN pre-commit evidence in the body, and add the SPEC.md row.
+- **Next step:** Record CI on PR #9744; on merge, confirm the protected-main
+  sync lands the resolved hook environment note.
 
 ## Shipped (Last 90 Days)
 
