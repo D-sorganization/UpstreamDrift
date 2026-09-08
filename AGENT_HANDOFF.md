@@ -1,6 +1,8 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 00:30 PDT
+Updated: 2026-09-07 (UD #9492 decomposition in flight on its own branch)
+
 ## Impact Dynamics and Acoustics: #9700
 
 - Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
@@ -20,6 +22,31 @@ recovery constraints, and next commands are in `docs/development/proximal_distal
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
+`_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
+`architecture_budget.json` exceptions are removed, behavior pinned by tests.
+
+## Unit-Gate `src`-Identity Sentinel: #9387 (In Review)
+
+- The worker-corruption class from #9099 (a test mutating
+  `sys.modules['src']`/`src.*` and corrupting later tests on the same
+  xdist worker) is covered by a runtime sentinel,
+  `tests/unit/repo_hygiene/test_src_identity_sentinel.py`: each of the
+  four documented victim files runs in its own serial subprocess
+  (`-p no:xdist`) and the sentinel asserts `sys.modules['src']`
+  identity plus the `src.*` namespace snapshot are unchanged. RED was
+  demonstrated with a scratch pivot module (removed before commit).
+- The four judgment-call leak sites from the audit are explicitly
+  snapshot/restored (`test_ux_enhancements.py`, pinocchio
+  `test_tasks.py`, `test_gui_import_boundaries.py`,
+  `test_golf_launcher_integration.py`); the full audit table lives in
+  the PR body. `tests/unit/test_ux_enhancements.py` collects 0 test
+  functions (dead fixture file since #5753) — deletion candidate for a
+  follow-up PR; do not delete it here.
+- Known environment limitation: in `git worktree` checkouts (`.git` is
+  a pointer file), `tests/scripts/test_validate_suite.py` fails two
+  `.git`-inspecting tests; the sentinel tolerates exactly those two ids
+  there and requires them to pass in normal checkouts and CI.
 
 ## Pre-Commit on Windows — Resolved (#9494)
 
