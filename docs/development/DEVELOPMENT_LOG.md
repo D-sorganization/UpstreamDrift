@@ -5,9 +5,9 @@ State table for every feature in flight in this repository. Update entries
 to ship. See the `development-logs` section of `AGENTS.md` for the binding rules
 and `shared_scripts/development_log.py` for the validator.
 
-- **Portfolio:** infra
-- **WIP limit:** 3
-- **Last audited:** 2026-09-08 by `claude`
+- **Portfolio:** golf
+- **WIP limit:** 8
+- **Last audited:** 2026-09-08 by claude
 
 ## States
 
@@ -16,6 +16,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 `in_progress`; open a new entry instead.
 
 ## Active
+
 
 ### DL-#9409 · Always-on quality gate lane and conftest src-pivot guard
 
@@ -28,3 +29,33 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-08 (`SELF`)
 - **Summary:** CI Standard gains an always-on, ≤10-minute `always-on-unit-lane` (verify_installation import smoke over the shared Tools alias roots, top-level smoke tests, contract tests) that `quality-gate` requires `success` on every PR including docs-only ones; a repo-hygiene guard forbids any conftest from pivoting `sys.modules["src"]` directly (must use `EngineSrcPivot`). Deferred on #9409: main-branch cancel exemption (RM campaign) and nightly cross-engine dedupe (#8725/#9002).
 - **Next step:** Verify the first CI run of the PR executes `always-on-unit-lane` to `success` within its 10-minute budget.
+
+### DL-#9494 · Resolve the CLAUDE.md `--no-verify` Contradiction by Fixing the Windows Hook Environment
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9494
+- **Branch:** `claude/issue-9494-precommit-env`
+- **PR:** #9744
+- **Paths:** `CLAUDE.md`, `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`, `SPEC.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`dbc6727aa`)
+- **Summary:** CLAUDE.md forbade `git commit --no-verify` while agents on
+  Windows reported every pre-commit invocation failing (hook virtualenvs
+  targeting Python 3.11, absent from the workstation). Investigation found no
+  interpreter pin left in `.pre-commit-config.yaml` (`default_language_version:
+python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
+  commit-stage hook plus pre-push `mypy`/`bandit` passes after a from-scratch
+  environment build. Option (a) of the issue is therefore satisfied; CLAUDE.md
+  now documents the resolved environment and states that the `--no-verify`
+  prohibition stands on Windows with no blanket exception.
+- **Next step:** Record CI on PR #9744; on merge, confirm the protected-main
+  sync lands the resolved hook environment note.
+
+## Shipped (Last 90 Days)
+
+Entries stay here for 90 days after merge, then move to the archive.
+
+## Archive
+
+Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
