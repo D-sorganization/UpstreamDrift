@@ -130,6 +130,22 @@ A `LayoutSpec` (JSON schema `rig-layout/1.0.0`) is a named `rows`x`cols` grid
 stamp in two scopes: user (`<AppConfigLocation>/UpstreamDrift/capture_rig/layouts/`)
 and session (`<session>/layouts/`, so a layout travels with a take); built-in
 presets appear read-only in `list()`.
+
+### Layout Editor
+
+`tools/capture_rig/layout_editor.LayoutEditor` (#9812) is the interactive
+front end of the layout model: grid spinners (up to 4x4) and a preset menu
+(built-ins plus the layouts in the user and session scopes of `LayoutStore`),
+a composed thumbnail of the whole layout drawn through the same `compose()`
+the preview and export use, and per-tile controls: source, rotate, flip,
+crop (switch _Crop_ on and drag a rectangle over the tile), fit, label and
+span (+/- row and column). Click a tile to select it; drag it onto another
+cell to move it (the two swap). _Save as..._, _Load_ and _Delete_ go through
+the store; _Undo_/_Redo_ keep the last 20 edits. The widget emits
+`layout_changed(LayoutSpec)` once per edit; frames for the thumbnails come
+from an injected `frame_provider(SourceRef)`; every control's tooltip says
+what it does and, when grey, why.
+
 ## Live Preview
 
 _Preview cameras_ opens every planned view through the same camera binding
