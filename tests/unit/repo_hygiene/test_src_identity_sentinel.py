@@ -193,6 +193,7 @@ def _missing_dependency(report: dict[str, Any]) -> str | None:
     return None
 
 
+@pytest.mark.unit
 @pytest.mark.timeout(600)
 @pytest.mark.parametrize("victim", VICTIM_FILES)
 def test_victim_file_leaves_src_identity_untouched(tmp_path: Path, victim: str) -> None:
