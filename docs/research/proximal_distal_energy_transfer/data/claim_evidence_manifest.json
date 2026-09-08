@@ -2,7 +2,7 @@
   "schema_version": "proximal-distal-claim-evidence-integrity-v2",
   "registry": {
     "path": "docs/research/proximal_distal_energy_transfer/data/claim_audit_registry.json",
-    "sha256": "5ea18b05a4910435f792e9dd53a362836641ebbfcefc02980f33324abfe4cfef"
+    "sha256": "66b05c26457ecf09323fddf477d6c7bb572ca7a561badc47465eb80993a7c72f"
   },
   "scope": {
     "local_artifact_semantics": "content_integrity_not_independent_validation",
@@ -12,8 +12,8 @@
   },
   "summary": {
     "claim_count": 328,
-    "evidence_reference_count": 2501,
-    "local_artifact_count": 421,
+    "evidence_reference_count": 2571,
+    "local_artifact_count": 430,
     "external_url_count": 78
   },
   "claims": {
@@ -2817,50 +2817,120 @@
     "PD-CLAIM-297": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "external_references": []
     },
     "PD-CLAIM-298": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "external_references": []
     },
     "PD-CLAIM-299": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "external_references": []
     },
     "PD-CLAIM-300": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "external_references": []
     },
     "PD-CLAIM-301": {
       "local_references": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "external_references": []
     },
@@ -4191,6 +4261,17 @@
     }
   },
   "local_artifacts": {
+    ".github/workflows/ci-optional-stack.yml": {
+      "sha256": "818f35299986adb4bf6d3975b0e0fae118a19cd83f4894b0f30f35573c3f4017",
+      "bytes": 32141,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
     "docs/research/proximal_distal_energy_transfer/BOUNDED_EVENT_REACHABILITY.md": {
       "sha256": "c6e63fbf52b5de694cfeec7b727a028782f8659e0c02ddfa5375eb9ee2362247",
       "bytes": 3870,
@@ -4562,8 +4643,8 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "4fbb40ac2302e8111a19fc97903bc1877ab2cb07ced7258b8f78994ca4d627d8",
-      "bytes": 3562,
+      "sha256": "15d00b5e81b07b4f65aebe707f06f6686a6daf98a4536fda28d6ba682aa157fd",
+      "bytes": 6631,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -5732,7 +5813,12 @@
         "PD-CLAIM-267",
         "PD-CLAIM-268",
         "PD-CLAIM-269",
-        "PD-CLAIM-270"
+        "PD-CLAIM-270",
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": {
@@ -5749,7 +5835,12 @@
         "PD-CLAIM-267",
         "PD-CLAIM-268",
         "PD-CLAIM-269",
-        "PD-CLAIM-270"
+        "PD-CLAIM-270",
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_spatial_geometry.json": {
@@ -6322,7 +6413,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "e2df9a0dd40af1969258365d0b471c6ec104683e9aa80cf25dd8d18a88fc51ba",
+      "sha256": "1acdedc03e54000681db8011466c41319d2555437b824f98acfc327f149fe340",
       "bytes": 163108,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -6465,7 +6556,12 @@
       "referenced_by": [
         "PD-CLAIM-274",
         "PD-CLAIM-275",
-        "PD-CLAIM-276"
+        "PD-CLAIM-276",
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py": {
@@ -6486,6 +6582,17 @@
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/articulated_native_runtime.py": {
+      "sha256": "3431b3fb921d9709dc882e4b82c05386f941d862be6dfdcb567964776f8f4a56",
+      "bytes": 5507,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "scripts/research/proximal_distal_energy/articulated_shaft.py": {
@@ -7186,8 +7293,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": {
-      "sha256": "5c7ca81fffa7dd2c931779ccd1f16cecc2d9454a4f1b37ff41e83e6c180db3d6",
-      "bytes": 10864,
+      "sha256": "601759b0071c4dcdd9493c7701345669d208c810c876817d24ffcbb729473be4",
+      "bytes": 10753,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -7230,6 +7337,28 @@
         "PD-CLAIM-271",
         "PD-CLAIM-272",
         "PD-CLAIM-273"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in": {
+      "sha256": "08a13bcfc8b7e534f778da266cb7e45784a8095eb76f0a48c005ae5da2437d23",
+      "bytes": 397,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
+    "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock": {
+      "sha256": "c777ca6349a9efcf4157f774458b3ffd6a4f86b9878f401bbfed88fd49e6751c",
+      "bytes": 52191,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "scripts/research/proximal_distal_energy/rotating_base_two_hand.py": {
@@ -7883,6 +8012,11 @@
         "PD-CLAIM-181",
         "PD-CLAIM-182",
         "PD-CLAIM-183",
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301",
         "PD-CLAIM-302",
         "PD-CLAIM-303",
         "PD-CLAIM-304"
@@ -7919,7 +8053,12 @@
         "PD-CLAIM-267",
         "PD-CLAIM-268",
         "PD-CLAIM-269",
-        "PD-CLAIM-270"
+        "PD-CLAIM-270",
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "scripts/research/proximal_distal_energy/timing_viability.py": {
@@ -8098,6 +8237,28 @@
       "bytes": 23743,
       "referenced_by": [
         "PD-CLAIM-095"
+      ]
+    },
+    "tests/ci/test_articulated_manufactured_authority_provenance_red.py": {
+      "sha256": "1e1fa6816f26db74c870851e213574bcf47296144fe10ca0637749a874e5ac0c",
+      "bytes": 7939,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
+    "tests/ci/test_articulated_manufactured_hybrid_ci_red.py": {
+      "sha256": "a72b02d3c6455a81399ba0be0d76f3777fea50699cd653a2811d9c0b9f6ddb2f",
+      "bytes": 7518,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
       ]
     },
     "tests/research/test_advanced_biological_bridge.py": {
@@ -8281,9 +8442,42 @@
         "PD-CLAIM-276"
       ]
     },
+    "tests/research/test_articulated_manufactured_hybrid_authority_red.py": {
+      "sha256": "8ff08d1921401a21f06ead188c262b1721b6531d8f8b234daaf07adca9727818",
+      "bytes": 8923,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
+    "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py": {
+      "sha256": "03c94ef0fb53ab469cb694b217c8d74430191c385ca4919f5bbf67900d985486",
+      "bytes": 7598,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
+    "tests/research/test_articulated_manufactured_hybrid_semantics_red.py": {
+      "sha256": "d24e8bcd44effdbc4d5618de443ac0b0f7010514be5caab57bf28cd984c20422",
+      "bytes": 11533,
+      "referenced_by": [
+        "PD-CLAIM-297",
+        "PD-CLAIM-298",
+        "PD-CLAIM-299",
+        "PD-CLAIM-300",
+        "PD-CLAIM-301"
+      ]
+    },
     "tests/research/test_articulated_manufactured_solution.py": {
-      "sha256": "361621ded5d1fdf24da1587bbc534a6a6d9daf98608e79b4ac52ef6fa09242bc",
-      "bytes": 10403,
+      "sha256": "08000ac1bf63462b559967e0b4d2c1aeb7afa53c18e952fddcb7db104550d302",
+      "bytes": 10267,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",

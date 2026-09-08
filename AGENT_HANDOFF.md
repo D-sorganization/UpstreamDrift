@@ -53,14 +53,11 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 
 ## Impact Dynamics and Acoustics: #9700
 
-- Theory AffineDrift #4258/#4282 and integration plan #9706 merged. Tools T1 #5077 merged; T2 #5082 remains open.
-- Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
-- Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
-- Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 merged at `9aa26e4f8`; #9787 repairs its observed research companion failures.
-- #9787 / PR #9804: synchronized with main `563e7aaa9`, including native bootstrap #9726. Actual regenerated native record has SHA `0c0f3395`; only governed source hashes change. All 122 combined authority/provenance/bootstrap tests and three distinct rolling tests pass. Reviewer summary and inspected 253-page PDF are current; incoming mocap aliases are explicitly typed and the actual mypy hook passes. See `docs/development/manufactured_authority_9787_turnover.md`; protected CI remains required.
-- Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
-
-- Import/provider history: `docs/development/impact_provider_import_turnover.md`; reviewed renderer evidence: `docs/development/renderer_reference_9783_turnover.md`; program design: `docs/development/impact_acoustics_program.md`.
+- AffineDrift theory #4258/#4282 and integration plan #9706 are merged. Paired grip/stability correction #4298 merged as d7e51655d after protected checks; its auxiliary benchmark made no measurements despite green workflow status.
+- Tools finite-grip response is published at 12bcf3d83 (665 Linux tests); separate-G/C spectra 97d46055c pass 692 Linux and 49 focused controls. Turnover bbc27dbe3 is published through normal hooks. Explicit stability, nonlinear contact and physical/blinded acoustics remain open.
+- PR #9804 merged as 736ec2189 from b8da0c024 with a bypassed claim-preservation helper and stale seven-source native record. Follow-up #9825 reuses the helper in actual reconciliation, preserves reviewed evidence/order and refuses changed science. Six real-path failures become 11 passes.
+- Worktree UpstreamDrift-impact-claim-preservation; branch fix/9825-preserve-reviewed-claims; base 9f54c5e0b. Lease codex / impact-acoustics-01a07d8a-claims9825 expires 2026-09-09T00:57:12Z. Actual deterministic native regeneration 15d00b5e restores 14-source provenance with unchanged numerical results; 128 strict contracts pass without skips/xfails. Reviewed 253-page PDF bf855f79 and computational release records are refreshed; normal delivery remains.
+- Continue from docs/development/claim_preservation_9825_turnover.md. Preserve former shared branch/local 6235789dc. Tools #5103/#5106 private consumer lookup remains blocked; #8920/#8556 remain physical-parameter gates. Program: docs/development/impact_acoustics_program.md.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
 evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
