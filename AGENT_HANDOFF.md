@@ -12,7 +12,7 @@
   #8557 protected evidence, vendored Tools pin, manufactured-data boundaries and
   workstation recovery restrictions. No calibrated acoustic solver is established.
 
-Updated: 2026-08-30 10:02 PDT
+Updated: 2026-09-08 09:45 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -24,6 +24,28 @@ contract, recovery constraints, and next commands are in
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+
+## Unit-Gate `src`-Identity Sentinel: #9387 (In Review)
+
+- The worker-corruption class from #9099 (a test mutating
+  `sys.modules['src']`/`src.*` and corrupting later tests on the same
+  xdist worker) is covered by a runtime sentinel,
+  `tests/unit/repo_hygiene/test_src_identity_sentinel.py`: each of the
+  four documented victim files runs in its own serial subprocess
+  (`-p no:xdist`) and the sentinel asserts `sys.modules['src']`
+  identity plus the `src.*` namespace snapshot are unchanged. RED was
+  demonstrated with a scratch pivot module (removed before commit).
+- The four judgment-call leak sites from the audit are explicitly
+  snapshot/restored (`test_ux_enhancements.py`, pinocchio
+  `test_tasks.py`, `test_gui_import_boundaries.py`,
+  `test_golf_launcher_integration.py`); the full audit table lives in
+  the PR body. `tests/unit/test_ux_enhancements.py` collects 0 test
+  functions (dead fixture file since #5753) — deletion candidate for a
+  follow-up PR; do not delete it here.
+- Known environment limitation: in `git worktree` checkouts (`.git` is
+  a pointer file), `tests/scripts/test_validate_suite.py` fails two
+  `.git`-inspecting tests; the sentinel tolerates exactly those two ids
+  there and requires them to pass in normal checkouts and CI.
 
 ## Protected Authority
 
