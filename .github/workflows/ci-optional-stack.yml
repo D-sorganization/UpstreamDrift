@@ -195,6 +195,7 @@ jobs:
           echo "### What is installed in this lane" >> "$GITHUB_STEP_SUMMARY"
           echo "- Core project dependencies (\`[dev,gui-test]\`)" >> "$GITHUB_STEP_SUMMARY"
           echo "- Pinocchio ecosystem: \`pinocchio\`, \`pin-pink\`, \`crocoddyl\` (where available via conda-forge/pip)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Trajectory optimization: \`casadi\` (\`[optimal-control]\`), \`bioptim\` (\`[bioptim]\`, git-pinned) -- #9759 / epic #9762" >> "$GITHUB_STEP_SUMMARY"
           echo "- API extras: \`fastapi[all]\`, \`httpx\`, \`python-multipart\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- GUI extras: \`PyQt6\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -349,6 +350,122 @@ jobs:
               "Check that skipTest() guard conditions are still valid."
           fi
 
+      - name: Install Optimal-Control Stack (CasADi)
+        # #9759: the CasADi swing backend and its Pinocchio oracle tests had
+        # no CI leg. casadi wheels bundle IPOPT+MUMPS, so this is pip-only.
+        id: casadi_install
+        continue-on-error: true
+        run: |
+          source scripts/ci/pip_retry.sh
+          pip_retry install -e ".[optimal-control]" 2>&1 | tee /tmp/casadi_install.log
+          if python3 -c "import casadi" 2>/dev/null; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "CasADi installation: SUCCESS"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "CasADi installation: NOT AVAILABLE on this runner (tests will be skipped)"
+          fi
+
+      - name: Run Trajectory-Optimization Backend Tests (CasADi / Crocoddyl)
+        # Live solves for the CasADi (finite-difference and multiple-shooting)
+        # and Crocoddyl backends. Each file self-skips when its stack is
+        # absent; when a stack IS installed its tests must pass.
+        env:
+          PYTHONPATH: .:src
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "### Trajectory-Optimization Backend Tests" >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          set -o pipefail
+          xvfb-run --auto-servernum pytest \
+            -p no:xvfb \
+            tests/integration/optimization \
+            -m "requires_casadi or requires_crocoddyl" \
+            --timeout=600 \
+            --timeout-method=thread \
+            -v --tb=short \
+            2>&1 | tee /tmp/optimization-backend-test-results.txt
+          rc=$?
+          set -e
+
+          passed=$(grep -c "PASSED" /tmp/optimization-backend-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/optimization-backend-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/optimization-backend-test-results.txt || true)
+          echo "- CasADi installed: ${{ steps.casadi_install.outputs.available }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$rc" -eq 5 ]]; then
+            echo "::warning::No trajectory-optimization backend tests were collected."
+          elif [[ "$rc" -ne 0 ]]; then
+            echo "::error::Trajectory-optimization backend tests failed with pytest exit code $rc."
+            exit "$rc"
+          fi
+          if [[ "${{ steps.casadi_install.outputs.available }}" == "true" ]] && \
+             [[ "$passed" -eq 0 ]] && [[ "$skipped" -gt 0 ]]; then
+            echo "::warning::CasADi is installed but ALL backend tests were skipped." \
+              "Check that the requires_casadi guards are still valid."
+          fi
+
+      - name: Install bioptim Stack
+        # Epic #9762 Phase 0.2: bioptim is git-pinned (conda-forge only) and
+        # its gui/plot.py imports tkinter at module scope, hence python3-tk.
+        id: bioptim_install
+        continue-on-error: true
+        run: |
+          if [ "$(id -u)" -eq 0 ]; then
+            apt-get -o DPkg::Lock::Timeout=300 install -y python3-tk || true
+          elif command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+            sudo apt-get -o DPkg::Lock::Timeout=300 install -y python3-tk || true
+          fi
+          source scripts/ci/pip_retry.sh
+          pip_retry install -e ".[bioptim]" 2>&1 | tee /tmp/bioptim_install.log
+          if python3 -c "import casadi, importlib.util as u; raise SystemExit(0 if u.find_spec('bioptim') else 1)" 2>/dev/null; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "bioptim installation: SUCCESS"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "bioptim installation: NOT AVAILABLE on this runner (tests will be skipped)"
+          fi
+
+      - name: Run bioptim OCP Tests
+        # Marker requires_bioptim; tests self-skip without the stack and must
+        # pass with it. MPLBACKEND=Agg is set job-wide; no test opens a plot.
+        env:
+          PYTHONPATH: .:src
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "### bioptim OCP Tests" >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          set -o pipefail
+          xvfb-run --auto-servernum pytest \
+            -p no:xvfb \
+            tests/integration/optimization/ocp \
+            tests/architecture/test_bioptim_isolation.py \
+            -m "requires_bioptim or integration" \
+            --timeout=600 \
+            --timeout-method=thread \
+            -v --tb=short \
+            2>&1 | tee /tmp/bioptim-test-results.txt
+          rc=$?
+          set -e
+
+          passed=$(grep -c "PASSED" /tmp/bioptim-test-results.txt || true)
+          failed=$(grep -c "FAILED" /tmp/bioptim-test-results.txt || true)
+          skipped=$(grep -c "SKIPPED" /tmp/bioptim-test-results.txt || true)
+          echo "- bioptim installed: ${{ steps.bioptim_install.outputs.available }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Passed: $passed | Failed: $failed | Skipped: $skipped" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$rc" -eq 5 ]]; then
+            echo "::warning::No bioptim tests were collected."
+          elif [[ "$rc" -ne 0 ]]; then
+            echo "::error::bioptim OCP tests failed with pytest exit code $rc."
+            exit "$rc"
+          fi
+          if [[ "${{ steps.bioptim_install.outputs.available }}" == "true" ]] && \
+             [[ "$passed" -eq 0 ]] && [[ "$skipped" -gt 0 ]]; then
+            echo "::warning::bioptim is installed but ALL bioptim tests were skipped."
+          fi
+
       - name: Run Unit Tests (Optional Stack)
         # Run the non-engine unit suite with optional extras present. Native
         # engine unit tests are covered by dedicated engine/equivalence lanes;
@@ -431,7 +548,7 @@ jobs:
           echo "The following test files reported skips in the optional-stack lane." >> "$GITHUB_STEP_SUMMARY"
           echo "If counts increase unexpectedly, investigate guard conditions." >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          for f in /tmp/api-test-results.txt /tmp/pinocchio-test-results.txt /tmp/unit-test-results.txt; do
+          for f in /tmp/api-test-results.txt /tmp/pinocchio-test-results.txt /tmp/optimization-backend-test-results.txt /tmp/bioptim-test-results.txt /tmp/unit-test-results.txt; do
             if [[ -f "$f" ]]; then
               label=$(basename "$f" .txt)
               count=$(grep -c "SKIPPED" "$f" || true)
@@ -447,8 +564,12 @@ jobs:
           path: |
             /tmp/api-test-results.txt
             /tmp/pinocchio-test-results.txt
+            /tmp/optimization-backend-test-results.txt
+            /tmp/bioptim-test-results.txt
             /tmp/unit-test-results.txt
             /tmp/pinocchio_install.log
+            /tmp/casadi_install.log
+            /tmp/bioptim_install.log
 
   articulated-manufactured-authority:
     needs: pick-runner
