@@ -9,14 +9,19 @@ synchronous, dialog-free public method on :class:`MainWidget`
 The button handlers merely wrap those methods (the export handler adds a
 ``QFileDialog``); they never block on a modal dialog inside the core logic.
 
-Rollouts of the 2-DoF golf model are sub-millisecond, so the GUI runs them
-synchronously rather than on a worker thread.
+A single rollout of the 2-DoF golf model is sub-millisecond, but a sweep is
+``_SWEEP_SAMPLES`` of them at up to the 5000-step horizon -- 120,000
+integration steps, which froze the window solid. Every button therefore runs
+its work through :mod:`src.tools.async_action` (issue #8880): off the GUI
+thread, with a progress bar and a cooperative Cancel. The synchronous
+``run_*`` methods below remain the testable core and are what the async path
+calls into, so behaviour is identical either way.
 """
 
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
@@ -35,6 +40,7 @@ from src.shared.python.simulation_backends import (
 )
 from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
 from src.shared.python.simulation_backends.trace_io import write_trace
+from src.tools.async_action import AsyncActionBar, WorkerContext
 
 if TYPE_CHECKING:
     from src.shared.python.simulation_backends.protocol import Trace
@@ -216,6 +222,14 @@ class MainWidget(QtWidgets.QWidget):
             "Write the last rollout to a versioned HDF5 trace file."
         )
 
+        # Progress + Cancel for whichever action is running (#8880). It
+        # disables the three run buttons for the duration, so a second click
+        # cannot queue a second sweep on top of the first.
+        self.action_bar = AsyncActionBar()
+        self.action_bar.set_trigger_buttons(
+            self.run_button, self.sweep_button, self.crossval_button
+        )
+
     def _build_output_widgets(self) -> None:
         self.figure = Figure(figsize=(5.0, 3.5), tight_layout=True)
         self.canvas = FigureCanvasQTAgg(self.figure)
@@ -303,13 +317,14 @@ class MainWidget(QtWidgets.QWidget):
         outer = QtWidgets.QVBoxLayout(self)
         outer.setContentsMargins(8, 8, 8, 8)
         outer.addWidget(splitter, stretch=1)
+        outer.addWidget(self.action_bar)
         outer.addWidget(self.status_label)
 
     def _wire_signals(self) -> None:
         self.backend_combo.currentIndexChanged.connect(self._refresh_capabilities_label)
-        self.run_button.clicked.connect(self.run_rollout)
-        self.sweep_button.clicked.connect(self.run_sweep)
-        self.crossval_button.clicked.connect(self.run_cross_validation)
+        self.run_button.clicked.connect(self.run_rollout_async)
+        self.sweep_button.clicked.connect(self.run_sweep_async)
+        self.crossval_button.clicked.connect(self.run_cross_validation_async)
         self.export_button.clicked.connect(self._on_export_clicked)
 
     def _apply_theme_best_effort(self) -> None:
@@ -438,6 +453,17 @@ class MainWidget(QtWidgets.QWidget):
             self._report_failure("Parameter sweep failed", exc)
             return
 
+        self._present_sweep(backend_name, masses, speeds, horizon, dt)
+
+    def _present_sweep(
+        self,
+        backend_name: str,
+        masses: np.ndarray,
+        speeds: list[float],
+        horizon: int,
+        dt: float,
+    ) -> None:
+        """Render a completed sweep. GUI-thread only (#8880)."""
         self._plot_sweep(masses, speeds)
         best_idx = int(np.argmax(speeds))
         self.report_text.setPlainText(
@@ -478,27 +504,49 @@ class MainWidget(QtWidgets.QWidget):
             self.status_label.setText("Cross-validation skipped: MuJoCo not installed.")
             return
 
-        params = self.current_params()
+        try:
+            reports = self._cross_validate(
+                self.current_params(), min(200, int(self.horizon_spin.value()))
+            )
+        except _ACTION_ERRORS as exc:
+            self._report_failure("Cross-validation failed", exc)
+            return
+        self._present_cross_validation(*reports)
+
+    @staticmethod
+    def _cross_validate(
+        params: GolfModelParams,
+        horizon: int,
+        ctx: WorkerContext | None = None,
+    ) -> tuple[Any, Any]:
+        """Pure compute half of cross-validation. Safe off the GUI thread."""
         q_samples = [
             np.array([0.1, -0.2]),
             np.array([0.6, 0.3]),
             np.array([-0.4, 0.5]),
         ]
-        try:
-            ode = make_backend("ode", params)
-            mj = make_backend("mujoco", params)
-            # ode/mujoco backends both implement DynamicsProvider at runtime;
-            # narrow the static SimulationBackend type for the mass-matrix check.
-            mass_report = validation.cross_validate_mass_matrix(
-                cast(DynamicsProvider, ode), cast(DynamicsProvider, mj), q_samples
-            )
-            traj_report = validation.cross_validate_trajectory(
-                ode, mj, None, min(200, int(self.horizon_spin.value())), 0.005
-            )
-        except _ACTION_ERRORS as exc:
-            self._report_failure("Cross-validation failed", exc)
-            return
+        if ctx is not None:
+            ctx.report(0.0, "building backends")
+        ode = make_backend("ode", params)
+        mj = make_backend("mujoco", params)
+        if ctx is not None:
+            ctx.raise_if_cancelled()
+            ctx.report(0.3, "cross-validating mass matrix")
+        # ode/mujoco backends both implement DynamicsProvider at runtime;
+        # narrow the static SimulationBackend type for the mass-matrix check.
+        mass_report = validation.cross_validate_mass_matrix(
+            cast(DynamicsProvider, ode), cast(DynamicsProvider, mj), q_samples
+        )
+        if ctx is not None:
+            ctx.raise_if_cancelled()
+            ctx.report(0.6, "cross-validating trajectory")
+        traj_report = validation.cross_validate_trajectory(
+            ode, mj, None, horizon, 0.005
+        )
+        return mass_report, traj_report
 
+    def _present_cross_validation(self, mass_report: Any, traj_report: Any) -> None:
+        """Render completed cross-validation reports. GUI-thread only."""
         self.report_text.setPlainText(
             "ODE vs MuJoCo cross-validation\n"
             "==============================\n"
@@ -509,6 +557,93 @@ class MainWidget(QtWidgets.QWidget):
         both_passed = mass_report.passed and traj_report.passed
         verdict = "PASS" if both_passed else "FAIL"
         self.status_label.setText(f"Cross-validation complete: {verdict}.")
+
+    # ---- async entry points (#8880) -------------------------------------
+    #
+    # The buttons call these; the synchronous ``run_*`` methods above stay
+    # the testable core. Each async wrapper does the heavy part in a worker
+    # and hands the (cheap) plotting back to the GUI thread in on_finished.
+
+    def run_rollout_async(self) -> None:
+        """Run a rollout off the GUI thread with progress and cancel."""
+        name = self.current_backend_name()
+        horizon = int(self.horizon_spin.value())
+        dt = float(self.dt_spin.value())
+        params = self.current_params()
+        initial = self._initial_state()
+
+        def _work(ctx: WorkerContext) -> object:
+            ctx.report(None, f"integrating {horizon} steps on {name}")
+            backend = make_backend(name, params)
+            backend.reset(initial)
+            ctx.raise_if_cancelled()
+            return backend.rollout(None, horizon, dt)
+
+        def _present(trace: object) -> None:
+            self._last_trace = cast("Trace", trace)
+            self._plot_trajectory(self._last_trace)
+            self.status_label.setText(
+                f"Rollout complete: backend={self._last_trace.backend}, "
+                f"{self._last_trace.num_steps} samples, dt={dt:g} s."
+            )
+
+        self.action_bar.start(
+            "Rollout",
+            _work,
+            on_finished=_present,
+            on_failed=lambda message: self._report_failure_text(
+                "Rollout failed", message
+            ),
+        )
+
+    def run_sweep_async(self) -> None:
+        """Run the clubhead-mass sweep off the GUI thread (the worst case)."""
+        backend_name = self._cpu_backend_name()
+        horizon = int(self.horizon_spin.value())
+        dt = float(self.dt_spin.value())
+        masses = self._sweep_masses(float(self.lower_clubhead_mass_spin.value()))
+
+        def _work(ctx: WorkerContext) -> list[float]:
+            return self._sweep_speeds(backend_name, masses, horizon, dt, ctx)
+
+        def _present(speeds: list[float]) -> None:
+            self._present_sweep(backend_name, masses, speeds, horizon, dt)
+
+        self.action_bar.start(
+            "Parameter sweep",
+            _work,
+            on_finished=_present,
+            on_failed=lambda message: self._report_failure_text(
+                "Parameter sweep failed", message
+            ),
+        )
+
+    def run_cross_validation_async(self) -> None:
+        """Run cross-validation off the GUI thread."""
+        if not has_mujoco():
+            self.run_cross_validation()
+            return
+        params = self.current_params()
+        horizon = min(200, int(self.horizon_spin.value()))
+
+        def _work(ctx: WorkerContext) -> tuple[object, object]:
+            return self._cross_validate(params, horizon, ctx)
+
+        def _present(reports: tuple[object, object]) -> None:
+            self._present_cross_validation(*reports)
+
+        self.action_bar.start(
+            "Cross-validation",
+            _work,
+            on_finished=_present,
+            on_failed=lambda message: self._report_failure_text(
+                "Cross-validation failed", message
+            ),
+        )
+
+    def cleanup(self) -> None:
+        """Cancel and join any running action (launcher tab close)."""
+        self.action_bar.shutdown()
 
     def export_trace_to(self, path: str) -> bool:
         """Write the last rollout to an HDF5 trace file.
@@ -557,13 +692,29 @@ class MainWidget(QtWidgets.QWidget):
         return np.linspace(low, high, _SWEEP_SAMPLES)
 
     def _sweep_speeds(
-        self, backend_name: str, masses: np.ndarray, horizon: int, dt: float
+        self,
+        backend_name: str,
+        masses: np.ndarray,
+        horizon: int,
+        dt: float,
+        ctx: WorkerContext | None = None,
     ) -> list[float]:
-        """Roll out each clubhead mass passively and return speed proxies."""
+        """Roll out each clubhead mass passively and return speed proxies.
+
+        ``ctx`` is the cancellation/progress seam (#8880). The per-sample
+        loop is the natural checkpoint: one rollout is sub-millisecond, so
+        checking between samples bounds cancel latency at one rollout while
+        adding no measurable overhead. ``None`` keeps the synchronous path
+        (and every existing test) working unchanged.
+        """
         base = self.current_params()
         initial = self._initial_state()
         speeds: list[float] = []
-        for mass in masses:
+        total = len(masses)
+        for index, mass in enumerate(masses):
+            if ctx is not None:
+                ctx.raise_if_cancelled()
+                ctx.report(index / total, f"clubhead mass {index + 1}/{total}")
             lower = base.lower.model_copy(update={"clubhead_mass_kg": float(mass)})
             params = base.model_copy(update={"lower": lower})
             backend = make_backend(backend_name, params)
@@ -594,7 +745,11 @@ class MainWidget(QtWidgets.QWidget):
     def _report_failure(self, headline: str, exc: Exception) -> None:
         """Surface an action failure in the status/report panes and log it."""
         logger.exception(headline)
-        message = f"{headline}: {exc}"
+        self._report_failure_text(headline, str(exc))
+
+    def _report_failure_text(self, headline: str, detail: str) -> None:
+        """Surface a failure whose traceback the worker already logged."""
+        message = f"{headline}: {detail}"
         self.status_label.setText(message)
         self.report_text.setPlainText(message)
 

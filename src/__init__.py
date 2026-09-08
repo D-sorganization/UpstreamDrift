@@ -77,6 +77,28 @@ def _install_parent_shared_aliases() -> bool:
     return True
 
 
+def _shared_python_spec_is_ud_alias(spec: Any) -> bool:
+    """Report whether a ``shared.python`` spec resolves to UpstreamDrift's own copy.
+
+    Under the repository's import bootstrap the top-level ``shared`` namespace
+    includes ``src/shared``, so ``find_spec("shared.python")`` can return
+    UpstreamDrift's aliased package even when no Tools tree exists at all. Such
+    a spec is not an installed Tools distribution; treating it as one is what
+    let the fallback finder install against a missing vendored tree and recurse
+    without a diagnostic (UpstreamDrift#9733).
+    """
+    origins = [spec.origin] if spec.origin else []
+    origins.extend(spec.submodule_search_locations or ())
+    for origin in origins:
+        try:
+            resolved = Path(origin).resolve()
+        except OSError:
+            continue
+        if resolved == _UD_SHARED_PYTHON or resolved.is_relative_to(_UD_SHARED_PYTHON):
+            return True
+    return False
+
+
 def _register_vendored_tools_fallback() -> bool:
     """Report whether the pinned Tools tree is present to fall back to.
 
@@ -97,17 +119,36 @@ def _register_vendored_tools_fallback() -> bool:
 
     Returns:
         True when either Tools tree is reachable, so the finder has something
-        to serve. False when neither is, where there is nothing to fall back to.
+        to serve. False when neither is, where there is nothing to fall back
+        to and no Tools dependency is declared at all.
+
+    Raises:
+        ImportError: when the vendored tree is missing while ``shared.python``
+            resolves only to UpstreamDrift's own aliased copy -- the state in
+            which the finder previously recursed instead of failing (#9733).
     """
     if (_VENDORED_TOOLS_SRC / "shared" / "python").is_dir():
         return True
     try:
-        return importlib.util.find_spec("shared.python") is not None
+        spec = importlib.util.find_spec("shared.python")
     except (ImportError, ValueError):
         return False
+    if spec is None:
+        return False
+    if _shared_python_spec_is_ud_alias(spec):
+        raise ImportError(_UNINITIALIZED_VENDORED_TREE_MESSAGE)
+    return True
 
 
 _UD_SHARED_PYTHON = Path(__file__).resolve().parent / "shared" / "python"
+_UNINITIALIZED_VENDORED_TREE_MESSAGE = (
+    "The pinned Tools tree is not initialized: 'vendor/ud-tools/src/shared/python' "
+    "is missing, and 'shared.python' resolves only to this repository's own "
+    "aliased copy, so retired modules cannot resolve and the fallback import "
+    "chain previously recursed forever instead of failing (UpstreamDrift#9733). "
+    "Remediation -- run from the repository root: "
+    "git submodule update --init vendor/ud-tools"
+)
 
 
 def _cluster_is_still_owned(tail: str) -> bool:
