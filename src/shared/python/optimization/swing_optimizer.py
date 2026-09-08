@@ -28,6 +28,7 @@ References:
 - MacKenzie (2012) Understanding the role of shaft stiffness
 """
 
+import warnings
 from collections.abc import Callable
 from typing import Any
 
@@ -55,6 +56,11 @@ from src.shared.python.optimization._swing_models import (
     OptimizationObjective,
     OptimizationResult,
     SwingTrajectory,
+)
+from src.shared.python.optimization.backend_registry import (
+    BackendSpec,
+    get_backend,
+    require_backend,
 )
 from src.shared.python.optimization._swing_objectives import (
     compute_metrics,
@@ -221,8 +227,9 @@ class SwingOptimizer(ContractChecker):
         start_time = time.time()
 
         x0 = self._prepare_initial_guess(initial_swing)
-        if self.config.solver == "casadi":
-            result, iteration_count = self._run_casadi_optimization(x0)
+        backend = get_backend(self.config.solver)
+        if backend is not None and backend.solve is not None:
+            result, iteration_count = self._run_backend(backend, x0)
         else:
             result, iteration_count = self._run_scipy_optimization(x0, callback)
 
@@ -240,17 +247,25 @@ class SwingOptimizer(ContractChecker):
             return trajectory_to_vector(initial_swing)
         return generate_initial_guess(self.golfer, self.config, self.joint_limits)
 
-    def _run_casadi_optimization(self, x0: np.ndarray) -> tuple[Any, int]:
-        """Solve via the CasADi direct-transcription backend (#8398).
+    def _run_backend(self, backend: BackendSpec, x0: np.ndarray) -> tuple[Any, int]:
+        """Solve via a registered engine backend (#9760).
 
         Returns a scipy-``OptimizeResult``-shaped shim so the shared
         result builders work unchanged.
-        """
-        from src.shared.python.optimization.casadi_backend import (
-            solve_swing_casadi,
-        )
 
-        outcome = solve_swing_casadi(
+        Raises:
+            BackendNotAvailableError: When the backend's stack is absent.
+        """
+        require_backend(backend.name)
+        if backend.deprecated:
+            warnings.warn(
+                f"optimizer backend {backend.name!r} is deprecated: "
+                f"{backend.problem_class}; see ADR-0050",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+        assert backend.solve is not None  # require_backend + caller guard
+        outcome = backend.solve(
             self.golfer,
             self.club,
             self.config,
@@ -265,6 +280,10 @@ class SwingOptimizer(ContractChecker):
             fun=outcome.fun,
         )
         return shim, outcome.iterations
+
+    def _run_casadi_optimization(self, x0: np.ndarray) -> tuple[Any, int]:
+        """Backward-compatible alias for the ``casadi`` registry entry."""
+        return self._run_backend(require_backend("casadi"), x0)
 
     def _run_scipy_optimization(
         self,
