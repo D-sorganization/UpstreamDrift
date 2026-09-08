@@ -34,9 +34,12 @@ from .fit import (
     cameras_from_records,
     fit_bundle,
     load_views,
+    load_views_from,
 )
 from .initialize import initialize_cameras, subject_frame
 from .layouts import to_reconstruct_layout
+from ..provenance import write_stamped
+from ..variants import ensure_variant, register_variant
 from .skeleton import JOINT_NAMES
 from .temporal import SmootherOptions
 
@@ -47,11 +50,16 @@ CLEAN_REPORT_FILE = "clean_report.json"
 DEFAULT_ACCELERATION_SIGMA_PX = 20_000.0  # px/s^2 at 1920x1200 from ~4 m
 
 
+SESSION_RECONSTRUCTION_SCHEMA = "session-reconstruction/1.0.0"
+CLEAN_REPORT_SCHEMA = "clean-report/1.0.0"
+
+
 class SessionReconstruction(BaseModel):
     """``reconstruct/session_reconstruction.json``: the chain's summary."""
 
     model_config = ConfigDict(frozen=True)
 
+    schema_version: str = SESSION_RECONSTRUCTION_SCHEMA
     session: str
     views: tuple[str, ...]
     cleaned_rejections: dict[str, int]
@@ -62,6 +70,9 @@ class SessionReconstruction(BaseModel):
     measured_lengths_m: dict[str, float] = {}
     fps: float | None = None
     excluded_joints: tuple[str, ...] = ()
+    observation_set: str = "observations"
+    variant: str = ""
+    camera_source: str | None = None
 
 
 def start_cameras_from(path: Path) -> list[PinholeCamera]:
@@ -103,8 +114,17 @@ def reconstruct_session(
     acceleration_sigma_px: float = DEFAULT_ACCELERATION_SIGMA_PX,
     min_confidence: float = 0.05,
     exclude_joints: Sequence[str] = (),
+    observation_set: str = "observations",
+    views: Sequence[str] | None = None,
+    variant: str = "",
+    camera_source: str | None = None,
 ) -> SessionReconstruction:
-    """Run layout -> clean -> fit on ``<session>/observations`` and write results.
+    """Run layout -> clean -> fit on ``<session>/<observation_set>``; write results.
+
+    ``views`` restricts and orders the cameras used (default: every start
+    camera with observations); ``variant`` names the match so its outputs go
+    under ``variants/<variant>/`` (#9793); ``camera_source`` is recorded in
+    the provenance (which file the cameras came from).
 
     Start from ``start_cameras`` (a previous take) or, for the first take of a
     new setup, from ``intrinsics`` alone: placement is then initialised from
@@ -126,31 +146,44 @@ def reconstruct_session(
         (start_cameras is None) != (intrinsics is None),
         "give start cameras or intrinsics, not both",
     )
-    views = load_views(session_dir)
+    obs_set_dir = session_dir / observation_set
+    all_views = load_views_from(obs_set_dir)
     ids = (
         [c.camera_id for c in start_cameras]
         if start_cameras
         else [i[0] for i in intrinsics or []]
     )
-    missing = [i for i in ids if i not in views]
+    if views is not None:
+        unknown = [v for v in views if v not in ids]
+        require(not unknown, "requested views have no camera record", unknown)
+        require(len(views) >= 2, "triangulation needs at least two views", views)
+        ids = list(views)
+        if start_cameras:
+            start_cameras = [c for v in ids for c in start_cameras if c.camera_id == v]
+        elif intrinsics is not None:
+            intrinsics = [i for v in ids for i in intrinsics if i[0] == v]
+    missing = [i for i in ids if i not in all_views]
     require(not missing, "start cameras without observations", missing)
-    out_dir = session_dir / RECONSTRUCT_DIR
+    views_used = {v: all_views[v] for v in ids}
+    root = ensure_variant(session_dir, variant)
+    out_dir = root / RECONSTRUCT_DIR
     obs_dir = out_dir / "observations"
     obs_dir.mkdir(parents=True, exist_ok=True)
     options = SmootherOptions(acceleration_sigma=acceleration_sigma_px)
     rejections = _clean_all(
-        views, ids, out_dir, options, min_confidence, tuple(exclude_joints)
+        views_used, ids, out_dir, options, min_confidence, tuple(exclude_joints)
     )
     if start_cameras is None:
         assert intrinsics is not None
         start_cameras = _initial_cameras(out_dir, ids, intrinsics, scale_anchor)
     record: Reconstruction = fit_bundle(
         out_dir,
+        base=session_dir,
         scale_anchor=scale_anchor,
         start_cameras=start_cameras,
         measured_lengths_m=measured,
     )
-    fps = float(views[ids[0]]["fps"])
+    fps = float(views_used[ids[0]]["fps"])
     joints = np.load(out_dir / "joints_3d_m.npy")
     swing, _series = summarize_swing(joints, fps)
     swing_file = out_dir / "swing_summary.json"
@@ -166,9 +199,38 @@ def reconstruct_session(
         measured_lengths_m=dict(measured),
         fps=fps,
         excluded_joints=tuple(exclude_joints),
+        observation_set=observation_set,
+        variant=variant,
+        camera_source=camera_source,
     )
-    (out_dir / "session_reconstruction.json").write_text(
-        summary.model_dump_json(indent=2), encoding="utf-8"
+    source_views = [obs_set_dir / f"{v}.json" for v in ids]
+    write_stamped(
+        out_dir / "session_reconstruction.json",
+        summary.model_dump(mode="json"),
+        schema_version=SESSION_RECONSTRUCTION_SCHEMA,
+        module=__name__,
+        inputs=[*source_views, out_dir / RECONSTRUCTION_FILE],
+        parameters={
+            "views": list(ids),
+            "observation_set": observation_set,
+            "variant": variant,
+            "anchors": list(measurements),
+            "scale_anchor": list(scale_anchor),
+            "excluded_joints": list(exclude_joints),
+            "acceleration_sigma_px": acceleration_sigma_px,
+            "camera_source": camera_source,
+            "source": {"kind": "triangulate"},
+        },
+        derived_from=[out_dir / RECONSTRUCTION_FILE, *source_views],
+        base=session_dir,
+    )
+    register_variant(
+        session_dir,
+        variant,
+        views=ids,
+        observation_set=observation_set,
+        source={"kind": "triangulate", "camera_source": camera_source},
+        module=__name__,
     )
     return summary
 
@@ -198,8 +260,16 @@ def _clean_all(
         rejections[view_id] = len(report.rejected)
         reports[view_id] = _report_dict(report)
         logger.info("cleaned %s: %d rejections", view_id, len(report.rejected))
-    (out_dir / CLEAN_REPORT_FILE).write_text(
-        json.dumps(reports, indent=1), encoding="utf-8"
+    write_stamped(
+        out_dir / CLEAN_REPORT_FILE,
+        {"views": reports},
+        schema_version=CLEAN_REPORT_SCHEMA,
+        module=__name__,
+        parameters={
+            "acceleration_sigma": options.acceleration_sigma,
+            "min_confidence": min_confidence,
+            "excluded_joints": list(exclude_joints),
+        },
     )
     return rejections
 
