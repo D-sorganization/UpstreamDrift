@@ -1,0 +1,293 @@
+"""``SwingBioModel``: bioptim's custom-model protocol over the swing (Phase 1.2).
+
+Implements ``bioptim.StateDynamics`` (torque-driven, ``[q, qdot]`` states,
+``tau`` controls) plus the ``BioModel`` surface bioptim's penalty library
+calls on a model -- markers, marker velocities, centre of mass, mass,
+gravity, ``tau_max`` -- all delegated to :class:`SymbolicSwingModel`.
+
+bioptim is imported lazily through :func:`_compat.require_bioptim` so this
+module imports without the optional extra; :func:`make_swing_bio_model` is
+the constructor callers use.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import Any
+
+import numpy as np
+
+from src.shared.python.optimization._swing_kinematics import JOINTS
+from src.shared.python.optimization._swing_models import ClubModel, GolferModel
+from src.shared.python.optimization.ocp._compat import require_bioptim
+from src.shared.python.optimization.ocp.symbolic_model import SymbolicSwingModel
+
+__all__ = ["make_swing_bio_model"]  # SwingBioModel is provided lazily via __getattr__
+
+_CLASS_CACHE: dict[str, type] = {}
+
+
+def _build_class() -> type:
+    """Define the adapter class once bioptim is importable.
+
+    The base class (``bioptim.StateDynamics``) only exists when bioptim is
+    installed, so the class body lives in a function.
+    """
+    bioptim = require_bioptim()
+    import casadi as ca
+
+    class SwingBioModel(bioptim.StateDynamics):  # type: ignore[misc,name-defined]
+        """Torque-driven ``StateDynamics`` over :class:`SymbolicSwingModel`.
+
+        Args:
+            golfer, club: The numeric model.
+            parameters: Names promoted to bioptim ``Parameter``s, in the order
+                they will be added to the OCP's ``ParameterList`` (Phase 4).
+                Every CasADi function then reads them from bioptim's
+                ``parameters`` vector.
+        """
+
+        def __init__(
+            self,
+            golfer: GolferModel | None = None,
+            club: ClubModel | None = None,
+            *,
+            parameters: Sequence[str] = (),
+            **kwargs: Any,
+        ) -> None:
+            super().__init__(**kwargs)
+            self.symbolic = SymbolicSwingModel(golfer, club, parameters=parameters)
+            self.golfer = self.symbolic.golfer
+            self.club = self.symbolic.club
+            self._parameter_names = tuple(parameters)
+            self._q = ca.MX.sym("q", self.nb_q)
+            self._qdot = ca.MX.sym("qdot", self.nb_q)
+            self._tau = ca.MX.sym("tau", self.nb_q)
+
+        # -- mandatory StateDynamics surface ---------------------------------
+
+        @property
+        def name(self) -> str:
+            return "UpstreamDriftSwing7DOF"
+
+        @property
+        def name_dofs(self) -> list[str]:
+            return list(JOINTS)
+
+        @property
+        def state_configuration_functions(self) -> list[Any]:
+            return [bioptim.States.Q, bioptim.States.QDOT]
+
+        @property
+        def control_configuration_functions(self) -> list[Any]:
+            return [bioptim.Controls.TAU]
+
+        @property
+        def algebraic_configuration_functions(self) -> list[Any]:
+            return []
+
+        @property
+        def extra_configuration_functions(self) -> list[Any]:
+            return []
+
+        def dynamics(
+            self,
+            time: Any,
+            states: Any,
+            controls: Any,
+            parameters: Any,
+            algebraic_states: Any,
+            numerical_timeseries: Any,
+            nlp: Any,
+        ) -> Any:
+            get = bioptim.DynamicsFunctions.get
+            q = get(nlp.states["q"], states)
+            qdot = get(nlp.states["qdot"], states)
+            tau = get(nlp.controls["tau"], controls)
+            qddot = self.symbolic.forward_dynamics(q, qdot, tau, parameters)
+            defects = None
+            if isinstance(nlp.dynamics_type.ode_solver, bioptim.OdeSolver.COLLOCATION):
+                # Direct collocation needs implicit defects: the polynomial
+                # slopes must match the dynamics at every collocation point.
+                slope_q = nlp.states_dot["q"].cx
+                slope_qdot = nlp.states_dot["qdot"].cx
+                if (
+                    nlp.dynamics_type.ode_solver.defects_type
+                    == bioptim.DefectType.TAU_EQUALS_INVERSE_DYNAMICS
+                ):
+                    tau_id = self.symbolic.rnea(q, qdot, slope_qdot, parameters)
+                    defects = ca.vertcat(slope_q - qdot, tau - tau_id)
+                else:
+                    defects = ca.vertcat(slope_q - qdot, slope_qdot - qddot)
+            return bioptim.DynamicsEvaluation(
+                dxdt=ca.vertcat(qdot, qddot), defects=defects
+            )
+
+        # -- sizes -------------------------------------------------------------
+
+        @property
+        def nb_q(self) -> int:
+            return self.symbolic.n_q
+
+        @property
+        def nb_qdot(self) -> int:
+            return self.symbolic.n_q
+
+        @property
+        def nb_qddot(self) -> int:
+            return self.symbolic.n_q
+
+        @property
+        def nb_tau(self) -> int:
+            return self.symbolic.n_q
+
+        @property
+        def nb_dof(self) -> int:
+            return self.symbolic.n_q
+
+        @property
+        def nb_root(self) -> int:
+            return 0
+
+        @property
+        def nb_quaternions(self) -> int:
+            return 0
+
+        @property
+        def nb_parameters(self) -> int:
+            return self.symbolic.n_parameters
+
+        @property
+        def parameter_names(self) -> tuple[str, ...]:
+            return self._parameter_names
+
+        # -- kinematics used by penalties -------------------------------------
+
+        @property
+        def marker_names(self) -> tuple[str, ...]:
+            return self.symbolic.marker_names
+
+        @property
+        def nb_markers(self) -> int:
+            return self.symbolic.n_markers
+
+        def marker_index(self, name: str) -> int:
+            return self.symbolic.marker_index(name)
+
+        def markers(self) -> Any:
+            return self.symbolic.markers
+
+        def markers_velocities(self, reference_index: Any = None) -> Any:
+            if reference_index is not None:
+                raise NotImplementedError(
+                    "marker velocities in a segment frame are not supported"
+                )
+            return self.symbolic.markers_velocities
+
+        def center_of_mass(self) -> Any:
+            return self.symbolic.center_of_mass
+
+        def center_of_mass_velocity(self) -> Any:
+            return self.symbolic.center_of_mass_velocity
+
+        def mass(self) -> Any:
+            return self.symbolic.total_mass
+
+        def gravity(self) -> Any:
+            return self.symbolic.gravity
+
+        # -- dynamics used by penalties ---------------------------------------
+
+        def forward_dynamics(self, with_contact: bool = False) -> Any:
+            if with_contact:
+                raise NotImplementedError("the swing chain has no contacts")
+            return self.symbolic.forward_dynamics
+
+        def inverse_dynamics(self, with_contact: bool = False) -> Any:
+            if with_contact:
+                raise NotImplementedError("the swing chain has no contacts")
+            return self.symbolic.rnea
+
+        def tau_max(self) -> Any:
+            """``(tau_max, tau_min)(q, qdot, parameters)`` from the golfer."""
+            limits = self.symbolic.torque_limits()
+            p = self.symbolic.parameter_symbols()
+            q = ca.SX.sym("q", self.nb_q)
+            qdot = ca.SX.sym("qdot", self.nb_q)
+            return ca.Function(
+                "swing_tau_max",
+                [q, qdot, p],
+                [ca.SX(limits), ca.SX(-limits)],
+                ["q", "qdot", "parameters"],
+                ["tau_max", "tau_min"],
+            )
+
+        # -- bookkeeping bioptim expects ---------------------------------------
+
+        def copy(self) -> SwingBioModel:
+            return SwingBioModel(
+                self.golfer, self.club, parameters=self._parameter_names
+            )
+
+        def serialize(self) -> tuple[Any, dict[str, Any]]:
+            return SwingBioModel, {
+                "golfer": self.golfer,
+                "club": self.club,
+                "parameters": self._parameter_names,
+            }
+
+        def set_parameter(self, value: Any, **kwargs: Any) -> None:
+            """``ParameterList.add(..., function=model.set_parameter)`` hook.
+
+            bioptim calls this with the parameter's symbol at build time.
+            Nothing to mutate: every function reads the OCP parameter vector
+            directly, so the hook only records the symbol for inspection.
+            """
+            self.last_parameter_symbol = value
+
+        def bounds_from_ranges(self, key: str, flexibility: float = 1.0) -> Any:
+            """``Bounds`` for ``"q"`` (golfer ROMs) or ``"qdot"``."""
+            from src.shared.python.optimization.model_provider import (
+                swing_joint_limits,
+            )
+
+            if key == "q":
+                limits = swing_joint_limits(self.golfer)
+                lower = np.array([limits[j][0] for j in JOINTS]) * flexibility
+                upper = np.array([limits[j][1] for j in JOINTS]) * flexibility
+            elif key == "qdot":
+                lower = np.full(self.nb_q, -40.0)
+                upper = np.full(self.nb_q, 40.0)
+            else:
+                raise KeyError(key)
+            return bioptim.Bounds(key, min_bound=lower, max_bound=upper)
+
+    return SwingBioModel
+
+
+def make_swing_bio_model(
+    golfer: GolferModel | None = None,
+    club: ClubModel | None = None,
+    *,
+    parameters: Sequence[str] = (),
+) -> Any:
+    """Instantiate :class:`SwingBioModel` (defines the class on first use).
+
+    Raises:
+        BioptimNotAvailableError: When bioptim is not installed.
+    """
+    cls = _CLASS_CACHE.get("SwingBioModel")
+    if cls is None:
+        cls = _build_class()
+        _CLASS_CACHE["SwingBioModel"] = cls
+    return cls(golfer, club, parameters=parameters)
+
+
+def __getattr__(name: str) -> Any:
+    if name == "SwingBioModel":
+        cls = _CLASS_CACHE.get("SwingBioModel")
+        if cls is None:
+            cls = _build_class()
+            _CLASS_CACHE["SwingBioModel"] = cls
+        return cls
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
