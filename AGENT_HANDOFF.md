@@ -4,7 +4,7 @@
 
 - Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
 - Tools #5077 and #5082 remain open. Distributed shaft, flexible contact, acoustics, studies and empirical gates remain active.
-- #9735 / PR #9745 (open; CI mode correction in progress): `fix/9735-impact-provider-imports`, base `dbc6727aa`; fixes test bootstrap/origin checks, with no production import changes.
+- #9735 / PR #9745 (open; provider CI passes, main sync in progress): `fix/9735-impact-provider-imports`, base `dbc6727aa`; fixes test bootstrap/origin checks, with no production import changes.
 - No-vendor provider contracts: 13 passed; ownership-eviction mutation detected; installed-wheel CLI bootstrap passed. Pinned-vendor/CLI/fallback checks: 72 passed.
 - Current compatibility record: `docs/development/impact_provider_import_turnover.md`; overall design: `docs/development/impact_acoustics_program.md`.
 - Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.

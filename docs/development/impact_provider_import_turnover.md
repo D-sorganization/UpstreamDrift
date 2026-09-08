@@ -123,3 +123,15 @@ The phantom guard initially matched only the issue's illustrative runtime path.
 Issue #9735 now records the located test/fixture paths and diagnosis, preserving
 its original smallest-responsible-boundary acceptance criteria. No override
 label, tolerance relaxation or production edit was used to bypass that gate.
+
+## Provider CI and Main Synchronization
+
+At `94034b56e`, the actual shared-tools-consumer-contracts job passes
+(run 34183574996, job 101927443723). Remaining failures include launcher parity
+(provider_unavailable versus ready statuses for seven tiles) and a repository-wide
+security scan reporting existing files outside this PR, including the sidekick
+Python REPL and MJCF parser. No fixture path is among the inspected findings.
+Main advanced to `6bb246e38` (#9740); merge preserves that model-generation
+implementation unchanged and resolves only the adjacent SPEC rows, retaining
+both #9735 and #9740. Revalidate provider contracts and normal protected CI;
+do not infer completion from the earlier narrower checks.
