@@ -87,6 +87,24 @@ Constraints that shaped the decision:
    Jacobians through an unstable forward model; exact AD removes that class of
    bug.
 
+## Amendment 2026-09-08: the finite-difference path is deprecated, not rewired
+
+The epic's Phase 6.2 proposed making `solve_swing_casadi` delegate to the
+bioptim OCP whenever bioptim is importable. That is rejected: the two do not
+solve the same problem. The finite-difference path *maximises* terminal
+clubhead speed, which with the dynamics genuinely enforced is a concave
+objective whose optimum sits on the velocity bound and which no interior-point
+solver certifies (measured in `docs/estimation/bioptim_parity.md`; the CasADi
+multiple-shooting path fails the same way). The OCP path therefore defaults to
+a convex *target*-speed objective. Silently swapping one for the other would
+change every existing caller's answer.
+
+Instead: `transcription="finite_difference"` emits a `DeprecationWarning`
+naming its replacement, the registry marks the `casadi` backend deprecated, and
+callers migrate deliberately to `multiple_shooting` (same maximisation, real
+dynamics, may not converge) or to `bioptim` (target speed, converges). Removal
+follows one release after the warning ships.
+
 ## Consequences
 
 - Positive: one place answers "which backend, and is it installed"; adding a

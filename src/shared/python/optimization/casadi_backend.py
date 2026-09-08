@@ -36,6 +36,7 @@ absent, :func:`require_casadi` raises with an install hint.
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from importlib import import_module
@@ -561,6 +562,16 @@ def solve_swing_casadi(
         raise ValueError(
             "transcription must be 'finite_difference' or 'multiple_shooting', "
             f"got {transcription!r}"
+        )
+    if transcription == "finite_difference":
+        warnings.warn(
+            "the finite-difference transcription does not enforce the swing "
+            "dynamics between nodes, so its torques and clubhead speeds are "
+            "not physically realisable (see docs/estimation/bioptim_parity.md "
+            "and #9756). Use transcription='multiple_shooting', or the "
+            "'bioptim' backend for constrained and tracking problems.",
+            DeprecationWarning,
+            stacklevel=2,
         )
     ca = require_casadi()
     n_joints = len(JOINTS)
