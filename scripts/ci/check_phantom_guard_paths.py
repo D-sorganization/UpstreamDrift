@@ -37,9 +37,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-ISSUE_REF_PATTERN = re.compile(
-    r"(?:Closes|Fixes|Resolves)\s+#([0-9]+)", re.IGNORECASE
-)
+ISSUE_REF_PATTERN = re.compile(r"(?:Closes|Fixes|Resolves)\s+#([0-9]+)", re.IGNORECASE)
 ISSUE_PATH_PATTERN = re.compile(r"(?:src|tests|rust_core|api)/[A-Za-z0-9_/.-]+")
 ENV_CHANGED_FILES = "PR_CHANGED_FILES"
 MAX_PATHS_SHOWN = 5
@@ -92,9 +90,7 @@ def _git_changed_files(
     merge_base = _merge_base(base_sha, head_sha, repo_root)
     if merge_base is None:
         return None
-    out = _run_git(
-        ["diff", "--name-only", f"{merge_base}...{head_sha}"], repo_root
-    )
+    out = _run_git(["diff", "--name-only", f"{merge_base}...{head_sha}"], repo_root)
     if out is None:
         return None
     return [line for line in out.splitlines() if line.strip()]
@@ -111,8 +107,16 @@ def _api_changed_files(pr_number: str, repo: str) -> list[str] | None:
     """Return the PR changed-file list via the GitHub CLI, or None."""
     result = subprocess.run(
         [
-            "gh", "pr", "view", pr_number, "--repo", repo,
-            "--json", "files", "--jq", ".files[].path",
+            "gh",
+            "pr",
+            "view",
+            pr_number,
+            "--repo",
+            repo,
+            "--json",
+            "files",
+            "--jq",
+            ".files[].path",
         ],
         check=False,
         capture_output=True,
@@ -172,9 +176,7 @@ def _issue_referenced_paths(issue_body: str) -> list[str]:
     return sorted(set(ISSUE_PATH_PATTERN.findall(issue_body)))
 
 
-def _first_path_match(
-    changed_files: list[str], referenced: list[str]
-) -> str | None:
+def _first_path_match(changed_files: list[str], referenced: list[str]) -> str | None:
     """Return the first referenced path touched by the diff, if any.
 
     Mirrors the original shell semantics: a substring match anywhere in a
@@ -187,9 +189,7 @@ def _first_path_match(
         directory = posixpath.dirname(path)
         if directory in ("", ".", "/"):
             continue
-        if any(
-            changed.startswith(f"{directory}/") for changed in changed_files
-        ):
+        if any(changed.startswith(f"{directory}/") for changed in changed_files):
             return directory
     return None
 
@@ -198,8 +198,16 @@ def _load_issue_body(pr_number: str, repo: str) -> str | None:
     """Fetch an issue body via the GitHub CLI; None when unavailable."""
     result = subprocess.run(
         [
-            "gh", "issue", "view", pr_number, "--repo", repo,
-            "--json", "body", "--jq", ".body",
+            "gh",
+            "issue",
+            "view",
+            pr_number,
+            "--repo",
+            repo,
+            "--json",
+            "body",
+            "--jq",
+            ".body",
         ],
         check=False,
         capture_output=True,
