@@ -350,6 +350,29 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **Next step:** Record CI on PR #9743; on green, protected squash merge
   closes #9733.
 
+### DL-#8943 · Cache API CPU Work Off the Event Loop
+
+- **State:** in_review
+- **Owner:** W3_8943 (agent `claude`)
+- **Issue:** #8943
+- **Branch:** `claude/issue-8943-api-cache`
+- **PR:** #9727 (open)
+- **Paths:** `src/api/routes/analysis_plots.py`, `src/api/routes/model_explorer.py`,
+  `src/api/routes/models.py`, `src/api/routes/launch_monitor_analytics.py`,
+  `src/api/routes/_route_utils.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** `GET /analysis/plot-data/{plot_type}` now builds the
+  `AnalysisOrchestrator` once per recorder identity (LRU invalidated when the
+  recorder is replaced) and serves per-plot-type results from an LRU, computed
+  under `anyio.to_thread.run_sync`. Model-explorer and models URDF handlers read
+  and parse through `functools.lru_cache` helpers keyed by
+  `(resolved_path, st_mtime_ns, st_size)` (shared `urdf_file_key` helper), also
+  run in a worker thread. `launch_monitor_analytics` defers `import pandas` into
+  its seven handlers so API boot no longer pays the pandas import.
+- **Next step:** Merge the PR and confirm CI route/lazy-import gates pass on
+  `main`.
+
 ### DL-#9631 · Vendor Pin Carries the Tools#5048 Alias-Predicate Fix
 
 - **State:** in_review
@@ -367,9 +390,3 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **Next step:** maintainer re-cuts the 2.1.3 release via tag/workflow dispatch after the PR merges.
 
 ## Shipped (Last 90 Days)
-
-Entries stay here for 90 days after merge, then move to the archive.
-
-## Archive
-
-Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
