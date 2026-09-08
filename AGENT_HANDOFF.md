@@ -1,7 +1,7 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 02:55 PDT
-Updated: 2026-09-08 03:10 UTC (adds the #9648 RTMPose ONNX estimator section)
+Updated: 2026-09-08 03:10 UTC (adds the #9648 RTMPose ONNX estimator section; CI repair for PR #9739)
 
 ## Impact Dynamics and Acoustics: #9700
 
@@ -168,7 +168,6 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - TDD evidence: the missing module produced the expected RED import failure;
   after implementation, four registration tests pass serially.
 
-
 ## Markerless Pose Estimator Backends: #9648
 
 - `rtmpose_onnx` (RTMPose, Apache-2.0; SimCC decode via `onnxruntime`) is
@@ -181,6 +180,12 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   unverified (no weights fetched or committed). Blockers: owner-verified
   digest pinning, then a `rig compare` table against MediaPipe on take 2.
 - MoveNet remains a follow-up candidate only (TensorFlow stack absent).
+- CI repair (PR #9739): the per-frame video loop and detector-result
+  assembly shared with `OpenPoseDnnEstimator` moved into
+  `pose_estimation.interface` (`estimate_video_frames`, `detection_result`)
+  to satisfy the DRY duplication gate, and
+  `docs/shared_tools/divergence_inventory.v1.json` was regenerated for the
+  two new UD-only `pose_estimation` files.
 
 ## Immediate Order
 
