@@ -9,9 +9,9 @@ than a committed ``.gitattributes``. Run once per clone; git config and
 
 **Wire this into your repository's existing hook-setup entry point** rather
 than relying on people to run it by hand -- in Repository_Management that is
-``scripts/install_workspace_hooks.py``; in Tools it is
-``scripts/setup_hooks.py``, which already registers that repo's other merge
-driver the same way. A vendored copy of this file that nothing invokes leaves
+``scripts/install_workspace_hooks.py``; in Tools and UpstreamDrift it is
+``scripts/setup_hooks.py``, which registers the ``spec-rows`` driver the same
+way. A vendored copy of this file that nothing invokes leaves
 the driver inert, and this docstring is exactly where someone checks whether it
 is automatic, so do not let it name an entry point the repository does not
 have.
