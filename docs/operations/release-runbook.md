@@ -189,9 +189,10 @@ Every release tag as of `v2.1.2`:
 | `v2.1.1` | annotated | `verified=false`, `reason=unsigned` |
 | `v2.1.2` | lightweight | cannot carry one |
 
-`.github/workflows/release.yml` contains no signature-verification step, and no
-branch or tag ruleset requires signed tags. A signature would therefore be
-recorded but unchecked.
+`.github/workflows/release.yml` contains no signature-verification step, and
+the repository has no tag rulesets at all — every ruleset targets `branch`, and
+none carries a `required_signatures` rule. A signature would therefore be
+recorded but never checked by anything.
 
 This runbook previously prescribed `git tag -s`. No release has ever been cut
 that way, and on an operator workstation without a configured signing key the
@@ -205,7 +206,7 @@ gpg: skipped "...": No secret key
 which stops the release at the tag step with the version bump already merged.
 Documenting `-a` matches what is actually done and what actually works.
 
-### Adopting signed tags
+### Adopting Signed Tags
 
 Signing is worth having — it binds a release name to an identity rather than to
 whoever holds push rights. Doing it properly means all of:
@@ -221,9 +222,9 @@ whoever holds push rights. Doing it properly means all of:
 4. This section and the commands above updated back to `-s` in the same change.
 
 Until step 3 exists, prescribing `-s` documents an intention rather than a
-control. Track adoption in its own issue rather than changing the command here
-alone: a `-s` in the runbook with no verification in CI is exactly the gap that
-made this section necessary.
+control — and re-breaks the release for any operator without a key. Adoption is
+tracked in [#9747](https://github.com/D-sorganization/UpstreamDrift/issues/9747);
+sequence it verification-first, then the command.
 
 ## Operational Limits
 
