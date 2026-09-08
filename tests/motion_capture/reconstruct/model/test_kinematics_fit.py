@@ -211,3 +211,84 @@ def test_fit_can_refine_a_measured_length() -> None:
         model, truth, fps, q0=q_true * 0.0, lengths_m=wrong, options=options
     )
     assert abs(fit.lengths_m["forearm"] - 0.26) < 0.01
+
+
+def test_constant_pre_and_post_frames_wrap_the_moving_primitives() -> None:
+    """child = parent . R(pre) . R_axes(q) . R(post), and frames() exposes it."""
+    from scipy.spatial.transform import Rotation
+
+    pre, post = (0.3, -0.2, 1.1), (-1.0, 0.4, 0.2)
+    spec = ModelSpec(
+        name="frames/1.0",
+        joints=(
+            Joint("root", None, axes=""),
+            Joint("hinge", "root", (0.0, 0.0, 1.0), "seg", "x", (), True, pre, post),
+            Joint("tip", "hinge", (1.0, 0.0, 0.0), "seg", ""),
+        ),
+        lengths_m={"seg": 0.5},
+    )
+    model = ArticulatedModel(spec)
+    q = np.zeros((2, model.n_dof))
+    q[:, model.dof_slice("hinge")] = [[0.4], [-0.9]]
+    pos, frames = model.forward_frames(q)
+    expected = (
+        Rotation.from_rotvec(pre)
+        * Rotation.from_euler("X", q[:, model.dof_slice("hinge")])
+        * Rotation.from_rotvec(post)
+    ).as_matrix()
+    np.testing.assert_allclose(frames[:, model.index["hinge"]], expected, atol=1e-12)
+    np.testing.assert_allclose(model.frames(q), frames)
+    tip = pos[:, model.index["hinge"]] + 0.5 * expected[:, :, 0]
+    np.testing.assert_allclose(pos[:, model.index["tip"]], tip, atol=1e-12)
+    assert (
+        Joint("plain", "root", (0.0, 0.0, 1.0), "seg", "x")
+        .constant_frames()[0]
+        .tolist()
+        == np.eye(3).tolist()
+    )
+
+
+@pytest.mark.parametrize(
+    "axes,signs", [("x", (1,)), ("xz", (1, -1)), ("zxy", (-1, 1, 1))]
+)
+def test_decompose_primitives_round_trips_and_reports_the_remainder(
+    axes: str, signs: tuple[int, ...]
+) -> None:
+    from src.motion_capture.reconstruct.model.kinematics import (
+        _axis_rotations,
+        decompose_primitives,
+    )
+
+    rng = np.random.default_rng(3)
+    q = rng.uniform(-1.2, 1.2, (5, len(axes)))
+    rot = _axis_rotations(q * np.asarray(signs), axes)
+    got, remainder = decompose_primitives(rot, axes, signs)
+    np.testing.assert_allclose(got, q, atol=1e-9)
+    np.testing.assert_allclose(remainder, 0.0, atol=1e-9)
+    # A rotation the primitives cannot express leaves a remainder.
+    spoiled = _axis_rotations(np.full((5, 3), 0.3), "yzx")
+    _, remainder = decompose_primitives(spoiled, axes[:1])
+    assert remainder.min() > 0.1
+
+
+def test_gate_keeps_everything_when_the_model_cannot_represent_the_motion() -> None:
+    """A rigid 0.2 m link fitted to 0.5 m-apart landmarks: every observation
+    is beyond the gate, so rejecting would leave nothing. The fit keeps all,
+    reports the honest RMS, and rejects nothing."""
+    spec = ModelSpec(
+        name="stick/1.0",
+        joints=(
+            Joint("root", None, axes="xyz"),
+            Joint("tip", "root", (0.0, -1.0, 0.0), "link", ""),
+        ),
+        lengths_m={"link": 0.2},
+    )
+    model = ArticulatedModel(spec)
+    frames = 8
+    observed = np.zeros((frames, 2, 3))
+    observed[:, 1, 1] = -0.5
+    fit = fit_trajectory(
+        model, observed, 60.0, options=FitOptions(max_iterations=30, gate=5.0)
+    )
+    assert fit.rejected == ()
+    assert np.isfinite(fit.rms_m) and 0.1 < fit.rms_m < 0.2
