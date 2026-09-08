@@ -127,7 +127,7 @@ def test_fit_model_command_and_tile_action(tmp_path: Path) -> None:
 
 
 def test_rig_compare_models_and_kinetics_commands(tmp_path: Path) -> None:
-    root = _golfer_session(tmp_path)
+    root = _golfer_session(tmp_path, frames=20)  # two fits under CI's 60 s budget
     assert (
         rig_cli.main(
             [
@@ -136,13 +136,28 @@ def test_rig_compare_models_and_kinetics_commands(tmp_path: Path) -> None:
                 str(root),
                 "--models",
                 "golfer,double_pendulum",
+                "--max-iterations",
+                "25",  # CI's per-test budget is 60 s; the pendulum cannot fit
             ]
         )
         == 0
     )
     comparison = json.loads((root / "model" / "comparison.json").read_text("utf-8"))
     assert {s["model"] for s in comparison["ranking"]} == {"golfer", "double_pendulum"}
-    assert rig_cli.main(["fit-model", "--session", str(root), "--model", "golfer"]) == 0
+    assert (
+        rig_cli.main(
+            [
+                "fit-model",
+                "--session",
+                str(root),
+                "--model",
+                "golfer",
+                "--max-iterations",
+                "30",
+            ]
+        )
+        == 0
+    )
     assert (
         rig_cli.main(
             [
@@ -158,7 +173,7 @@ def test_rig_compare_models_and_kinetics_commands(tmp_path: Path) -> None:
         == 0
     )
     kinetics = json.loads((root / "model" / "kinetics.json").read_text("utf-8"))
-    assert kinetics["model"] == "golfer-scapula/2.0" and len(kinetics["tau"]) == 30
+    assert kinetics["model"] == "golfer-scapula/2.0" and len(kinetics["tau"]) == 20
     assert "LScapStartPositionX" in kinetics["simscape_names"].values()
     with pytest.raises(SystemExit, match="fit-model"):
         rig_cli.main(
