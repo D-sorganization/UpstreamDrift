@@ -1016,6 +1016,9 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         Prefers the attached ``ControlSystem``; otherwise writes the static
         ``control_vector`` when one is present.
         """
+        if self.data is None:
+            return
+
         if self.control_system is not None:
             self.control_system.update_time(self.data.time)
             nu = self._safe_model_nu()
