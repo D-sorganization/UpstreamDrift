@@ -50,9 +50,17 @@ PARAMETER_NAMES: tuple[str, ...] = (
     "head_mass",
 )
 
-#: Marker set: joint centres (shoulder once -- its two DOFs are co-located)
-#: plus the clubhead at the chain tip. ``keypoint_map`` maps video keypoint
-#: names onto these.
+#: Marker set: joint centres (shoulder once -- its two DOFs are co-located),
+#: the clubhead at the chain tip, and ``clubface``, offset from the shaft
+#: axis. ``keypoint_map`` maps video keypoint names onto these.
+#:
+#: The ``clubface`` offset is not decoration. Every joint-origin marker is
+#: invariant under the terminal shaft-roll DOF (``wrist_rotation`` turns
+#: about the axis the clubhead origin sits on), so a marker set made only of
+#: joint centres leaves that DOF unobservable and the tracking OCP recovers
+#: an arbitrary value for it. A point off the shaft axis -- which is where a
+#: real clubhead's mass sits, cf. the MacKenzie 2012 epic -- makes the roll
+#: observable.
 MARKER_NAMES: tuple[str, ...] = (
     "hip",
     "trunk",
@@ -60,6 +68,7 @@ MARKER_NAMES: tuple[str, ...] = (
     "elbow",
     "wrist",
     "clubhead",
+    "clubface",
 )
 _MARKER_JOINT: dict[str, str] = {
     "hip": "hip_rotation",
@@ -69,6 +78,9 @@ _MARKER_JOINT: dict[str, str] = {
     "wrist": "wrist_cock",
     "clubhead": "wrist_rotation",
 }
+#: Lateral offset [m] of ``clubface`` from the clubhead origin, in the
+#: terminal joint frame (perpendicular to the shaft).
+CLUBFACE_OFFSET: tuple[float, float, float] = (0.05, 0.0, 0.0)
 
 
 def _rotation(ca: Any, axis: np.ndarray, angle: Any) -> Any:
@@ -195,9 +207,16 @@ class SymbolicSwingModel:
         joint_positions = ca.horzcat(*positions)
         self._joint_positions_expr = joint_positions
 
-        markers = ca.horzcat(
-            *[positions[JOINTS.index(_MARKER_JOINT[name])] for name in MARKER_NAMES]
-        )
+        marker_columns = []
+        for name in MARKER_NAMES:
+            if name == "clubface":
+                # Rotated by the terminal DOF, so shaft roll is observable.
+                marker_columns.append(
+                    positions[-1] + rotations[-1] @ ca.SX(list(CLUBFACE_OFFSET))
+                )
+            else:
+                marker_columns.append(positions[JOINTS.index(_MARKER_JOINT[name])])
+        markers = ca.horzcat(*marker_columns)
         markers_velocity = ca.jtimes(markers, q, v)
 
         total_mass: Any = 0.0
