@@ -148,10 +148,14 @@ class AssetLibraryEditorRoutesMixin:
             return APIResponse.error("Missing model_id")
 
         for model in ModelLibrary().list_models():
-            if model.model_id == model_id:
+            # ModelEntry's field is `id`, not `model_id`. This module was
+            # never exercised while the adapters used the rest_api_routes
+            # monolith, which had it right, so the mistake sat here
+            # unreached until the two were unified (#9699).
+            if model.id == model_id:
                 return APIResponse.ok(
                     {
-                        "id": model.model_id,
+                        "id": model.id,
                         "name": model.name,
                         "category": model.category.value,
                         "source": model.source.value if model.source else None,
@@ -186,7 +190,7 @@ class AssetLibraryEditorRoutesMixin:
         if not entry:
             return APIResponse.error("Failed to add model")
         return APIResponse.created(
-            {"id": entry.model_id, "name": entry.name, "category": entry.category.value}
+            {"id": entry.id, "name": entry.name, "category": entry.category.value}
         )
 
     def library_remove_model(self, request: APIRequest) -> APIResponse:
