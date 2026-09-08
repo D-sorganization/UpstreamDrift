@@ -37,7 +37,7 @@ The proxy table lives in `ui/src/config/devProxy.ts` and is covered by
 
 The browser UI expects the API server to be reachable on the same machine, and the WebSocket clients in `ui/src/api/client.ts` connect through `/api/ws/simulate/{engineType}`.
 
-## Vite / plugin-react pairing (issue #9249)
+## Vite / Plugin-React Pairing (Issue #9249)
 
 `ui` pins `vite ^7.3.2` and `@vitejs/plugin-react ^5` **as a pair**:
 `@vitejs/plugin-react` 6.x declares `peerDependencies.vite: "^8.0.0"` and
