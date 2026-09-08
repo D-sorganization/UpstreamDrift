@@ -1,17 +1,14 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 10:02 PDT
+Updated: 2026-09-07 18:20 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
 design-manual program.
 
-Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
-contract, recovery constraints, and next commands are in
-`docs/development/proximal_distal_program_turnover.md`.
+Detailed takeover context (merge-versus-quarantine boundary, exact smoke contract, recovery constraints, next commands): `docs/development/proximal_distal_program_turnover.md`.
 
-Seam (#9406) and failure triage (#9474): see
-`docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+- Seam (#9406) / failure triage (#9474): see `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
 
 ## Protected Authority
 
@@ -144,7 +141,9 @@ python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
 ```
 
-Also run claim/evidence integrity, release qualification, PDF inspection, and
-affected full gates after publication changes. Never force-push, bypass branch
-protection, relax tolerances after inspecting results, or create capacity-only
-reruns.
+Also run claim/evidence integrity, release qualification, PDF inspection, and affected full gates after publication changes. Never
+force-push, bypass branch protection, relax tolerances after inspecting results, or create capacity-only reruns.
+
+## UI dependency pin: #9249
+
+- Dependabot now ignores `@vitejs/plugin-react` major updates (`.github/dependabot.yml`): 6.x needs Vite 8 (`peerDependencies.vite: "^8.0.0"`; Vite 7 exports no `./internal`), so a lone bump cannot merge. Stay on plugin-react ^5 with vite ^7.3.2 until a paired Vite-8 upgrade; pairing note lives in `ui/README.md`. Branch `claude/issue-9249-ui-pin`.
