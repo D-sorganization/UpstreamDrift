@@ -24,7 +24,7 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 - Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
 - Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
 - Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 merged at `9aa26e4f8`; #9787 repairs its observed research companion failures.
-- #9787: 116 strict authority tests and three distinct rolling tests pass; 253 PDF pages pass computational inspection. Native ABI/provenance and preserved claim review evidence: `docs/development/manufactured_authority_9787_turnover.md`.
+- #9787 / PR #9804: published `d1563dffa` passes all normal push hooks; 116 strict authority tests and three distinct rolling tests pass; 253 PDF pages pass computational inspection. Native ABI/provenance and preserved claim review evidence: `docs/development/manufactured_authority_9787_turnover.md`.
 - Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
 
 - Import/provider history: `docs/development/impact_provider_import_turnover.md`; reviewed renderer evidence: `docs/development/renderer_reference_9783_turnover.md`; program design: `docs/development/impact_acoustics_program.md`.
