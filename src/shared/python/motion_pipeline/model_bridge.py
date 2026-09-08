@@ -24,6 +24,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+
+# `escape` writes XML text, it never parses it, so the defusedxml rule does not
+# apply and defusedxml ships no saxutils replacement.
+# nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from xml.sax.saxutils import escape
 
 from .contracts import SkeletonRig

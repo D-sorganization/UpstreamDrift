@@ -87,42 +87,43 @@ def _defects(
     return report.max_position_defect, report.max_velocity_defect
 
 
-def run(config: OptimizationConfig, golfer: GolferModel, club: ClubModel) -> list[Row]:
-    """Run every available backend and return the parity rows."""
-    joint_limits = swing_joint_limits(golfer)
-    limits = _torque_limits(golfer)
-    x0 = generate_initial_guess(golfer, config, joint_limits)
-    rows: list[Row] = []
+class _Bench:
+    """Shared inputs and the row accumulator, so each backend times alike.
 
-    initial_defect = None
-    from src.shared.python.optimization.casadi_backend import casadi_available
+    Every backend gets the same golfer, club, node grid and warm start;
+    keeping them on one object is what lets the per-backend functions below
+    take a single argument instead of repeating a six-parameter signature.
+    """
 
-    if casadi_available():
-        initial_defect = _defects(golfer, club, config, x0, None)
-        rows.append(
-            Row(
-                backend="initial guess (kinematic)",
-                available=True,
-                converged=None,
-                clubhead_speed_m_s=_terminal_speed(golfer, club, x0, config.n_nodes),
-                max_position_defect_rad=initial_defect[0],
-                max_velocity_defect_rad_s=initial_defect[1],
-                note="the smooth sine warm start every backend receives",
-            )
-        )
+    def __init__(
+        self, config: OptimizationConfig, golfer: GolferModel, club: ClubModel
+    ) -> None:
+        self.config = config
+        self.golfer = golfer
+        self.club = club
+        self.joint_limits = swing_joint_limits(golfer)
+        self.limits = _torque_limits(golfer)
+        self.x0 = generate_initial_guess(golfer, config, self.joint_limits)
+        self.rows: list[Row] = []
 
-    def timed(name: str, note: str, call: Any) -> None:
+    def unavailable(self, *backends: str, note: str) -> None:
+        """Record backends whose optional stack is not installed."""
+        for backend in backends:
+            self.rows.append(Row(backend=backend, available=False, note=note))
+
+    def timed(self, name: str, note: str, call: Any) -> None:
+        """Run one backend, timing it and measuring its dynamics defect."""
         started = time.perf_counter()
         result = call()
         wall = time.perf_counter() - started
-        defect = _defects(golfer, club, config, result.x, result.torques)
-        rows.append(
+        defect = _defects(self.golfer, self.club, self.config, result.x, result.torques)
+        self.rows.append(
             Row(
                 backend=name,
                 available=True,
                 converged=bool(result.success),
                 clubhead_speed_m_s=_terminal_speed(
-                    golfer, club, result.x, config.n_nodes
+                    self.golfer, self.club, result.x, self.config.n_nodes
                 ),
                 wall_time_s=wall,
                 iterations=int(result.iterations),
@@ -132,114 +133,159 @@ def run(config: OptimizationConfig, golfer: GolferModel, club: ClubModel) -> lis
             )
         )
 
-    # scipy flagship
+
+def _bench_initial_guess(bench: _Bench) -> None:
+    """The warm start itself, as the baseline every backend improves on."""
+    from src.shared.python.optimization.casadi_backend import casadi_available
+
+    if not casadi_available():
+        return
+    defect = _defects(bench.golfer, bench.club, bench.config, bench.x0, None)
+    bench.rows.append(
+        Row(
+            backend="initial guess (kinematic)",
+            available=True,
+            converged=None,
+            clubhead_speed_m_s=_terminal_speed(
+                bench.golfer, bench.club, bench.x0, bench.config.n_nodes
+            ),
+            max_position_defect_rad=defect[0],
+            max_velocity_defect_rad_s=defect[1],
+            note="the smooth sine warm start every backend receives",
+        )
+    )
+
+
+def _bench_scipy(bench: _Bench) -> None:
+    """The flagship optimizer, which has no ODE to violate."""
     from src.shared.python.optimization.swing_optimizer import SwingOptimizer
 
     started = time.perf_counter()
-    scipy_result = SwingOptimizer(golfer, club, config).optimize()
-    scipy_wall = time.perf_counter() - started
-    rows.append(
+    result = SwingOptimizer(bench.golfer, bench.club, bench.config).optimize()
+    wall = time.perf_counter() - started
+    bench.rows.append(
         Row(
             backend="scipy SLSQP",
             available=True,
-            converged=bool(scipy_result.success),
-            clubhead_speed_m_s=float(scipy_result.predicted_clubhead_speed),
-            wall_time_s=scipy_wall,
-            iterations=int(scipy_result.iterations),
+            converged=bool(result.success),
+            clubhead_speed_m_s=float(result.predicted_clubhead_speed),
+            wall_time_s=wall,
+            iterations=int(result.iterations),
             note="flagship path; its own kinematic model, no ODE to violate",
         )
     )
 
-    if casadi_available():
-        from src.shared.python.optimization.casadi_backend import solve_swing_casadi
 
-        timed(
+def _bench_casadi(bench: _Bench) -> None:
+    """Both CasADi transcriptions: the legacy fit and multiple shooting."""
+    from src.shared.python.optimization.casadi_backend import casadi_available
+
+    if not casadi_available():
+        bench.unavailable(
             "casadi finite-difference",
-            "legacy #9756 path: kinematic fit with a torque check",
-            lambda: solve_swing_casadi(golfer, club, config, limits, joint_limits, x0),
-        )
-        timed(
             "casadi multiple shooting",
-            "RK4 shooting constraints, torque decision variables",
-            lambda: solve_swing_casadi(
-                golfer,
-                club,
-                config,
-                limits,
-                joint_limits,
-                x0,
-                transcription="multiple_shooting",
-            ),
+            note="pip install 'upstream-drift[optimal-control]'",
         )
-    else:
-        rows.append(
-            Row(
-                backend="casadi finite-difference",
-                available=False,
-                note="pip install 'upstream-drift[optimal-control]'",
-            )
-        )
-        rows.append(
-            Row(
-                backend="casadi multiple shooting",
-                available=False,
-                note="pip install 'upstream-drift[optimal-control]'",
-            )
+        return
+    from src.shared.python.optimization.casadi_backend import (
+        CasadiSolveOptions,
+        solve_swing_casadi,
+    )
+
+    def solve(options: CasadiSolveOptions | None) -> Any:
+        return solve_swing_casadi(
+            bench.golfer,
+            bench.club,
+            bench.config,
+            bench.limits,
+            bench.joint_limits,
+            bench.x0,
+            options=options,
         )
 
+    bench.timed(
+        "casadi finite-difference",
+        "legacy #9756 path: kinematic fit with a torque check",
+        lambda: solve(None),
+    )
+    bench.timed(
+        "casadi multiple shooting",
+        "RK4 shooting constraints, torque decision variables",
+        lambda: solve(CasadiSolveOptions(transcription="multiple_shooting")),
+    )
+
+
+def _bench_crocoddyl(bench: _Bench) -> None:
+    """Crocoddyl's DDP, reached through the backend registry."""
     from src.shared.python.optimization.crocoddyl_backend import crocoddyl_available
 
-    if crocoddyl_available():
-        from src.shared.python.optimization.backend_registry import get_backend
-
-        spec = get_backend("crocoddyl")
-        assert spec is not None and spec.solve is not None
-        timed(
-            "crocoddyl FDDP",
-            "DDP; targets an impact speed rather than maximising",
-            lambda: spec.solve(golfer, club, config, limits, joint_limits, x0),
+    if not crocoddyl_available():
+        bench.unavailable(
+            "crocoddyl FDDP", note="conda install -c conda-forge crocoddyl pinocchio"
         )
-    else:
-        rows.append(
-            Row(
-                backend="crocoddyl FDDP",
-                available=False,
-                note="conda install -c conda-forge crocoddyl pinocchio",
-            )
-        )
+        return
+    from src.shared.python.optimization.backend_registry import get_backend
 
+    spec = get_backend("crocoddyl")
+    assert spec is not None and spec.solve is not None
+    bench.timed(
+        "crocoddyl FDDP",
+        "DDP; targets an impact speed rather than maximising",
+        lambda: spec.solve(
+            bench.golfer,
+            bench.club,
+            bench.config,
+            bench.limits,
+            bench.joint_limits,
+            bench.x0,
+        ),
+    )
+
+
+def _bench_bioptim(bench: _Bench) -> None:
+    """Both bioptim transcriptions, on the convex target-speed objective."""
     from src.shared.python.optimization.ocp._compat import bioptim_available
 
-    if bioptim_available():
-        from src.shared.python.optimization.ocp.swing_ocp import solve_max_speed_ocp
-
-        for ode in ("rk4", "collocation"):
-            timed(
-                f"bioptim {ode}",
-                "target-speed objective (convex); dynamics enforced by construction",
-                lambda ode=ode: (
-                    solve_max_speed_ocp(
-                        golfer, club, config, limits, joint_limits, x0, ode=ode
-                    ).result
-                ),
-            )
-    else:
-        rows.append(
-            Row(
-                backend="bioptim rk4",
-                available=False,
-                note="pip install 'upstream-drift[bioptim]'",
-            )
+    if not bioptim_available():
+        bench.unavailable(
+            "bioptim rk4",
+            "bioptim collocation",
+            note="pip install 'upstream-drift[bioptim]'",
         )
-        rows.append(
-            Row(
-                backend="bioptim collocation",
-                available=False,
-                note="pip install 'upstream-drift[bioptim]'",
-            )
+        return
+    from src.shared.python.optimization.ocp.swing_ocp import (
+        MaxSpeedOcpOptions,
+        solve_max_speed_ocp,
+    )
+
+    def solve(ode: str) -> Any:
+        return solve_max_speed_ocp(
+            bench.golfer,
+            bench.club,
+            bench.config,
+            bench.limits,
+            bench.joint_limits,
+            bench.x0,
+            options=MaxSpeedOcpOptions(ode=ode),  # type: ignore[arg-type]
+        ).result
+
+    for ode in ("rk4", "collocation"):
+        bench.timed(
+            f"bioptim {ode}",
+            "target-speed objective (convex); dynamics enforced by construction",
+            lambda ode=ode: solve(ode),
         )
 
-    return rows
+
+def run(config: OptimizationConfig, golfer: GolferModel, club: ClubModel) -> list[Row]:
+    """Run every available backend and return the parity rows."""
+    bench = _Bench(config, golfer, club)
+    _bench_initial_guess(bench)
+    _bench_scipy(bench)
+    _bench_casadi(bench)
+    _bench_crocoddyl(bench)
+    _bench_bioptim(bench)
+    return bench.rows
 
 
 def _cell(value: Any) -> str:

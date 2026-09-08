@@ -34,6 +34,8 @@ from src.shared.python.optimization.casadi_backend import (
     rnea_expression,
 )
 from src.shared.python.optimization.model_provider import (
+    BodyInertialInputs,
+    ClubInertialInputs,
     swing_joint_axes,
     swing_segment_inertials,
     swing_segment_offsets,
@@ -169,14 +171,18 @@ class SymbolicSwingModel:
         )
         raw_inertials = swing_segment_inertials(
             offsets=offsets,
-            mass=values["mass"],
-            trunk_mass_ratio=self.golfer.trunk_mass_ratio,
-            arm_mass_ratio=self.golfer.arm_mass_ratio,
-            height=values["height"],
-            grip_mass=self.club.grip_mass,
-            shaft_mass=self.club.shaft_mass,
-            shaft_length=self.club.shaft_length,
-            head_mass=values["head_mass"],
+            body=BodyInertialInputs(
+                mass=values["mass"],
+                trunk_mass_ratio=self.golfer.trunk_mass_ratio,
+                arm_mass_ratio=self.golfer.arm_mass_ratio,
+                height=values["height"],
+            ),
+            club=ClubInertialInputs(
+                grip_mass=self.club.grip_mass,
+                shaft_mass=self.club.shaft_mass,
+                shaft_length=self.club.shaft_length,
+                head_mass=values["head_mass"],
+            ),
         )
         axes_by_joint = swing_joint_axes()
         self._offsets = [ca.vertcat(*offsets[name]) for name in JOINTS]

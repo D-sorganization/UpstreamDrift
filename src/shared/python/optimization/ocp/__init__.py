@@ -38,6 +38,7 @@ from src.shared.python.optimization.ocp._compat import (
 __all__ = [
     "BIOPTIM_INSTALL_HINT",
     "BioptimNotAvailableError",
+    "MaxSpeedOcpOptions",
     "SwingBioModel",
     "SymbolicSwingModel",
     "bioptim_available",
@@ -51,6 +52,7 @@ __all__ = [
 _LAZY: dict[str, str] = {
     "SymbolicSwingModel": "src.shared.python.optimization.ocp.symbolic_model",
     "SwingBioModel": "src.shared.python.optimization.ocp.bioptim_model",
+    "MaxSpeedOcpOptions": "src.shared.python.optimization.ocp.swing_ocp",
     "build_max_speed_ocp": "src.shared.python.optimization.ocp.swing_ocp",
     "solve_max_speed_swing": "src.shared.python.optimization.ocp.swing_ocp",
     "build_tracking_ocp": "src.shared.python.optimization.ocp.tracking_ocp",

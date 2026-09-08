@@ -86,7 +86,7 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
   "Hook bypass policy" documents this resolution.
 
-## bioptim Optimal-Control Layer and the Swing-Dynamics Fixes (#9762)
+## `bioptim` Optimal-Control Layer and the Swing-Dynamics Fixes (#9762)
 
 - Branch `claude/fixes-epic-implementation-x2bu36`, PR #9768 (open). Epic doc:
   `docs/issues/EPIC_BIOPTIM_OCP_INTEGRATION.md`; decision: ADR-0050.
@@ -106,9 +106,24 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   seven-DOF chain (`hip_rotation` and `trunk_rotation` are an exact null
   direction), so tracking results report their own identifiability.
 - Gate commands: `MPLBACKEND=Agg pytest src/shared/python/optimization/ocp/tests
-  tests/architecture/test_bioptim_isolation.py -m "not slow"` (23 pass);
+  tests/architecture/test_bioptim_isolation.py -m "not slow"`;
   `pytest tests/unit/optimization tests/unit/estimation`;
-  `python -m benchmarks.bioptim_parity --nodes 12 --duration 0.6`.
+  `MPLBACKEND=Agg PYTHONPATH=src python -m benchmarks.bioptim_parity --nodes 8
+  --duration 0.6`. The benchmark needs `PYTHONPATH=src` (pytest's conftest adds
+  it, `python -m` does not) or it dies importing `bunkershot3d`.
+- Run the ocp tests on their own. Co-running them with
+  `tests/unit/optimization` makes `bioptim_available()` return False and
+  silently skips 16 of them, in either collection order and on `main` as well
+  as here -- something in that directory poisons the import. Pre-existing, not
+  this branch's, and worth its own issue: a skip that only appears in a
+  combined run is exactly the kind CI hides.
+- Architecture budget: the nine violations this branch authored were fixed by
+  decomposition -- `CasadiSolveOptions` and `MaxSpeedOcpOptions` group the
+  keyword arguments that pushed `solve_swing_casadi` and `build_max_speed_ocp`
+  over the parameter budget, `_SwingModelSurface` moves the bioptim-independent
+  half of the adapter to module level, and the parity benchmark is one function
+  per backend. `crocoddyl_backend.solve_swing_ddp` is byte-identical to
+  `origin/main` and carries a dated exception instead.
 - CI state on PR #9768: the `hatchling` direct-reference fix (`52a8710`)
   cleared the eleven jobs that could not build the package at all. The
   `dependency-consistency` gate is red on `main` too, because #9716 added

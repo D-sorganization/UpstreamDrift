@@ -30,6 +30,7 @@ from src.shared.python.optimization._swing_models import (
     OptimizationConfig,
 )
 from src.shared.python.optimization.casadi_backend import (
+    CasadiSolveOptions,
     CasadiSwingResult,
     casadi_available,
     solve_swing_casadi,
@@ -173,7 +174,7 @@ def _solve_casadi_multiple_shooting(
         torque_limits,
         joint_limits,
         x0,
-        transcription="multiple_shooting",
+        options=CasadiSolveOptions(transcription="multiple_shooting"),
     )
 
 

@@ -521,133 +521,115 @@ def build_clubhead_position(
     return ca.Function("clubhead_position", [q], [p])
 
 
-def solve_swing_casadi(
-    golfer: GolferModel,
-    club: ClubModel,
-    config: OptimizationConfig,
-    torque_limits: dict[str, float],
-    joint_limits: dict[str, tuple[float, float]],
-    x0: np.ndarray,
-    *,
-    transcription: Transcription = "finite_difference",
-    link_inertials: Mapping[str, LinkInertial] | None = None,
-    n_substeps: int = 4,
-) -> CasadiSwingResult:
-    """Solve the swing trajectory optimization with CasADi + IPOPT.
+@dataclass(frozen=True)
+class CasadiSolveOptions:
+    """How :func:`solve_swing_casadi` discretises and models the swing.
 
-    Args:
-        golfer: Anthropometrics (limits, flexibility, inertials).
-        club: Club parameters (chain geometry, masses).
-        config: Node count, duration, objective weights, solver options.
-        torque_limits: Per-joint torque bounds [N*m].
-        joint_limits: Per-joint (lower, upper) angle bounds [rad].
-        x0: Warm-start decision vector in flagship layout.
+    Grouped rather than passed loose so the entry point stays inside the
+    architecture parameter budget, and so the CasADi backend takes its
+    options the same way the bioptim one does
+    (``ocp.swing_ocp.MaxSpeedOcpOptions``).
+
+    Attributes:
         transcription: ``"finite_difference"`` (legacy kinematic fit with a
-            torque check) or ``"multiple_shooting"`` (RK4 shooting
+            torque check, deprecated -- it does not enforce the dynamics
+            between nodes) or ``"multiple_shooting"`` (RK4 shooting
             constraints with torque decision variables, #9756).
         link_inertials: Override the anthropometric link inertials.
         n_substeps: RK4 substeps per shooting interval (multiple shooting
             only). Four keeps the integration error well below the node
             spacing at swing speeds; :func:`dynamics_defect` re-integrates
-            with a finer grid to report the residual discretisation error.
-
-    Returns:
-        CasadiSwingResult with the optimized decision vector.
-
-    Raises:
-        CasadiNotAvailableError: When casadi is not installed.
-        ValueError: On malformed inputs.
+            on a finer grid to report the residual discretisation error.
     """
-    if transcription not in ("finite_difference", "multiple_shooting"):
-        raise ValueError(
-            "transcription must be 'finite_difference' or 'multiple_shooting', "
-            f"got {transcription!r}"
-        )
-    if transcription == "finite_difference":
-        warnings.warn(
-            "the finite-difference transcription does not enforce the swing "
-            "dynamics between nodes, so its torques and clubhead speeds are "
-            "not physically realisable (see docs/estimation/bioptim_parity.md "
-            "and #9756). Use transcription='multiple_shooting', or the "
-            "'bioptim' backend for constrained and tracking problems.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-    ca = require_casadi()
-    n_joints = len(JOINTS)
-    n_nodes = config.n_nodes
-    expected = 2 * n_joints * n_nodes
-    x0 = np.asarray(x0, dtype=float).reshape(-1)
-    if x0.shape[0] != expected:
-        raise ValueError(
-            f"x0 must have length {expected} "
-            f"(2 * {n_joints} joints * {n_nodes} nodes), got {x0.shape[0]}"
-        )
-    if n_nodes < 2:
-        raise ValueError("config.n_nodes must be at least 2")
-    dt = config.swing_duration / (n_nodes - 1)
 
-    rnea = build_symbolic_rnea(golfer, club, ca, link_inertials=link_inertials)
-    clubhead = build_clubhead_position(golfer, club, ca)
+    transcription: Transcription = "finite_difference"
+    link_inertials: Mapping[str, LinkInertial] | None = None
+    n_substeps: int = 4
 
-    opti = ca.Opti()
-    q_var = opti.variable(n_joints, n_nodes)
-    v_var = opti.variable(n_joints, n_nodes)
+    def __post_init__(self) -> None:
+        if self.transcription not in ("finite_difference", "multiple_shooting"):
+            raise ValueError(
+                "transcription must be 'finite_difference' or "
+                f"'multiple_shooting', got {self.transcription!r}"
+            )
+        if self.n_substeps < 1:
+            raise ValueError("n_substeps must be positive")
 
+
+def _apply_decision_bounds(
+    opti: Any,
+    q_var: Any,
+    v_var: Any,
+    golfer: GolferModel,
+    joint_limits: dict[str, tuple[float, float]],
+) -> None:
+    """Joint ROM (scaled by flexibility) and velocity bounds."""
     flex = golfer.flexibility_factor
     for j, joint in enumerate(JOINTS):
         lo, hi = joint_limits[joint]
         opti.subject_to(opti.bounded(lo * flex, q_var[j, :], hi * flex))
     opti.subject_to(opti.bounded(-_VELOCITY_BOUND, v_var, _VELOCITY_BOUND))
 
-    # Boundary: start at the warm-start address pose, at rest.
-    q0_nodes = x0[: n_joints * n_nodes].reshape(n_joints, n_nodes)
-    v0_nodes = x0[n_joints * n_nodes :].reshape(n_joints, n_nodes)
-    opti.subject_to(q_var[:, 0] == q0_nodes[:, 0])
-    opti.subject_to(v_var[:, 0] == 0.0)
 
-    limits_vec = np.array([torque_limits.get(j, 100.0) for j in JOINTS])
+def _finite_difference_torques(
+    opti: Any, q_var: Any, v_var: Any, dt: float, rnea: Any
+) -> list[Any]:
+    """Tie velocities to pose differences and read torques off via RNEA.
 
-    # Node torques: evaluated (FD) or decided (multiple shooting).
-    tau_var = None
-    node_torques: list[Any] = []
-    if transcription == "finite_difference":
-        # Velocity consistency (central differences; one-sided at endpoints).
-        for k in range(n_nodes):
-            if k == 0:
-                dq = (q_var[:, 1] - q_var[:, 0]) / dt
-            elif k == n_nodes - 1:
-                dq = (q_var[:, -1] - q_var[:, -2]) / dt
-            else:
-                dq = (q_var[:, k + 1] - q_var[:, k - 1]) / (2 * dt)
-            opti.subject_to(v_var[:, k] == dq)
-        for k in range(n_nodes):
-            if k == 0:
-                dv = (v_var[:, 1] - v_var[:, 0]) / dt
-            elif k == n_nodes - 1:
-                dv = (v_var[:, -1] - v_var[:, -2]) / dt
-            else:
-                dv = (v_var[:, k + 1] - v_var[:, k - 1]) / (2 * dt)
-            node_torques.append(rnea(q_var[:, k], v_var[:, k], dv))
-    else:
-        tau_var = opti.variable(n_joints, n_nodes - 1)
-        step = build_rk4_integrator(
-            golfer, club, dt, ca, n_substeps=n_substeps, link_inertials=link_inertials
-        )
-        for k in range(n_nodes - 1):
-            q_next, v_next = step(q_var[:, k], v_var[:, k], tau_var[:, k])
-            opti.subject_to(q_var[:, k + 1] == q_next)
-            opti.subject_to(v_var[:, k + 1] == v_next)
-        # The terminal node reuses the last interval torque for the smooth
-        # risk term so every node contributes exactly once.
-        node_torques = [tau_var[:, k] for k in range(n_nodes - 1)]
-        node_torques.append(tau_var[:, n_nodes - 2])
+    Central differences in the interior, one-sided at the endpoints. This
+    constrains the *kinematics* only: nothing here makes the trajectory
+    dynamically feasible, which is why the path is deprecated (#9756).
+    """
+    n_nodes = q_var.shape[1]
 
+    def _difference(var: Any, k: int) -> Any:
+        if k == 0:
+            return (var[:, 1] - var[:, 0]) / dt
+        if k == n_nodes - 1:
+            return (var[:, -1] - var[:, -2]) / dt
+        return (var[:, k + 1] - var[:, k - 1]) / (2 * dt)
+
+    for k in range(n_nodes):
+        opti.subject_to(v_var[:, k] == _difference(q_var, k))
+    return [
+        rnea(q_var[:, k], v_var[:, k], _difference(v_var, k)) for k in range(n_nodes)
+    ]
+
+
+def _shooting_torques(
+    opti: Any, q_var: Any, v_var: Any, tau_var: Any, step: Any
+) -> list[Any]:
+    """RK4 shooting constraints; torques are decision variables."""
+    n_nodes = q_var.shape[1]
+    for k in range(n_nodes - 1):
+        q_next, v_next = step(q_var[:, k], v_var[:, k], tau_var[:, k])
+        opti.subject_to(q_var[:, k + 1] == q_next)
+        opti.subject_to(v_var[:, k + 1] == v_next)
+    # The terminal node reuses the last interval torque for the smooth
+    # risk term so every node contributes exactly once.
+    torques = [tau_var[:, k] for k in range(n_nodes - 1)]
+    torques.append(tau_var[:, n_nodes - 2])
+    return torques
+
+
+def _effort_and_risk(
+    ca: Any,
+    opti: Any,
+    node_torques: list[Any],
+    v_var: Any,
+    limits_vec: np.ndarray,
+    dt: float,
+    *,
+    terminal_node_has_effort: bool,
+) -> tuple[Any, Any]:
+    """Bound the node torques and accumulate the effort and risk terms."""
+    n_nodes = len(node_torques)
+    n_joints = limits_vec.shape[0]
     effort: Any = 0.0
     smooth_risk: Any = 0.0
     for k, tau_k in enumerate(node_torques):
         opti.subject_to(opti.bounded(-limits_vec, tau_k, limits_vec))
-        if transcription == "finite_difference" or k < n_nodes - 1:
+        if terminal_node_has_effort or k < n_nodes - 1:
             effort = effort + ca.sumsqr(tau_k) * dt
         # Smooth injury surrogate terms (velocity spike + torque
         # saturation), mirroring smooth_costs' logistic structure.
@@ -663,9 +645,12 @@ def solve_swing_casadi(
                     / (2 * limits_vec[j])
                 )
             )
-    smooth_risk = smooth_risk / n_nodes
+    return effort, smooth_risk / n_nodes
 
-    # Terminal clubhead speed via FK jacobian-vector product.
+
+def _terminal_speed(ca: Any, clubhead: Any, q_var: Any, v_var: Any) -> Any:
+    """Clubhead speed at the last node, via an FK Jacobian-vector product."""
+    n_joints = q_var.shape[0]
     q_sym = ca.SX.sym("q", n_joints)
     v_sym = ca.SX.sym("v", n_joints)
     p_sym = clubhead(q_sym)
@@ -674,38 +659,210 @@ def solve_swing_casadi(
         [q_sym, v_sym],
         [ca.norm_2(ca.jtimes(p_sym, q_sym, v_sym))],
     )
-    terminal_speed = speed_fn(q_var[:, -1], v_var[:, -1])
+    return speed_fn(q_var[:, -1], v_var[:, -1])
 
+
+def _casadi_result(
+    solution: Any,
+    variables: tuple[Any, Any, Any | None],
+    objective: Any,
+    transcription: Transcription,
+) -> CasadiSwingResult:
+    """Read the solved values back into the flagship result shape."""
+    q_var, v_var, tau_var = variables
+    n_joints, n_nodes = q_var.shape
+    q_opt = np.asarray(solution.value(q_var), dtype=float).reshape(n_joints, n_nodes)
+    v_opt = np.asarray(solution.value(v_var), dtype=float).reshape(n_joints, n_nodes)
+    torques = None
+    if tau_var is not None:
+        torques = np.asarray(solution.value(tau_var), dtype=float).reshape(
+            n_joints, n_nodes - 1
+        )
+    stats = solution.stats()
+    return CasadiSwingResult(
+        success=bool(stats.get("success", True)),
+        x=np.concatenate([q_opt.flatten(), v_opt.flatten()]),
+        fun=float(solution.value(objective)),
+        message=str(stats.get("return_status", "solved")),
+        iterations=int(stats.get("iter_count", 0)),
+        torques=torques,
+        transcription=transcription,
+    )
+
+
+def _validate_warm_start(
+    config: OptimizationConfig, x0: np.ndarray, n_joints: int
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Split the flagship decision vector into pose and velocity nodes."""
+    n_nodes = config.n_nodes
+    if n_nodes < 2:
+        raise ValueError("config.n_nodes must be at least 2")
+    expected = 2 * n_joints * n_nodes
+    flat = np.asarray(x0, dtype=float).reshape(-1)
+    if flat.shape[0] != expected:
+        raise ValueError(
+            f"x0 must have length {expected} "
+            f"(2 * {n_joints} joints * {n_nodes} nodes), got {flat.shape[0]}"
+        )
+    q0_nodes = flat[: n_joints * n_nodes].reshape(n_joints, n_nodes)
+    v0_nodes = flat[n_joints * n_nodes :].reshape(n_joints, n_nodes)
+    return q0_nodes, v0_nodes, config.swing_duration / (n_nodes - 1)
+
+
+def _apply_warm_start(
+    opti: Any,
+    variables: tuple[Any, Any, Any | None],
+    nodes: tuple[np.ndarray, np.ndarray],
+    step: Any | None,
+) -> None:
+    """Seed the decision variables, rolling out the dynamics when shooting."""
+    q_var, v_var, tau_var = variables
+    q0_nodes, v0_nodes = nodes
+    if step is None:
+        opti.set_initial(q_var, q0_nodes)
+        opti.set_initial(v_var, v0_nodes)
+        return
+    # A warm start that violates the shooting constraints (the flagship
+    # guess is kinematic, not dynamic) sends IPOPT into a long restoration
+    # phase. Roll the passive dynamics out from the address pose instead:
+    # feasible by construction, and the optimizer then only has to shape
+    # torques.
+    n_joints, n_nodes = q_var.shape
+    q_roll, v_roll = _rollout(step, q0_nodes[:, 0], n_nodes)
+    opti.set_initial(q_var, q_roll)
+    opti.set_initial(v_var, v_roll)
+    opti.set_initial(tau_var, np.zeros((n_joints, n_nodes - 1)))
+
+
+def _weighted_objective(
+    config: OptimizationConfig, terminal_speed: Any, smooth_risk: Any, effort: Any
+) -> Any:
+    """Combine the speed, injury and effort terms at the configured weights."""
     w_speed = config.objectives.get(OptimizationObjective.CLUBHEAD_VELOCITY, 1.0)
     w_injury = config.objectives.get(OptimizationObjective.INJURY_RISK, 0.0)
     w_energy = config.objectives.get(OptimizationObjective.ENERGY_EFFICIENCY, 0.0)
-    objective = (
+    return (
         -w_speed * terminal_speed / 50.0
         + w_injury * smooth_risk / 100.0
         + w_energy * effort / 1000.0
         + 1e-4 * effort  # regularizer keeps torques bounded when w_energy=0
     )
-    opti.minimize(objective)
 
-    if tau_var is None:
-        opti.set_initial(q_var, q0_nodes)
-        opti.set_initial(v_var, v0_nodes)
-    else:
-        # A warm start that violates the shooting constraints (the flagship
-        # guess is kinematic, not dynamic) sends IPOPT into a long
-        # restoration phase. Roll the passive dynamics out from the address
-        # pose instead: feasible by construction, and the optimizer then
-        # only has to shape torques.
-        q_roll, v_roll = _rollout(step, q0_nodes[:, 0], n_nodes)
-        opti.set_initial(q_var, q_roll)
-        opti.set_initial(v_var, v_roll)
-        opti.set_initial(tau_var, np.zeros((n_joints, n_nodes - 1)))
 
+def _build_transcription(
+    opti: Any,
+    variables: tuple[Any, Any],
+    models: tuple[GolferModel, ClubModel, Any],
+    dt: float,
+    options: CasadiSolveOptions,
+) -> tuple[list[Any], Any | None, Any | None]:
+    """Constrain the trajectory and return ``(node_torques, tau_var, step)``.
+
+    ``tau_var`` and ``step`` are ``None`` on the finite-difference path,
+    where torques are read off by inverse dynamics rather than decided.
+    """
+    q_var, v_var = variables
+    golfer, club, ca = models
+    inertials = options.link_inertials
+    if options.transcription == "finite_difference":
+        rnea = build_symbolic_rnea(golfer, club, ca, link_inertials=inertials)
+        return _finite_difference_torques(opti, q_var, v_var, dt, rnea), None, None
+    n_joints, n_nodes = q_var.shape
+    tau_var = opti.variable(n_joints, n_nodes - 1)
+    step = build_rk4_integrator(
+        golfer, club, dt, ca, n_substeps=options.n_substeps, link_inertials=inertials
+    )
+    return _shooting_torques(opti, q_var, v_var, tau_var, step), tau_var, step
+
+
+def _configure_ipopt(opti: Any, config: OptimizationConfig) -> None:
+    """Silence IPOPT and cap its iterations at the configured budget."""
     opti.solver(
         "ipopt",
         {"print_time": False, "expand": True},
         {"max_iter": int(config.max_iterations), "print_level": 0, "sb": "yes"},
     )
+
+
+def solve_swing_casadi(
+    golfer: GolferModel,
+    club: ClubModel,
+    config: OptimizationConfig,
+    torque_limits: dict[str, float],
+    joint_limits: dict[str, tuple[float, float]],
+    x0: np.ndarray,
+    *,
+    options: CasadiSolveOptions | None = None,
+) -> CasadiSwingResult:
+    """Solve the swing trajectory optimization with CasADi + IPOPT.
+
+    Args:
+        golfer: Anthropometrics (limits, flexibility, inertials).
+        club: Club parameters (chain geometry, masses).
+        config: Node count, duration, objective weights, solver options.
+        torque_limits: Per-joint torque bounds [N*m].
+        joint_limits: Per-joint (lower, upper) angle bounds [rad].
+        x0: Warm-start decision vector in flagship layout.
+        options: Transcription and modelling choices; see
+            :class:`CasadiSolveOptions`. ``None`` keeps the historical
+            default, which is the deprecated finite-difference path.
+
+    Returns:
+        CasadiSwingResult with the optimized decision vector.
+
+    Raises:
+        CasadiNotAvailableError: When casadi is not installed.
+        ValueError: On malformed inputs.
+    """
+    options = options or CasadiSolveOptions()
+    transcription = options.transcription
+    finite_difference = transcription == "finite_difference"
+    if finite_difference:
+        warnings.warn(
+            "the finite-difference transcription does not enforce the swing "
+            "dynamics between nodes, so its torques and clubhead speeds are "
+            "not physically realisable (see docs/estimation/bioptim_parity.md "
+            "and #9756). Use transcription='multiple_shooting', or the "
+            "'bioptim' backend for constrained and tracking problems.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+    ca = require_casadi()
+    n_joints = len(JOINTS)
+    n_nodes = config.n_nodes
+    q0_nodes, v0_nodes, dt = _validate_warm_start(config, x0, n_joints)
+
+    clubhead = build_clubhead_position(golfer, club, ca)
+    opti = ca.Opti()
+    q_var = opti.variable(n_joints, n_nodes)
+    v_var = opti.variable(n_joints, n_nodes)
+    _apply_decision_bounds(opti, q_var, v_var, golfer, joint_limits)
+
+    # Boundary: start at the warm-start address pose, at rest.
+    opti.subject_to(q_var[:, 0] == q0_nodes[:, 0])
+    opti.subject_to(v_var[:, 0] == 0.0)
+
+    limits_vec = np.array([torque_limits.get(j, 100.0) for j in JOINTS])
+    node_torques, tau_var, step = _build_transcription(
+        opti, (q_var, v_var), (golfer, club, ca), dt, options
+    )
+
+    effort, smooth_risk = _effort_and_risk(
+        ca,
+        opti,
+        node_torques,
+        v_var,
+        limits_vec,
+        dt,
+        terminal_node_has_effort=finite_difference,
+    )
+    objective = _weighted_objective(
+        config, _terminal_speed(ca, clubhead, q_var, v_var), smooth_risk, effort
+    )
+    opti.minimize(objective)
+    _apply_warm_start(opti, (q_var, v_var, tau_var), (q0_nodes, v0_nodes), step)
+
+    _configure_ipopt(opti, config)
     try:
         solution = opti.solve()
     except RuntimeError as exc:
@@ -717,22 +874,4 @@ def solve_swing_casadi(
             iterations=0,
             transcription=transcription,
         )
-
-    q_opt = np.asarray(solution.value(q_var), dtype=float).reshape(n_joints, n_nodes)
-    v_opt = np.asarray(solution.value(v_var), dtype=float).reshape(n_joints, n_nodes)
-    x_out = np.concatenate([q_opt.flatten(), v_opt.flatten()])
-    torques = None
-    if tau_var is not None:
-        torques = np.asarray(solution.value(tau_var), dtype=float).reshape(
-            n_joints, n_nodes - 1
-        )
-    stats = solution.stats()
-    return CasadiSwingResult(
-        success=bool(stats.get("success", True)),
-        x=x_out,
-        fun=float(solution.value(objective)),
-        message=str(stats.get("return_status", "solved")),
-        iterations=int(stats.get("iter_count", 0)),
-        torques=torques,
-        transcription=transcription,
-    )
+    return _casadi_result(solution, (q_var, v_var, tau_var), objective, transcription)
