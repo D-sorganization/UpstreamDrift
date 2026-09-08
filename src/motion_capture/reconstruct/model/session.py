@@ -14,7 +14,7 @@ import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -28,7 +28,7 @@ from ..skeleton import JOINT_NAMES
 from .fit import FitOptions, ModelFit, fit_to_dict, fit_trajectory
 from .kinematics import ArticulatedModel, ModelSpec
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 logger = get_logger(__name__)
 
 MODEL_DIR = "model"

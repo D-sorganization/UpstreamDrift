@@ -22,26 +22,26 @@ casadi 3.6.7, bioptim 3.4.0, pin 4.1.0); wall times are indicative only.
 
 ### 12 Nodes Over 0.6 s (`dt` = 55 ms)
 
-| Backend | Converged | Clubhead speed [m/s] | Wall [s] | Iterations | Max position defect [rad] | Max velocity defect [rad/s] |
-| --- | --- | --- | --- | --- | --- | --- |
-| initial guess (kinematic) | -- | 32.1 | -- | -- | 1.1 | 31.4 |
-| scipy SLSQP | yes | 64.2 | 0.2 | 4 | -- | -- |
-| casadi finite-difference | yes | 109 | 1.7 | 254 | 2.88 | 101 |
-| casadi multiple shooting | no | -- | 186 | cap | -- | -- |
-| crocoddyl FDDP | not installed | -- | -- | -- | -- | -- |
-| bioptim RK4 | yes | 49.9 | 38.4 | 97 | **0.26** | 15.2 |
-| bioptim collocation | yes | 45.9 | 8.5 | 113 | **0.22** | 19.9 |
+| Backend                   | Converged     | Clubhead speed [m/s] | Wall [s] | Iterations | Max position defect [rad] | Max velocity defect [rad/s] |
+| ------------------------- | ------------- | -------------------- | -------- | ---------- | ------------------------- | --------------------------- |
+| initial guess (kinematic) | --            | 32.1                 | --       | --         | 1.1                       | 31.4                        |
+| scipy SLSQP               | yes           | 64.2                 | 0.2      | 4          | --                        | --                          |
+| casadi finite-difference  | yes           | 109                  | 1.7      | 254        | 2.88                      | 101                         |
+| casadi multiple shooting  | no            | --                   | 186      | cap        | --                        | --                          |
+| crocoddyl FDDP            | not installed | --                   | --       | --         | --                        | --                          |
+| bioptim RK4               | yes           | 49.9                 | 38.4     | 97         | **0.26**                  | 15.2                        |
+| bioptim collocation       | yes           | 45.9                 | 8.5      | 113        | **0.22**                  | 19.9                        |
 
 ### 8 Nodes Over 1.0 s (`dt` = 143 ms)
 
-| Backend | Converged | Clubhead speed [m/s] | Wall [s] | Iterations | Max position defect [rad] | Max velocity defect [rad/s] |
-| --- | --- | --- | --- | --- | --- | --- |
-| initial guess (kinematic) | -- | 18.2 | -- | -- | 1.4 | 28.9 |
-| scipy SLSQP | yes | 24.5 | 0.1 | 4 | -- | -- |
-| casadi finite-difference | yes | 63.1 | 0.9 | 113 | 3.63 | 44.7 |
-| casadi multiple shooting | no | -- | 117 | cap | -- | -- |
-| bioptim RK4 | yes | 49.9 | 89.1 | 337 | 1.77 | 48.6 |
-| bioptim collocation | yes | 49.9 | 4.2 | 64 | 3.33 | 63.3 |
+| Backend                   | Converged | Clubhead speed [m/s] | Wall [s] | Iterations | Max position defect [rad] | Max velocity defect [rad/s] |
+| ------------------------- | --------- | -------------------- | -------- | ---------- | ------------------------- | --------------------------- |
+| initial guess (kinematic) | --        | 18.2                 | --       | --         | 1.4                       | 28.9                        |
+| scipy SLSQP               | yes       | 24.5                 | 0.1      | 4          | --                        | --                          |
+| casadi finite-difference  | yes       | 63.1                 | 0.9      | 113        | 3.63                      | 44.7                        |
+| casadi multiple shooting  | no        | --                   | 117      | cap        | --                        | --                          |
+| bioptim RK4               | yes       | 49.9                 | 89.1     | 337        | 1.77                      | 48.6                        |
+| bioptim collocation       | yes       | 49.9                 | 4.2      | 64         | 3.33                      | 63.3                        |
 
 ## What the Numbers Say
 
@@ -57,7 +57,7 @@ transcription while enforcing the dynamics nowhere between nodes.
 bioptim's 0.22-0.26 rad on the same grid is more than ten times better, and
 what remains is discretisation error between the transcription's own scheme
 and the reference re-integration, not an unenforced constraint. Its 49.9 m/s
-is the speed it was *asked* for and could actually deliver.
+is the speed it was _asked_ for and could actually deliver.
 
 **Refining the grid helps the OCPs and hurts the finite-difference path.**
 Going from dt = 143 ms to dt = 55 ms cuts the bioptim defect by roughly 7x

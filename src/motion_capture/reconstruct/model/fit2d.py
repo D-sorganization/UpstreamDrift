@@ -22,7 +22,7 @@ import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -35,7 +35,7 @@ from .fit import Array, FitOptions, ModelFit, RejectedLandmark, _Problem, solve_
 from .kinematics import ArticulatedModel
 from .session import LandmarkMap
 
-Mask = npt.NDArray[np.bool_]
+Mask: TypeAlias = npt.NDArray[np.bool_]
 DEFAULT_SIGMA_PX = 4.0
 DEFAULT_ROOT_DEPTH_M = 3.5
 

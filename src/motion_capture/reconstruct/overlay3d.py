@@ -15,7 +15,7 @@ import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -27,8 +27,8 @@ from .cameras import PinholeCamera
 from .fit import RECONSTRUCTION_FILE, cameras_from_records
 from .skeleton import JOINT_NAMES, PARENTS
 
-Array = npt.NDArray[np.float64]
-Mask = npt.NDArray[np.bool_]
+Array: TypeAlias = npt.NDArray[np.float64]
+Mask: TypeAlias = npt.NDArray[np.bool_]
 Edge = tuple[int, int]
 Colour = tuple[int, int, int]
 
