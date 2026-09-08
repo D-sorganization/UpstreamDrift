@@ -33,7 +33,7 @@ design-manual program.
 Detailed takeover context (merge-versus-quarantine boundary, exact smoke contract, recovery constraints, next commands): `docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
-`docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+  `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
 UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 `_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
 `architecture_budget.json` exceptions are removed, behavior pinned by tests.
@@ -85,6 +85,15 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   commit-stage hooks pass; pre-push `mypy`/`bandit` pass on scoped files;
   `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
   "Hook bypass policy" documents this resolution.
+
+## Vendor Pin & Alias Predicate: #9631
+
+- `vendor/ud-tools` = Tools `eab74a901a`, carrying the Tools#5049 flattened-install alias fix
+  (`f8b94bfe` is an ancestor); do NOT rewind — that drops Tools #5051-#5057 incl. the Sentinel
+  ShellTool injection fix. Cargo rev, companion `pinned_commit`, `check_tools_pins.py` agree.
+- `tests/unit/repo_hygiene/test_pinned_import_alias_contract.py` pins the flattened-install
+  contract (RED at pre-#9657 pin `3d93bb2c`, GREEN at the current pin). Child copy stays
+  unconverged per #9657. Remaining: re-cut the 2.1.3 release.
 
 ## Protected Authority
 
@@ -177,8 +186,9 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - `scripts/install_spec_merge_driver.py` and `shared_scripts/spec_changelog.py`
   are re-vendored from Repository_Management#1521's corrected copies and pinned
   byte-identical by `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`;
-  registration wiring into `scripts/setup_hooks.py` follows in the companion
-  wiring PR (`claude/issue-9476-driver-wiring`).
+  `scripts/setup_hooks.py` now calls the installer (issue #9476), so the
+  documented setup registers the `spec-rows` driver, and the installer
+  docstring names this repository's entry point.
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
@@ -226,8 +236,10 @@ python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
 ```
 
-Also run claim/evidence integrity, release qualification, PDF inspection, and affected full gates after publication changes. Never
-force-push, bypass branch protection, relax tolerances after inspecting results, or create capacity-only reruns.
+Also run claim/evidence integrity, release qualification, PDF inspection, and
+affected full gates after publication changes. Never force-push, bypass branch
+protection, relax tolerances after inspecting results, or create capacity-only
+reruns. Do not restart the Actions runner or start WSL.
 
 ## UI Dependency Pin: #9249
 
