@@ -58,7 +58,7 @@ def test_every_command_runs_the_rig_module(tmp_path: Path) -> None:
         commands.proxy_command(session, encoder="libx264"),
         commands.ingest_command(session, estimator="openpose_dnn", max_frames=5),
         commands.reconstruct_command(
-            session, anchor_segment="neck", anchor_m=0.53, intrinsics=tmp_path / "i"
+            session, measurements=["neck=0.53"], intrinsics=tmp_path / "i"
         ),
         commands.calibrate_command(session, square_m=0.025),
     ):
@@ -68,7 +68,7 @@ def test_every_command_runs_the_rig_module(tmp_path: Path) -> None:
     ing = commands.ingest_command(session, estimator="openpose_dnn", max_frames=5)
     assert ing[-4:] == ["--estimator", "openpose_dnn", "--max-frames", "5"]
     rc = commands.reconstruct_command(
-        session, anchor_segment="neck", anchor_m=0.53, cameras=tmp_path / "c.json"
+        session, measurements=["neck=0.53"], cameras=tmp_path / "c.json"
     )
     assert "--anchor" in rc and rc[rc.index("--anchor") + 1] == "neck=0.53"
     assert commands.repo_root().joinpath("src", "motion_capture", "rig").is_dir()
@@ -81,13 +81,12 @@ def test_command_preconditions(tmp_path: Path) -> None:
     with pytest.raises(Exception, match="not both"):
         commands.reconstruct_command(
             tmp_path,
-            anchor_segment="neck",
-            anchor_m=0.5,
+            measurements=["neck=0.5"],
             cameras=tmp_path,
             intrinsics=tmp_path,
         )
     with pytest.raises(Exception, match="not both"):
-        commands.reconstruct_command(tmp_path, anchor_segment="neck", anchor_m=0.5)
+        commands.reconstruct_command(tmp_path, measurements=["neck=0.5"])
 
 
 def test_estimator_choices_come_from_the_registry() -> None:

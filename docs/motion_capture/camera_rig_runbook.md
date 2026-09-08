@@ -216,7 +216,7 @@ python3 -m src.motion_capture.rig import --out S --view face_on=clip.mp4 [--view
 python3 -m src.motion_capture.rig ingest --session S --estimator openpose_dnn --option input_height=368 --out S/observations_openpose_dnn
 python3 -m src.motion_capture.rig reliability --session S
 python3 -m src.motion_capture.rig analyze --session S            # single view: 2-D events and tempo
-python3 -m src.motion_capture.rig reconstruct --session S --intrinsics S/intrinsics.json --anchor neck=0.53 --exclude-joints nose
+python3 -m src.motion_capture.rig reconstruct --session S --intrinsics S/intrinsics.json --anchor shank=0.42 --anchor forearm=0.26 --exclude-joints nose
 python3 -m src.motion_capture.rig export --session S             # reconstruct/reconstruction.trc + reconstruction_export.json
 ```
 
@@ -253,6 +253,26 @@ python3 -m src.motion_capture.rig compare-takes --session S --view cam_b --other
 - **Compare takes** (#9681) renders two views side by side aligned on the
   chosen event (each at its own rate) and writes the metric deltas beside
   the video. The tile offers both as _Export clip_ and _Compare takes_.
+
+## Which Segments to Measure
+
+`--anchor` is repeatable (#9707). The first reading sets the scale; every
+further one replaces a 5 cm anthropometric prior with a 3 mm tape reading,
+so measure as many as you can. Everyday names constrain both sides at once;
+use `left_...`/`right_...` only when the sides really differ.
+
+| Name             | Tape from ... to ...                                       | Why it ranks where it does                              |
+| ---------------- | ---------------------------------------------------------- | ------------------------------------------------------- |
+| `shank`          | lateral knee joint line → lateral ankle bone, leg straight | bony landmarks, long, rigid, knees/ankles detected well |
+| `forearm`        | lateral elbow crease → wrist bone, arm straight            | bony landmarks; carries the swing                       |
+| `upper_arm`      | acromion → lateral elbow joint line                        | good landmarks; shoulder detection a little softer      |
+| `thigh`          | greater trochanter → lateral knee joint line               | long, but the hip centre sits inside the body           |
+| `shoulder_width` | acromion → acromion across the back                        | halves onto the two shoulder segments                   |
+| `hip_width`      | trochanter → trochanter                                    | halves onto the two hip segments                        |
+| `torso`          | mid-hip → base of the neck (C7)                            | both ends are virtual points; measure last              |
+
+The tile's _Measured segments_ field takes the same `name=metres` list and
+shows these landmarks as a tooltip.
 
 ## Capture Rig Tool (Desktop)
 
