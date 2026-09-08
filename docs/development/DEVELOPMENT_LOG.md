@@ -75,6 +75,25 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **Next step:** Record CI on PR #9744; on merge, confirm the protected-main
   sync lands the resolved hook environment note.
 
+### DL-#9733 · Fail Fast on the Uninitialized Vendored Tools Fallback
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9733
+- **Branch:** `claude/issue-9733-fail-fast`
+- **PR:** #9743 (open; `Fixes #9733`)
+- **Paths:** `src/__init__.py`, `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`160f9b759`)
+- **Summary:** When `vendor/ud-tools` is uninitialized, `src/__init__.py`'s
+  fallback registration mistook UpstreamDrift's own aliased `shared.python` copy
+  for an installed Tools distribution, installed `_VendoredToolsFallbackFinder`,
+  and livelocked pytest collection in meta-path `find_spec` recursion. The
+  registration probe now raises an actionable ImportError naming the remediation
+  command before any finder is installed; the initialized path is unchanged.
+- **Next step:** Record CI on PR #9743; on green, protected squash merge
+  closes #9733.
+
 ## Shipped (Last 90 Days)
 
 Entries stay here for 90 days after merge, then move to the archive.
