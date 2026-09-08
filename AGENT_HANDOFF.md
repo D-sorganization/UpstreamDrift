@@ -2,17 +2,14 @@
 
 ## Impact Dynamics and Acoustics: #9700
 
-- Inventory/design slice #9701 is locally verified on `docs/9700-impact-acoustics-program`,
-  based on `40308a0c`; PR #9706; initial implementation `077ae9df9`. Theory: AffineDrift #4253; provider: Tools #5068.
-- The merge-sync pre-push initially hung during import discovery with an empty
-  vendor directory; initialized the existing eab74a901a Tools pin and reran.
-- PR #9706 synced protected main `c2322f02df62057f18c652bdf28de3bab01cd369`; both SPEC row sets retained.
-- Integration plan: `docs/development/impact_acoustics_program.md` (complete).
-- Reuse impact/shaft and moving-base/articulated research infrastructure. Preserve
-  #8557 protected evidence, vendored Tools pin, manufactured-data boundaries and
-  workstation recovery restrictions. No calibrated acoustic solver is established.
+- Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
+- Tools #5077 and #5082 remain open. Distributed shaft, flexible contact, acoustics, studies and empirical gates remain active.
+- #9735 / PR #9745 (open; provider CI passes, main sync in progress): `fix/9735-impact-provider-imports`, base `dbc6727aa`; fixes test bootstrap/origin checks, with no production import changes.
+- No-vendor provider contracts: 13 passed; ownership-eviction mutation detected; installed-wheel CLI bootstrap passed. Pinned-vendor/CLI/fallback checks: 72 passed.
+- Current compatibility record: `docs/development/impact_provider_import_turnover.md`; overall design: `docs/development/impact_acoustics_program.md`.
+- Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.
 
-Updated: 2026-09-08 (fleet wave) PDT
+Updated: 2026-09-08 02:55 PDT
 
 ## Import Bootstrap Fail-Fast: #9733
 
@@ -33,6 +30,18 @@ contract, recovery constraints, and next commands are in
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+
+## Pre-Commit on Windows — Resolved (#9494)
+
+- The hook environment works on Windows; no `--no-verify` exception exists
+  or is needed. `default_language_version: python: python` resolves to the
+  PATH interpreter (3.13.3 here); the old `python3.11` pin is gone since
+  #1792/#2720. Do not pin a minor version — workstations without it cannot
+  build hook virtualenvs.
+- Verified 2026-09-08 (pre-commit 4.6.2, from-scratch env build): all
+  commit-stage hooks pass; pre-push `mypy`/`bandit` pass on scoped files;
+  `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
+  "Hook bypass policy" documents this resolution.
 
 ## Protected Authority
 
@@ -116,6 +125,7 @@ Seam (#9406) and failure triage (#9474): see
    case enumeration, atomic resume, typed failures, and no outcome promotion.
 3. Execute the six registered cases only after runner code and tests merge.
    Never import or relabel legacy checkpoints as outcomes.
+4. #9483: the stale 15-tile nav-gap audit `reports/feature_navigation_gaps/` is deleted (findings dispositioned in the deleting PR); live tile truth is the `src/config/models.yaml` registry plus the generated launcher manifest (#9412/#9437/#9478).
 
 ## Scientific Boundaries
 
@@ -152,8 +162,7 @@ Seam (#9406) and failure triage (#9474): see
 
 ## Validation
 
-Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` and
-`-n 0` for pytest.
+Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` with `-n 0` for pytest.
 
 ```powershell
 python -m pytest -n 0 -q tests/research/test_articulated_distributed_smoke_registration.py
