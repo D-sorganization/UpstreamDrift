@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import QApplication
 
 from src.tools.capture_rig import commands
 from src.tools.capture_rig.gui import CaptureRigWidget, get_dockable_ui
-from src.tools.capture_rig.workflow import Status
+from src.tools.capture_rig.workflow import ACTION_HELP, Status
 from tests.tools.capture_rig.test_core import _bundle, _observations
 
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
@@ -106,16 +106,21 @@ def test_panels_build_commands_from_their_inputs(tmp_path: Path) -> None:
         widget.command_for("nope")
 
 
-def test_without_a_session_only_setup_actions_are_enabled() -> None:
+def test_without_a_session_setup_and_capture_actions_are_enabled() -> None:
     _app()
     widget = CaptureRigWidget()
     assert widget.enabled_actions() == {
         "plan_check",
         "import",
+        "record",
+        "proxy",
         "stop",
         "load",
         "preview",
     }
+    assert {a for a, _ in widget._ACTIONS} == set(ACTION_HELP)
+    assert widget.buttons["record"].toolTip().startswith("Record")
+    assert "Disabled" in widget.buttons["ingest"].toolTip()
     assert widget.workflow.statuses()["setup"] is Status.READY
     widget.capture.plan_edit.setText("")
     widget.trigger("plan_check")
