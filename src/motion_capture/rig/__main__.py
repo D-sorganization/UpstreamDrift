@@ -42,6 +42,7 @@ file; the derived plan name records the overrides in the bundle.
 from __future__ import annotations
 
 import argparse
+import json
 from typing import Any
 import logging
 import sys
@@ -49,6 +50,8 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
+from src.motion_capture.provenance import write_stamped
+from src.motion_capture.variants import variant_dir
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .bundle import build_index, check_bundle, write_bundle
@@ -184,16 +187,95 @@ def _add_model_parsers(sub: Any) -> None:
         help="learn the model's learnable segment lengths from the data",
     )
     fm.add_argument("--max-iterations", type=int, default=60, help="solver budget")
+    _add_variant_args(fm, observations=True)
+    fm.add_argument(
+        "--from-views",
+        default="",
+        metavar="a,b",
+        help="image-space fit to these views' 2-D keypoints (1..N), no triangulation",
+    )
+    fm.add_argument(
+        "--cameras-from",
+        default="",
+        metavar="VARIANT",
+        help="variant whose reconstruction supplies the cameras for --from-views",
+    )
+    fm.add_argument("--sigma-px", type=float, default=4.0, help="pixel noise")
     cmm = sub.add_parser("compare-models", help="fit several models, rank them")
     cmm.add_argument("--session", type=Path, required=True)
     cmm.add_argument("--models", default=None, help="comma list; default: all")
     cmm.add_argument("--fit-lengths", action="store_true")
     cmm.add_argument("--sigma-accel", type=float, default=300.0)
     cmm.add_argument("--max-iterations", type=int, default=60, help="solver budget")
+    _add_variant_args(cmm)
     kin = sub.add_parser("kinetics", help="inverse dynamics + replay check of a fit")
     kin.add_argument("--session", type=Path, required=True)
     kin.add_argument("--model", default="golfer", help="registered model name")
     kin.add_argument("--body-mass", type=float, required=True, help="kg")
+    _add_variant_args(kin)
+    _add_variant_tools_parsers(sub)
+    lin = sub.add_parser("lineage", help="provenance chain of a pipeline output")
+    lin.add_argument("--session", type=Path, required=True)
+    lin.add_argument("--path", type=Path, required=True, help="file inside the session")
+    lin.add_argument("--json", action="store_true", help="machine-readable")
+
+
+def _add_variant_tools_parsers(sub: Any) -> None:
+    """overlay, compare-variants, annotations-to-observations (#9795/#9796/#9801)."""
+    ov = sub.add_parser("overlay", help="draw variants' 3-D results on a view")
+    ov.add_argument("--session", type=Path, required=True)
+    ov.add_argument("--view", required=True)
+    ov.add_argument(
+        "--variant",
+        action="append",
+        default=[],
+        metavar="NAME",
+        help="variant to draw, repeatable (default: the session's default match)",
+    )
+    ov.add_argument("--out", type=Path, required=True, help="mp4 to write")
+    ov.add_argument("--from", dest="start", type=int, default=0, metavar="FRAME")
+    ov.add_argument("--to", dest="stop", type=int, default=None, metavar="FRAME")
+    ov.add_argument("--speed", type=float, default=1.0)
+    ov.add_argument("--observations", default="observations", metavar="SET")
+    ov.add_argument("--no-legend", action="store_true")
+    cv = sub.add_parser("compare-variants", help="held-out and 3-D error per variant")
+    cv.add_argument("--session", type=Path, required=True)
+    cv.add_argument("--reference", default="", metavar="NAME")
+    cv.add_argument("--observations", default="observations", metavar="SET")
+    a2o = sub.add_parser(
+        "annotations-to-observations",
+        help="manual clicks as an observation set (optionally over a detector set)",
+    )
+    a2o.add_argument("--session", type=Path, required=True)
+    a2o.add_argument("--view", action="append", default=[], help="repeatable")
+    a2o.add_argument("--merge-with", default="", metavar="SET")
+    a2o.add_argument("--out", default="", metavar="SET")
+
+
+def _add_variant_args(
+    parser: Any, *, observations: bool = False, views: bool = False
+) -> None:
+    """``--variant`` (and for reconstruct: ``--observations``, ``--views``), #9793."""
+    parser.add_argument(
+        "--variant",
+        default="",
+        metavar="NAME",
+        help="named match: outputs under variants/NAME/ (default: the session)",
+    )
+    if observations:
+        parser.add_argument(
+            "--observations",
+            default="observations",
+            metavar="SET",
+            help="observation-set directory to use (observations, observations_x)",
+        )
+    if views:
+        parser.add_argument(
+            "--views",
+            default="",
+            metavar="a,b",
+            help="subset and order of the cameras to use (default: all with cameras)",
+        )
 
 
 def _add_offline_parsers(sub: Any) -> None:
@@ -252,6 +334,7 @@ def _add_offline_parsers(sub: Any) -> None:
         default=20_000.0,
         help="acceleration prior in px/s^2",
     )
+    _add_variant_args(rec3, observations=True, views=True)
     imp = sub.add_parser("import", help="build a bundle from existing video files")
     imp.add_argument("--out", type=Path, required=True)
     imp.add_argument(
@@ -275,6 +358,7 @@ def _add_offline_parsers(sub: Any) -> None:
     exp.add_argument("--session", type=Path, required=True)
     exp.add_argument("--trc", type=Path, default=None)
     exp.add_argument("--json", type=Path, default=None)
+    _add_variant_args(exp)
     cal = sub.add_parser("calibrate-intrinsics", help="chessboard intrinsics per view")
     cal.add_argument("--session", type=Path, required=True)
     cal.add_argument(
@@ -577,23 +661,46 @@ def cmd_fit_model(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.model.session import fit_session_model
 
     registered = get_model(args.model)
-    fit, out_dir = fit_session_model(
-        args.session,
-        registered.spec,
-        registered.landmark_map,
-        options=FitOptions(
-            sigma_landmark_m=args.sigma_landmark,
-            sigma_accel_rad_s2=args.sigma_accel,
-            max_velocity_rad_s=args.max_velocity,
-            max_iterations=args.max_iterations,
-            fit_lengths=registered.learnable_lengths if args.fit_lengths else (),
-        ),
-        out_subdir=None if args.model == "golfer" else args.model,
+    options = FitOptions(
+        sigma_landmark_m=args.sigma_landmark,
+        sigma_accel_rad_s2=args.sigma_accel,
+        max_velocity_rad_s=args.max_velocity,
+        max_iterations=args.max_iterations,
+        fit_lengths=registered.learnable_lengths if args.fit_lengths else (),
     )
+    out_subdir = None if args.model == "golfer" else args.model
+    from_views = [v.strip() for v in args.from_views.split(",") if v.strip()]
+    if from_views:
+        # --cameras-from "" is the session's default variant.
+        from src.motion_capture.reconstruct.model.fit2d import (
+            ImageSpaceSource,
+            fit_session_model_2d,
+        )
+
+        fit, out_dir = fit_session_model_2d(
+            args.session,
+            registered.spec,
+            registered.landmark_map,
+            ImageSpaceSource(
+                tuple(from_views), args.cameras_from, args.observations, args.variant
+            ),
+            options=FitOptions(**{**vars(options), "sigma_px": args.sigma_px}),
+            out_subdir=out_subdir,
+        )
+    else:
+        fit, out_dir = fit_session_model(
+            variant_dir(args.session, args.variant),
+            registered.spec,
+            registered.landmark_map,
+            session_root=args.session,
+            options=options,
+            out_subdir=out_subdir,
+        )
     logger.info(
-        "fit-model %s: rms %.1f mm, %d rejected, %d velocity violations -> %s",
+        "fit-model %s: rms %.1f mm (%s px), %d rejected, %d velocity violations -> %s",
         args.session,
         1000 * fit.rms_m,
+        f"{fit.rms_px:.2f}" if fit.rms_px is not None else "n/a",
         len(fit.rejected),
         fit.velocity_violations,
         out_dir,
@@ -607,7 +714,7 @@ def cmd_compare_models(args: argparse.Namespace) -> int:
 
     names = [n.strip() for n in args.models.split(",")] if args.models else None
     report = compare_models(
-        args.session,
+        variant_dir(args.session, args.variant),
         names,
         options=FitOptions(
             sigma_accel_rad_s2=args.sigma_accel, max_iterations=args.max_iterations
@@ -629,7 +736,7 @@ def cmd_kinetics(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.model.registry import get_model
 
     registered = get_model(args.model)
-    model_dir = args.session / "model"
+    model_dir = variant_dir(args.session, args.variant) / "model"
     if args.model != "golfer":
         model_dir = model_dir / args.model
     angles_file = model_dir / "joint_angles.json"
@@ -645,7 +752,16 @@ def cmd_kinetics(args: argparse.Namespace) -> int:
         names=simscape_variable_names() if args.model == "golfer" else None,
     )
     out = model_dir / "kinetics.json"
-    out.write_text(json.dumps(report), encoding="utf-8")
+    write_stamped(
+        out,
+        report,
+        schema_version=str(report["schema_version"]),
+        module=__name__,
+        inputs=[angles_file],
+        parameters={"model": args.model, "body_mass_kg": args.body_mass},
+        derived_from=[angles_file],
+        base=args.session,
+    )
     logger.info(
         "kinetics %s: replay max |error| %.4f rad (worst %s) -> %s",
         args.model,
@@ -653,6 +769,104 @@ def cmd_kinetics(args: argparse.Namespace) -> int:
         report["replay_worst_dof"],
         out,
     )
+    return 0
+
+
+def cmd_overlay(args: argparse.Namespace) -> int:
+    from src.tools.capture_rig.overlay_render import ClipRange, export_overlay
+
+    sidecar = export_overlay(
+        args.session,
+        args.view,
+        tuple(args.variant) or ("",),
+        args.out,
+        clip=ClipRange(args.start, args.stop, args.speed),
+        observation_set=args.observations,
+        legend=not args.no_legend,
+    )
+    for track in sidecar["tracks"]:
+        logger.info(
+            "overlay %s: %s rms %s px%s",
+            args.view,
+            track["label"],
+            track["reprojection_rms_px"],
+            " (held out)" if track["held_out"] else "",
+        )
+    return 0
+
+
+def cmd_compare_variants(args: argparse.Namespace) -> int:
+    from src.motion_capture.compare_variants import compare_variants, markdown
+
+    payload = compare_variants(
+        args.session, reference=args.reference, observation_set=args.observations
+    )
+    logger.info("compare-variants:\n%s", markdown(payload))
+    return 0
+
+
+def cmd_annotations_to_observations(args: argparse.Namespace) -> int:
+    from src.motion_capture.annotate.store import AnnotationSet, annotation_path
+    from src.motion_capture.annotate.to_observations import (
+        DEFAULT_OUT,
+        merge,
+        to_view_observations,
+        write_observation_set,
+    )
+
+    from .bundle import load_bundle
+
+    plan, _index, _ = load_bundle(args.session)
+    views = args.view or [
+        p.stem for p in sorted((args.session / "annotations").glob("*.json"))
+    ]
+    if not views:
+        raise SystemExit("no annotations in the session")
+    out_set = args.out or (
+        f"{args.merge_with}_edited" if args.merge_with else DEFAULT_OUT
+    )
+    payloads = {}
+    inputs = []
+    counts: dict[str, int] = {}
+    for view in views:
+        path = annotation_path(args.session, view)
+        store = AnnotationSet.load(path)
+        inputs.append(path)
+        if args.merge_with:
+            base = args.session / args.merge_with / f"{view}.json"
+            if not base.is_file():
+                raise SystemExit(f"no {args.merge_with} observations for {view}")
+            detector = json.loads(base.read_text(encoding="utf-8"))
+            payloads[view], done = merge(store, detector)
+            inputs.append(base)
+            counts = {k: counts.get(k, 0) + v for k, v in done.items()}
+        else:
+            payloads[view] = to_view_observations(store, annotation_file=path)
+    out_dir = write_observation_set(
+        args.session,
+        out_set,
+        payloads,
+        plan_name=plan.name,
+        inputs=inputs,
+        parameters={
+            "estimator": "manual",
+            "merge_with": args.merge_with or None,
+            "corrections": counts,
+        },
+    )
+    logger.info("annotations -> %s (%s)", out_dir, counts or "manual only")
+    return 0
+
+
+def cmd_lineage(args: argparse.Namespace) -> int:
+    from src.motion_capture.provenance import lineage, lineage_markdown
+
+    path = args.path if args.path.is_absolute() else args.session / args.path
+    records = lineage(path, base=args.session)
+    if args.json:
+        sys.stdout.write(json.dumps([r.__dict__ for r in records], indent=2) + "\n")
+    else:
+        sys.stdout.write(lineage_markdown(records))
     return 0
 
 
@@ -682,10 +896,11 @@ def cmd_reliability(args: argparse.Namespace) -> int:
 def cmd_export(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.export import export_reconstruction
 
+    root = variant_dir(args.session, args.variant)
     written = export_reconstruction(
-        args.session / "reconstruct", trc_path=args.trc, json_path=args.json
+        root / "reconstruct", trc_path=args.trc, json_path=args.json
     )
-    model_angles = args.session / "model" / "joint_angles.json"
+    model_angles = root / "model" / "joint_angles.json"
     if model_angles.is_file():
         from src.motion_capture.reconstruct.model.golfer import write_simscape_csv
 
@@ -764,6 +979,7 @@ def cmd_compare(args: argparse.Namespace) -> int:
 
 def cmd_reconstruct(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.pipeline import (
+        MatchSpec,
         intrinsics_from,
         reconstruct_session,
         start_cameras_from,
@@ -777,14 +993,25 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
         expand_measurements(args.anchor)  # usage errors before any heavy work
     except ValueError as exc:
         raise SystemExit(f"--anchor: {exc}") from exc
+    wanted = [v.strip() for v in args.views.split(",") if v.strip()]
     summary = reconstruct_session(
         args.session,
         start_cameras=start_cameras_from(args.cameras) if args.cameras else None,
         intrinsics=intrinsics_from(args.intrinsics) if args.intrinsics else None,
         measurements=tuple(args.anchor),
         acceleration_sigma_px=args.accel_sigma_px,
-        exclude_joints=tuple(
-            j.strip() for j in args.exclude_joints.split(",") if j.strip()
+        match=MatchSpec(
+            observation_set=args.observations,
+            views=tuple(wanted) or None,
+            variant=args.variant,
+            camera_source=(
+                f"cameras:{args.cameras}"
+                if args.cameras
+                else f"intrinsics:{args.intrinsics}"
+            ),
+            exclude_joints=tuple(
+                j.strip() for j in args.exclude_joints.split(",") if j.strip()
+            ),
         ),
     )
     logger.info(
@@ -846,6 +1073,10 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "analyze": cmd_analyze,
     "fit-model": cmd_fit_model,
     "compare-models": cmd_compare_models,
+    "lineage": cmd_lineage,
+    "overlay": cmd_overlay,
+    "compare-variants": cmd_compare_variants,
+    "annotations-to-observations": cmd_annotations_to_observations,
     "kinetics": cmd_kinetics,
     "board": cmd_board,
     "clip": cmd_clip,
