@@ -190,6 +190,25 @@ ANALYZE_2D = Step(
     applies=lambda m: not _multi(m),
 )
 
+FIT_MODEL = Step(
+    key="fit_model",
+    title="Fit the Articulated Golfer",
+    purpose="Joint angles of a realistic model (spine, torso, scapula struts, arms, legs) through the reconstructed joints, with continuous motion enforced.",
+    requirements=(
+        "A reconstruction (joints_3d_m.npy).",
+        "Tape-measured segments help: measured lengths replace the model defaults.",
+    ),
+    instructions=(
+        "Press *Fit model*. The fit solves every frame together with an acceleration prior on each joint angle, soft joint limits and robust rejection, so a point the model cannot reach by continuous motion is listed as rejected, not followed.",
+        "Read model/fit_report.json: RMS per landmark, rejections, peak joint speeds; scapula angles appear as left/right_scapula.rx (elevation) and .ry (protraction).",
+        "*Export* then also writes joint_angles_simscape.csv in the MATLAB model's variable names.",
+    ),
+    actions=("fit_model",),
+    done=lambda m: m.model_fit is not None,
+    ready=lambda m: _ready_if(m.reconstruction is not None, "reconstruct first"),
+    applies=_multi,
+)
+
 EXPORT = Step(
     key="export",
     title="Export to the Motion Pipeline",
@@ -212,6 +231,7 @@ STEPS: tuple[Step, ...] = (
     DETECT,
     REVIEW,
     RECONSTRUCT,
+    FIT_MODEL,
     ANALYZE_2D,
     EXPORT,
 )

@@ -58,6 +58,7 @@ class SessionMedia:
     analysis_2d: dict[str, dict[str, Any]] | None = None
     export: Path | None = None
     observation_sets: tuple[str, ...] = ()
+    model_fit: dict[str, Any] | None = None
 
     @property
     def ingested(self) -> bool:
@@ -173,6 +174,7 @@ def load_session(root: Path) -> SessionMedia:
         analysis_2d=_analysis_2d(root),
         export=_existing(recon / "reconstruction.trc"),
         observation_sets=tuple(sets),
+        model_fit=_read_json(root / "model" / "fit_report.json"),
     )
 
 

@@ -225,6 +225,23 @@ def _add_offline_parsers(sub: Any) -> None:
     )
     imp.add_argument("--name", default=None, help="plan name (default import:<out>)")
     _add_coaching_parsers(sub)
+    fm = sub.add_parser(
+        "fit-model", help="articulated golfer (scapula) fit, continuous"
+    )
+    fm.add_argument("--session", type=Path, required=True)
+    fm.add_argument(
+        "--sigma-accel",
+        type=float,
+        default=300.0,
+        help="acceleration prior on every joint angle, rad/s^2 (smaller = stiffer)",
+    )
+    fm.add_argument(
+        "--max-velocity",
+        type=float,
+        default=25.0,
+        help="report joint-angle speeds above this, rad/s",
+    )
+    fm.add_argument("--sigma-landmark", type=float, default=0.01, help="metres")
     ana = sub.add_parser("analyze", help="2-D events and tempo per ingested view")
     ana.add_argument("--session", type=Path, required=True)
     ana.add_argument("--observations", default="observations", help="set directory")
@@ -532,6 +549,35 @@ def cmd_compare_takes(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_fit_model(args: argparse.Namespace) -> int:
+    from src.motion_capture.reconstruct.model import FitOptions
+    from src.motion_capture.reconstruct.model.golfer import (
+        GOLFER_LANDMARK_MAP,
+        GOLFER_SPEC,
+    )
+    from src.motion_capture.reconstruct.model.session import fit_session_model
+
+    fit, out_dir = fit_session_model(
+        args.session,
+        GOLFER_SPEC,
+        GOLFER_LANDMARK_MAP,
+        options=FitOptions(
+            sigma_landmark_m=args.sigma_landmark,
+            sigma_accel_rad_s2=args.sigma_accel,
+            max_velocity_rad_s=args.max_velocity,
+        ),
+    )
+    logger.info(
+        "fit-model %s: rms %.1f mm, %d rejected, %d velocity violations -> %s",
+        args.session,
+        1000 * fit.rms_m,
+        len(fit.rejected),
+        fit.velocity_violations,
+        out_dir,
+    )
+    return 0 if fit.velocity_violations == 0 else 1
+
+
 def cmd_analyze(args: argparse.Namespace) -> int:
     from src.motion_capture.reconstruct.analytics2d import analyze_session_2d
 
@@ -561,6 +607,11 @@ def cmd_export(args: argparse.Namespace) -> int:
     written = export_reconstruction(
         args.session / "reconstruct", trc_path=args.trc, json_path=args.json
     )
+    model_angles = args.session / "model" / "joint_angles.json"
+    if model_angles.is_file():
+        from src.motion_capture.reconstruct.model.golfer import write_simscape_csv
+
+        written["simscape_csv"] = str(write_simscape_csv(model_angles))
     for kind, path in written.items():
         logger.info("export %s: %s", kind, path)
     return 0
@@ -715,6 +766,7 @@ _COMMANDS: dict[str, Callable[[argparse.Namespace], int]] = {
     "import": cmd_import,
     "export": cmd_export,
     "analyze": cmd_analyze,
+    "fit-model": cmd_fit_model,
     "board": cmd_board,
     "clip": cmd_clip,
     "compare-takes": cmd_compare_takes,
