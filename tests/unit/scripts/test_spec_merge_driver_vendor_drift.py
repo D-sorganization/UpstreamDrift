@@ -44,11 +44,18 @@ PINNED_SPEC_CHANGELOG_SHA256 = (
     "2f0ab9696ef87c8d85c28919bca078f5ebff384691307368e4cdb1e7dff239c4"
 )
 
-#: Upstream wording of the one docstring line this repository is allowed to
-#: rewrite, and this repository's pinned replacement for it (issue #9476).
-UPSTREAM_ENTRY_POINT_LINE = "``scripts/install_workspace_hooks.py``; in Tools it is"
-VENDORED_ENTRY_POINT_LINE = (
-    "``scripts/install_workspace_hooks.py``; in Tools and UpstreamDrift it is"
+#: Upstream wording of the docstring span this repository is allowed to
+#: rewrite -- the wiring paragraph naming the per-repo hook-setup entry
+#: point -- and this repository's pinned replacement for it (issue #9476).
+UPSTREAM_ENTRY_POINT_BLOCK = (
+    "``scripts/install_workspace_hooks.py``; in Tools it is\n"
+    "``scripts/setup_hooks.py``, which already registers that repo's other merge\n"
+    "driver the same way. A vendored copy of this file that nothing invokes leaves\n"
+)
+VENDORED_ENTRY_POINT_BLOCK = (
+    "``scripts/install_workspace_hooks.py``; in Tools and UpstreamDrift it is\n"
+    "``scripts/setup_hooks.py``, which registers the ``spec-rows`` driver the same\n"
+    "way. A vendored copy of this file that nothing invokes leaves\n"
 )
 
 
@@ -58,14 +65,14 @@ def _sha256(path: Path) -> str:
 
 
 def _installer_normalized_to_upstream() -> str:
-    """Return the installer text with the pinned vendored line reverted.
+    """Return the installer text with the pinned vendored block reverted.
 
     The substitution is capped at one occurrence: if the pinned divergence
-    line ever appears twice, or drifts in any other way, the resulting digest
-    no longer matches the pinned upstream digest and the test fails.
+    block ever appears twice, or drifts in any other way, the resulting
+    digest no longer matches the pinned upstream digest and the test fails.
     """
     text = INSTALLER.read_text(encoding="utf-8")
-    return text.replace(VENDORED_ENTRY_POINT_LINE, UPSTREAM_ENTRY_POINT_LINE, 1)
+    return text.replace(VENDORED_ENTRY_POINT_BLOCK, UPSTREAM_ENTRY_POINT_BLOCK, 1)
 
 
 def test_spec_changelog_is_byte_identical_to_pinned_upstream() -> None:
