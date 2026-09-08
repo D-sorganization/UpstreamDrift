@@ -234,6 +234,14 @@ dev = [
     "sympy>=1.12",
     # Required for video/image processing tests
     "opencv-python-headless>=4.13.0.92",
+    # Excel-export (.xlsx via pandas.read_excel) and imageio-backed video paths
+    # are exercised by tests, but openpyxl was declared only in `gui-tools` and
+    # imageio only in `pose`, and no CI test lane installs either extra, so
+    # requirements-dev.lock (--extra=dev --extra=gui-test) never contained them
+    # (#9533). Declare them here so the dev lock actually installs what tests
+    # import.
+    "openpyxl>=3.1.0",
+    "imageio[ffmpeg]>=2.31.0",
     # Required for C3D motion-capture tests (load_club_target_c3d cluster-marker suite)
     "ezc3d>=1.5.0",
     # Required for property-based testing
