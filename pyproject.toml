@@ -472,6 +472,8 @@ max-complexity = 10
 "shared_scripts/**" = ["T201"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
+# Benchmark CLIs report their tables on stdout, like scripts/** above.
+"benchmarks/**" = ["T201"]
 # Runnable docs examples are CLI-style scripts: stdout is how they report results.
 "docs/examples/**" = ["T201"]
 "tests/unit/test_calc_backend_protocols.py" = ["I"]
