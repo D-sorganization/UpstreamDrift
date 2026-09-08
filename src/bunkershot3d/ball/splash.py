@@ -346,7 +346,9 @@ class MomentumTransfer:
         density = float(bed_relative_density)
         if not math.isfinite(density) or not 0.0 <= density <= 1.0:
             _refuse("bed relative density", density, "a finite fraction in [0, 1]")
-        efficiency = self.efficiency * (1.0 - self.packing_sensitivity * (1.0 - density))
+        efficiency = self.efficiency * (
+            1.0 - self.packing_sensitivity * (1.0 - density)
+        )
         if efficiency > self.efficiency:
             raise ValueError(
                 f"the bed-dependent efficiency {efficiency:.6g} exceeds the "
@@ -371,7 +373,8 @@ def momentum_transfer_provenance(transfer: MomentumTransfer) -> SandProvenance:
         presets and the RFT coefficients already use.
     """
     placeholder = (
-        f"chosen placeholder, {transfer.efficiency:.3g} in a fully dense bed; " "not a calibration"
+        f"chosen placeholder, {transfer.efficiency:.3g} in a fully dense bed; "
+        "not a calibration"
     )
     return SandProvenance(
         entries={
@@ -402,7 +405,8 @@ def momentum_transfer_provenance(transfer: MomentumTransfer) -> SandProvenance:
             "spin_lever_arm": PropertyProvenance(
                 basis=ProvenanceBasis.CONVENTION,
                 source=(
-                    f"{transfer.spin_lever_arm_fraction:.3g} of the ball radius " "below its centre"
+                    f"{transfer.spin_lever_arm_fraction:.3g} of the ball radius "
+                    "below its centre"
                 ),
                 note=(
                     "a modelling convention for where the sand stream acts; no "
@@ -564,11 +568,11 @@ class SandDelivery:
             vector = tuple(float(component) for component in value)
         except (TypeError, ValueError) as error:
             raise ValueError(
-                f"{name} must be a finite 3-element sequence of floats, got " f"{value!r}"
+                f"{name} must be a finite 3-element sequence of floats, got {value!r}"
             ) from error
         if len(vector) != 3 or not all(math.isfinite(v) for v in vector):
             raise ValueError(
-                f"{name} must be a finite 3-element sequence of floats, got " f"{value!r}"
+                f"{name} must be a finite 3-element sequence of floats, got {value!r}"
             )
         object.__setattr__(self, name, vector)
 
@@ -1022,7 +1026,9 @@ def compute_ball_launch_from_splash(
     )
     ball_speed = math.hypot(*velocity)
     horizontal = math.hypot(velocity[0], velocity[1])
-    launch_angle = math.atan2(velocity[2], horizontal) if horizontal > 1e-10 else club_loft_rad
+    launch_angle = (
+        math.atan2(velocity[2], horizontal) if horizontal > 1e-10 else club_loft_rad
+    )
     azimuth = math.atan2(velocity[1], velocity[0]) if horizontal > 1e-10 else 0.0
 
     omega = _angular_velocity(splash, ball)
@@ -1049,7 +1055,9 @@ def compute_ball_launch_from_splash(
         ball_velocity=velocity,
         ball_angular_velocity=omega,
         contact_type=ContactType.SPLASH,
-        energy_transfer_fraction=((ball_ke + ball_rot_ke) / head_ke if head_ke > 0.0 else 0.0),
+        energy_transfer_fraction=(
+            (ball_ke + ball_rot_ke) / head_ke if head_ke > 0.0 else 0.0
+        ),
         transfer_efficiency=splash.transfer_efficiency,
         delivered_impulse_n_s=splash.delivered_impulse_n_s,
         ball_impulse_n_s=splash.ball_impulse_n_s,

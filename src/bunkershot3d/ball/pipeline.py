@@ -161,12 +161,16 @@ def to_post_impact_state(
         )
 
     if delivery.exit_angular_velocity_rad_s is not None:
-        clubhead_angular_velocity = np.array(delivery.exit_angular_velocity_rad_s, dtype=float)
+        clubhead_angular_velocity = np.array(
+            delivery.exit_angular_velocity_rad_s, dtype=float
+        )
     else:
         clubhead_angular_velocity = np.zeros(3, dtype=float)
 
     ball_ke = 0.5 * state.ball.mass_kg * result.ball_speed_m_s**2
-    ball_rot_ke = 0.5 * state.ball.moi_kg_m2 * float(np.linalg.norm(ball_angular_velocity)) ** 2
+    ball_rot_ke = (
+        0.5 * state.ball.moi_kg_m2 * float(np.linalg.norm(ball_angular_velocity)) ** 2
+    )
 
     return PostImpactState(
         ball_velocity=np.array(result.ball_velocity, dtype=float),
@@ -298,7 +302,8 @@ class PostImpactEnvelope:
             )
         if not isinstance(self.verdict, ValidityVerdict):
             raise ValueError(
-                "an envelope must carry the launch verdict, got " f"{type(self.verdict).__name__}"
+                "an envelope must carry the launch verdict, got "
+                f"{type(self.verdict).__name__}"
             )
         if not isinstance(self.fidelity_tier, FidelityTier):
             raise ValueError("fidelity_tier must be a FidelityTier")
@@ -312,7 +317,9 @@ class PostImpactEnvelope:
             self.clubhead_angular_velocity_provenance,
             self.clubhead_angular_velocity_frame,
         )
-        _require_provenance_pair("ball_launch", self.ball_launch_provenance, self.ball_frame)
+        _require_provenance_pair(
+            "ball_launch", self.ball_launch_provenance, self.ball_frame
+        )
         if len(self.source_digest) != 64 or any(
             character not in "0123456789abcdef" for character in self.source_digest
         ):
@@ -389,9 +396,13 @@ class PostImpactEnvelope:
             schema_version=payload["schema_version"],
             post_impact_state=PostImpactState(
                 ball_velocity=_frozen_vector(post_payload["ball_velocity"]),
-                ball_angular_velocity=_frozen_vector(post_payload["ball_angular_velocity"]),
+                ball_angular_velocity=_frozen_vector(
+                    post_payload["ball_angular_velocity"]
+                ),
                 clubhead_velocity=_frozen_vector(post_payload["clubhead_velocity"]),
-                clubhead_angular_velocity=_frozen_vector(post_payload["clubhead_angular_velocity"]),
+                clubhead_angular_velocity=_frozen_vector(
+                    post_payload["clubhead_angular_velocity"]
+                ),
                 contact_duration=float(post_payload["contact_duration"]),
                 energy_transfer=float(post_payload["energy_transfer"]),
                 impact_location=_frozen_vector(post_payload["impact_location"]),
@@ -404,7 +415,9 @@ class PostImpactEnvelope:
             clubhead_angular_velocity_provenance=ExitVectorProvenance(
                 payload["clubhead_angular_velocity_provenance"]
             ),
-            ball_launch_provenance=ExitVectorProvenance(payload["ball_launch_provenance"]),
+            ball_launch_provenance=ExitVectorProvenance(
+                payload["ball_launch_provenance"]
+            ),
             clubhead_velocity_frame=HandoffFrame(payload["clubhead_velocity_frame"]),
             clubhead_angular_velocity_frame=HandoffFrame(
                 payload["clubhead_angular_velocity_frame"]
@@ -438,7 +451,9 @@ def _payload_digest(body: Mapping[str, Any]) -> str:
 
 def _to_flight_frame(vector: Any, frame: HandoffFrame) -> np.ndarray:
     """Express ``vector`` from its handoff ``frame`` in the flight frame."""
-    return np.array(_FRAME_TRANSFORMS[frame], dtype=float) @ np.asarray(vector, dtype=float)
+    return np.array(_FRAME_TRANSFORMS[frame], dtype=float) @ np.asarray(
+        vector, dtype=float
+    )
 
 
 def _verdict_payload(verdict: ValidityVerdict) -> dict[str, Any]:
@@ -474,7 +489,9 @@ def _verdict_from_payload(payload: Mapping[str, Any]) -> ValidityVerdict:
         status=EnvelopeStatus(payload["status"]),
         groups=tuple(
             DimensionlessGroups(
-                scale=FeatureScale(name=group["scale_name"], length_m=group["scale_length_m"]),
+                scale=FeatureScale(
+                    name=group["scale_name"], length_m=group["scale_length_m"]
+                ),
                 speed_m_s=group["speed_m_s"],
                 grain_diameter_m=group["grain_diameter_m"],
                 froude=group["froude"],
@@ -494,7 +511,9 @@ def _verdict_from_payload(payload: Mapping[str, Any]) -> ValidityVerdict:
     )
 
 
-def post_impact_envelope(result: BallLaunchResult, state: BunkerShotState) -> PostImpactEnvelope:
+def post_impact_envelope(
+    result: BallLaunchResult, state: BunkerShotState
+) -> PostImpactEnvelope:
     """Build the versioned result envelope for one bunker launch (issue #9542).
 
     The legacy :func:`to_post_impact_state` adapter stays available for
@@ -542,6 +561,8 @@ def post_impact_envelope(result: BallLaunchResult, state: BunkerShotState) -> Po
         ball_frame=HandoffFrame.BUNKER_LAUNCH,
         source_digest="0" * 64,
     )
-    body = {key: value for key, value in payload.to_dict().items() if key != "source_digest"}
+    body = {
+        key: value for key, value in payload.to_dict().items() if key != "source_digest"
+    }
     digest = _payload_digest(body)
     return replace(payload, source_digest=digest)

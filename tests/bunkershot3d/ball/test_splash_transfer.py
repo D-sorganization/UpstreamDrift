@@ -433,7 +433,11 @@ class TestExitKinematicsAreConsistentAndOwned:
         orientation = [row, [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
         strike = delivery(exit_orientation=orientation)  # type: ignore[arg-type]
         row[0] = math.nan
-        assert strike.exit_orientation == ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
+        assert strike.exit_orientation == (
+            (1.0, 0.0, 0.0),
+            (0.0, 1.0, 0.0),
+            (0.0, 0.0, 1.0),
+        )
 
     def test_a_velocity_list_mutated_after_construction_cannot_leak_in(self) -> None:
         velocity = [12.0, 3.5, -4.2]
