@@ -53,7 +53,9 @@ The post-refresh 68-test claim/release suite initially finds five failures: the 
 
 ## Delivery and Next Actions
 
-Source, reviewed generated artifacts, SPEC and handoff are being prepared for normal commit/push and a ready PR. Run final claim/release checks after metadata refresh; record the final source revision, protected CI and review results here. Do not close #9825 or the full impact program before acceptance is verified. Preserve the former shared branch and its distinct historical authority.
+Source f0bbc4d50d589bbe871150f7de0523c15c02508b is published; normal commit/push hooks pass and the remote SHA is verified. Computational publication validation passes at that exact source. The first push passed security but stopped during unit collection because Python 3.12 lacked h5py. A local ignored .venv inherits the existing general test environment and supplies repository-locked h5py 3.16.0, NumPy 2.2.6 and SciPy 1.15.3; the normal unit hook then passes. The exact Linux scientific authority environment remains separate and unchanged. Research scripts are excluded by the existing mypy hook, which reports no files; do not call that a new strict type-check result.
+
+Ready PR #9826: https://github.com/D-sorganization/UpstreamDrift/pull/9826. Its first CI observation is running, with initial superseded runs cancelled; no failure or success is inferred from pending checks. Apply the repository ci-watch-and-fix skill, retaining the fleet polling interval and no automatic retries of running work. Temporary heartbeat log: impact-9825-ci-watch.log. SPEC is keyed to #9826 and the development log is in_review. Do not close #9825 or the full impact program before protected CI/review and acceptance are verified. Preserve the former shared branch and its distinct historical authority.
 
 ## Related Program State
 
