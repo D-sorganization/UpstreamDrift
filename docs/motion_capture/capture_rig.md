@@ -108,6 +108,29 @@ units distinct. Windows grants one process exclusive access to a camera, so a
 session either observes through frame sources or records through recorders,
 not both on the same camera.
 
+## Layout Model
+
+Multiview pictures (live preview, playback and composite export) are all
+rendered through one pure model, `tools/capture_rig/layout_model.py` (#9810).
+A `LayoutSpec` (JSON schema `rig-layout/1.0.0`) is a named `rows`x`cols` grid
+(1..4 each, so up to 16 tiles) on a canvas; every `Tile` names a `source`
+(`live`/`recorded`/`overlay` of a view plus optional variants, or `empty`), a
+`cell` (row, col, rowspan, colspan; tiles may not overlap), `rotation`
+(0/90/180/270), `flip_h`/`flip_v`, a normalised `crop`, `fit`
+(`fit` letterboxes, `fill` centre-crops, `stretch`) and an optional label.
+`to_dict()`/`from_dict()` round-trip it and name the offending field on a
+`ValueError`; `with_tile`/`without_tile`/`move_tile` return new specs.
+`compose(frames, spec, size, palette)` draws a mapping of BGR frames (keyed by
+`SourceRef.key`, e.g. `live:face_on`) into one image with theme-derived
+`Palette` colours; missing sources show a placeholder. Built-in presets:
+`single`, `side_by_side`, `three_across`, `two_by_two`, `three_by_three`,
+`four_by_four`, `primary_plus_strip`.
+
+`layout_presets.LayoutStore` (#9811) saves named layouts with a provenance
+stamp in two scopes: user (`<AppConfigLocation>/UpstreamDrift/capture_rig/layouts/`)
+and session (`<session>/layouts/`, so a layout travels with a take); built-in
+presets appear read-only in `list()`.
+
 ## Recording a Session
 
 ```bash
