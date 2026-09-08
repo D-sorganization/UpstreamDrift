@@ -354,7 +354,7 @@
       "tiles": ["pose_studio"]
     },
     "tools.capture_rig": {
-      "title": "Capture Rig camera controller with live preview, movable panes and saved layouts, themed header with status strip and workflow-grouped actions, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets and an interactive layout editor",
+      "title": "Capture Rig camera controller with live preview, movable panes and saved layouts, themed header with status strip and workflow-grouped actions, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor and composite multiview video export",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
       "web": null,
