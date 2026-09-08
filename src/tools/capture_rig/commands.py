@@ -99,11 +99,22 @@ def record_command(
     duration_s: float = 10.0,
     warmup_s: float | None = None,
     dry_run: bool = False,
+    live_preview: Path | None = None,
+    stop_file: Path | None = None,
+    cameras: Mapping[str, str] | None = None,
 ) -> list[str]:
-    """Precondition: a positive duration."""
+    """Precondition: a positive duration. ``live_preview``/``stop_file`` pass
+    the recorder's live snapshot directory and early-stop file through.
+    """
     require(duration_s > 0, "duration must be positive", duration_s)
     args = ["record", *selection.args(), "--duration", f"{duration_s:g}", "--out"]
     args.append(str(out))
+    if live_preview is not None:
+        args += ["--live-preview", str(live_preview)]
+    if stop_file is not None:
+        args += ["--stop-file", str(stop_file)]
+    for view, instance in (cameras or {}).items():
+        args += ["--camera", f"{view}={instance}"]
     if warmup_s is not None:
         args += ["--warmup", f"{warmup_s:g}"]
     if dry_run:
