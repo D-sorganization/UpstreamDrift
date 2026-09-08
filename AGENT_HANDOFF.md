@@ -109,6 +109,18 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   tests/architecture/test_bioptim_isolation.py -m "not slow"` (23 pass);
   `pytest tests/unit/optimization tests/unit/estimation`;
   `python -m benchmarks.bioptim_parity --nodes 12 --duration 0.6`.
+- CI state on PR #9768: the `hatchling` direct-reference fix (`52a8710`)
+  cleared the eleven jobs that could not build the package at all. The
+  `dependency-consistency` gate is red on `main` too, because #9716 added
+  `openpyxl` and `imageio` to the `dev` extra without regenerating the
+  locks; this branch carries the regenerated `requirements-dev.lock` and
+  `environment.yml` so the gate passes here and no-ops once `main` catches
+  up. Regenerate them only with Python 3.12 (`make sync-deps`) — that is
+  the interpreter the gate runs, and 3.11 produces a different lock.
+- `code-quality` runs `ruff` unpinned, so it floats ahead of the
+  `ruff>=0.15.10` floor in `pyproject.toml`. 0.15.17 reformats a
+  parenthesised lambda body in `benchmarks/bioptim_parity.py` that 0.15.8
+  left alone; the committed form is stable under both.
 
 ## Protected Authority
 

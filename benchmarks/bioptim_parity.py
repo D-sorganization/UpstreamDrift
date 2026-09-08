@@ -217,9 +217,11 @@ def run(config: OptimizationConfig, golfer: GolferModel, club: ClubModel) -> lis
             timed(
                 f"bioptim {ode}",
                 "target-speed objective (convex); dynamics enforced by construction",
-                lambda ode=ode: solve_max_speed_ocp(
-                    golfer, club, config, limits, joint_limits, x0, ode=ode
-                ).result,
+                lambda ode=ode: (
+                    solve_max_speed_ocp(
+                        golfer, club, config, limits, joint_limits, x0, ode=ode
+                    ).result
+                ),
             )
     else:
         rows.append(

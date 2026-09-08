@@ -34,7 +34,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   `docs/estimation/bioptim_parity.md`, `docs/issues/EPIC_BIOPTIM_OCP_INTEGRATION.md`,
   `.github/workflows/ci-optional-stack.yml`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`edc302294`)
+- **Last verified:** 2026-09-08 (`SELF`)
 - **Summary:** Adopts `pyomeca/bioptim` as an opt-in optimal-control layer
   driven by UpstreamDrift's own CasADi dynamics through bioptim's custom-model
   protocol (no biorbd, no conda), and fixes the defects that made the existing
@@ -55,7 +55,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   target-speed objective), and the six-marker set cannot observe the full
   seven-DOF chain (hip and trunk rotation are an exact null direction), so every
   tracking solve reports what it could not see.
-- **Next step:** Record CI on PR #9768; phases 4 and 5 of the epic remain.
+- **Next step:** Drive PR #9768 to green, then open the phase-4 parameter-block
+  entry.
 
 
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
@@ -66,16 +67,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`,
   `requirements*.lock`, `environment.yml`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`289b3aac2`)
+- **Last verified:** 2026-09-08 (`SELF`)
 - **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools`
   and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed
   them and ~24 CI tests failed on import. Both now resolve through the `dev`
   extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml`
   workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR,
   since Windows/WSL cannot regenerate correctly (#9533).
-- **Next step:** Regenerate the locks via `lock-refresh.yml` so the
-  dependency-consistency freshness gate and the 24 previously failing tests
-  go green.
+- **Next step:** Land the regenerated locks. PR #9768 carries them already
+  (regenerated with `make sync-deps` on Python 3.12, the exact interpreter
+  the `dependency-consistency` gate uses), because that gate is red on
+  `main` and blocks every open PR until the locks catch up; `lock-refresh.yml`
+  stays the standing mechanism for the next drift.
 
 ## Shipped (Last 90 Days)
 
