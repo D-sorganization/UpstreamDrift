@@ -7,13 +7,13 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
 from src.motion_capture.rig import __main__ as rig_cli
 from src.motion_capture.rig.bundle import build_index, write_bundle
 from src.motion_capture.rig.plan import CameraBinding, RigPlan
 from src.motion_capture.rig.probe import RecordingProbe
 from src.motion_capture.rig.recorder import RecordingResult
 from src.tools.capture_rig import commands, workflow
+from src.tools.capture_rig.commands import MultipictureArgs
 from src.tools.capture_rig.layout_model import (
     PRESET_NAMES,
     LayoutSpec,
@@ -24,6 +24,7 @@ from src.tools.capture_rig.layout_model import (
 from src.tools.capture_rig.layout_presets import SESSION, USER, LayoutStore
 from src.tools.capture_rig.mosaic import (
     MOSAIC_SCHEMA,
+    MosaicOptions,
     MosaicResult,
     default_sources,
     export_from_session,
@@ -159,7 +160,9 @@ def test_side_by_side_export_writes_video_and_provenance_sidecar(
     spec = preset("side_by_side", default_sources(media))
     assert spec.source_keys() == ("recorded:cam_a", "recorded:cam_b")
     out = tmp_path / "mosaic.mp4"
-    result = export_multipicture(root, spec, out, size=(2 * SIZE[0], SIZE[1]))
+    result = export_multipicture(
+        root, spec, out, MosaicOptions(size=(2 * SIZE[0], SIZE[1]))
+    )
     assert isinstance(result, MosaicResult)
     assert result.frames == FRAMES and result.first == 0 and result.last == 11
     assert result.fps == pytest.approx(FPS) and result.size == (2 * SIZE[0], SIZE[1])
@@ -211,7 +214,9 @@ def test_overlay_tile_draws_the_observed_pose_in_its_cell(tmp_path: Path) -> Non
         ),
     )
     out = tmp_path / "overlay.mp4"
-    result = export_multipicture(root, spec, out, size=(3 * SIZE[0], SIZE[1]))
+    result = export_multipicture(
+        root, spec, out, MosaicOptions(size=(3 * SIZE[0], SIZE[1]))
+    )
     assert result.frames == FRAMES
     frame = _first_frame(out)
     b, g, r = (int(c) for c in frame[60, SIZE[0] + 100])
@@ -229,7 +234,7 @@ def test_speed_keeps_every_frame_and_scales_the_fps(tmp_path: Path) -> None:
     spec = preset("side_by_side", default_sources(media))
     out = tmp_path / "slow.mp4"
     result = export_multipicture(
-        root, spec, out, clip=ClipRange(2, 7), speed=0.5, size=(320, 100)
+        root, spec, out, MosaicOptions(clip=ClipRange(2, 7), speed=0.5, size=(320, 100))
     )
     assert result.frames == 6 and (result.first, result.last) == (2, 7)
     assert result.fps == pytest.approx(FPS * 0.5)
@@ -246,12 +251,14 @@ def test_short_source_holds_its_last_frame_and_range_is_checked(
     media = load_session(root)
     spec = preset("side_by_side", default_sources(media))
     out = tmp_path / "hold.mp4"
-    result = export_multipicture(root, spec, out, size=(2 * SIZE[0], SIZE[1]))
+    result = export_multipicture(
+        root, spec, out, MosaicOptions(size=(2 * SIZE[0], SIZE[1]))
+    )
     assert result.frames == FRAMES, "the longest source sets the length"
     with pytest.raises(Exception, match="start"):
-        export_multipicture(root, spec, out, clip=ClipRange(40, 50))
+        export_multipicture(root, spec, out, MosaicOptions(clip=ClipRange(40, 50)))
     with pytest.raises(Exception, match="canvas"):
-        export_multipicture(root, spec, out, size=(0, 10))
+        export_multipicture(root, spec, out, MosaicOptions(size=(0, 10)))
     with pytest.raises(Exception, match="source"):
         export_multipicture(root, preset("single"), out)
 
@@ -283,7 +290,9 @@ def test_frame_offsets_follow_the_manifest_timing_block(tmp_path: Path) -> None:
     media = load_session(root)
     spec = preset("side_by_side", default_sources(media))
     out = tmp_path / "aligned.mp4"
-    result = export_multipicture(root, spec, out, size=(2 * SIZE[0], SIZE[1]))
+    result = export_multipicture(
+        root, spec, out, MosaicOptions(size=(2 * SIZE[0], SIZE[1]))
+    )
     assert result.offsets == {"cam_b": 2}
     frame = _first_frame(out)
     # frame 0 of cam_a has a 10 px bar; cam_b shows its frame 2 (30 px bar).
@@ -338,12 +347,14 @@ def test_cli_and_command_builder(tmp_path: Path) -> None:
         root,
         "side_by_side",
         out,
-        variants=("", "pair"),
-        observation_set="observations",
-        start=1,
-        stop=6,
-        speed=0.5,
-        size=(640, 200),
+        MultipictureArgs(
+            start=1,
+            stop=6,
+            variants=("", "pair"),
+            observation_set="observations",
+            speed=0.5,
+            size=(640, 200),
+        ),
     )
     assert argv[:3] == commands.python_module_command([])[:3]
     assert argv[3:] == [
@@ -373,9 +384,12 @@ def test_cli_and_command_builder(tmp_path: Path) -> None:
     with pytest.raises(Exception, match="layout"):
         commands.multipicture_command(root, " ", out)
     with pytest.raises(Exception, match="speed"):
-        commands.multipicture_command(root, "single", out, speed=0)
+        commands.multipicture_command(root, "single", out, MultipictureArgs(speed=0))
     argv = commands.multipicture_command(
-        root, "side_by_side", out, start=1, stop=6, speed=0.5, size=(640, 200)
+        root,
+        "side_by_side",
+        out,
+        MultipictureArgs(start=1, stop=6, speed=0.5, size=(640, 200)),
     )
     assert rig_cli.main(argv[3:]) == 0
     assert _video_props(out) == (6, 640, 200, pytest.approx(5.0))
@@ -385,7 +399,9 @@ def test_cli_and_command_builder(tmp_path: Path) -> None:
 def test_export_from_session_resolves_the_layout_text(tmp_path: Path) -> None:
     root = _two_view_bundle(tmp_path)
     out = tmp_path / "from_session.avi"
-    result = export_from_session(root, "side_by_side", out, size=(320, 100))
+    result = export_from_session(
+        root, "side_by_side", out, MosaicOptions(size=(320, 100))
+    )
     assert result.layout == "side_by_side" and result.frames == FRAMES
 
 

@@ -347,17 +347,36 @@ def _resolve_range(
     return start, last
 
 
+@dataclass(frozen=True)
+class MosaicOptions:
+    """Everything but the session, layout and destination of an export.
+
+    Keeping these together holds :func:`export_multipicture` and
+    :func:`~src.tools.capture_rig.commands.multipicture_command` inside the
+    repository's parameter budget and lets the tile and the CLI describe an
+    export in the same shape. Invariants: positive ``speed``; positive
+    ``size`` when given.
+    """
+
+    clip: ClipRange | None = None
+    variants: Sequence[str] = ()
+    observation_set: str = "observations"
+    size: tuple[int, int] | None = None
+    speed: float | None = None
+    palette: Palette = DEFAULT_PALETTE
+
+    def rate(self) -> float:
+        """The output rate multiplier: ``speed`` if given, else the clip's."""
+        if self.speed is not None:
+            return self.speed
+        return self.clip.speed if self.clip is not None else 1.0
+
+
 def export_multipicture(
     session: Path,
     spec: LayoutSpec,
     out: Path,
-    *,
-    clip: ClipRange | None = None,
-    variants: Sequence[str] = (),
-    observation_set: str = "observations",
-    size: tuple[int, int] | None = None,
-    speed: float | None = None,
-    palette: Palette = DEFAULT_PALETTE,
+    options: MosaicOptions | None = None,
 ) -> MosaicResult:
     """Write ``out`` through ``spec`` plus a provenance sidecar beside it.
 
@@ -371,9 +390,12 @@ def export_multipicture(
     ``result.sidecar`` exists with the layout, sources and provenance.
     """
     require(isinstance(spec, LayoutSpec), "spec must be a LayoutSpec", type(spec))
-    rate = speed if speed is not None else (clip.speed if clip is not None else 1.0)
+    options = options or MosaicOptions()
+    clip, variants = options.clip, options.variants
+    observation_set, palette = options.observation_set, options.palette
+    rate = options.rate()
     require(rate > 0, "speed must be positive", rate)
-    canvas = size or spec.canvas
+    canvas = options.size or spec.canvas
     require(canvas[0] > 0 and canvas[1] > 0, "canvas size must be positive", canvas)
     media = load_session(session)
     sources = _open_sources(
@@ -452,12 +474,7 @@ def export_from_session(
     session: Path,
     layout: str,
     out: Path,
-    *,
-    clip: ClipRange | None = None,
-    variants: Sequence[str] = (),
-    observation_set: str = "observations",
-    size: tuple[int, int] | None = None,
-    speed: float | None = None,
+    options: MosaicOptions | None = None,
 ) -> MosaicResult:
     """CLI entry: resolve ``layout`` (preset, saved name or file) and export.
 
@@ -468,13 +485,4 @@ def export_from_session(
         spec = resolve_layout(layout, session, default_sources(media))
     except LayoutStoreError as exc:
         raise ValueError(f"layout {layout!r}: {exc}") from exc
-    return export_multipicture(
-        session,
-        spec,
-        out,
-        clip=clip,
-        variants=variants,
-        observation_set=observation_set,
-        size=size,
-        speed=speed,
-    )
+    return export_multipicture(session, spec, out, options)

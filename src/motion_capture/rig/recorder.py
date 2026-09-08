@@ -64,7 +64,13 @@ class Recorder(Protocol):
         ...
 
     def start(
-        self, identity: str, device_ref: str, mode: CaptureMode, path: Path
+        self,
+        identity: str,
+        device_ref: str,
+        mode: CaptureMode,
+        path: Path,
+        *,
+        live_preview: Path | None = None,
     ) -> None: ...
 
     def signal_stop(self) -> None:
@@ -91,11 +97,78 @@ def dshow_device_ref(camera_instance_id: str) -> str:
     return f"@device_pnp_\\\\?\\{body}#{_DSHOW_CATEGORY}\\global"
 
 
+LIVE_PREVIEW_WIDTH = 480
+LIVE_PREVIEW_FPS = 8
+LIVE_PREVIEW_LOWRES = 2  # MJPEG decodes at 1/4 size: the copy is never starved
+LIVE_RTBUFSIZE = "256M"  # absorbs decode jitter so no packet is dropped
+
+
+@dataclass(frozen=True)
+class LiveOptions:
+    """What a take exposes while it runs: snapshots per view and an early stop.
+
+    ``live_preview_dir/<view>.jpg`` is rewritten at a few frames per second
+    by the recorder itself (the device cannot be opened twice), so a GUI
+    keeps showing the cameras during the take. ``stop_file`` ends the take
+    early the moment it appears; the recorder deletes it afterwards.
+    """
+
+    live_preview_dir: Path | None = None
+    stop_file: Path | None = None
+
+    def preview_path(self, view: str) -> Path | None:
+        if self.live_preview_dir is None:
+            return None
+        return self.live_preview_dir / f"{view}.jpg"
+
+
 def ffmpeg_stream_copy_args(
-    ffmpeg_exe: str, device_ref: str, mode: CaptureMode, path: Path
+    ffmpeg_exe: str,
+    device_ref: str,
+    mode: CaptureMode,
+    path: Path,
+    *,
+    live_preview: Path | None = None,
 ) -> list[str]:
-    """ffmpeg command that copies the camera's compressed stream to ``path``."""
+    """ffmpeg command that copies the camera's compressed stream to ``path``.
+
+    With ``live_preview`` the same process also decodes the stream at reduced
+    resolution (``-lowres``) and keeps rewriting that JPEG (480 wide, 8 fps,
+    atomic) for a live view; a large real-time buffer keeps the stream copy
+    lossless while the decoder works.
+    """
     codec = "mjpeg" if mode.fourcc == "MJPG" else mode.fourcc.lower()
+    outputs: list[str]
+    live_input: list[str] = []
+    if live_preview is None:
+        outputs = ["-c:v", "copy", "-y", str(path)]
+    else:
+        live_input = [
+            "-rtbufsize",
+            LIVE_RTBUFSIZE,
+            "-lowres:v",
+            str(LIVE_PREVIEW_LOWRES),
+        ]
+        outputs = [
+            "-map",
+            "0:v",
+            "-c:v",
+            "copy",
+            "-y",
+            str(path),
+            "-map",
+            "0:v",
+            "-vf",
+            f"fps={LIVE_PREVIEW_FPS},scale={LIVE_PREVIEW_WIDTH}:-2",
+            "-update",
+            "1",
+            "-atomic_writing",
+            "1",
+            "-f",
+            "image2",
+            "-y",
+            str(live_preview),
+        ]
     return [
         ffmpeg_exe,
         "-hide_banner",
@@ -109,12 +182,10 @@ def ffmpeg_stream_copy_args(
         f"{mode.width}x{mode.height}",
         "-framerate",
         str(mode.fps),
+        *live_input,
         "-i",
         f"video={device_ref}",
-        "-c:v",
-        "copy",
-        "-y",
-        str(path),
+        *outputs,
     ]
 
 
@@ -127,12 +198,20 @@ class NullRecorder:
     def __init__(self) -> None:
         self._identity: str | None = None
         self._path: Path | None = None
+        self.live_preview: Path | None = None
         self.signalled = False
 
     def start(
-        self, identity: str, device_ref: str, mode: CaptureMode, path: Path
+        self,
+        identity: str,
+        device_ref: str,
+        mode: CaptureMode,
+        path: Path,
+        *,
+        live_preview: Path | None = None,
     ) -> None:
         self._identity, self._path = identity, path
+        self.live_preview = live_preview
 
     def signal_stop(self) -> None:
         self.signalled = True
@@ -168,14 +247,24 @@ class FfmpegStreamCopyRecorder:
         return self._ffmpeg
 
     def start(
-        self, identity: str, device_ref: str, mode: CaptureMode, path: Path
+        self,
+        identity: str,
+        device_ref: str,
+        mode: CaptureMode,
+        path: Path,
+        *,
+        live_preview: Path | None = None,
     ) -> None:
         import subprocess
 
         if self._stack is not None:
             raise StateError(f"recorder already running for {self._identity}")
         path.parent.mkdir(parents=True, exist_ok=True)
-        args = ffmpeg_stream_copy_args(self._exe(), device_ref, mode, path)
+        if live_preview is not None:
+            live_preview.parent.mkdir(parents=True, exist_ok=True)
+        args = ffmpeg_stream_copy_args(
+            self._exe(), device_ref, mode, path, live_preview=live_preview
+        )
         stack = ExitStack()
         self._proc = stack.enter_context(
             managed_popen(
@@ -250,6 +339,28 @@ def _wait_for_streams(
     return waited
 
 
+STOP_POLL_S = 0.1
+
+
+def _run_clock(
+    duration_s: float, stop_file: Path | None, sleep: Callable[[float], None]
+) -> None:
+    """Sleep out the take; with a stop file, poll for it and return early."""
+    if stop_file is None:
+        sleep(duration_s)
+        return
+    if stop_file.exists():  # stale from an interrupted take
+        stop_file.unlink()
+    slept = 0.0
+    while slept < duration_s and not stop_file.exists():
+        step = min(STOP_POLL_S, duration_s - slept)
+        sleep(step)
+        slept += step
+    if stop_file.exists():
+        logger.info("stop file %s seen after %.1f s; ending the take", stop_file, slept)
+        stop_file.unlink()
+
+
 def record_all(
     plan: RigPlan,
     device_refs: Mapping[str, str],
@@ -259,6 +370,7 @@ def record_all(
     *,
     warmup_s: float = DEFAULT_WARMUP_S,
     sleep: Callable[[float], None] = time.sleep,
+    live: LiveOptions | None = None,
 ) -> list[RecordingResult]:
     """Record every planned view together for ``duration_s`` seconds.
 
@@ -269,12 +381,16 @@ def record_all(
     each other. Devices that never deliver are not waited on past
     ``warmup_s``; the bundle reports them as short or empty.
     Precondition: ``device_refs`` maps every plan view to a DirectShow device ref.
+    With ``live.stop_file`` the clock polls for that file and ends the take
+    early when it appears (the file is removed); ``live.live_preview_dir``
+    gives every recorder a snapshot path.
     """
     require(duration_s > 0, "duration_s must be positive", duration_s)
     require(warmup_s >= 0, "warmup_s must be non-negative", warmup_s)
     missing = [c.view for c in plan.cameras if c.view not in device_refs]
     require(not missing, "device_refs missing views", missing)
     out_dir.mkdir(parents=True, exist_ok=True)
+    live = live or LiveOptions()
     active: list[Recorder] = []
     for binding in plan.cameras:
         rec = recorder_factory()
@@ -283,11 +399,12 @@ def record_all(
             device_refs[binding.view],
             binding.mode,
             out_dir / f"{binding.view}_{binding.identity}.mkv",
+            live_preview=live.preview_path(binding.view),
         )
         active.append(rec)
     waited = _wait_for_streams(active, warmup_s, sleep)
     logger.info("all %d recorders streaming after %.2f s", len(active), waited)
-    sleep(duration_s)
+    _run_clock(duration_s, live.stop_file, sleep)
     for rec in active:
         rec.signal_stop()
     return [rec.stop() for rec in active]

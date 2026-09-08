@@ -43,12 +43,12 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import Any
 import logging
 import sys
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from src.motion_capture.provenance import write_stamped
 from src.motion_capture.variants import variant_dir
@@ -61,13 +61,14 @@ from .proxy import DEFAULT_CRF, DEFAULT_ENCODER, ENCODERS, make_proxies
 from .recorder import (
     DEFAULT_WARMUP_S,
     FfmpegStreamCopyRecorder,
+    LiveOptions,
     NullRecorder,
     Recorder,
     dshow_device_ref,
     record_all,
 )
 from .session import CaptureOutcome, CaptureSession, CaptureTuning
-from .sources import FrameSource, OpenCvMsmfSource, SyntheticFrameSource
+from .sources import FrameSource, SyntheticFrameSource
 from .tools_bridge import probe_tools_schema
 from .topology import (
     CameraLocation,
@@ -412,6 +413,28 @@ def _parser() -> argparse.ArgumentParser:
         help="seconds for the devices to open before the duration clock starts",
     )
     rec.add_argument(
+        "--camera",
+        action="append",
+        default=[],
+        metavar="VIEW=INSTANCE_ID",
+        help="use this DirectShow device for a view instead of enumerating "
+        "(repeat per view; a GUI passes the cameras its preview already bound)",
+    )
+    rec.add_argument(
+        "--live-preview",
+        type=Path,
+        default=None,
+        metavar="DIR",
+        help="write <DIR>/<view>.jpg a few times a second while recording",
+    )
+    rec.add_argument(
+        "--stop-file",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="end the take early as soon as this file exists (it is removed)",
+    )
+    rec.add_argument(
         "--dry-run",
         action="store_true",
         help="record nothing; write the bundle with NullRecorder results",
@@ -428,24 +451,29 @@ def _parser() -> argparse.ArgumentParser:
 
 def _located_plan(plan: RigPlan) -> dict[str, CameraLocation]:
     """Enumerate cameras and map each plan view to its location; exit when unrealizable."""
-    cams = attach_capture_indices(query_topology(), dshow_order())
-    check = check_plan(plan, cams)
-    if not check.ok:
-        raise SystemExit(
-            f"plan not realizable: missing={list(check.missing)} "
-            f"conflicts={list(check.conflicts)}"
-        )
-    by_instance = {c.camera: c for c in cams}
-    return {view: by_instance[inst] for view, inst in check.matched.items()}
+    from .binding import locate_plan
+
+    try:
+        return locate_plan(plan)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def _real_sources(plan: RigPlan) -> dict[str, FrameSource]:
-    sources: dict[str, FrameSource] = {}
-    for view, cam in _located_plan(plan).items():
-        if cam.index is None:
-            raise SystemExit(f"camera {cam.identity} has no capture index")
-        sources[view] = OpenCvMsmfSource(cam.identity, cam.index)
-    return sources
+    from .binding import real_sources
+
+    try:
+        return dict(real_sources(plan))
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+
+
+def parse_camera_binding(text: str) -> tuple[str, str]:
+    """``VIEW=INSTANCE_ID`` -> ``(view, instance_id)``; both parts non-empty."""
+    view, sep, instance = text.partition("=")
+    if not sep or not view.strip() or not instance.strip():
+        raise SystemExit(f"--camera expects VIEW=INSTANCE_ID, got {text!r}")
+    return view.strip(), instance.strip()
 
 
 def _device_refs(plan: RigPlan) -> dict[str, str]:
@@ -521,11 +549,18 @@ def cmd_record(args: argparse.Namespace) -> int:
     if args.dry_run:
         refs = {c.view: f"dry-run:{c.identity}" for c in plan.cameras}
         factory = NullRecorder
+    elif args.camera:
+        refs = {
+            view: dshow_device_ref(instance)
+            for view, instance in map(parse_camera_binding, args.camera)
+        }
+        factory = FfmpegStreamCopyRecorder
     else:
         refs = _device_refs(plan)
         factory = FfmpegStreamCopyRecorder
+    live = LiveOptions(live_preview_dir=args.live_preview, stop_file=args.stop_file)
     results = record_all(
-        plan, refs, args.duration, args.out, factory, warmup_s=args.warmup
+        plan, refs, args.duration, args.out, factory, warmup_s=args.warmup, live=live
     )
     prober = _dry_run_probe if args.dry_run else probe_recording
     index = build_index(plan, results, args.duration, args.out, prober=prober)
@@ -666,17 +701,23 @@ def cmd_compare_takes(args: argparse.Namespace) -> int:
 
 
 def cmd_multipicture(args: argparse.Namespace) -> int:
-    from src.tools.capture_rig.mosaic import export_from_session, parse_size
+    from src.tools.capture_rig.mosaic import (
+        MosaicOptions,
+        export_from_session,
+        parse_size,
+    )
     from src.tools.capture_rig.overlay_render import ClipRange
 
     result = export_from_session(
         args.session,
         args.layout,
         args.out,
-        clip=ClipRange(args.start, args.stop, args.speed),
-        variants=tuple(args.variants),
-        observation_set=args.set,
-        size=parse_size(args.size) if args.size else None,
+        MosaicOptions(
+            clip=ClipRange(args.start, args.stop, args.speed),
+            variants=tuple(args.variants),
+            observation_set=args.set,
+            size=parse_size(args.size) if args.size else None,
+        ),
     )
     logger.info(
         "multipicture %s: %d frames %d-%d, %dx%d at %.3g fps -> %s",
