@@ -24,9 +24,12 @@ class CaptureRigAdapter:
         )
 
     def create_main_widget(self, parent: Any) -> Any:
+        """The tile widget, themed like the standalone window (#9816)."""
+        from . import styling
         from .gui import CaptureRigWidget
 
         self._widget = CaptureRigWidget(parent=parent)
+        styling.apply_theme(self._widget)
         return self._widget
 
     def cleanup(self) -> None:
