@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -29,7 +29,7 @@ EXPORT_SCHEMA_VERSION = "reconstruction-export/1.0.0"
 
 from .skeleton import JOINT_NAMES
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 M_TO_MM = 1000.0
 
 

@@ -219,3 +219,20 @@ warnings (14.42 s). Canonical claim registration, summary and release writers
 refresh source evidence and manifests; the 328 claim outcomes, corrected QMD
 table and rebuilt PDF remain unchanged. Keep the current-head protected CI
 gate and all empirical/archival limits; previous native hashes are historical.
+
+## Incoming Mocap Type-Check Prerequisite
+
+The normal push of merge `d8dba2919` passes its unit and Bandit gates but fails
+the real mypy hook with 211 diagnostics in 12 incoming mocap files. NumPy is
+not installed in that hook's declared environment, so implicit `Array`/`Mask`
+aliases are treated as ordinary variables. Ten declaration-owning files now
+use explicit `typing.TypeAlias`, including the camera/geometry/kinematics
+providers used by the affected callers. Right-hand NumPy expressions and all
+calculations remain unchanged; no diagnostic suppression or hook exclusion is
+added. The same actual hook first reports 211 errors, then 22 remaining
+provider-alias errors, then passes over the complete merge source scope.
+Repository-wide Ruff 0.15.17 also passes (6,737 files). This change is a
+delivery prerequisite for the main merge, not an impact-model extension.
+All 21 focused camera, triangulation and articulated-kinematics/fit tests pass
+(19.03 s, five existing alias warnings). Native scientific sources and their
+record remain unchanged by these type declarations.

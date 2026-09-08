@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (122 combined native/provenance/bootstrap contracts and three distinct rolling contracts pass)
 - **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
-- **Next step:** Main `563e7aaa9` and bootstrap #9726 are integrated; actual native evidence is regenerated with only source hashes changed. Combined-suite environment contamination is repaired. Claim outcomes and inspected 253-page PDF are unchanged; publish through normal hooks and await protected CI.
+- **Next step:** Main `563e7aaa9` and bootstrap #9726 are integrated; actual native evidence is regenerated with only source hashes changed. Combined-suite environment contamination is repaired. Explicit incoming mocap NumPy aliases fix the actual hook without changing calculations. Claim outcomes and inspected 253-page PDF are unchanged; publish through normal hooks and await protected CI.
 
 ### DL-#9478 · Launcher Registry Truth: `tools://` Provenance Scheme and Ready/Beta Maturity Gate
 
