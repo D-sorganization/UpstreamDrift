@@ -65,8 +65,6 @@ humanoid_character_builder/mesh/_cg_metrics.py
 humanoid_character_builder/mesh/_cg_primitive_fitting.py
 humanoid_character_builder/mesh/_cg_types.py
 humanoid_character_builder/tests/test_support_polygon.py
-model_generation/api/generation_handlers.py
-model_generation/api/library_handlers.py
 model_generation/canonical_model.py
 model_generation/converters/_mjcf_rust_facade.py
 model_generation/converters/_urdf_rust_facade.py
