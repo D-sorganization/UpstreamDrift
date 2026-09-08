@@ -60,3 +60,11 @@ Update this document whenever a new workflow is added or the status of an existi
   regression is `tests/unit/repo_hygiene/test_no_non_delegating_import_hook.py`.
 - `nightly-cross-engine.yml` is the repo's dedicated cross-engine lane and is
   the right place to expand stricter native-engine validation over time.
+- `ci-standard.yml` `always-on-unit-lane` (issue #9409): runs on every pull
+  request with no path filter - `scripts/ci/verify_installation.py` (core
+  dependency imports, `src.*` suite module imports, and one spec-resolution
+  import per shared Tools alias root), the top-level `tests/smoke` files, and
+  `tests/shared_contracts/`, budgeted at 10 minutes. The required
+  `quality-gate` aggregate needs it unconditionally and requires result
+  `success`, so a docs-only PR still executes a real check instead of
+  reporting a verdict decided entirely by the path diff.
