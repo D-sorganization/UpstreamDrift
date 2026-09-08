@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 from typing import Any
 
 from src.shared.python.model_generation.api.rest_api_contracts import (
@@ -133,7 +134,10 @@ class GenerationConversionRoutesMixin:
 
         try:
             urdf_string = MJCFConverter().mjcf_to_urdf(content)
-        except (ValueError, KeyError, OSError) as error:
+        # ET.ParseError subclasses SyntaxError, not ValueError, so malformed
+        # XML used to escape this clause and surface as a generic 500.
+        # Unparseable input is the client's error, not the server's.
+        except (ET.ParseError, ValueError, KeyError, OSError) as error:
             return APIResponse.error(f"Conversion failed: {error}", 422)
 
         robot_name = body.get("robot_name", "converted")
@@ -158,7 +162,7 @@ class GenerationConversionRoutesMixin:
 
         try:
             mjcf_string = MJCFConverter().urdf_to_mjcf(content)
-        except (ValueError, KeyError, OSError) as error:
+        except (ET.ParseError, ValueError, KeyError, OSError) as error:
             return APIResponse.error(f"Conversion failed: {error}", 422)
 
         robot_name = body.get("robot_name", "converted")
@@ -213,7 +217,7 @@ class GenerationConversionRoutesMixin:
 
         try:
             model = URDFParser().parse(content)
-        except (ValueError, KeyError, OSError) as error:
+        except (ET.ParseError, ValueError, KeyError, OSError) as error:
             return APIResponse.error(f"Parse failed: {error}", 422)
 
         root = model.get_root_link()
