@@ -1,7 +1,7 @@
 # Impact Provider Import Compatibility Turnover
 
 Parent #9700; focused prerequisite #9735; related provider PR Tools #5077 and
-qualified lumped-impact draft Tools #5082. The full impact/acoustics program
+qualified lumped-impact Tools #5082. The full impact/acoustics program
 remains active. A1 (AffineDrift #4258) and U1 (#9706) are merged; no distributed
 shaft, acoustic or experimental completion is implied.
 
@@ -104,4 +104,4 @@ files were edited. The wider vendor/provider/CLI/fallback run passed 72 tests in
 
 Pinned Ruff 0.15.17 reports all 6,649 files formatted and no lint errors.
 Design-manual governance passes with its existing release block retained.
-Next: publish the focused Fixes #9735 PR and resolve its protected CI; then resolve Tools provider CI and continue T3 onward.
+PR #9745 is open at implementation commit `163239a6b`; all local commit and push hooks passed. Protected CI is running. Resolve its checks before normal merge, then retry the relevant Tools downstream lane against merged consumer code. T3 work is active in the separate Tools-impact-shaft worktree; the full program remains open.
