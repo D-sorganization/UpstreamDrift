@@ -183,11 +183,13 @@ def _add_model_parsers(sub: Any) -> None:
         action="store_true",
         help="learn the model's learnable segment lengths from the data",
     )
+    fm.add_argument("--max-iterations", type=int, default=60, help="solver budget")
     cmm = sub.add_parser("compare-models", help="fit several models, rank them")
     cmm.add_argument("--session", type=Path, required=True)
     cmm.add_argument("--models", default=None, help="comma list; default: all")
     cmm.add_argument("--fit-lengths", action="store_true")
     cmm.add_argument("--sigma-accel", type=float, default=300.0)
+    cmm.add_argument("--max-iterations", type=int, default=60, help="solver budget")
     kin = sub.add_parser("kinetics", help="inverse dynamics + replay check of a fit")
     kin.add_argument("--session", type=Path, required=True)
     kin.add_argument("--model", default="golfer", help="registered model name")
@@ -583,6 +585,7 @@ def cmd_fit_model(args: argparse.Namespace) -> int:
             sigma_landmark_m=args.sigma_landmark,
             sigma_accel_rad_s2=args.sigma_accel,
             max_velocity_rad_s=args.max_velocity,
+            max_iterations=args.max_iterations,
             fit_lengths=registered.learnable_lengths if args.fit_lengths else (),
         ),
         out_subdir=None if args.model == "golfer" else args.model,
@@ -606,7 +609,9 @@ def cmd_compare_models(args: argparse.Namespace) -> int:
     report = compare_models(
         args.session,
         names,
-        options=FitOptions(sigma_accel_rad_s2=args.sigma_accel),
+        options=FitOptions(
+            sigma_accel_rad_s2=args.sigma_accel, max_iterations=args.max_iterations
+        ),
         fit_lengths=args.fit_lengths,
     )
     logger.info("compare-models:\n%s", report.markdown())
