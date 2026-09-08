@@ -1,0 +1,275 @@
+"""The rig plan: which camera plays which view, and how it is captured.
+
+A plan is the operator's declaration of an experimental condition. It binds
+named views to camera *identities* (USB serial, or the port-path fallback for
+units without one — never an OpenCV index, which reshuffles on replug) and to
+a capture mode plus control overrides. Plans are plain JSON so they can be
+versioned alongside a session, diffed between conditions, and checked against
+the live USB topology before anything is mounted.
+"""
+
+from __future__ import annotations
+
+import re
+from collections.abc import Iterable
+from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from src.shared.python.core.contracts import require
+
+from .topology import CameraLocation, conflicting_identities
+
+PLAN_SCHEMA_VERSION = "rig-plan/1.0.0"
+UNSERIALIZED_IDENTITY = "unserialized"
+_MODE_RE = re.compile(r"^\s*(\d+)[xX](\d+)@(\d+)(?::([A-Za-z0-9]{4}))?\s*$")
+
+
+def parse_mode(text: str) -> CaptureMode:
+    """Parse an operator mode string ``WIDTHxHEIGHT@FPS[:FOURCC]``.
+
+    Raises ``ValueError`` naming the string when it is malformed or any
+    dimension is zero; ``CaptureMode`` enforces the positive bounds.
+    """
+    match = _MODE_RE.match(text or "")
+    if not match:
+        raise ValueError(f"mode must look like 1280x720@120[:MJPG], got {text!r}")
+    width, height, fps, fourcc = match.groups()
+    try:
+        return CaptureMode(
+            width=int(width),
+            height=int(height),
+            fps=int(fps),
+            fourcc=fourcc or "MJPG",
+        )
+    except ValueError as exc:
+        raise ValueError(f"invalid mode {text!r}: {exc}") from exc
+
+
+class CaptureMode(BaseModel):
+    """Negotiable stream parameters."""
+
+    model_config = ConfigDict(frozen=True)
+
+    width: int = Field(default=1920, gt=0)
+    height: int = Field(default=1200, gt=0)
+    fps: int = Field(default=60, gt=0)
+    fourcc: str = Field(default="MJPG", min_length=4, max_length=4)
+
+    @field_validator("fourcc")
+    @classmethod
+    def _upper(cls, value: str) -> str:
+        return value.upper()
+
+
+class CameraControls(BaseModel):
+    """Optional UVC control overrides; ``None`` leaves the camera default."""
+
+    model_config = ConfigDict(frozen=True)
+
+    exposure: float | None = None
+    gain: float | None = None
+    auto_exposure: bool | None = None
+
+    def as_overrides(self) -> dict[str, float]:
+        """Non-``None`` controls as ``{name: value}`` (bools become 0/1)."""
+        items = {
+            "exposure": self.exposure,
+            "gain": self.gain,
+            "auto_exposure": None
+            if self.auto_exposure is None
+            else float(self.auto_exposure),
+        }
+        return {k: float(v) for k, v in items.items() if v is not None}
+
+
+class CameraBinding(BaseModel):
+    """One view of the rig bound to one physical camera."""
+
+    model_config = ConfigDict(frozen=True)
+
+    view: str = Field(min_length=1)
+    serial: str | None = None
+    port_path: str | None = None
+    # The one unit on the rig that exposes no USB serial. It is resolved by
+    # elimination at plan-check time, so it keeps its view name when moved to
+    # another jack (a port_path would not); ambiguous when two such units exist.
+    unserialized: bool = False
+    mode: CaptureMode = Field(default_factory=CaptureMode)
+    controls: CameraControls = Field(default_factory=CameraControls)
+
+    @model_validator(mode="after")
+    def _needs_identity(self) -> CameraBinding:
+        explicit = self.serial or self.port_path
+        if not (explicit or self.unserialized):
+            raise ValueError(
+                f"view {self.view!r} needs a serial, a port_path or unserialized"
+            )
+        if explicit and self.unserialized:
+            raise ValueError(
+                f"view {self.view!r}: give a serial/port_path or unserialized, not both"
+            )
+        return self
+
+    @property
+    def identity(self) -> str:
+        """Serial, else the port-path identity, else the unserialized marker."""
+        if self.unserialized:
+            return UNSERIALIZED_IDENTITY
+        return self.serial or str(self.port_path)
+
+
+class RigPlan(BaseModel):
+    """A named set of camera bindings for one experimental condition."""
+
+    model_config = ConfigDict(frozen=True)
+
+    schema_version: str = PLAN_SCHEMA_VERSION
+    name: str = Field(min_length=1)
+    cameras: tuple[CameraBinding, ...] = Field(min_length=1)
+    notes: str = ""
+
+    @model_validator(mode="after")
+    def _unique(self) -> RigPlan:
+        views = [c.view for c in self.cameras]
+        idents = [c.identity for c in self.cameras]
+        if len(set(views)) != len(views):
+            raise ValueError(f"duplicate views in plan {self.name!r}: {views}")
+        if len(set(idents)) != len(idents):
+            raise ValueError(f"duplicate camera identities in plan {self.name!r}")
+        return self
+
+    def binding_for(self, identity: str) -> CameraBinding | None:
+        return next((c for c in self.cameras if c.identity == identity), None)
+
+    def with_overrides(
+        self,
+        *,
+        mode: CaptureMode | None = None,
+        views: Iterable[str] | None = None,
+        controls: CameraControls | None = None,
+    ) -> RigPlan:
+        """A derived plan for a quick change of condition without a new file.
+
+        ``mode`` replaces every selected view's capture mode; ``views`` keeps
+        only those views, in plan order; ``controls`` replaces every selected
+        view's UVC controls. The name records the overrides so the session
+        bundle shows what actually ran. Precondition: every requested view
+        exists and at least one is selected. Postcondition: ``self`` is
+        unchanged.
+        """
+        selected = tuple(self.cameras)
+        name = self.name
+        if controls is not None and not controls.as_overrides():
+            controls = None  # all defaults: nothing to override
+        if views is not None:
+            wanted = tuple(views)
+            known = {c.view for c in self.cameras}
+            unknown = [v for v in wanted if v not in known]
+            if unknown:
+                raise ValueError(f"unknown view(s) {unknown} in plan {self.name!r}")
+            if not wanted:
+                raise ValueError("at least one view must be selected")
+            selected = tuple(c for c in self.cameras if c.view in wanted)
+            name += "+" + ",".join(c.view for c in selected)
+        if mode is not None:
+            selected = tuple(c.model_copy(update={"mode": mode}) for c in selected)
+            name += f"+{mode.width}x{mode.height}@{mode.fps}"
+        if controls is not None:
+            selected = tuple(
+                c.model_copy(update={"controls": controls}) for c in selected
+            )
+            name += "+" + ",".join(
+                f"{k}={v:g}" for k, v in sorted(controls.as_overrides().items())
+            )
+        if mode is None and views is None and controls is None:
+            return self
+        return self.model_copy(update={"cameras": selected, "name": name})
+
+    def save(self, path: Path) -> None:
+        """Write the plan as indented JSON (creates parent directories)."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(self.model_dump_json(indent=2), encoding="utf-8")
+
+    @classmethod
+    def load(cls, path: Path) -> RigPlan:
+        """Read a plan; raises ``ValueError`` for an incompatible schema version."""
+        require(path.is_file(), "plan file must exist", str(path))
+        plan = cls.model_validate_json(path.read_text(encoding="utf-8"))
+        if plan.schema_version != PLAN_SCHEMA_VERSION:
+            raise ValueError(
+                f"plan schema {plan.schema_version!r} is not {PLAN_SCHEMA_VERSION!r}"
+            )
+        return plan
+
+
+class PlanCheck(BaseModel):
+    """Result of matching a plan against the live topology."""
+
+    model_config = ConfigDict(frozen=True)
+
+    matched: dict[str, str]  # view -> camera instance id
+    missing: tuple[str, ...]  # views whose camera was not enumerated
+    conflicts: tuple[str, ...]  # views sharing a USB 2.0 bandwidth domain
+    unplanned: tuple[str, ...]  # enumerated identities no view claims
+
+    @property
+    def ok(self) -> bool:
+        return not self.missing and not self.conflicts
+
+
+def _resolve_unserialized(
+    plan: RigPlan,
+    located: list[CameraLocation],
+    matched: dict[str, str],
+    missing: list[str],
+    resolved: dict[str, str],
+) -> None:
+    """Bind ``unserialized`` views by elimination; never guess between two."""
+    wanting = [b.view for b in plan.cameras if b.unserialized]
+    if not wanting:
+        return
+    taken = set(matched.values())
+    candidates = [c for c in located if c.serial is None and c.camera not in taken]
+    if len(wanting) == 1 and len(candidates) == 1:
+        matched[wanting[0]] = candidates[0].camera
+        resolved[wanting[0]] = candidates[0].identity
+        return
+    missing.extend(wanting)
+
+
+def check_plan(plan: RigPlan, cams: Iterable[CameraLocation]) -> PlanCheck:
+    """Match plan bindings to enumerated cameras and flag bus conflicts.
+
+    Postcondition: every view appears in exactly one of ``matched``/``missing``.
+    """
+    located = list(cams)
+    by_identity = {c.identity: c for c in located}
+    matched: dict[str, str] = {}
+    missing: list[str] = []
+    resolved: dict[str, str] = {}  # view -> camera identity actually used
+    for binding in plan.cameras:
+        if binding.unserialized:
+            continue
+        cam = by_identity.get(binding.identity)
+        if cam is None:
+            missing.append(binding.view)
+        else:
+            matched[binding.view] = cam.camera
+            resolved[binding.view] = cam.identity
+    _resolve_unserialized(plan, located, matched, missing, resolved)
+    missing.sort(key=[b.view for b in plan.cameras].index)
+    planned = set(resolved.values())
+    conflicted = set(
+        conflicting_identities([c for c in located if c.identity in planned])
+    )
+    conflicts = tuple(
+        b.view for b in plan.cameras if resolved.get(b.view) in conflicted
+    )
+    unplanned = tuple(sorted(i for i in by_identity if i not in planned))
+    return PlanCheck(
+        matched=matched,
+        missing=tuple(missing),
+        conflicts=conflicts,
+        unplanned=unplanned,
+    )

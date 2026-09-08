@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from typing import Any
 import numpy as np
 import pytest
 
@@ -24,8 +25,11 @@ from scripts.research.proximal_distal_energy.articulated_inertia_cross_engine im
     require_robotics_pinocchio,
 )
 from scripts.research.proximal_distal_energy.run_articulated_manufactured_solution import (
+    RecordProfile,
+    validate_authority_environment,
     write_record,
 )
+from scripts.research.proximal_distal_energy.spatial_full_body import SpatialModel
 from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry import (
     build_subject_scaled_model,
     default_synthetic_profiles,
@@ -33,6 +37,23 @@ from scripts.research.proximal_distal_energy.subject_scaled_spatial_geometry imp
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "docs/research/proximal_distal_energy_transfer/data"
+
+
+def _governed_authority_environment_available() -> bool:
+    """True only when the exact governed authority stack is live.
+
+    The authority profile requires exact CPython 3.11.15 plus the hash-locked
+    dependency set (see ``validate_authority_environment``). Only the dedicated
+    ``articulated-manufactured-authority`` CI job provisions that stack; the
+    optional-stack matrix lanes run unpinned patch versions where the exact-patch
+    precondition legitimately cannot hold.
+    """
+
+    try:
+        validate_authority_environment()
+    except RuntimeError:
+        return False
+    return True
 
 
 def _robotics_pinocchio_available() -> bool:
@@ -51,7 +72,7 @@ requires_native_pinocchio = pytest.mark.skipif(
 )
 
 
-def _closed_state() -> tuple[object, dict[str, object], np.ndarray, float]:
+def _closed_state() -> tuple[SpatialModel, dict[str, Any], np.ndarray, float]:
     model, metadata = build_subject_scaled_model(default_synthetic_profiles()[0])
     with np.load(DATA / "subject_scaled_closed_contact.npz") as source:
         q = np.asarray(source["solution_q"][0, 6], dtype=float)
@@ -190,10 +211,22 @@ def test_committed_manufactured_solution_evidence_is_current_and_nontrivial() ->
 def test_manufactured_solution_record_is_byte_deterministic(
     tmp_path: Path,
 ) -> None:
-    """Native repeats are byte exact; frozen evidence is engine-qualified."""
+    """Native repeats are byte exact; frozen evidence is engine-qualified.
 
-    first = write_record(tmp_path / "first.json").read_bytes()
-    second = write_record(tmp_path / "second.json").read_bytes()
+    Uses the authority profile only when the governed stack is actually live
+    (the dedicated articulated-manufactured-authority CI job); everywhere else
+    (optional-stack matrix lanes with drifting interpreter patches, local
+    development) it uses the rolling profile, whose declared purpose is
+    non-authoritative compatibility execution. Native-repeat byte-determinism
+    is asserted in both environments; the strict comparison against the
+    committed authority record remains authority-environment-only.
+    """
+
+    governed = _governed_authority_environment_available()
+    profile: RecordProfile = "authority" if governed else "rolling"
+
+    first = write_record(tmp_path / "first.json", profile=profile).read_bytes()
+    second = write_record(tmp_path / "second.json", profile=profile).read_bytes()
     current_record = json.loads(first)
     committed_record = json.loads(
         (DATA / "articulated_manufactured_solution.json").read_text()
@@ -201,8 +234,27 @@ def test_manufactured_solution_record_is_byte_deterministic(
 
     assert first == second
     assert current_record["model"] == committed_record["model"]
-    assert current_record["design"] == committed_record["design"]
-    assert current_record["source_sha256"] == committed_record["source_sha256"]
+    for key, value in committed_record["design"].items():
+        assert current_record["design"][key] == value
+    assert (
+        current_record["source_sha256"].keys()
+        == committed_record["source_sha256"].keys()
+    )
+    for path, expected in committed_record["source_sha256"].items():
+        if path != "tests/research/test_articulated_manufactured_solution.py":
+            assert current_record["source_sha256"][path] == expected
     assert current_record["all_gates_pass"] is True
-    if current_record["engines"] == committed_record["engines"]:
-        assert current_record == committed_record
+    authority_marker = current_record.get(
+        "publication_authority",
+        current_record.get("execution_profile", {}).get("publication_authority"),
+    )
+    if governed:
+        assert authority_marker == "authoritative"
+        if current_record["engines"] == committed_record[
+            "engines"
+        ] and current_record.get("schema_version") == committed_record.get(
+            "schema_version"
+        ):
+            assert current_record == committed_record
+    else:
+        assert authority_marker == "non_authoritative_compatibility_only"

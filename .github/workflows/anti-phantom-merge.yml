@@ -183,10 +183,12 @@ jobs:
             CHANGED_FILES=$(git diff --name-only "$MERGE_BASE...$HEAD_SHA" || true)
             NUM_CHANGED=$(echo "$CHANGED_FILES" | sed '/^$/d' | wc -l)
             # If the API sees changes but local git still doesn't, trust the API
-            # count to avoid a false-positive rule-1 failure on a racey push.
+            # count AND file list to avoid a false-positive rule-1/rule-3 failure
+            # on a racey push or a merge-base git can't resolve (e.g. #9404).
             if [ "$NUM_CHANGED" -eq 0 ] && [ "$API_FILES" -gt 0 ]; then
-              echo "::notice::API reports $API_FILES changed files; deferring to API count to avoid race-induced false positive"
+              echo "::notice::API reports $API_FILES changed files; deferring to API count and file list to avoid race-induced false positive"
               NUM_CHANGED="$API_FILES"
+              CHANGED_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json files --jq '.files[].path' 2>/dev/null || echo "")
             fi
             RETRIES=$((RETRIES + 1))
           done

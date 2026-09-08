@@ -2,7 +2,6 @@
 # This file is a child copy that shadows or shares code with the Tools repository.
 # Canonical changes must be made in the Tools repository under src/shared/python/
 # and synchronized back to UpstreamDrift. Direct edits here risk being lost.
-
 """Sidekick analytics tools.
 
 Exposes a deterministic summarizer for simulation runs so the AI chat
@@ -15,6 +14,11 @@ The summary is built from a JSON ``manifest.json`` stored under
 ``<runs_dir>/<run_id>/manifest.json``. The default ``runs_dir`` is
 ``~/.golf_modeling_suite/runs`` but can be overridden via the
 ``UPSTREAMDRIFT_SIM_RUNS_DIR`` environment variable.
+
+Provenance: authored in UpstreamDrift for #5464 and upstreamed here under the
+seam ruling for ``ai/tools`` (tools-canonical). UpstreamDrift's copy carried
+the Tools child-copy header without a counterpart existing; this module is
+that counterpart. See D-sorganization/UpstreamDrift#9474.
 """
 
 from __future__ import annotations
@@ -198,8 +202,8 @@ def summarize_simulation_run(run_id: str) -> dict[str, Any]:
 # ── Registry hookup ──────────────────────────────────────────────────
 
 
-_TOOL_NAME = "summarize_simulation_run"
-_TOOL_DESCRIPTION = (
+SIDEKICK_ANALYTICS_TOOL_NAME = "summarize_simulation_run"
+SIDEKICK_ANALYTICS_TOOL_DESCRIPTION = (
     "Summarize a stored simulation run by id. Returns engine, duration, "
     "frame count, key metrics, and a deterministic natural-language "
     "summary suitable for the chat assistant to rephrase."
@@ -219,10 +223,18 @@ def register_sidekick_analytics_tools(registry: ToolRegistry) -> None:
         raise TypeError("registry must be a ToolRegistry instance")
 
     registry.register(
-        name=_TOOL_NAME,
-        description=_TOOL_DESCRIPTION,
+        name=SIDEKICK_ANALYTICS_TOOL_NAME,
+        description=SIDEKICK_ANALYTICS_TOOL_DESCRIPTION,
         category=ToolCategory.ANALYSIS,
         expertise_level=1,
     )(summarize_simulation_run)
 
-    logger.debug("Registered Sidekick analytics tool: %s", _TOOL_NAME)
+    logger.debug("Registered Sidekick analytics tool: %s", SIDEKICK_ANALYTICS_TOOL_NAME)
+
+
+__all__ = [
+    "SIDEKICK_ANALYTICS_TOOL_DESCRIPTION",
+    "SIDEKICK_ANALYTICS_TOOL_NAME",
+    "register_sidekick_analytics_tools",
+    "summarize_simulation_run",
+]

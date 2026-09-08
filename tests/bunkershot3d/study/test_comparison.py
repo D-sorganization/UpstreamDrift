@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from bunkershot3d.study import compare_designs, compare_predicted_designs
-from bunkershot3d.study.comparison import _IntervalEstimate
+from bunkershot3d.study.comparison import DesignComparison, _IntervalEstimate
 from bunkershot3d.study.rng import new_seed_record
 
 pytestmark = pytest.mark.unit
@@ -233,3 +233,35 @@ def test_manifest_records_the_comparison_settings() -> None:
         GRIND_NAMES, data, seed=manifest.seed.entropy, n_bootstrap=500
     )
     np.testing.assert_array_equal(result.probability_best, replay.probability_best)
+
+
+class TestWinnerIsHonest:
+    """``best`` always names somebody; ``winner`` does not (issue #9243)."""
+
+    def _overlapping(self) -> DesignComparison:
+        """Two designs a four-replicate study cannot tell apart."""
+        return compare_designs(
+            ("a", "b"),
+            np.array([[1.0, 1.1, 0.9, 1.05], [1.02, 1.12, 0.92, 1.07]]),
+            seed=11,
+        )
+
+    def test_best_names_a_design_even_when_they_overlap(self) -> None:
+        """Pinned so nobody mistakes it for a verdict."""
+        comparison = self._overlapping()
+        assert not comparison.is_separated()
+        assert comparison.best in {"a", "b"}
+
+    def test_winner_is_none_when_they_overlap(self) -> None:
+        """The property a display may read without overstating the study."""
+        assert self._overlapping().winner is None
+
+    def test_winner_names_the_leader_when_separated(self) -> None:
+        """It has to be able to answer, or it says nothing."""
+        comparison = compare_designs(
+            ("a", "b"),
+            np.array([[1.0, 1.01, 0.99, 1.0], [8.0, 8.01, 7.99, 8.0]]),
+            seed=11,
+        )
+        assert comparison.is_separated()
+        assert comparison.winner == "a"

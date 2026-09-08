@@ -186,13 +186,24 @@ class TestComparison:
         assert widget._bounce_map_a.values.size > 0
         assert widget._bounce_map_b.values.size > 0
 
-    def test_the_comparison_report_ranks_the_two(
+    def test_the_comparison_report_states_a_verdict(
         self, widget: BunkerShotWidget
     ) -> None:
+        """Issue #9243: the report headlines a verdict, never a leader.
+
+        The verdict is allowed to be "indistinguishable", so this asserts that
+        one of the three admissible answers reached the widget -- not that a
+        design name did.
+        """
         widget.run_comparison()
         text = widget.report_text
         assert "A/B:" in text
-        assert "Leader" in text or "not available" in text
+        assert (
+            "INDISTINGUISHABLE" in text
+            or "is better" in text
+            or "not available" in text
+        )
+        assert "Leader" not in text
 
     def test_the_compare_button_is_wired(self, widget: BunkerShotWidget) -> None:
         widget._compare_button.click()

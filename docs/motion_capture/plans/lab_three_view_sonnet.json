@@ -1,0 +1,19 @@
+{
+  "schema_version": "rig-plan/1.0.0",
+  "name": "lab-three-view-sonnet",
+  "cameras": [
+    {
+      "view": "cam_a",
+      "serial": "2605160001"
+    },
+    {
+      "view": "cam_b",
+      "serial": "2601240001"
+    },
+    {
+      "view": "cam_c",
+      "unserialized": true
+    }
+  ],
+  "notes": "All three ELP AR0234 on the Sonnet eGPU root hub 9&1d291187 (validated 2026-09-06). cam_c is the unit without a USB serial, bound by elimination. TS4 on its own Thunderbolt port."
+}

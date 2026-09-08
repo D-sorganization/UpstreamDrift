@@ -131,10 +131,26 @@ def test_gui_load_poses(mock_qapp) -> None:
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
 def test_gui_save_load_clicked(mock_qapp) -> None:
+    """Save/Load open real file dialogs and no-op cleanly on cancel (#8882).
+
+    Before #8882 these handlers only flashed a QToolTip, so calling them
+    unpatched was harmless. They now open a modal QFileDialog, so the
+    dialogs are patched to return the "user cancelled" empty path.
+    """
     win = PoseStudioWindow()
-    # Ensure no crashes on clicking save/load
-    win._on_save_clicked()
-    win._on_load_clicked()
+    with patch(
+        "src.tools.pose_studio.gui.QtWidgets.QFileDialog.getSaveFileName",
+        return_value=("", ""),
+    ) as save_dialog:
+        win._on_save_clicked()
+    assert save_dialog.call_count == 1
+
+    with patch(
+        "src.tools.pose_studio.gui.QtWidgets.QFileDialog.getOpenFileName",
+        return_value=("", ""),
+    ) as load_dialog:
+        win._on_load_clicked()
+    assert load_dialog.call_count == 1
 
 
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")

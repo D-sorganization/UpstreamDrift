@@ -420,3 +420,119 @@ class TestPerturbTorqueProfile:
         """Empty profile must raise ValueError."""
         with pytest.raises(ValueError, match="non-empty"):
             perturb_torque_profile(np.array([]), noise_amplitude=0.1)
+
+
+# ---------------------------------------------------------------------------
+# Physics metrics tests (#9477)
+# ---------------------------------------------------------------------------
+
+
+class TestPhysicsMetrics:
+    """Validate physical energy and Cartesian speed calculations (#9477)."""
+
+    @pytest.mark.unit
+    def test_total_energy_scales_with_mass(self) -> None:
+        """Doubling mass doubles kinetic energy (dimensional check: E = 0.5 * m * v^2 in Joules)."""
+        eng_a = MockEngine(gain=1.0)
+        eng_a.mass = 1.0
+
+        eng_b = MockEngine(gain=1.0)
+        eng_b.mass = 2.0
+
+        cfg = CrossEngineSimConfig(n_trials=1, noise_amplitude=0.0)
+        runner = CrossEnginePerturbationRunner(cfg)
+        runner.register_engine("eng_a", eng_a)
+        runner.register_engine("eng_b", eng_b)
+
+        n_steps = round(runner.config.t_end / runner.config.dt)
+        profile = np.ones(n_steps)
+        results = runner.run_comparison(profile)
+
+        energy_a = results["eng_a"].mean_total_energy_final
+        energy_b = results["eng_b"].mean_total_energy_final
+
+        # Since velocities are identical (same gain and control), energy must scale linearly with mass:
+        assert energy_a > 0.0
+        assert energy_b == pytest.approx(2.0 * energy_a, rel=1e-6)
+
+    @pytest.mark.unit
+    def test_single_link_pendulum_analytic_energy_and_speed(self) -> None:
+        """Analytic check against known single-link pendulum: E = 0.5 * I * omega^2, v_ee = L * omega."""
+
+        class AnalyticPendulumEngine:
+            def __init__(self, mass: float = 2.5, length: float = 1.2) -> None:
+                self.mass = mass
+                self.lengths = (length,)
+                self.inertia = mass * (length**2)
+                self.q = np.array([0.5])
+                self.v = np.array([3.0])  # omega = 3 rad/s
+
+            def reset(self) -> None:
+                self.q = np.array([0.5])
+                self.v = np.array([3.0])
+
+            def set_control(self, u: np.ndarray) -> None:
+                pass
+
+            def step(self, dt: float | None = None) -> None:
+                pass
+
+            def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+                return self.q.copy(), self.v.copy()
+
+        engine = AnalyticPendulumEngine(mass=2.5, length=1.2)
+        cfg = CrossEngineSimConfig(n_trials=1, noise_amplitude=0.0)
+        runner = CrossEnginePerturbationRunner(cfg)
+        runner.register_engine("pendulum", engine)
+
+        n_steps = round(runner.config.t_end / runner.config.dt)
+        results = runner.run_comparison(np.zeros(n_steps))
+        res = results["pendulum"]
+
+        expected_speed = 1.2 * 3.0  # L * omega = 3.6 m/s
+        expected_ke = 0.5 * (2.5 * 1.2**2) * (3.0**2)  # 0.5 * I * omega^2 = 16.2 J
+
+        assert res.mean_end_effector_speed_final == pytest.approx(
+            expected_speed, rel=1e-6
+        )
+        assert res.mean_peak_end_effector_speed == pytest.approx(
+            expected_speed, rel=1e-6
+        )
+        assert res.mean_total_energy_final == pytest.approx(expected_ke, rel=1e-6)
+
+    @pytest.mark.unit
+    def test_queries_native_engine_energy_methods(self) -> None:
+        """Runner queries engine-native total_energy() and get_end_effector_speed() when available."""
+
+        class NativeEnergyEngine:
+            def __init__(self) -> None:
+                self.q = np.zeros(2)
+                self.v = np.zeros(2)
+
+            def reset(self) -> None:
+                pass
+
+            def set_control(self, u: np.ndarray) -> None:
+                pass
+
+            def step(self, dt: float | None = None) -> None:
+                pass
+
+            def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+                return self.q, self.v
+
+            def get_total_energy(self) -> float:
+                return 42.195
+
+            def get_end_effector_speed(self) -> float:
+                return 9.876
+
+        cfg = CrossEngineSimConfig(n_trials=1, noise_amplitude=0.0)
+        runner = CrossEnginePerturbationRunner(cfg)
+        runner.register_engine("native", NativeEnergyEngine())
+
+        n_steps = round(runner.config.t_end / runner.config.dt)
+        results = runner.run_comparison(np.zeros(n_steps))
+
+        assert results["native"].mean_total_energy_final == pytest.approx(42.195)
+        assert results["native"].mean_end_effector_speed_final == pytest.approx(9.876)

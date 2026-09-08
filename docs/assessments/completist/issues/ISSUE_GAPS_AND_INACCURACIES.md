@@ -145,25 +145,32 @@ A comprehensive review of implementation gaps and inaccuracies was conducted on 
 For the full detailed report, please refer to:
 [ISSUE_COMPREHENSIVE_GAPS_2026_02_25.md](ISSUE_COMPREHENSIVE_GAPS_2026_02_25.md)
 
+> Note (2026-09-03, issue #8851): the daily completist reports dated
+> 2026-02-28 through 2026-03-07 were deleted from the repository by
+> `chore: remove stale assessments and archives` (commit `987d67ccb`, PR #1748).
+> Their filenames below are kept as plain text for the historical record; the
+> dead links were removed. The surviving reports start at
+> [`Completist_Report_2026-03-08.md`](../Completist_Report_2026-03-08.md).
+
 ## Update: 2026-02-28
 
-A comprehensive automated analysis of implementation gaps and technical debt markers (`TRACKED_TASK`, `TRACKED_DEFECT`, `NotImplementedError`, `pass`) generated the [Completist_Report_2026-02-28.md](../Completist_Report_2026-02-28.md). This report specifically highlights the severe extent of empty test cases and missing implementation stubs across tool scripts and integration tests.
+A comprehensive automated analysis of implementation gaps and technical debt markers (`TRACKED_TASK`, `TRACKED_DEFECT`, `NotImplementedError`, `pass`) generated the `Completist_Report_2026-02-28.md`. This report specifically highlights the severe extent of empty test cases and missing implementation stubs across tool scripts and integration tests.
 
 ## Update: 2026-03-01
 
-A comprehensive automated analysis of implementation gaps and technical debt markers (`TRACKED_TASK`, `TRACKED_DEFECT`, `NotImplementedError`, `pass`) generated the [Completist_Report_2026-03-01.md](../Completist_Report_2026-03-01.md). This report further reinforces the widespread nature of placeholder logic. In particular, we have identified critical unimplemented stubs throwing `NotImplementedError` that block essential functionality, such as hardware connectivity in `src/deployment/realtime/controller.py` and format conversion utilities in `src/tools/model_generation/converters/format_utils.py`. The presence of placeholder tests using `pass` across unit and integration suites remains a major concern that needs addressing immediately.
+A comprehensive automated analysis of implementation gaps and technical debt markers (`TRACKED_TASK`, `TRACKED_DEFECT`, `NotImplementedError`, `pass`) generated the `Completist_Report_2026-03-01.md`. This report further reinforces the widespread nature of placeholder logic. In particular, we have identified critical unimplemented stubs throwing `NotImplementedError` that block essential functionality, such as hardware connectivity in `src/deployment/realtime/controller.py` and format conversion utilities in `src/tools/model_generation/converters/format_utils.py`. The presence of placeholder tests using `pass` across unit and integration suites remains a major concern that needs addressing immediately.
 
 ## Update: 2026-03-02
 
-An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-02.md](../Completist_Report_2026-03-02.md). The scan identifies 300 critical implementation gaps (stubs/pass blocks) predominantly in core module paths, and 79 feature requests tracked as `TRACKED_TASK`s. New draft issues for the top 50 missing implementations were auto-generated to track their resolution.
+An updated automated analysis of implementation gaps generated `Completist_Report_2026-03-02.md`. The scan identifies 300 critical implementation gaps (stubs/pass blocks) predominantly in core module paths, and 79 feature requests tracked as `TRACKED_TASK`s. New draft issues for the top 50 missing implementations were auto-generated to track their resolution.
 
 ## Update: 2026-03-03
 
-Another automated analysis of implementation gaps generated [Completist_Report_2026-03-03.md](../Completist_Report_2026-03-03.md). The scan identifies critical implementation gaps in `src/deployment/realtime/controller.py` specifically with connection methods and other blocking items.
+Another automated analysis of implementation gaps generated `Completist_Report_2026-03-03.md`. The scan identifies critical implementation gaps in `src/deployment/realtime/controller.py` specifically with connection methods and other blocking items.
 
 ## Update: 2026-03-04
 
-An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-04.md](../Completist_Report_2026-03-04.md) using `scripts/scan_for_incomplete_code.py`. The scan identifies 458 potential issues in 174 files. Specifically, it found:
+An updated automated analysis of implementation gaps generated `Completist_Report_2026-03-04.md` using `scripts/scan_for_incomplete_code.py`. The scan identifies 458 potential issues in 174 files. Specifically, it found:
 
 - **404** empty `pass` blocks, particularly concentrated in test files, indicating widespread gaps in test coverage and assertions.
 - **5** `NotImplementedError` stubs blocking functionality in core utility modules.
@@ -174,15 +181,15 @@ These widespread placeholders must be systematically addressed to ensure system 
 
 ## Update: 2026-03-05
 
-An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-05.md](../Completist_Report_2026-03-05.md) using `scripts/analyze_completist_data.py`. The scan identifies 300 potential critical issues (Stubs) and 79 feature requests (TODOs) as well as technical debt and doc gaps. Many issues are missing implementations related to building and downloading models, and process calculators.
+An updated automated analysis of implementation gaps generated `Completist_Report_2026-03-05.md` using `scripts/analyze_completist_data.py`. The scan identifies 300 potential critical issues (Stubs) and 79 feature requests (TODOs) as well as technical debt and doc gaps. Many issues are missing implementations related to building and downloading models, and process calculators.
 
 ## Update: 2026-03-06
 
-An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-06.md](../Completist_Report_2026-03-06.md) using `scripts/analyze_completist_data.py`. The scan identifies 300 critical gaps, 79 feature gaps, and 25 technical debt items, primarily impacting `src` and `vendor` directories.
+An updated automated analysis of implementation gaps generated `Completist_Report_2026-03-06.md` using `scripts/analyze_completist_data.py`. The scan identifies 300 critical gaps, 79 feature gaps, and 25 technical debt items, primarily impacting `src` and `vendor` directories.
 
 ## Update: 2026-03-07
 
-An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-07.md](../Completist_Report_2026-03-07.md) using `scripts/analyze_completist_data.py`. The scan identifies 300 critical gaps, 79 feature gaps, and 25 technical debt items, primarily impacting `src` and `vendor` directories. 50 new issues were generated to track missing implementations.
+An updated automated analysis of implementation gaps generated `Completist_Report_2026-03-07.md` using `scripts/analyze_completist_data.py`. The scan identifies 300 critical gaps, 79 feature gaps, and 25 technical debt items, primarily impacting `src` and `vendor` directories. 50 new issues were generated to track missing implementations.
 
 ## Update: 2026-03-10
 

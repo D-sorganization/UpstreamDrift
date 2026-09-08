@@ -1,14 +1,8 @@
 {
   "_comment": "Recorded, tolerated duplicate SPEC.md change-log entries. Since Repository_Management#1520 a row is keyed by its pull request rather than by a serial spec version, so the former 'duplicates' map -- 54 version numbers each carried by two rows because two branches claimed the same next-free number -- describes a defect that can no longer occur and has been removed. Key uniqueness is now enforced directly, for rows dated on or after the 2026-09-03 migration cutover; earlier rows legitimately share a governing issue and are exempt.",
   "duplicate_text": {
-    "be3f472ab00fa53b": [
-      "#7277",
-      "#7277"
-    ],
-    "7a2187c9a46792c3": [
-      "#7278",
-      "#7278"
-    ]
+    "be3f472ab00fa53b": ["#7277", "#7277"],
+    "7a2187c9a46792c3": ["#7278", "#7278"]
   },
   "_comment_text": "Change-log rows whose prose is byte-identical. These arise when a hot-prepend conflict is resolved by keeping 'both' rows where one was already a copy of the other, so one change is logged twice. Each entry lists the pull-request keys currently sharing one body. This ratchet is orthogonal to key uniqueness and is kept. Shrink this map when a pair is genuinely reconciled; never grow it to make a build pass. Migrating to PR-keyed rows already shrank it from 3 pairs to 2: the pair formerly at digest 85d49f1ea7858898 (specs 1.0.466 / 1.0.467) no longer has identical prose, because the migration preserved each row's original serial inline."
 }

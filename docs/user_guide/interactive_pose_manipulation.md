@@ -595,7 +595,7 @@ The Golf Modeling Suite provides best-in-class pose manipulation:
 - **Text input** for exact values
 - **Real-time visualization**
 
-📖 **See**: [Interactive Pose Guide](docs/interactive_pose_manipulation.md)
+📖 **See**: [Interactive Pose Guide](../user_guide/interactive_pose_manipulation.md)
 ```
 
 ### 2. **Add Tutorial Videos** (Future Work)

@@ -9,6 +9,7 @@ the model_generation package for representing URDF elements.
 
 from __future__ import annotations  # noqa: E402, F404
 
+import logging  # noqa: E402
 import math  # noqa: E402
 from dataclasses import dataclass, field  # noqa: E402
 from enum import Enum  # noqa: E402
@@ -18,6 +19,8 @@ import numpy as np  # noqa: E402
 from numpy.typing import NDArray  # noqa: E402
 
 from src.shared.python.model_generation.core.contracts import precondition  # noqa: E402
+
+logger = logging.getLogger(__name__)
 
 
 class GeometryType(Enum):
@@ -234,7 +237,12 @@ class Inertia:
         i_sphere = (2.0 / 5.0) * m_sphere * radius**2
         # Parallel axis theorem for hemisphere offset
         hemisphere_offset = length / 2.0 + (3.0 / 8.0) * radius
-        i_sphere_perp = i_sphere + 0.5 * m_sphere * hemisphere_offset**2
+        # Parallel axis theorem. Two hemispheres of mass m_sphere/2 each,
+        # each offset by hemisphere_offset, contribute
+        #     2 * (m_sphere / 2) * hemisphere_offset**2 = m_sphere * offset**2
+        # so there is no factor of 0.5 here. That factor was a real defect,
+        # fixed once and reverted by the squash b8d95ad25.
+        i_sphere_perp = i_sphere + m_sphere * hemisphere_offset**2
 
         i_axial = i_cyl_axial + i_sphere
         i_perp = i_cyl_perp + i_sphere_perp
@@ -473,7 +481,12 @@ class Geometry:
         if self.geometry_type == GeometryType.SPHERE:
             return f'<geometry><sphere radius="{self.dimensions[0]:.6g}"/></geometry>'
         if self.geometry_type == GeometryType.CAPSULE:
-            # URDF doesn't have capsule, approximate with cylinder
+            # URDF doesn't have capsule, approximate with cylinder. Warn: the
+            # returned XML describes a different shape from this Geometry.
+            logger.warning(
+                "Capsule geometry approximated as cylinder"
+                " (URDF has no native capsule support)"
+            )
             return (
                 f'<geometry><cylinder radius="{self.dimensions[0]:.6g}" '
                 f'length="{self.dimensions[1]:.6g}"/></geometry>'

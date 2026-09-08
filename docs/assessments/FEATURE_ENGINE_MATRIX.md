@@ -213,8 +213,7 @@ These features are available regardless of which physics engine is selected:
 ## Related Documents
 
 - [Comprehensive Assessment](./Comprehensive_Assessment.md)
-- [PATH_FORWARD](./PATH_FORWARD.md)
-- [Engine Selection Guide](../engine_selection_guide.md)
+- [Engine Selection Guide](../engines/engine_selection_guide.md)
 - [Project Design Guidelines](../project_design_guidelines.qmd)
 - [AI Implementation Plan](../ai_implementation/AI_IMPLEMENTATION_MASTER_PLAN.md)
 

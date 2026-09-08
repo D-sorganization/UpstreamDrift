@@ -13,6 +13,9 @@ pytestmark = pytest.mark.unit
 # they check.
 REPO_ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS = REPO_ROOT / ".github" / "workflows"
+DOCS_GOVERNANCE_ACTION = (
+    REPO_ROOT / ".github" / "actions" / "docs-governance-checks" / "action.yml"
+)
 
 
 def test_docs_ci_runs_docs_governance() -> None:
@@ -36,11 +39,13 @@ def test_docs_ci_runs_docs_governance() -> None:
 
 
 def test_docs_governance_workflow_installs_pytest_asyncio() -> None:
-    """The isolated docs-governance venv must satisfy pyproject pytest options."""
-    workflow = yaml.safe_load(
-        (WORKFLOWS / "docs-governance.yml").read_text(encoding="utf-8")
-    )
-    steps = workflow["jobs"]["doc-governance"]["steps"]
+    """The isolated docs-governance venv must satisfy pyproject pytest options.
+
+    The steps moved from docs-governance.yml into the shared composite action
+    so ci-standard.yml's docs-governance-gates job runs the identical list.
+    """
+    action = yaml.safe_load(DOCS_GOVERNANCE_ACTION.read_text(encoding="utf-8"))
+    steps = action["runs"]["steps"]
     install_steps = [
         step for step in steps if step.get("name") == "Install test dependencies"
     ]

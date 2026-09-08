@@ -344,6 +344,7 @@ class LauncherPresentationMetadata:
     status: str
     web_route: str | None = None
     default_launch: str = "tab"
+    categories: tuple[str, ...] = ()
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> LauncherPresentationMetadata:
@@ -360,22 +361,44 @@ class LauncherPresentationMetadata:
                 f"Launcher metadata missing required fields: {sorted(missing)}"
             )
 
+        valid_categories = {
+            "physics_engine",
+            "simulation",
+            "motion_matching",
+            "motion_capture",
+            "tool",
+            "documentation",
+            "biomechanics",
+            "external",
+        }
+
         category = str(data["category"]).strip()
         require(
-            category
-            in {
-                "physics_engine",
-                "simulation",
-                "motion_matching",
-                "motion_capture",
-                "tool",
-                "documentation",
-                "biomechanics",
-                "external",
-            },
-            "launcher category must be one of: physics_engine, simulation, motion_matching, motion_capture, tool, documentation, biomechanics, external",
+            category in valid_categories,
+            f"launcher category must be one of: {', '.join(sorted(valid_categories))}",
             category,
         )
+
+        categories_raw = data.get("categories")
+        categories: tuple[str, ...] = ()
+        if categories_raw:
+            if isinstance(categories_raw, list):
+                for item in categories_raw:
+                    item_str = str(item).strip()
+                    require(
+                        item_str in valid_categories,
+                        f"launcher category in categories list must be one of: {', '.join(sorted(valid_categories))}",
+                        item_str,
+                    )
+                categories = tuple(str(item).strip() for item in categories_raw)
+            elif isinstance(categories_raw, str):
+                item_str = categories_raw.strip()
+                require(
+                    item_str in valid_categories,
+                    f"launcher category in categories list must be one of: {', '.join(sorted(valid_categories))}",
+                    item_str,
+                )
+                categories = (item_str,)
 
         logo = str(data["logo"]).strip()
         status = str(data["status"]).strip()
@@ -400,6 +423,7 @@ class LauncherPresentationMetadata:
                 web_route_raw.strip() if isinstance(web_route_raw, str) else None
             ),
             default_launch=default_launch,
+            categories=categories,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -410,6 +434,8 @@ class LauncherPresentationMetadata:
             "status": self.status,
             "default_launch": self.default_launch,
         }
+        if self.categories:
+            data["categories"] = list(self.categories)
         if self.web_route:
             data["web_route"] = self.web_route
         return data

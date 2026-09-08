@@ -26,13 +26,29 @@ _cv2_state: dict[str, Any] = {"lib": None, "invalid": False}
 
 
 def get_cv2() -> Any:
-    """Lazy import of OpenCV to speed up initial load."""
+    """Lazy import of OpenCV to speed up initial load.
+
+    Postcondition: returns the imported ``cv2`` module, or ``None`` when
+    OpenCV is unusable. Every caller in this mixin already branches on
+    ``None``; this function must therefore never propagate.
+
+    ``ImportError`` is not the only way an OpenCV import fails. A
+    half-initialised install -- typically one whose ``sys.modules`` entries
+    were disturbed by another test's mock -- fails inside cv2's own
+    ``bootstrap()`` with ``AttributeError: partially initialized module 'cv2'
+    has no attribute 'mat_wrapper'``. Because this is reached from
+    ``_on_timer``, i.e. from inside a Qt slot, an escaping exception is fatal
+    under PyQt6 and aborted the whole 3.11 test lane (UD #9474). Narrowing the
+    guard to ``ImportError`` was the defect; the contract was always "module
+    or ``None``".
+    """
     if _cv2_state["lib"] is None and not _cv2_state["invalid"]:
         try:
             import cv2
 
             _cv2_state["lib"] = cv2
-        except ImportError:
+        except Exception:  # noqa: BLE001 - see contract note above
+            logger.warning("OpenCV is unavailable or broken", exc_info=True)
             _cv2_state["invalid"] = True
     return _cv2_state["lib"]
 

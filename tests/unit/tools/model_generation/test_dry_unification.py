@@ -125,7 +125,7 @@ class TestQuickFunctionsUseSharedPresets:
         """Create a mock ParametricBuilder that records set_parameters calls."""
         mock_builder = MagicMock()
         mock_result = MagicMock()
-        mock_result.solver_status = "success"
+        mock_result.success = True
         mock_result.urdf_xml = "<robot name='test'/>"
         mock_builder.build.return_value = mock_result
         return mock_builder
@@ -266,7 +266,7 @@ class TestPresetsNotMutated:
 
         mock_builder = MagicMock()
         mock_result = MagicMock()
-        mock_result.solver_status = "success"
+        mock_result.success = True
         mock_result.urdf_xml = "<robot/>"
         mock_builder.build.return_value = mock_result
 
