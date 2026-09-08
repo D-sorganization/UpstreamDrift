@@ -23,6 +23,10 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.config.model_source_providers import (
+    TOOLS_PATH_SCHEME,
+    strip_tools_scheme,
+)
 from src.shared.python.config.tools_vendor_authority import (
     ToolsVendorAuthority,
     inspect_tools_vendor_authority,
@@ -274,6 +278,17 @@ def resolve_tile_target(model: Any, repo_root: Path) -> TileTargetResolution:
         )
     if path.startswith("virtual/"):
         return _resolve_virtual(path, repo_root)
+    if path.startswith(TOOLS_PATH_SCHEME):
+        # The scheme itself declares vendor provenance (issue #9478): the
+        # path resolves against the pinned vendor root, never the repo.
+        stripped = strip_tools_scheme(path)
+        require(
+            stripped is not None,
+            "tools:// entry point must strip to a concrete path",
+            stripped,
+        )
+        assert stripped is not None  # mypy narrowing; validated by require above
+        return _resolve_tools_vendor(stripped, repo_root, _get(model, "source_root"))
     if _get(model, "provider") == "tools":
         return _resolve_tools_vendor(path, repo_root, _get(model, "source_root"))
     source_root = _get(model, "source_root")
@@ -282,3 +297,45 @@ def resolve_tile_target(model: Any, repo_root: Path) -> TileTargetResolution:
     if tile_type == "shared_repo":
         return _resolve_shared_repo(path, repo_root)
     return _resolve_local_file(path, repo_root)
+
+
+READY_MATURITY_STATUSES = frozenset({"ready", "beta"})
+"""Registry statuses that claim the tile's entry point launches.
+
+Issue #9478 acceptance: a tile claiming one of these statuses whose
+launch target does not resolve is a false registry claim, not a
+documentation nuance.
+"""
+
+
+def ready_maturity_gate(model: Any, repo_root: Path) -> tuple[str, str | None]:
+    """Gate a tile's ready/beta maturity claim against target reality.
+
+    Args:
+        model: A registry entry exposing ``id``, ``status``, and optional
+            ``path``, ``type``, ``provider``, ``source_root`` attributes.
+        repo_root: The UpstreamDrift checkout root.
+
+    Returns:
+        ``(outcome, reason)`` where outcome is ``"ok"`` when the claim is
+        backed (or the tile makes no ready/beta claim), ``"skip"`` when
+        the target lives in the pinned Tools vendor gitlink and that
+        surface is simply not materialised in this checkout (an
+        environment gap, never faked as success), and ``"fail"`` when the
+        declared maturity is false — the registry lie the gate exists to
+        stop (issue #9478).
+    """
+    if _get(model, "status").lower() not in READY_MATURITY_STATUSES:
+        return "ok", None
+    resolution = resolve_tile_target(model, repo_root)
+    if resolution.resolvable:
+        return "ok", None
+    if resolution.kind == KIND_PATHLESS:
+        # Pathless tiles are governed by the web-contract rule
+        # (``test_tile_launch_target_resolves``); no native claim to gate.
+        return "ok", None
+    if resolution.kind == KIND_TOOLS_VENDOR:
+        authority = _cached_tools_authority(str(repo_root))
+        if not authority.available:
+            return "skip", resolution.reason
+    return "fail", resolution.reason
