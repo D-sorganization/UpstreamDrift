@@ -28,7 +28,7 @@ The absence of a `contradicted` row does not mean that every mechanism survived 
 | `external_methods_or_measurement` | 10 |
 | `external_modeling_or_simulation` | 15 |
 | `external_review_or_synthesis` | 10 |
-| `project_derivation_or_document` | 118 |
+| `project_derivation_or_document` | 113 |
 | `project_executable_or_generated` | 299 |
 | `prospective_or_unexecuted` | 15 |
 
