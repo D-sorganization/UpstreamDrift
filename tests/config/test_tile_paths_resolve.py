@@ -36,6 +36,22 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 pytestmark = pytest.mark.unit
 
 
+def _vendor_gitlink_materialised() -> bool:
+    """True when this checkout materialised the pinned vendor/ud-tools
+    gitlink as an initialized, clean worktree."""
+    from src.shared.python.config.tools_vendor_authority import (
+        inspect_tools_vendor_authority,
+    )
+
+    return inspect_tools_vendor_authority(REPO_ROOT).available
+
+
+requires_vendor_gitlink = pytest.mark.skipif(
+    not _vendor_gitlink_materialised(),
+    reason="vendor/ud-tools gitlink is not materialised in this checkout",
+)
+
+
 def _all_tiles() -> list[LauncherTile]:
     manifest = LauncherManifest.load()
     return list(manifest.tiles)
@@ -256,6 +272,7 @@ class TestReadyMaturityGate:
         outcome, reason = ready_maturity_gate(model, tmp_path)
         assert outcome == "skip", reason
 
+    @requires_vendor_gitlink
     def test_tools_vendor_missing_entry_fails(self, tmp_path: Path) -> None:
         """With the vendor materialised (real repo root), a ready Tools
         tile naming a path absent from the pinned tree fails."""
@@ -347,6 +364,7 @@ class TestToolsPathProvenance:
             "provider: tools entries without the tools:// scheme: " + str(offenders)
         )
 
+    @requires_vendor_gitlink
     def test_tools_scheme_resolves_against_vendor_root(self) -> None:
         """A ``tools://`` path resolves inside the pinned vendor/ud-tools
         gitlink, never against the repository root."""
@@ -370,6 +388,7 @@ class TestToolsPathProvenance:
             "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py"
         )
 
+    @requires_vendor_gitlink
     def test_tools_scheme_does_not_resolve_as_local_file(self) -> None:
         """A ``tools://`` path for a file that only exists locally still
         resolves through the vendor authority, never the repo root."""
