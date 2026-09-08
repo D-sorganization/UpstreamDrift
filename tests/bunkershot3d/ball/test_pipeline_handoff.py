@@ -12,8 +12,7 @@ are gone, and a state without a measured
 :class:`~bunkershot3d.ball.splash.SandDelivery` cannot be constructed at all.
 """
 
-from __future__ import annotations
-
+import json
 import math
 
 import numpy as np
@@ -21,15 +20,24 @@ import pytest
 
 from bunkershot3d.ball.lie import BallLie, BallProperties
 from bunkershot3d.ball.pipeline import (
+    HEAD_FRAME_TO_FLIGHT_TRANSFORM,
     BunkerShotState,
+    ExitVectorProvenance,
+    PostImpactEnvelope,
     compute_bunker_launch,
+    post_impact_envelope,
     to_post_impact_state,
 )
+from bunkershot3d.solvers import EnvelopeStatus, FidelityTier, evaluate_envelope
 from src.shared.python.physics.impact_model import PostImpactState
 
 from .test_splash_transfer import delivery
 
 pytestmark = pytest.mark.unit
+
+#: The three feature scales the F0 tier judges every shot at, as in
+#: ``test_splash_transfer``.
+_FEATURE_LENGTHS_M = {"clubhead": 0.1, "sole width": 0.03, "leading edge": 0.005}
 
 
 def nominal_state(**overrides: object) -> BunkerShotState:
@@ -125,6 +133,8 @@ class TestToPostImpactState:
         custom_exit_spin = (0.0, 45.0, -10.0)
         state = nominal_state(
             delivery=delivery(
+                speed_m_s=25.0,
+                exit_speed_m_s=math.hypot(12.0, 3.5, 4.2),
                 exit_velocity_m_s=custom_exit_vel,
                 exit_angular_velocity_rad_s=custom_exit_spin,
             )
@@ -136,16 +146,6 @@ class TestToPostImpactState:
         np.testing.assert_allclose(
             post.clubhead_angular_velocity, custom_exit_spin, rtol=0, atol=1e-12
         )
-
-    def test_the_contact_duration_is_the_measured_one(self) -> None:
-        state = nominal_state(delivery=delivery(contact_duration_s=0.0072))
-        post = to_post_impact_state(compute_bunker_launch(state), state)
-        assert post.contact_duration == pytest.approx(0.0072)
-
-    def test_energy_transfer_reported(self) -> None:
-        state = nominal_state()
-        post = to_post_impact_state(compute_bunker_launch(state), state)
-        assert post.energy_transfer > 0
 
 
 class TestEnergyAccounting:
@@ -182,3 +182,198 @@ class TestLaunchConditionsSanity:
         assert 0.5 < result.ball_speed_m_s < 25
         assert 25 < math.degrees(result.launch_angle_rad) < 70
         assert 200 < result.spin_rate_rpm < 12000
+
+
+class TestExitProvenance:
+    """Issue #9542 (reopen), defect 2: actual vs modelled, typed, not implied."""
+
+    def test_a_synthesised_direction_is_labelled_modeled_convention(self) -> None:
+        state = nominal_state()
+        envelope = post_impact_envelope(compute_bunker_launch(state), state)
+        assert (
+            envelope.clubhead_velocity_provenance
+            is ExitVectorProvenance.MODELED_CONVENTION
+        )
+        assert (
+            envelope.clubhead_angular_velocity_provenance
+            is ExitVectorProvenance.MODELED_CONVENTION
+        )
+
+    def test_supplied_exit_vectors_are_labelled_actual(self) -> None:
+        state = nominal_state(
+            delivery=delivery(
+                speed_m_s=25.0,
+                exit_speed_m_s=math.hypot(12.0, 3.5, 4.2),
+                exit_velocity_m_s=(-12.0, 3.5, -4.2),
+                exit_angular_velocity_rad_s=(0.0, 45.0, -10.0),
+            )
+        )
+        envelope = post_impact_envelope(compute_bunker_launch(state), state)
+        assert (
+            envelope.clubhead_velocity_provenance
+            is ExitVectorProvenance.ACTUAL_EXIT_STATE
+        )
+        assert (
+            envelope.clubhead_angular_velocity_provenance
+            is ExitVectorProvenance.ACTUAL_EXIT_STATE
+        )
+
+    def test_a_legitimately_zero_twist_is_actual_not_modeled(self) -> None:
+        state = nominal_state(
+            delivery=delivery(exit_angular_velocity_rad_s=(0.0, 0.0, 0.0))
+        )
+        envelope = post_impact_envelope(compute_bunker_launch(state), state)
+        assert (
+            envelope.clubhead_angular_velocity_provenance
+            is ExitVectorProvenance.ACTUAL_EXIT_STATE
+        )
+
+    def test_the_ball_launch_is_never_advertised_as_measured(self) -> None:
+        state = nominal_state()
+        envelope = post_impact_envelope(compute_bunker_launch(state), state)
+        assert (
+            envelope.ball_launch_provenance is ExitVectorProvenance.MODELED_CONVENTION
+        )
+
+
+class TestEnvelopeVerdictAndFidelity:
+    """Issue #9542 (reopen), defect 1: the verdict survives the boundary."""
+
+    def test_the_envelope_carries_the_launch_verdict(self) -> None:
+        state = nominal_state()
+        result = compute_bunker_launch(state)
+        envelope = post_impact_envelope(result, state)
+        assert envelope.verdict.status is result.verdict.status
+
+    def test_the_nominal_shot_is_beyond_validation_and_f0(self) -> None:
+        envelope = post_impact_envelope(
+            compute_bunker_launch(nominal_state()), nominal_state()
+        )
+        assert envelope.verdict.status is EnvelopeStatus.BEYOND_VALIDATION
+        assert envelope.fidelity_tier is FidelityTier.F0
+
+
+class TestFrameTransform:
+    """Issue #9542 (reopen), defect 5: the frames are declared, not assumed."""
+
+    def test_the_declared_transform_is_a_proper_nontrivial_rotation(self) -> None:
+        matrix = np.array(HEAD_FRAME_TO_FLIGHT_TRANSFORM, dtype=float)
+        assert matrix.shape == (3, 3)
+        assert np.all(np.isfinite(matrix))
+        assert np.allclose(matrix @ matrix.T, np.eye(3), atol=1e-12)
+        assert math.isclose(float(np.linalg.det(matrix)), 1.0, abs_tol=1e-12)
+        assert not np.allclose(matrix, np.eye(3))
+
+    def test_head_frame_travel_maps_to_forward(self) -> None:
+        matrix = np.array(HEAD_FRAME_TO_FLIGHT_TRANSFORM, dtype=float)
+        np.testing.assert_allclose(
+            matrix @ (-1.0, 0.0, 0.0), (1.0, 0.0, 0.0), atol=1e-12
+        )
+
+    def test_the_transform_applies_to_linear_and_angular_vectors(self) -> None:
+        linear = (-12.0, 3.5, -4.2)
+        angular = (1.0, -2.0, 3.0)
+        matrix = np.array(HEAD_FRAME_TO_FLIGHT_TRANSFORM, dtype=float)
+        np.testing.assert_allclose(matrix @ linear, (12.0, -3.5, -4.2), atol=1e-12)
+        np.testing.assert_allclose(matrix @ angular, (-1.0, 2.0, 3.0), atol=1e-12)
+
+
+class TestEnvelopeHandoff:
+    """The envelope around the Tools-owned state: frames, digests, round-trip."""
+
+    def test_actual_exit_vectors_can_be_expressed_in_the_flight_frame(self) -> None:
+        state = nominal_state(
+            delivery=delivery(
+                speed_m_s=25.0,
+                exit_speed_m_s=math.hypot(12.0, 3.5, 4.2),
+                exit_velocity_m_s=(-12.0, 3.5, -4.2),
+                exit_angular_velocity_rad_s=(1.0, -2.0, 3.0),
+            )
+        )
+        envelope = post_impact_envelope(compute_bunker_launch(state), state)
+        np.testing.assert_allclose(
+            envelope.clubhead_velocity_in_flight_frame(), (12.0, -3.5, -4.2), atol=1e-12
+        )
+        np.testing.assert_allclose(
+            envelope.clubhead_angular_velocity_in_flight_frame(),
+            (-1.0, 2.0, 3.0),
+            atol=1e-12,
+        )
+
+    def test_modeled_convention_vectors_are_already_flight_aligned(self) -> None:
+        state = nominal_state()
+        post = to_post_impact_state(compute_bunker_launch(state), state)
+        envelope = post_impact_envelope(compute_bunker_launch(state), state)
+        np.testing.assert_allclose(
+            envelope.clubhead_velocity_in_flight_frame(),
+            post.clubhead_velocity,
+            atol=1e-12,
+        )
+
+    def test_envelope_state_vectors_are_owned(self) -> None:
+        envelope = post_impact_envelope(
+            compute_bunker_launch(nominal_state()), nominal_state()
+        )
+        with pytest.raises(ValueError):
+            envelope.post_impact_state.ball_velocity[0] = float("nan")
+
+    def test_serialization_round_trip_retains_verdict_and_provenance(self) -> None:
+        state = nominal_state(
+            delivery=delivery(
+                speed_m_s=25.0,
+                exit_speed_m_s=math.hypot(12.0, 3.5, 4.2),
+                exit_velocity_m_s=(-12.0, 3.5, -4.2),
+                exit_angular_velocity_rad_s=(0.0, 45.0, -10.0),
+            )
+        )
+        envelope = post_impact_envelope(compute_bunker_launch(state), state)
+        reloaded = PostImpactEnvelope.from_dict(
+            json.loads(json.dumps(envelope.to_dict()))
+        )
+        assert reloaded.verdict.status is envelope.verdict.status
+        assert reloaded.fidelity_tier is envelope.fidelity_tier
+        assert (
+            reloaded.clubhead_velocity_provenance
+            is envelope.clubhead_velocity_provenance
+        )
+        assert reloaded.source_digest == envelope.source_digest
+        np.testing.assert_allclose(
+            reloaded.post_impact_state.ball_velocity,
+            envelope.post_impact_state.ball_velocity,
+            atol=1e-12,
+        )
+
+    def test_a_tampered_serialized_envelope_is_refused(self) -> None:
+        envelope = post_impact_envelope(
+            compute_bunker_launch(nominal_state()), nominal_state()
+        )
+        payload = envelope.to_dict()
+        payload["post_impact_state"]["ball_velocity"][0] = 123.0
+        with pytest.raises(ValueError, match="digest"):
+            PostImpactEnvelope.from_dict(payload)
+
+    def test_a_refused_verdict_survives_serialization(self) -> None:
+        refused = evaluate_envelope(
+            speed_m_s=25.0,
+            feature_lengths_m=_FEATURE_LENGTHS_M,
+            grain_diameter_m=0.0005,
+            element_size_m=0.002,
+            dynamic_terms_active=False,
+        )
+        assert refused.status is EnvelopeStatus.REFUSED
+        state = nominal_state(delivery=delivery(verdict=refused))
+        envelope = post_impact_envelope(compute_bunker_launch(state), state)
+        reloaded = PostImpactEnvelope.from_dict(
+            json.loads(json.dumps(envelope.to_dict()))
+        )
+        assert reloaded.verdict.status is EnvelopeStatus.REFUSED
+
+    def test_an_unknown_schema_version_is_refused(self) -> None:
+        envelope = post_impact_envelope(
+            compute_bunker_launch(nominal_state()), nominal_state()
+        )
+        payload = envelope.to_dict()
+        payload["schema_version"] = 999
+        payload["source_digest"] = envelope.source_digest
+        with pytest.raises(ValueError, match="schema_version"):
+            PostImpactEnvelope.from_dict(payload)

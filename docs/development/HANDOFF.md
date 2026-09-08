@@ -5,37 +5,45 @@ Keep this file current and concise. Replace instructional placeholders; do not a
 ## Identity
 
 - Repository: `D-sorganization/UpstreamDrift`
-- Working directory: `C:/tmp/UD_w9409` (per-issue fleet workspace)
-- Branch: `claude/issue-9409-always-on-gate`
-- Baseline commit: `191351b` (`191351b` = `feat(reconstruct): many tape-measured segments ... (#9708)`, head of `main` at branch time)
+- Working directory: `C:/tmp/UD_w9542`
+- Branch: `claude/issue-9542-exit-envelope`
+- Baseline commit: `191351bdf84b8b46e2c95dddc073fc8555ce4b12`
 - Implementation commit: `SELF` — the commit containing this update; resolve with `git rev-parse HEAD`
-- Pull request: opened immediately after this commit is pushed (`Fixes #9409`); see the branch's open PR list
-- Governing issue/epic: D-sorganization/UpstreamDrift#9409 (program: D-sorganization/Repository_Management#1505; workflow governance RM #1505 / #1507)
+- Pull request: [#9728](https://github.com/D-sorganization/UpstreamDrift/pull/9728) — open, ready for review
+- Governing issue/epic: #9542 (parent epic #9541)
 
 ## Objective and Status
 
-- Objective: make the required `quality-gate` honest for every PR by adding an always-on minimal unit lane, and prevent the conftest `sys.modules["src"]` pivot failure class (issue #9402 / PR #9404) from recurring.
-- Status: in_review
-- Completed:
-  - `.github/workflows/ci-standard.yml`: new `always-on-unit-lane` job (no `if:` gate, `timeout-minutes: 10`) running `scripts/ci/verify_installation.py` (core dependency imports, `src.*` suite module imports, and the shared Tools alias-root import smoke), the top-level `tests/smoke` test files, and `tests/shared_contracts/`. `quality-gate` now `needs` it unconditionally and requires result `success` even on docs-only PRs. The literal `cancel-in-progress: true` is untouched; the main-branch cancel exemption is deliberately NOT implemented here (separate RM campaign).
-  - `tests/unit/repo_hygiene/test_no_conftest_src_module_pivot.py`: static AST guard — no `conftest.py` anywhere in the repo may bind/delete/`pop`/`setdefault` `sys.modules["src"]` directly; the shadow must go through `tests.helpers.engine_src_pivot.EngineSrcPivot`. TDD: RED verified by a scratch conftest pivot, then removed for GREEN.
-  - `docs/workflows/WORKFLOW_TRACKING.md`: documents the always-on lane.
-  - `docs/development/DEVELOPMENT_LOG.md`: `DL-#9409` entry created.
-- Remaining (deliberately deferred, tracked on #9409):
-  - Main-branch `cancel-in-progress` exemption — governed by the RM campaign, out of scope here.
-  - Nightly cross-engine dedupe (#8361 canonical; #8725/#9002) — not touched.
-  - Branch-protection ruleset change to require `lod-quality-gate` alongside the literally-named `quality-gate` context — a repository-settings change that cannot be made from a PR; note for the repo owner (see `quality-gate.yml` header comment).
+- Objective: Reject reflected poses are already handled (PR #9574); this increment makes `SandDelivery`'s exit record one consistent owned snapshot (reopen defects 3+4), labels the legacy synthesized launch convention explicitly (defect 2), and delivers the versioned post-impact result envelope with frame transform and verdict (defects 1+5).
+- Status: ready for review
+- Completed: contradictory `exit_speed_m_s`/`exit_velocity_m_s` pairs refused at construction; list-supplied exit vectors owned/copied and re-validated so post-construction mutation cannot invalidate the record; `ExitVectorProvenance` labels (actual vs modeled convention) on the `to_post_impact_state` boundary; `PostImpactEnvelope` with `ValidityVerdict`, `FidelityTier.F0`, per-group frames, `HEAD_FRAME_TO_FLIGHT_TRANSFORM`, schema version, SHA-256 source digest, JSON round trip, flight-frame expressions; 20 new focused tests (RED first, then GREEN).
+- Remaining: issue #9542 completion criteria that require merged protected PRs with rendered/numerical evidence per the issue's closing policy; GUI/workbench adoption of the envelope is intentionally out of scope.
 
 ## Files and Decisions
 
-- Files changed:
-  - `.github/workflows/ci-standard.yml` — added `always-on-unit-lane` job; extended `quality-gate` needs/env/aggregate script.
-  - `tests/unit/repo_hygiene/test_no_conftest_src_module_pivot.py` — new hygiene guard (ratchet ledger `_PREEXISTING_SRC_PIVOT_CONFTESTS` is empty and must only shrink).
-  - `docs/workflows/WORKFLOW_TRACKING.md`, `docs/development/HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md` — governance/bookkeeping.
-- Key decisions:
-  - Reuse `scripts/ci/verify_installation.py` for the import smoke rather than adding a new script: it already resolves every shared Tools alias root through `SharedImportAliasFinder` (`check_shared_alias_roots`) and imports the `src.*` suite modules.
-  - The lane installs the same dependency set as `unit-test-gate` (`requirements-dev.lock` + editable install + hypothesis toolcache hygiene + numpy/scipy ABI pin) minus the xvfb/apt steps, because the lane only runs headless-safe tests.
-  - The guard is static (AST) so it cannot itself pivot modules while checking; the two legitimate pivot conftests pass because they delegate to `EngineSrcPivot`.
+- Files changed: `src/bunkershot3d/ball/splash.py` (exit-record consistency + ownership), `src/bunkershot3d/ball/pipeline.py` (provenance labels, frame transform, envelope), `tests/bunkershot3d/ball/test_splash_transfer.py`, `tests/bunkershot3d/ball/test_pipeline_handoff.py` (RED-first tests), this handoff and `docs/development/DEVELOPMENT_LOG.md`.
+- Key decisions: reused `bunkershot3d.solvers.envelope.ValidityVerdict` and `provenance.hashing.canonical_json` instead of new verdict/digest code (DRY); exit speed and exit vector are two representations of one measurement so they must agree within `EXIT_SPEED_AGREEMENT_TOLERANCE` (rel 1e-6, abs 1e-6); provenance determines frame (`ACTUAL_EXIT_STATE` → bunker solver world, `MODELED_CONVENTION` → launch frame) and the envelope enforces the pair; the pi-about-z `HEAD_FRAME_TO_FLIGHT_TRANSFORM` is a proper rotation (det +1), never an axis reflection; envelope `schema_version` 1 with digest-over-payload tamper detection.
+- User-owned or unrelated worktree changes: none observed
+
+## Validation
+
+- `python -m pytest tests/bunkershot3d/ball/test_splash_transfer.py tests/bunkershot3d/ball/test_pipeline_handoff.py -q -o addopts=""` — pass, 64 passed (was 44 baseline + 20 new)
+- `ruff check <changed files>` — pass; `black --line-length 100 <changed files>` — applied
+- Neighbor consumers run: `tests/bunkershot3d/ball/test_launch_credibility.py tests/bunkershot3d/ball/test_lie_dependent_transfer.py tests/bunkershot3d/metrics/test_accelerated_mass_8659.py tests/unit/tools/bunker_shot_gui/test_uncertainty_propagation_9243.py` — 105 passed, 2 failed; the 2 failures (`test_uncertainty_propagation_9243.py::TestPlayabilityWindowCarriesABand::test_the_area_band_is_not_decorative`, `::TestWhatDominates::test_the_mass_interval_swamps_the_budget`) reproduce on clean baseline `191351b` and are unrelated pre-existing failures.
+
+## Blockers and Risks
+
+- Blockers: none
+- Risks/assumptions: full bunkershot3d suite and heavy-backend CI not run locally per fleet focused-test policy; CI validates those. The #9574 test `test_preserves_actual_exit_velocity_and_angular_velocity` fixture was corrected to carry a consistent exit pair (its synthetic 12/3.5/-4.2 vector with the default 15 m/s exit speed now contradicts the new consistency contract).
+
+## Next Steps
+
+1. Open protected PR to `main` with `Fixes #9542`, label `agent:claude`, RED/GREEN evidence in body.
+2. Follow-up: adopt `post_impact_envelope` in the bunker GUI/workbench boundary so the carry verdict and provenance replace the separate workbench verdict.
+
+## Change Log
+
+- `SELF` — SandDelivery exit-record consistency/ownership, provenance labeling, PostImpactEnvelope with frames/verdict/digest; tests RED→GREEN; handoff and development log created.
 - Working directory: `C:/tmp/UD_w9733`
 - Branch: `claude/issue-9733-fail-fast`
 - Baseline commit: `dbc6727aa` (origin/main)
@@ -76,9 +84,6 @@ Keep this file current and concise. Replace instructional placeholders; do not a
 
 ## Validation
 
-- `python -m pytest tests/unit/repo_hygiene/test_no_conftest_src_module_pivot.py -p no:cacheprovider --no-cov -q` — RED with scratch pivot conftest present (guard fails listing the scratch file), GREEN after removal (2 passed).
-- `python -c "import yaml; yaml.safe_load(open('.github/workflows/ci-standard.yml', encoding='utf-8'))"` — parses; job count 29 with `always-on-unit-lane` present in `jobs` and in `quality-gate.needs`. Parse-only: execution is validated by CI.
-- Focused local test runs only; the machine is shared with concurrent fleet agents, so no repo-wide suite was run. Heavy native stacks were not installed locally; CI validates those (disclosed in the PR body).
 - `python -m pytest tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py -p no:warnings` — 6 passed.
 - `python -m pytest tests/unit/repo_hygiene -q -p no:warnings --tb=no` — failure set byte-identical to the pristine-`main` baseline (7 pre-existing environment failures).
 - `python -m pytest tests/unit/api -q -p no:warnings --tb=no` — failure set identical to baseline (17 pre-existing; only mock-id/temp-path text differs).
