@@ -164,6 +164,10 @@ frame range, speed and the standard provenance block. `compare-takes` stitches
 through the same compositor. The tile's _Export multiview_ button exports
 through the live pane's chosen layout (#9813).
 
+Measured on the lab's three-camera rig, with both composite figures and the
+recorder's frame counts:
+[`evidence/capture_rig_multiview.md`](evidence/capture_rig_multiview.md).
+
 ## Live Preview
 
 _Preview cameras_ opens every planned view through the same camera binding
