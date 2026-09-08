@@ -107,6 +107,7 @@ Seam (#9406) and failure triage (#9474): see
    case enumeration, atomic resume, typed failures, and no outcome promotion.
 3. Execute the six registered cases only after runner code and tests merge.
    Never import or relabel legacy checkpoints as outcomes.
+4. #9483: the stale 15-tile nav-gap audit `reports/feature_navigation_gaps/` is deleted (findings dispositioned in the deleting PR); live tile truth is the `src/config/models.yaml` registry plus the generated launcher manifest (#9412/#9437/#9478).
 
 ## Scientific Boundaries
 
@@ -143,8 +144,7 @@ Seam (#9406) and failure triage (#9474): see
 
 ## Validation
 
-Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` and
-`-n 0` for pytest.
+Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` with `-n 0` for pytest.
 
 ```powershell
 python -m pytest -n 0 -q tests/research/test_articulated_distributed_smoke_registration.py
