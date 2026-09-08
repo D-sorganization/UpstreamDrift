@@ -1,6 +1,19 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-07 18:20 PDT
+## Impact Dynamics and Acoustics: #9700
+
+- Inventory/design slice #9701 is locally verified on `docs/9700-impact-acoustics-program`,
+  based on `40308a0c`; PR #9706; initial implementation `077ae9df9`. Theory: AffineDrift #4253; provider: Tools #5068.
+- The merge-sync pre-push initially hung during import discovery with an empty
+  vendor directory; initialized the existing eab74a901a Tools pin and reran.
+- PR #9706 synced protected main `c2322f02df62057f18c652bdf28de3bab01cd369`; both SPEC row sets retained.
+- Integration plan: `docs/development/impact_acoustics_program.md` (complete).
+- Reuse impact/shaft and moving-base/articulated research infrastructure. Preserve
+  #8557 protected evidence, vendored Tools pin, manufactured-data boundaries and
+  workstation recovery restrictions. No calibrated acoustic solver is established.
+
+Updated: 2026-08-30 10:02 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
