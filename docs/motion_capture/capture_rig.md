@@ -149,14 +149,33 @@ what it does and, when grey, why.
 ## Live Preview
 
 _Preview cameras_ opens every planned view through the same camera binding
-the recorder uses (`src/motion_capture/rig/binding.py`) and shows the streams
-side by side above the player, one worker thread per camera, refreshed at up
-to 15 Hz. The plan path is prefilled with the lab plan and the session folder
+the recorder uses (`src/motion_capture/rig/binding.py`) and composites the
+latest frame of every view into one canvas above the player (#9813), one
+worker thread per camera, refreshed at up to 15 Hz. The plan path is prefilled with the lab plan and the session folder
 with a fresh `sessions/<timestamp>-take`, so _Record_ works out of the box:
 pressing it releases the cameras (ffmpeg needs the devices), runs the
 recorder, loads the take into the player and resumes the preview. A plan that
 cannot be realised on this machine is reported on the preview's status line
 rather than raised.
+
+### Multiview Live and Playback
+
+Both viewing panes are drawn through a `LayoutSpec` (#9813, #9814). The
+picker above each canvas lists the built-in presets and every saved layout;
+_Edit..._ opens the layout editor beside it, with live thumbnails, and each
+edit applies as you make it. A view that the layout does not show is still
+captured, and the same view may appear twice (full plus a cropped detail).
+The chosen layout name is saved with the pane arrangement, so both come back
+on the next start.
+
+Playback composites several of the session's sources at once: `recorded`
+tiles show the raw recording (or its proxy) and `overlay` tiles the same
+footage with the detector's pose and the ticked variants' models drawn on it,
+so raw and overlay of one view can sit side by side. Frame *k* is the same
+instant in every tile — when the manifest carries a strobe-alignment block
+each reader is shifted by its whole-frame offset. Scrubbing, play/pause,
+speed, single-frame stepping and _Export PNG..._ (the canvas exactly as shown)
+sit under the canvas.
 
 ### Panes, Layouts and Recording Controls
 

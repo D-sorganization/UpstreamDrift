@@ -17,6 +17,7 @@ show.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 
 from PyQt6.QtCore import QByteArray, QSettings, Qt
 from PyQt6.QtWidgets import (
@@ -35,6 +36,7 @@ from src.shared.python.core.contracts import require
 from src.shared.python.theme.responsive import wrap_in_scroll_area
 
 LAST_LAYOUT = "__last__"  # auto-saved on shutdown, never listed
+EXTRAS = "extras"  # sub-group of per-layout strings the panes contribute
 ORGANIZATION = "UpstreamDrift"
 APPLICATION = "CaptureRig"
 DOCK_FEATURES = (
@@ -88,6 +90,28 @@ class LayoutStore:
         state = raw.data() if isinstance(raw, QByteArray) else bytes(raw)
         sizes = self._settings.value(f"layouts/{name}/sizes", []) or []
         return state, [int(s) for s in sizes]
+
+    def save_extras(self, name: str, extras: Mapping[str, str]) -> None:
+        """Store the panes' own per-layout strings beside the dock state.
+
+        The multiview layout each pane is drawn through (#9813/#9814) travels
+        with the arrangement this way, so both come back together on restart.
+        """
+        self._check_name(name)
+        for key, value in extras.items():
+            require("/" not in key, "extras key must not contain '/'", key)
+            self._settings.setValue(f"layouts/{name}/{EXTRAS}/{key}", str(value))
+        self._settings.sync()
+
+    def extras(self, name: str) -> dict[str, str]:
+        """The strings saved by :meth:`save_extras`; empty when there are none."""
+        self._check_name(name)
+        self._settings.beginGroup(f"layouts/{name}/{EXTRAS}")
+        try:
+            keys = self._settings.childKeys()
+            return {k: str(self._settings.value(k, "")) for k in keys}
+        finally:
+            self._settings.endGroup()
 
     def delete(self, name: str) -> None:
         self._check_name(name)
@@ -153,6 +177,19 @@ class PaneHost(QMainWindow):
         self.docks[key].setFloating(floating)
 
 
+@dataclass(frozen=True)
+class PaneExtras:
+    """How the bar reads and re-applies the panes' own per-layout strings.
+
+    Keeps :class:`LayoutBar` ignorant of what a pane shows: it only carries
+    the strings (the multiview layout names, #9813/#9814) between the panes
+    and the store.
+    """
+
+    read: Callable[[], dict[str, str]]
+    apply: Callable[[Mapping[str, str]], None]
+
+
 class LayoutBar(QWidget):
     """Load / save / delete / reset the pane arrangement."""
 
@@ -163,10 +200,12 @@ class LayoutBar(QWidget):
         splitter: QSplitter | None = None,
         *,
         ask_name: Callable[[], str | None] | None = None,
+        extras: PaneExtras | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self._host, self._store, self._splitter = host, store, splitter
+        self._extras = extras
         self._ask_name = ask_name or self._dialog_name
         self.combo = QComboBox()
         self.combo.setMinimumContentsLength(12)
@@ -220,8 +259,10 @@ class LayoutBar(QWidget):
         return self._host.state(), sizes
 
     def save_as(self, name: str) -> None:
-        """Save the current arrangement under ``name`` and select it."""
+        """Save the current arrangement (and the panes' extras) under ``name``."""
         self._store.save(name, *self._snapshot())
+        if self._extras is not None:
+            self._store.save_extras(name, self._extras.read())
         self.refresh()
         self.combo.setCurrentText(name)
 
@@ -236,6 +277,8 @@ class LayoutBar(QWidget):
         ok = self._host.restore(state)
         if ok and sizes and self._splitter is not None:
             self._splitter.setSizes(sizes)
+        if ok and self._extras is not None:
+            self._extras.apply(self._store.extras(name))
         return ok
 
     def delete(self, name: str) -> None:
@@ -246,6 +289,8 @@ class LayoutBar(QWidget):
     def save_last(self) -> None:
         """Remember the arrangement for the next start (called on shutdown)."""
         self._store.save(LAST_LAYOUT, *self._snapshot())
+        if self._extras is not None:
+            self._store.save_extras(LAST_LAYOUT, self._extras.read())
 
     def restore_last(self) -> bool:
         return self.apply(LAST_LAYOUT)
