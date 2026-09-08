@@ -148,6 +148,37 @@ async def _validate_video_upload(file: UploadFile) -> str:
     return video_suffix
 
 
+async def _validate_video_request(
+    estimator_type: str,
+    min_confidence: float,
+    file: UploadFile,
+) -> str:
+    """Validate estimator type, confidence bounds, and uploaded file payload.
+
+    Args:
+        estimator_type: Chosen pose estimator backend name.
+        min_confidence: Detection confidence threshold.
+        file: Uploaded video file payload.
+
+    Returns:
+        The validated container suffix derived from the upload filename.
+    """
+    if estimator_type not in VALID_ESTIMATOR_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid estimator_type '{estimator_type}'. "
+            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
+        )
+
+    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
+        raise HTTPException(
+            status_code=400,
+            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
+        )
+
+    return await _validate_video_upload(file)
+
+
 # fmt: off
 @router.post("/analyze/video", response_model=VideoAnalysisResponse)
 @precondition(  # fmt: skip
@@ -183,20 +214,7 @@ async def analyze_video(
     Raises:
         HTTPException: On validation or processing failure.
     """
-    if estimator_type not in VALID_ESTIMATOR_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid estimator_type '{estimator_type}'. "
-            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
-        )
-
-    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
-        raise HTTPException(
-            status_code=400,
-            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
-        )
-
-    video_suffix = await _validate_video_upload(file)
+    video_suffix = await _validate_video_request(estimator_type, min_confidence, file)
 
     temp_path: Path | None = None
     try:
@@ -293,20 +311,7 @@ async def analyze_video_async(
     Raises:
         HTTPException: On validation failure.
     """
-    if estimator_type not in VALID_ESTIMATOR_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid estimator_type '{estimator_type}'. "
-            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
-        )
-
-    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
-        raise HTTPException(
-            status_code=400,
-            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
-        )
-
-    video_suffix = await _validate_video_upload(file)
+    video_suffix = await _validate_video_request(estimator_type, min_confidence, file)
 
     task_id = str(uuid.uuid4())
 
