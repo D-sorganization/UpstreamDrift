@@ -243,6 +243,17 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - TDD evidence: the missing module produced the expected RED import failure;
   after implementation, four registration tests pass serially.
 
+## Spec Check Reminder Fail-Safe Extraction (#9499)
+
+- The `Verify SPEC.md freshness` job no longer carries its comment-posting
+  logic as an inline `actions/github-script` heredoc (an unescaped backtick
+  from the RM #1520 wording once aborted it with `SyntaxError: Invalid or
+unexpected token`, swallowing the finding). Posting now runs
+  `scripts/post_spec_reminder.py`, which prints the full diagnostic into the
+  job log and exits 0 on any posting failure; the `always()`-guarded
+  "Fail if spec is stale" step owns the non-zero exit.
+- Contracts pinned by `tests/ci/test_spec_check_workflow.py`.
+
 ## Immediate Order
 
 1. Verify the latest turnover-correction PR recorded on #9153 is protected on
@@ -261,8 +272,9 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - `scripts/install_spec_merge_driver.py` and `shared_scripts/spec_changelog.py`
   are re-vendored from Repository_Management#1521's corrected copies and pinned
   byte-identical by `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`;
-  registration wiring into `scripts/setup_hooks.py` follows in the companion
-  wiring PR (`claude/issue-9476-driver-wiring`).
+  `scripts/setup_hooks.py` now calls the installer (issue #9476), so the
+  documented setup registers the `spec-rows` driver, and the installer
+  docstring names this repository's entry point.
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not

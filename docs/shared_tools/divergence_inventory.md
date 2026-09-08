@@ -92,7 +92,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `plot_theme` | 6 | 0 | 0 | 1 | 0 | 6 |
 | `plotting` | 0 | 3 | 0 | 25 | 0 | 3 |
 | `pose_editor` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `pose_estimation` | 0 | 0 | 0 | 16 | 0 | 0 |
+| `pose_estimation` | 0 | 0 | 0 | 18 | 0 | 0 |
 | `pose_interchange` | 0 | 0 | 0 | 25 | 0 | 0 |
 | `programmatic_pid` | 0 | 0 | 0 | 0 | 24 | 0 |
 | `putting_dynamics` | 0 | 0 | 0 | 7 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **462** | **276** | **126** | **1196** | **520** | **738** |
+| **Total** | **462** | **276** | **126** | **1198** | **520** | **738** |
 
 ## Diverged Files by Package
 
