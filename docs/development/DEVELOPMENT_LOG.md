@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (116 strict native contracts and three distinct rolling contracts pass)
 - **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
-- **Next step:** Canonical release/claim manifests and all 253 PDF pages validate; finish normal push hooks and protected PR delivery; manufactured controls do not replace physical validation.
+- **Next step:** Source push hooks and updated-main 116 native contracts pass; release/claim manifests and all 253 PDF pages validate. Finish protected PR delivery and coordinate #9726 source regeneration; manufactured controls do not replace physical validation.
 
 ### DL-#9762 · `bioptim` Optimal-Control Backend and the Swing-Dynamics Fixes
 

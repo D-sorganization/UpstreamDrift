@@ -101,3 +101,22 @@ and no passing result is inferred.
 The full impact, contact, acoustics and empirical program remains open. These
 manufactured controls qualify numerical operators, not human measurements,
 physiological mechanisms or sound quality.
+
+## Main Integration and Related Runtime Work
+
+All normal source push hooks passed and checkpoint `71a163101` was published.
+Renderer #9784 merged at `9aa26e4f8`. Main integration `7efc01b98` retains that
+reviewed provider contract and new OCP/inertial work from #9768, resolving only
+the overlapping handoff, SPEC and development-log sections. All 116 strict
+native contracts pass again (58.83 s). The canonical writer refreshed the
+claim-evidence manifest for incoming main artifacts; full computational release
+validation passes again at that full source revision. Native candidate bytes
+remain unchanged. The newer optimizer registry is an integration candidate for
+U2/U3, not evidence that a closed-loop two-hand flexible-impact model exists.
+
+Open #9726/#9607 adds startup diagnostics/re-execution for native-library search.
+It does not supply compatible wheel pins or the real regenerated authority
+record; its PR explicitly leaves those follow-ups. This repair covers those
+observed failures without duplicating the bootstrap. If #9726 lands, its new
+governed runner/source identity requires actual regeneration and canonical
+manifest refresh before authority can pass. Preserve both scopes and claims.
