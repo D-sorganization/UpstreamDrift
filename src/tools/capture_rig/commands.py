@@ -250,21 +250,22 @@ def export_command(session: Path) -> list[str]:
 def reconstruct_command(
     session: Path,
     *,
-    anchor_segment: str,
-    anchor_m: float,
+    measurements: Sequence[str],
     cameras: Path | None = None,
     intrinsics: Path | None = None,
     exclude_joints: Sequence[str] = (),
 ) -> list[str]:
     """Exactly one of ``cameras`` (later take) or ``intrinsics`` (first take)."""
-    require(anchor_segment.strip() != "", "anchor segment must be named")
-    require(anchor_m > 0, "anchor length must be positive metres", anchor_m)
+    require(len(measurements) >= 1, "at least one measured segment is needed")
+    for item in measurements:
+        require("=" in item, "measurement must be NAME=METRES", item)
     require(
         (cameras is None) != (intrinsics is None),
         "give a cameras file or an intrinsics file, not both",
     )
     args = ["reconstruct", "--session", str(session)]
-    args += ["--anchor", f"{anchor_segment}={anchor_m:g}"]
+    for item in measurements:
+        args += ["--anchor", item]
     if cameras is not None:
         args += ["--cameras", str(cameras)]
     else:

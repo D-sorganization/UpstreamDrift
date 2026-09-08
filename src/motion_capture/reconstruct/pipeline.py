@@ -12,7 +12,7 @@ produce is written beside the bundle so a take can be audited file by file.
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+from collections.abc import Sequence, Mapping
 
 import numpy as np
 from pathlib import Path
@@ -27,6 +27,7 @@ from .analytics import summarize_swing
 from .cameras import PinholeCamera
 from .clean import CleanReport, clean_view
 from .bundle import observations_from_views
+from .measurements import expand_measurements, gauge
 from .fit import (
     RECONSTRUCTION_FILE,
     Reconstruction,
@@ -58,6 +59,7 @@ class SessionReconstruction(BaseModel):
     rms_px: float
     unobservable_points: int
     swing_summary_file: str | None = None
+    measured_lengths_m: dict[str, float] = {}
     fps: float | None = None
     excluded_joints: tuple[str, ...] = ()
 
@@ -96,7 +98,8 @@ def reconstruct_session(
     *,
     start_cameras: Sequence[PinholeCamera] | None = None,
     intrinsics: Sequence[tuple[str, Any, tuple[int, int]]] | None = None,
-    scale_anchor: tuple[str, float],
+    scale_anchor: tuple[str, float] | None = None,
+    measurements: Sequence[str] = (),
     acceleration_sigma_px: float = DEFAULT_ACCELERATION_SIGMA_PX,
     min_confidence: float = 0.05,
     exclude_joints: Sequence[str] = (),
@@ -112,6 +115,11 @@ def reconstruct_session(
     reports, ``reconstruction.json`` and the summary.
     """
     require(acceleration_sigma_px > 0, "acceleration_sigma_px must be positive")
+    measured = expand_measurements(measurements)
+    if scale_anchor is None:
+        scale_anchor = gauge(measured)  # the first measurement sets the scale
+    elif scale_anchor[0] not in measured:
+        measured = {scale_anchor[0]: scale_anchor[1], **measured}
     unknown = [j for j in exclude_joints if j not in JOINT_NAMES]
     require(not unknown, "exclude_joints must name fit joints", unknown)
     require(
@@ -130,6 +138,51 @@ def reconstruct_session(
     obs_dir = out_dir / "observations"
     obs_dir.mkdir(parents=True, exist_ok=True)
     options = SmootherOptions(acceleration_sigma=acceleration_sigma_px)
+    rejections = _clean_all(
+        views, ids, out_dir, options, min_confidence, tuple(exclude_joints)
+    )
+    if start_cameras is None:
+        assert intrinsics is not None
+        start_cameras = _initial_cameras(out_dir, ids, intrinsics, scale_anchor)
+    record: Reconstruction = fit_bundle(
+        out_dir,
+        scale_anchor=scale_anchor,
+        start_cameras=start_cameras,
+        measured_lengths_m=measured,
+    )
+    fps = float(views[ids[0]]["fps"])
+    joints = np.load(out_dir / "joints_3d_m.npy")
+    swing, _series = summarize_swing(joints, fps)
+    swing_file = out_dir / "swing_summary.json"
+    swing_file.write_text(swing.model_dump_json(indent=2), encoding="utf-8")
+    summary = SessionReconstruction(
+        session=str(session_dir),
+        views=tuple(ids),
+        cleaned_rejections=rejections,
+        reconstruction_file=str(out_dir / RECONSTRUCTION_FILE),
+        rms_px=record.rms_px,
+        unobservable_points=record.unobservable_points,
+        swing_summary_file=str(swing_file),
+        measured_lengths_m=dict(measured),
+        fps=fps,
+        excluded_joints=tuple(exclude_joints),
+    )
+    (out_dir / "session_reconstruction.json").write_text(
+        summary.model_dump_json(indent=2), encoding="utf-8"
+    )
+    return summary
+
+
+def _clean_all(
+    views: Mapping[str, dict[str, Any]],
+    ids: Sequence[str],
+    out_dir: Path,
+    options: SmootherOptions,
+    min_confidence: float,
+    exclude_joints: Sequence[str],
+) -> dict[str, int]:
+    """Clean every view into ``out_dir/observations``; write the clean report."""
+    obs_dir = out_dir / "observations"
     rejections: dict[str, int] = {}
     reports: dict[str, Any] = {}
     for view_id in ids:
@@ -148,49 +201,31 @@ def reconstruct_session(
     (out_dir / CLEAN_REPORT_FILE).write_text(
         json.dumps(reports, indent=1), encoding="utf-8"
     )
-    if start_cameras is None:
-        assert intrinsics is not None
-        cleaned_views = load_views(out_dir)
-        obs = observations_from_views(cleaned_views, ids)
-        init = initialize_cameras(
-            obs,
-            [i[1] for i in intrinsics],
-            [i[2] for i in intrinsics],
-            anchor=scale_anchor,
-        )
-        require(
-            init.ok,
-            "camera initialisation lacks inliers",
-            [p.inliers for p in init.pairs],
-        )
-        start_cameras = subject_frame(init.cameras, obs)
-        logger.info(
-            "initialised placement from joints: %s",
-            [(p.camera_id, p.inliers) for p in init.pairs],
-        )
-    record: Reconstruction = fit_bundle(
-        out_dir, scale_anchor=scale_anchor, start_cameras=start_cameras
+    return rejections
+
+
+def _initial_cameras(
+    out_dir: Path,
+    ids: Sequence[str],
+    intrinsics: Sequence[tuple[str, Any, tuple[int, int]]],
+    scale_anchor: tuple[str, float],
+) -> tuple[PinholeCamera, ...]:
+    """First-take placement from the cleaned joints and the intrinsics alone."""
+    obs = observations_from_views(load_views(out_dir), ids)
+    init = initialize_cameras(
+        obs,
+        [i[1] for i in intrinsics],
+        [i[2] for i in intrinsics],
+        anchor=scale_anchor,
     )
-    fps = float(views[ids[0]]["fps"])
-    joints = np.load(out_dir / "joints_3d_m.npy")
-    swing, _series = summarize_swing(joints, fps)
-    swing_file = out_dir / "swing_summary.json"
-    swing_file.write_text(swing.model_dump_json(indent=2), encoding="utf-8")
-    summary = SessionReconstruction(
-        session=str(session_dir),
-        views=tuple(ids),
-        cleaned_rejections=rejections,
-        reconstruction_file=str(out_dir / RECONSTRUCTION_FILE),
-        rms_px=record.rms_px,
-        unobservable_points=record.unobservable_points,
-        swing_summary_file=str(swing_file),
-        fps=fps,
-        excluded_joints=tuple(exclude_joints),
+    require(
+        init.ok, "camera initialisation lacks inliers", [p.inliers for p in init.pairs]
     )
-    (out_dir / "session_reconstruction.json").write_text(
-        summary.model_dump_json(indent=2), encoding="utf-8"
+    logger.info(
+        "initialised placement from joints: %s",
+        [(p.camera_id, p.inliers) for p in init.pairs],
     )
-    return summary
+    return subject_frame(init.cameras, obs)
 
 
 def _exclude(payload: dict[str, Any], names: Sequence[str]) -> dict[str, Any]:
