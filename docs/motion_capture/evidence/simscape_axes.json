@@ -1,0 +1,194 @@
+{
+  "schema_version": "simscape-axis-validation/1.0.0",
+  "frames": 620,
+  "joints": {
+    "hip_torso": {
+      "parent": "World",
+      "child": "Torso",
+      "sequence": "y+ x- z+ z+",
+      "reference": "sensor",
+      "angle_columns": [
+        "HipLogs_HipAngularPositionX",
+        "HipLogs_HipAngularPositionY",
+        "HipLogs_HipAngularPositionZ",
+        "TorsoLogs_AngularPosition"
+      ],
+      "order": "yxzz",
+      "signs": [1, -1, 1, 1],
+      "pre_frame_rotvec": [
+        0.41038408600430143, 0.41035217916851535, -1.531555662624286
+      ],
+      "post_frame_rotvec": [
+        9.545039262697878e-6, 6.096235977068771e-6, 1.5707950898130654
+      ],
+      "residual_rad": 6.655341716082289e-5,
+      "offset_parent_frame_m": [
+        -0.03831217163394628, 0.09341567744530073, 0.43925331182034194
+      ],
+      "offset_spread_m": 0.5036569552984859
+    },
+    "spine": {
+      "parent": "Torso",
+      "child": "Spine",
+      "sequence": "z+ x+",
+      "reference": "parent",
+      "angle_columns": [
+        "SpineLogs_AngularPositionX",
+        "SpineLogs_AngularPositionY"
+      ],
+      "order": "zx",
+      "signs": [1, 1],
+      "pre_frame_rotvec": [
+        -1.2092059600672513, 1.2091769411997562, -1.2091880844475686
+      ],
+      "post_frame_rotvec": [
+        -1.2092150854704165, -1.2092063570940972, -1.209145641258515
+      ],
+      "residual_rad": 0.00011624940474884813,
+      "offset_parent_frame_m": [
+        1.8025700699076853e-7, 1.213406837893229e-6, 0.06095611407623881
+      ],
+      "offset_spread_m": 7.812823571204793e-6
+    },
+    "left_scapula": {
+      "parent": "Spine",
+      "child": "LScap",
+      "sequence": "x+ z-",
+      "reference": "parent",
+      "angle_columns": [
+        "LScapLogs_AngularPositionX",
+        "LScapLogs_AngularPositionY"
+      ],
+      "order": "xz",
+      "signs": [1, -1],
+      "pre_frame_rotvec": [
+        1.2091880878112233, -1.209197739984444, 1.209193886106075
+      ],
+      "post_frame_rotvec": [
+        -1.5707907546590545, 1.024305776803876e-5, -1.4610544461353216e-5
+      ],
+      "residual_rad": 6.449377782075811e-5,
+      "offset_parent_frame_m": [
+        1.3151202062801023e-6, -0.0507957004688056, -0.2438334431013306
+      ],
+      "offset_spread_m": 2.0274644983143062e-5
+    },
+    "right_scapula": {
+      "parent": "Spine",
+      "child": "RScap",
+      "sequence": "y+ z+",
+      "reference": "parent",
+      "angle_columns": [
+        "RScapLogs_AngularPositionX",
+        "RScapLogs_AngularPositionY"
+      ],
+      "order": "yz",
+      "signs": [1, 1],
+      "pre_frame_rotvec": [
+        -1.968849729406318e-5, -2.221479955172438, -2.221399105296558
+      ],
+      "post_frame_rotvec": [
+        1.2091914164752837, 1.2092156373887237, 1.209172874503113
+      ],
+      "residual_rad": 8.274683629489017e-5,
+      "offset_parent_frame_m": [
+        1.3151202062867056e-6, -0.05079570046880557, -0.2438334431013306
+      ],
+      "offset_spread_m": 2.027464498316461e-5
+    },
+    "left_shoulder": {
+      "parent": "LScap",
+      "child": "LS",
+      "sequence": "x+ y+ z+",
+      "reference": "parent",
+      "angle_columns": [
+        "LSLogs_AngularPositionX",
+        "LSLogs_AngularPositionY",
+        "LSLogs_AngularPosition_Z"
+      ],
+      "order": "xyz",
+      "signs": [1, 1, 1],
+      "pre_frame_rotvec": [
+        2.221383698173298, 0.00010401791088073978, -2.2213959899385065
+      ],
+      "post_frame_rotvec": [
+        3.092685124349376e-6, -5.511345644355067e-5, -0.00010431794204915611
+      ],
+      "residual_rad": 0.000273446004235006,
+      "offset_parent_frame_m": [
+        -4.897815843706839e-6, 4.491565819424557e-6, -0.25396595892816193
+      ],
+      "offset_spread_m": 4.601550544449283e-5
+    },
+    "right_shoulder": {
+      "parent": "RScap",
+      "child": "RS",
+      "sequence": "y+ z+ x+",
+      "reference": "parent",
+      "angle_columns": [
+        "RSLogs_AngularPositionX",
+        "RSLogs_AngularPositionY",
+        "RSLogs_AngularPosition_Z"
+      ],
+      "order": "yzx",
+      "signs": [1, 1, 1],
+      "pre_frame_rotvec": [
+        -3.485479109174018e-5, -2.221411332482268, -2.221448969548902
+      ],
+      "post_frame_rotvec": [
+        1.2091936697534607, 1.2091395356386905, 1.2092349034007144
+      ],
+      "residual_rad": 0.00021098662396994258,
+      "offset_parent_frame_m": [
+        2.697217163491836e-6, -4.093372644854448e-6, 0.2539690972377519
+      ],
+      "offset_spread_m": 4.125382420890609e-5
+    },
+    "left_elbow": {
+      "parent": "LS",
+      "child": "LF",
+      "sequence": "y+ x+",
+      "reference": "parent",
+      "angle_columns": [
+        "AngularKinematicsLogs_LEAngularPosition",
+        "LFLogs_AngularPosition"
+      ],
+      "order": "yx",
+      "signs": [1, 1],
+      "pre_frame_rotvec": [
+        -3.141523942451647, -1.503145711712498e-5, 2.717099237442763e-5
+      ],
+      "post_frame_rotvec": [
+        -1.2091854797413466, 1.2092142666740644, -1.2092625609879724
+      ],
+      "residual_rad": 0.0002619700478076442,
+      "offset_parent_frame_m": [
+        0.2798323177604166, 5.697380815470684e-6, 0.12372250586628722
+      ],
+      "offset_spread_m": 0.11237773545869258
+    },
+    "right_elbow": {
+      "parent": "RS",
+      "child": "RF",
+      "sequence": "x+ y+",
+      "reference": "parent",
+      "angle_columns": [
+        "AngularKinematicsLogs_REAngularPosition",
+        "RFLogs_AngularPosition"
+      ],
+      "order": "xy",
+      "signs": [1, 1],
+      "pre_frame_rotvec": [
+        -5.490466615960179e-5, -8.730221527187781e-6, -1.5707576163136305
+      ],
+      "post_frame_rotvec": [
+        -7.629574024669275e-6, 2.2214174338703176, 2.2214450809757325
+      ],
+      "residual_rad": 0.0002106147438232937,
+      "offset_parent_frame_m": [
+        0.2576515079135754, -2.8131902479113595e-6, 0.1061143453302246
+      ],
+      "offset_spread_m": 0.11893026713999781
+    }
+  }
+}
