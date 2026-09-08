@@ -8,13 +8,10 @@ import sys
 def main() -> int:
     from PyQt6.QtWidgets import QApplication
 
-    from src.shared.python.theme.integration import apply_theme_to_window
-
     from .gui import CaptureRigWindow
 
     app = QApplication.instance() or QApplication(sys.argv)
-    window = CaptureRigWindow(autostart_preview=True)
-    apply_theme_to_window(window)
+    window = CaptureRigWindow(autostart_preview=True)  # applies the theme itself
     window.show()
     return int(app.exec())
 
