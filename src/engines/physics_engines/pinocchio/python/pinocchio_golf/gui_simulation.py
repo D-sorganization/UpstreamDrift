@@ -56,7 +56,9 @@ class SimulationMixin:
         self._update_viewer()
         self._sync_kinematic_controls()
 
-        # Reset recording
+        # Reset recording and actuator torque
+        self.commanded_tau = np.zeros(self.model.nv) if self.model is not None else None
+        self.applied_tau = np.zeros(self.model.nv) if self.model is not None else None
         self.recorder.reset()
         self.lbl_rec_status.setText("Frames: 0")
         if self.btn_record.isChecked():
@@ -92,7 +94,18 @@ class SimulationMixin:
 
             self._update_viewer()
 
-    def _advance_physics(self: Any) -> None:
+    def set_commanded_torque(self: Any, tau: np.ndarray) -> None:
+        """Set commanded actuator torque vector for subsequent physics steps."""
+        if tau is None:
+            raise ValueError("tau must be provided")
+        tau_arr = np.asarray(tau, dtype=float)
+        if self.model is not None and tau_arr.shape != (self.model.nv,):
+            raise ValueError(
+                f"tau length ({tau_arr.shape[0]}) must match model.nv ({self.model.nv})"
+            )
+        self.commanded_tau = tau_arr.copy()
+
+    def _advance_physics(self: Any, tau: np.ndarray | None = None) -> None:
         """Integrate physics forward by one time step."""
         if not (self.model is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
@@ -102,13 +115,27 @@ class SimulationMixin:
             raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.v is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        tau = np.zeros(self.model.nv)
-        a = pin.aba(self.model, self.data, self.q, self.v, tau)
+        if tau is None:
+            tau = getattr(self, "commanded_tau", None)
+        if tau is None:
+            tau = getattr(self, "tau", None)
+        if tau is None:
+            tau_applied = np.zeros(self.model.nv)
+        else:
+            tau_arr = np.asarray(tau, dtype=float)
+            if tau_arr.shape != (self.model.nv,):
+                raise ValueError(
+                    f"tau shape mismatch: expected ({self.model.nv},), got {tau_arr.shape}"
+                )
+            tau_applied = tau_arr.copy()
+
+        self.applied_tau = tau_applied.copy()
+        a = pin.aba(self.model, self.data, self.q, self.v, tau_applied)
         self.v += a * self.dt
         self.q = pin.integrate(self.model, self.q, self.v * self.dt)
         self.sim_time += self.dt
 
-    def _record_frame(self: Any) -> None:
+    def _record_frame(self: Any, tau: np.ndarray | None = None) -> None:
         """Record a single frame of simulation data."""
         if not (self.model is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
@@ -118,7 +145,16 @@ class SimulationMixin:
             raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.v is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        tau = np.zeros(self.model.nv)
+        if tau is None:
+            tau = getattr(self, "applied_tau", None)
+        if tau is None:
+            tau = getattr(self, "commanded_tau", None)
+        if tau is None:
+            tau = getattr(self, "tau", None)
+        if tau is None:
+            tau_recorded = np.zeros(self.model.nv)
+        else:
+            tau_recorded = np.asarray(tau, dtype=float).copy()
 
         # Compute energies for recording
         pin.computeKineticEnergy(self.model, self.data, self.q, self.v)
@@ -130,13 +166,13 @@ class SimulationMixin:
         q_for_recording = self.q if self.q is not None else np.array([])
 
         # Induced / Counterfactuals
-        induced, counterfactuals = self._compute_live_analysis(tau)
+        induced, counterfactuals = self._compute_live_analysis(tau_recorded)
 
         self.recorder.record_frame(
             time=self.sim_time,
             q=q_for_recording,
             v=self.v,
-            tau=tau,
+            tau=tau_recorded,
             kinetic_energy=self.data.kinetic_energy,
             potential_energy=self.data.potential_energy,
             club_head_position=club_head_pos,

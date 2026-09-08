@@ -145,6 +145,10 @@ class TestPathTraversalValidation:
 class TestExportExcel:
     """Tests for export_to_excel (issue #411)."""
 
+    @pytest.fixture(autouse=True)
+    def _require_openpyxl(self):
+        pytest.importorskip("openpyxl")
+
     def _make_result(self):
         from movement_optimizer.tests._helpers import make_test_result
 

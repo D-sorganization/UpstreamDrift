@@ -42,15 +42,16 @@ class _C3DViewerEmbedAdapter:
         return self._widget
 
     def cleanup(self) -> None:
-        """Release matplotlib figures held by the plot tabs.
+        """Tear down the matplotlib canvases held by the plot tabs.
 
-        Must be idempotent; explicitly closes only the figures owned by
-        this tool's canvases. Wrapped in a defensive try/except so a
-        misbehaving matplotlib never blocks host shutdown.
+        Must be idempotent; tears down only the canvases owned by this
+        tool. Teardown itself lives on the shared canvas
+        (``MplCanvas.close_canvas``), which defuses any queued
+        ``draw_idle`` before releasing the figure so a timer cannot fire
+        against a destroyed C++ object (#9474). Wrapped in a defensive
+        try/except so a misbehaving matplotlib never blocks host shutdown.
         """
         try:
-            import matplotlib.pyplot as plt
-
             if not hasattr(self, "_widget") or self._widget is None:
                 return
 
@@ -64,8 +65,9 @@ class _C3DViewerEmbedAdapter:
                 w.force_plot_tab.cop_canvas,
             ]
             for canvas in canvases:
-                if hasattr(canvas, "fig"):
-                    plt.close(canvas.fig)
+                close_canvas = getattr(canvas, "close_canvas", None)
+                if close_canvas is not None:
+                    close_canvas()
         except Exception:  # pragma: no cover - defensive  # noqa: BLE001
             # Host shutdown must not depend on us. Swallow rather than
             # raise; the registry contract requires ``cleanup`` to be

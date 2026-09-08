@@ -12,7 +12,7 @@ from typing import Any
 
 import yaml
 
-DEFAULT_WORKFLOW = Path(".github/workflows/Jules-PR-AutoFix.yml")
+WORKFLOWS_DIR = Path(".github/workflows")
 DISPATCH_ONLY_RE = re.compile(r"github\.event_name\s*==\s*['\"]workflow_dispatch['\"]")
 WORKFLOW_RUN_RE = re.compile(r"\bworkflow_run\b")
 PR_CODE_RUN_PATTERNS = (
@@ -65,7 +65,23 @@ def _action_name(uses: str) -> str:
     return uses.split("@", 1)[0]
 
 
-def find_violations(path: Path = DEFAULT_WORKFLOW) -> list[Violation]:
+def default_workflows(workflows_dir: Path = WORKFLOWS_DIR) -> list[Path]:
+    """Return every workflow file the guard scans when no path is given.
+
+    ``find_violations`` returns no violations for a workflow that does not
+    trigger on ``workflow_run``, so scanning the whole directory is equivalent
+    to scanning the privileged subset without hardcoding a filename.
+    """
+    if not workflows_dir.is_dir():
+        return []
+    return sorted(
+        path
+        for path in workflows_dir.iterdir()
+        if path.is_file() and path.suffix in {".yml", ".yaml"}
+    )
+
+
+def find_violations(path: Path) -> list[Violation]:
     """Return violations where workflow_run-capable jobs can execute PR code."""
     workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(workflow, dict):
@@ -115,11 +131,10 @@ def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "workflow",
-        nargs="?",
+        "workflows",
+        nargs="*",
         type=Path,
-        default=DEFAULT_WORKFLOW,
-        help="Workflow file to scan.",
+        help="Workflow files to scan. Defaults to every repository workflow.",
     )
     return parser.parse_args()
 
@@ -127,7 +142,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     """Print workflow_run trust-boundary violations."""
     args = parse_args()
-    violations = find_violations(args.workflow)
+    paths = args.workflows or default_workflows()
+    violations: list[Violation] = []
+    for path in paths:
+        violations.extend(find_violations(path))
     for violation in violations:
         print(
             f"{violation.path}: job {violation.job!r}, step {violation.step!r}: "

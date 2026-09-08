@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from .rest_api_routes import ModelGenerationAPI
+from .rest_api_core import ModelGenerationAPI
 from .rest_api_types import APIRequest, HTTPMethod, Route
 
 

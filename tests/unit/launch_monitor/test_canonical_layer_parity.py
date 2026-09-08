@@ -195,12 +195,10 @@ _MISSING_VENDOR_HINT = (
 
 
 def _require_vendored_package() -> Path:
-    """Return the vendored canonical package, or fail closed in CI."""
-    if _VENDORED_PACKAGE.is_dir():
-        return _VENDORED_PACKAGE
-    if os.environ.get("CI"):
-        raise AssertionError(_MISSING_VENDOR_HINT)
-    pytest.skip(_MISSING_VENDOR_HINT)
+    """Return the vendored canonical package, or fail closed unless opted out."""
+    from tests.helpers.seam_guards import require_vendor_path
+
+    return require_vendor_path(_VENDORED_PACKAGE)
 
 
 @pytest.mark.parametrize("module_name", WAVE_1_MODULES)

@@ -1,0 +1,65 @@
+name: Docs governance checks
+description: >-
+  Run the documentation governance gates: governance files, engineering
+  design-manual governance, doc catalog, doc size budget, document title
+  case, and their contract tests. Shared by docs-governance.yml (advisory
+  PR signal and red-main canary) and ci-standard.yml's docs-governance-gates
+  job (the copy that blocks merges via the required `quality-gate`
+  aggregate) so the two step lists cannot drift apart — the divergence that
+  let PR #9418 merge a doc-size regression while only the non-required
+  check caught it.
+inputs:
+  changed-from:
+    description: >-
+      Git ref the title-case check diffs against (PR base SHA or push
+      `before` SHA). When empty — schedule and workflow_dispatch runs have
+      no diff basis — the title-case step is skipped: a full-tree scan
+      reports thousands of grandfathered violations and would permanently
+      fail the required gate.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Validate documentation governance files
+      shell: bash
+      run: python3 scripts/check_docs_governance.py
+
+    - name: Validate engineering design-manual governance
+      shell: bash
+      run: python3 -m scripts.check_design_manual_governance
+
+    - name: Install test dependencies
+      shell: bash
+      run: |
+        python3 -m venv "$RUNNER_TEMP/docs-governance-venv"
+        echo "$RUNNER_TEMP/docs-governance-venv/bin" >> "$GITHUB_PATH"
+        "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install --upgrade pip
+        "$RUNNER_TEMP/docs-governance-venv/bin/python" -m pip install pytest pytest-asyncio pytest-timeout pypdf
+
+    - name: Validate documentation catalog
+      shell: bash
+      run: python3 scripts/check_doc_catalog.py
+
+    - name: Validate documentation size budget
+      shell: bash
+      run: python3 scripts/check_doc_size_budget.py
+
+    - name: Validate document title capitalization
+      shell: bash
+      env:
+        CHANGED_FROM: ${{ inputs.changed-from }}
+      run: |
+        if [ -z "$CHANGED_FROM" ]; then
+          echo "::notice::No base ref for this event; skipping the diff-scoped title-case check."
+          exit 0
+        fi
+        python3 scripts/check_document_title_case.py --changed-from "$CHANGED_FROM"
+
+    - name: Run documentation governance tests
+      shell: bash
+      run: >-
+        python -m pytest
+        tests/scripts/test_doc_governance_checks.py
+        tests/scripts/test_design_manual_governance_contract.py
+        tests/scripts/test_document_title_case.py -q

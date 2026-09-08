@@ -119,6 +119,24 @@ class TestToPostImpactState:
         assert clubhead_speed == pytest.approx(state.delivery.exit_speed_m_s)
         assert clubhead_speed < state.delivery.entry_speed_m_s
 
+    def test_preserves_actual_exit_velocity_and_angular_velocity(self) -> None:
+        """Issue #9542: Non-zero lateral velocity and spin must not be flattened or dropped."""
+        custom_exit_vel = (12.0, 3.5, -4.2)
+        custom_exit_spin = (0.0, 45.0, -10.0)
+        state = nominal_state(
+            delivery=delivery(
+                exit_velocity_m_s=custom_exit_vel,
+                exit_angular_velocity_rad_s=custom_exit_spin,
+            )
+        )
+        post = to_post_impact_state(compute_bunker_launch(state), state)
+        np.testing.assert_allclose(
+            post.clubhead_velocity, custom_exit_vel, rtol=0, atol=1e-12
+        )
+        np.testing.assert_allclose(
+            post.clubhead_angular_velocity, custom_exit_spin, rtol=0, atol=1e-12
+        )
+
     def test_the_contact_duration_is_the_measured_one(self) -> None:
         state = nominal_state(delivery=delivery(contact_duration_s=0.0072))
         post = to_post_impact_state(compute_bunker_launch(state), state)

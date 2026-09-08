@@ -115,18 +115,18 @@
   },
   "next_gate": "add finite ground/free-moment and uncertainty pathways before full-delivery or human inference",
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "0d9f4d7d9e479b5c611294662d73d92c11f197bd85e91ee1af7c98c7785d5df2",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
     "docs/research/proximal_distal_energy_transfer/data/shaft_beam_reference.json": "f07fc33cc76fb80f395cd10b01a30169b6440cec3854be3894024d435bc0f722",
-    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "1365d509011e88c1c96bf28874d43720098fd658679bfd40f46258c50b47dd78",
-    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "f0bdb296956e51d7dda43d24f5215d67ccb6585562e2393ec0e8e5ce34d52664",
-    "scripts/research/proximal_distal_energy/articulated_shaft.py": "37e7d5a51abd771e359bf81417246424e7d3dfb24e62ebe00201b383087972b1",
-    "scripts/research/proximal_distal_energy/articulated_shaft_forward.py": "d23c535f5fd6ea46f39b497293d5a78ccd16586e6ce0b2327f68113d3e11c544",
-    "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "1536e074e95be61d4ce26502e595b9c60d45792f9d3862f0bb727d504ec8bfb8",
-    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "1405dc8214cfdf4931ec71e9c1608d284cd44c0fa42d5d42d3c1e338f212481e",
+    "scripts/research/proximal_distal_energy/articulated_distributed_grip.py": "305e1542d0dfa95fe86cc9f7b2fe86d90f44be86db71c45053eaa61789ee0c57",
+    "scripts/research/proximal_distal_energy/articulated_distributed_forward.py": "373c5288e4021cfb8674882f833157576af0621d3656a4f08e0cadc5208283f7",
+    "scripts/research/proximal_distal_energy/articulated_shaft.py": "314371699ad92854817fb0f79bc60cd9e7febd827d2c5c9ad0a8a3a632a5ece1",
+    "scripts/research/proximal_distal_energy/articulated_shaft_forward.py": "0d3067e5c3ee11606f5719d6b9066ea4bc6c7568dcf653f85f1fba407f3c0323",
+    "scripts/research/proximal_distal_energy/articulated_shaft_atlas.py": "acb98cbb0e5d6eed102d71891a19ce884e3dad0e60240188d2c335a331ebb9f9",
+    "scripts/research/proximal_distal_energy/shaft_beam_reference.py": "39281a354eb911d01f1d6d11ac7ddafae98d1c0828b42f9df873f3a7c7e84f24",
     "scripts/research/proximal_distal_energy/moving_base_modal_shaft.py": "260adaad2d43b2ce288c8344bb4e432272ff872fc719fe333c5cdcad571680e2",
-    "tests/research/test_articulated_shaft.py": "2dec0b1ad81797e9d33c3c15ad7e88c614367fe14f16b87a0c8accbd2840c273",
+    "tests/research/test_articulated_shaft.py": "6a46ad7aba60db597c99cb96369dfd90dbabba8db30b644c926415a45b28e4f9",
     "tests/research/test_articulated_shaft_forward.py": "56968be215aa81c8182c7ef8f6a11289103058686c929f3907e679efe7d6a432",
-    "tests/research/test_articulated_shaft_atlas.py": "eadc8cf96993d9babc936ea94fff9c5134f12bec6f80dcd7d5b845463cea6d41"
+    "tests/research/test_articulated_shaft_atlas.py": "ede9b804aad5058a283a08b8214ba2b1630e223cec56c8158f6ded2342ab6869"
   }
 }

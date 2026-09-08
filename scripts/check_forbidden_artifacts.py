@@ -17,12 +17,17 @@ FORBIDDEN_FILES = frozenset(
         "coverage.json",
         "bandit_results.json",
         "reports/bandit.json",
+        "reports/pip_audit.json",
+        "reports/semgrep.json",
         "temp_id.txt",
         "matlab_quality_report.txt",
         "test.npz",
     }
 )
-FORBIDDEN_DIR_PREFIXES = (".jules/completist_data/",)
+FORBIDDEN_DIR_PREFIXES = (
+    ".jules/completist_data/",
+    ".scratch/",
+)
 FORBIDDEN_PATTERNS = (
     "*.bak",
     "*.swp",
@@ -31,6 +36,8 @@ FORBIDDEN_PATTERNS = (
     "pr_body_*.md",
     "fix_*.py",
     ".ci_trigger*",
+    "reports/*.json",
+    "reports/**/*.json",
 )
 
 

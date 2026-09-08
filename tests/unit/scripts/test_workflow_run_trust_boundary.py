@@ -6,7 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from scripts.check_workflow_run_trust_boundary import find_violations
+from scripts.check_workflow_run_trust_boundary import (
+    default_workflows,
+    find_violations,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -76,4 +79,18 @@ jobs:
 
 
 def test_current_jules_workflow_preserves_workflow_run_boundary() -> None:
-    assert find_violations() == []
+    """No repository workflow lets a ``workflow_run`` job execute PR code.
+
+    The guard used to scan a single hardcoded ``Jules-PR-AutoFix.yml``; that
+    workflow was retired with the rest of the unowned Jules suite (#1483), so
+    the contract is now asserted over every workflow in the repository. The
+    test name is unchanged because the unit-gate quarantine ledger is
+    removal-only and keys on it.
+    """
+    violations = [
+        violation
+        for workflow in default_workflows()
+        for violation in find_violations(workflow)
+    ]
+
+    assert violations == []
