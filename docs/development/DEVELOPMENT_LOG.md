@@ -28,7 +28,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-08 (15 provider tests pass against both pinned and candidate Tools; four strict pair refusals)
 - **Summary:** Reproduced the candidate's exact old-hash failure before accepting the two reviewed source/hash pairs. Tolerances, immutable provider origin and the current vendor pin remain strict.
 - **Next step:** Complete normal protected delivery, then verify the Tools downstream consumer lane against merged UpstreamDrift.
-
 ### DL-#9482 · Launcher Tile Logo Families and Registry Gate
 
 - **State:** in_review
@@ -205,6 +204,19 @@ Never place credentials, tokens, or customer data in a development log.
 - **Next step:** Observe the first post-merge `phantom-guard` run on a PR
   whose base fetch is too shallow for merge-base to confirm rule 3 defers to
   the API list.
+
+### DL-#9484 · Impact Explorer Web Route Has a CI Bundle Producer
+
+- **State:** in_review
+- **Owner:** W4_9484 (agent claude)
+- **Issue:** #9484
+- **PR:** #9724 (open)
+- **Paths:** `.github/workflows/ci-standard.yml`, `scripts/check_declared_route_producers.py`, `tests/scripts/test_declared_route_producers.py`, `docs/workflows/WORKFLOW_TRACKING.md`
+- **Branch:** `claude/issue-9484-impact-web-build`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** The `rate_of_closure` tile declared `web.mode: route` for `/tools/impact-explorer` but no pipeline built `vendor/ud-tools/src/rate_of_closure/web/dist`, so a clean checkout served the honest fallback. CI Standard now builds the bundle from the pinned Tools tree with `npm run build -- --base=/impact-explorer-app/`, and `scripts/check_declared_route_producers.py` fails any declared route that no pipeline produces. Shipping the bundle inside the wheel/image remains an open maintainer decision (#9417).
+- **Next step:** Merge PR for #9484, then decide the bundle distribution channel (wheel/image vs fetched Tools release artifact, #9417).
 
 ## Shipped (Last 90 Days)
 
