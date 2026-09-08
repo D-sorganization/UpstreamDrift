@@ -55,6 +55,7 @@ class Reconstruction(BaseModel):
     cameras: list[dict[str, Any]]  # CameraCalibration.to_dict()
     bone_lengths_m: dict[str, float]
     scale_anchor: tuple[str, float]
+    measured_lengths_m: dict[str, float] = {}
     rms_px: float
     initial_rms_px: float
     unobservable_points: int
@@ -134,6 +135,7 @@ def fit_bundle(
     start_cameras: Sequence[PinholeCamera] | None = None,
     length_prior_m: Mapping[str, float] = DEFAULT_LENGTHS_M,
     options: BundleOptions | None = None,
+    measured_lengths_m: Mapping[str, float] | None = None,
 ) -> Reconstruction:
     """Fit the bundle and write ``reconstruction.json``; returns the record.
 
@@ -164,7 +166,13 @@ def fit_bundle(
     names = tuple(views[ids[0]]["detector_layout"]["keypoint_names"])
     require(names == JOINT_NAMES, "fit expects the 15-joint reconstruct layout", names)
     opts = options or BundleOptions()
-    opts = BundleOptions(**{**vars(opts), "scale_anchor": scale_anchor})
+    opts = BundleOptions(
+        **{
+            **vars(opts),
+            "scale_anchor": scale_anchor,
+            "measured_lengths_m": dict(measured_lengths_m or {}),
+        }
+    )
     result = bundle_adjust(
         start_cameras, obs, length_prior_m=length_prior_m, options=opts
     )
@@ -174,6 +182,7 @@ def fit_bundle(
         cameras=[c.to_calibration().to_dict() for c in result.cameras],
         bone_lengths_m=result.bone_lengths_m,
         scale_anchor=scale_anchor,
+        measured_lengths_m=dict(measured_lengths_m or {}),
         rms_px=result.rms_px,
         initial_rms_px=result.initial_rms_px,
         unobservable_points=result.unobservable_points,
