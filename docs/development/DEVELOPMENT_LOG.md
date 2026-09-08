@@ -263,6 +263,19 @@ Never place credentials, tokens, or customer data in a development log.
 - **Summary:** `SandDelivery` now refuses contradictory exit speed/vector pairs and owns copies of list-supplied exit vectors so post-construction mutation cannot invalidate the frozen record; the `to_post_impact_state` boundary carries explicit `ExitVectorProvenance` labels, and `PostImpactEnvelope` wraps the flight handoff with the validity verdict, F0 tier, per-group frames, the proper `HEAD_FRAME_TO_FLIGHT_TRANSFORM`, a schema version, and a SHA-256 source digest with JSON round trip. Reflection rejection itself was already delivered by PR #9574 and is not redone.
 - **Next step:** Open the protected PR to `main` with `Fixes #9542`, label `agent:claude`, and RED/GREEN evidence in the body.
 
+### DL-#9607 · Authority Runtime Native Library Bootstrap for Cmeel Pinocchio Wheels
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9607
+- **PR:** #9726 (open; `Fixes #9607`)
+- **Branch:** `claude/issue-9607-pinocchio-abi`
+- **Paths:** `scripts/research/proximal_distal_energy/articulated_native_runtime.py`, `scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py`, `tests/research/test_articulated_native_runtime.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`SELF`)
+- **Summary:** Resolves the authority lane's `liburdfdom_sensor.so.4.0` import failure by resolving `cmeel.prefix/lib` from the live venv, verifying the locked sonames with an explicit DbC diagnostic, and re-execing the authority profile with `LD_LIBRARY_PATH` prepended before `import pinocchio`.
+- **Next step:** Verify the `articulated-manufactured-authority` job in `ci-optional-stack.yml` imports pinocchio, then regenerate the committed publication authority record from a byte-identical locked Linux run.
+
 ### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
 
 - **State:** in_review
