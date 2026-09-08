@@ -9,7 +9,7 @@ Keep this file current and concise. Replace instructional placeholders; do not a
 - Branch: `claude/issue-9542-exit-envelope`
 - Baseline commit: `191351bdf84b8b46e2c95dddc073fc8555ce4b12`
 - Implementation commit: `SELF` — the commit containing this update; resolve with `git rev-parse HEAD`
-- Pull request: not created
+- Pull request: [#9728](https://github.com/D-sorganization/UpstreamDrift/pull/9728) — open, ready for review
 - Governing issue/epic: #9542 (parent epic #9541)
 
 ## Objective and Status

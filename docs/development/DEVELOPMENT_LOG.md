@@ -23,7 +23,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #9542
 - **Branch:** `claude/issue-9542-exit-envelope`
-- **PR:** not created
+- **PR:** #9728 (open)
 - **Paths:** `src/bunkershot3d/ball/**`
 - **Started:** 2026-09-07
 - **Last verified:** 2026-09-07 (`SELF`)
