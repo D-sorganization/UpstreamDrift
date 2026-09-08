@@ -17,6 +17,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9478 · Launcher Registry Truth: `tools://` Provenance Scheme and Ready/Beta Maturity Gate
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9478
+- **Branch:** `claude/issue-9478-registry-truth`
+- **PR:** #9729 (open)
+- **Paths:** `src/config/models.yaml`, `src/config/launcher_manifest.json`,
+  `src/shared/python/config/tile_target_resolution.py`,
+  `tests/config/test_tile_paths_resolve.py`
+- **Started:** 2026-09-07
+- **Last verified:** 2026-09-08 (Windows, Python 3.13.3, pytest 9.0.3)
+- **Summary:** `provider: tools` entries in `src/config/models.yaml` and
+  `src/config/launcher_manifest.json` now declare vendor provenance in the path
+  itself (`tools://src/<tool>/...`). `ToolsVendorModelSourceProvider` strips the
+  scheme at launch time; the local-repo and sibling providers reject it, so a
+  vendor path can no longer masquerade as a repo-relative one. The registry gate
+  (`tests/config/test_tile_paths_resolve.py`) gained a `ready`/`beta` maturity
+  gate (`ready_maturity_gate` in
+  `src/shared/python/config/tile_target_resolution.py`): a tile claiming
+  launchability whose entry point does not resolve fails the gate, except a
+  pinned-vendor target in a checkout that has not materialised the
+  `vendor/ud-tools` gitlink (skip with a reason, never faked as success);
+  the three vendor-materialised registry tests now carry a
+  `requires_vendor_gitlink` skipif so a submodule-less CI checkout (the
+  `unit-test-gate` job checks out no submodule) skips them through the
+  repo's #9501 seam-skip convention instead of failing on the authority's
+  fail-closed reason.
+  Maturity corrections: the four `*_models_shared` sibling-folder tiles and
+  `movement_optimizer` downgraded `ready` → `experimental` with sibling-folder
+  caveats; `motion_capture` downgraded `beta` → `experimental` (argparse CLI,
+  exits on a usage error as a tile); `myosim_suite`, `biomech_gait`,
+  `biomech_sit_to_stand`, `chat_assistant`, and `tools_calculator_hub`
+  descriptions now state what the tiles actually do. Focused verification:
+  `python -m pytest tests/config/test_tile_paths_resolve.py` — 85 passed,
+  5 skips, 0 failures.
+- **Next step:** build the dedicated calculator surface for
+  `tools_calculator_hub` (it still opens the shared Data Processor window).
+
 ### DL-#9612 · Video Upload Suffix Derived From Filename Allow-List
 
 - **State:** in_review
