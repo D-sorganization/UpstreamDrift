@@ -12,10 +12,10 @@
   },
   "totals": {
     "identical": 462,
-    "diverged": 277,
-    "ud-only": 1188,
-    "tools-only": 519,
-    "spelling-only": 127
+    "diverged": 276,
+    "ud-only": 1186,
+    "tools-only": 520,
+    "spelling-only": 126
   },
   "packages": {
     "README.md": {
@@ -447,10 +447,10 @@
     },
     "model_generation": {
       "identical": 27,
-      "diverged": 53,
-      "ud-only": 18,
-      "tools-only": 0,
-      "spelling-only": 17
+      "diverged": 52,
+      "ud-only": 16,
+      "tools-only": 1,
+      "spelling-only": 16
     },
     "motion_matching": {
       "identical": 0,
@@ -9493,37 +9493,13 @@
       "spelling_only": true
     },
     {
-      "path": "model_generation/api/generation_handlers.py",
-      "classification": "ud-only",
-      "package": "model_generation",
-      "subpackage": "api",
-      "ud_bytes": 7541,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": true,
-      "spelling_only": false
-    },
-    {
-      "path": "model_generation/api/library_handlers.py",
-      "classification": "ud-only",
-      "package": "model_generation",
-      "subpackage": "api",
-      "ud_bytes": 16184,
-      "tools_bytes": null,
-      "byte_delta": null,
-      "byte_identical": false,
-      "ud_has_child_copy_header": true,
-      "spelling_only": false
-    },
-    {
       "path": "model_generation/api/rest_api.py",
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 1203,
+      "ud_bytes": 1727,
       "tools_bytes": 631,
-      "byte_delta": 572,
+      "byte_delta": 1096,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9533,9 +9509,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 15029,
+      "ud_bytes": 15287,
       "tools_bytes": 15081,
-      "byte_delta": -52,
+      "byte_delta": 206,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9569,9 +9545,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 4942,
+      "ud_bytes": 4940,
       "tools_bytes": 4967,
-      "byte_delta": -25,
+      "byte_delta": -27,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9581,9 +9557,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 2585,
+      "ud_bytes": 2583,
       "tools_bytes": 2655,
-      "byte_delta": -70,
+      "byte_delta": -72,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9593,21 +9569,21 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 8862,
+      "ud_bytes": 9226,
       "tools_bytes": 8854,
-      "byte_delta": 8,
+      "byte_delta": 372,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
     },
     {
       "path": "model_generation/api/rest_api_routes.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 38936,
+      "ud_bytes": null,
       "tools_bytes": 39913,
-      "byte_delta": -977,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -9617,9 +9593,9 @@
       "classification": "diverged",
       "package": "model_generation",
       "subpackage": "api",
-      "ud_bytes": 3705,
+      "ud_bytes": 4192,
       "tools_bytes": 3735,
-      "byte_delta": -30,
+      "byte_delta": 457,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -32070,19 +32046,6 @@
       }
     },
     {
-      "path": "model_generation/api/rest_api_routes.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-09-05",
-        "commit": "0855f6b09ce60031a209554ec51c4e17f543b5cd"
-      }
-    },
-    {
       "path": "model_generation/api/rest_api_support.py",
       "ud": {
         "author": "Dieter Olson",
@@ -32150,9 +32113,9 @@
     {
       "path": "model_generation/builders/urdf_writer.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "0575fb4b82538d74750eacb91a59d5f791d35995"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-07",
+        "commit": "8075878f55f6c9ee2fdd7327bd30affba0482bd8"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32306,9 +32269,9 @@
     {
       "path": "model_generation/core/types.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "60ce59cda9e6a71def70716eab5fcdb1df02fd97"
+        "commit": "c30de9ef0938d5bfccc55ef0bb85f51e1e61be96"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32358,9 +32321,9 @@
     {
       "path": "model_generation/editor/editor_modifications.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "60ce59cda9e6a71def70716eab5fcdb1df02fd97"
+        "commit": "c30de9ef0938d5bfccc55ef0bb85f51e1e61be96"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -32488,9 +32451,9 @@
     {
       "path": "model_generation/inertia/primitives.py",
       "ud": {
-        "author": "Dieter Olson",
+        "author": "d-sorgclaudeagent[bot]",
         "date": "2026-09-07",
-        "commit": "60ce59cda9e6a71def70716eab5fcdb1df02fd97"
+        "commit": "c30de9ef0938d5bfccc55ef0bb85f51e1e61be96"
       },
       "tools": {
         "author": "Dieter Olson",
