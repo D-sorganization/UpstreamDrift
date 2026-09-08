@@ -1,6 +1,19 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 00:30 PDT
+## Impact Dynamics and Acoustics: #9700
+
+- Inventory/design slice #9701 is locally verified on `docs/9700-impact-acoustics-program`,
+  based on `40308a0c`; PR #9706; initial implementation `077ae9df9`. Theory: AffineDrift #4253; provider: Tools #5068.
+- The merge-sync pre-push initially hung during import discovery with an empty
+  vendor directory; initialized the existing eab74a901a Tools pin and reran.
+- PR #9706 synced protected main `c2322f02df62057f18c652bdf28de3bab01cd369`; both SPEC row sets retained.
+- Integration plan: `docs/development/impact_acoustics_program.md` (complete).
+- Reuse impact/shaft and moving-base/articulated research infrastructure. Preserve
+  #8557 protected evidence, vendored Tools pin, manufactured-data boundaries and
+  workstation recovery restrictions. No calibrated acoustic solver is established.
+
+Updated: 2026-09-08 02:55 PDT
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
 evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
@@ -10,6 +23,18 @@ recovery constraints, and next commands are in `docs/development/proximal_distal
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+
+## Pre-Commit on Windows — Resolved (#9494)
+
+- The hook environment works on Windows; no `--no-verify` exception exists
+  or is needed. `default_language_version: python: python` resolves to the
+  PATH interpreter (3.13.3 here); the old `python3.11` pin is gone since
+  #1792/#2720. Do not pin a minor version — workstations without it cannot
+  build hook virtualenvs.
+- Verified 2026-09-08 (pre-commit 4.6.2, from-scratch env build): all
+  commit-stage hooks pass; pre-push `mypy`/`bandit` pass on scoped files;
+  `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
+  "Hook bypass policy" documents this resolution.
 
 ## Protected Authority
 
@@ -95,6 +120,7 @@ Seam (#9406) and failure triage (#9474): see
    Never import or relabel legacy checkpoints as outcomes.
 4. Regenerate `requirements*.lock`/`environment.yml` via dispatch-only `lock-refresh.yml`
    for #9533 (DL-#9533, PR #9716) once it merges; the locks were left untouched there.
+4. #9483: the stale 15-tile nav-gap audit `reports/feature_navigation_gaps/` is deleted (findings dispositioned in the deleting PR); live tile truth is the `src/config/models.yaml` registry plus the generated launcher manifest (#9412/#9437/#9478).
 
 ## Scientific Boundaries
 
@@ -131,8 +157,7 @@ Seam (#9406) and failure triage (#9474): see
 
 ## Validation
 
-Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` and
-`-n 0` for pytest.
+Use `C:\Users\diete\AppData\Local\Programs\Python\Python312\python.exe` with `-n 0` for pytest.
 
 ```powershell
 python -m pytest -n 0 -q tests/research/test_articulated_distributed_smoke_registration.py
