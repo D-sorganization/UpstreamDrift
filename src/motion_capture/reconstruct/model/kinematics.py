@@ -272,15 +272,15 @@ def forward_kinematics(
     for index, name in enumerate(spec.order):
         seg = spec.segments[name]
         if seg.parent is None:
-            parent_pos = np.zeros((frames, 3))
-            parent_rot = np.broadcast_to(np.eye(3), (frames, 3, 3)).copy()
+            parent_pos: Array = np.zeros((frames, 3))
+            parent_rot: Array = np.broadcast_to(np.eye(3), (frames, 3, 3)).copy()
         else:
             parent_index = spec.order.index(seg.parent)
             parent_pos = positions[:, parent_index]
             parent_rot = orientations[:, parent_index]
         offset = np.asarray(seg.offset, dtype=np.float64)
         local = parent_pos + parent_rot @ offset
-        rot = np.broadcast_to(np.eye(3), (frames, 3, 3)).copy()
+        rot: Array = np.broadcast_to(np.eye(3), (frames, 3, 3)).copy()
         for dof_index, dof in enumerate(seg.joint.dofs):
             axis = np.asarray(dof.axis, dtype=np.float64)
             rot = rot @ _rodrigues(axis, q_arr[:, _dof_offset(spec, name) + dof_index])
@@ -331,7 +331,7 @@ def jacobian(spec: ModelSpec, q: Array, *, enforce_limits: bool = True) -> Array
         seg = spec.segments[name]
         base = _dof_offset(spec, name)
         parent_index = 0 if seg.parent is None else spec.order.index(seg.parent)
-        pre = (
+        pre: Array = (
             np.broadcast_to(np.eye(3), (frames, 3, 3)).copy()
             if seg.parent is None
             else state.orientations[:, parent_index].copy()
