@@ -67,6 +67,7 @@ from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .overlay import PoseTrack, draw_pose
 from .overlay_box import VariantOverlayBox
 from .overlay_render import render_frame
+from .preview import PreviewPanel
 from .provenance_tab import ProvenanceTab, SourcedTable
 from .player import VideoReader, clamp_index
 from .session import SessionMedia, ViewMedia, flatten_numbers, load_session
@@ -82,7 +83,8 @@ STATUS_GLYPH = {
     workflow.Status.BLOCKED: "○",
     workflow.Status.SKIPPED: "–",
 }
-ALWAYS_ENABLED = frozenset({"stop", "load"})
+ALWAYS_ENABLED = frozenset({"stop", "load", "preview"})
+LAB_PLAN = Path("docs/motion_capture/plans/lab_three_view_sonnet.json")
 BUTTONS_PER_ROW = 5
 
 
@@ -189,13 +191,27 @@ class WorkflowPanel(QGroupBox):
         return {s.step.key: s.status for s in self._states}
 
 
+def default_plan_path() -> Path | None:
+    """The lab plan shipped in docs when it exists, so Record works out of the box."""
+    candidate = commands.repo_root() / LAB_PLAN
+    return candidate if candidate.is_file() else None
+
+
+def default_session_dir() -> Path:
+    """A fresh ``sessions/<timestamp>`` under the repo for the next take."""
+    from datetime import datetime
+
+    stamp = datetime.now().strftime("%Y-%m-%dT%H-%M")
+    return commands.repo_root() / "sessions" / f"{stamp}-take"
+
+
 class CapturePanel(QGroupBox):
     """Plan, mode, views, UVC controls and duration for the camera commands."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__("Capture", parent)
-        self.plan_edit = QLineEdit()
-        self.session_edit = QLineEdit(str(Path.cwd() / "session"))
+        self.plan_edit = QLineEdit(str(default_plan_path() or ""))
+        self.session_edit = QLineEdit(str(default_session_dir()))
         self.mode_combo = QComboBox()
         self.mode_combo.addItem(PLAN_DEFAULT, None)
         for mode in MODE_PRESETS:
@@ -732,6 +748,7 @@ class CaptureRigWidget(QWidget):
 
     _ACTIONS: tuple[tuple[str, str], ...] = (
         ("plan_check", "Plan check"),
+        ("preview", "Preview cameras"),
         ("record", "Record"),
         ("import", "Import videos"),
         ("proxy", "Proxies"),
@@ -758,6 +775,9 @@ class CaptureRigWidget(QWidget):
         self.capture = CapturePanel()
         self.process = ProcessPanel()
         self.match = MatchPanel()
+        self.preview = PreviewPanel()
+        self.preview.state_changed.connect(self._on_preview_state)
+        self._resume_preview = False
         self.playback = PlaybackPanel()
         self.results = QTabWidget()
         self.swing_table = SourcedTable()
@@ -819,9 +839,11 @@ class CaptureRigWidget(QWidget):
         mid_layout.addWidget(buttons)
         mid_layout.addWidget(self.log, 1)
         right = QSplitter(Qt.Orientation.Vertical)
+        right.addWidget(self.preview)
         right.addWidget(self.playback)
         right.addWidget(self.results)
-        right.setStretchFactor(0, 3)
+        right.setStretchFactor(0, 2)
+        right.setStretchFactor(1, 3)
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(left)
         splitter.addWidget(middle)
@@ -958,6 +980,13 @@ class CaptureRigWidget(QWidget):
         if action == "load":
             self.refresh_session()
             return
+        if action == "preview":
+            self.toggle_preview()
+            return
+        if action == "record":
+            # ffmpeg needs the devices: release them, resume after the take.
+            self._resume_preview = self.preview.active
+            self.preview.stop()
         if action == "annotate":
             dialog = self.annotate_dialog()
             if dialog is None:
@@ -982,6 +1011,23 @@ class CaptureRigWidget(QWidget):
         if code == 0:
             self.capture.pending_import = []
             self.refresh_session()
+        if self._resume_preview:
+            self._resume_preview = False
+            self.toggle_preview(on=True)
+
+    def toggle_preview(self, on: bool | None = None) -> None:
+        """Start (or stop) the live preview of the Capture panel's plan."""
+        want = (not self.preview.active) if on is None else on
+        if not want:
+            self.preview.stop()
+            return
+        try:
+            self.preview.start(self.capture.selection())
+        except (ValueError, TypeError) as exc:
+            self._append_log(f"cannot preview: {exc}\n")
+
+    def _on_preview_state(self, active: bool) -> None:
+        self.buttons["preview"].setText("Stop preview" if active else "Preview cameras")
 
     def _append_log(self, text: str) -> None:
         self.log.moveCursor(self.log.textCursor().MoveOperation.End)
@@ -1045,7 +1091,8 @@ class CaptureRigWidget(QWidget):
         return self.runner.busy
 
     def shutdown(self) -> None:
-        """Release the decoder and kill any running command."""
+        """Release the cameras and the decoder; kill any running command."""
+        self.preview.stop()
         self.playback.close_media()
         self.runner.stop()
 

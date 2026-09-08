@@ -95,9 +95,10 @@ The footage every later step works from.
 
 **Do**
 
-1. Set the duration, press *Record*, walk to address during the warm-up, swing, hold the finish.
-2. Or *Import videos* to build a session from files (one or many).
-3. Run *Proxies* for smooth playback of large MJPEG recordings.
+1. Press *Preview cameras* to see every planned view live (the plan and a fresh sessions/ folder are prefilled); frame the mat, then press *Record*: the preview releases the cameras for the recorder and resumes when the take is written.
+2. Set the duration, press *Record*, walk to address during the warm-up, swing, hold the finish.
+3. Or *Import videos* to build a session from files (one or many).
+4. Run *Proxies* for smooth playback of large MJPEG recordings.
 
 Tile actions: record, import, proxy.
 

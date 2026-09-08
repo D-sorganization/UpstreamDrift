@@ -354,7 +354,7 @@
       "tiles": ["pose_studio"]
     },
     "tools.capture_rig": {
-      "title": "Capture Rig camera controller, recorder, overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing",
+      "title": "Capture Rig camera controller with live preview, recorder, overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
       "web": null,

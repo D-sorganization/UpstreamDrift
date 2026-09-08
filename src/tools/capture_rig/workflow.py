@@ -113,6 +113,7 @@ CAPTURE = Step(
         "10 s takes at 60-120 fps; tape-measured segments on the golfer: shank (lateral knee line to ankle bone) and forearm (elbow crease to wrist bone) first, then upper arm and thigh; one reading covers both sides.",
     ),
     instructions=(
+        "Press *Preview cameras* to see every planned view live (the plan and a fresh sessions/ folder are prefilled); frame the mat, then press *Record*: the preview releases the cameras for the recorder and resumes when the take is written.",
         "Set the duration, press *Record*, walk to address during the warm-up, swing, hold the finish.",
         "Or *Import videos* to build a session from files (one or many).",
         "Run *Proxies* for smooth playback of large MJPEG recordings.",

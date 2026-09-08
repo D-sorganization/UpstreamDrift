@@ -109,7 +109,13 @@ def test_panels_build_commands_from_their_inputs(tmp_path: Path) -> None:
 def test_without_a_session_only_setup_actions_are_enabled() -> None:
     _app()
     widget = CaptureRigWidget()
-    assert widget.enabled_actions() == {"plan_check", "import", "stop", "load"}
+    assert widget.enabled_actions() == {
+        "plan_check",
+        "import",
+        "stop",
+        "load",
+        "preview",
+    }
     assert widget.workflow.statuses()["setup"] is Status.READY
     widget.capture.plan_edit.setText("")
     widget.trigger("plan_check")
