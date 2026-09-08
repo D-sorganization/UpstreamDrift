@@ -21,16 +21,14 @@ never returns to `in_progress`; open a new entry instead.
 
 - **State:** in_review
 - **Owner:** claude
-- **Issue:** #9387
-- **Branch:** `claude/issue-9387-worker-corruption`
-- **PR:** this PR (opened with this commit; `Fixes #9387`)
+- **PR:** #9741 (open; `Fixes #9387`)
 - **Paths:** `tests/unit/repo_hygiene/test_src_identity_sentinel.py`,
   `tests/imports/test_gui_import_boundaries.py`,
   `tests/integration/test_golf_launcher_integration.py`,
   `tests/unit/engines/pinocchio/test_tasks.py`,
   `tests/unit/test_ux_enhancements.py`
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (`SELF`)
+- **Last verified:** 2026-09-08 (`c70d5ddae`)
 - **Summary:** Static audit of `tests/` (conftests excluded) found 83
   `sys.modules['src*']` mutation sites in 23 files with 0 unambiguous
   leakers; the judgment-call leaks (ux-enhancements fixture, pinocchio
