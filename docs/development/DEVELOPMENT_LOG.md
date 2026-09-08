@@ -152,6 +152,50 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** `#9476`
+- **Branch:** `claude/issue-9476-driver-wiring`
+- **PR:** #9736 (open, in_review; re-vendor leg #9734)
+- **Paths:** `scripts/install_spec_merge_driver.py`,
+  `shared_scripts/spec_changelog.py`,
+  `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py`,
+  `scripts/setup_hooks.py`,
+  `tests/unit/scripts/test_setup_hooks_wires_spec_merge_driver.py`, `SPEC.md`,
+  `AGENT_HANDOFF.md`, `docs/development/DEVELOPMENT_LOG.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`875cd501e`)
+- **Summary:** The vendored installer still stamped the withdrawn
+  merge-abort claim into `$GIT_COMMON_DIR/info/attributes` and both vendored
+  copies had no drift detection. Re-vendored both files byte-identical from
+  Repository_Management#1521's corrected copies (verified: the false
+  `ATTRIBUTE_BLOCK` text is gone; the repo-wide scan's only surviving match
+  in UD-owned files is the correction narrative quoting the wrong claim to
+  refute it, plus true statements about the half-configured state), and added
+  `tests/unit/scripts/test_spec_merge_driver_vendor_drift.py` pinning SHA-256
+  digests against the upstream reference so future divergence fails loudly.
+  The behaviour change the issue requests followed on this branch:
+  `scripts/setup_hooks.py` (the documented local-automation entry point)
+  now calls the vendored installer, so the documented setup registers the
+  `spec-rows` driver, and the installer docstring names this repository's
+  entry point instead of Repository_Management's.
+- **Next step:** Land PR #9734, then the wiring PR.
+
+### DL-#9533 · Test-Only Extras Reachable From the Dev Lock
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9533`
+- **Branch:** `claude/issue-9533-test-extras`
+- **PR:** #9716 (open, in_review)
+- **Paths:** `pyproject.toml`, `.github/workflows/lock-refresh.yml`, `requirements*.lock`, `environment.yml`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`289b3aa`)
+- **Summary:** `openpyxl` and `imageio` were declared only in the `gui-tools` and `pose` extras, so the dev-compiled `requirements-dev.lock` never installed them and ~24 CI tests failed on import. Both now resolve through the `dev` extra; lock regeneration is delegated to a dispatch-only `lock-refresh.yml` workflow that runs `make sync-deps` on ubuntu + Python 3.12 and opens a PR, since Windows/WSL cannot regenerate correctly (#9533).
+- **Next step:** Dispatch `.github/workflows/lock-refresh.yml` from `main` once this PR merges, then confirm the `ci-standard.yml` dependency-consistency freshness gate and the 24 previously failing tests go green.
+
+### DL-#9476 · Re-Vendor the Corrected Spec Merge Driver and Pin Drift
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9476`
 - **Branch:** `claude/issue-9476-spec-merge-driver`
 - **PR:** #9734 (open, in_review)
 - **Paths:** `scripts/install_spec_merge_driver.py`,
@@ -205,6 +249,22 @@ python: python`, 3.11 pin removed by #1792/#2720), and on Python 3.13.3 every
   command before any finder is installed; the initialized path is unchanged.
 - **Next step:** Record CI on PR #9743; on green, protected squash merge
   closes #9733.
+
+### DL-#9631 · Vendor Pin Carries the Tools#5048 Alias-Predicate Fix
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** `#9631`
+- **Branch:** `claude/issue-9631-vendor-pin`
+- **PR:** #9722 (open; `Fixes #9631`)
+- **Paths:** `vendor/ud-tools`, `tests/unit/repo_hygiene/test_pinned_import_alias_contract.py`
+- **Started:** `2026-09-08`
+- **Last verified:** `2026-09-08` (`e4c47751f`)
+- **Summary:** The `vendor/ud-tools` pin `eab74a901a` already carries the Tools#5049
+  flattened-install fix (`f8b94bfe` is an ancestor), so the v2.1.2 wheel defect is fixed at
+  the pin; this entry lands the repository's own TDD contract test asserting the pinned
+  predicate in both layouts and records that the pin must not be rewound.
+- **Next step:** maintainer re-cuts the 2.1.3 release via tag/workflow dispatch after the PR merges.
 
 ## Shipped (Last 90 Days)
 
