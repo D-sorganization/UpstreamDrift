@@ -209,7 +209,9 @@ Never place credentials, tokens, or customer data in a development log.
 
 - **State:** in_review
 - **Owner:** W4_9484 (agent claude)
-- **Issue:** #9484
+  <<<<<<< HEAD
+- # **Issue:** #9484
+  > > > > > > > 0adb7c284 (docs(spec): record PR #9724 change-log row and PR reference (#9484))
 - **PR:** #9724 (open)
 - **Paths:** `.github/workflows/ci-standard.yml`, `scripts/check_declared_route_producers.py`, `tests/scripts/test_declared_route_producers.py`, `docs/workflows/WORKFLOW_TRACKING.md`
 - **Branch:** `claude/issue-9484-impact-web-build`
