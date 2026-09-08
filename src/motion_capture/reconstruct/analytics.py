@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -34,7 +35,7 @@ from src.shared.python.core.contracts import require
 from .skeleton import JOINT_NAMES
 from .temporal import SmootherOptions, smooth
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 UP = np.array([0.0, 1.0, 0.0])
 # Prior spread of hand acceleration for the speed smoother, m/s^2: a driver
 # swing peaks near 300 m/s^2 at the hands; the prior is deliberately looser.
