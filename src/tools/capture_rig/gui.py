@@ -26,7 +26,14 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PyQt6.QtCore import QProcess, QProcessEnvironment, Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import (
+    QSettings,
+    QProcess,
+    QProcessEnvironment,
+    Qt,
+    QTimer,
+    pyqtSignal,
+)
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import (
     QCheckBox,
@@ -67,6 +74,7 @@ from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .overlay import PoseTrack, draw_pose
 from .overlay_box import VariantOverlayBox
 from .overlay_render import render_frame
+from .layout import LayoutBar, LayoutStore, PaneHost
 from .preview import PreviewPanel
 from .provenance_tab import ProvenanceTab, SourcedTable
 from .player import VideoReader, clamp_index
@@ -769,8 +777,11 @@ class CaptureRigWidget(QWidget):
         ("load", "Load session"),
     )
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, parent: QWidget | None = None, *, settings: QSettings | None = None
+    ) -> None:
         super().__init__(parent)
+        self.layout_store = LayoutStore(settings)
         self.workflow = WorkflowPanel()
         self.capture = CapturePanel()
         self.process = ProcessPanel()
@@ -811,6 +822,7 @@ class CaptureRigWidget(QWidget):
         self._layout()
         self.media: SessionMedia | None = None
         self._apply_workflow(None)
+        self.layout_bar.restore_last()
 
     # -- layout -------------------------------------------------------------
     def _buttons(self) -> dict[str, QPushButton]:
@@ -838,21 +850,26 @@ class CaptureRigWidget(QWidget):
         mid_layout = QVBoxLayout(middle)
         mid_layout.addWidget(buttons)
         mid_layout.addWidget(self.log, 1)
-        right = QSplitter(Qt.Orientation.Vertical)
-        right.addWidget(self.preview)
-        right.addWidget(self.playback)
-        right.addWidget(self.results)
-        right.setStretchFactor(0, 2)
-        right.setStretchFactor(1, 3)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(left)
-        splitter.addWidget(middle)
-        splitter.addWidget(right)
-        splitter.setStretchFactor(2, 2)
-        splitter.setSizes([420, 520, 660])
+        controls = QSplitter(Qt.Orientation.Horizontal)
+        controls.addWidget(left)
+        controls.addWidget(middle)
+        controls.setSizes([420, 520])
+        right = Qt.DockWidgetArea.RightDockWidgetArea
+        self.panes = PaneHost(
+            controls,
+            {
+                "preview": ("Live preview", self.preview, right),
+                "playback": ("Playback", self.playback, right),
+                "results": ("Results", self.results, right),
+            },
+        )
+        self.layout_bar = LayoutBar(self.panes, self.layout_store, controls)
+        header = QHBoxLayout()
+        header.addWidget(self.session_label, 1)
+        header.addWidget(self.layout_bar)
         layout = QVBoxLayout(self)
-        layout.addWidget(self.session_label)
-        layout.addWidget(splitter, 1)
+        layout.addLayout(header)
+        layout.addWidget(self.panes, 1)
 
     # -- commands -----------------------------------------------------------
     def command_for(self, action: str) -> list[str]:
@@ -1094,6 +1111,7 @@ class CaptureRigWidget(QWidget):
 
     def shutdown(self) -> None:
         """Release the cameras and the decoder; kill any running command."""
+        self.layout_bar.save_last()
         self.preview.stop()
         self.playback.close_media()
         self.runner.stop()
