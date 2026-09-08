@@ -155,8 +155,7 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
    Never import or relabel legacy checkpoints as outcomes.
 4. #9483: the stale 15-tile nav-gap audit `reports/feature_navigation_gaps/` is deleted (findings dispositioned in the deleting PR); live tile truth is the `src/config/models.yaml` registry plus the generated launcher manifest (#9412/#9437/#9478).
 5. Regenerate `requirements*.lock`/`environment.yml` via dispatch-only `lock-refresh.yml`
-   for #9533 (DL-#9533) once its extras PR merges; the locks were left untouched there.
-
+   for #9533 (DL-#9533, PR #9716) once it merges; the locks were left untouched there.
 ## Scientific Boundaries
 
 - Event locations qualify the retained discrete trajectory only; they are not
