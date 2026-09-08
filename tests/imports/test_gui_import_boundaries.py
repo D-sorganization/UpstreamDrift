@@ -42,9 +42,25 @@ def _blocked_imports(*blocked_roots: str) -> Iterator[None]:
         builtins.__import__ = real_import
 
 
-def _drop_modules(*module_names: str) -> None:
-    for module_name in module_names:
-        sys.modules.pop(module_name, None)
+@contextmanager
+def _dropped_modules(*module_names: str) -> Iterator[None]:
+    """Drop modules from ``sys.modules`` for the block, then restore.
+
+    Issue #9387: the drops are load-bearing for import-boundary testing,
+    but they must not leak: entries that existed before the block are
+    re-bound to their prior objects in a ``finally``, and entries that
+    did not exist are removed again so a replacement import performed
+    inside the block never survives it.
+    """
+    saved = [(name, sys.modules.pop(name, None)) for name in module_names]
+    try:
+        yield
+    finally:
+        for name, module in saved:
+            if module is not None:
+                sys.modules[name] = module
+            else:
+                sys.modules.pop(name, None)
 
 
 def _fake_perturbation_panel_module() -> ModuleType:
@@ -68,12 +84,13 @@ def _fake_simulation_panel_module() -> ModuleType:
 
 
 def test_torque_history_widget_imports_without_pyqtgraph() -> None:
-    _drop_modules(
-        "pyqtgraph",
-        "src.shared.python.pendulum_simulator.gui.torque_history_widget",
-    )
-
-    with _blocked_imports("pyqtgraph"):
+    with (
+        _dropped_modules(
+            "pyqtgraph",
+            "src.shared.python.pendulum_simulator.gui.torque_history_widget",
+        ),
+        _blocked_imports("pyqtgraph"),
+    ):
         module = importlib.import_module(
             "src.shared.python.pendulum_simulator.gui.torque_history_widget"
         )
@@ -82,37 +99,37 @@ def test_torque_history_widget_imports_without_pyqtgraph() -> None:
 
 
 def test_panel_builders_imports_without_pyqtgraph() -> None:
-    _drop_modules(
+    with _dropped_modules(
         "pyqtgraph",
         "src.shared.python.pendulum_simulator.gui.perturbation_panel",
         "src.shared.python.pendulum_simulator.gui.simulation_panel",
         "src.shared.python.pendulum_simulator.gui.torque_history_widget",
         "src.shared.python.pendulum_simulator.gui.panel_builders",
-    )
-
-    fake_modules = {
-        "src.shared.python.pendulum_simulator.gui.perturbation_panel": (
-            _fake_perturbation_panel_module()
-        ),
-        "src.shared.python.pendulum_simulator.gui.simulation_panel": (
-            _fake_simulation_panel_module()
-        ),
-    }
-    with patch.dict(sys.modules, fake_modules), _blocked_imports("pyqtgraph"):
-        module = importlib.import_module(
-            "src.shared.python.pendulum_simulator.gui.panel_builders"
-        )
+    ):
+        fake_modules = {
+            "src.shared.python.pendulum_simulator.gui.perturbation_panel": (
+                _fake_perturbation_panel_module()
+            ),
+            "src.shared.python.pendulum_simulator.gui.simulation_panel": (
+                _fake_simulation_panel_module()
+            ),
+        }
+        with patch.dict(sys.modules, fake_modules), _blocked_imports("pyqtgraph"):
+            module = importlib.import_module(
+                "src.shared.python.pendulum_simulator.gui.panel_builders"
+            )
 
     assert module.build_double_panel.__name__ == "build_double_panel"
 
 
 def test_visualization_widget_imports_without_qt_openglwidgets() -> None:
-    _drop_modules(
-        "PyQt6.QtOpenGLWidgets",
-        "src.tools.model_explorer.visualization_widget",
-    )
-
-    with _blocked_imports("PyQt6.QtOpenGLWidgets"):
+    with (
+        _dropped_modules(
+            "PyQt6.QtOpenGLWidgets",
+            "src.tools.model_explorer.visualization_widget",
+        ),
+        _blocked_imports("PyQt6.QtOpenGLWidgets"),
+    ):
         module = importlib.import_module(
             "src.tools.model_explorer.visualization_widget"
         )
