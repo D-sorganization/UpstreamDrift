@@ -18,6 +18,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ## Active
 
 
+
 ### DL-#9409 · Always-on quality gate lane and conftest src-pivot guard
 
 - **State:** in_review
@@ -29,6 +30,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-08 (`SELF`)
 - **Summary:** CI Standard gains an always-on, ≤10-minute `always-on-unit-lane` (verify_installation import smoke over the shared Tools alias roots, top-level smoke tests, contract tests) that `quality-gate` requires `success` on every PR including docs-only ones; a repo-hygiene guard forbids any conftest from pivoting `sys.modules["src"]` directly (must use `EngineSrcPivot`). Deferred on #9409: main-branch cancel exemption (RM campaign) and nightly cross-engine dedupe (#8725/#9002).
 - **Next step:** Verify the first CI run of the PR executes `always-on-unit-lane` to `success` within its 10-minute budget.
+
+### DL-#9249 · UI: Pin @vitejs/Plugin-React to ^5 Until Vite 8
+
+- **State:** in_review
+- **Owner:** claude
+- **PR:** #9718 (open; `Fixes #9249`)
+- **Paths:** `.github/dependabot.yml`, `ui/README.md`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`7cdbb0a3d`)
+- **Summary:** Dependabot ignores `@vitejs/plugin-react` major updates
+  because 6.x needs Vite 8 (Vite 7 exports no `./internal`); the pairing
+  constraint is documented in `ui/README.md`.
+- **Next step:** Merge the guard PR; revisit the paired vite@8 +
+  plugin-react@6 upgrade once `vitest`/`@react-three/*` are Vite-8 ready.
 
 ### DL-#9470 · Launch-Monitor Analysis Handlers Onto the Async_Action Worker
 
