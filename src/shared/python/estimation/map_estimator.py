@@ -9,9 +9,10 @@ internals.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import asdict, dataclass
-from typing import Any, Literal
+from dataclasses import asdict, dataclass, field
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy.optimize import least_squares
@@ -19,10 +20,40 @@ from scipy.optimize import least_squares
 from src.shared.python.contracts import require
 from src.shared.python.simulation_backends.provenance import ProvenanceStamp
 
+if TYPE_CHECKING:
+    from src.shared.python.estimation.identifiability import (
+        IdentifiabilityGateOptions,
+        IdentifiabilityGateReport,
+    )
+
+logger = logging.getLogger(__name__)
+
 # Large finite value substituted for non-finite residual entries so the
 # trust-region optimizer rejects an infeasible finite-difference step instead of
 # the callback raising and aborting the entire least_squares solve (issue #6893).
+# The substitution is a symptom fix -- finite-difference Jacobians through an
+# unstable forward model -- so every solve counts how often it fired and can be
+# asked to raise instead (#9757).
 NON_FINITE_RESIDUAL_SENTINEL = 1.0e12
+
+NonFinitePolicy = Literal["sentinel", "raise"]
+
+
+class NonFiniteResidualError(RuntimeError):
+    """Raised under ``non_finite_policy="raise"`` when a residual is NaN/Inf."""
+
+
+class NonFiniteCounter:
+    """Counts sentinel substitutions during one solve (mutable by design)."""
+
+    def __init__(self) -> None:
+        self.evaluations = 0
+        self.entries = 0
+
+    def record(self, n_entries: int) -> None:
+        self.evaluations += 1
+        self.entries += int(n_entries)
+
 
 ParameterKind = Literal["length", "inertia", "generic"]
 ResidualFn = Callable[["SplineTrajectoryEvaluation", Mapping[str, float]], np.ndarray]
@@ -425,13 +456,24 @@ class MapDecisionLayout:
 
 @dataclass(frozen=True)
 class MapEstimatorOptions:
-    """Numerical options for the single-trial MAP solve."""
+    """Numerical options for the single-trial MAP solve.
+
+    ``non_finite_policy`` (#9757): ``"sentinel"`` keeps the #6893 behaviour
+    (substitute :data:`NON_FINITE_RESIDUAL_SENTINEL`, count it, warn once);
+    ``"raise"`` raises :class:`NonFiniteResidualError` on the first NaN/Inf.
+
+    ``identifiability`` (#9758): gate the free shared parameters through
+    :func:`estimation.identifiability.gate_shared_parameters` before solving.
+    ``None`` uses the gate's default (``warn``) policy.
+    """
 
     max_iterations: int = 50
     xtol: float = 1e-10
     ftol: float = 1e-10
     gtol: float = 1e-10
     method: Literal["trf", "lm"] = "trf"
+    non_finite_policy: NonFinitePolicy = "sentinel"
+    identifiability: IdentifiabilityGateOptions | None = None
 
 
 @dataclass(frozen=True)
@@ -450,7 +492,13 @@ class MapEstimatorProblem:
 
 @dataclass(frozen=True)
 class MapEstimatorResult:
-    """Deterministic result of a single-trial MAP solve."""
+    """Deterministic result of a single-trial MAP solve.
+
+    ``n_non_finite_evaluations`` counts residual evaluations in which at least
+    one entry was NaN/Inf and got the sentinel (#9757); ``identifiability`` is
+    the pre-solve gate report, or ``None`` when no free parameters exist or
+    the gate was switched off (#9758).
+    """
 
     success: bool
     coefficients: np.ndarray
@@ -460,20 +508,32 @@ class MapEstimatorResult:
     n_iterations: int
     message: str
     provenance: ProvenanceStamp | None = None
+    n_non_finite_evaluations: int = 0
+    identifiability: IdentifiabilityGateReport | None = None
+    locked_by_gate: tuple[str, ...] = field(default_factory=tuple)
 
 
 def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
-    """Solve a single-trial MAP problem with spline and shared parameters."""
+    """Solve a single-trial MAP problem with spline and shared parameters.
+
+    Preconditions are checked by :func:`_validate_problem`. When the shared
+    block has free parameters the identifiability gate runs first and may
+    lock parameters (policy ``lock``) or refuse the solve (policy ``raise``).
+    """
     _validate_problem(problem)
+    gate_report, locked = _apply_identifiability_gate(problem)
+    if locked:
+        problem = _with_locked_parameters(problem, locked)
     x0 = _pack_decision(problem.initial_coefficients, problem.shared_parameters)
     lower, upper = _decision_bounds(problem)
     layout = MapDecisionLayout(
         trajectory_size=problem.trajectory.coefficient_size,
         parameter_names=tuple(spec.name for spec in problem.shared_parameters.specs),
     )
+    counter = NonFiniteCounter()
 
     def residual_for_solver(x: np.ndarray) -> np.ndarray:
-        return _objective_residual(problem, x)
+        return _objective_residual(problem, x, counter)
 
     jacobian_for_solver = None
     if problem.jacobian is not None:
@@ -497,6 +557,7 @@ def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
     )
     residual = residual_for_solver(result.x)
     coefficients, parameter_values = _unpack_decision(problem, result.x)
+    _warn_if_sentinel_fired(counter, problem.jacobian is not None)
     return MapEstimatorResult(
         success=bool(result.success),
         coefficients=coefficients,
@@ -506,6 +567,69 @@ def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
         n_iterations=int(result.nfev),
         message=str(result.message),
         provenance=problem.provenance,
+        n_non_finite_evaluations=counter.evaluations,
+        identifiability=gate_report,
+        locked_by_gate=tuple(locked),
+    )
+
+
+def _apply_identifiability_gate(
+    problem: MapEstimatorProblem,
+) -> tuple[IdentifiabilityGateReport | None, list[str]]:
+    """Run the #9758 gate on the free shared parameters at the initial guess."""
+    from src.shared.python.estimation.identifiability import (
+        IdentifiabilityGateOptions,
+        gate_shared_parameters,
+    )
+
+    options = problem.options.identifiability or IdentifiabilityGateOptions()
+    if options.policy == "off" or problem.shared_parameters.free_size == 0:
+        return None, []
+    block = problem.shared_parameters
+    coefficients = np.asarray(problem.initial_coefficients, dtype=float)
+    evaluation = problem.trajectory.evaluate(coefficients, problem.evaluation_times)
+
+    def residual_of_free(free_values: np.ndarray) -> np.ndarray:
+        values = block.expand_free_vector(free_values)
+        return np.asarray(problem.residual(evaluation, block.to_mapping(values)))
+
+    report = gate_shared_parameters(residual_of_free, block, options)
+    return report, list(report.locked_parameters)
+
+
+def _with_locked_parameters(
+    problem: MapEstimatorProblem, names: Sequence[str]
+) -> MapEstimatorProblem:
+    """Return a copy of ``problem`` with ``names`` locked at their initials."""
+    from dataclasses import replace
+
+    specs = tuple(
+        replace(spec, locked=True) if spec.name in names else spec
+        for spec in problem.shared_parameters.specs
+    )
+    block = SharedParameterBlock.from_specs(specs)
+    return replace(problem, shared_parameters=block)
+
+
+def _warn_if_sentinel_fired(counter: NonFiniteCounter, has_jacobian: bool) -> None:
+    if counter.evaluations == 0:
+        return
+    hint = (
+        ""
+        if has_jacobian
+        else " No analytic Jacobian was supplied, so scipy probed the residual "
+        "with finite differences; supply one (see "
+        "estimation.residuals.residual_jacobian(method='jax')) to remove the "
+        "infeasible probes."
+    )
+    logger.warning(
+        "MAP residual was non-finite in %d evaluation(s) (%d entries replaced "
+        "by the %.0e sentinel); the solution may sit against the sentinel "
+        "rather than the data.%s",
+        counter.evaluations,
+        counter.entries,
+        NON_FINITE_RESIDUAL_SENTINEL,
+        hint,
     )
 
 
@@ -572,7 +696,9 @@ def _decision_bounds(problem: MapEstimatorProblem) -> tuple[np.ndarray, np.ndarr
 
 
 def _objective_residual(
-    problem: MapEstimatorProblem, decision: np.ndarray
+    problem: MapEstimatorProblem,
+    decision: np.ndarray,
+    counter: NonFiniteCounter | None = None,
 ) -> np.ndarray:
     coefficients, parameter_values = _unpack_decision(problem, decision)
     evaluation = problem.trajectory.evaluate(coefficients, problem.evaluation_times)
@@ -580,12 +706,21 @@ def _objective_residual(
     data_residual = np.asarray(problem.residual(evaluation, parameters), dtype=float)
     if data_residual.ndim != 1:
         raise ValueError("residual callable must return a 1D array")
-    data_residual = _sentinel_for_non_finite(data_residual)
+    data_residual = _sentinel_for_non_finite(
+        data_residual,
+        policy=problem.options.non_finite_policy,
+        counter=counter,
+    )
     prior_residual = problem.shared_parameters.prior_residuals(parameter_values)
     return np.concatenate([data_residual, prior_residual])
 
 
-def _sentinel_for_non_finite(residual: np.ndarray) -> np.ndarray:
+def _sentinel_for_non_finite(
+    residual: np.ndarray,
+    *,
+    policy: NonFinitePolicy = "sentinel",
+    counter: NonFiniteCounter | None = None,
+) -> np.ndarray:
     """Replace non-finite residual entries with a large finite sentinel.
 
     SciPy's ``least_squares`` perturbs the decision vector for its 2-point
@@ -593,9 +728,22 @@ def _sentinel_for_non_finite(residual: np.ndarray) -> np.ndarray:
     near-zero projection depth) can yield NaN/Inf. Returning a large finite value
     lets the trust region reject the step instead of raising and aborting the
     whole solve (issue #6893).
+
+    Under ``policy="raise"`` the substitution is refused and
+    :class:`NonFiniteResidualError` names the offending entries (#9757).
+    Every substitution is recorded on ``counter`` when one is given.
     """
-    if np.all(np.isfinite(residual)):
+    finite = np.isfinite(residual)
+    if np.all(finite):
         return residual
+    bad = np.flatnonzero(~finite)
+    if policy == "raise":
+        raise NonFiniteResidualError(
+            f"residual has {bad.size} non-finite entries at indices "
+            f"{bad[:10].tolist()}{'...' if bad.size > 10 else ''}"
+        )
+    if counter is not None:
+        counter.record(bad.size)
     return np.nan_to_num(
         residual,
         nan=NON_FINITE_RESIDUAL_SENTINEL,
