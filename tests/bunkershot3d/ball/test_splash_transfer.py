@@ -83,6 +83,7 @@ def delivery(
     displaced_mass_bounds_kg: tuple[float, float] | None = None,
     contact_duration_s: float = 0.005,
     speed_m_s: float = 25.0,
+    exit_speed_m_s: float | None = None,
     bed_relative_density: float = 0.5,
     verdict: ValidityVerdict | None = None,
     exit_velocity_m_s: tuple[float, float, float] | None = None,
@@ -110,6 +111,9 @@ def delivery(
         exit_velocity_m_s: Optional actual exit velocity.
         exit_angular_velocity_rad_s: Optional exit angular velocity.
         exit_orientation: Optional exit orientation.
+        exit_speed_m_s: Scalar exit speed, defaulting to 60% of entry. Supply
+            it explicitly when a supplied exit vector's magnitude is the
+            measurement to match (issue #9542).
 
     Returns:
         The delivery.
@@ -120,7 +124,7 @@ def delivery(
         displaced_mass_bounds_kg=displaced_mass_bounds_kg,
         contact_duration_s=contact_duration_s,
         entry_speed_m_s=speed_m_s,
-        exit_speed_m_s=0.6 * speed_m_s,
+        exit_speed_m_s=0.6 * speed_m_s if exit_speed_m_s is None else exit_speed_m_s,
         bed_relative_density=bed_relative_density,
         verdict=solver_verdict(speed_m_s) if verdict is None else verdict,
         exit_velocity_m_s=exit_velocity_m_s,
@@ -384,3 +388,59 @@ class TestGreensideSanity:
     def test_the_verdict_is_never_better_than_the_solver_s(self) -> None:
         result = launch(delivery())
         assert result.verdict.status is not EnvelopeStatus.WITHIN
+
+
+class TestExitKinematicsAreConsistentAndOwned:
+    """Issue #9542 (reopen): the exit record is one consistent, owned snapshot.
+
+    Defect 3: the solver's scalar exit speed and the supplied exit vector are
+    two representations of the same measurement; a delivery carrying both
+    must refuse a contradictory pair rather than publish both.
+
+    Defect 4: a ``list`` supplied for an exit vector must be copied into the
+    record, so mutating the caller's list afterwards cannot invalidate a
+    "frozen" dataclass that validated the borrowed reference at construction.
+    """
+
+    def test_contradictory_exit_speed_and_vector_are_refused(self) -> None:
+        # 25 m/s entry leaves 15 m/s of exit speed; a 1000 m/s vector cannot
+        # be the same measurement.
+        with pytest.raises(ValueError, match="exit"):
+            delivery(speed_m_s=25.0, exit_velocity_m_s=(1000.0, 0.0, 0.0))
+
+    def test_agreeing_exit_speed_and_vector_are_accepted(self) -> None:
+        strike = delivery(speed_m_s=25.0, exit_velocity_m_s=(15.0, 0.0, 0.0))
+        assert strike.exit_velocity_m_s == (15.0, 0.0, 0.0)
+
+    def test_a_supplied_velocity_list_is_owned_not_borrowed(self) -> None:
+        velocity = [12.0, 3.5, -4.2]
+        strike = delivery(
+            speed_m_s=25.0,
+            exit_speed_m_s=math.hypot(12.0, 3.5, 4.2),
+            exit_velocity_m_s=velocity,
+        )
+        velocity[0] = math.nan
+        assert strike.exit_velocity_m_s == (12.0, 3.5, -4.2)
+
+    def test_a_supplied_angular_list_is_owned_not_borrowed(self) -> None:
+        spin = [0.0, 45.0, -10.0]
+        strike = delivery(exit_angular_velocity_rad_s=spin)
+        spin[1] = math.nan
+        assert strike.exit_angular_velocity_rad_s == (0.0, 45.0, -10.0)
+
+    def test_a_supplied_orientation_matrix_is_owned_not_borrowed(self) -> None:
+        row = [1.0, 0.0, 0.0]
+        orientation = [row, [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        strike = delivery(exit_orientation=orientation)  # type: ignore[arg-type]
+        row[0] = math.nan
+        assert strike.exit_orientation == ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
+
+    def test_a_velocity_list_mutated_after_construction_cannot_leak_in(self) -> None:
+        velocity = [12.0, 3.5, -4.2]
+        strike = delivery(
+            speed_m_s=25.0,
+            exit_speed_m_s=math.hypot(12.0, 3.5, 4.2),
+            exit_velocity_m_s=velocity,
+        )
+        velocity[0] = math.nan
+        assert all(math.isfinite(v) for v in strike.exit_velocity_m_s)
