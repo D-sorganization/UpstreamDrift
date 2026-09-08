@@ -111,6 +111,13 @@ mocap-io = ["upstream-mocap-io>=0.1.0"]
 # runtime modules import it. Consumers keep their guarded imports, so absence
 # still degrades gracefully.
 c3d = ["ezc3d>=1.5.0,<2.0.0"]
+
+# RTMPose ONNX pose estimator (issue #9648). Opt-in: `onnxruntime` is never
+# imported at module import time — the rtmpose_onnx estimator imports it in
+# its session factory, the registry gates availability on the module, and
+# absence degrades to an install hint. The estimator is registered with
+# capture_source=False until it is qualified against real takes.
+pose-onnx = ["onnxruntime>=1.16.0"]
 # Upper bounds added per issue #5914 to prevent silent breakage on
 # upstream major releases of these physics engines.
 drake = ["drake>=1.22.0,<2.0.0"]
