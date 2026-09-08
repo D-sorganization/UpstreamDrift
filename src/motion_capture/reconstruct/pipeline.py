@@ -12,7 +12,7 @@ produce is written beside the bundle so a take can be audited file by file.
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+from collections.abc import Sequence, Mapping
 
 import numpy as np
 from pathlib import Path
@@ -138,44 +138,12 @@ def reconstruct_session(
     obs_dir = out_dir / "observations"
     obs_dir.mkdir(parents=True, exist_ok=True)
     options = SmootherOptions(acceleration_sigma=acceleration_sigma_px)
-    rejections: dict[str, int] = {}
-    reports: dict[str, Any] = {}
-    for view_id in ids:
-        payload: dict[str, Any] = dict(views[view_id])
-        if tuple(payload["detector_layout"]["keypoint_names"]) != JOINT_NAMES:
-            payload = to_reconstruct_layout(payload)
-        cleaned, report = clean_view(payload, options, min_confidence=min_confidence)
-        if exclude_joints:
-            cleaned = _exclude(cleaned, exclude_joints)
-        (obs_dir / f"{view_id}.json").write_text(
-            json.dumps(cleaned, indent=1), encoding="utf-8"
-        )
-        rejections[view_id] = len(report.rejected)
-        reports[view_id] = _report_dict(report)
-        logger.info("cleaned %s: %d rejections", view_id, len(report.rejected))
-    (out_dir / CLEAN_REPORT_FILE).write_text(
-        json.dumps(reports, indent=1), encoding="utf-8"
+    rejections = _clean_all(
+        views, ids, out_dir, options, min_confidence, tuple(exclude_joints)
     )
     if start_cameras is None:
         assert intrinsics is not None
-        cleaned_views = load_views(out_dir)
-        obs = observations_from_views(cleaned_views, ids)
-        init = initialize_cameras(
-            obs,
-            [i[1] for i in intrinsics],
-            [i[2] for i in intrinsics],
-            anchor=scale_anchor,
-        )
-        require(
-            init.ok,
-            "camera initialisation lacks inliers",
-            [p.inliers for p in init.pairs],
-        )
-        start_cameras = subject_frame(init.cameras, obs)
-        logger.info(
-            "initialised placement from joints: %s",
-            [(p.camera_id, p.inliers) for p in init.pairs],
-        )
+        start_cameras = _initial_cameras(out_dir, ids, intrinsics, scale_anchor)
     record: Reconstruction = fit_bundle(
         out_dir,
         scale_anchor=scale_anchor,
@@ -203,6 +171,61 @@ def reconstruct_session(
         summary.model_dump_json(indent=2), encoding="utf-8"
     )
     return summary
+
+
+def _clean_all(
+    views: Mapping[str, dict[str, Any]],
+    ids: Sequence[str],
+    out_dir: Path,
+    options: SmootherOptions,
+    min_confidence: float,
+    exclude_joints: Sequence[str],
+) -> dict[str, int]:
+    """Clean every view into ``out_dir/observations``; write the clean report."""
+    obs_dir = out_dir / "observations"
+    rejections: dict[str, int] = {}
+    reports: dict[str, Any] = {}
+    for view_id in ids:
+        payload: dict[str, Any] = dict(views[view_id])
+        if tuple(payload["detector_layout"]["keypoint_names"]) != JOINT_NAMES:
+            payload = to_reconstruct_layout(payload)
+        cleaned, report = clean_view(payload, options, min_confidence=min_confidence)
+        if exclude_joints:
+            cleaned = _exclude(cleaned, exclude_joints)
+        (obs_dir / f"{view_id}.json").write_text(
+            json.dumps(cleaned, indent=1), encoding="utf-8"
+        )
+        rejections[view_id] = len(report.rejected)
+        reports[view_id] = _report_dict(report)
+        logger.info("cleaned %s: %d rejections", view_id, len(report.rejected))
+    (out_dir / CLEAN_REPORT_FILE).write_text(
+        json.dumps(reports, indent=1), encoding="utf-8"
+    )
+    return rejections
+
+
+def _initial_cameras(
+    out_dir: Path,
+    ids: Sequence[str],
+    intrinsics: Sequence[tuple[str, Any, tuple[int, int]]],
+    scale_anchor: tuple[str, float],
+) -> tuple[PinholeCamera, ...]:
+    """First-take placement from the cleaned joints and the intrinsics alone."""
+    obs = observations_from_views(load_views(out_dir), ids)
+    init = initialize_cameras(
+        obs,
+        [i[1] for i in intrinsics],
+        [i[2] for i in intrinsics],
+        anchor=scale_anchor,
+    )
+    require(
+        init.ok, "camera initialisation lacks inliers", [p.inliers for p in init.pairs]
+    )
+    logger.info(
+        "initialised placement from joints: %s",
+        [(p.camera_id, p.inliers) for p in init.pairs],
+    )
+    return subject_frame(init.cameras, obs)
 
 
 def _exclude(payload: dict[str, Any], names: Sequence[str]) -> dict[str, Any]:
