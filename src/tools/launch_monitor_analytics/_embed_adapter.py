@@ -34,6 +34,9 @@ class LaunchMonitorAnalyticsEmbedAdapter:
         widget = self._widget
         self._widget = None
         if widget is not None:
+            # Cancel and join any running analysis before the widget dies
+            # (#9470); dropping a live worker thread would strand it.
+            widget.cleanup()
             widget.deleteLater()
 
     def is_dirty(self) -> bool:
