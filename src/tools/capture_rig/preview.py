@@ -16,23 +16,31 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Mapping
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (
+    QGridLayout,
+    QLabel,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
 from src.motion_capture.rig.plan import CaptureMode, RigPlan
 from src.motion_capture.rig.sources import FrameSource
 from src.shared.python.core.contracts import require
 from src.shared.python.core.process_safety import narrow_catch
+from src.shared.python.theme.palette import get_current_colors
 
 from .commands import PlanSelection
 
 SourceFactory = Callable[[RigPlan], Mapping[str, FrameSource]]
 DISPLAY_INTERVAL_S = 1 / 15  # UI refresh cap; the camera keeps its own rate
-TILE_MIN = (320, 200)
+TILE_MIN = (96, 60)  # a soft floor; tiles otherwise follow the pane size
 
 
 def default_sources(plan: RigPlan) -> Mapping[str, FrameSource]:
@@ -40,6 +48,12 @@ def default_sources(plan: RigPlan) -> Mapping[str, FrameSource]:
     from src.motion_capture.rig.preview_source import ffmpeg_preview_sources
 
     return ffmpeg_preview_sources(plan)
+
+
+def tile_style() -> str:
+    """Preview tile colours from the active theme (no literal colours here)."""
+    colors = get_current_colors()
+    return f"background: {colors['bg']}; color: {colors['text_secondary']};"
 
 
 def bgr_to_pixmap(frame_bgr: npt.NDArray[np.uint8], width: int, height: int) -> QPixmap:
@@ -131,6 +145,7 @@ class PreviewPanel(QWidget):
         self._workers: dict[str, CameraWorker] = {}
         self._tiles: dict[str, QLabel] = {}
         self._frames: dict[str, int] = {}
+        self._last: dict[str, npt.NDArray[np.uint8]] = {}
         self.status = QLabel("preview off")
         self.grid_box = QWidget()
         self.grid = QGridLayout(self.grid_box)
@@ -199,12 +214,16 @@ class PreviewPanel(QWidget):
             tile.deleteLater()
         self._tiles = {}
         self._frames = {}
+        self._last = {}
         for column, view in enumerate(views):
             tile = QLabel(view)
             tile.setAlignment(Qt.AlignmentFlag.AlignCenter)
             tile.setMinimumSize(*TILE_MIN)
-            tile.setStyleSheet("background: #202020; color: #ddd;")
+            # Ignored: the pixmap never dictates the tile's size, the pane does.
+            tile.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
+            tile.setStyleSheet(tile_style())
             self.grid.addWidget(tile, 0, column)
+            self.grid.setColumnStretch(column, 1)
             self._tiles[view] = tile
 
     # -- slots --------------------------------------------------------------------
@@ -240,11 +259,19 @@ class PreviewPanel(QWidget):
         if tile is None or not isinstance(image, np.ndarray):
             return
         self._frames[view] = self._frames.get(view, 0) + 1
+        self._last[view] = image
         tile.setPixmap(bgr_to_pixmap(image, tile.width(), tile.height()))
         if self._frames[view] == 1:
             self.status.setText(
                 "live: " + ", ".join(v for v, n in self._frames.items() if n)
             )
+
+    def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        super().resizeEvent(event)
+        for view, image in self._last.items():
+            tile = self._tiles.get(view)
+            if tile is not None:
+                tile.setPixmap(bgr_to_pixmap(image, tile.width(), tile.height()))
 
     def _on_opened(self, view: str, mode_text: str) -> None:
         self._tiles[view].setToolTip(f"{view} {mode_text}")
