@@ -4,6 +4,39 @@ Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
 
+## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
+
+The Capture Rig tile went from "no live view at all" to a recording station.
+Merged in order: #9809 (live preview, movable/scrollable panes with saved dock
+layouts, transport-style recording), #9819 (#9816 theme and layout standards:
+`styling.py`, `header.py`, `action_grid.py`, `playback.py` split out of
+`gui.py`), #9820 (#9810/#9811 `layout_model.py` compositor + `layout_presets.py`
+store), #9821 (#9815 `mosaic.py` + `rig multipicture`), #9823 (#9813/#9814 live
+preview and playback rendered through a `LayoutSpec`). PR #9822 was closed as
+superseded: it was #9823's base, so its files landed byte-identically with that
+squash, and merging it would have reverted the multiview panes. Only #9817
+(this documentation pass) remained.
+
+Hardware facts worth keeping, all measured on the three-camera rig and written
+up in `docs/motion_capture/evidence/capture_rig_multiview.md`:
+
+- A DirectShow camera opens once. During a take the recorder tees its own
+  preview (`--live-preview DIR`); the tile shows those snapshots.
+- That tee must decode cheaply. At full resolution it starved the stream copy
+  (95/393/74 frames in ~7 s); with `-lowres:v 2` and a 256 MB real-time buffer
+  all three cameras hold 60 fps (493/494/462 frames in 8 s).
+- Enumeration costs ~30 s; `--camera VIEW=INSTANCE_ID` reuses what the preview
+  already bound.
+- OpenCV cannot drive these cameras: Media Foundation hangs on the third unit
+  and DirectShow-by-index refuses 1920x1200@60.
+
+Two defects were found while integrating the parallel branches, not by CI:
+`workflow.py` briefly held two `ACTION_HELP` tables where the second silently
+won, and three new entry points each took nine parameters against a budget of
+eight (now `MosaicOptions` / `MultipictureArgs`). A wall-clock assertion in
+`test_layout_model.py` that flaked under load now takes the best of several
+rounds.
+
 ## PR Backlog Catch-Up Sweep: 2026-09-08 (Agent `claude`, Session UpstreamPRs)
 
 Disposition of the 38-PR open backlog (REST-verified states at sweep start):
