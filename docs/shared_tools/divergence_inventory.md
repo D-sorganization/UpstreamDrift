@@ -80,7 +80,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `notes` | 6 | 0 | 0 | 1 | 0 | 6 |
-| `optimization` | 0 | 0 | 0 | 33 | 0 | 0 |
+| `optimization` | 0 | 0 | 0 | 27 | 0 | 0 |
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `pendulum_simulator` | 0 | 0 | 0 | 77 | 0 | 0 |
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **462** | **276** | **126** | **1202** | **520** | **738** |
+| **Total** | **462** | **276** | **126** | **1196** | **520** | **738** |
 
 ## Diverged Files by Package
 
