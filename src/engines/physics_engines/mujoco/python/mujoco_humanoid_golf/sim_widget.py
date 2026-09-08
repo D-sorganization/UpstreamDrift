@@ -985,7 +985,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             return 0
         return max(0, nu)
 
-    def _on_timer(self) -> None:  # noqa: C901, PLR0912, PLR0915
+    def _on_timer(self) -> None:
         """Handle timer event for simulation stepping."""
         if self.model is None or self.data is None:
             return
@@ -995,86 +995,97 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                 self._enforce_interactive_constraints()
                 self._render_once()
                 return
+            self._step_dynamic_simulation()
+            self._update_recording_analysis()
 
-            steps_per_frame = max(
-                1, int(1.0 / (self.fps * self._safe_model_timestep()))
-            )  # noqa: E501
+        self._render_timer_frame()
 
-            for _ in range(steps_per_frame):
-                if self.control_system is not None:
-                    self.control_system.update_time(self.data.time)
+    def _step_dynamic_simulation(self) -> None:
+        """Advance the dynamic simulation by this frame's physics step count."""
+        steps_per_frame = max(1, int(1.0 / (self.fps * self._safe_model_timestep())))
 
-                if self.control_system is not None:
-                    nu = self._safe_model_nu()
-                    velocities = (
-                        self.data.qvel[:nu] if nu <= len(self.data.qvel) else None
-                    )  # noqa: E501
-                    control_torques = self.control_system.compute_control_vector(
-                        velocities,
-                    )
-                    self.data.ctrl[:] = control_torques[:]
-                elif self.control_vector is not None:
-                    self.data.ctrl[:] = self.control_vector[:]
+        for _ in range(steps_per_frame):
+            self._apply_control()
+            mujoco.mj_step(self.model, self.data)
+            if self.telemetry is not None:
+                self.telemetry.record_step(self.data)
 
-                mujoco.mj_step(self.model, self.data)
-                if self.telemetry is not None:
-                    self.telemetry.record_step(self.data)
+    def _apply_control(self) -> None:
+        """Write one control update into ``data.ctrl``.
 
-            config_requests_analysis = False
-            config_selected_actuator = None
+        Prefers the attached ``ControlSystem``; otherwise writes the static
+        ``control_vector`` when one is present.
+        """
+        if self.control_system is not None:
+            self.control_system.update_time(self.data.time)
+            nu = self._safe_model_nu()
+            velocities = self.data.qvel[:nu] if nu <= len(self.data.qvel) else None
+            torques = self.control_system.compute_control_vector(velocities)
+            self.data.ctrl[:] = torques[:]
+        elif self.control_vector is not None:
+            self.data.ctrl[:] = self.control_vector[:]
 
-            if hasattr(self.recorder, "analysis_config") and isinstance(
-                self.recorder.analysis_config, dict
-            ):
-                cfg = self.recorder.analysis_config
-                if (
-                    cfg.get("ztcf")
-                    or cfg.get("zvcf")
-                    or cfg.get("track_drift")
-                    or cfg.get("track_total_control")
-                ):
-                    config_requests_analysis = True
+    def _update_recording_analysis(self) -> None:
+        """Run the per-frame biomechanical analysis and recording hook."""
+        should_compute, selected_actuator = self._resolve_live_analysis()
 
-                sources = cfg.get("induced_accel_sources", [])
-                if sources:
-                    config_requests_analysis = True
-                    for src in sources:
-                        if src not in [
-                            "gravity",
-                            "velocity",
-                            "total",
-                            "actuator",
-                        ]:
-                            config_selected_actuator = str(src)
-                            break
+        if self.analyzer is not None and self.recorder.is_recording:
+            bio_data = self.analyzer.extract_full_state(
+                selected_actuator_name=selected_actuator,
+                compute_advanced_metrics=should_compute,
+            )
+            self.recorder.record_frame(bio_data)
+            self.latest_bio_data = bio_data
+        elif should_compute and self.analyzer:
+            self.latest_bio_data = self.analyzer.extract_full_state(
+                selected_actuator_name=selected_actuator,
+                compute_advanced_metrics=True,
+            )
 
-            should_compute = self.enable_live_analysis or config_requests_analysis
+    def _resolve_live_analysis(self) -> tuple[bool, str | None]:
+        """Resolve this frame's live-analysis request.
 
-            selected_actuator = config_selected_actuator
+        Returns ``(should_compute, selected_actuator)`` derived from the
+        recorder's ``analysis_config`` plus the widget's live-analysis and
+        induced-vector toggles.
+        """
+        config_requests_analysis = False
+        config_selected_actuator = None
+
+        if hasattr(self.recorder, "analysis_config") and isinstance(
+            self.recorder.analysis_config, dict
+        ):
+            cfg = self.recorder.analysis_config
             if (
-                selected_actuator is None
-                and self.show_induced_vectors
-                and self.induced_vector_source
-                not in [
-                    "gravity",
-                    "actuator",
-                ]
+                cfg.get("ztcf")
+                or cfg.get("zvcf")
+                or cfg.get("track_drift")
+                or cfg.get("track_total_control")
             ):
-                selected_actuator = self.induced_vector_source
+                config_requests_analysis = True
 
-            if self.analyzer is not None and self.recorder.is_recording:
-                bio_data = self.analyzer.extract_full_state(
-                    selected_actuator_name=selected_actuator,
-                    compute_advanced_metrics=should_compute,
-                )
-                self.recorder.record_frame(bio_data)
-                self.latest_bio_data = bio_data
-            elif should_compute and self.analyzer:
-                self.latest_bio_data = self.analyzer.extract_full_state(
-                    selected_actuator_name=selected_actuator,
-                    compute_advanced_metrics=True,
-                )
+            sources = cfg.get("induced_accel_sources", [])
+            if sources:
+                config_requests_analysis = True
+                for src in sources:
+                    if src not in ["gravity", "velocity", "total", "actuator"]:
+                        config_selected_actuator = str(src)
+                        break
 
+        should_compute = self.enable_live_analysis or config_requests_analysis
+
+        selected_actuator = config_selected_actuator
+        if (
+            selected_actuator is None
+            and self.show_induced_vectors
+            and self.induced_vector_source not in ["gravity", "actuator"]
+        ):
+            selected_actuator = self.induced_vector_source
+
+        return should_compute, selected_actuator
+
+    def _render_timer_frame(self) -> None:
+        """Enforce constraints, refresh overlays and render one frame."""
         self._enforce_interactive_constraints()
         self.compute_ellipsoids()
         self._record_club_trajectory_point()

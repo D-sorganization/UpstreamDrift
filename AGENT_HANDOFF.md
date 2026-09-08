@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 10:02 PDT
+Updated: 2026-09-07 (UD #9492 decomposition in flight on its own branch)
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -12,6 +12,9 @@ contract, recovery constraints, and next commands are in
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
+`_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
+`architecture_budget.json` exceptions are removed, behavior pinned by tests.
 
 ## Protected Authority
 
