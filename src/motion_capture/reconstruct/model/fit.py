@@ -161,24 +161,24 @@ class _Problem:
         scale = np.repeat(self.w, 3, axis=1)[:, :, None] / self.o.sigma_landmark_m
         jac = jac * scale
         rows_per_t = self.l * 3
-        rows = np.repeat(np.arange(self.t * rows_per_t), self.n)
+        rows: Array = np.repeat(np.arange(self.t * rows_per_t), self.n).astype(float)
         cols = (
             np.arange(self.t)[:, None, None] * self.n
             + np.arange(self.n)[None, None, :]
             + np.zeros((1, rows_per_t, 1), dtype=int)
         ).ravel()
-        vals = jac.ravel()
+        vals: Array = jac.ravel()
         if self.length_names:
             lj = self.model.length_jacobian(q, lengths, self.length_names) * scale
             lrows = np.repeat(np.arange(self.t * rows_per_t), len(self.length_names))
             lcols = np.tile(
                 self.t * self.n + np.arange(len(self.length_names)), self.t * rows_per_t
             )
-            rows = np.concatenate([rows, lrows])
+            rows = np.concatenate([rows, lrows.astype(float)])
             cols = np.concatenate([cols, lcols])
             vals = np.concatenate([vals, lj.ravel()])
         return csr_matrix(
-            (vals, (rows, cols)), shape=(self.t * rows_per_t, self.n_params)
+            (vals, (rows.astype(int), cols)), shape=(self.t * rows_per_t, self.n_params)
         )
 
     def _accel_block(self) -> csr_matrix:
