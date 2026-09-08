@@ -1,6 +1,6 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-Updated: 2026-08-30 10:02 PDT
+Updated: 2026-09-07 (fleet issue #9699 in review on branch claude/issue-9699-mjcf-422)
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
@@ -38,6 +38,22 @@ Seam (#9406) and failure triage (#9474): see
 - Tools force-source frame #4873 merged as
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
+
+## Model Generation REST API Repair: #9699
+
+- Branch `claude/issue-9699-mjcf-422` unifies the three `convert_mjcf_to_urdf`
+  copies on `rest_api_support.mjcf_to_urdf_response` (canonical core; tests
+  exercise `rest_api_routes.ModelGenerationAPI`, the `rest_api.py` shim path
+  through `rest_api_core`/`rest_api_generation` delegates to the same helper)
+  and maps `ET.ParseError` to 422 instead of 500. PR pending.
+- Local pytest dead-locked repo-wide until `git submodule update --init
+  vendor/ud-tools` populated the pinned Tools tree: without it,
+  `src/__init__.py`'s vendored fallback finder recurses against the installed
+  Tools distribution and every pytest run hangs at conftest collection.
+  Initialize the submodule before running tests on this machine.
+- Pre-existing unrelated red on `main`:
+  `test_mjcf_converter_roundtrip.py::TestRoundTrip::test_fixed_joint_topology_survives_urdf_mjcf_urdf`
+  (fixed-joint name not preserved through URDF→MJCF→URDF); follow-up needed.
 
 ## Active Hybrid Authority Repair: #9236
 

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from .rest_api_types import APIRequest, APIResponse, HTTPMethod, Route
+from .rest_api_support import mjcf_to_urdf_response
 
 logger = logging.getLogger(__name__)
 MAX_MESH_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MiB — closes #2479
@@ -515,12 +516,14 @@ class ModelGenerationAPI:
         return APIResponse.ok(response_data)
 
     def convert_mjcf_to_urdf(self, request: APIRequest) -> APIResponse:
-        """Convert MJCF to URDF."""
+        """Convert MJCF to URDF.
+
+        Delegates the conversion itself to the shared canonical helper in
+        ``rest_api_support`` (issue #9699); this handler owns request
+        extraction so the framework-neutral contract stays local.
+        """
         if request is None:
             raise ValueError("request must be provided")
-        from shared.python.model_generation.converters.mjcf_converter import (
-            MJCFConverter,
-        )
 
         body = request.body or {}
 
@@ -530,19 +533,9 @@ class ModelGenerationAPI:
         if error:
             return error
 
-        converter = MJCFConverter()
-
-        try:
-            urdf_string = converter.mjcf_to_urdf(content)
-        except (ValueError, KeyError, OSError) as e:
-            return APIResponse.error(f"Conversion failed: {e}", 422)
-
-        robot_name = body.get("robot_name", "converted")
-
-        if request.query_params.get("download") == "true":
-            return APIResponse.file(urdf_string, f"{robot_name}.urdf")
-
-        return APIResponse.ok({"urdf": urdf_string})
+        return mjcf_to_urdf_response(
+            request, content=content, robot_name=body.get("robot_name", "converted")
+        )
 
     def convert_urdf_to_mjcf(self, request: APIRequest) -> APIResponse:
         """Convert URDF to MJCF."""
