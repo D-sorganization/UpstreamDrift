@@ -12,7 +12,16 @@
   #8557 protected evidence, vendored Tools pin, manufactured-data boundaries and
   workstation recovery restrictions. No calibrated acoustic solver is established.
 
-Updated: 2026-08-30 10:02 PDT
+Updated: 2026-09-08 (fleet wave) PDT
+
+## Import Bootstrap Fail-Fast: #9733
+
+- Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
+  uninitialized: `src/__init__.py` now raises an actionable ImportError naming
+  `git submodule update --init vendor/ud-tools` instead of installing the
+  fallback finder into an unbounded `find_spec` recursion. Regression tests:
+  `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py` (probe simulated
+  by monkeypatch; never touches the real submodule).
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
