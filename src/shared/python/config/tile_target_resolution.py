@@ -281,9 +281,14 @@ def resolve_tile_target(model: Any, repo_root: Path) -> TileTargetResolution:
     if path.startswith(TOOLS_PATH_SCHEME):
         # The scheme itself declares vendor provenance (issue #9478): the
         # path resolves against the pinned vendor root, never the repo.
-        return _resolve_tools_vendor(
-            strip_tools_scheme(path), repo_root, _get(model, "source_root")
+        stripped = strip_tools_scheme(path)
+        require(
+            stripped is not None,
+            "tools:// entry point must strip to a concrete path",
+            stripped,
         )
+        assert stripped is not None  # mypy narrowing; validated by require above
+        return _resolve_tools_vendor(stripped, repo_root, _get(model, "source_root"))
     if _get(model, "provider") == "tools":
         return _resolve_tools_vendor(path, repo_root, _get(model, "source_root"))
     source_root = _get(model, "source_root")

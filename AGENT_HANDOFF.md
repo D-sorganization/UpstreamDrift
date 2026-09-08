@@ -1,7 +1,7 @@
 # Agent Handoff: Proximal–Distal Research Program
 
 Updated: 2026-09-08 02:55 PDT
-Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-08 07:55 UTC
 
 ## Impact Dynamics and Acoustics: #9700
 
@@ -47,6 +47,11 @@ the dev-log entry migrated to the DL-#9478 table format. Follow-ups: a
 dedicated calculator surface for `tools_calculator_hub`, a GUI tile for
 `motion_capture`, sibling-folder click error reporting, and the #9484
 Impact Explorer web build.
+Final CI repair round: `strip_tools_scheme` is `Optional`, so the `tools://`
+dispatch in `ready_maturity_gate` narrows with an explicit `require` before
+`_resolve_tools_vendor` (fixes the `code-quality` mypy `arg-type` failure); and
+`requirements-dev.lock`/`environment.yml` are synced for main's openpyxl/imageio
+dev-extra addition (#9716), fixing the shared `dependency-consistency` red.
 
 Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
 contract, recovery constraints, and next commands are in
