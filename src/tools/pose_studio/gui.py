@@ -13,6 +13,7 @@ each widget owns its own internal state.
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -33,6 +34,11 @@ from src.tools.pose_studio.controllers import (
     HistoryController,
 )
 from src.tools.pose_studio.core import SUPPORTED_ENGINES
+from src.tools.pose_studio.pose_files import (
+    engine_format,
+    load_pose,
+    save_pose,
+)
 from src.tools.pose_studio.widgets import (
     EnginePicker,
     JointPanel,
@@ -44,10 +50,12 @@ logger = get_logger(__name__)
 
 
 _SAVE_TOOLTIP = (
-    "Save formats coming in #4900 (Subtask 6 of EPIC #4895). Currently a stub."
+    "Save the current pose as an engine-native initial-state file for the "
+    "selected engine (Ctrl+S)."
 )
 _LOAD_TOOLTIP = (
-    "Load formats coming in #4900 (Subtask 6 of EPIC #4895). Currently a stub."
+    "Load a pose from an engine-native initial-state file written for the "
+    "selected engine (Ctrl+O)."
 )
 
 
@@ -71,6 +79,10 @@ class MainWidget(QtWidgets.QWidget):
 
         self._engine_controller = EngineController(initial_engine)
         self._history = HistoryController(canonical_zero_pose())
+        # True once the pose has been edited and not yet written to (or read
+        # from) a file. Cleared by a successful save or load (#8882).
+        self._dirty = False
+        self._last_pose_path: str | None = None
 
         self._build_widgets(initial_engine)
         self._build_layout()
@@ -116,6 +128,18 @@ class MainWidget(QtWidgets.QWidget):
         self.act_redo.setShortcut(QtGui.QKeySequence("Ctrl+Shift+Z"))
         self.act_redo.triggered.connect(self._on_redo)
         self.addAction(self.act_redo)
+
+        self.act_save = QtGui.QAction("&Save Pose...", self)
+        self.act_save.setShortcut(QtGui.QKeySequence.StandardKey.Save)
+        self.act_save.setToolTip(_SAVE_TOOLTIP)
+        self.act_save.triggered.connect(self._on_save_clicked)
+        self.addAction(self.act_save)
+
+        self.act_load = QtGui.QAction("&Load Pose...", self)
+        self.act_load.setShortcut(QtGui.QKeySequence.StandardKey.Open)
+        self.act_load.setToolTip(_LOAD_TOOLTIP)
+        self.act_load.triggered.connect(self._on_load_clicked)
+        self.addAction(self.act_load)
 
     def _build_layout(self) -> None:
         outer = QtWidgets.QVBoxLayout(self)
@@ -193,19 +217,107 @@ class MainWidget(QtWidgets.QWidget):
     def _on_load_reference(self) -> None:
         self._apply_pose(canonical_from_reference_setup(), record_history=True)
 
-    def _on_save_clicked(self) -> None:
-        QtWidgets.QToolTip.showText(
-            self.btn_save.mapToGlobal(self.btn_save.rect().bottomLeft()),
-            _SAVE_TOOLTIP,
-            self.btn_save,
+    # ---- save / load (#8882) -------------------------------------------
+
+    def is_dirty(self) -> bool:
+        """Return ``True`` when the pose has unsaved edits.
+
+        Public so :class:`_EmbedAdapter` and :class:`PoseStudioWindow` can
+        honour it without reaching into ``_history`` (Law of Demeter).
+        """
+        return self._dirty
+
+    def save_pose_to(self, path: str | Path) -> Path:
+        """Write the current pose for the current engine. Returns the path."""
+        written = save_pose(
+            self._engine_controller.pose,
+            self._engine_controller.engine_name,
+            path,
         )
+        self._dirty = False
+        self._last_pose_path = str(written)
+        return written
+
+    def load_pose_from(self, path: str | Path) -> None:
+        """Read a pose for the current engine and make it the current pose."""
+        pose = load_pose(self._engine_controller.engine_name, path)
+        self._apply_pose(pose, record_history=True)
+        self._dirty = False
+        self._last_pose_path = str(path)
+
+    def _confirm_discard_unsaved(self, action_label: str) -> bool:
+        """Prompt Save / Discard / Cancel before dropping unsaved edits.
+
+        Returns ``True`` when the caller may proceed. A ``Save`` answer
+        proceeds only when the save actually cleared the dirty flag, so a
+        cancelled file dialog cannot fall through into a discard.
+        """
+        if not self._dirty:
+            return True
+        buttons = QtWidgets.QMessageBox.StandardButton
+        answer = QtWidgets.QMessageBox.question(
+            self,
+            "Unsaved Pose Edits",
+            f"This pose has unsaved edits. Save before {action_label}?",
+            buttons.Save | buttons.Discard | buttons.Cancel,
+            buttons.Cancel,
+        )
+        if answer == buttons.Discard:
+            return True
+        if answer != buttons.Save:
+            return False
+        self._on_save_clicked()
+        return not self._dirty
+
+    def _on_save_clicked(self) -> None:
+        engine = self._engine_controller.engine_name
+        fmt = engine_format(engine)
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            f"Save Pose for {engine}",
+            self._last_pose_path or fmt.default_name(),
+            fmt.name_filter,
+        )
+        if not path:
+            return
+        try:
+            written = self.save_pose_to(path)
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            self._report_file_failure("Could Not Save Pose", exc)
+            return
+        logger.info("Saved %s pose to %s", engine, written)
 
     def _on_load_clicked(self) -> None:
-        QtWidgets.QToolTip.showText(
-            self.btn_load.mapToGlobal(self.btn_load.rect().bottomLeft()),
-            _LOAD_TOOLTIP,
-            self.btn_load,
+        if not self._confirm_discard_unsaved("loading another pose"):
+            return
+        engine = self._engine_controller.engine_name
+        fmt = engine_format(engine)
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            f"Load Pose for {engine}",
+            self._last_pose_path or "",
+            fmt.name_filter,
         )
+        if not path:
+            return
+        try:
+            self.load_pose_from(path)
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            self._report_file_failure("Could Not Load Pose", exc)
+
+    def _report_file_failure(self, title: str, exc: Exception) -> None:
+        """Surface a save/load failure to the user, not just to the log."""
+        logger.exception(title)
+        QtWidgets.QMessageBox.warning(self, title, f"{title}: {exc}")
+
+    def confirm_close(self) -> bool:
+        """Return ``True`` when this widget may be closed.
+
+        Used by :class:`PoseStudioWindow.closeEvent`; the embedded path
+        reaches the same decision through ``_EmbedAdapter.is_dirty`` and
+        the launcher's own prompt.
+        """
+        return self._confirm_discard_unsaved("closing Pose Studio")
 
     # ---- core state plumbing -------------------------------------------
 
@@ -223,6 +335,7 @@ class MainWidget(QtWidgets.QWidget):
         self.joint_panel.set_angles(pose.angles_full_dict_deg())
         if record_history:
             self._history.push(pose)
+            self._dirty = True
         self._refresh_undo_redo_actions()
 
     def _refresh_undo_redo_actions(self) -> None:
@@ -254,16 +367,10 @@ class MainWidget(QtWidgets.QWidget):
         assert pose_menu is not None  # noqa: S101 — Qt invariant
         assert view_menu is not None  # noqa: S101 — Qt invariant
 
-        # File menu.
-        act_save = QtGui.QAction("&Save Pose...", parent)
-        act_save.setToolTip(_SAVE_TOOLTIP)
-        act_save.triggered.connect(self._on_save_clicked)
-        file_menu.addAction(act_save)
-
-        act_load = QtGui.QAction("&Load Pose...", parent)
-        act_load.setToolTip(_LOAD_TOOLTIP)
-        act_load.triggered.connect(self._on_load_clicked)
-        file_menu.addAction(act_load)
+        # File menu -- the same QActions the widget owns, so the menu and
+        # the footer buttons can never drift apart (#8882).
+        file_menu.addAction(self.act_save)
+        file_menu.addAction(self.act_load)
         file_menu.addSeparator()
         act_quit = QtGui.QAction("&Quit", parent)
         act_quit.triggered.connect(parent.close)
@@ -317,6 +424,18 @@ class PoseStudioWindow(QtWidgets.QMainWindow):
 
         # Create menu bar
         self._main_widget.create_menu_bar(self)
+
+    def closeEvent(self, a0: QtGui.QCloseEvent | None) -> None:
+        """Prompt before discarding unsaved pose edits (#8882).
+
+        Mirrors the launcher's ``_confirm_dirty_close`` so the standalone
+        window and the embedded tab behave identically.
+        """
+        if not self._main_widget.confirm_close():
+            if a0 is not None:
+                a0.ignore()
+            return
+        super().closeEvent(a0)
 
     @property
     def main_widget(self) -> MainWidget:
@@ -376,11 +495,13 @@ class _EmbedAdapter:
         self._widget = None
 
     def is_dirty(self) -> bool:
-        """Return True if the tool has unsaved state.
+        """Return True if the embedded pose has unsaved edits (#8882).
 
-        Pose Studio does not currently track dirty state.
+        Delegates to the widget's public ``is_dirty`` rather than reading
+        its private history stack, so the launcher's dirty-close guard and
+        the standalone ``closeEvent`` agree on one definition.
         """
-        return False
+        return self._widget is not None and self._widget.is_dirty()
 
 
 # Register the embed adapter when this module is imported

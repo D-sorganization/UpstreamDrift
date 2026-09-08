@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.ai.sample_tools import (
     register_golf_suite_tools,
 )
@@ -76,7 +78,7 @@ class TestDataTools:
         register_golf_suite_tools(registry)
 
         result = registry.execute("list_sample_files", {})
-        assert result.solver_status == "success"
+        assert result.success is True
         assert "files" in result.result
         assert "message" in result.result
 
@@ -86,7 +88,7 @@ class TestDataTools:
         register_golf_suite_tools(registry)
 
         result = registry.execute("load_c3d", {"file_path": "/nonexistent.c3d"})
-        assert result.solver_status == "success"  # Tool executed successfully
+        assert result.success is True  # Tool executed successfully
         assert result.result["success"] is False  # But operation failed
         assert "not found" in result.result["error"].lower()
 
@@ -98,7 +100,7 @@ class TestDataTools:
         # Note: File doesn't exist, so we get "file not found" first
         # In real usage with existing non-.c3d file, we'd get the extension error
         result = registry.execute("load_c3d", {"file_path": "file.txt"})
-        assert result.solver_status == "success"  # Tool executed
+        assert result.success is True  # Tool executed
         assert result.result["success"] is False  # But operation failed
 
 
@@ -114,7 +116,7 @@ class TestAnalysisTools:
             "run_inverse_dynamics",
             {"file_path": "test.c3d", "engine": "invalid"},
         )
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result["success"] is False
         assert "invalid" in result.result["error"].lower()
 
@@ -127,7 +129,7 @@ class TestAnalysisTools:
             "run_inverse_dynamics",
             {"file_path": "test.c3d", "engine": "mujoco"},
         )
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result["success"] is False
         assert result.result["error"] == "not_implemented"
         assert result.result["status"] == "not_implemented"
@@ -142,7 +144,7 @@ class TestAnalysisTools:
             "interpret_torques",
             {"shoulder_torque": 100.0, "hip_torque": 150.0, "wrist_torque": 30.0},
         )
-        assert result.solver_status == "success"
+        assert result.success is True
         assert "shoulder" in result.result
         assert "hip" in result.result
         assert "wrist" in result.result
@@ -179,7 +181,7 @@ class TestEducationTools:
             "explain_concept",
             {"term": "inverse_dynamics", "expertise_level": 1},
         )
-        assert result.solver_status == "success"
+        assert result.success is True
         assert "explanation" in result.result
         assert len(result.result["explanation"]) > 50  # Non-trivial explanation
 
@@ -192,7 +194,7 @@ class TestEducationTools:
             "explain_concept",
             {"term": "nonexistent_term", "expertise_level": 1},
         )
-        assert result.solver_status == "success"
+        assert result.success is True
         assert "not found" in result.result["explanation"].lower()
 
     def test_explain_concept_expertise_levels(self) -> None:
@@ -221,7 +223,7 @@ class TestEducationTools:
         register_golf_suite_tools(registry)
 
         result = registry.execute("list_glossary_terms", {})
-        assert result.solver_status == "success"
+        assert result.success is True
         assert len(result.result["terms"]) > 0
         assert len(result.result["categories"]) > 0
 
@@ -231,7 +233,7 @@ class TestEducationTools:
         register_golf_suite_tools(registry)
 
         result = registry.execute("list_glossary_terms", {"category": "dynamics"})
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result["filter"] == "dynamics"
         assert "inverse_dynamics" in result.result["terms"]
 
@@ -241,7 +243,7 @@ class TestEducationTools:
         register_golf_suite_tools(registry)
 
         result = registry.execute("search_glossary", {"query": "force"})
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result["count"] > 0
 
 
@@ -257,7 +259,7 @@ class TestValidationTools:
             "validate_cross_engine",
             {"file_path": "test.c3d", "tolerance": 0.02},
         )
-        assert result.solver_status == "success"
+        assert result.success is True
         assert "engines" in result.result
         assert len(result.result["engines"]) == 3
 
@@ -270,7 +272,7 @@ class TestValidationTools:
             "check_energy_conservation",
             {"tolerance": 0.01},
         )
-        assert result.solver_status == "success"
+        assert result.success is True
         assert result.result["tolerance"] == 0.01
 
     def test_list_physics_engines(self) -> None:
@@ -279,7 +281,7 @@ class TestValidationTools:
         register_golf_suite_tools(registry)
 
         result = registry.execute("list_physics_engines", {})
-        assert result.solver_status == "success"
+        assert result.success is True
         assert len(result.result["engines"]) == 3
         assert "available_count" in result.result
 
@@ -311,3 +313,47 @@ class TestToolsForProvider:
         for tool in anthropic_tools:
             assert "name" in tool
             assert "input_schema" in tool
+
+
+@pytest.mark.unit
+class TestShellToolSecurity:
+    """Security tests for ShellTool command injection prevention."""
+
+    def test_safe_whitelisted_command(self) -> None:
+        """Safe find or ls command is accepted."""
+        from src.shared.python.ai.tools.cli_tools import ShellTool
+
+        tool = ShellTool()
+        assert tool._is_command_allowed("find . -name '*.py'")
+        assert tool._is_command_allowed("ls -la")
+
+    def test_blocks_find_exec(self) -> None:
+        """Dangerous flag -exec is blocked."""
+        from src.shared.python.ai.tools.cli_tools import ShellTool
+
+        tool = ShellTool()
+        assert not tool._is_command_allowed("find . -exec rm -rf {} +")
+        assert not tool._is_command_allowed("find . --exec rm -rf {} +")
+        assert not tool._is_command_allowed("find . -execdir rm -rf {} +")
+
+    def test_blocks_find_delete(self) -> None:
+        """Dangerous flag -delete is blocked."""
+        from src.shared.python.ai.tools.cli_tools import ShellTool
+
+        tool = ShellTool()
+        assert not tool._is_command_allowed("find . -name '*.tmp' -delete")
+
+    def test_blocks_exec_assignment(self) -> None:
+        """Dangerous flag with assignment syntax is blocked."""
+        from src.shared.python.ai.tools.cli_tools import ShellTool
+
+        tool = ShellTool()
+        assert not tool._is_command_allowed("find . --exec=/bin/sh")
+
+    def test_blocks_unauthorized_base_command(self) -> None:
+        """Commands outside allowlist are rejected."""
+        from src.shared.python.ai.tools.cli_tools import ShellTool
+
+        tool = ShellTool()
+        assert not tool._is_command_allowed("bash -c 'echo pwned'")
+        assert not tool._is_command_allowed("python -c 'import os'")

@@ -190,10 +190,10 @@ def _module_name(relative: str) -> tuple[str, bool]:
     parts = Path(relative).with_suffix("").parts
     is_package = parts[-1] == "__init__"
     module_parts = parts[:-1] if is_package else parts
-    if not module_parts or module_parts[0] != "sidekick":
+    if not module_parts or module_parts[0] not in _SUPPORTED_SCOPES:
         raise RuntimeError(
-            "Manifest-gated runtime extensions must use the sidekick namespace: "
-            f"{relative}"
+            "Manifest-gated runtime extensions must use supported scopes "
+            f"({', '.join(_SUPPORTED_SCOPES)}): {relative}"
         )
     return ".".join(module_parts), is_package
 

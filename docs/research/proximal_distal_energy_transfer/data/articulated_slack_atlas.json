@@ -320,9 +320,9 @@
   },
   "next_gate": "extend event-qualified laws to distributed grip and shaft compliance, longer horizons, ground coupling, and governed bilateral human wrenches",
   "source_sha256": {
-    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "8eed52fe4ebbc55fcf753f4703330dd6d768281b0babfbb2adca074b862fc36d",
+    "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json": "0d9f4d7d9e479b5c611294662d73d92c11f197bd85e91ee1af7c98c7785d5df2",
     "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz": "9fa4364571ba5535995c63226289c0711ee1ebf37c58b7a3b4e4d14a98561779",
-    "scripts/research/proximal_distal_energy/articulated_slack_contact.py": "2301d3ddbdb1387df952d18c1f37d6b81e892ca87f1cab037879cc38ed204844",
+    "scripts/research/proximal_distal_energy/articulated_slack_contact.py": "79ad8644029ff8d447eae2e697a5ed7deceb173c000e5ef2b4f53be6c791ad69",
     "scripts/research/proximal_distal_energy/articulated_slack_forward.py": "1a2190ad0616b50a32c1427e66401760beff789ef128bf2eba2bb7a6eba5ea54",
     "scripts/research/proximal_distal_energy/articulated_slack_atlas.py": "c5a49913785d35d85a1830b01d0a71d4819a999ea98497cd99d9d4fe4d5c8ca1",
     "scripts/research/proximal_distal_energy/run_articulated_slack_atlas.py": "db5f0e9f2fd04cf305e44b90c7df718df126c0362a2caac6bb94647faccd889b",

@@ -108,6 +108,18 @@ class Settings(BaseSettings):
         validation_alias="CORS_ORIGINS",
     )
 
+    # --- Pose estimation cluster (#9592) ----------------------------------
+    # mediapipe>=0.10 loads a ``.task`` model from disk; see
+    # ``pose_estimation.mediapipe_models`` for resolution and verification.
+    mediapipe_pose_model_path: str | None = Field(
+        default=None,
+        validation_alias="MEDIAPIPE_POSE_MODEL_PATH",
+    )
+    mediapipe_pose_model_variant: str = Field(
+        default="full",
+        validation_alias="MEDIAPIPE_POSE_MODEL_VARIANT",
+    )
+
     @field_validator("server_port")
     @classmethod
     def _validate_port(cls, value: int) -> int:
