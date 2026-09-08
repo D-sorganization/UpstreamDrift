@@ -28,7 +28,7 @@ import dataclasses
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -42,8 +42,8 @@ from .cameras import PinholeCamera
 from .geometry import triangulate
 from .skeleton import JOINT_NAMES, PARENTS, SYMMETRIC_PAIRS
 
-Array = npt.NDArray[np.float64]
-Mask = npt.NDArray[np.bool_]
+Array: TypeAlias = npt.NDArray[np.float64]
+Mask: TypeAlias = npt.NDArray[np.bool_]
 
 
 @dataclass(frozen=True)
