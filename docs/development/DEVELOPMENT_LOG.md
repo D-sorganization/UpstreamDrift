@@ -57,9 +57,33 @@ Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
 
 Never place credentials, tokens, or customer data in a development log.
 
-### DL-#9494 · Resolve the CLAUDE.md `--no-verify` Contradiction by Fixing the Windows Hook Environment
+### DL-#9387 · Unit-Gate Worker Corruption: `src`-Identity Sentinel and Leak Fixes
 
 - **State:** in_review
+- **Owner:** claude
+- **PR:** #9741 (open; `Fixes #9387`)
+- **Paths:** `tests/unit/repo_hygiene/test_src_identity_sentinel.py`,
+  `tests/imports/test_gui_import_boundaries.py`,
+  `tests/integration/test_golf_launcher_integration.py`,
+  `tests/unit/engines/pinocchio/test_tasks.py`,
+  `tests/unit/test_ux_enhancements.py`
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (`c70d5ddae`)
+- **Summary:** Static audit of `tests/` (conftests excluded) found 83
+  `sys.modules['src*']` mutation sites in 23 files with 0 unambiguous
+  leakers; the judgment-call leaks (ux-enhancements fixture, pinocchio
+  tasks fixture, GUI import-boundary drops, golf-launcher pops) are now
+  explicitly snapshot/restored, and a runtime sentinel runs each of the
+  four documented victim files in a serial subprocess asserting
+  `sys.modules['src']` identity and the `src.*` namespace are unchanged.
+- **Next step:** Watch this PR's `quality-gate` run once after opening;
+  on green, protected squash merge closes #9387, then rerun the flaky
+  `unit-test-gate` histories of #9384/#9374/#9404 to confirm no fresh
+  worker-corruption victims appear.
+
+### DL-#9494 · Resolve the CLAUDE.md `--no-verify` Contradiction by Fixing the Windows Hook Environment
+
+- **State:** shipped
 - **Owner:** claude
 - **Issue:** #9494
 - **Branch:** `claude/issue-9494-precommit-env`
