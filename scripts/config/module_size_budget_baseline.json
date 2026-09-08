@@ -1,4 +1,11 @@
 {
   "max_lines": 1200,
-  "exceptions": []
+  "exceptions": [
+    {
+      "path": "src/tools/launch_monitor_analytics/gui.py",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "reason": "Issue #9470 temporary exception while launch monitor analysis handlers and GUI widgets are decomposed (1646 lines).",
+      "expires_on": "2026-10-31"
+    }
+  ]
 }
