@@ -1,5 +1,8 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+Updated: 2026-09-08 02:55 PDT
+Updated: 2026-09-08 03:10 UTC
+
 ## Impact Dynamics and Acoustics: #9700
 
 - Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
@@ -11,16 +14,62 @@
 
 Updated: 2026-09-08 02:55 PDT
 
+## Import Bootstrap Fail-Fast: #9733
+
+- Open PR fixes the pytest livelock in fresh worktrees with `vendor/ud-tools`
+  uninitialized: `src/__init__.py` now raises an actionable ImportError naming
+  `git submodule update --init vendor/ud-tools` instead of installing the
+  fallback finder into an unbounded `find_spec` recursion. Regression tests:
+  `tests/unit/repo_hygiene/test_src_fallback_fail_fast_9733.py` (probe simulated
+  by monkeypatch; never touches the real submodule).
+
 Epic #8557 is canonical; issue state, local files, and checkpoints are not
 completion evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate
 design-manual program.
 
-Detailed takeover context, the merge-versus-quarantine boundary, exact smoke
-contract, recovery constraints, and next commands are in
-`docs/development/proximal_distal_program_turnover.md`.
+Detailed takeover context (merge-versus-quarantine boundary, exact smoke contract, recovery constraints, next commands): `docs/development/proximal_distal_program_turnover.md`.
 
 Seam (#9406) and failure triage (#9474): see
 `docs/development/readiness_seam_handoff.md` before retiring a shared cluster.
+UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
+`_add_live_kinematics_overlays` are decomposed into focused helpers, both dated
+`architecture_budget.json` exceptions are removed, behavior pinned by tests.
+
+## In-Flight Tool Migration: #9470 (Launch-Monitor Async Analytics)
+
+- Branch `claude/issue-9470-async-analytics` migrates the seven launch-monitor
+  analysis handlers onto the #8880 `async_action` worker: one shared
+  `AsyncActionBar` for all trigger buttons, widget-free `_compute_*` halves
+  with cancellation checkpoints, synchronous `present(compute())` paths kept,
+  and the embed adapter `cleanup()` cancelling and joining the worker.
+- The branch is stacked on PR #9472 (the #8880 mechanism, `readiness/p2-8880-async-action-worker`);
+  merge #9472 first, then this PR applies cleanly.
+- Remaining #9470 checklist follow-ups, in pain order: `bunker_shot_gui/gui.py`
+  (`_guarded` wait cursor), `putting_green_gui`, `ball_flight_gui`,
+  `swing_flight_pipeline`, `terrain_engine`, then the audit-only tools.
+- Gate: `python -m pytest -q tests/ui/tools/launch_monitor tests/tools/test_async_action.py`
+
+## Unit-Gate `src`-Identity Sentinel: #9387 (Merged)
+
+- The worker-corruption class from #9099 (a test mutating
+  `sys.modules['src']`/`src.*` and corrupting later tests on the same
+  xdist worker) is covered by a runtime sentinel,
+  `tests/unit/repo_hygiene/test_src_identity_sentinel.py`: each of the
+  four documented victim files runs in its own serial subprocess
+  (`-p no:xdist`) and the sentinel asserts `sys.modules['src']`
+  identity plus the `src.*` namespace snapshot are unchanged. RED was
+  demonstrated with a scratch pivot module (removed before commit).
+- The four judgment-call leak sites from the audit are explicitly
+  snapshot/restored (`test_ux_enhancements.py`, pinocchio
+  `test_tasks.py`, `test_gui_import_boundaries.py`,
+  `test_golf_launcher_integration.py`); the full audit table lives in
+  the PR body. `tests/unit/test_ux_enhancements.py` collects 0 test
+  functions (dead fixture file since #5753) — deletion candidate for a
+  follow-up PR; do not delete it here.
+- Known environment limitation: in `git worktree` checkouts (`.git` is
+  a pointer file), `tests/scripts/test_validate_suite.py` fails two
+  `.git`-inspecting tests; the sentinel tolerates exactly those two ids
+  there and requires them to pass in normal checkouts and CI.
 
 ## Pre-Commit on Windows — Resolved (#9494)
 
@@ -189,7 +238,9 @@ python scripts/ci/check_file_size_budget.py
 python scripts/ci/check_architecture_budget.py
 ```
 
-Also run claim/evidence integrity, release qualification, PDF inspection, and
-affected full gates after publication changes. Never force-push, bypass branch
-protection, relax tolerances after inspecting results, or create capacity-only
-reruns.
+Also run claim/evidence integrity, release qualification, PDF inspection, and affected full gates after publication changes. Never
+force-push, bypass branch protection, relax tolerances after inspecting results, or create capacity-only reruns.
+
+## UI Dependency Pin: #9249
+
+- Dependabot now ignores `@vitejs/plugin-react` major updates (`.github/dependabot.yml`): 6.x needs Vite 8 (`peerDependencies.vite: "^8.0.0"`; Vite 7 exports no `./internal`), so a lone bump cannot merge. Stay on plugin-react ^5 with vite ^7.3.2 until a paired Vite-8 upgrade; pairing note lives in `ui/README.md`. Branch `claude/issue-9249-ui-pin`.
