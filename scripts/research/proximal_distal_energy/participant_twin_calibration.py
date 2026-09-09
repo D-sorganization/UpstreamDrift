@@ -266,21 +266,12 @@ def _strata_for(
     return strata
 
 
-def build_synthetic_cohort() -> dict[str, Any]:
-    """Build the frozen identity-safe synthetic benchmark cohort record."""
-    pseudonyms = tuple(
-        sorted(
-            _pseudonym("pt", "participant", str(index))
-            for index in range(PARTICIPANT_COUNT)
-        )
-    )
-    club_pool = tuple(
-        sorted(_pseudonym("cl", "club", str(index)) for index in range(CLUB_POOL_SIZE))
-    )
-    held_out = assign_participant_holdout(
-        pseudonyms, split_salt=COHORT_SALT, holdout_fraction=HOLDOUT_FRACTION
-    )
-    strata = _strata_for(pseudonyms, held_out)
+def _build_cohort_participants(
+    pseudonyms: tuple[str, ...],
+    club_pool: tuple[str, ...],
+    held_out: tuple[str, ...],
+    strata: dict[str, dict[str, str]],
+) -> tuple[list[dict[str, Any]], dict[str, str]]:
     participants: list[dict[str, Any]] = []
     trajectory_roles: dict[str, str] = {}
     for index, pseudonym in enumerate(pseudonyms):
@@ -317,6 +308,27 @@ def build_synthetic_cohort() -> dict[str, Any]:
                 ),
             }
         )
+    return participants, trajectory_roles
+
+
+def build_synthetic_cohort() -> dict[str, Any]:
+    """Build the frozen identity-safe synthetic benchmark cohort record."""
+    pseudonyms = tuple(
+        sorted(
+            _pseudonym("pt", "participant", str(index))
+            for index in range(PARTICIPANT_COUNT)
+        )
+    )
+    club_pool = tuple(
+        sorted(_pseudonym("cl", "club", str(index)) for index in range(CLUB_POOL_SIZE))
+    )
+    held_out = assign_participant_holdout(
+        pseudonyms, split_salt=COHORT_SALT, holdout_fraction=HOLDOUT_FRACTION
+    )
+    strata = _strata_for(pseudonyms, held_out)
+    participants, trajectory_roles = _build_cohort_participants(
+        pseudonyms, club_pool, held_out, strata
+    )
     record = {
         "schema_version": PROVENANCE_SCHEMA_VERSION,
         "cohort_id": COHORT_ID,

@@ -390,15 +390,16 @@ def build_evaluation_ledger(
     cohort: dict[str, Any],
     screen: IdentifiabilityScreen,
     barrier_held_out_reads: int,
-    prior_check: dict[str, Any],
-    posterior_check: dict[str, Any],
-    contraction: dict[str, Any],
+    checks: dict[str, Any],
     holdouts: dict[str, Any],
     transport: dict[str, Any],
     *,
     include_discrepancy: bool,
 ) -> dict[str, Any]:
     """Assemble the fail-closed promotion ledger for this workflow run."""
+    prior_check = checks["prior_check"]
+    posterior_check = checks["posterior_check"]
+    contraction = checks["contraction"]
     summary = validate_cohort(cohort)
     trajectory = holdouts["trajectory_held_out"]
     participant = holdouts["participant_held_out"]
@@ -510,9 +511,11 @@ def run_workflow(
         cohort,
         screen,
         barrier.held_out_outcomes_read(),
-        prior_check,
-        posterior_check,
-        contraction,
+        {
+            "prior_check": prior_check,
+            "posterior_check": posterior_check,
+            "contraction": contraction,
+        },
         holdouts,
         transport,
         include_discrepancy=include_discrepancy,
