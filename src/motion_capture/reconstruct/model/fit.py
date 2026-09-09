@@ -297,6 +297,9 @@ def _huber_weight(u: Array, delta: float) -> Array:
 
 
 def _solve(problem: _Problem, x0: Array, options: FitOptions) -> tuple[Array, int]:
+    lower = np.full(x0.shape, -np.inf)
+    if problem.length_names:
+        lower[-len(problem.length_names) :] = np.finfo(float).eps
     fit = least_squares(
         problem.residuals,
         x0,
@@ -306,6 +309,7 @@ def _solve(problem: _Problem, x0: Array, options: FitOptions) -> tuple[Array, in
         ftol=1e-8,
         xtol=1e-8,
         x_scale="jac",
+        bounds=(lower, np.inf),
     )
     return np.asarray(fit.x, dtype=float), int(fit.nfev)
 

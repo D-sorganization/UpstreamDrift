@@ -119,6 +119,8 @@ def fit_reference(
         q0=reference_initial_state(model, observed),
         options=selected,
     )
+    if not all(np.isfinite(v) and v > 0 for v in fit.lengths_m.values()):
+        raise ValueError("Solver returned invalid fitted dimensions")
     world = model.forward(fit.q, fit.lengths_m)
     if not np.isfinite(world).all() or not np.isfinite(fit.q).all():
         raise ValueError("Solver returned non-finite reference geometry")

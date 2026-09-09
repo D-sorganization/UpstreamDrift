@@ -70,12 +70,17 @@ Capture Rig reference UI tests pass. The normal pre-push gates passed on
 `74e867786`: Ruff, formatting, governance, mypy, Bandit and unit tests.
 The merge preserves the capture agent's calibration work and current handoff.
 
-The full-rate driver run retains all 654 source frames and all 9,800 available
-observations: RMS 65.40 mm, maximum 213.90 mm, zero rejections, 300 evaluations
-across the three stages. Its bundle hashes are verified and its keyframes
-visually inspected. Finite output at the evaluation cap is not convergence;
-the 30 Hz and 360 Hz results must remain separately identified.
+The first full-rate driver run is withdrawn: it contained a negative learned
+shoulder offset despite finite positions. Its prior RMS does not qualify it.
+The invalid library asset was moved to the rejected artifact directory, and
+its result remains explicitly marked in `withdrawn_runs` for audit.
 
 The architecture budget initially caught a 104-line MJCF loader. Extracting
 compiled-topology validation restores the 100-line budget; native FK parity,
 Ruff, file-size, architecture and SPEC-duplicate checks pass afterward.
+
+Final DbC audit: a manufactured incompatible capture first learned a negative
+segment length (RED). The shared continuous solver now bounds learned lengths
+strictly positive; a separate reference postcondition rejects negative/nonfinite
+solver output before asset creation. Ten focused tests pass (GREEN). Both full
+captures and the catalog are being rerun with this corrected solver.
