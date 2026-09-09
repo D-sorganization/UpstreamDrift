@@ -29,6 +29,7 @@ from src.shared.python.theme.theme_manager import ThemeManager
 Palette = Mapping[str, str]
 _HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
 CHIP_KINDS: tuple[str, ...] = ("neutral", "ok", "warning", "record")
+STEP_KINDS: tuple[str, ...] = ("done", "current", "ready", "blocked", "skipped")
 HEADER_OBJECT_NAME = "captureRigHeader"
 
 
@@ -119,6 +120,33 @@ def chip_style(kind: str, colors: Palette | None = None) -> str:
         f"border-radius: {LayoutMetrics.RADIUS_SM}px; "
         f"padding: 1px {LayoutMetrics.SPACING_SM}px; font-weight: {weight}; }}"
     )
+
+
+def step_row_style(kind: str, colors: Palette | None = None) -> str:
+    """One step rail row. Precondition: ``kind`` in :data:`STEP_KINDS`.
+
+    Postcondition: the current step is the only bold row, so the eye lands
+    on where the operator is.
+    """
+    require(kind in STEP_KINDS, "unknown step kind", kind)
+    c = colors if colors is not None else get_current_colors()
+    foreground = {
+        "done": signal_colors(c).ok,
+        "current": c["accent"],
+        "ready": c["text"],
+        "blocked": c["text_secondary"],
+        "skipped": c["label"],
+    }[kind]
+    weight = "bold" if kind == "current" else "normal"
+    return (
+        f"QLabel {{ color: {foreground}; background: transparent; "
+        f"border: none; font-weight: {weight}; }}"
+    )
+
+
+def rail_action_style(primary: bool) -> str:
+    """The rail's one big next action, or one of its lesser siblings."""
+    return Styles.BTN_PRIMARY if primary else Styles.BTN_SECONDARY
 
 
 def readout_style(recording: bool, countdown: bool) -> str:
