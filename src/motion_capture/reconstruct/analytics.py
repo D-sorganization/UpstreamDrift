@@ -23,7 +23,7 @@ replacement for them.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import TypeAlias
 
 import numpy as np
@@ -43,6 +43,10 @@ HAND_ACCELERATION_SIGMA = 600.0
 # Reconstructed joint positions carry ~millimetre noise; a noise-free synthetic
 # trajectory would otherwise drive the smoother's weights to infinity.
 HAND_POSITION_SIGMA_M = 0.002
+
+
+class SwingDataUnavailable(ValueError):
+    """Reconstruction exists but its observed interval cannot support a summary."""
 
 
 class SwingEvents(BaseModel):
@@ -299,7 +303,66 @@ def summarize_swing(
     fps: float,
     joint_names: Sequence[str] = JOINT_NAMES,
 ) -> tuple[SwingSummary, SwingSeries]:
-    """The coach-facing numbers and the series they came from."""
+    """Summarize observed motion, retaining the original source-frame timeline.
+
+    Reconstruction's all-zero frames denote unobserved frames. An excluded
+    prefix/suffix must not become a jump to/from the origin in speed estimates.
+    Interior wholly missing frames require a continuous selection; silently
+    assigning motion to such a gap would invent analysis evidence.
+    """
+    joints = np.asarray(joints_3d_m, dtype=float)
+    require(joints.ndim == 3 and joints.shape[2] == 3, "need (T, K, 3) joints")
+    observed = np.isfinite(joints).all(axis=(1, 2)) & np.any(joints != 0, axis=(1, 2))
+    indices = np.flatnonzero(observed)
+    if indices.size < 3:
+        raise SwingDataUnavailable(
+            "need at least three observed frames for swing analysis"
+        )
+    first, stop = int(indices[0]), int(indices[-1]) + 1
+    if not observed[first:stop].all():
+        raise SwingDataUnavailable(
+            "swing analysis needs a continuous observed interval; select a range without wholly missing frames"
+        )
+    summary, series = _summarize_contiguous(joints[first:stop], fps, joint_names)
+    if first == 0 and stop == len(joints):
+        return summary, series
+    events = summary.events.model_copy(
+        update={
+            name: getattr(summary.events, name) + first
+            for name in (
+                "address_frame",
+                "top_frame",
+                "peak_speed_frame",
+                "finish_frame",
+            )
+        }
+    )
+    summary = summary.model_copy(
+        update={
+            "frames": len(joints),
+            "events": events,
+            "peak_hand_speed_frame": summary.peak_hand_speed_frame + first,
+        }
+    )
+    expanded = {}
+    for field in fields(SwingSeries):
+        if field.name == "time_s":
+            expanded[field.name] = np.arange(len(joints)) / fps
+        else:
+            values = np.full(
+                len(joints), 0.0 if field.name == "hand_speed_mps" else np.nan
+            )
+            values[first:stop] = getattr(series, field.name)
+            expanded[field.name] = values
+    return summary, SwingSeries(**expanded)
+
+
+def _summarize_contiguous(
+    joints_3d_m: Array,
+    fps: float,
+    joint_names: Sequence[str],
+) -> tuple[SwingSummary, SwingSeries]:
+    """Coach-facing numbers within one observed interval."""
     series = swing_series(joints_3d_m, fps, joint_names)
     events = detect_events(series, fps)
     peak = events.peak_speed_frame

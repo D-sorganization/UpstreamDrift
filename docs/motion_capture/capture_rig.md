@@ -324,6 +324,39 @@ placement, 3-D joints and bone lengths, starting from the given camera records
 take, from a placement initialised from the golfer's joints. See
 [Self-Calibrating Markerless Pipeline](self_calibrating_pipeline.md).
 
+## Swing Selection and Capture Library
+
+Use **Library** in the Capture Rig header to manage captures. **Add session folder**
+registers an existing session; **Import videos** starts the normal video import into
+a new library capture. Select a row to edit its title and multiline swing notes.
+Save notes before opening another capture. Search matches both titles and notes.
+**Open capture** returns to the rig; **Edit swing** opens the selection editor.
+The header also offers **Edit swing** for the currently loaded take.
+
+In the editor, pick a camera view, scrub to the swing and use **Mark in** and
+**Mark out**. Frame numbers start at zero and both endpoints are included. Drag
+between corners to crop around the player, or enter exact source-pixel coordinates.
+**Play selection** previews the selected interval. **Reset crop** restores the full
+image; **Reset this view** restores its complete recording. **Save selection** stores
+a reversible recipe in `swing_edits.json`. Ingest uses that recipe while retaining
+original camera coordinates and timestamps. Original recordings remain intact.
+An already analyzed take requires an editable copy so its old results remain valid.
+Keep an address hold at the beginning and the finish at the end for analysis.
+**Export swing** saves the selection and writes a separate MP4 or AVI in a background
+worker, with cancellation and a provenance JSON beside it. This coaching export
+contains video only; original files retain their audio. Choose a new filename.
+The export retains the crop exactly; an odd width/height gets one replicated edge
+pixel as encoder padding, recorded in provenance. Main multiview playback continues
+to show the original synchronized scene; selection playback is in the editor.
+
+The library's **Archive** action hides a capture from the active list; use the
+archived filter and **Restore** to bring it back. Archiving does not free disk space.
+Session storage and linked media are reported separately. **Open folder** provides
+access to files. **Rename recording** updates the recording index and is available
+only for owned, unprocessed files; capture titles and notes can be changed separately.
+Editable copies reference original videos, so those files must remain available.
+Changing **Library folder** selects a different catalog and does not move media.
+
 ## Ingest
 
 ```bash

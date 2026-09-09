@@ -495,7 +495,7 @@
     },
     {
       "feature_id": "tools.capture_rig",
-      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export",
+      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management",
       "status": "exempt",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
@@ -506,7 +506,7 @@
       "tiles": [
         "capture_rig"
       ],
-      "notes": "",
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 and expert/full-body reference overlays #9863 remain planned, not shipped.",
       "id": "tools.capture_rig"
     },
     {
@@ -1562,6 +1562,20 @@
       "view": "system"
     },
     {
+      "id": "capture.library",
+      "title": "Capture Library",
+      "description": "Find, import, open and edit captures; save swing notes and manage archive/storage.",
+      "evidence": "src/tools/capture_rig/library_dialog.py",
+      "view": "workflow"
+    },
+    {
+      "id": "capture.selection",
+      "title": "Swing Selection",
+      "description": "Preview source frames, mark in/out and crop before inference.",
+      "evidence": "src/tools/capture_rig/swing_editor.py",
+      "view": "workflow"
+    },
+    {
       "id": "step.setup",
       "title": "Set up Cameras and Plan",
       "description": "Bind each camera to a named view so takes are repeatable.",
@@ -1576,7 +1590,7 @@
         "Choose the plan file and a session folder.",
         "Pick a mode preset or leave 'plan default'; optionally restrict the views.",
         "Run *Plan check*: every view must resolve to a camera before recording.",
-        "Importing existing video files instead? Use *Import videos* and skip to Detect."
+        "Importing existing video files instead? Use *Import videos* or the header *Library*, then review the swing selection before Detect."
       ],
       "actions": [
         "plan_check",
@@ -1621,7 +1635,9 @@
         "The live view opens with the tile (or press *Preview cameras*); the plan and a fresh sessions/ folder are prefilled. Frame the mat, pick a take length (5/10/15/30 s or custom) and a countdown.",
         "Press *Record*: the countdown runs, the recorder takes over the cameras and the tiles keep showing them with a red REC readout; walk to address, swing, hold the finish. *Stop* ends the take early.",
         "Or *Import videos* to build a session from files (one or many).",
-        "Run *Proxies* for smooth playback of large MJPEG recordings."
+        "Run *Proxies* for smooth playback of large MJPEG recordings.",
+        "Open *Edit swing* in the header to mark in/out, preview and crop. Keep an address hold and the finish. Save before Ingest; originals remain intact.",
+        "Use the header *Library* to save swing notes, find earlier captures and manage archive/storage."
       ],
       "actions": [
         "record",
@@ -1640,6 +1656,7 @@
         "MediaPipe (fast, primary) or OpenPose BODY_25 via OpenCV DNN (slow, second opinion)."
       ],
       "instructions": [
+        "Optional: use header *Edit swing* to isolate the swing and player before inference.",
         "Choose the estimator and settings; press *Ingest*. Each estimator writes its own observation set.",
         "Press *Compare* to run both and get coverage / confidence / jitter / agreement per joint.",
         "Scrub the playback with the overlay on; low-confidence joints are red."
@@ -1976,13 +1993,49 @@
       "evidence": "src/tools/capture_rig/clips.py",
       "constraint": "Coaching reference; single-view outputs are not 3-D",
       "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "step.capture",
+      "artifact": "Existing session / imported videos",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/library_actions.py",
+      "constraint": "Sidecar notes survive catalog rebuild; archived captures remain on disk",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "capture.selection",
+      "artifact": "Original camera recordings",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/swing_editor.py",
+      "constraint": "Keep an address hold for calibration and the finish for analysis",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "step.detect",
+      "artifact": "swing_edits.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/rig/ingest.py",
+      "constraint": "Only selected frames and crop reach inference; original pixels and clocks are retained",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "files",
+      "artifact": "Swing video + provenance",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/swing_export.py",
+      "constraint": "Separate output; source hash, exact recipe and any encoder padding are recorded",
+      "view": "workflow"
     }
   ],
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "48bc00c9bfe0a859b7fb7ba4076f962f9560f33d1bc2efead74d400504b50e4b",
-    "src/config/capability_connections.json": "59bb85e4ffe6a2c2bce4d072b57898083743fb9f747a4fd7d72f422b7234ed4b",
-    "src/tools/capture_rig/workflow.py": "88ebc4a0983a7324b24b02491349dacd377877b3613bcfdb671043a1a7e4514b"
+    "src/config/feature_parity.json": "e97354ef41f18c45f32a8bca1d9e8e3b9be8feb035d36474fd754abb3aa4c3fa",
+    "src/config/capability_connections.json": "3bae1863a3d4f61cee29afb89d0348a9f9fac9e76f4a3530d3113c33934a13fa",
+    "src/tools/capture_rig/workflow.py": "ef3c35db12049cb4ca5aa08c9a8ca5f376dd114efc61b36f72f5fd036f00e147"
   }
 }

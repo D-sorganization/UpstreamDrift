@@ -534,6 +534,12 @@ Final native-host CI exposed optional Qt menu return annotations. Menus now use 
 
 The final host CI type check passes after menu contracts and the native COM matrix correction. The DRY gate then identified duplicated menu setup; install_force_color_menu now owns that validated setup for both GUIs. Native GUI tests pass after extraction. Await the corrected head's aggregate quality gate before closing the epic.
 
+## Capture Editing and Reference Work
+
+- Product #9849 now includes trim/crop #9860, library/notes #9861 and coaching drawings #9862; separate advanced reference epic #9863 has children #9864–#9866. All are active goal scope.
+- Isolated branch feat/9860-swing-editing contains the edit recipe, ingestion mapping, native editor and visible capture library with notes, imports, archive/storage, rename recovery and editable copies. See docs/development/capture_editing_integration.md for reuse audit and remaining work. Selected-swing export and downstream trimmed-timeline qualification are implemented; PR #9868 is open after normal push checks; protected CI/merge remains.
+- Preserve the concurrent #9843 GUI dock/layout work; new header entry points use existing wrapping layout without changing dock policy. Raw recordings and prior analyses must remain intact.
+
 ## Capture Product Review (#9851, #9857)
 
 See `docs/development/HANDOFF.md` and `docs/development/capture_product_review.md`. Bounded duplicate-frame cache and child startup recovery are covered by six focused tests. The camera suite passed 241 tests before the recovery change. GUI #9843 remains independently owned; hardware qualification remains outstanding.

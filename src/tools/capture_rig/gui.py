@@ -75,6 +75,7 @@ from .commands import (
     mode_text,
 )
 from .header import HeaderBar, StatusStrip
+from .library_actions import LibraryActions
 from . import multiview
 from .layout import LayoutBar, LayoutStore, PaneExtras
 from .panes import LOG_KEY, TileParts, build_host
@@ -83,7 +84,7 @@ from .playback import PlaybackPanel as PlaybackPanel  # re-export (moved, #9816)
 from .preview import PreviewPanel
 from .process_runner import RigProcessRunner
 from .provenance_tab import ProvenanceTab, SourcedTable
-from .record_bar import RecordBar
+from .record_bar import Phase, RecordBar
 from .step_rail import StepRail
 from .session import SessionMedia, flatten_numbers, load_session
 
@@ -265,6 +266,9 @@ class CapturePanel(QGroupBox):
             views=_csv(self.views_edit.text()),
             controls=self.controls(),
         )
+
+    def set_session_path(self, path: Path | str) -> None:
+        self.session_edit.setText(str(path))
 
     def session_dir(self) -> Path:
         require(self.session_edit.text().strip() != "", "choose a session folder")
@@ -611,8 +615,16 @@ class CaptureRigWidget(QWidget):
         self.runner.finished.connect(self._on_command_finished)
         self._take_running = False
         self.buttons = self._buttons()
-        self._layout()
         self.media: SessionMedia | None = None
+        self.library_actions = LibraryActions(
+            self,
+            current_session=lambda: self.media.root if self.media else None,
+            open_capture=self._open_library_capture,
+            import_videos=self._import_library_videos,
+            busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
+            settings=settings,
+        )
+        self._layout()
         self._apply_workflow(None)
         self.layout_bar.restore_last()
         styling.connect_theme_changed(self.restyle)
@@ -650,7 +662,14 @@ class CaptureRigWidget(QWidget):
             extras=PaneExtras(read=self.pane_extras, apply=self.apply_pane_extras),
         )
         self.log_toggle = self._log_toggle()
-        self.header = HeaderBar(self.layout_bar, toggles=(self.log_toggle,))
+        self.header = HeaderBar(
+            self.layout_bar,
+            toggles=(
+                self.library_actions.library_button,
+                self.library_actions.edit_button,
+                self.log_toggle,
+            ),
+        )
         self.session_label: QLabel = self.header.session
         self.status_strip: StatusStrip = self.header.status
         self.record_bar.badge_changed.connect(self._on_badge)
@@ -925,6 +944,7 @@ class CaptureRigWidget(QWidget):
             self._append_log(f"cannot run {action}: {exc}\n")
             return
         self.runner.run(argv)
+        self.library_actions.refresh()
 
     def _on_command_finished(self, code: int) -> None:
         if self._take_running:
@@ -938,6 +958,7 @@ class CaptureRigWidget(QWidget):
         if self._resume_preview:
             self._resume_preview = False
             self.toggle_preview(on=True)
+        self.library_actions.command_finished(code)
 
     # -- recording ------------------------------------------------------------
     def start_take(self) -> None:
@@ -993,17 +1014,29 @@ class CaptureRigWidget(QWidget):
 
     def _on_badge(self, readout: str) -> None:
         self.status_strip.set_recording(self.record_bar.phase, readout)
+        self.library_actions.refresh()
 
     def _append_log(self, text: str) -> None:
         self.log.moveCursor(self.log.textCursor().MoveOperation.End)
         self.log.insertPlainText(text)
 
     # -- session ------------------------------------------------------------
+    def _open_library_capture(self, root: Path) -> None:
+        self.capture.set_session_path(root)
+        self.refresh_session()
+
+    def _import_library_videos(self, target: Path) -> None:
+        self.capture.choose_import_files()
+        if self.capture.pending_import:
+            self.capture.set_session_path(target)
+            self.trigger("import")
+
     def refresh_session(self) -> SessionMedia | None:
         """Re-read the session folder and refresh every panel."""
         try:
             media = load_session(self.capture.session_dir())
         except (ValueError, TypeError, OSError) as exc:
+            self.media = None
             self.session_label.setText(f"session not loadable: {exc}")
             self._apply_workflow(None)
             return None
@@ -1041,6 +1074,7 @@ class CaptureRigWidget(QWidget):
         return media
 
     def _apply_workflow(self, media: SessionMedia | None) -> None:
+        self.library_actions.refresh()
         states = workflow.evaluate(media)
         self.workflow.refresh(states)
         enabled = workflow.enabled_actions(states) | ALWAYS_ENABLED
