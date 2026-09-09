@@ -13,7 +13,7 @@
   "totals": {
     "identical": 429,
     "diverged": 275,
-    "ud-only": 1206,
+    "ud-only": 1207,
     "tools-only": 554,
     "spelling-only": 126
   },
@@ -490,7 +490,7 @@
     "optimization": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 28,
+      "ud-only": 29,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -11220,7 +11220,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "loaders",
-      "ud_bytes": 617,
+      "ud_bytes": 1440,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12288,7 +12288,7 @@
       "classification": "ud-only",
       "package": "motion_pipeline",
       "subpackage": "sources",
-      "ud_bytes": 13004,
+      "ud_bytes": 14431,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14736,7 +14736,7 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "ocp",
-      "ud_bytes": 2349,
+      "ud_bytes": 3042,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14760,7 +14760,7 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "ocp",
-      "ud_bytes": 11684,
+      "ud_bytes": 11948,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14780,11 +14780,23 @@
       "spelling_only": false
     },
     {
+      "path": "optimization/ocp/parameter_ocp.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 13146,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "optimization/ocp/result.py",
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "ocp",
-      "ud_bytes": 5869,
+      "ud_bytes": 7051,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -30384,9 +30396,9 @@
     {
       "path": "__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "128b8d9483fe6a60ccfea2f134aa54f95b32f5ec"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "dba24ceb7e66420e2bc173eed8fcc41607b6564f"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -31723,9 +31735,9 @@
     {
       "path": "config/__init__.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-13",
-        "commit": "b4ddf7b30a4fc64eb4c83781c2005c0eefb6e0fa"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -31736,9 +31748,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-26",
-        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -31827,9 +31839,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-29",
-        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -33322,9 +33334,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-20",
-        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
