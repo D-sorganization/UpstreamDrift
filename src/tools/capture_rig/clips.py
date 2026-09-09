@@ -23,6 +23,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
+from src.motion_capture.rig.edits import CropRect
 from src.shared.python.core.contracts import require
 
 from .overlay import PoseTrack, draw_pose
@@ -37,6 +38,36 @@ EVENT_KEYS = {
 }
 MIN_OUT_FPS = 1.0
 TEXT_COLOUR = (255, 255, 255)
+
+
+@dataclass(frozen=True)
+class ClipRendering:
+    """Optional crop and cancellable export; defaults retain coaching clips."""
+
+    crop: CropRect | None = None
+    clock: bool = True
+    strict: bool = False
+    cancelled: Callable[[], bool] = lambda: False
+    progress: Callable[[int, int], None] = lambda done, total: None
+
+    def size(self, width: int, height: int) -> tuple[int, int]:
+        if self.crop:
+            self.crop.validate_size(width, height)
+            # Video encoders require even dimensions: pad, never cut source pixels.
+            width, height = self.crop.width, self.crop.height
+            return width + width % 2, height + height % 2
+        return width, height
+
+    def image(self, frame: npt.NDArray[np.uint8]) -> npt.NDArray[np.uint8]:
+        if self.crop is None:
+            return frame
+        crop = self.crop
+        cropped = frame[crop.y : crop.y + crop.height, crop.x : crop.x + crop.width]
+        return np.pad(
+            cropped,
+            ((0, crop.height % 2), (0, crop.width % 2), (0, 0)),
+            mode="edge",
+        )
 
 
 @dataclass(frozen=True)
@@ -129,6 +160,7 @@ def _rendered(
     *,
     min_confidence: float,
     label: str,
+    rendering: ClipRendering = ClipRendering(),
 ) -> npt.NDArray[np.uint8] | None:
     frame = reader.read(index)
     if frame is None:
@@ -142,8 +174,13 @@ def _rendered(
             track.edges if track else (),
             min_confidence=min_confidence,
         )
+    frame = np.ascontiguousarray(rendering.image(frame))
     fps = reader.fps or 30.0
-    return _stamp(np.ascontiguousarray(frame), f"{label} f{index} t={index / fps:.3f}s")
+    return (
+        _stamp(frame, f"{label} f{index} t={index / fps:.3f}s")
+        if rendering.clock
+        else frame
+    )
 
 
 def export_clip(
@@ -155,6 +192,7 @@ def export_clip(
     observations: Path | None = None,
     min_confidence: float = 0.5,
     label: str | None = None,
+    rendering: ClipRendering = ClipRendering(),
 ) -> dict[str, Any]:
     """Write ``out`` with frames ``clip`` of ``view`` at ``fps * speed``.
 
@@ -165,26 +203,36 @@ def export_clip(
     require(view.playable is not None, "view has no playable recording", view.view)
     require(0.0 < speed <= 1.0, "speed must be in (0, 1]", speed)
     assert view.playable is not None
+    if out.resolve() in {p.resolve() for p in (view.recording, view.proxy) if p}:
+        raise ValueError("Export must not overwrite source media")
     track_path = observations or view.observations
     track = PoseTrack.load(track_path) if track_path else None
     with VideoReader(view.playable) as reader:
+        if rendering.strict and clip.last >= reader.frame_count:
+            raise ValueError("Selection exceeds the decodable recording")
         last = clamp_index(clip.last, reader.frame_count)
         rate = max((reader.fps or view.fps or 30.0) * speed, MIN_OUT_FPS)
-        writer = _writer(out, rate, (reader.width, reader.height))
+        writer = _writer(out, rate, rendering.size(reader.width, reader.height))
         written = 0
         try:
             for index in range(clip.first, last + 1):
+                if rendering.cancelled():
+                    raise InterruptedError("Swing export cancelled")
                 frame = _rendered(
                     reader,
                     index,
                     track,
                     min_confidence=min_confidence,
                     label=label or view.view,
+                    rendering=rendering,
                 )
                 if frame is None:
+                    if rendering.strict:
+                        raise ValueError(f"Could not decode source frame {index}")
                     break
                 writer.write(frame)
                 written += 1
+                rendering.progress(written, clip.frames)
         finally:
             writer.release()
     require(written > 0, "no frame of the range decoded", (clip.first, last))
