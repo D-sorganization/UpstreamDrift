@@ -1,7 +1,15 @@
 # Segment Force Color Epic
 
-Status: Local implementation in progress; GitHub authentication prevents publishing
-the epic and checking remote main. Base: locally cached origin/main `9f54c5e0b`.
+Status: Implementation in progress under GitHub epic #9833. Current remote main
+`ff0effa5a` is merged into `feat/segment-force-colors`. Git access works with the
+stale HTTP extraheader cleared per invocation; no global credential changes made.
+
+## GitHub Work Items
+
+- [ ] #9834 Shared Axial Load Contracts and Color Policy
+- [ ] #9835 Desktop Force Color Integration and Source Qualification
+- [ ] #9836 Web Force Color Streaming and Renderer Parity
+- [ ] #9837 Force Color Release Evidence and Protected Merge
 
 ## Feasibility
 
@@ -10,7 +18,7 @@ Matplotlib and PyQtGraph OpenGL. React renders URDF link materials and golfer
 segments. Updating existing colors preserves geometry and avoids additional force
 arrows. A shared scalar-to-color policy plus narrow renderer adapters is feasible.
 
-The current SimulationFrame does not carry signed segment axial loads. An adapter
+SimulationFrame now carries optional signed segment axial loads. An adapter
 must supply axial force in newtons, positive in tension and negative in compression,
 with stable segment identifiers and frame alignment. Joint torques, contact-force
 magnitudes and motion-only capture are insufficient evidence of internal axial load.
@@ -22,12 +30,12 @@ load at a declared section; it is not a spatial stress field or a tissue safety 
 - [x] Shared validated policy: disabled by default, blue tension, red compression,
       neutral zero band, custom opaque RGB colors, independent positive saturation
       limits in newtons, clipping and unavailable-data behavior.
-- [ ] Frame-aligned load contract and provider capability with explicit provenance.
+- [x] Frame-aligned load contract and provider capability with explicit provenance.
 - [x] Matplotlib and PyQtGraph adapters that recolor existing artists, preserve
       opacity and geometry, and restore base colors without clearing the scene.
 - [ ] Reusable desktop toggle, palette/range controls and labeled legend; connect
       the controls and frame loads to applicable animation consumers.
-- [ ] React parity: shared wire contract, reusable controls and URDF/segment
+- [x] React parity: shared wire contract, reusable controls and URDF/segment
       material adapter; retain original materials on disable and missing data.
 - [ ] Concrete force-source adapters qualified with analytical tension/compression
       fixtures, including sign/frame conventions and unsupported engine behavior.
@@ -53,9 +61,11 @@ were qualified without executing their adapters.
 ## Local Validation Evidence
 
 The web scene exposes reusable force-color controls and accepts a qualified,
-synchronized `segmentLoads` prop for URDF and fallback geometry. The default
-simulation producers do not yet populate it. PyQt controls are available as a
-shared widget; remaining desktop hosts still require binding and producer work.
+synchronized `segmentLoads` prop or optional websocket frame field for URDF and
+fallback geometry. MuJoCo supplies qualified rod section reactions using scratch
+data. Double and triple pendulums use existing analytical joint reactions.
+Their desktop views expose the shared controls. Other native hosts still require
+binding and source qualification; unsupported models retain their base colors.
 See `docs/user_guide/body_part_viz/force_colors.md` for the adapter contract.
 
 Policy RED: missing `force_colors` import; GREEN: 15 tests. Matplotlib RED:
@@ -77,3 +87,10 @@ ESLint and TypeScript checking passed. The local Node dependencies were reused
 from the existing checkout; remote lockfile CI is still required. Design-manual
 governance passes its current structural check but reports the pre-existing
 publication release gate `blocked-inventory-required`.
+
+Additional native qualification passes for hanging and inverted double/triple
+pendulums, MuJoCo static and centripetal loads, unchanged live physics state,
+native scene color restoration, Qt controls and websocket frame alignment.
+TypeScript passes after using a library-compatible material lookup. Broad local
+mypy reports existing imported-module errors; new policy and settings type errors
+were corrected. This is not a claim of a clean repository-wide type check.

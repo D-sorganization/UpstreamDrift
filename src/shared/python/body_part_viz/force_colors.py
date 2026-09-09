@@ -63,11 +63,12 @@ class ForceColorScale:
             raise TypeError("force_n must be a real number or None")
         if not self.enabled or force_n is None or not math.isfinite(force_n):
             return base_color
-        magnitude = abs(force_n)
+        force = float(force_n)
+        magnitude = abs(force)
         if magnitude <= self.deadband_n:
             return self.neutral_color
-        endpoint = self.tension_color if force_n > 0 else self.compression_color
-        limit = self.tension_limit_n if force_n > 0 else self.compression_limit_n
+        endpoint = self.tension_color if force > 0 else self.compression_color
+        limit = self.tension_limit_n if force > 0 else self.compression_limit_n
         fraction = min(1.0, (magnitude - self.deadband_n) / (limit - self.deadband_n))
         channels = []
         for offset in (1, 3, 5):

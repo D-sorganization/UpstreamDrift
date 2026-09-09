@@ -51,8 +51,9 @@ export class SegmentMaterialColors {
         throw new TypeError('Overrides must be opaque #RRGGBB colors or null');
       }
     }
+    const supplied = new Map(Object.entries(colors));
     for (const [segment, entries] of this.entries) {
-      const color = Object.hasOwn(colors, segment) ? colors[segment] : null;
+      const color = supplied.get(segment);
       for (const entry of entries) {
         if (!color) {
           this.restore(entry);

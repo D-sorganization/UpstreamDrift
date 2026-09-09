@@ -1,15 +1,17 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-## Segment Force Colors: Local Work Awaiting GitHub Access
+## Segment Force Colors: Epic #9833 in Progress
 
 Branch `feat/segment-force-colors` lives in `_codex_worktrees/segment-force-colors`.
 See `docs/development/segment_force_color_epic.md` for current scope and evidence.
-Shared Python/Three.js color policies, renderer adapters, desktop/web controls and
-optional Scene3D wiring are implemented locally. Native force producers and the
-remaining desktop integrations are unfinished. Git and the GitHub app both reject
-authentication; no remote epic/PR/merge exists. Refresh access, verify remote main,
-publish/claim the epic and children, finish integrations, add the issue-keyed SPEC
-row, and run protected CI before closing anything. Do not claim universal rollout.
+Shared Python/Three.js policies, native pendulum and MuJoCo reaction sources,
+renderer adapters, desktop controls and WebSocket/Scene3D wiring are implemented.
+Epic #9833 and children #9834–#9837 are published. Remote main `ff0effa5a` was merged
+into the branch. Git works by clearing the stale `http.https://github.com/.extraheader`
+per invocation and using `gh auth git-credential`; global settings are unchanged.
+Remaining gates: wider interface adapters, native render evidence, protected CI
+and merge. Native MuJoCo tests on this Windows host must import mujoco before
+pytest/Qt to avoid a loader-order DLL failure. Do not claim universal rollout.
 
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
@@ -417,7 +419,6 @@ reruns. Do not restart the Actions runner or start WSL.
 ## UI Dependency Pin: #9249
 
 - Dependabot now ignores `@vitejs/plugin-react` major updates (`.github/dependabot.yml`): 6.x needs Vite 8 (`peerDependencies.vite: "^8.0.0"`; Vite 7 exports no `./internal`), so a lone bump cannot merge. Stay on plugin-react ^5 with vite ^7.3.2 until a paired Vite-8 upgrade; pairing note lives in `ui/README.md`. Branch `claude/issue-9249-ui-pin`.
-
 
 ## OCP Compat Robust to Poisoned `sys.modules` (#9771)
 

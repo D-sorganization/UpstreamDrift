@@ -60,7 +60,9 @@ the toggle can always turn off the display even when an unapplied edit is invali
 `segmentLoads` prop with `time_s` matching `frame.time`, `units: "N"`,
 `sign_convention: "tension-positive"`, a nonempty `source`, and `values_n` keyed
 by model link names. Absent or mismatched frames display an unavailable message.
-Existing solver streams do not yet populate this field automatically.
+The WebSocket stream populates `frame.segment_loads` when its engine implements
+`AxialLoadProvider`; Scene3D consumes this field automatically. Missing capability
+is explicitly unavailable. The timestamp is checked before wire rounding.
 
 Other Three.js interfaces can reuse `ForceColorControls`, `forceColor`, and
 `SegmentMaterialColors`. Bind their own stable segment IDs to mesh lists. The
@@ -70,6 +72,21 @@ Python and JavaScript share conformance examples in
 `schemas/force-color-examples.json`.
 
 ## Qualification Status
+
+The Pendulums View menu provides Segment Force Colors (Ctrl+Shift+F). Double and
+triple pendulums use the existing transmitted joint reactions, projected at the
+proximal section. Both flat and tapered segment views share the color policy.
+The golfer's point-mass net forces are not transmitted section reactions and are
+not mislabeled as axial segment loads.
+
+The MuJoCo view has a Segment Force Colors button. The native source uses scratch
+simulation data and supports named bodies with one capsule/cylinder whose endpoint
+coincides with the proximal joint. Ambiguous axes and free bodies remain unchanged.
+Tendons, plugins and global dynamics callbacks are unavailable in this adapter.
+MuJoCo documents a spatial-tendon limitation in `cfrc_int`; see the
+[native API reference](https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mj-rnepostconstraint).
+The same engine provider feeds the web stream. MeshCat, Drake, Pinocchio, OpenSim
+and other interface integrations remain tracked under #9833.
 
 The shared policy, native renderer object updates, controls and web scene wiring
 have local automated coverage. Offscreen OpenGL object tests do not qualify GPU
