@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9911 · Preview Discovery Failure Recovery
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9911
+- **Branch:** feat/capture-guided-setup
+- **PR:** #9910 (draft)
+- **Paths:** src/tools/capture_rig/preview.py, tests/tools/capture_rig/test_preview.py
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`6af9c1773` base; 11 preview regressions pass)
+- **Summary:** Report missing discovery imports and subprocess timeouts through the existing preview status.
+- **Next step:** Publish and qualify with #9910.
+
 ### DL-#9898 · Calibration Profile Compatibility
 
 - **State:** in_progress
@@ -29,20 +42,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-09 (`b4abd67bb`)
 - **Summary:** Optical profile review UI and verified rig export; everyday observations remain required.
 - **Next step:** Qualify UI/consumers, then add reference sessions under #9898/#9900.
-
-### DL-#9882 · Comparison Rendering and Export Qualification
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #9882 (advanced reference epic #9863)
-- **Branch:** fix/9882-comparison-rendering
-- **PR:** #9889 (supersedes #9888)
-- **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py, reference_comparison.py, clips.py, swing_export.py, related tests/docs
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)
-- **Summary:** Shared preview/export compositor, motion opacity, coverage-aware expert homography, retained decoders and strict staged publication.
-- **Evidence:** 48 comparison/coaching/export regressions pass; 33 renderer/state cases pass after adding three cancellation/homography checks. Five-module mypy, Ruff and architecture pass. Exact pre-encode pixel parity and complete real-container decoding are tested.
-- **Next step:** No-growth gates pass. Integrate parent #9885 and complete protected checks. #9883 remains separate.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 
@@ -328,6 +327,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Address review feedback on PR #9725 and merge when approved.
 
 ## Shipped (Last 90 Days)
+
+### DL-#9882 · Comparison Rendering and Export Qualification
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9882
+- **Branch:** fix/9882-comparison-rendering
+- **PR:** #9896 (integrates #9889)
+- **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Shared compositor, coverage-aware expert homography and staged exports delivered with qualified product #9896.
 
 ### DL-#9894 · Scoped Ubuntu CI Dependencies
 
