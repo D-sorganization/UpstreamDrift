@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Reference Preview & Verified Export Parity (#9882)
+
+Ensure verified reference exports and comparison preview share identical spatial alignment, layer visibility, rendering pipelines, and sidecar manifest provenance (`src.tools.capture_rig.reference_export`, `src.tools.capture_rig.reference_rendering`, `src.motion_capture.reference.evidence`):
+- `ReferenceRenderPipeline`: Shared renderer abstraction guaranteeing consistent layer alpha blending, skeleton coloring, trail rendering, and Brown-Conrady camera distortion projection between live preview canvases and batch video exports.
+- `ReferenceExportService`: Validates identical registration transform application, view boundaries, and export frame sizing matching active preview viewport geometries.
+- Verification evidence and qualification: `ReferenceEvidenceManifest` records full source video, reference trial, camera calibration, and rendering configuration hashes to ensure bit-for-bit reproducibility of exported artifacts.
+
 ## Reference Synchronization, Sampling Gaps & Calibration Identity (#9881)
 
 Harden and qualify reference synchronization, sampling gap rejection, and calibration binding (`src.motion_capture.reference.registration`):
