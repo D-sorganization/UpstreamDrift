@@ -3,9 +3,10 @@
 Panels over one session directory, driven by the workflow step model
 (:mod:`.workflow`):
 
-* **Workflow** — the steps with their status (done / ready / blocked with
-  the reason / skipped for this session), the current step's requirements
-  and instructions, and only the applicable actions enabled.
+* **Workflow** — the :class:`~.step_rail.StepRail` naming every step, where
+  the operator is and the one obvious action to press next, over
+  :class:`WorkflowPanel` with the current step's purpose, requirements and
+  instructions.
 * **Capture** — plan file, capture mode, view subset, UVC controls, duration,
   or an import of existing files; single or multi-camera alike.
 * **Process** — estimator with its settings, comparison, reliability, joint
@@ -14,11 +15,13 @@ Panels over one session directory, driven by the workflow step model
 * **Review** — frame-accurate playback of any view and any observation set
   with the pose drawn on it (:mod:`.playback`), and the results as a table.
 
-A themed header (:mod:`.header`) carries the session line, a status strip
-(cameras bound, recorder state, last take) and the pane layout bar; the
-action buttons sit in :class:`~.action_grid.ActionGrid`, grouped by
-workflow step. Every colour and style comes from :mod:`.styling`, which
-follows the application theme.
+The live view is the middle of the tile and every control is a dock around
+it (:mod:`.panes`, #9846); the log is a drawer, shut until the **Log**
+toggle in the header opens it. A themed header (:mod:`.header`) carries the
+session line, a status strip (cameras bound, recorder state, last take),
+that toggle and the pane layout bar; the action buttons sit in
+:class:`~.action_grid.ActionGrid`, grouped by workflow step. Every colour
+and style comes from :mod:`.styling`, which follows the application theme.
 
 Every command is built by :mod:`.commands`; every file is found by
 :mod:`.session`. This module only arranges widgets and forwards clicks.
@@ -42,11 +45,10 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QListWidget,
-    QListWidgetItem,
     QMainWindow,
     QPlainTextEdit,
     QPushButton,
+    QSizePolicy,
     QSpinBox,
     QSplitter,
     QTableWidget,
@@ -74,13 +76,15 @@ from .commands import (
 )
 from .header import HeaderBar, StatusStrip
 from . import multiview
-from .layout import LayoutBar, LayoutStore, PaneExtras, PaneHost
+from .layout import LayoutBar, LayoutStore, PaneExtras
+from .panes import LOG_KEY, TileParts, build_host
 from .match_panel import MatchPanel, fit_model_args, reconstruct_args
 from .playback import PlaybackPanel as PlaybackPanel  # re-export (moved, #9816)
 from .preview import PreviewPanel
 from .process_runner import RigProcessRunner
 from .provenance_tab import ProvenanceTab, SourcedTable
 from .record_bar import RecordBar
+from .step_rail import StepRail
 from .session import SessionMedia, flatten_numbers, load_session
 
 logger = logging.getLogger(__name__)
@@ -88,16 +92,9 @@ logger = logging.getLogger(__name__)
 TOOL_ID = "capture_rig"
 PLAN_DEFAULT = "plan default"
 AUTO_EXPOSURE_CHOICES = ("camera default", "on", "off")
-STATUS_GLYPH = {
-    workflow.Status.DONE: "✓",
-    workflow.Status.READY: "▶",
-    workflow.Status.BLOCKED: "○",
-    workflow.Status.SKIPPED: "–",
-}
 ALWAYS_ENABLED = frozenset({"stop", "load", "preview"})
 DEFAULT_EXPORT_LAYOUT = "three_across"  # a sensible default for the lab rig
 LAB_PLAN = Path("docs/motion_capture/plans/lab_three_view_sonnet.json")
-CONTROLS_SIZES = (420, 520)
 WINDOW_SIZE = (1600, 900)
 
 
@@ -112,34 +109,35 @@ def _csv(text: str) -> tuple[str, ...]:
 
 
 class WorkflowPanel(QGroupBox):
-    """The guided steps: status list plus the selected step's guidance."""
+    """The current step's purpose, requirements and instructions.
+
+    The navigating is the :class:`~.step_rail.StepRail`'s job (#9845): this
+    panel sits under the rail in the same dock and spells out the step the
+    rail marks as current, so the two never show the same thing twice.
+    """
 
     def __init__(self, parent: QWidget | None = None) -> None:
-        super().__init__("Workflow", parent)
-        self.steps = QListWidget()
-        self.steps.currentRowChanged.connect(self._show)
+        super().__init__("Step details", parent)
         self.guidance = QTextBrowser()
         self.guidance.setOpenExternalLinks(False)
         self._states: tuple[workflow.StepState, ...] = ()
         layout = QVBoxLayout(self)
-        layout.addWidget(self.steps, 1)
-        layout.addWidget(self.guidance, 2)
+        layout.setContentsMargins(
+            LayoutMetrics.SPACING_SM,
+            LayoutMetrics.SPACING_SM,
+            LayoutMetrics.SPACING_SM,
+            LayoutMetrics.SPACING_SM,
+        )
+        layout.addWidget(self.guidance, 1)
 
     def refresh(self, states: tuple[workflow.StepState, ...]) -> None:
-        """Repaint the list; select the current step."""
+        """Show the guidance for the current step of ``states``.
+
+        Postcondition: :meth:`statuses` reports exactly ``states``.
+        """
         self._states = states
-        self.steps.blockSignals(True)
-        self.steps.clear()
-        for state in states:
-            text = f"{STATUS_GLYPH[state.status]}  {state.step.title}"
-            if state.reason:
-                text += f"  ({state.reason})"
-            self.steps.addItem(QListWidgetItem(text))
-        self.steps.blockSignals(False)
         current = workflow.current(states)
-        row = states.index(current) if current is not None else 0
-        self.steps.setCurrentRow(row)
-        self._show(row)
+        self._show(states.index(current) if current is not None else 0)
 
     def _show(self, row: int) -> None:
         if not (0 <= row < len(self._states)):
@@ -571,6 +569,8 @@ class CaptureRigWidget(QWidget):
         super().__init__(parent)
         self.layout_store = LayoutStore(settings)
         self.workflow = WorkflowPanel()
+        self.rail = StepRail(labels=dict(self._ACTIONS))
+        self.rail.action_triggered.connect(self.trigger)
         self.capture = CapturePanel()
         self.process = ProcessPanel()
         self.match = MatchPanel()
@@ -627,40 +627,30 @@ class CaptureRigWidget(QWidget):
         return out
 
     def _layout(self) -> None:
-        inputs = QTabWidget()
-        inputs.addTab(self.capture, "Capture")
-        inputs.addTab(self.process, "Process")
-        inputs.addTab(self.match, "Match")
-        left = QSplitter(Qt.Orientation.Vertical)
-        left.addWidget(self.workflow)
-        left.addWidget(inputs)
+        """Assemble the tile: the live view central, every control a dock.
+
+        Postcondition: ``self.panes`` holds the live pane as its central
+        widget and the log drawer shut (:mod:`.panes` says why).
+        """
         self.action_grid = ActionGrid(self.buttons)
-        middle = QWidget()
-        mid_layout = QVBoxLayout(middle)
-        mid_layout.setContentsMargins(0, 0, 0, 0)
-        mid_layout.setSpacing(LayoutMetrics.SPACING_MD)
-        mid_layout.addWidget(self.action_grid)
-        mid_layout.addWidget(self.log, 1)
-        controls = QSplitter(Qt.Orientation.Horizontal)
-        controls.addWidget(left)
-        controls.addWidget(middle)
-        controls.setSizes(list(CONTROLS_SIZES))
-        right = Qt.DockWidgetArea.RightDockWidgetArea
-        self.panes = PaneHost(
-            controls,
-            {
-                "preview": ("Live preview", self._live_pane(), right),
-                "playback": ("Playback", self.playback, right),
-                "results": ("Results", self.results, right),
-            },
+        self.panes = build_host(
+            TileParts(
+                live=self._live_pane(),
+                playback=self.playback,
+                results=self.results,
+                rail=self._workflow_pane(),
+                inputs=self._input_tabs(),
+                actions=self.action_grid,
+                log=self.log,
+            )
         )
         self.layout_bar = LayoutBar(
             self.panes,
             self.layout_store,
-            controls,
             extras=PaneExtras(read=self.pane_extras, apply=self.apply_pane_extras),
         )
-        self.header = HeaderBar(self.layout_bar)
+        self.log_toggle = self._log_toggle()
+        self.header = HeaderBar(self.layout_bar, toggles=(self.log_toggle,))
         self.session_label: QLabel = self.header.session
         self.status_strip: StatusStrip = self.header.status
         self.record_bar.badge_changed.connect(self._on_badge)
@@ -670,6 +660,53 @@ class CaptureRigWidget(QWidget):
         layout.setSpacing(LayoutMetrics.SPACING_SM)
         layout.addWidget(self.header)
         layout.addWidget(self.panes, 1)
+
+    def _input_tabs(self) -> QTabWidget:
+        """Capture, Process and Match settings as one tabbed dock."""
+        inputs = QTabWidget()
+        inputs.addTab(self.capture, "Capture")
+        inputs.addTab(self.process, "Process")
+        inputs.addTab(self.match, "Match")
+        return inputs
+
+    def _workflow_pane(self) -> QWidget:
+        """The step rail over the current step's details, in one dock."""
+        pane = QSplitter(Qt.Orientation.Vertical)
+        pane.addWidget(self.rail)
+        pane.addWidget(self.workflow)
+        pane.setStretchFactor(0, 3)
+        pane.setStretchFactor(1, 2)
+        return pane
+
+    def _log_toggle(self) -> QPushButton:
+        """The header button that opens and shuts the log drawer (#9846)."""
+        button = QPushButton("Log")
+        button.setCheckable(True)
+        button.setToolTip(
+            "Show the command output. It is a drawer behind the Actions "
+            "pane, so opening it never takes space from the video."
+        )
+        button.toggled.connect(self._show_log)
+        drawer = self.panes.docks[LOG_KEY]
+        drawer.visibilityChanged.connect(
+            lambda _shown, b=button, d=drawer: self._sync_log_toggle(b, d)
+        )
+        return button
+
+    @staticmethod
+    def _sync_log_toggle(button: QPushButton, drawer: QWidget) -> None:
+        """Keep the header toggle telling the truth when the dock is closed."""
+        wanted = not drawer.isHidden()
+        if button.isChecked() != wanted:
+            button.blockSignals(True)
+            button.setChecked(wanted)
+            button.blockSignals(False)
+
+    def _show_log(self, shown: bool) -> None:
+        """Open (and raise) or shut the log drawer."""
+        self.panes.set_visible(LOG_KEY, shown)
+        if shown:
+            self.panes.docks[LOG_KEY].raise_()
 
     def pane_extras(self) -> dict[str, str]:
         """The multiview layout each pane is drawn through (#9813/#9814).
@@ -690,12 +727,19 @@ class CaptureRigWidget(QWidget):
         """Re-read every style from the theme (connected to ``themeChanged``)."""
         self.header.restyle()
         self.action_grid.restyle()
+        self.rail.restyle()
         self.preview.restyle()
         self.record_bar.restyle()
 
     def _live_pane(self) -> QWidget:
-        """Preview tiles with the transport controls underneath, like a camera app."""
+        """Preview tiles with the transport controls underneath, like a camera app.
+
+        This is the tile's central widget (#9846): it declares itself
+        expanding so the spare width of the window goes to the video rather
+        than to the control docks around it.
+        """
         pane = QWidget()
+        pane.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         column = QVBoxLayout(pane)
         column.setContentsMargins(0, 0, 0, 0)
         column.addWidget(self.preview, 1)
@@ -1001,6 +1045,7 @@ class CaptureRigWidget(QWidget):
         self.workflow.refresh(states)
         enabled = workflow.enabled_actions(states) | ALWAYS_ENABLED
         hints = workflow.action_hints(states, ALWAYS_ENABLED)
+        self.rail.set_states(states, enabled=enabled, hints=hints)
         for action, button in self.buttons.items():
             button.setEnabled(action in enabled)
             button.setToolTip(hints.get(action, ""))
