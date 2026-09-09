@@ -88,6 +88,25 @@ rollout follow-up is now #9830, leased to codex/session
 impact-acoustics-01a07d8a-shooting9830 until 2026-09-09T02:13:33Z, with isolated
 worktree UpstreamDrift-shooting-convergence based on protected main 9f54c5e0b.
 
+Merged source b557682c8b1e7c530422fd31910fdc61df6d53e5 is published through
+all normal hooks with matching remote SHA. Both contributions are retained;
+all 11 publication tests pass after reconciliation (8.88 s, five inherited
+warnings). Protected CI is still running at the latest observation, with no
+reported failures yet; main has advanced to 9623a5662 via unrelated #9465,
+so #9826 is behind and not merge-qualified.
+
+The isolated #9830 case reproduces the exact 0.5190812793829043 rad failure
+in 110.59 s. The saved candidate agrees with its own eight-substep map at
+4.65e-11 rad / 2.38e-9 rad/s, but the nominal 16-substep reference is itself
+under-resolved. RK4 at 32/64 substeps and adaptive DOP853 converge near
+0.481202564 rad and 25.8570083 rad/s local interval defects. Tightening the
+adaptive tolerances from rtol 1e-8/atol 1e-10 to 1e-10/1e-12 changes these
+maxima by about 1.04e-9 rad / 1.41e-7 rad/s. Thus neither the first failing
+reference nor passing the existing 0.5 rad threshold establishes accurate
+trajectory dynamics. The fixed-candidate exploratory study and a separate
+16-substep optimization are continuing under #9830; no solver code or
+threshold is changed in #9826.
+
 ## Related Program State
 
 Tools finite-support response is published at 12bcf3d83 (665 Linux tests). Separate-G/C spectra 97d46055c pass 692 Linux golf/API tests and 49 focused controls; normal hooks pass and remote SHA is verified. Turnover bbc27dbe32181dd3d147841784a108fdc1aadeea is also published. AffineDrift #4298 merged normally as d7e51655d47d37a092b1bcd29d25972ce373b244 after required CI passed, with no unresolved review threads. Its auxiliary benchmark workflow performed no measurements despite green workflow status; no performance result is claimed.
