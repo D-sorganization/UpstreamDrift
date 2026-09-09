@@ -24,6 +24,7 @@ from src.motion_capture.provenance import sha256_of
 from src.motion_capture.reference import ReferenceSource, ReferenceVideo
 from src.motion_capture.reference.importers import MotionDraft, MotionImportOptions
 from src.motion_capture.reference.model import Axis
+from src.shared.python.ui.qt import create_button
 
 from .player import VideoReader
 from . import styling
@@ -108,11 +109,14 @@ class ReferenceMappingDialog(QDialog):
         self.status = QLabel()
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        buttons = QDialogButtonBox(self)
+        buttons.addButton(
+            create_button("Import Reference", self.accept),
+            QDialogButtonBox.ButtonRole.AcceptRole,
         )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
+        buttons.addButton(
+            create_button("Cancel", self.reject), QDialogButtonBox.ButtonRole.RejectRole
+        )
         layout.addWidget(buttons)
         if draft.canonical:
             self.units.setCurrentText("m")
