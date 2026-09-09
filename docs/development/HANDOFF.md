@@ -11,13 +11,13 @@
   on combined main 18c8f922e. Normal pre-push gates pass on 74e867786.
   Exact commands are in the epic document.
 - Evidence: Corrected positive-length model survey bundles under `../reference-fit-artifacts-9914`.
-  Corrected full-rate runs are pending; first driver fit was withdrawn for a negative length.
+  Twenty corrected bundles verified; first driver fit was withdrawn for a negative length.
   Tracked survey evidence: docs/development/reference_fit_qualification.json. Native OpenSim adapter and MyoSuite anatomy
   are unavailable, explicitly recorded rather than replaced with a fallback.
 - Coordination: `codex-reference-9914-20260909`, issue lease and central presence
   registered. #9913 owns capture GUI changes; no edits to those files here.
 - Next: finish evidence, rerun final checks, commit/push with normal hooks and
-  create a protected PR. Do not close the epic without implemented acceptance.
+  qualify protected PR #9918 after owner PR #9917. Do not close the epic without implemented acceptance.
 
 # Guided Capture Setup Handoff
 

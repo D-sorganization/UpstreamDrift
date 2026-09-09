@@ -1,14 +1,13 @@
 {
   "schema_version": "reference-fit-qualification/1.0",
   "issue": 9914,
-  "implementation_commit": "c9782fae7",
-  "geometry_typing_fix": "74e867786",
+  "implementation_commit": "2e84bb81016fe7e66443b4afdd5c80d294037f0c",
   "runs": {
-    "qualified-driver-catalog": {
+    "final-driver-catalog": {
       "job": {
         "schema_version": "reference-fit-job/1.0",
         "source": "data/C3D_TA_Driver.c3d",
-        "output": "../reference-fit-artifacts-9914/qualified-driver-catalog",
+        "output": "../reference-fit-artifacts-9914/final-driver-catalog",
         "models": ["all"],
         "custom_models": {},
         "profile": {
@@ -40,7 +39,7 @@
         "fit_lengths": true,
         "outlier_gate_sigma": 1000.0,
         "huber_delta": 1000.0,
-        "library": "../reference-fit-artifacts-9914/qualified-library"
+        "library": "../reference-fit-artifacts-9914/final-library"
       },
       "source": {
         "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
@@ -49,62 +48,62 @@
       },
       "models": {
         "golfer": {
-          "reference_id": "3ef63285-1653-5bc7-85f4-6359ea23d1fd",
-          "all_observed_rms_m": 0.04923039164036778,
-          "all_observed_max_m": 0.106010652539858,
+          "reference_id": "08913f04-1519-5cd1-a5cb-34d25e5f40ae",
+          "all_observed_rms_m": 0.04851246081774349,
+          "all_observed_max_m": 0.09938892266681344,
           "observed_samples": 825,
           "retained_samples": 825,
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "1563391bc06f7fd0d36084e571ec2abd02a7dd09a0a5892fe63dc9dbcc4af1c9"
+          "manifest_sha256": "ddb7389141f685d4ca0f273e4c8026c9c51118592054b21be96fb9467b87edd2"
         },
         "double_pendulum": {
-          "reference_id": "5535b6b1-f872-5ce1-8fed-0eb08f175fbb",
-          "all_observed_rms_m": 0.033102223059660096,
-          "all_observed_max_m": 0.09763619284849812,
+          "reference_id": "701ef8ed-5c32-5345-8ff5-0437adb205d8",
+          "all_observed_rms_m": 0.033102240291483474,
+          "all_observed_max_m": 0.09763603379527191,
           "observed_samples": 110,
           "retained_samples": 110,
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "7031069ebc54ec79692cb4b007048092f8e108f756a7d5bf112c7159ad1432d1"
+          "manifest_sha256": "1dcaf55cd2a397d6d08645b54b64c0bcf2518d4b6fc027a8281fafc677309628"
         },
         "triple_pendulum": {
-          "reference_id": "a269a3c7-ea0e-584a-b826-8508fb18f6b0",
-          "all_observed_rms_m": 0.01303956514138694,
-          "all_observed_max_m": 0.0458463944273301,
+          "reference_id": "c7e35a96-3811-5944-b480-2baa1372aa35",
+          "all_observed_rms_m": 0.009595269344347304,
+          "all_observed_max_m": 0.04811894152868084,
           "observed_samples": 165,
           "retained_samples": 165,
           "rejected_samples": 0,
-          "iterations": 45,
+          "iterations": 57,
           "frames": 55,
-          "manifest_sha256": "cdc54fbfe64595ac914e3bc6da07d7892cd23ffc5ab4742868a2173b851c0afd"
+          "manifest_sha256": "aab3fb682525b501213b60c3c2c9c864bd1514ecffb73258f657bbbc795074d9"
         },
         "pinocchio_golfer": {
-          "reference_id": "35f1d108-3dab-521e-b30c-fdc7b5a02cb7",
-          "all_observed_rms_m": 0.16764783563484015,
-          "all_observed_max_m": 0.3874969038124676,
+          "reference_id": "613d7e89-9362-5df0-9ead-b87b929411bb",
+          "all_observed_rms_m": 0.1676000545546102,
+          "all_observed_max_m": 0.3874878418724891,
           "observed_samples": 770,
           "retained_samples": 770,
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "f2a6eb4b9e84f1c2e2531ae2c59ce14f7f16d541fc323aa2104669865a38dd2d"
+          "manifest_sha256": "b9d04d9e0af2f690cef724b8cd167037e03cfcc71f0b2512a91e6ae48223e11b"
         },
         "pinocchio_golfer_ik": {
-          "reference_id": "4365f816-02a8-591a-9d44-a5b98eb25012",
-          "all_observed_rms_m": 0.16764783563484015,
-          "all_observed_max_m": 0.3874969038124676,
+          "reference_id": "bed19e63-6e87-525b-b9d5-50165ce9bf7a",
+          "all_observed_rms_m": 0.1676000545546102,
+          "all_observed_max_m": 0.3874878418724891,
           "observed_samples": 770,
           "retained_samples": 770,
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "1d58d6805be18ee39f492357c821655f0e89fee82b14d0174db0d9f87a37b3b5"
+          "manifest_sha256": "d14a471b94c423b6a8a20c86e9a73e848c20a4e1d8a2c4de31938dba6dd3777d"
         },
         "drake_golfer": {
-          "reference_id": "a5409f48-0ea4-57ae-bf63-2b3ac8e13ff2",
+          "reference_id": "f91495ea-a8de-58a1-93f9-7f8e6e5846df",
           "all_observed_rms_m": 0.13168705787533283,
           "all_observed_max_m": 0.2675289017093643,
           "observed_samples": 440,
@@ -112,10 +111,10 @@
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "9968463045bc0fbe7a2a46496b0cc024ddcc2b00be73809de50aefe41b3a9b24"
+          "manifest_sha256": "58d44e68571a607ab7db9b1ccb74b9369abdc668e3c0531d54ed81b169157475"
         },
         "simple_humanoid": {
-          "reference_id": "e8d7bb6d-cc4f-5490-80d1-018f73e566b2",
+          "reference_id": "83b95d69-3003-540d-b3ad-634342bbb611",
           "all_observed_rms_m": 0.1962956113652499,
           "all_observed_max_m": 0.47913056827170253,
           "observed_samples": 660,
@@ -123,21 +122,21 @@
           "rejected_samples": 0,
           "iterations": 50,
           "frames": 55,
-          "manifest_sha256": "b61f96fa441d85b6a27797409bef2ca468a3e4af62c546f87f2555f07703672e"
+          "manifest_sha256": "535f108d3a43e180cba2c90a14b4f3a57b56c0d6252682278c9dba824ad3b6d0"
         },
         "human_subject": {
-          "reference_id": "61d4a6f9-459f-5e23-a7b8-efb31b7aa020",
-          "all_observed_rms_m": 0.10111247888774959,
-          "all_observed_max_m": 0.2617172721065769,
+          "reference_id": "6e8d81e2-800b-58d5-aba2-b2cd17a8b002",
+          "all_observed_rms_m": 0.1011124792222242,
+          "all_observed_max_m": 0.2617176919742891,
           "observed_samples": 825,
           "retained_samples": 825,
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "3e8af8e08239e7acde1de32715bd4cce2264a076a7a0d1fec12e8fa81efaca97"
+          "manifest_sha256": "acc9ab54d679ca1e587f3ba749c96e64b11c932b856717337adf855684dd543a"
         },
         "mujoco_humanoid": {
-          "reference_id": "2d86b178-a443-5c69-b66d-6806902890d8",
+          "reference_id": "ee1f4ded-fb44-5936-87df-68b9ef4812d3",
           "all_observed_rms_m": 0.23600886929949497,
           "all_observed_max_m": 0.44113702144474093,
           "observed_samples": 660,
@@ -145,7 +144,7 @@
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "4511ddc71736c116c799cb4d3f1128cd26247e3b1b7c5c7655e67674f0a2a535"
+          "manifest_sha256": "ed8004df303f6ba8ed777a3065af03429526de59deb901f76c01691a8d2d64b6"
         }
       },
       "inventory": {
@@ -195,11 +194,11 @@
         }
       }
     },
-    "qualified-iron-catalog": {
+    "final-iron-catalog": {
       "job": {
         "schema_version": "reference-fit-job/1.0",
         "source": "data/C3D_TA_Iron.c3d",
-        "output": "../reference-fit-artifacts-9914/qualified-iron-catalog",
+        "output": "../reference-fit-artifacts-9914/final-iron-catalog",
         "models": ["all"],
         "custom_models": {},
         "profile": {
@@ -231,7 +230,7 @@
         "fit_lengths": true,
         "outlier_gate_sigma": 1000.0,
         "huber_delta": 1000.0,
-        "library": "../reference-fit-artifacts-9914/qualified-library"
+        "library": "../reference-fit-artifacts-9914/final-library"
       },
       "source": {
         "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Iron.c3d",
@@ -240,40 +239,40 @@
       },
       "models": {
         "golfer": {
-          "reference_id": "fe2acde4-3e5f-561f-bbe4-36c7c702f2ac",
-          "all_observed_rms_m": 0.049920367415426645,
-          "all_observed_max_m": 0.09715365397847718,
+          "reference_id": "445eaf0d-daff-5945-9bef-7cd759e78431",
+          "all_observed_rms_m": 0.049685626502261146,
+          "all_observed_max_m": 0.09547382614419343,
           "observed_samples": 825,
           "retained_samples": 825,
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "0323ce8f431c677001ba6b0b03611136492bb17d8fd38632ceacb720969b892e"
+          "manifest_sha256": "2aba81526912235f7fb9448d77946db4ab59c384b2c4f9808c13b8ec7d909407"
         },
         "double_pendulum": {
-          "reference_id": "fcb36763-41ca-5d15-b29a-e523038df6c9",
-          "all_observed_rms_m": 0.026861536316025305,
-          "all_observed_max_m": 0.06903931078956824,
+          "reference_id": "d08c6276-b586-5a3e-b938-0046b8a4d43b",
+          "all_observed_rms_m": 0.026861538859072946,
+          "all_observed_max_m": 0.06903928793070116,
           "observed_samples": 110,
           "retained_samples": 110,
           "rejected_samples": 0,
-          "iterations": 84,
+          "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "0ce0ebe078a0ebfabb7c6f28e50af724a2f3d13799bd65b83904a5943519c1ba"
+          "manifest_sha256": "906653dc7733e624c6cf4d3581788648a83fdfb016a0262d226659cced8bd1f4"
         },
         "triple_pendulum": {
-          "reference_id": "5e8e5ecf-0fce-5f4a-a229-3395ade91bc0",
-          "all_observed_rms_m": 0.012313315513363995,
-          "all_observed_max_m": 0.04491000176014451,
+          "reference_id": "41d2076a-4b2a-5c60-a89d-28679bd42c3b",
+          "all_observed_rms_m": 0.008009326914990077,
+          "all_observed_max_m": 0.038877399024408926,
           "observed_samples": 165,
           "retained_samples": 165,
           "rejected_samples": 0,
-          "iterations": 39,
+          "iterations": 139,
           "frames": 55,
-          "manifest_sha256": "b618536dc452a0b53ad6cad1c5582430095ce3f626b68667489948d326a61b84"
+          "manifest_sha256": "5266771c8861b472139e48a3157a7794f0d0d49fe3ef2577c6b0acf7e12c4b97"
         },
         "pinocchio_golfer": {
-          "reference_id": "347e30dc-0125-5147-8e2f-d939f7293c95",
+          "reference_id": "9e972e48-a44a-5891-8999-c11536663d7d",
           "all_observed_rms_m": 0.17184658100194597,
           "all_observed_max_m": 0.3824732264228687,
           "observed_samples": 770,
@@ -281,10 +280,10 @@
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "f2a630dcb753bfd5f588eb36f9815d24ff21cbb36ac51bd7f093116fdc4605b6"
+          "manifest_sha256": "9846cf82a8c032ebef57dadb24ea4e71285b007a082596f040d125a6903cf3c5"
         },
         "pinocchio_golfer_ik": {
-          "reference_id": "27a41ef1-e6b8-5120-907d-b954580557aa",
+          "reference_id": "7a05a3cd-c3b3-5890-8c31-12590f3662cf",
           "all_observed_rms_m": 0.17184658100194597,
           "all_observed_max_m": 0.3824732264228687,
           "observed_samples": 770,
@@ -292,10 +291,10 @@
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "538d8b83fb6e46426a95b39a009434d75ce2eb9fbdb91f05cbfa52f3038e7b4b"
+          "manifest_sha256": "a42e8a7497d36d919be8a6ecd95eaf41bb85d8a14538ccc6bfa38ab255d5b9ce"
         },
         "drake_golfer": {
-          "reference_id": "6f559107-b680-5771-9884-25ce5c5c3165",
+          "reference_id": "3738e9b0-906c-52c9-a782-c9ab3a4b53a7",
           "all_observed_rms_m": 0.138962040663826,
           "all_observed_max_m": 0.28575744685874394,
           "observed_samples": 440,
@@ -303,10 +302,10 @@
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "67499e17610e0d20e6613ce86efc49f5292e822ecde1f8da29e3ff1aaddd017b"
+          "manifest_sha256": "47a035e5b22523c00aea645b71a2ea21d45edaf0b7808ee59d9774f651dade97"
         },
         "simple_humanoid": {
-          "reference_id": "1e5c2a65-97f7-545c-9a2e-7df3a81a0855",
+          "reference_id": "573fa792-8f44-5352-bf18-95bf0912b42b",
           "all_observed_rms_m": 0.18812126447197708,
           "all_observed_max_m": 0.481490974066393,
           "observed_samples": 660,
@@ -314,10 +313,10 @@
           "rejected_samples": 0,
           "iterations": 76,
           "frames": 55,
-          "manifest_sha256": "59eaabb0c76b014a6931618ed0837c3eeae68001b62490532f9950b3c61ab954"
+          "manifest_sha256": "0c3a6144ac29586beb76383333c7d8c8caa944e0f0db2edb216f585abe494cb1"
         },
         "human_subject": {
-          "reference_id": "1322a734-1393-5163-a7af-f08896d7911e",
+          "reference_id": "4cae04bb-664a-5600-9ed2-2c39028fc5b8",
           "all_observed_rms_m": 0.09652350505860985,
           "all_observed_max_m": 0.2673294837790971,
           "observed_samples": 825,
@@ -325,10 +324,10 @@
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "09392b51bbd592c37ccc42b145f74912b20bc41e403123b565b871adfb7cb413"
+          "manifest_sha256": "f38591b2e74432c913b99dc34a73b96096c058f773327e9bf8a7cad0e59a5cd4"
         },
         "mujoco_humanoid": {
-          "reference_id": "1fcba8a3-4add-53e1-8676-ee0065ea022f",
+          "reference_id": "0ed71031-f2e0-555b-9f7e-37082f53875c",
           "all_observed_rms_m": 0.22630836826214012,
           "all_observed_max_m": 0.42940134641110256,
           "observed_samples": 660,
@@ -336,7 +335,213 @@
           "rejected_samples": 0,
           "iterations": 150,
           "frames": 55,
-          "manifest_sha256": "723db4f7ebeda3b1f95587e62cf622a86808d6d0423d8530addce53a6b582ea8"
+          "manifest_sha256": "16d4c8961a093f7c59454381659b18e5da024147f10bec8c16fa7130e3f95965"
+        }
+      },
+      "inventory": {
+        "golfer": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "double_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "triple_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "pinocchio_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+        },
+        "pinocchio_golfer_ik": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"
+        },
+        "drake_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/drake/models/generated/golfer.urdf"
+        },
+        "simple_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/simple_humanoid/humanoid.urdf"
+        },
+        "human_subject": {
+          "status": "available",
+          "source": "src/tools/model_explorer/bundled_assets/human_models/human_subject_with_meshes/model.urdf"
+        },
+        "mujoco_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/mujoco_humanoid/humanoid.xml"
+        },
+        "myosuite_body": {
+          "status": "unavailable",
+          "reason": "Bundled myobody/myoupperbody are labeled placeholder models, not MyoSuite anatomy."
+        },
+        "opensim_golfer": {
+          "status": "unavailable",
+          "reason": "Native OpenSim custom-joint/muscle constraints require an OpenSim adapter; no surrogate fit is substituted."
+        }
+      }
+    },
+    "final-driver-full": {
+      "job": {
+        "schema_version": "reference-fit-job/1.0",
+        "source": "data/C3D_TA_Driver.c3d",
+        "output": "../reference-fit-artifacts-9914/final-driver-full",
+        "models": ["golfer"],
+        "custom_models": {},
+        "profile": {
+          "schema_version": "reference-marker-profile/1.0",
+          "name": "tour-average-surface-proxies/1.0",
+          "axes": ["+X", "-Z", "+Y"],
+          "units": "m",
+          "joints": {
+            "mid_hip": ["WaistLeft", "WaistRight"],
+            "neck": ["BackTop"],
+            "nose": ["HeadFront"],
+            "left_shoulder": ["LShoulderBack"],
+            "right_shoulder": ["RShoulderBack"],
+            "left_elbow": ["LElbowOut"],
+            "right_elbow": ["RElbowOut"],
+            "left_wrist": ["LWristTop"],
+            "right_wrist": ["RWristTop"],
+            "left_hip": ["WaistLeft"],
+            "right_hip": ["WaistRight"],
+            "left_knee": ["LKneeOut"],
+            "right_knee": ["RKneeOut"],
+            "left_ankle": ["LAnkleOut"],
+            "right_ankle": ["RAnkleOut"]
+          },
+          "notes": "Surface proxies, not anatomical centers. Waist markers approximate hips; BackTop approximates neck. Posterior shoulder markers avoid the occluded RShoulderTop. Club and sentinel markers are excluded."
+        },
+        "stride": 1,
+        "max_iterations": 100,
+        "fit_lengths": true,
+        "outlier_gate_sigma": 1000.0,
+        "huber_delta": 1000.0,
+        "library": "../reference-fit-artifacts-9914/final-library"
+      },
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
+        "sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+        "format": "c3d"
+      },
+      "models": {
+        "golfer": {
+          "reference_id": "bc2d3eca-ab32-5d93-9d35-5d3624225607",
+          "all_observed_rms_m": 0.048863875407066146,
+          "all_observed_max_m": 0.10054314280501554,
+          "observed_samples": 9800,
+          "retained_samples": 9800,
+          "rejected_samples": 0,
+          "iterations": 300,
+          "frames": 654,
+          "manifest_sha256": "a4d8b9b9af6886d29a10b20573b1c307f0ad118f05ad1f890a4c717dcae4fb77"
+        }
+      },
+      "inventory": {
+        "golfer": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "double_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "triple_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "pinocchio_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+        },
+        "pinocchio_golfer_ik": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"
+        },
+        "drake_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/drake/models/generated/golfer.urdf"
+        },
+        "simple_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/simple_humanoid/humanoid.urdf"
+        },
+        "human_subject": {
+          "status": "available",
+          "source": "src/tools/model_explorer/bundled_assets/human_models/human_subject_with_meshes/model.urdf"
+        },
+        "mujoco_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/mujoco_humanoid/humanoid.xml"
+        },
+        "myosuite_body": {
+          "status": "unavailable",
+          "reason": "Bundled myobody/myoupperbody are labeled placeholder models, not MyoSuite anatomy."
+        },
+        "opensim_golfer": {
+          "status": "unavailable",
+          "reason": "Native OpenSim custom-joint/muscle constraints require an OpenSim adapter; no surrogate fit is substituted."
+        }
+      }
+    },
+    "final-iron-full": {
+      "job": {
+        "schema_version": "reference-fit-job/1.0",
+        "source": "data/C3D_TA_Iron.c3d",
+        "output": "../reference-fit-artifacts-9914/final-iron-full",
+        "models": ["golfer"],
+        "custom_models": {},
+        "profile": {
+          "schema_version": "reference-marker-profile/1.0",
+          "name": "tour-average-surface-proxies/1.0",
+          "axes": ["+X", "-Z", "+Y"],
+          "units": "m",
+          "joints": {
+            "mid_hip": ["WaistLeft", "WaistRight"],
+            "neck": ["BackTop"],
+            "nose": ["HeadFront"],
+            "left_shoulder": ["LShoulderBack"],
+            "right_shoulder": ["RShoulderBack"],
+            "left_elbow": ["LElbowOut"],
+            "right_elbow": ["RElbowOut"],
+            "left_wrist": ["LWristTop"],
+            "right_wrist": ["RWristTop"],
+            "left_hip": ["WaistLeft"],
+            "right_hip": ["WaistRight"],
+            "left_knee": ["LKneeOut"],
+            "right_knee": ["RKneeOut"],
+            "left_ankle": ["LAnkleOut"],
+            "right_ankle": ["RAnkleOut"]
+          },
+          "notes": "Surface proxies, not anatomical centers. Waist markers approximate hips; BackTop approximates neck. Posterior shoulder markers avoid the occluded RShoulderTop. Club and sentinel markers are excluded."
+        },
+        "stride": 1,
+        "max_iterations": 100,
+        "fit_lengths": true,
+        "outlier_gate_sigma": 1000.0,
+        "huber_delta": 1000.0,
+        "library": "../reference-fit-artifacts-9914/final-library"
+      },
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Iron.c3d",
+        "sha256": "395deb1f91006586819020fc85180409e716f07e1c680f9fb2ca114759f80845",
+        "format": "c3d"
+      },
+      "models": {
+        "golfer": {
+          "reference_id": "b19813cc-f52d-5de6-896f-dc9ef755f3c9",
+          "all_observed_rms_m": 0.04992113931314176,
+          "all_observed_max_m": 0.09662343764187495,
+          "observed_samples": 9839,
+          "retained_samples": 9839,
+          "rejected_samples": 0,
+          "iterations": 300,
+          "frames": 657,
+          "manifest_sha256": "1ca86b9cd97609de548ffe393003f6902861414c4539a376c41e90d8db061a14"
         }
       },
       "inventory": {
@@ -499,5 +704,6 @@
       },
       "rejection_reason": "Negative fitted hub_to_shoulder length -0.1253960033540757 m; withdrawn from playable library."
     }
-  }
+  },
+  "library_metadata": "Published copies have capture/model/sample-rate display labels; bundle assets remain unmodified source-version evidence."
 }

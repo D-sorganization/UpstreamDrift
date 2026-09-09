@@ -157,7 +157,7 @@ def fit_reference(
     identity = str(uuid5(NAMESPACE_URL, encoded))
     asset = ReferenceMotion(
         id=identity,
-        title=f"{profile.name}: {model_name}",
+        title=f"{Path(draft.source.path).stem}: {model_name} ({1 / delta[0]:g} Hz)",
         source=draft.source,
         notes=f"Fitted kinematics, not observed joints. {profile.notes}",
         model_identity=registered.spec.name,
