@@ -84,6 +84,42 @@
       "expires_on": "2026-10-31"
     },
     {
+      "path": "src/shared/python/pendulum_simulator/simulation.py",
+      "symbol": "run_simulation",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8928,
+      "reason": "Issue #8928: pre-existing simulation runner exceeds parameters budget; PR #8928 only optimizes energy_at computation and caching.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/simulation_golfer.py",
+      "symbol": "run_simulation",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8928,
+      "reason": "Issue #8928: pre-existing golfer simulation runner exceeds function-lines budget; PR #8928 only optimizes energy_at computation and caching.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/simulation_golfer.py",
+      "symbol": "run_simulation",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8928,
+      "reason": "Issue #8928: pre-existing golfer simulation runner exceeds parameters budget; PR #8928 only optimizes energy_at computation and caching.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/simulation_triple.py",
+      "symbol": "run_simulation",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 8928,
+      "reason": "Issue #8928: pre-existing triple simulation runner exceeds parameters budget; PR #8928 only optimizes energy_at computation and caching.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "src/launchers/upstream_drift_launcher.py",
       "symbol": "UpstreamDriftLauncher.select_model",
       "rule": "function-lines",

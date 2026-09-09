@@ -16,7 +16,16 @@ from ._types import FittedShape
 from .bindings import MarkerBinding
 from .theme import ShapeTheme
 
-__all__ = ["BodyPartShape", "ShapeFitter", "ShapeRenderer"]
+__all__ = ["BodyPartShape", "ColorOverrideRenderer", "ShapeFitter", "ShapeRenderer"]
+
+
+@runtime_checkable
+class ColorOverrideRenderer(Protocol):
+    """Optional color capability; hosts need no access to native artist internals."""
+
+    def set_color(self, handle: str, color: str | None) -> None:
+        """Override color without changing opacity; None restores base styling."""
+        ...
 
 
 @runtime_checkable

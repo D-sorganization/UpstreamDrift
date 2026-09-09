@@ -354,7 +354,7 @@
       "tiles": ["pose_studio"]
     },
     "tools.capture_rig": {
-      "title": "Capture Rig camera controller with live preview, movable panes and saved layouts, themed header with status strip and workflow-grouped actions, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export",
+      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
       "web": null,
@@ -412,6 +412,14 @@
       "reason": "Desktop optimization GUI; desktop-only candidate pending #7460.",
       "pending_decision": true,
       "tiles": ["swing_optimizer"]
+    },
+    "visualization.force_color_controls": {
+      "title": "Shared Segment Force Color Controls",
+      "pyqt": "src/shared/python/body_part_viz/force_color_controls.py",
+      "web": "ui/src/components/visualization/ForceColorControls.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. This entry qualifies controls only; automatic solver load production and remaining desktop host wiring are pending in docs/development/segment_force_color_epic.md."
     }
   }
 }

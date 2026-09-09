@@ -193,7 +193,7 @@ on the next start.
 Playback composites several of the session's sources at once: `recorded`
 tiles show the raw recording (or its proxy) and `overlay` tiles the same
 footage with the detector's pose and the ticked variants' models drawn on it,
-so raw and overlay of one view can sit side by side. Frame *k* is the same
+so raw and overlay of one view can sit side by side. Frame _k_ is the same
 instant in every tile — when the manifest carries a strobe-alignment block
 each reader is shifted by its whole-frame offset. Scrubbing, play/pause,
 speed, single-frame stepping and _Export PNG..._ (the canvas exactly as shown)
@@ -201,14 +201,30 @@ sit under the canvas.
 
 ### Panes, Layouts and Recording Controls
 
-The viewing panes (**Live preview**, **Playback**, **Results**) are dock
-widgets: drag a title bar to move a pane to another edge, tear it off to float
-it (onto a second monitor if you like), tab two panes together, or close one.
-Every pane scrolls when its content is larger than the space it has, so the
-window never grows past the screen. **Layout** (top right) saves the current
-arrangement under a name, loads or deletes a saved one, and **Reset layout**
-returns to the default with every pane shown. The last arrangement is restored
-on the next start.
+The **live view is the middle of the tile** and every control sits in a dock
+around it (#9846). The centre holds the preview canvas with the record
+transport under it — the thing you actually watch — and it keeps the spare
+width of the window; the **Workflow** rail and step details are docked on the
+left, **Settings** (Capture / Process / Match) under them, **Playback** and
+**Results** tabbed on the right, and **Actions** across the bottom. Before
+this the controls were the central widget and Qt squeezed the video docks to
+68 px each; now the video is the widest thing on screen at any window size,
+and the whole tile can be made about 420 px wide instead of 3276 px.
+
+Each dock behaves like a pane: drag its title bar to another edge, tear it off
+to float it (onto a second monitor if you like), tab two together, or close
+one. Every dock scrolls when its content is larger than the space it has, so
+the window never grows past the screen. **Layout** (top right) saves the
+current arrangement under a name, loads or deletes a saved one, and **Reset
+layout** returns to the default with every pane shown and the drawers shut.
+The last arrangement is restored on the next start; an arrangement saved by an
+older version of the tile names docks that no longer exist, so it is declined
+and the default is used instead of half-restoring it.
+
+The **log is a drawer**, not a pane. The command output is a dock tabbed
+behind **Actions**, closed at start and opened by the **Log** button in the
+header — so it occupies no height of its own and can never take space from the
+video, which is what it used to do with a layout stretch of `1`.
 
 ### Appearance
 
@@ -216,8 +232,16 @@ The tile follows the application theme (#9816). Its header is one toolbar:
 the session line on the left, then a status strip of three chips (cameras
 bound, recorder state with the live REC readout, and the outcome of the last
 take) and the **Layout** bar on the right. The action buttons are grouped by
-workflow step, each row labelled with the step it belongs to, so the grid
-reads in the same order as the Workflow panel. Every colour and style comes
+workflow step, each group opening with a label naming the step it belongs to,
+so the grid reads in the same order as the Workflow rail. The groups sit in a
+wrapping (flow) layout (`src/tools/capture_rig/flow_layout.py`, #9844) — as
+do the header, the status chips, the layout bar and the record transport
+(#9846), and long text elides rather than widening the tile
+(`src/tools/capture_rig/labels.py`): they
+reflow onto as many rows as the pane is wide enough for, and a section label
+always opens the row its first button starts on, so the grid never sets a
+minimum width wider than a single button and the tile can be made narrow
+enough for a laptop panel. Every colour and style comes
 from `src/tools/capture_rig/styling.py`, which composes them from the active
 palette and the fleet `Styles` constants: nothing in the tile names a colour,
 spacing comes from `LayoutMetrics`, and switching theme (standalone window or
