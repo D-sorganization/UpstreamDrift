@@ -19,6 +19,11 @@ import type { URDFModel } from './URDFViewer';
 import { GolferModel, ClubTrajectory } from './GolferModel';
 import { ForceOverlay as ForceOverlayComponent } from './ForceOverlay';
 import type { ForceVector3D } from './ForceOverlay';
+import { ForceColorControls } from './ForceColorControls';
+import { ForceColorLayer } from './ForceColorLayer';
+import { defaultForceColorScale } from './forceColors';
+import { segmentForcesAtTime } from './segmentForceFrame';
+import type { SegmentForceFrame } from './segmentForceFrame';
 
 /** Force/torque overlay data for visualization. See issue #1179 */
 export interface ForceOverlay {
@@ -30,6 +35,8 @@ export interface ForceOverlay {
 }
 
 interface Props {
+  /** Qualified signed axial loads synchronized to frame.time; absent means unavailable. */
+  segmentLoads?: SegmentForceFrame;
   engine: string;
   frame: SimulationFrame | null;
   frames?: SimulationFrame[];
@@ -90,6 +97,7 @@ function CameraController({
 }
 
 export function Scene3D({
+  segmentLoads,
   engine: _engine, // eslint-disable-line @typescript-eslint/no-unused-vars
   frame,
   frames,
@@ -101,6 +109,11 @@ export function Scene3D({
 }: Props) {
   const orbitRef = useRef<OrbitControlsImpl | null>(null);
   const rootRef = useRef<THREE.Group>(null);
+  const [forceScale, setForceScale] = useState(defaultForceColorScale);
+  const segmentForces = segmentForcesAtTime(segmentLoads, frame?.time ?? NaN);
+  const segmentIds = urdfModel?.links.map(link => link.link_name) ?? [
+    'torso', 'head', 'left_arm', 'right_arm', 'club_shaft', 'club_head', 'left_leg', 'right_leg',
+  ];
 
   // Interaction State
   const [selectedBodyName, setSelectedBodyName] = useState<string | null>(null);
@@ -291,6 +304,7 @@ export function Scene3D({
         </group>
 
         <ClubTrajectory frames={frames} />
+        <ForceColorLayer rootRef={rootRef} segmentIds={segmentIds} forces={segmentForces} scale={forceScale} />
 
         {/* See issue #1179, #1199: Force/torque overlays */}
         <ForceOverlayComponent vectors={mappedVectors} />
@@ -298,6 +312,12 @@ export function Scene3D({
         <axesHelper args={[1]} />
         <Environment preset="studio" />
       </Canvas>
+      <details className="absolute top-2 right-2 z-20 max-h-[70%] overflow-auto rounded bg-gray-900/95 text-white">
+        <summary className="cursor-pointer p-2">Segment Force Colors</summary>
+        <ForceColorControls scale={forceScale} onChange={setForceScale} />
+        {!Object.values(segmentForces).some(value => value !== null) &&
+          <p className="px-3 pb-3">Axial load data unavailable for this frame.</p>}
+      </details>
 
       {/* Floating Interactive Controls Panel */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-black/75 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-xl z-20">
