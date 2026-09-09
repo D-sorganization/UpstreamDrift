@@ -61,3 +61,47 @@ def test_different_view_marks_survive_switching_and_fit_laptop(tmp_path: Path) -
     assert dialog.canvas.width() >= 320
     assert dialog.save()
     dialog.close()
+
+
+def test_drag_crop_uses_source_pixels_after_letterboxing(tmp_path: Path) -> None:
+    app = _app()
+    from PyQt6.QtCore import QPoint, Qt
+    from PyQt6.QtTest import QTest
+
+    dialog = SwingEditor(_bundle(tmp_path))
+    dialog.resize(850, 650)
+    dialog.show()
+    app.processEvents()
+    canvas = dialog.canvas
+    scale = min(canvas.width() / 64, canvas.height() / 48)
+    centre = QPoint(canvas.width() // 2, canvas.height() // 2)
+    delta = QPoint(round(16 * scale), round(12 * scale))
+    QTest.mousePress(canvas, Qt.MouseButton.LeftButton, pos=centre - delta)
+    QTest.mouseRelease(canvas, Qt.MouseButton.LeftButton, pos=centre + delta)
+    crop = dialog.current_edit().crop
+    assert crop is not None
+    assert crop.x == pytest.approx(16, abs=1)
+    assert crop.y == pytest.approx(12, abs=1)
+    assert crop.width == pytest.approx(32, abs=1)
+    assert crop.height == pytest.approx(24, abs=1)
+    assert dialog.save()
+    dialog.close()
+
+
+def test_cancel_close_keeps_unsaved_selection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    app = _app()
+    from PyQt6.QtWidgets import QMessageBox
+
+    dialog = SwingEditor(_bundle(tmp_path))
+    dialog.show()
+    app.processEvents()
+    dialog.first.setValue(2)
+    monkeypatch.setattr(
+        QMessageBox, "question", lambda *args: QMessageBox.StandardButton.Cancel
+    )
+    dialog.close()
+    assert dialog.isVisible() and dialog.first.value() == 2
+    assert dialog.save()
+    dialog.close()

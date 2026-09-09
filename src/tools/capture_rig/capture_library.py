@@ -8,9 +8,12 @@ Storage scans run in the library UI's worker, never on its event loop.
 from __future__ import annotations
 
 import os
+import builtins
 import re
 import shutil
 import sqlite3
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -29,6 +32,7 @@ from src.motion_capture.rig.documents import write_document
 from src.motion_capture.rig.edits import EDITS_FILE, has_analysis
 
 NOTES_FILE = "capture_notes.json"
+RENAME_FILE = ".recording-rename.json"
 MAX_NOTES_BYTES = 200_000
 _UNSAFE_NAME = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 _RESERVED = re.compile(r"^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)", re.IGNORECASE)
@@ -52,6 +56,14 @@ class CaptureNotes(BaseModel):
         return value.strip()
 
 
+class RenameIntent(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    schema_version: Literal["recording-rename/1.0.0"] = "recording-rename/1.0.0"
+    view: str
+    source: str
+    target: str
+
+
 def read_notes(root: Path) -> CaptureNotes:
     path = root / NOTES_FILE
     if path.stat().st_size > MAX_NOTES_BYTES:
@@ -71,7 +83,7 @@ class LibraryEntry:
     problem: str = ""
 
 
-def _storage(root: Path) -> tuple[int, int]:
+def _storage(root: Path, cancelled: Callable[[], bool]) -> tuple[int, int]:
     """Logical bytes, excluding symlink targets and counting external media once."""
     managed = 0
 
@@ -79,6 +91,8 @@ def _storage(root: Path) -> tuple[int, int]:
         raise error
 
     for directory, dirs, files in os.walk(root, followlinks=False, onerror=failed):
+        if cancelled():
+            raise InterruptedError("Library scan cancelled")
         dirs[:] = [d for d in dirs if not (Path(directory) / d).is_symlink()]
         for name in files:
             path = Path(directory) / name
@@ -104,8 +118,14 @@ class CaptureLibrary:
                 "CREATE TABLE IF NOT EXISTS captures (path TEXT PRIMARY KEY)"
             )
 
-    def _connect(self) -> sqlite3.Connection:
-        return sqlite3.connect(self._database, timeout=10)
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
+        connection = sqlite3.connect(self._database, timeout=10)
+        try:
+            with connection:
+                yield connection
+        finally:
+            connection.close()
 
     def _known(self, root: Path) -> Path:
         root = root.resolve()
@@ -120,6 +140,7 @@ class CaptureLibrary:
     def register(self, root: Path) -> CaptureNotes:
         root = root.resolve()
         load_bundle(root)
+        self.recover_rename(root)
         if not (root / NOTES_FILE).exists():
             write_document(
                 root / NOTES_FILE, CaptureNotes(title=root.name).model_dump(mode="json")
@@ -140,7 +161,13 @@ class CaptureLibrary:
         write_document(root / NOTES_FILE, updated.model_dump(mode="json"))
         return updated
 
-    def list(self, *, query: str = "", archived: bool = False) -> list[LibraryEntry]:
+    def list(
+        self,
+        *,
+        query: str = "",
+        archived: bool = False,
+        cancelled: Callable[[], bool] = lambda: False,
+    ) -> builtins.list[LibraryEntry]:
         with self._connect() as connection:
             paths = [
                 Path(row[0])
@@ -148,6 +175,8 @@ class CaptureLibrary:
             ]
         entries = []
         for root in paths:
+            if cancelled():
+                raise InterruptedError("Library scan cancelled")
             try:
                 notes = read_notes(root)
                 if (
@@ -156,7 +185,7 @@ class CaptureLibrary:
                     not in f"{notes.title}\n{notes.notes}".casefold()
                 ):
                     continue
-                managed, external = _storage(root)
+                managed, external = _storage(root, cancelled)
                 entries.append(
                     LibraryEntry(
                         root,
@@ -168,6 +197,8 @@ class CaptureLibrary:
                         external,
                     )
                 )
+            except InterruptedError:
+                raise
             except (ValueError, OSError) as exc:
                 entries.append(LibraryEntry(root, title=root.name, problem=str(exc)))
         return entries
@@ -175,6 +206,7 @@ class CaptureLibrary:
     def editable_copy(self, root: Path) -> Path:
         """New lineage; media referenced, calibration/timing retained, results omitted."""
         root = self._known(root)
+        self.recover_rename(root)
         plan, index, manifest = load_bundle(root)
         notes = read_notes(root)
         destination = self.root / "captures" / str(uuid4())
@@ -212,6 +244,7 @@ class CaptureLibrary:
     def rename_recording(self, root: Path, view: str, filename: str) -> None:
         """Rename owned, unprocessed media and repair its index; rollback on failure."""
         root = self._known(root)
+        self.recover_rename(root)
         if (
             not filename
             or filename in (".", "..")
@@ -240,8 +273,10 @@ class CaptureLibrary:
             e.model_copy(update={"file": new_file}) if e.file == entry.file else e
             for e in index.recordings
         )
-        source.rename(target)
+        intent = RenameIntent(view=view, source=entry.file, target=new_file)
+        write_document(root / RENAME_FILE, intent.model_dump(mode="json"))
         try:
+            source.rename(target)
             write_document(
                 root / RECORDINGS_FILE,
                 index.model_copy(update={"recordings": entries}).model_dump(
@@ -249,5 +284,40 @@ class CaptureLibrary:
                 ),
             )
         except (ValueError, OSError):
-            target.rename(source)
+            self.recover_rename(root)
             raise
+        (root / RENAME_FILE).unlink()
+
+    def recover_rename(self, root: Path) -> None:
+        """Finish or roll back an interrupted rename, never overwrite a file."""
+        root = root.resolve()
+        journal = root / RENAME_FILE
+        if not journal.exists():
+            return
+        if journal.stat().st_size > MAX_NOTES_BYTES:
+            raise ValueError("Invalid rename recovery record")
+        intent = RenameIntent.model_validate_json(journal.read_text(encoding="utf-8"))
+        source, target = (
+            (root / intent.source).resolve(),
+            (root / intent.target).resolve(),
+        )
+        if (
+            not source.is_relative_to(root)
+            or not target.is_relative_to(root)
+            or source.parent != target.parent
+            or source == target
+        ):
+            raise ValueError(
+                "Rename recovery paths must be different files inside this capture"
+            )
+        entry = next(
+            (e for e in load_bundle(root)[1].recordings if e.view == intent.view), None
+        )
+        current = (root / entry.file).resolve() if entry else None
+        if current not in (source, target) or source.exists() == target.exists():
+            raise ValueError("Rename recovery is ambiguous; inspect the capture folder")
+        if current == source and target.exists():
+            target.rename(source)
+        elif current == target and not target.exists():
+            raise ValueError("Renamed recording is missing; inspect the capture folder")
+        journal.unlink()

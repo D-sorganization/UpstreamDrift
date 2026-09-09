@@ -42,41 +42,47 @@ unobserved. Raw media remains byte-identical.
 The native SwingEditor reuses VideoReader and ImageCanvas, supports per-view
 scrubbing, in/out marks, inclusive numeric bounds, drag or numeric cropping,
 selection playback, reset/save and unsaved-change handling. It opens original
-recordings rather than resized proxies. Its integration button, editable-copy
-flow, library and subsequent drawing/reference features are still in progress.
+recordings rather than resized proxies. Library and Edit swing buttons in the
+Capture Rig header open the catalog and editor. Analyzed takes offer an editable
+copy before editing, preserving earlier results. Buttons follow command and
+recording/countdown state.
 
-## Qualification and Remaining Work
-
-Initial missing-module tests established RED; first backend suite passed 20 tests
-and initial native editor suite passed 3. A downstream reconstruction regression
-then exposed why processed-frame count cannot replace the source timeline; the
-implementation now preserves that contract. The combined backend/timing/editor suite passes 23 tests and all three modules
-pass mypy. At 850x650 the themed editor has readable controls, a 492-px minimum
-width and an 828x367-px canvas. The fontless Qt offscreen test backend required
-loading the installed Segoe UI font for the screenshot; application code was unchanged. No camera hardware or physical
-calibration validation is claimed by synthetic footage.
-
-Remaining: visible app entry points, library/notes/storage/archive/rename and
-editable copies; editor failure/unsaved/drag visual checks; coaching shape model,
-editing and export; reference import/registration/sync/comparison; generated map
-updates; protected CI and merges. Do not close epics based on this document.
-
-## Library Backend Qualification
+## Library Workflow and Recovery
 
 CaptureLibrary indexes registered bundle locations in SQLite; capture_notes.json
 owns stable identity, title, multiline notes, archive state and source-copy lineage.
 Catalog rebuilding preserves sidecars. Archive/restore changes metadata and reclaims
 no disk space. Storage reports logical bytes inside the session separately from
-external recordings, without following directory symlinks. The UI must call scans
-in a worker and show entry-specific failures.
+external recordings, without following directory symlinks. The visible library
+scans in a cancellable worker and shows entry-specific failures. Operators can
+search titles/notes, change catalog location, import videos, add existing sessions,
+open/edit captures, browse folders and save notes with unsaved-change protection.
 
 Editable copies retain original file references, plan, manifest/timing, calibration
 and edit recipe, plus a new identity and source_capture pointer. Derived analyses
 are not copied. Filename changes are limited to owned, unprocessed recordings with
-unchanged extensions and collision/reserved-name checks; index-write failure rolls
-the rename back. A process crash between the filesystem rename and index replacement
-is still a recovery gap to resolve before release; runtime exceptions are tested.
+unchanged extensions and collision/reserved-name checks. Index-write failures roll
+back. A validated rename journal recovers interrupted file/index changes on the
+next open; ambiguous recovery states fail visibly. SQLite connections close after
+each transaction, including failures, preventing Windows catalog file locks.
 
-Six backend tests pass for persistence/rebuild, archive/restore/search, corrupt-entry
-isolation, editable lineage, safe rename and rollback. Visible library controls and
-import/open/edit integration are the next step; no complete-library claim is made.
+## Qualification and Remaining Work
+
+Initial missing-module tests established RED. A downstream reconstruction regression
+exposed why processed-frame count cannot replace source timeline extent; the fix
+preserves original indices. The integrated camera package plus editing/ingestion/
+timing suite passed 300 tests before three additional focused regressions were
+added. Library/dialog/integration qualification now passes 12 tests; editor gesture,
+unsaved-change and persistence qualification passes 5. Eight implementation modules
+pass mypy and scoped Ruff passes. These are synthetic-media checks, not physical
+camera or calibration qualification.
+
+Visual review used 850x650 for the editor (492-px minimum width) and 900x650 for
+the library (350-px minimum width). The fontless Qt offscreen backend required
+loading installed Segoe UI in the screenshot harness; application fonts were not
+changed. A real Windows catalog-handle cleanup failure was reproduced and fixed.
+
+Remaining: selection export/playback integration, generated map updates, protected
+CI and merge; coaching shape model/editing/export under #9862 and advanced reference
+import/registration/sync/comparison under #9863. Do not close epics based on this
+document or claim these remaining features already work.
