@@ -419,3 +419,100 @@ class TestMotionCaptureValidator:
         assert visibility["visibility_percentage"] == pytest.approx(
             (2 / 3) * 100, abs=0.1
         )
+
+
+@pytest.mark.unit
+class TestMotionRetargetingIKCost:
+    """Regression tests for the multi-marker IK forward-evaluation cost (#8922).
+
+    ``_solve_frame_ik`` must evaluate ``mj_forward`` once per IK iteration --
+    not once per marker within each iteration -- and must not grow the
+    stacked Jacobian with a fresh ``np.vstack`` per marker.
+    """
+
+    @pytest.fixture()
+    def two_marker_setup(
+        self,
+    ) -> tuple[mujoco.MjModel, mujoco.MjData, MarkerSet]:
+        """Model, data and a marker set with two markers on one mobile body."""
+        model = mujoco.MjModel.from_xml_string(DOUBLE_PENDULUM_XML)
+        data = mujoco.MjData(model)
+        mujoco.mj_forward(model, data)
+        marker_set = MarkerSet(
+            markers={"m1": "club_body", "m2": "club_body"},
+            marker_offsets={
+                "m1": np.array([0, 0, 0]),
+                "m2": np.array([0, 0, 0]),
+            },
+        )
+        return model, data, marker_set
+
+    def test_forward_evaluated_once_per_iteration(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        two_marker_setup: tuple[mujoco.MjModel, mujoco.MjData, MarkerSet],
+    ) -> None:
+        """``mj_forward`` calls stay bounded by one per IK iteration."""
+        model, data, marker_set = two_marker_setup
+        retargeting = MotionRetargeting(model, data, marker_set)
+
+        calls = {"count": 0}
+        real_forward = mujoco.mj_forward
+
+        def counting_forward(*args: object, **kwargs: object) -> None:
+            calls["count"] += 1
+            real_forward(*args, **kwargs)  # type: ignore[arg-type]
+
+        monkeypatch.setattr(mujoco, "mj_forward", counting_forward)
+
+        frame = MotionCaptureFrame(
+            time=0.0,
+            marker_positions={
+                "m1": np.array([0.0, 0.4, 1.2]),
+                "m2": np.array([0.05, 0.4, 1.2]),
+            },
+        )
+        q_init = data.qpos.copy()
+
+        max_iterations = 3
+        retargeting._solve_frame_ik(
+            frame,
+            use_markers=["m1", "m2"],
+            q_init=q_init,
+            max_iterations=max_iterations,
+        )
+
+        assert calls["count"] <= max_iterations + 1, (
+            "mj_forward must be evaluated once per IK iteration, "
+            f"not once per marker: got {calls['count']} calls for "
+            f"{max_iterations} iterations and 2 markers"
+        )
+
+    def test_multi_marker_ik_reduces_error(
+        self,
+        two_marker_setup: tuple[mujoco.MjModel, mujoco.MjData, MarkerSet],
+    ) -> None:
+        """The batched-Jacobian IK drives marker error toward the targets."""
+        model, data, marker_set = two_marker_setup
+        retargeting = MotionRetargeting(model, data, marker_set)
+
+        frame = MotionCaptureFrame(
+            time=0.0,
+            marker_positions={
+                "m1": np.array([0.0, 0.4, 1.2]),
+                "m2": np.array([0.05, 0.4, 1.2]),
+            },
+        )
+
+        q0 = data.qpos.copy()
+        initial_error = sum(retargeting.compute_marker_errors(frame, q0).values())
+
+        q, _success = retargeting._solve_frame_ik(
+            frame,
+            use_markers=["m1", "m2"],
+            q_init=q0,
+            max_iterations=50,
+        )
+
+        final_error = sum(retargeting.compute_marker_errors(frame, q).values())
+        assert final_error < initial_error
