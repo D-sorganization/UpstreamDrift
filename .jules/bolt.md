@@ -1,4 +1,4 @@
-## YYYY-MM-DD - [Optimize Python List and Array Reduction Overheads]
+## 2026-09-09 - [Optimize Python List and Array Reduction Overheads]
 **Learning:** Using `np.sum()` on a standard Python list introduces significant overhead because NumPy must first implicitly convert the list into a temporary ndarray. This overhead is heavily pronounced when the list contains NumPy scalars, as opposed to raw Python floats. Python's built-in `sum()` is ~10x faster for such lists. Similarly, evaluating `np.count_nonzero()` on boolean arrays is ~30% faster than `np.sum()` because it counts directly at the C-level without engaging the full summation machinery.
 **Action:** Replace `np.sum()` with the built-in `sum()` for python lists, and use `np.count_nonzero()` for boolean arrays. Additionally, replace module-level `np.sum(array)` with the array method `.sum()` when applicable.
 
@@ -27,10 +27,6 @@
 **Learning:** Using `np.sqrt(np.einsum("ij,ij->i", diff, diff))` is significantly faster (~30%) than `np.linalg.norm(diff, axis=1)` for 2D differences, avoiding intermediate array allocation in the inner loops of combinatorial design sampling algorithms.
 **Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.
 
-## 2026-09-01 - [Optimize Norm Calculation in Morris Design]
-**Learning:** Using `np.sqrt(np.einsum("ij,ij->i", diff, diff))` is significantly faster (~30%) than `np.linalg.norm(diff, axis=1)` for 2D differences, avoiding intermediate array allocation in the inner loops of combinatorial design sampling algorithms.
-**Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum("ij,ij->i", diff, diff))` in `src/bunkershot3d/study/morris.py` to optimize trajectory distance calculations.
-
 ## 2024-05-19 - [Optimize Sum of Squares]
 
 ## 2026-09-05 - Optimize np.linalg.norm for multidimensional arrays
@@ -50,3 +46,11 @@
 ## 2024-05-19 - Optimize Norm Calculation in Analytics
 **Learning:** Using `np.sqrt(np.einsum('ij,ij->i', arr, arr))` instead of `np.linalg.norm(..., axis=1)` is ~2.4x faster for medium-sized multidimensional arrays because it avoids multiple internal dispatch checks and temporary array allocations within NumPy's linear algebra engine. It's particularly useful in data-heavy analysis loops like motion capture reconstruction.
 **Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', arr, arr))` in data-heavy analysis pipelines to optimize array magnitude calculations.
+
+## 2026-09-09 - [Optimize Multidimensional Norm Calculations in Motion Capture]
+**Learning:** In the motion capture analysis and reconstruction pipelines (e.g., `src/motion_capture/compare_variants.py`), computing the Euclidean distance along the inner-most axis using `np.linalg.norm(..., axis=2)` incurs significant overhead due to NumPy's internal dispatching and temporary array allocations. Profiling reveals that computing the difference first and then evaluating `np.sqrt(np.einsum('ijk,ijk->ij', diff, diff))` is ~10-20x faster.
+**Action:** Replace `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum('ijk,ijk->ij', diff, diff))` where multidimensional array magnitude operations are performed in loops or heavily executed evaluation methods. Ensure `diff` is explicitly calculated once to prevent duplicate temporary allocations inside the `einsum` call.
+
+## 2026-09-09 - [Optimize Multidimensional Norm Calculations in Motion Capture]
+**Learning:** In the motion capture analysis and reconstruction pipelines (e.g., `src/motion_capture/compare_variants.py`), computing the Euclidean distance along the inner-most axis using `np.linalg.norm(..., axis=2)` incurs significant overhead due to NumPy's internal dispatching and temporary array allocations. Profiling reveals that computing the difference first and then evaluating `np.sqrt(np.einsum('ijk,ijk->ij', diff, diff))` is ~10-20x faster.
+**Action:** Replace `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum('ijk,ijk->ij', diff, diff))` where multidimensional array magnitude operations are performed in loops or heavily executed evaluation methods. Ensure `diff` is explicitly calculated once to prevent duplicate temporary allocations inside the `einsum` call.

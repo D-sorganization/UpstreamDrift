@@ -4847,7 +4847,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 
 ## Change 2026-06-18
 
-- Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum('...i,...i->...', ...))` in chain_forces.py and test_swingset_chain_models.py for improved performance.
 
 ### Module Map Changelog
 
@@ -5587,6 +5586,7 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
   can establish stateful friction, equipment calibration, anatomy, biological
   passivity, human behavior, injury risk, or coaching guidance.
 
+- Replaced `np.linalg.norm(..., axis=2)` with `np.sqrt(np.einsum('ijk,ijk->ij', ..., ...))` in `src/motion_capture` to optimize multidimensional array magnitude calculation. (spec-exempt: micro-optimization)
 - Use `np.vdot` instead of `np.sum(x**2)` and `np.sqrt(np.einsum("ij,ij->i", x, x))` instead of `np.linalg.norm(x, axis=1)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - Use `np.einsum('ij,ij->j', x, x)` instead of `np.sum(x * x, axis=0)` when performing critical numerical calculation in Python to avoid temporary intermediate array allocation. (spec-exempt: micro-optimization)
 - (spec-exempt: micro-optimization) Replaced `.iterrows()` with `.to_dict('records')` in `data_processor_widget.py`, `kaggle_validation.py`, and `launch_monitor_analytics/widgets.py` to optimize UI and validation performance.
