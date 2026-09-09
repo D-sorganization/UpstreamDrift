@@ -47,5 +47,19 @@
       "spec_missing_rows": [],
       "validator_revision": "ad9bcb8855199cdb4319775c17cda5db8b060779"
     }
+  },
+  "current_repair": {
+    "provider_revision": "00d17e7f91fe8541bc8882ee745fda58ee2ad7af",
+    "tests": 79,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 36.212,
+    "warnings": 8,
+    "junit_sha256": "4f10dc27ccc6ea2a4e2f6d0b6f19a841f443d6524f9cab4f48c5c42269a21d44",
+    "seam_gate": "passed with 15 existing/pending notes",
+    "theme": "obsolete color_derivation child retired; public string controls and source origins verified",
+    "realtime": "split/pending-cleanup under #8942; facade unchanged",
+    "wheel": "pending rebuild; previous wheel above is historical",
+    "protected_provider_review": "pending"
   }
 }

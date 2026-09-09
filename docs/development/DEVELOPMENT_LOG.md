@@ -26,10 +26,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9916
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (Tools 608e85b24; main 18c8f922e; merge 70243adfe; audit SELF)
+- **Last verified:** 2026-09-09 (Tools 00d17e7f9; main 18c8f922e; repair SELF)
 - **Summary:** Qualify the exact Tools #5133 candidate through the existing vendor boundary, including strict shaft inputs and paired theme compatibility.
-- **Evidence:** Six old-pin failures become six passes; all 24 provider contracts also pass after main 18c8f922e. Clean Python-only wheel import/wire/theme and pip check pass. Physical qualification remains open.
-- **Next step:** Qualify the final Tools #5133 repair revision through the provider suite.
+- **Evidence:** Six old-pin failures become six passes. Current repair: 79 provider/theme/fallback/manual tests pass; seam gate passes. Old-pin wheel evidence is retained; current wheel and provider review remain.
+- **Next step:** Build and verify the current candidate wheel; await Tools #5133 protected qualification.
 
 ### DL-#9911 · Preview Discovery Failure Recovery
 

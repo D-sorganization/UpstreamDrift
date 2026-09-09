@@ -101,3 +101,20 @@ def test_paired_theme_keeps_resolved_tokens_and_custom_extension() -> None:
         assert resolved["is_dark"] is True
         resolved["bg"] = "#FFFFFF"
         assert colors.as_dict()["bg"] == "#202020"
+
+
+@pytest.mark.parametrize(
+    "spelling",
+    [
+        "src.shared.python.theme.color_derivation",
+        "shared.python.theme.color_derivation",
+    ],
+)
+def test_shared_theme_color_helpers_use_one_provider(spelling: str) -> None:
+    with _fresh_provider_import("theme"):
+        provider = importlib.import_module(spelling)
+        _assert_from_tools(Path(provider.__file__))
+        assert provider.adjust("#808080", 1.5) == "#c0c0c0"
+        assert provider.with_alpha("#f00", 64) == "#ff000040"
+        assert provider.is_dark_bg("#000") is True
+        assert provider.adjust("#zzz", 1.2) == "#zzz"
