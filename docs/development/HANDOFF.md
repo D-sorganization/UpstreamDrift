@@ -113,3 +113,5 @@ still lack adoption; direct notices request the canonical replacement queue. Do 
   Issue #9911 adds import/timeout recovery; 11 preview regressions pass. An isolated
   TEMP/upstreamdrift-capture-test-runtime now supplies the declared FFmpeg dependency.
   Verify the current launch before claiming the application is still open.
+
+- SELF: preserve concurrent atlas regeneration 996fa03b15b57cad08c60743b6c054d144374ef1 via normal merge; generated projections are byte-identical to local 8e6863bd0.
