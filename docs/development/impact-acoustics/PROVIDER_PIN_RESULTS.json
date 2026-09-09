@@ -103,6 +103,11 @@
       },
       "conflicts": "root handoff and development log only; both scopes retained",
       "wheel_scope": "Installed provider wheel from efe44846e; capture merge leaves provider pin and shared ownership changes intact."
+    },
+    "concurrent_remote_merge": {
+      "head": "7141feb79ffff0e745d960e2a5866fb62374c9f0",
+      "commits": ["343d05b5d", "f417cd8fe", "7141feb79"],
+      "resolution": "Same pin and color retirement preserved. Reviewed main use_start_file serves the same process action as concurrent set_start_path; no duplicate API added. Realtime split/pending-cleanup retained from actual two-copy inventory; no Tools-only claim. Earlier source/wheel provenance remains unchanged."
     }
   }
 }
