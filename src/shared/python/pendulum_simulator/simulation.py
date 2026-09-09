@@ -32,7 +32,6 @@ from .physics import (
     mass_matrix_components,
     net_joint_forces,
     potential_energy,
-    total_energy,
 )
 from .simulation_core import integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
@@ -133,16 +132,11 @@ class SimulationResult(TrajectoryResultMixin):
         qddot = self.accelerations_at(idx)
         return control_vector(self.states[idx], qddot, self.params, self.limits)
 
-    def energy_at(self, idx: int) -> dict:
-        self._check_idx(idx)
-        state = self.states[idx]
-        result = {
-            "kinetic": kinetic_energy(state, self.params),
-            "potential": potential_energy(state, self.params),
-            "total": total_energy(state, self.params),
-        }
-        self._assert_energy_finite(result, idx)
-        return result
+    def _kinetic_energy_at(self, state: np.ndarray) -> float:
+        return float(kinetic_energy(state, self.params))
+
+    def _potential_energy_at(self, state: np.ndarray) -> float:
+        return float(potential_energy(state, self.params))
 
     def coriolis_at(self, idx: int) -> np.ndarray:
         self._check_idx(idx)
