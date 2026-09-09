@@ -12,11 +12,13 @@ from collections.abc import Iterable, Mapping
 
 import numpy as np
 import numpy.typing as npt
+from typing import TypeAlias
+
 from pydantic import BaseModel, ConfigDict
 
 from src.shared.python.core.contracts import require
 
-Array = npt.NDArray[np.float64]
+Array: TypeAlias = npt.NDArray[np.float64]
 
 
 class PoseError(BaseModel):
