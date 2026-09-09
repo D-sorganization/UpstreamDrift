@@ -8,18 +8,20 @@ The existing vendor mechanism selects Tools 00d17e7f91fe8541bc8882ee745fda58ee2a
 The repaired provider/theme/fallback/manual contract set passes all 79 tests.
 The obsolete theme color child is retired; UD-only theme modules stay local.
 Realtime has a split/pending-cleanup ruling tied to #8942; its API is preserved.
-The old 608e85b24 Python-only wheel remains historical installation evidence.
-A clean wheel for the current candidate, protected review and final pin remain.
+The efe44846e Python-only wheel at this pin installs cleanly: shaft wire,
+source tamper refusal, theme/layout/realtime ownership and pip check pass.
+The 79-contract suite also passes after main 8fce9f238. Protected review remains.
 Tools #5133 has a Python 3.11 momentum-oracle failure under investigation.
 Do not merge this consumer before the provider is reviewed and green.
 
 ## Incoming Main Integration
 
-Main 18c8f922e is integrated into the provider branch with its capture calibration
-and industrial-readiness implementations preserved. Only shared turnover/SPEC
-documents conflicted; canonical HANDOFF.md retains the incoming capture handoff.
+Main 8fce9f238 is integrated after capture PR #9917 merged. Its LoD fixes and
+capture journey implementation are preserved. Only the root handoff and
+development log conflicted; both owners' entries remain. Canonical HANDOFF.md
+retains the incoming capture handoff.
 The full incoming root handoff remains at its immutable source:
-[Incoming Main Handoff](https://github.com/D-sorganization/UpstreamDrift/blob/18c8f922e87c92f6f518da05c0819f71ce3193ba/AGENT_HANDOFF.md).
+[Incoming Main Handoff](https://github.com/D-sorganization/UpstreamDrift/blob/8fce9f238ce89876dd363fb41b4ba1169a87d1b6/AGENT_HANDOFF.md).
 The capture setup, catalog and wizard work stays with its original owners.
 
 ## Preserved Repository Context

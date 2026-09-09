@@ -2,12 +2,24 @@
 
 ## Current Continuation State
 
+Main 8fce9f238 (capture PR #9917) is integrated with its reviewed LoD fixes.
+Only root handoff and development-log conflicts needed resolution; both scopes
+are retained. All 79 provider/theme/fallback/manual checks pass again after the merge.
+
 Current repair: 79 provider/theme/fallback/manual tests pass against 00d17e7f9,
 with eight existing deprecation warnings. The seam gate passes after actual
 retirement of the already-shadowed color child and an explicit realtime
 split/pending-cleanup ruling linked to #8942. Its facade remains local.
 No byte-identity or private non-string equivalence is claimed for the removed
-color child. The 608e85b24 wheel below is historical; rebuild the current pin.
+color child. The 608e85b24 wheel below is historical. The current 00d17e7f9 pin was built
+from efe44846e and installed into a fresh environment with all core dependencies.
+Shaft wire/digest/tamper and theme/layout/realtime import checks pass under
+site-packages; pip check passes. Wheel SHA256:
+8e09cd2c6e6c6ddb008c0bff9839514aa3e07f7c95f031da629bbe34ad4c3ce8.
+This is Python-provider evidence; UI assets and physical qualification remain
+excluded. Source checks after capture merge pass all 79 tests; development-log
+audit retains 36 inherited findings against main's 37, with no new findings
+and the exact union of both parents' SPEC issue rows.
 Root handoff again carries required UP-D0/UP-D1 references. The PR title now
 accurately uses chore for dependency qualification. Provider CI is still open.
 
@@ -88,14 +100,24 @@ The following incoming handoff is preserved from main 18c8f922e, including its o
 
 - Repository: D-sorganization/UpstreamDrift
 - Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-setup`
-- Branch: `feat/capture-guided-setup`
+- Branch: `feat/9913-capture-journey`
 - Baseline commit: `54b9b0586` (main after qualified product merge #9896)
 - Implementation commit: `SELF`
-- Pull request: #9910 (draft): https://github.com/D-sorganization/UpstreamDrift/pull/9910
-- Governing issue: #9898; epics #9897, #9902, #9906; development entry DL-#9898
+- Pull request: #9917 https://github.com/D-sorganization/UpstreamDrift/pull/9917 for #9913; prior calibration/profile PR #9910 merged at 18c8f922e87c92f6f518da05c0819f71ce3193ba
+- Governing issue: #9913; epics #9897, #9902, #9906 remain active; entries DL-#9913 and DL-#9911 refreshed
 - Session: `capture-product-01a08427-guided-setup`, issue lease and presence active.
 
 ## Objective and Status
+
+Latest player steering: #9913 requires action feedback, capture/swing and model
+status, clickable next steps, detailed contextual help, detachable screens with
+close-to-redock, and familiar fullscreen video interactions. Implement and merge
+to remote main as part of the active goal. Session capture-product-01a08427-journey
+owns Capture Rig/tests in this branch; preserve the launched PID50860 checkout.
+
+Tools numerical PR #5136 at e92cacd3f5e775f686ffcc4b0eace034b42ebd68 fixes OpenCV 5 compatibility. Normal commit/pre-push hooks pass (two pytest workers after a native parallel import crash); Python 3.11/3.12 shared CI tests now pass. Three other jobs fail before checkout on runner-3 EACCES for `Tools/__pycache__/build_hooks.cpython-312.pyc`. No merge or runner mutation yet.
+Tools#5137 moving-reference contracts/solver are separate in Worktrees/Tools-calibration-numerics,
+branch feat/5137-reference-placements;12 placement tests plus API gate pass.
 
 Complete the newly requested everyday calibration, sourced club database/player bag,
 and capability-driven setup wizard. The full prior fleet rollout also remains required.
@@ -126,6 +148,23 @@ geometry, club data and wizard work remain open. Do not close #9898 or its epic 
   retains standing UP-D0/UP-D1 governance and other agents' historical context.
 - User-owned changes: none in this new isolated worktree. The launched application
   remains in the separate UpstreamDrift-ubuntu-ci checkout.
+
+## Integration Checkpoint
+
+Remote #9910 was rebased to c9225f18e during validation. Its five conflicting capture/docs files are byte-identical to pre-UX b743eef09; those conflicts retain the qualified UX versions. All incoming research, readiness, policy and CI changes are preserved. UX commit 8f590cc80 passed normal commit and pre-push checks; push was refused as non-fast-forward. The same source then merged as #9910 at18c8f922e; its conflicted capture files are also byte-identical to the remote branch. Both histories are preserved; UX delivery continues separately on feat/9913-capture-journey.
+
+## Publication Checkpoint
+
+Candidate dd8136f152bc8451bf1a2511ff6246bd309a52b5 is published as #9917. All445 capture/parity tests pass with zero skips (39.578s), and normal pre-push gates pass. Remote CI found seven deep UI-access chains, a155-line status renderer and a562-byte development-log overrun. Public panel methods and separate status-tree rendering now pass the unchanged LoD/function/document budgets;445 capture/parity tests pass again with zero skips (75.089s). The next CI run found stale generated capability maps after the workflow/profile wording and parity notes changed. Regenerated all four projections; freshness now passes. Protected checks/review and merge remain required. Tools#5137 now passes101 mocap/authority/API tests; its normal commit is pending. Tools#5136 remains blocked by downstream Gasification repository-access and a Rust pre-checkout failure; the three #5139 permission checks passed unchanged after retry.
+
+## Journey Qualification (#9913)
+
+- JourneyPanel/JourneyActions provide visible running/failure/retry and capture identity; history preserves detector/model context per capture without precreating record destinations.
+- Metadata identifies actual estimators and changed swing edits; output availability is not scientific or hash verification.
+- Existing Qt widgets move between panes/windows; floating close redocks, F11/Escape restore prior presentation, paused playback recomposes on resize.
+- Invalid capture selection clears prior playback, matches and provenance. Help renders canonical steps with search/navigation; generated guide and parity registry updated.
+- Capture and feature-parity suites pass after correcting an obsolete title expectation; final focused run passed 37 tests in 10.315 s. Mypy, Ruff, file budgets and design-manual governance pass. Central development-log audit reports pre-existing legacy entry schema debt; normal hooks remain to run.
+- Visual inspection at 1280x800 uses explicit Windows fonts in offscreen Qt and the real theme. Fixed unreadable default HTML link blue through theme styling. Artifacts: TEMP/capture-9913-visual.
 
 ## Validation
 
@@ -170,3 +209,5 @@ still lack adoption; direct notices request the canonical replacement queue. Do 
   Issue #9911 adds import/timeout recovery; 11 preview regressions pass. An isolated
   TEMP/upstreamdrift-capture-test-runtime now supplies the declared FFmpeg dependency.
   Verify the current launch before claiming the application is still open.
+
+- SELF: preserve concurrent atlas regeneration 996fa03b15b57cad08c60743b6c054d144374ef1 via normal merge; generated projections are byte-identical to local 8e6863bd0.
