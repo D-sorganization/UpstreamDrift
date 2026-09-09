@@ -21,6 +21,10 @@ ignored output/native-meshcat. C3D broad tests have one unrelated loader error-t
 expectation mismatch; the new force test passes. Remaining gates: wider interface adapters, protected CI
 and merge. Native MuJoCo tests on this Windows host must import mujoco before
 pytest/Qt to avoid a loader-order DLL failure. Do not claim universal rollout.
+Combined focused regression: 575 passed; web: 68 passed with TypeScript/ESLint.
+Cycle 2 fixes add suite markers and merge main `39d944540` (CI's shallow direct
+diff had falsely reported its new notebook test deleted). All earlier CI failures
+are fixed locally; current-head checks remain required. Wider hosts remain open.
 
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC

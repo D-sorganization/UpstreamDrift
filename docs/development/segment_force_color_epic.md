@@ -1,7 +1,7 @@
 # Segment Force Color Epic
 
-Status: Implementation in progress under GitHub epic #9833. Current remote main
-`ff0effa5a` is merged into `feat/segment-force-colors`. Git access works with the
+Status: Implementation in progress under GitHub epic #9833 and PR #9840. Remote main
+`39d944540` is merged into `feat/segment-force-colors`. Git access works with the
 stale HTTP extraheader cleared per invocation; no global credential changes made.
 
 ## GitHub Work Items
@@ -94,3 +94,17 @@ native scene color restoration, Qt controls and websocket frame alignment.
 TypeScript passes after using a library-compatible material lookup. Broad local
 mypy reports existing imported-module errors; new policy and settings type errors
 were corrected. This is not a claim of a clean repository-wide type check.
+
+The combined focused suite now passes 575 tests using the normal root bootstrap:
+body-part visualization, API force streaming/WebSocket regressions, feature parity,
+and C3D force colors. The web visualization suite passes 68 tests; TypeScript and
+changed-file ESLint pass. Native MeshCat command transport and a graphics-free
+subprocess import test pass. MuJoCo raster verification confirms blue/red output
+and pixel-exact disabled restoration. The broader C3D directory has one existing
+invalid-CSV error-text mismatch outside this feature.
+
+CI cycle 1 fixes remove a nested series-storage access, defer the optional plotting
+import, split the rendering method, and remove a redundant websocket cast. Cycle 2
+adds explicit unit-suite markers and incorporates current main after the shallow
+CI diff incorrectly classified main's new notebook test as deleted. No gate or
+baseline was weakened. Current-head CI and protected merge remain required.
