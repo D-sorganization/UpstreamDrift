@@ -30,18 +30,31 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
 - **Next step:** Complete native/affected-consumer checks and normal PR delivery. The TDD adaptive reference refuses unresolved endpoints, retains component budgets and preserves the original candidate/ceiling. Parity claims are corrected; do not promote this numerical diagnostic to physical or acoustic validation.
 
+### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9825
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9826
+- **Branch:** fix/9825-preserve-reviewed-claims
+- **Paths:** manufactured claim registration, integration/native contracts, governed research evidence, canonical publication and claim_preservation_9825_turnover.md.
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (128 strict native contracts; native/rolling/publication CI passes at e93ef5224; stale PDF regression reproduced and repaired, all 11 publication tests pass with five inherited warnings; changed-file Ruff/format pass)
+- **Summary:** Actual reconciliation now preserves reviewed evidence/order and refuses changed science; six real-path failures become 11 passes. Current pinned engines regenerate deterministic provenance with unchanged numerical results; two expected-failure exemptions are removed. All 328 outcomes remain unchanged; the generated census/PDF is refreshed and reviewed.
+- **Next step:** PR #9826 merged as a410ae705 from fced8c0d6 at 2026-09-09T01:12:29Z. Merge is verified; queued auxiliary jobs are not claimed passed. Continue numerical follow-up #9830 and the separate physical/acoustic qualifications; preserve historical evidence.
+
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9787
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9804
 - **Branch:** fix/9787-manufactured-authority
-- **Paths:** `scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.*`, `scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py`, manufactured research/CI contracts, native CI workflow, canonical evidence and turnover.
+- **Paths:** authority runtime pins, native provenance/CI contracts and manufactured_authority_9787_turnover.md.
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (122 combined native/provenance/bootstrap contracts and three distinct rolling contracts pass)
-- **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
-- **Next step:** Main `563e7aaa9` and bootstrap #9726 are integrated; actual native evidence is regenerated with only source hashes changed. Combined-suite environment contamination is repaired. Explicit incoming mocap NumPy aliases fix the actual hook without changing calculations. Claim outcomes and inspected 253-page PDF are unchanged; published at `befa329d1` through every normal hook; await protected CI.
+- **Last verified:** 2026-09-08 (PR merged as 736ec2189 from b8da0c024)
+- **Summary:** Compatible native pins and runtime support merged. The merged revision differs from locally validated 6235789dc; its actual registration bypass and stale evidence require follow-up #9825. Historical test results do not certify differing merged bytes.
+- **Next step:** Follow DL-#9825 for current preservation and native/publication qualification; retain the old branch as historical evidence.
 
 ### DL-#9478 · Launcher Registry Truth: `tools://` Provenance Scheme and Ready/Beta Maturity Gate
 
