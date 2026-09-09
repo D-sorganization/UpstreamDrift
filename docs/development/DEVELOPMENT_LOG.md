@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9860 · Capture Editing and Library
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9860, #9861 (product #9849)
+- **PR:** not created
+- **Branch:** feat/9860-swing-editing
+- **Paths:** src/motion_capture/rig/edits.py, ingest.py, src/tools/capture_rig/swing_editor.py, related tests and docs/development/capture_editing_integration.md
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`b52db19ad` base)
+- **Summary:** Non-destructive source-frame selection and crop with camera-coordinate restoration; native editor. Library integration remains in progress.
+- **Evidence:** Backend 20 tests and initial Qt editor 3 tests passed; downstream sparse-timeline regression added before integration.
+- **Next step:** Complete library and visible entry points, integrated tests and visual review, then protected PR.
+
 ### DL-#9830 · Independent Shooting Accuracy
 
 - **State:** in_review
