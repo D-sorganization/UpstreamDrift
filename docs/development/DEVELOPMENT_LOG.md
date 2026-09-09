@@ -19,17 +19,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9879 · Comparison State and Export Lifetime
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9879 (advanced reference epic #9863)
 - **Branch:** fix/reference-comparison-qualification
-- **PR:** pending
+- **PR:** #9884
 - **Paths:** src/motion_capture/reference/comparison.py, src/tools/capture_rig/reference_comparison.py, src/tools/capture_rig/swing_export_actions.py, tests/tools/capture_rig/test_reference_comparison_state.py
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`; local validation in progress)
+- **Last verified:** 2026-09-09 (`SELF`; local validation complete)
 - **Summary:** Preserve exact unrelated layer/registration fields, reject bad saved records, and reuse the existing export controller for safe thread ownership and deferred close.
 - **Evidence:** Nine regressions failed on merged main; subsequent 31 focused comparison, real-thread cancellation, existing swing and coaching tests pass. Three modified source modules pass mypy.
-- **Next step:** Complete architecture/DRY/LoD and protected checks. Continue #9881, #9882 and #9883 before closing #9863.
+- **Next step:** Architecture/DRY/LoD pass; await protected checks. Continue #9881, #9882 and #9883 before closing #9863.
 
 ### DL-#9865 · Reference Scene Registration & Synchronization
 
