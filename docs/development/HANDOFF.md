@@ -8,7 +8,7 @@
 - Baseline commit: a5dfc3542 (state qualification #9884)
 - Implementation commit: SELF
 - Governing issue: #9881; advanced epic #9863
-- Pull request: pending
+- Pull request: #9885 (draft until #9884 integrates)
 
 ## Changes and Evidence
 
@@ -34,7 +34,7 @@ The combined comparison/backend/native suite passes 46 tests, including actual
 camera loading, stale calibration rejection and independent two-camera pixels.
 Architecture and DRY/LoD no-growth gates pass with unchanged baselines.
 Protected validation remains pending.
-Twelve modified source modules pass mypy. Benchmark report and rerunnable script
+Fourteen modified source modules pass mypy. Benchmark report and rerunnable script
 are included: 17 joints, 120/1200/12000 source frames; single-frame sampling
 medians 0.252/0.255/0.228 ms versus a full-trajectory workload control of
 17.959/168.654/2171.389 ms. This excludes load, decode, draw and display; no
@@ -43,7 +43,7 @@ installed environment or set this worktree's src directory on PYTHONPATH.
 
 ## Remaining Work
 
-Finish final tests, architecture/DRY/LoD and protected checks; #9884 must be
+Local qualification passes; finish protected checks; #9884 must be
 integrated without overwriting its remote rebases. #9882 owns strict export
 failure behavior and complete renderer parity; #9883 owns spatial/event controls
 and visual qualification. No scientific calibration accuracy or manual
