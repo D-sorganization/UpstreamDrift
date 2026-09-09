@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/c3d-reference-overlay-9914
 - **Paths:** src/motion_capture
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`2e84bb810`; 177 tests pass)
+- **Last verified:** 2026-09-09 (`2e84bb810`; 177 tests, 20 valid bundles)
 - **Summary:** Model fitting and camera assets; see [evidence](reference_fitting_epic.md).
-- **Next step:** Complete corrected full-rate evidence and protected checks.
+- **Next step:** Qualify and merge #9918 after #9917.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
