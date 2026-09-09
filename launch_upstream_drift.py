@@ -40,8 +40,31 @@ from types import ModuleType
 _REPO_ROOT = Path(__file__).resolve().parent
 
 
+def _ud_tools_distribution_installed() -> bool:
+    """Return True when the ``ud-tools`` distribution is importable from site-packages.
+
+    ``pip install "upstream-drift[tools]"`` installs Tools from the git pin in
+    ``pyproject.toml`` (UD #9406). When present it is the preferred source and the
+    ``vendor/ud-tools`` submodule is left off ``sys.path``.
+    """
+    try:
+        from importlib import metadata
+
+        metadata.distribution("ud-tools")
+    except metadata.PackageNotFoundError:
+        return False
+    except Exception:  # noqa: BLE001 - metadata backends may raise anything; treat as absent
+        return False
+    return True
+
+
 def _launcher_bootstrap_paths(repo_root: Path, tools_root: Path | None) -> list[str]:
-    """Build deterministic, parent-source-first import precedence."""
+    """Build deterministic, parent-source-first import precedence.
+
+    Resolution order (docs/shared_tools/README.md): explicit ``--tools-root``,
+    then the installed ``ud-tools`` distribution (nothing to add to ``sys.path``),
+    then the pinned ``vendor/ud-tools`` submodule, then this repository.
+    """
     paths_to_add: list[str] = []
     if tools_root is not None:
         paths_to_add.extend(
@@ -52,14 +75,17 @@ def _launcher_bootstrap_paths(repo_root: Path, tools_root: Path | None) -> list[
             ]
         )
 
-    vendor_src = repo_root / "vendor" / "ud-tools" / "src"
-    paths_to_add.extend(
-        [
-            str(vendor_src / "shared" / "python"),
-            str(vendor_src),
-            str(vendor_src / "python" / "src"),
-        ]
-    )
+    # An installed ud-tools distribution (pip wheel) is preferred over the
+    # submodule; nothing is added for it because it already sits in site-packages.
+    if not (tools_root is None and _ud_tools_distribution_installed()):
+        vendor_src = repo_root / "vendor" / "ud-tools" / "src"
+        paths_to_add.extend(
+            [
+                str(vendor_src / "shared" / "python"),
+                str(vendor_src),
+                str(vendor_src / "python" / "src"),
+            ]
+        )
 
     installed_tools_packages = all(
         (repo_root / package_name).is_dir() for package_name in ("chat", "sidekick")

@@ -299,3 +299,180 @@ def test_reference_track_generates_overlay_track() -> None:
     # At frame 0, pelvis is at target center -> (960, 540)
     assert bool(track.visible[0, 0]) is True
     np.testing.assert_allclose(track.px[0, 0], [960.0, 540.0], atol=1e-2)
+
+
+def test_event_anchors_rejects_non_monotonic_or_unbounded_rates() -> None:
+    # Repeated reference timestamps
+    with pytest.raises(ValueError, match="strictly monotonic"):
+        EventAnchors(
+            reference={"address": 0.0, "impact": 0.0},
+            scene={"address": 1.0, "impact": 2.0},
+        )
+
+    # Reversed reference timestamps
+    with pytest.raises(ValueError, match="strictly monotonic"):
+        EventAnchors(
+            reference={"address": 1.0, "impact": 0.5},
+            scene={"address": 1.0, "impact": 2.0},
+        )
+
+    # Reversed scene timestamps
+    with pytest.raises(ValueError, match="strictly monotonic"):
+        EventAnchors(
+            reference={"address": 0.0, "impact": 1.0},
+            scene={"address": 2.0, "impact": 1.0},
+        )
+
+    # Unbounded rate (dt_scene / dt_ref > 100.0)
+    with pytest.raises(ValueError, match="bounded within"):
+        EventAnchors(
+            reference={"address": 0.0, "impact": 0.01},
+            scene={"address": 0.0, "impact": 2.0},  # rate = 200.0
+        )
+
+    # Unbounded rate (dt_scene / dt_ref < 0.01)
+    with pytest.raises(ValueError, match="bounded within"):
+        EventAnchors(
+            reference={"address": 0.0, "impact": 10.0},
+            scene={"address": 0.0, "impact": 0.05},  # rate = 0.005
+        )
+
+
+def test_single_anchor_alignment_and_scalar_array_round_trip() -> None:
+    # Exactly one anchor must align that event as a pure offset
+    anchors = EventAnchors(
+        reference={"impact": 1.2},
+        scene={"impact": 5.7},
+    )
+    tm = TimeMapping(event_anchors=anchors, rate_scale=1.5)
+    # At t_ref = 1.2, t_scene MUST be exactly 5.7
+    assert tm.reference_to_scene(1.2) == pytest.approx(5.7)
+    assert tm.scene_to_reference(5.7) == pytest.approx(1.2)
+
+    # Test arbitrary scalars
+    t_ref_val = 2.0
+    t_scene_val = tm.reference_to_scene(t_ref_val)
+    assert tm.scene_to_reference(t_scene_val) == pytest.approx(t_ref_val)
+
+    # Test array round trip
+    ref_arr = np.array([-1.0, 0.0, 1.2, 3.5, 10.0])
+    scene_arr = tm.reference_to_scene(ref_arr)
+    assert isinstance(scene_arr, np.ndarray)
+    np.testing.assert_allclose(tm.scene_to_reference(scene_arr), ref_arr)
+
+
+def test_multi_anchor_piecewise_warping_round_trip_and_extrapolation() -> None:
+    anchors = EventAnchors(
+        reference={"address": 0.0, "top": 0.5, "impact": 1.0, "finish": 1.5},
+        scene={"address": 5.0, "top": 5.8, "impact": 6.5, "finish": 8.0},
+    )
+    tm = TimeMapping(event_anchors=anchors)
+
+    # Endpoints exact match
+    assert tm.reference_to_scene(0.0) == pytest.approx(5.0)
+    assert tm.reference_to_scene(0.5) == pytest.approx(5.8)
+    assert tm.reference_to_scene(1.0) == pytest.approx(6.5)
+    assert tm.reference_to_scene(1.5) == pytest.approx(8.0)
+
+    # Inverses exact match
+    assert tm.scene_to_reference(5.0) == pytest.approx(0.0)
+    assert tm.scene_to_reference(5.8) == pytest.approx(0.5)
+    assert tm.scene_to_reference(6.5) == pytest.approx(1.0)
+    assert tm.scene_to_reference(8.0) == pytest.approx(1.5)
+
+    # Arrays including interior, endpoints, and extrapolation outside
+    ref_points = np.array([-0.5, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.5])
+    scene_points = tm.reference_to_scene(ref_points)
+    recovered_ref = tm.scene_to_reference(scene_points)
+    np.testing.assert_allclose(recovered_ref, ref_points, atol=1e-12)
+
+
+def test_sample_reference_motion_refuses_interpolation_beyond_max_gap() -> None:
+    motion = sample_motion()
+    reg = ReferenceRegistration(
+        reference_id=motion.id,
+        calibration_id="rig_01",
+        transform=ReferenceTransform(),
+        time_mapping=TimeMapping(offset_s=0.0),
+    )
+    # Frames in sample_motion are at 0.0, 0.5, 1.0, 1.5, 2.0 (interval is 0.5s)
+    # With max_gap_s=0.4, gap of 0.5s between frames must refuse interpolation!
+    t_eval = np.array([0.25])
+    pts, valid = sample_reference_motion(motion, reg, t_eval, max_gap_s=0.4)
+    assert not valid[0].any()
+
+    # With default max_gap_s=0.5 (dt = 0.5 <= max_gap_s), interpolation is permitted
+    pts_allowed, valid_allowed = sample_reference_motion(
+        motion, reg, t_eval, max_gap_s=0.5
+    )
+    assert bool(valid_allowed[0, 0]) is True  # pelvis is observed
+
+
+def test_reference_registration_geometry_fingerprints_and_stale_guards() -> None:
+    motion = sample_motion()
+    # Cannot be calibrated with uncalibrated calibration_id
+    with pytest.raises(ValueError, match="is_calibrated cannot be True"):
+        ReferenceRegistration(
+            reference_id=motion.id,
+            calibration_id="uncalibrated",
+            is_calibrated=True,
+        )
+
+    with pytest.raises(ValueError, match="is_calibrated cannot be True"):
+        ReferenceRegistration(
+            reference_id=motion.id,
+            calibration_id="uncalibrated_2d",
+            is_calibrated=True,
+        )
+
+    # Valid binding with fingerprints
+    reg = ReferenceRegistration(
+        reference_id=motion.id,
+        calibration_id="rig_calib_2026",
+        asset_fingerprint="sha256:abc12345",
+        camera_fingerprint="sha256:fed98765",
+        is_calibrated=True,
+    )
+    assert reg.asset_fingerprint == "sha256:abc12345"
+    assert reg.camera_fingerprint == "sha256:fed98765"
+    assert reg.is_calibrated is True
+
+
+def test_projection_across_two_cameras_with_distortion_and_clipping() -> None:
+    cam_fo, cam_dtl = two_camera_rig()
+    motion = sample_motion()
+    reg = ReferenceRegistration(
+        reference_id=motion.id,
+        calibration_id="rig_01",
+        transform=ReferenceTransform(),
+        time_mapping=TimeMapping(offset_s=0.0),
+    )
+
+    # Point at target (0, 1, 0)
+    pts_world = np.array([[[0.0, 1.0, 0.0]]])
+    valid = np.array([[True]])
+
+    # Face-on camera (at [0, 1, 3.5] looking at [0, 1, 0])
+    px_fo, vis_fo = project_reference_to_camera(pts_world, valid, cam_fo)
+    assert bool(vis_fo[0, 0]) is True
+    np.testing.assert_allclose(px_fo[0, 0], [960.0, 540.0], atol=1e-3)
+
+    # Down-the-line camera (at [-3.5, 1.0, 0.0] looking at [0, 1, 0])
+    px_dtl, vis_dtl = project_reference_to_camera(pts_world, valid, cam_dtl)
+    assert bool(vis_dtl[0, 0]) is True
+    np.testing.assert_allclose(px_dtl[0, 0], [960.0, 540.0], atol=1e-3)
+
+    # Add Brown-Conrady distortion to DTL camera
+    dist_k = (-0.1, 0.02, 0.0, 0.0)
+    calib_dtl = CameraCalibration(
+        camera_id=cam_dtl.camera_id,
+        intrinsics=CameraIntrinsics(matrix=cam_dtl.matrix, distortion=np.array(dist_k)),
+        extrinsics=CameraExtrinsics(
+            rotation_world_from_camera=cam_dtl.rotation_world_from_camera,
+            translation_world_from_camera_m=cam_dtl.translation_world_from_camera_m,
+        ),
+        image_size_px=cam_dtl.image_size_px,
+    )
+    px_dtl_dist, vis_dtl_dist = project_reference_to_camera(pts_world, valid, calib_dtl)
+    assert bool(vis_dtl_dist[0, 0]) is True
+    np.testing.assert_allclose(px_dtl_dist[0, 0], [960.0, 540.0], atol=1e-2)
