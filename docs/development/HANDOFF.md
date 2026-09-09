@@ -82,4 +82,7 @@ still lack adoption; direct notices request the canonical replacement queue. Do 
   profile compatibility with durable calibration revisions; UI integration remains open.
 
 - `SELF`: add visible calibration revision review and verified per-view exports.
-  Testable product remains open in UpstreamDrift-ubuntu-ci (PID49580, exec99934).
+  Test launch PID49580 exited: missing imageio_ffmpeg escaped automatic preview.
+  Issue #9911 adds import/timeout recovery; 11 preview regressions pass. An isolated
+  TEMP/upstreamdrift-capture-test-runtime now supplies the declared FFmpeg dependency.
+  Verify the current launch before claiming the application is still open.

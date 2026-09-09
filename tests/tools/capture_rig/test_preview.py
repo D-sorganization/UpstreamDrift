@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -21,7 +22,7 @@ from src.motion_capture.rig.sources import SyntheticFrameSource
 from src.motion_capture.rig.topology import CameraLocation
 from src.tools.capture_rig import gui
 from src.tools.capture_rig.commands import PlanSelection
-from src.tools.capture_rig.preview import PreviewPanel
+from src.tools.capture_rig.preview import BinderThread, PreviewPanel
 
 pytestmark = [pytest.mark.unit, pytest.mark.ui]
 
@@ -57,6 +58,31 @@ def _plan(tmp_path: Path) -> Path:
 
 def _synthetic(plan: RigPlan) -> dict[str, SyntheticFrameSource]:
     return {c.view: SyntheticFrameSource(c.identity) for c in plan.cameras}
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        ModuleNotFoundError("No module named 'imageio_ffmpeg'"),
+        subprocess.TimeoutExpired("camera discovery", 60),
+    ],
+)
+def test_discovery_environment_failures_leave_a_reportable_preview_error(
+    tmp_path: Path, failure: Exception
+) -> None:
+    _app()
+
+    def unavailable(plan: RigPlan) -> dict[str, SyntheticFrameSource]:
+        raise failure
+
+    binder = BinderThread(unavailable, RigPlan.load(_plan(tmp_path)))
+    errors: list[str] = []
+    bound: list[object] = []
+    binder.failed.connect(errors.append)
+    binder.bound.connect(bound.append)
+    binder.run()
+    assert errors and str(failure) in errors[0]
+    assert not bound
 
 
 def _pump(app: QApplication, seconds: float) -> None:
