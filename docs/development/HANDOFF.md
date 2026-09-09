@@ -7,7 +7,7 @@
 - Branch: feat/9883-reference-alignment-controls
 - Baseline commit: 66a7f017d (rendering #9888; parent #9885)
 - Implementation commit: SELF
-- Pull request: not created
+- Pull request: #9890 (draft; #9885/#9888 dependencies)
 - Governing issue/epic: #9883; advanced reference epic #9863
 
 ## Objective and Status
@@ -39,3 +39,5 @@ Commit this isolated work, merge current rendering, run focused validation and a
 Merged rendering 7e06f8b68 and timing de430c500, including concurrent peer #9886 compatibility and the shared encoder path. Current settings UI and its canonical handoff remain authoritative for #9883. Rechecked SPEC duplicates after the merge driver ran.
 
 Alignment Undo preserves subsequently written lesson notes; an explicit regression covers it. Removed the old #9882 SPEC row restored by the merge driver, retaining #9888. Re-run duplicate validation after every stack merge.
+
+Final screenshots refreshed and visually inspected: all three tabs fit the desktop inspector; Pair Current Frames is visible on the laptop; lesson notes remain accessible in the scrolling Notes tab. Four-module mypy and 67 integrated regressions pass.
