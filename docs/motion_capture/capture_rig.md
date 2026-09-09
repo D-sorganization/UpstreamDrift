@@ -201,14 +201,30 @@ sit under the canvas.
 
 ### Panes, Layouts and Recording Controls
 
-The viewing panes (**Live preview**, **Playback**, **Results**) are dock
-widgets: drag a title bar to move a pane to another edge, tear it off to float
-it (onto a second monitor if you like), tab two panes together, or close one.
-Every pane scrolls when its content is larger than the space it has, so the
-window never grows past the screen. **Layout** (top right) saves the current
-arrangement under a name, loads or deletes a saved one, and **Reset layout**
-returns to the default with every pane shown. The last arrangement is restored
-on the next start.
+The **live view is the middle of the tile** and every control sits in a dock
+around it (#9846). The centre holds the preview canvas with the record
+transport under it — the thing you actually watch — and it keeps the spare
+width of the window; the **Workflow** rail and step details are docked on the
+left, **Settings** (Capture / Process / Match) under them, **Playback** and
+**Results** tabbed on the right, and **Actions** across the bottom. Before
+this the controls were the central widget and Qt squeezed the video docks to
+68 px each; now the video is the widest thing on screen at any window size,
+and the whole tile can be made about 420 px wide instead of 3276 px.
+
+Each dock behaves like a pane: drag its title bar to another edge, tear it off
+to float it (onto a second monitor if you like), tab two together, or close
+one. Every dock scrolls when its content is larger than the space it has, so
+the window never grows past the screen. **Layout** (top right) saves the
+current arrangement under a name, loads or deletes a saved one, and **Reset
+layout** returns to the default with every pane shown and the drawers shut.
+The last arrangement is restored on the next start; an arrangement saved by an
+older version of the tile names docks that no longer exist, so it is declined
+and the default is used instead of half-restoring it.
+
+The **log is a drawer**, not a pane. The command output is a dock tabbed
+behind **Actions**, closed at start and opened by the **Log** button in the
+header — so it occupies no height of its own and can never take space from the
+video, which is what it used to do with a layout stretch of `1`.
 
 ### Appearance
 
@@ -217,8 +233,11 @@ the session line on the left, then a status strip of three chips (cameras
 bound, recorder state with the live REC readout, and the outcome of the last
 take) and the **Layout** bar on the right. The action buttons are grouped by
 workflow step, each group opening with a label naming the step it belongs to,
-so the grid reads in the same order as the Workflow panel. The groups sit in a
-wrapping (flow) layout (`src/tools/capture_rig/flow_layout.py`, #9844): they
+so the grid reads in the same order as the Workflow rail. The groups sit in a
+wrapping (flow) layout (`src/tools/capture_rig/flow_layout.py`, #9844) — as
+do the header, the status chips, the layout bar and the record transport
+(#9846), and long text elides rather than widening the tile
+(`src/tools/capture_rig/labels.py`): they
 reflow onto as many rows as the pane is wide enough for, and a section label
 always opens the row its first button starts on, so the grid never sets a
 minimum width wider than a single button and the tile can be made narrow

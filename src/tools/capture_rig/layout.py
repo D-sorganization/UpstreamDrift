@@ -16,14 +16,13 @@ show.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 
-from PyQt6.QtCore import QByteArray, QSettings, Qt
+from PyQt6.QtCore import QByteArray, QSettings, QSize, Qt
 from PyQt6.QtWidgets import (
     QComboBox,
     QDockWidget,
-    QHBoxLayout,
     QInputDialog,
     QLabel,
     QMainWindow,
@@ -33,12 +32,19 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.core.contracts import require
+from src.shared.python.theme.layout_metrics import LayoutMetrics
 from src.shared.python.theme.responsive import wrap_in_scroll_area
+
+from .flow_layout import FlowLayout
 
 LAST_LAYOUT = "__last__"  # auto-saved on shutdown, never listed
 EXTRAS = "extras"  # sub-group of per-layout strings the panes contribute
 ORGANIZATION = "UpstreamDrift"
 APPLICATION = "CaptureRig"
+#: Bumped whenever the set of dock object names changes, so that Qt declines
+#: an arrangement saved by an older layout instead of half-restoring it.
+#: 1 = controls central, viewing docks (<= #9845); 2 = video central (#9846).
+STATE_VERSION = 2
 DOCK_FEATURES = (
     QDockWidget.DockWidgetFeature.DockWidgetMovable
     | QDockWidget.DockWidgetFeature.DockWidgetFloatable
@@ -119,13 +125,43 @@ class LayoutStore:
         self._settings.sync()
 
 
+class PaneDock(QDockWidget):
+    """A dock that asks for ``preferred_width`` instead of its content's width.
+
+    A scroll area's size hint is as wide as whatever it holds, so a dock of
+    input tabs would claim the window and squeeze the central video back to
+    nothing — the very bug #9846 fixes. The hint is a preference, not a
+    limit: the operator still drags the splitter wherever they like.
+    """
+
+    def __init__(
+        self, title: str, parent: QWidget | None = None, *, preferred_width: int = 0
+    ) -> None:
+        """Precondition: ``preferred_width`` is not negative (0 = no opinion)."""
+        require(preferred_width >= 0, "width must not be negative", preferred_width)
+        super().__init__(title, parent)
+        self._preferred_width = preferred_width
+
+    def sizeHint(self) -> QSize:  # noqa: N802 (Qt API)
+        hint = super().sizeHint()
+        if self._preferred_width <= 0:
+            return hint
+        return QSize(self._preferred_width, hint.height())
+
+
 class PaneHost(QMainWindow):
-    """Controls in the centre, viewing panes as movable/floatable docks.
+    """The viewing surface in the centre, every control as a movable dock.
 
     ``panes`` maps a key to ``(title, widget, area)``; every widget is wrapped
     in a scroll area (the theme package's ``wrap_in_scroll_area``) so a pane
-    larger than its dock scrolls. The arrangement right after construction is
-    the default that :meth:`reset` returns to.
+    larger than its dock scrolls and never widens the tile. ``hidden`` names
+    the docks that start closed (and are left closed by :meth:`reset`);
+    ``tabify`` names ``(first, second)`` pairs stacked as tabs. The
+    arrangement right after construction is the default :meth:`reset` returns
+    to.
+
+    Invariant: every key of ``hidden`` and of each ``tabify`` pair is a key of
+    ``panes``.
     """
 
     def __init__(
@@ -133,9 +169,15 @@ class PaneHost(QMainWindow):
         central: QWidget,
         panes: Mapping[str, tuple[str, QWidget, Qt.DockWidgetArea]],
         parent: QWidget | None = None,
+        *,
+        hidden: Iterable[str] = (),
+        tabify: Sequence[tuple[str, str]] = (),
+        widths: Mapping[str, int] | None = None,
     ) -> None:
         super().__init__(parent)
         require(bool(panes), "at least one pane is required")
+        self._hidden = frozenset(hidden)
+        require(self._hidden <= set(panes), "hidden names an unknown pane")
         self.setWindowFlags(Qt.WindowType.Widget)  # a child widget, not a window
         self.setDockOptions(
             QMainWindow.DockOption.AnimatedDocks
@@ -143,32 +185,88 @@ class PaneHost(QMainWindow):
             | QMainWindow.DockOption.AllowTabbedDocks
         )
         self.setCentralWidget(central)
+        self._widths = dict(widths or {})
+        require(set(self._widths) <= set(panes), "widths names an unknown pane")
+        self._sized = False
         self.docks: dict[str, QDockWidget] = {}
         for key, (title, widget, area) in panes.items():
-            dock = QDockWidget(title, self)
+            dock = PaneDock(title, self, preferred_width=self._widths.get(key, 0))
             dock.setObjectName(f"capture_rig.{key}")  # saveState needs names
             dock.setFeatures(DOCK_FEATURES)
             dock.setWidget(wrap_in_scroll_area(widget))
             self.addDockWidget(area, dock)
             self.docks[key] = dock
+        for first, second in tabify:
+            require(
+                first in self.docks and second in self.docks,
+                "tabify names an unknown pane",
+            )
+            self.tabifyDockWidget(self.docks[first], self.docks[second])
+            self.docks[first].raise_()
+        for key in self._hidden:
+            self.docks[key].hide()
         self._default_state = self.state()
+
+    @property
+    def hidden(self) -> frozenset[str]:
+        """The docks that start closed; :meth:`show_all` leaves them closed."""
+        return self._hidden
 
     def state(self) -> bytes:
         """The dock arrangement (positions, sizes, floating, visibility)."""
-        return self.saveState().data()
+        return self.saveState(STATE_VERSION).data()
 
     def restore(self, state: bytes) -> bool:
-        """Apply a saved arrangement; ``False`` when it does not parse."""
-        return bool(state) and self.restoreState(QByteArray(state))
+        """Apply a saved arrangement; ``False`` when it does not parse.
+
+        An arrangement saved under a different :data:`STATE_VERSION` — the
+        pre-#9846 layout, whose docks were the viewing panes — is declined
+        here, leaving the tile on its default rather than half-restored.
+        """
+        return bool(state) and self.restoreState(QByteArray(state), STATE_VERSION)
 
     def reset(self) -> None:
-        """Back to the arrangement the tile was built with; every pane shown."""
+        """Back to the arrangement the tile was built with; drawers stay shut."""
         self.restore(self._default_state)
         self.show_all()
+        self._apply_widths()
+
+    def showEvent(self, a0: object) -> None:  # noqa: N802 (Qt API)
+        """Give the docks their starting widths the first time we are shown.
+
+        ``resizeDocks`` only bites once the window has a geometry, so the
+        default arrangement is not final until here; the state captured now
+        is what *Reset layout* returns to.
+        """
+        super().showEvent(a0)  # type: ignore[arg-type]
+        if not self._sized:
+            self._sized = True
+            self._apply_widths()
+            self._default_state = self.state()
+
+    def _apply_widths(self) -> None:
+        """Ask Qt for the starting dock widths, leaving the rest to the video."""
+        if not self._widths:
+            return
+        self.resizeDocks(
+            [self.docks[k] for k in self._widths],
+            [int(w) for w in self._widths.values()],
+            Qt.Orientation.Horizontal,
+        )
 
     def show_all(self) -> None:
-        for dock in self.docks.values():
-            dock.show()
+        """Show every pane except the drawers named ``hidden`` at build time."""
+        for key, dock in self.docks.items():
+            if key not in self._hidden:
+                dock.show()
+
+    def is_visible(self, key: str) -> bool:
+        return not self.docks[key].isHidden()
+
+    def set_visible(self, key: str, visible: bool) -> None:
+        """Open or shut one dock (the log drawer's toggle, #9846)."""
+        require(key in self.docks, "unknown pane", key)
+        self.docks[key].setVisible(visible)
 
     def is_floating(self, key: str) -> bool:
         return self.docks[key].isFloating()
@@ -230,9 +328,8 @@ class LayoutBar(QWidget):
             lambda: self.delete(self.combo.currentText())
         )
         self.reset_button.clicked.connect(self._host.reset)
-        row = QHBoxLayout(self)
-        row.setContentsMargins(0, 0, 0, 0)
-        row.addWidget(QLabel("Layout"))
+        row = FlowLayout(self, spacing=LayoutMetrics.SPACING_SM)
+        row.add_widget(QLabel("Layout"))
         for w in (
             self.combo,
             self.load_button,
@@ -240,7 +337,7 @@ class LayoutBar(QWidget):
             self.delete_button,
             self.reset_button,
         ):
-            row.addWidget(w)
+            row.add_widget(w)
         self.refresh()
 
     # -- store <-> widgets ------------------------------------------------------
