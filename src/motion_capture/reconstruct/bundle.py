@@ -24,9 +24,11 @@ means in practice. Ownership of this fitter is decided in #9630.
 
 from __future__ import annotations
 
+import dataclasses
+
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -40,8 +42,8 @@ from .cameras import PinholeCamera
 from .geometry import triangulate
 from .skeleton import JOINT_NAMES, PARENTS, SYMMETRIC_PAIRS
 
-Array = npt.NDArray[np.float64]
-Mask = npt.NDArray[np.bool_]
+Array: TypeAlias = npt.NDArray[np.float64]
+Mask: TypeAlias = npt.NDArray[np.bool_]
 
 
 @dataclass(frozen=True)
@@ -118,6 +120,51 @@ class BundleResult:
     converged: bool
     initial_rms_px: float = field(default=float("nan"))
     unobservable_points: int = 0  # (frame, joint) pairs with < 2 surviving views
+
+
+def observed_frames(obs: Observations) -> npt.NDArray[np.intp]:
+    """Indices of frames some camera observed (confidence > 0 on any joint)."""
+    return np.flatnonzero((obs.confidence > 0).any(axis=(0, 2)))
+
+
+def compact_frames(obs: Observations) -> tuple[Observations, npt.NDArray[np.intp]]:
+    """``obs`` restricted to its observed frames, and their original indices.
+
+    Frames no camera saw must not enter the bundle: as free variables they
+    sit at the origin and, through the segment lengths shared across frames,
+    drag every observed frame toward the gauge camera (#9802). Precondition:
+    at least one observed frame.
+    """
+    keep = observed_frames(obs)
+    require(keep.size >= 1, "no observed frame in the take")
+    return (
+        Observations(obs.camera_ids, obs.pixels[:, keep], obs.confidence[:, keep]),
+        keep,
+    )
+
+
+def expand_result(
+    result: BundleResult, keep: npt.NDArray[np.intp], total: int
+) -> BundleResult:
+    """A compacted result back on ``total`` frames: dropped frames are
+    unobservable (all-zero joints, NaN residuals), rejections re-indexed."""
+    c, _, k = result.residuals_px.shape
+    joints = np.zeros((total, k, 3))
+    joints[keep] = result.joints_3d_m
+    residuals = np.full((c, total, k), np.nan)
+    residuals[:, keep] = result.residuals_px
+    rejected = tuple(
+        RejectedObservation(r.camera_id, int(keep[r.frame]), r.joint, r.residual_px)
+        for r in result.rejected
+    )
+    dropped = total - keep.size
+    return dataclasses.replace(
+        result,
+        joints_3d_m=joints,
+        residuals_px=residuals,
+        rejected=rejected,
+        unobservable_points=result.unobservable_points + dropped * k,
+    )
 
 
 def _segments(joint_names: Sequence[str]) -> list[tuple[int, int, str]]:

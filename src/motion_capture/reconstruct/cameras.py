@@ -12,6 +12,7 @@ is applied by undistorting observations before they reach this model.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -23,8 +24,8 @@ from src.shared.python.pose_estimation.observations import (
     CameraIntrinsics,
 )
 
-Array = npt.NDArray[np.float64]
-Mask = npt.NDArray[np.bool_]
+Array: TypeAlias = npt.NDArray[np.float64]
+Mask: TypeAlias = npt.NDArray[np.bool_]
 _TOL = 1e-6
 
 

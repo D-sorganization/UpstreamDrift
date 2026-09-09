@@ -38,6 +38,7 @@ class Step:
     done: Callable[[SessionMedia], bool]
     ready: Callable[[SessionMedia], tuple[bool, str]]
     applies: Callable[[SessionMedia], bool] = lambda m: True
+    starts_fresh: bool = False  # ready before any session exists on disk
 
 
 @dataclass(frozen=True)
@@ -77,6 +78,7 @@ SETUP = Step(
     actions=("plan_check", "import"),
     done=lambda m: bool(m.views),
     ready=lambda m: (True, ""),
+    starts_fresh=True,
 )
 
 INTRINSICS = Step(
@@ -113,13 +115,15 @@ CAPTURE = Step(
         "10 s takes at 60-120 fps; tape-measured segments on the golfer: shank (lateral knee line to ankle bone) and forearm (elbow crease to wrist bone) first, then upper arm and thigh; one reading covers both sides.",
     ),
     instructions=(
-        "Set the duration, press *Record*, walk to address during the warm-up, swing, hold the finish.",
+        "The live view opens with the tile (or press *Preview cameras*); the plan and a fresh sessions/ folder are prefilled. Frame the mat, pick a take length (5/10/15/30 s or custom) and a countdown.",
+        "Press *Record*: the countdown runs, the recorder takes over the cameras and the tiles keep showing them with a red REC readout; walk to address, swing, hold the finish. *Stop* ends the take early.",
         "Or *Import videos* to build a session from files (one or many).",
         "Run *Proxies* for smooth playback of large MJPEG recordings.",
     ),
     actions=("record", "import", "proxy"),
     done=_has_recordings,
     ready=lambda m: (True, ""),
+    starts_fresh=True,
 )
 
 DETECT = Step(
@@ -137,6 +141,28 @@ DETECT = Step(
     ),
     actions=("ingest", "compare"),
     done=lambda m: m.ingested,
+    ready=lambda m: _ready_if(_has_recordings(m), "record or import first"),
+)
+
+ANNOTATE = Step(
+    key="annotate",
+    title="Annotate or Correct Points by Hand",
+    purpose="Click joints frame by frame where the detectors fail, or correct their outliers.",
+    requirements=(
+        "A playable recording for the view.",
+        "Optionally an observation set to correct (pick it in the player).",
+    ),
+    instructions=(
+        "Pick the view (and, to correct a detector, its observation set) in the player; press *Annotate / edit points*.",
+        "Follow the banner: click the joint it names, S to skip an occluded joint (or reject a detector point), N for the next frame, B back, J jump, A to accept a detector's frame, Q to finish.",
+        "Run `rig annotations-to-observations` (with `--merge-with SET` for corrections) to get a set the reconstruction and model fit use like any other.",
+    ),
+    actions=("annotate",),
+    # Optional: satisfied by detections or by hand-made annotations.
+    done=lambda m: (
+        m.ingested
+        or any((m.root / "annotations" / f"{v.view}.json").is_file() for v in m.views)
+    ),
     ready=lambda m: _ready_if(_has_recordings(m), "record or import first"),
 )
 
@@ -165,7 +191,8 @@ RECONSTRUCT = Step(
     ),
     instructions=(
         "Pick the start file (intrinsics or previous reconstruction), enter the measured segments (shank=0.42, forearm=0.26, ...), optionally joints to exclude.",
-        "Press *Reconstruct*. The summary shows RMS, rejections and the swing metrics.",
+        "In the *Match* tab tick the cameras to use and name the variant (blank = the default match); matches of one take live side by side under variants/ and every output records its provenance.",
+        "Press *Reconstruct*. The summary shows RMS, rejections and the swing metrics; tick variants under *Model overlay* in the player to draw them on any view, including views a match never used.",
     ),
     actions=("reconstruct",),
     done=lambda m: m.reconstruction is not None,
@@ -183,8 +210,9 @@ ANALYZE_2D = Step(
     instructions=(
         "Press *Analyze 2-D*. Results are in subject box heights, not metres.",
         "*Export clip* writes the swing (address to finish, slow motion, overlay, frame clock) as a video; *Compare takes* puts another session's view beside this one aligned on the top of the backswing, with metric deltas.",
+        "*Export multiview* stitches the raw footage and its overlay through a layout (preset, saved or JSON file) into one composite video with a provenance sidecar.",
     ),
-    actions=("analyze", "clip", "compare_takes"),
+    actions=("analyze", "clip", "compare_takes", "multipicture"),
     done=lambda m: bool(m.analysis_2d),
     ready=lambda m: _ready_if(m.ingested, "ingest first"),
     applies=lambda m: not _multi(m),
@@ -202,6 +230,7 @@ FIT_MODEL = Step(
         "Press *Fit model*. The fit solves every frame together with an acceleration prior on each joint angle, soft joint limits and robust rejection, so a point the model cannot reach by continuous motion is listed as rejected, not followed.",
         "Read model/fit_report.json: RMS per landmark, rejections, peak joint speeds; scapula angles appear as left/right_scapula.rx (elevation) and .ry (protraction).",
         "*Export* then also writes joint_angles_simscape.csv in the MATLAB model's variable names.",
+        "Image-space matching: choose *image space* in the *Match* tab with one or more views and the variant whose cameras to borrow; the model is fitted to the 2-D keypoints directly (the single-camera path).",
     ),
     actions=("fit_model",),
     done=lambda m: m.model_fit is not None,
@@ -235,18 +264,23 @@ EXPORT = Step(
     instructions=(
         "Press *Export*. reconstruction.trc loads in the motion pipeline and the model-matching tools as a marker file.",
         "*Export clip* and *Compare takes* produce annotated, slowed videos of this take, alone or beside another session, for coaching.",
+        "*Export multiview* writes every view (and the model overlay of any of them) side by side through a layout as one composite video, synchronised by frame with the session's alignment offsets.",
     ),
-    actions=("export", "clip", "compare_takes"),
+    actions=("export", "clip", "compare_takes", "multipicture"),
     done=lambda m: m.export is not None,
     ready=lambda m: _ready_if(m.reconstruction is not None, "reconstruct first"),
     applies=_multi,
 )
+
+#: One line of help per tile action key; every ``Step.actions`` entry has one
+#: (the GUI's buttons are checked against this list).
 
 STEPS: tuple[Step, ...] = (
     SETUP,
     INTRINSICS,
     CAPTURE,
     DETECT,
+    ANNOTATE,
     REVIEW,
     RECONSTRUCT,
     FIT_MODEL,
@@ -261,14 +295,8 @@ def evaluate(media: SessionMedia | None) -> tuple[StepState, ...]:
     out = []
     for step in STEPS:
         if media is None:
-            status = Status.READY if step.key == "setup" else Status.BLOCKED
-            out.append(
-                StepState(
-                    step,
-                    status,
-                    "" if status is Status.READY else "load or record a session",
-                )
-            )
+            status = Status.READY if step.starts_fresh else Status.BLOCKED
+            out.append(StepState(step, status, "" if step.starts_fresh else NO_SESSION))
             continue
         if not step.applies(media):
             out.append(StepState(step, Status.SKIPPED, "not for this session"))
@@ -296,3 +324,78 @@ def enabled_actions(states: tuple[StepState, ...]) -> frozenset[str]:
         if s.status in (Status.READY, Status.DONE):
             out.update(s.step.actions)
     return frozenset(out)
+
+
+def action_hints(
+    states: tuple[StepState, ...], always: frozenset[str] = frozenset()
+) -> dict[str, str]:
+    """Tooltip text per action: what it does and, when disabled, why.
+
+    Precondition: every action of every step has an entry in
+    :data:`ACTION_HELP` (the GUI's button list is checked against it in
+    tests). Postcondition: every key of ``ACTION_HELP`` is present; an
+    action that is neither enabled nor in ``always`` carries a
+    ``Disabled:`` line naming the first step that withholds it and its
+    reason, so the operator sees what to do instead of a grey button.
+    """
+    enabled = enabled_actions(states) | always
+    hints: dict[str, str] = {}
+    for action, help_text in ACTION_HELP.items():
+        hints[action] = help_text
+        if action in enabled:
+            continue
+        holder = next((s for s in states if action in s.step.actions), None)
+        if holder is None:
+            continue
+        reason = holder.reason or holder.status.value
+        hints[action] = (
+            f"{help_text}\n\nDisabled: step '{holder.step.title}' is "
+            f"{holder.status.value} ({reason})."
+        )
+    return hints
+
+
+NO_SESSION = "load or record a session first"
+
+ACTION_HELP: dict[str, str] = {
+    "plan_check": (
+        "Bind every planned view to a connected camera (USB topology + "
+        "DirectShow) and report conflicts."
+    ),
+    "preview": (
+        "Show every planned view live at reduced rate; toggles off to release "
+        "the cameras."
+    ),
+    "record": (
+        "Record a take of the chosen length after the optional countdown; the "
+        "live view keeps running from the recorder and the REC readout shows "
+        "elapsed time. Press again to stop early."
+    ),
+    "import": "Build a session from existing video files, one per view.",
+    "proxy": (
+        "Write small H.264 proxies of large MJPEG recordings for smooth playback."
+    ),
+    "ingest": "Run the pose detector on every view and write per-frame keypoints.",
+    "compare": "Compare two detectors' keypoints on the same views.",
+    "reliability": "Score each view's detections and suggest exclusions.",
+    "calibrate": (
+        "Solve lens intrinsics from a chessboard take (needs board size and "
+        "square length)."
+    ),
+    "reconstruct": (
+        "Triangulate 3-D joints from the ingested views using the intrinsics."
+    ),
+    "fit_model": "Fit the articulated golfer model to the reconstructed joints.",
+    "kinetics": "Compute joint torques and powers from the fitted model.",
+    "compare_models": "Compare two model fits (variants) side by side.",
+    "analyze": "Single-camera 2-D analysis: swing events and tempo.",
+    "export": "Export the reconstruction and model for downstream tools.",
+    "clip": "Export a slow-motion clip with the overlay around an event.",
+    "compare_takes": "Compare two takes side by side with deltas.",
+    "multipicture": "Composite multiview video of raw and overlay streams through a layout.",
+    "annotate": (
+        "Click keypoints frame by frame, or edit the detector's points on the overlay."
+    ),
+    "stop": "Kill the running rig command.",
+    "load": "Load the session folder named in the Capture panel.",
+}

@@ -11,7 +11,7 @@ def main() -> int:
     from .gui import CaptureRigWindow
 
     app = QApplication.instance() or QApplication(sys.argv)
-    window = CaptureRigWindow()
+    window = CaptureRigWindow(autostart_preview=True)  # applies the theme itself
     window.show()
     return int(app.exec())
 
