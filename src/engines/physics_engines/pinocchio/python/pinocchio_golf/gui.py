@@ -173,7 +173,7 @@ class PinocchioGUI(
         super().__init__()
 
         from src.shared.python.body_part_viz.force_color_controls import (
-            install_force_color_action,
+            install_force_color_menu,
         )
         from src.shared.python.body_part_viz.meshcat_force_colors import (
             MeshcatForceColorSession,
@@ -196,12 +196,7 @@ class PinocchioGUI(
 
         self._setup_ui()
 
-        menu_bar = self.menuBar()
-        if menu_bar is None:
-            raise RuntimeError("the simulation window requires a menu bar")
-        view_menu = QtWidgets.QMenu("View", self)
-        menu_bar.addMenu(view_menu)
-        install_force_color_action(view_menu, lambda: [self.segment_force_colors])
+        install_force_color_menu(self, lambda: [self.segment_force_colors])
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self._game_loop)
