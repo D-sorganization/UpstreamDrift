@@ -32,16 +32,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9913; epic #9906
 - **Branch:** feat/9913-capture-journey
-- **PR:** #9917 (open)
+- **PR:** #9917 (merged)
 - **Paths:** src/tools/capture_rig/, tests/tools/capture_rig/, generated guide and parity registry
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`71d8f5a1f`;445 tests, LoD/function/doc budgets and regenerated atlas pass)
+- **Last verified:** 2026-09-09 (`71d8f5a1f`; 445 tests, LoD/function/doc budgets and regenerated atlas pass)
 - **Summary:** Capture identity/history, linked workflow/help/provenance, safe selection clearing and retained Qt views.
-- **Next step:** Qualify protected CI/review on #9917 and merge.
+- **Next step:** Retain capture journey coverage.
 
 ### DL-#9911 · Preview Discovery Failure Recovery
 
