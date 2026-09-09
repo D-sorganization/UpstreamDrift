@@ -59,3 +59,5 @@ Preserved remote rewrite e8a070d11 by a normal merge. Its product modules match 
 CI exposed the expanded fleet-managed AGENTS.md exceeding the unchanged 50 KiB documentation budget. Moved the detailed local infrastructure directory into docs/agents/shared-infrastructure.md, adjusted relative links and title case, and retained the required entry-point discovery workflow plus every managed block. Registered the directory in the catalog.
 
 Integrated fleet policy main 213c5a6ca and regenerated the spec-changelog-rows section from the central title-case correction in Repository_Management #1627. The central source remains authoritative. Full diff-scoped document checks now include the newly adopted policy.
+
+Agent-document consistency now distinguishes optional references and explicitly hub-owned paths from required local files, and ignores only separator lines plus the exact repeated managed-section notice. Two reproductions failed before the fix; all 27 consistency tests and the live checker pass. Required missing local paths and substantive duplicate instructions remain errors.
