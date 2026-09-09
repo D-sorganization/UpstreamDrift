@@ -1,4 +1,11 @@
-# Agent Handoff: Proximal–Distal Research Program
+## Capture Rig GUI: Layout Inversion, Responsive Adaptation & Evidence (#9847, #9848)
+
+Epic #9843 complete. Branch `docs/9848-capture-rig-evidence` documents responsive
+compact mode in `docs/motion_capture/capture_rig.md`, records before/after metrics
+in `docs/motion_capture/evidence/capture_rig_responsive_evidence.md` (minimum width
+reduced from 3276 px to 478 px against the <= 900 px budget; preview width 656 px vs
+controls 240 px at 1280x800), and provides offscreen screenshot
+`capture_rig_responsive_layout.png`. PR #9876 merged (`d34a41a2e`).
 
 ## Reference Overlay: Comparison Workspace, Saved Layers & Reproducible Exports (#9866)
 
