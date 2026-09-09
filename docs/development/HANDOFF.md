@@ -7,7 +7,7 @@
 - Branch: feat/9864-reference-assets
 - Baseline commit: db4862fb8 (drawings stack; dependency #9868 now merged)
 - Implementation commit: SELF
-- Pull request: not created
+- Pull request: #9870 (draft)
 - Governing issue/epic: #9864, #9863
 
 ## Objective and Status
@@ -64,3 +64,5 @@ or mesh files are not silently converted. Shared clones and peers' worktrees int
 - SELF — Final local checks: 49 registry/atlas tests pass; atlas and parity artifacts are fresh; eight-module mypy passes; configured LoD no-growth check passes (2,987 source files, existing baseline retained). Visually inspected both screens including themed mapping. A cancelled archive-filter change now restores the visible filter and preserves unsaved notes (RED then four UI tests GREEN). Scoped Ruff/format pass. Keep the single current #9868 SPEC row while recording the new reference change.
 
 - SELF — Merge reviewed drawings head 3f8b592bf through a normal merge after reference implementation 269354d07. Preserve the complete reference additions and the same drawing/editor behavior; the extracted sparse-summary helper already matches merged #9868. Reference PR is now a focused addition to this dependency.
+
+- SELF — Published draft PR #9870 after normal push hooks. Local import and library qualification is complete. Integrate drawing theme correction before readying this PR. Fleet runner repair #1588 merged; live rollout 34330895204 exposed Git credential routing and a stale clone-root handoff, being corrected in an isolated RM branch.
