@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
     QWidget,
     QDialog,
     QMenu,
+    QMainWindow,
     QVBoxLayout,
 )
 
@@ -30,6 +31,20 @@ class ForceColorTarget(Protocol):
     def set_axial_color_scale(self, scale: ForceColorScale) -> None:
         """Apply a validated scale to the current view."""
         ...
+
+
+def install_force_color_menu(
+    window: QMainWindow, targets: Callable[[], Iterable[ForceColorTarget]]
+) -> QAction:
+    """Install a validated View menu consistently across native main windows."""
+    if not isinstance(window, QMainWindow) or not callable(targets):
+        raise TypeError("main window and callable targets are required")
+    menu_bar = window.menuBar()
+    if menu_bar is None:
+        raise RuntimeError("the simulation window requires a menu bar")
+    view_menu = QMenu("View", window)
+    menu_bar.addMenu(view_menu)
+    return install_force_color_action(view_menu, targets)
 
 
 def install_force_color_action(
