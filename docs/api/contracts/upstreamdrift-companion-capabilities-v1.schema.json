@@ -138,7 +138,13 @@
           "enum": ["supported", "extended", "experimental", "not_applicable"]
         },
         "maturity": {
-          "enum": ["stable", "beta", "experimental", "deprecated", "unclassified"]
+          "enum": [
+            "stable",
+            "beta",
+            "experimental",
+            "deprecated",
+            "unclassified"
+          ]
         },
         "availability_state": {
           "enum": ["available", "conditional", "unavailable"]

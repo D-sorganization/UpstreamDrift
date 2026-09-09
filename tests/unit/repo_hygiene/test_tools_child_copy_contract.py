@@ -227,11 +227,28 @@ def _ud_canonical_entries() -> frozenset[str]:
     )
 
 
+def _deferred_entries() -> frozenset[str]:
+    """Return the top-level shared entries with deferred seam rulings."""
+    if not _SEAM_RULINGS.is_file():
+        return frozenset()
+    rulings = json.loads(_SEAM_RULINGS.read_text(encoding="utf-8")).get("rulings", {})
+    return frozenset(
+        name for name, entry in rulings.items() if entry.get("ruling") == "deferred"
+    )
+
+
 def _is_ud_canonical(relative: Path) -> bool:
     """Return whether ``relative`` falls under a ud-canonical ruling."""
     parts = relative.as_posix().split("/")
     candidate = parts[0] if len(parts) > 1 else relative.as_posix()
     return candidate in _ud_canonical_entries()
+
+
+def _is_deferred(relative: Path) -> bool:
+    """Return whether ``relative`` falls under a deferred seam ruling."""
+    parts = relative.as_posix().split("/")
+    candidate = parts[0] if len(parts) > 1 else relative.as_posix()
+    return candidate in _deferred_entries()
 
 
 def _normalise_seam_imports(text: str) -> str:
@@ -294,6 +311,7 @@ def _direct_tools_edit_offenders(
         )
         and not _converges_on_canonical(relative)
         and not _is_ud_canonical(relative)
+        and not _is_deferred(relative)
     ]
 
 
@@ -703,3 +721,12 @@ def test_tools_canonical_clusters_are_still_guarded() -> None:
         assert not _is_ud_canonical(Path(name) / "anything.py"), (
             f"{name} is tools-canonical and must stay guarded"
         )
+
+
+def test_deferred_clusters_may_be_edited_here() -> None:
+    """Paths with a deferred seam ruling may be edited in UpstreamDrift."""
+    deferred = _deferred_entries()
+
+    assert deferred, "fixture assumption: some entries are deferred"
+    assert _is_deferred(Path("__init__.py"))
+    assert _is_deferred(Path("config/__init__.py"))

@@ -53,7 +53,7 @@ with a detached `.sha256` sidecar; `PAYLOAD_ASSET_NAMES` in
   versioned file (see below);
 - `capabilities.json` — capability ids per program and per engine, derived
   from the same committed inputs;
-- `screenshots.json` — screenshot *metadata* only: one `pending` record per
+- `screenshots.json` — screenshot _metadata_ only: one `pending` record per
   visible program with null asset fields and an explicit reason until the
   governed capture workflow (#9191) exists; nothing is fabricated;
 - `upstreamdrift-companion-v1.schema.json`,
