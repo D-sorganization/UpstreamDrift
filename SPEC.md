@@ -17,18 +17,20 @@
 
 ## Reference Overlay: Comparison Workspace, Saved Layers & Reproducible Exports (#9866)
 
-The reference overlay comparison workspace provides dual synchronized playback,
-overlay composition, saved layer configurations, and reproducible exports:
+The initial workspace provides one composite canvas, playback/scrubbing,
+reference selection, offset/scale and layer controls, saved comparison JSON,
+and a background export pipeline. Its sidecars contain provenance hashes;
+they are not signed documents. Post-merge qualification reopened epic #9863:
+#9881 owns timing/gap/calibration identity, #9882 owns renderer/export parity,
+and #9883 owns complete spatial/event controls and laptop visual evidence.
 
-- `ReferenceComparisonDialog` provides dual playback of current take and calibrated
-  reference motions, synchronized scrub controls, alignment mode switching, and layer
-  styling adjustments (opacity, color palette, skeleton visibility).
-- Comparison state persists to and loads from sidecar JSON files (`.comparison.json`)
-  using `ComparisonSession` and `ComparisonLayer` schema representations.
-- Reproducible video exports (`export_comparison_video`) generate side-by-side or composite
-  renderings alongside signed provenance sidecars (`build_comparison_sidecar`) recording
-  camera calibration parameters, alignment timestamps, layer styling, and input file hashes.
-- Background exports run via `ComparisonExportWorker` with responsive cancellation support.
+Issue #9879 preserves unrelated saved registration and layer fields during
+control changes, blocks restoration signals while switching references, and
+rejects malformed or mismatched comparison sidecars. Filename-safe view
+identifiers and canonical reference UUIDs keep comparison files inside the
+session directory. Exports reuse the existing SwingExportActions lifecycle:
+snapshot a saved job, prevent duplicates, report failure, cancel on close or
+Escape, and close the dialog only after its worker has finished.
 
 
 ## Video Upload Suffix Derivation From Filename Allow-List (#9612)
@@ -4193,6 +4195,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-09 | #9879 | Preserve comparison registration/layer settings on independent edits and reference switches; validate sidecar identity/path/size; reuse safe export ownership, snapshots and deferred close. Qualification gaps remain tracked under #9863. |
 | 2026-09-09 | #9871 | Calibrated reference overlay scene registration and event synchronization: rigid/similarity transform, body-size normalization, coordinate frame conversion from canonical Z-up into ADR-0041 scene world, event-anchor and offset time warping, missing-joint gap mask preservation across interpolation, camera projection with distortion and clipping, and uncalibrated 2D video homography. |
 | 2026-09-09 | #9870 | Add validated expert reference assets and a native library: C3D/shared model marker imports, explicit units/axes/joint mapping, masked samples, source hashes, separate 2D video kind, notes/archive and background I/O. Reuse existing Rust-preferred C3D adapter and correct fallback residual handling. Shared Qt button construction gives the mapping step an explicit Import Reference action. Registration and projection remain in #9865/#9866. |
 | 2026-09-09 | #9869 | Saved source-coordinate coaching references with line/arrow/circle/ellipse/rectangle tools, gesture and keyboard editing, visibility intervals, undo/redo, portable layers and shared preview/still/video rendering. Library and swing-editor entry points preserve original media and measured landmarks. |
