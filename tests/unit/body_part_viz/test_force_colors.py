@@ -1,10 +1,19 @@
 """Behavioral contracts for signed axial-load display."""
 
 import math
+import json
+from pathlib import Path
 
 import pytest
 
 from src.shared.python.body_part_viz.force_colors import ForceColorScale
+
+
+def test_cross_runtime_conformance_examples():
+    path = Path(__file__).resolve().parents[3] / "schemas/force-color-examples.json"
+    for case in json.loads(path.read_text())["cases"]:
+        scale = ForceColorScale.from_dict(case["settings"])
+        assert scale.color(case["force_n"], "#123456") == case["expected"]
 
 
 def test_disabled_preserves_base_color():

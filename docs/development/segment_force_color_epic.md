@@ -52,6 +52,12 @@ were qualified without executing their adapters.
 
 ## Local Validation Evidence
 
+The web scene exposes reusable force-color controls and accepts a qualified,
+synchronized `segmentLoads` prop for URDF and fallback geometry. The default
+simulation producers do not yet populate it. PyQt controls are available as a
+shared widget; remaining desktop hosts still require binding and producer work.
+See `docs/user_guide/body_part_viz/force_colors.md` for the adapter contract.
+
 Policy RED: missing `force_colors` import; GREEN: 15 tests. Matplotlib RED:
 three missing `set_color` failures; GREEN: 24 renderer tests. OpenGL RED: two
 missing `set_color` failures; GREEN: 19 renderer object tests. Frame controller
@@ -62,3 +68,12 @@ from local git objects at `eab74a901a7c8467e1997049a73e2cfd2df74428`.
 Command: `python3 -m pytest -o addopts= -q
 --confcutdir=tests/unit/body_part_viz tests/unit/body_part_viz`.
 Focused runs omit the root fixture bootstrap; full repository CI remains required.
+
+Subsequent validation used the normal root bootstrap: 458 Python tests across
+body-part visualization and feature parity passed with PyQt6 selected consistently
+(`PYTEST_QT_API=pyqt6`, `QT_API=pyqt6`, `PYQTGRAPH_QT_LIB=PyQt6`). The web
+visualization folder passed 67 tests in nine files. Ruff lint/format, changed web
+ESLint and TypeScript checking passed. The local Node dependencies were reused
+from the existing checkout; remote lockfile CI is still required. Design-manual
+governance passes its current structural check but reports the pre-existing
+publication release gate `blocked-inventory-required`.

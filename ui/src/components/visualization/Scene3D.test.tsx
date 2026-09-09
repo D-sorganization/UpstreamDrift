@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { screen, waitFor } from '@testing-library/dom';
 
 // Mock react-three/fiber before importing Scene3D
@@ -75,6 +75,14 @@ import { Scene3D } from './Scene3D';
 import type { SimulationFrame } from '@/api/client';
 
 describe('Scene3D', () => {
+  it('exposes optional force colors and reports missing axial loads', () => {
+    render(<Scene3D engine="mujoco" frame={null} />);
+    const toggle = screen.getByLabelText('Color Segments by Axial Force');
+    expect(toggle).not.toBeChecked();
+    fireEvent.click(toggle);
+    expect(toggle).toBeChecked();
+    expect(screen.getByText('Axial load data unavailable for this frame.')).toBeInTheDocument();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
   });
