@@ -8,6 +8,40 @@ from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceCol
 pytestmark = pytest.mark.unit
 
 
+def test_session_rejects_stale_loads_and_clears_bindings_on_model_replacement():
+    from src.shared.python.body_part_viz.meshcat_force_colors import (
+        MeshcatForceColorSession,
+    )
+
+    calls = []
+    adapter = MeshcatForceColors(
+        lambda *args: calls.append(args), {"x": {"/a/<object>": (0, 1, 0, 0.5)}}
+    )
+    session = MeshcatForceColorSession()
+    model = object()
+    session.update(model, 0)
+    session.bind(adapter, model)
+    session.set_frame(AxialLoadFrame(0, {"x": 1000}, "Known section"))
+    assert calls == []
+    session.set_axial_color_scale(ForceColorScale(enabled=True))
+    assert calls[-1][2] == [0, 0, 1, 0.5]
+    session.update(model, 1)
+    assert calls[-1][2] == [0, 1, 0, 0.5]
+    session.set_frame(AxialLoadFrame(1, {"x": -1000}, "Known section"))
+    assert calls[-1][2] == [1, 0, 0, 0.5]
+    session.set_axial_color_scale(ForceColorScale())
+    assert calls[-1][2] == [0, 1, 0, 0.5]
+    session.set_axial_color_scale(ForceColorScale(enabled=True))
+    session.update(object(), 1)
+    count = len(calls)
+    session.set_frame(AxialLoadFrame(1, {"x": 1000}, "Old model data"))
+    assert len(calls) == count
+    with pytest.raises(ValueError):
+        session.bind(adapter, model)
+    with pytest.raises(ValueError):
+        session.update(model, float("nan"))
+
+
 def test_shared_transport_handles_multiple_geometries_and_restoration():
     calls = []
     bindings = {
@@ -43,6 +77,59 @@ def test_off_does_not_touch_an_unmodified_scene():
     assert calls == []
     with pytest.raises(ValueError):
         MeshcatForceColors(lambda *args: None, {"x": {"/a/<object>": (1, 1, 1, 2)}})
+
+
+@pytest.mark.requires_pinocchio
+@pytest.mark.requires_drake
+def test_native_meshcat_host_settings_and_display_clock(monkeypatch):
+    """Exercise real optional GUIs, their settings actions and display lifecycle."""
+    pytest.importorskip("pinocchio.visualize")
+    pytest.importorskip("pydrake.all")
+    pytest.importorskip("meshcat")
+    from PyQt6.QtWidgets import QApplication
+    from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
+        PinocchioGUI,
+    )
+    from src.engines.physics_engines.drake.python.src.drake_gui_app import DrakeSimApp
+
+    monkeypatch.setenv("MESHCAT_HOST", "localhost")
+    app = QApplication.instance() or QApplication([])
+    for cls in (PinocchioGUI, DrakeSimApp):
+        window = cls()
+        try:
+            window.timer.stop()
+            menus = [a.menu() for a in window.menuBar().actions() if a.menu()]
+            actions = [
+                a
+                for menu in menus
+                for a in menu.actions()
+                if a.text() == "Segment Force Colors…"
+            ]
+            assert len(actions) == 1
+            actions[0].trigger()
+            app.processEvents()
+            window.update_visualization()
+            model = window.model if isinstance(window, PinocchioGUI) else window.plant
+            time_s = (
+                window.sim_time
+                if isinstance(window, PinocchioGUI)
+                else window.context.get_time()
+            )
+            calls = []
+            adapter = MeshcatForceColors(
+                lambda *args, target=calls: target.append(args),
+                {"x": {"/test/<object>": (0, 1, 0, 1)}},
+            )
+            session = window.segment_force_colors
+            session.bind(adapter, model)
+            session.set_frame(AxialLoadFrame(time_s, {"x": 1000}, "Qualified fixture"))
+            session.set_axial_color_scale(ForceColorScale(enabled=True))
+            assert calls[-1][2] == [0, 0, 1, 1]
+            session.set_axial_color_scale(ForceColorScale())
+            assert calls[-1][2] == [0, 1, 0, 1]
+        finally:
+            window.close()
+            app.processEvents()
 
 
 def test_mujoco_meshcat_uses_native_commands_without_changing_geometry(monkeypatch):
