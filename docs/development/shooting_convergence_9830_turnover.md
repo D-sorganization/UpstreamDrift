@@ -4,7 +4,7 @@
 
 - Follow-up to #9756 under #9762; integration relevance to impact program #9700.
 - Branch: fix/9830-independent-shooting-convergence. Codex lease session
-  impact-acoustics-01a07d8a-shooting9830 expires 2026-09-09T02:13:33Z.
+  impact-acoustics-01a07d8a-shooting9830 expires 2026-09-09T04:11:20Z.
 - Reproduction source: protected main 9f54c5e0b79d9ca0e81aebf52f90f07ffac832c0.
   Worktree subsequently fast-forwards to ff0effa5a, retaining identical
   casadi_backend, model_provider, \_swing_models and motion_pipeline/model_bridge.
@@ -183,6 +183,61 @@ The failures precede optimization and defect evaluation. Follow-up
 [#9842](https://github.com/D-sorganization/UpstreamDrift/issues/9842) owns
 real-process compatibility, pin/probe corrections and consumer validation;
 do not claim these OCP paths passed or alter historical study dependencies.
+
+## Bioptim Compatibility and Selected Runtime (#9842)
+
+The real-process matrix test first failed on `MX_eye` (24.22 s). Supplying
+MX/SX aliases exposed the additional missing `DM_eye`; an AST inventory of
+Bioptim imports confirmed all three. The compatibility helper now installs
+only absent aliases from exact CasADi class factories, without replacing
+native exports. The absent-distribution fixture explicitly simulates absence
+so it also works on hosts with a real SDK. Values, types, zero-size shapes,
+MX/SX Jacobians and repeated imports are exercised in a subprocess.
+
+With the aliases, CasADi 3.8 reports 16 passed and one failed in 205.31 s
+across factory, contamination and swing/tracking controls. The remaining
+eight-node, 1 s RK4 case fails solver success with its original 500-iteration
+budget. A separate 1,000-iteration diagnostic also fails, stopping at 635
+iterations; more iterations did not resolve it. Raw status is 1 and does not
+identify a more specific IPOPT failure cause. The failed result's fallback
+warm-start `x` was not analyzed as a final candidate. Diagnostic provenance is
+archived in `/home/dieterolson/.cache/codex-impact/bioptim9842/budget1000.json`,
+including source hashes for the then-uncommitted compatibility patch.
+
+A separate environment preserves the same 51 packages except CasADi 3.6.7.
+All 13 unchanged swing/tracking cases pass in 170.58 s; the native-factory
+control passes in 4.41 s. The original 3.8 study environment remains intact.
+The Bioptim extra therefore pins CasADi 3.6.7, while the general
+`optimal-control` range remains unchanged. Dependency-contract TDD produced
+two failures/two passes before the pin and four passes afterward (10.39 s).
+No integration substeps, solver budgets or regression ceilings were changed.
+The final combined real swing/tracking, factory, module-isolation and dependency
+suite passes all 21 cases in 162.06 s (one inherited deprecation warning).
+Python 3.11 Linux is the tested numerical scope; other available wheels are
+not equivalent validation. The parity guide records that limit and the
+unsuccessful 3.8 case. Source docstrings no longer claim convexity guarantees
+or a general collocation performance advantage.
+
+The normal push of callback fix 7369ccc2d was rejected by a shared hook cache
+combining mypy 1.13 with NumPy 2.5.3 syntax. No hook was skipped and the shared
+cache was not modified. A task-isolated PRE_COMMIT_HOME installs the same
+configured hooks; its actual mypy hook passes all three changed source
+modules. The separate CI-equivalent SciPy-stub type check also passes.
+
+CI's unit gate reports one failure, 14,448 passes and 671 skips: the generated
+shared-tools divergence inventory lacks the new private reference module.
+The generator preview adds that sole classification entry and preserves the
+Tools pin; generated authorship and byte metadata also refresh. Canonical
+regeneration is now complete: all ten inventory tests pass in 16.78 s, and
+the classification projection differs only by the new reference module.
+Current-main integration remains required before publishing this follow-up.
+PR #9841 remains open; no green protected-CI claim is made.
+
+Repository-pinned Ruff 0.15.17 passes root lint and format (6,771 files).
+An initial check accidentally used the shared environment's newer 0.16.4;
+its unrelated new-rule/Markdown-format findings are not the repository gate,
+and no unrelated files were changed. Manual governance and the SPEC hook
+pass; manual release remains `blocked-inventory-required`.
 
 ## Related Delivery
 

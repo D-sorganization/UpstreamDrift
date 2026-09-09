@@ -4145,7 +4145,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
-| 2026-09-09 | #9841 | Separate fixed-grid swing feasibility from adaptively refined ODE endpoint diagnostics, preserve strict position/velocity budgets and correct historical parity interpretations. |
+| 2026-09-09 | #9841 | Separate fixed-grid swing feasibility from adaptively refined ODE endpoint diagnostics, preserve strict position/velocity budgets, qualify the Bioptim dependency runtime and correct historical parity interpretations. |
 | 2026-09-03 | #9465 | Training Controller job actions report their failures (#8884). `_on_cancel_clicked`/`_on_pause_clicked`/`_on_resume_clicked` each wrapped their controller call in a `try/except` whose entire body was `logger.error`, so a rejected action was indistinguishable from a successful one: nothing moved, the row still read Running, and the user clicked again or walked away believing the job had stopped. A shared `_run_job_action` now reports every failure to a new action status strip and a `QMessageBox` (keeping `logger.exception` for the traceback, per ADR-0016), refreshes the job table immediately on success instead of waiting for the next poll, and gates Cancel behind a confirmation naming the job id and its H:MM runtime. |
 | 2026-09-07 | #9478 | Made the launcher registry honest about Tools provenance and tile maturity: `provider: tools` entries in `src/config/models.yaml` and `src/config/launcher_manifest.json` now carry a `tools://` scheme so a vendor path cannot masquerade as a repo-relative one (`ModelSourcePathPolicy`/`ToolsVendorModelSourceProvider` strip the scheme; local/sibling providers reject it), and the registry gate (`tests/config/test_tile_paths_resolve.py` via the new `ready_maturity_gate` in `tile_target_resolution.py`) fails any `ready`/`beta` tile whose entry point does not resolve. Corrected maturity claims to match reality: the four `*_models_shared` sibling-folder tiles and `movement_optimizer` downgraded to `experimental` with sibling-folder caveats, `motion_capture` downgraded from `beta` (argparse CLI, not a GUI tile), and the `myosim_suite`, `biomech_gait`, `biomech_sit_to_stand`, `chat_assistant`, and `tools_calculator_hub` descriptions now state what the tiles actually do. |
 | 2026-09-08 | #9783 | Accept the two exact reviewed Tools renderer source/hash identities in consumer verification, reject swapped or unknown pairs, and preserve analysis policy, pixel tolerances and vendor pin. |
@@ -5608,3 +5608,9 @@ The original coarse swing remains an adverse regression control: it can pass
 the historical position ceiling while exhibiting a large velocity mismatch.
 No shooting threshold is relaxed. Historical parity tables retain their
 original reference identity and do not establish physical realizability.
+
+Bioptim's extra selects CasADi 3.6.7, where the unchanged swing/tracking
+regressions pass. Missing legacy matrix factories use exact SDK class
+factories without replacing native exports. The install probe imports the
+consumer; matrix compatibility on 3.8 does not imply solver qualification.
+The general optimal-control extra retains its separate version range (#9842).
