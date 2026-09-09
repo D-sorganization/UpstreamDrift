@@ -19,17 +19,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9860 · Capture Editing and Library
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9860, #9861 (product #9849)
-- **PR:** not created
+- **PR:** #9868
 - **Branch:** feat/9860-swing-editing
 - **Paths:** src/motion_capture/rig/edits.py, ingest.py, src/tools/capture_rig/swing_editor.py, related tests and docs/development/capture_editing_integration.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`2d92e179d`)
+- **Last verified:** 2026-09-09 (`795921f63`)
 - **Summary:** Non-destructive source-frame selection/crop and native editor; portable capture-note/catalog backend with archive, storage, rename/rollback and editable copies. Visible Library/Edit swing header actions, notes and file controls, cancellable scans, rename journal and Windows SQLite cleanup, cancellable selected-swing export, downstream timeline guards and generated map updates are implemented.
 - **Evidence:** Integrated suite 300 passed; subsequent focused library/UI suite 12 passed and editor suite 5 passed; eight-module mypy passed. Native editor visual review at 850x650 has readable controls and 492-px minimum width.
-- **Next step:** Submit protected editing/library PR with completed export and downstream timeline qualification.
+- **Next step:** Verify current-head CI and protected merge for #9868.
 
 ### DL-#9851 · Capture Responsiveness and Recovery
 

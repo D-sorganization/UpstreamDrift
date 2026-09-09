@@ -343,7 +343,8 @@ original camera coordinates and timestamps. Original recordings remain intact.
 An already analyzed take requires an editable copy so its old results remain valid.
 Keep an address hold at the beginning and the finish at the end for analysis.
 **Export swing** saves the selection and writes a separate MP4 or AVI in a background
-worker, with cancellation and a provenance JSON beside it. Choose a new filename.
+worker, with cancellation and a provenance JSON beside it. This coaching export
+contains video only; original files retain their audio. Choose a new filename.
 The export retains the crop exactly; an odd width/height gets one replicated edge
 pixel as encoder padding, recorded in provenance. Main multiview playback continues
 to show the original synchronized scene; selection playback is in the editor.
