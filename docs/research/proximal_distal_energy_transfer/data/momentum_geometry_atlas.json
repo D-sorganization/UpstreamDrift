@@ -105,7 +105,7 @@
   ],
   "source_sha256": {
     "momentum_geometry_atlas.py": "dc0b02014241feaf090073c93d49fe200bd3412a89ca2dab41ae60b07cd43427",
-    "run_momentum_geometry_atlas.py": "7d992c654881f3588c4c61174354a8eea280a8f10eed66e8db4dc3571d4fe4f5"
+    "run_momentum_geometry_atlas.py": "c5f330060820f38429698c466fe4e71dcc9d3116c45eae74fe4dda01ea72d911"
   },
   "array_artifact": "momentum_geometry_atlas.npz"
 }
