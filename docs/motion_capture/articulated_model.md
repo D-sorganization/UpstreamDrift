@@ -123,6 +123,90 @@ observed coordinate), with RMS, rejections and peak joint speeds beside it.
 Register another model with `register_model`; the fit, the comparison, the
 kinetics and the tile pick it up without further code.
 
+## Variants: Any Subset of the Cameras (#9790)
+
+Capture once with every camera, then match with any subset. A **variant**
+is a named match of the same recordings: `variants/<name>/` holds its own
+`reconstruct/` and `model/` trees while the recordings and observation sets
+stay shared; the session root is the default variant (`""`). One resolver,
+`src/motion_capture/variants.py::variant_dir`, is used by every command
+that reads or writes those trees, and `variants/index.json` records each
+variant's views, observation set and source.
+
+```
+rig reconstruct --session S --cameras start.json --anchor shank=0.42 \
+    --views face_on,down_line --variant pair_fd
+rig fit-model   --session S --variant pair_fd
+rig fit-model   --session S --variant cam_face --from-views face_on --cameras-from ""
+rig overlay     --session S --view overhead --variant "" --variant pair_fd --out o.mp4
+rig compare-variants --session S
+```
+
+`--views` restricts and orders the cameras (two or more for triangulation);
+`--observations` picks the detector set (`observations`,
+`observations_openpose_dnn`, `observations_manual`, `observations_edited`).
+
+## Image-Space Fit: One Camera and Up (#9794)
+
+`reconstruct/model/fit2d.py` fits the articulated model to the 2-D
+keypoints of one or more views directly, with the data term
+`(project_v(landmark) - keypoint_px) / sigma_px` and the same continuity,
+limit, rest and length priors as the 3-D fit (`_Problem2D` overrides only
+the landmark block and the reporting hooks of `fit._Problem`). The cameras
+come from a previous multi-camera variant (`--cameras-from`) and that
+dependency is recorded in the provenance. With one view the in-plane motion
+is observed directly; depth comes from perspective and the model's known
+segment lengths, so this is the seam for the single-camera research:
+`rms_px` and per-view `residual_px` are reported, `rms_m` is NaN.
+
+Synthetic evidence (lab rig, 1 px noise): landmark RMS against the truth
+under 10 mm from three views and under 20 mm from two; from one view the
+in-plane error stays under 30 mm while depth is only weakly observed
+(`tests/motion_capture/reconstruct/model/test_image_space_fit.py`).
+
+## Overlays and the Cost of Fewer Cameras (#9795, #9796)
+
+`reconstruct/overlay3d.py` projects a variant's reconstructed joints and
+fitted model landmarks onto **any** view, including views the variant never
+used (_held out_; the camera comes from the variant's own reconstruction,
+else from the variant it borrowed cameras from, else from the default).
+`src/tools/capture_rig/overlay_render.py` draws one or several variants on
+the recording in distinct colours with a legend (`rig overlay`, and the
+_Model overlay_ checkboxes in the player). `rig compare-variants` writes
+`variants/comparison.{json,md}`: per variant the reprojection RMS on every
+view with held-out views flagged, the 3-D joint RMS and the per-DOF angle
+RMS against a reference variant. `docs/motion_capture/evidence/camera_subsets.md`
+tabulates the synthetic 3 / 2 / 1-camera experiment.
+
+## Provenance (#9792)
+
+Every JSON the pipeline writes carries `schema_version` and a `provenance`
+block (`src/motion_capture/provenance.py`): creation time, the generating
+package/module/version/git SHA, the hashed inputs, the parameters (views,
+observation set, anchors, camera source, detector, fit options, model,
+source kind) and `derived_from`. `rig lineage --session S --path FILE`
+walks a model fit back to the reconstruction, the observation files and the
+recordings; the tile's _Provenance_ tab shows the same when a result row is
+clicked. The detector's own record inside an observation file is kept and
+folded into the parameters, so the plug-in and its options are visible at
+every hop.
+
+## Manual Annotations as a Source (#9791)
+
+`src/motion_capture/annotate/` holds the Qt-free logic: a sparse
+`annotations/<view>.json` store (clicks, skips for occluded joints, an
+optional `base_set` when it corrects a detector), a guided cursor that walks
+frames and joints, and `rig annotations-to-observations`, which writes a
+`view-observations/1.0.0` set (estimator `manual`) or, with
+`--merge-with SET`, the detector set with the corrections applied (clicks
+replace, skips reject) and the counts in the provenance. The Capture Rig
+tile's _Annotate / edit points_ dialog drives the cursor over the player's
+view; opened with an observation set selected it becomes the outlier
+editor. The reconstruction and the model fit treat confidence 0 as
+unobserved and carry the continuity prior across gaps, so sparse clicks fit
+like any other set; `evidence/sparse_annotations.md` records the accuracy
+against frame stride.
+
 ## Kinetics (#9714, First Slice)
 
 `rig kinetics --model NAME --body-mass KG` computes, for the fitted

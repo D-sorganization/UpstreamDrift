@@ -6,7 +6,11 @@ running model with control-effort and state regularization plus a
 joint-limit barrier, and a terminal model driving the clubhead frame to a
 target impact velocity — solved with Crocoddyl's FDDP over the shared B1
 swing model (:mod:`.model_provider`), with analytic RNEA/ABA derivatives
-from Pinocchio (no finite differences anywhere).
+from Pinocchio (no finite differences anywhere). The model carries the
+anthropometric link inertials of ``model_provider.swing_link_inertials``
+(#9755), so the effort weights and the achieved clubhead speed refer to
+the golfer's real segment masses rather than the bridge's unit
+placeholders.
 
 Availability: crocoddyl ships wheels for common Linux platforms but not
 everywhere (conda-forge/WSL elsewhere). It is declared as the opt-in

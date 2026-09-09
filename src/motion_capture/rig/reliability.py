@@ -22,6 +22,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from src.shared.python.core.contracts import require
 
+from ..provenance import write_stamped
+
 from .compare import DEFAULT_MIN_CONFIDENCE, SHARED_JOINTS, joint_metrics, load_series
 
 RELIABILITY_FILE = "reliability.json"
@@ -200,6 +202,12 @@ def _mean(values: Sequence[float | None]) -> float | None:
 
 def write_reliability(report: ReliabilityReport, session_dir: Path) -> Path:
     path = session_dir / RELIABILITY_FILE
-    path.write_text(report.model_dump_json(indent=2), encoding="utf-8")
+    write_stamped(
+        path,
+        report.model_dump(mode="json"),
+        schema_version=report.schema_version,
+        module=__name__,
+        base=session_dir,
+    )
     path.with_suffix(".md").write_text(report.markdown(), encoding="utf-8")
     return path
