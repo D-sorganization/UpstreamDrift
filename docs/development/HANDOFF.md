@@ -62,3 +62,5 @@
 - SELF — Integrated concurrent agent commit c401d006e through a normal merge. Preserved its panel-owned set_session_path API and retained the callback integration tests; removed the equivalent duplicate accessor.
 
 - SELF — Full CI #9868 exposed a sparse-manual regression (unit job 102370002003): summary availability must not block reconstruction/model fitting. Added a specific SwingDataUnavailable result path, recorded the reason in session_reconstruction.json, and removed stale dense summaries before retaining sparse output. Existing every-fifth-frame model-fit qualification now passes along with nine pipeline/analytics checks (10 total). Scientific calculations and interpolation policies remain unchanged.
+
+- SELF — Integrated latest main dba24ceb7 (Tools canonical theme/notes migration) in merge 3a10d4986. The corrected sparse-fit, trim-timeline and native GUI/library/editor suite passes 15 tests with the pinned Tools theme; atlas freshness passes. Two-module mypy and design-manual governance pass.
