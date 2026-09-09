@@ -80,6 +80,7 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 
 ## Impact Dynamics and Acoustics: #9700
 
+- #9841 follow-up: CI's SciPy stubs expose a callback return annotation mismatch; locally reproduced and corrected with 67 reference tests still passing. The real pinned Bioptim consumer run instead fails before optimization on removed CasADi MX_eye imports (8 failed/5 passed); #9842 owns compatibility and validation. Tools #5106 merged as 287767dfa6; #5114 tracks the separate unfinished GUI shard behind #5103. No all-checks-green or physical qualification claim.
 - Claim-preservation #9826 merged as a410ae7059883d7f27f5fb12405b61859267457c from fced8c0d6 at 2026-09-09T01:12:29Z; merge verified, remaining queued auxiliary checks not claimed passed.
 - Theory AffineDrift #4258/#4282/#4298 and integration plan #9706 are merged. Tools T1 #5077 and T2 #5082 (80d580d57) are merged; T2 golf source/tests match reviewed e47fde4e and prior 476eaa98.
 - Tools T3 autonomous decay 58f33e403 and turnover 2d290079b are published through normal hooks (731 Linux golf/API tests, two optional CAD skips). Driven/nonlinear stability, bandwidth, contact/acoustics and empirical gates remain open.

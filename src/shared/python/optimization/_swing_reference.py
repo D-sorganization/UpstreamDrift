@@ -120,7 +120,9 @@ class ReferenceEndpoint:
     status: str = "refinement_supported"
 
 
-def _checked_rhs(rhs: Rhs, size: int, budget: int) -> tuple[Rhs, list[int]]:
+def _checked_rhs(
+    rhs: Rhs, size: int, budget: int
+) -> tuple[Callable[[float, np.ndarray], np.ndarray], list[int]]:
     calls = [0]
 
     def evaluate(time: float, state: np.ndarray) -> np.ndarray:
