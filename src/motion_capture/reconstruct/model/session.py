@@ -20,6 +20,7 @@ import numpy as np
 import numpy.typing as npt
 
 from src.shared.python.core.contracts import require
+from src.motion_capture.rig.equipment import CAPTURE_CLUB_FILE, model_equipment_context
 
 from ...provenance import write_stamped
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -230,6 +231,10 @@ def write_fit(
         "derived_from": list(stamp.derived_from),
         "base": stamp.base,
     }
+    equipment = model_equipment_context(stamp.base)
+    if equipment is not None:
+        stamp_kw["inputs"].append(stamp.base / CAPTURE_CLUB_FILE)
+        stamp_kw["parameters"]["equipment"] = equipment
     write_stamped(
         out_dir / JOINT_ANGLES_FILE,
         payload,
