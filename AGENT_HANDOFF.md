@@ -1,6 +1,6 @@
 # Attributed Club Catalog Continuation
 
-Current work: `feat/9903-player-club-catalog`, #9903 / epic #9902; PR not created. Optional attributed records and JSON/CSV exchange extend the existing club-data authority; 63 tests and scoped mypy pass. Offline source examples and read-only review #9904 now pass 69 combined tests; bag UI #9905 remains open. Canonical state: `docs/development/HANDOFF.md`. Preserve the standing manual governance and historical context below.
+Current work: `feat/9903-player-club-catalog`, #9903 / epic #9902; PR not created. Optional attributed records and JSON/CSV exchange extend the existing club-data authority; 63 tests and scoped mypy pass. Offline source examples and read-only review #9904 now pass 69 combined tests; bag UI #9905 remains open. Capture UX dependency #9917 at501092b27 is integrated;445 capture/parity tests passed before the merge. Canonical state: `docs/development/HANDOFF.md`. Preserve the standing manual governance and historical context below.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
