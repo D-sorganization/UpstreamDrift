@@ -391,6 +391,13 @@ export function LauncherDashboard({
                         </div>
                     </details>
                     <NavButton to="/chat" label="Chat" icon={MessageSquare} />
+                    <a
+                        href="/capability-atlas/index.html"
+                        className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                        <ExternalLink className="w-5 h-5" aria-hidden="true" />
+                        <span className="text-sm font-medium">Capability Map</span>
+                    </a>
                     <button
                         id="help-button"
                         onClick={onShowHelp}

@@ -1,0 +1,252 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "operator",
+      "title": "Operator",
+      "description": "Record, review, compare and export.",
+      "evidence": "docs/motion_capture/capture_rig.md",
+      "view": "system"
+    },
+    {
+      "id": "desktop",
+      "title": "Desktop Workbench",
+      "description": "PyQt tools and local camera sessions.",
+      "evidence": "src/launchers/embedded_host.py",
+      "view": "system"
+    },
+    {
+      "id": "web",
+      "title": "Web and Tauri",
+      "description": "Browser tools; native-only gaps remain explicit.",
+      "evidence": "ui/src/App.tsx",
+      "view": "system"
+    },
+    {
+      "id": "api",
+      "title": "Application API",
+      "description": "Jobs, artifacts and engine orchestration.",
+      "evidence": "src/api/server.py",
+      "view": "system"
+    },
+    {
+      "id": "pipeline",
+      "title": "Motion Pipeline",
+      "description": "Canonical motion input, scaling and retargeting.",
+      "evidence": "src/shared/python/motion_pipeline",
+      "view": "system"
+    },
+    {
+      "id": "engines",
+      "title": "Physics Engines",
+      "description": "Optional backend capabilities; qualify each result.",
+      "evidence": "src/shared/python/engine_core",
+      "view": "system"
+    },
+    {
+      "id": "files",
+      "title": "Session and Export Files",
+      "description": "Versioned artifacts and provenance.",
+      "evidence": "src/motion_capture/provenance.py",
+      "view": "system"
+    },
+    {
+      "id": "tools",
+      "title": "Tools Contracts",
+      "description": "Pinned vendor-owned shared schemas and libraries.",
+      "evidence": "src/motion_capture/rig/tools_bridge.py",
+      "view": "system"
+    }
+  ],
+  "edges": [
+    {
+      "source": "operator",
+      "target": "desktop",
+      "artifact": "Camera and analysis controls",
+      "kind": "runtime",
+      "evidence": "src/tools/capture_rig/gui.py",
+      "constraint": "Local desktop workflow",
+      "view": "system"
+    },
+    {
+      "source": "operator",
+      "target": "web",
+      "artifact": "Available browser tools",
+      "kind": "runtime",
+      "evidence": "ui/src/App.tsx",
+      "constraint": "Feature parity registry lists gaps and exemptions",
+      "view": "system"
+    },
+    {
+      "source": "web",
+      "target": "api",
+      "artifact": "REST and WebSocket requests",
+      "kind": "runtime",
+      "evidence": "ui/src/api/fetch.ts",
+      "constraint": "Requires a reachable authorized backend",
+      "view": "system"
+    },
+    {
+      "source": "desktop",
+      "target": "files",
+      "artifact": "Session bundles and video",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/session.py",
+      "constraint": "Camera media remains local",
+      "view": "system"
+    },
+    {
+      "source": "files",
+      "target": "pipeline",
+      "artifact": "TRC marker file",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "User exports and imports; not a live automatic connection",
+      "view": "system"
+    },
+    {
+      "source": "pipeline",
+      "target": "engines",
+      "artifact": "Canonical motion and retargeting",
+      "kind": "contract",
+      "evidence": "src/shared/python/motion_pipeline",
+      "constraint": "Backend and model-dependent capability; validate units and conventions",
+      "view": "system"
+    },
+    {
+      "source": "desktop",
+      "target": "tools",
+      "artifact": "Pinned mocap schema",
+      "kind": "contract",
+      "evidence": "src/motion_capture/rig/tools_bridge.py",
+      "constraint": "Fail-closed optional Tools contract bridge",
+      "view": "system"
+    },
+    {
+      "source": "step.setup",
+      "target": "step.capture",
+      "artifact": "Resolved plan / imported views",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "constraint": "Check plan before recording; importing existing files is supported",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.intrinsics",
+      "artifact": "Separate chessboard take",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/intrinsics.py",
+      "constraint": "Multi-view lens calibration; once per camera/mode, not each swing",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.detect",
+      "artifact": "Recorded swing videos",
+      "kind": "file",
+      "evidence": "src/motion_capture/rig/ingest.py",
+      "constraint": "One observation set per estimator",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.annotate",
+      "artifact": "Video frames",
+      "kind": "file",
+      "evidence": "src/motion_capture/annotate/guide.py",
+      "constraint": "Sparse manual points; mark occlusion rather than invent coordinates",
+      "view": "workflow"
+    },
+    {
+      "source": "step.detect",
+      "target": "step.review",
+      "artifact": "2-D observations",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "constraint": "Review confidence, coverage, jitter and provenance",
+      "view": "workflow"
+    },
+    {
+      "source": "step.annotate",
+      "target": "step.review",
+      "artifact": "Converted observation set",
+      "kind": "file",
+      "evidence": "src/motion_capture/annotate/to_observations.py",
+      "constraint": "Run annotations-to-observations; optional merge with detector output",
+      "view": "workflow"
+    },
+    {
+      "source": "step.detect",
+      "target": "step.analyze_2d",
+      "artifact": "Single-view observations",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/analytics2d.py",
+      "constraint": "2-D normalized measurements, not metric depth",
+      "view": "workflow"
+    },
+    {
+      "source": "step.intrinsics",
+      "target": "step.reconstruct",
+      "artifact": "intrinsics.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/pipeline.py",
+      "constraint": "Two or more views plus measured segments; reuse calibrated camera placement when appropriate",
+      "view": "workflow"
+    },
+    {
+      "source": "step.review",
+      "target": "step.reconstruct",
+      "artifact": "Reviewed multi-view observations",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/pipeline.py",
+      "constraint": "Reliability review does not prove geometric observability",
+      "view": "workflow"
+    },
+    {
+      "source": "step.reconstruct",
+      "target": "step.fit_model",
+      "artifact": "joints_3d_m.npy",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/model/fit.py",
+      "constraint": "Fit residuals are not independent physical validation",
+      "view": "workflow"
+    },
+    {
+      "source": "step.fit_model",
+      "target": "step.kinetics",
+      "artifact": "joint_angles.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/model/dynamics.py",
+      "constraint": "Model-dependent inverse dynamics; inspect replay drift and assumptions",
+      "view": "workflow"
+    },
+    {
+      "source": "step.reconstruct",
+      "target": "step.export",
+      "artifact": "Reconstruction artifacts",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "TRC uses millimetres; canonical JSON states units",
+      "view": "workflow"
+    },
+    {
+      "source": "step.export",
+      "target": "pipeline",
+      "artifact": "TRC / canonical JSON",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "Explicit artifact import into motion pipeline",
+      "view": "workflow"
+    },
+    {
+      "source": "step.analyze_2d",
+      "target": "files",
+      "artifact": "Annotated clips and metrics",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/clips.py",
+      "constraint": "Coaching reference; single-view outputs are not 3-D",
+      "view": "workflow"
+    }
+  ]
+}
