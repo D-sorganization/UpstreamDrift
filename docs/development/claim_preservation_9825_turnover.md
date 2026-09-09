@@ -107,6 +107,23 @@ trajectory dynamics. The fixed-candidate exploratory study and a separate
 16-substep optimization are continuing under #9830; no solver code or
 threshold is changed in #9826.
 
+## Current Main Integration
+
+At c7a88299d, Python 3.11/3.12 jobs 102292092259/102292092233 fail before
+pytest because their shallow checkout cannot resolve a merge base and the
+fallback direct diff treats newly added main tests as deletions. Logs identify
+test_compat_poisoned_sys_modules.py; the local direct diff also identifies the
+new training-controller lifecycle test. Merge current main ff0effa5a, preserving
+both new tests, incoming #9465/#9829 changes and every existing handoff/SPEC row.
+No deletion-guard waiver or workflow modification is applied.
+
+The combined incoming/test-publication run initially has 16 passes and ten
+setup errors because local pytest-qt is missing. Install pytest-qt 4.5.0 only
+in the ignored local environment (pytest 9.1.1 is resolved there); all 26 tests
+then pass in 15.69 s with five inherited config-import warnings. Repository
+Ruff 0.15.17 lint/format passes all 6,766 Python files. Normal merge delivery
+hooks and current-head protected CI remain to be verified.
+
 ## Related Program State
 
 Tools finite-support response is published at 12bcf3d83 (665 Linux tests). Separate-G/C spectra 97d46055c pass 692 Linux golf/API tests and 49 focused controls; normal hooks pass and remote SHA is verified. Turnover bbc27dbe32181dd3d147841784a108fdc1aadeea is also published. AffineDrift #4298 merged normally as d7e51655d47d37a092b1bcd29d25972ce373b244 after required CI passed, with no unresolved review threads. Its auxiliary benchmark workflow performed no measurements despite green workflow status; no performance result is claimed.
