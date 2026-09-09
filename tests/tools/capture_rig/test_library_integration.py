@@ -23,11 +23,9 @@ def test_header_library_and_editor_follow_session_and_recording_state(
     assert widget.library_actions.library_button.isEnabled()
     assert not widget.library_actions.edit_button.isEnabled()
     root = _bundle(tmp_path)
-    widget.capture.session_edit.setText(str(root))
-    widget.refresh_session()
+    widget._open_library_capture(root)
     assert widget.library_actions.edit_button.isEnabled()
-    widget.capture.session_edit.setText(str(tmp_path / "missing"))
-    widget.refresh_session()
+    widget._open_library_capture(tmp_path / "missing")
     assert not widget.library_actions.edit_button.isEnabled()
     widget.record_bar.clock.phase = Phase.COUNTDOWN
     widget.library_actions.refresh()
