@@ -32,29 +32,29 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9904 · Offline Club Source Catalog
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9904; epic #9902
 - **Branch:** feat/9903-player-club-catalog
-- **PR:** not created
+- **PR:** #9919
 - **Paths:** club_data/catalog_sources.py, public_clubs.json, scripts/review_club_catalog.py and tests
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (SELF;69 tests, offline validator and scoped mypy pass)
 - **Summary:** Three sourced builds, review diffs and preserved player overrides.
-- **Next step:** Publish and qualify the catalog implementation PR.
+- **Next step:** Qualify protected checks on #9919.
 
 ### DL-#9903 · Attributed Club Catalog
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9903; epic #9902
 - **Branch:** feat/9903-player-club-catalog
-- **PR:** not created
+- **PR:** #9919
 - **Paths:** club_data/, test_club_catalog.py and club_catalog.md
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (SELF; 63 catalog/legacy tests and scoped mypy pass)
 - **Summary:** Attributed optional properties, explicit inference gates and lossless exchange.
-- **Next step:** Qualify the catalog contract and publish its implementation PR.
+- **Next step:** Qualify protected checks on #9919.
 
 ### DL-#9911 · Preview Discovery Failure Recovery
 

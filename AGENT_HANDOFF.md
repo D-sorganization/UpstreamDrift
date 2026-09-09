@@ -1,6 +1,6 @@
 # Attributed Club Catalog Continuation
 
-Current work: `feat/9903-player-club-catalog`, #9903 / epic #9902; PR not created. Optional attributed records and JSON/CSV exchange extend the existing club-data authority; 63 tests and scoped mypy pass. Offline source examples and read-only review #9904 now pass 69 combined tests; bag UI #9905 remains open. Capture UX #9917 merged at8fce9f238 and is integrated;445 capture/parity tests passed before the merge. Canonical state: `docs/development/HANDOFF.md`. Preserve the standing manual governance and historical context below.
+Current work: `feat/9903-player-club-catalog`, #9903 / epic #9902; PR #9919 (open). Optional attributed records and JSON/CSV exchange extend the existing club-data authority; 63 tests and scoped mypy pass. Offline source examples and read-only review #9904 now pass 69 combined tests; bag UI #9905 remains open. Capture UX #9917 merged at8fce9f238 and is integrated;445 capture/parity tests passed before the merge. Canonical state: `docs/development/HANDOFF.md`. Preserve the standing manual governance and historical context below.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
@@ -107,7 +107,7 @@ Updated: 2026-09-08 (wave-2 issue backlog sweep, session UD2IssuesA)
 
 ## Capability Atlas #9850
 
-Isolated branch `feat/9850-capability-atlas`, commit `SELF`, PR not created.
+Isolated branch `feat/9850-capability-atlas`, commit `SELF`, PR #9919 (open).
 See `docs/development/HANDOFF.md` and `DL-#9850` for current validation and
 continuation. Generated references consume existing registries and preserve
 GUI epic #9843 and optimization-agent file ownership. Product #9849 and
