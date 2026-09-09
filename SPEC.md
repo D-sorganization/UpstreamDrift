@@ -1,5 +1,14 @@
 # SPEC.md — Repository Specification Document
 
+## Reference Synchronization, Sampling Gaps & Calibration Identity (#9881)
+
+Harden and qualify reference synchronization, sampling gap rejection, and calibration binding (`src.motion_capture.reference.registration`):
+- `EventAnchors` validation: Enforces paired, finite, strictly monotonic ordering (`t_{k+1} > t_k`) for common reference and scene events. Rejects repeated or non-monotonic timestamps and bounds positive interval rates within `[0.01, 100.0]`.
+- `TimeMapping`: Exactly aligns single-anchor events as pure time offsets (`offset = t_scene - t_ref * rate_scale`) and provides exact mathematical inverse round-trips for scalar and array inputs including boundary extrapolation.
+- `sample_reference_motion`: Refuses linear interpolation across intervals exceeding configurable `max_gap_s` (default 0.5s), masking gaps as invalid while strictly propagating missing endpoint joint masks.
+- `ReferenceRegistration`: Explicitly binds to optional `asset_fingerprint` and `camera_fingerprint` geometry records; guards against asserting `is_calibrated=True` with uncalibrated calibration identifiers.
+- `project_reference_to_camera`: Preserves Brown-Conrady camera lens distortion, frustum clipping, and optional camera clock offsets (`camera_offset_ns`).
+
 ## Optimize Root Mean Square Calculation in OCP Tracking
 
 - Replaced `np.sum(error**2, axis=0)` with `np.einsum("i...,i...->...", error, error)` in `src/shared/python/optimization/ocp/tracking_ocp.py` to bypass intermediate array allocation overhead. (spec-exempt: micro-optimization)

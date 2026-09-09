@@ -114,7 +114,39 @@ class EventAnchors(BaseModel):
         for key in common_keys:
             if not np.isfinite(self.reference[key]) or not np.isfinite(self.scene[key]):
                 raise ValueError("Anchor timestamps must be finite numbers")
+
+        # Sort common keys by reference time
+        sorted_keys = sorted(common_keys, key=lambda k: float(self.reference[k]))
+        r_times = [float(self.reference[k]) for k in sorted_keys]
+        s_times = [float(self.scene[k]) for k in sorted_keys]
+
+        # Enforce strictly monotonic ordering and bounded positive rates
+        for i in range(len(sorted_keys) - 1):
+            dt_ref = r_times[i + 1] - r_times[i]
+            dt_scene = s_times[i + 1] - s_times[i]
+            if dt_ref <= 0.0:
+                raise ValueError(
+                    f"Reference anchor timestamps must be strictly monotonic: {sorted_keys[i]} ({r_times[i]}) >= {sorted_keys[i + 1]} ({r_times[i + 1]})"
+                )
+            if dt_scene <= 0.0:
+                raise ValueError(
+                    f"Scene anchor timestamps must be strictly monotonic: {sorted_keys[i]} ({s_times[i]}) >= {sorted_keys[i + 1]} ({s_times[i + 1]})"
+                )
+            rate = dt_scene / dt_ref
+            if rate < 0.01 or rate > 100.0:
+                raise ValueError(
+                    f"Anchor interval rate must be positive and bounded within [0.01, 100.0]: got {rate:.4f}"
+                )
         return self
+
+    def sorted_common_events(self) -> list[str]:
+        """Return event keys present in both reference and scene, sorted by reference time."""
+        ref_dict = self.reference
+        scene_dict = self.scene
+        return sorted(
+            set(ref_dict.keys()) & set(scene_dict.keys()),
+            key=lambda k: float(ref_dict[k]),
+        )
 
 
 class TimeMapping(BaseModel):
@@ -134,10 +166,13 @@ class TimeMapping(BaseModel):
             # Piecewise linear warping through common sorted events
             ref_dict = anchors.reference
             scene_dict = anchors.scene
-            common = sorted(
-                set(ref_dict.keys()) & set(scene_dict.keys()),
-                key=lambda k: ref_dict[k],
-            )
+            common = anchors.sorted_common_events()
+            if len(common) == 1:
+                # Exactly one anchor: pure offset alignment so anchor matches exactly
+                k = common[0]
+                eff_offset = float(scene_dict[k]) - float(ref_dict[k]) * self.rate_scale
+                res = arr * self.rate_scale + eff_offset
+                return float(res) if arr.ndim == 0 else res
             if len(common) >= 2:
                 r_times = [float(ref_dict[k]) for k in common]
                 s_times = [float(scene_dict[k]) for k in common]
@@ -168,10 +203,13 @@ class TimeMapping(BaseModel):
         if anchors is not None:
             ref_dict = anchors.reference
             scene_dict = anchors.scene
-            common = sorted(
-                set(ref_dict.keys()) & set(scene_dict.keys()),
-                key=lambda k: scene_dict[k],
-            )
+            common = anchors.sorted_common_events()
+            if len(common) == 1:
+                # Exactly one anchor: invert pure offset alignment
+                k = common[0]
+                eff_offset = float(scene_dict[k]) - float(ref_dict[k]) * self.rate_scale
+                res = (arr - eff_offset) / self.rate_scale
+                return float(res) if arr.ndim == 0 else res
             if len(common) >= 2:
                 s_times = [float(scene_dict[k]) for k in common]
                 r_times = [float(ref_dict[k]) for k in common]
@@ -211,6 +249,8 @@ class ReferenceRegistration(BaseModel):
     )
     image_transform_2d: Matrix3x3 | None = None
     assumption_labels: tuple[str, ...] = ()
+    asset_fingerprint: str | None = None
+    camera_fingerprint: str | None = None
     is_calibrated: bool = False
 
     @model_validator(mode="after")
@@ -220,6 +260,14 @@ class ReferenceRegistration(BaseModel):
             raise ValueError("reference_id must be a valid canonical UUID")
         if not self.calibration_id.strip():
             raise ValueError("calibration_id must be non-empty")
+        if self.is_calibrated and self.calibration_id.strip().lower() in (
+            "uncalibrated",
+            "uncalibrated_2d",
+            "none",
+        ):
+            raise ValueError(
+                "is_calibrated cannot be True with an uncalibrated calibration_id"
+            )
         return self
 
 
@@ -261,11 +309,14 @@ def sample_reference_motion(
     motion: ReferenceMotion,
     registration: ReferenceRegistration,
     scene_times: npt.NDArray[np.float64],
+    *,
+    max_gap_s: float | None = 0.5,
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.bool_]]:
     """Sample reference motion at requested scene times using bounded linear interpolation.
 
     Strictly propagates missing-joint masks: if either bounding frame has a missing point
-    for joint k, the interpolated point at time t is masked as invalid (valid_mask=False).
+    for joint k, or if the time interval between bounding frames exceeds ``max_gap_s``,
+    the interpolated point at time t is masked as invalid (valid_mask=False).
     """
     source_scene_times, pts_world, source_mask = transform_reference_motion(
         motion, registration
@@ -308,7 +359,12 @@ def sample_reference_motion(
             out_valid[sample_idx] = source_mask[idx]
             continue
 
-        alpha = (t - t_prev) / (t_next - t_prev)
+        dt = t_next - t_prev
+        if max_gap_s is not None and dt > max_gap_s:
+            # Exceeds allowed gap bound: refuse interpolation across large gap
+            continue
+
+        alpha = (t - t_prev) / dt
         # Joint is valid ONLY if BOTH endpoints are valid
         both_valid = source_mask[idx - 1] & source_mask[idx]
         out_valid[sample_idx] = both_valid
@@ -323,6 +379,8 @@ def project_reference_to_camera(
     points_world: npt.NDArray[np.float64],
     valid_mask: npt.NDArray[np.bool_],
     camera: PinholeCamera | CameraCalibration,
+    *,
+    camera_offset_ns: int | None = None,
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.bool_]]:
     """Project 3D world points onto camera image coordinates with clipping and distortion.
 
