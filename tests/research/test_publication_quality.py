@@ -25,6 +25,9 @@ PDF = ARTICLE / "proximal_distal_energy_transfer.pdf"
 MANIFEST = ARTICLE / "release_manifest.json"
 SOURCE_REPOSITORY = "https://github.com/D-sorganization/UpstreamDrift"
 SOURCE_REVISION = "a" * 40
+# Reviewed census-only rerender: see claim_preservation_9825_turnover.md.
+REVIEWED_PDF_SHA256 = "bf855f791e142e9ff84a30af61966bee6a0fcf406fdb7f41616e0de8a6e567e5"
+REVIEWED_PDF_BYTES = 2_012_367
 pytestmark = pytest.mark.unit
 requires_fitz = pytest.mark.skipif(
     fitz is None,
@@ -187,11 +190,9 @@ def test_canonical_pdf_byte_identity_is_dependency_free() -> None:
         "proximal_distal_energy_transfer.pdf"
     ]
 
-    assert digest == (
-        "554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36"
-    )
-    assert PDF.stat().st_size == 2_011_818
-    assert artifact == {"sha256": digest, "bytes": 2_011_818}
+    assert digest == REVIEWED_PDF_SHA256
+    assert PDF.stat().st_size == REVIEWED_PDF_BYTES
+    assert artifact == {"sha256": digest, "bytes": REVIEWED_PDF_BYTES}
 
 
 @requires_fitz
@@ -222,10 +223,8 @@ def test_canonical_pdf_passes_the_computational_profile() -> None:
         render_zoom=0.2,
     )
 
-    assert report["publication"]["sha256"] == (
-        "554fca211786ac5a06959f41b9f7d75720c89155168faeaac9d648524e8c9e36"
-    )
-    assert report["publication"]["bytes"] == 2_011_818
+    assert report["publication"]["sha256"] == REVIEWED_PDF_SHA256
+    assert report["publication"]["bytes"] == REVIEWED_PDF_BYTES
     assert report["publication"]["pages"] == 253
     assert report["publication"]["fast_web_access"] is True
     assert report["navigation"] == {
