@@ -493,3 +493,5 @@ reruns. Do not restart the Actions runner or start WSL.
   Note the local reproducer cannot exercise real casadi/bioptim (Python 3.14
   has no casadi wheel); CI lanes with the `[bioptim]` extra must show the
   ocp bioptim legs running (not skipping) in combined lanes.
+
+PR #9840 CI cycle 3: full unit gate passed 14,431 tests and failed only the companion feature-count expectation and shared divergence inventory. Updated counts for the new controls and regenerated the inventory with the pinned Tools tree. Both affected modules pass (34 tests). Await the refreshed remote gate before merging.
