@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9851 · Capture Responsiveness and Recovery
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9851, #9857 (epic #9849)
+- **Branch:** `perf/9851-capture-responsiveness`
+- **PR:** #9859
+- **Paths:** `src/tools/capture_rig/player.py`, `src/tools/capture_rig/process_runner.py`, `scripts/benchmark_capture_responsiveness.py`, `tests/tools/capture_rig/test_player_cache.py`, `tests/tools/capture_rig/test_process_runner.py`, `docs/development/capture_product_review.md`
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`e7c9021c9`)
+- **Acceptance:** Duplicate frames decode once with isolated pixels; failed child starts restore the lifecycle and allow retry; measured evidence and hardware limits documented.
+- **Evidence:** 241 camera tests after cache; six focused tests after recovery; duplicate median 196.788 to 12.613 ms.
+- **Next step:** Complete protected CI; integrate with GUI owner of #9843.
+
 ### DL-#9850 · Generated Capability Atlas
 
 - **State:** in_review

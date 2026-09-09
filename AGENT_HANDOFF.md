@@ -533,3 +533,7 @@ Pinocchio and Drake now expose View > Segment Force Colors via a shared MeshcatF
 Final native-host CI exposed optional Qt menu return annotations. Menus now use explicit QMenu construction after validating the menu bar. Pinocchio synchronizes force colors in its GUI coordinator override, leaving the legacy visualization mixin unchanged; native Linux host tests still pass (2 tests). Current required gate remains red until the type correction is validated remotely.
 
 The final host CI type check passes after menu contracts and the native COM matrix correction. The DRY gate then identified duplicated menu setup; install_force_color_menu now owns that validated setup for both GUIs. Native GUI tests pass after extraction. Await the corrected head's aggregate quality gate before closing the epic.
+
+## Capture Product Review (#9851, #9857)
+
+See `docs/development/HANDOFF.md` and `docs/development/capture_product_review.md`. Bounded duplicate-frame cache and child startup recovery are covered by six focused tests. The camera suite passed 241 tests before the recovery change. GUI #9843 remains independently owned; hardware qualification remains outstanding.
