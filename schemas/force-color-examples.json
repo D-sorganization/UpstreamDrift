@@ -1,0 +1,27 @@
+{
+  "description": "Cross-runtime signed axial force color conformance; N, tension positive, opaque sRGB interpolation",
+  "cases": [
+    { "settings": { "enabled": true }, "force_n": 1000, "expected": "#0000ff" },
+    {
+      "settings": { "enabled": true },
+      "force_n": -1000,
+      "expected": "#ff0000"
+    },
+    { "settings": { "enabled": true }, "force_n": 0, "expected": "#ffffff" },
+    { "settings": { "enabled": true }, "force_n": 500, "expected": "#8080ff" },
+    { "settings": { "enabled": true }, "force_n": -500, "expected": "#ff8080" },
+    { "settings": { "enabled": true }, "force_n": null, "expected": "#123456" },
+    { "settings": {}, "force_n": 1000, "expected": "#123456" },
+    {
+      "settings": {
+        "enabled": true,
+        "tension_limit_n": 110,
+        "deadband_n": 10,
+        "neutral_color": "#000000",
+        "tension_color": "#00ff00"
+      },
+      "force_n": 60,
+      "expected": "#008000"
+    }
+  ]
+}
