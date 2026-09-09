@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 429,
+    "identical": 440,
     "diverged": 275,
-    "ud-only": 1206,
-    "tools-only": 554,
+    "ud-only": 1208,
+    "tools-only": 543,
     "spelling-only": 126
   },
   "packages": {
@@ -490,7 +490,7 @@
     "optimization": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 28,
+      "ud-only": 29,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -677,10 +677,10 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 235,
+      "identical": 246,
       "diverged": 74,
-      "ud-only": 36,
-      "tools-only": 23,
+      "ud-only": 37,
+      "tools-only": 12,
       "spelling-only": 25
     },
     "signal_toolkit": {
@@ -11220,7 +11220,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "loaders",
-      "ud_bytes": 617,
+      "ud_bytes": 1440,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -12288,7 +12288,7 @@
       "classification": "ud-only",
       "package": "motion_pipeline",
       "subpackage": "sources",
-      "ud_bytes": 13004,
+      "ud_bytes": 14431,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14736,7 +14736,7 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "ocp",
-      "ud_bytes": 2349,
+      "ud_bytes": 3042,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14760,7 +14760,7 @@
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "ocp",
-      "ud_bytes": 11684,
+      "ud_bytes": 11948,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -14780,11 +14780,23 @@
       "spelling_only": false
     },
     {
+      "path": "optimization/ocp/parameter_ocp.py",
+      "classification": "ud-only",
+      "package": "optimization",
+      "subpackage": "ocp",
+      "ud_bytes": 13146,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "optimization/ocp/result.py",
       "classification": "ud-only",
       "package": "optimization",
       "subpackage": "ocp",
-      "ud_bytes": 5869,
+      "ud_bytes": 7051,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21117,13 +21129,13 @@
     },
     {
       "path": "sidekick/process_calculators/psa_package/PSA System PFD.jpg",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 29361,
       "tools_bytes": 29361,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -21141,23 +21153,35 @@
     },
     {
       "path": "sidekick/process_calculators/psa_package/References/Design Basis for PSA Unit.JPG",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 80136,
       "tools_bytes": 80136,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/psa_package/References/ICR PSA Logic Summary.docx",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 31422,
       "tools_bytes": 31422,
+      "byte_delta": 0,
+      "byte_identical": true,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "sidekick/process_calculators/psa_package/References/IMG_20180807_100123236.jpg",
+      "classification": "ud-only",
+      "package": "sidekick",
+      "subpackage": "process_calculators",
+      "ud_bytes": 1888971,
+      "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -21165,37 +21189,37 @@
     },
     {
       "path": "sidekick/process_calculators/psa_package/References/PSA Control Narrative.docx",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 21190,
       "tools_bytes": 21190,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/psa_package/References/PSA Status Update July 2018.docx",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 254945,
       "tools_bytes": 254945,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/psa_package/References/PSA System PFD.jpg",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 29361,
       "tools_bytes": 29361,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -21237,37 +21261,37 @@
     },
     {
       "path": "sidekick/process_calculators/psa_package/o2_removal_sweep.png",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 110606,
       "tools_bytes": 110606,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/psa_package/o2_safety_analysis.png",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 162111,
       "tools_bytes": 162111,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/psa_package/operating_envelope.png",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 114348,
       "tools_bytes": 114348,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -21357,25 +21381,25 @@
     },
     {
       "path": "sidekick/process_calculators/psa_package/recovery_surface_3d.png",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 225938,
       "tools_bytes": 225938,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "sidekick/process_calculators/psa_package/sensitivity_recycle.png",
-      "classification": "tools-only",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "process_calculators",
-      "ud_bytes": null,
+      "ud_bytes": 219516,
       "tools_bytes": 219516,
-      "byte_delta": null,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -30384,9 +30408,9 @@
     {
       "path": "__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-09-02",
-        "commit": "128b8d9483fe6a60ccfea2f134aa54f95b32f5ec"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-09-09",
+        "commit": "dba24ceb7e66420e2bc173eed8fcc41607b6564f"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -31723,9 +31747,9 @@
     {
       "path": "config/__init__.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-06-13",
-        "commit": "b4ddf7b30a4fc64eb4c83781c2005c0eefb6e0fa"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -31736,9 +31760,9 @@
     {
       "path": "config/environment.py",
       "ud": {
-        "author": "codex-scheduled-tasks[bot]",
-        "date": "2026-05-26",
-        "commit": "a11644a4e8181b6c56a90e3fc90df8b1af187c42"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "codex-scheduled-tasks[bot]",
@@ -31827,9 +31851,9 @@
     {
       "path": "gui_launcher/tools_sidebar_integration.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-29",
-        "commit": "93f243f28792ddb48647836a5c515927900d81a4"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
@@ -33322,9 +33346,9 @@
     {
       "path": "sidekick/process_calculators/psa_package/psa_analysis.ipynb",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-05-20",
-        "commit": "8bb184cfb945d5477d06a3569ba2e2e774dfb598"
+        "author": "d-sorgclaudeagent[bot]",
+        "date": "2026-07-26",
+        "commit": "185af2349be27127ea84183525db2e7bd5a5ca9f"
       },
       "tools": {
         "author": "Dieter Olson",
