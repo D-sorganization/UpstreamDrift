@@ -12,6 +12,9 @@ project Python environment. In PowerShell, expose the repository packages:
 
 ```powershell
 $env:PYTHONPATH="$PWD/src;$PWD/src/shared/python"
+$env:OPENBLAS_NUM_THREADS="1"
+$env:OMP_NUM_THREADS="1"
+$env:MKL_NUM_THREADS="1"
 python3 -m src.motion_capture.reference.fit_job --list-models
 python3 -m src.motion_capture.reference.fit_job --config examples/motion_capture/reference_driver.json
 ```
@@ -23,6 +26,11 @@ choose another output directory. Set `models` to `["all"]` for the available
 catalog, or list selected names. `stride: 12` selects every twelfth source frame
 for an inexpensive 30 Hz survey; `stride: 1` retains every source sample.
 The saved timestamps remain source timestamps, without implicit event shifts.
+
+Use one BLAS thread per fitting worker, particularly alongside other agents.
+On the development workstation the default was 20 threads; sparse full-rate
+fitting spent excessive time coordinating those threads. These environment
+variables affect only the shell's child processes, not another agent's runtime.
 
 `max_iterations` is the maximum per robust solver stage, not a total budget or
 a certificate of convergence. The report records total iterations and residuals.
