@@ -1,3 +1,10 @@
+## Reference Timing and Camera Evidence (#9881)
+
+Active isolated branch `fix/9881-reference-timing` builds on #9884 and preserves
+its state/lifetime fixes. Bounded event mapping, efficient sampling and actual
+calibration/clock bindings are implemented; final qualification remains. See
+`docs/development/HANDOFF.md`. #9882/#9883 remain open before epic closure.
+
 ## Comparison State Qualification (#9879)
 
 Branch `fix/reference-comparison-qualification` preserves merged reference work

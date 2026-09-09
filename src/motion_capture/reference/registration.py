@@ -13,7 +13,8 @@ Strictly preserves:
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal, Self
+from bisect import bisect_left
+from typing import Literal, Self
 from uuid import UUID
 
 import numpy as np
@@ -21,10 +22,13 @@ import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.motion_capture.reconstruct.cameras import PinholeCamera
-from src.motion_capture.reference.model import ReferenceMotion
+from src.motion_capture.reference.model import Asset, ReferenceMotion
 from src.shared.python.core.contracts import check_finite, require
 from src.shared.python.estimation.residuals import project_pinhole
 from src.shared.python.pose_estimation.observations import CameraCalibration
+
+from .synchronization import EventAnchors as EventAnchors, TimeMapping as TimeMapping
+from .evidence import CameraSnapshot, ViewClock, asset_identity
 
 Matrix3x3 = tuple[
     tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]
@@ -98,102 +102,6 @@ class ReferenceTransform(BaseModel):
         return scaled_rotated + t
 
 
-class EventAnchors(BaseModel):
-    """Key swing events anchored in both reference time and scene time."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
-
-    reference: dict[str, float]
-    scene: dict[str, float]
-
-    @model_validator(mode="after")
-    def validate_anchors(self) -> Self:
-        common_keys = set(self.reference.keys()) & set(self.scene.keys())
-        if not common_keys:
-            raise ValueError("Event anchors must share at least one common event key")
-        for key in common_keys:
-            if not np.isfinite(self.reference[key]) or not np.isfinite(self.scene[key]):
-                raise ValueError("Anchor timestamps must be finite numbers")
-        return self
-
-
-class TimeMapping(BaseModel):
-    """Synchronizes reference timestamps into the scene timeline."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
-
-    offset_s: float = 0.0
-    rate_scale: float = Field(default=1.0, gt=0.01, lt=100.0)
-    event_anchors: EventAnchors | None = None
-
-    def reference_to_scene(self, t_ref: float | npt.NDArray[np.float64]) -> Any:
-        """Convert a reference timestamp (or array) to scene time."""
-        arr = np.asarray(t_ref, dtype=float)
-        anchors = self.event_anchors
-        if anchors is not None:
-            # Piecewise linear warping through common sorted events
-            ref_dict = anchors.reference
-            scene_dict = anchors.scene
-            common = sorted(
-                set(ref_dict.keys()) & set(scene_dict.keys()),
-                key=lambda k: ref_dict[k],
-            )
-            if len(common) >= 2:
-                r_times = [float(ref_dict[k]) for k in common]
-                s_times = [float(scene_dict[k]) for k in common]
-                # Bounded interpolation with linear extrapolation at endpoints
-                interp_val = np.interp(arr, r_times, s_times)
-                # Extrapolate linearly beyond bounds
-                left_mask = arr < r_times[0]
-                right_mask = arr > r_times[-1]
-                warped = np.array(interp_val, dtype=float, copy=True)
-                if np.any(left_mask):
-                    slope_l = (s_times[1] - s_times[0]) / (r_times[1] - r_times[0])
-                    warped[left_mask] = (
-                        s_times[0] + (arr[left_mask] - r_times[0]) * slope_l
-                    )
-                if np.any(right_mask):
-                    slope_r = (s_times[-1] - s_times[-2]) / (r_times[-1] - r_times[-2])
-                    warped[right_mask] = (
-                        s_times[-1] + (arr[right_mask] - r_times[-1]) * slope_r
-                    )
-                return float(warped) if arr.ndim == 0 else warped
-        res = arr * self.rate_scale + self.offset_s
-        return float(res) if arr.ndim == 0 else res
-
-    def scene_to_reference(self, t_scene: float | npt.NDArray[np.float64]) -> Any:
-        """Convert a scene timestamp (or array) back to reference time."""
-        arr = np.asarray(t_scene, dtype=float)
-        anchors = self.event_anchors
-        if anchors is not None:
-            ref_dict = anchors.reference
-            scene_dict = anchors.scene
-            common = sorted(
-                set(ref_dict.keys()) & set(scene_dict.keys()),
-                key=lambda k: scene_dict[k],
-            )
-            if len(common) >= 2:
-                s_times = [float(scene_dict[k]) for k in common]
-                r_times = [float(ref_dict[k]) for k in common]
-                interp_val = np.interp(arr, s_times, r_times)
-                left_mask = arr < s_times[0]
-                right_mask = arr > s_times[-1]
-                warped = np.array(interp_val, dtype=float, copy=True)
-                if np.any(left_mask):
-                    slope_l = (r_times[1] - r_times[0]) / (s_times[1] - s_times[0])
-                    warped[left_mask] = (
-                        r_times[0] + (arr[left_mask] - s_times[0]) * slope_l
-                    )
-                if np.any(right_mask):
-                    slope_r = (r_times[-1] - r_times[-2]) / (s_times[-1] - s_times[-2])
-                    warped[right_mask] = (
-                        r_times[-1] + (arr[right_mask] - s_times[-1]) * slope_r
-                    )
-                return float(warped) if arr.ndim == 0 else warped
-        res = (arr - self.offset_s) / self.rate_scale
-        return float(res) if arr.ndim == 0 else res
-
-
 class ReferenceRegistration(BaseModel):
     """Documented registration of a reference asset into a camera rig scene."""
 
@@ -212,6 +120,10 @@ class ReferenceRegistration(BaseModel):
     image_transform_2d: Matrix3x3 | None = None
     assumption_labels: tuple[str, ...] = ()
     is_calibrated: bool = False
+    max_gap_s: float = Field(default=0.25, gt=0, le=10)
+    asset_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    camera: CameraSnapshot | None = None
+    clock: ViewClock | None = None
 
     @model_validator(mode="after")
     def validate_registration(self) -> Self:
@@ -220,7 +132,44 @@ class ReferenceRegistration(BaseModel):
             raise ValueError("reference_id must be a valid canonical UUID")
         if not self.calibration_id.strip():
             raise ValueError("calibration_id must be non-empty")
+        if self.camera and self.clock and self.camera.camera_id != self.clock.view:
+            raise ValueError("Camera and clock must describe the same view")
         return self
+
+    def validate_binding(
+        self, asset: Asset, camera: CameraSnapshot | None, clock: ViewClock
+    ) -> None:
+        """Check once when opening/saving/exporting, outside the per-frame sampler."""
+        if asset.id != self.reference_id or self.asset_sha256 != asset_identity(asset):
+            raise ValueError("Reference geometry changed; review its alignment")
+        if (self.camera.identity if self.camera else None) != (
+            camera.identity if camera else None
+        ):
+            raise ValueError("Reference camera changed; review its alignment")
+        if self.clock != clock:
+            raise ValueError("Reference clock changed; review its event alignment")
+
+    def bound(
+        self, asset: Asset, camera: CameraSnapshot | None, clock: ViewClock
+    ) -> Self:
+        """Snapshot the manual reference recipe; camera presence is not registration accuracy."""
+        if asset.id != self.reference_id:
+            raise ValueError("Registration belongs to a different reference")
+        if self.asset_sha256 is not None:
+            self.validate_binding(asset, camera, clock)
+        return type(self).model_validate(
+            self.model_dump()
+            | {
+                "asset_sha256": asset_identity(asset),
+                "camera": self.camera or camera,
+                "clock": clock,
+                "calibration_id": camera.identity if camera else "unavailable",
+                "is_calibrated": False,
+            }
+        )
+
+    def scene_time(self, original_time: float) -> float:
+        return self.clock.player_time(original_time) if self.clock else original_time
 
 
 def transform_reference_motion(
@@ -267,55 +216,47 @@ def sample_reference_motion(
     Strictly propagates missing-joint masks: if either bounding frame has a missing point
     for joint k, the interpolated point at time t is masked as invalid (valid_mask=False).
     """
-    source_scene_times, pts_world, source_mask = transform_reference_motion(
-        motion, registration
+    require(
+        registration.reference_id == motion.id,
+        "Registration belongs to a different reference",
     )
-
     t_eval = np.asarray(scene_times, dtype=float)
-    n_samples = len(t_eval)
-    k_count = pts_world.shape[1]
-
-    out_pts = np.zeros((n_samples, k_count, 3), dtype=float)
-    out_valid = np.zeros((n_samples, k_count), dtype=bool)
-
-    for sample_idx, t in enumerate(t_eval):
-        # Find bracketing indices
-        if t < source_scene_times[0] or t > source_scene_times[-1]:
-            # Beyond reference bounds
+    require(t_eval.ndim == 1, "scene_times must be one-dimensional")
+    reference_times = registration.time_mapping.scene_to_reference(t_eval)
+    k_count = len(motion.joint_names)
+    out_pts = np.zeros((len(t_eval), k_count, 3), dtype=float)
+    out_valid = np.zeros((len(t_eval), k_count), dtype=bool)
+    for sample, time in enumerate(reference_times):
+        right = bisect_left(motion.time_s, time)
+        exact = next(
+            (
+                i
+                for i in (right, right - 1)
+                if 0 <= i < len(motion.time_s) and abs(motion.time_s[i] - time) <= 1e-9
+            ),
+            None,
+        )
+        if exact is not None:
+            left, right, alpha = exact, exact, 0.0
+        elif right == 0 or right == len(motion.time_s):
             continue
-
-        idx = np.searchsorted(source_scene_times, t)
-        if idx == 0:
-            if np.isclose(t, source_scene_times[0]):
-                out_pts[sample_idx] = pts_world[0]
-                out_valid[sample_idx] = source_mask[0]
-            continue
-        if idx == len(source_scene_times):
-            if np.isclose(t, source_scene_times[-1]):
-                out_pts[sample_idx] = pts_world[-1]
-                out_valid[sample_idx] = source_mask[-1]
-            continue
-
-        # Check exact hit
-        t_prev = source_scene_times[idx - 1]
-        t_next = source_scene_times[idx]
-        if np.isclose(t, t_prev):
-            out_pts[sample_idx] = pts_world[idx - 1]
-            out_valid[sample_idx] = source_mask[idx - 1]
-            continue
-        if np.isclose(t, t_next):
-            out_pts[sample_idx] = pts_world[idx]
-            out_valid[sample_idx] = source_mask[idx]
-            continue
-
-        alpha = (t - t_prev) / (t_next - t_prev)
-        # Joint is valid ONLY if BOTH endpoints are valid
-        both_valid = source_mask[idx - 1] & source_mask[idx]
-        out_valid[sample_idx] = both_valid
-        out_pts[sample_idx, both_valid] = (1.0 - alpha) * pts_world[
-            idx - 1, both_valid
-        ] + alpha * pts_world[idx, both_valid]
-
+        else:
+            left = right - 1
+            gap = motion.time_s[right] - motion.time_s[left]
+            if gap > registration.max_gap_s:
+                continue
+            alpha = (time - motion.time_s[left]) / gap
+        for joint, (a, b) in enumerate(
+            zip(motion.points_m[left], motion.points_m[right], strict=True)
+        ):
+            if a is not None and b is not None:
+                out_pts[sample, joint] = (1 - alpha) * np.asarray(
+                    a
+                ) + alpha * np.asarray(b)
+                out_valid[sample, joint] = True
+    converted = canonical_z_up_to_adr0041_world(out_pts)
+    out_pts = registration.transform.apply(converted)
+    out_pts[~out_valid] = 0
     return out_pts, out_valid
 
 
