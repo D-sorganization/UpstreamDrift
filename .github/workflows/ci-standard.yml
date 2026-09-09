@@ -425,6 +425,9 @@ jobs:
           python -m pip install --no-cache-dir --ignore-installed -r requirements-dev.lock
           python -m pip install --no-cache-dir --no-deps -e ".[dev]"
 
+      - name: Generated Capability Atlas Freshness
+        run: python3 -m scripts.generate_capability_atlas --check
+
       - name: Pin Type Toolchain
         run: |
           python -m ensurepip --upgrade || true
