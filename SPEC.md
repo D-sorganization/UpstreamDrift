@@ -5592,6 +5592,8 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Resolve sidekick extension overlay supported scopes and fix test path resolution (#9572).
 
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/tools/bunker_shot_gui/shot3d.py` to optimize array magnitude calculation. (spec-exempt: micro-optimization)
+- Resolve bunkershot3d canonical imports, packaged config paths, and artifact output directories in notebooks/bunkershot3d/phase1_mvp.py (#8842 #9832).
+- MotionRetargeting._solve_frame_ik evaluates mj_forward once per IK iteration and batches marker Jacobian/error rows into single array operations (#8922 #9828).
 
 ## Independently Refined Swing Defect Reference (#9830)
 
