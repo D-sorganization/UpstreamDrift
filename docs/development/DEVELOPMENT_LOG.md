@@ -23,10 +23,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #9898; epic #9897 (goal also includes #9902 and #9906)
 - **Branch:** feat/capture-guided-setup
-- **PR:** not created
+- **PR:** #9910 (draft)
 - **Paths:** src/tools/capture_rig/calibration_profiles.py, tests/tools/capture_rig/test_calibration_profiles.py, docs/development/capture_setup_execution_plan.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`54b9b0586` plus working changes)
+- **Last verified:** 2026-09-09 (`b4abd67bb`)
 - **Summary:** Compatible optical profiles and archived intrinsic revisions; everyday observations and UI integration remain required.
 - **Next step:** Integrate reference-session capture and profile selection under #9898/#9900.
 
