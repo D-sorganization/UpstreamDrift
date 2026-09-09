@@ -2,15 +2,65 @@
 
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
+
+## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
+
+The Capture Rig tile went from "no live view at all" to a recording station.
+Merged in order: #9809 (live preview, movable/scrollable panes with saved dock
+layouts, transport-style recording), #9819 (#9816 theme and layout standards:
+`styling.py`, `header.py`, `action_grid.py`, `playback.py` split out of
+`gui.py`), #9820 (#9810/#9811 `layout_model.py` compositor + `layout_presets.py`
+store), #9821 (#9815 `mosaic.py` + `rig multipicture`), #9823 (#9813/#9814 live
+preview and playback rendered through a `LayoutSpec`). PR #9822 was closed as
+superseded: it was #9823's base, so its files landed byte-identically with that
+squash, and merging it would have reverted the multiview panes. Only #9817
+(this documentation pass) remained.
+
+Hardware facts worth keeping, all measured on the three-camera rig and written
+up in `docs/motion_capture/evidence/capture_rig_multiview.md`:
+
+- A DirectShow camera opens once. During a take the recorder tees its own
+  preview (`--live-preview DIR`); the tile shows those snapshots.
+- That tee must decode cheaply. At full resolution it starved the stream copy
+  (95/393/74 frames in ~7 s); with `-lowres:v 2` and a 256 MB real-time buffer
+  all three cameras hold 60 fps (493/494/462 frames in 8 s).
+- Enumeration costs ~30 s; `--camera VIEW=INSTANCE_ID` reuses what the preview
+  already bound.
+- OpenCV cannot drive these cameras: Media Foundation hangs on the third unit
+  and DirectShow-by-index refuses 1920x1200@60.
+
+Two defects were found while integrating the parallel branches, not by CI:
+`workflow.py` briefly held two `ACTION_HELP` tables where the second silently
+won, and three new entry points each took nine parameters against a budget of
+eight (now `MosaicOptions` / `MultipictureArgs`). A wall-clock assertion in
+`test_layout_model.py` that flaked under load now takes the best of several
+rounds.
+
+## PR Backlog Catch-Up Sweep: 2026-09-08 (Agent `claude`, Session UpstreamPRs)
+
+Disposition of the 38-PR open backlog (REST-verified states at sweep start):
+
+- **Merged (18):** #9513, #9715, #9716, #9717, #9718, #9719, #9721, #9722, #9728, #9734, #9736, #9738, #9739, #9741, #9742, #9743, #9744, #9745. Every branch was brought current with `main` (REST update-branch, never force-push) and its AGENT_HANDOFF/SPEC/DEVELOPMENT_LOG conflicts resolved (union for SPEC rows, main-wins for handoff stamps, DL entries re-added into the Active table).
+- **Closed as redundant (3):** #9433 (duplicate of #9723 for #9409), #9437 (superseded by the merged #9412 registry work, `1b53a9bf5`), #9737 (superseded by merged #9740 for #9699). Explanatory comments posted on each.
+- **Armed for auto-merge (9):** #9434, #9465, #9471, #9720, #9723, #9724, #9725, #9726, #9729. Branches are conflict-free and current; auto-merge (merge/squash per repo allowance) merges each as `quality-gate` passes under strict up-to-date. No action needed; they drain serially.
+- **Blocked (2):**
+  - **#9440** — the `split` ruling deletes UD `theme/__init__.py`+`palette.py`, but main landed UD-only palette/typography extensions (#8972/#9037, `ThemePalette`/`get_current_colors`, ~217 lines) that the pinned Tools tree (`eab74a901a`) does not contain; 10+ launchers/API modules consume them. Next steps: land #8972/#9037 in D-sorganization/Tools tools-canonical side, bump the `vendor/ud-tools` pin, re-merge main, regenerate `docs/shared_tools/divergence_inventory{.md,.v1.json}` via `scripts/shared_tools/divergence_inventory.py`, then re-run `tests/unit/shared_python/test_seam_redirect.py` + quality-gate.
+  - **#9442** — stacked on #9440's base branch (retarget to `main` only after #9440 lands); its own CI failures overlap open #9607 / PR #9726 (pinocchio authority lock drift) and a self-hosted authority-runner artifact path. Do not merge in isolation.
+- **Skipped drafts (4):** #9610, #9618, #9633, #9636 (conductor research drafts, not trivially completable).
+
+No issue was closed in this sweep (redundant-PR closures do not close issues). Fleet-wide handoff/lease state at sweep start: `C:/tmp/backlog/UpstreamDrift.md`.
 
 ## Impact Dynamics and Acoustics: #9700
 
-- Inventory/design #9701 merged via PR #9706 at `dbc6727aa`; AffineDrift theory PR #4258 also merged.
-- Tools #5077 merged at `f72544613`; #5082 remains open. T3 section inertia is published at `22cfc8df9`; rotating loaded dynamics, contact, acoustics and empirical gates remain active.
-- #9735 / PR #9745 merged at `1b48707d5`. Follow-up #9783 accepts exact reviewed renderer source/hash pairs; the existing vendor pin and strict pixel tolerances stay intact.
-- No-vendor provider contracts: 13 passed; ownership-eviction mutation detected; installed-wheel CLI bootstrap passed. Pinned-vendor/CLI/fallback checks: 72 passed.
-- Current renderer compatibility: `docs/development/renderer_reference_9783_turnover.md`; import history: `docs/development/impact_provider_import_turnover.md`; design: `docs/development/impact_acoustics_program.md`.
-- Preserve #8557 protected evidence, exact Tools pin, manufactured-data boundaries and workstation recovery restrictions. No calibrated acoustic solver is established.
+- Theory AffineDrift #4258/#4282 and integration plan #9706 merged. Tools T1 #5077 merged; T2 #5082 remains open.
+- Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
+- Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
+- Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 merged at `9aa26e4f8`; #9787 repairs its observed research companion failures.
+- #9787 / PR #9804: synchronized with main `563e7aaa9`, including native bootstrap #9726. Actual regenerated native record has SHA `0c0f3395`; only governed source hashes change. All 122 combined authority/provenance/bootstrap tests and three distinct rolling tests pass. Reviewer summary and inspected 253-page PDF are current; incoming mocap aliases are explicitly typed and the actual mypy hook passes. See `docs/development/manufactured_authority_9787_turnover.md`; protected CI remains required.
+- Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
+
+- Import/provider history: `docs/development/impact_provider_import_turnover.md`; reviewed renderer evidence: `docs/development/renderer_reference_9783_turnover.md`; program design: `docs/development/impact_acoustics_program.md`.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
 evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
@@ -87,6 +137,81 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
   `pytest-unit` is slow locally (CI owns the full suite). CLAUDE.md
   "Hook bypass policy" documents this resolution.
 
+## `bioptim` Optimal-Control Layer and the Swing-Dynamics Fixes (#9762)
+
+- Branch `claude/fixes-epic-implementation-x2bu36`, PR #9768 (open). Epic doc:
+  `docs/issues/EPIC_BIOPTIM_OCP_INTEGRATION.md`; decision: ADR-0050.
+- Prerequisite issues #9755-#9761 are filed; #9755-#9760 are implemented on
+  this branch, #9761 (upstream PR to pyomeca/bioptim) is external and open.
+- Epic phases 0-3 are implemented and tested; phases 4 (parameter block) and
+  5 (moving-horizon wrapper) are not started. `ocp/tracking_ocp` already
+  accepts a `parameters` list, which is the seam phase 4 builds on.
+- **Do not** import `bioptim` outside `src/shared/python/optimization/ocp/`:
+  `tests/architecture/test_bioptim_isolation.py` fails on it. bioptim is
+  git-pinned to `Release_3.4.0` (SHA `fdafe4d9`) in the `[bioptim]` extra;
+  re-pinning is a ticket that re-runs the phase 0-3 tests.
+- Two findings that constrain how results may be read:
+  maximising terminal clubhead speed is a concave objective and converges in
+  no backend once the dynamics are enforced, so the OCP defaults to a convex
+  target-speed objective; and the six-marker set cannot observe the full
+  seven-DOF chain (`hip_rotation` and `trunk_rotation` are an exact null
+  direction), so tracking results report their own identifiability.
+- Gate commands: `MPLBACKEND=Agg pytest tests/integration/optimization/ocp
+tests/architecture/test_bioptim_isolation.py -m "not slow"`;
+  `pytest tests/unit/optimization tests/unit/estimation`;
+  `MPLBACKEND=Agg PYTHONPATH=src python -m benchmarks.bioptim_parity --nodes 8
+--duration 0.6`. The benchmark needs `PYTHONPATH=src` (pytest's conftest adds
+  it, `python -m` does not) or it dies importing `bunkershot3d`.
+- The ocp tests live in `tests/integration/optimization/ocp/`, NOT under
+  `src/`. `scripts/check_test_layout.py` (the Test Layout Guard inside
+  `repo-structure-gates`) rejects any new `tests` directory under `src/`
+  because root pytest does not collect it -- its `LEGACY_SRC_TEST_DIRS`
+  allowlist is grandfathered debt, so do not add to it. They sit beside
+  `test_casadi_swing_live.py`, the other suite that needs the real optional
+  stack rather than the mocks `tests/unit/conftest.py` installs.
+- The lane that really exercises them is the `bioptim OCP Tests` step in
+  `ci-optional-stack.yml`, which installs the extra and runs only
+  `tests/integration/optimization/ocp` plus the isolation test under
+  `-m "requires_bioptim or integration"`. It is NOT fail-soft. Locally that
+  exact selection is 26 passed in about 150 s; a timeout there is contention,
+  not a hang -- the slowest test on its own is 80 s against a 600 s budget.
+- Run the ocp tests on their own. Co-running them with
+  `tests/unit/optimization` makes `bioptim_available()` return False and
+  silently skips 16 of them, in either collection order and on `main` as well
+  as here -- something in that directory poisons the import. Pre-existing, not
+  this branch's, and worth its own issue: a skip that only appears in a
+  combined run is exactly the kind CI hides.
+- Two gates only reachable once the earlier ones passed, both fixed:
+  `code-quality` fails at its **mypy** step, not ruff, on
+  `crocoddyl_backend.py:316` -- `pin.Motion` is missing from the repo's own
+  `stubs/pinocchio/__init__.pyi`, which `mypy_path = "stubs"` makes
+  authoritative whether or not pinocchio is installed. Reproduce it in an
+  environment WITHOUT pinocchio; a venv that has the real package hides
+  nothing, but it is the stub mypy reads either way. `unit-test-gate` fails
+  `test_divergence_inventory` until `python -m
+scripts.shared_tools.divergence_inventory --write` re-records the 16 new
+  `optimization/ocp/` files; that regeneration also rewrites unrelated
+  authorship rows, which is expected -- the file is generated, not hand-edited.
+- Architecture budget: the nine violations this branch authored were fixed by
+  decomposition -- `CasadiSolveOptions` and `MaxSpeedOcpOptions` group the
+  keyword arguments that pushed `solve_swing_casadi` and `build_max_speed_ocp`
+  over the parameter budget, `_SwingModelSurface` moves the bioptim-independent
+  half of the adapter to module level, and the parity benchmark is one function
+  per backend. `crocoddyl_backend.solve_swing_ddp` is byte-identical to
+  `origin/main` and carries a dated exception instead.
+- CI state on PR #9768: the `hatchling` direct-reference fix (`52a8710`)
+  cleared the eleven jobs that could not build the package at all. The
+  `dependency-consistency` gate is red on `main` too, because #9716 added
+  `openpyxl` and `imageio` to the `dev` extra without regenerating the
+  locks; this branch carries the regenerated `requirements-dev.lock` and
+  `environment.yml` so the gate passes here and no-ops once `main` catches
+  up. Regenerate them only with Python 3.12 (`make sync-deps`) — that is
+  the interpreter the gate runs, and 3.11 produces a different lock.
+- `code-quality` runs `ruff` unpinned, so it floats ahead of the
+  `ruff>=0.15.10` floor in `pyproject.toml`. 0.15.17 reformats a
+  parenthesised lambda body in `benchmarks/bioptim_parity.py` that 0.15.8
+  left alone; the committed form is stable under both.
+
 ## Vendor Pin & Alias Predicate: #9631
 
 - `vendor/ud-tools` = Tools `eab74a901a`, carrying the Tools#5049 flattened-install alias fix
@@ -95,6 +220,13 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - `tests/unit/repo_hygiene/test_pinned_import_alias_contract.py` pins the flattened-install
   contract (RED at pre-#9657 pin `3d93bb2c`, GREEN at the current pin). Child copy stays
   unconverged per #9657. Remaining: re-cut the 2.1.3 release.
+
+## In-Flight Issue Work
+
+- `claude/issue-9612-video-suffix` (PR pending): `src/api/routes/video.py`
+  derives the upload temp-file suffix from the filename against
+  `SUPPORTED_VIDEO_SUFFIXES` and fails closed with 400 on unknown/missing
+  extensions; state tracked in `docs/development/DEVELOPMENT_LOG.md` (DL-#9612).
 
 ## Protected Authority
 
@@ -121,6 +253,23 @@ UD #9492 (branch `claude/issue-9492-decompose-timer`): `_on_timer` and
 - Tools force-source frame #4873 merged as
   `cc883cbaf63157b58c71cba385a683df2762b0cb`; Tools #4142 remains the broader
   reusable-variation completion authority.
+
+## Impact Explorer Web Route Producer: #9484
+
+- PR: #9724 (open against `main`, `Fixes #9484`).
+- The `rate_of_closure` tile declares `web.mode: route` for
+  `/tools/impact-explorer`; `src/api/local_server.py` mounts
+  `vendor/ud-tools/src/rate_of_closure/web/dist` when it exists. CI Standard's
+  `impact-explorer-web-build` job now builds that bundle from the pinned Tools
+  tree (`npm ci`, then `npm run build -- --base=/impact-explorer-app/`) and
+  `scripts/check_declared_route_producers.py` fails any launcher route that no
+  pipeline produces (unit tests in `tests/scripts/test_declared_route_producers.py`).
+- Open decision (maintainer, #9417): whether the built bundle ships inside the
+  wheel/image or is fetched as a Tools release artifact; this work deliberately
+  does not re-architect distribution. The vendored build authority is Tools'
+  `.github/workflows/rate-of-closure-web-distribution.yml` (node 22, `npm ci`
+  in `src/rate_of_closure/web`); the base path comes from the route fallback
+  in `ui/src/pages/ImpactExplorer.tsx`.
 
 ## Active Hybrid Authority Repair: #9236
 
