@@ -38,7 +38,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `chat` | 40 | 17 | 10 | 1 | 0 | 57 |
 | `chat_contracts` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `cli_utils.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `club_data` | 0 | 0 | 0 | 5 | 0 | 0 |
+| `club_data` | 0 | 0 | 0 | 10 | 0 | 0 |
 | `codemap` | 0 | 0 | 0 | 0 | 14 | 0 |
 | `compatibility.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `config` | 0 | 2 | 0 | 13 | 0 | 2 |
@@ -127,7 +127,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **429** | **275** | **126** | **1207** | **554** | **704** |
+| **Total** | **429** | **275** | **126** | **1212** | **554** | **704** |
 
 ## Diverged Files by Package
 
@@ -258,8 +258,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
-| `config/__init__.py` | +4998 |  | d-sorgclaudeagent[bot] 2026-07-26 | codex-scheduled-tasks[bot] 2026-05-20 |
-| `config/environment.py` | +13621 |  | d-sorgclaudeagent[bot] 2026-07-26 | codex-scheduled-tasks[bot] 2026-05-20 |
+| `config/__init__.py` | +4998 |  | codex-scheduled-tasks[bot] 2026-06-13 | codex-scheduled-tasks[bot] 2026-05-20 |
+| `config/environment.py` | +13621 |  | codex-scheduled-tasks[bot] 2026-05-26 | codex-scheduled-tasks[bot] 2026-05-20 |
 
 ### Package `contracts.py` (1 Diverged Files)
 
@@ -286,7 +286,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher/launcher.py` | -159 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `gui_launcher/launcher_web.py` | -107 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-05 |
 | `gui_launcher/registry.py` | -75 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
-| `gui_launcher/tools_sidebar_integration.py` | +10123 |  | d-sorgclaudeagent[bot] 2026-07-26 | Dieter Olson 2026-08-20 |
+| `gui_launcher/tools_sidebar_integration.py` | +10123 |  | Dieter Olson 2026-05-29 | Dieter Olson 2026-08-20 |
 
 ### Package `humanoid_character_builder` (25 Diverged Files)
 
@@ -431,7 +431,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `sidekick/process_calculators/pressure_drop_calculator/pressure_drop_validation.py` | +3 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-06 |
 | `sidekick/process_calculators/pressure_drop_calculator/utils/flow_rate_converter.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
 | `sidekick/process_calculators/pressure_drop_calculator/utils/gas_properties.py` | -423 |  | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-09-05 |
-| `sidekick/process_calculators/psa_package/psa_analysis.ipynb` | +2 |  | d-sorgclaudeagent[bot] 2026-07-26 | Dieter Olson 2026-08-20 |
+| `sidekick/process_calculators/psa_package/psa_analysis.ipynb` | +2 |  | Dieter Olson 2026-05-20 | Dieter Olson 2026-08-20 |
 | `sidekick/process_calculators/psa_package/psa_gui.py` | -48 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/process_calculators/psa_package/psa_webapp.py` | -24 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `sidekick/process_calculators/psa_package/ui/main_window.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-15 |
