@@ -1,71 +1,78 @@
-# Scoped Ubuntu Dependency Installation Handoff
+# Guided Capture Setup Handoff
 
 ## Identity
 
 - Repository: D-sorganization/UpstreamDrift
-- Branch: fix/9894-ubuntu-ci-sources
-- Baseline: 213c5a6ca
-- Implementation commit: SELF
-- Governing issue: #9894
-- Pull request: #9896 (draft pending #9890 integration)
-- Session: capture-product-01a08427-ubuntu-ci
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-capture-setup`
+- Branch: `feat/capture-guided-setup`
+- Baseline commit: `54b9b0586` (main after qualified product merge #9896)
+- Implementation commit: `SELF`
+- Pull request: not created.
+- Governing issue: #9898; epics #9897, #9902, #9906; development entry DL-#9898
+- Session: `capture-product-01a08427-guided-setup`, issue lease and presence active.
 
-## Changes and Evidence
+## Objective and Status
 
-Four standard CI dependency steps now use one Bash installer. It copies the
-runner-provided signed Ubuntu deb822 source into a temporary directory and
-uses isolated APT source, package-index and binary-cache paths for both update and install.
-The original thirteen Qt/Xvfb libraries and each job condition are retained.
-Signature and hash verification remain enabled; any failed index rejects update.
-Lock timeouts and bounded retries remain. Temporary state is removed on exit;
-no machine-wide package source files are edited or deleted.
+Complete the newly requested everyday calibration, sourced club database/player bag,
+and capability-driven setup wizard. The full prior fleet rollout also remains required.
+Detailed execution children and dependency/acceptance boundaries are recorded in
+`docs/development/capture_setup_execution_plan.md` and the three linked GitHub epics.
 
-Six real-Bash tests first failed before implementation, then passed with only
-privileged commands stubbed. They cover source-copy integrity, scoped indexes,
-missing/unsigned source refusal, transient retry, persistent update/install
-failure, install suppression after failed update, and cleanup on failure.
-Ruff and focused mypy pass. Actionlint reports the same three pre-existing
-workflow diagnostics on baseline and changed stdin input. The first pre-push
-unit run exposed an uninitialized pinned Tools submodule in this new worktree;
-the exact eab74a901 pin is now initialized and all normal pre-push hooks pass,
-including Bandit and the required unit subset. Actual Ubuntu CI run 34387111648 completed all four dependency transactions
-successfully in 10-14 seconds on dbfd599b6.
+The current change is a tested intrinsic-profile foundation, not a completed player
+calibration workflow. Common-reference observations, actual UI integration, multi-view
+geometry, club data and wizard work remain open. Do not close #9898 or its epic yet.
 
-## Coordination and Remaining Work
+## Files and Decisions
 
-The comparison branch #9890 is being changed by a separate process. Its latest
-Chrome source removal is preserved there; this isolated proposal offers a
-job-scoped replacement. #9893 owns contributor-guide compatibility. Do not
-modify those branches or managed agent policy here. The authoritative design
-manual and standing UP-D0/UP-D1 records remain unchanged.
+- `calibration_profiles.py` references existing IntrinsicsRecord artifacts; it creates
+  no reference solver or competing camera contract. Manual lens settings need fresh
+  confirmation; camera/lens/zoom/focus/image size/sensor-crop changes reject reuse.
+- Saving a profile preserves an atomic calibration artifact revision separately from
+  the mutable input filename, with source provenance and digests. Old captures can
+  restore a prior revision after recalibration. Corrupt history/revisions are errors.
+- `test_calibration_profiles.py` covers compatibility, invalid quality/geometry,
+  changed/missing files, idempotency and preserved revisions. The plan records all
+  ten execution issues across the three new epics.
+- Existing #9621/#9622/#9623/#9630/#9554 and ADR-0041 remain authorities/dependencies.
+  Common paper/yardstick observations cannot silently certify full 3-D geometry.
+- Preserve existing club-data and setup/workflow/registry infrastructure. Unknown
+  club properties remain unknown, with published/measured/estimated distinctions.
+- Reconciled this task's completed DL-#9894/#9892/#9883 entries against the qualified
+  #9896 merge; earlier product epics #9849/#9850/#9863 are complete. Root handoff
+  retains standing UP-D0/UP-D1 governance and other agents' historical context.
+- User-owned changes: none in this new isolated worktree. The launched application
+  remains in the separate UpstreamDrift-ubuntu-ci checkout.
 
-PR #9896 records its unique SPEC row and development-log link. Complete
-protected validation and reconcile #9890 before integration. A readable signed
-Ubuntu deb822 source is required; unsupported runner images fail explicitly.
+## Validation
 
-## Dependency Integration
+- TDD: profile module initially absent; revision-preservation regression then failed
+  before implementing archived snapshots. Existing normal repo conftest is enabled.
+- `python3 -m pytest tests/tools/capture_rig/test_calibration_profiles.py tests/motion_capture/reconstruct/test_intrinsics.py -q --timeout=60`: 31 passed, including archive idempotency/corruption, geometry rejection and existing solver/CLI behavior.
+- Changed-file Ruff lint/format pass after reviewed dict-literal fixes. Focused mypy (`--follow-imports=silent --ignore-missing-imports`) passes for the new source module. Catalog, title, SPEC and tracked file-size checks pass; staged checks and normal hooks remain required.
+- Pinned Tools submodule initialized at eab74a901a7c8467e1997049a73e2cfd2df74428.
 
-Merged the guide follow-up through 0787dde27, which includes instructor head
-b4ed1e7d2. Preserved the Sidekick index, all product code/screenshots/benchmarks,
-and both development-log entries. Resolved four workflow conflicts in favor
-of this job-scoped installer, preserving the surrounding job conditions. Both
-SPEC rows are retained. The canonical handoff stays specific to #9894; guide
-qualification remains independently recorded in #9893.
+## Blockers and Risks
 
-The combined tree must pass protected checks before #9896 is ready. #9890 and
-#9893 remain dependencies; no runner permissions or fleet closure conflict is
-resolved by this merge.
+No blocker prevents continued feature implementation. The profile API is not yet
+wired into Capture Rig or downstream geometry, so it is not a shipped zoom guard.
+Do not claim physical calibration accuracy from synthetic tests alone. Generic
+calibration/reference geometry belongs to Tools under ADR-0041.
 
-Fifty combined installer/guide/Sidekick tests pass. Document catalog, title, size,
-SPEC uniqueness and full-PR architecture checks pass. The development-log entry
-for #9894 is concise to remain within the existing 50 KiB documentation limit.
+Fleet context: central handoff PR #1628 merged as 537f9ad087dd3afdda60d28dd2e54d1ac7583864. Half-ton-controls #3 candidate
+f17766c5eb0ced58261f85a0869796807c6f401d awaits quality job 102603927666 in run
+34391771678 (live watch 87268). Tools#5127, Tools_Private#1475 and Gasification_Model#4942
+have direct conflict notices requesting their claimed canonical replacement queue.
+Last complete adoption inventory: 37/41. Do not restart live jobs or race closures.
 
-## Protected Completion Candidate
+## Next Steps
 
-Current main acbb3a0c (#9895) is integrated without dropping managed guidance.
-PR #9896 now carries the final comparison controls (#9883), compatible guide
-checker (#9892), and scoped installer (#9894). It preserves all code, images,
-and benchmark evidence from #9890 and the checker qualification from #9893.
-Earlier PRs remain open until their exact changes are verified on main; do not
-close them merely as redundant. The public PR description covers this final
-scope. Full protected validation remains required before epic #9863 closure.
+1. Complete final tests/type checks and normal hooks for this foundation.
+2. Implement common-reference observation sessions and compatible profile UI, then
+   qualify consumers before closing #9898/#9900. Follow Tools geometry ownership.
+3. Execute #9899/#9901, club children #9903-#9905, and wizard children #9907-#9909.
+4. Continue actual fleet adoption and audit every required result before goal closure.
+
+## Change Log
+
+- `SELF`: start DL-#9898, preserve three new goal epics, and implement tested optical
+  profile compatibility with durable calibration revisions; UI integration remains open.

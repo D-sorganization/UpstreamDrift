@@ -17,47 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9894 · Scoped Ubuntu CI Dependencies
+### DL-#9898 · Calibration Profile Compatibility
 
-- **State:** in_review
+- **State:** in_progress
 - **Owner:** codex
-- **Issue:** #9894
-- **Branch:** fix/9894-ubuntu-ci-sources
-- **PR:** #9896
-- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/, tests/scripts/
+- **Issue:** #9898; epic #9897 (goal also includes #9902 and #9906)
+- **Branch:** feat/capture-guided-setup
+- **PR:** not created
+- **Paths:** src/tools/capture_rig/calibration_profiles.py, tests/tools/capture_rig/test_calibration_profiles.py, docs/development/capture_setup_execution_plan.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`)
-- **Summary:** Scoped signed APT sources; runner config preserved.
-- **Evidence:** Six Bash tests and four Ubuntu installs pass (run 34387111648).
-- **Next step:** Finish combined protected checks after #9890/#9893.
-
-### DL-#9892 · Fleet Guide Compatibility
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #9892; Repository_Management#1579
-- **Branch:** fix/9892-fleet-guide-validation
-- **PR:** #9893
-- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py, generated agent entry files
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (27 tests and live consistency check pass)
-- **Summary:** Retain central guidance with precise optional/external path handling and exact managed-notice exemptions; preserve real missing-path and duplicate-instruction failures.
-- **Evidence:** Two RED/GREEN reproductions; inherited instructor evidence remains in #9890.
-- **Next step:** Complete protected follow-up after #9890; central canonical corrections are in Repository_Management#1627.
-
-### DL-#9883 · Instructor Reference Alignment Workspace
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #9883 (advanced epic #9863)
-- **PR:** #9890
-- **Branch:** `feat/9883-reference-alignment-controls`
-- **Paths:** `src/tools/capture_rig/reference_comparison.py`, `reference_controls.py`, `reference_timeline.py`, `styling.py`, related tests, docs and capability atlas
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`; 67 integrated alignment/render/state/timing cases pass)
-- **Summary:** Responsive placement/timing/notes inspector, independent expert scrubbing and paired swing events, pending-edit guards, undo/reset and manual stale-evidence review with settings backup.
-- **Evidence:** Native screenshots at desktop/laptop sizes; shared rotation tests, perspective preservation, invalid event rejection, notes/switch/Escape guards, stale settings backup and existing exact preview/export parity. Full-PR architecture, four-module mypy and LoD/DRY no-growth pass; integrated timing and rendering regressions pass.
-- **Next step:** Complete protected review #9890 after rendering #9889 merges (timing #9885 merged).
+- **Last verified:** 2026-09-09 (`54b9b0586` plus working changes)
+- **Summary:** Compatible optical profiles and archived intrinsic revisions; everyday observations and UI integration remain required.
+- **Next step:** Integrate reference-session capture and profile selection under #9898/#9900.
 
 ### DL-#9882 · Comparison Rendering and Export Qualification
 
@@ -357,6 +328,40 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Address review feedback on PR #9725 and merge when approved.
 
 ## Shipped (Last 90 Days)
+
+### DL-#9894 · Scoped Ubuntu CI Dependencies
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9894
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/, tests/scripts/
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Signed per-job APT sources preserve shared-runner configuration; six Bash regressions and standard CI pass.
+
+### DL-#9892 · Fleet Guide Compatibility
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9892
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Central managed guidance and legitimate external/optional paths pass without hiding real missing-file failures.
+
+### DL-#9883 · Instructor Reference Alignment Workspace
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9883
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** src/tools/capture*rig/reference*\*.py, styling.py, tests/tools/capture_rig/
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Responsive placement/timing/notes controls, event alignment, revision checks, preview/export parity and native layout evidence are delivered.
+- **Evidence:** Qualified candidate equals merged tree; standard unit gate passed 14,821 tests.
 
 Entries stay here for 90 days after merge, then move to the archive.
 
