@@ -29,7 +29,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-09 (`SELF`; 67 integrated alignment/render/state/timing cases pass)
 - **Summary:** Responsive placement/timing/notes inspector, independent expert scrubbing and paired swing events, pending-edit guards, undo/reset and manual stale-evidence review with settings backup.
 - **Evidence:** Native screenshots at desktop/laptop sizes; shared rotation tests, perspective preservation, invalid event rejection, notes/switch/Escape guards, stale settings backup and existing exact preview/export parity. Full-PR architecture, four-module mypy and LoD/DRY no-growth pass; integrated timing and rendering regressions pass.
-- **Next step:** Complete protected review #9890 after parent #9885/#9888 merge.
+- **Next step:** Complete protected review #9890 after rendering #9889 merges (timing #9885 merged).
 
 ### DL-#9882 · Comparison Rendering and Export Qualification
 
@@ -37,7 +37,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #9882 (advanced reference epic #9863)
 - **Branch:** fix/9882-comparison-rendering
-- **PR:** #9888
+- **PR:** #9889 (supersedes #9888)
 - **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py, reference_comparison.py, clips.py, swing_export.py, related tests/docs
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)

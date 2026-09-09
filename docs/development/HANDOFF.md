@@ -7,7 +7,7 @@
 - Branch: feat/9883-reference-alignment-controls
 - Baseline commit: 66a7f017d (rendering #9888; parent #9885)
 - Implementation commit: SELF
-- Pull request: #9890 (draft; #9885/#9888 dependencies)
+- Pull request: #9890 (draft; #9885 merged; rendering #9889 dependency)
 - Governing issue/epic: #9883; advanced reference epic #9863
 
 ## Objective and Status
@@ -24,7 +24,7 @@ Forty alignment, renderer and state regressions passed. Seven alignment scenario
 
 ## Blockers and Risks
 
-Parent timing #9885 and rendering #9888 remain protected-review dependencies. Another agent has pushed to #9885; those changes are preserved by normal merges and central scope notices. Keep one SPEC row per PR; the fleet merge driver can restore an old duplicate #9879 row, so run the duplicate gate after integration. No other worktree was modified.
+Timing #9885 is merged. Rendering #9888 was superseded by compatible #9889; its pending merge remains a dependency. Another agent has pushed to #9885; those changes are preserved by normal merges and central scope notices. Keep one SPEC row per PR; the fleet merge driver can restore an old duplicate #9879 row, so run the duplicate gate after integration. No other worktree was modified.
 
 ## Next Steps
 
@@ -45,3 +45,9 @@ Final screenshots refreshed and visually inspected: all three tabs fit the deskt
 Restored standing design-manual governance and earlier task context in AGENT_HANDOFF.md after the doc-governance test exposed its removal. Canonical current state remains here. Run tests/scripts/test_design_manual_governance_contract.py before readiness.
 
 Merged final sampler bounds 7bd6b4d0c, including its five adverse regressions and refreshed source-hashed benchmark. No alignment UI behavior changed.
+
+Integrated peer rendering #9889 (a7c224e2e): preserved the newer instructor UI, strict export implementation, and five legacy gap-bound regressions. Retained the independent scene-evidence fixture. Existing registration already validates camera/clock view identity; the duplicate peer validator is unnecessary.
+
+Final integration: 88 focused alignment/render/state/registration/timing/evidence/governance tests passed. Full architecture, module and file budgets passed. Regenerated atlas after source-hash drift in the merge. Broad mypy reports five pre-existing dependency errors in keypoint_offsets.py, \_unit_contracts.py, trc_adapter.py and rtmpose_onnx_estimator.py; explicit edited-module checking is recorded separately.
+
+Explicit mypy --follow-imports=silent passes all four edited UI modules. Atlas freshness passes after regeneration.

@@ -1,5 +1,12 @@
 # SPEC.md — Repository Specification Document
 
+## Reference Preview & Verified Export Parity (#9882)
+
+Ensure verified reference exports and comparison preview share identical spatial alignment, layer visibility, rendering pipelines, and sidecar manifest provenance (`src.tools.capture_rig.reference_export`, `src.tools.capture_rig.reference_rendering`, `src.motion_capture.reference.evidence`):
+- `ReferenceRenderPipeline`: Shared renderer abstraction guaranteeing consistent layer alpha blending, skeleton coloring, trail rendering, and Brown-Conrady camera distortion projection between live preview canvases and batch video exports.
+- `ReferenceExportService`: Validates identical registration transform application, view boundaries, and export frame sizing matching active preview viewport geometries.
+- Verification evidence and qualification: `ReferenceEvidenceManifest` records full source video, reference trial, camera calibration, and rendering configuration hashes to ensure bit-for-bit reproducibility of exported artifacts.
+
 ## Reference Synchronization, Sampling Gaps & Calibration Identity (#9881)
 
 Harden and qualify reference synchronization, sampling gap rejection, and calibration binding (`src.motion_capture.reference.registration`):
@@ -4226,11 +4233,11 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
-| 2026-09-09 | #9888 | Unify comparison preview/export through the coaching compositor; apply motion opacity and coverage-aware expert homographies; retain decoders, preserve odd source pixels and verify complete staged output/input identity before publication. |
-| 2026-09-09 | #9442 | Consume Tools as an installable dependency (`requirements-tools.txt` release wheel), launcher bootstrap distribution preference, and tools pin reporting (#9406). |
-| 2026-09-09 | #9878 | Simultaneous state and parameter estimation via optimal control (`src/shared/python/optimization/ocp/parameter_ocp.py`): quadratic priors, identifiability gating with configurable policies, limited-memory Hessian approximation, and conversion to `MapEstimatorResult` (#9762). |
+| 2026-09-09 | #9889 | Unify comparison preview/export through the coaching compositor; apply motion opacity and coverage-aware expert homographies; retain decoders, preserve odd source pixels and verify complete staged output/input identity before publication. |
 | 2026-09-09 | #9885 | Qualify event synchronization (0.25–4 interval rates), gap-aware neighboring-frame sampling, camera/distortion and clock snapshots, saved registration identity checks and manual alignment claims. Include deterministic adverse fixtures and a diagnostic sampling benchmark. |
 | 2026-09-09 | #9884 | Preserve comparison registration/layer settings on independent edits and reference switches; validate sidecar identity/path/size; reuse safe export ownership, snapshots and deferred close. Qualification gaps remain tracked under #9863. |
+| 2026-09-09 | #9878 | Simultaneous state and parameter estimation via optimal control (`src/shared/python/optimization/ocp/parameter_ocp.py`): quadratic priors, identifiability gating with configurable policies, limited-memory Hessian approximation, and conversion to `MapEstimatorResult` (#9762). |
+| 2026-09-09 | #9442 | Consume Tools as an installable dependency (`requirements-tools.txt` release wheel), launcher bootstrap distribution preference, and tools pin reporting (#9406). |
 | 2026-09-09 | #9871 | Calibrated reference overlay scene registration and event synchronization: rigid/similarity transform, body-size normalization, coordinate frame conversion from canonical Z-up into ADR-0041 scene world, event-anchor and offset time warping, missing-joint gap mask preservation across interpolation, camera projection with distortion and clipping, and uncalibrated 2D video homography. |
 | 2026-09-09 | #9870 | Add validated expert reference assets and a native library: C3D/shared model marker imports, explicit units/axes/joint mapping, masked samples, source hashes, separate 2D video kind, notes/archive and background I/O. Reuse existing Rust-preferred C3D adapter and correct fallback residual handling. Shared Qt button construction gives the mapping step an explicit Import Reference action. Registration and projection remain in #9865/#9866. |
 | 2026-09-09 | #9869 | Saved source-coordinate coaching references with line/arrow/circle/ellipse/rectangle tools, gesture and keyboard editing, visibility intervals, undo/redo, portable layers and shared preview/still/video rendering. Library and swing-editor entry points preserve original media and measured landmarks. |
