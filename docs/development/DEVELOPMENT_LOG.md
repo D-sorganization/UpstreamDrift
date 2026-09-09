@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex
 - **Issue:** #9913; epic #9906
 - **Branch:** feat/9913-capture-journey
-- **PR:** pending
+- **PR:** #9917 (open)
 - **Paths:** src/tools/capture_rig/, tests/tools/capture_rig/, scripts/generate_mocap_user_guide.py, docs/motion_capture/user_guide.md, src/config/feature_parity.json
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`8f590cc80779ef4dad4fd5bd4b28c63e784303b9`; capture/parity suites, 37 final focused tests, five final journey tests and normal commit/pre-push gates pass; preserving remote rebase by normal merge)
+- **Last verified:** 2026-09-09 (`dd8136f152bc8451bf1a2511ff6246bd309a52b5`; all445 merged capture/parity tests and normal commit/pre-push gates pass)
 - **Summary:** Persistent identity and action feedback, per-capture history, detector/edit association, clickable workflow/help/provenance, invalid-selection state clearing, and Qt window detachment/fullscreen with preserved content.
-- **Next step:** Publish the separate #9913 PR after merged-tree checks.
+- **Next step:** Qualify protected CI/review on #9917 and merge.
 
 ### DL-#9911 · Preview Discovery Failure Recovery
 
