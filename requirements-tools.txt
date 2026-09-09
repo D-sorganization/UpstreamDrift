@@ -1,0 +1,13 @@
+# Shared Tools (D-sorganization/Tools) as an installed dependency — UD #9406.
+#
+#   pip install -r requirements-tools.txt
+#
+# Pinned to the Tools release wheel (Tools #4920, tag v1.15.0 = Tools commit
+# e87b04105). The vendor/ud-tools submodule gitlink (c0a395d5) is a different
+# Tools commit: the gitlink wins for the source tree (tests, Docker, launcher
+# fallback); this wheel is what pip users receive. Kept out of pyproject.toml
+# because a direct URL reference cannot be published to PyPI.
+# scripts/shared_tools/check_tools_pins.py reports this pin; a
+# `ud-tools @ git+https://github.com/D-sorganization/Tools.git@<sha>` line, if
+# ever used instead, must equal the gitlink exactly.
+ud_tools @ https://github.com/D-sorganization/Tools/releases/download/v1.15.0/ud_tools-1.15.0-py3-none-any.whl
