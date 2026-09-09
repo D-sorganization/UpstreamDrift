@@ -36,8 +36,8 @@ Architecture and DRY/LoD no-growth gates pass with unchanged baselines.
 Protected validation remains pending.
 Fourteen modified source modules pass mypy. Benchmark report and rerunnable script
 are included: 17 joints, 120/1200/12000 source frames; single-frame sampling
-medians 0.252/0.255/0.228 ms versus a full-trajectory workload control of
-17.959/168.654/2171.389 ms. This excludes load, decode, draw and display; no
+medians 0.157/0.093/0.304 ms versus a full-trajectory workload control of
+17.934/172.309/1486.035 ms. This excludes load, decode, draw and display; no
 whole-app speedup, portable threshold, or Rust rewrite is claimed. Run in an
 installed environment or set this worktree's src directory on PYTHONPATH.
 
@@ -65,3 +65,15 @@ mypy, architecture, Ruff and DRY/LoD no-growth checks.
 
 Main 2c99bc83e integrates state qualification #9884 and concurrent OCP work.
 The merge retains timing validation at saved-registration load.
+
+## Protected CI Repair
+
+CI found export_comparison_video one line over its 100-line budget and newer
+NumPy typing rejected assigning a general transformed array back to the
+shape-inferred allocation variable. Camera conversion is now a separate helper;
+the transformed array retains its own variable. Sixteen focused timing/export
+regressions pass. Architecture passes with --base-ref origin/main, which checks
+the complete PR rather than the default local change scope. Use that explicit
+base for remaining product PRs. No limits or type exclusions were relaxed.
+The diagnostic benchmark was rerun and its source fingerprint updated after this
+non-algorithmic typing correction; host-load variability is not a performance claim.
