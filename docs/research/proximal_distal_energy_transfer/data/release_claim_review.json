@@ -2431,10 +2431,24 @@
       ],
       "evidence_artifacts": [
         "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.json",
+        "docs/research/proximal_distal_energy_transfer/data/subject_scaled_closed_contact.npz",
+        "scripts/research/proximal_distal_energy/articulated_inertia_cross_engine.py",
         "scripts/research/proximal_distal_energy/articulated_manufactured_solution.py",
+        "scripts/research/proximal_distal_energy/articulated_native_runtime.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in",
         "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py",
         "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py",
-        "tests/research/test_articulated_manufactured_solution.py"
+        "scripts/research/proximal_distal_energy/spatial_full_body.py",
+        "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py",
+        "tests/research/test_articulated_manufactured_solution.py",
+        "tests/research/test_articulated_manufactured_hybrid_authority_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py",
+        "tests/research/test_articulated_manufactured_hybrid_semantics_red.py",
+        "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.lock",
+        ".github/workflows/ci-optional-stack.yml",
+        "tests/ci/test_articulated_manufactured_authority_provenance_red.py",
+        "tests/ci/test_articulated_manufactured_hybrid_ci_red.py"
       ],
       "source_locations": [
         "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd:466",

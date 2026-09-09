@@ -2,7 +2,34 @@
 
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
+Updated: 2026-09-08 23:59 UTC (wave-2 PR triage, session UD2PRs)
+
+## Wave-2 PR Triage: 2026-09-08 (Agent `claude`, Session UD2PRs)
+
+Repo-wide npm-audit red: advisory GHSA-2883-xcg3-v3hh (js-yaml high,
+published 2026-09-08 between the 21:57 main push run and the 22:15 PR runs)
+fails `code-quality` (`npm audit --audit-level=high`) on every merge ref
+whose lockfile carries js-yaml 4.3.1 - main itself goes red on its next
+Standard run. Fix on `bot/claude/npm-audit-jsyaml`: npm `overrides.js-yaml`
+= `^4.3.2` in `ui/package.json` (dev-only dep of `@eslint/eslintrc`), audit
+drops to 5 moderate, gate passes. Disposition table below is maintained as
+PRs settle (in-progress at first commit).
+
+Wave-2 disposition table (REST-verified 2026-09-09 ~00:45 UTC):
+
+| PR                         | Disposition at yield                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #9465                      | **MERGED** (squash `9623a5662`).                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| #9827 (this PR)            | js-yaml audit fix; auto-merge armed, draining.                                                                                                                                                                                                                                                                                                                                                                                                       |
+| #9826                      | PDF identity pins in `tests/research/test_publication_quality.py` re-synced to the refreshed artifact (`bf855f79`, 2012367 bytes) on `fix/9825-preserve-reviewed-claims` (commit `30aecd113`); auto-merge armed.                                                                                                                                                                                                                                     |
+| #9763-#9767                | Five dependabot /ui bumps; unblocked by this PR's audit fix; auto-merge armed, draining.                                                                                                                                                                                                                                                                                                                                                             |
+| #9471                      | Merged main in twice (SPEC row conflicts: dropped the branch-side duplicate #9476 row, kept this PR's #9471 row); repo-structure-gates green; auto-merge armed.                                                                                                                                                                                                                                                                                      |
+| #9434                      | Merged main in (WORKFLOW_TRACKING.md conflict: companion entry kept, main's always-on-unit-lane entry kept); auto-merge armed.                                                                                                                                                                                                                                                                                                                       |
+| #9440                      | Merged main in: theme modify/delete resolved as PR deletions; shadow ledger 33 -> 17 (stale + this-PR entries dropped); seam rulings = main's retirement narratives + PR cleaned rows for notes/plot_theme/theme; divergence inventory regenerated; SeamRedirectFinder roots synced to merged cleaned rulings (commit `4d3193f81`). Auto-merge armed; the wave-1 #8972/#9037 Tools-palette prerequisite still applies if palette-consumer tests red. |
+| #9442                      | Stacked on #9440's branch (base `readiness/p1-9406-delete-tools-canonical-1`, not main); branch merged forward to `b45ec951f` with the seam-root sync; fresh CI running; auto-merge not armable while stacked - retarget to main only after #9440 lands (wave-1 rule).                                                                                                                                                                               |
+| #9636, #9633, #9618, #9610 | Conductor drafts, skipped per assignment.                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
 
@@ -53,14 +80,12 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 
 ## Impact Dynamics and Acoustics: #9700
 
-- Theory AffineDrift #4258/#4282 and integration plan #9706 merged. Tools T1 #5077 merged; T2 #5082 remains open.
-- Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
-- Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
-- Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 merged at `9aa26e4f8`; #9787 repairs its observed research companion failures.
-- #9787 / PR #9804: synchronized with main `563e7aaa9`, including native bootstrap #9726. Actual regenerated native record has SHA `0c0f3395`; only governed source hashes change. All 122 combined authority/provenance/bootstrap tests and three distinct rolling tests pass. Reviewer summary and inspected 253-page PDF are current; incoming mocap aliases are explicitly typed and the actual mypy hook passes. See `docs/development/manufactured_authority_9787_turnover.md`; protected CI remains required.
-- Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
-
-- Import/provider history: `docs/development/impact_provider_import_turnover.md`; reviewed renderer evidence: `docs/development/renderer_reference_9783_turnover.md`; program design: `docs/development/impact_acoustics_program.md`.
+- AffineDrift theory #4258/#4282 and integration plan #9706 are merged. Paired grip/stability correction #4298 merged as d7e51655d after protected checks; its auxiliary benchmark made no measurements despite green workflow status.
+- Tools finite-grip response is published at 12bcf3d83 (665 Linux tests); separate-G/C spectra 97d46055c pass 692 Linux and 49 focused controls. Turnover bbc27dbe3 is published through normal hooks. Explicit stability, nonlinear contact and physical/blinded acoustics remain open.
+- PR #9804 merged as 736ec2189 from b8da0c024 with a bypassed claim-preservation helper and stale seven-source native record. Follow-up #9825 reuses the helper in actual reconciliation, preserves reviewed evidence/order and refuses changed science. Six real-path failures become 11 passes.
+- Worktree UpstreamDrift-impact-claim-preservation; branch fix/9825-preserve-reviewed-claims; base 9f54c5e0b. Lease codex / impact-acoustics-01a07d8a-claims9825 expires 2026-09-09T00:57:12Z. Actual deterministic native regeneration 15d00b5e restores 14-source provenance with unchanged numerical results; 128 strict contracts pass without skips/xfails. Reviewed 253-page PDF bf855f79 and computational release records are refreshed; source f0bbc4d50 is published through normal hooks; ready PR #9826 is awaiting protected CI/review.
+- PR #9826 native/rolling/publication CI passes at e93ef5224. PDF pins are corrected and concurrent 30aecd113 preserved in published b557682c8; all normal hooks and 11 reconciled publication tests pass, remote SHA verified. New CI is running; main 9623a5662 makes the PR behind. #9830 exactly reproduces the optional-stack defect; the 16-step reference is under-resolved and tighter integrations still show about 0.4812 rad / 25.857 rad/s mismatch. Follow claim_preservation_9825_turnover.md before delivery/merge; no threshold relaxation or physical validation is claimed.
+- Continue from docs/development/claim_preservation_9825_turnover.md. Preserve former shared branch/local 6235789dc. Tools #5103/#5106 private consumer lookup remains blocked; #8920/#8556 remain physical-parameter gates. Program: docs/development/impact_acoustics_program.md.
 
 Epic #8557 is canonical; issue state, local files, and checkpoints are not completion
 evidence. UP-D0 (#9066) and UP-D1 (#9067) remain a separate design-manual program.
@@ -406,3 +431,22 @@ reruns. Do not restart the Actions runner or start WSL.
 ## UI Dependency Pin: #9249
 
 - Dependabot now ignores `@vitejs/plugin-react` major updates (`.github/dependabot.yml`): 6.x needs Vite 8 (`peerDependencies.vite: "^8.0.0"`; Vite 7 exports no `./internal`), so a lone bump cannot merge. Stay on plugin-react ^5 with vite ^7.3.2 until a paired Vite-8 upgrade; pairing note lives in `ui/README.md`. Branch `claude/issue-9249-ui-pin`.
+
+## OCP Compat Robust to Poisoned `sys.modules` (#9771)
+
+- `tests/unit/conftest.py` installs spec-less `casadi`/`pinocchio` MagicMocks
+  process-wide in `pytest_configure` and never removes them, so a lane
+  collecting `tests/unit/optimization` and `tests/integration/optimization/ocp`
+  together made `_compat.bioptim_available()` report the genuinely installed
+  stack as absent and silently skip 16 bioptim ocp tests.
+- `src/shared/python/optimization/ocp/_compat.py` now probes top-level names
+  through `importlib.machinery.PathFinder` (ignores `sys.modules`), so a mock
+  hides a real distribution only when no real one exists behind it;
+  `require_bioptim()` evicts mocked `casadi`/`bioptim`/`biorbd_casadi`
+  entries before importing so bioptim binds the genuine modules (the unit
+  tree's autouse fixture reinstalls its own mocks per test, so unit-tree
+  degradation semantics are unchanged).
+- Contracts: `tests/integration/optimization/ocp/test_compat_poisoned_sys_modules.py`.
+  Note the local reproducer cannot exercise real casadi/bioptim (Python 3.14
+  has no casadi wheel); CI lanes with the `[bioptim]` extra must show the
+  ocp bioptim legs running (not skipping) in combined lanes.
