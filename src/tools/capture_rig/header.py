@@ -5,14 +5,22 @@ bound, recorder phase, last take outcome); :class:`StatusStrip` renders it
 as themed chips and :class:`HeaderBar` frames session line, strip and the
 pane :class:`~.layout.LayoutBar` as one toolbar. Styles come from
 :mod:`.styling`; :meth:`HeaderBar.restyle` re-reads them on a theme change.
+
+The bar wraps (#9846): its parts are laid out by :class:`~.flow_layout.
+FlowLayout` and the session line elides, so a long session path can never
+set a floor under the width of the whole tile.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, replace
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QWidget
+from PyQt6.QtWidgets import QFrame, QLabel, QWidget
+
+from .flow_layout import FlowLayout
+from .labels import ElidedLabel
 
 from src.shared.python.core.contracts import require
 from src.shared.python.theme.layout_metrics import LayoutMetrics
@@ -77,12 +85,10 @@ class StatusStrip(QWidget):
         self.cameras = QLabel()
         self.recording = QLabel()
         self.last_take = QLabel()
-        row = QHBoxLayout(self)
-        row.setContentsMargins(0, 0, 0, 0)
-        row.setSpacing(LayoutMetrics.SPACING_SM)
+        row = FlowLayout(self, spacing=LayoutMetrics.SPACING_SM)
         for chip in (self.cameras, self.recording, self.last_take):
             chip.setFont(get_qfont(Sizes.SM, Weights.MEDIUM))
-            row.addWidget(chip)
+            row.add_widget(chip)
         self.refresh()
 
     @property
@@ -117,34 +123,47 @@ class StatusStrip(QWidget):
 
 
 class HeaderBar(QFrame):
-    """Session line on the left, status chips and the layout bar on the right."""
+    """Session line on the left, status chips, drawer toggles and layout bar.
 
-    def __init__(self, layout_bar: QWidget, parent: QWidget | None = None) -> None:
+    ``toggles`` are the small buttons that open the tile's drawers (the log,
+    #9846); they sit between the status chips and the layout bar so that
+    opening one is always one click from the top of the tile.
+    """
+
+    def __init__(
+        self,
+        layout_bar: QWidget,
+        parent: QWidget | None = None,
+        *,
+        toggles: Sequence[QWidget] = (),
+    ) -> None:
         super().__init__(parent)
         require(layout_bar is not None, "a layout bar is required")
         self.setObjectName(styling.HEADER_OBJECT_NAME)
-        self.session = QLabel("no session loaded")
+        self.session = ElidedLabel("no session loaded")
         self.session.setFont(get_qfont(Sizes.MD, Weights.MEDIUM))
         self.session.setTextInteractionFlags(
             Qt.TextInteractionFlag.TextSelectableByMouse
         )
         self.status = StatusStrip()
         self.layout_bar = layout_bar
-        row = QHBoxLayout(self)
+        row = FlowLayout(self, spacing=LayoutMetrics.SPACING_LG)
         row.setContentsMargins(
             LayoutMetrics.SPACING_MD,
             LayoutMetrics.SPACING_SM,
             LayoutMetrics.SPACING_MD,
             LayoutMetrics.SPACING_SM,
         )
-        row.setSpacing(LayoutMetrics.SPACING_LG)
-        row.addWidget(self.session, 1)
-        row.addWidget(self.status)
-        row.addWidget(layout_bar)
+        row.add_widget(self.session)
+        row.add_widget(self.status)
+        for toggle in toggles:
+            row.add_widget(toggle)
+        row.add_widget(layout_bar)
         self.restyle()
 
     def set_session(self, text: str) -> None:
-        self.session.setText(text)
+        """Show ``text``, elided to whatever width the header has."""
+        self.session.set_full_text(text)
 
     def restyle(self) -> None:
         self.setStyleSheet(styling.header_style())

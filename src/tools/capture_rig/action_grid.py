@@ -3,28 +3,32 @@
 :func:`group_actions` is the pure grouping: each action sits under the
 *last* step of :data:`workflow.STEPS` that lists it (Record belongs to the
 take, not to the calibration that also uses it); actions no step lists
-(preview, load, stop) form a trailing *Session* group. :class:`ActionGrid`
-lays the groups out in two columns, filled top to bottom, so the grid reads
-in step order and stays compact. The buttons are created and owned by the
-tile; the grid only places them.
+(preview, load, stop) form a trailing *Session* group.
+
+:class:`ActionGrid` places those groups in a :class:`~.flow_layout.FlowLayout`
+so they wrap onto as many rows as the pane is wide enough for (#9844). Each
+section label opens a fresh row, so it always sits immediately above or
+beside the buttons it names, and the grid's minimum width is one button
+rather than the sum of every column. The buttons are created and owned by
+the tile; the grid only places them, tooltips and all.
 """
 
 from __future__ import annotations
 
-import math
 from collections.abc import Mapping, Sequence
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QGridLayout, QLabel, QPushButton, QWidget
+from PyQt6.QtWidgets import QLabel, QPushButton, QSizePolicy, QWidget
 
 from src.shared.python.core.contracts import require
 from src.shared.python.theme.layout_metrics import LayoutMetrics
 from src.shared.python.theme.typography import Sizes, Weights, get_qfont
 
 from . import styling, workflow
+from .flow_layout import FlowLayout
 
 SESSION_GROUP = "Session"
-COLUMNS = 2
+NARROW_WIDTH = 320  # the width the grid must still fit inside (#9844)
 
 Groups = tuple[tuple[str, tuple[str, ...]], ...]
 
@@ -55,7 +59,7 @@ def group_actions(
 
 
 class ActionGrid(QWidget):
-    """Section label + that step's buttons per row, two step-columns wide."""
+    """A wrapping row of step sections: a label, then that step's buttons."""
 
     def __init__(
         self,
@@ -63,32 +67,37 @@ class ActionGrid(QWidget):
         steps: Sequence[workflow.Step] = workflow.STEPS,
         parent: QWidget | None = None,
     ) -> None:
+        """Precondition: ``buttons`` is not empty.
+
+        Postcondition: every button in ``buttons`` is placed exactly once,
+        each group's label opens the row its first button starts on, and
+        ``minimumSizeHint().width()`` is at most :data:`NARROW_WIDTH`.
+        """
         super().__init__(parent)
         require(bool(buttons), "at least one button is required")
         self.groups: Groups = group_actions(steps, tuple(buttons))
         self.section_labels: dict[str, QLabel] = {}
-        grid = QGridLayout(self)
-        grid.setContentsMargins(0, 0, 0, 0)
-        grid.setHorizontalSpacing(LayoutMetrics.SPACING_SM)
-        grid.setVerticalSpacing(LayoutMetrics.SPACING_SM)
-        widest = max(len(actions) for _, actions in self.groups)
-        rows = math.ceil(len(self.groups) / COLUMNS)
-        for index, (title, actions) in enumerate(self.groups):
-            row, block = index % rows, (index // rows) * (widest + 1)
-            label = QLabel(title)
-            label.setFont(get_qfont(Sizes.SM, Weights.SEMIBOLD))
-            label.setAlignment(
-                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
-            )
-            self.section_labels[title] = label
-            grid.addWidget(label, row, block)
-            for offset, action in enumerate(actions, start=1):
-                grid.addWidget(buttons[action], row, block + offset)
-        for column in range(COLUMNS):
-            grid.setColumnStretch(column * (widest + 1), 0)
-            for offset in range(1, widest + 1):
-                grid.setColumnStretch(column * (widest + 1) + offset, 1)
+        flow = FlowLayout(self, spacing=LayoutMetrics.SPACING_SM)
+        row_height = max(b.sizeHint().height() for b in buttons.values())
+        for title, actions in self.groups:
+            flow.add_widget(self._label(title, row_height), starts_line=True)
+            for action in actions:
+                flow.add_widget(buttons[action])
+        policy = self.sizePolicy()
+        policy.setHeightForWidth(True)
+        policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
+        self.setSizePolicy(policy)
         self.restyle()
+
+    def _label(self, title: str, row_height: int) -> QLabel:
+        """The section label for ``title``, wrapping rather than widening."""
+        label = QLabel(title)
+        label.setFont(get_qfont(Sizes.SM, Weights.SEMIBOLD))
+        label.setWordWrap(True)
+        label.setMinimumHeight(row_height)
+        label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        self.section_labels[title] = label
+        return label
 
     @staticmethod
     def section_style() -> str:
