@@ -37,9 +37,9 @@ _QUEUE_BADGES = {
 }
 
 _ACCEPTANCE_BADGES = {
-    "met": "✅ met",
-    "partial": "🟡 partial",
-    "unmet": "🔴 unmet",
+    "met": "✅ Met",
+    "partial": "🟡 Partial",
+    "unmet": "🔴 Unmet",
 }
 
 _RELEASE_BADGES = {
@@ -119,7 +119,7 @@ def render_index(ledger: IndustrialReadinessLedger) -> str:
     open_items = ledger.open_items
     merged_items = ledger.merged_items
     lines = [
-        "# Industrial readiness index",
+        "# Industrial Readiness Index",
         "",
         "<!-- AUTO-GENERATED — do not edit by hand. -->",
         "<!-- Regenerate with: python3 -m scripts.generate_industrial_readiness_index -->",
@@ -142,7 +142,7 @@ def render_index(ledger: IndustrialReadinessLedger) -> str:
         " (context, not current branch identity)",
         f"- **Queue:** {len(merged_items)} merged · {len(open_items)} open",
         "",
-        "## Priority implementation queue",
+        "## Priority Implementation Queue",
         "",
     ]
     # A markdown table would be reformatted by prettier (which pads cells to a
@@ -164,14 +164,14 @@ def render_index(ledger: IndustrialReadinessLedger) -> str:
         lines += _render_item(item)
 
     lines += [
-        "## Acceptance criteria",
+        "## Acceptance Criteria",
         "",
     ]
     for criterion in ledger.acceptance:
         lines += _render_acceptance(criterion)
 
     lines += [
-        "## Keeping this record honest",
+        "## Keeping This Record Honest",
         "",
         "`src/config/industrial_readiness_loader.py` refuses a ledger that claims",
         "more than the tree supports. A merged entry must carry a 40-character",

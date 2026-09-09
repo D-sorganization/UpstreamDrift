@@ -1,4 +1,4 @@
-# Industrial readiness index
+# Industrial Readiness Index
 
 <!-- AUTO-GENERATED — do not edit by hand. -->
 <!-- Regenerate with: python3 -m scripts.generate_industrial_readiness_index -->
@@ -17,14 +17,14 @@ governance pathway.
 - **Audit snapshot:** `1f69a51fce997932f04a6ad1dd95bf4d065ba971` (context, not current branch identity)
 - **Queue:** 2 merged · 2 open
 
-## Priority implementation queue
+## Priority Implementation Queue
 
 - **U1** · [#9477](https://github.com/D-sorganization/UpstreamDrift/issues/9477) · P1 · ✅ merged
 - **U2** · [#9407](https://github.com/D-sorganization/UpstreamDrift/issues/9407) · P0 · ✅ merged
 - **U3** · [#8820](https://github.com/D-sorganization/UpstreamDrift/issues/8820) · P1 · 🔴 open · owner unassigned, depends on [#8822](https://github.com/D-sorganization/UpstreamDrift/issues/8822), [#8821](https://github.com/D-sorganization/UpstreamDrift/issues/8821)
 - **U4** · [#9417](https://github.com/D-sorganization/UpstreamDrift/issues/9417) · P3 · 🔴 open · owner unassigned, depends on [#9416](https://github.com/D-sorganization/UpstreamDrift/issues/9416)
 
-### U1 — Pinocchio ran free-fall only and cross-engine 'total energy' had no mass term
+### U1 — Pinocchio Ran Free-Fall Only and Cross-Engine 'Total Energy' Had No Mass Term
 
 ✅ merged · P1 · [#9477](https://github.com/D-sorganization/UpstreamDrift/issues/9477)
 
@@ -34,7 +34,7 @@ governance pathway.
 
 **Acceptance evidence.** Commanded torque now reaches the Pinocchio stepping loop (`set_commanded_torque` / `_advance_physics` in `gui_simulation.py`), so a user who applies nonzero actuation sees the model driven rather than dropped. Cross-engine total energy resolves through engine-native energy methods, then the mass matrix / inertia / mass fallbacks in `_eval_mass_or_inertia_energy`, so the reported figure is joules rather than a unit-mass velocity proxy.
 
-### U2 — README install path did not work on a clean machine
+### U2 — README Install Path Did Not Work on a Clean Machine
 
 ✅ merged · P0 · [#9407](https://github.com/D-sorganization/UpstreamDrift/issues/9407)
 
@@ -44,7 +44,7 @@ governance pathway.
 
 **Acceptance evidence.** The documented install path initializes the `vendor/ud-tools` submodule and no longer advertises a Git LFS step that the repository does not use; `scripts/ci/verify_installation.py` executes the documented examples so a clean-machine install is checked rather than asserted. The audit's original missing-init finding must not be re-filed.
 
-### U3 — Engine dashboard exports carry no engine, model path, run ID, or timestamp
+### U3 — Engine Dashboard Exports Carry No Engine, Model Path, Run ID, or Timestamp
 
 🔴 open · P1 · [#8820](https://github.com/D-sorganization/UpstreamDrift/issues/8820)
 
@@ -55,7 +55,7 @@ governance pathway.
 
 **Narrow PR plan.** Confirmed still open against the reconciliation SHA. `UnifiedDashboardWindow.export_data` saves under the default name `swing_data` and dumps `recorder.get_data_dict()`, which stamps only `model_name` and `num_frames`; `_flatten_dict_for_csv` then keeps only per-frame arrays, so the CSV carries no identifying column at all and MuJoCo, Drake and Pinocchio exports are byte-level indistinguishable. Narrow PR order: (1) add the engine field to `ProvenanceInfo` and make `model_path` mandatory at the dashboard call site (#8822); (2) emit a sidecar plus header rows for JSON and CSV using the already-present, currently unused `add_provenance_to_csv` (#8821); (3) stamp engine, model path and hash, timestamp and run ID into the dashboard export dict and assert the round trip from each of the three engine dashboards (#8820). Do not widen the export schema without a reimport test.
 
-### U4 — Ship installable artifacts: wheel, image, desktop bundles, SBOM
+### U4 — Ship Installable Artifacts: Wheel, Image, Desktop Bundles, SBOM
 
 🔴 open · P3 · [#9417](https://github.com/D-sorganization/UpstreamDrift/issues/9417)
 
@@ -66,45 +66,45 @@ governance pathway.
 
 **Narrow PR plan.** Confirmed still open against the reconciliation SHA: `deploy/` is present but empty, and `release.yml` publishes a wheel without the container image, Tauri bundles or per-artifact SBOM the installation docs imply. The companion-manifest dependency (#9416) is merged at 072db089188edc96f365e3a11e3e43bd27efd11d, so this is dependency-ready. Narrow PR order: decide the GA artifact set; add image build/push, bundle upload, SBOM and attestation to the release workflow; resolve the Windows MSI decision against `installer/windows/build_installer.py`; either populate `deploy/` with the API compose/helm or delete it; add a clean-machine smoke install per artifact. Ship the artifact-set decision first — the later slices depend on it.
 
-## Acceptance criteria
+## Acceptance Criteria
 
-### ✅ met — Each priority child is reconciled against current main and has a narrow PR plan.
+### ✅ Met — Each Priority Child Is Reconciled Against Current Main and Has a Narrow PR Plan.
 
 - **Blockers:** —
 
 All four queue entries were re-read against the reconciliation SHA rather than the audit snapshot: U1 and U2 are merged with the SHAs recorded here, and U3 and U4 were re-confirmed open at the named source locations and carry an ordered PR plan.
 
-### ✅ met — Every claimed completed capability links implementation SHA, executed tests and user-visible acceptance evidence.
+### ✅ Met — Every Claimed Completed Capability Links Implementation SHA, Executed Tests and User-Visible Acceptance Evidence.
 
 - **Blockers:** —
 
 The registry contract refuses a `merged` entry that lacks a 40-character merge SHA, a test path, or acceptance evidence, and refuses any implementation or test path that does not exist in the tree.
 
-### 🟡 partial — Required release profiles pass installed-product journeys; unsupported profiles are explicit.
+### 🟡 Partial — Required Release Profiles Pass Installed-Product Journeys; Unsupported Profiles Are Explicit.
 
 - **Blockers:** [#9417](https://github.com/D-sorganization/UpstreamDrift/issues/9417)
 
 Engine support is explicit in `docs/operations/tier-policy.md` (MuJoCo core; Drake and Pinocchio extended; OpenSim and MyoSuite experimental behind a warning), and the source install journey is checked by `scripts/ci/verify_installation.py`. No built artifact other than the wheel has a clean-machine journey, which is exactly the U4 scope.
 
-### ✅ met — Numerical/scientific validity, software correctness and human qualification remain separately recorded.
+### ✅ Met — Numerical/Scientific Validity, Software Correctness and Human Qualification Remain Separately Recorded.
 
 - **Blockers:** —
 
 This ledger records software correctness only. Scientific qualification stays in the design-manual governance pathway (`scripts/config/design_manual_governance.json`, `python3 -m scripts.check_design_manual_governance`); a passing entry here is not scientific or human approval, and no registered experiment may be rerun or promoted to satisfy it.
 
-### ✅ met — Outstanding blockers have a named owner/dependency and do not masquerade as green release status.
+### ✅ Met — Outstanding Blockers Have a Named Owner/Dependency and Do Not Masquerade as Green Release Status.
 
 - **Blockers:** [#8820](https://github.com/D-sorganization/UpstreamDrift/issues/8820), [#9417](https://github.com/D-sorganization/UpstreamDrift/issues/9417)
 
 `release_status` is `blocked` and the contract forbids `ready` while any queue entry is open or any acceptance criterion is unmet. Every open entry must carry an owner and a plan, must carry a dependency when the owner is unassigned, and must appear in at least one acceptance blocker list, so an open item cannot be dropped from the summary.
 
-### 🟡 partial — Release evidence includes recovery/rollback instructions and preserves user data.
+### 🟡 Partial — Release Evidence Includes Recovery/Rollback Instructions and Preserves User Data.
 
 - **Blockers:** [#9417](https://github.com/D-sorganization/UpstreamDrift/issues/9417)
 
 `docs/operations/release-runbook.md` carries a Rollback section that pins downstream consumers to the previous tag, forbids overwriting or rerunning immutable release assets, and requires an incident issue before a patch release. It covers the wheel; the artifacts U4 adds have no rollback step yet.
 
-## Keeping this record honest
+## Keeping This Record Honest
 
 `src/config/industrial_readiness_loader.py` refuses a ledger that claims
 more than the tree supports. A merged entry must carry a 40-character

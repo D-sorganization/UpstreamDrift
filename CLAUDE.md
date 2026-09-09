@@ -169,7 +169,7 @@ regenerate the human-readable matrix:
 python3 -m scripts.generate_feature_parity_matrix
 ```
 
-## Industrial readiness ledger (epic #9539)
+## Industrial Readiness Ledger (Epic #9539)
 
 `src/config/industrial_readiness.json` is the machine-readable execution index
 for the 2026-09-04 industrial readiness review. It records, per priority child,
