@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-09 (75 reference/live tests pass in 101.48 s; all three formerly skipped native comparisons pass in 2.78 s after Pinocchio installation; 13 degradation/registry tests pass; root lint/format and two-module mypy pass)
 - **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
-- **Next step:** Publish the CI-stub callback correction and #9842 runtime qualification after generated-inventory/current-main integration. The combined Bioptim 3.6.7 OCP, real factory/isolation and dependency suite passes 21 tests in 162.06 s. The 3.8 RK4 solve remains unsuccessful even at a 1,000-iteration budget; factory compatibility does not qualify that solver combination. Protected CI and physical/acoustic validation remain open.
+- **Next step:** Publish c2a8d5b6e through normal hooks and follow #9841 protected CI. It integrates main 438bd3282 without changing validated optimization paths; regenerated inventory passes ten tests, root pinned Ruff and SPEC pass. The combined Bioptim 3.6.7 OCP, real factory/isolation and dependency suite passes 21 tests in 162.06 s. The 3.8 RK4 solve remains unsuccessful even at a 1,000-iteration budget; factory compatibility does not qualify that solver combination. Physical/acoustic validation remains open.
 
 ### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
 
