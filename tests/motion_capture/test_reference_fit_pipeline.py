@@ -109,3 +109,22 @@ def test_identity_covers_actual_samples_and_not_source_location() -> None:
     changed = replace(draft, points=draft.points + 0.01)
     third = fit_reference(changed, profile, "double_pendulum")
     assert first.asset.id != third.asset.id
+
+
+@pytest.mark.parametrize("invalid_length", [-0.1, float("nan"), float("inf")])
+def test_invalid_fitted_dimensions_cannot_be_published(
+    monkeypatch: pytest.MonkeyPatch, invalid_length: float
+) -> None:
+    from dataclasses import replace
+
+    draft, profile = pendulum_input()
+    valid = fit_reference(draft, profile, "double_pendulum")
+    lengths = dict(valid.fit.lengths_m)
+    lengths[next(iter(lengths))] = invalid_length
+    invalid = replace(valid.fit, lengths_m=lengths)
+    monkeypatch.setattr(
+        "src.motion_capture.reference.fit_pipeline.fit_trajectory",
+        lambda *args, **kwargs: invalid,
+    )
+    with pytest.raises(ValueError, match="dimensions"):
+        fit_reference(draft, profile, "double_pendulum")

@@ -385,7 +385,16 @@
           "reason": "Native OpenSim custom-joint/muscle constraints require an OpenSim adapter; no surrogate fit is substituted."
         }
       }
-    },
+    }
+  },
+  "limitations": [
+    "Surface-marker proxies are not anatomical joint centers.",
+    "RMS values use different mapped landmark sets and are not a model ranking.",
+    "Native OpenSim custom joints unsupported; MyoSuite body files are placeholders.",
+    "Full model trees include unobserved degrees of freedom constrained by priors.",
+    "Graphics are joint trees; no shaded native mesh rendering."
+  ],
+  "withdrawn_runs": {
     "driver-full-serial": {
       "job": {
         "schema_version": "reference-fit-job/1.0",
@@ -487,14 +496,8 @@
           "status": "unavailable",
           "reason": "Native OpenSim custom-joint/muscle constraints require an OpenSim adapter; no surrogate fit is substituted."
         }
-      }
+      },
+      "rejection_reason": "Negative fitted hub_to_shoulder length -0.1253960033540757 m; withdrawn from playable library."
     }
-  },
-  "limitations": [
-    "Surface-marker proxies are not anatomical joint centers.",
-    "RMS values use different mapped landmark sets and are not a model ranking.",
-    "Native OpenSim custom joints unsupported; MyoSuite body files are placeholders.",
-    "Full model trees include unobserved degrees of freedom constrained by priors.",
-    "Graphics are joint trees; no shaded native mesh rendering."
-  ]
+  }
 }
