@@ -1,71 +1,73 @@
-# Implementation Handoff
+# Reference Asset Implementation Handoff
 
 ## Identity
 
-- Repository: `D-sorganization/UpstreamDrift`
-- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-coaching-drawings`
-- Branch: `feat/9862-coaching-drawings`
-- Baseline commit: `156615443` (editing/library PR #9868 with concurrent navigation fix preserved)
-- Implementation commit: `SELF`
-- Pull request: #9869 (draft)
-- Governing issue/epic: #9862; #9849
+- Repository: D-sorganization/UpstreamDrift
+- Working directory: C:/Users/diete/Repositories/Worktrees/UpstreamDrift-reference-assets
+- Branch: feat/9864-reference-assets
+- Baseline commit: db4862fb8 (drawings stack; dependency #9868 now merged)
+- Implementation commit: SELF
+- Pull request: #9870 (draft)
+- Governing issue/epic: #9864, #9863
 
 ## Objective and Status
 
-- Objective: Give instructors saved visual references over original camera video, with intuitive editing and consistent exports.
-- Status: draft review; dependency integration pending
-- Completed: Five shape tools, source-pixel/frame document, validation, bounded undo/redo, draw/select/move/resize, numeric and keyboard editing, style/visibility, atomic save/reopen, library/editor access, common preview/PNG/video renderer and portable sidecars.
-- Remaining: Final focused validation, visual review, protected PR and current-head CI. Advanced external reference epic #9863 and fleet adoption remain separate open work.
+Validated expert C3D/model marker/video imports with a visible native library.
+Implementation is in progress; registration #9865 and projection/sync UI #9866
+remain separate work. Drawing #9869 and fleet rollout #1588 are in protected CI.
 
 ## Files and Decisions
 
-- Files changed: src/motion_capture/coaching, coaching_canvas.py, coaching_dialog.py, coaching_export.py, existing clip/export/editor/library adapters, tests, generated feature/workflow maps and user documentation.
-- Key decisions: Use the native ImageCanvas coordinate transform and OpenCV export renderer. Visual reference layers never enter scientific landmark observations. Draw before crop and retain original frames. Reuse existing export worker and exclusive publication helper. Tools Fabric is a workflow reference, not falsely compatible serialization; no vendor edits.
-- User-owned or unrelated worktree changes: none; concurrent editing branch update c401d006e preserved through baseline 156615443. Shared clones and other agents' branches untouched.
+New reference model/importers/storage and native mapping/library dialogs reuse
+C3DAdapter, BodyTarget JSON loader, CIR MarkerTrajectory, VideoReader, atomic
+write_document, provenance hashing and FlowLayout. No vendor edits. Explicit
+source-unit/axis/name choices precede 3D registration. Missing points remain null;
+zero coordinates remain valid. Video clocks are nominal-frame-rate only.
+
+The shared C3D adapter retains complete labels and rejects duplicates. ezc3d
+residuals come from meta_points, not the XYZ1 fourth row. Source arrays are never
+filled or resampled. Existing pipeline.py helper is aligned to merged editing
+head 4909ee460; this is a dependency update, not a new analytics change.
 
 ## Validation
 
-- Initial RED: new coaching test failed because the module did not exist. Nine backend shape/history/persistence tests then passed.
-- Initial integrated drawing/export suite: 18 passed. Ten source modules pass mypy with repository follow-imports=silent settings.
-- Broader UI integration found a fixed-row minimum width of 952 px after adding Draw References; switched to existing FlowLayout. Repaired integrated drawing/library/editor/clip suite: 28 passed.
-- Initial visual review at 900x720 showed all controls and a 496-px minimum width. Reduced selection handles to screen-relative size and added a visible stroke-unit label/colour value.
-- Subsequent final checks are recorded before PR submission; synthetic media do not qualify physical camera calibration or instructor usability.
+- 21 backend/import/C3D tests pass, including a real ezc3d-written fixture.
+- Two initial C3D fidelity regressions failed before the adapter correction.
+- Four native tests pass (notes/archive, mapping confirmation, video source
+  immutability, unsaved close). Initial 808-px minimum-width failure was corrected
+  by a scrollable source-path field and existing FlowLayout.
+- Eight modules pass mypy with --follow-imports=silent. Architecture budget passes.
+- Design-manual governance passes; release remains blocked-inventory-required.
+- Remaining: expanded integration/negative cases, map freshness, full LoD, visual
+  review, final formatting and protected PR checks. No physical calibration claim.
 
-## Blockers and Risks
+## Risks and Compatibility
 
-- Blockers: none for implementation; protected CI remains required before merge.
-- Risks/assumptions: Video exports are silent. Media/sidecar publication rolls back ordinary errors but is not atomic across power loss. Imported Fabric documents, freehand/text tools and external expert projection are outside this shape layer; #9863 remains open.
+Worker lifecycle prevents closing while a bounded import/write runs. No immediate
+native-parser cancellation is claimed. Sources are linked, not copied or deleted.
+CIR/model inputs must contain Cartesian marker trajectories; arbitrary joint-angle
+or mesh files are not silently converted. Shared clones and peers' worktrees intact.
 
 ## Next Steps
 
-1. Integrate dependency PR #9868 after its current-head protected checks pass.
-2. Qualify the focused #9869 diff against merged main, then mark ready; respect normal branch protection.
-3. Continue advanced reference imports/registration/comparison and verify fleet adoption.
+1. Complete reference-library integration, visual review and generated checks.
+2. Commit with DL-#9864/SPEC evidence; integrate merged drawings/main and submit PR.
+3. Implement #9865 registration/time mapping and #9866 comparison/export controls.
+4. Verify fleet #1579 adoption after #1588 runner fix merges and live sync executes.
 
 ## Change Log
 
-- SELF — Add native saved coaching references and shared image/video rendering, preserving source media and scientific observations. Reuse existing layout and export lifecycle primitives; correct the laptop-width regression discovered by integration tests.
+- SELF — Build reference import contracts, native management and shared C3D fidelity fix.
 
-- SELF — Final qualification: registry/atlas 49 passed; latest library/drawing/export suite 19 passed, including immutable worker snapshot, output sidecar race and copied reference layers. Twelve-module mypy plus storage/library follow-up pass. Full LoD scan is clean across 3,012 files. Generated atlas, parity matrix and guide are fresh. Final visual review: drawing dialog 900x720/minimum 496 px; swing editor 850x650/minimum 465 px. Both remain readable.
+- SELF — Expanded qualification: 30 backend/import/C3D/reference UI/existing-library tests pass. Fresh-process body JSON isolation reproduced an eager legacy C3D import failure; the shared loaders facade now lazily resolves optional formats, and the regression plus import tests pass. Standalone previews opened: library 740×660 (184-px minimum), mapping 640×650 (441-px minimum). Mapping now applies the shared theme. Atlas/parity freshness passes. Full unbaselined LoD reports existing repository findings; use the configured no-growth baseline and fix the new source-path access through the asset-owned property.
 
-- 2d92e179d — Integrated protected main with atlas and performance improvements; preserved both development-log entries and all SPEC rows.
+- SELF — Final local checks: 49 registry/atlas tests pass; atlas and parity artifacts are fresh; eight-module mypy passes; configured LoD no-growth check passes (2,987 source files, existing baseline retained). Visually inspected both screens including themed mapping. A cancelled archive-filter change now restores the visible filter and preserves unsaved notes (RED then four UI tests GREEN). Scoped Ruff/format pass. Keep the single current #9868 SPEC row while recording the new reference change.
 
-- SELF — Add cancellable swing export with provenance, source-timeline initialization and analytics regressions, and regenerated workflow/capability references. Export/editor/clips 12 passed, reconstruction/analytics 11 passed, registry/atlas 49 passed, repaired guide/timing 10 passed, five-module mypy passed.
+- SELF — Merge reviewed drawings head 3f8b592bf through a normal merge after reference implementation 269354d07. Preserve the complete reference additions and the same drawing/editor behavior; the extracted sparse-summary helper already matches merged #9868. Reference PR is now a focused addition to this dependency.
 
-- SELF — Record PR #9868 and passing normal push hooks (including mypy, Bandit and unit tests); place its single SPEC row inside the canonical change-log table.
+- SELF — Published draft PR #9870 after normal push hooks. Local import and library qualification is complete. Integrate drawing theme correction before readying this PR. Fleet runner repair #1588 merged; live rollout 34330895204 exposed Git credential routing and a stale clone-root handoff, being corrected in an isolated RM branch.
 
-- SELF — CI identified two library navigation calls reaching through CapturePanel into its text control. Added a panel-owned set_session_path API and exercised the real library-open callback in the integration test; no baseline weakening.
+- SELF — Integrate merged drawings #9869 / main 77e6bca88. Preserve all expert-reference additions while taking the qualified shared drawing-colour default from main. Mark editing/drawings log entries shipped based on protected merges.
+- SELF — Post-main integration qualification: 31 reference import, persistence, C3D, native reference-library and theme tests pass. Ready to validate the focused PR against merged drawings.
 
-- Verification: full LoD scan passes (3,005 source files), six GUI/library integration tests pass, and gui.py passes mypy after the navigation API correction.
-
-- SELF — Integrated concurrent agent commit c401d006e through a normal merge. Preserved its panel-owned set_session_path API and retained the callback integration tests; removed the equivalent duplicate accessor.
-
-- SELF — Full CI #9868 exposed a sparse-manual regression (unit job 102370002003): summary availability must not block reconstruction/model fitting. Added a specific SwingDataUnavailable result path, recorded the reason in session_reconstruction.json, and removed stale dense summaries before retaining sparse output. Existing every-fifth-frame model-fit qualification now passes along with nine pipeline/analytics checks (10 total). Scientific calculations and interpolation policies remain unchanged.
-
-- SELF — Integrated latest main dba24ceb7 (Tools canonical theme/notes migration) in merge 3a10d4986. The corrected sparse-fit, trim-timeline and native GUI/library/editor suite passes 15 tests with the pinned Tools theme; atlas freshness passes. Two-module mypy and design-manual governance pass.
-
-- SELF — Integrated merged dependency PR #9868 on main into #9869. Ready for protected PR review and CI.
-
-- SELF — Integrated editing fix 951c94ed8, latest Tools-canonical migration from main dba24ceb7 and qualification commit 1e2469296. Sparse manual captures now retain reconstruction/model fit while recording summary unavailability and removing stale metrics. Dependency validation passes 15 sparse/timeline/GUI/editor tests; drawings remain separate additional behavior.
-
-- SELF — Record PR #9869; post-dependency integration passes 22 drawing/editor/library tests and atlas freshness. Normal commit and push hooks passed. External editing-branch architecture extraction 4909ee460 is integrated cleanly.
+- SELF — Full CI identified duplicate Qt button setup in reference mapping. Reuse the public shared create_button factory and label the action Import Reference. Four native reference tests and the full DRY no-growth gate pass; no quarantine changes.

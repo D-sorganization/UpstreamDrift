@@ -1,5 +1,13 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+## Expert Reference Imports (#9864)
+
+Active isolated worktree `UpstreamDrift-reference-assets`, branch
+`feat/9864-reference-assets`, implements versioned motion/video reference imports,
+explicit source mapping, a native reference library and shared C3D residual fidelity.
+See canonical `docs/development/HANDOFF.md` and `DL-#9864`. Camera registration
+#9865 and projection/synchronization #9866 remain open goal work.
+
 ## Coaching Reference Work in Progress (#9862)
 
 Isolated branch `feat/9862-coaching-drawings` builds on editing/library PR #9868
@@ -552,3 +560,5 @@ The final host CI type check passes after menu contracts and the native COM matr
 ## Capture Product Review (#9851, #9857)
 
 See `docs/development/HANDOFF.md` and `docs/development/capture_product_review.md`. Bounded duplicate-frame cache and child startup recovery are covered by six focused tests. The camera suite passed 241 tests before the recovery change. GUI #9843 remains independently owned; hardware qualification remains outstanding.
+
+Expert reference imports are in draft PR #9870 (30 integrated tests, 49 atlas/registry tests and scoped quality gates passed). Registration/time mapping #9865 and native comparison #9866 remain next. Preserve native drawing dependency #9869.
