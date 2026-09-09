@@ -5,7 +5,7 @@
 - Repository: `D-sorganization/UpstreamDrift`
 - Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-swing-editing`
 - Branch: `feat/9860-swing-editing`
-- Baseline commit: `b52db19ad`
+- Baseline commit: `eaf8503ce` (merged atlas #9856 and performance #9859)
 - Implementation commit: `SELF`
 - Pull request: not created
 - Governing issue/epic: #9860, #9861; #9849
@@ -48,3 +48,5 @@
 - 5d70e394e — Add portable capture notes/catalog, archive/restore, safe filename changes and editable copies.
 
 - SELF — Add visible library and header actions, rename recovery, cancellable scanning, Windows catalog cleanup and integrated UI qualification.
+
+- SELF — Integrated protected main with atlas and performance improvements; preserved both development-log entries and all SPEC rows.

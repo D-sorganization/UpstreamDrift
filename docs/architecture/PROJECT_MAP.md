@@ -1,5 +1,12 @@
 # UpstreamDrift - Complete Project Map
 
+> **Current Generated Reference:** [Capability Atlas](CAPABILITY_ATLAS.md) reads
+> the canonical launcher/feature registries and camera workflow on every build.
+> [Open the Searchable Network Map](../../ui/public/capability-atlas/index.html)
+> for system connections, capture-to-analysis paths and surface limitations.
+> The historical inventory below is retained as background; use the generated
+> atlas for current tile and feature counts.
+
 > **Version 2.1.1** | Last updated: 2026-06-10
 >
 > This document is the single comprehensive reference for every feature,

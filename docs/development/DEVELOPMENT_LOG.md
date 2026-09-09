@@ -31,6 +31,38 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Evidence:** Integrated suite 300 passed; subsequent focused library/UI suite 12 passed and editor suite 5 passed; eight-module mypy passed. Native editor visual review at 850x650 has readable controls and 492-px minimum width.
 - **Next step:** Finish selection export/playback integration and generated map updates, then protected PR.
 
+### DL-#9851 · Capture Responsiveness and Recovery
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9851, #9857 (epic #9849)
+- **Branch:** `perf/9851-capture-responsiveness`
+- **PR:** #9859
+- **Paths:** `src/tools/capture_rig/player.py`, `src/tools/capture_rig/process_runner.py`, `scripts/benchmark_capture_responsiveness.py`, `tests/tools/capture_rig/test_player_cache.py`, `tests/tools/capture_rig/test_process_runner.py`, `docs/development/capture_product_review.md`
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`eaf8503ce`)
+- **Acceptance:** Duplicate frames decode once with isolated pixels; failed child starts restore the lifecycle and allow retry; measured evidence and hardware limits documented.
+- **Evidence:** 241 camera tests after cache; six focused tests after recovery; duplicate median 196.788 to 12.613 ms.
+- **Next step:** Maintain merged functionality as capture features evolve.
+
+### DL-#9850 · Generated Capability Atlas
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9850 (children #9852, #9853; product #9849)
+- **Branch:** `feat/9850-capability-atlas`
+- **PR:** #9856
+- **Paths:** `scripts/capability_atlas/`, `scripts/generate_capability_atlas.py`,
+  `src/config/capability_connections.json`, `ui/public/capability-atlas/`,
+  `ui/src/components/simulation/LauncherDashboard.tsx`, `docs/architecture/`,
+  `tests/scripts/test_capability_atlas.py`
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`9d6e6a872`)
+- **Summary:** Source-backed C4-style context, artifact/workflow network,
+  searchable feature/tile reference and standard Mermaid exports. Reads existing
+  registries and workflow; no separate feature inventory or GUI fork.
+- **Next step:** Maintain merged functionality as capture features evolve.
+
 ### DL-#9830 · Independent Shooting Accuracy
 
 - **State:** in_review
