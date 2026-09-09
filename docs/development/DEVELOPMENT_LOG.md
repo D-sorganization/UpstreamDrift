@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9912 · Impact Shaft Provider Integration
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9912; parent #9703
+- **Branch:** feat/9912-impact-provider-pin
+- **PR:** not created
+- **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (Tools 608e85b24; consumer base 6e3610a9b; changes SELF)
+- **Summary:** Qualify the exact Tools #5133 candidate through the existing vendor boundary, including strict shaft inputs and paired theme compatibility.
+- **Evidence:** Six old-pin failures become six passes; all 24 provider contracts pass on candidate 608e85b24. Ruff and manual governance pass. Physical qualification remains open.
+- **Next step:** Qualify the final Tools #5133 repair revision through the provider suite.
+
 ### DL-#9894 · Scoped Ubuntu CI Dependencies
 
 - **State:** in_review
@@ -191,16 +205,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#9830 · Independent Shooting Accuracy
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9830
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9841
 - **Branch:** fix/9830-independent-shooting-convergence
 - **Paths:** optimization reference/defect contracts and docs/development/shooting_convergence_9830_turnover.md
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-09 (75 reference/live tests pass in 101.48 s; all three formerly skipped native comparisons pass in 2.78 s after Pinocchio installation; 13 degradation/registry tests pass; root lint/format and two-module mypy pass)
-- **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
-- **Next step:** Publish c2a8d5b6e through normal hooks and follow #9841 protected CI. It integrates main 438bd3282 without changing validated optimization paths; regenerated inventory passes ten tests, root pinned Ruff and SPEC pass. The combined Bioptim 3.6.7 OCP, real factory/isolation and dependency suite passes 21 tests in 162.06 s. The 3.8 RK4 solve remains unsuccessful even at a 1,000-iteration budget; factory compatibility does not qualify that solver combination. Physical/acoustic validation remains open.
+- **Last verified:** 2026-09-09 (merged 28d9bf79e; details in shooting_convergence_9830_turnover.md)
+- **Summary:** Adaptive independent-reference defects expose under-resolved own-grid checks. Native Bioptim/Casadi 3.6.7 suite: 21 passes; Casadi 3.8 RK4 solve remains unsuccessful at 1,000 iterations. Numerical evidence does not qualify physical accuracy.
+- **Next step:** Retain the native/runtime qualifications in downstream impact studies.
 
 ### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
 
@@ -211,9 +225,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** fix/9825-preserve-reviewed-claims
 - **Paths:** manufactured claim registration, integration/native contracts, governed research evidence, canonical publication and claim_preservation_9825_turnover.md.
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (128 strict native contracts; native/rolling/publication CI passes at e93ef5224; stale PDF regression reproduced and repaired, all 11 publication tests pass with five inherited warnings; changed-file Ruff/format pass)
-- **Summary:** Actual reconciliation now preserves reviewed evidence/order and refuses changed science; six real-path failures become 11 passes. Current pinned engines regenerate deterministic provenance with unchanged numerical results; two expected-failure exemptions are removed. All 328 outcomes remain unchanged; the generated census/PDF is refreshed and reviewed.
-- **Next step:** PR #9826 merged as a410ae705 from fced8c0d6 at 2026-09-09T01:12:29Z. Merge is verified; queued auxiliary jobs are not claimed passed. Continue numerical follow-up #9830 and the separate physical/acoustic qualifications; preserve historical evidence.
+- **Last verified:** 2026-09-09 (merged a410ae705; claim_preservation_9825_turnover.md)
+- **Summary:** Actual registration preserves all 328 reviewed outcomes and ordering while refusing changed science. 128 strict native contracts and 11 publication controls pass; regenerated provenance and reviewed PDF retain their physical limitations.
+- **Next step:** Preserve the reviewed claim boundaries when integrating new impact evidence.
 
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 
