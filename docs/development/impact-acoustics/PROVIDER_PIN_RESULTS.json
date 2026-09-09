@@ -6,7 +6,27 @@
   "skipped": 0,
   "warnings": 5,
   "source_mode": "vendored",
-  "installed_wheel_validation": "pending",
+  "installed_wheel_validation": {
+    "consumer_revision": "b6107f8e2559afffb8e360098f793d88c2ec2886",
+    "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+    "wheel_sha256": "6f6f259ff9679f921a5a05e515abcb4bb466589221ce6c7aefdc43b9ca656653",
+    "wheel_bytes": 210496037,
+    "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
+    "origins": {
+      "shared.python.golf_club.shaft_model_data": "C:\\Users\\diete\\.cache\\codex-impact\\provider9912-installed\\Lib\\site-packages\\shared\\python\\golf_club\\shaft_model_data.py",
+      "shared.python.theme.api": "C:\\Users\\diete\\.cache\\codex-impact\\provider9912-installed\\Lib\\site-packages\\shared\\python\\theme\\api.py"
+    },
+    "versions": {
+      "upstream-drift": "2.1.3",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pydantic": "2.13.5"
+    },
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "checks_passed": true,
+    "qualification": "Python provider installation only; UI build omitted; physical qualification open",
+    "pip_check_passed": true
+  },
   "physical_qualification": "unqualified",
   "junit_sha256": "0b8c97e710e11222856075cb67f0fdec7964fa86aac72f9848058dc38232b7b5"
 }

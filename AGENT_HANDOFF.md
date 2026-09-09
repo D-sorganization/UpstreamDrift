@@ -6,7 +6,8 @@ Issue #9912 is a child of #9703/#9701; PR not created. Current commit is SELF.
 
 The existing vendor mechanism now selects Tools 608e85b249e6f61238ac96abbe7dc37428629b9e for review.
 Six new contracts fail against the old pin and pass against this candidate.
-All 24 provider contracts pass; the candidate is not physically qualified.
+All 24 provider contracts and clean installed-wheel provider checks pass.
+The Python-only wheel omits UI assets; physical qualification remains open.
 Tools #5133 CI repairs, final provider revision and protected review remain.
 Do not merge this consumer before the provider is reviewed and green.
 
