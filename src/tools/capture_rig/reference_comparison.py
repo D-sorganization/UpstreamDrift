@@ -235,17 +235,18 @@ class ReferenceComparisonDialog(QDialog):
     def _update_status_label(self) -> None:
         if self._current_asset is None:
             self.status_label.setText("No reference loaded")
+            self.status_label.setStyleSheet(styling.chip_style("neutral"))
             return
         if self._current_asset.kind == "motion":
             if self._camera:
                 self.status_label.setText("3D Calibrated Projection")
-                self.status_label.setStyleSheet("color: #44dd44;")
+                self.status_label.setStyleSheet(styling.chip_style("ok"))
             else:
                 self.status_label.setText("3D Uncalibrated (No camera match)")
-                self.status_label.setStyleSheet("color: #ffaa00;")
+                self.status_label.setStyleSheet(styling.chip_style("warning"))
         else:
             self.status_label.setText("2D Homography (No 3D claims)")
-            self.status_label.setStyleSheet("color: #44aaff;")
+            self.status_label.setStyleSheet(styling.chip_style("neutral"))
 
     def _asset_changed(self, index: int) -> None:
         if 0 <= index < len(self.assets):
