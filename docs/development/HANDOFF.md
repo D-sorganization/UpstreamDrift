@@ -7,6 +7,7 @@
 - Baseline: 213c5a6ca
 - Implementation commit: SELF
 - Governing issue: #9894
+- Pull request: #9896 (draft pending #9890 integration)
 - Session: capture-product-01a08427-ubuntu-ci
 
 ## Changes and Evidence
@@ -26,7 +27,8 @@ failure, install suppression after failed update, and cleanup on failure.
 Ruff and focused mypy pass. Actionlint reports the same three pre-existing
 workflow diagnostics on baseline and changed stdin input. The first pre-push
 unit run exposed an uninitialized pinned Tools submodule in this new worktree;
-initialize that exact pin and rerun normal hooks. Local tests do not perform actual Linux installs;
+the exact eab74a901 pin is now initialized and all normal pre-push hooks pass,
+including Bandit and the required unit subset. Local tests do not perform actual Linux installs;
 protected CI must qualify the real runner transaction.
 
 ## Coordination and Remaining Work
@@ -37,6 +39,6 @@ job-scoped replacement. #9893 owns contributor-guide compatibility. Do not
 modify those branches or managed agent policy here. The authoritative design
 manual and standing UP-D0/UP-D1 records remain unchanged.
 
-Publish a focused PR, record its unique SPEC row and development-log link,
-and complete protected validation before integration. A readable signed
+PR #9896 records its unique SPEC row and development-log link. Complete
+protected validation and reconcile #9890 before integration. A readable signed
 Ubuntu deb822 source is required; unsupported runner images fail explicitly.
