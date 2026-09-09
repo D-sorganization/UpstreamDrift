@@ -126,6 +126,15 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         self._drake_pre_init_done = False
         super().__init__()
 
+        from src.shared.python.body_part_viz.force_color_controls import (
+            install_force_color_action,
+        )
+        from src.shared.python.body_part_viz.meshcat_force_colors import (
+            MeshcatForceColorSession,
+        )
+
+        self.segment_force_colors = MeshcatForceColorSession()
+
         # Simulation State
         self.simulator: Simulator | None = None  # type: ignore[no-any-unimported]
         self.diagram: Diagram | None = None  # type: ignore[no-any-unimported]
@@ -160,6 +169,9 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
 
         # UI Setup
         self._setup_ui()
+
+        view_menu = self.menuBar().addMenu("View")
+        install_force_color_action(view_menu, lambda: [self.segment_force_colors])
 
         # Sync initial state to UI
         self._sync_kinematic_sliders()

@@ -3929,7 +3929,7 @@
       "classification": "ud-only",
       "package": "body_part_viz",
       "subpackage": "",
-      "ud_bytes": 3673,
+      "ud_bytes": 6346,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

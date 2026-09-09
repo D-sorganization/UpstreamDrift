@@ -33,11 +33,11 @@ load at a declared section; it is not a spatial stress field or a tissue safety 
 - [x] Frame-aligned load contract and provider capability with explicit provenance.
 - [x] Matplotlib and PyQtGraph adapters that recolor existing artists, preserve
       opacity and geometry, and restore base colors without clearing the scene.
-- [ ] Reusable desktop toggle, palette/range controls and labeled legend; connect
+- [x] Reusable desktop toggle, palette/range controls and labeled legend; connect
       the controls and frame loads to applicable animation consumers.
 - [x] React parity: shared wire contract, reusable controls and URDF/segment
       material adapter; retain original materials on disable and missing data.
-- [ ] Concrete force-source adapters qualified with analytical tension/compression
+- [x] Concrete force-source adapters qualified with analytical tension/compression
       fixtures, including sign/frame conventions and unsupported engine behavior.
 - [ ] Regression and native renderer checks, user guide, parity registry, SPEC and
       handoff updates; publish epic/children and merge through protected PR checks.
@@ -64,8 +64,10 @@ The web scene exposes reusable force-color controls and accepts a qualified,
 synchronized `segmentLoads` prop or optional websocket frame field for URDF and
 fallback geometry. MuJoCo supplies qualified rod section reactions using scratch
 data. Double and triple pendulums use existing analytical joint reactions.
-Their desktop views expose the shared controls. Other native hosts still require
-binding and source qualification; unsupported models retain their base colors.
+Their desktop views expose the shared controls. Pinocchio and Drake expose the
+same controls and a shared session for explicitly bound, time-aligned load frames.
+Native GUI tests qualify settings, redraw, binding and restoration; automatic force
+inference is unavailable in those hosts. Unsupported models retain base colors.
 See `docs/user_guide/body_part_viz/force_colors.md` for the adapter contract.
 
 Policy RED: missing `force_colors` import; GREEN: 15 tests. Matplotlib RED:
@@ -108,3 +110,16 @@ import, split the rendering method, and remove a redundant websocket cast. Cycle
 adds explicit unit-suite markers and incorporates current main after the shallow
 CI diff incorrectly classified main's new notebook test as deleted. No gate or
 baseline was weakened. Current-head CI and protected merge remain required.
+
+CI cycle 3 updates the companion catalog expectation and regenerates the shared
+divergence inventory. Those modules pass 34 tests; the preceding full unit gate
+passed 14,431 tests with only those two bookkeeping failures.
+
+The shared MeshCat session began with a missing-class RED test. GREEN covers
+stale-frame restoration, toggling and model replacement. Native Pinocchio 4.1.0
+and Drake 1.56.0 GUI tests pass in an isolated Linux environment, including actual
+settings dialogs, redraw and explicit frame bindings. The native test caught a
+duplicate legacy Pinocchio mixin; the active host's redraw hook is now exercised.
+OpenSim currently has result plots rather than an animated 3D scene. Both MeshCat
+hosts require a qualified caller-supplied section-force source and explicit scene
+bindings; Drake's sampled reaction output must not be treated as current by default.

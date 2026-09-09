@@ -172,6 +172,15 @@ class PinocchioGUI(
         """Initialize the Pinocchio GUI."""
         super().__init__()
 
+        from src.shared.python.body_part_viz.force_color_controls import (
+            install_force_color_action,
+        )
+        from src.shared.python.body_part_viz.meshcat_force_colors import (
+            MeshcatForceColorSession,
+        )
+
+        self.segment_force_colors = MeshcatForceColorSession()
+
         self._init_internal_state()
 
         pin_version = getattr(pin, "__version__", "unknown")
@@ -186,6 +195,9 @@ class PinocchioGUI(
         self._scan_urdf_models()
 
         self._setup_ui()
+
+        view_menu = self.menuBar().addMenu("View")
+        install_force_color_action(view_menu, lambda: [self.segment_force_colors])
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self._game_loop)
