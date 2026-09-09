@@ -4,6 +4,18 @@ Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
 Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
+Updated: 2026-09-08 23:59 UTC (wave-2 PR triage, session UD2PRs)
+
+## Wave-2 PR Triage: 2026-09-08 (Agent `claude`, Session UD2PRs)
+
+Repo-wide npm-audit red: advisory GHSA-2883-xcg3-v3hh (js-yaml high,
+published 2026-09-08 between the 21:57 main push run and the 22:15 PR runs)
+fails `code-quality` (`npm audit --audit-level=high`) on every merge ref
+whose lockfile carries js-yaml 4.3.1 - main itself goes red on its next
+Standard run. Fix on `bot/claude/npm-audit-jsyaml`: npm `overrides.js-yaml`
+= `^4.3.2` in `ui/package.json` (dev-only dep of `@eslint/eslintrc`), audit
+drops to 5 moderate, gate passes. Disposition table below is maintained as
+PRs settle (in-progress at first commit).
 
 ## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
 
