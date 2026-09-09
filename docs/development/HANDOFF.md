@@ -77,3 +77,7 @@ Parent timing CI repair 250c421e4 is integrated. The newer compositor keeps its
 own existing camera-snapshot helper instead of the superseded export helper.
 NumPy shape typing and refreshed benchmark evidence are retained. Full-PR
 architecture passes with --base-ref origin/main; use this explicit comparison.
+
+## Timing Integration
+
+Merged parent #9885 at de430c500, preserving concurrent #9886 compatibility and tests. This export implementation retains its shared renderer and stricter staged publication. Canonical timing evidence is in #9885; rendering tests and preview parity remain required before merge.
