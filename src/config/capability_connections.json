@@ -56,6 +56,20 @@
       "description": "Pinned vendor-owned shared schemas and libraries.",
       "evidence": "src/motion_capture/rig/tools_bridge.py",
       "view": "system"
+    },
+    {
+      "id": "capture.library",
+      "title": "Capture Library",
+      "description": "Find, import, open and edit captures; save swing notes and manage archive/storage.",
+      "evidence": "src/tools/capture_rig/library_dialog.py",
+      "view": "workflow"
+    },
+    {
+      "id": "capture.selection",
+      "title": "Swing Selection",
+      "description": "Preview source frames, mark in/out and crop before inference.",
+      "evidence": "src/tools/capture_rig/swing_editor.py",
+      "view": "workflow"
     }
   ],
   "edges": [
@@ -246,6 +260,42 @@
       "kind": "file",
       "evidence": "src/tools/capture_rig/clips.py",
       "constraint": "Coaching reference; single-view outputs are not 3-D",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "step.capture",
+      "artifact": "Existing session / imported videos",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/library_actions.py",
+      "constraint": "Sidecar notes survive catalog rebuild; archived captures remain on disk",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "capture.selection",
+      "artifact": "Original camera recordings",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/swing_editor.py",
+      "constraint": "Keep an address hold for calibration and the finish for analysis",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "step.detect",
+      "artifact": "swing_edits.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/rig/ingest.py",
+      "constraint": "Only selected frames and crop reach inference; original pixels and clocks are retained",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "files",
+      "artifact": "Swing video + provenance",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/swing_export.py",
+      "constraint": "Separate output; source hash, exact recipe and any encoder padding are recorded",
       "view": "workflow"
     }
   ]

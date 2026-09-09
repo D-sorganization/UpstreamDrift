@@ -37,6 +37,7 @@ from .alignment import (
     view_timing,
 )
 from .bundle import RecordingEntry, RecordingsIndex, load_bundle
+from .edits import EDITS_FILE, ViewEdit, load_edits
 
 logger = get_logger(__name__)
 
@@ -242,6 +243,7 @@ def ingest_view(
     estimator: FrameEstimator,
     *,
     max_frames: int | None = None,
+    edit: ViewEdit | None = None,
 ) -> ViewObservations:
     """Estimate every frame of one recording into :class:`KeypointObservation` rows.
 
@@ -254,24 +256,49 @@ def ingest_view(
         max_frames is None or max_frames > 0, "max_frames must be positive", max_frames
     )
     rate = _rate_for(entry)
+    if edit is not None:
+        edit.validate_recording(entry)
+    selection = edit or ViewEdit()
     layout = estimator.layout
     rows: list[dict[str, Any]] = []
     total = 0
     for index, image in iter_video_frames(video_path):
-        if max_frames is not None and index >= max_frames:
+        if index < selection.first:
+            continue
+        if selection.last is not None and index > selection.last:
             break
-        total = index + 1
-        pose = estimator.estimate(image, int(round(index * 1000.0 / rate)))
+        if max_frames is not None and total >= max_frames:
+            break
+        total += 1
+        height, width = image.shape[:2]
+        crop = selection.crop
+        if crop:
+            crop.validate_size(width, height)
+            pixels = image[crop.y : crop.y + crop.height, crop.x : crop.x + crop.width]
+        else:
+            pixels = image
+        pose = estimator.estimate(pixels, int(round(index * 1000.0 / rate)))
         if pose is None:
             continue
-        height, width = image.shape[:2]
+        scale = [crop.width, crop.height] if crop else [width, height]
+        origin = [crop.x, crop.y] if crop else [0, 0]
         obs = KeypointObservation(
             camera_id=entry.identity,
             time_s=index / rate,
-            keypoints_px=pose.keypoints_norm * np.array([width, height], dtype=float),
+            keypoints_px=pose.keypoints_norm * np.array(scale, dtype=float) + origin,
             confidence=pose.confidence,
         )
         rows.append(obs.to_dict())
+    if edit is not None:
+        expected = (
+            selection.last - selection.first + 1 if selection.last is not None else None
+        )
+        if expected is not None and max_frames is not None:
+            expected = min(expected, max_frames)
+        if total == 0 or (expected is not None and total < expected):
+            raise ValueError(
+                "Recording ended before the selected frames could be decoded"
+            )
     return ViewObservations(
         view=entry.view,
         identity=entry.identity,
@@ -279,13 +306,17 @@ def ingest_view(
         fps=rate,
         width=entry.width,
         height=entry.height,
-        frames_total=total,
+        # Existing consumers allocate a source-indexed timeline from this field.
+        # Sparse selection must not truncate late swing frames in reconstruction.
+        frames_total=(entry.frames or selection.first + total) if edit else total,
         frames_with_pose=len(rows),
         detector_layout=layout.to_dict(),
         frames=tuple(rows),
         provenance={
             **estimator.provenance,
             "requested_mode": entry.requested_mode.model_dump(),
+            "frames_processed": total,
+            **({"edit": edit.model_dump(mode="json")} if edit is not None else {}),
         },
     )
 
@@ -330,6 +361,7 @@ def _ingest_entry(
     estimator: FrameEstimator,
     max_frames: int | None,
     timing: dict[str, Any],
+    edit: ViewEdit | None = None,
 ) -> ViewIngestStatus:
     if not entry.ok:
         reason = (
@@ -342,7 +374,9 @@ def _ingest_entry(
             reason=reason,
         )
     observations = _with_reference_clock(
-        ingest_view(entry, bundle_dir / entry.file, estimator, max_frames=max_frames),
+        ingest_view(
+            entry, bundle_dir / entry.file, estimator, max_frames=max_frames, edit=edit
+        ),
         timing,
     )
     target = out_dir / f"{entry.view}.json"
@@ -351,7 +385,7 @@ def _ingest_entry(
         observations.model_dump(mode="json"),
         schema_version=VIEW_OBSERVATIONS_SCHEMA_VERSION,
         module=__name__,
-        inputs=[bundle_dir / entry.file],
+        inputs=[bundle_dir / entry.file] + ([bundle_dir / EDITS_FILE] if edit else []),
         parameters={"view": entry.view},
         base=bundle_dir,
     )
@@ -380,6 +414,7 @@ def ingest_bundle(
     written. Postcondition: one status per plan view.
     """
     plan, index, manifest = load_bundle(bundle_dir)
+    edits = load_edits(bundle_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     estimator = estimator_factory()
     statuses: list[ViewIngestStatus] = []
@@ -387,7 +422,15 @@ def ingest_bundle(
     try:
         for entry in index.recordings:
             statuses.append(
-                _ingest_entry(entry, bundle_dir, out_dir, estimator, max_frames, timing)
+                _ingest_entry(
+                    entry,
+                    bundle_dir,
+                    out_dir,
+                    estimator,
+                    max_frames,
+                    timing,
+                    edits.views.get(entry.view),
+                )
             )
     finally:
         estimator.close()
@@ -397,7 +440,7 @@ def ingest_bundle(
         timing=timing,
         timing_report=_write_timing_report(timing, index, out_dir),
         tools_schema=dict(manifest.tools_schema),
-        provenance=estimator.provenance,
+        provenance={**estimator.provenance, "edits": edits.model_dump(mode="json")},
     )
     written = [
         out_dir / s.file for s in statuses if s.file and (out_dir / s.file).is_file()

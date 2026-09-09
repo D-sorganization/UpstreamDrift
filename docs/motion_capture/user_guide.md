@@ -59,7 +59,7 @@ Bind each camera to a named view so takes are repeatable.
 1. Choose the plan file and a session folder.
 2. Pick a mode preset or leave 'plan default'; optionally restrict the views.
 3. Run *Plan check*: every view must resolve to a camera before recording.
-4. Importing existing video files instead? Use *Import videos* and skip to Detect.
+4. Importing existing video files instead? Use *Import videos* or the header *Library*, then review the swing selection before Detect.
 
 Tile actions: plan_check, import.
 
@@ -99,6 +99,8 @@ The footage every later step works from.
 2. Press *Record*: the countdown runs, the recorder takes over the cameras and the tiles keep showing them with a red REC readout; walk to address, swing, hold the finish. *Stop* ends the take early.
 3. Or *Import videos* to build a session from files (one or many).
 4. Run *Proxies* for smooth playback of large MJPEG recordings.
+5. Open *Edit swing* in the header to mark in/out, preview and crop. Keep an address hold and the finish. Save before Ingest; originals remain intact.
+6. Use the header *Library* to save swing notes, find earlier captures and manage archive/storage.
 
 Tile actions: record, import, proxy.
 
@@ -113,9 +115,10 @@ Tile actions: record, import, proxy.
 
 **Do**
 
-1. Choose the estimator and settings; press *Ingest*. Each estimator writes its own observation set.
-2. Press *Compare* to run both and get coverage / confidence / jitter / agreement per joint.
-3. Scrub the playback with the overlay on; low-confidence joints are red.
+1. Optional: use header *Edit swing* to isolate the swing and player before inference.
+2. Choose the estimator and settings; press *Ingest*. Each estimator writes its own observation set.
+3. Press *Compare* to run both and get coverage / confidence / jitter / agreement per joint.
+4. Scrub the playback with the overlay on; low-confidence joints are red.
 
 Tile actions: ingest, compare.
 

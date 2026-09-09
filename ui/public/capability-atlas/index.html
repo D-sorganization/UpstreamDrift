@@ -120,49 +120,65 @@
     </section>
     <section id="workflow" aria-labelledby="workflow-heading">
       <div class="section-head"><div><p class="eyebrow">02 / Capture to Analysis</p><h2 id="workflow-heading">Choose the Path Your Evidence Supports</h2><p>Record or import, inspect observations, then follow the single-view or calibrated multi-view path. Each stage has a defined input and output.</p></div><a href="capture-workflow.mmd" download>Download Workflow Diagram ↗</a></div>
-      <div class="diagram workflow" tabindex="0" role="region" aria-label="Capture Workflow; Scroll Horizontally to Follow the Stages"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1810 555" role="img" aria-labelledby="workflow-title workflow-desc">
+      <div class="diagram workflow" tabindex="0" role="region" aria-label="Capture Workflow; Scroll Horizontally to Follow the Stages"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2065 555" role="img" aria-labelledby="workflow-title workflow-desc">
 <title id="workflow-title">Workflow Capability Network</title>
 <desc id="workflow-desc">Connections are detailed in the adjacent table. Dashed arrows represent file exchange, not automatic execution.</desc>
 <defs><marker id="arrow-workflow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#76b9bf"/></marker></defs>
-<path d="M245,104 C275,104 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Resolved plan / imported views: Check plan before recording; importing existing files is supported</title></path>
-<text x="254" y="93" fill="#c3d9df" font-size="11">1</text>
+<path d="M245,279 C275,279 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Resolved plan / imported views: Check plan before recording; importing existing files is supported</title></path>
+<text x="254" y="268" fill="#c3d9df" font-size="11">1</text>
 <path d="M500,104 C530,104 507,454 537,454" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Separate chessboard take: Multi-view lens calibration; once per camera/mode, not each swing</title></path>
 <text x="509" y="93" fill="#c3d9df" font-size="11">2</text>
-<path d="M500,104 C530,104 507,279 537,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Recorded swing videos: One observation set per estimator</title></path>
+<path d="M500,104 C530,104 762,104 792,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Recorded swing videos: One observation set per estimator</title></path>
 <text x="509" y="93" fill="#c3d9df" font-size="11">3</text>
-<path d="M500,104 C530,104 507,104 537,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Video frames: Sparse manual points; mark occlusion rather than invent coordinates</title></path>
+<path d="M500,104 C530,104 507,279 537,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Video frames: Sparse manual points; mark occlusion rather than invent coordinates</title></path>
 <text x="509" y="93" fill="#c3d9df" font-size="11">4</text>
-<path d="M755,279 C785,279 762,104 792,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>2-D observations: Review confidence, coverage, jitter and provenance</title></path>
-<text x="764" y="268" fill="#c3d9df" font-size="11">5</text>
-<path d="M755,104 C785,104 762,104 792,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Converted observation set: Run annotations-to-observations; optional merge with detector output</title></path>
-<text x="764" y="93" fill="#c3d9df" font-size="11">6</text>
-<path d="M755,279 C785,279 762,279 792,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Single-view observations: 2-D normalized measurements, not metric depth</title></path>
-<text x="764" y="268" fill="#c3d9df" font-size="11">7</text>
-<path d="M755,454 C785,454 1017,279 1047,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>intrinsics.json: Two or more views plus measured segments; reuse calibrated camera placement when appropriate</title></path>
+<path d="M1010,104 C1040,104 1017,279 1047,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>2-D observations: Review confidence, coverage, jitter and provenance</title></path>
+<text x="1019" y="93" fill="#c3d9df" font-size="11">5</text>
+<path d="M755,279 C785,279 1017,279 1047,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Converted observation set: Run annotations-to-observations; optional merge with detector output</title></path>
+<text x="764" y="268" fill="#c3d9df" font-size="11">6</text>
+<path d="M1010,104 C1040,104 1017,104 1047,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Single-view observations: 2-D normalized measurements, not metric depth</title></path>
+<text x="1019" y="93" fill="#c3d9df" font-size="11">7</text>
+<path d="M755,454 C785,454 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>intrinsics.json: Two or more views plus measured segments; reuse calibrated camera placement when appropriate</title></path>
 <text x="764" y="443" fill="#c3d9df" font-size="11">8</text>
-<path d="M1010,104 C1040,104 1017,279 1047,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reviewed multi-view observations: Reliability review does not prove geometric observability</title></path>
-<text x="1019" y="93" fill="#c3d9df" font-size="11">9</text>
-<path d="M1265,279 C1295,279 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joints_3d_m.npy: Fit residuals are not independent physical validation</title></path>
-<text x="1274" y="268" fill="#c3d9df" font-size="11">10</text>
-<path d="M1520,279 C1550,279 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joint_angles.json: Model-dependent inverse dynamics; inspect replay drift and assumptions</title></path>
-<text x="1529" y="268" fill="#c3d9df" font-size="11">11</text>
-<path d="M1265,279 C1295,279 1272,104 1302,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reconstruction artifacts: TRC uses millimetres; canonical JSON states units</title></path>
-<text x="1274" y="268" fill="#c3d9df" font-size="11">12</text>
-<path d="M1520,104 C1550,104 1527,104 1557,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>TRC / canonical JSON: Explicit artifact import into motion pipeline</title></path>
-<text x="1529" y="93" fill="#c3d9df" font-size="11">13</text>
-<path d="M1010,279 C1040,279 1017,104 1047,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Annotated clips and metrics: Coaching reference; single-view outputs are not 3-D</title></path>
-<text x="1019" y="268" fill="#c3d9df" font-size="11">14</text>
+<path d="M1265,279 C1295,279 1272,279 1302,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reviewed multi-view observations: Reliability review does not prove geometric observability</title></path>
+<text x="1274" y="268" fill="#c3d9df" font-size="11">9</text>
+<path d="M1520,279 C1550,279 1527,279 1557,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joints_3d_m.npy: Fit residuals are not independent physical validation</title></path>
+<text x="1529" y="268" fill="#c3d9df" font-size="11">10</text>
+<path d="M1775,279 C1805,279 1782,279 1812,279" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>joint_angles.json: Model-dependent inverse dynamics; inspect replay drift and assumptions</title></path>
+<text x="1784" y="268" fill="#c3d9df" font-size="11">11</text>
+<path d="M1520,279 C1550,279 1527,104 1557,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Reconstruction artifacts: TRC uses millimetres; canonical JSON states units</title></path>
+<text x="1529" y="268" fill="#c3d9df" font-size="11">12</text>
+<path d="M1775,104 C1805,104 1782,104 1812,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>TRC / canonical JSON: Explicit artifact import into motion pipeline</title></path>
+<text x="1784" y="93" fill="#c3d9df" font-size="11">13</text>
+<path d="M1265,104 C1295,104 1272,104 1302,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Annotated clips and metrics: Coaching reference; single-view outputs are not 3-D</title></path>
+<text x="1274" y="93" fill="#c3d9df" font-size="11">14</text>
+<path d="M245,104 C275,104 252,104 282,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)"><title>Existing session / imported videos: Sidecar notes survive catalog rebuild; archived captures remain on disk</title></path>
+<text x="254" y="93" fill="#c3d9df" font-size="11">15</text>
+<path d="M500,104 C530,104 507,104 537,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Original camera recordings: Keep an address hold for calibration and the finish for analysis</title></path>
+<text x="509" y="93" fill="#c3d9df" font-size="11">16</text>
+<path d="M755,104 C785,104 762,104 792,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>swing_edits.json: Only selected frames and crop reach inference; original pixels and clocks are retained</title></path>
+<text x="764" y="93" fill="#c3d9df" font-size="11">17</text>
+<path d="M755,104 C785,104 1272,104 1302,104" fill="none" stroke="#76b9bf" stroke-width="2" marker-end="url(#arrow-workflow)" stroke-dasharray="5 4"><title>Swing video + provenance: Separate output; source hash, exact recipe and any encoder padding are recorded</title></path>
+<text x="764" y="93" fill="#c3d9df" font-size="11">18</text>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/motion_pipeline" aria-label="Motion Pipeline source">
-<rect x="1565" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1580" y="80" fill="#edf5f7" font-size="15">Motion Pipeline</text>
+<rect x="1820" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="80" fill="#edf5f7" font-size="15">Motion Pipeline</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/provenance.py" aria-label="Session and Export Files source">
-<rect x="1055" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1070" y="80" fill="#edf5f7" font-size="15">Session and Export Files</text>
+<rect x="1310" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1325" y="80" fill="#edf5f7" font-size="15">Session and Export Files</text>
+</a>
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_dialog.py" aria-label="Capture Library source">
+<rect x="35" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="80" fill="#edf5f7" font-size="15">Capture Library</text>
+</a>
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/swing_editor.py" aria-label="Swing Selection source">
+<rect x="545" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="560" y="80" fill="#edf5f7" font-size="15">Swing Selection</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Set up Cameras and Plan source">
-<rect x="35" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="50" y="80" fill="#edf5f7" font-size="15">Set up Cameras and Plan</text>
+<rect x="35" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="50" y="255" fill="#edf5f7" font-size="15">Set up Cameras and Plan</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Calibrate Each Camera Once source">
 <rect x="545" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
@@ -175,41 +191,41 @@
 <text x="305" y="101" fill="#edf5f7" font-size="15">Swing Take</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Detect the Pose in Every View source">
-<rect x="545" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="560" y="255" fill="#edf5f7" font-size="15">Detect the Pose in Every</text>
-<text x="560" y="276" fill="#edf5f7" font-size="15">View</text>
+<rect x="800" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="815" y="80" fill="#edf5f7" font-size="15">Detect the Pose in Every</text>
+<text x="815" y="101" fill="#edf5f7" font-size="15">View</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Annotate or Correct Points by Hand source">
-<rect x="545" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="560" y="80" fill="#edf5f7" font-size="15">Annotate or Correct</text>
-<text x="560" y="101" fill="#edf5f7" font-size="15">Points by Hand</text>
+<rect x="545" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="560" y="255" fill="#edf5f7" font-size="15">Annotate or Correct</text>
+<text x="560" y="276" fill="#edf5f7" font-size="15">Points by Hand</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Review Joint Reliability source">
-<rect x="800" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="815" y="80" fill="#edf5f7" font-size="15">Review Joint Reliability</text>
+<rect x="1055" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1070" y="255" fill="#edf5f7" font-size="15">Review Joint Reliability</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Reconstruct in 3-D source">
-<rect x="1055" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1070" y="255" fill="#edf5f7" font-size="15">Reconstruct in 3-D</text>
+<rect x="1310" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1325" y="255" fill="#edf5f7" font-size="15">Reconstruct in 3-D</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Analyse the Single View source">
-<rect x="800" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="815" y="255" fill="#edf5f7" font-size="15">Analyse the Single View</text>
+<rect x="1055" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1070" y="80" fill="#edf5f7" font-size="15">Analyse the Single View</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Fit the Articulated Golfer source">
-<rect x="1310" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1325" y="255" fill="#edf5f7" font-size="15">Fit the Articulated</text>
-<text x="1325" y="276" fill="#edf5f7" font-size="15">Golfer</text>
+<rect x="1565" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1580" y="255" fill="#edf5f7" font-size="15">Fit the Articulated</text>
+<text x="1580" y="276" fill="#edf5f7" font-size="15">Golfer</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Kinetics and Model Comparison source">
-<rect x="1565" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1580" y="255" fill="#edf5f7" font-size="15">Kinetics and Model</text>
-<text x="1580" y="276" fill="#edf5f7" font-size="15">Comparison</text>
+<rect x="1820" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1835" y="255" fill="#edf5f7" font-size="15">Kinetics and Model</text>
+<text x="1835" y="276" fill="#edf5f7" font-size="15">Comparison</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Export to the Motion Pipeline source">
-<rect x="1310" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="1325" y="80" fill="#edf5f7" font-size="15">Export to the Motion</text>
-<text x="1325" y="101" fill="#edf5f7" font-size="15">Pipeline</text>
+<rect x="1565" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
+<text x="1580" y="80" fill="#edf5f7" font-size="15">Export to the Motion</text>
+<text x="1580" y="101" fill="#edf5f7" font-size="15">Pipeline</text>
 </a>
 </svg></div>
       <p class="note"><strong>One camera:</strong> 2-D events, tempo and normalized motion. <strong>Multiple cameras:</strong> calibrate lenses, check synchronization and geometric observability, then reconstruct. Fit completion and low residuals do not establish physical validity.</p>
@@ -229,6 +245,10 @@
 <tr><th scope="row">12. Reconstruct in 3-D → Export to the Motion Pipeline</th><td>Reconstruction artifacts<br><small>file</small></td><td>TRC uses millimetres; canonical JSON states units <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/export.py">Source</a></td></tr>
 <tr><th scope="row">13. Export to the Motion Pipeline → Motion Pipeline</th><td>TRC / canonical JSON<br><small>file</small></td><td>Explicit artifact import into motion pipeline <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/export.py">Source</a></td></tr>
 <tr><th scope="row">14. Analyse the Single View → Session and Export Files</th><td>Annotated clips and metrics<br><small>file</small></td><td>Coaching reference; single-view outputs are not 3-D <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/clips.py">Source</a></td></tr>
+<tr><th scope="row">15. Capture Library → Record or Import the Swing Take</th><td>Existing session / imported videos<br><small>workflow</small></td><td>Sidecar notes survive catalog rebuild; archived captures remain on disk <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/library_actions.py">Source</a></td></tr>
+<tr><th scope="row">16. Record or Import the Swing Take → Swing Selection</th><td>Original camera recordings<br><small>file</small></td><td>Keep an address hold for calibration and the finish for analysis <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/swing_editor.py">Source</a></td></tr>
+<tr><th scope="row">17. Swing Selection → Detect the Pose in Every View</th><td>swing_edits.json<br><small>file</small></td><td>Only selected frames and crop reach inference; original pixels and clocks are retained <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/rig/ingest.py">Source</a></td></tr>
+<tr><th scope="row">18. Swing Selection → Session and Export Files</th><td>Swing video + provenance<br><small>file</small></td><td>Separate output; source hash, exact recipe and any encoder padding are recorded <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/swing_export.py">Source</a></td></tr>
 </tbody></table></div></details>
     </section>
     <section id="catalog" aria-labelledby="catalog-heading">
@@ -267,7 +287,7 @@
 <article data-entry data-status="parity"><span class="badge parity">parity</span><h3>Shot Tracer / ball-flight visualization</h3><p>Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 gave both surfaces cross-family trajectory-record import, each overlaying imported swing_sim.ball_flight_trajectory/1 records from either flight-model family and labeling them by model_family/model_name: the web BallFlight page via H3 (#9352, POST /tools/ball-flight/import), and the PyQt6 Shot Tracer via H2 (#9351, the vendored flight_interchange reader).</p><small>simulation.shot_tracer</small><p><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/_shot_tracer_gui.py">Desktop</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/ball_flight.py">API</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/BallFlight.tsx">Web</a></p></article>
 <article data-entry data-status="parity"><span class="badge parity">parity</span><h3>Swing Objective Lab — mechanism-vs-outcome downswing comparison</h3><p>Parity implementation via #9128: canonical API route /api/tools/swing-objectives/compare and React surface ui/src/pages/SwingObjectiveLab.tsx; scientific equivalence remains evidence-gated.</p><small>simulation.swing_objective_lab</small><p><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/adapters/swing_objective_lab_embed.py">Desktop</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/swing_objectives.py">API</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/SwingObjectiveLab.tsx">Web</a></p></article>
 <article data-entry data-status="gap"><span class="badge gap">gap</span><h3>BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict)</h3><p>Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -&gt; a notebook script, bunker_shot -&gt; the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; no API route or web page exists yet. The visualization suite (epic #8699) keeps that split: shot3d.py and traces.py compute, render3d.py and render_traces.py draw headlessly through matplotlib, and viewport_widgets.py only wires them to a canvas. A React port would consume shot3d.viewport_payload, which is the backend-neutral ADR-0027 ViewportOverlayPayload and carries the envelope status and fidelity tier in its metadata so any renderer can stamp its own frames. The F1 sand cut (#8710, #8711) keeps the same split and adds one constraint a port must honour: the field carries its fidelity tier and validity status as data covered by a SHA-256 over the provenance and the arrays together, so any client that renders a field must read the standing out of the file rather than out of its filename, and must refuse a field whose digest does not match. Tracking issue #8607.</p><small>tools.bunkershot3d_workbench</small><p><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/bunker_shot_gui/gui.py">Desktop</a></p></article>
-<article data-entry data-status="exempt"><span class="badge exempt">exempt</span><h3>Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export</h3><p>Exemption pending review. Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) and the multiview layout model/presets/editor and the layout-composited live preview and playback (#9810, #9811, #9812, #9813, #9814) run on the same local session trees; desktop-only candidate pending #7460.</p><small>tools.capture_rig</small><p><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/__main__.py">Desktop</a></p></article>
+<article data-entry data-status="exempt"><span class="badge exempt">exempt</span><h3>Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management</h3><p>Exemption pending review. Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) and the multiview layout model/presets/editor and the layout-composited live preview and playback (#9810, #9811, #9812, #9813, #9814) run on the same local session trees; desktop-only candidate pending #7460.</p><small>tools.capture_rig</small><p><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/__main__.py">Desktop</a></p></article>
 <article data-entry data-status="gap"><span class="badge gap">gap</span><h3>Character Builder (humanoid URDF generation)</h3><p>Web page exists but the backing API endpoints are stubs/partial (F4). Tracking issue #7448.</p><small>tools.character_builder</small><p><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/model_generation/cli/main.py">Desktop</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/character_builder.py">API</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/CharacterBuilder.tsx">Web</a></p></article>
 <article data-entry data-status="gap"><span class="badge gap">gap</span><h3>Data Explorer (import/filter/visualize datasets)</h3><p>Web page exists but the backing API endpoints are stubs/partial (F4). Tracking issue #7448.</p><small>tools.data_explorer</small><p><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/data_explorer.py">API</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DataExplorer.tsx">Web</a></p></article>
 <article data-entry data-status="parity"><span class="badge parity">parity</span><h3>Swing dataset generation and import</h3><p>Web-first tool; the desktop launcher opens the web route.</p><small>tools.dataset_generator</small><p><a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/dataset.py">API</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DatasetGenerator.tsx">Web</a></p></article>

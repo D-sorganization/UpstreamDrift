@@ -24,10 +24,10 @@ from pydantic import BaseModel, ConfigDict
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-from .analytics import summarize_swing
+from .analytics import SwingDataUnavailable, summarize_swing
 from .cameras import PinholeCamera
 from .clean import CleanReport, clean_view
-from .bundle import observations_from_views
+from .bundle import compact_frames, observations_from_views
 from .measurements import expand_measurements, gauge
 from .fit import (
     RECONSTRUCTION_FILE,
@@ -68,6 +68,7 @@ class SessionReconstruction(BaseModel):
     rms_px: float
     unobservable_points: int
     swing_summary_file: str | None = None
+    swing_summary_unavailable_reason: str | None = None
     measured_lengths_m: dict[str, float] = {}
     fps: float | None = None
     excluded_joints: tuple[str, ...] = ()
@@ -183,9 +184,7 @@ def reconstruct_session(
     )
     fps = float(views_used[ids[0]]["fps"])
     joints = np.load(out_dir / "joints_3d_m.npy")
-    swing, _series = summarize_swing(joints, fps)
-    swing_file = out_dir / "swing_summary.json"
-    swing_file.write_text(swing.model_dump_json(indent=2), encoding="utf-8")
+    swing_file, swing_reason = _write_swing_summary(out_dir, joints, fps)
     summary = SessionReconstruction(
         session=str(session_dir),
         views=tuple(ids),
@@ -193,7 +192,8 @@ def reconstruct_session(
         reconstruction_file=str(out_dir / RECONSTRUCTION_FILE),
         rms_px=record.rms_px,
         unobservable_points=record.unobservable_points,
-        swing_summary_file=str(swing_file),
+        swing_summary_file=str(swing_file) if swing_reason is None else None,
+        swing_summary_unavailable_reason=swing_reason,
         measured_lengths_m=dict(measured),
         fps=fps,
         excluded_joints=tuple(exclude_joints),
@@ -208,6 +208,25 @@ def reconstruct_session(
     }
     _write_summary(session_dir, out_dir, obs_set_dir, summary, parameters)
     return summary
+
+
+def _write_swing_summary(
+    out_dir: Path,
+    joints: np.ndarray,
+    fps: float,
+) -> tuple[Path, str | None]:
+    """Write swing_summary.json or remove stale summary if unavailable."""
+    swing_file = out_dir / "swing_summary.json"
+    swing_reason = None
+    try:
+        swing, _series = summarize_swing(joints, fps)
+    except SwingDataUnavailable as exc:
+        swing_reason = str(exc)
+        swing_file.unlink(missing_ok=True)
+        logger.warning("Swing summary unavailable: %s", swing_reason)
+    else:
+        swing_file.write_text(swing.model_dump_json(indent=2), encoding="utf-8")
+    return swing_file, swing_reason
 
 
 def _select_views(
@@ -320,7 +339,7 @@ def _initial_cameras(
     scale_anchor: tuple[str, float],
 ) -> tuple[PinholeCamera, ...]:
     """First-take placement from the cleaned joints and the intrinsics alone."""
-    obs = observations_from_views(load_views(out_dir), ids)
+    obs, _ = compact_frames(observations_from_views(load_views(out_dir), ids))
     init = initialize_cameras(
         obs,
         [i[1] for i in intrinsics],
