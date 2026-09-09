@@ -569,7 +569,7 @@ fleet hooks as `development-log`. Run it directly with
 > This section is managed centrally by Repository_Management and synced fleet-wide.
 > Do NOT edit it directly in individual repositories — edit the source in Repository_Management/AGENTS.md.
 
-### Change-log rows are keyed by pull request
+### Change-Log Rows Are Keyed by Pull Request
 
 Binding fleet-wide from
 [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520)
@@ -579,7 +579,7 @@ Binding fleet-wide from
   log: `| YYYY-MM-DD | #<your PR or issue> | one-line summary |`.
 - **Never put a serial spec version in a row**, and **never bump the
   `Spec Version` field**. That field is release-derived — set by
-  `scripts/bump_spec_version.py` when a release is cut.
+  Repository_Management's `scripts/bump_spec_version.py` when a release is cut.
 - **Never renumber, reorder, or reword another contributor's row**, including
   while resolving a rebase. If a rebase conflicts inside the table, keep both
   rows; that is always the correct resolution.
