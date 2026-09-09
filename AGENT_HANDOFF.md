@@ -11,7 +11,7 @@ Earlier entries below describe historical implementations, not current completio
 Phase 4 of bioptim OCP migration complete. Branch `feat/9762-bioptim-parameter-ocp` implements
 `src.shared.python.optimization.ocp.parameter_ocp` (335 LOC) for simultaneous trajectory tracking
 and parameter estimation with quadratic priors, identifiability gating, and IPOPT Hessian tuning.
-All unit contracts, isolation guards, and quality gates pass. PR #9878 open.
+All unit contracts, isolation guards, and quality gates pass. PR #9878 merged.
 
 ## Capture Rig GUI: Layout Inversion, Responsive Adaptation & Evidence (#9847, #9848)
 
