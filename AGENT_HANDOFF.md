@@ -3,9 +3,9 @@
 Implementation and validation state: `docs/development/HANDOFF.md`, section
 Verified Agent Context. Component map: `docs/agent_context/README.md`.
 
-# Guided Capture Setup Continuation
+# Attributed Club Catalog Continuation
 
-Current work: `feat/9913-capture-journey`, issue #9913, PR #9917. Candidate dd8136f15 passes all445 capture/parity tests and normal hooks; remote CI/review and merge remain. Prior calibration/profile and preview recovery PR #9910 merged at18c8f922e; #9898 and its broader epics remain open. Latest player feedback adds persistent capture status, next-step/help links, saved action history and detachable/fullscreen views; DL-#9913 tracks qualification. Visible profile review and verified rig export now pass Capture Rig tests; common-reference solving remains open. The user added everyday calibration (#9897), club catalog/player bag (#9902), and a capability-driven wizard (#9906) to the existing goal. See `docs/development/HANDOFF.md` and `capture_setup_execution_plan.md`. Prior comparison/product epics were delivered through #9896; their older status notes below are historical. Preserve standing UP-D0/UP-D1 governance and all unrelated work.
+Current work: `feat/9903-player-club-catalog`, #9903 / epic #9902; PR #9919 (open). Optional attributed records and JSON/CSV exchange extend the existing club-data authority; 63 tests and scoped mypy pass. Offline source examples and read-only review #9904 now pass 69 combined tests; bag UI #9905 remains open. Capture UX #9917 merged at8fce9f238 and is integrated;445 capture/parity tests passed before the merge. Canonical state: `docs/development/HANDOFF.md`. Preserve the standing manual governance and historical context below.
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
@@ -112,7 +112,7 @@ Updated: 2026-09-08 (wave-2 issue backlog sweep, session UD2IssuesA)
 
 ## Capability Atlas #9850
 
-Isolated branch `feat/9850-capability-atlas`, commit `SELF`, PR not created.
+Isolated branch `feat/9850-capability-atlas`, commit `SELF`, PR #9919 (open).
 See `docs/development/HANDOFF.md` and `DL-#9850` for current validation and
 continuation. Generated references consume existing registries and preserve
 GUI epic #9843 and optimization-agent file ownership. Product #9849 and
