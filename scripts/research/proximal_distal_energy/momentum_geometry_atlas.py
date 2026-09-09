@@ -64,8 +64,46 @@ def bilateral_force_couple(
     return signed_separation_m * np.cross(axis / norm, force)
 
 
+def distributed_contact_couple(
+    station_offsets_m: npt.ArrayLike,
+    separation_axis: npt.ArrayLike,
+    station_forces_n: npt.ArrayLike,
+) -> FloatArray:
+    """Return the midpoint couple of a distributed contact-station set.
+
+    ``station_offsets_m`` are signed station positions along ``separation_axis``
+    measured from the declared reference midpoint, and ``station_forces_n`` is
+    one force per station.  The result is the cross product of the axis with the
+    first moment of the station forces, so a distributed grip is gated by the
+    same signed-separation geometry as an ideal opposed pair: two half-contacts
+    at plus and minus half of a signed separation, carrying opposite forces,
+    reproduce :func:`bilateral_force_couple` exactly, and any station spread
+    that leaves the first moment unchanged leaves the couple unchanged.
+    """
+
+    offsets = np.asarray(station_offsets_m, dtype=np.float64)
+    axis = np.asarray(separation_axis, dtype=np.float64)
+    forces = np.asarray(station_forces_n, dtype=np.float64)
+    if offsets.ndim != 1 or forces.shape != (offsets.size, 3):
+        raise ValueError("offsets must be (n,) and station forces must be (n, 3)")
+    if axis.shape != (3,):
+        raise ValueError("separation axis must have shape (3,)")
+    if (
+        not np.all(np.isfinite(offsets))
+        or not np.all(np.isfinite(axis))
+        or not np.all(np.isfinite(forces))
+    ):
+        raise ValueError("offsets, axis, and station forces must be finite")
+    norm = float(np.linalg.norm(axis))
+    if norm <= 0.0:
+        raise ValueError("separation axis must have nonzero length")
+    first_moment = offsets @ forces
+    return np.cross(axis / norm, first_moment)
+
+
 __all__ = [
     "bilateral_force_couple",
+    "distributed_contact_couple",
     "force_velocity_projection",
     "relative_link_gates",
 ]

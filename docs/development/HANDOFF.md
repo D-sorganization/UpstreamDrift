@@ -7,7 +7,7 @@
 - Branch: `feat/capture-guided-setup`
 - Baseline commit: `54b9b0586` (main after qualified product merge #9896)
 - Implementation commit: `SELF`
-- Pull request: #9910 (draft): https://github.com/D-sorganization/UpstreamDrift/pull/9910
+- Pull request: #9910 (open; remotely marked ready): https://github.com/D-sorganization/UpstreamDrift/pull/9910
 - Governing issue: #9898; epics #9897, #9902, #9906; development entry DL-#9898
 - Session: `capture-product-01a08427-guided-setup`, issue lease and presence active.
 
@@ -52,6 +52,10 @@ geometry, club data and wizard work remain open. Do not close #9898 or its epic 
   retains standing UP-D0/UP-D1 governance and other agents' historical context.
 - User-owned changes: none in this new isolated worktree. The launched application
   remains in the separate UpstreamDrift-ubuntu-ci checkout.
+
+## Integration Checkpoint
+
+Remote #9910 was rebased to c9225f18e during validation. Its five conflicting capture/docs files are byte-identical to pre-UX b743eef09; those conflicts retain the qualified UX versions. All incoming research, readiness, policy and CI changes are preserved. UX commit 8f590cc80 passed normal commit and pre-push checks; push was refused as non-fast-forward. Normal merge/checks are in progress.
 
 ## Journey Qualification (#9913)
 

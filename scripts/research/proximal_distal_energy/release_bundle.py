@@ -302,6 +302,10 @@ _RELEASE_METADATA: dict[str, Any] = {
             "command": "python -m scripts.research.proximal_distal_energy.run_bilateral_wrench_sensor_qualification",
             "tier": "synthetic_trajectory_point_force_sensor_qualification",
         },
+        "participant_twin_calibration": {
+            "command": "python -m scripts.research.proximal_distal_energy.run_participant_twin_calibration write",
+            "tier": "synthetic_identity_safe_hierarchical_participant_twin_calibration",
+        },
     },
     "claims": {
         "interaction_dynamics_planar": "supported_at_declared_model_tier",
@@ -433,6 +437,7 @@ _RELEASE_METADATA: dict[str, Any] = {
         "equipment-calibrated distributed beam and grip coupled into a subject-scaled forward solve",
         "measured tissue-level preload and slack identification",
         "governed held-out human experimental evaluation",
+        "governed participant cohort for digital-twin calibration and population transport",
         "external archive deposit and persistent identifier",
     ],
     "archive": {
