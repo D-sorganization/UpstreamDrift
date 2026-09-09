@@ -43,3 +43,5 @@ Alignment Undo preserves subsequently written lesson notes; an explicit regressi
 Final screenshots refreshed and visually inspected: all three tabs fit the desktop inspector; Pair Current Frames is visible on the laptop; lesson notes remain accessible in the scrolling Notes tab. Four-module mypy and 67 integrated regressions pass.
 
 Restored standing design-manual governance and earlier task context in AGENT_HANDOFF.md after the doc-governance test exposed its removal. Canonical current state remains here. Run tests/scripts/test_design_manual_governance_contract.py before readiness.
+
+Merged final sampler bounds 7bd6b4d0c, including its five adverse regressions and refreshed source-hashed benchmark. No alignment UI behavior changed.
