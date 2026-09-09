@@ -135,3 +135,10 @@ checks passed, and ten source modules passed mypy with the repository's
 follow-imports=silent configuration. Integration caught a laptop-width regression
 from adding a button to a fixed row; that row now uses the existing wrapping
 FlowLayout. Physical camera/coach usability qualification is still required.
+
+Sparse manual observations remain valid reconstruction/model-fit inputs. When their
+wholly missing interior frames prevent a trustworthy swing summary, the chain
+records swing_summary_unavailable_reason, omits the summary path, removes any
+stale summary and continues to produce the reconstruction. It does not invent
+speed/event metrics across gaps. The existing every-fifth-frame model-fit accuracy
+regression and nine pipeline/analytics checks pass.

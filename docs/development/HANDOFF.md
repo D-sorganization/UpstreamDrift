@@ -49,3 +49,5 @@
 - SELF — Final qualification: registry/atlas 49 passed; latest library/drawing/export suite 19 passed, including immutable worker snapshot, output sidecar race and copied reference layers. Twelve-module mypy plus storage/library follow-up pass. Full LoD scan is clean across 3,012 files. Generated atlas, parity matrix and guide are fresh. Final visual review: drawing dialog 900x720/minimum 496 px; swing editor 850x650/minimum 465 px. Both remain readable.
 
 - SELF — Dependency PR #9868 full CI exposed a sparse-manual reconstruction regression; that fix is owned in the editing worktree. Do not mark this drawing feature shipped until the corrected dependency is integrated and protected CI passes.
+
+- SELF — Integrated editing fix 951c94ed8, latest Tools-canonical migration from main dba24ceb7 and qualification commit 1e2469296. Sparse manual captures now retain reconstruction/model fit while recording summary unavailability and removing stale metrics. Dependency validation passes 15 sparse/timeline/GUI/editor tests; drawings remain separate additional behavior.
