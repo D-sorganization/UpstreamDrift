@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9864 · Expert Reference Asset Imports
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9864 (advanced reference epic #9863)
+- **Branch:** feat/9864-reference-assets
+- **PR:** not created
+- **Paths:** src/motion_capture/reference, src/tools/capture_rig/reference_import.py, src/tools/capture_rig/reference_library_dialog.py, src/tools/capture_rig/library_dialog.py, src/shared/python/motion_pipeline/sources/c3d_adapter.py and related tests/docs/maps
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`db4862fb8` baseline; implementation uncommitted)
+- **Summary:** Versioned portable reference assets retain explicit mapping, source hashes, timestamps and missing points; native library adds imports, notes/archive and background I/O. Expert videos remain linked 2D assets.
+- **Evidence:** 30 integrated backend/import/adapter/reference UI/existing-library tests pass, including a real C3D fixture and fresh-process loader-isolation regression. Four native reference tests pass after correcting laptop-width metadata layout. Eight source modules pass mypy; architecture budget passes after alignment with the merged editing helper.
+- **Next step:** Finish integration, visual and generated-map qualification before protected PR submission.
+
 ### DL-#9862 · Saved Coaching References
 
 - **State:** in_review

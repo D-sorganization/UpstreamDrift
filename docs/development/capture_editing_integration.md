@@ -142,3 +142,30 @@ records swing_summary_unavailable_reason, omits the summary path, removes any
 stale summary and continues to produce the reconstruction. It does not invent
 speed/event metrics across gaps. The existing every-fifth-frame model-fit accuracy
 regression and nine pipeline/analytics checks pass.
+
+## Advanced Reference Import Integration (#9864)
+
+- Reuse `motion_pipeline.sources.C3DAdapter`, including its existing optional Rust
+  parser, instead of introducing a capture-specific parser. Preserve labels of
+  fully missing tracks and reject duplicate labels before constructing dictionaries.
+- Reuse `motion_matching.loaders.body_json.load_body_target_json` for existing
+  model Cartesian exports; its loader retains the supplied time grid. Use the CIR
+  `MarkerTrajectory` contract for additional engine-exported marker animations.
+- Reuse `provenance.sha256_of`, atomic `write_document`, native `VideoReader` and
+  `FlowLayout`. New code owns reference identity/mapping/catalog and the native UI.
+- The ezc3d fallback now reads invalid residual flags from
+  `data.meta_points.residuals`, whose shape is 1×markers×frames. Its points array
+  contains XYZ1 homogeneous coordinates, not residuals. See the
+  [ezc3d API documentation](https://github.com/pyomeca/ezc3d#read-a-c3d) and
+  [C3D residual specification](https://www.c3d.org/HTML/Documents/3dpointresiduals.htm).
+- Saved motion assets contain a version, source hash/location, original and mapped
+  names, signed axis assignment, source units, canonical metres/Z-up coordinates,
+  exact sample times, null missing points, connectivity and optional model identity.
+  Asset imports are capped at 64 MB and one million joint samples.
+- Scope still pending: actual rig registration/time mapping (#9865), synchronized
+  projection controls and export (#9866), and physical instructor/hardware review.
+
+The shared motion-matching loaders facade now resolves format exports lazily,
+matching its parent package. This prevents JSON/reference startup from requiring
+unrelated legacy C3D dependencies. A fresh Python-process test reproduces and
+verifies this boundary without the test suite's import shims.

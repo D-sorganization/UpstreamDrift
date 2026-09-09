@@ -57,6 +57,17 @@ except ImportError:  # pragma: no cover
 _HAS_C3D_BACKEND = _HAS_RUST or _HAS_EZC3D
 
 
+def _validated_labels(raw: Iterable[object]) -> list[str]:
+    labels = [str(label).strip() for label in raw]
+    if (
+        not labels
+        or any(not label for label in labels)
+        or len(set(labels)) != len(labels)
+    ):
+        raise AdapterContractError("C3D labels must be non-empty and unique")
+    return labels
+
+
 def _normalize_rust_events(raw_events: object) -> list[dict[str, object]]:
     """Return JSON-serializable C3D events from the Rust parser payload."""
     if not isinstance(raw_events, Iterable):
@@ -230,7 +241,7 @@ class C3DAdapter(MocapSourceAdapter):
             r = _rust_io.parse_c3d(str(p))
         except (OSError, ValueError) as e:
             raise AdapterContractError(f"Failed to load C3D file {p}: {e}") from e
-        labels: list[str] = list(r["labels"])
+        labels = _validated_labels(r["labels"])
         positions = r["positions"]  # (n_frames, n_markers * 3) float32, meters
         n_frames = int(r["n_frames"])
         units = (str(r["units"]).strip().lower()) or "mm"
@@ -282,6 +293,10 @@ class C3DAdapter(MocapSourceAdapter):
             metadata={
                 "source_file": str(p),
                 "units": units,
+                "source_labels": labels,
+                # The native payload does not distinguish absent units from its
+                # fallback. Consumers requiring proof must confirm units explicitly.
+                "units_declared": False,
                 "events": events,
                 "analog": analog,
                 "force_platforms": force_platforms,
@@ -299,8 +314,17 @@ class C3DAdapter(MocapSourceAdapter):
             raise AdapterContractError(f"Failed to load C3D file {p}: {e}") from e
         params = c["parameters"]
         points = c["data"]["points"]  # shape (4, N_markers, N_frames)
+        residuals = c["data"].get("meta_points", {}).get("residuals")
+        if residuals is not None and residuals.shape != (
+            1,
+            points.shape[1],
+            points.shape[2],
+        ):
+            raise AdapterContractError(
+                "C3D residual dimensions must match marker samples"
+            )
         labels_raw = params["POINT"]["LABELS"]["value"]
-        labels = [str(label).strip() for label in labels_raw]
+        labels = _validated_labels(labels_raw)
         fps = resolve_fps(
             params["POINT"]["RATE"]["value"][0],
             format_name="C3D",
@@ -340,7 +364,14 @@ class C3DAdapter(MocapSourceAdapter):
                 x = float(xs[mi])
                 y = float(ys[mi])
                 z = float(zs[mi])
-                if has_nan_coordinate(x, y, z):
+                # ezc3d points are XYZ1 homogeneous coordinates. Residuals
+                # live in meta_points, not in the fourth coordinate row.
+                residual = float(residuals[0, mi, fi]) if residuals is not None else 0.0
+                if (
+                    has_nan_coordinate(x, y, z)
+                    or residual < 0
+                    or not math.isfinite(residual)
+                ):
                     continue
                 markers[name] = marker_ctor(
                     name=name, x=x, y=y, z=z, residual=None, occluded=False
@@ -354,7 +385,12 @@ class C3DAdapter(MocapSourceAdapter):
             id=f"c3d-{p.stem}",
             frames=frames,
             calibration=calibration,
-            metadata={"source_file": str(p), "units": units},
+            metadata={
+                "source_file": str(p),
+                "units": units,
+                "source_labels": labels,
+                "units_declared": bool(params["POINT"]["UNITS"]["value"]),
+            },
         )
 
 
