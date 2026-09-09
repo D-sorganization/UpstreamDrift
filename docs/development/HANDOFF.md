@@ -39,5 +39,5 @@ Focused qualification passes.
 
 ## Next Steps
 
-1. Submit PR referencing #9865 with auto-merge enabled.
+1. Await CI Standard completion and auto-squash merge of PR #9871.
 2. Advance to Subepic #9866 (reference comparison, synchronized projection UI & export).
