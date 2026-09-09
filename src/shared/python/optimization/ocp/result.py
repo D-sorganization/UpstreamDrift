@@ -27,6 +27,7 @@ __all__ = [
     "bioptim_provenance",
     "solution_arrays",
     "solution_to_swing_result",
+    "tracking_to_map_estimator_result",
 ]
 
 
@@ -172,3 +173,32 @@ def solution_to_swing_result(
         transcription=transcription,
     )
     return result, q, qdot, tau
+
+
+def tracking_to_map_estimator_result(result: Any) -> Any:
+    """Convert a :class:`TrackingResult` into a :class:`MapEstimatorResult`.
+
+    Adapts optimal-estimation tracking solves back to the canonical MAP
+    estimator result contract.
+    """
+    from src.shared.python.estimation.map_estimator import MapEstimatorResult
+
+    coefficients = np.concatenate([result.q.flatten(), result.qdot.flatten()])
+    residual_values = [val for val in result.marker_rms_m.values() if not np.isnan(val)]
+    residual = (
+        np.array(residual_values, dtype=float) if residual_values else np.zeros(0)
+    )
+    gate_report = getattr(result, "gate_report", None)
+    return MapEstimatorResult(
+        success=bool(result.success),
+        coefficients=coefficients,
+        parameters=dict(result.parameters),
+        residual=residual,
+        objective=float(result.cost),
+        n_iterations=int(result.iterations),
+        message=f"bioptim IPOPT status {result.status}",
+        provenance=result.provenance,
+        n_non_finite_evaluations=0,
+        identifiability=gate_report,
+        locked_by_gate=tuple(result.locked_by_gate),
+    )
