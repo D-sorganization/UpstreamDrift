@@ -272,6 +272,13 @@ No PDF regeneration, outcome promotion or archival approval occurs. The report
 is archived as `impact-9841-publication-qa.json` in system TEMP; protected CI
 must still validate the subsequently published correction.
 
+A second concurrent remote update, 02c133518, includes main cf75b0fb7 and a
+typing-only `cast` around the already validated SciPy callback. Merge 3676800e5
+preserves those changes and the checksum correction. The 67 actual reference
+tests pass again in 7.15 s; an initial command pointed at a nonexistent unit
+directory and executed no tests. Root pinned Ruff (6,773 files) and divergence
+freshness also pass. The cast changes no numerical expression or tolerance.
+
 Tools autonomous decay 58f33e403 and turnover 2d290079b are published through
 normal hooks (731 Linux golf/API tests). T2 #5082 has merged as 80d580d57;
 its golf source/tests match both reviewed e47fde4e and prior 476eaa98.
