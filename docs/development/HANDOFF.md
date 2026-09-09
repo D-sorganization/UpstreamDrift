@@ -49,7 +49,7 @@ the currently launched app in `UpstreamDrift-ubuntu-ci`, PID50860. Reference age
 SPEC/development-log conflicts must preserve each issue's entry.
 
 This isolated worktree contains only task-owned changes. Do not alter other agents'
-branches or the vendored Tools checkout. Capture UX #9917 at501092b27387a120a629e48f85ae061488f8f859 is integrated by normal merge; source files were conflict-free. Its445 capture/parity tests passed; generated maps are regenerated after combining source registries. Latest visible test launch is Python child PID61500 (venv launcher PID30900) in UpstreamDrift-capture-setup (old PID50860 exited).
+branches or the vendored Tools checkout. Capture UX #9917 merged to remote main at8fce9f238ce89876dd363fb41b4ba1169a87d1b6 and is integrated by normal merge; source files were conflict-free. Its445 capture/parity tests passed; generated maps are regenerated after combining source registries. Latest visible test launch is Python child PID61500 (venv launcher PID30900) in UpstreamDrift-capture-setup (old PID50860 exited).
 
 The shared reference solver is Tools PR
 #5140; numerical repair is #5136. Their CI is still pending and private downstream
@@ -72,3 +72,5 @@ with replacement owners now confirmed: context/Obsidian task will carry the cano
 - SELF: add three offline manufacturer builds with per-field source/units/status, read-only deterministic review command and separate player overrides. 69 catalog/source/legacy tests and two-module mypy pass; source review uses Titleist T150 2023 and PING G440 MAX HL official tables. Read-only CLI regression also passes. Update DL-#9904 and preserve earlier entries.
 
 - SELF: integrate capture UX501092b27; preserve both issue-keyed logs and all source. Regenerate conflicting map outputs from combined registries.
+
+- SELF: integrate remote main8fce9f238 (tree-identical to501092b27); mark DL-#9913 shipped. Full LoD now passes3013 files with no baseline growth. Preserve club continuation and regenerated maps.
