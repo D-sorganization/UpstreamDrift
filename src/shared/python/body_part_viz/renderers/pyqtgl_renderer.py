@@ -207,6 +207,22 @@ class PyQtGLRenderer:
             faces_i = np.asarray(entry.shape.faces(), dtype=np.int32)
             entry.item.setMeshData(vertexes=verts, faces=faces_i)
 
+    def set_color(self, handle: str, color: str | None) -> None:
+        """Override fill/line color in place; None restores the base color.
+
+        Original opacity and geometry are preserved across frame updates.
+        """
+        entry = self._entries.get(handle)
+        if entry is None:
+            raise KeyError(f"Unknown handle: {handle!r}")
+        resolved = entry.theme.color if color is None else color
+        ShapeTheme(color=resolved)
+        rgba = _hex_or_name_to_rgba(resolved, entry.theme.opacity)
+        if entry.is_line:
+            entry.item.setData(color=rgba)
+        else:
+            entry.item.setColor(rgba)
+
     def set_visible(self, handle: str, visible: bool) -> None:
         entry = self._entries.get(handle)
         if entry is None:
