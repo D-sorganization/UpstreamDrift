@@ -104,6 +104,11 @@ def test_cancel_close_keeps_unsaved_selection(
     )
     dialog.close()
     assert dialog.isVisible() and dialog.first.value() == 2
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtTest import QTest
+
+    QTest.keyClick(dialog.view, Qt.Key.Key_Escape)
+    assert dialog.isVisible() and dialog.first.value() == 2
     assert dialog.save()
     dialog.close()
 

@@ -1,5 +1,14 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+## Coaching Reference Work in Progress (#9862)
+
+Isolated branch `feat/9862-coaching-drawings` builds on editing/library PR #9868
+(`1e2469296`). Draft PR #9869 contains five saved drawing tools, gesture/keyboard controls, source-frame
+visibility and common preview/still/video exports are implemented and passed
+focused qualification. Dependency #9868 must merge before this PR is ready. See `docs/development/HANDOFF.md`. External reference epic
+#9863 and fleet adoption are still open. No changes to shared clones or vendor
+code; the concurrent panel-navigation correction is preserved.
+
 ## Segment Force Colors: Epic #9833 in Progress
 
 Branch `feat/segment-force-colors` lives in `_codex_worktrees/segment-force-colors`.

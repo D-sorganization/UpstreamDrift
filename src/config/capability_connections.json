@@ -70,6 +70,13 @@
       "description": "Preview source frames, mark in/out and crop before inference.",
       "evidence": "src/tools/capture_rig/swing_editor.py",
       "view": "workflow"
+    },
+    {
+      "id": "capture.references",
+      "title": "Coaching References",
+      "description": "Saved lines, arrows, circles, ellipses and rectangles in original camera pixels.",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "view": "workflow"
     }
   ],
   "edges": [
@@ -296,6 +303,33 @@
       "kind": "file",
       "evidence": "src/tools/capture_rig/swing_export.py",
       "constraint": "Separate output; source hash, exact recipe and any encoder padding are recorded",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "capture.references",
+      "artifact": "Original camera view + saved drawing layer",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "constraint": "Visual references remain separate from measured pose observations",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "capture.references",
+      "artifact": "Original camera view + saved drawing layer",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "constraint": "Visual references remain separate from measured pose observations",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.references",
+      "target": "files",
+      "artifact": "Annotated PNG / swing video + portable drawing sidecar",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/coaching_export.py",
+      "constraint": "Draw at source resolution before crop; retain original frame numbers and preserve media",
       "view": "workflow"
     }
   ]

@@ -3,51 +3,50 @@
 ## Identity
 
 - Repository: `D-sorganization/UpstreamDrift`
-- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-swing-editing`
-- Branch: `feat/9860-swing-editing`
-- Baseline commit: `eaf8503ce` (merged atlas #9856 and performance #9859)
+- Working directory: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-coaching-drawings`
+- Branch: `feat/9862-coaching-drawings`
+- Baseline commit: `156615443` (editing/library PR #9868 with concurrent navigation fix preserved)
 - Implementation commit: `SELF`
-- Pull request: #9868, https://github.com/D-sorganization/UpstreamDrift/pull/9868
-- Governing issue/epic: #9860, #9861; #9849
+- Pull request: #9869 (draft)
+- Governing issue/epic: #9862; #9849
 
 ## Objective and Status
 
-- Objective: Make swing selection and capture-library workflows safe, discoverable and responsive.
-- Status: in review
-- Completed: Source-coordinate edit contract, ingestion crop/trim, native editor, visible library with notes/import/storage/archive/rename recovery and header integration, selected-swing export, downstream timeline regressions, generated maps, focused tests and Tools reuse audit.
-- Remaining: Protected PR, current-head CI and merge. Drawings/reference epics remain separate outstanding scope.
+- Objective: Give instructors saved visual references over original camera video, with intuitive editing and consistent exports.
+- Status: draft review; dependency integration pending
+- Completed: Five shape tools, source-pixel/frame document, validation, bounded undo/redo, draw/select/move/resize, numeric and keyboard editing, style/visibility, atomic save/reopen, library/editor access, common preview/PNG/video renderer and portable sidecars.
+- Remaining: Final focused validation, visual review, protected PR and current-head CI. Advanced external reference epic #9863 and fleet adoption remain separate open work.
 
 ## Files and Decisions
 
-- Files changed: edits.py, documents.py, ingest.py, swing_editor.py, capture_library.py, library_dialog.py, library_actions.py, gui.py, focused tests, integration review, SPEC and development log.
-- Key decisions: Preserve source timeline and camera coordinates. Process only selected image regions; never mutate raw media. Analyzed takes require an editable copy. Reuse native readers/canvas and existing projection/export paths.
-- User-owned or unrelated worktree changes: none; concurrent #9843 GUI changes preserved on baseline.
+- Files changed: src/motion_capture/coaching, coaching_canvas.py, coaching_dialog.py, coaching_export.py, existing clip/export/editor/library adapters, tests, generated feature/workflow maps and user documentation.
+- Key decisions: Use the native ImageCanvas coordinate transform and OpenCV export renderer. Visual reference layers never enter scientific landmark observations. Draw before crop and retain original frames. Reuse existing export worker and exclusive publication helper. Tools Fabric is a workflow reference, not falsely compatible serialization; no vendor edits.
+- User-owned or unrelated worktree changes: none; concurrent editing branch update c401d006e preserved through baseline 156615443. Shared clones and other agents' branches untouched.
 
 ## Validation
 
-- Initial backend suite: 20 passed. Initial native editor suite: 3 passed.
-- Combined backend, timing, downstream timeline and native editor suite: 23 passed.
-- Library backend plus editing regressions: 17 passed (six new library tests).
-- Integrated suite: 300 passed. Later focused library/UI suite: 12 passed; editor suite: 5 passed. Eight implementation modules pass mypy; scoped Ruff passed.
-- Visual review at 850x650 with Segoe UI explicitly loaded for the fontless Qt offscreen backend: readable controls, minimum width 492 px, canvas 828x367 px. No application font override was needed.
+- Initial RED: new coaching test failed because the module did not exist. Nine backend shape/history/persistence tests then passed.
+- Initial integrated drawing/export suite: 18 passed. Ten source modules pass mypy with repository follow-imports=silent settings.
+- Broader UI integration found a fixed-row minimum width of 952 px after adding Draw References; switched to existing FlowLayout. Repaired integrated drawing/library/editor/clip suite: 28 passed.
+- Initial visual review at 900x720 showed all controls and a 496-px minimum width. Reduced selection handles to screen-relative size and added a visible stroke-unit label/colour value.
+- Subsequent final checks are recorded before PR submission; synthetic media do not qualify physical camera calibration or instructor usability.
 
 ## Blockers and Risks
 
-- Blockers: none for continued implementation.
-- Risks/assumptions: Synthetic videos do not validate physical camera calibration. Source timeline extent must remain compatible with downstream dense-array consumers. Editing a recording after analysis must not silently reuse stale results.
+- Blockers: none for implementation; protected CI remains required before merge.
+- Risks/assumptions: Video exports are silent. Media/sidecar publication rolls back ordinary errors but is not atomic across power loss. Imported Fabric documents, freehand/text tools and external expert projection are outside this shape layer; #9863 remains open.
 
 ## Next Steps
 
-1. Verify current-head CI for #9868 and merge through normal branch protection.
-2. Qualify and submit editing/library PR; then coaching drawings #9862 and reference epic #9863.
-3. Refresh generated maps and obtain protected CI/merge evidence; keep open scope open.
+1. Integrate dependency PR #9868 after its current-head protected checks pass.
+2. Qualify the focused #9869 diff against merged main, then mark ready; respect normal branch protection.
+3. Continue advanced reference imports/registration/comparison and verify fleet adoption.
 
 ## Change Log
 
-- 3184f57b8 — Add source-preserving swing edit foundation and native editor.
-- 5d70e394e — Add portable capture notes/catalog, archive/restore, safe filename changes and editable copies.
+- SELF — Add native saved coaching references and shared image/video rendering, preserving source media and scientific observations. Reuse existing layout and export lifecycle primitives; correct the laptop-width regression discovered by integration tests.
 
-- 8b14709a8 — Add visible library and header actions, rename recovery, cancellable scanning, Windows catalog cleanup and integrated UI qualification.
+- SELF — Final qualification: registry/atlas 49 passed; latest library/drawing/export suite 19 passed, including immutable worker snapshot, output sidecar race and copied reference layers. Twelve-module mypy plus storage/library follow-up pass. Full LoD scan is clean across 3,012 files. Generated atlas, parity matrix and guide are fresh. Final visual review: drawing dialog 900x720/minimum 496 px; swing editor 850x650/minimum 465 px. Both remain readable.
 
 - 2d92e179d — Integrated protected main with atlas and performance improvements; preserved both development-log entries and all SPEC rows.
 
@@ -64,3 +63,9 @@
 - SELF — Full CI #9868 exposed a sparse-manual regression (unit job 102370002003): summary availability must not block reconstruction/model fitting. Added a specific SwingDataUnavailable result path, recorded the reason in session_reconstruction.json, and removed stale dense summaries before retaining sparse output. Existing every-fifth-frame model-fit qualification now passes along with nine pipeline/analytics checks (10 total). Scientific calculations and interpolation policies remain unchanged.
 
 - SELF — Integrated latest main dba24ceb7 (Tools canonical theme/notes migration) in merge 3a10d4986. The corrected sparse-fit, trim-timeline and native GUI/library/editor suite passes 15 tests with the pinned Tools theme; atlas freshness passes. Two-module mypy and design-manual governance pass.
+
+- SELF — Integrated merged dependency PR #9868 on main into #9869. Ready for protected PR review and CI.
+
+- SELF — Integrated editing fix 951c94ed8, latest Tools-canonical migration from main dba24ceb7 and qualification commit 1e2469296. Sparse manual captures now retain reconstruction/model fit while recording summary unavailability and removing stale metrics. Dependency validation passes 15 sparse/timeline/GUI/editor tests; drawings remain separate additional behavior.
+
+- SELF — Record PR #9869; post-dependency integration passes 22 drawing/editor/library tests and atlas freshness. Normal commit and push hooks passed. External editing-branch architecture extraction 4909ee460 is integrated cleanly.
