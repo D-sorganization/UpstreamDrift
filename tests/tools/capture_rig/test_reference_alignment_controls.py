@@ -210,3 +210,20 @@ def test_changed_asset_can_be_reviewed_without_losing_previous_settings(
     assert backups[0].read_bytes() == previous
     reviewed.close()
     app.processEvents()
+
+
+def test_alignment_undo_preserves_notes_written_after_placement(tmp_path: Path) -> None:
+    app = _app()
+    root = _bundle(tmp_path)
+    library = ReferenceLibrary(tmp_path / "references")
+    library.save(synthetic_motion())
+    dialog = ReferenceComparisonDialog(root, "a", library)
+    dialog.spatial.translation[0].setValue(1)
+    dialog.spatial.apply_placement()
+    dialog.notes.setPlainText("Retain this lesson observation")
+    dialog.undo_change()
+    assert dialog._session.registration.transform.translation_m[0] == 0
+    assert dialog._session.notes == "Retain this lesson observation"
+    assert dialog.save()
+    dialog.close()
+    app.processEvents()
