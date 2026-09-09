@@ -169,6 +169,28 @@ regenerate the human-readable matrix:
 python3 -m scripts.generate_feature_parity_matrix
 ```
 
+## Industrial Readiness Ledger (Epic #9539)
+
+`src/config/industrial_readiness.json` is the machine-readable execution index
+for the 2026-09-04 industrial readiness review. It records, per priority child,
+whether the slice landed and what proves it — merge SHA, tests, user-visible
+acceptance evidence — or, when it is still open, an owner, a dependency and an
+ordered narrow-PR plan. **PRs that land or reopen a priority child must update
+the entry.** CI enforces the contract via `tests/config/industrial_readiness/`
+(no completion claim without a 40-char merge SHA, a test and acceptance
+evidence; no open entry without an owner and plan; every referenced path must
+exist; no open issue may be missing from the acceptance blocker lists; and
+`release_status` cannot read `ready` while anything is outstanding). After
+editing the JSON, regenerate the index:
+
+```bash
+python3 -m scripts.generate_industrial_readiness_index
+```
+
+An issue closure, a mock-only success, a changed golden file or a raised
+tolerance is not acceptance evidence. The ledger records software correctness
+only — scientific qualification stays in the design-manual governance pathway.
+
 ## Error handling (issue #5911 / ADR-0016)
 
 Three anti-patterns are blocked by `scripts/ci/check_error_handling_ratchet.py` from growing beyond the baseline in `scripts/config/error_handling_baseline.json`. Pre-existing instances are grandfathered with `# noqa: <code>`; **new code must use the helpers**.
