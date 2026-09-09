@@ -8,7 +8,7 @@
 - Baseline commit: a5dfc3542 (state qualification #9884)
 - Implementation commit: SELF
 - Governing issue: #9881; advanced epic #9863
-- Pull request: #9885 (draft until #9884 integrates)
+- Pull request: #9885; #9884 merged at 2c99bc83e
 
 ## Changes and Evidence
 
@@ -62,3 +62,6 @@ packaging work is preserved separately for #9406; no parameter-budget waiver
 is required. The inherited projection/export callers pass seven additional
 regression tests. The current change passes 46 focused tests and 14-module
 mypy, architecture, Ruff and DRY/LoD no-growth checks.
+
+Main 2c99bc83e integrates state qualification #9884 and concurrent OCP work.
+The merge retains timing validation at saved-registration load.
