@@ -1,7 +1,7 @@
 ## C3D Reference Fitting (#9914)
 
 Current work is isolated in `../UpstreamDrift-reference-9914`, branch
-`feat/c3d-reference-overlay-9914`; implementation commit SELF; PR not created.
+`feat/c3d-reference-overlay-9914`; implementation commit SELF; PR #9918.
 See `docs/development/reference_fitting_epic.md` and the operator guide
 `docs/motion_capture/reference_model_fitting.md`. DL-#9914 records current state.
 The new headless modules reuse the merged reference library and compositor;
