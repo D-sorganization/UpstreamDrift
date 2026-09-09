@@ -37,7 +37,6 @@ from .physics_golfer import (
     mass_matrix,
     net_joint_forces,
     potential_energy,
-    total_energy,
 )
 from .simulation_core import integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
@@ -139,17 +138,11 @@ class GolferSimulationResult(TrajectoryResultMixin):
         self._check_idx(idx)
         return gravity_vector(self.q_at(idx), self.params)  # type: ignore[no-any-return]
 
-    def energy_at(self, idx: int) -> dict:
-        """Energy decomposition at time index."""
-        self._check_idx(idx)
-        state = self.states[idx]
-        result = {
-            "kinetic": kinetic_energy(state[:N_DOF], state[N_DOF:], self.params),
-            "potential": potential_energy(state, self.params),
-            "total": total_energy(state, self.params),
-        }
-        self._assert_energy_finite(result, idx)
-        return result
+    def _kinetic_energy_at(self, state: np.ndarray) -> float:
+        return float(kinetic_energy(state[:N_DOF], state[N_DOF:], self.params))
+
+    def _potential_energy_at(self, state: np.ndarray) -> float:
+        return float(potential_energy(state, self.params))
 
     def friction_torques_at(self, idx: int) -> np.ndarray:
         """Friction torques at time index."""

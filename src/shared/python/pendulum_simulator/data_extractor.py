@@ -213,6 +213,10 @@ def extract_series(
 ) -> tuple[np.ndarray, str, str]:
     """Extract a named data series from a simulation result.
 
+    Results are memoized on the result object (``_series_cache``) so
+    repeated plot clicks for the same series do not recompute the batch
+    accessor (#8928). Callers must treat the returned array as read-only.
+
     Parameters
     ----------
     result : SimulationResult (or triple/golfer variant)
@@ -237,7 +241,17 @@ def extract_series(
     if key not in _DOUBLE_SERIES:
         raise KeyError(f"Unknown series key: {key!r}")
     desc, unit, extractor = _DOUBLE_SERIES[key]
-    values = extractor(result)
-    if not (values.ndim == 1):
-        raise ValueError(f"Expected 1-D array, got shape {values.shape}")
-    return values, desc, unit
+
+    cache = getattr(result, "_series_cache", None)
+    if cache is None:
+        cache = {}
+        try:
+            result._series_cache = cache
+        except AttributeError:
+            pass  # immutable result types: no memoization possible
+    if key not in cache:
+        values = np.asarray(extractor(result), dtype=float)
+        if not (values.ndim == 1):
+            raise ValueError(f"Expected 1-D array, got shape {values.shape}")
+        cache[key] = values
+    return cache[key], desc, unit
