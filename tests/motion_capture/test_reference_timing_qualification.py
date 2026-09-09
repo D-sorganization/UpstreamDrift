@@ -121,3 +121,11 @@ def test_piecewise_mapping_roundtrip_including_extrapolation() -> None:
     np.testing.assert_allclose(
         mapping.scene_to_reference(mapping.reference_to_scene(values)), values
     )
+
+
+@pytest.mark.parametrize("gap", [float("nan"), float("inf"), -1.0, 0.0, 11.0])
+def test_sampler_gap_override_obeys_the_saved_recipe_bounds(gap: float) -> None:
+    asset = motion((0.0, 2.0))
+    reg = ReferenceRegistration(reference_id=asset.id, calibration_id="fixture")
+    with pytest.raises(ValueError, match="max_gap_s"):
+        sample_reference_motion(asset, reg, np.array([1.0]), max_gap_s=gap)

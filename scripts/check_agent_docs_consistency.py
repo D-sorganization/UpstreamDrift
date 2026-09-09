@@ -22,6 +22,11 @@ CHANGELOG = ROOT / "CHANGELOG.md"
 CI_STANDARD = ROOT / ".github" / "workflows" / "ci-standard.yml"
 _COVERAGE_LITERAL = re.compile(r"(\d+)%")
 _COVERAGE_GATE = re.compile(r"--cov-fail-under=(\d+)")
+_MANAGED_NOTICE = (
+    "> This section is managed centrally by Repository_Management and synced fleet-wide. "
+    "> Do NOT edit it directly in individual repositories — edit the source in "
+    "Repository_Management/AGENTS.md."
+)
 
 
 def _read(path: Path) -> str:
@@ -52,11 +57,15 @@ def _iter_duplicate_paragraphs(text: str) -> list[str]:
         for paragraph in re.split(r"\n\s*\n", text)
         if paragraph.strip()
     ]
-    return [paragraph for paragraph, count in Counter(paragraphs).items() if count > 1]
+    return [
+        paragraph
+        for paragraph, count in Counter(paragraphs).items()
+        if count > 1 and paragraph not in {"---", _MANAGED_NOTICE}
+    ]
 
 
 def _iter_repo_relative_paths(text: str) -> list[str]:
-    candidates = re.findall(r"`([^`\n]+)`", text)
+    candidates = re.finditer(r"`([^`\n]+)`", text)
     repo_roots = {
         ".gaai",
         ".github",
@@ -83,7 +92,14 @@ def _iter_repo_relative_paths(text: str) -> list[str]:
     }
     paths: list[str] = []
     for candidate in candidates:
-        normalized = candidate.strip().lstrip("@")
+        prefix = text[max(0, candidate.start() - 100) : candidate.start()]
+        line_end = text.find("\n", candidate.end())
+        suffix = text[candidate.end() : line_end if line_end >= 0 else len(text)]
+        if re.search(r"Repository_Management['’]s\s*$", prefix) or re.search(
+            r"^(?:`[^`]+`|[^.!?\n`])*\bwhen present\b", suffix
+        ):
+            continue
+        normalized = candidate.group(1).strip().lstrip("@")
         if (
             not normalized
             or " " in normalized

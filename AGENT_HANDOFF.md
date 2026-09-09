@@ -1,6 +1,26 @@
-## Reference Timing, Synchronization, Sampling Gaps & Calibration Identity (#9881)
+## Scoped Ubuntu CI Dependency Installation (#9894)
 
-Active isolated branch `fix/9881-reference-timing` qualifies reference synchronization, sampling gap rejection, and calibration identity in `src.motion_capture.reference`. Enforces strictly monotonic paired event anchors with bounded interval rates, exact single-anchor time offset alignment, mathematical forward/inverse round-trip fidelity, `max_gap_s` interpolation refusal, geometry fingerprint bindings, and lens distortion preservation across multi-camera projections. Builds on #9884 and #9886. See `docs/development/HANDOFF.md`.
+Isolated branch `fix/9894-ubuntu-ci-sources` replaces four standard CI APT
+installers with signed Ubuntu sources and temporary package indexes. Source
+configuration on shared runners is preserved. See `docs/development/HANDOFF.md`.
+
+# Reference Alignment Controls
+
+Current implementation: issue #9883, PR #9890, branch feat/9883-reference-alignment-controls. The canonical continuation state is docs/development/HANDOFF.md. Preserve the standing governance and earlier task context below.
+
+## Comparison Rendering Qualification (#9882)
+
+Active isolated branch `fix/9882-comparison-rendering` extends timing PR #9885.
+Shared preview/export pixels, retained expert decoders, opacity/homography and
+strict staged publication are implemented. Canonical evidence and remaining
+#9883 controls are in `docs/development/HANDOFF.md`. Epic #9863 stays open.
+
+## Reference Timing and Camera Evidence (#9881)
+
+Active isolated branch `fix/9881-reference-timing` builds on #9884 and preserves
+its state/lifetime fixes. Bounded event mapping, efficient sampling and actual
+calibration/clock bindings are implemented; final qualification remains. See
+`docs/development/HANDOFF.md`. #9882/#9883 remain open before epic closure.
 
 ## Comparison State Qualification (#9879)
 
