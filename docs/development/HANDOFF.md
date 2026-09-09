@@ -3,7 +3,7 @@
 ## Current Continuation State
 
 - Working directory: C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin.
-- Branch: feat/9912-impact-provider-pin; implementation commit b6107f8e2; PR not created.
+- Branch: feat/9912-impact-provider-pin; implementation commit b6107f8e2; PR #9916.
 - Base: 6e3610a9b; Tools candidate: 608e85b249e6f61238ac96abbe7dc37428629b9e.
 - Governing issue #9912, development entry DL-#9912, parent #9703/#9701/#9700.
 - Pair: Tools #5133. No shared source is copied or modified in this consumer.
@@ -43,8 +43,8 @@ not qualify a UI/release artifact. The final reviewed provider pin remains pendi
 
 1. Incorporate the reviewed Tools repair revision and rerun the provider checks.
 2. Repeat installed-consumer validation when the final provider pin changes.
-3. Publish the actual paired PR, add its UD-PAIR reference to Tools #5133, and
-   finish protected checks before merging in provider-then-consumer order.
+3. Finish protected checks on PR #9916 and its Tools #5133 pair before
+   merging in provider-then-consumer order.
 4. Continue the full #9703 engine adapters and registered #9704 studies.
 
 This pin does not close physical calibration, flexible impact, acoustic radiation

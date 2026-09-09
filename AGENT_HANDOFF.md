@@ -2,7 +2,7 @@
 
 Canonical continuation: [docs/development/HANDOFF.md](docs/development/HANDOFF.md).
 Development entry: DL-#9912. Branch: feat/9912-impact-provider-pin.
-Issue #9912 is a child of #9703/#9701; PR not created. Current commit is SELF.
+Issue #9912 is a child of #9703/#9701; PR #9916. Current commit is SELF.
 
 The existing vendor mechanism now selects Tools 608e85b249e6f61238ac96abbe7dc37428629b9e for review.
 Six new contracts fail against the old pin and pass against this candidate.
