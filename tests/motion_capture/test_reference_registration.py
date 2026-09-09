@@ -324,14 +324,14 @@ def test_event_anchors_rejects_non_monotonic_or_unbounded_rates() -> None:
         )
 
     # Unbounded rate (dt_scene / dt_ref > 100.0)
-    with pytest.raises(ValueError, match="between 0.25 and 4"):
+    with pytest.raises(ValueError, match="bounded within"):
         EventAnchors(
             reference={"address": 0.0, "impact": 0.01},
             scene={"address": 0.0, "impact": 2.0},  # rate = 200.0
         )
 
     # Unbounded rate (dt_scene / dt_ref < 0.01)
-    with pytest.raises(ValueError, match="between 0.25 and 4"):
+    with pytest.raises(ValueError, match="bounded within"):
         EventAnchors(
             reference={"address": 0.0, "impact": 10.0},
             scene={"address": 0.0, "impact": 0.05},  # rate = 0.005
