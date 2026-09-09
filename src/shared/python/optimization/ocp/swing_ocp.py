@@ -9,16 +9,13 @@ collocation, with the dynamics enforced on every interval by construction.
 Two terminal objectives, because they are numerically very different:
 
 - ``"track_speed"`` (default): minimise ``(||v_clubhead(T)|| - target)^2``.
-  Convex in the terminal speed, so IPOPT converges; it is also the
-  formulation :mod:`.crocoddyl_backend` already uses (it tracks a target
-  impact motion) and what ``SwingOptimizationConfig.target_clubhead_velocity``
-  means. Ask for the speed a golfer is trying to reach.
-- ``"maximize_speed"``: minimise ``-||v_clubhead(T)||^2``, matching the
-  CasADi backend's objective exactly. A negative-weight quadratic is
-  **concave**, so the NLP is nonconvex in that direction: with the dynamics
-  properly enforced the optimum sits on the velocity bound and IPOPT
-  typically stops at the iteration cap with a good but not certified point.
-  Use it for parity comparisons, not production runs.
+  The target represents the speed the golfer is trying to reach.
+- ``"maximize_speed"``: minimise ``-||v_clubhead(T)||^2``.
+
+Both full problems are nonlinear and nonconvex. Neither objective guarantees
+IPOPT convergence, a global optimum, or physical realizability. Check solver
+status, discrete feasibility and resolved continuous-ODE discrepancies
+separately before interpreting a candidate.
 
 The node grid equals the flagship optimizer's (``n_shooting = n_nodes - 1``,
 ``final_time = swing_duration``), so the decision vector comes back in the
@@ -91,9 +88,8 @@ class MaxSpeedOcpOptions:
     the boundary, before any bioptim object is built.
 
     Attributes:
-        objective: ``"track_speed"`` (default, convex) or
-            ``"maximize_speed"`` (CasADi-backend parity, nonconvex). See
-            the module docstring for why the default is the convex one.
+        objective: ``"track_speed"`` (default) or ``"maximize_speed"``.
+            Neither choice makes the full nonlinear OCP convex.
         target_speed: Terminal clubhead speed [m/s] for ``"track_speed"``.
         ode: ``"rk4"`` multiple shooting or ``"collocation"`` (degree 3).
         n_integration_steps: RK4 substeps per shooting interval.
@@ -152,8 +148,8 @@ def clubhead_speed_error_objective(
 ) -> Any:
     """Custom Mayer objective: terminal clubhead speed minus its target.
 
-    Scalar and convex around the target, which is what makes the tracking
-    formulation converge where pure maximisation does not.
+    Squaring this scalar residual penalizes departure from the target speed;
+    it does not make the full OCP convex or guarantee solver convergence.
     """
     import casadi as ca
 
@@ -340,7 +336,7 @@ def build_max_speed_ocp(
             neutral pose.
         options: Transcription and objective choices; see
             :class:`MaxSpeedOcpOptions`. ``None`` uses its defaults
-            (convex target-speed objective, RK4 multiple shooting).
+            (target-speed objective, RK4 multiple shooting).
 
     Raises:
         BioptimNotAvailableError: When bioptim is not installed.
@@ -476,9 +472,9 @@ def solve_max_speed_swing(
 ) -> CasadiSwingResult:
     """Registry entry point (``solver="bioptim"``): flagship-layout result.
 
-    Uses direct collocation and the convex target-speed objective: on this
-    problem it is both better conditioned and an order of magnitude faster
-    than RK4 multiple shooting (tens of IPOPT iterations against hundreds).
+    Uses direct collocation and the target-speed objective. Historical runs
+    differ in timing and terminal speed; they do not establish equivalent
+    optima or a general performance advantage over RK4 multiple shooting.
     Call :func:`solve_max_speed_ocp` directly to choose otherwise.
     """
     return solve_max_speed_ocp(
