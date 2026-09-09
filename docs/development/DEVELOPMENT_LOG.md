@@ -17,6 +17,62 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9894 · Scoped Ubuntu CI Dependencies
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9894
+- **Branch:** fix/9894-ubuntu-ci-sources
+- **PR:** #9896
+- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/, tests/scripts/
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`SELF`)
+- **Summary:** Scoped signed APT sources; runner config preserved.
+- **Evidence:** Six Bash tests and four Ubuntu installs pass (run 34387111648).
+- **Next step:** Finish combined protected checks after #9890/#9893.
+
+### DL-#9892 · Fleet Guide Compatibility
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9892; Repository_Management#1579
+- **Branch:** fix/9892-fleet-guide-validation
+- **PR:** #9893
+- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py, generated agent entry files
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (27 tests and live consistency check pass)
+- **Summary:** Retain central guidance with precise optional/external path handling and exact managed-notice exemptions; preserve real missing-path and duplicate-instruction failures.
+- **Evidence:** Two RED/GREEN reproductions; inherited instructor evidence remains in #9890.
+- **Next step:** Complete protected follow-up after #9890; central canonical corrections are in Repository_Management#1627.
+
+### DL-#9883 · Instructor Reference Alignment Workspace
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9883 (advanced epic #9863)
+- **PR:** #9890
+- **Branch:** `feat/9883-reference-alignment-controls`
+- **Paths:** `src/tools/capture_rig/reference_comparison.py`, `reference_controls.py`, `reference_timeline.py`, `styling.py`, related tests, docs and capability atlas
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`SELF`; 67 integrated alignment/render/state/timing cases pass)
+- **Summary:** Responsive placement/timing/notes inspector, independent expert scrubbing and paired swing events, pending-edit guards, undo/reset and manual stale-evidence review with settings backup.
+- **Evidence:** Native screenshots at desktop/laptop sizes; shared rotation tests, perspective preservation, invalid event rejection, notes/switch/Escape guards, stale settings backup and existing exact preview/export parity. Full-PR architecture, four-module mypy and LoD/DRY no-growth pass; integrated timing and rendering regressions pass.
+- **Next step:** Complete protected review #9890 after rendering #9889 merges (timing #9885 merged).
+
+### DL-#9882 · Comparison Rendering and Export Qualification
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9882 (advanced reference epic #9863)
+- **Branch:** fix/9882-comparison-rendering
+- **PR:** #9889 (supersedes #9888)
+- **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py, reference_comparison.py, clips.py, swing_export.py, related tests/docs
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)
+- **Summary:** Shared preview/export compositor, motion opacity, coverage-aware expert homography, retained decoders and strict staged publication.
+- **Evidence:** 48 comparison/coaching/export regressions pass; 33 renderer/state cases pass after adding three cancellation/homography checks. Five-module mypy, Ruff and architecture pass. Exact pre-encode pixel parity and complete real-container decoding are tested.
+- **Next step:** No-growth gates pass. Integrate parent #9885 and complete protected checks. #9883 remains separate.
+
 ### DL-#9881 · Reference Timing and Camera Evidence
 
 - **State:** in_review

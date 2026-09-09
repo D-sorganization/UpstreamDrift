@@ -4,16 +4,24 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
+from uuid import uuid4
 
 import cv2
 from PyQt6.QtCore import QSignalBlocker, Qt, QTimer
-from PyQt6.QtGui import QCloseEvent, QColor
+from PyQt6.QtGui import QCloseEvent, QColor, QResizeEvent, QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QBoxLayout,
     QColorDialog,
     QComboBox,
     QDialog,
     QDoubleSpinBox,
+    QPlainTextEdit,
+    QScrollArea,
+    QSplitter,
+    QTabWidget,
+    QTableWidgetItem,
+    QSizePolicy,
     QFormLayout,
     QHBoxLayout,
     QInputDialog,
@@ -27,7 +35,7 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.pose_estimation.observations import CameraCalibration
 from src.motion_capture.reference.evidence import CameraSnapshot
-from src.motion_capture.coaching.storage import load_layer
+from src.motion_capture.reference.scene import session_camera, session_clock
 from src.motion_capture.reference.comparison import (
     ComparisonLayer,
     ComparisonSession,
@@ -36,10 +44,12 @@ from src.motion_capture.reference.comparison import (
     save_comparison_session,
 )
 from src.motion_capture.reference.model import Asset
-from src.motion_capture.reference.registration import ReferenceRegistration
-from src.motion_capture.reference.scene import session_camera, session_clock
-from src.motion_capture.reference.storage import ReferenceLibrary
+from src.motion_capture.coaching.storage import load_layer
 from src.motion_capture.rig.edits import ViewEdit, load_edits
+from src.motion_capture.reference.registration import (
+    ReferenceRegistration,
+)
+from src.motion_capture.reference.storage import ReferenceLibrary
 from src.tools.capture_rig.reference_export import (
     ComparisonVideoExportOptions,
     export_comparison_video,
@@ -48,6 +58,8 @@ from src.tools.capture_rig.reference_export import (
 from . import styling
 from .annotate_widget import ImageCanvas
 from .flow_layout import FlowLayout
+from .reference_controls import SpatialControls, TimeControls
+from .reference_timeline import ReferenceTimeline
 from .player import VideoReader
 from .overlay import PoseTrack
 from .reference_rendering import ComparisonRenderContext, ComparisonRenderer
@@ -64,11 +76,15 @@ class ReferenceComparisonDialog(QDialog):
         view: str,
         library: ReferenceLibrary,
         parent: QWidget | None = None,
+        *,
+        review_stale: bool = False,
     ) -> None:
         super().__init__(parent)
         self.root = root
         self.view = view
         self.library = library
+        self._review_stale = review_stale
+        self._stale_original: ComparisonSession | None = None
         media = load_session(root)
         view_media = media.view(view)
         if view_media.recording is None:
@@ -94,6 +110,8 @@ class ReferenceComparisonDialog(QDialog):
             ComparisonRenderer(self._current_asset) if self._current_asset else None
         )
 
+        self._saved_session = self._stale_original or self._session
+        self._undo: list[ComparisonSession] = []
         self.canvas = ImageCanvas()
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._advance)
@@ -109,9 +127,26 @@ class ReferenceComparisonDialog(QDialog):
             label="Export Comparison Video…",
         )
 
-        self.setWindowTitle(f"Reference Comparison · {view}")
+        self.setWindowTitle(f"Reference Comparison · {view}[*]")
         self.resize(1000, 720)
         self._build_ui()
+        self._shortcuts: list[QShortcut] = []
+        for key, action in (
+            ("Ctrl+S", self.save),
+            ("Alt+P", self._toggle_play),
+            ("Alt+Left", lambda: self.slider.setValue(self.slider.value() - 1)),
+            ("Alt+Right", lambda: self.slider.setValue(self.slider.value() + 1)),
+            ("Alt+U", self.undo_change),
+        ):
+            shortcut = QShortcut(QKeySequence(key), self)
+            shortcut.activated.connect(action)
+            self._shortcuts.append(shortcut)
+        self.play_button.setToolTip(
+            "Play / pause: Alt+P. Step one frame: Alt+Left / Alt+Right."
+        )
+        self.save_button.setToolTip(
+            "Save comparison: Ctrl+S. Undo the last alignment change: Alt+U."
+        )
         styling.apply_theme(self)
         self._show_frame(self.slider.minimum())
 
@@ -163,11 +198,35 @@ class ReferenceComparisonDialog(QDialog):
                 )
             registration = saved.registration
             if registration and registration.asset_sha256:
-                registration.validate_binding(
-                    self._current_asset, self._camera_snapshot, self._clock
-                )
+                try:
+                    registration.validate_binding(
+                        self._current_asset, self._camera_snapshot, self._clock
+                    )
+                except ValueError as exc:
+                    if not self._review_stale:
+                        raise
+                    answer = QMessageBox.question(
+                        self,
+                        "Review Changed Reference Evidence",
+                        f"{exc}. Open the saved placement and events for manual review? "
+                        "Saving will keep a copy of the previous settings.",
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                        QMessageBox.StandardButton.No,
+                    )
+                    if answer != QMessageBox.StandardButton.Yes:
+                        raise
+                    self._stale_original = saved
+                    registration = ReferenceRegistration.model_validate(
+                        registration.model_dump()
+                        | {
+                            "asset_sha256": None,
+                            "camera": None,
+                            "clock": None,
+                            "is_calibrated": False,
+                        }
+                    )
+                    return saved.changed(registration=registration)
             return saved
-        labels = ("Manual reference-to-scene alignment", self._clock.source)
         return ComparisonSession(
             session_root=str(self.root),
             view=self.view,
@@ -177,94 +236,195 @@ class ReferenceComparisonDialog(QDialog):
                 reference_id=self._current_asset.id,
                 calibration_id="calib_session",
                 is_calibrated=False,
-                assumption_labels=labels,
+                assumption_labels=(
+                    "Manual reference-to-scene alignment",
+                    self._clock.source,
+                ),
             ),
             layer=ComparisonLayer(),
         )
 
     def _build_ui(self) -> None:
-        main_layout = QVBoxLayout(self)
-
-        top_row = QHBoxLayout()
+        layout = QVBoxLayout(self)
+        header = QHBoxLayout()
         self.asset_selector = QComboBox()
-        for a in self.assets:
-            self.asset_selector.addItem(f"{a.title} ({a.kind})", a.id)
+        self.asset_selector.setAccessibleName("Expert Reference Asset")
+        self.asset_selector.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self.asset_selector.setMinimumContentsLength(16)
+        for asset in self.assets:
+            self.asset_selector.addItem(f"{asset.title} ({asset.kind})", asset.id)
         self.asset_selector.currentIndexChanged.connect(self._asset_changed)
-        top_row.addWidget(QLabel("Reference Asset:"))
-        top_row.addWidget(self.asset_selector, 1)
-
+        header.addWidget(QLabel("Expert Reference"))
+        header.addWidget(self.asset_selector, 1)
         self.status_label = QLabel()
+        self.status_label.setWordWrap(True)
+        self.status_label.setMaximumWidth(360)
         self._update_status_label()
-        top_row.addWidget(self.status_label)
-        main_layout.addLayout(top_row)
+        header.addWidget(self.status_label)
+        layout.addLayout(header)
+        guide = QLabel(
+            "1. Choose an expert  ·  2. Place the reference  ·  3. Pair swing events  ·  4. Save or export"
+        )
+        guide.setWordWrap(True)
+        layout.addWidget(guide)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+        preview = QWidget()
+        preview_layout = QVBoxLayout(preview)
+        preview_layout.setContentsMargins(0, 0, 0, 0)
+        preview_layout.addWidget(self.canvas, 1)
+        preview_layout.addLayout(self._playback_row())
+        self.splitter.addWidget(preview)
+        self.inspector = self._build_inspector()
+        self.splitter.addWidget(self.inspector)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setStretchFactor(0, 3)
+        self.splitter.setStretchFactor(1, 1)
+        layout.addWidget(self.splitter, 1)
+        buttons = FlowLayout(spacing=6)
+        for label, slot in (
+            ("Save Comparison", self.save),
+            ("Undo Change", self.undo_change),
+            ("Reset Alignment", self.reset_alignment),
+        ):
+            button = QPushButton(label)
+            button.clicked.connect(slot)
+            if label == "Save Comparison":
+                self.save_button = button
+            buttons.add_widget(button)
+        buttons.add_widget(self.exporter.button)
+        close = QPushButton("Close")
+        close.clicked.connect(self.close)
+        buttons.add_widget(close)
+        layout.addLayout(buttons)
+        self._adapt_layout()
 
-        main_layout.addWidget(self.canvas, 1)
-
-        slider_row = QHBoxLayout()
+    def _playback_row(self) -> QHBoxLayout:
+        row = QHBoxLayout()
         self.play_button = QPushButton("Play")
         self.play_button.clicked.connect(self._toggle_play)
-        slider_row.addWidget(self.play_button)
-
+        row.addWidget(self.play_button)
         self.slider = QSlider(Qt.Orientation.Horizontal)
-        max_frame = (
+        self.slider.setAccessibleName("Player Source Frame")
+        self.slider.setRange(
+            self._edit.first,
             self._edit.last
             if self._edit.last is not None
-            else max(0, self.reader.frame_count - 1)
+            else self.reader.frame_count - 1,
         )
-        self.slider.setRange(self._edit.first, max_frame)
         self.slider.valueChanged.connect(self._show_frame)
-        slider_row.addWidget(self.slider, 1)
+        row.addWidget(self.slider, 1)
+        self.clock_label = QLabel()
+        row.addWidget(self.clock_label)
+        return row
 
-        self.clock_label = QLabel("0.000s")
-        slider_row.addWidget(self.clock_label)
-        main_layout.addLayout(slider_row)
+    def _build_inspector(self) -> QTabWidget:
+        tabs = QTabWidget()
+        tabs.setStyleSheet(styling.compact_tabs_style())
+        tabs.setMinimumWidth(270)
+        tabs.setMinimumHeight(220)
+        registration = self._session.registration or ReferenceRegistration(
+            reference_id=self._session.reference_id, calibration_id="unavailable"
+        )
+        asset = self._current_asset
+        size = (self.reader.width, self.reader.height)
+        reference_size = (
+            (asset.width, asset.height) if asset and asset.kind == "video" else size
+        )
+        self.spatial = SpatialControls(
+            registration,
+            asset.kind if asset else "motion",
+            size,
+            reference_size=reference_size,
+        )
+        self.spatial.changed.connect(self._registration_applied)
+        self.spatial.pending_changed.connect(self._pending_changed)
+        self.scale_spin = self.spatial.scale
+        self.scale_spin.valueChanged.connect(self._reg_changed)
+        tabs.addTab(self._scroll(self.spatial), "Placement")
+        self.timing = TimeControls(registration)
+        self.timing.changed.connect(self._registration_applied)
+        self.timing.pending_changed.connect(self._pending_changed)
+        self.offset_spin = self.timing.offset
+        self.offset_spin.valueChanged.connect(self._reg_changed)
+        timing_page = QWidget()
+        timing_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, timing_page)
+        self.timing_layout = timing_layout
+        expert_page = QWidget()
+        expert_layout = QVBoxLayout(expert_page)
+        expert_layout.setContentsMargins(0, 0, 0, 0)
+        self.expert_timeline = (
+            ReferenceTimeline(asset, registration, self._camera, size)
+            if asset
+            else None
+        )
+        if self.expert_timeline:
+            pair = QPushButton("Pair Current Frames…")
+            pair.clicked.connect(self._pair_frames)
+            expert_layout.addWidget(pair)
+            expert_layout.addWidget(self.expert_timeline)
+            expert_layout.addStretch()
+            timing_layout.addWidget(expert_page, 1)
+        timing_layout.addWidget(self.timing, 2)
+        tabs.addTab(self._scroll(timing_page), "Timing")
+        tabs.addTab(self._scroll(self._appearance_page()), "Notes")
+        tabs.currentChanged.connect(lambda: self._show_frame(self.slider.value()))
+        return tabs
 
-        controls = QFormLayout()
-        layer_row = QHBoxLayout()
-        self.visible_check = QCheckBox("Visible")
+    @staticmethod
+    def _scroll(content: QWidget) -> QScrollArea:
+        area = QScrollArea()
+        area.setWidgetResizable(True)
+        area.setWidget(content)
+        area.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        return area
+
+    def _appearance_page(self) -> QWidget:
+        page = QWidget()
+        form = QFormLayout(page)
+        form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
+        self.visible_check = QCheckBox("Show Reference Layer")
         self.visible_check.setChecked(self._session.layer_visible)
         self.visible_check.toggled.connect(self._layer_changed)
-        layer_row.addWidget(self.visible_check)
-
-        self.colour_button = QPushButton("Colour…")
+        form.addRow(self.visible_check)
+        self.colour_button = QPushButton("Reference Colour…")
         self.colour_button.clicked.connect(self._choose_colour)
-        layer_row.addWidget(self.colour_button)
-
-        def _spin(val: float, low: float, high: float) -> QDoubleSpinBox:
-            b = QDoubleSpinBox()
-            b.setRange(low, high)
-            b.setSingleStep(0.05)
-            b.setValue(val)
-            return b
-
-        self.opacity_spin = _spin(self._session.layer_opacity, 0.0, 1.0)
+        form.addRow(self.colour_button)
+        self.opacity_spin = QDoubleSpinBox()
+        self.opacity_spin.setRange(0, 1)
+        self.opacity_spin.setSingleStep(0.05)
+        self.opacity_spin.setValue(self._session.layer_opacity)
+        self.opacity_spin.setAccessibleName("Reference Opacity")
         self.opacity_spin.valueChanged.connect(self._layer_changed)
-        layer_row.addWidget(QLabel("Opacity:"))
-        layer_row.addWidget(self.opacity_spin)
+        form.addRow("Opacity", self.opacity_spin)
+        self.notes = QPlainTextEdit(self._session.notes)
+        self.notes.setAccessibleName("Comparison Lesson Notes")
+        self.notes.setPlaceholderText(
+            "Record the coaching objective, alignment assumptions and observations…"
+        )
+        self.notes.textChanged.connect(self._notes_changed)
+        form.addRow("Lesson Notes", self.notes)
+        return page
 
-        reg = self._session.registration
-        self.offset_spin = _spin(reg.time_mapping.offset_s if reg else 0.0, -60.0, 60.0)
-        self.offset_spin.valueChanged.connect(self._reg_changed)
-        layer_row.addWidget(QLabel("Time Offset (s):"))
-        layer_row.addWidget(self.offset_spin)
+    def _adapt_layout(self) -> None:
+        compact = self.width() < 1100
+        orientation = Qt.Orientation.Vertical if compact else Qt.Orientation.Horizontal
+        if self.splitter.orientation() != orientation:
+            self.splitter.setOrientation(orientation)
+            self.splitter.setSizes([440, 260] if compact else [760, 320])
+        self.timing_layout.setDirection(
+            QBoxLayout.Direction.LeftToRight
+            if compact
+            else QBoxLayout.Direction.TopToBottom
+        )
+        self.inspector.setMaximumWidth(16777215 if compact else 410)
+        self.inspector.setMaximumHeight(340 if compact else 16777215)
 
-        self.scale_spin = _spin(reg.transform.scale if reg else 1.0, 0.1, 5.0)
-        self.scale_spin.valueChanged.connect(self._reg_changed)
-        layer_row.addWidget(QLabel("Scale:"))
-        layer_row.addWidget(self.scale_spin)
-
-        controls.addRow("Layer & Sync:", layer_row)
-        main_layout.addLayout(controls)
-
-        buttons = FlowLayout(spacing=6)
-        save_btn = QPushButton("Save Comparison")
-        save_btn.clicked.connect(self.save)
-        buttons.add_widget(save_btn)
-        buttons.add_widget(self.exporter.button)
-        close_btn = QPushButton("Close")
-        close_btn.clicked.connect(self.close)
-        buttons.add_widget(close_btn)
-        main_layout.addLayout(buttons)
+    def resizeEvent(self, event: QResizeEvent | None) -> None:  # noqa: N802
+        super().resizeEvent(event)
+        if hasattr(self, "splitter"):
+            self._adapt_layout()
 
     def _update_status_label(self) -> None:
         if self._current_asset is None:
@@ -280,17 +440,26 @@ class ReferenceComparisonDialog(QDialog):
                 self.status_label.setText("No Usable Camera · Projection Unavailable")
                 self.status_label.setStyleSheet(styling.chip_style("warning"))
         else:
-            self.status_label.setText("2D Homography (No 3D claims)")
+            self.status_label.setText("Expert Video · 2D Alignment")
             self.status_label.setStyleSheet(styling.chip_style("neutral"))
 
     def _asset_changed(self, index: int) -> None:
         if 0 <= index < len(self.assets):
             previous = self._current_asset
+            if not self._confirm_unsaved():
+                with QSignalBlocker(self.asset_selector):
+                    self.asset_selector.setCurrentIndex(
+                        self.assets.index(previous) if previous else -1
+                    )
+                return
+            previous_stale = self._stale_original
+            self._stale_original = None
             self._current_asset = self.assets[index]
             try:
                 saved = self._find_or_create_session()
             except (ValueError, OSError) as exc:
                 self._current_asset = previous
+                self._stale_original = previous_stale
                 with QSignalBlocker(self.asset_selector):
                     self.asset_selector.setCurrentIndex(
                         self.assets.index(previous) if previous else -1
@@ -298,31 +467,143 @@ class ReferenceComparisonDialog(QDialog):
                 self.status_label.setText(f"Cannot load comparison: {exc}")
                 return
             self._session = saved
+            self._saved_session = self._stale_original or saved
+            self._undo.clear()
             if self._renderer:
                 self._renderer.close()
             self._renderer = ComparisonRenderer(self._current_asset)
+            self._replace_inspector()
             self._update_status_label()
-            registration = saved.registration
-            for control, value in (
-                (self.visible_check, saved.layer_visible),
-                (self.opacity_spin, saved.layer_opacity),
-                (
-                    self.offset_spin,
-                    registration.time_mapping.offset_s if registration else 0.0,
-                ),
-                (
-                    self.scale_spin,
-                    registration.transform.scale if registration else 1.0,
-                ),
-            ):
-                with QSignalBlocker(control):
-                    if isinstance(control, QCheckBox):
-                        control.setChecked(bool(value))
-                    else:
-                        control.setValue(float(value))
             self._show_frame(self.slider.value())
 
+    def _replace_inspector(self) -> None:
+        if self.expert_timeline:
+            self.expert_timeline.dispose()
+        old = self.inspector
+        old.setParent(None)
+        self.inspector = self._build_inspector()
+        self.splitter.addWidget(self.inspector)
+        old.deleteLater()
+        self._adapt_layout()
+        self._pending_changed()
+
+    def _remember(self) -> None:
+        self._undo.append(self._session)
+        self._undo = self._undo[-100:]
+
+    def _registration_applied(self, registration: ReferenceRegistration) -> None:
+        self._remember()
+        self._session = self._session.changed(registration=registration)
+        self.spatial.registration = registration
+        self.timing.registration = registration
+        if self.expert_timeline:
+            self.expert_timeline.registration = registration
+        self._pending_changed()
+        self._show_frame(self.slider.value())
+
+    def _notes_changed(self) -> None:
+        text = self.notes.toPlainText()
+        if len(text) > 50000:
+            self.status_label.setText("Keep comparison notes within 50,000 characters.")
+            return
+        self._session = self._session.changed(notes=text)
+        self._pending_changed()
+
+    def _dirty(self) -> bool:
+        return (
+            self._session != self._saved_session
+            or self.spatial.pending
+            or self.timing.pending
+            or self.notes.toPlainText() != self._session.notes
+        )
+
+    def _pending_changed(self) -> None:
+        self.setWindowModified(self._dirty())
+
+    def _apply_pending(self) -> bool:
+        if len(self.notes.toPlainText()) > 50000:
+            return False
+        if self.spatial.pending:
+            applied = (
+                self.spatial.apply_image()
+                if self._current_asset and self._current_asset.kind == "video"
+                else self.spatial.apply_placement()
+            )
+            if not applied:
+                return False
+        return not (self.timing.pending and not self.timing.apply_events())
+
+    def _confirm_unsaved(self) -> bool:
+        if not self._dirty():
+            return True
+        self._timer.stop()
+        self.play_button.setText("Play")
+        answer = QMessageBox.question(
+            self,
+            "Unsaved Comparison",
+            "Save the comparison and pending alignment edits?",
+            QMessageBox.StandardButton.Save
+            | QMessageBox.StandardButton.Discard
+            | QMessageBox.StandardButton.Cancel,
+        )
+        return answer == QMessageBox.StandardButton.Discard or (
+            answer == QMessageBox.StandardButton.Save and self.save()
+        )
+
+    def undo_change(self) -> None:
+        if self.spatial.pending or self.timing.pending:
+            self._replace_inspector()
+        elif self._undo:
+            self._session = self._undo.pop().changed(notes=self._session.notes)
+            self._replace_inspector()
+        else:
+            return
+        self._show_frame(self.slider.value())
+
+    def reset_alignment(self) -> None:
+        if self._current_asset is None:
+            return
+        self._remember()
+        registration = ReferenceRegistration(
+            reference_id=self._current_asset.id,
+            calibration_id="manual",
+            assumption_labels=(
+                "Manual reference-to-scene alignment",
+                self._clock.source,
+            ),
+        )
+        self._session = self._session.changed(registration=registration)
+        self._replace_inspector()
+        self._show_frame(self.slider.value())
+        self.status_label.setText(
+            "Alignment Reset · Undo Restores the Previous Settings"
+        )
+
+    def _pair_frames(self) -> None:
+        if self.expert_timeline is None:
+            return
+        name, accepted = QInputDialog.getText(
+            self, "Pair Swing Event", "Event Name", text="Impact"
+        )
+        if not accepted:
+            return
+        table = self.timing.events
+        if table.rowCount() >= 32:
+            self.status_label.setText("Use at most 32 paired events.")
+            return
+        row = table.rowCount()
+        table.insertRow(row)
+        times = (
+            name.strip(),
+            str(self.expert_timeline.reference_time),
+            str(self._clock.player_time(self.slider.value() / self.fps)),
+        )
+        for column, value in enumerate(times):
+            table.setItem(row, column, QTableWidgetItem(value))
+        self.timing.apply_events()
+
     def _layer_changed(self) -> None:
+        self._remember()
         self._session = self._session.with_layer(
             opacity=self.opacity_spin.value(),
             visible=self.visible_check.isChecked(),
@@ -342,14 +623,14 @@ class ReferenceComparisonDialog(QDialog):
                     "offset_s": self.offset_spin.value()
                 }
             new_reg = reg.model_validate(values)
-            self._session = self._session.changed(registration=new_reg)
-            self._show_frame(self.slider.value())
+            self._registration_applied(new_reg)
 
     def _choose_colour(self) -> None:
         col = QColorDialog.getColor(
             QColor(self._session.layer_colour), self, "Reference Colour"
         )
         if col.isValid():
+            self._remember()
             self._session = self._session.with_layer(colour=col.name())
             self._show_frame(self.slider.value())
 
@@ -385,6 +666,9 @@ class ReferenceComparisonDialog(QDialog):
                 self.status_label.setText(f"Cannot render comparison: {exc}")
                 return
         self.canvas.set_image(img)
+        if self.expert_timeline:
+            self.expert_timeline.follow(t_scene)
+        self._pending_changed()
 
     def _toggle_play(self) -> None:
         if self._timer.isActive():
@@ -406,14 +690,34 @@ class ReferenceComparisonDialog(QDialog):
         if self._current_asset is None:
             return False
         try:
+            if not self._apply_pending():
+                self.status_label.setText(
+                    "Resolve the pending alignment fields before saving."
+                )
+                return False
             registration = self._session.registration
             if registration is None:
                 raise ValueError("Reference registration is unavailable")
             registration = registration.bound(
                 self._current_asset, self._camera_snapshot, self._clock
             )
-            self._session = self._session.changed(registration=registration)
-            save_comparison_session(self._session, self.root)
+            saved = self._session.changed(registration=registration)
+            if self._stale_original:
+                path = comparison_session_path(
+                    self.root, self.view, self._current_asset.id
+                )
+                backup = path.with_name(f"{path.stem}.before-review-{uuid4()}.json")
+                with backup.open("xb") as stream:
+                    stream.write(path.read_bytes())
+            save_comparison_session(saved, self.root)
+            self._stale_original = None
+            self._session = saved
+            self.spatial.registration = registration
+            self.timing.registration = registration
+            if self.expert_timeline:
+                self.expert_timeline.registration = registration
+            self._saved_session = saved
+            self._pending_changed()
             self.status_label.setText("Comparison Saved")
             return True
         except (ValueError, OSError) as exc:
@@ -469,12 +773,18 @@ class ReferenceComparisonDialog(QDialog):
         if not self.exporter.can_close():
             event.ignore()
             return
+        if not self._confirm_unsaved():
+            event.ignore()
+            return
         self.reader.close()
+        if self.expert_timeline:
+            self.expert_timeline.dispose()
         if self._renderer:
             self._renderer.close()
         event.accept()
 
     def reject(self) -> None:
+        """Escape uses the same export cancellation guard as the close button."""
         self.close()
 
 
@@ -493,6 +803,6 @@ def show_reference_comparison(
             )
             if not ok:
                 return
-        ReferenceComparisonDialog(root, view, library, parent).exec()
+        ReferenceComparisonDialog(root, view, library, parent, review_stale=True).exec()
     except (ValueError, OSError, cv2.error) as exc:
         QMessageBox.warning(parent, "Reference Comparison", str(exc))
