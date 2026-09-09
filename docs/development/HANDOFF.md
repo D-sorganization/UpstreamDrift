@@ -7,7 +7,7 @@
 - Branch: `feat/9913-capture-journey`
 - Baseline commit: `54b9b0586` (main after qualified product merge #9896)
 - Implementation commit: `SELF`
-- Pull request: pending for #9913; prior calibration/profile PR #9910 merged at 18c8f922e87c92f6f518da05c0819f71ce3193ba
+- Pull request: #9917 https://github.com/D-sorganization/UpstreamDrift/pull/9917 for #9913; prior calibration/profile PR #9910 merged at 18c8f922e87c92f6f518da05c0819f71ce3193ba
 - Governing issue: #9913; epics #9897, #9902, #9906 remain active; entries DL-#9913 and DL-#9911 refreshed
 - Session: `capture-product-01a08427-guided-setup`, issue lease and presence active.
 
@@ -56,6 +56,10 @@ geometry, club data and wizard work remain open. Do not close #9898 or its epic 
 ## Integration Checkpoint
 
 Remote #9910 was rebased to c9225f18e during validation. Its five conflicting capture/docs files are byte-identical to pre-UX b743eef09; those conflicts retain the qualified UX versions. All incoming research, readiness, policy and CI changes are preserved. UX commit 8f590cc80 passed normal commit and pre-push checks; push was refused as non-fast-forward. The same source then merged as #9910 at18c8f922e; its conflicted capture files are also byte-identical to the remote branch. Both histories are preserved; UX delivery continues separately on feat/9913-capture-journey.
+
+## Publication Checkpoint
+
+Candidate dd8136f152bc8451bf1a2511ff6246bd309a52b5 is published as #9917. All445 capture/parity tests pass with zero skips (39.578s), and normal pre-push gates pass. Protected remote CI/review and merge remain required. Tools#5137 now passes101 mocap/authority/API tests; its normal commit is pending. Tools#5136 remains blocked by downstream Gasification repository-access and a Rust pre-checkout failure; the three #5139 permission checks passed unchanged after retry.
 
 ## Journey Qualification (#9913)
 
