@@ -465,6 +465,9 @@ class ProcessPanel(QGroupBox):
         if intrinsics is not None and not self.start_edit.text().strip():
             self.start_edit.setText(str(intrinsics))
 
+    def set_start_path(self, path: Path | str) -> None:
+        self.start_edit.setText(str(path))
+
     def board(self) -> tuple[str, float]:
         return self.board_edit.text().strip(), float(self.square_spin.value())
 
@@ -632,7 +635,7 @@ class CaptureRigWidget(QWidget):
             selection=self.capture.selection,
             session=lambda: self.media.root if self.media else None,
             library_root=lambda: self.library_actions.library().root,
-            apply=lambda path: self.process.start_edit.setText(str(path)),
+            apply=self.process.set_start_path,
             recalibrate=self._recalibrate_board,
             busy=lambda: self.runner.busy or self.record_bar.phase is not Phase.IDLE,
         )
