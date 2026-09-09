@@ -4063,6 +4063,8 @@ blocks Python package publication on the built-wheel smoke matrix.
   FastAPI/PyQt/React surfaces await the protected Tools ground merge (#4276).
 
 ## 12. Change Log
+
+| 2026-09-09 | #9851 | Capture product qualification: mutation-safe last-frame cache, repeatable responsiveness benchmark, product review, and child startup failure recovery (#9857). |
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
 | 2026-09-08 | #9839 | Capture Rig: a stalled live preview no longer holds the cameras, which made every take come back empty (#9838). A preview ffmpeg can stay alive while sending nothing (observed: three processes at zero CPU for over an hour); its reader parked in a blocking pipe read never re-checked the stop flag, so `PreviewPanel.stop()` timed out, cleared its workers and reported "cameras released" while every device was still claimed, and the recorder failed with -5 on all three. `CameraWorker.stop()` now closes the source (which frees a parked reader), a watchdog releases and names any view that stops delivering, and `stop()` reports honestly when a reader thread is still finishing. Verified on the rig: preview live in 36 s, Record returns outcome=supported, preview resumes after the take. |

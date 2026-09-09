@@ -1,0 +1,53 @@
+{
+  "environment": {
+    "python": "3.13.5",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "opencv": "4.13.0"
+  },
+  "fixture": {
+    "source_size": [1280, 720],
+    "canvas_size": [960, 540],
+    "codec": "MJPG",
+    "seed": 9851,
+    "warmup": 5
+  },
+  "player_sha256": "1b8a9f0db5199acc08c5c7d839d3f3a48b19426e188d43358f63f9646498e0bd",
+  "composition": [
+    {
+      "views": 1,
+      "samples": 60,
+      "median_ms": 4.395,
+      "p95_ms": 5.183,
+      "max_ms": 5.458
+    },
+    {
+      "views": 3,
+      "samples": 60,
+      "median_ms": 5.248,
+      "p95_ms": 6.577,
+      "max_ms": 7.526
+    },
+    {
+      "views": 6,
+      "samples": 60,
+      "median_ms": 8.425,
+      "p95_ms": 11.093,
+      "max_ms": 12.573
+    }
+  ],
+  "decode": {
+    "sequential": {
+      "samples": 60,
+      "median_ms": 14.001,
+      "p95_ms": 14.935,
+      "max_ms": 15.191
+    },
+    "duplicate": {
+      "samples": 60,
+      "median_ms": 196.788,
+      "p95_ms": 226.653,
+      "max_ms": 310.897
+    }
+  },
+  "limitations": "Synthetic noisy video; excludes camera capture, Qt painting, inference and storage contention. Compare on the same host."
+}

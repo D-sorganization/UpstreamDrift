@@ -29,6 +29,8 @@ class VideoReader:
         require(self._cap.isOpened(), "could not open video", str(path))
         self._path = path
         self._next = 0
+        self._cached_index: int | None = None
+        self._cached_frame: npt.NDArray[np.uint8] | None = None
         self.frame_count = int(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.fps = float(self._cap.get(cv2.CAP_PROP_FPS)) or 0.0
         self.width = int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -43,6 +45,8 @@ class VideoReader:
         import cv2
 
         require(index >= 0, "frame index must be >= 0", index)
+        if index == self._cached_index and self._cached_frame is not None:
+            return self._cached_frame.copy()
         if index != self._next:
             self._cap.set(cv2.CAP_PROP_POS_FRAMES, index)
             self._next = index
@@ -50,9 +54,15 @@ class VideoReader:
         if not ok:
             return None
         self._next = index + 1
-        return np.asarray(frame, dtype=np.uint8)
+        # Raw and overlay tiles request the same reader/frame. Retain only the
+        # most recent decode, and isolate every caller's mutable drawing pixels.
+        self._cached_index = index
+        self._cached_frame = np.asarray(frame, dtype=np.uint8)
+        return self._cached_frame.copy()
 
     def close(self) -> None:
+        self._cached_index = None
+        self._cached_frame = None
         self._cap.release()
 
     def __enter__(self) -> VideoReader:
