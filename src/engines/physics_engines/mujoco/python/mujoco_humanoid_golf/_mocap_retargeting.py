@@ -111,56 +111,48 @@ class MotionRetargeting:
         Returns:
             Tuple of (joint_config, success)
         """
-        # Multi-target IK: minimize error to all marker positions
-        if frame is None:
-            raise ValueError("frame must be provided")
+        # Resolve the marker -> (body, target) pairs once per frame so the
+        # iteration loop never re-filters or re-looks-up them (#8922).
+        targets: list[tuple[int, np.ndarray]] = []
+        for marker_name in use_markers:
+            if marker_name not in frame.marker_positions:
+                continue
+            body_id = self.marker_to_body_id.get(marker_name)
+            if body_id is None:
+                continue
+            targets.append((body_id, frame.marker_positions[marker_name]))
+
         q = q_init.copy()
-        if len(q) != self.model.nq:
-            raise ValueError(
-                f"q_init must have length nq={self.model.nq}, got {len(q)}"
-            )
 
         for _iteration in range(max_iterations):
-            # Compute error for all markers
+            # One forward evaluation per iteration, not one per marker:
+            # all marker positions and Jacobians below are read from the
+            # same computed configuration (#8922).
+            self.data.qpos[:] = q
+            mujoco.mj_forward(self.model, self.data)
+
             total_error = 0.0
-            total_jacobian = None
-            total_error_vector = None
+            jacobian_rows: list[np.ndarray] = []
+            error_rows: list[np.ndarray] = []
 
-            for marker_name in use_markers:
-                if marker_name not in frame.marker_positions:
-                    continue
-                if marker_name not in self.marker_to_body_id:
-                    continue
+            for body_id, target_pos in targets:
+                current_pos = self.data.xpos[body_id]
 
-                body_id = self.marker_to_body_id[marker_name]
-                target_pos = frame.marker_positions[marker_name]
-
-                # Current body position
-                self.data.qpos[:] = q
-                mujoco.mj_forward(self.model, self.data)
-                current_pos = self.data.xpos[body_id].copy()
-
-                # Position error
                 pos_error = target_pos - current_pos
                 total_error += float(np.linalg.norm(pos_error))
 
-                # Jacobian
                 jacp, _ = self.ik_analyzer.compute_body_jacobian(body_id)
-
-                # Accumulate
-                if total_jacobian is None:
-                    total_jacobian = jacp
-                    total_error_vector = pos_error
-                else:
-                    total_jacobian = np.vstack([total_jacobian, jacp])
-                    total_error_vector = np.concatenate([total_error_vector, pos_error])
+                jacobian_rows.append(jacp)
+                error_rows.append(pos_error)
 
             # Check convergence
             if total_error < 1e-3:  # 1mm threshold
                 return q, True
 
             # Solve for joint update
-            if total_jacobian is not None and total_error_vector is not None:
+            if jacobian_rows and error_rows:
+                total_jacobian = np.vstack(jacobian_rows)
+                total_error_vector = np.concatenate(error_rows)
                 # Damped least-squares
                 damping = 0.01
                 J = total_jacobian
@@ -176,8 +168,6 @@ class MotionRetargeting:
 
                 # Clamp to limits
                 q = self.ik_analyzer._clamp_to_joint_limits(q)
-
-        # Did not converge
         return q, False
 
     def compute_marker_errors(
