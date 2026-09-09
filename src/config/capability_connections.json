@@ -84,6 +84,20 @@
       "description": "Import linked 2D video or validated C3D/model marker motion with explicit units, axes and joint names.",
       "evidence": "src/tools/capture_rig/reference_library_dialog.py",
       "view": "workflow"
+    },
+    {
+      "id": "capture.comparison",
+      "title": "Expert Comparison",
+      "description": "Place an expert video or model, pair swing events, and review through the selected camera.",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "view": "workflow"
+    },
+    {
+      "id": "comparison.outputs",
+      "title": "Comparison Deliverables",
+      "description": "Encoded comparison video and portable evidence sidecar.",
+      "evidence": "src/tools/capture_rig/reference_export.py",
+      "view": "workflow"
     }
   ],
   "edges": [
@@ -345,7 +359,7 @@
       "artifact": "Saved reference assets, titles, notes and archive state",
       "kind": "workflow",
       "evidence": "src/tools/capture_rig/library_dialog.py",
-      "constraint": "Reference import is available; camera registration and synchronized projection are tracked separately by #9865/#9866",
+      "constraint": "Import and manage reference assets, then open Compare Reference for the selected camera view",
       "view": "workflow"
     },
     {
@@ -355,6 +369,42 @@
       "kind": "file",
       "evidence": "src/motion_capture/reference/importers.py",
       "constraint": "Missing motion samples stay masked; no automatic 2D-to-3D conversion or invented camera calibration",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.experts",
+      "target": "capture.comparison",
+      "artifact": "Expert video / marker animation",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "2D image alignment or camera-projected 3D motion; manual registration is explicit",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "capture.comparison",
+      "artifact": "Saved trim, crop, drawings and original clock",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Preview and export share the same composition pipeline",
+      "view": "workflow"
+    },
+    {
+      "source": "step.reconstruct",
+      "target": "capture.comparison",
+      "artifact": "Camera intrinsics, distortion and pose",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/reference_comparison.py",
+      "constraint": "Changed camera or motion evidence requires manual review",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.comparison",
+      "target": "comparison.outputs",
+      "artifact": "Comparison video + reproducible sidecar",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/reference_export.py",
+      "constraint": "Exact event mapping, layer recipe, input hashes and camera evidence; cancelled or incomplete exports are not published",
       "view": "workflow"
     }
   ]

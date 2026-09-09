@@ -79,7 +79,14 @@ def test_oversized_comparison_is_rejected_before_parsing(tmp_path: Path) -> None
         load_comparison_session(path)
 
 
-def test_control_edits_preserve_registration_and_switch_exactly(tmp_path: Path) -> None:
+def test_control_edits_preserve_registration_and_switch_exactly(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from PyQt6.QtWidgets import QMessageBox
+
+    monkeypatch.setattr(
+        QMessageBox, "question", lambda *args: QMessageBox.StandardButton.Discard
+    )
     app = _app()
     root = _bundle(tmp_path)
     library = ReferenceLibrary(tmp_path / "references")
