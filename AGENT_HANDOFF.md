@@ -11,6 +11,15 @@ The Python-only wheel omits UI assets; physical qualification remains open.
 Tools #5133 CI repairs, final provider revision and protected review remain.
 Do not merge this consumer before the provider is reviewed and green.
 
+## Incoming Main Integration
+
+Main 18c8f922e is integrated into the provider branch with its capture calibration
+and industrial-readiness implementations preserved. Only shared turnover/SPEC
+documents conflicted; canonical HANDOFF.md retains the incoming capture handoff.
+The full incoming root handoff remains at its immutable source:
+[Incoming Main Handoff](https://github.com/D-sorganization/UpstreamDrift/blob/18c8f922e87c92f6f518da05c0819f71ce3193ba/AGENT_HANDOFF.md).
+The capture setup, catalog and wizard work stays with its original owners.
+
 ## Preserved Repository Context
 
 The previous 516-line root handoff is preserved at the immutable base:

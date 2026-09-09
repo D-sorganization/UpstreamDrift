@@ -26,66 +26,38 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9916
 - **Paths:** vendor/ud-tools, tests/shared_contracts, docs/development/impact-acoustics
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (Tools 608e85b24; consumer base 6e3610a9b; consumer b6107f8e2)
+- **Last verified:** 2026-09-09 (Tools 608e85b24; main 18c8f922e; consumer b6107f8e2; merge SELF)
 - **Summary:** Qualify the exact Tools #5133 candidate through the existing vendor boundary, including strict shaft inputs and paired theme compatibility.
-- **Evidence:** Six old-pin failures become six passes; all 24 provider contracts pass on candidate 608e85b24. Clean Python-only wheel import/wire/theme and pip check pass. Physical qualification remains open.
+- **Evidence:** Six old-pin failures become six passes; all 24 provider contracts also pass after main 18c8f922e. Clean Python-only wheel import/wire/theme and pip check pass. Physical qualification remains open.
 - **Next step:** Qualify the final Tools #5133 repair revision through the provider suite.
 
 ### DL-#9894 · Scoped Ubuntu CI Dependencies
 
-- **State:** in_review
+### DL-#9911 · Preview Discovery Failure Recovery
+
+- **State:** in_progress
 - **Owner:** codex
-- **Issue:** #9894
-- **Branch:** fix/9894-ubuntu-ci-sources
-- **PR:** #9896
-- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/, tests/scripts/
+- **Issue:** #9911
+- **Branch:** feat/capture-guided-setup
+- **PR:** #9910 (draft)
+- **Paths:** src/tools/capture_rig/preview.py, tests/tools/capture_rig/test_preview.py
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`)
-- **Summary:** Scoped signed APT sources; runner config preserved.
-- **Evidence:** Six Bash tests and four Ubuntu installs pass (run 34387111648).
-- **Next step:** Finish combined protected checks after #9890/#9893.
+- **Last verified:** 2026-09-09 (`6af9c1773` base; 11 preview regressions pass)
+- **Summary:** Report missing discovery imports and subprocess timeouts through the existing preview status.
+- **Next step:** Publish and qualify with #9910.
 
-### DL-#9892 · Fleet Guide Compatibility
+### DL-#9898 · Calibration Profile Compatibility
 
-- **State:** in_review
+- **State:** in_progress
 - **Owner:** codex
-- **Issue:** #9892; Repository_Management#1579
-- **Branch:** fix/9892-fleet-guide-validation
-- **PR:** #9893
-- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py, generated agent entry files
+- **Issue:** #9898; epic #9897 (goal also includes #9902 and #9906)
+- **Branch:** feat/capture-guided-setup
+- **PR:** #9910 (draft)
+- **Paths:** src/tools/capture_rig/calibration_profiles.py, tests/tools/capture_rig/test_calibration_profiles.py, docs/development/capture_setup_execution_plan.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (27 tests and live consistency check pass)
-- **Summary:** Retain central guidance with precise optional/external path handling and exact managed-notice exemptions; preserve real missing-path and duplicate-instruction failures.
-- **Evidence:** Two RED/GREEN reproductions; inherited instructor evidence remains in #9890.
-- **Next step:** Complete protected follow-up after #9890; central canonical corrections are in Repository_Management#1627.
-
-### DL-#9883 · Instructor Reference Alignment Workspace
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #9883 (advanced epic #9863)
-- **PR:** #9890
-- **Branch:** `feat/9883-reference-alignment-controls`
-- **Paths:** `src/tools/capture_rig/reference_comparison.py`, `reference_controls.py`, `reference_timeline.py`, `styling.py`, related tests, docs and capability atlas
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`; 67 integrated alignment/render/state/timing cases pass)
-- **Summary:** Responsive placement/timing/notes inspector, independent expert scrubbing and paired swing events, pending-edit guards, undo/reset and manual stale-evidence review with settings backup.
-- **Evidence:** Native screenshots at desktop/laptop sizes; shared rotation tests, perspective preservation, invalid event rejection, notes/switch/Escape guards, stale settings backup and existing exact preview/export parity. Full-PR architecture, four-module mypy and LoD/DRY no-growth pass; integrated timing and rendering regressions pass.
-- **Next step:** Complete protected review #9890 after rendering #9889 merges (timing #9885 merged).
-
-### DL-#9882 · Comparison Rendering and Export Qualification
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #9882 (advanced reference epic #9863)
-- **Branch:** fix/9882-comparison-rendering
-- **PR:** #9889 (supersedes #9888)
-- **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py, reference_comparison.py, clips.py, swing_export.py, related tests/docs
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)
-- **Summary:** Shared preview/export compositor, motion opacity, coverage-aware expert homography, retained decoders and strict staged publication.
-- **Evidence:** 48 comparison/coaching/export regressions pass; 33 renderer/state cases pass after adding three cancellation/homography checks. Five-module mypy, Ruff and architecture pass. Exact pre-encode pixel parity and complete real-container decoding are tested.
-- **Next step:** No-growth gates pass. Integrate parent #9885 and complete protected checks. #9883 remains separate.
+- **Last verified:** 2026-09-09 (`b4abd67bb`)
+- **Summary:** Optical profile review UI and verified rig export; everyday observations remain required.
+- **Next step:** Qualify UI/consumers, then add reference sessions under #9898/#9900.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 
@@ -371,6 +343,52 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Address review feedback on PR #9725 and merge when approved.
 
 ## Shipped (Last 90 Days)
+
+### DL-#9882 · Comparison Rendering and Export Qualification
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9882
+- **Branch:** fix/9882-comparison-rendering
+- **PR:** #9896 (integrates #9889)
+- **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Shared compositor, coverage-aware expert homography and staged exports delivered with qualified product #9896.
+
+### DL-#9894 · Scoped Ubuntu CI Dependencies
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9894
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/, tests/scripts/
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Signed per-job APT sources preserve shared-runner configuration; six Bash regressions and standard CI pass.
+
+### DL-#9892 · Fleet Guide Compatibility
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9892
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Central managed guidance and legitimate external/optional paths pass without hiding real missing-file failures.
+
+### DL-#9883 · Instructor Reference Alignment Workspace
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9883
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** src/tools/capture*rig/reference*\*.py, styling.py, tests/tools/capture_rig/
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Responsive placement/timing/notes controls, event alignment, revision checks, preview/export parity and native layout evidence are delivered.
+- **Evidence:** Qualified candidate equals merged tree; standard unit gate passed 14,821 tests.
 
 Entries stay here for 90 days after merge, then move to the archive.
 
