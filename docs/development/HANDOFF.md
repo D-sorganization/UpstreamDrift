@@ -1,4 +1,25 @@
-# Scoped Ubuntu Dependency Installation Handoff
+# C3D Reference Fitting Handoff
+
+- Repository/worktree: `D-sorganization/UpstreamDrift`, `../UpstreamDrift-reference-9914`.
+- Branch: `feat/c3d-reference-overlay-9914`; baseline `7c09642df`; commit SELF.
+- Governing epic: #9914; PR not created; development entry DL-#9914.
+- Complete: marker profiles, URDF and compiled-MJCF tree adapters, root seed,
+  existing continuous fit orchestration, saved jobs and library assets,
+  fixed placement estimator, standalone keyframe graphic, operator guide.
+- Validation: RED observed before each new module; 80 reference tests pass;
+  new two-camera renderer, preview, identity and custom-model contracts pass
+  separately. Scoped Ruff passes; one mypy matrix typing issue corrected,
+  recheck pending. Exact commands are in the epic document.
+- Evidence: provisional model surveys under `../reference-fit-artifacts-9914`.
+  Full driver and iron runs are still active; do not treat provisional artifacts
+  as final source-version evidence. Native OpenSim adapter and MyoSuite anatomy
+  are unavailable, explicitly recorded rather than replaced with a fallback.
+- Coordination: `codex-reference-9914-20260909`, issue lease and central presence
+  registered. #9913 owns capture GUI changes; no edits to those files here.
+- Next: finish evidence, rerun final checks, commit/push with normal hooks and
+  create a protected PR. Do not close the epic without implemented acceptance.
+
+## Prior Scoped Ubuntu Dependency Installation Handoff
 
 ## Identity
 

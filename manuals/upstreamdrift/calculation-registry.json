@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-reference-kinematics-inventory",
+      "owner": "UpstreamDrift issue #9914",
+      "resolution": "Classify reference fitting, URDF/MJCF kinematic adapters, and selected-pose similarity registration under src/motion_capture/reference before a manual coverage claim. Surface-marker proxy fits and synthetic FK parity do not qualify anatomical accuracy, camera calibration, global optimality, or native dynamics."
+    },
+    {
       "id": "UP-D1-inventory-required",
       "owner": "UpstreamDrift issue #9067",
       "resolution": "Inventory and classify every in-scope calculation and module before any coverage or release claim."
