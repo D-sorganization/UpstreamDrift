@@ -10,10 +10,16 @@ MPLBACKEND=Agg python -m benchmarks.bioptim_parity --nodes 12 --duration 0.6 \
 
 The interesting column is the **dynamics defect**: integrate each solution's
 own torques forward from each node and see whether the next node comes back.
-A trajectory that violates the equations of motion between its nodes is not a
-swing a golfer could make, however fast its clubhead is reported to move.
+This tests local consistency with the specified mathematical model. It does
+not establish that a golfer could execute the trajectory or validate impact
+forces, shaft response, ball launch, or acoustics.
 
-## Results
+## Historical Results
+
+These tables retain their original fixed 16-substep RK4 reference. They have
+**not** been regenerated with the adaptive reference introduced for #9830.
+Reference integration error was not independently resolved in these runs;
+do not interpret the columns as certified continuous-ODE errors.
 
 Benchmark golfer (`GolferModel()`, `ClubModel()`), anthropometric inertials
 (#9755), same sine warm start for every backend, IPOPT capped at 500
@@ -45,57 +51,57 @@ casadi 3.6.7, bioptim 3.4.0, pin 4.1.0); wall times are indicative only.
 
 ## What the Numbers Say
 
-**The finite-difference path buys its speed by breaking physics.** It reports
-109 m/s of clubhead speed on the finer grid. A tour driver swing is around
-50 m/s and the fastest ever recorded is under 65 m/s, so that number is not a
-swing. Its 2.88 rad position defect says why: the torques it computes at the
-nodes would not carry the model from one node to the next. This is the
-concrete measurement behind #9756 — the module called itself a direct
-transcription while enforcing the dynamics nowhere between nodes.
+The finite-difference formulation does not enforce interval dynamics. Its
+reported speed and node torque limits therefore do not establish a dynamically
+feasible swing. The historical 2.88 rad discrepancy motivates checking the
+continuous ODE, but its precise value also depends on the unresolved reference.
 
-**The OCP paths cost an order of magnitude in defect, not in credibility.**
-bioptim's 0.22-0.26 rad on the same grid is more than ten times better, and
-what remains is discretisation error between the transcription's own scheme
-and the reference re-integration, not an unenforced constraint. Its 49.9 m/s
-is the speed it was _asked_ for and could actually deliver.
+The OCP formulations enforce their chosen discrete equations. Smaller
+historical discrepancies (0.22–0.26 rad and 15.2–19.9 rad/s on the finer grid)
+do not establish acceptable accuracy. Both state components require explicit
+application-specific numerical budgets and a resolved reference. A target
+speed reached by an optimizer is not evidence of physical realizability.
 
-**Refining the grid helps the OCPs and hurts the finite-difference path.**
-Going from dt = 143 ms to dt = 55 ms cuts the bioptim defect by roughly 7x
-(3.33 to 0.22 rad) while the finite-difference defect stays around 3 rad and
-its reported speed climbs from 63 to 109 m/s. A transcription converges as
-the grid refines; a kinematic fit with a torque check just finds more room to
-cheat.
+The two tables change both interval spacing and total swing duration. They
+are not a controlled mesh-convergence experiment. Nonlinear constraints and
+different objectives also prevent treating backend rows as solutions of an
+identical optimization problem. A shared initial guess does not ensure a shared
+local optimum. The failed speed-maximization runs do not prove that this
+objective is universally invalid or that concavity caused those failures;
+target-speed penalties do not make the full nonlinear OCP convex.
 
-**Maximising terminal speed is the wrong objective, in every backend.** The
-`casadi multiple shooting` row fails on both grids, and it fails the same way
-the bioptim `maximize_speed` variant does: a negative-weight quadratic is
-concave, so with the dynamics genuinely enforced the optimum sits on the
-velocity bound and IPOPT never certifies it. The finite-difference path only
-appears to converge here because its own consistency constraints pin
-velocities to positions, shrinking the feasible set until the maximum is
-interior. Both bioptim entries above therefore use the convex **target-speed**
-objective, which is also what `crocoddyl_backend` (`target_speed=45.0`) and
-`SwingOptimizationConfig.target_clubhead_velocity` have always meant. Ask for
-the speed a golfer is trying to reach; do not ask for infinity and take
-whatever the bounds allow.
-
-**Collocation is the default for a reason.** Degree-3 collocation reaches the
-same answer as RK4 multiple shooting in a fifth of the wall time (8.5 s vs
-38.4 s), so `backend_registry`'s `bioptim` entry routes through it.
+The recorded collocation run is faster than RK4 and reaches a different speed
+(45.9 versus 49.9 m/s). These single runs do not demonstrate equivalent
+solutions or a general performance advantage.
 
 ## Method and Caveats
 
-- **Defect metric.** `casadi_backend.dynamics_defect` re-integrates
+- **Historical defect metric.** The tables re-integrated
   `forward_dynamics` with RK4 at 16 substeps per interval, holding each
   interval's torque constant, and reports the largest per-interval mismatch.
   For the finite-difference path, whose torques are evaluated rather than
   decided, the torque used is what its own stencil implies.
-- **Collocation is measured out of its native scheme.** A collocation
-  solution satisfies polynomial defects at collocation points, not a
-  zero-order-hold RK4 step, so its defect column mixes genuine error with
-  scheme mismatch. Compare it to the finite-difference path (same
-  measurement, same grid) rather than reading it as absolute integration
-  error.
+- **Current reference.** Calling `dynamics_defect` without `n_substeps` uses
+  DOP853 twice on the same model RHS, with tighter tolerances and a smaller
+  maximum step on the second pass. Absolute tolerances are separate for
+  position (rad) and velocity (rad/s). Each endpoint must pass a componentwise
+  refinement check; failure raises instead of emitting qualified metrics.
+  `reference_resolution` retains controls, RHS counts and normalized endpoint
+  differences. This is numerical refinement evidence, not a rigorous error
+  bound or an independent implementation of the dynamics. The four historical
+  `to_dict()` fields remain unchanged; archive the resolution evidence as well
+  when making a new qualification claim.
+- **Discrete feasibility.** An explicit positive `n_substeps` still selects
+  fixed RK4. Using the transcription's own substeps tests its discrete
+  equations; it does not resolve continuous-ODE accuracy. Reports keep position
+  and velocity separate. The legacy `max_defect` mixes units and must not define
+  a scientific accuracy budget.
+- **Control reconstruction.** Collocation and shooting comparisons must use
+  the same interval torque convention and model. Re-integrating an identical
+  zero-order-held control with a resolved reference tests local ODE consistency;
+  a different control interpolation would also measure reconstruction mismatch.
+  Every interval restarts at the candidate node, so these are not accumulated
+  whole-swing error bounds.
 - **scipy has no defect entry.** The flagship optimizer carries its own
   lumped-inertia kinematic model rather than the multibody chain, so there is
   no shared ODE to violate. Its speed column is its own reported metric.
@@ -105,10 +111,45 @@ same answer as RK4 multiple shooting in a fifth of the wall time (8.5 s vs
   fill that row.
 - **Wall times are indicative.** Single container, one thread, no warm cache.
 
+The preserved #9830 six-node, 0.6 s candidate demonstrates the distinction:
+eight-substep shooting has an own-grid residual below 1e-8 in each state block,
+yet adaptive re-integration gives about 0.4812 rad and 25.857 rad/s. The old
+16-substep reference instead gives 0.5191 rad. Passing the historical 0.5 rad
+regression ceiling does not qualify this candidate for impact predictions.
+Separate 16- and 32-substep optimizations reduced the observed discrepancies;
+the settings, source identity and limits are recorded in the
+[shooting refinement turnover](../development/shooting_convergence_9830_turnover.md).
+
+## Bioptim Runtime Qualification (#9842)
+
+The `bioptim` extra selects CasADi 3.6.7 with Bioptim 3.4.0 at revision
+fdafe4d9e50edb3f92a14f1980b08c3f81434545. The unchanged swing and tracking
+consumer modules pass all 13 tests on Linux, Python 3.11.15, NumPy 2.4.6,
+SciPy 1.17.1 and Pinocchio 4.1.0. This qualifies those numerical regression
+cases in that environment, not every platform or physical application.
+[PyPI lists 3.11–3.13 wheels](https://pypi.org/project/casadi/3.6.7/);
+wheel availability does not establish numerical qualification on those hosts.
+
+CasADi 3.8 removes legacy `MX_eye`, `SX_eye` and `DM_eye` exports. The private
+compatibility boundary supplies only missing names using the corresponding
+SDK class factories, preserving existing exports. Real subprocess controls
+check matrix values, types, shapes, symbolic Jacobians and idempotence on
+3.6.7 and 3.8. The optional CI install probe now imports the actual consumer.
+
+Import compatibility does not qualify the 3.8 solver stack: with aliases
+installed, the original eight-node, 1 s RK4 regression still returns an
+unsuccessful solve at its 500-iteration budget. A separate diagnostic with a
+1,000-iteration budget also fails, stopping at iteration 635. Neither proves
+the failure is solely iteration exhaustion. No fixture, tolerance or numerical
+acceptance threshold was relaxed. The general `optimal-control` extra retains
+its separate CasADi range; its 3.8 reference/backend evidence remains distinct.
+
 ## Follow-Ups
 
 - Fill the crocoddyl row on a conda-forge environment.
 - Phase 6.2 deprecates the finite-difference transcription once the OCP path
   has carried production traffic for a release.
-- A defect metric evaluated in each transcription's own scheme would make the
-  collocation column directly comparable.
+- Regenerate parity evidence with resolved references, comparable objectives,
+  explicit control reconstruction and independent position/velocity budgets.
+- Keep discrete feasibility, reference resolution, continuous-ODE discrepancy
+  and experimental validation separate when qualifying impact or acoustic use.

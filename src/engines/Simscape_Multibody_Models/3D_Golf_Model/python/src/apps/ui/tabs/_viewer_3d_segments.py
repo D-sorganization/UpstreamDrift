@@ -8,12 +8,18 @@ existing public segment API.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from typing import Any
 
 import numpy as np
 
-from src.shared.python.body_part_viz import SegmentVizSpec, ShapeTheme
+from src.shared.python.body_part_viz import (
+    ForceColorDisplay,
+    ForceColorScale,
+    SegmentLoadSeries,
+    SegmentVizSpec,
+    ShapeTheme,
+)
 from src.shared.python.body_part_viz.asset_library import ShapeLibrary
 from src.shared.python.body_part_viz.fitters import (
     BetweenTwoMarkersFitter,
@@ -133,6 +139,57 @@ class UserSegmentRenderer:
         self._renderer: MatplotlibRenderer | None = None
         self._render_entries: list[tuple[str | None, str, np.ndarray | None]] = []
         self._shape_library: ShapeLibrary | None = None
+        self._force_display: ForceColorDisplay | None = None
+        self._force_scale = ForceColorScale()
+        self._loads: SegmentLoadSeries | None = None
+        self._load_indices: dict[str, int] = {}
+        self._frame = 0
+
+    def set_axial_color_scale(self, scale: ForceColorScale) -> None:
+        """Apply shared settings to current artists without rebuilding geometry."""
+        if not isinstance(scale, ForceColorScale):
+            raise TypeError("scale must be ForceColorScale")
+        self._force_scale = scale
+        if self._force_display is not None:
+            self._force_display.configure(scale)
+
+    def set_axial_loads(
+        self, loads: SegmentLoadSeries | None, indices: Mapping[str, int]
+    ) -> None:
+        """Bind declared load IDs to explicit segment indices; host validates clock."""
+        if loads is not None and not isinstance(loads, SegmentLoadSeries):
+            raise TypeError("loads must be SegmentLoadSeries or None")
+        if not isinstance(indices, Mapping):
+            raise TypeError("indices must be a mapping")
+        if any(
+            not isinstance(k, str)
+            or not k
+            or isinstance(i, bool)
+            or not isinstance(i, int)
+            or not 0 <= i < len(self._segments)
+            for k, i in indices.items()
+        ):
+            raise ValueError("load bindings require valid segment indices")
+        if len(set(indices.values())) != len(indices):
+            raise ValueError("segment indices must be unique")
+        self._loads, self._load_indices = loads, dict(indices)
+        self._bind_force_display()
+
+    def _bind_force_display(self) -> None:
+        if self._force_display is not None:
+            self._force_display.set_loads(None)
+        self._force_display = None
+        if self._renderer is None:
+            return
+        handles = {
+            name: self._render_entries[i][0]
+            for name, i in self._load_indices.items()
+            if i < len(self._render_entries) and self._render_entries[i][0] is not None
+        }
+        self._force_display = ForceColorDisplay(self._renderer, handles)
+        self._force_display.set_loads(self._loads)
+        self._force_display.update_frame(self._frame)
+        self._force_display.configure(self._force_scale)
 
     def set_segments(
         self,
@@ -153,6 +210,7 @@ class UserSegmentRenderer:
                     f"got {type(spec).__name__}"
                 )
         self._segments = tuple(viz_specs)
+        self.set_axial_loads(None, {})
 
     @property
     def cylinder_count(self) -> int:
@@ -174,6 +232,7 @@ class UserSegmentRenderer:
 
     def clear(self) -> None:
         """Clear all allocated artists while retaining the segment specs."""
+        self._force_display = None
         if self._renderer is not None:
             self._renderer.clear()
         self._renderer = None
@@ -194,6 +253,7 @@ class UserSegmentRenderer:
         for spec in self._segments:
             entry = self._build_render_entry(spec, model, n_frames, library)
             self._render_entries.append(entry)
+        self._bind_force_display()
 
     def update_frame(self, frame: int, n_frames: int) -> None:
         """Update visible user-segment artists for one validated frame."""
@@ -201,6 +261,9 @@ class UserSegmentRenderer:
             return
         if not 0 <= frame < n_frames:
             return
+        self._frame = frame
+        if self._force_display is not None:
+            self._force_display.update_frame(frame)
         for entry, spec in zip(self._render_entries, self._segments, strict=False):
             handle, _kind, valid_mask = entry
             if handle is None:

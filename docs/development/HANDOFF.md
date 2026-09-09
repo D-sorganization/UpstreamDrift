@@ -7,7 +7,7 @@
 - Branch: `perf/9851-capture-responsiveness`
 - Baseline commit: `072db0891`
 - Implementation commit: `SELF`
-- Pull request: pending
+- Pull request: #9859
 - Governing issue/epic: #9851, #9857; epic #9849
 
 ## Objective and Status
@@ -42,3 +42,5 @@
 ## Change Log
 
 - SELF — Cache duplicate frames, recover child launch failures, and document product assessment.
+
+- SELF — Integrated current main, preserved other agents' handoff/spec entries, and recorded PR #9859. Full normal push hooks passed in a clean cache.
