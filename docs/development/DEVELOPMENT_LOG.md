@@ -17,9 +17,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9864 · Expert Reference Asset Imports
+### DL-#9865 · Reference Scene Registration & Synchronization
 
 - **State:** in_review
+- **Owner:** codex
+- **Issue:** #9865 (advanced reference epic #9863)
+- **Branch:** feat/9865-scene-registration
+- **PR:** #9871
+- **Paths:** src/motion_capture/reference/registration.py, src/motion_capture/reconstruct/overlay3d.py, related tests/docs
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`SELF`; local qualification complete)
+- **Summary:** Calibrated scene registration, event-anchor and offset time synchronization, missing-joint gap mask preservation across bounded interpolation, distortion-aware camera projection, and 2D expert video homography without 3D claims.
+- **Evidence:** 7 focused registration tests pass in tests/motion_capture/test_reference_registration.py. Strict round-trip serialization/deserialization validated. Projection tested with both pinhole and Brown-Conrady distortion. Ruff checks pass cleanly.
+- **Next step:** Await CI Standard completion and automated squash merge of PR #9871.
+
+### DL-#9864 · Expert Reference Asset Imports
+
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9864 (advanced reference epic #9863)
 - **Branch:** feat/9864-reference-assets
