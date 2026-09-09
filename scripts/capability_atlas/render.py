@@ -12,13 +12,16 @@ from .model import Graph
 REPO_URL = "https://github.com/D-sorganization/UpstreamDrift"
 
 
-def source_link(path: str, label: str = "Source") -> str:
+def source_url(path: str) -> str:
     repo_url = REPO_URL
     if path.startswith("vendor/ud-tools/"):
         repo_url = "https://github.com/D-sorganization/Tools"
         path = path.removeprefix("vendor/ud-tools/")
-    url = f"{repo_url}/blob/main/{quote(path, safe='/')}"
-    return f'<a href="{url}">{html.escape(label)}</a>'
+    return f"{repo_url}/blob/main/{quote(path, safe='/')}"
+
+
+def source_link(path: str, label: str = "Source") -> str:
+    return f'<a href="{source_url(path)}">{html.escape(label)}</a>'
 
 
 def view_graph(graph: Graph, view: str) -> tuple[list[dict], list[dict]]:
@@ -225,7 +228,7 @@ def document(graph: Graph) -> str:
     ]
     for item in graph["features"]:
         links = [
-            f"[{key}]({REPO_URL}/blob/main/{quote(item[key], safe='/')})"
+            f"[{key}]({source_url(item[key])})"
             for key in ("pyqt", "api", "web")
             if item.get(key)
         ]
