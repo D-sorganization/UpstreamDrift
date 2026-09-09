@@ -140,10 +140,22 @@ preserved; the tables have not been regenerated.
 
 ## Remaining Acceptance and Delivery
 
-1. Complete native comparison and affected optional/degradation checks; retain
-   exact dependency versions and distinguish unavailable Bioptim paths.
-2. Finish turnover/SPEC, normal commit/push hooks and focused PR delivery, then
-   protected CI. No PR exists for #9830 yet.
+1. Native and degradation checks are complete as recorded above. A combined
+   Windows collection of the new reference tests and existing mocked-SDK tests
+   also passed all 80 cases in 8.79 s (nine inherited warnings), checking the
+   optional-module contamination boundary. Bioptim remains a protected-lane
+   requirement, not a locally passed test.
+2. Implementation 17211e201 and SPEC placement ccd64c8b4 are integrated with
+   main 403292ca3 in 7c0a84b8865a356cc1d2508397b460706f346b81. The merge
+   changes no optimization source or tests relative to the validated code.
+   Root Ruff still passes (6,769 files); the fleet SPEC hook passes with exactly
+   one new row. The script is absent in this checkout and was run from the
+   authoritative Repository_Management sibling. All normal commit/push hooks,
+   including mypy, Bandit and the configured unit gate, passed. Remote SHA was
+   verified. PR [#9841](https://github.com/D-sorganization/UpstreamDrift/pull/9841)
+   is open; protected CI/review are pending. An initial phantom-guard run was
+   cancelled before any runner/step; its duplicate is queued. No source failure
+   or successful guard execution is inferred from that cancellation.
 3. Numerical reference resolution does not qualify the coarse swing for impact
    use. Application-specific state budgets, whole-trajectory convergence,
    physical calibration and acoustic validation remain separate program work.
@@ -156,6 +168,12 @@ its golf source/tests match both reviewed e47fde4e and prior 476eaa98.
 Inventory #5103 has advanced to 02b53e2d8 and awaits current CI; its AST
 correction is still needed for the new decay calculation. Signal PR #5106 at
 c8f3b4d1 still reports a failed private-consumer lane with other checks pending.
+At the subsequent #5103 observation, private-consumer job 102292157026 again
+fails its repository lookup with Not Found. Python 3.11/3.12 aggregate checks
+fail because their rate-of-closure shards were cancelled after about 90 minutes;
+the 3.11 log reaches 99% and then has no further test completion before
+cancellation. These are not classifier failures or passing suites; source
+diagnosis of the unfinished GUI tests and private access remains separate.
 UpstreamDrift #9826 merged as a410ae7059883d7f27f5fb12405b61859267457c
 at 2026-09-09T01:12:29Z, from reviewed head fced8c0d6. This was verified via
 GitHub; remaining queued auxiliary jobs are not claimed as passed. The
