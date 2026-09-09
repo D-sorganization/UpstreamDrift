@@ -2,11 +2,20 @@
 
 ## Current Continuation State
 
+Current repair: 79 provider/theme/fallback/manual tests pass against 00d17e7f9,
+with eight existing deprecation warnings. The seam gate passes after actual
+retirement of the already-shadowed color child and an explicit realtime
+split/pending-cleanup ruling linked to #8942. Its facade remains local.
+No byte-identity or private non-string equivalence is claimed for the removed
+color child. The 608e85b24 wheel below is historical; rebuild the current pin.
+Root handoff again carries required UP-D0/UP-D1 references. The PR title now
+accurately uses chore for dependency qualification. Provider CI is still open.
+
 - Working directory: C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin.
 - Branch: feat/9912-impact-provider-pin; implementation commit b6107f8e2; PR #9916.
-- Original base: 6e3610a9b; incoming main: 18c8f922e; Tools candidate: 608e85b249e6f61238ac96abbe7dc37428629b9e.
+- Original base: 6e3610a9b; incoming main: 18c8f922e; Tools candidate: 00d17e7f91fe8541bc8882ee745fda58ee2ad7af.
 - Governing issue #9912, development entry DL-#9912, parent #9703/#9701/#9700.
-- Pair: Tools #5133. No shared source is copied or modified in this consumer.
+- Pair: Tools #5133. Canonical shared source stays in Tools; the obsolete theme color child is retired.
 
 The new tests/shared_contracts/test_impact_shaft_provider.py exercises the strict
 golf_club.distributed_shaft/1 public input format and canonical theme API through

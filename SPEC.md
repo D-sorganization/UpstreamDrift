@@ -4157,7 +4157,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
-| 2026-09-09 | #9916 | Qualify the explicit distributed-shaft wire and resolved theme through the exact Tools vendor pin, with synthetic refusal/source controls and clean installed-wheel provider evidence (#9912). Final reviewed provider pin and physical qualification remain required. |
+| 2026-09-09 | #9916 | Qualify the explicit distributed-shaft wire and resolved theme through the exact Tools vendor pin, with synthetic refusal/source controls and clean installed-wheel provider evidence (#9912). Repair to 00d17e7f9 passes 79 provider/theme/fallback/manual controls; retire the obsolete color child and record pending realtime migration. Final reviewed pin and physical qualification remain required. |
 | 2026-09-09 | #9896 | Qualify instructor comparison controls, retain central guide compatibility, and isolate Ubuntu dependency sources/indexes/caches; preserve scoped evidence from #9890/#9893 (#9883, #9892, #9894). |
 
 | 2026-09-09 | #9893 | Retain generated fleet guidance with precise optional/external path checks and exact managed-notice handling; required local paths and substantive duplicates remain enforced. |
