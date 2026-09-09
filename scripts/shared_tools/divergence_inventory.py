@@ -55,7 +55,9 @@ DEFAULT_JSON = Path("docs/shared_tools/divergence_inventory.v1.json")
 DEFAULT_MARKDOWN = Path("docs/shared_tools/divergence_inventory.md")
 
 # Names that are never meaningful for the seam ruling.
-_IGNORED_DIR_NAMES = frozenset({"__pycache__", ".pytest_cache", ".mypy_cache"})
+_IGNORED_DIR_NAMES = frozenset(
+    {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache"}
+)
 _IGNORED_SUFFIXES = frozenset({".pyc", ".pyo"})
 
 # Alias roots served by ``SharedImportAliasFinder`` that the vendored Tools

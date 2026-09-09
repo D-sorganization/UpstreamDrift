@@ -26,13 +26,29 @@ _cv2_state: dict[str, Any] = {"lib": None, "invalid": False}
 
 
 def get_cv2() -> Any:
-    """Lazy import of OpenCV to speed up initial load."""
+    """Lazy import of OpenCV to speed up initial load.
+
+    Postcondition: returns the imported ``cv2`` module, or ``None`` when
+    OpenCV is unusable. Every caller in this mixin already branches on
+    ``None``; this function must therefore never propagate.
+
+    ``ImportError`` is not the only way an OpenCV import fails. A
+    half-initialised install -- typically one whose ``sys.modules`` entries
+    were disturbed by another test's mock -- fails inside cv2's own
+    ``bootstrap()`` with ``AttributeError: partially initialized module 'cv2'
+    has no attribute 'mat_wrapper'``. Because this is reached from
+    ``_on_timer``, i.e. from inside a Qt slot, an escaping exception is fatal
+    under PyQt6 and aborted the whole 3.11 test lane (UD #9474). Narrowing the
+    guard to ``ImportError`` was the defect; the contract was always "module
+    or ``None``".
+    """
     if _cv2_state["lib"] is None and not _cv2_state["invalid"]:
         try:
             import cv2
 
             _cv2_state["lib"] = cv2
-        except ImportError:
+        except Exception:  # noqa: BLE001 - see contract note above
+            logger.warning("OpenCV is unavailable or broken", exc_info=True)
             _cv2_state["invalid"] = True
     return _cv2_state["lib"]
 
@@ -158,48 +174,35 @@ class SimRenderingMixin:
 
         self.label.setPixmap(pixmap)
 
-    def _add_live_kinematics_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
-        if rgb is None:
-            raise ValueError("rgb must be provided")
-        if self.model is None or self.data is None:
-            return rgb
-        cv2 = get_cv2()
-        if cv2 is None:
-            return rgb
+    @staticmethod
+    def _euler_from_matrix(mat: np.ndarray) -> tuple[float, float, float]:
+        """Convert a 3x3 rotation matrix to xyz Euler angles (radians)."""
+        sy = np.sqrt(mat[0, 0] * mat[0, 0] + mat[1, 0] * mat[1, 0])
+        singular = sy < 1e-6
+        if not singular:
+            x_e = np.arctan2(mat[2, 1], mat[2, 2])
+            y_e = np.arctan2(-mat[2, 0], sy)
+            z_e = np.arctan2(mat[1, 0], mat[0, 0])
+        else:
+            x_e = np.arctan2(-mat[1, 2], mat[1, 1])
+            y_e = np.arctan2(-mat[2, 0], sy)
+            z_e = 0
+        return (x_e, y_e, z_e)
 
-        selected_id = (
-            getattr(self.manipulator, "selected_body_id", None)
-            if self.manipulator
-            else None  # noqa: E501
-        )
-        if selected_id is None or selected_id < 0:
-            return rgb
+    def _draw_live_pose_overlays(
+        self: Any, cv2: Any, img: np.ndarray, body_id: int, screen_pos: tuple[int, int]
+    ) -> int:
+        """Draw the euler/quat text overlays for the selected body.
 
-        img = rgb.copy()
-        body_id = selected_id
-        pos = self.data.xpos[body_id].copy()
-        quat = self.data.xquat[body_id].copy()
+        Returns the next free y offset below the drawn text rows.
+        """
         mat = self.data.xmat[body_id].reshape(3, 3).copy()
-
-        screen_pos = self._world_to_screen(pos)
-        if screen_pos is None:
-            return img
-
+        quat = self.data.xquat[body_id].copy()
         x, y = screen_pos
         y_offset = 30
 
         if getattr(self, "show_live_euler", False):
-            # Convert rotation matrix to xyz euler
-            sy = np.sqrt(mat[0, 0] * mat[0, 0] + mat[1, 0] * mat[1, 0])
-            singular = sy < 1e-6
-            if not singular:
-                x_e = np.arctan2(mat[2, 1], mat[2, 2])
-                y_e = np.arctan2(-mat[2, 0], sy)
-                z_e = np.arctan2(mat[1, 0], mat[0, 0])
-            else:
-                x_e = np.arctan2(-mat[1, 2], mat[1, 1])
-                y_e = np.arctan2(-mat[2, 0], sy)
-                z_e = 0
+            x_e, y_e, z_e = self._euler_from_matrix(mat)
             msg = (
                 f"Euler (xyz): [{np.rad2deg(x_e):.1f}, "
                 f"{np.rad2deg(y_e):.1f}, {np.rad2deg(z_e):.1f}] deg"
@@ -218,7 +221,7 @@ class SimRenderingMixin:
         if getattr(self, "show_live_quat", False):
             msg = (
                 f"Quat (w,x,y,z): [{quat[0]:.2f}, "
-                f"{quat[1]:.2f}, {quat[2]:.2f}, {quat[3]:.2f}]"  # noqa: E501
+                f"{quat[1]:.2f}, {quat[2]:.2f}, {quat[3]:.2f}]"
             )
             cv2.putText(
                 img,
@@ -231,37 +234,77 @@ class SimRenderingMixin:
             )
             y_offset += 15
 
-        if getattr(self, "show_live_screw", False):
-            # Compute rigorous instantaneous screw axis per Guideline C3
-            try:
-                from .screw_kinematics import ScrewKinematicsAnalyzer
+        return y_offset
 
-                analyzer = ScrewKinematicsAnalyzer(self.model)
-                twist = analyzer.compute_twist(self.data.qpos, self.data.qvel, body_id)
-                screw = analyzer.compute_screw_axis(twist)
+    def _draw_live_screw_overlay(
+        self: Any,
+        cv2: Any,
+        img: np.ndarray,
+        body_id: int,
+        screen_pos: tuple[int, int],
+        y_offset: int,
+    ) -> None:
+        """Draw the instantaneous screw axis overlay when enabled."""
+        if not getattr(self, "show_live_screw", False):
+            return
 
-                # Visualize screw axis line
-                start_pt, end_pt = analyzer.visualize_screw_axis(screw, length=0.5)
+        try:
+            from .screw_kinematics import ScrewKinematicsAnalyzer
 
-                start_px = self._world_to_screen(start_pt)
-                end_px = self._world_to_screen(end_pt)
+            analyzer = ScrewKinematicsAnalyzer(self.model)
+            twist = analyzer.compute_twist(self.data.qpos, self.data.qvel, body_id)
+            screw = analyzer.compute_screw_axis(twist)
 
-                if start_px and end_px:
-                    cv2.line(img, start_px, end_px, (255, 0, 255), 2)
-                    # Add direction arrow pointer
-                    cv2.circle(img, end_px, 3, (255, 0, 255), -1)
+            # Visualize screw axis line
+            start_pt, end_pt = analyzer.visualize_screw_axis(screw, length=0.5)
 
-                cv2.putText(
-                    img,
-                    f"ISA Pitch: {screw.pitch:.3f} m/rad",
-                    (x + 10, y + y_offset),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.4,
-                    (255, 0, 255),
-                    1,
-                )
-            except Exception as exc:  # noqa: BLE001
-                logger.debug("Overlay text render skipped: %s", exc)
+            start_px = self._world_to_screen(start_pt)
+            end_px = self._world_to_screen(end_pt)
+
+            if start_px and end_px:
+                cv2.line(img, start_px, end_px, (255, 0, 255), 2)
+                # Add direction arrow pointer
+                cv2.circle(img, end_px, 3, (255, 0, 255), -1)
+
+            cv2.putText(
+                img,
+                f"ISA Pitch: {screw.pitch:.3f} m/rad",
+                (screen_pos[0] + 10, screen_pos[1] + y_offset),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.4,
+                (255, 0, 255),
+                1,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Overlay text render skipped: %s", exc)
+
+    def _add_live_kinematics_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
+        """Overlay live kinematic state for the selected body onto ``rgb``."""
+        if rgb is None:
+            raise ValueError("rgb must be provided")
+        if self.model is None or self.data is None:
+            return rgb
+        cv2 = get_cv2()
+        if cv2 is None:
+            return rgb
+
+        selected_id = (
+            getattr(self.manipulator, "selected_body_id", None)
+            if self.manipulator
+            else None
+        )
+        if selected_id is None or selected_id < 0:
+            return rgb
+
+        img = rgb.copy()
+        body_id = selected_id
+        pos = self.data.xpos[body_id].copy()
+        screen_pos = self._world_to_screen(pos)
+        if screen_pos is None:
+            return img
+
+        y_offset = self._draw_live_pose_overlays(cv2, img, body_id, screen_pos)
+        self._draw_live_screw_overlay(cv2, img, body_id, screen_pos, y_offset)
         return img
 
     def _update_background_colors(self: Any) -> None:

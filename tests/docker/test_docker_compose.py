@@ -6,7 +6,8 @@ import yaml
 
 
 def test_frontend_compose_bootstraps_dependencies_before_dev_server() -> None:
-    compose = yaml.safe_load(Path("docker-compose.yml").read_text())
+    compose_path = Path(__file__).resolve().parents[2] / "docker-compose.yml"
+    compose = yaml.safe_load(compose_path.read_text())
 
     frontend = compose["services"]["frontend"]
     command = frontend["command"]

@@ -19,7 +19,7 @@ def _client() -> object:
     from fastapi.testclient import TestClient
 
     from model_generation.api.rest_api_fastapi import FastAPIAdapter
-    from model_generation.api.rest_api_routes import ModelGenerationAPI
+    from model_generation.api.rest_api import ModelGenerationAPI
 
     app = FastAPI()
     FastAPIAdapter(ModelGenerationAPI()).register(app)
@@ -56,11 +56,13 @@ def test_path_param_route_not_422() -> None:
 def test_path_param_value_is_captured() -> None:
     """The ``{model_id}`` segment is delivered to the handler as a path param.
 
-    The DELETE handler returns 501 ("Remove not implemented") only once it
-    has confirmed a non-empty ``model_id``; without the captured path param
-    it would short-circuit to 400 ("Missing model_id"). The 501 therefore
-    proves the path-param value flowed through the adapter.
+    This asserted 501 until #9699, using "Remove not implemented" as a proxy:
+    the handler only got that far once it had a non-empty ``model_id``, so the
+    501 implied the path param had flowed through. `library_remove_model` is
+    implemented now, so that proxy is gone -- but the 404 body echoes the id,
+    which demonstrates the same thing directly instead of by implication.
     """
     response = _client().delete("/api/v1/library/models/some-model-id")
 
-    assert response.status_code == 501, response.text
+    assert response.status_code == 404, response.text
+    assert "some-model-id" in response.text

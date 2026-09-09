@@ -158,3 +158,70 @@ def test_simulation_service_handles_engine_without_joint_names() -> None:
     service._retain_active_session(object(), recorder)
     assert service.active_recorder is recorder
     assert service.active_joint_names == []
+
+
+# ----------------------------------------------------------------------
+# Orchestrator/plot-data caching (issue #8943)
+# ----------------------------------------------------------------------
+
+
+def _counting_orchestrator(monkeypatch: pytest.MonkeyPatch, constructed: list) -> None:
+    """Replace the module's AnalysisOrchestrator with a recording wrapper."""
+    from src.api.routes import analysis_plots
+
+    real_cls = analysis_plots.AnalysisOrchestrator
+
+    class _CountingOrchestrator(real_cls):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            super().__init__(*args, **kwargs)
+            constructed.append(self)
+
+    monkeypatch.setattr(analysis_plots, "AnalysisOrchestrator", _CountingOrchestrator)
+
+
+def test_orchestrator_built_once_across_repeated_calls(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Repeated plot-data calls for one recorder must reuse the orchestrator."""
+    from src.api.routes import analysis_plots
+
+    client = _client(_ServiceStub(StubRecorder(), ["Hip", "Shoulder", "Wrist"]))
+    constructed: list = []
+    _counting_orchestrator(monkeypatch, constructed)
+
+    assert client.get("/analysis/plot-data/joint_angles").status_code == 200
+    assert client.get("/analysis/plot-data/joint_angles").status_code == 200
+    assert client.get("/analysis/plot-data/joint_angles").status_code == 200
+    assert len(constructed) == 1
+
+
+def test_plot_data_computed_once_per_plot_type(
+    monkeypatch: pytest.MonkeyPatch, client_with_data: TestClient
+) -> None:
+    """Plot data for an unchanged recorder is served from the per-type LRU."""
+    calls: list[str] = []
+    real = AnalysisOrchestrator.get_plot_data
+
+    def spy(self: Any, plot_type: str) -> Any:
+        calls.append(plot_type)
+        return real(self, plot_type)
+
+    monkeypatch.setattr(AnalysisOrchestrator, "get_plot_data", spy)
+    assert client_with_data.get("/analysis/plot-data/joint_angles").status_code == 200
+    assert client_with_data.get("/analysis/plot-data/joint_angles").status_code == 200
+    assert calls == ["joint_angles"]
+
+
+def test_orchestrator_cache_invalidated_on_recorder_replacement(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Replacing the active recorder must drop the cached orchestrator."""
+    service = _ServiceStub(StubRecorder(), ["Hip"])
+    client = _client(service)
+    constructed: list = []
+    _counting_orchestrator(monkeypatch, constructed)
+
+    assert client.get("/analysis/plot-data/joint_angles").status_code == 200
+    service._recorder = StubRecorder()
+    assert client.get("/analysis/plot-data/joint_angles").status_code == 200
+    assert len(constructed) == 2

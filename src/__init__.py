@@ -1,10 +1,31 @@
 """Golf Modeling Suite source package."""
 
 import importlib
+import importlib.util
 import sys
 from collections.abc import Mapping, Sequence
+from importlib.abc import MetaPathFinder
+from pathlib import Path
 from types import ModuleType
 from typing import Any
+
+# The pinned Tools tree, as a *fallback* import location for the shared
+# namespace (UpstreamDrift#9406).
+#
+# Every `tools-canonical` ruling in docs/shared_tools/seam_rulings.v1.json is
+# "delete UpstreamDrift's copy and let the pinned Tools tree answer", and all 36
+# actionable rulings sit at `pending-cleanup` because nothing put that tree on
+# the import path at runtime: deleting a child copy simply produced
+# ModuleNotFoundError. This is the mechanism those rulings were waiting for.
+#
+# It is APPENDED, never prepended. While a child copy exists it is still found
+# first, so this changes no import that resolves today -- it only answers the
+# ones that would otherwise fail. Prepending would silently flip resolution for
+# the 292 files that still diverge, which is exactly the ambiguity #9406 exists
+# to remove.
+_VENDORED_TOOLS_SRC = (
+    Path(__file__).resolve().parent.parent / "vendor" / "ud-tools" / "src"
+)
 
 _CANONICAL_ALIAS_MODULES = frozenset(
     {
@@ -56,4 +77,203 @@ def _install_parent_shared_aliases() -> bool:
     return True
 
 
+def _shared_python_spec_is_ud_alias(spec: Any) -> bool:
+    """Report whether a ``shared.python`` spec resolves to UpstreamDrift's own copy.
+
+    Under the repository's import bootstrap the top-level ``shared`` namespace
+    includes ``src/shared``, so ``find_spec("shared.python")`` can return
+    UpstreamDrift's aliased package even when no Tools tree exists at all. Such
+    a spec is not an installed Tools distribution; treating it as one is what
+    let the fallback finder install against a missing vendored tree and recurse
+    without a diagnostic (UpstreamDrift#9733).
+    """
+    origins = [spec.origin] if spec.origin else []
+    origins.extend(spec.submodule_search_locations or ())
+    for origin in origins:
+        try:
+            resolved = Path(origin).resolve()
+        except OSError:
+            continue
+        if resolved == _UD_SHARED_PYTHON or resolved.is_relative_to(_UD_SHARED_PYTHON):
+            return True
+    return False
+
+
+def _register_vendored_tools_fallback() -> bool:
+    """Report whether the pinned Tools tree is present to fall back to.
+
+    Deliberately does NOT add the tree to ``sys.path``. Doing so exposes every
+    top-level Tools package -- ``sidekick``, ``chat``, ``contracts`` -- as
+    importable, which silently changed availability probes elsewhere:
+    ``sidekick.lab.mocap`` began resolving and ``probe_tools_schema()`` flipped
+    from "unavailable" to "ready" in a repository that had never declared that
+    dependency reachable. The finder below answers the shared namespace on its
+    own, so the fallback stays scoped to what it is meant to serve.
+
+    Tools can live in either of two places, and a retired cluster must resolve
+    from whichever is present: the pinned tree at ``vendor/ud-tools``, or an
+    installed Tools distribution providing a top-level ``shared.python``.
+    Tools' own downstream-consumer contracts install the distribution into a
+    checkout that has no submodule at all, so gating on the vendored tree alone
+    left retired clusters unresolvable there (Tools#5048).
+
+    Returns:
+        True when either Tools tree is reachable, so the finder has something
+        to serve. False when neither is, where there is nothing to fall back
+        to and no Tools dependency is declared at all.
+
+    Raises:
+        ImportError: when the vendored tree is missing while ``shared.python``
+            resolves only to UpstreamDrift's own aliased copy -- the state in
+            which the finder previously recursed instead of failing (#9733).
+    """
+    if (_VENDORED_TOOLS_SRC / "shared" / "python").is_dir():
+        return True
+    try:
+        spec = importlib.util.find_spec("shared.python")
+    except (ImportError, ValueError):
+        return False
+    if spec is None:
+        return False
+    if _shared_python_spec_is_ud_alias(spec):
+        raise ImportError(_UNINITIALIZED_VENDORED_TREE_MESSAGE)
+    return True
+
+
+_UD_SHARED_PYTHON = Path(__file__).resolve().parent / "shared" / "python"
+_UNINITIALIZED_VENDORED_TREE_MESSAGE = (
+    "The pinned Tools tree is not initialized: 'vendor/ud-tools/src/shared/python' "
+    "is missing, and 'shared.python' resolves only to this repository's own "
+    "aliased copy, so retired modules cannot resolve and the fallback import "
+    "chain previously recursed forever instead of failing (UpstreamDrift#9733). "
+    "Remediation -- run from the repository root: "
+    "git submodule update --init vendor/ud-tools"
+)
+
+
+def _cluster_is_still_owned(tail: str) -> bool:
+    """Report whether UpstreamDrift still owns the top-level cluster in *tail*.
+
+    The fallback exists to serve clusters that have been **wholly retired**, so
+    a deleted child copy resolves upstream instead of raising. It must not fill
+    a gap *inside* a cluster UpstreamDrift still owns: doing so silently builds
+    a hybrid package, half UpstreamDrift and half Tools.
+
+    That is not hypothetical. ``sidekick`` is UpstreamDrift-owned and has no
+    ``lab/mocap``; the pinned tree does. Without this guard the finder served
+    ``sidekick.lab.mocap`` from the pinned tree, which flipped
+    ``probe_tools_schema()`` from ``unavailable`` to ``ready`` and broke two
+    ``motion_capture/rig`` tests that assert the module is absent. The absence
+    of a submodule inside an owned package is meaningful, not a gap to patch.
+    """
+    cluster = tail.split(".", 1)[0]
+    if not cluster:
+        return False
+    return (_UD_SHARED_PYTHON / cluster).is_dir() or (
+        _UD_SHARED_PYTHON / f"{cluster}.py"
+    ).is_file()
+
+
+class _VendoredToolsFallbackFinder(MetaPathFinder):
+    """Resolve retired child copies from the pinned Tools tree, and only those.
+
+    Mutating ``src.shared.python.__path__`` is not sufficient, and the reason is
+    an ordering one: that package's own ``__init__`` imports submodules while it
+    executes (``from . import cli_utils``, which imports
+    ``src.shared.python.logging_pkg.logging_config``). Those imports run *before*
+    any code that could extend the finished module's ``__path__``, so a retired
+    copy still raised ``ModuleNotFoundError`` during package initialisation.
+
+    A meta-path finder has no such window: it is consulted on every import,
+    including the ones a package issues about itself. This one is **appended** to
+    ``sys.meta_path``, so it is asked last -- after the normal machinery has
+    failed -- which is what keeps a present child copy authoritative.
+    """
+
+    _PREFIXES = ("src.shared.python.", "shared.python.")
+
+    def find_spec(
+        self,
+        fullname: str,
+        path: Sequence[str] | None = None,
+        target: ModuleType | None = None,
+    ) -> Any:
+        """Return a spec from the pinned tree, or None to defer to everything else."""
+        for prefix in self._PREFIXES:
+            if not fullname.startswith(prefix):
+                continue
+            tail = fullname[len(prefix) :]
+            if _cluster_is_still_owned(tail):
+                return None
+            relative = tail.replace(".", "/")
+            base = _VENDORED_TOOLS_SRC / "shared" / "python" / relative
+            package_init = base / "__init__.py"
+            if package_init.is_file():
+                return importlib.util.spec_from_file_location(
+                    fullname, package_init, submodule_search_locations=[str(base)]
+                )
+            module_file = base.with_suffix(".py")
+            if module_file.is_file():
+                return importlib.util.spec_from_file_location(fullname, module_file)
+            return self._installed_tools_spec(fullname, tail)
+        return None
+
+    def _installed_tools_spec(self, fullname: str, tail: str) -> Any:
+        """Resolve a retired cluster from an installed Tools distribution.
+
+        The pinned tree is one of two places Tools can live. A consumer that
+        installs Tools as a distribution -- Tools' own downstream-consumer
+        contracts do exactly that -- has no ``vendor/ud-tools`` checkout at
+        all, so a retired cluster has nothing to fall back to there.
+
+        Until Tools#5048 that gap was hidden: ``SharedImportAliasFinder``
+        rewrote every ``src.shared.python.<root>`` to ``shared.python.<root>``,
+        which happened to cover retired clusters too. Correcting that predicate
+        stops the blanket rewrite -- rightly, since it also captured clusters
+        UpstreamDrift owns -- and leaves this finder to serve the retired ones
+        from whichever tree is present.
+
+        ``_cluster_is_still_owned`` has already run, so this cannot capture a
+        cluster UpstreamDrift still owns.
+        """
+        canonical = f"shared.python.{tail}"
+        if canonical in sys.modules:
+            return getattr(sys.modules[canonical], "__spec__", None)
+        removed = self in sys.meta_path
+        if removed:
+            sys.meta_path.remove(self)
+        try:
+            spec = importlib.util.find_spec(canonical)
+        except (ImportError, ValueError):
+            return None
+        finally:
+            if removed:
+                sys.meta_path.append(self)
+        if spec is None or spec.origin is None:
+            return None
+        return importlib.util.spec_from_file_location(
+            fullname,
+            spec.origin,
+            submodule_search_locations=(
+                list(spec.submodule_search_locations)
+                if spec.submodule_search_locations is not None
+                else None
+            ),
+        )
+
+
+def _install_vendored_tools_fallback_finder() -> bool:
+    """Append the fallback finder so retired child copies resolve upstream."""
+    if not _VENDORED_TOOLS_FALLBACK_REGISTERED:
+        return False
+    if any(
+        isinstance(finder, _VendoredToolsFallbackFinder) for finder in sys.meta_path
+    ):
+        return False
+    sys.meta_path.append(_VendoredToolsFallbackFinder())
+    return True
+
+
+_VENDORED_TOOLS_FALLBACK_REGISTERED = _register_vendored_tools_fallback()
+_VENDORED_TOOLS_FALLBACK_FINDER_INSTALLED = _install_vendored_tools_fallback_finder()
 _PARENT_SHARED_ALIASES_INSTALLED = _install_parent_shared_aliases()

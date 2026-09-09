@@ -38,8 +38,10 @@ REQUIRED_GITIGNORE_PATTERNS = (
     "/output/*",
     "!/output/.gitkeep",
     "/.scratch/",
+    ".scratch/",
     "/motion_matching_training/",
     "/motion_matching/",
+    "/reports/*.json",
 )
 
 
@@ -75,6 +77,14 @@ def test_output_dir_tracks_only_the_keepfile() -> None:
     allowed = sorted(OUTPUT_ALLOWED)
     assert names == allowed, (
         f"output/ may only track the keepfile (#9415): tracked {names!r}"
+    )
+
+
+def test_reports_dir_tracks_no_scanner_dumps() -> None:
+    tracked = _tracked_files("reports")
+    json_dumps = [f for f in tracked if f.endswith(".json")]
+    assert json_dumps == [], (
+        f"reports/ must not track scanner dumps (#8836, #9415): {json_dumps!r}"
     )
 
 

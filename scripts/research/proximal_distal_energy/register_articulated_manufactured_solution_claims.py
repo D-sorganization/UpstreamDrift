@@ -157,6 +157,32 @@ def _build_claims(
     return claims, selected
 
 
+def _refresh_claims(
+    existing: list[dict[str, Any]], updates: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Refresh provenance without erasing reviewed outcomes or numeric evidence.
+
+    Existing scientific fields must match before review metadata is retained.
+    Changed scientific meaning requires explicit review, never an inferred
+    outcome. Preserve registry order and leave input records unmodified.
+    """
+    merged = {claim["claim_id"]: dict(claim) for claim in existing}
+    refresh_fields = {"evidence_artifacts", "last_verified_on"}
+    for update in updates:
+        claim_id = update["claim_id"]
+        previous = merged.get(claim_id)
+        if previous is not None and any(
+            previous.get(key) != value
+            for key, value in update.items()
+            if key not in refresh_fields
+        ):
+            raise ValueError(
+                f"scientific claim {claim_id} changed; new review required"
+            )
+        merged[claim_id] = {**(previous or {}), **update}
+    return list(merged.values())
+
+
 def _reconcile(
     registry: dict[str, Any],
     inventory: dict[str, Any],

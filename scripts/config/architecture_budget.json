@@ -3,6 +3,51 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/launchers/launcher_layout_manager.py",
+      "symbol": "LayoutManager.rebuild_grid",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing layout manager rebuild_grid method exceeds function-lines budget; PR #9481 only reconciled tile category derivation without altering grid layout logic.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/config/model_pack_manifest.py",
+      "symbol": "_normalize_model_pack_v1",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing manifest normalizer exceeds function-lines budget by 1 line; PR #9481 touched LauncherPresentationMetadata in this file.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/shared/python/config/model_pack_manifest.py",
+      "symbol": "ModelPackEntry.from_dict",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9481,
+      "reason": "Issue #9481: pre-existing model pack entry deserializer exceeds function-lines budget; PR #9481 touched LauncherPresentationMetadata in this file.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/api/services/chat_service.py",
+      "symbol": "ChatService.stream_response",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9495,
+      "reason": "Issue #9495: pre-existing legacy chat streaming method (237 lines) coordinates adapter thread lifecycle, SSE queue pumping, and session persistence; unblocking and thread join fix touched this function, full modularization tracked as part of chat service decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "src/api/services/chat_service.py",
+      "symbol": "ChatService.stream_response._stream_to_queue",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9495,
+      "reason": "Issue #9495: pre-existing inner thread worker function (143 lines) handles token streaming and tool call execution loops; full modularization tracked as part of chat service decomposition.",
+      "expires_on": "2026-10-31"
+    },
+    {
       "path": "scripts/research/proximal_distal_energy/make_articulated_native_constraint_discrepancy_figure.py",
       "symbol": "make_figure",
       "rule": "function-lines",
@@ -10,6 +55,24 @@
       "issue": 9153,
       "reason": "Issue #9153: the 102-line deterministic figure writer is hash-frozen in the completed two-replay CRBA requalification. Splitting two lines after observing the replay would invalidate the prospective figure-source authority and require two new native executions; defer the behavior-preserving helper extraction until the protected evidence lands.",
       "expires_on": "2026-09-15"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+      "symbol": "_analyze_case",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9233,
+      "reason": "Issue #9233: pre-existing research analysis script exceeds function-lines budget; touched to fix MATLAB table path and re-register SHA256.",
+      "expires_on": "2026-10-31"
+    },
+    {
+      "path": "scripts/research/proximal_distal_energy/run_two_hand_wscg_analysis.py",
+      "symbol": "build_outputs",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/physics-team",
+      "issue": 9233,
+      "reason": "Issue #9233: pre-existing research analysis script exceeds function-lines budget; touched to fix MATLAB table path and re-register SHA256.",
+      "expires_on": "2026-10-31"
     },
     {
       "path": "src/shared/python/optimization/batch_swing_optimizer.py",
@@ -224,6 +287,24 @@
       "issue": 9151,
       "reason": "Issue #9151: the native evidence artifact is hash-bound to this preregistered control evaluator. A context-object decomposition would invalidate the exact successful Ubuntu evidence source digest and requires a fresh native rerun; retain the explicit operator inputs temporarily and remove this exception with the next forward-attribution implementation.",
       "expires_on": "2026-09-30"
+    },
+    {
+      "path": "src/shared/python/optimization/crocoddyl_backend.py",
+      "symbol": "solve_swing_ddp",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9762,
+      "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/optimization/crocoddyl_backend.py",
+      "symbol": "solve_swing_ddp",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 9762,
+      "reason": "Pre-existing on origin/main: solve_swing_ddp is byte-identical to the origin/main version (162 lines, 10 parameters) and already exceeded both budgets before this change. PR #9768 (epic #9762) touched five lines elsewhere in crocoddyl_backend.py -- routing the anthropometric link inertials of #9755 into the Pinocchio model -- and the architecture budget inspects whole changed files rather than changed functions, so the pre-existing violations surfaced as if they were new. They were surfaced, not introduced, by #9768. The nine violations this PR did author were fixed by decomposition instead (options objects for solve_swing_casadi and build_max_speed_ocp, a module-level mixin for the bioptim adapter, per-backend functions in the parity benchmark); decomposing the Crocoddyl solver as well would put an unreviewed refactor of a second backend inside a bioptim-integration diff. Tracked in #9762.",
+      "expires_on": "2026-12-31"
     }
   ]
 }

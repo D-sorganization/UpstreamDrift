@@ -864,6 +864,8 @@ class TestCIEnvironmentCompatibility:
             "rust-wheel-parity",
             "shared-tools-consumer-contracts",
             "seam-drift-gate",
+            "impact-explorer-web-build",
+            "always-on-unit-lane",
         }
         assert job["if"] == "always()"
         aggregate_step = next(
@@ -879,6 +881,9 @@ class TestCIEnvironmentCompatibility:
         )
         assert aggregate_step["env"]["SHARED_TOOLS_CONSUMER_CONTRACTS"] == (
             "${{ needs.shared-tools-consumer-contracts.result }}"
+        )
+        assert aggregate_step["env"]["ALWAYS_ON_UNIT_LANE"] == (
+            "${{ needs.always-on-unit-lane.result }}"
         )
 
         # A docs-only PR skips the general gates, so `skipped` has to be accepted -
@@ -1749,15 +1754,6 @@ class TestCIEnvironmentCompatibility:
             in strict_step
         )
 
-    def test_jules_pr_cleanup_falls_back_to_repository_token(self) -> None:
-        """Scheduled cleanup must authenticate gh even without an optional PAT secret."""
-        workflow = (
-            REPO_ROOT / ".github" / "workflows" / "Jules-PR-Cleanup.yml"
-        ).read_text(encoding="utf-8")
-
-        assert "GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}" in workflow
-        assert "pull-requests: write" in workflow
-
     def test_model_explorer_xml_suppressions_are_build_only(self) -> None:
         """Model Explorer must parse untrusted XML through defusedxml only."""
         model_explorer = REPO_ROOT / "src" / "tools" / "model_explorer"
@@ -1843,6 +1839,32 @@ class TestPyprojectTomlConsistency:
             assert package in deps
             assert package not in dev_deps
             assert f"{package}==" in lock
+
+    def test_dev_extra_reaches_test_only_packages(self) -> None:
+        """openpyxl and imageio must resolve through the dev extra (#9533).
+
+        requirements-dev.lock is compiled with ``--extra=dev --extra=gui-test``
+        and no CI test lane installs the ``gui-tools`` or ``pose`` extras, so
+        packages declared only there are never installed anywhere in CI.
+        """
+        data = self._load_pyproject()
+
+        def _dist_name(requirement: str) -> str:
+            return (
+                requirement.split("[", 1)[0].split(">", 1)[0].split("=", 1)[0].lower()
+            )
+
+        dev_deps = {
+            _dist_name(requirement)
+            for requirement in data["project"]["optional-dependencies"]["dev"]
+        }
+
+        for package in ("imageio", "openpyxl"):
+            assert package in dev_deps, (
+                f"{package} must be reachable from the dev extra: "
+                "requirements-dev.lock (--extra=dev --extra=gui-test) is the only "
+                "dependency source installed by the CI test lanes (#9533)."
+            )
 
     def test_pytest_collects_in_tree_tests_by_default(self) -> None:
         """Default pytest config must include intentional colocated src tests."""

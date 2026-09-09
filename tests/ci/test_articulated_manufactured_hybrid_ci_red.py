@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 from typing import Any
 
 import pytest
@@ -107,6 +108,44 @@ def test_rolling_runtime_closes_governed_test_import_dependencies() -> None:
 
     for requirement in ROLLING_IMPORT_REQUIREMENTS:
         assert requirement in commands
+
+
+@pytest.mark.parametrize("name", [AUTHORITY_JOB, ROLLING_JOB])
+def test_native_jobs_initialize_exact_tools_provider_before_execution(
+    name: str,
+) -> None:
+    """Clean workspaces must supply the provider required by native imports."""
+    job = _job(name)
+    steps = job["steps"]
+    provider_steps = [
+        index
+        for index, step in enumerate(steps)
+        if "git submodule update" in str(step.get("run", ""))
+        and "vendor/ud-tools" in str(step.get("run", ""))
+    ]
+    assert provider_steps, "native research imports require the pinned Tools tree"
+    commands = str(steps[provider_steps[0]]["run"])
+    assert "--init" in commands
+    assert "--remote" not in commands, "the recorded gitlink owns scientific inputs"
+    execution = next(
+        index for index, step in enumerate(steps) if "-m pytest" in step.get("run", "")
+    )
+    assert provider_steps[0] < execution
+
+
+def test_canonical_authority_bytes_are_preserved_by_formatting_hooks() -> None:
+    """Canonical record serialization must survive the normal commit pipeline."""
+    config = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text())
+    prettier = next(
+        hook
+        for repository in config["repos"]
+        for hook in repository["hooks"]
+        if hook["id"] == "prettier"
+    )
+    excluded = re.compile(prettier["exclude"])
+    record = "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json"
+    assert excluded.search(record), "canonical authority has its own byte validator"
+    assert not excluded.search("docs/development/ordinary-config.json")
 
 
 def test_authority_job_uploads_deterministic_candidate_on_publication_red() -> None:
