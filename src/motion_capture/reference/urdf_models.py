@@ -37,7 +37,13 @@ def _joint(source: URDFJoint, observed: bool) -> Joint:
     return Joint(
         name=source.child,
         parent=source.parent,
-        direction=tuple(offset / length) if length else (0.0, 0.0, 0.0),
+        direction=(
+            float(offset[0] / length),
+            float(offset[1] / length),
+            float(offset[2] / length),
+        )
+        if length
+        else (0.0, 0.0, 0.0),
         length=source.name if length else None,
         axes="" if kind == "fixed" else "x",
         limits_rad=limits,
