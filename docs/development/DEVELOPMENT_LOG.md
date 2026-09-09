@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/9860-swing-editing
 - **Paths:** src/motion_capture/rig/edits.py, ingest.py, src/tools/capture_rig/swing_editor.py, related tests and docs/development/capture_editing_integration.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`b52db19ad` base)
-- **Summary:** Non-destructive source-frame selection and crop with camera-coordinate restoration; native editor. Library integration remains in progress.
-- **Evidence:** Backend 20 tests and initial Qt editor 3 tests passed; downstream sparse-timeline regression added before integration.
+- **Last verified:** 2026-09-09 (`3184f57b8`)
+- **Summary:** Non-destructive source-frame selection/crop and native editor; portable capture-note/catalog backend with archive, storage, rename/rollback and editable copies. Library UI integration remains in progress.
+- **Evidence:** Combined editing suite 23 passed; library/edit regression suite 17 passed. Native editor visual review at 850x650 has readable controls and 492-px minimum width.
 - **Next step:** Complete library and visible entry points, integrated tests and visual review, then protected PR.
 
 ### DL-#9830 · Independent Shooting Accuracy

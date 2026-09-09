@@ -60,3 +60,23 @@ Remaining: visible app entry points, library/notes/storage/archive/rename and
 editable copies; editor failure/unsaved/drag visual checks; coaching shape model,
 editing and export; reference import/registration/sync/comparison; generated map
 updates; protected CI and merges. Do not close epics based on this document.
+
+## Library Backend Qualification
+
+CaptureLibrary indexes registered bundle locations in SQLite; capture_notes.json
+owns stable identity, title, multiline notes, archive state and source-copy lineage.
+Catalog rebuilding preserves sidecars. Archive/restore changes metadata and reclaims
+no disk space. Storage reports logical bytes inside the session separately from
+external recordings, without following directory symlinks. The UI must call scans
+in a worker and show entry-specific failures.
+
+Editable copies retain original file references, plan, manifest/timing, calibration
+and edit recipe, plus a new identity and source_capture pointer. Derived analyses
+are not copied. Filename changes are limited to owned, unprocessed recordings with
+unchanged extensions and collision/reserved-name checks; index-write failure rolls
+the rename back. A process crash between the filesystem rename and index replacement
+is still a recovery gap to resolve before release; runtime exceptions are tested.
+
+Six backend tests pass for persistence/rebuild, archive/restore/search, corrupt-entry
+isolation, editable lineage, safe rename and rollback. Visible library controls and
+import/open/edit integration are the next step; no complete-library claim is made.

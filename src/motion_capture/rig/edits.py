@@ -7,12 +7,12 @@ original image. Frame clocks and intrinsics consequently remain unchanged.
 from __future__ import annotations
 
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .bundle import RecordingEntry, load_bundle
+from .documents import write_document
 
 EDITS_FILE = "swing_edits.json"
 MAX_RECIPE_BYTES = 128_000
@@ -97,22 +97,4 @@ def save_edits(root: Path, recipe: SessionEdits) -> None:
     validate_edits(root, recipe)
     if has_analysis(root):
         raise ValueError("Create an editable copy before changing an analyzed capture")
-    target = root / EDITS_FILE
-    # Same-directory replace leaves the previous recipe intact on write failure.
-    temporary: Path | None = None
-    try:
-        with NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8",
-            newline="\n",
-            dir=root,
-            prefix=".swing-edits-",
-            suffix=".json",
-            delete=False,
-        ) as stream:
-            temporary = Path(stream.name)
-            stream.write(recipe.model_dump_json(indent=2) + "\n")
-        temporary.replace(target)
-    finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
+    write_document(root / EDITS_FILE, recipe.model_dump(mode="json"))
