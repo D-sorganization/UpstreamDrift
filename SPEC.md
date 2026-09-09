@@ -4245,6 +4245,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 
 | Date       | PR         | Changes    |
 | ---------- | ---------- | ---------- |
+| 2026-09-09 | #9914 | Add reproducible C3D reference fitting with explicit marker profiles, native URDF/MJCF kinematics, retained observations and fit diagnostics, reference-library output, and fixed spatial alignment for the existing camera comparison pipeline. |
 | 2026-09-06 | #9636 | Retargeted the test that guards the mypy exclusion budget's re-attestation dates. The assertion derives the bound from the budget's own schedule, and repository-file reads are anchored to the repo root. |
 | 2026-09-09 | #9610 | Reconciled the ground-reaction bibliography against original sources in grf_source_reconciliation.json, mapping GRF, CoP, free-moment, and segment-power topics to verified publications. |
 | 2026-09-09 | #9633 | Momentum-transfer geometry atlas carried through subject-scaled articulated closed-contact, distributed-club, and synthetic held-out measurement tiers. |
