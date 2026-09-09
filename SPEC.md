@@ -1,5 +1,17 @@
 # SPEC.md — Repository Specification Document
 
+## Impact Shaft Provider Integration (#9912)
+
+The exact vendor/ud-tools pin provides golf_club.distributed_shaft/1 through the
+existing Tools resolution boundary. Preserve full coupled section coefficients,
+integrated inertia, canonical serialization and explicit source/calibration
+identities. Unsupported versions, incomplete records, scalar coercion and
+qualification promotion fail at the provider boundary. Byte identity remains
+distinct from physical validation. Resolved theme defaults and custom tokens
+must survive the same provider update. Engine adapters and studies remain under
+#9703/#9704; this integration does not claim their completion.
+
+
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
 Standard Qt/Xvfb dependency jobs share `scripts/ci/install_ubuntu_dependencies.sh`.

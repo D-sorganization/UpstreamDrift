@@ -1,3 +1,56 @@
+# Impact Shaft Provider Integration (#9912)
+
+## Current Continuation State
+
+- Working directory: C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin.
+- Branch: feat/9912-impact-provider-pin; implementation commit SELF; PR not created.
+- Base: 6e3610a9b; Tools candidate: 608e85b249e6f61238ac96abbe7dc37428629b9e.
+- Governing issue #9912, development entry DL-#9912, parent #9703/#9701/#9700.
+- Pair: Tools #5133. No shared source is copied or modified in this consumer.
+
+The new tests/shared_contracts/test_impact_shaft_provider.py exercises the strict
+golf_club.distributed_shaft/1 public input format and canonical theme API through
+the existing provider-resolution harness. The synthetic fixture verifies coupled
+stiffness, integrated mass, canonical roundtrip/digest, exact source-byte checks
+and preserved unqualified status. Adverse cases reject version changes, missing
+calibration fields, numeric strings and attempted qualification promotion.
+Theme coverage checks resolved defaults, custom tokens and independent output.
+
+Before changing the old eab74a901 pin, all six tests failed: five missing shaft
+module cases and one missing resolved-theme method. After selecting the exact
+candidate, all six pass; the whole provider suite passes all 24 cases with five
+existing import-alias deprecation warnings. Run with the established Python 3.12
+environment, REQUIRE_REAL_TOOLS_REPO=1, TOOLS_REPO_PATH pointing to this worktree's
+vendor/ud-tools, and pytest tests/shared_contracts --tools-mode=vendored -n 0
+--no-cov. Numerical libraries use one native thread; Qt is offscreen.
+Pinned Ruff 0.15.17 check/format passes all 6,840 files, along with manual,
+document-catalog, size and title checks. Ten existing packaging/provenance tests
+pass. The local development-log validator file is absent despite synced policy;
+the central validator at ad9bcb885 reports 40 inherited findings versus 41 on
+base, with no new findings after normalizing shifted diagnostic line numbers.
+DL-#9830 and DL-#9825 now concisely record their verified merged results; detailed
+evidence remains in their existing turnover documents. Other owners' entries
+are preserved. Installed-wheel validation and final provider pin remain pending.
+
+## Remaining Work
+
+1. Incorporate the reviewed Tools repair revision and rerun the provider checks.
+2. Complete packaging, structure/manual and installed-consumer validation.
+3. Publish the actual paired PR, add its UD-PAIR reference to Tools #5133, and
+   finish protected checks before merging in provider-then-consumer order.
+4. Continue the full #9703 engine adapters and registered #9704 studies.
+
+This pin does not close physical calibration, flexible impact, acoustic radiation
+or blinded sweetness qualification. Tools #5133 still has protected CI failures;
+private Gasification checkout access is separately unresolved. Current dirty
+files belong to this branch; other worktrees and user-owned source are untouched.
+The presence read is complete with no path conflicts, but reports an unrelated
+rejected identity-change warning. Preserve the original owners' scope.
+
+## Preserved Incoming Handoff
+
+The following text predates this provider branch and retains its original context.
+
 # Scoped Ubuntu Dependency Installation Handoff
 
 ## Identity

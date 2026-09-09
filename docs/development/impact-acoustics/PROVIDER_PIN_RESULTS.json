@@ -1,0 +1,12 @@
+{
+  "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+  "suite": "tests/shared_contracts",
+  "passed": 24,
+  "failures": 0,
+  "skipped": 0,
+  "warnings": 5,
+  "source_mode": "vendored",
+  "installed_wheel_validation": "pending",
+  "physical_qualification": "unqualified",
+  "junit_sha256": "0b8c97e710e11222856075cb67f0fdec7964fa86aac72f9848058dc38232b7b5"
+}
