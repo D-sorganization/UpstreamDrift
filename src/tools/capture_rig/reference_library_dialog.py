@@ -52,12 +52,18 @@ class ReferenceTask(QThread):
 
 class ReferenceLibraryDialog(QDialog):
     def __init__(
-        self, library: ReferenceLibrary, parent: QWidget | None = None
+        self,
+        library: ReferenceLibrary,
+        parent: QWidget | None = None,
+        *,
+        capture_root: Path | None = None,
     ) -> None:
         super().__init__(parent)
         self.library = library
+        self.capture_root = capture_root
         self._rows: list[Asset] = []
         self._asset: Asset | None = None
+
         self._visible_archived = False
         self._worker: ReferenceTask | None = None
         self._callback: Callable[[object], None] | None = None
@@ -108,6 +114,7 @@ class ReferenceLibraryDialog(QDialog):
         actions = FlowLayout(spacing=6)
         for title, callback in (
             ("Save title and notes", self.save_notes),
+            ("Compare with capture…", self.compare_with_capture),
             ("Archive / restore", self.archive_selected),
             ("Open source", self.open_source),
         ):
@@ -115,6 +122,7 @@ class ReferenceLibraryDialog(QDialog):
             button.clicked.connect(callback)
             actions.addWidget(button)
         form.addLayout(actions)
+
         layout.addWidget(self.content)
         self.progress = QProgressBar()
         self.progress.setRange(0, 0)
@@ -248,6 +256,21 @@ class ReferenceLibraryDialog(QDialog):
             )
         except ValueError as exc:
             self.status.setText(str(exc))
+
+    def compare_with_capture(self) -> None:
+        if self._asset is None or not self._leave():
+            return
+        capture_path = self.capture_root
+        if capture_path is None:
+            folder = QFileDialog.getExistingDirectory(
+                self, "Select Capture Session Folder"
+            )
+            if not folder:
+                return
+            capture_path = Path(folder)
+        from .reference_comparison import show_reference_comparison
+
+        show_reference_comparison(capture_path, self.library, self)
 
     def archive_selected(self) -> None:
         if self._asset is not None and self._leave():
