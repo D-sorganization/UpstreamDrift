@@ -8,6 +8,7 @@ import {
 } from './websocketToken';
 import { logger } from '../utils/logger';
 import type { EngineListResponse, EngineStatusResponse } from './generated/types';
+import type { SegmentForceFrame } from './segmentLoads';
 
 /**
  * Result of a `setSpeed` call (issue #7166).
@@ -21,6 +22,7 @@ export interface SetSpeedResult {
 }
 
 export interface SimulationFrame {
+  segment_loads?: SegmentForceFrame;
   frame: number;
   time: number;
   state: Record<string, number[]>;

@@ -88,6 +88,47 @@ def test_constructor_rejects_none() -> None:
         MatplotlibRenderer(None)  # type: ignore[arg-type]
 
 
+@pytest.mark.parametrize("shape", [LineShape(length=1.0), CylinderShape()])
+@pytest.mark.unit
+def test_force_color_override_preserves_artist_and_restores_base(ax, shape):
+    from matplotlib.colors import to_rgba
+
+    renderer = MatplotlibRenderer(ax)
+    theme = ShapeTheme(color="#123456", opacity=0.4)
+    handle = renderer.add_shape(shape, _fitted(shape.shape_id), theme)
+    artist = ax.collections[0]
+    renderer.set_color(handle, "#ff0000")
+    renderer.update_frame(handle, 2)
+    ax.figure.canvas.draw()
+    colors = (
+        artist.get_colors()
+        if isinstance(artist, Line3DCollection)
+        else artist.get_facecolor()
+    )
+    assert np.allclose(colors[0], to_rgba("#ff0000", 0.4))
+    renderer.set_color(handle, None)
+    ax.figure.canvas.draw()
+    colors = (
+        artist.get_colors()
+        if isinstance(artist, Line3DCollection)
+        else artist.get_facecolor()
+    )
+    assert np.allclose(colors[0], to_rgba("#123456", 0.4))
+    assert ax.collections[0] is artist
+    assert len(ax.collections) == 1
+
+
+@pytest.mark.unit
+def test_invalid_color_does_not_mutate_artist(ax):
+    renderer = MatplotlibRenderer(ax)
+    shape = LineShape(length=1.0)
+    handle = renderer.add_shape(shape, _fitted(shape.shape_id), ShapeTheme())
+    with pytest.raises(ValueError):
+        renderer.set_color(handle, "not-a-color")
+    with pytest.raises(KeyError):
+        renderer.set_color("unknown", "#ffffff")
+
+
 # ---------------------------------------------------------------------------
 # add_shape: artist creation
 # ---------------------------------------------------------------------------

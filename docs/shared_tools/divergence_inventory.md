@@ -30,7 +30,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomechanics` | 0 | 0 | 0 | 26 | 0 | 0 |
-| `body_part_viz` | 0 | 0 | 0 | 27 | 0 | 0 |
+| `body_part_viz` | 0 | 0 | 0 | 34 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `canonical_core` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `capabilities.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -82,7 +82,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `notes` | 6 | 0 | 0 | 1 | 0 | 6 |
 | `optimization` | 0 | 0 | 0 | 28 | 0 | 0 |
 | `output_manager.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `pendulum_simulator` | 0 | 0 | 0 | 77 | 0 | 0 |
+| `pendulum_simulator` | 0 | 0 | 0 | 78 | 0 | 0 |
 | `perturbation` | 0 | 0 | 0 | 17 | 0 | 0 |
 | `physics` | 0 | 0 | 0 | 70 | 0 | 0 |
 | `physics_informed` | 0 | 0 | 0 | 7 | 0 | 0 |
@@ -126,7 +126,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 3 | 0 | 0 |
-| **Total** | **462** | **276** | **126** | **1199** | **520** | **738** |
+| **Total** | **462** | **276** | **126** | **1207** | **520** | **738** |
 
 ## Diverged Files by Package
 
