@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9913 · Capture Journey Feedback and Detachable Views
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9913; epic #9906
+- **Branch:** feat/9913-capture-journey
+- **PR:** #9917 (open)
+- **Paths:** capture_rig source/tests, guide and parity registry
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`71d8f5a1f`;445 tests, LoD/function/doc budgets and regenerated atlas pass)
+- **Summary:** Identity/history, linked help/provenance and retained detachable Qt views.
+- **Next step:** Qualify protected CI/review on #9917 and merge.
+
 ### DL-#9904 · Offline Club Source Catalog
 
 - **State:** in_progress
@@ -27,7 +40,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** club_data/catalog_sources.py, public_clubs.json, scripts/review_club_catalog.py and tests
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (SELF;69 tests, offline validator and scoped mypy pass)
-- **Summary:** Three attributed partial builds, deterministic source review and preserved player overrides.
+- **Summary:** Three sourced builds, review diffs and preserved player overrides.
 - **Next step:** Publish and qualify the catalog implementation PR.
 
 ### DL-#9903 · Attributed Club Catalog
@@ -37,10 +50,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #9903; epic #9902
 - **Branch:** feat/9903-player-club-catalog
 - **PR:** not created
-- **Paths:** src/shared/python/club_data/, tests/unit/test_club_catalog.py, docs/motion_capture/club_catalog.md
+- **Paths:** club_data/, test_club_catalog.py and club_catalog.md
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (SELF; 63 catalog/legacy tests and scoped mypy pass)
-- **Summary:** Optional sourced component properties, build/revision identity, explicit inference gates and JSON/CSV exchange; preserve unknowns and legacy defaults.
+- **Summary:** Attributed optional properties, explicit inference gates and lossless exchange.
 - **Next step:** Qualify the catalog contract and publish its implementation PR.
 
 ### DL-#9911 · Preview Discovery Failure Recovery
@@ -66,7 +79,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** src/tools/capture_rig/calibration_profiles.py, tests/tools/capture_rig/test_calibration_profiles.py, docs/development/capture_setup_execution_plan.md
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`b4abd67bb`)
-- **Summary:** Optical profile review UI and verified rig export; everyday observations remain required.
+- **Summary:** Versioned camera/lens profiles reject incompatible settings; full reference workflow remains open.
 - **Next step:** Qualify UI/consumers, then add reference sessions under #9898/#9900.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
@@ -137,7 +150,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-09 (`77e6bca88`; protected PR merged)
 - **Summary:** Saved source-coordinate shapes; draw/edit/style/frame visibility, undo/redo, library/editor access and cancellable PNG/video export.
 - **Evidence:** 49 registry/atlas and19 drawing/export tests;12-module mypy;3012-file LoD clean. Visual minimums:496px references,465px editor.
-- **Next step:** Continue advanced expert reference epic #9863.
+- **Next step:** Retain regression coverage.
 
 ### DL-#9860 · Capture Editing and Library
 
@@ -151,7 +164,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-09 (`4c89892d7`; protected PR merged)
 - **Summary:** Source-preserving trim/crop, capture notes/library, archive/storage/rename rollback, editable copies, cancellable export and timeline guards.
 - **Evidence:** 300 integrated, 12 library/UI and 5 editor tests; eight-module mypy. Visual QA: 850x650, minimum492px.
-- **Next step:** Continue advanced expert reference epic #9863.
+- **Next step:** Retain regression coverage.
 
 ### DL-#9851 · Capture Responsiveness and Recovery
 
@@ -165,7 +178,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-09-09 (`eaf8503ce`)
 - **Acceptance:** Repeated frames decode once with isolated pixels; failed starts restore lifecycle/retry; benchmark limits documented.
 - **Evidence:** 241 camera tests after cache; six focused tests after recovery; duplicate median 196.788 to 12.613 ms.
-- **Next step:** Maintain merged functionality as capture features evolve.
+- **Next step:** Retain regression coverage.
 
 ### DL-#9850 · Generated Capability Atlas
 
@@ -180,10 +193,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   `tests/scripts/test_capability_atlas.py`
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`9d6e6a872`)
-- **Summary:** Source-backed C4-style context, artifact/workflow network,
-  searchable feature/tile reference and standard Mermaid exports. Reads existing
-  registries and workflow; no separate feature inventory or GUI fork.
-- **Next step:** Maintain merged functionality as capture features evolve.
+- **Summary:** Generated C4-style context, workflow/artifact maps, searchable capabilities and Mermaid from existing registries.
+- **Next step:** Retain regression coverage.
 
 ### DL-#9830 · Independent Shooting Accuracy
 

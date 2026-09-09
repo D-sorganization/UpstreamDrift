@@ -225,10 +225,10 @@
 <rect x="35" y="225" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
 <text x="50" y="255" fill="#edf5f7" font-size="15">Set up Cameras and Plan</text>
 </a>
-<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Calibrate Each Camera Once source">
+<a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Calibrate the Camera and Lens Profile source">
 <rect x="545" y="400" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
-<text x="560" y="430" fill="#edf5f7" font-size="15">Calibrate Each Camera</text>
-<text x="560" y="451" fill="#edf5f7" font-size="15">Once</text>
+<text x="560" y="430" fill="#edf5f7" font-size="15">Calibrate the Camera and</text>
+<text x="560" y="451" fill="#edf5f7" font-size="15">Lens Profile</text>
 </a>
 <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py" aria-label="Record or Import the Swing Take source">
 <rect x="290" y="50" width="210" height="110" rx="14" fill="#152d40" stroke="#436274"/>
@@ -277,13 +277,13 @@
       <details><summary>Read the Workflow as a Table</summary><div class="table-scroll"><table><caption>Capability Connections</caption>
 <thead><tr><th scope="col"># / Connection</th><th scope="col">Artifact</th><th scope="col">Meaning and Limits</th></tr></thead><tbody>
 <tr><th scope="row">1. Set up Cameras and Plan → Record or Import the Swing Take</th><td>Resolved plan / imported views<br><small>workflow</small></td><td>Check plan before recording; importing existing files is supported <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py">Source</a></td></tr>
-<tr><th scope="row">2. Record or Import the Swing Take → Calibrate Each Camera Once</th><td>Separate chessboard take<br><small>file</small></td><td>Multi-view lens calibration; once per camera/mode, not each swing <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/intrinsics.py">Source</a></td></tr>
+<tr><th scope="row">2. Record or Import the Swing Take → Calibrate the Camera and Lens Profile</th><td>Separate chessboard take<br><small>file</small></td><td>Multi-view lens calibration; once per camera/mode, not each swing <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/intrinsics.py">Source</a></td></tr>
 <tr><th scope="row">3. Record or Import the Swing Take → Detect the Pose in Every View</th><td>Recorded swing videos<br><small>file</small></td><td>One observation set per estimator <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/rig/ingest.py">Source</a></td></tr>
 <tr><th scope="row">4. Record or Import the Swing Take → Annotate or Correct Points by Hand</th><td>Video frames<br><small>file</small></td><td>Sparse manual points; mark occlusion rather than invent coordinates <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/annotate/guide.py">Source</a></td></tr>
 <tr><th scope="row">5. Detect the Pose in Every View → Review Joint Reliability</th><td>2-D observations<br><small>file</small></td><td>Review confidence, coverage, jitter and provenance <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/workflow.py">Source</a></td></tr>
 <tr><th scope="row">6. Annotate or Correct Points by Hand → Review Joint Reliability</th><td>Converted observation set<br><small>file</small></td><td>Run annotations-to-observations; optional merge with detector output <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/annotate/to_observations.py">Source</a></td></tr>
 <tr><th scope="row">7. Detect the Pose in Every View → Analyse the Single View</th><td>Single-view observations<br><small>file</small></td><td>2-D normalized measurements, not metric depth <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/analytics2d.py">Source</a></td></tr>
-<tr><th scope="row">8. Calibrate Each Camera Once → Reconstruct in 3-D</th><td>intrinsics.json<br><small>file</small></td><td>Two or more views plus measured segments; reuse calibrated camera placement when appropriate <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/pipeline.py">Source</a></td></tr>
+<tr><th scope="row">8. Calibrate the Camera and Lens Profile → Reconstruct in 3-D</th><td>intrinsics.json<br><small>file</small></td><td>Two or more views plus measured segments; reuse calibrated camera placement when appropriate <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/pipeline.py">Source</a></td></tr>
 <tr><th scope="row">9. Review Joint Reliability → Reconstruct in 3-D</th><td>Reviewed multi-view observations<br><small>file</small></td><td>Reliability review does not prove geometric observability <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/pipeline.py">Source</a></td></tr>
 <tr><th scope="row">10. Reconstruct in 3-D → Fit the Articulated Golfer</th><td>joints_3d_m.npy<br><small>file</small></td><td>Fit residuals are not independent physical validation <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/fit.py">Source</a></td></tr>
 <tr><th scope="row">11. Fit the Articulated Golfer → Kinetics and Model Comparison</th><td>joint_angles.json<br><small>file</small></td><td>Model-dependent inverse dynamics; inspect replay drift and assumptions <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/src/motion_capture/reconstruct/model/dynamics.py">Source</a></td></tr>

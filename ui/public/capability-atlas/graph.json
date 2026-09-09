@@ -506,7 +506,7 @@
       "tiles": [
         "capture_rig"
       ],
-      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration and synchronized overlays #9865/#9866 remain planned.",
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls.",
       "id": "tools.capture_rig"
     },
     {
@@ -1641,8 +1641,8 @@
     },
     {
       "id": "step.intrinsics",
-      "title": "Calibrate Each Camera Once",
-      "description": "Lens focal length and distortion per camera; the only precise setup step.",
+      "title": "Calibrate the Camera and Lens Profile",
+      "description": "Estimate lens focal length and distortion for each camera's capture settings.",
       "evidence": "src/tools/capture_rig/workflow.py",
       "view": "workflow",
       "requirements": [
@@ -1653,7 +1653,8 @@
       "instructions": [
         "Record the board session (one take, all cameras, 30 s) or import the board files.",
         "Enter the board size and square length, run *Calibrate intrinsics*.",
-        "Keep intrinsics.json: it is the --intrinsics input of the first swing reconstruction."
+        "Keep intrinsics.json: it is the --intrinsics input of the first swing reconstruction.",
+        "Repeat calibration when optical zoom, focus, resolution or crop changes. Keep the matching camera profile with each capture; camera placement is evaluated separately."
       ],
       "actions": [
         "record",
@@ -2166,8 +2167,8 @@
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "fa719921e5d5047a2383f219ea80f06e358c93c6260358c8ccc2d4f3c7c5d165",
+    "src/config/feature_parity.json": "2f0cab648bc01ef4d6fde999eb4b18bcedf1ee4e9bb36b361ce8e9c097992524",
     "src/config/capability_connections.json": "66b60272e7bd8d9fbdb6a0825ea274588cc9f3cc90d8f267f510e1a4da150924",
-    "src/tools/capture_rig/workflow.py": "ef3c35db12049cb4ca5aa08c9a8ca5f376dd114efc61b36f72f5fd036f00e147"
+    "src/tools/capture_rig/workflow.py": "2e9e63c295d0fbc7343c48a5339cfc9b2224e1904e39d42a40cffe17a1758f9e"
   }
 }

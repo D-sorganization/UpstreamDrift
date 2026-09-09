@@ -20,12 +20,14 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 
 from PyQt6.QtCore import QByteArray, QSettings, QSize, Qt
+from PyQt6.QtGui import QCloseEvent
 from PyQt6.QtWidgets import (
     QComboBox,
     QDockWidget,
     QInputDialog,
     QLabel,
     QMainWindow,
+    QMenu,
     QPushButton,
     QSplitter,
     QWidget,
@@ -36,6 +38,7 @@ from src.shared.python.theme.layout_metrics import LayoutMetrics
 from src.shared.python.theme.responsive import wrap_in_scroll_area
 
 from .flow_layout import FlowLayout
+from .view_windows import CentralView, window_shortcuts
 
 LAST_LAYOUT = "__last__"  # auto-saved on shutdown, never listed
 EXTRAS = "extras"  # sub-group of per-layout strings the panes contribute
@@ -141,6 +144,43 @@ class PaneDock(QDockWidget):
         require(preferred_width >= 0, "width must not be negative", preferred_width)
         super().__init__(title, parent)
         self._preferred_width = preferred_width
+        self._fullscreen_restore: tuple[bool, QByteArray] | None = None
+        window_shortcuts(self, self.fullscreen, self.leave_fullscreen)
+
+    def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: N802
+        """A floating close returns the pane visibly to its dock."""
+        if self.isFloating() or self.isFullScreen():
+            self._fullscreen_restore = None
+            self.showNormal()
+            self.setFloating(False)
+            self.show()
+            self.raise_()
+            if event is not None:
+                event.ignore()
+            return
+        super().closeEvent(event)
+
+    def fullscreen(self) -> None:
+        """Keep this pane's existing contents/transport in a fullscreen window."""
+        if self.isFullScreen():
+            self.leave_fullscreen()
+            return
+        self._fullscreen_restore = (self.isFloating(), self.saveGeometry())
+        self.setFloating(True)
+        self.showFullScreen()
+        self.activateWindow()
+
+    def leave_fullscreen(self) -> None:
+        if self._fullscreen_restore is None:
+            return
+        was_floating, geometry = self._fullscreen_restore
+        self._fullscreen_restore = None
+        self.showNormal()
+        self.setFloating(was_floating)
+        if was_floating:
+            self.restoreGeometry(geometry)
+        self.show()
+        self.raise_()
 
     def sizeHint(self) -> QSize:  # noqa: N802 (Qt API)
         hint = super().sizeHint()
@@ -185,10 +225,11 @@ class PaneHost(QMainWindow):
             | QMainWindow.DockOption.AllowTabbedDocks
         )
         self.setCentralWidget(central)
+        self.central_view = CentralView(self)
         self._widths = dict(widths or {})
         require(set(self._widths) <= set(panes), "widths names an unknown pane")
         self._sized = False
-        self.docks: dict[str, QDockWidget] = {}
+        self.docks: dict[str, PaneDock] = {}
         for key, (title, widget, area) in panes.items():
             dock = PaneDock(title, self, preferred_width=self._widths.get(key, 0))
             dock.setObjectName(f"capture_rig.{key}")  # saveState needs names
@@ -227,6 +268,7 @@ class PaneHost(QMainWindow):
 
     def reset(self) -> None:
         """Back to the arrangement the tile was built with; drawers stay shut."""
+        self.redock_all()
         self.restore(self._default_state)
         self.show_all()
         self._apply_widths()
@@ -273,6 +315,53 @@ class PaneHost(QMainWindow):
 
     def set_floating(self, key: str, floating: bool) -> None:
         self.docks[key].setFloating(floating)
+
+    def pop_out(self, key: str) -> None:
+        """Detach a visible screen using the existing Qt pane or central window."""
+        if key == "live":
+            self.central_view.pop_out()
+        else:
+            dock = self.docks[key]
+            dock.setFloating(True)
+            dock.show()
+            dock.raise_()
+            dock.activateWindow()
+
+    def fullscreen(self, key: str) -> None:
+        if key == "live":
+            self.central_view.fullscreen()
+        else:
+            self.docks[key].fullscreen()
+
+    def redock_all(self) -> None:
+        """Return floating screens without discarding their contents."""
+        self.central_view.redock()
+        for dock in self.docks.values():
+            dock.leave_fullscreen()
+            if dock.isFloating():
+                dock.setFloating(False)
+                dock.show()
+
+    def view_menu(self, parent: QWidget) -> QMenu:
+        """Discoverable viewing actions; title-bar dragging still works."""
+        menu = QMenu(parent)
+        titles = {
+            "live": "Live Cameras",
+            **{k: d.windowTitle() for k, d in self.docks.items()},
+        }
+        for key, title in titles.items():
+            pane = QMenu(title, menu)
+            menu.addMenu(pane)
+            pane.addAction("Pop Out", lambda _checked=False, k=key: self.pop_out(k))
+            pane.addAction(
+                "Full Screen (F11 / Escape)",
+                lambda _checked=False, k=key: self.fullscreen(k),
+            )
+            if key != "live":
+                pane.addAction(self.docks[key].toggleViewAction())
+        menu.addSeparator()
+        menu.addAction("Redock All Screens", self.redock_all)
+        return menu
 
 
 @dataclass(frozen=True)
@@ -328,6 +417,12 @@ class LayoutBar(QWidget):
             lambda: self.delete(self.combo.currentText())
         )
         self.reset_button.clicked.connect(self._host.reset)
+        self.views_button = QPushButton("Views")
+        self.views_button.setMenu(host.view_menu(self.views_button))
+        self.views_button.setToolTip(
+            "Pop out screens onto another monitor or open fullscreen. "
+            "Close floating screens to redock; press Escape to leave fullscreen."
+        )
         row = FlowLayout(self, spacing=LayoutMetrics.SPACING_SM)
         row.add_widget(QLabel("Layout"))
         for w in (
@@ -336,6 +431,7 @@ class LayoutBar(QWidget):
             self.save_button,
             self.delete_button,
             self.reset_button,
+            self.views_button,
         ):
             row.add_widget(w)
         self.refresh()
