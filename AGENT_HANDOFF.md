@@ -1,3 +1,11 @@
+## Comparison State Qualification (#9879)
+
+Branch `fix/reference-comparison-qualification` preserves merged reference work
+and fixes state loss, sidecar validation and export lifetime through the existing
+SwingExportActions controller. Canonical evidence: `docs/development/HANDOFF.md`.
+Epic #9863 is reopened; #9881, #9882 and #9883 track remaining release acceptance.
+Earlier entries below describe historical implementations, not current completion.
+
 ## Capture Rig GUI: Layout Inversion, Responsive Adaptation & Evidence (#9847, #9848)
 
 Epic #9843 complete. Branch `docs/9848-capture-rig-evidence` documents responsive
