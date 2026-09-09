@@ -12,10 +12,14 @@
  * settings apply immediately: theme tokens are re-fetched and applied as
  * CSS variables, the font scale is set as a root CSS variable, and the
  * localStorage cache (cache only) is refreshed.
+ *
+ * Unsaved edits are tracked against a pristine snapshot (#8892). Leaving the
+ * page -- the back arrow, a tab close, a reload -- confirms first, and the
+ * Save button is disabled and relabelled according to that dirty state, so a
+ * route change or tab close can never discard edits silently.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Stethoscope } from 'lucide-react';
 import {
   DEFAULT_WEB_SETTINGS,
@@ -31,6 +35,7 @@ import {
 import { applyThemeToCSSVariables, fetchActiveTheme } from '@/api/themeClient';
 import { useToast } from '@/components/ui/Toast';
 import { useUIStore, useEngineStore, useSimulationStore } from '@/stores';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 
 type LoadState = 'loading' | 'loaded' | 'error';
 
@@ -85,6 +90,19 @@ export function SettingsPage() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [saving, setSaving] = useState(false);
 
+  // Dirty tracking (#8892). `pristine` is the last state that is known to
+  // match the server: whatever was loaded on mount, or whatever a successful
+  // save returned. Comparison is a deep value compare via JSON -- WebSettings
+  // is a small, flat, JSON-round-trippable object, so this is exact rather
+  // than a heuristic, and it correctly reports "clean" when the user edits a
+  // field and then puts it back.
+  const [pristine, setPristine] = useState<WebSettings>(settings);
+  const isDirty = useMemo(
+    () => JSON.stringify(settings) !== JSON.stringify(pristine),
+    [settings, pristine],
+  );
+  const { guardedNavigate } = useUnsavedChangesGuard(isDirty);
+
   // Load settings + theme list on mount (localStorage is only a cache; the
   // server file is authoritative).
   useEffect(() => {
@@ -93,6 +111,7 @@ export function SettingsPage() {
       .then((loaded) => {
         if (cancelled) return;
         setSettings(loaded);
+        setPristine(loaded);
         setLoadState('loaded');
       })
       .catch(() => {
@@ -136,6 +155,7 @@ export function SettingsPage() {
         timestep: saved.simulation_defaults.timestep,
       });
       setSettings(saved);
+      setPristine(saved);
       showSuccess('Settings saved');
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Failed to save settings');
@@ -152,13 +172,14 @@ export function SettingsPage() {
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center gap-4">
-        <Link
-          to="/"
+        <button
+          type="button"
+          onClick={() => guardedNavigate('/')}
           className="p-1.5 rounded hover:bg-gray-700 transition-colors"
           aria-label="Back to dashboard"
         >
           <ArrowLeft className="w-5 h-5" aria-hidden="true" />
-        </Link>
+        </button>
         <div>
           <h1 className="text-lg font-semibold text-gray-100">Settings</h1>
           <p className="text-xs text-gray-400 mt-0.5">
@@ -313,14 +334,21 @@ export function SettingsPage() {
         </SectionCard>
 
         {/* Save */}
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-3">
+          <p
+            className="text-xs text-gray-400"
+            data-testid="settings-dirty-state"
+            aria-live="polite"
+          >
+            {isDirty ? 'You have unsaved changes.' : 'All changes saved.'}
+          </p>
           <button
             type="button"
             onClick={handleSave}
-            disabled={saving || loadState === 'loading'}
+            disabled={saving || loadState === 'loading' || !isDirty}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm font-medium rounded transition-colors"
           >
-            {saving ? 'Saving…' : 'Save settings'}
+            {saving ? 'Saving…' : isDirty ? 'Save changes •' : 'Save settings'}
           </button>
         </div>
       </div>
