@@ -136,6 +136,26 @@ class _StubLineShape:
 # --- Construction --------------------------------------------------
 
 
+@pytest.mark.parametrize("shape", [_StubLineShape(), _StubMeshShape("mesh")])
+@pytest.mark.unit
+def test_color_override_survives_animation_and_restores(gl_widget, shape):
+    renderer = PyQtGLRenderer(gl_widget)
+    handle = renderer.add_shape(
+        shape,
+        _identity_fitted(shape.shape_id),
+        ShapeTheme(color="#123456", opacity=0.4),
+    )
+    item = gl_widget.items[0]
+    renderer.set_color(handle, "#ff0000")
+    renderer.update_frame(handle, 1)
+    color = item.color if isinstance(shape, _StubLineShape) else item.opts["color"]
+    assert np.allclose(color, (1, 0, 0, 0.4))
+    renderer.set_color(handle, None)
+    color = item.color if isinstance(shape, _StubLineShape) else item.opts["color"]
+    assert np.allclose(color, (0x12 / 255, 0x34 / 255, 0x56 / 255, 0.4))
+    assert gl_widget.items[0] is item
+
+
 def test_renderer_implements_shape_renderer_protocol(gl_widget):
     r = PyQtGLRenderer(gl_widget)
     assert isinstance(r, ShapeRenderer)
