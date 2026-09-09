@@ -20,7 +20,7 @@ python3 -m agent_context --root . context COMPONENT --max-chars 16000
 ```
 
 Replace QUERY and COMPONENT with the relevant concept and returned component ID.
-Reinstall after changing the provider pin. A runtime built from another Tools
+Reinstall after changing the provider pin with `python3 -m pip install --force-reinstall ./vendor/ud-tools/packages/agent-context`. A runtime built from another Tools
 revision is not verified merely because the submodule itself is clean.
 
 ## Changing an Integration
@@ -57,3 +57,8 @@ For fleet policy and adoption, see the
 [Fleet Guide](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agent-context.md).
 
 The [existing capability atlas](../architecture/CAPABILITY_ATLAS.md) remains the product-wide feature and workflow map. Regenerate it with `python3 -m scripts.generate_capability_atlas` after changing its source registries.
+
+CI also verifies that the provider commit is published on Tools main. A paired
+consumer PR may test a candidate pin, but remains blocked until that provider
+is merged and the final published revision is pinned. Local source verification
+checks checkout identity; it does not imply release approval.

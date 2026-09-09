@@ -1379,6 +1379,10 @@ jobs:
           python-version: "3.11"
       - name: Initialize the Pinned Context Provider
         run: git submodule update --init vendor/ud-tools
+      - name: Require Published Tools Revision
+        run: |
+          git -C vendor/ud-tools fetch --no-tags origin main:refs/remotes/origin/main
+          git -C vendor/ud-tools merge-base --is-ancestor HEAD refs/remotes/origin/main
       - name: Install Dependency-Free Context Package and Test Tools
         run: python3 -m pip install ./vendor/ud-tools/packages/agent-context pytest PyYAML pydantic
       - name: Check Source, Contracts, Pins and Generated Views

@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/issue-9915-agent-context
 - **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `AGENTS.md`
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09; 41 existing boundary tests and three context/gate tests pass; explicit boundary reviews are recorded. Current-main capture merge:15 atlas/workflow tests pass and both affected reviews renewed. Initial navigation evaluation:12/12 curated task expectations pass (max 13238 characters; initial median 2193 ms). Required CI wiring not yet qualified.
+- **Last verified:** 2026-09-09; five context/pin/CI tests and 12/12 navigation tasks pass against provider candidate82151279f. Boundary tests pass; final provider publication and current-head CI remain pending.
 - **Summary:** Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Parent epic Repository_Management#1629 remains active; no subscription infrastructure is required.
-- **Next step:** Qualify the shared provider changes with the normal local checks before publishing its protected PR.
+- **Next step:** Publish the paired consumer PR with the candidate pin; required provider-publication gate prevents premature merge. Repin the final merged provider and verify all required checks.
 
 ### DL-#9913 · Capture Journey Feedback and Detachable Views
 

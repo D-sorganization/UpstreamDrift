@@ -22,3 +22,7 @@ def test_existing_atlas_and_model_parameters_remain_authorities() -> None:
     )
     matches = ContextService(ROOT).search("model parameters")
     assert matches["matches"][0]["id"] == "model-parameters"
+
+
+def test_tools_provider_pin_cannot_be_omitted() -> None:
+    assert load_catalog(ROOT).dependencies == ("vendor/ud-tools",)
