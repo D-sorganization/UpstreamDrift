@@ -41,35 +41,39 @@ flowchart LR
   n1["Session and Export Files"]
   n2["Capture Library"]
   n3["Swing Selection"]
-  n4["Set up Cameras and Plan"]
-  n5["Calibrate Each Camera Once"]
-  n6["Record or Import the Swing Take"]
-  n7["Detect the Pose in Every View"]
-  n8["Annotate or Correct Points by Hand"]
-  n9["Review Joint Reliability"]
-  n10["Reconstruct in 3-D"]
-  n11["Analyse the Single View"]
-  n12["Fit the Articulated Golfer"]
-  n13["Kinetics and Model Comparison"]
-  n14["Export to the Motion Pipeline"]
-  n4 -->|"Resolved plan / imported views"| n6
-  n6 -.->|"Separate chessboard take"| n5
-  n6 -.->|"Recorded swing videos"| n7
-  n6 -.->|"Video frames"| n8
-  n7 -.->|"2-D observations"| n9
-  n8 -.->|"Converted observation set"| n9
-  n7 -.->|"Single-view observations"| n11
-  n5 -.->|"intrinsics.json"| n10
-  n9 -.->|"Reviewed multi-view observations"| n10
-  n10 -.->|"joints_3d_m.npy"| n12
-  n12 -.->|"joint_angles.json"| n13
-  n10 -.->|"Reconstruction artifacts"| n14
-  n14 -.->|"TRC / canonical JSON"| n0
-  n11 -.->|"Annotated clips and metrics"| n1
-  n2 -->|"Existing session / imported videos"| n6
-  n6 -.->|"Original camera recordings"| n3
-  n3 -.->|"swing_edits.json"| n7
+  n4["Coaching References"]
+  n5["Set up Cameras and Plan"]
+  n6["Calibrate Each Camera Once"]
+  n7["Record or Import the Swing Take"]
+  n8["Detect the Pose in Every View"]
+  n9["Annotate or Correct Points by Hand"]
+  n10["Review Joint Reliability"]
+  n11["Reconstruct in 3-D"]
+  n12["Analyse the Single View"]
+  n13["Fit the Articulated Golfer"]
+  n14["Kinetics and Model Comparison"]
+  n15["Export to the Motion Pipeline"]
+  n5 -->|"Resolved plan / imported views"| n7
+  n7 -.->|"Separate chessboard take"| n6
+  n7 -.->|"Recorded swing videos"| n8
+  n7 -.->|"Video frames"| n9
+  n8 -.->|"2-D observations"| n10
+  n9 -.->|"Converted observation set"| n10
+  n8 -.->|"Single-view observations"| n12
+  n6 -.->|"intrinsics.json"| n11
+  n10 -.->|"Reviewed multi-view observations"| n11
+  n11 -.->|"joints_3d_m.npy"| n13
+  n13 -.->|"joint_angles.json"| n14
+  n11 -.->|"Reconstruction artifacts"| n15
+  n15 -.->|"TRC / canonical JSON"| n0
+  n12 -.->|"Annotated clips and metrics"| n1
+  n2 -->|"Existing session / imported videos"| n7
+  n7 -.->|"Original camera recordings"| n3
+  n3 -.->|"swing_edits.json"| n8
   n3 -.->|"Swing video + provenance"| n1
+  n2 -->|"Original camera view + saved drawing layer"| n4
+  n3 -->|"Original camera view + saved drawing layer"| n4
+  n4 -.->|"Annotated PNG / swing video + portable drawing sidecar"| n1
 ```
 
 Dashed connections exchange files explicitly. Single-view analysis is
@@ -110,7 +114,7 @@ Dashed connections exchange files explicitly. Single-view analysis is
 | Shot Tracer / ball-flight visualization | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/_shot_tracer_gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/ball_flight.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/BallFlight.tsx) |
 | Swing Objective Lab — mechanism-vs-outcome downswing comparison | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/adapters/swing_objective_lab_embed.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/swing_objectives.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/SwingObjectiveLab.tsx) |
 | BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/bunker_shot_gui/gui.py) |
-| Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/__main__.py) |
+| Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management; saved coaching lines/arrows/circles/ellipses/rectangles with selection, resize, undo/redo, frame visibility and annotated still/video exports | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/capture_rig/__main__.py) |
 | Character Builder (humanoid URDF generation) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/model_generation/cli/main.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/character_builder.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/CharacterBuilder.tsx) |
 | Data Explorer (import/filter/visualize datasets) | gap | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/data_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DataExplorer.tsx) |
 | Swing dataset generation and import | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/dataset.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DatasetGenerator.tsx) |

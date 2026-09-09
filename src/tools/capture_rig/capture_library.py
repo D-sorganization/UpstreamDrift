@@ -7,6 +7,8 @@ Storage scans run in the library UI's worker, never on its event loop.
 
 from __future__ import annotations
 
+from src.motion_capture.coaching.storage import copy_layers
+
 import os
 import builtins
 import re
@@ -233,6 +235,7 @@ class CaptureLibrary:
             for filename in (EDITS_FILE, "intrinsics.json"):
                 if (root / filename).is_file():
                     shutil.copyfile(root / filename, destination / filename)
+            copy_layers(root, destination, tuple(entry.view for entry in entries))
             self.register(destination)
         except (ValueError, OSError, sqlite3.Error):
             # Only this operation's freshly-created child is removed on failure.

@@ -24,6 +24,7 @@ import numpy as np
 import numpy.typing as npt
 
 from src.motion_capture.rig.edits import CropRect
+from src.motion_capture.coaching import DrawingLayer, render_layer
 from src.shared.python.core.contracts import require
 
 from .overlay import PoseTrack, draw_pose
@@ -47,6 +48,7 @@ class ClipRendering:
     crop: CropRect | None = None
     clock: bool = True
     strict: bool = False
+    drawings: DrawingLayer | None = None
     cancelled: Callable[[], bool] = lambda: False
     progress: Callable[[int, int], None] = lambda done, total: None
 
@@ -174,6 +176,8 @@ def _rendered(
             track.edges if track else (),
             min_confidence=min_confidence,
         )
+    if rendering.drawings is not None:
+        frame = render_layer(frame, rendering.drawings, index)
     frame = np.ascontiguousarray(rendering.image(frame))
     fps = reader.fps or 30.0
     return (
