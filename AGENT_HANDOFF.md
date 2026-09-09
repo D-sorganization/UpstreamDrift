@@ -1,12 +1,11 @@
 # Agent Handoff: Proximal–Distal Research Program
 
-## Expert Reference Imports (#9864)
+## Calibrated Scene Registration & Event Synchronization (#9865)
 
-Active isolated worktree `UpstreamDrift-reference-assets`, branch
-`feat/9864-reference-assets`, implements versioned motion/video reference imports,
-explicit source mapping, a native reference library and shared C3D residual fidelity.
-See canonical `docs/development/HANDOFF.md` and `DL-#9864`. Camera registration
-#9865 and projection/synchronization #9866 remain open goal work.
+Branch `feat/9865-scene-registration` implements calibrated reference scene registration,
+event-anchor and offset synchronization, bounded time warping, gap masking, and distortion-aware
+camera projection for ReferenceMotion and 2D expert videos. See canonical `docs/development/HANDOFF.md`
+and `DL-#9865`. Synchronized projection controls and comparison UI (#9866) remain open goal work.
 
 ## Coaching Reference Work in Progress (#9862)
 
