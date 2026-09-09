@@ -69,3 +69,6 @@ Use ordinary topic PRs, hooks and protections. Preserve unrelated agent work.
 
 Parent cab3505a4 is merged with #9884 and concurrent main OCP changes retained.
 Only the canonical handoff conflicted; this rendering handoff remains current.
+
+Normal pre-push mypy needs explicit TypeAlias declarations under its import policy;
+Image and Camera aliases now declare their role. No runtime behavior changed.

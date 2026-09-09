@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from types import TracebackType
+from typing import TypeAlias
 
 import cv2
 import numpy as np
@@ -23,8 +24,8 @@ from .clips import ClipRendering, _rendered
 from .overlay import PoseTrack
 from .player import VideoReader
 
-Image = npt.NDArray[np.uint8]
-Camera = PinholeCamera | CameraCalibration | None
+Image: TypeAlias = npt.NDArray[np.uint8]
+Camera: TypeAlias = PinholeCamera | CameraCalibration | None
 
 
 @dataclass(frozen=True)
