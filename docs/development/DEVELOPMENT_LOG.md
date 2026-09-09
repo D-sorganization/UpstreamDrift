@@ -35,9 +35,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
   registries and workflow; no separate feature inventory or GUI fork.
 - **Next step:** Verify browser controls and freshness, publish protected PR.
 
-### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
+### DL-#9830 · Independent Shooting Accuracy
 
 - **State:** in_review
+- **Owner:** codex
+- **Issue:** #9830
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9841
+- **Branch:** fix/9830-independent-shooting-convergence
+- **Paths:** optimization reference/defect contracts and docs/development/shooting_convergence_9830_turnover.md
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-09 (75 reference/live tests pass in 101.48 s; all three formerly skipped native comparisons pass in 2.78 s after Pinocchio installation; 13 degradation/registry tests pass; root lint/format and two-module mypy pass)
+- **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
+- **Next step:** Publish c2a8d5b6e through normal hooks and follow #9841 protected CI. It integrates main 438bd3282 without changing validated optimization paths; regenerated inventory passes ten tests, root pinned Ruff and SPEC pass. The combined Bioptim 3.6.7 OCP, real factory/isolation and dependency suite passes 21 tests in 162.06 s. The 3.8 RK4 solve remains unsuccessful even at a 1,000-iteration budget; factory compatibility does not qualify that solver combination. Physical/acoustic validation remains open.
+
+### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
+
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9825
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9826
@@ -46,7 +59,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-08 (128 strict native contracts; native/rolling/publication CI passes at e93ef5224; stale PDF regression reproduced and repaired, all 11 publication tests pass with five inherited warnings; changed-file Ruff/format pass)
 - **Summary:** Actual reconciliation now preserves reviewed evidence/order and refuses changed science; six real-path failures become 11 passes. Current pinned engines regenerate deterministic provenance with unchanged numerical results; two expected-failure exemptions are removed. All 328 outcomes remain unchanged; the generated census/PDF is refreshed and reviewed.
-- **Next step:** Published b557682c8 preserves the concurrent PDF correction; all normal hooks and 11 reconciled publication tests pass. Follow current-head CI and update from advanced main before protected merge. #9830 reproduces the separate shooting defect and finds an under-resolved reference plus substantial velocity mismatch; investigate without weakening thresholds. Physical and archival qualifications remain separate.
+- **Next step:** PR #9826 merged as a410ae705 from fced8c0d6 at 2026-09-09T01:12:29Z. Merge is verified; queued auxiliary jobs are not claimed passed. Continue numerical follow-up #9830 and the separate physical/acoustic qualifications; preserve historical evidence.
 
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 

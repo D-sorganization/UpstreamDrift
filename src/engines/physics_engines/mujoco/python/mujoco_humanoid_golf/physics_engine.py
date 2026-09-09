@@ -18,6 +18,7 @@ from typing import Any, cast  # noqa: F401
 import mujoco
 import numpy as np
 
+from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.core.contracts import (
     PreconditionError,
     check_finite,
@@ -364,6 +365,16 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         if self.data is None:
             return 0.0
         return float(self.data.time)
+
+    def get_segment_axial_loads(self) -> AxialLoadFrame | None:
+        """Return qualified current rod reactions, or None for unavailable models."""
+        from src.shared.python.body_part_viz.mujoco_axial_loads import (
+            MujocoAxialLoadSource,
+        )
+
+        if self.model is None or self.data is None:
+            return None
+        return MujocoAxialLoadSource(self.model).sample(self.data)
 
     def get_joint_names(self) -> list[str]:
         """Get list of joint names."""
