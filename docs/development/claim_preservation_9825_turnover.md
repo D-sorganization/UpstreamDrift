@@ -79,6 +79,15 @@ Track the discretization/independent-rollout issue separately under #9762.
 The unit failure is the first scoped remediation cycle; protected merge remains
 blocked until actual current-head acceptance is verified.
 
+The scoped correction committed as f1afbff0b passes all normal hooks, but its
+push is rejected by a concurrent update to 30aecd113. That contribution pins
+the same reviewed PDF hash/bytes and adds a handoff timestamp. Merge it without
+rewriting history: retain its timestamp and both identical expectations through
+the shared constants. No PDF bytes or scientific evidence change. The separate
+rollout follow-up is now #9830, leased to codex/session
+impact-acoustics-01a07d8a-shooting9830 until 2026-09-09T02:13:33Z, with isolated
+worktree UpstreamDrift-shooting-convergence based on protected main 9f54c5e0b.
+
 ## Related Program State
 
 Tools finite-support response is published at 12bcf3d83 (665 Linux tests). Separate-G/C spectra 97d46055c pass 692 Linux golf/API tests and 49 focused controls; normal hooks pass and remote SHA is verified. Turnover bbc27dbe32181dd3d147841784a108fdc1aadeea is also published. AffineDrift #4298 merged normally as d7e51655d47d37a092b1bcd29d25972ce373b244 after required CI passed, with no unresolved review threads. Its auxiliary benchmark workflow performed no measurements despite green workflow status; no performance result is claimed.

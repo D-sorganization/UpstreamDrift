@@ -2,6 +2,7 @@
 
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
 
 ## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
