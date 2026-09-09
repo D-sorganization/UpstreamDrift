@@ -42,7 +42,6 @@ __all__ = [
     "SeamResolutionError",
     "extend_shared_python_path",
     "install",
-    "installed_tools_distribution",
     "vendor_search_paths",
 ]
 
@@ -88,23 +87,6 @@ def vendor_search_paths(vendor_root: Path = _VENDOR_ROOT) -> tuple[str, ...]:
         str(src),
         str(src / "python" / "src"),
     )
-
-
-def installed_tools_distribution() -> str | None:
-    """Return the installed ``ud-tools`` version, or None when not installed.
-
-    An installed distribution is preferred over ``vendor/ud-tools``: its
-    ``shared`` package is a regular package on ``sys.path`` already, so
-    :func:`_ensure_canonical_on_path` leaves ``sys.path`` alone.
-    """
-    try:
-        from importlib import metadata
-
-        return metadata.version("ud-tools")
-    except metadata.PackageNotFoundError:
-        return None
-    except Exception:  # noqa: BLE001 - metadata backends may raise anything; treat as absent
-        return None
 
 
 def _shared_is_regular_package() -> bool:
