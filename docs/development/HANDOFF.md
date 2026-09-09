@@ -81,3 +81,5 @@ architecture passes with --base-ref origin/main; use this explicit comparison.
 ## Timing Integration
 
 Merged parent #9885 at de430c500, preserving concurrent #9886 compatibility and tests. This export implementation retains its shared renderer and stricter staged publication. Canonical timing evidence is in #9885; rendering tests and preview parity remain required before merge.
+
+The stacked SPEC merge driver restored the old #9879 row. Removed it again, retaining PR #9884; explicit duplicate validation passes. No rendering change.
