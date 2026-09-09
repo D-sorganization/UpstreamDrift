@@ -111,37 +111,12 @@ def _common_mode_station_couple(count: int, signed_separation_m: float) -> float
     return float(distributed_contact_couple(offsets, axis, forces)[2])
 
 
-def _cross_tier_controls() -> dict[str, dict[str, float | str]]:
-    """Collect existing achieved-state geometry controls without relabeling them."""
-
+def _load_planar_and_torso_controls() -> dict[str, dict[str, float | str]]:
     moving = json.loads(
         (DATA / "moving_base_flexible_study.json").read_text(encoding="utf-8")
     )
     rotating = json.loads(
         (DATA / "rotating_base_torso_velocity_study.json").read_text(encoding="utf-8")
-    )
-    spatial = json.loads(
-        (DATA / "spatial_forward_contact_study.json").read_text(encoding="utf-8")
-    )
-    ladder = json.loads(
-        (DATA / "mechanism_ladder_study.json").read_text(encoding="utf-8")
-    )
-    prescribed = json.loads(
-        (DATA / "subject_scaled_spatial_geometry.json").read_text(encoding="utf-8")
-    )
-    closed = json.loads(
-        (DATA / "subject_scaled_closed_contact.json").read_text(encoding="utf-8")
-    )
-    grip = json.loads(
-        (DATA / "articulated_distributed_grip_atlas.json").read_text(encoding="utf-8")
-    )
-    shaft = json.loads(
-        (DATA / "articulated_shaft_atlas.json").read_text(encoding="utf-8")
-    )
-    sensor = json.loads(
-        (DATA / "bilateral_wrench_sensor_qualification.json").read_text(
-            encoding="utf-8"
-        )
     )
     return {
         "moving_base_planar": {
@@ -165,6 +140,17 @@ def _cross_tier_controls() -> dict[str, dict[str, float | str]]:
             ],
             "provenance": "rotating_base_torso_velocity_study.json",
         },
+    }
+
+
+def _load_spatial_and_ladder_controls() -> dict[str, dict[str, float | str]]:
+    spatial = json.loads(
+        (DATA / "spatial_forward_contact_study.json").read_text(encoding="utf-8")
+    )
+    ladder = json.loads(
+        (DATA / "mechanism_ladder_study.json").read_text(encoding="utf-8")
+    )
+    return {
         "spatial_two_engine": {
             "minimum_killswitch_couple_nm": spatial["mechanism_tests"][
                 "same_state_killswitch_minimum_couple_nm"
@@ -186,6 +172,28 @@ def _cross_tier_controls() -> dict[str, dict[str, float | str]]:
             ],
             "provenance": "mechanism_ladder_study.json",
         },
+    }
+
+
+def _load_articulated_and_sensor_controls() -> dict[str, dict[str, float | str]]:
+    prescribed = json.loads(
+        (DATA / "subject_scaled_spatial_geometry.json").read_text(encoding="utf-8")
+    )
+    closed = json.loads(
+        (DATA / "subject_scaled_closed_contact.json").read_text(encoding="utf-8")
+    )
+    grip = json.loads(
+        (DATA / "articulated_distributed_grip_atlas.json").read_text(encoding="utf-8")
+    )
+    shaft = json.loads(
+        (DATA / "articulated_shaft_atlas.json").read_text(encoding="utf-8")
+    )
+    sensor = json.loads(
+        (DATA / "bilateral_wrench_sensor_qualification.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    return {
         "subject_scaled_articulated_contact": {
             "couple_per_span_invariance_residual": prescribed["geometry_tests"][
                 "couple_per_span_invariance_residual"
@@ -238,9 +246,18 @@ def _cross_tier_controls() -> dict[str, dict[str, float | str]]:
     }
 
 
-def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
-    """Return the preregistered atlas and its machine-readable arrays."""
+def _cross_tier_controls() -> dict[str, dict[str, float | str]]:
+    """Collect existing achieved-state geometry controls without relabeling them."""
+    controls: dict[str, dict[str, float | str]] = {}
+    controls.update(_load_planar_and_torso_controls())
+    controls.update(_load_spatial_and_ladder_controls())
+    controls.update(_load_articulated_and_sensor_controls())
+    return controls
 
+
+def _compute_simulation_arrays() -> tuple[
+    dict[str, np.ndarray], list[float], list[float], float
+]:
     projection_angle = np.linspace(-np.pi, np.pi, 361)
     normalized_power = cast(
         np.ndarray, force_velocity_projection(1.0, 1.0, projection_angle)
@@ -299,7 +316,29 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         float(np.max(np.abs(couple + couple[::-1]))),
         float(np.max(np.abs(distributed_couple + distributed_couple[:, ::-1]))),
     ]
-    record: dict[str, Any] = {
+    arrays = {
+        "projection_angle_rad": projection_angle,
+        "normalized_force_power_w": normalized_power,
+        "relative_link_angle_rad": relative_angle,
+        "distal_tangential_gate": tangential,
+        "distal_centripetal_gate": centripetal,
+        "signed_grip_separation_m": separation,
+        "differential_force_angle_rad": force_angle,
+        "couple_normalized_nm": couple,
+        "station_count_per_hand": station_counts,
+        "station_width_m": np.array([STATION_WIDTH_M]),
+        "point_pair_couple_normalized_nm": point_pair_couple,
+        "distributed_couple_normalized_nm": distributed_couple,
+    }
+    return arrays, null_residuals, reversal_residuals, station_count_deviation
+
+
+def _build_study_record(
+    null_residuals: list[float],
+    reversal_residuals: list[float],
+    station_count_deviation: float,
+) -> dict[str, Any]:
+    return {
         "schema_version": SCHEMA_VERSION,
         "study_id": "reference-explicit-momentum-transfer-geometry-atlas-v1",
         "registered_before_preferred_result": True,
@@ -364,20 +403,16 @@ def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
         "source_sha256": _source_hashes(),
         "array_artifact": NPZ_PATH.name,
     }
-    arrays = {
-        "projection_angle_rad": projection_angle,
-        "normalized_force_power_w": normalized_power,
-        "relative_link_angle_rad": relative_angle,
-        "distal_tangential_gate": tangential,
-        "distal_centripetal_gate": centripetal,
-        "signed_grip_separation_m": separation,
-        "differential_force_angle_rad": force_angle,
-        "couple_normalized_nm": couple,
-        "station_count_per_hand": station_counts,
-        "station_width_m": np.array([STATION_WIDTH_M]),
-        "point_pair_couple_normalized_nm": point_pair_couple,
-        "distributed_couple_normalized_nm": distributed_couple,
-    }
+
+
+def build_study() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    """Return the preregistered atlas and its machine-readable arrays."""
+    arrays, null_residuals, reversal_residuals, station_count_deviation = (
+        _compute_simulation_arrays()
+    )
+    record = _build_study_record(
+        null_residuals, reversal_residuals, station_count_deviation
+    )
     return record, arrays
 
 
