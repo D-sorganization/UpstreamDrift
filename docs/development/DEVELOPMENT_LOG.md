@@ -17,6 +17,20 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9894 · Scoped Ubuntu CI Dependency Installation
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #9894
+- **Branch:** fix/9894-ubuntu-ci-sources
+- **PR:** pending
+- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/install_ubuntu_dependencies.sh, tests/scripts/test_ubuntu_dependency_install.py
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`SELF`; six real-Bash regressions pass)
+- **Summary:** Consolidate four installers using signed Ubuntu sources and job-local indexes without modifying shared runner source configuration.
+- **Evidence:** Six regressions first failed, then passed; Ruff and focused mypy pass. Persistent failures retain nonzero exit status and temporary-state cleanup.
+- **Next step:** Publish and qualify the actual Linux transaction through protected CI.
+
 ### DL-#9881 Â· Reference Timing and Camera Evidence
 
 - **State:** in_review
