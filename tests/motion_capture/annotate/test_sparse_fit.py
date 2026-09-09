@@ -58,13 +58,26 @@ def test_every_fifth_frame_fits_within_twice_the_dense_error(tmp_path: Path) -> 
         assert manual["provenance"]["estimator"] == "manual"
         assert manual["frames_with_pose"] == len(range(0, 30, stride))
         variant = f"sparse_k{stride}"
-        reconstruct_session(
+        root = variant_dir(session, variant)
+        stale_summary = root / "reconstruct" / "swing_summary.json"
+        if stride == 5:
+            stale_summary.parent.mkdir(parents=True, exist_ok=True)
+            stale_summary.write_text('{"peak_hand_speed_mps": 999}', encoding="utf-8")
+        summary = reconstruct_session(
             session,
             start_cameras=start_cameras_from(cameras),
             scale_anchor=("neck", 0.5),
             match=MatchSpec(observation_set=out_set, variant=variant),
         )
-        root = variant_dir(session, variant)
+        if stride == 5:
+            assert summary.swing_summary_file is None
+            assert (
+                "continuous observed interval"
+                in summary.swing_summary_unavailable_reason
+            )
+            assert not stale_summary.exists()
+        else:
+            assert summary.swing_summary_file is not None
         fit, _ = fit_session_model(
             root,
             GOLFER_SPEC,
