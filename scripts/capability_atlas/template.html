@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Capability Atlas — UpstreamDrift</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,sans-serif;color:#e9f1f6;background:#0b1622;line-height:1.55}
+    *{box-sizing:border-box}body{margin:0}a{color:#87dadd;text-underline-offset:4px}
+    a:hover{color:#fff}button,input,select{font:inherit}button,select{cursor:pointer}
+    :focus-visible{outline:3px solid #f4cc82;outline-offset:4px}
+    .skip{position:absolute;top:-80px;left:20px;background:#173149;padding:12px;z-index:10}.skip:focus{top:12px}
+    .shell{max-width:1480px;margin:auto;padding:24px 38px 60px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:12px 0 24px;border-bottom:1px solid #294152}
+    .brand{font-size:18px;font-weight:700;letter-spacing:.04em;color:#eef8fc;text-decoration:none}
+    nav{display:flex;gap:24px;flex-wrap:wrap;font-size:14px}nav a{text-decoration:none}
+    .eyebrow{color:#8ad2d2;text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:700}
+    .hero{display:grid;grid-template-columns:1.6fr 1fr;gap:50px;align-items:center;padding:46px 0 36px}
+    h1{font-size:clamp(34px,4vw,54px);line-height:1.1;letter-spacing:-.045em;margin:14px 0 20px;max-width:800px}
+    .lead{color:#b1c5d4;max-width:720px;font-size:18px}.stats{display:flex;gap:36px;border-left:1px solid #375262;padding-left:30px}
+    .stats strong{display:block;font-size:38px;line-height:1.25;font-weight:600}.stats span{color:#9cb3c4;font-size:13px}
+    h2{font-size:25px;line-height:1.25;letter-spacing:-.02em;margin:0 0 12px}h3{font-size:17px;line-height:1.45;margin:14px 0 10px;overflow-wrap:anywhere}
+    section{scroll-margin-top:20px;margin:0 0 44px}.section-head{display:flex;justify-content:space-between;gap:24px;align-items:start;margin-bottom:20px}
+    .section-head p{margin:0;color:#aec3d1;max-width:800px}.section-head a{white-space:nowrap;font-size:13px}
+    .diagram{background:linear-gradient(135deg,#102233,#0b1b29);border:1px solid #2b465a;border-radius:18px;padding:12px;overflow:auto}
+    .diagram svg{display:block;width:100%;min-width:900px;font-family:system-ui,sans-serif}.diagram.workflow svg{min-width:1500px}
+    .legend{display:flex;gap:24px;flex-wrap:wrap;margin:12px 0;color:#9fb7c7;font-size:13px}.legend b{color:#e2edf3}
+    details{border:1px solid #2b465a;border-radius:12px;margin-top:16px;padding:14px 18px}summary{cursor:pointer;font-weight:600}
+    .table-scroll{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px;text-align:left;margin:20px 0 4px}
+    caption{text-align:left;font-weight:700;margin-bottom:14px}th,td{padding:12px;border-bottom:1px solid #2b465a;vertical-align:top}th{font-weight:600}td{color:#b7cbd8}td small{color:#8cd3d6}
+    .note{padding:15px 20px;background:#172c3c;border-left:3px solid #d6b36a;border-radius:0 10px 10px 0;color:#cbd8e1;font-size:14px}
+    .toolbar{display:flex;gap:16px;flex-wrap:wrap;align-items:end;margin:22px 0}.field{display:flex;flex-direction:column;gap:7px;flex:1;min-width:220px;font-size:13px;color:#aec3d1}
+    input,select{background:#142838;border:1px solid #476071;border-radius:9px;color:#edf5fa;padding:12px 14px;width:100%}.field:last-of-type{max-width:270px}
+    .count{color:#a4bdce;font-size:13px;min-width:140px}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+    article{background:#102334;border:1px solid #294354;border-radius:14px;padding:22px}article p{color:#adbfce;font-size:14px}article small{color:#8da9bc;overflow-wrap:anywhere}
+    .badge{display:inline-block;border:1px solid #496579;border-radius:5px;padding:2px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#c6d8e5}
+    .parity{border-color:#40716b;color:#9ae0c7}.gap{border-color:#9b6950;color:#ffd2b6}.exempt{border-color:#7d70a4;color:#d6c9f1}
+    [hidden]{display:none!important}footer{border-top:1px solid #294152;padding-top:24px;font-size:13px;color:#93adbf}
+    @media(max-width:760px){.shell{padding:18px}.hero{grid-template-columns:1fr;gap:20px;padding:32px 0}.stats{border:0;padding:0}.section-head{display:block}.section-head a{display:inline-block;margin-top:12px}header{align-items:start;flex-direction:column}nav{gap:16px}.lead{font-size:16px}}
+    @media print{body{background:white;color:#111}.shell{padding:0}.toolbar,nav,.skip{display:none}.diagram{background:#102233;break-inside:avoid}.diagram svg{min-width:0!important}article{break-inside:avoid}.cards{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to Capability Map</a>
+<div class="shell">
+  <header>
+    <a class="brand" href="/">UPSTREAMDRIFT <span style="color:#89aabd;font-weight:400">/ Atlas</span></a>
+    <nav aria-label="Atlas Sections"><a href="#system">System</a><a href="#workflow">Capture Workflow</a><a href="#catalog">Capabilities</a><a href="#tiles">Launcher Tiles</a></nav>
+  </header>
+  <main id="main">
+    <div class="hero">
+      <div><p class="eyebrow">Explore the Platform</p><h1>From a recorded swing<br>to a model you can inspect.</h1><p class="lead">See where to start, what each feature produces, and how the pieces connect. Follow the capture workflow or explore the complete feature catalog.</p></div>
+      <div class="stats" aria-label="Catalog Size"><div><strong>{{TILE_COUNT}}</strong><span>Launcher Tiles</span></div><div><strong>{{FEATURE_COUNT}}</strong><span>Feature Contracts</span></div></div>
+    </div>
+    <section id="system" aria-labelledby="system-heading">
+      <div class="section-head"><div><p class="eyebrow">01 / Platform Structure</p><h2 id="system-heading">One Platform, Connected Workspaces</h2><p>A C4-style context and container view. Desktop camera work, browser tools, analysis services and shared contracts have distinct responsibilities.</p></div><a href="system.mmd" download>Download Mermaid Diagram ↗</a></div>
+      <div class="diagram" tabindex="0" role="region" aria-label="System Network; Scroll Horizontally to Explore">{{SYSTEM_SVG}}</div>
+      <div class="legend"><span><b>Solid</b> — runtime or contract connection</span><span><b>Dashed</b> — explicit file exchange</span><span><b>Numbers</b> — connection table below</span></div>
+      <details><summary>Read Connections and Integration Limits</summary>{{SYSTEM_TABLE}}</details>
+    </section>
+    <section id="workflow" aria-labelledby="workflow-heading">
+      <div class="section-head"><div><p class="eyebrow">02 / Capture to Analysis</p><h2 id="workflow-heading">Choose the Path Your Evidence Supports</h2><p>Record or import, inspect observations, then follow the single-view or calibrated multi-view path. Each stage has a defined input and output.</p></div><a href="capture-workflow.mmd" download>Download Workflow Diagram ↗</a></div>
+      <div class="diagram workflow" tabindex="0" role="region" aria-label="Capture Workflow; Scroll Horizontally to Follow the Stages">{{WORKFLOW_SVG}}</div>
+      <p class="note"><strong>One camera:</strong> 2-D events, tempo and normalized motion. <strong>Multiple cameras:</strong> calibrate lenses, check synchronization and geometric observability, then reconstruct. Fit completion and low residuals do not establish physical validity.</p>
+      <details><summary>Read the Workflow as a Table</summary>{{WORKFLOW_TABLE}}</details>
+    </section>
+    <section id="catalog" aria-labelledby="catalog-heading">
+      <p class="eyebrow">03 / Find a Capability</p><h2 id="catalog-heading">Explore the Feature Catalog</h2>
+      <p class="lead">Parity describes the declared desktop, API and web surfaces. A gap is tracked work; an exemption may still be awaiting review. These labels are not live health checks.</p>
+      <div class="toolbar"><label class="field" for="search">Search Features and Launcher Tiles<input id="search" type="search" placeholder="Try camera, optimization, model or export" autocomplete="off"></label><label class="field" for="status">Surface Status<select id="status"><option value="all">All Entries</option><option value="parity">Parity</option><option value="gap">Web Gaps</option><option value="exempt">Exemptions</option><option value="launcher">Launcher Tiles</option></select></label><p class="count" id="count" role="status" aria-live="polite"></p></div>
+      <p id="empty" hidden>No matching entries. Try a broader term or choose All Entries.</p>
+      <div class="cards">{{FEATURES}}</div>
+    </section>
+    <section id="tiles" aria-labelledby="tiles-heading"><p class="eyebrow">04 / Available Entry Points</p><h2 id="tiles-heading">Launcher Tiles</h2><p class="lead">Every entry in the canonical launcher manifest. Sources link to implementation or registration metadata; engine availability depends on the local installation.</p><div class="cards">{{TILES}}</div></section>
+  </main>
+  <footer><p>Generated from UpstreamDrift's launcher, feature-parity and capture-workflow sources. <a href="graph.json">Inspect Graph Data</a> · <a href="https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/architecture/CAPABILITY_ATLAS.md">Architecture Reference</a></p><p>Update the source registry and regenerate; freshness is checked automatically. No analytics, network service or remote diagram runtime is used by this reference.</p></footer>
+</div>
+<script>
+  const search = document.getElementById('search');
+  const status = document.getElementById('status');
+  const entries = [...document.querySelectorAll('[data-entry]')];
+  function filterEntries() {
+    const query = search.value.trim().toLocaleLowerCase();
+    let shown = 0;
+    for (const entry of entries) {
+      const match = entry.textContent.toLocaleLowerCase().includes(query) && (status.value === 'all' || entry.dataset.status === status.value);
+      entry.hidden = !match;
+      if (match) shown++;
+    }
+    document.getElementById('count').textContent = `${shown} of ${entries.length} entries`;
+    document.getElementById('empty').hidden = shown !== 0;
+  }
+  search.addEventListener('input', filterEntries);
+  status.addEventListener('change', filterEntries);
+  filterEntries();
+</script>
+</body>
+</html>

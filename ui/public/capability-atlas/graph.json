@@ -1,0 +1,1988 @@
+{
+  "version": 1,
+  "features": [
+    {
+      "feature_id": "analysis.analysis_tools_api",
+      "title": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
+      "status": "gap",
+      "pyqt": null,
+      "api": "src/api/routes/analysis_tools.py",
+      "web": "ui/src/pages/AnalysisTools.tsx",
+      "issue": 7448,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "analysis_tools_api"
+      ],
+      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4).",
+      "id": "analysis.analysis_tools_api"
+    },
+    {
+      "feature_id": "analysis.counterfactuals",
+      "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
+      "status": "gap",
+      "pyqt": "src/shared/python/biomechanics/ztcf.py",
+      "api": null,
+      "web": null,
+      "issue": 7450,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "simulation_backends"
+      ],
+      "notes": "",
+      "id": "analysis.counterfactuals"
+    },
+    {
+      "feature_id": "analysis.cross_engine_robustness",
+      "title": "Cross-engine robustness dashboard (perturbation/CV)",
+      "status": "parity",
+      "pyqt": "src/launchers/cross_engine_dashboard.py",
+      "api": "src/api/routes/cross_engine.py",
+      "web": "ui/src/pages/CrossEngineDashboard.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "cross_engine_dashboard",
+        "perturbation_analysis"
+      ],
+      "notes": "",
+      "id": "analysis.cross_engine_robustness"
+    },
+    {
+      "feature_id": "analysis.static_plots",
+      "title": "Static analysis plots (20+ plot types)",
+      "status": "parity",
+      "pyqt": "vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py",
+      "api": "src/api/routes/analysis_plots.py",
+      "web": "ui/src/components/analysis/PlotsSection.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Reached parity via #7449 (closed completed 2026-06-12). GET /analysis/plot-types enumerates AnalysisOrchestrator.PLOT_TYPES; GET /analysis/plot-data/{plot_type} returns PlotData JSON rendered by the web PlotsSection.",
+      "id": "analysis.static_plots"
+    },
+    {
+      "feature_id": "biomech.exercise_injury_dashboards",
+      "title": "Exercise + injury-risk biomechanics dashboards",
+      "status": "exempt",
+      "pyqt": "src/launchers/exercise_dashboard.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Desktop biomechanics dashboards; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [
+        "biomech_exercise",
+        "injury_analysis"
+      ],
+      "notes": "",
+      "id": "biomech.exercise_injury_dashboards"
+    },
+    {
+      "feature_id": "canonical_core.workspaces",
+      "title": "Canonical-core estimation/comparison workspaces",
+      "status": "parity",
+      "pyqt": "src/tools/canonical_core/estimation.py",
+      "api": null,
+      "web": "ui/src/pages/CanonicalCoreShell.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "canonical_core_estimation",
+        "canonical_core_comparison"
+      ],
+      "notes": "",
+      "id": "canonical_core.workspaces"
+    },
+    {
+      "feature_id": "chat.live_context",
+      "title": "Live app/engine context in chat",
+      "status": "parity",
+      "pyqt": "src/launchers/launcher_sidekick_sidebar.py",
+      "api": "src/api/services/chat_app_context.py",
+      "web": "ui/src/components/ui/ChatContextChip.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Shared ChatAppContext schema (#7453): both server wirings install make_app_state_provider; web chip via GET /chat/context.",
+      "id": "chat.live_context"
+    },
+    {
+      "feature_id": "chat.transport",
+      "title": "AI chat transport (message send/stream)",
+      "status": "parity",
+      "pyqt": "src/launchers/launcher_sidekick_sidebar.py",
+      "api": "src/api/routes/chat_ws.py",
+      "web": "ui/src/pages/Chat.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "chat_assistant"
+      ],
+      "notes": "",
+      "id": "chat.transport"
+    },
+    {
+      "feature_id": "diagnostics.integrations_health",
+      "title": "Diagnostics + integrations-health panel",
+      "status": "parity",
+      "pyqt": "src/launchers/integrations_health_panel.py",
+      "api": "src/api/routes/diagnostics.py",
+      "web": "ui/src/components/ui/DiagnosticsPanel.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Single probe implementation (DIAGNOSTIC_CHECKS in launcher_diagnostics.py + integrations_health_data.py) feeds the desktop panels and GET /api/v1/diagnostics/full + /api/v1/integrations/health (issue #7458).",
+      "id": "diagnostics.integrations_health"
+    },
+    {
+      "feature_id": "docs.document_library",
+      "title": "Document library / project map viewer",
+      "status": "exempt",
+      "pyqt": "src/launchers/library_widget.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Desktop documentation browser; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [
+        "project_map"
+      ],
+      "notes": "",
+      "id": "docs.document_library"
+    },
+    {
+      "feature_id": "engines.dashboards",
+      "title": "Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio)",
+      "status": "exempt",
+      "pyqt": "src/launchers/drake_dashboard.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Experimental desktop dashboards; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [
+        "drake_dashboard",
+        "mujoco_dashboard",
+        "pinocchio_dashboard"
+      ],
+      "notes": "",
+      "id": "engines.dashboards"
+    },
+    {
+      "feature_id": "engines.load_and_simulate",
+      "title": "Engine load/probe + basic simulation loop",
+      "status": "parity",
+      "pyqt": "src/launchers/launcher_simulation.py",
+      "api": "src/api/routes/engines.py",
+      "web": "ui/src/pages/Simulation.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "mujoco_unified",
+        "drake_golf",
+        "pinocchio_golf",
+        "opensim_golf",
+        "myosim_suite",
+        "pendulum_simulator"
+      ],
+      "notes": "",
+      "id": "engines.load_and_simulate"
+    },
+    {
+      "feature_id": "export.recordings_downloads",
+      "title": "Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings)",
+      "status": "gap",
+      "pyqt": "src/shared/python/data_io/export.py",
+      "api": "src/api/routes/export.py",
+      "web": null,
+      "issue": 7451,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "",
+      "id": "export.recordings_downloads"
+    },
+    {
+      "feature_id": "launcher.docker_management",
+      "title": "Docker engine management dialog",
+      "status": "exempt",
+      "pyqt": "src/launchers/docker_manager.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Manages the local Docker daemon from the desktop; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [],
+      "notes": "",
+      "id": "launcher.docker_management"
+    },
+    {
+      "feature_id": "launcher.embedded_tabs_docks",
+      "title": "Embedded tool host (tabs + docks)",
+      "status": "exempt",
+      "pyqt": "src/launchers/embedded_host.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Desktop windowing composition is explicitly desktop-only per ADR-0028 (React shell uses routes, not embedded Qt docks).",
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "",
+      "id": "launcher.embedded_tabs_docks"
+    },
+    {
+      "feature_id": "launcher.mcp_config",
+      "title": "MCP server configuration writer/preferences",
+      "status": "exempt",
+      "pyqt": "src/launchers/mcp_config_writer.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Writes local MCP configuration files for desktop AI integrations; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [],
+      "notes": "",
+      "id": "launcher.mcp_config"
+    },
+    {
+      "feature_id": "launcher.tile_grid",
+      "title": "Launcher tile grid from shared manifest",
+      "status": "parity",
+      "pyqt": "src/launchers/embedded_tool_bootstrap.py",
+      "api": "src/api/routes/launcher.py",
+      "web": "ui/src/pages/Dashboard.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "src/config/models.yaml is the canonical registry for both shells: the PyQt launcher reads it via ModelRegistry, and the web/API surface reads the same registry through LauncherManifest.load(), which overlays web metadata from launcher_manifest.json. tests/config/test_launcher_registry_parity.py enforces the ID parity.",
+      "id": "launcher.tile_grid"
+    },
+    {
+      "feature_id": "launcher.tile_web_reachability",
+      "title": "Manifest tile web-reachability contract (route / native-window / unavailable)",
+      "status": "gap",
+      "pyqt": "src/launchers/embedded_tool_bootstrap.py",
+      "api": null,
+      "web": "ui/src/pages/Dashboard.tsx",
+      "issue": 7461,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "video_analyzer",
+        "video_processor",
+        "data_processor",
+        "tools_calculator_hub",
+        "pid_generator",
+        "unreal_integration",
+        "robotics_module"
+      ],
+      "notes": "External/docs-backed tiles whose web reachability is not yet contract-checked.",
+      "id": "launcher.tile_web_reachability"
+    },
+    {
+      "feature_id": "mocap.breadth",
+      "title": "Motion-capture breadth (C3D upload/playback, OpenPose source)",
+      "status": "parity",
+      "pyqt": "src/tools/freemocap_sidecar/run_freemocap.py",
+      "api": "src/api/routes/motion_capture.py",
+      "web": "ui/src/pages/MotionCapture.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "motion_capture",
+        "motion_target_preview",
+        "starting_pose_matcher",
+        "motion_pipeline"
+      ],
+      "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406).",
+      "id": "mocap.breadth"
+    },
+    {
+      "feature_id": "onboarding.about_version",
+      "title": "About/version info + onboarding",
+      "status": "gap",
+      "pyqt": "src/launchers/about_dialog.py",
+      "api": null,
+      "web": null,
+      "issue": 7459,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "",
+      "id": "onboarding.about_version"
+    },
+    {
+      "feature_id": "optimization.swing_optimizer",
+      "title": "Swing Optimizer (trajectory optimization GUI)",
+      "status": "exempt",
+      "pyqt": "src/shared/python/optimization/swing_optimizer.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Desktop optimization GUI; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [
+        "swing_optimizer"
+      ],
+      "notes": "",
+      "id": "optimization.swing_optimizer"
+    },
+    {
+      "feature_id": "platform.aip_protocol",
+      "title": "AI Protocol (AIP) structured method dispatch",
+      "status": "parity",
+      "pyqt": null,
+      "api": "src/api/routes/aip.py",
+      "web": null,
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "aip"
+      ],
+      "notes": "API-backed protocol; both shells are thin consumers.",
+      "id": "platform.aip_protocol"
+    },
+    {
+      "feature_id": "settings.desktop_only_tabs",
+      "title": "Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance)",
+      "status": "exempt",
+      "pyqt": "src/launchers/settings_dialog.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Desktop-process management (MCP server processes, Docker startup, window layout, app zoom of native widgets) has no browser equivalent; awaiting the desktop-only exemption decision in issue #7460.",
+      "pending_decision": true,
+      "tiles": [],
+      "notes": "",
+      "id": "settings.desktop_only_tabs"
+    },
+    {
+      "feature_id": "settings.preferences",
+      "title": "Settings/preferences surface + persistence",
+      "status": "parity",
+      "pyqt": "src/launchers/settings_dialog.py",
+      "api": "src/api/routes/settings.py",
+      "web": "ui/src/pages/Settings.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Web /settings route (appearance/notifications/simulation-defaults/diagnostics) persisted server-side to ~/.upstreamdrift/web_settings.json; theme round-trips via the shared /themes router (#7457).",
+      "id": "settings.preferences"
+    },
+    {
+      "feature_id": "sidekick.terminal_repl_jupyter_skills",
+      "title": "Sidekick OS terminal / REPL / Jupyter / skills",
+      "status": "exempt",
+      "pyqt": "src/launchers/launcher_sidekick_sidebar.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Desktop-native OS integration (terminal/REPL/Jupyter/skills) per ADR-0028; final disposition pending #7460.",
+      "pending_decision": true,
+      "tiles": [],
+      "notes": "",
+      "id": "sidekick.terminal_repl_jupyter_skills"
+    },
+    {
+      "feature_id": "simulation.controls_wiring",
+      "title": "Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls)",
+      "status": "gap",
+      "pyqt": "src/launchers/launcher_simulation.py",
+      "api": null,
+      "web": "ui/src/components/simulation/SimulationControls.tsx",
+      "issue": 7452,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "force_overlays",
+        "actuator_controls"
+      ],
+      "notes": "",
+      "id": "simulation.controls_wiring"
+    },
+    {
+      "feature_id": "simulation.golf_suite_batch",
+      "title": "Golf Simulation Suite (parameter sweeps, batch runs)",
+      "status": "exempt",
+      "pyqt": "src/tools/golf_simulation_suite/__main__.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Desktop batch-simulation GUI; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [
+        "golf_simulation_suite"
+      ],
+      "notes": "",
+      "id": "simulation.golf_suite_batch"
+    },
+    {
+      "feature_id": "simulation.realtime_ws_stream",
+      "title": "Live simulation data over WebSocket pub-sub",
+      "status": "parity",
+      "pyqt": "src/launchers/launcher_simulation.py",
+      "api": "src/api/routes/simulation_ws.py",
+      "web": "ui/src/pages/Simulation.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "realtime_ws"
+      ],
+      "notes": "",
+      "id": "simulation.realtime_ws_stream"
+    },
+    {
+      "feature_id": "simulation.shot_tracer",
+      "title": "Shot Tracer / ball-flight visualization",
+      "status": "parity",
+      "pyqt": "src/launchers/_shot_tracer_gui.py",
+      "api": "src/api/routes/ball_flight.py",
+      "web": "ui/src/pages/BallFlight.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "shot_tracer"
+      ],
+      "notes": "Reached parity via #7456 (closed completed 2026-06-12); web BallFlight page consumes the existing /ball_flight API. ADR-0047 gave both surfaces cross-family trajectory-record import, each overlaying imported swing_sim.ball_flight_trajectory/1 records from either flight-model family and labeling them by model_family/model_name: the web BallFlight page via H3 (#9352, POST /tools/ball-flight/import), and the PyQt6 Shot Tracer via H2 (#9351, the vendored flight_interchange reader).",
+      "id": "simulation.shot_tracer"
+    },
+    {
+      "feature_id": "simulation.swing_objective_lab",
+      "title": "Swing Objective Lab — mechanism-vs-outcome downswing comparison",
+      "status": "parity",
+      "pyqt": "src/launchers/adapters/swing_objective_lab_embed.py",
+      "api": "src/api/routes/swing_objectives.py",
+      "web": "ui/src/pages/SwingObjectiveLab.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "swing_objective_lab"
+      ],
+      "notes": "Parity implementation via #9128: canonical API route /api/tools/swing-objectives/compare and React surface ui/src/pages/SwingObjectiveLab.tsx; scientific equivalence remains evidence-gated.",
+      "id": "simulation.swing_objective_lab"
+    },
+    {
+      "feature_id": "tools.bunkershot3d_workbench",
+      "title": "BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict)",
+      "status": "gap",
+      "pyqt": "src/tools/bunker_shot_gui/gui.py",
+      "api": null,
+      "web": null,
+      "issue": 8607,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "bunkershot3d"
+      ],
+      "notes": "Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -> a notebook script, bunker_shot -> the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; no API route or web page exists yet. The visualization suite (epic #8699) keeps that split: shot3d.py and traces.py compute, render3d.py and render_traces.py draw headlessly through matplotlib, and viewport_widgets.py only wires them to a canvas. A React port would consume shot3d.viewport_payload, which is the backend-neutral ADR-0027 ViewportOverlayPayload and carries the envelope status and fidelity tier in its metadata so any renderer can stamp its own frames. The F1 sand cut (#8710, #8711) keeps the same split and adds one constraint a port must honour: the field carries its fidelity tier and validity status as data covered by a SHA-256 over the provenance and the arrays together, so any client that renders a field must read the standing out of the file rather than out of its filename, and must refuse a field whose digest does not match.",
+      "id": "tools.bunkershot3d_workbench"
+    },
+    {
+      "feature_id": "tools.capture_rig",
+      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export",
+      "status": "exempt",
+      "pyqt": "src/tools/capture_rig/__main__.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) and the multiview layout model/presets/editor and the layout-composited live preview and playback (#9810, #9811, #9812, #9813, #9814) run on the same local session trees; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [
+        "capture_rig"
+      ],
+      "notes": "",
+      "id": "tools.capture_rig"
+    },
+    {
+      "feature_id": "tools.character_builder",
+      "title": "Character Builder (humanoid URDF generation)",
+      "status": "gap",
+      "pyqt": "src/shared/python/model_generation/cli/main.py",
+      "api": "src/api/routes/character_builder.py",
+      "web": "ui/src/pages/CharacterBuilder.tsx",
+      "issue": 7448,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "character_builder"
+      ],
+      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4).",
+      "id": "tools.character_builder"
+    },
+    {
+      "feature_id": "tools.data_explorer",
+      "title": "Data Explorer (import/filter/visualize datasets)",
+      "status": "gap",
+      "pyqt": null,
+      "api": "src/api/routes/data_explorer.py",
+      "web": "ui/src/pages/DataExplorer.tsx",
+      "issue": 7448,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "data_explorer"
+      ],
+      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4).",
+      "id": "tools.data_explorer"
+    },
+    {
+      "feature_id": "tools.dataset_generator",
+      "title": "Swing dataset generation and import",
+      "status": "parity",
+      "pyqt": null,
+      "api": "src/api/routes/dataset.py",
+      "web": "ui/src/pages/DatasetGenerator.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "dataset_generator"
+      ],
+      "notes": "Web-first tool; the desktop launcher opens the web route.",
+      "id": "tools.dataset_generator"
+    },
+    {
+      "feature_id": "tools.launch_monitor_analytics",
+      "title": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
+      "status": "gap",
+      "pyqt": "src/tools/launch_monitor_analytics/gui.py",
+      "api": "src/api/routes/launch_monitor_analytics.py",
+      "web": null,
+      "issue": 8364,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "launch_monitor_analytics"
+      ],
+      "notes": "The PyQt6 workbench and versioned API share one flexible-analysis contract. React/Vite parity in the authoritative Tools Rate of Closure app is tracked cross-repository in Tools #4205 under epic #8364.",
+      "id": "tools.launch_monitor_analytics"
+    },
+    {
+      "feature_id": "tools.matlab_suite",
+      "title": "MATLAB/Simscape model suite",
+      "status": "exempt",
+      "pyqt": "src/launchers/matlab_suite_dialog.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Requires a local MATLAB installation; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [
+        "matlab_suite"
+      ],
+      "notes": "",
+      "id": "tools.matlab_suite"
+    },
+    {
+      "feature_id": "tools.model_explorer",
+      "title": "Model Explorer (browse/select/build URDF-MJCF)",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/launch_model_explorer.py",
+      "api": "src/api/routes/model_explorer.py",
+      "web": "ui/src/pages/ModelExplorer.tsx",
+      "issue": 7448,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "model_explorer"
+      ],
+      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4).",
+      "id": "tools.model_explorer"
+    },
+    {
+      "feature_id": "tools.pose_editing",
+      "title": "Pose Studio interactive pose editing",
+      "status": "exempt",
+      "pyqt": "src/tools/pose_studio/__main__.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Interactive 3D pose editing; desktop-only candidate pending #7460.",
+      "pending_decision": true,
+      "tiles": [
+        "pose_studio"
+      ],
+      "notes": "",
+      "id": "tools.pose_editing"
+    },
+    {
+      "feature_id": "tools.putting_green",
+      "title": "Putting green simulation",
+      "status": "parity",
+      "pyqt": "src/engines/physics_engines/putting_green/python/simulator.py",
+      "api": "src/api/routes/putting_green.py",
+      "web": "ui/src/pages/PuttingGreen.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "putting_green"
+      ],
+      "notes": "",
+      "id": "tools.putting_green"
+    },
+    {
+      "feature_id": "tools.rate_of_closure",
+      "title": "Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite)",
+      "status": "parity",
+      "pyqt": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
+      "api": "src/api/local_server.py",
+      "web": "ui/src/pages/ImpactExplorer.tsx",
+      "issue": null,
+      "reason": "Desktop tile launches the vendored PyQt app; /tools/impact-explorer embeds the vendored React build when present (built with --base=/impact-explorer-app/) and states how to build it when absent.",
+      "pending_decision": false,
+      "tiles": [
+        "rate_of_closure"
+      ],
+      "notes": "",
+      "id": "tools.rate_of_closure"
+    },
+    {
+      "feature_id": "tools.terrain_engine",
+      "title": "Terrain and topography configuration",
+      "status": "parity",
+      "pyqt": null,
+      "api": "src/api/routes/terrain.py",
+      "web": "ui/src/pages/Terrain.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "terrain_engine"
+      ],
+      "notes": "Web-first tool; the desktop launcher opens the web route.",
+      "id": "tools.terrain_engine"
+    },
+    {
+      "feature_id": "visualization.force_color_controls",
+      "title": "Shared Segment Force Color Controls",
+      "status": "parity",
+      "pyqt": "src/shared/python/body_part_viz/force_color_controls.py",
+      "api": null,
+      "web": "ui/src/components/visualization/ForceColorControls.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. This entry qualifies controls only; automatic solver load production and remaining desktop host wiring are pending in docs/development/segment_force_color_epic.md.",
+      "id": "visualization.force_color_controls"
+    }
+  ],
+  "tiles": [
+    {
+      "id": "mujoco_unified",
+      "title": "MuJoCo",
+      "description": "Biomechanical golf swing analysis (humanoid + simulation)",
+      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py",
+      "launch_target": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py",
+      "category": "physics_engine",
+      "status": "ready",
+      "capabilities": [
+        "rigid_body",
+        "contact",
+        "tendons",
+        "actuators",
+        "mass_matrix",
+        "jacobian",
+        "force_vectors",
+        "torque_vectors",
+        "contact_forces",
+        "wrench",
+        "screw_theory",
+        "video_export",
+        "dataset_export",
+        "biomechanics",
+        "spatial_algebra",
+        "actuator_controls",
+        "force_overlays",
+        "control_schemes",
+        "realtime",
+        "realtime_ws",
+        "unreal_streaming",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
+      ]
+    },
+    {
+      "id": "drake_golf",
+      "title": "Drake",
+      "description": "Drake robotics with MeshCat visualisation",
+      "path": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
+      "launch_target": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
+      "category": "physics_engine",
+      "status": "ready",
+      "capabilities": [
+        "rigid_body",
+        "optimization",
+        "contact",
+        "mass_matrix",
+        "jacobian",
+        "actuator_controls",
+        "force_overlays",
+        "control_schemes",
+        "realtime",
+        "realtime_ws",
+        "unreal_streaming",
+        "screw_theory",
+        "spatial_algebra",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
+      ]
+    },
+    {
+      "id": "pinocchio_golf",
+      "title": "Pinocchio",
+      "description": "Rigid-body dynamics with analytical derivatives",
+      "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
+      "launch_target": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
+      "category": "physics_engine",
+      "status": "ready",
+      "capabilities": [
+        "rigid_body",
+        "inverse_kinematics",
+        "mass_matrix",
+        "jacobian",
+        "actuator_controls",
+        "force_overlays",
+        "control_schemes",
+        "realtime_ws",
+        "unreal_streaming",
+        "biomechanics_library",
+        "data_io",
+        "plot_engine",
+        "recorder",
+        "advanced_analysis"
+      ]
+    },
+    {
+      "id": "opensim_golf",
+      "title": "OpenSim",
+      "description": "Musculoskeletal modelling for biomechanics",
+      "path": "src/engines/physics_engines/opensim/python/opensim_gui.py",
+      "launch_target": "src/engines/physics_engines/opensim/python/opensim_gui.py",
+      "category": "physics_engine",
+      "status": "ready",
+      "capabilities": [
+        "musculoskeletal",
+        "inverse_kinematics",
+        "muscle_analysis",
+        "mass_matrix",
+        "jacobian",
+        "biomechanics",
+        "actuator_controls"
+      ]
+    },
+    {
+      "id": "myosim_suite",
+      "title": "MyoSuite",
+      "description": "MyoSuite engine dashboard: engine availability and environment status (driving a simulation requires the optional myosuite package — #9478)",
+      "path": "src/engines/physics_engines/myosuite/python/gui.py",
+      "launch_target": "src/engines/physics_engines/myosuite/python/gui.py",
+      "category": "physics_engine",
+      "status": "ready",
+      "capabilities": [
+        "musculoskeletal",
+        "muscle_control",
+        "neural_activation",
+        "mass_matrix",
+        "jacobian"
+      ]
+    },
+    {
+      "id": "matlab_suite",
+      "title": "Simscape",
+      "description": "MATLAB / Simscape models, dataset generators, and tooling",
+      "path": "src/config/models.yaml",
+      "launch_target": "virtual/matlab_suite",
+      "category": "physics_engine",
+      "status": "ready",
+      "capabilities": [
+        "simscape_2d",
+        "simscape_3d",
+        "analysis_tools"
+      ]
+    },
+    {
+      "id": "golf_simulation_suite",
+      "title": "Simulator",
+      "description": "Complete golf simulation with ball flight physics and putting green",
+      "path": "src/tools/golf_simulation_suite/__main__.py",
+      "launch_target": "src/tools/golf_simulation_suite/__main__.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "full_simulation",
+        "parameter_sweep",
+        "batch_runs"
+      ]
+    },
+    {
+      "id": "putting_green",
+      "title": "Putting Green",
+      "description": "Realistic putting green with ball-rolling physics",
+      "path": "src/tools/putting_green_gui/gui.py",
+      "launch_target": "src/tools/putting_green_gui/gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "surface_modeling",
+        "ball_physics",
+        "terrain"
+      ]
+    },
+    {
+      "id": "mujoco_models_shared",
+      "title": "MuJoCo Models",
+      "description": "MuJoCo simulation models repository folder (opens only when the MuJoCo_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "path": "src/config/models.yaml",
+      "launch_target": "MuJoCo_Models",
+      "category": "simulation",
+      "status": "experimental",
+      "capabilities": []
+    },
+    {
+      "id": "drake_models_shared",
+      "title": "Drake Models",
+      "description": "Drake simulation models repository folder (opens only when the Drake_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "path": "src/config/models.yaml",
+      "launch_target": "Drake_Models",
+      "category": "simulation",
+      "status": "experimental",
+      "capabilities": []
+    },
+    {
+      "id": "pinocchio_models_shared",
+      "title": "Pinocchio Models",
+      "description": "Pinocchio simulation models repository folder (opens only when the Pinocchio_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "path": "src/config/models.yaml",
+      "launch_target": "Pinocchio_Models",
+      "category": "simulation",
+      "status": "experimental",
+      "capabilities": []
+    },
+    {
+      "id": "opensim_models_shared",
+      "title": "OpenSim Models",
+      "description": "OpenSim simulation models repository folder (opens only when the OpenSim_Models sibling folder is checked out beside this repository; does nothing on click when it is absent — #9478)",
+      "path": "src/config/models.yaml",
+      "launch_target": "OpenSim_Models",
+      "category": "simulation",
+      "status": "experimental",
+      "capabilities": []
+    },
+    {
+      "id": "bunkershot3d",
+      "title": "BunkerShot3D Designer Workbench",
+      "description": "Wedge sole design against the F0 dynamic-RFT bunker model",
+      "path": "src/tools/bunker_shot_gui/gui.py",
+      "launch_target": "src/tools/bunker_shot_gui/gui.py",
+      "category": "simulation",
+      "status": "experimental",
+      "capabilities": [
+        "wedge_sole_design",
+        "sand_simulation",
+        "playability_window",
+        "bounce_utilisation",
+        "ab_comparison",
+        "validity_envelope"
+      ]
+    },
+    {
+      "id": "pendulum_simulator",
+      "title": "Pendulum Simulator",
+      "description": "Interactive proximal–distal companion for double, triple, and 8-DOF golfer dynamics",
+      "path": "src/config/models.yaml",
+      "launch_target": "tools://src/double_pendulum_golf/__main__.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "educational",
+        "pendulum",
+        "proximal_distal",
+        "counterfactuals",
+        "force_vectors"
+      ]
+    },
+    {
+      "id": "swing_objective_lab",
+      "title": "Swing Objective Lab",
+      "description": "Compare downswings optimized for clubhead speed against centrifugal, Coriolis, energy, and impulse transfer",
+      "path": "src/config/models.yaml",
+      "launch_target": "tools://src/double_pendulum_golf/swing_objectives/__main__.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "pendulum",
+        "trajectory_optimization",
+        "objective_comparison",
+        "proximal_distal",
+        "counterfactuals"
+      ]
+    },
+    {
+      "id": "shot_tracer",
+      "title": "Shot Tracer",
+      "description": "Multi-model golf ball trajectory comparison (Waterloo, MacDonald, Nathan)",
+      "path": "src/launchers/_shot_tracer_gui.py",
+      "launch_target": "src/launchers/_shot_tracer_gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "trajectory_visualization",
+        "multi_model_comparison"
+      ]
+    },
+    {
+      "id": "cross_engine_dashboard",
+      "title": "Cross-Engine Dashboard",
+      "description": "Perturbation robustness comparison across physics engines",
+      "path": "src/launchers/cross_engine_dashboard.py",
+      "launch_target": "src/launchers/cross_engine_dashboard.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "cross_validation",
+        "perturbation",
+        "robustness_scoring",
+        "comparison",
+        "cross_engine_robustness"
+      ]
+    },
+    {
+      "id": "terrain_engine",
+      "title": "Terrain Engine",
+      "description": "Topography presets and surface queries for terrain-aware ball physics",
+      "path": "src/tools/terrain_engine/gui.py",
+      "launch_target": "src/tools/terrain_engine/gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "surface_modeling",
+        "ball_physics",
+        "topography",
+        "terrain_query"
+      ]
+    },
+    {
+      "id": "golf_environment",
+      "title": "Golf Environment",
+      "description": "3D Driving Range and Golf Course Hole visualization",
+      "path": "src/tools/golf_environment/gui.py",
+      "launch_target": "src/tools/golf_environment/gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "swing_flight_pipeline",
+      "title": "Swing → Flight Pipeline",
+      "description": "End-to-end swing dynamics → impact → aerodynamic ball flight pipeline",
+      "path": "src/tools/swing_flight_pipeline/gui.py",
+      "launch_target": "src/tools/swing_flight_pipeline/gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "ball_flight_simulator",
+      "title": "Ball Flight Simulator",
+      "description": "Aerodynamic ball flight simulator with drag, Magnus, and wind models",
+      "path": "src/tools/ball_flight_gui/gui.py",
+      "launch_target": "src/tools/ball_flight_gui/gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "putting_green_gui",
+      "title": "Putting Green",
+      "description": "Legacy alias for the canonical putting_green launcher tile.",
+      "path": "src/tools/putting_green_gui/gui.py",
+      "launch_target": "src/tools/putting_green_gui/gui.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "motion_target_preview",
+      "title": "Motion-Match Preview",
+      "description": "Preview multi-source motion-capture targets on a shared timegrid",
+      "path": "src/tools/starting_pose_matcher/__main__.py",
+      "launch_target": "src/tools/starting_pose_matcher/__main__.py",
+      "category": "motion_matching",
+      "status": "ready",
+      "capabilities": [
+        "c3d",
+        "mocap",
+        "club",
+        "body",
+        "preview"
+      ]
+    },
+    {
+      "id": "pose_studio",
+      "title": "Pose Studio",
+      "description": "Cross-engine interactive pose editor",
+      "path": "src/tools/pose_studio/__main__.py",
+      "launch_target": "src/tools/pose_studio/__main__.py",
+      "category": "motion_matching",
+      "status": "beta",
+      "capabilities": [
+        "pose_editing",
+        "retargeting",
+        "joint_manipulation"
+      ]
+    },
+    {
+      "id": "capture_rig",
+      "title": "Capture Rig",
+      "description": "Multi-camera capture, pose ingest and reconstruction with an overlay player",
+      "path": "src/tools/capture_rig/__main__.py",
+      "launch_target": "src/tools/capture_rig/__main__.py",
+      "category": "motion_capture",
+      "status": "beta",
+      "capabilities": [
+        "video_capture",
+        "camera_control",
+        "pose_estimation",
+        "video_processing"
+      ]
+    },
+    {
+      "id": "starting_pose_matcher",
+      "title": "Starting-Pose Matcher (legacy)",
+      "description": "Legacy alias for motion_target_preview. Hidden by default.",
+      "path": "src/tools/starting_pose_matcher/__main__.py",
+      "launch_target": "src/tools/starting_pose_matcher/__main__.py",
+      "category": "motion_matching",
+      "status": "deprecated",
+      "capabilities": [
+        "c3d",
+        "mocap",
+        "club",
+        "body",
+        "preview"
+      ]
+    },
+    {
+      "id": "c3d_viewer",
+      "title": "C3D Viewer",
+      "description": "Visualise and analyse optical mocap data (.c3d)",
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py",
+      "launch_target": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py",
+      "category": "motion_capture",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "video_analyzer",
+      "title": "Video Analyzer",
+      "description": "Video-based motion analysis with pose tracking",
+      "path": "vendor/ud-tools/src/video_analyzer/launch_video_analyzer.py",
+      "launch_target": "tools://src/video_analyzer/launch_video_analyzer.py",
+      "category": "motion_capture",
+      "status": "ready",
+      "capabilities": [
+        "video_processing",
+        "pose_estimation",
+        "motion_tracking",
+        "frame_analysis"
+      ]
+    },
+    {
+      "id": "video_processor",
+      "title": "Video Processor",
+      "description": "Shared media processor for video conversion, frame extraction, and analysis",
+      "path": "vendor/ud-tools/src/media_processing/video_processor/apps/web/launch_platform.py",
+      "launch_target": "tools://src/media_processing/video_processor/apps/web/launch_platform.py",
+      "category": "motion_capture",
+      "status": "ready",
+      "capabilities": [
+        "video_processing",
+        "format_conversion",
+        "frame_extraction",
+        "media_analysis"
+      ]
+    },
+    {
+      "id": "openpose_analysis",
+      "title": "OpenPose",
+      "description": "High-accuracy body pose estimation (Academic License)",
+      "path": "src/shared/python/pose_estimation/openpose_gui.py",
+      "launch_target": "src/shared/python/pose_estimation/openpose_gui.py",
+      "category": "motion_capture",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "mediapipe_analysis",
+      "title": "MediaPipe",
+      "description": "Fast pose estimation via Google MediaPipe (Apache 2.0)",
+      "path": "src/shared/python/pose_estimation/mediapipe_gui.py",
+      "launch_target": "src/shared/python/pose_estimation/mediapipe_gui.py",
+      "category": "motion_capture",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "model_explorer",
+      "title": "Model Explorer",
+      "description": "Explore models and generate URDFs",
+      "path": "src/tools/model_explorer/main_window.py",
+      "launch_target": "src/tools/model_explorer/main_window.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "model_browsing",
+        "urdf_generation",
+        "open_in_engine"
+      ]
+    },
+    {
+      "id": "data_explorer",
+      "title": "Data Explorer",
+      "description": "Import, filter, and visualise simulation datasets",
+      "path": "vendor/ud-tools/src/data_explorer/data_explorer_app.py",
+      "launch_target": "tools://src/data_explorer/data_explorer_app.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "data_import",
+        "filtering",
+        "visualization",
+        "export"
+      ]
+    },
+    {
+      "id": "data_processor",
+      "title": "Data Processor",
+      "description": "Shared signal processing and time-series data analysis tool",
+      "path": "vendor/ud-tools/src/data_processing/data_processor/launch_pyqt6.py",
+      "launch_target": "tools://src/data_processing/data_processor/launch_pyqt6.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "data_import",
+        "signal_processing",
+        "time_series",
+        "filtering",
+        "statistics",
+        "export",
+        "process_calculators"
+      ]
+    },
+    {
+      "id": "launch_monitor_analytics",
+      "title": "Launch Monitor Analytics",
+      "description": "Harmonize multi-vendor shot data, map impact-parameter dependencies, compare monitors, and track dispersion and trends",
+      "path": "src/tools/launch_monitor_analytics/__main__.py",
+      "launch_target": "src/tools/launch_monitor_analytics/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "launch_monitor_import",
+        "session_aggregation",
+        "correlation_network",
+        "regression",
+        "neural_network",
+        "monitor_comparison",
+        "dispersion",
+        "longitudinal_trends"
+      ]
+    },
+    {
+      "id": "rate_of_closure",
+      "title": "Rate of Closure Impact Explorer",
+      "description": "Quantifies how a rotating clubhead's impact-point delivery differs from the tracked reference point (COM or geometric center)",
+      "path": "vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py",
+      "launch_target": "tools://src/rate_of_closure/launch_pyqt6.py",
+      "category": "simulation",
+      "status": "gui_ready",
+      "capabilities": [
+        "rate_of_closure",
+        "impact_analysis",
+        "clubhead_kinematics",
+        "attack_angle",
+        "face_rotation",
+        "putting_simulation",
+        "launch_monitor_analytics",
+        "3d_visualization"
+      ]
+    },
+    {
+      "id": "sidekick",
+      "title": "Sidekick",
+      "description": "AI assistant chat panel — embed as a dock or tab",
+      "path": "src/tools/sidekick/_embed_adapter.py",
+      "launch_target": "src/tools/sidekick/_embed_adapter.py",
+      "category": "tool",
+      "status": "beta",
+      "capabilities": []
+    },
+    {
+      "id": "training_controller",
+      "title": "Training Controller",
+      "description": "Schedule, monitor, and manage model-training jobs across engines.",
+      "path": "src/tools/training_controller/__main__.py",
+      "launch_target": "src/tools/training_controller/__main__.py",
+      "category": "tool",
+      "status": "beta",
+      "capabilities": []
+    },
+    {
+      "id": "config_setup_wizard",
+      "title": "Setup Wizard",
+      "description": "Validate canonical-core units, model dimensions, and calibration before a run.",
+      "path": "src/tools/config_setup_wizard/_embed_adapter.py",
+      "launch_target": "src/tools/config_setup_wizard/_embed_adapter.py",
+      "category": "tool",
+      "status": "beta",
+      "capabilities": []
+    },
+    {
+      "id": "pose_subscriber_demo",
+      "title": "Pose Subscriber (demo)",
+      "description": "Live mirror of Pose Studio's canonical pose via the realtime IPC layer",
+      "path": "src/tools/pose_subscriber_demo/__main__.py",
+      "launch_target": "src/tools/pose_subscriber_demo/__main__.py",
+      "category": "motion_matching",
+      "status": "experimental",
+      "capabilities": []
+    },
+    {
+      "id": "project_map",
+      "title": "Project Map",
+      "description": "Map of every feature and module in the suite",
+      "path": "docs/architecture/PROJECT_MAP.md",
+      "launch_target": "docs/architecture/PROJECT_MAP.md",
+      "category": "documentation",
+      "status": "ready",
+      "capabilities": [
+        "documentation",
+        "feature_discovery",
+        "project_overview"
+      ]
+    },
+    {
+      "id": "library_tool",
+      "title": "Library",
+      "description": "Research library for managing publications, LaTeX references, and documents",
+      "path": "src/config/models.yaml",
+      "launch_target": "virtual/library",
+      "category": "documentation",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "biomech_gait",
+      "title": "Gait Model",
+      "description": "Exercise preset that forwards the gait filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)",
+      "path": "src/config/models.yaml",
+      "launch_target": "registered launcher action",
+      "category": "biomechanics",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "biomech_sit_to_stand",
+      "title": "Sit-to-Stand Model",
+      "description": "Exercise preset that forwards the sit-to-stand filter to the Biomechanics Exercise Dashboard (not a standalone model — #9478)",
+      "path": "src/config/models.yaml",
+      "launch_target": "registered launcher action",
+      "category": "biomechanics",
+      "status": "ready",
+      "capabilities": []
+    },
+    {
+      "id": "movement_optimizer",
+      "title": "Movement Optimizer",
+      "description": "Cross-engine trajectory optimization (requires the Movement_Optimizer sibling checkout beside this repository; prefer the vendored tools_movement_optimizer tile — #9478)",
+      "path": "src/config/models.yaml",
+      "launch_target": "src/movement_optimizer/__main__.py",
+      "category": "biomechanics",
+      "status": "experimental",
+      "capabilities": []
+    },
+    {
+      "id": "canonical_core_estimation",
+      "title": "Canonical-Core Estimation",
+      "description": "CC-19 estimation services in the unified workspace",
+      "path": "src/tools/canonical_core/estimation.py",
+      "launch_target": "src/tools/canonical_core/estimation.py",
+      "category": "biomechanics",
+      "status": "experimental",
+      "capabilities": [
+        "canonical_core",
+        "estimation",
+        "services_layer",
+        "biomechanics"
+      ]
+    },
+    {
+      "id": "canonical_core_comparison",
+      "title": "Canonical-Core Comparison",
+      "description": "CC-27 comparison services in the unified workspace",
+      "path": "src/tools/canonical_core/comparison.py",
+      "launch_target": "src/tools/canonical_core/comparison.py",
+      "category": "biomechanics",
+      "status": "experimental",
+      "capabilities": [
+        "canonical_core",
+        "comparison",
+        "services_layer",
+        "biomechanics"
+      ]
+    },
+    {
+      "id": "simulation_backends",
+      "title": "Simulation Backends",
+      "description": "Compare ODE, MuJoCo (CPU) and MuJoCo Warp (GPU) backends with rollouts, sweeps, and HDF5 export",
+      "path": "src/tools/simulation_backends_launcher/__main__.py",
+      "launch_target": "src/tools/simulation_backends_launcher/__main__.py",
+      "category": "simulation",
+      "status": "ready",
+      "capabilities": [
+        "backend_selection",
+        "rollout",
+        "parameter_sweep",
+        "cross_validation",
+        "ztcf_zvcf",
+        "hdf5_export"
+      ]
+    },
+    {
+      "id": "motion_capture",
+      "title": "Motion Capture",
+      "description": "FreeMoCap sidecar: markerless motion capture recording and processing (command-line interface requiring --input; it is not yet a launchable GUI tile — #9478)",
+      "path": "src/tools/freemocap_sidecar/run_freemocap.py",
+      "launch_target": "src/tools/freemocap_sidecar/run_freemocap.py",
+      "category": "motion_capture",
+      "status": "experimental",
+      "capabilities": [
+        "c3d_viewer",
+        "openpose",
+        "mediapipe",
+        "pose_estimation",
+        "retargeting",
+        "id_solving",
+        "signal_processing",
+        "scaling"
+      ]
+    },
+    {
+      "id": "biomech_exercise",
+      "title": "Exercise Dashboard",
+      "description": "Biomechanics exercise workflows with injury risk and joint stress analysis",
+      "path": "src/launchers/exercise_dashboard.py",
+      "launch_target": "src/launchers/exercise_dashboard.py",
+      "category": "biomechanics",
+      "status": "ready",
+      "capabilities": [
+        "injury_risk",
+        "joint_stress",
+        "swing_modification",
+        "exercise_presets"
+      ]
+    },
+    {
+      "id": "swing_optimizer",
+      "title": "Swing Optimizer",
+      "description": "Trajectory optimization with constraint solving and cost functions",
+      "path": "src/shared/python/optimization/swing_optimizer.py",
+      "launch_target": "src/shared/python/optimization/swing_optimizer.py",
+      "category": "simulation",
+      "status": "experimental",
+      "capabilities": [
+        "trajectory_optimization",
+        "constraint_solving",
+        "cost_functions"
+      ]
+    },
+    {
+      "id": "injury_analysis",
+      "title": "Injury Risk Analysis",
+      "description": "Joint stress, spinal load, and swing modification analysis for injury prevention",
+      "path": "src/shared/python/injury/injury_risk.py",
+      "launch_target": "src/shared/python/injury/injury_risk.py",
+      "category": "biomechanics",
+      "status": "experimental",
+      "capabilities": [
+        "injury_risk",
+        "joint_stress",
+        "spinal_load",
+        "swing_modification"
+      ]
+    },
+    {
+      "id": "drake_dashboard",
+      "title": "Drake Dashboard",
+      "description": "Interactive Drake simulation dashboard",
+      "path": "src/launchers/drake_dashboard.py",
+      "launch_target": "src/launchers/drake_dashboard.py",
+      "category": "physics_engine",
+      "status": "experimental",
+      "capabilities": [
+        "rigid_body",
+        "optimization",
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
+      ]
+    },
+    {
+      "id": "mujoco_dashboard",
+      "title": "MuJoCo Dashboard",
+      "description": "Interactive MuJoCo simulation dashboard",
+      "path": "src/launchers/mujoco_dashboard.py",
+      "launch_target": "src/launchers/mujoco_dashboard.py",
+      "category": "physics_engine",
+      "status": "experimental",
+      "capabilities": [
+        "rigid_body",
+        "contact",
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
+      ]
+    },
+    {
+      "id": "pinocchio_dashboard",
+      "title": "Pinocchio Dashboard",
+      "description": "Interactive Pinocchio simulation dashboard",
+      "path": "src/launchers/pinocchio_dashboard.py",
+      "launch_target": "src/launchers/pinocchio_dashboard.py",
+      "category": "physics_engine",
+      "status": "experimental",
+      "capabilities": [
+        "rigid_body",
+        "inverse_kinematics",
+        "dashboard",
+        "recorder",
+        "advanced_analysis"
+      ]
+    },
+    {
+      "id": "pinn_pure_rigid",
+      "title": "Pure Rigid Body",
+      "description": "Pinocchio inverse dynamics only — no ML",
+      "path": "src/config/models.yaml",
+      "launch_target": "registered launcher action",
+      "category": "biomechanics",
+      "status": "experimental",
+      "capabilities": []
+    },
+    {
+      "id": "pinn_hybrid",
+      "title": "PINN Hybrid",
+      "description": "Rigid body + JAX residual torque MLP",
+      "path": "src/config/models.yaml",
+      "launch_target": "registered launcher action",
+      "category": "biomechanics",
+      "status": "experimental",
+      "capabilities": []
+    }
+  ],
+  "nodes": [
+    {
+      "id": "operator",
+      "title": "Operator",
+      "description": "Record, review, compare and export.",
+      "evidence": "docs/motion_capture/capture_rig.md",
+      "view": "system"
+    },
+    {
+      "id": "desktop",
+      "title": "Desktop Workbench",
+      "description": "PyQt tools and local camera sessions.",
+      "evidence": "src/launchers/embedded_host.py",
+      "view": "system"
+    },
+    {
+      "id": "web",
+      "title": "Web and Tauri",
+      "description": "Browser tools; native-only gaps remain explicit.",
+      "evidence": "ui/src/App.tsx",
+      "view": "system"
+    },
+    {
+      "id": "api",
+      "title": "Application API",
+      "description": "Jobs, artifacts and engine orchestration.",
+      "evidence": "src/api/server.py",
+      "view": "system"
+    },
+    {
+      "id": "pipeline",
+      "title": "Motion Pipeline",
+      "description": "Canonical motion input, scaling and retargeting.",
+      "evidence": "src/shared/python/motion_pipeline",
+      "view": "system"
+    },
+    {
+      "id": "engines",
+      "title": "Physics Engines",
+      "description": "Optional backend capabilities; qualify each result.",
+      "evidence": "src/shared/python/engine_core",
+      "view": "system"
+    },
+    {
+      "id": "files",
+      "title": "Session and Export Files",
+      "description": "Versioned artifacts and provenance.",
+      "evidence": "src/motion_capture/provenance.py",
+      "view": "system"
+    },
+    {
+      "id": "tools",
+      "title": "Tools Contracts",
+      "description": "Pinned vendor-owned shared schemas and libraries.",
+      "evidence": "src/motion_capture/rig/tools_bridge.py",
+      "view": "system"
+    },
+    {
+      "id": "step.setup",
+      "title": "Set up Cameras and Plan",
+      "description": "Bind each camera to a named view so takes are repeatable.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "One camera per USB 2.0 root port (30 ft powered cables are fine: one camera per cable).",
+        "A plan file naming each view (cam_a, cam_b, ...) by serial, port path or the one unserialized unit.",
+        "All cameras on the same capture mode; 1280x720@120 or 1920x1200@60 for swings."
+      ],
+      "instructions": [
+        "Choose the plan file and a session folder.",
+        "Pick a mode preset or leave 'plan default'; optionally restrict the views.",
+        "Run *Plan check*: every view must resolve to a camera before recording.",
+        "Importing existing video files instead? Use *Import videos* and skip to Detect."
+      ],
+      "actions": [
+        "plan_check",
+        "import"
+      ]
+    },
+    {
+      "id": "step.intrinsics",
+      "title": "Calibrate Each Camera Once",
+      "description": "Lens focal length and distortion per camera; the only precise setup step.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "A printed chessboard with 9x6 inner corners (10x7 squares), flat, one square measured to the millimetre.",
+        "A 20-40 s recording per camera at the capture mode you will use: move the board slowly through the whole frame, corners and edges included, tilting up to ~45 degrees; sharp and well lit; board at least a fifth of the frame.",
+        "At least 8 frames with the board found; reprojection RMS under 1 px is the standard."
+      ],
+      "instructions": [
+        "Record the board session (one take, all cameras, 30 s) or import the board files.",
+        "Enter the board size and square length, run *Calibrate intrinsics*.",
+        "Keep intrinsics.json: it is the --intrinsics input of the first swing reconstruction."
+      ],
+      "actions": [
+        "record",
+        "calibrate"
+      ]
+    },
+    {
+      "id": "step.capture",
+      "title": "Record or Import the Swing Take",
+      "description": "The footage every later step works from.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "Whole body in every camera for the whole swing; ball in view.",
+        "Start at address and hold still about one second (the first frames define up and the origin).",
+        "Multi-camera: at least two cameras, three preferred, at least 30 degrees apart, same mode.",
+        "Single camera: face-on or down-the-line; gives 2-D events and tempo, no 3-D.",
+        "10 s takes at 60-120 fps; tape-measured segments on the golfer: shank (lateral knee line to ankle bone) and forearm (elbow crease to wrist bone) first, then upper arm and thigh; one reading covers both sides."
+      ],
+      "instructions": [
+        "The live view opens with the tile (or press *Preview cameras*); the plan and a fresh sessions/ folder are prefilled. Frame the mat, pick a take length (5/10/15/30 s or custom) and a countdown.",
+        "Press *Record*: the countdown runs, the recorder takes over the cameras and the tiles keep showing them with a red REC readout; walk to address, swing, hold the finish. *Stop* ends the take early.",
+        "Or *Import videos* to build a session from files (one or many).",
+        "Run *Proxies* for smooth playback of large MJPEG recordings."
+      ],
+      "actions": [
+        "record",
+        "import",
+        "proxy"
+      ]
+    },
+    {
+      "id": "step.detect",
+      "title": "Detect the Pose in Every View",
+      "description": "2-D joints per frame from MediaPipe or OpenPose; re-run with other settings any time.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "A recorded or imported session.",
+        "MediaPipe (fast, primary) or OpenPose BODY_25 via OpenCV DNN (slow, second opinion)."
+      ],
+      "instructions": [
+        "Choose the estimator and settings; press *Ingest*. Each estimator writes its own observation set.",
+        "Press *Compare* to run both and get coverage / confidence / jitter / agreement per joint.",
+        "Scrub the playback with the overlay on; low-confidence joints are red."
+      ],
+      "actions": [
+        "ingest",
+        "compare"
+      ]
+    },
+    {
+      "id": "step.annotate",
+      "title": "Annotate or Correct Points by Hand",
+      "description": "Click joints frame by frame where the detectors fail, or correct their outliers.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "A playable recording for the view.",
+        "Optionally an observation set to correct (pick it in the player)."
+      ],
+      "instructions": [
+        "Pick the view (and, to correct a detector, its observation set) in the player; press *Annotate / edit points*.",
+        "Follow the banner: click the joint it names, S to skip an occluded joint (or reject a detector point), N for the next frame, B back, J jump, A to accept a detector's frame, Q to finish.",
+        "Run `rig annotations-to-observations` (with `--merge-with SET` for corrections) to get a set the reconstruction and model fit use like any other."
+      ],
+      "actions": [
+        "annotate"
+      ]
+    },
+    {
+      "id": "step.review",
+      "title": "Review Joint Reliability",
+      "description": "Know which joints to trust before fitting.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "At least one observation set."
+      ],
+      "instructions": [
+        "Press *Reliability*: joints are graded reliable / usable / weak from coverage, confidence, jitter and (after a fit) outlier rejections.",
+        "Weak joints are pre-filled in *Exclude joints*; edit the list as you see fit."
+      ],
+      "actions": [
+        "reliability"
+      ]
+    },
+    {
+      "id": "step.reconstruct",
+      "title": "Reconstruct in 3-D",
+      "description": "Camera placement learned from the golfer, rigid skeleton, outliers rejected.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "Two or more ingested views.",
+        "First take of a placement: intrinsics.json from the calibration step; later takes: the previous reconstruction.json.",
+        "At least one tape-measured segment in metres (the first sets the scale); every additional one replaces a 5 cm anthropometric prior with a 3 mm measurement, so measure as many as you can: shank, forearm, upper_arm, thigh, shoulder_width, hip_width."
+      ],
+      "instructions": [
+        "Pick the start file (intrinsics or previous reconstruction), enter the measured segments (shank=0.42, forearm=0.26, ...), optionally joints to exclude.",
+        "In the *Match* tab tick the cameras to use and name the variant (blank = the default match); matches of one take live side by side under variants/ and every output records its provenance.",
+        "Press *Reconstruct*. The summary shows RMS, rejections and the swing metrics; tick variants under *Model overlay* in the player to draw them on any view, including views a match never used."
+      ],
+      "actions": [
+        "reconstruct"
+      ]
+    },
+    {
+      "id": "step.analyze_2d",
+      "title": "Analyse the Single View",
+      "description": "Events, tempo and normalised hand speed from one camera.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "One ingested view."
+      ],
+      "instructions": [
+        "Press *Analyze 2-D*. Results are in subject box heights, not metres.",
+        "*Export clip* writes the swing (address to finish, slow motion, overlay, frame clock) as a video; *Compare takes* puts another session's view beside this one aligned on the top of the backswing, with metric deltas.",
+        "*Export multiview* stitches the raw footage and its overlay through a layout (preset, saved or JSON file) into one composite video with a provenance sidecar."
+      ],
+      "actions": [
+        "analyze",
+        "clip",
+        "compare_takes",
+        "multipicture"
+      ]
+    },
+    {
+      "id": "step.fit_model",
+      "title": "Fit the Articulated Golfer",
+      "description": "Joint angles of a realistic model (spine, torso, scapula struts, arms, legs) through the reconstructed joints, with continuous motion enforced.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "A reconstruction (joints_3d_m.npy).",
+        "Tape-measured segments help: measured lengths replace the model defaults."
+      ],
+      "instructions": [
+        "Press *Fit model*. The fit solves every frame together with an acceleration prior on each joint angle, soft joint limits and robust rejection, so a point the model cannot reach by continuous motion is listed as rejected, not followed.",
+        "Read model/fit_report.json: RMS per landmark, rejections, peak joint speeds; scapula angles appear as left/right_scapula.rx (elevation) and .ry (protraction).",
+        "*Export* then also writes joint_angles_simscape.csv in the MATLAB model's variable names.",
+        "Image-space matching: choose *image space* in the *Match* tab with one or more views and the variant whose cameras to borrow; the model is fitted to the 2-D keypoints directly (the single-camera path)."
+      ],
+      "actions": [
+        "fit_model"
+      ]
+    },
+    {
+      "id": "step.kinetics",
+      "title": "Kinetics and Model Comparison",
+      "description": "Torques that produce the fitted motion, a replay check, and a ranking of every registered model on this take.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "A fitted model (joint_angles.json).",
+        "The golfer's body mass in kilograms for the segment masses."
+      ],
+      "instructions": [
+        "Press *Kinetics*: inverse dynamics on the fitted joint angles (point masses at segment centres, de Leva fractions) and a forward replay whose drift from the fitted angles is the acceptance number; model/kinetics.json holds the torques.",
+        "Press *Compare models* to fit the scapula golfer, the double and the triple pendulum to the same take and rank them by a DOF-penalised score in model/comparison.md."
+      ],
+      "actions": [
+        "kinetics",
+        "compare_models"
+      ]
+    },
+    {
+      "id": "step.export",
+      "title": "Export to the Motion Pipeline",
+      "description": "TRC and canonical JSON for scaling, IK and model matching.",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "view": "workflow",
+      "requirements": [
+        "A reconstruction."
+      ],
+      "instructions": [
+        "Press *Export*. reconstruction.trc loads in the motion pipeline and the model-matching tools as a marker file.",
+        "*Export clip* and *Compare takes* produce annotated, slowed videos of this take, alone or beside another session, for coaching.",
+        "*Export multiview* writes every view (and the model overlay of any of them) side by side through a layout as one composite video, synchronised by frame with the session's alignment offsets."
+      ],
+      "actions": [
+        "export",
+        "clip",
+        "compare_takes",
+        "multipicture"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "operator",
+      "target": "desktop",
+      "artifact": "Camera and analysis controls",
+      "kind": "runtime",
+      "evidence": "src/tools/capture_rig/gui.py",
+      "constraint": "Local desktop workflow",
+      "view": "system"
+    },
+    {
+      "source": "operator",
+      "target": "web",
+      "artifact": "Available browser tools",
+      "kind": "runtime",
+      "evidence": "ui/src/App.tsx",
+      "constraint": "Feature parity registry lists gaps and exemptions",
+      "view": "system"
+    },
+    {
+      "source": "web",
+      "target": "api",
+      "artifact": "REST and WebSocket requests",
+      "kind": "runtime",
+      "evidence": "ui/src/api/fetch.ts",
+      "constraint": "Requires a reachable authorized backend",
+      "view": "system"
+    },
+    {
+      "source": "desktop",
+      "target": "files",
+      "artifact": "Session bundles and video",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/session.py",
+      "constraint": "Camera media remains local",
+      "view": "system"
+    },
+    {
+      "source": "files",
+      "target": "pipeline",
+      "artifact": "TRC marker file",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "User exports and imports; not a live automatic connection",
+      "view": "system"
+    },
+    {
+      "source": "pipeline",
+      "target": "engines",
+      "artifact": "Canonical motion and retargeting",
+      "kind": "contract",
+      "evidence": "src/shared/python/motion_pipeline",
+      "constraint": "Backend and model-dependent capability; validate units and conventions",
+      "view": "system"
+    },
+    {
+      "source": "desktop",
+      "target": "tools",
+      "artifact": "Pinned mocap schema",
+      "kind": "contract",
+      "evidence": "src/motion_capture/rig/tools_bridge.py",
+      "constraint": "Fail-closed optional Tools contract bridge",
+      "view": "system"
+    },
+    {
+      "source": "step.setup",
+      "target": "step.capture",
+      "artifact": "Resolved plan / imported views",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "constraint": "Check plan before recording; importing existing files is supported",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.intrinsics",
+      "artifact": "Separate chessboard take",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/intrinsics.py",
+      "constraint": "Multi-view lens calibration; once per camera/mode, not each swing",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.detect",
+      "artifact": "Recorded swing videos",
+      "kind": "file",
+      "evidence": "src/motion_capture/rig/ingest.py",
+      "constraint": "One observation set per estimator",
+      "view": "workflow"
+    },
+    {
+      "source": "step.capture",
+      "target": "step.annotate",
+      "artifact": "Video frames",
+      "kind": "file",
+      "evidence": "src/motion_capture/annotate/guide.py",
+      "constraint": "Sparse manual points; mark occlusion rather than invent coordinates",
+      "view": "workflow"
+    },
+    {
+      "source": "step.detect",
+      "target": "step.review",
+      "artifact": "2-D observations",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/workflow.py",
+      "constraint": "Review confidence, coverage, jitter and provenance",
+      "view": "workflow"
+    },
+    {
+      "source": "step.annotate",
+      "target": "step.review",
+      "artifact": "Converted observation set",
+      "kind": "file",
+      "evidence": "src/motion_capture/annotate/to_observations.py",
+      "constraint": "Run annotations-to-observations; optional merge with detector output",
+      "view": "workflow"
+    },
+    {
+      "source": "step.detect",
+      "target": "step.analyze_2d",
+      "artifact": "Single-view observations",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/analytics2d.py",
+      "constraint": "2-D normalized measurements, not metric depth",
+      "view": "workflow"
+    },
+    {
+      "source": "step.intrinsics",
+      "target": "step.reconstruct",
+      "artifact": "intrinsics.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/pipeline.py",
+      "constraint": "Two or more views plus measured segments; reuse calibrated camera placement when appropriate",
+      "view": "workflow"
+    },
+    {
+      "source": "step.review",
+      "target": "step.reconstruct",
+      "artifact": "Reviewed multi-view observations",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/pipeline.py",
+      "constraint": "Reliability review does not prove geometric observability",
+      "view": "workflow"
+    },
+    {
+      "source": "step.reconstruct",
+      "target": "step.fit_model",
+      "artifact": "joints_3d_m.npy",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/model/fit.py",
+      "constraint": "Fit residuals are not independent physical validation",
+      "view": "workflow"
+    },
+    {
+      "source": "step.fit_model",
+      "target": "step.kinetics",
+      "artifact": "joint_angles.json",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/model/dynamics.py",
+      "constraint": "Model-dependent inverse dynamics; inspect replay drift and assumptions",
+      "view": "workflow"
+    },
+    {
+      "source": "step.reconstruct",
+      "target": "step.export",
+      "artifact": "Reconstruction artifacts",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "TRC uses millimetres; canonical JSON states units",
+      "view": "workflow"
+    },
+    {
+      "source": "step.export",
+      "target": "pipeline",
+      "artifact": "TRC / canonical JSON",
+      "kind": "file",
+      "evidence": "src/motion_capture/reconstruct/export.py",
+      "constraint": "Explicit artifact import into motion pipeline",
+      "view": "workflow"
+    },
+    {
+      "source": "step.analyze_2d",
+      "target": "files",
+      "artifact": "Annotated clips and metrics",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/clips.py",
+      "constraint": "Coaching reference; single-view outputs are not 3-D",
+      "view": "workflow"
+    }
+  ],
+  "inputs": {
+    "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
+    "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
+    "src/config/feature_parity.json": "48bc00c9bfe0a859b7fb7ba4076f962f9560f33d1bc2efead74d400504b50e4b",
+    "src/config/capability_connections.json": "59bb85e4ffe6a2c2bce4d072b57898083743fb9f747a4fd7d72f422b7234ed4b",
+    "src/tools/capture_rig/workflow.py": "88ebc4a0983a7324b24b02491349dacd377877b3613bcfdb671043a1a7e4514b"
+  }
+}

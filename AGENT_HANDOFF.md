@@ -33,6 +33,15 @@ Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
 Updated: 2026-09-08 23:59 UTC (wave-2 PR triage, session UD2PRs)
 Updated: 2026-09-08 (wave-2 issue backlog sweep, session UD2IssuesA)
 
+## Capability Atlas #9850
+
+Isolated branch `feat/9850-capability-atlas`, commit `SELF`, PR not created.
+See `docs/development/HANDOFF.md` and `DL-#9850` for current validation and
+continuation. Generated references consume existing registries and preserve
+GUI epic #9843 and optimization-agent file ownership. Product #9849 and
+performance review #9851 are separate workstreams. Fleet communication lives
+in Repository_Management PR #1580 and has completed a real peer message exchange.
+
 ## Wave-2 PR Triage: 2026-09-08 (Agent `claude`, Session UD2PRs)
 
 Repo-wide npm-audit red: advisory GHSA-2883-xcg3-v3hh (js-yaml high,
@@ -530,3 +539,7 @@ The final host CI type check passes after menu contracts and the native COM matr
 - Product #9849 now includes trim/crop #9860, library/notes #9861 and coaching drawings #9862; separate advanced reference epic #9863 has children #9864–#9866. All are active goal scope.
 - Isolated branch feat/9860-swing-editing contains the edit recipe, ingestion mapping, native editor and visible capture library with notes, imports, archive/storage, rename recovery and editable copies. See docs/development/capture_editing_integration.md for reuse audit and remaining work. Not yet a complete feature or PR.
 - Preserve the concurrent #9843 GUI dock/layout work; new header entry points use existing wrapping layout without changing dock policy. Raw recordings and prior analyses must remain intact.
+
+## Capture Product Review (#9851, #9857)
+
+See `docs/development/HANDOFF.md` and `docs/development/capture_product_review.md`. Bounded duplicate-frame cache and child startup recovery are covered by six focused tests. The camera suite passed 241 tests before the recovery change. GUI #9843 remains independently owned; hardware qualification remains outstanding.
