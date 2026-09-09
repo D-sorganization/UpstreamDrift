@@ -13,6 +13,16 @@
 
 ## Objective and Status
 
+Latest player steering: #9913 requires action feedback, capture/swing and model
+status, clickable next steps, detailed contextual help, detachable screens with
+close-to-redock, and familiar fullscreen video interactions. Implement and merge
+to remote main as part of the active goal. Session capture-product-01a08427-journey
+owns Capture Rig/tests in this branch; preserve the launched PID50860 checkout.
+
+Tools numerical PR #5136 at e92cacd3f5e775f686ffcc4b0eace034b42ebd68 fixes OpenCV 5 compatibility. Normal commit/pre-push hooks pass (two pytest workers after a native parallel import crash); Python 3.11/3.12 shared CI tests now pass. Three other jobs fail before checkout on runner-3 EACCES for `Tools/__pycache__/build_hooks.cpython-312.pyc`. No merge or runner mutation yet.
+Tools#5137 moving-reference contracts/solver are separate in Worktrees/Tools-calibration-numerics,
+branch feat/5137-reference-placements;12 placement tests plus API gate pass.
+
 Complete the newly requested everyday calibration, sourced club database/player bag,
 and capability-driven setup wizard. The full prior fleet rollout also remains required.
 Detailed execution children and dependency/acceptance boundaries are recorded in
@@ -42,6 +52,15 @@ geometry, club data and wizard work remain open. Do not close #9898 or its epic 
   retains standing UP-D0/UP-D1 governance and other agents' historical context.
 - User-owned changes: none in this new isolated worktree. The launched application
   remains in the separate UpstreamDrift-ubuntu-ci checkout.
+
+## Journey Qualification (#9913)
+
+- JourneyPanel/JourneyActions provide visible running/failure/retry and capture identity; history preserves detector/model context per capture without precreating record destinations.
+- Metadata identifies actual estimators and changed swing edits; output availability is not scientific or hash verification.
+- Existing Qt widgets move between panes/windows; floating close redocks, F11/Escape restore prior presentation, paused playback recomposes on resize.
+- Invalid capture selection clears prior playback, matches and provenance. Help renders canonical steps with search/navigation; generated guide and parity registry updated.
+- Capture and feature-parity suites pass after correcting an obsolete title expectation; final focused run passed 37 tests in 10.315 s. Mypy, Ruff, file budgets and design-manual governance pass. Central development-log audit reports pre-existing legacy entry schema debt; normal hooks remain to run.
+- Visual inspection at 1280x800 uses explicit Windows fonts in offscreen Qt and the real theme. Fixed unreadable default HTML link blue through theme styling. Artifacts: TEMP/capture-9913-visual.
 
 ## Validation
 
