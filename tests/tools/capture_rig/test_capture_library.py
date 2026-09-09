@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 
 import pytest
 
@@ -110,11 +111,62 @@ def test_rename_rolls_back_when_index_write_fails(
     library.register(root)
     from src.tools.capture_rig import capture_library
 
-    def fail(*args: object, **kwargs: object) -> None:
-        raise OSError("disk unavailable")
+    real_write = capture_library.write_document
+
+    def fail(path: Path, payload: dict) -> None:
+        if path.name == "recordings.json":
+            raise OSError("disk unavailable")
+        real_write(path, payload)
 
     monkeypatch.setattr(capture_library, "write_document", fail)
     with pytest.raises(OSError, match="disk unavailable"):
         library.rename_recording(root, "a", "renamed.avi")
     assert (root / "a_1.avi").exists() and not (root / "renamed.avi").exists()
     assert load_bundle(root)[1].recordings[0].file == "a_1.avi"
+
+
+def test_interrupted_rename_recovers_without_overwriting_other_files(
+    tmp_path: Path,
+) -> None:
+    root = _bundle(tmp_path)
+    library = CaptureLibrary(tmp_path / "library")
+    library.register(root)
+    journal = root / ".recording-rename.json"
+    journal.write_text(
+        json.dumps(
+            {
+                "schema_version": "recording-rename/1.0.0",
+                "view": "a",
+                "source": "a_1.avi",
+                "target": "renamed.avi",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / "a_1.avi").rename(root / "renamed.avi")
+    library.recover_rename(root)
+    assert (root / "a_1.avi").is_file() and not journal.exists()
+    journal.write_text(
+        json.dumps(
+            {
+                "schema_version": "recording-rename/1.0.0",
+                "view": "a",
+                "source": "../outside.avi",
+                "target": "renamed.avi",
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError):
+        library.recover_rename(root)
+    assert (root / "a_1.avi").is_file()
+
+
+def test_catalog_operations_release_database_handles(tmp_path: Path) -> None:
+    library = CaptureLibrary(tmp_path / "library")
+    library.register(_bundle(tmp_path))
+    library.list()
+    path = library.root / "capture_catalog.sqlite3"
+    moved = path.with_suffix(".backup")
+    path.rename(moved)  # Windows refuses this when a connection remains open.
+    moved.rename(path)
