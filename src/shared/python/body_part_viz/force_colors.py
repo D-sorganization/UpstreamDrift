@@ -53,7 +53,7 @@ class ForceColorScale:
                 raise ValueError(f"{name} must be an opaque #RRGGBB color")
             object.__setattr__(self, name, value.lower())
 
-    def color(self, force_n: Real | None, base_color: str) -> str:
+    def color(self, force_n: float | Real | None, base_color: str) -> str:
         """Return base styling when off/unavailable, otherwise clipped sRGB color."""
         if not isinstance(base_color, str):
             raise TypeError("base_color must be a string")
