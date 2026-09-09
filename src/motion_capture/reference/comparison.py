@@ -10,10 +10,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Annotated, Any, Literal, Self
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, model_validator
 
 from src.motion_capture.provenance import now_utc, sha256_of, stamp
 from src.motion_capture.reference.model import Asset
@@ -24,6 +24,11 @@ from src.shared.python.core.contracts import require
 COMPARISON_SESSION_SCHEMA = "comparison-session/1.0.0"
 COMPARISON_EXPORT_SCHEMA = "comparison-export/1.0.0"
 DEFAULT_REFERENCE_COLOUR = "#00dcff"
+MAX_COMPARISON_BYTES = 256_000
+ComparisonView = Annotated[
+    str, Field(min_length=1, max_length=64, pattern=r"^[\w -]+$")
+]
+_VIEW_ADAPTER = TypeAdapter(ComparisonView)
 
 
 class ComparisonLayer(BaseModel):
@@ -54,7 +59,7 @@ class ComparisonSession(BaseModel):
     schema_version: Literal["comparison-session/1.0.0"] = "comparison-session/1.0.0"
     id: str = Field(default_factory=lambda: str(uuid4()))
     session_root: str = Field(min_length=1)
-    view: str = Field(min_length=1, max_length=64)
+    view: ComparisonView
     reference_id: str
     reference_kind: Literal["motion", "video"]
     registration: ReferenceRegistration | None = None
@@ -68,6 +73,8 @@ class ComparisonSession(BaseModel):
             raise ValueError("Comparison session id must be a canonical UUID")
         if str(UUID(self.reference_id)) != self.reference_id:
             raise ValueError("Reference id must be a canonical UUID")
+        if self.registration and self.registration.reference_id != self.reference_id:
+            raise ValueError("Registration must belong to the comparison reference")
         return self
 
     def changed(self, **values: object) -> Self:
@@ -99,7 +106,8 @@ class ComparisonSession(BaseModel):
     ) -> Self:
         current = self.layer
         new_layer = current.model_validate(
-            {
+            current.model_dump()
+            | {
                 "colour": colour if colour is not None else current.colour,
                 "opacity": opacity if opacity is not None else current.opacity,
                 "visible": visible if visible is not None else current.visible,
@@ -113,6 +121,9 @@ class ComparisonSession(BaseModel):
 
 def comparison_session_path(root: Path, view: str, reference_id: str) -> Path:
     """Conventional path for saved comparison session sidecars."""
+    _VIEW_ADAPTER.validate_python(view)
+    if str(UUID(reference_id)) != reference_id:
+        raise ValueError("Reference id must be a canonical UUID")
     return root / "comparisons" / f"{view}_{reference_id}.json"
 
 
@@ -129,6 +140,8 @@ def save_comparison_session(session: ComparisonSession, root: Path) -> Path:
 def load_comparison_session(path: Path) -> ComparisonSession:
     """Load comparison session from a JSON sidecar."""
     require(path.is_file(), "Comparison file does not exist", str(path))
+    if path.stat().st_size > MAX_COMPARISON_BYTES:
+        raise ValueError("Comparison file is too large")
     return ComparisonSession.model_validate_json(path.read_text(encoding="utf-8"))
 
 
