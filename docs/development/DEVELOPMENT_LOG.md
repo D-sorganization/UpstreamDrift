@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-08
 - **Last verified:** 2026-09-09 (75 reference/live tests pass in 101.48 s; all three formerly skipped native comparisons pass in 2.78 s after Pinocchio installation; 13 degradation/registry tests pass; root lint/format and two-module mypy pass)
 - **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
-- **Next step:** Published 7c0a84b88 integrates main 403292ca3 without changing validated optimization bytes; all normal push hooks and the 80-case mixed mocked/reference collection pass. Follow protected CI/review on #9841, including Bioptim. The adaptive reference retains strict endpoint budgets and the original candidate/ceiling; physical/acoustic validation remains separate.
+- **Next step:** Publish the CI-stub callback annotation correction (reproduced RED, two-module mypy GREEN and 67 reference tests pass). Prior 7c0a84b88 integrates main 403292ca3 and all normal hooks/80 mixed tests pass. Follow #9841 CI and #9842: real Bioptim tests now identify an existing MX_eye import incompatibility before optimization (8 fail/5 pass). Physical/acoustic validation remains separate.
 
 ### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
 
