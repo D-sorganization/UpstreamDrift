@@ -1,11 +1,17 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+## Reference Overlay: Comparison Workspace, Saved Layers & Reproducible Exports (#9866)
+
+Branch `feat/9866-reference-comparison-workspace` implements the synchronized comparison
+workspace, saved layer configurations, and reproducible video/sidecar exports for calibrated
+reference motions and capture takes. See canonical `docs/development/HANDOFF.md` and `DL-#9866`.
+All focused unit and UI tests pass; quality gates verified.
+
 ## Calibrated Scene Registration & Event Synchronization (#9865)
 
 Branch `feat/9865-scene-registration` implements calibrated reference scene registration,
 event-anchor and offset synchronization, bounded time warping, gap masking, and distortion-aware
-camera projection for ReferenceMotion and 2D expert videos. See canonical `docs/development/HANDOFF.md`
-and `DL-#9865`. Synchronized projection controls and comparison UI (#9866) remain open goal work.
+camera projection for ReferenceMotion and 2D expert videos. PR #9871 merged to main (`10caddd21`).
 
 ## Coaching Reference Work in Progress (#9862)
 
