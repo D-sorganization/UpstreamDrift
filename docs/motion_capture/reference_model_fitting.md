@@ -26,8 +26,9 @@ workstation with one BLAS thread. Outputs must use a new directory: previous run
 overwritten. Change `source` to `data/C3D_TA_Iron.c3d` for the iron capture and
 choose another output directory. Set `models` to `["all"]` for the available
 catalog, or list selected names. `stride: 12` selects every twelfth source frame
-for an inexpensive 30 Hz survey; `stride: 1` retains every source sample.
+for an inexpensive approximately 30 Hz survey; `stride: 1` retains every source sample.
 The saved timestamps remain source timestamps, without implicit event shifts.
+Driver is 360 Hz; iron is 359 Hz. The workflow uses each file's actual clock.
 
 Use one BLAS thread per fitting worker, particularly alongside other agents.
 On the development workstation the default was 20 threads; sparse full-rate

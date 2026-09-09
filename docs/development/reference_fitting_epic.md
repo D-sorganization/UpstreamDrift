@@ -88,8 +88,8 @@ captures and the catalog were rerun with this corrected solver.
 ## Final Corrected Qualification
 
 All 20 bundles from solver commit `2e84bb810` pass file-hash and finite-positive
-dimension verification. Driver full-rate: 654 frames, 9,800 retained observations,
-48.86 mm RMS and 100.54 mm maximum. Iron full-rate: 657 frames, 9,839 retained
+dimension verification. Driver full-rate (360 Hz): 654 frames, 9,800 retained observations,
+48.86 mm RMS and 100.54 mm maximum. Iron full-rate (359 Hz): 657 frames, 9,839 retained
 observations, 49.92 mm RMS and 96.62 mm maximum. Neither run rejects observations;
 both use 300 evaluations across three stages, which is not a convergence claim.
 
