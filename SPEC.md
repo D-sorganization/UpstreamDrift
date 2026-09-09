@@ -5600,3 +5600,4 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Resolve sidekick extension overlay supported scopes and fix test path resolution (#9572).
 
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/tools/bunker_shot_gui/shot3d.py` to optimize array magnitude calculation. (spec-exempt: micro-optimization)
+- Publish manifest.json, capabilities.json, and screenshots.json from import-free companion publication builder (#9416 #9434).
