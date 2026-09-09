@@ -10,15 +10,24 @@ from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from PyQt6.QtWidgets import QFileDialog, QProgressDialog, QPushButton, QWidget
 
 from .swing_export import export_swing
+from src.motion_capture.coaching import DrawingLayer
 
 
 class SwingExportWorker(QThread):
     progress = pyqtSignal(int, int)
 
-    def __init__(self, root: Path, view: str, out: Path, parent: QObject) -> None:
+    def __init__(
+        self,
+        root: Path,
+        view: str,
+        out: Path,
+        parent: QObject,
+        drawings: DrawingLayer | None = None,
+    ) -> None:
         super().__init__(parent)
         self.root, self.view, self.out = root, view, out
         self.message = ""
+        self.drawings = drawings
 
     def run(self) -> None:
         try:
@@ -28,6 +37,7 @@ class SwingExportWorker(QThread):
                 self.out,
                 cancelled=self.isInterruptionRequested,
                 progress=self.progress.emit,
+                drawings=self.drawings,
             )
             self.message = f"Swing video and provenance saved: {self.out}"
         except (OSError, ValueError, cv2.error) as exc:
@@ -45,16 +55,19 @@ class SwingExportActions(QObject):
         view: Callable[[], str],
         save: Callable[[], bool],
         status: Callable[[str], None],
+        drawings: Callable[[], DrawingLayer | None] = lambda: None,
+        label: str = "Export swing…",
     ) -> None:
         super().__init__(parent)
         self.widget, self.root = parent, root
         self._view, self._save, self._status = view, save, status
+        self._drawings = drawings
         self._worker: SwingExportWorker | None = None
         self._progress: QProgressDialog | None = None
         self._closing = False
-        self.button = QPushButton("Export swing…")
+        self.button = QPushButton(label)
         self.button.setToolTip(
-            "Save selection, then export its frames and crop to a new video. Originals stay intact."
+            "Save changes, then export the saved frame selection and crop to a new video. Originals stay intact."
         )
         self.button.clicked.connect(self.choose_output)
 
@@ -84,7 +97,9 @@ class SwingExportActions(QObject):
         self._progress.setMinimumDuration(0)
         self._progress.setAutoClose(False)
         self._progress.canceled.connect(self.cancel)
-        self._worker = SwingExportWorker(self.root, self._view(), out, self)
+        self._worker = SwingExportWorker(
+            self.root, self._view(), out, self, self._drawings()
+        )
         self._worker.progress.connect(self._update)
         self._worker.finished.connect(self._finished)
         self._worker.start()

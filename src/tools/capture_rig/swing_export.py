@@ -12,6 +12,7 @@ from typing import Any
 
 from src.motion_capture.rig.documents import write_document
 from src.motion_capture.rig.edits import ViewEdit, load_edits
+from src.motion_capture.coaching import DrawingLayer
 
 from .clips import ClipRange, ClipRendering, export_clip
 from .player import VideoReader
@@ -28,6 +29,20 @@ def _digest(path: Path, cancelled: Callable[[], bool]) -> str:
     return digest.hexdigest()
 
 
+def publish_export(staged: Path, out: Path) -> None:
+    """Publish staged media/JSON without overwriting either destination.
+
+    Roll back the media link when publishing metadata fails. Both staged files
+    must be on the destination filesystem; callers retain staging ownership.
+    """
+    os.link(staged, out)
+    try:
+        os.link(staged.with_suffix(".json"), out.with_suffix(".json"))
+    except OSError:
+        out.unlink()
+        raise
+
+
 def export_swing(
     root: Path,
     view: str,
@@ -35,6 +50,7 @@ def export_swing(
     *,
     cancelled: Callable[[], bool] = lambda: False,
     progress: Callable[[int, int], None] = lambda done, total: None,
+    drawings: DrawingLayer | None = None,
 ) -> dict[str, Any]:
     """Export saved trim/crop and provenance, refusing existing output files.
 
@@ -60,11 +76,22 @@ def export_swing(
     edit = load_edits(root).views.get(view, ViewEdit())
     source_hash = _digest(original.recording, cancelled)
     with VideoReader(original.recording) as reader:
+        if drawings is not None and (
+            drawings.view != view
+            or drawings.frames != reader.frame_count
+            or (drawings.width, drawings.height) != (reader.width, reader.height)
+        ):
+            raise ValueError("Drawing layer does not match the original recording")
         clip = ClipRange(
             edit.first, edit.last if edit.last is not None else reader.frame_count - 1
         )
     rendering = ClipRendering(
-        crop=edit.crop, clock=False, strict=True, cancelled=cancelled, progress=progress
+        crop=edit.crop,
+        clock=False,
+        strict=True,
+        cancelled=cancelled,
+        progress=progress,
+        drawings=drawings,
     )
     with TemporaryDirectory(prefix=".swing-export-", dir=out.parent) as temporary:
         staged = Path(temporary) / out.name
@@ -75,6 +102,7 @@ def export_swing(
             source=str(original.recording),
             source_sha256=source_hash,
             edit=edit.model_dump(mode="json"),
+            drawings=drawings.model_dump(mode="json") if drawings else None,
             padding={
                 "right": edit.crop.width % 2 if edit.crop else 0,
                 "bottom": edit.crop.height % 2 if edit.crop else 0,
@@ -84,10 +112,5 @@ def export_swing(
         write_document(staged_notes, result)
         if cancelled():
             raise InterruptedError("Swing export cancelled")
-        os.link(staged, out)
-        try:
-            os.link(staged_notes, sidecar)
-        except OSError:
-            out.unlink()
-            raise
+        publish_export(staged, out)
     return result

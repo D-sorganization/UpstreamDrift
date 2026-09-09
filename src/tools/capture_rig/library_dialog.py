@@ -34,6 +34,7 @@ from . import styling
 from .capture_library import CaptureLibrary, LibraryEntry, read_notes
 from .flow_layout import FlowLayout
 from .swing_editor import SwingEditor
+from .coaching_dialog import show_coaching
 
 
 class LibraryScan(QThread):
@@ -159,6 +160,7 @@ class LibraryDialog(QDialog):
         for text, callback in (
             ("Open capture", self.open_selected),
             ("Edit swing…", self.edit_selected),
+            ("Draw References…", self.draw_selected),
             ("Add session folder…", self.add_session),
             ("Open folder", self.open_folder),
             ("Rename recording…", self.rename_selected),
@@ -364,6 +366,10 @@ class LibraryDialog(QDialog):
                 self.refresh()
             except (ValueError, OSError, sqlite3.Error) as exc:
                 self.status.setText(str(exc))
+
+    def draw_selected(self) -> None:
+        if self._leave_selection():
+            self._operate(lambda root: show_coaching(root, self))
 
     def choose_location(self) -> None:
         if self.loading:

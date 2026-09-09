@@ -5,32 +5,36 @@ flowchart LR
   n1["Session and Export Files"]
   n2["Capture Library"]
   n3["Swing Selection"]
-  n4["Set up Cameras and Plan"]
-  n5["Calibrate Each Camera Once"]
-  n6["Record or Import the Swing Take"]
-  n7["Detect the Pose in Every View"]
-  n8["Annotate or Correct Points by Hand"]
-  n9["Review Joint Reliability"]
-  n10["Reconstruct in 3-D"]
-  n11["Analyse the Single View"]
-  n12["Fit the Articulated Golfer"]
-  n13["Kinetics and Model Comparison"]
-  n14["Export to the Motion Pipeline"]
-  n4 -->|"Resolved plan / imported views"| n6
-  n6 -.->|"Separate chessboard take"| n5
-  n6 -.->|"Recorded swing videos"| n7
-  n6 -.->|"Video frames"| n8
-  n7 -.->|"2-D observations"| n9
-  n8 -.->|"Converted observation set"| n9
-  n7 -.->|"Single-view observations"| n11
-  n5 -.->|"intrinsics.json"| n10
-  n9 -.->|"Reviewed multi-view observations"| n10
-  n10 -.->|"joints_3d_m.npy"| n12
-  n12 -.->|"joint_angles.json"| n13
-  n10 -.->|"Reconstruction artifacts"| n14
-  n14 -.->|"TRC / canonical JSON"| n0
-  n11 -.->|"Annotated clips and metrics"| n1
-  n2 -->|"Existing session / imported videos"| n6
-  n6 -.->|"Original camera recordings"| n3
-  n3 -.->|"swing_edits.json"| n7
+  n4["Coaching References"]
+  n5["Set up Cameras and Plan"]
+  n6["Calibrate Each Camera Once"]
+  n7["Record or Import the Swing Take"]
+  n8["Detect the Pose in Every View"]
+  n9["Annotate or Correct Points by Hand"]
+  n10["Review Joint Reliability"]
+  n11["Reconstruct in 3-D"]
+  n12["Analyse the Single View"]
+  n13["Fit the Articulated Golfer"]
+  n14["Kinetics and Model Comparison"]
+  n15["Export to the Motion Pipeline"]
+  n5 -->|"Resolved plan / imported views"| n7
+  n7 -.->|"Separate chessboard take"| n6
+  n7 -.->|"Recorded swing videos"| n8
+  n7 -.->|"Video frames"| n9
+  n8 -.->|"2-D observations"| n10
+  n9 -.->|"Converted observation set"| n10
+  n8 -.->|"Single-view observations"| n12
+  n6 -.->|"intrinsics.json"| n11
+  n10 -.->|"Reviewed multi-view observations"| n11
+  n11 -.->|"joints_3d_m.npy"| n13
+  n13 -.->|"joint_angles.json"| n14
+  n11 -.->|"Reconstruction artifacts"| n15
+  n15 -.->|"TRC / canonical JSON"| n0
+  n12 -.->|"Annotated clips and metrics"| n1
+  n2 -->|"Existing session / imported videos"| n7
+  n7 -.->|"Original camera recordings"| n3
+  n3 -.->|"swing_edits.json"| n8
   n3 -.->|"Swing video + provenance"| n1
+  n2 -->|"Original camera view + saved drawing layer"| n4
+  n3 -->|"Original camera view + saved drawing layer"| n4
+  n4 -.->|"Annotated PNG / swing video + portable drawing sidecar"| n1

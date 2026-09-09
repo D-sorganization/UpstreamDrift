@@ -32,6 +32,8 @@ from .annotate_widget import ImageCanvas
 from . import styling
 from .player import VideoReader
 from .swing_export_actions import SwingExportActions
+from .coaching_dialog import show_coaching
+from .flow_layout import FlowLayout
 
 
 class CropCanvas(ImageCanvas):
@@ -145,7 +147,7 @@ class SwingEditor(QDialog):
         reset_crop.clicked.connect(lambda: self.set_crop(None))
         crop_row.addWidget(reset_crop)
         layout.addLayout(crop_row)
-        buttons = QHBoxLayout()
+        buttons = FlowLayout(spacing=6)
         reset = QPushButton("Reset this view")
         reset.clicked.connect(self.reset_view)
         save = QPushButton("&Save selection")
@@ -153,13 +155,20 @@ class SwingEditor(QDialog):
         save.clicked.connect(self.save)
         close = QPushButton("Close")
         close.clicked.connect(self.close)
-        buttons.addWidget(reset)
-        buttons.addWidget(self.exporter.button)
-        buttons.addStretch()
-        buttons.addWidget(save)
-        buttons.addWidget(close)
+        buttons.add_widget(reset)
+        references = QPushButton("Draw References…")
+        references.clicked.connect(self._draw_references)
+        buttons.add_widget(references)
+        buttons.add_widget(self.exporter.button)
+        buttons.add_widget(save)
+        buttons.add_widget(close)
         layout.addWidget(self.status)
         layout.addLayout(buttons)
+
+    def _draw_references(self) -> None:
+        self._stop()
+        if self.save():
+            show_coaching(self.root, self, self._current)
 
     def current_edit(self) -> ViewEdit:
         crop = CropRect(

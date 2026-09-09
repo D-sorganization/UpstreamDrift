@@ -495,7 +495,7 @@
     },
     {
       "feature_id": "tools.capture_rig",
-      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management",
+      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management; saved coaching lines/arrows/circles/ellipses/rectangles with selection, resize, undo/redo, frame visibility and annotated still/video exports",
       "status": "exempt",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
@@ -506,7 +506,7 @@
       "tiles": [
         "capture_rig"
       ],
-      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 and expert/full-body reference overlays #9863 remain planned, not shipped.",
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert/full-body reference overlays #9863 remain planned, not shipped.",
       "id": "tools.capture_rig"
     },
     {
@@ -1576,6 +1576,13 @@
       "view": "workflow"
     },
     {
+      "id": "capture.references",
+      "title": "Coaching References",
+      "description": "Saved lines, arrows, circles, ellipses and rectangles in original camera pixels.",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "view": "workflow"
+    },
+    {
       "id": "step.setup",
       "title": "Set up Cameras and Plan",
       "description": "Bind each camera to a named view so takes are repeatable.",
@@ -2029,13 +2036,40 @@
       "evidence": "src/tools/capture_rig/swing_export.py",
       "constraint": "Separate output; source hash, exact recipe and any encoder padding are recorded",
       "view": "workflow"
+    },
+    {
+      "source": "capture.library",
+      "target": "capture.references",
+      "artifact": "Original camera view + saved drawing layer",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "constraint": "Visual references remain separate from measured pose observations",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.selection",
+      "target": "capture.references",
+      "artifact": "Original camera view + saved drawing layer",
+      "kind": "workflow",
+      "evidence": "src/tools/capture_rig/coaching_dialog.py",
+      "constraint": "Visual references remain separate from measured pose observations",
+      "view": "workflow"
+    },
+    {
+      "source": "capture.references",
+      "target": "files",
+      "artifact": "Annotated PNG / swing video + portable drawing sidecar",
+      "kind": "file",
+      "evidence": "src/tools/capture_rig/coaching_export.py",
+      "constraint": "Draw at source resolution before crop; retain original frame numbers and preserve media",
+      "view": "workflow"
     }
   ],
   "inputs": {
     "src/config/models.yaml": "eec7627d19ac59e5910f0b151e429bd7d9f493c8ad084d4a3340d96b94b2d0ff",
     "src/config/launcher_manifest.json": "24c3a7e81e5c88fc493dca33976cd61dc82a4cddab6da93d74c74f4cc1b50747",
-    "src/config/feature_parity.json": "e97354ef41f18c45f32a8bca1d9e8e3b9be8feb035d36474fd754abb3aa4c3fa",
-    "src/config/capability_connections.json": "3bae1863a3d4f61cee29afb89d0348a9f9fac9e76f4a3530d3113c33934a13fa",
+    "src/config/feature_parity.json": "d87ede4523e7cc4bba859ef9181a2e18b4da04cebc820cbdfed484cd5d3aadf1",
+    "src/config/capability_connections.json": "79129d55c76187476e4b45c495d949deccade384017756fb271f186bf07a00f4",
     "src/tools/capture_rig/workflow.py": "ef3c35db12049cb4ca5aa08c9a8ca5f376dd114efc61b36f72f5fd036f00e147"
   }
 }
