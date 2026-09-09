@@ -26,65 +26,48 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** feat/issue-9915-agent-context
 - **Paths:** `docs/agent_context`, `.github/workflows/ci-standard.yml`, `AGENTS.md`
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09; 41 existing boundary tests and three context/gate tests pass; explicit boundary reviews are recorded. Initial navigation evaluation: and 12/12 curated task expectations pass (max 13238 characters; initial median 2193 ms). Required CI wiring not yet qualified.
+- **Last verified:** 2026-09-09; 41 existing boundary tests and three context/gate tests pass; explicit boundary reviews are recorded. Current-main capture merge:15 atlas/workflow tests pass and both affected reviews renewed. Initial navigation evaluation:12/12 curated task expectations pass (max 13238 characters; initial median 2193 ms). Required CI wiring not yet qualified.
 - **Summary:** Twelve components, five integration contracts and twelve navigation tasks linked to existing launcher/parity/capture atlas authorities. Parent epic Repository_Management#1629 remains active; no subscription infrastructure is required.
 - **Next step:** Qualify the shared provider changes with the normal local checks before publishing its protected PR.
 
-### DL-#9894 · Scoped Ubuntu CI Dependencies
+### DL-#9913 · Capture Journey Feedback and Detachable Views
 
 - **State:** in_review
 - **Owner:** codex
-- **Issue:** #9894
-- **Branch:** fix/9894-ubuntu-ci-sources
-- **PR:** #9896
-- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/, tests/scripts/
+- **Issue:** #9913; epic #9906
+- **Branch:** feat/9913-capture-journey
+- **PR:** #9917 (open)
+- **Paths:** src/tools/capture_rig/, tests/tools/capture_rig/, generated guide and parity registry
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`)
-- **Summary:** Scoped signed APT sources; runner config preserved.
-- **Evidence:** Six Bash tests and four Ubuntu installs pass (run 34387111648).
-- **Next step:** Finish combined protected checks after #9890/#9893.
+- **Last verified:** 2026-09-09 (`71d8f5a1f`;445 tests, LoD/function/doc budgets and regenerated atlas pass)
+- **Summary:** Capture identity/history, linked workflow/help/provenance, safe selection clearing and retained Qt views.
+- **Next step:** Qualify protected CI/review on #9917 and merge.
 
-### DL-#9892 · Fleet Guide Compatibility
+### DL-#9911 · Preview Discovery Failure Recovery
 
-- **State:** in_review
+- **State:** shipped
 - **Owner:** codex
-- **Issue:** #9892; Repository_Management#1579
-- **Branch:** fix/9892-fleet-guide-validation
-- **PR:** #9893
-- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py, generated agent entry files
+- **Issue:** #9911
+- **Branch:** feat/capture-guided-setup
+- **PR:** #9910 (merged)
+- **Paths:** src/tools/capture_rig/preview.py, tests/tools/capture_rig/test_preview.py
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (27 tests and live consistency check pass)
-- **Summary:** Retain central guidance with precise optional/external path handling and exact managed-notice exemptions; preserve real missing-path and duplicate-instruction failures.
-- **Evidence:** Two RED/GREEN reproductions; inherited instructor evidence remains in #9890.
-- **Next step:** Complete protected follow-up after #9890; central canonical corrections are in Repository_Management#1627.
+- **Last verified:** 2026-09-09 (`18c8f922e` merge; recovery tests pass)
+- **Summary:** Report discovery imports/timeouts through preview status.
+- **Next step:** Retain the preview recovery regressions.
 
-### DL-#9883 · Instructor Reference Alignment Workspace
+### DL-#9898 · Calibration Profile Compatibility
 
-- **State:** in_review
+- **State:** in_progress
 - **Owner:** codex
-- **Issue:** #9883 (advanced epic #9863)
-- **PR:** #9890
-- **Branch:** `feat/9883-reference-alignment-controls`
-- **Paths:** `src/tools/capture_rig/reference_comparison.py`, `reference_controls.py`, `reference_timeline.py`, `styling.py`, related tests, docs and capability atlas
+- **Issue:** #9898; epic #9897 (goal also includes #9902 and #9906)
+- **Branch:** feat/capture-guided-setup
+- **PR:** #9910 (merged); #9917 boundary cleanup
+- **Paths:** src/tools/capture_rig/calibration_profiles.py, tests/tools/capture_rig/test_calibration_profiles.py, docs/development/capture_setup_execution_plan.md
 - **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`; 67 integrated alignment/render/state/timing cases pass)
-- **Summary:** Responsive placement/timing/notes inspector, independent expert scrubbing and paired swing events, pending-edit guards, undo/reset and manual stale-evidence review with settings backup.
-- **Evidence:** Native screenshots at desktop/laptop sizes; shared rotation tests, perspective preservation, invalid event rejection, notes/switch/Escape guards, stale settings backup and existing exact preview/export parity. Full-PR architecture, four-module mypy and LoD/DRY no-growth pass; integrated timing and rendering regressions pass.
-- **Next step:** Complete protected review #9890 after rendering #9889 merges (timing #9885 merged).
-
-### DL-#9882 · Comparison Rendering and Export Qualification
-
-- **State:** in_review
-- **Owner:** codex
-- **Issue:** #9882 (advanced reference epic #9863)
-- **Branch:** fix/9882-comparison-rendering
-- **PR:** #9889 (supersedes #9888)
-- **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py, reference_comparison.py, clips.py, swing_export.py, related tests/docs
-- **Started:** 2026-09-09
-- **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)
-- **Summary:** Shared preview/export compositor, motion opacity, coverage-aware expert homography, retained decoders and strict staged publication.
-- **Evidence:** 48 comparison/coaching/export regressions pass; 33 renderer/state cases pass after adding three cancellation/homography checks. Five-module mypy, Ruff and architecture pass. Exact pre-encode pixel parity and complete real-container decoding are tested.
-- **Next step:** No-growth gates pass. Integrate parent #9885 and complete protected checks. #9883 remains separate.
+- **Last verified:** 2026-09-09 (`cb8493e7e`; profile boundary cleanup in #9917)
+- **Summary:** Optical profile review UI and verified rig export; everyday observations remain required.
+- **Next step:** Qualify UI/consumers, then add reference sessions under #9898/#9900.
 
 ### DL-#9881 · Reference Timing and Camera Evidence
 
@@ -97,7 +80,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`SELF`; local qualification passed; protected checks pending)
 - **Summary:** Immutable bounded event anchors, binary-search gap-aware sampling, actual camera/clock snapshots and stale-registration checks replace unsupported calibration assumptions.
-- **Evidence:** Twelve adverse regressions first failed. Combined suite 46 passed including final camera fixtures; fourteen-module mypy passes. Refreshed diagnostic sampling medians are 0.157/0.093/0.304 ms across 120/1200/12000 source frames; source fingerprint retained. CI shape typing and function budget corrections pass 16 focused regressions.
+- **Evidence:** 12 adverse regressions failed before repair; 46 combined tests and 14-module mypy pass. Sampling medians: 0.157/0.093/0.304 ms for120/1200/12000 frames. CI typing/budget corrections pass16 tests.
 - **Next step:** Finish protected checks, then continue #9882/#9883.
 
 ### DL-#9879 · Comparison State and Export Lifetime
@@ -111,7 +94,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`SELF`; local validation complete)
 - **Summary:** Preserve exact unrelated layer/registration fields, reject bad saved records, and reuse the existing export controller for safe thread ownership and deferred close.
-- **Evidence:** Nine regressions failed on merged main; subsequent 31 focused comparison, real-thread cancellation, existing swing and coaching tests pass. Three modified source modules pass mypy.
+- **Evidence:** Nine adverse regressions preceded repair;31 comparison/cancellation/swing/coaching tests and three-module mypy pass.
 - **Next step:** Architecture/DRY/LoD pass; await protected checks. Continue #9881, #9882 and #9883 before closing #9863.
 
 ### DL-#9865 · Reference Scene Registration & Synchronization
@@ -139,7 +122,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-09
 - **Last verified:** 2026-09-09 (`90b147e10`; local qualification complete)
 - **Summary:** Versioned portable reference assets retain explicit mapping, source hashes, timestamps and missing points; native library adds imports, notes/archive and background I/O. Expert videos remain linked 2D assets.
-- **Evidence:** 30 integrated backend/import/adapter/reference UI/existing-library tests pass, including a real C3D fixture and fresh-process loader-isolation regression. Four native reference tests pass after correcting laptop-width metadata layout. Eight source modules pass mypy; architecture budget passes after alignment with the merged editing helper.
+- **Evidence:** 30 integration tests pass, including real C3D and fresh-process isolation. Four native UI tests, eight-module mypy and architecture checks pass after layout/helper corrections.
 - **Next step:** Integrate the drawing theme correction, then verify protected CI on #9870.
 
 ### DL-#9862 · Saved Coaching References
@@ -370,6 +353,52 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Address review feedback on PR #9725 and merge when approved.
 
 ## Shipped (Last 90 Days)
+
+### DL-#9882 · Comparison Rendering and Export Qualification
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9882
+- **Branch:** fix/9882-comparison-rendering
+- **PR:** #9896 (integrates #9889)
+- **Paths:** src/tools/capture_rig/reference_rendering.py, reference_export.py
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Shared compositor, coverage-aware expert homography and staged exports delivered with qualified product #9896.
+
+### DL-#9894 · Scoped Ubuntu CI Dependencies
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9894
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** .github/workflows/ci-standard.yml, scripts/ci/, tests/scripts/
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Signed per-job APT sources preserve shared-runner configuration; six Bash regressions and standard CI pass.
+
+### DL-#9892 · Fleet Guide Compatibility
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9892
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** scripts/check_agent_docs_consistency.py, tests/architecture/test_check_agent_docs_consistency.py
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Central managed guidance and legitimate external/optional paths pass without hiding real missing-file failures.
+
+### DL-#9883 · Instructor Reference Alignment Workspace
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9883
+- **PR:** #9896 (merged; prior proposals preserved)
+- **Paths:** src/tools/capture*rig/reference*\*.py, styling.py, tests/tools/capture_rig/
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`5ef615e6fe22a046aec0bac4f80a1c241d03fef3`)
+- **Summary:** Responsive placement/timing/notes controls, event alignment, revision checks, preview/export parity and native layout evidence are delivered.
+- **Evidence:** Qualified candidate equals merged tree; standard unit gate passed 14,821 tests.
 
 Entries stay here for 90 days after merge, then move to the archive.
 

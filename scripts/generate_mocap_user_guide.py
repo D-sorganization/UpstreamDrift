@@ -41,7 +41,39 @@ Both kinds of session are plain folders written by
 `python3 -m src.motion_capture.rig`; every button in the tile runs that
 command, so a terminal user and a tile user produce the same files.
 
-## Detectors and Their Data
+## Navigate, Review, and Recover
+
+The persistent status area names the selected swing and capture folder. Hover
+over its identity to see the library capture ID and full folder. Use **Library**
+to name a swing, add notes, open another capture, or create an editable copy.
+Original recordings stay associated with their capture.
+
+Click a workflow step to show its actions and instructions. **Next Step** opens
+the suggested step without starting work. Read the blocked reason when an action
+is unavailable. The status area explains validation errors, running commands,
+completion, cancellation and failures; **Retry** repeats a failed action after
+you correct its settings. **View Activity Log** shows command diagnostics.
+
+**Capture Status** lists camera views, observation sets and matched variants.
+It reads detector names from saved metadata, distinguishes missing outputs and
+changed swing edits, and shows each variant's input views and observation set.
+Double-click an observation row to inspect its provenance. Its action history
+is saved in `capture_activity.json` in that capture's folder. A running record
+from an earlier app session is labelled unconfirmed, since it cannot prove a
+process is still alive. Finished commands and existing files do not establish
+tracking quality or scientific validity; review overlays, reliability and results.
+
+Use **Views** to pop out Live Cameras, Playback, Results, settings, workflow,
+actions or the log onto another monitor. Close a floating window to return its
+existing contents to the app. Double-click video or press **F11** for fullscreen;
+**Escape** restores the previous docked or floating view. **Redock All Screens**
+returns detached views, and **Reset Layout** restores the initial arrangement.
+Save a named layout when you are happy with the arrangement.
+
+**Help and Workflow** provides the same step instructions inside the app, with
+clickable step links and a Find field. Press Enter to find the next occurrence.
+
+## Pose Detection and Observation Sets
 
 MediaPipe (primary) and OpenPose BODY_25 through OpenCV DNN (second opinion)
 both write the same per-view record: `observations*/<view>.json` with the

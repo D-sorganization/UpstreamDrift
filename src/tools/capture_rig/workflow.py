@@ -83,8 +83,8 @@ SETUP = Step(
 
 INTRINSICS = Step(
     key="intrinsics",
-    title="Calibrate Each Camera Once",
-    purpose="Lens focal length and distortion per camera; the only precise setup step.",
+    title="Calibrate the Camera and Lens Profile",
+    purpose="Estimate lens focal length and distortion for each camera's capture settings.",
     requirements=(
         "A printed chessboard with 9x6 inner corners (10x7 squares), flat, one square measured to the millimetre.",
         "A 20-40 s recording per camera at the capture mode you will use: move the board slowly through the whole frame, corners and edges included, tilting up to ~45 degrees; sharp and well lit; board at least a fifth of the frame.",
@@ -94,6 +94,7 @@ INTRINSICS = Step(
         "Record the board session (one take, all cameras, 30 s) or import the board files.",
         "Enter the board size and square length, run *Calibrate intrinsics*.",
         "Keep intrinsics.json: it is the --intrinsics input of the first swing reconstruction.",
+        "Repeat calibration when optical zoom, focus, resolution or crop changes. Keep the matching camera profile with each capture; camera placement is evaluated separately.",
     ),
     actions=("record", "calibrate"),
     done=lambda m: m.intrinsics is not None,

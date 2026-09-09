@@ -170,3 +170,24 @@ The allocation poles are generalized actuator subspaces. The transmission
 channel is a declared phenomenological dead-zone model. Neither identifies
 scapular action, muscular inactivity, biological slack, or a preferred human
 technique.
+
+## Participant-Calibrated Twins and Population Ensembles
+
+- Contract and gate table:
+  [`PARTICIPANT_TWIN_CALIBRATION.md`](PARTICIPANT_TWIN_CALIBRATION.md)
+- Identity-safe cohort:
+  [`participant_twin_cohort.json`](data/participant_twin_cohort.json)
+- Inference, evaluation ledger, and public facade:
+  [`participant_twin_calibration.json`](data/participant_twin_calibration.json)
+
+Read `evaluation_ledger.gates` first. `private_governed_authority_contract` is
+`blocked_no_governed_participant_data`, so every downstream number is a
+synthetic-benchmark result. Then read `identifiability_screen` before
+`parameter_recovery`: the benchmark contains a declared exact alias, and the
+aliased and practically non-identifiable parameters are retained in the record
+but never reported as recovered. `posterior_contraction` and
+`held_out_evaluation` are separate sections on purpose; contraction is what the
+design and prior constrain, not out-of-sample skill. `transport_audit` retains
+every stratum level that appears only among held-out participants. Nothing in
+this package identifies anatomy, equipment, injury risk, or technique, and no
+personalized recommendation is emitted.

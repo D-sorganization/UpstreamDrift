@@ -61,6 +61,88 @@ def _host() -> PaneHost:
     )
 
 
+def test_closing_floating_pane_redocks_without_losing_content() -> None:
+    app = _app()
+    host = _host()
+    host.show()
+    dock = host.docks["a"]
+    content = dock.widget()
+    host.set_floating("a", True)
+    dock.close()
+    app.processEvents()
+    assert not dock.isFloating()
+    assert not dock.isHidden()
+    assert dock.widget() is content
+    host.close()
+
+
+def test_live_view_detaches_and_returns_when_closed() -> None:
+    app = _app()
+    host = _host()
+    host.show()
+    content = host.centralWidget()
+    host.pop_out("live")
+    assert host.central_view.window.centralWidget() is content
+    assert host.centralWidget() is not content
+    host.central_view.window.close()
+    app.processEvents()
+    assert host.centralWidget() is content
+    assert content.isVisible()
+    host.close()
+
+
+def test_fullscreen_escape_preserves_docking_and_content() -> None:
+    from PyQt6.QtTest import QTest
+
+    app = _app()
+    host = _host()
+    host.show()
+    dock = host.docks["a"]
+    content = dock.widget()
+    host.fullscreen("a")
+    app.processEvents()
+    assert dock.isFullScreen()
+    QTest.keyClick(dock, Qt.Key.Key_Escape)
+    app.processEvents()
+    assert not dock.isFullScreen()
+    assert not dock.isFloating()
+    assert dock.widget() is content
+    host.close()
+
+
+def test_views_menu_routes_to_named_pane_and_reset_returns_live_view() -> None:
+    _app()
+    host = _host()
+    host.show()
+    menu = host.view_menu(host)
+    menu.actions()[1].menu().actions()[0].trigger()
+    assert host.docks["a"].isFloating()
+    content = host.centralWidget()
+    menu.actions()[0].menu().actions()[0].trigger()
+    assert host.central_view.detached
+    host.reset()
+    assert host.centralWidget() is content
+    assert not host.docks["a"].isFloating()
+    host.close()
+
+
+def test_video_double_click_fullscreens_existing_player(tmp_path: Path) -> None:
+    from PyQt6.QtTest import QTest
+
+    app = _app()
+    widget = gui.CaptureRigWidget(settings=_settings(tmp_path))
+    widget.show()
+    player = widget.playback
+    QTest.mouseDClick(player.image, Qt.MouseButton.LeftButton)
+    app.processEvents()
+    dock = widget.panes.docks["playback"]
+    assert dock.isFullScreen()
+    assert dock.widget().widget() is player
+    QTest.keyClick(dock, Qt.Key.Key_Escape)
+    assert not dock.isFullScreen()
+    widget.close()
+
+
 def test_store_saves_lists_loads_and_deletes_named_layouts(tmp_path: Path) -> None:
     _app()
     store = LayoutStore(_settings(tmp_path))
@@ -130,6 +212,21 @@ def test_pane_scrolls_when_its_content_is_wider_than_the_dock() -> None:
     area = host.docks["big"].widget()
     assert isinstance(area, QScrollArea)
     assert area.horizontalScrollBar().maximum() > 0
+    host.close()
+
+
+def test_live_fullscreen_returns_to_existing_floating_window() -> None:
+    _app()
+    host = _host()
+    content = host.centralWidget()
+    host.pop_out("live")
+    host.fullscreen("live")
+    host.central_view.leave_fullscreen()
+    assert host.central_view.detached
+    assert host.central_view.window.centralWidget() is content
+    assert not host.central_view.window.isFullScreen()
+    host.central_view.window.close()
+    assert host.centralWidget() is content
     host.close()
 
 

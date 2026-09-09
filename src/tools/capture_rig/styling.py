@@ -27,6 +27,13 @@ from src.shared.python.theme.style_constants import Styles
 from src.shared.python.theme.theme_manager import ThemeManager
 
 Palette = Mapping[str, str]
+
+
+def help_document_style() -> str:
+    """Keep rich-text help links readable against the active window theme."""
+    return f"a {{ color: {get_current_colors()['text']}; text-decoration: underline; }}"
+
+
 _HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
 CHIP_KINDS: tuple[str, ...] = ("neutral", "ok", "warning", "record")
 STEP_KINDS: tuple[str, ...] = ("done", "current", "ready", "blocked", "skipped")
