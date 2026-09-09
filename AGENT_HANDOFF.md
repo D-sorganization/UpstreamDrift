@@ -4,7 +4,7 @@ Canonical continuation: [docs/development/HANDOFF.md](docs/development/HANDOFF.m
 Development entry: DL-#9912. Branch: feat/9912-impact-provider-pin.
 Issue #9912 is a child of #9703/#9701; PR #9916. Current commit is SELF.
 
-The existing vendor mechanism now selects Tools 608e85b249e6f61238ac96abbe7dc37428629b9e for review.
+The existing vendor mechanism now selects Tools 00d17e7f91fe8541bc8882ee745fda58ee2ad7af for review.
 Six new contracts fail against the old pin and pass against this candidate.
 All 24 provider contracts and clean installed-wheel provider checks pass.
 The Python-only wheel omits UI assets; physical qualification remains open.

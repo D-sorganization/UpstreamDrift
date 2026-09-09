@@ -1,5 +1,5 @@
 {
-  "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+  "provider_revision": "00d17e7f91fe8541bc8882ee745fda58ee2ad7af",
   "suite": "tests/shared_contracts",
   "passed": 24,
   "failures": 0,
@@ -8,7 +8,7 @@
   "source_mode": "vendored",
   "installed_wheel_validation": {
     "consumer_revision": "b6107f8e2559afffb8e360098f793d88c2ec2886",
-    "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+    "provider_revision": "00d17e7f91fe8541bc8882ee745fda58ee2ad7af",
     "wheel_sha256": "6f6f259ff9679f921a5a05e515abcb4bb466589221ce6c7aefdc43b9ca656653",
     "wheel_bytes": 210496037,
     "fixture_sha256": "fcabcfc6017bc92ecfbfecfdaa585b6e506c9041b59f0b49f5d5a1fde23ea7fe",
@@ -31,7 +31,7 @@
   "junit_sha256": "0b8c97e710e11222856075cb67f0fdec7964fa86aac72f9848058dc38232b7b5",
   "main_merge_validation": {
     "incoming_main": "18c8f922e87c92f6f518da05c0819f71ce3193ba",
-    "provider_revision": "608e85b249e6f61238ac96abbe7dc37428629b9e",
+    "provider_revision": "00d17e7f91fe8541bc8882ee745fda58ee2ad7af",
     "passed": 24,
     "warnings": 5,
     "skipped": 0,

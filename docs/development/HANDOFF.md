@@ -4,7 +4,7 @@
 
 - Working directory: C:/Users/diete/Repositories/UpstreamDrift-impact-provider-pin.
 - Branch: feat/9912-impact-provider-pin; implementation commit b6107f8e2; PR #9916.
-- Original base: 6e3610a9b; incoming main: 18c8f922e; Tools candidate: 608e85b249e6f61238ac96abbe7dc37428629b9e.
+- Original base: 6e3610a9b; incoming main: 18c8f922e; Tools candidate: 00d17e7f91fe8541bc8882ee745fda58ee2ad7af.
 - Governing issue #9912, development entry DL-#9912, parent #9703/#9701/#9700.
 - Pair: Tools #5133. No shared source is copied or modified in this consumer.
 
