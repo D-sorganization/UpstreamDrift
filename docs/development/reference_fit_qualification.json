@@ -1,0 +1,397 @@
+{
+  "schema_version": "reference-fit-qualification/1.0",
+  "issue": 9914,
+  "implementation_commit": "c9782fae7",
+  "geometry_typing_fix": "74e867786",
+  "runs": {
+    "qualified-driver-catalog": {
+      "job": {
+        "schema_version": "reference-fit-job/1.0",
+        "source": "data/C3D_TA_Driver.c3d",
+        "output": "../reference-fit-artifacts-9914/qualified-driver-catalog",
+        "models": ["all"],
+        "custom_models": {},
+        "profile": {
+          "schema_version": "reference-marker-profile/1.0",
+          "name": "tour-average-surface-proxies/1.0",
+          "axes": ["+X", "-Z", "+Y"],
+          "units": "m",
+          "joints": {
+            "mid_hip": ["WaistLeft", "WaistRight"],
+            "neck": ["BackTop"],
+            "nose": ["HeadFront"],
+            "left_shoulder": ["LShoulderBack"],
+            "right_shoulder": ["RShoulderBack"],
+            "left_elbow": ["LElbowOut"],
+            "right_elbow": ["RElbowOut"],
+            "left_wrist": ["LWristTop"],
+            "right_wrist": ["RWristTop"],
+            "left_hip": ["WaistLeft"],
+            "right_hip": ["WaistRight"],
+            "left_knee": ["LKneeOut"],
+            "right_knee": ["RKneeOut"],
+            "left_ankle": ["LAnkleOut"],
+            "right_ankle": ["RAnkleOut"]
+          },
+          "notes": "Surface proxies, not anatomical centers. Waist markers approximate hips; BackTop approximates neck. Posterior shoulder markers avoid the occluded RShoulderTop. Club and sentinel markers are excluded."
+        },
+        "stride": 12,
+        "max_iterations": 50,
+        "fit_lengths": true,
+        "outlier_gate_sigma": 1000.0,
+        "huber_delta": 1000.0,
+        "library": "../reference-fit-artifacts-9914/qualified-library"
+      },
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Driver.c3d",
+        "sha256": "545405ccdbae87a297d16951487b501d5d76f5a2ab253cfc6d797744184943ba",
+        "format": "c3d"
+      },
+      "models": {
+        "golfer": {
+          "reference_id": "3ef63285-1653-5bc7-85f4-6359ea23d1fd",
+          "all_observed_rms_m": 0.04923039164036778,
+          "all_observed_max_m": 0.106010652539858,
+          "observed_samples": 825,
+          "retained_samples": 825,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "1563391bc06f7fd0d36084e571ec2abd02a7dd09a0a5892fe63dc9dbcc4af1c9"
+        },
+        "double_pendulum": {
+          "reference_id": "5535b6b1-f872-5ce1-8fed-0eb08f175fbb",
+          "all_observed_rms_m": 0.033102223059660096,
+          "all_observed_max_m": 0.09763619284849812,
+          "observed_samples": 110,
+          "retained_samples": 110,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "7031069ebc54ec79692cb4b007048092f8e108f756a7d5bf112c7159ad1432d1"
+        },
+        "triple_pendulum": {
+          "reference_id": "a269a3c7-ea0e-584a-b826-8508fb18f6b0",
+          "all_observed_rms_m": 0.01303956514138694,
+          "all_observed_max_m": 0.0458463944273301,
+          "observed_samples": 165,
+          "retained_samples": 165,
+          "rejected_samples": 0,
+          "iterations": 45,
+          "frames": 55,
+          "manifest_sha256": "cdc54fbfe64595ac914e3bc6da07d7892cd23ffc5ab4742868a2173b851c0afd"
+        },
+        "pinocchio_golfer": {
+          "reference_id": "35f1d108-3dab-521e-b30c-fdc7b5a02cb7",
+          "all_observed_rms_m": 0.16764783563484015,
+          "all_observed_max_m": 0.3874969038124676,
+          "observed_samples": 770,
+          "retained_samples": 770,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "f2a6eb4b9e84f1c2e2531ae2c59ce14f7f16d541fc323aa2104669865a38dd2d"
+        },
+        "pinocchio_golfer_ik": {
+          "reference_id": "4365f816-02a8-591a-9d44-a5b98eb25012",
+          "all_observed_rms_m": 0.16764783563484015,
+          "all_observed_max_m": 0.3874969038124676,
+          "observed_samples": 770,
+          "retained_samples": 770,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "1d58d6805be18ee39f492357c821655f0e89fee82b14d0174db0d9f87a37b3b5"
+        },
+        "drake_golfer": {
+          "reference_id": "a5409f48-0ea4-57ae-bf63-2b3ac8e13ff2",
+          "all_observed_rms_m": 0.13168705787533283,
+          "all_observed_max_m": 0.2675289017093643,
+          "observed_samples": 440,
+          "retained_samples": 440,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "9968463045bc0fbe7a2a46496b0cc024ddcc2b00be73809de50aefe41b3a9b24"
+        },
+        "simple_humanoid": {
+          "reference_id": "e8d7bb6d-cc4f-5490-80d1-018f73e566b2",
+          "all_observed_rms_m": 0.1962956113652499,
+          "all_observed_max_m": 0.47913056827170253,
+          "observed_samples": 660,
+          "retained_samples": 660,
+          "rejected_samples": 0,
+          "iterations": 50,
+          "frames": 55,
+          "manifest_sha256": "b61f96fa441d85b6a27797409bef2ca468a3e4af62c546f87f2555f07703672e"
+        },
+        "human_subject": {
+          "reference_id": "61d4a6f9-459f-5e23-a7b8-efb31b7aa020",
+          "all_observed_rms_m": 0.10111247888774959,
+          "all_observed_max_m": 0.2617172721065769,
+          "observed_samples": 825,
+          "retained_samples": 825,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "3e8af8e08239e7acde1de32715bd4cce2264a076a7a0d1fec12e8fa81efaca97"
+        },
+        "mujoco_humanoid": {
+          "reference_id": "2d86b178-a443-5c69-b66d-6806902890d8",
+          "all_observed_rms_m": 0.23600886929949497,
+          "all_observed_max_m": 0.44113702144474093,
+          "observed_samples": 660,
+          "retained_samples": 660,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "4511ddc71736c116c799cb4d3f1128cd26247e3b1b7c5c7655e67674f0a2a535"
+        }
+      },
+      "inventory": {
+        "golfer": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "double_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "triple_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "pinocchio_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+        },
+        "pinocchio_golfer_ik": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"
+        },
+        "drake_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/drake/models/generated/golfer.urdf"
+        },
+        "simple_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/simple_humanoid/humanoid.urdf"
+        },
+        "human_subject": {
+          "status": "available",
+          "source": "src/tools/model_explorer/bundled_assets/human_models/human_subject_with_meshes/model.urdf"
+        },
+        "mujoco_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/mujoco_humanoid/humanoid.xml"
+        },
+        "myosuite_body": {
+          "status": "unavailable",
+          "reason": "Bundled myobody/myoupperbody are labeled placeholder models, not MyoSuite anatomy."
+        },
+        "opensim_golfer": {
+          "status": "unavailable",
+          "reason": "Native OpenSim custom-joint/muscle constraints require an OpenSim adapter; no surrogate fit is substituted."
+        }
+      }
+    },
+    "qualified-iron-catalog": {
+      "job": {
+        "schema_version": "reference-fit-job/1.0",
+        "source": "data/C3D_TA_Iron.c3d",
+        "output": "../reference-fit-artifacts-9914/qualified-iron-catalog",
+        "models": ["all"],
+        "custom_models": {},
+        "profile": {
+          "schema_version": "reference-marker-profile/1.0",
+          "name": "tour-average-surface-proxies/1.0",
+          "axes": ["+X", "-Z", "+Y"],
+          "units": "m",
+          "joints": {
+            "mid_hip": ["WaistLeft", "WaistRight"],
+            "neck": ["BackTop"],
+            "nose": ["HeadFront"],
+            "left_shoulder": ["LShoulderBack"],
+            "right_shoulder": ["RShoulderBack"],
+            "left_elbow": ["LElbowOut"],
+            "right_elbow": ["RElbowOut"],
+            "left_wrist": ["LWristTop"],
+            "right_wrist": ["RWristTop"],
+            "left_hip": ["WaistLeft"],
+            "right_hip": ["WaistRight"],
+            "left_knee": ["LKneeOut"],
+            "right_knee": ["RKneeOut"],
+            "left_ankle": ["LAnkleOut"],
+            "right_ankle": ["RAnkleOut"]
+          },
+          "notes": "Surface proxies, not anatomical centers. Waist markers approximate hips; BackTop approximates neck. Posterior shoulder markers avoid the occluded RShoulderTop. Club and sentinel markers are excluded."
+        },
+        "stride": 12,
+        "max_iterations": 50,
+        "fit_lengths": true,
+        "outlier_gate_sigma": 1000.0,
+        "huber_delta": 1000.0,
+        "library": "../reference-fit-artifacts-9914/qualified-library"
+      },
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\UpstreamDrift-reference-9914\\data\\C3D_TA_Iron.c3d",
+        "sha256": "395deb1f91006586819020fc85180409e716f07e1c680f9fb2ca114759f80845",
+        "format": "c3d"
+      },
+      "models": {
+        "golfer": {
+          "reference_id": "fe2acde4-3e5f-561f-bbe4-36c7c702f2ac",
+          "all_observed_rms_m": 0.049920367415426645,
+          "all_observed_max_m": 0.09715365397847718,
+          "observed_samples": 825,
+          "retained_samples": 825,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "0323ce8f431c677001ba6b0b03611136492bb17d8fd38632ceacb720969b892e"
+        },
+        "double_pendulum": {
+          "reference_id": "fcb36763-41ca-5d15-b29a-e523038df6c9",
+          "all_observed_rms_m": 0.026861536316025305,
+          "all_observed_max_m": 0.06903931078956824,
+          "observed_samples": 110,
+          "retained_samples": 110,
+          "rejected_samples": 0,
+          "iterations": 84,
+          "frames": 55,
+          "manifest_sha256": "0ce0ebe078a0ebfabb7c6f28e50af724a2f3d13799bd65b83904a5943519c1ba"
+        },
+        "triple_pendulum": {
+          "reference_id": "5e8e5ecf-0fce-5f4a-a229-3395ade91bc0",
+          "all_observed_rms_m": 0.012313315513363995,
+          "all_observed_max_m": 0.04491000176014451,
+          "observed_samples": 165,
+          "retained_samples": 165,
+          "rejected_samples": 0,
+          "iterations": 39,
+          "frames": 55,
+          "manifest_sha256": "b618536dc452a0b53ad6cad1c5582430095ce3f626b68667489948d326a61b84"
+        },
+        "pinocchio_golfer": {
+          "reference_id": "347e30dc-0125-5147-8e2f-d939f7293c95",
+          "all_observed_rms_m": 0.17184658100194597,
+          "all_observed_max_m": 0.3824732264228687,
+          "observed_samples": 770,
+          "retained_samples": 770,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "f2a630dcb753bfd5f588eb36f9815d24ff21cbb36ac51bd7f093116fdc4605b6"
+        },
+        "pinocchio_golfer_ik": {
+          "reference_id": "27a41ef1-e6b8-5120-907d-b954580557aa",
+          "all_observed_rms_m": 0.17184658100194597,
+          "all_observed_max_m": 0.3824732264228687,
+          "observed_samples": 770,
+          "retained_samples": 770,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "538d8b83fb6e46426a95b39a009434d75ce2eb9fbdb91f05cbfa52f3038e7b4b"
+        },
+        "drake_golfer": {
+          "reference_id": "6f559107-b680-5771-9884-25ce5c5c3165",
+          "all_observed_rms_m": 0.138962040663826,
+          "all_observed_max_m": 0.28575744685874394,
+          "observed_samples": 440,
+          "retained_samples": 440,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "67499e17610e0d20e6613ce86efc49f5292e822ecde1f8da29e3ff1aaddd017b"
+        },
+        "simple_humanoid": {
+          "reference_id": "1e5c2a65-97f7-545c-9a2e-7df3a81a0855",
+          "all_observed_rms_m": 0.18812126447197708,
+          "all_observed_max_m": 0.481490974066393,
+          "observed_samples": 660,
+          "retained_samples": 660,
+          "rejected_samples": 0,
+          "iterations": 76,
+          "frames": 55,
+          "manifest_sha256": "59eaabb0c76b014a6931618ed0837c3eeae68001b62490532f9950b3c61ab954"
+        },
+        "human_subject": {
+          "reference_id": "1322a734-1393-5163-a7af-f08896d7911e",
+          "all_observed_rms_m": 0.09652350505860985,
+          "all_observed_max_m": 0.2673294837790971,
+          "observed_samples": 825,
+          "retained_samples": 825,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "09392b51bbd592c37ccc42b145f74912b20bc41e403123b565b871adfb7cb413"
+        },
+        "mujoco_humanoid": {
+          "reference_id": "1fcba8a3-4add-53e1-8676-ee0065ea022f",
+          "all_observed_rms_m": 0.22630836826214012,
+          "all_observed_max_m": 0.42940134641110256,
+          "observed_samples": 660,
+          "retained_samples": 660,
+          "rejected_samples": 0,
+          "iterations": 150,
+          "frames": 55,
+          "manifest_sha256": "723db4f7ebeda3b1f95587e62cf622a86808d6d0423d8530addce53a6b582ea8"
+        }
+      },
+      "inventory": {
+        "golfer": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "double_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "triple_pendulum": {
+          "status": "available",
+          "source": "articulated registry"
+        },
+        "pinocchio_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+        },
+        "pinocchio_golfer_ik": {
+          "status": "available",
+          "source": "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"
+        },
+        "drake_golfer": {
+          "status": "available",
+          "source": "src/engines/physics_engines/drake/models/generated/golfer.urdf"
+        },
+        "simple_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/simple_humanoid/humanoid.urdf"
+        },
+        "human_subject": {
+          "status": "available",
+          "source": "src/tools/model_explorer/bundled_assets/human_models/human_subject_with_meshes/model.urdf"
+        },
+        "mujoco_humanoid": {
+          "status": "available",
+          "source": "src/shared/python/model_generation/library/bundled/mujoco_humanoid/humanoid.xml"
+        },
+        "myosuite_body": {
+          "status": "unavailable",
+          "reason": "Bundled myobody/myoupperbody are labeled placeholder models, not MyoSuite anatomy."
+        },
+        "opensim_golfer": {
+          "status": "unavailable",
+          "reason": "Native OpenSim custom-joint/muscle constraints require an OpenSim adapter; no surrogate fit is substituted."
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Surface-marker proxies are not anatomical joint centers.",
+    "RMS values use different mapped landmark sets and are not a model ranking.",
+    "Native OpenSim custom joints unsupported; MyoSuite body files are placeholders.",
+    "Full model trees include unobserved degrees of freedom constrained by priors.",
+    "Graphics are joint trees; no shaded native mesh rendering."
+  ]
+}

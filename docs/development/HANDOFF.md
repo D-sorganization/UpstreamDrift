@@ -6,13 +6,13 @@
 - Complete: marker profiles, URDF and compiled-MJCF tree adapters, root seed,
   existing continuous fit orchestration, saved jobs and library assets,
   fixed placement estimator, standalone keyframe graphic, operator guide.
-- Validation: RED observed before each new module; 80 reference tests pass;
+- Validation: RED observed before each new module; 134 combined reference/UI tests pass;
   new two-camera renderer, preview, identity and custom-model contracts pass
-  separately. Scoped Ruff passes; one mypy matrix typing issue corrected,
-  recheck pending. Exact commands are in the epic document.
-- Evidence: provisional model surveys under `../reference-fit-artifacts-9914`.
-  Full driver and iron runs are still active; do not treat provisional artifacts
-  as final source-version evidence. Native OpenSim adapter and MyoSuite anatomy
+  on combined main 18c8f922e. Normal pre-push gates pass on 74e867786.
+  Exact commands are in the epic document.
+- Evidence: 18 hash-verified model survey bundles under `../reference-fit-artifacts-9914`.
+  Full-rate driver and iron runs are additional pending evidence.
+  Tracked survey evidence: docs/development/reference_fit_qualification.json. Native OpenSim adapter and MyoSuite anatomy
   are unavailable, explicitly recorded rather than replaced with a fallback.
 - Coordination: `codex-reference-9914-20260909`, issue lease and central presence
   registered. #9913 owns capture GUI changes; no edits to those files here.
