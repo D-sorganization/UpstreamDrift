@@ -1,3 +1,15 @@
+## C3D Reference Fitting (#9914)
+
+Current work is isolated in `../UpstreamDrift-reference-9914`, branch
+`feat/c3d-reference-overlay-9914`; implementation commit SELF; PR #9918.
+See `docs/development/reference_fitting_epic.md` and the operator guide
+`docs/motion_capture/reference_model_fitting.md`. DL-#9914 records current state.
+Reference fitting and the expanded club/ellipsoid/handedness controls reuse the
+existing compositor. #9917 is integrated; other capture work remains with its
+owner. Reference/Capture Rig regressions pass. Twenty qualified numerical bundles
+and twenty club display assets are ready; final push/CI gates remain. Existing
+camera data and the original main worktree's user changes are untouched.
+
 # Attributed Club Catalog Continuation
 
 Current work: `feat/9903-player-club-catalog`, #9903 / epic #9902; PR #9919 (open). Optional attributed records and JSON/CSV exchange extend the existing club-data authority; 63 tests and scoped mypy pass. Offline source examples and read-only review #9904 now pass 69 combined tests; bag UI #9905 remains open. Capture UX #9917 merged at8fce9f238 and is integrated;445 capture/parity tests passed before the merge. Canonical state: `docs/development/HANDOFF.md`. Preserve the standing manual governance and historical context below.
