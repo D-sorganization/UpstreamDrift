@@ -85,8 +85,15 @@ coincides with the proximal joint. Ambiguous axes and free bodies remain unchang
 Tendons, plugins and global dynamics callbacks are unavailable in this adapter.
 MuJoCo documents a spatial-tendon limitation in `cfrc_int`; see the
 [native API reference](https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mj-rnepostconstraint).
-The same engine provider feeds the web stream. MeshCat, Drake, Pinocchio, OpenSim
-and other interface integrations remain tracked under #9833.
+The same engine provider feeds the web stream and MuJoCo's MeshCat view.
+`MeshcatForceColors` accepts a public property setter and explicit segment-to-leaf
+object bindings with original RGBA values. For meshcat-python pass
+`lambda path, prop, value: viewer[path].set_property(prop, value)`; for Drake pass
+`meshcat.SetProperty`. This adapter supports multiple geometries per segment and
+restores base RGBA on disable or missing data. Recreate it when base materials
+change. Its native meshcat-python command test qualifies transport, not browser
+raster output. Drake, Pinocchio, OpenSim and other host/source integrations remain
+tracked under #9833.
 
 The C3D/Simscape viewer exposes the same controls for user-defined shapes. Its
 `set_segment_axial_loads(loads, segment_indices)` method accepts a qualified
