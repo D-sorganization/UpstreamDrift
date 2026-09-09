@@ -84,27 +84,69 @@ for reference refinements; do not invent its lost iteration/objective metadata
 runs. This helper is not a qualified production implementation. The SciPy
 versioned web reader refused its URL; no full-page review or bypass is claimed.
 
-## Next Implementation and Acceptance
+## Adaptive Reference Implementation
 
-1. Add failing tests for an independently controlled reference integration,
-   including analytic stiff/oscillatory models, endpoint coverage, component
-   units, nonfinite inputs/output, solver failure and unresolved refinement.
-   Keep a deliberate fixed-grid path for checking shooting constraints.
-2. Reuse the existing symbolic dynamics and defect record. The pendulum ODE
-   helper deliberately excludes the final endpoint from its output grid; it is
-   unsuitable unchanged for this endpoint comparison. The sidekick helper
-   expects symbolic expressions; do not duplicate a dynamics model to use it.
-3. Separate NLP convergence, discrete feasibility, reference resolution and
-   continuous-ODE discrepancy in contracts and documentation. A fixed larger
-   substep count alone cannot guarantee an accurate reference for every input.
-   Do not report own-grid residuals as physical validation or silently mix
-   position and velocity acceptance scales.
-4. Preserve the failing candidate and original threshold history. Require a
-   converged reference and scientifically stated error budgets; do not increase
-   0.5 simply to obtain green CI, skip the case or retry it as flaky.
-5. Correct the parity narrative where it promotes OCP outputs to realizable
-   swings despite unqualified defects. Then run live integration/optimization
-   tests, required lint/type/manual checks and protected CI before merging.
+The private `_swing_reference.py` endpoint operation now reuses SciPy DOP853
+with analytic oscillator, damped-mode and constant-acceleration controls.
+`dynamics_defect` reuses the existing symbolic forward dynamics and inverse
+dynamics. Its default reference requires two endpoint integrations to agree;
+explicit `n_substeps` retains the fixed RK4 discrete-map diagnostic. Position
+and velocity defects retain their units and separate summaries. The legacy
+four-field dictionary remains compatible; `reference_resolution` additionally
+retains endpoint values, component agreement, settings and RHS counts.
+
+Endpoint agreement uses `atol + rtol*max(abs(coarse), abs(fine))` separately
+for each component. The initial-state magnitude is deliberately excluded:
+a RED control showed that a large initial displacement could otherwise hide
+a small near-zero endpoint discrepancy. Default endpoint budgets are rtol
+1e-8, position atol 1e-10 rad and velocity atol 1e-10 rad/s. Local solver
+tolerances are 10 and 100 times tighter, with step caps interval/32 and
+interval/64. These are numerical settings, not experimental uncertainty or
+a rigorous global error bound. Unresolved refinement, nonfinite values,
+malformed endpoints and exceeded RHS-call budgets refuse qualification.
+
+TDD and live evidence on 2026-09-09:
+
+- Missing endpoint module: RED collection failure before implementation.
+- Initial analytic/refusal suite: 52 passed. The initial-magnitude masking
+  control then failed before correcting the endpoint scale.
+- Backend default routing and strict-domain controls: 13 failed, 53 passed
+  before integration; all 66 passed afterward in 6.53 s.
+- First complete live run: 1 failed, 7 passed, 3 native-dependency skips in
+  99.00 s. Endpoint agreement correctly refused the coarse reference in the
+  original swing. The endpoint budget was not relaxed. A separate RED test
+  required tighter local tolerances; one budget-separation control passed.
+- With local solver tolerances tightened, the combined reference and live
+  suite passed: 75 passed, 3 Pinocchio-dependent skips in 101.48 s. The
+  original six-node/eight-substep case and 0.5 rad historical ceiling remain;
+  assertions now also require the intentionally large velocity discrepancy
+  and retained reference-resolution evidence. Seven existing deprecation
+  warnings remain.
+- Installed Pinocchio 4.1.0 without changing NumPy 2.4.6, SciPy 1.17.1 or
+  CasADi 3.8.0. All three previously skipped native RNEA/dynamics comparisons
+  passed in 2.78 s (eight unrelated cases deselected). The isolated Windows
+  mocked-SDK/degradation and backend-registry suite also passed: 13 tests in
+  15.93 s, with nine existing deprecation warnings. Bioptim remains unavailable
+  in this dedicated numerical environment; its protected lane is still needed.
+- Root Ruff 0.15.17 lint/format checks passed (6,769 files); mypy 1.13.0
+  passed on both changed source modules. Manual governance passes its
+  structural check but still reports `blocked-inventory-required`, with zero
+  registered calculations. No scientific/manual release approval is claimed.
+
+The parity narrative now labels its tables as historical fixed-reference
+results. It removes unsupported physical-realizability, controlled mesh
+convergence, convexity and equivalent-optimum claims. The old numbers are
+preserved; the tables have not been regenerated.
+
+## Remaining Acceptance and Delivery
+
+1. Complete native comparison and affected optional/degradation checks; retain
+   exact dependency versions and distinguish unavailable Bioptim paths.
+2. Finish turnover/SPEC, normal commit/push hooks and focused PR delivery, then
+   protected CI. No PR exists for #9830 yet.
+3. Numerical reference resolution does not qualify the coarse swing for impact
+   use. Application-specific state budgets, whole-trajectory convergence,
+   physical calibration and acoustic validation remain separate program work.
 
 ## Related Delivery
 
@@ -114,6 +156,8 @@ its golf source/tests match both reviewed e47fde4e and prior 476eaa98.
 Inventory #5103 has advanced to 02b53e2d8 and awaits current CI; its AST
 correction is still needed for the new decay calculation. Signal PR #5106 at
 c8f3b4d1 still reports a failed private-consumer lane with other checks pending.
-UpstreamDrift #9826 publishes c7a88299d and is integrating current main to
-remove the shallow-diff false deletion failure. The impact/acoustic program
-remains active; physical calibration and blinded listener evidence remain open.
+UpstreamDrift #9826 merged as a410ae7059883d7f27f5fb12405b61859267457c
+at 2026-09-09T01:12:29Z, from reviewed head fced8c0d6. This was verified via
+GitHub; remaining queued auxiliary jobs are not claimed as passed. The
+impact/acoustic program remains active; physical calibration and blinded
+listener evidence remain open.

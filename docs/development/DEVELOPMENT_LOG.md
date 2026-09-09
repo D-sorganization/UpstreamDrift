@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** fix/9830-independent-shooting-convergence
 - **Paths:** optimization reference/defect contracts and docs/development/shooting_convergence_9830_turnover.md
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (unchanged case reproduces CI failure exactly in 110.59 s; three synthetic shooting refinements compared with fixed/adaptive references; no production fix yet)
+- **Last verified:** 2026-09-09 (75 reference/live tests pass in 101.48 s; all three formerly skipped native comparisons pass in 2.78 s after Pinocchio installation; 13 degradation/registry tests pass; root lint/format and two-module mypy pass)
 - **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
-- **Next step:** Add independent reference-integration RED controls, then separate discrete feasibility, reference resolution and continuous discrepancy with explicit component budgets. Preserve the original failing case and avoid threshold relaxation; correct parity claims and validate live/native/protected paths before delivery.
+- **Next step:** Complete native/affected-consumer checks and normal PR delivery. The TDD adaptive reference refuses unresolved endpoints, retains component budgets and preserves the original candidate/ceiling. Parity claims are corrected; do not promote this numerical diagnostic to physical or acoustic validation.
 
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 

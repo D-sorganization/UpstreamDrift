@@ -4053,8 +4053,10 @@ blocks Python package publication on the built-wheel smoke matrix.
   FastAPI/PyQt/React surfaces await the protected Tools ground merge (#4276).
 
 ## 12. Change Log
+
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
+| 2026-09-09 | #9830 | Separate fixed-grid swing feasibility from adaptively refined ODE endpoint diagnostics, preserve strict position/velocity budgets and correct historical parity interpretations. |
 | 2026-09-08 | #9824 | Capture Rig multiview epic #9818 closed out: hardware evidence page (`docs/motion_capture/evidence/capture_rig_multiview.md`) with both composite figures and the recorder's measured frame counts (a full-resolution live-preview tee starves the stream copy at 95/393/74 frames; `-lowres:v 2` holds 60 fps at 493/494/462), handoff notes covering the DirectShow single-open constraint and the two integration defects the parallel branches produced, and a 4x4 compose budget that takes the best of several rounds instead of one wall-clock assertion that flaked under load. |
 | 2026-09-08 | #9823 | Capture Rig multiview live preview and synchronized playback (#9813, #9814; epic #9818, wave 2): `PreviewPanel` composites the latest frame of every view into one canvas through the chosen `LayoutSpec` (camera workers, recorder-snapshot mode, REC badge and generation guard unchanged; a view outside the layout is still captured, a view may appear twice); `PlaybackPanel` plays several of a session's sources through the same model (`recorded` tiles raw, `overlay` tiles with the pose and the ticked variants' models), frame-synchronised by the manifest's strobe offsets, readers opened once per view so a layout switch re-composites without re-opening a file, plus speed, frame stepping and PNG export of the canvas; new `multiview.py` (theme->compositor palette, canvas label, layout picker over built-ins and `LayoutStore` scopes with an *Edit...* button opening `LayoutEditor` with live thumbnails, PNG writing); the chosen layout name persists with the dock arrangement (`layout.LayoutStore` extras + `LayoutBar` `PaneExtras`) and drives the composite export; `mosaic.frame_offsets` split into a pure `offsets_from_timing` shared with playback (one alignment function, one compositor). 14 new offscreen tests (234 in the package). |
 | 2026-09-08 | #9822 | Capture Rig multiview layout editor (#9812; epic #9818, wave 2): `tools/capture_rig/layout_editor.py` `LayoutEditor` (grid spinners to 4x4, preset menu over built-ins and `LayoutStore` user/session scopes, drag tiles between cells, span +/-, per-tile source/rotate/flip/crop/fit/label, Save as.../Load/Delete behind injectable dialogs, 20-step undo/redo, one `layout_changed` per edit, what/why-disabled tooltips) and `layout_editor_canvas.py` `LayoutCanvas` (QGraphicsView drawing the whole layout through `compose()` from an injectable `frame_provider`, theme-derived colours only). 37 offscreen tests. |
@@ -5589,3 +5591,19 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Resolve sidekick extension overlay supported scopes and fix test path resolution (#9572).
 
 - Replaced `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ...))` in `src/tools/bunker_shot_gui/shot3d.py` to optimize array magnitude calculation. (spec-exempt: micro-optimization)
+
+## Independently Refined Swing Defect Reference (#9830)
+
+`casadi_backend.dynamics_defect` defaults to adaptive DOP853 endpoint
+re-integration of the existing multibody RHS. Two local-tolerance/step settings
+must agree within separately scaled position and velocity endpoint budgets.
+Strict input, endpoint, finite-value and bounded RHS-work contracts refuse
+unresolved results. Reference diagnostics retain settings and componentwise
+agreement; this is numerical evidence, not a rigorous error bound or physical
+validation. Explicit positive `n_substeps` preserves fixed RK4 diagnostics for
+discrete feasibility. The historical four-field summary remains compatible.
+
+The original coarse swing remains an adverse regression control: it can pass
+the historical position ceiling while exhibiting a large velocity mismatch.
+No shooting threshold is relaxed. Historical parity tables retain their
+original reference identity and do not establish physical realizability.
