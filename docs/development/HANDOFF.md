@@ -43,3 +43,9 @@ CI installer work while preserving the centrally generated CLAUDE sections here.
 All 38 existing Sidekick documentation checks pass; the live guide checker and
 SPEC duplicate gate pass. The job-scoped installer replacement remains isolated
 in #9896. This PR still waits for #9890 so its final diff stays focused.
+
+## Suite Classification
+
+The first protected structure run identified two new guide-checker tests without
+a suite marker. The module now declares its actual unit-test classification;
+existing assertions and the suite-marker baseline remain unchanged.
