@@ -7,13 +7,13 @@
 - Branch: `feat/9862-coaching-drawings`
 - Baseline commit: `156615443` (editing/library PR #9868 with concurrent navigation fix preserved)
 - Implementation commit: `SELF`
-- Pull request: pending
+- Pull request: #9869 (draft)
 - Governing issue/epic: #9862; #9849
 
 ## Objective and Status
 
 - Objective: Give instructors saved visual references over original camera video, with intuitive editing and consistent exports.
-- Status: implementation qualification
+- Status: draft review; dependency integration pending
 - Completed: Five shape tools, source-pixel/frame document, validation, bounded undo/redo, draw/select/move/resize, numeric and keyboard editing, style/visibility, atomic save/reopen, library/editor access, common preview/PNG/video renderer and portable sidecars.
 - Remaining: Final focused validation, visual review, protected PR and current-head CI. Advanced external reference epic #9863 and fleet adoption remain separate open work.
 
@@ -38,8 +38,8 @@
 
 ## Next Steps
 
-1. Complete final targeted tests, type/lint/LoD checks, generated map freshness and visual review.
-2. Submit #9862 after dependency PR #9868 merges; respect normal branch protection.
+1. Integrate dependency PR #9868 after its current-head protected checks pass.
+2. Qualify the focused #9869 diff against merged main, then mark ready; respect normal branch protection.
 3. Continue advanced reference imports/registration/comparison and verify fleet adoption.
 
 ## Change Log
@@ -65,3 +65,7 @@
 - SELF — Integrated latest main dba24ceb7 (Tools canonical theme/notes migration) in merge 3a10d4986. The corrected sparse-fit, trim-timeline and native GUI/library/editor suite passes 15 tests with the pinned Tools theme; atlas freshness passes. Two-module mypy and design-manual governance pass.
 
 - SELF — Integrated merged dependency PR #9868 on main into #9869. Ready for protected PR review and CI.
+
+- SELF — Integrated editing fix 951c94ed8, latest Tools-canonical migration from main dba24ceb7 and qualification commit 1e2469296. Sparse manual captures now retain reconstruction/model fit while recording summary unavailability and removing stale metrics. Dependency validation passes 15 sparse/timeline/GUI/editor tests; drawings remain separate additional behavior.
+
+- SELF — Record PR #9869; post-dependency integration passes 22 drawing/editor/library tests and atlas freshness. Normal commit and push hooks passed. External editing-branch architecture extraction 4909ee460 is integrated cleanly.

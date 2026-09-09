@@ -3,9 +3,9 @@
 ## Coaching Reference Work in Progress (#9862)
 
 Isolated branch `feat/9862-coaching-drawings` builds on editing/library PR #9868
-(`156615443`). Five saved drawing tools, gesture/keyboard controls, source-frame
-visibility and common preview/still/video exports are implemented and undergoing
-final qualification. See `docs/development/HANDOFF.md`. External reference epic
+(`1e2469296`). Draft PR #9869 contains five saved drawing tools, gesture/keyboard controls, source-frame
+visibility and common preview/still/video exports are implemented and passed
+focused qualification. Dependency #9868 must merge before this PR is ready. See `docs/development/HANDOFF.md`. External reference epic
 #9863 and fleet adoption are still open. No changes to shared clones or vendor
 code; the concurrent panel-navigation correction is preserved.
 
