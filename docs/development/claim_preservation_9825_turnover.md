@@ -57,6 +57,28 @@ Source f0bbc4d50d589bbe871150f7de0523c15c02508b is published; normal commit/push
 
 Ready PR #9826: https://github.com/D-sorganization/UpstreamDrift/pull/9826. Its first CI observation is running, with initial superseded runs cancelled; no failure or success is inferred from pending checks. Apply the repository ci-watch-and-fix skill, retaining the fleet polling interval and no automatic retries of running work. Temporary heartbeat log: impact-9825-ci-watch.log. SPEC is keyed to #9826 and the development log is in_review. Do not close #9825 or the full impact program before protected CI/review and acceptance are verified. Preserve the former shared branch and its distinct historical authority.
 
+## CI Remediation
+
+At published e93ef5224, native authority and rolling profiles, publication quality, consumer contracts,
+code quality and the remaining ancillary gates pass. The unit gate has one
+failure among 14,373 passes: the canonical PDF regression still pins the prior
+SHA/byte count. Reproduced locally (one failure, 2.42 s); replace both duplicated
+expectations with constants for the already visually reviewed bf855f79 artifact
+and 2,012,367 bytes. All 11 publication tests then pass in 15.76 s, including
+full-page rendering; five inherited config-import deprecation warnings remain.
+The PDF and its manifest are unchanged. Local ignored test environment adds
+PyMuPDF 1.28.2 and pikepdf 10.13.0.post1; no global dependency change.
+
+Optional-stack run 34292252213/job 102281274047 independently fails
+test_multiple_shooting_satisfies_its_own_dynamics: reference position defect
+0.5190812793829043 exceeds 0.5. Lane result: one failure, 17 passes,
+19 deselections. This test and solver predate the PR (af6923bc7 / #9768),
+unchanged on current remote main; #9756 is closed and no matching open fix PR
+was found. Do not increase the threshold, declare flakiness or rerun live work.
+Track the discretization/independent-rollout issue separately under #9762.
+The unit failure is the first scoped remediation cycle; protected merge remains
+blocked until actual current-head acceptance is verified.
+
 ## Related Program State
 
 Tools finite-support response is published at 12bcf3d83 (665 Linux tests). Separate-G/C spectra 97d46055c pass 692 Linux golf/API tests and 49 focused controls; normal hooks pass and remote SHA is verified. Turnover bbc27dbe32181dd3d147841784a108fdc1aadeea is also published. AffineDrift #4298 merged normally as d7e51655d47d37a092b1bcd29d25972ce373b244 after required CI passed, with no unresolved review threads. Its auxiliary benchmark workflow performed no measurements despite green workflow status; no performance result is claimed.

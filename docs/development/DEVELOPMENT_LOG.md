@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** fix/9825-preserve-reviewed-claims
 - **Paths:** manufactured claim registration, integration/native contracts, governed research evidence, canonical publication and claim_preservation_9825_turnover.md.
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (128 strict native contracts, five summary tests, 6,764-file Ruff/format and computational publication qualification pass)
+- **Last verified:** 2026-09-08 (128 strict native contracts; native/rolling/publication CI passes at e93ef5224; stale PDF regression reproduced and repaired, all 11 publication tests pass with five inherited warnings; changed-file Ruff/format pass)
 - **Summary:** Actual reconciliation now preserves reviewed evidence/order and refuses changed science; six real-path failures become 11 passes. Current pinned engines regenerate deterministic provenance with unchanged numerical results; two expected-failure exemptions are removed. All 328 outcomes remain unchanged; the generated census/PDF is refreshed and reviewed.
-- **Next step:** Source f0bbc4d50 is published through all normal hooks; PR #9826 is ready and protected CI is running. Monitor current-head checks and review. Physical and archival qualifications remain separate.
+- **Next step:** Publish the scoped PDF expectation correction through normal hooks and recheck protected CI. Investigate the separate unchanged multiple-shooting reference-defect failure under #9762 without weakening thresholds. Physical and archival qualifications remain separate.
 
 ### DL-#9787 · Manufactured Authority Runtime and Provenance
 
