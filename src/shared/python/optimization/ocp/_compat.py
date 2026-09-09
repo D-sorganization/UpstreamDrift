@@ -22,10 +22,10 @@ from __future__ import annotations
 import sys
 import types
 from importlib import import_module
+from importlib.machinery import PathFinder
 from importlib.util import find_spec
 from typing import Any
-
-from src.shared.python.optimization.casadi_backend import casadi_available
+from unittest.mock import Mock
 
 __all__ = [
     "BIOPTIM_INSTALL_HINT",
@@ -53,7 +53,27 @@ class BioptimNotAvailableError(RuntimeError):
     """Raised when bioptim is required but not importable."""
 
 
+def _is_mock_module(module: Any) -> bool:
+    """Whether ``module`` is a ``unittest.mock`` stand-in, not a real module."""
+    return isinstance(module, Mock)
+
+
 def _importable(name: str) -> bool:
+    """Whether ``name`` resolves to a *real* importable distribution.
+
+    A spec-less ``MagicMock`` in ``sys.modules`` (the unit tree's conftest
+    installs one for ``casadi`` process-wide, #9771) both raises
+    ``ValueError`` out of :func:`find_spec` on Python 3.14+ and shadows the
+    genuine distribution behind it. Top-level names are therefore probed
+    through the path finder, which consults ``sys.path`` and ignores
+    ``sys.modules`` entirely; only the absence of a real distribution --
+    with or without a mock in front of it -- counts as not installed.
+    """
+    if "." not in name:
+        try:
+            return PathFinder.find_spec(name) is not None
+        except (ValueError, ImportError):
+            return False
     try:
         return find_spec(name) is not None
     except (ValueError, ModuleNotFoundError):
@@ -61,13 +81,15 @@ def _importable(name: str) -> bool:
 
 
 def bioptim_available() -> bool:
-    """Whether ``bioptim`` and ``casadi`` are importable (mock-tolerant).
+    """Whether ``bioptim`` and ``casadi`` are really importable.
 
-    A spec-less ``MagicMock`` installed in ``sys.modules`` (the unit tree's
-    conftest does that for ``casadi``) counts as unavailable, matching
-    :func:`casadi_backend.casadi_available`.
+    A spec-less ``MagicMock`` in ``sys.modules`` counts as unavailable
+    *only when no real distribution sits behind it* (#9771): the unit
+    tree's conftest poisons ``casadi`` process-wide, which must not make
+    a co-run lane skip every bioptim test on a machine that has the stack
+    installed.
     """
-    return casadi_available() and _importable("bioptim")
+    return _importable("casadi") and _importable("bioptim")
 
 
 class _PermissiveDummy:
@@ -151,9 +173,18 @@ def require_bioptim() -> Any:
     Postcondition: ``sys.modules`` carries ``biorbd_casadi`` and ``tkinter``
     (real or shim), ``matplotlib.cm.get_cmap`` resolves, and ``bioptim``
     imported without touching conda.
+
+    Spec-less mocks for ``casadi``/``bioptim`` (the unit tree's conftest
+    poisons ``casadi`` process-wide, #9771) are evicted before the import so
+    bioptim binds the genuine modules, and left evicted: the unit tree's
+    autouse fixture reinstalls its own mocks before each of its tests, while
+    the lazy ``import casadi`` inside the ocp tests must see the real one.
     """
     if not bioptim_available():
         raise BioptimNotAvailableError(BIOPTIM_INSTALL_HINT)
+    for name in ("casadi", "bioptim", "biorbd_casadi"):
+        if _is_mock_module(sys.modules.get(name)):
+            del sys.modules[name]
     install_biorbd_shim()
     install_tkinter_shim()
     install_matplotlib_shim()
