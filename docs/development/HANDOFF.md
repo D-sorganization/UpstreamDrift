@@ -66,3 +66,6 @@ or mesh files are not silently converted. Shared clones and peers' worktrees int
 - SELF — Merge reviewed drawings head 3f8b592bf through a normal merge after reference implementation 269354d07. Preserve the complete reference additions and the same drawing/editor behavior; the extracted sparse-summary helper already matches merged #9868. Reference PR is now a focused addition to this dependency.
 
 - SELF — Published draft PR #9870 after normal push hooks. Local import and library qualification is complete. Integrate drawing theme correction before readying this PR. Fleet runner repair #1588 merged; live rollout 34330895204 exposed Git credential routing and a stale clone-root handoff, being corrected in an isolated RM branch.
+
+- SELF — Integrate merged drawings #9869 / main 77e6bca88. Preserve all expert-reference additions while taking the qualified shared drawing-colour default from main. Mark editing/drawings log entries shipped based on protected merges.
+- SELF — Post-main integration qualification: 31 reference import, persistence, C3D, native reference-library and theme tests pass. Ready to validate the focused PR against merged drawings.
