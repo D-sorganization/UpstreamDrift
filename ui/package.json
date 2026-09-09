@@ -18,11 +18,11 @@
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
-    "@react-three/fiber": "^9.6.1",
+    "@react-three/fiber": "^9.7.0",
     "@tanstack/react-query": "^5.101.4",
     "@tauri-apps/api": "2.11.1",
     "@types/three": "^0.184.1",
-    "autoprefixer": "^10.5.4",
+    "autoprefixer": "^10.5.5",
     "clsx": "^2.1.1",
     "hls.js": "^1.7.1",
     "lucide-react": "^1.38.0",
@@ -39,11 +39,11 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@tailwindcss/postcss": "^4.3.1",
-    "@tauri-apps/cli": "2.11.0",
+    "@tauri-apps/cli": "2.11.4",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.5.0",
+    "@testing-library/user-event": "^14.6.7",
     "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
@@ -54,7 +54,7 @@
     "eslint-plugin-react-refresh": "^0.5.4",
     "globals": "^17.11.0",
     "jsdom": "^30.0.1",
-    "terser": "^5.48.0",
+    "terser": "^5.51.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.65.0",
     "vite": "^7.3.2",
@@ -71,6 +71,7 @@
     "yaml": "^2.8.3",
     "tunnel-rat": {
       "zustand": "$zustand"
-    }
+    },
+    "js-yaml": "^4.3.2"
   }
 }

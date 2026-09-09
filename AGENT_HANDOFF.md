@@ -1,8 +1,105 @@
 # Agent Handoff: Proximal–Distal Research Program
 
+## Segment Force Colors: Epic #9833 in Progress
+
+Branch `feat/segment-force-colors` lives in `_codex_worktrees/segment-force-colors`.
+See `docs/development/segment_force_color_epic.md` for current scope and evidence.
+Shared Python/Three.js policies, native pendulum and MuJoCo reaction sources,
+renderer adapters, desktop controls and WebSocket/Scene3D wiring are implemented.
+Epic #9833 and children #9834–#9837 are published. Remote main `ff0effa5a` was merged
+into the branch. Git works by clearing the stale `http.https://github.com/.extraheader`
+per invocation and using `gh auth git-credential`; global settings are unchanged.
+PR #9840 is open. C3D user segments now accept explicitly bound, clock-checked
+loads and expose the shared controls. Native MuJoCo raster verification passed
+blue/red output and pixel-exact off restoration (local output/force-colors).
+Remote main `403292ca3` is merged and the SPEC conflict is resolved with both rows
+preserved. PR CI cycle 1 exposed LoD storage access, a plotting import in headless
+contracts, render-function size and a redundant websocket cast; fixes and a
+headless regression are included. MuJoCo MeshCat now uses shared leaf-object
+bindings; its native command test passes with meshcat 0.3.2 installed only under
+ignored output/native-meshcat. C3D broad tests have one unrelated loader error-text
+expectation mismatch; the new force test passes. Remaining gates: wider interface adapters, protected CI
+and merge. Native MuJoCo tests on this Windows host must import mujoco before
+pytest/Qt to avoid a loader-order DLL failure. Do not claim universal rollout.
+Combined focused regression: 575 passed; web: 68 passed with TypeScript/ESLint.
+Cycle 2 fixes add suite markers and merge main `39d944540` (CI's shallow direct
+diff had falsely reported its new notebook test deleted). All earlier CI failures
+are fixed locally; current-head checks remain required. Wider hosts remain open.
+
 Updated: 2026-09-08 02:55 PDT
 Updated: 2026-09-08 03:10 UTC
+Updated: 2026-09-09 00:20 UTC (unit-gate PDF identity pins re-synced to the refreshed canonical PDF)
 Updated: 2026-09-08 09:30 UTC (PR backlog catch-up sweep)
+Updated: 2026-09-08 23:59 UTC (wave-2 PR triage, session UD2PRs)
+Updated: 2026-09-08 (wave-2 issue backlog sweep, session UD2IssuesA)
+
+## Capability Atlas #9850
+
+Isolated branch `feat/9850-capability-atlas`, commit `SELF`, PR not created.
+See `docs/development/HANDOFF.md` and `DL-#9850` for current validation and
+continuation. Generated references consume existing registries and preserve
+GUI epic #9843 and optimization-agent file ownership. Product #9849 and
+performance review #9851 are separate workstreams. Fleet communication lives
+in Repository_Management PR #1580 and has completed a real peer message exchange.
+
+## Wave-2 PR Triage: 2026-09-08 (Agent `claude`, Session UD2PRs)
+
+Repo-wide npm-audit red: advisory GHSA-2883-xcg3-v3hh (js-yaml high,
+published 2026-09-08 between the 21:57 main push run and the 22:15 PR runs)
+fails `code-quality` (`npm audit --audit-level=high`) on every merge ref
+whose lockfile carries js-yaml 4.3.1 - main itself goes red on its next
+Standard run. Fix on `bot/claude/npm-audit-jsyaml`: npm `overrides.js-yaml`
+= `^4.3.2` in `ui/package.json` (dev-only dep of `@eslint/eslintrc`), audit
+drops to 5 moderate, gate passes. Disposition table below is maintained as
+PRs settle (in-progress at first commit).
+
+Wave-2 disposition table (REST-verified 2026-09-09 ~00:45 UTC):
+
+| PR                         | Disposition at yield                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #9465                      | **MERGED** (squash `9623a5662`).                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| #9827                      | **MERGED** (squash `403292ca3`).                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| #9826                      | PDF identity pins in `tests/research/test_publication_quality.py` re-synced to the refreshed artifact (`bf855f79`, 2012367 bytes) on `fix/9825-preserve-reviewed-claims` (commit `30aecd113`); auto-merge armed.                                                                                                                                                                                                                                     |
+| #9763-#9767                | Five dependabot /ui bumps; unblocked by this PR's audit fix; auto-merge armed, draining.                                                                                                                                                                                                                                                                                                                                                             |
+| #9471                      | Merged main in twice (SPEC row conflicts: dropped the branch-side duplicate #9476 row, kept this PR's #9471 row); repo-structure-gates green; auto-merge armed.                                                                                                                                                                                                                                                                                      |
+| #9434                      | Merged main in (WORKFLOW_TRACKING.md conflict: companion entry kept, main's always-on-unit-lane entry kept); auto-merge armed.                                                                                                                                                                                                                                                                                                                       |
+| #9440                      | Merged main in: theme modify/delete resolved as PR deletions; shadow ledger 33 -> 17 (stale + this-PR entries dropped); seam rulings = main's retirement narratives + PR cleaned rows for notes/plot_theme/theme; divergence inventory regenerated; SeamRedirectFinder roots synced to merged cleaned rulings (commit `4d3193f81`). Auto-merge armed; the wave-1 #8972/#9037 Tools-palette prerequisite still applies if palette-consumer tests red. |
+| #9442                      | Stacked on #9440's branch (base `readiness/p1-9406-delete-tools-canonical-1`, not main); branch merged forward to `b45ec951f` with the seam-root sync; fresh CI running; auto-merge not armable while stacked - retarget to main only after #9440 lands (wave-1 rule).                                                                                                                                                                               |
+| #9636, #9633, #9618, #9610 | Conductor drafts, skipped per assignment.                                                                                                                                                                                                                                                                                                                                                                                                            |
+
+## Wave-2 Issue Backlog: 2026-09-08 (Agent `claude`, Session UD2IssuesA)
+
+Second-wave residual-backlog sweep over the older half of the 186 open issues
+(#8346–#8930). Sibling PRs from the same sweep (based on the identical main
+revision): PR #9828 (#8922, mocap retargeting IK cost) and PR #9831 (#8928,
+pendulum result accessor caching).
+
+- **#8842** — `notebooks/bunkershot3d/phase1_mvp.py` was unrunnable: it
+  imported a nonexistent top-level `bunkershot3d` package and pointed at a
+  nonexistent repo-root `configs/` tree. It now imports via
+  `bunkershot3d.*` with a repo-root `sys.path` bootstrap, resolves the
+  packaged `src/bunkershot3d/calibration/configs/canonical.yaml`, writes
+  artifacts under gitignored `output/bunkershot3d/`, and exits 1 with a
+  clear log line when the optional `pychrono` backend is absent (phases 1-2
+  still produce their artifacts). Smoke tests:
+  `tests/bunkershot3d/test_phase1_mvp_notebook.py`.
+- **#8922** (PR #9828) — `MotionRetargeting._solve_frame_ik` called
+  `mj_forward` once **per marker per IK iteration** (~40x overcount with the
+  golf marker set) and grew the stacked Jacobian with a fresh `np.vstack`
+  per marker. The marker→(body, target) pairs are now resolved once per
+  frame, `mj_forward` runs exactly once per iteration, and the
+  Jacobian/error rows are batched with a single `np.vstack` /
+  `np.concatenate`. Regression tests pin the forward-call bound and
+  multi-marker error reduction
+  (`tests/unit/engines/mujoco/test_motion_capture.py::TestMotionRetargetingIKCost`).
+- **#8928** — pendulum simulation result accessors re-integrated the
+  trajectory on every call (`all_energies` once per energy key = 3 passes;
+  `extract_series` fresh per plot per joint). `TrajectoryResultMixin`
+  now computes every `all_*` batch in a single pass and memoizes it on
+  the result object, and `energy_at` derives `total` arithmetically
+  (E = T + V) instead of re-evaluating both terms. Benchmark (400-step
+  golfer result): repeated `all_accelerations` 0.64 s → ~6 µs; repeated
+  `all_energies` 0.15 s → ~6 µs.
 
 ## Capture Rig Multiview Epic #9818: 2026-09-08 (Agent `claude`)
 
@@ -53,11 +150,14 @@ No issue was closed in this sweep (redundant-PR closures do not close issues). F
 
 ## Impact Dynamics and Acoustics: #9700
 
-- Theory AffineDrift #4258/#4282 and integration plan #9706 merged. Tools T1 #5077 merged; T2 #5082 remains open.
-- Tools T3 rotating loaded roots published at `f47f64acf` (560 golf/API passes, two optional CAD skips). Full stability, work, contact/acoustics and empirical gates remain open.
+- #9841/#9842 follow-up: the CI-stub callback annotation is corrected, with 67 reference tests passing. Bioptim now selects CasADi 3.6.7; the combined real OCP, matrix/import isolation and dependency suite passes 21 tests in 162.06 s. Exact missing factory aliases repair 3.8 imports, but its RK4 solve remains unsuccessful even at a 1,000-iteration budget; no numerical qualification is claimed for that combination. Inventory regeneration passes ten tests; c2a8d5b6e integrates main 438bd3282 without changing validated optimization paths. Root Ruff 0.15.17 and SPEC pass. Tools #5106 merged as 287767dfa6; #5114 tracks the separate unfinished GUI shard behind #5103. Publish through normal hooks and follow protected CI; physical/acoustic qualification remains open.
+- Claim-preservation #9826 merged as a410ae7059883d7f27f5fb12405b61859267457c from fced8c0d6 at 2026-09-09T01:12:29Z; merge verified, remaining queued auxiliary checks not claimed passed.
+- Theory AffineDrift #4258/#4282/#4298 and integration plan #9706 are merged. Tools T1 #5077 and T2 #5082 (80d580d57) are merged; T2 golf source/tests match reviewed e47fde4e and prior 476eaa98.
+- Tools T3 autonomous decay 58f33e403 and turnover 2d290079b are published through normal hooks (731 Linux golf/API tests, two optional CAD skips). Driven/nonlinear stability, bandwidth, contact/acoustics and empirical gates remain open.
+- #9830 is claimed by codex/session impact-acoustics-01a07d8a-shooting9830 until 2026-09-09T04:11:20Z. Adaptive endpoint refinement and strict contracts are implemented TDD; 75 reference/live tests, all three native comparisons and 13 degradation/registry tests pass. Own-grid residuals remain separate from continuous-ODE discrepancy; the original candidate and 0.5 rad ceiling are preserved. Eighty mixed mocked/reference tests also pass. PR #9841 is open; the current runtime/inventory follow-up and protected CI remain recorded in docs/development/shooting_convergence_9830_turnover.md.
 - Tools early T5 #5084 and T6 #5083 merged; source audits and remaining qualification work are on #5074/#5075. Metadata labels alone do not validate measurements.
 - Provider prerequisite #9735 / PR #9745 merged at `1b48707d54fb47655e43eaaffaad7b1739445e40`. Renderer PR #9784 merged at `9aa26e4f8`; #9787 repairs its observed research companion failures.
-- #9787 / PR #9804: synchronized with main `563e7aaa9`, including native bootstrap #9726. Actual regenerated native record has SHA `0c0f3395`; only governed source hashes change. All 122 combined authority/provenance/bootstrap tests and three distinct rolling tests pass. Reviewer summary and inspected 253-page PDF are current; incoming mocap aliases are explicitly typed and the actual mypy hook passes. See `docs/development/manufactured_authority_9787_turnover.md`; protected CI remains required.
+- #9826 supersedes the merged #9804 registration bypass: actual reconciliation preserves reviewed claims, restores 14-source native provenance (15d00b5e) with unchanged numerical results, and retains all 328 outcomes. The reviewed 253-page PDF bf855f79 and 128 strict native contracts are documented in docs/development/claim_preservation_9825_turnover.md. Preserve prior branch/local 6235789dc as historical evidence.
 - Preserve #8557 protected authority, exact Tools pin, manufactured-data limits and workstation recovery restrictions; no calibrated acoustic solver is established.
 
 - Import/provider history: `docs/development/impact_provider_import_turnover.md`; reviewed renderer evidence: `docs/development/renderer_reference_9783_turnover.md`; program design: `docs/development/impact_acoustics_program.md`.
@@ -406,3 +506,34 @@ reruns. Do not restart the Actions runner or start WSL.
 ## UI Dependency Pin: #9249
 
 - Dependabot now ignores `@vitejs/plugin-react` major updates (`.github/dependabot.yml`): 6.x needs Vite 8 (`peerDependencies.vite: "^8.0.0"`; Vite 7 exports no `./internal`), so a lone bump cannot merge. Stay on plugin-react ^5 with vite ^7.3.2 until a paired Vite-8 upgrade; pairing note lives in `ui/README.md`. Branch `claude/issue-9249-ui-pin`.
+
+## OCP Compat Robust to Poisoned `sys.modules` (#9771)
+
+- `tests/unit/conftest.py` installs spec-less `casadi`/`pinocchio` MagicMocks
+  process-wide in `pytest_configure` and never removes them, so a lane
+  collecting `tests/unit/optimization` and `tests/integration/optimization/ocp`
+  together made `_compat.bioptim_available()` report the genuinely installed
+  stack as absent and silently skip 16 bioptim ocp tests.
+- `src/shared/python/optimization/ocp/_compat.py` now probes top-level names
+  through `importlib.machinery.PathFinder` (ignores `sys.modules`), so a mock
+  hides a real distribution only when no real one exists behind it;
+  `require_bioptim()` evicts mocked `casadi`/`bioptim`/`biorbd_casadi`
+  entries before importing so bioptim binds the genuine modules (the unit
+  tree's autouse fixture reinstalls its own mocks per test, so unit-tree
+  degradation semantics are unchanged).
+- Contracts: `tests/integration/optimization/ocp/test_compat_poisoned_sys_modules.py`.
+  Note the local reproducer cannot exercise real casadi/bioptim (Python 3.14
+  has no casadi wheel); CI lanes with the `[bioptim]` extra must show the
+  ocp bioptim legs running (not skipping) in combined lanes.
+
+PR #9840 CI cycle 3: full unit gate passed 14,431 tests and failed only the companion feature-count expectation and shared divergence inventory. Updated counts for the new controls and regenerated the inventory with the pinned Tools tree. Both affected modules pass (34 tests). Await the refreshed remote gate before merging.
+
+Pinocchio and Drake now expose View > Segment Force Colors via a shared MeshcatForceColorSession. Both native GUI tests pass on isolated Linux (Pinocchio 4.1.0, Drake 1.56.0). Explicit bindings and synchronous caller-supplied axial frames are required; automatic native reaction inference is not claimed. Session regression covers stale frames, model replacement and toggling. OpenSim currently has result plots, not a 3D animation host.
+
+Final native-host CI exposed optional Qt menu return annotations. Menus now use explicit QMenu construction after validating the menu bar. Pinocchio synchronizes force colors in its GUI coordinator override, leaving the legacy visualization mixin unchanged; native Linux host tests still pass (2 tests). Current required gate remains red until the type correction is validated remotely.
+
+The final host CI type check passes after menu contracts and the native COM matrix correction. The DRY gate then identified duplicated menu setup; install_force_color_menu now owns that validated setup for both GUIs. Native GUI tests pass after extraction. Await the corrected head's aggregate quality gate before closing the epic.
+
+## Capture Product Review (#9851, #9857)
+
+See `docs/development/HANDOFF.md` and `docs/development/capture_product_review.md`. Bounded duplicate-frame cache and child startup recovery are covered by six focused tests. The camera suite passed 241 tests before the recovery change. GUI #9843 remains independently owned; hardware qualification remains outstanding.

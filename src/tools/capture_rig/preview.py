@@ -53,6 +53,10 @@ from .multiview import (
 SourceFactory = Callable[[RigPlan], Mapping[str, FrameSource]]
 FastFactory = Callable[[RigPlan, Mapping[str, str]], Mapping[str, FrameSource]]
 DISPLAY_INTERVAL_S = 1 / 15  # UI refresh cap; the camera keeps its own rate
+STALL_TIMEOUT_S = 20.0  # a live view silent this long has stopped delivering;
+# it must clear the slowest honest gap: ffmpeg starting and yielding frame one
+STALL_POLL_MS = 1000
+WORKER_JOIN_MS = 3000
 SNAPSHOT_POLL_MS = 100
 DEFAULT_LIVE_LAYOUT = "side_by_side"
 NOTE_SEPARATOR = "\n"
@@ -146,10 +150,30 @@ class CameraWorker(QThread):
         self.view, self.source, self.mode = view, source, mode
         self.generation = generation
         self._stop = False
+        self._closed = False
         self.frames = 0
+        self.last_frame_ns = time.monotonic_ns()
 
     def stop(self) -> None:
+        """End the loop and release the camera.
+
+        Closing the source is what frees a reader parked in a blocking
+        read on a camera that has stopped sending, so this is safe (and
+        necessary) to call from the GUI thread: the flag alone would
+        never be seen again.
+        """
         self._stop = True
+        self.release()
+
+    def release(self) -> None:
+        """Close the source once; further calls do nothing."""
+        if self._closed:
+            return
+        self._closed = True
+        with narrow_catch(
+            OSError, ValueError, RuntimeError, log_message="close source"
+        ):
+            self.source.close()
 
     def run(self) -> None:  # noqa: D102 - QThread entry point
         try:
@@ -161,20 +185,26 @@ class CameraWorker(QThread):
             self.view, f"{effective.width}x{effective.height}@{effective.fps}"
         )
         last = 0.0
+        self.last_frame_ns = time.monotonic_ns()
         try:
             while not self._stop:
-                frame = self.source.read()
+                try:
+                    frame = self.source.read()
+                except (OSError, ValueError, RuntimeError):
+                    break  # the source was closed under us: that is the signal
                 if frame is None:
+                    if self._stop:
+                        break
                     time.sleep(0.005)
                     continue
                 self.frames += 1
+                self.last_frame_ns = time.monotonic_ns()
                 now = time.monotonic()
                 if now - last >= DISPLAY_INTERVAL_S:
                     last = now
                     self.frame_ready.emit(self.view, frame.image, self.generation)
         finally:
-            with narrow_catch(OSError, RuntimeError, log_message="close source"):
-                self.source.close()
+            self.release()
 
 
 class PreviewPanel(QWidget):
@@ -216,6 +246,10 @@ class PreviewPanel(QWidget):
         self._selection: PlanSelection | None = None
         self._snapshot_dir: Path | None = None
         self._snapshot_stamps: dict[str, float] = {}
+        self._stall_timeout_s = STALL_TIMEOUT_S
+        self._stall_timer = QTimer(self)
+        self._stall_timer.setInterval(STALL_POLL_MS)
+        self._stall_timer.timeout.connect(self._check_stalls)
         self._snapshot_timer = QTimer(self)
         self._snapshot_timer.setInterval(SNAPSHOT_POLL_MS)
         self._snapshot_timer.timeout.connect(self.poll_snapshots)
@@ -339,13 +373,18 @@ class PreviewPanel(QWidget):
             binder.wait(60000)  # binding cannot be interrupted; it is bounded
         workers = list(self._workers.values())
         for worker in workers:
-            worker.stop()
-        for worker in workers:
-            worker.wait(5000)
+            worker.stop()  # closes the source, so a parked read returns
+        lingering = [w for w in workers if not w.wait(WORKER_JOIN_MS)]
         self._workers = {}
+        self._stall_timer.stop()
         self._note_all("preview off")
         if workers or binder is not None:
-            self.status.setText("preview off (cameras released)")
+            self.status.setText(
+                "preview off (cameras released)"
+                if not lingering
+                else f"preview off (cameras released; {len(lingering)} "
+                "reader thread(s) still finishing)"
+            )
             self.state_changed.emit(False)
 
     def _set_views(self, views: tuple[str, ...]) -> None:
@@ -399,6 +438,7 @@ class PreviewPanel(QWidget):
             self._workers[view] = worker
             self._notes[view] = "opening…"
             worker.start()
+            self._stall_timer.start()
         self._show_notes()
         self.status.setText("preview starting…")
         if not self._workers:
@@ -510,6 +550,47 @@ class PreviewPanel(QWidget):
         self.canvas.setToolTip(
             "; ".join(f"{v} {n}" for v, n in self._notes.items() if n)
         )
+
+    def set_stall_timeout(self, seconds: float) -> None:
+        """How long a view may deliver nothing before its camera is released."""
+        require(seconds > 0, "stall timeout must be positive", seconds)
+        self._stall_timeout_s = seconds
+
+    def _check_stalls(self) -> None:
+        """Release any view that has stopped delivering frames.
+
+        A camera process can stay alive while sending nothing (seen on the lab
+        rig: three preview processes alive at zero CPU for over an hour). It
+        keeps the device claimed, so the recorder cannot open it and every take
+        comes back empty. Letting the view go frees the device and says so,
+        rather than leaving a frozen picture on screen.
+        """
+        if not self._workers:
+            self._stall_timer.stop()
+            return
+        limit_ns = self._stall_timeout_s * 1e9
+        now = time.monotonic_ns()
+        stalled = [
+            view
+            for view, worker in self._workers.items()
+            if now - worker.last_frame_ns > limit_ns
+        ]
+        for view in stalled:
+            worker = self._workers.pop(view)
+            worker.stop()
+            worker.wait(WORKER_JOIN_MS)
+            self._notes[view] = "stalled: camera released"
+        if not stalled:
+            return
+        self._show_notes()
+        self.status.setText(
+            "stalled, camera released: "
+            + ", ".join(stalled)
+            + " - press Preview cameras to reopen"
+        )
+        if not self._workers:
+            self._stall_timer.stop()
+            self.state_changed.emit(False)
 
     def _on_failed(self, view: str, message: str) -> None:
         if view in self._views:

@@ -17,18 +17,76 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#9787 · Manufactured Authority Runtime and Provenance
+### DL-#9851 · Capture Responsiveness and Recovery
 
 - **State:** in_review
+- **Owner:** codex
+- **Issue:** #9851, #9857 (epic #9849)
+- **Branch:** `perf/9851-capture-responsiveness`
+- **PR:** #9859
+- **Paths:** `src/tools/capture_rig/player.py`, `src/tools/capture_rig/process_runner.py`, `scripts/benchmark_capture_responsiveness.py`, `tests/tools/capture_rig/test_player_cache.py`, `tests/tools/capture_rig/test_process_runner.py`, `docs/development/capture_product_review.md`
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`e7c9021c9`)
+- **Acceptance:** Duplicate frames decode once with isolated pixels; failed child starts restore the lifecycle and allow retry; measured evidence and hardware limits documented.
+- **Evidence:** 241 camera tests after cache; six focused tests after recovery; duplicate median 196.788 to 12.613 ms.
+- **Next step:** Complete protected CI; integrate with GUI owner of #9843.
+
+### DL-#9850 · Generated Capability Atlas
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9850 (children #9852, #9853; product #9849)
+- **Branch:** `feat/9850-capability-atlas`
+- **PR:** #9856
+- **Paths:** `scripts/capability_atlas/`, `scripts/generate_capability_atlas.py`,
+  `src/config/capability_connections.json`, `ui/public/capability-atlas/`,
+  `ui/src/components/simulation/LauncherDashboard.tsx`, `docs/architecture/`,
+  `tests/scripts/test_capability_atlas.py`
+- **Started:** 2026-09-09
+- **Last verified:** 2026-09-09 (`7560fa9ec`)
+- **Summary:** Source-backed C4-style context, artifact/workflow network,
+  searchable feature/tile reference and standard Mermaid exports. Reads existing
+  registries and workflow; no separate feature inventory or GUI fork.
+- **Next step:** Verify browser controls and freshness, publish protected PR.
+
+### DL-#9830 · Independent Shooting Accuracy
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #9830
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9841
+- **Branch:** fix/9830-independent-shooting-convergence
+- **Paths:** optimization reference/defect contracts and docs/development/shooting_convergence_9830_turnover.md
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-09 (75 reference/live tests pass in 101.48 s; all three formerly skipped native comparisons pass in 2.78 s after Pinocchio installation; 13 degradation/registry tests pass; root lint/format and two-module mypy pass)
+- **Summary:** Own-grid residuals conceal significant ODE defects; the nominal 16-substep reference is itself under-resolved. Adaptive-reference defects improve across the observed 8/16/32-substep optimizations, without establishing physical validity or universal monotonic convergence.
+- **Next step:** Publish c2a8d5b6e through normal hooks and follow #9841 protected CI. It integrates main 438bd3282 without changing validated optimization paths; regenerated inventory passes ten tests, root pinned Ruff and SPEC pass. The combined Bioptim 3.6.7 OCP, real factory/isolation and dependency suite passes 21 tests in 162.06 s. The 3.8 RK4 solve remains unsuccessful even at a 1,000-iteration budget; factory compatibility does not qualify that solver combination. Physical/acoustic validation remains open.
+
+### DL-#9825 · Preserve Reviewed Manufactured Claims in Actual Registration
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #9825
+- **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9826
+- **Branch:** fix/9825-preserve-reviewed-claims
+- **Paths:** manufactured claim registration, integration/native contracts, governed research evidence, canonical publication and claim_preservation_9825_turnover.md.
+- **Started:** 2026-09-08
+- **Last verified:** 2026-09-08 (128 strict native contracts; native/rolling/publication CI passes at e93ef5224; stale PDF regression reproduced and repaired, all 11 publication tests pass with five inherited warnings; changed-file Ruff/format pass)
+- **Summary:** Actual reconciliation now preserves reviewed evidence/order and refuses changed science; six real-path failures become 11 passes. Current pinned engines regenerate deterministic provenance with unchanged numerical results; two expected-failure exemptions are removed. All 328 outcomes remain unchanged; the generated census/PDF is refreshed and reviewed.
+- **Next step:** PR #9826 merged as a410ae705 from fced8c0d6 at 2026-09-09T01:12:29Z. Merge is verified; queued auxiliary jobs are not claimed passed. Continue numerical follow-up #9830 and the separate physical/acoustic qualifications; preserve historical evidence.
+
+### DL-#9787 · Manufactured Authority Runtime and Provenance
+
+- **State:** shipped
 - **Owner:** codex
 - **Issue:** #9787
 - **PR:** https://github.com/D-sorganization/UpstreamDrift/pull/9804
 - **Branch:** fix/9787-manufactured-authority
-- **Paths:** `scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.*`, `scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py`, manufactured research/CI contracts, native CI workflow, canonical evidence and turnover.
+- **Paths:** authority runtime pins, native provenance/CI contracts and manufactured_authority_9787_turnover.md.
 - **Started:** 2026-09-08
-- **Last verified:** 2026-09-08 (122 combined native/provenance/bootstrap contracts and three distinct rolling contracts pass)
-- **Summary:** Actual ABI RED reproduced; compatible transitive pins retain scientific engines. Independent native candidates match prior numerical results. Claim refresh preserves reviewed outcomes/numeric evidence and refuses scientific changes.
-- **Next step:** Main `563e7aaa9` and bootstrap #9726 are integrated; actual native evidence is regenerated with only source hashes changed. Combined-suite environment contamination is repaired. Explicit incoming mocap NumPy aliases fix the actual hook without changing calculations. Claim outcomes and inspected 253-page PDF are unchanged; published at `befa329d1` through every normal hook; await protected CI.
+- **Last verified:** 2026-09-08 (PR merged as 736ec2189 from b8da0c024)
+- **Summary:** Compatible native pins and runtime support merged. The merged revision differs from locally validated 6235789dc; its actual registration bypass and stale evidence require follow-up #9825. Historical test results do not certify differing merged bytes.
+- **Next step:** Follow DL-#9825 for current preservation and native/publication qualification; retain the old branch as historical evidence.
 
 ### DL-#9478 · Launcher Registry Truth: `tools://` Provenance Scheme and Ready/Beta Maturity Gate
 

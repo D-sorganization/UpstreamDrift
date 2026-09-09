@@ -168,15 +168,20 @@ optimal-control = ["casadi>=3.6.0,<4.0.0"]
 crocoddyl = ["crocoddyl>=2.0.0,<4.0.0"]
 # bioptim optimal-control layer (epic #9762). bioptim is conda-forge only,
 # so it is pinned to a release SHA of the upstream git repository (never a
-# branch: every recent minor release changed the API). Release_3.4.0 has no
-# casadi.MX_eye usages, so it works with the casadi 3.6-3.8 wheels that
-# bundle IPOPT+MUMPS; PyPI casadi is all the solver stack it needs. biorbd
+# branch: every recent minor release changed the API). Release_3.4.0 imports
+# legacy MX_eye/SX_eye/DM_eye names; the ocp compatibility layer supplies missing
+# aliases from CasADi's exact class factories on 3.8 (#9842), retaining native
+# aliases on 3.6.7. The Bioptim consumer suite is qualified on 3.6.7;
+# successful imports alone do not qualify newer solver runtimes. The general
+# optimal-control extra retains its separate version range. PyPI CasADi
+# bundles IPOPT+MUMPS. biorbd
 # is deliberately NOT a dependency -- src/shared/python/optimization/ocp/
 # drives bioptim through its custom-model protocol and shims the two
 # biorbd_casadi touch points (#9761). Debian/Ubuntu CI images need
 # `apt-get install python3-tk` because bioptim/gui/plot.py imports tkinter.
 bioptim = [
     "upstream-drift[optimal-control]",
+    "casadi==3.6.7",
     "bioptim @ git+https://github.com/pyomeca/bioptim.git@fdafe4d9e50edb3f92a14f1980b08c3f81434545",
     "matplotlib>=3.8",
     "packaging>=23.0",

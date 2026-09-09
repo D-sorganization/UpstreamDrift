@@ -54,8 +54,8 @@
     },
     "payloads": {
       "type": "array",
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 18,
+      "maxItems": 18,
       "items": {
         "$ref": "#/$defs/payload"
       }
@@ -243,8 +243,8 @@
         },
         "assets": {
           "type": "array",
-          "minItems": 8,
-          "maxItems": 8,
+          "minItems": 18,
+          "maxItems": 18,
           "items": {
             "$ref": "#/$defs/releaseAsset"
           }
